@@ -31,6 +31,7 @@ GameNetworkManager.init = function (self, world, lobby, is_server)
 	self._lobby_host = lobby.lobby_host(lobby)
 	self.is_server = is_server
 	self._left_game = false
+	self._session_id = math.uuid()
 	self._game_object_types = {}
 	self._object_synchronizing_clients = {}
 	self._game_object_disconnect_callbacks = {}
@@ -49,6 +50,9 @@ GameNetworkManager.init = function (self, world, lobby, is_server)
 end
 GameNetworkManager.lobby = function (self)
 	return self._lobby
+end
+GameNetworkManager.session_id = function (self)
+	return self._session_id
 end
 GameNetworkManager.set_max_upload_speed = function (self, max_speed)
 	if self.is_server then
@@ -373,13 +377,7 @@ GameNetworkManager.spawn_peer_player = function (self, peer_id, local_player_id,
 			player = player_manager.add_remote_player(player_manager, peer_id, player_controlled, local_player_id, clan_tag)
 
 			player.create_boon_handler(player, self._world)
-
-			if GameSettingsDevelopment.use_telemetry then
-				local session_id = Managers.telemetry:get_session_id()
-				local server_tick = Managers.telemetry:get_current_tick()
-
-				self.network_transmit:send_rpc("rpc_to_client_session_synch", peer_id, session_id, server_tick)
-			end
+			self.network_transmit:send_rpc("rpc_to_client_session_synch", peer_id, self._session_id)
 		end
 	end
 

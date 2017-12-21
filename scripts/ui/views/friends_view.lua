@@ -78,36 +78,6 @@ local input_actions = {
 		}
 	}
 }
-local telemetry_data = {}
-
-local function _add_player_join_telemetry(joining_player)
-	local telemetry_id = joining_player.telemetry_id(joining_player)
-	local hero = joining_player.profile_display_name(joining_player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.joining_player_id = telemetry_id
-	telemetry_data.joining_player_hero = hero
-
-	Managers.telemetry:register_event("ui_join_game", telemetry_data)
-
-	return 
-end
-
-local function _add_player_invite_send_telemetry(sending_player)
-	local telemetry_id = sending_player.telemetry_id(sending_player)
-	local hero = sending_player.profile_display_name(sending_player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.sending_player_id = telemetry_id
-	telemetry_data.sending_player_hero = hero
-
-	Managers.telemetry:register_event("ui_invite_sent", telemetry_data)
-
-	return 
-end
-
 FriendsView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -887,13 +857,9 @@ FriendsView.on_join_button_clicked = function (self)
 		if lobby_id then
 			local lobby_data = LobbyInternal.get_lobby_data_from_id(lobby_id)
 			lobby_data.id = lobby_id
+			local player = Managers.player:local_player(1)
 
-			if GameSettingsDevelopment.use_telemetry then
-				local player_manager = Managers.player
-				local joining_player = player_manager.local_player(player_manager, 1)
-
-				_add_player_join_telemetry(joining_player)
-			end
+			Managers.telemetry.events:ui_join_game(player)
 
 			if not self.is_server or not self.is_in_inn then
 				self.ingame_ui:handle_transition("join_lobby", lobby_data)
@@ -912,13 +878,9 @@ FriendsView.on_invite_button_clicked = function (self, gamepad_active)
 	local friend_data = self.friends[id]
 	self.invite_cooldown_list[id] = INVITE_COOLDOWN_TIMER
 	self.invite_button.content.button_hotspot.disabled = true
+	local player = Managers.player:local_player(1)
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local sending_player = player_manager.local_player(player_manager, 1)
-
-		_add_player_invite_send_telemetry(sending_player)
-	end
+	Managers.telemetry.events:ui_invite_sent(player)
 
 	local lobby = self.network_lobby.lobby
 

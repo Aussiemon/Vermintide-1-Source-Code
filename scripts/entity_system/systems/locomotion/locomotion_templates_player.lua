@@ -50,10 +50,6 @@ T.update = function (data, t, dt)
 	T.update_average_velocity(data, t, dt)
 	T.update_disabled_units(data, dt)
 
-	if GameSettingsDevelopment.use_telemetry then
-		T.update_player_position_telemetry(data, t)
-	end
-
 	if UPDATE_STATISTICS then
 		T.update_statistics(data, t, dt)
 	end
@@ -354,30 +350,6 @@ T.update_debug_anims = function (data)
 	end
 
 	Profiler.stop("debug anims")
-
-	return 
-end
-local telemetry_data = {}
-T.update_player_position_telemetry = function (data, t)
-	local POSITION_LOOKUP = POSITION_LOOKUP
-	local player_manager = Managers.player
-	local telemetry_manager = Managers.telemetry
-
-	for unit, extension in pairs(data.all_update_units) do
-		if extension.telemetry_timer <= t then
-			local position = POSITION_LOOKUP[unit]
-			local player = player_manager.unit_owner(player_manager, unit)
-			local telemetry_id = player.telemetry_id(player)
-			local hero = player.profile_display_name(player)
-			telemetry_data.position = position
-			telemetry_data.player_id = telemetry_id
-			telemetry_data.hero = hero
-
-			telemetry_manager.register_event(telemetry_manager, "player_position", telemetry_data)
-
-			extension.telemetry_timer = t + extension.telemetry_log_interval
-		end
-	end
 
 	return 
 end

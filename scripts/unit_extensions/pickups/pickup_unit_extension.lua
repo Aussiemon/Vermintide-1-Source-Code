@@ -1,30 +1,4 @@
 PickupUnitExtension = class(PickupUnitExtension)
-local telemetry_data = {}
-
-local function _add_pickup_spawn_telemetry(pickup_name, pickup_spawn_type, position)
-	table.clear(telemetry_data)
-
-	telemetry_data.pickup_name = pickup_name
-	telemetry_data.pickup_spawn_type = pickup_spawn_type
-	telemetry_data.position = position
-
-	Managers.telemetry:register_event("pickup_spawn", telemetry_data)
-
-	return 
-end
-
-local function _add_pickup_destroyed_telemetry(pickup_name, pickup_spawn_type, position)
-	table.clear(telemetry_data)
-
-	telemetry_data.pickup_name = pickup_name
-	telemetry_data.pickup_spawn_type = pickup_spawn_type
-	telemetry_data.position = position
-
-	Managers.telemetry:register_event("pickup_destroyed", telemetry_data)
-
-	return 
-end
-
 PickupUnitExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
 	self.unit = unit
@@ -56,10 +30,10 @@ PickupUnitExtension.init = function (self, extension_init_context, unit, extensi
 		end
 	end
 
-	if GameSettingsDevelopment.use_telemetry and self.is_server then
+	if self.is_server then
 		local position = POSITION_LOOKUP[unit]
 
-		_add_pickup_spawn_telemetry(pickup_name, spawn_type, position)
+		Managers.telemetry.events:pickup_spawned(pickup_name, spawn_type, position)
 	end
 
 	return 
@@ -90,10 +64,10 @@ PickupUnitExtension.destroy = function (self)
 		pickup_system.set_taken(pickup_system, self.spawn_index)
 	end
 
-	if GameSettingsDevelopment.use_telemetry and self.is_server then
+	if self.is_server then
 		local position = POSITION_LOOKUP[self.unit]
 
-		_add_pickup_destroyed_telemetry(self.pickup_name, self.spawn_type, position)
+		Managers.telemetry.events:pickup_destroyed(self.pickup_name, self.spawn_type, position)
 	end
 
 	return 

@@ -21,20 +21,6 @@ local extensions = {
 local dialogue_category_config = DialogueSettings.dialogue_category_config
 local enabled = true
 DialogueSystem = class(DialogueSystem, ExtensionSystemBase)
-local telemetry_data = {}
-
-local function _add_vo_play_telemetry(sound_event, dialogue, unit_name)
-	table.clear(telemetry_data)
-
-	telemetry_data.sound_event = sound_event
-	telemetry_data.dialogue = dialogue
-	telemetry_data.unit_name = unit_name
-
-	Managers.telemetry:register_event("vo_play_event", telemetry_data)
-
-	return 
-end
-
 DialogueSystem.init = function (self, entity_system_creation_context, system_name)
 	local entity_manager = entity_system_creation_context.entity_manager
 
@@ -887,8 +873,8 @@ DialogueSystem.physics_async_update = function (self, context, t)
 					playing_dialogues[dialogue] = category_setting
 					playing_units[dialogue_actor_unit] = extension
 
-					if GameSettingsDevelopment.use_telemetry and source_id ~= 0 then
-						_add_vo_play_telemetry(sound_event, result, speaker_name)
+					if source_id ~= 0 then
+						Managers.telemetry.events:vo_play_event(sound_event, result, speaker_name)
 					end
 
 					if player_manager.owner(player_manager, dialogue_actor_unit) ~= nil or Unit.has_data(dialogue_actor_unit, "dialogue_face_anim") then

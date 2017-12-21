@@ -721,33 +721,6 @@ IngameUI._show_text = function (self, text, pos)
 
 	return Vector3(pos[1], pos[2] - 30, pos[3])
 end
-local telemetry_data = {}
-
-local function _add_view_enter_telemetry(player_id, hero, view_name)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.view_name = view_name
-
-	Managers.telemetry:register_event("ui_view_enter", telemetry_data)
-
-	return 
-end
-
-local function _add_view_exit_telemetry(player_id, hero, view_name, duration)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.view_name = view_name
-	telemetry_data.shown_duration = duration
-
-	Managers.telemetry:register_event("ui_view_exit", telemetry_data)
-
-	return 
-end
-
 IngameUI._update_system_message_cooldown = function (self, dt)
 	local system_message_delay = self.system_message_delay
 
@@ -875,30 +848,6 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 			self.views[old_view]:on_exit(unpack(transition_params))
 		end
 
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager)
-
-		if GameSettingsDevelopment.use_telemetry then
-			local time_manager = Managers.time
-			local player_id = player.telemetry_id(player)
-			local curr_t = time_manager.time(time_manager, "game")
-
-			if self.views[old_view] then
-				local duration = curr_t - self.telemetry_view_enter_time
-				local old_hero = self.telemetry_view_enter_hero
-
-				_add_view_exit_telemetry(player_id, old_hero, old_view, duration)
-			end
-
-			if new_view and self.views[new_view] and self.views[new_view].on_enter then
-				local hero = player.profile_display_name(player)
-				self.telemetry_view_enter_time = curr_t
-				self.telemetry_view_enter_hero = hero
-
-				_add_view_enter_telemetry(player_id, hero, new_view)
-			end
-		end
-
 		if new_view and self.views[new_view] and self.views[new_view].on_enter then
 			printf("[IngameUI] menu view on_enter %s", new_view)
 			self.views[new_view]:on_enter(unpack(transition_params))
@@ -1020,7 +969,7 @@ IngameUI.activate_end_screen_ui = function (self, you_win, checkpoint_available)
 end
 IngameUI.deactivate_end_screen_ui = function (self, you_win, ignore_survey)
 	local telemetry_survey_view = self.views.telemetry_survey
-	local use_survey = GameSettingsDevelopment.use_session_survey
+	local use_survey = TelemetrySettings.send and TelemetrySettings.use_session_survey
 
 	if use_survey and not ignore_survey then
 		local end_screen = self.end_screen

@@ -29,8 +29,6 @@ local function play_screen_space_blood(world, unit, attacker_unit, killing_blow,
 	return 
 end
 
-local telemetry_data = {}
-
 local function ai_default_unit_start(unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 	local killer_unit = killing_blow[DamageDataIndex.ATTACKER]
 	local death_hit_zone = killing_blow[DamageDataIndex.HIT_ZONE]
@@ -81,15 +79,12 @@ local function ai_default_unit_start(unit, dt, context, t, killing_blow, is_serv
 		WwiseWorld.trigger_event(wwise_world, breed.death_sound_event, wwise_source)
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player = Managers.player:owner(owner_unit)
+	local player = Managers.player:owner(owner_unit)
 
-		if player then
-			local breed_name = breed.name
-			local player_id = player.telemetry_id(player)
+	if player then
+		local breed_name = breed.name
 
-			DeathReactions._add_ai_killed_by_player_telemetry(unit, breed_name, owner_unit, player, player_id, damage_type, weapon_name, death_hit_zone)
-		end
+		DeathReactions._add_ai_killed_by_player_telemetry(unit, breed_name, owner_unit, player, damage_type, weapon_name, death_hit_zone)
 	end
 
 	local data = {
@@ -226,15 +221,12 @@ local function ai_default_husk_start(unit, dt, context, t, killing_blow, is_serv
 		WwiseWorld.trigger_event(wwise_world, breed.death_sound_event, wwise_source)
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player = Managers.player:owner(owner_unit)
+	local player = Managers.player:owner(owner_unit)
 
-		if player then
-			local breed_name = breed.name
-			local player_id = player.telemetry_id(player)
+	if player then
+		local breed_name = breed.name
 
-			DeathReactions._add_ai_killed_by_player_telemetry(unit, breed_name, owner_unit, player, player_id, damage_type, weapon_name, death_hit_zone)
-		end
+		DeathReactions._add_ai_killed_by_player_telemetry(unit, breed_name, owner_unit, player, damage_type, weapon_name, death_hit_zone)
 	end
 
 	local data = {
@@ -734,25 +726,12 @@ DeathReactions.templates = {
 	player = {
 		unit = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
-				if GameSettingsDevelopment.use_telemetry then
-					local position = Unit.local_position(unit, 0)
-					local damage_type = killing_blow[DamageDataIndex.DAMAGE_TYPE]
-					local damage_source = killing_blow[DamageDataIndex.DAMAGE_SOURCE_NAME]
-					local player_manager = Managers.player
-					local player = player_manager.owner(player_manager, unit)
-					local telemetry_id = player.telemetry_id(player)
-					local hero = player.profile_display_name(player)
+				local player = Managers.player:owner(unit)
+				local damage_type = killing_blow[DamageDataIndex.DAMAGE_TYPE]
+				local damage_source = killing_blow[DamageDataIndex.DAMAGE_SOURCE_NAME]
+				local position = Unit.local_position(unit, 0)
 
-					table.clear(telemetry_data)
-
-					telemetry_data.damage_type = damage_type
-					telemetry_data.position = position
-					telemetry_data.player_id = telemetry_id
-					telemetry_data.hero = hero
-					telemetry_data.damage_source = damage_source
-
-					Managers.telemetry:register_event("player_death", telemetry_data)
-				end
+				Managers.telemetry.events:player_death(player, damage_type, damage_source, position)
 
 				return nil, DeathReactions.IS_DONE
 			end
@@ -966,30 +945,17 @@ DeathReactions.get_reaction = function (death_reaction_template, is_husk)
 
 	return reaction
 end
-DeathReactions._add_ai_killed_by_player_telemetry = function (victim_unit, breed_name, player_unit, player, player_id, damage_type, weapon_name, death_hit_zone)
-	local victim_position = POSITION_LOOKUP[victim_unit]
-	local player_position = POSITION_LOOKUP[player_unit]
+DeathReactions._add_ai_killed_by_player_telemetry = function (victim_unit, breed_name, player_unit, player, damage_type, weapon_name, death_hit_zone)
 	local network_manager = Managers.state.network
 	local is_server = network_manager.is_server
 	local local_player = player.local_player
 	local is_bot = player.bot_player
 
 	if (is_bot and is_server) or local_player then
-		local hero = player.profile_display_name(player)
+		local player_position = POSITION_LOOKUP[player_unit]
+		local victim_position = POSITION_LOOKUP[victim_unit]
 
-		table.clear(telemetry_data)
-
-		telemetry_data.weapon_name = weapon_name
-		telemetry_data.victim_position = victim_position
-		telemetry_data.player_position = player_position
-		telemetry_data.damage_type = damage_type
-		telemetry_data.breed = breed_name
-		telemetry_data.player_id = player_id
-		telemetry_data.hero = hero
-		telemetry_data.hit_zone = death_hit_zone
-		telemetry_data.is_bot = is_bot == true
-
-		Managers.telemetry:register_event("player_killed_ai", telemetry_data)
+		Managers.telemetry.events:player_killed_ai(player, player_position, victim_position, breed_name, weapon_name, damage_type, death_hit_zone)
 	end
 
 	return 

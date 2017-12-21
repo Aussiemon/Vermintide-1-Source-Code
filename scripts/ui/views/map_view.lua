@@ -108,27 +108,7 @@ local start_game_disable_tooltips = {
 	wrong_level = "map_confirm_button_disabled_tooltip_level",
 	difficulty = "map_confirm_button_disabled_tooltip"
 }
-local telemetry_data = {}
 MapView = class(MapView)
-
-local function _add_map_press_play_telemetry(player, privacy_setting, level, difficulty, nr_level_switches)
-	local telemetry_id = player.telemetry_id(player)
-	local hero = player.profile_display_name(player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-	telemetry_data.privacy_setting = privacy_setting
-	telemetry_data.level = level
-	telemetry_data.difficulty = difficulty
-	telemetry_data.nr_level_switches = nr_level_switches
-
-	Managers.telemetry:register_event("matchmaking_map_done", telemetry_data)
-
-	return 
-end
-
 MapView.init = function (self, ingame_ui_context)
 	self.dialogue_system = ingame_ui_context.dialogue_system
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -185,10 +165,7 @@ MapView.init = function (self, ingame_ui_context)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 9, gui_layer, generic_input_actions.default)
 	self.map_interaction_enabled = true
 	DO_RELOAD = false
-
-	if GameSettingsDevelopment.use_telemetry then
-		self.nr_level_switches = 0
-	end
+	self.nr_level_switches = 0
 
 	self.apply_saved_settings(self)
 
@@ -831,7 +808,7 @@ MapView.on_level_index_changed = function (self, index_change, specific_index, i
 		playable_level = not level_information.is_area
 	end
 
-	if GameSettingsDevelopment.use_telemetry and new_index then
+	if new_index then
 		self.nr_level_switches = self.nr_level_switches + 1
 	end
 
@@ -1290,16 +1267,13 @@ MapView.on_play_pressed = function (self, t)
 	Managers.matchmaking:find_game(next_level_key, difficulty_key, private_game, random_level, game_mode, area, t)
 	self.play_sound(self, "Play_hud_map_mission_accept")
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local nr_level_switches = self.nr_level_switches
-		local selected_level_option = next_level_key
+	local player = Managers.player:local_player(1)
+	local nr_level_switches = self.nr_level_switches
+	local selected_level_option = next_level_key
 
-		_add_map_press_play_telemetry(player, new_privacy_setting, selected_level_option, difficulty_key, nr_level_switches)
+	Managers.telemetry.events:matchmaking_map_done(player, selected_level_option, difficulty_key, new_privacy_setting, nr_level_switches)
 
-		self.nr_level_switches = 0
-	end
+	self.nr_level_switches = 0
 
 	return 
 end
@@ -1826,9 +1800,7 @@ MapView.on_enter = function (self)
 		self.on_gamepad_activated(self)
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		self.nr_level_switches = 0
-	end
+	self.nr_level_switches = 0
 
 	self.play_sound(self, "Play_hud_map_open")
 

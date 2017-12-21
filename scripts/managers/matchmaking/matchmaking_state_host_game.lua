@@ -143,16 +143,12 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 		end
 
 		if self.start_directly then
-			if GameSettingsDevelopment.use_telemetry then
-				local player_manager = Managers.player
-				local player = player_manager.local_player(player_manager, 1)
-				local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
-				local time_taken = t - started_matchmaking_t
-				local connection_state = "host_game_start_directly"
-				local telemetry_manager = Managers.telemetry
+			local player = Managers.player:local_player(1)
+			local connection_state = "host_game_start_directly"
+			local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
+			local time_taken = t - started_matchmaking_t
 
-				telemetry_manager.add_matchmaking_connection_telemetry(telemetry_manager, player, connection_state, time_taken)
-			end
+			Managers.telemetry.events:matchmaking_connection(player, connection_state, time_taken)
 
 			return MatchmakingStateStartGame, self.state_context
 		else
@@ -217,16 +213,10 @@ MatchmakingStateHostGame.handle_popup_result = function (self, result)
 		self.matchmaking_manager:cancel_matchmaking()
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local telemetry_id = player.telemetry_id(player)
-		local hero = player.profile_display_name(player)
-		local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
-		local telemetry_manager = Managers.telemetry
+	local player = Managers.player:local_player(1)
+	local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
 
-		telemetry_manager.add_matchmaking_select_player_telemetry(telemetry_manager, telemetry_id, hero, reason, selected_hero_name, time_taken)
-	end
+	Managers.telemetry.events:ui_matchmaking_select_player(player, selected_hero_name, reason, time_taken)
 
 	return 
 end

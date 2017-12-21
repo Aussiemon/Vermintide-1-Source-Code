@@ -1359,34 +1359,14 @@ ScoreboardUI.is_voting_possible = function (self)
 
 	return 
 end
-local telemetry_data = {}
-
-local function _add_next_level_vote_telemetry(player_id, hero, vote_option_text)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.vote = vote_option_text
-
-	Managers.telemetry:register_event("next_level_vote", telemetry_data)
-
-	return 
-end
-
 ScoreboardUI.on_vote_level_pressed = function (self, index)
 	local active_vote_data = self.active_vote_list[index]
+	local player = Managers.player:local_player()
+	local widget_content = active_vote_data.widget.content
+	local list_text = widget_content.text
+	local vote_option_text = self.level_prefixes[index] or list_text
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager)
-		local player_id = player.telemetry_id(player)
-		local hero = player.profile_display_name(player)
-		local widget_content = active_vote_data.widget.content
-		local list_text = widget_content.text
-		local vote_option_text = self.level_prefixes[index] or list_text
-
-		_add_next_level_vote_telemetry(player_id, hero, vote_option_text)
-	end
+	Managers.telemetry.events:next_level_vote(player, vote_option_text)
 
 	for i = 1, 3, 1 do
 		local widget = self["voting_widget_" .. i]

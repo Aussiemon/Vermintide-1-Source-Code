@@ -76,65 +76,13 @@ InteractionDefinitions.player_generic = {
 		return 
 	end
 }
-local telemetry_data = {}
-
-local function _add_revive_telemetry(reviver_player, revivee_player, position)
-	local reviver_player_id = reviver_player.telemetry_id(reviver_player)
-	local reviver_hero = reviver_player.profile_display_name(reviver_player)
-	local revivee_player_id = revivee_player.telemetry_id(revivee_player)
-	local revivee_hero = revivee_player.profile_display_name(revivee_player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.reviver_player_id = reviver_player_id
-	telemetry_data.reviver_hero = reviver_hero
-	telemetry_data.revivee_player_id = revivee_player_id
-	telemetry_data.revivee_hero = revivee_hero
-	telemetry_data.position = position
-
-	Managers.telemetry:register_event("player_revive", telemetry_data)
-
-	return 
-end
-
-local function _add_pickup_telemetry(player_id, hero, pickup_name, pickup_spawn_type, position)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.pickup_name = pickup_name
-	telemetry_data.pickup_spawn_type = pickup_spawn_type
-	telemetry_data.position = position
-
-	Managers.telemetry:register_event("player_pickup", telemetry_data)
-
-	return 
-end
 
 local function _add_heal_telemetry(healer_player, target_player, position)
-	local healer_player_id = healer_player.telemetry_id(healer_player)
-	local healer_hero = healer_player.profile_display_name(healer_player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.position = position
-	local telemetry_type = nil
-
 	if healer_player == target_player then
-		telemetry_type = "player_heal_self"
-		telemetry_data.player_id = healer_player_id
-		telemetry_data.hero = healer_hero
+		Managers.telemetry.events:player_heal_self(healer_player, position)
 	else
-		local target_player_id = target_player.telemetry_id(target_player)
-		local target_hero = target_player.profile_display_name(target_player)
-		telemetry_type = "player_heal_ally"
-		telemetry_data.healer_player_id = healer_player_id
-		telemetry_data.healer_hero = healer_hero
-		telemetry_data.target_player_id = target_player_id
-		telemetry_data.target_hero = target_hero
+		Managers.telemetry.events:player_heal_ally(healer_player, target_player, position)
 	end
-
-	Managers.telemetry:register_event(telemetry_type, telemetry_data)
 
 	return 
 end
@@ -201,19 +149,17 @@ InteractionDefinitions.revive = {
 			if result == InteractionResult.SUCCESS then
 				StatusUtils.set_revived_network(interactable_unit, true, interactor_unit)
 
-				if GameSettingsDevelopment.use_telemetry then
-					local player_manager = Managers.player
-					local interactor_player = player_manager.unit_owner(player_manager, interactor_unit)
-					local interactable_player = player_manager.unit_owner(player_manager, interactable_unit)
+				local player_manager = Managers.player
+				local interactor_player = player_manager.unit_owner(player_manager, interactor_unit)
+				local interactable_player = player_manager.unit_owner(player_manager, interactable_unit)
 
-					if not interactor_player or not interactable_player then
-						return 
-					end
-
-					local interactable_pos = POSITION_LOOKUP[interactable_unit]
-
-					_add_revive_telemetry(interactor_player, interactable_player, interactable_pos)
+				if not interactor_player or not interactable_player then
+					return 
 				end
+
+				local interactable_pos = POSITION_LOOKUP[interactable_unit]
+
+				Managers.telemetry.events:player_revive(interactor_player, interactable_player, interactable_pos)
 			elseif Unit.alive(interactable_unit) then
 				local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
 
@@ -942,15 +888,11 @@ InteractionDefinitions.pickup_object = {
 
 					SurroundingAwareSystem.add_event(interactor_unit, "on_other_pickup", DialogueSettings.default_view_distance, "pickup_name", pickup_name, "target_name", target_name)
 
-					if GameSettingsDevelopment.use_telemetry then
-						local player_id = player.telemetry_id(player)
-						local hero = player.profile_display_name(player)
-						local pickup_name = pickup_extension.pickup_name
-						local pickup_spawn_type = pickup_extension.spawn_type
-						local pickup_position = POSITION_LOOKUP[interactable_unit]
+					local pickup_name = pickup_extension.pickup_name
+					local pickup_spawn_type = pickup_extension.spawn_type
+					local pickup_position = POSITION_LOOKUP[interactable_unit]
 
-						_add_pickup_telemetry(player_id, hero, pickup_name, pickup_spawn_type, pickup_position)
-					end
+					Managers.telemetry.events:player_pickup(player, pickup_name, pickup_spawn_type, pickup_position)
 
 					if pickup_settings.hide_on_pickup then
 						pickup_extension.hide(pickup_extension)
@@ -1490,14 +1432,12 @@ InteractionDefinitions.heal = {
 
 				mission_system.increment_goal_mission_counter(mission_system, "merchant_no_healing", 1, true)
 
-				if GameSettingsDevelopment.use_telemetry then
-					local player_manager = Managers.player
-					local interactor_player = player_manager.unit_owner(player_manager, interactor_unit)
-					local interactable_player = player_manager.unit_owner(player_manager, interactable_unit)
-					local interactable_pos = POSITION_LOOKUP[interactable_unit]
+				local player_manager = Managers.player
+				local interactor_player = player_manager.unit_owner(player_manager, interactor_unit)
+				local interactable_player = player_manager.unit_owner(player_manager, interactable_unit)
+				local interactable_pos = POSITION_LOOKUP[interactable_unit]
 
-					_add_heal_telemetry(interactor_player, interactable_player, interactable_pos)
-				end
+				_add_heal_telemetry(interactor_player, interactable_player, interactable_pos)
 			end
 
 			return 

@@ -56,19 +56,6 @@ GenericStatusExtension.init = function (self, extension_init_context, unit, exte
 	self.fall_height = nil
 	self.under_ratling_gunner_attack = nil
 	self.last_catapulted_time = 0
-	self.fatigue_telemetry = {
-		fatigue_type = "",
-		block_breaking = false,
-		hero = "",
-		player_id = "",
-		position = Vector3.zero()
-	}
-	self.knocked_down_telemetry = {
-		hero = "",
-		player_id = "",
-		damage_type = "",
-		position = Vector3.zero()
-	}
 	self.wounds = extension_init_data.wounds
 
 	if self.wounds == -1 then
@@ -629,20 +616,9 @@ GenericStatusExtension.add_fatigue_points = function (self, fatigue_type, action
 		self.last_fatigue_gain_time = t
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = self.player
-		local telemetry_id = player.telemetry_id(player)
-		local hero = player.profile_display_name(player)
-		local telemetry_data = self.fatigue_telemetry
-		telemetry_data.fatigue_type = fatigue_type
-		telemetry_data.position = POSITION_LOOKUP[self.unit]
-		telemetry_data.block_breaking = block_breaking
-		telemetry_data.player_id = telemetry_id
-		telemetry_data.hero = hero
+	local position = POSITION_LOOKUP[self.unit]
 
-		Managers.telemetry:register_event("fatigue_gain", telemetry_data)
-	end
+	Managers.telemetry.events:fatigue_gain(self.player, position, fatigue_type, block_breaking)
 
 	return 
 end
@@ -913,35 +889,20 @@ GenericStatusExtension.set_knocked_down = function (self, knocked_down)
 			self.add_intensity(self, CurrentIntensitySettings.intensity_add_knockdown)
 		end
 
-		if GameSettingsDevelopment.use_telemetry then
-			local kill_damages, num_kill_damages = damage_extension.recent_damages(damage_extension)
+		local kill_damages, num_kill_damages = damage_extension.recent_damages(damage_extension)
 
-			pack_index[DamageDataIndex.STRIDE](biggest_hit, 1, unpack_index[DamageDataIndex.STRIDE](kill_damages, 1))
+		pack_index[DamageDataIndex.STRIDE](biggest_hit, 1, unpack_index[DamageDataIndex.STRIDE](kill_damages, 1))
 
-			local damage_type = biggest_hit[DamageDataIndex.DAMAGE_TYPE]
+		if player then
+			local local_player = player.local_player
+			local is_bot = player.bot_player
 
-			self._add_player_knocked_down_telemetry(self, unit, player, damage_type)
-		end
-	end
+			if (is_bot and self.is_server) or local_player then
+				local damage_type = biggest_hit[DamageDataIndex.DAMAGE_TYPE]
+				local position = POSITION_LOOKUP[unit]
 
-	return 
-end
-GenericStatusExtension._add_player_knocked_down_telemetry = function (self, player_unit, player, damage_type)
-	if player then
-		local local_player = player.local_player
-		local is_bot = player.bot_player
-
-		if (is_bot and self.is_server) or local_player then
-			local telemetry_id = player.telemetry_id(player)
-			local position = POSITION_LOOKUP[player_unit]
-			local hero = player.profile_display_name(player)
-			local knocked_down_telemetry = self.knocked_down_telemetry
-			knocked_down_telemetry.damage_type = damage_type
-			knocked_down_telemetry.position = position
-			knocked_down_telemetry.player_id = telemetry_id
-			knocked_down_telemetry.hero = hero
-
-			Managers.telemetry:register_event("player_knocked_down", knocked_down_telemetry)
+				Managers.telemetry.events:player_knocked_down(player, damage_type, position)
+			end
 		end
 	end
 

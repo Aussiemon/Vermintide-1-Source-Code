@@ -112,21 +112,12 @@ TelemetrySurveyView.transition = function (self)
 
 	return 
 end
-local telemetry_data = {}
 TelemetrySurveyView.record_telemetry_survey = function (self)
 	assert(self.session_rating ~= 0, "Session rating was never set!")
 
-	local player_manager = Managers.player
-	local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
-	local hero = player.profile_display_name(player)
+	local player = Managers.player:player_from_peer_id(self.peer_id)
 
-	table.clear(telemetry_data)
-
-	telemetry_data.session_rating = self.session_rating
-	telemetry_data.player_id = self.peer_id
-	telemetry_data.hero = hero
-
-	Managers.telemetry:register_event("session_rating", telemetry_data)
+	Managers.telemetry.event:session_rating(player, self.session_rating)
 
 	return 
 end

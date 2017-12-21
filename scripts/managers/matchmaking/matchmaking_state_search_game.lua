@@ -185,16 +185,12 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 			return nil
 		end
 
-		if GameSettingsDevelopment.use_telemetry then
-			local player_manager = Managers.player
-			local player = player_manager.local_player(player_manager, 1)
-			local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
-			local time_taken = t - started_matchmaking_t
-			local connection_state = "search_game_timeout"
-			local telemetry_manager = Managers.telemetry
+		local player = Managers.player:local_player(1)
+		local connection_state = "search_game_timeout"
+		local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
+		local time_taken = t - started_matchmaking_t
 
-			telemetry_manager.add_matchmaking_connection_telemetry(telemetry_manager, player, connection_state, time_taken)
-		end
+		Managers.telemetry.events:matchmaking_connection(player, connection_state, time_taken)
 
 		return MatchmakingStateHostGame, self.state_context
 	end

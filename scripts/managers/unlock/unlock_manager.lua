@@ -1,6 +1,7 @@
 require("scripts/managers/unlock/unlock_clan")
 require("scripts/managers/unlock/unlock_dlc")
 require("scripts/managers/unlock/always_unlocked")
+require("scripts/managers/unlock/always_locked")
 require("scripts/settings/unlock_settings")
 
 UnlockManager = class(UnlockManager)

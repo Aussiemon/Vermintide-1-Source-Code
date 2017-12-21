@@ -1895,20 +1895,6 @@ LorebookView._set_content_to_current_page = function (self)
 
 	return 
 end
-local telemetry_data = {}
-
-local function _add_lore_page_selected_telemetry(player_id, hero, page_text)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.page_text = page_text
-
-	Managers.telemetry:register_event("lore_page_selected", telemetry_data)
-
-	return 
-end
-
 local divider_position_offset = 10
 local divider_size_offset = -20
 LorebookView._add_eventual_paragraph_divider = function (self, texts, return_indices, line_index, total_potential_lines, text_pos, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)

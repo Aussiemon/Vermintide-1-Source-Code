@@ -36,27 +36,7 @@ local dialogue_speakers = {
 	nik = "inn_keeper",
 	nfl = "ferry_lady"
 }
-local telemetry_data = {}
 ConsoleMapView = class(ConsoleMapView)
-
-local function _add_map_press_play_telemetry(player, privacy_setting, level, difficulty, nr_level_switches)
-	local telemetry_id = player.telemetry_id(player)
-	local hero = player.profile_display_name(player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-	telemetry_data.privacy_setting = privacy_setting
-	telemetry_data.level = level
-	telemetry_data.difficulty = difficulty
-	telemetry_data.nr_level_switches = nr_level_switches
-
-	Managers.telemetry:register_event("matchmaking_map_done", telemetry_data)
-
-	return 
-end
-
 ConsoleMapView.init = function (self, ingame_ui_context)
 	self.dialogue_system = ingame_ui_context.dialogue_system
 	self.ui_renderer = ingame_ui_context.ui_renderer

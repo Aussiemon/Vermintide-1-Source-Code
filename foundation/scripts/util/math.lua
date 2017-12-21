@@ -387,6 +387,15 @@ math.rand_utf8_string = function (string_length, ignore_chars)
 
 	return table.concat(array)
 end
+math.uuid = function ()
+	local template = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+
+	return string.gsub(template, "[xy]", function (c)
+		local v = (c == "x" and math.random(0, 15)) or math.random(8, 11)
+
+		return string.format("%x", v)
+	end)
+end
 math.get_uniformly_random_point_inside_sector = function (radius1, radius2, angle1, angle2)
 	local radius1_squared = radius1*radius1
 	local radius2_squared = radius2*radius2

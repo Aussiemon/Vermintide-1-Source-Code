@@ -1,23 +1,5 @@
 MatchmakingStateStartGame = class(MatchmakingStateStartGame)
 MatchmakingStateStartGame.NAME = "MatchmakingStateStartGame"
-local telemetry_data = {}
-
-local function _add_matchmaking_starting_game_telemetry(player, nr_friends)
-	local telemetry_id = player.telemetry_id(player)
-	local hero = player.profile_display_name(player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-	telemetry_data.nr_friends = nr_friends
-	local telemetry_manager = Managers.telemetry
-
-	telemetry_manager.register_event(telemetry_manager, "matchmaking_starting_game", telemetry_data)
-
-	return 
-end
-
 MatchmakingStateStartGame.init = function (self, params)
 	self.lobby = params.lobby
 	self.network_transmit = params.network_transmit
@@ -83,24 +65,21 @@ end
 MatchmakingStateStartGame.start_game = function (self)
 	local lobby_members = self.lobby:members()
 	local members = lobby_members.get_members(lobby_members)
+	local nr_friends = 0
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local nr_friends = 0
+	for _, peer_id in pairs(members) do
+		if rawget(_G, "Steam") and rawget(_G, "Friends") then
+			local is_friend = Friends.in_category(peer_id, Friends.FRIEND_FLAG)
 
-		for _, peer_id in pairs(members) do
-			if rawget(_G, "Steam") and rawget(_G, "Friends") then
-				local is_friend = Friends.in_category(peer_id, Friends.FRIEND_FLAG)
-
-				if is_friend then
-					nr_friends = nr_friends + 1
-				end
+			if is_friend then
+				nr_friends = nr_friends + 1
 			end
 		end
-
-		_add_matchmaking_starting_game_telemetry(player, nr_friends)
 	end
+
+	local player = Managers.player:local_player(1)
+
+	Managers.telemetry.events:matchmaking_starting_game(player, nr_friends)
 
 	if Application.platform() == "ps4" then
 		local statistics_db = self.statistics_db

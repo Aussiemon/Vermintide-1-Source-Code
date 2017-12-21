@@ -8,7 +8,6 @@ local fake_input_service = {
 		return 
 	end
 }
-local telemetry_data = {}
 MatchmakingStateSearchPlayers.init = function (self, params)
 	self.lobby = params.lobby
 	self.network_transmit = params.network_transmit
@@ -168,16 +167,12 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 		local full_group_timer_ended = (all_peers_ready and all_peers_ingame and self.update_full_group_timer(self, dt)) or false
 
 		if full_group_timer_ended then
-			if GameSettingsDevelopment.use_telemetry then
-				local player_manager = Managers.player
-				local player = player_manager.local_player(player_manager, 1)
-				local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
-				local time_taken = (started_matchmaking_t and t - started_matchmaking_t) or 0
-				local connection_state = "search_players_successful"
-				local telemetry_manager = Managers.telemetry
+			local player = Managers.player:local_player(1)
+			local connection_state = "search_players_successful"
+			local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
+			local time_taken = (started_matchmaking_t and t - started_matchmaking_t) or 0
 
-				telemetry_manager.add_matchmaking_connection_telemetry(telemetry_manager, player, connection_state, time_taken)
-			end
+			Managers.telemetry.events:matchmaking_connection(player, connection_state, time_taken)
 
 			return MatchmakingStateStartGame, self.state_context
 		elseif not all_peers_ready then

@@ -189,8 +189,8 @@ PlayerBot.spawn = function (self, position, rotation, is_initial_spawn, ammo_mel
 	Unit.set_data(unit, "sound_character", profile.sound_character)
 	Unit.create_actor(unit, "bot_collision", false)
 
-	if GameSettingsDevelopment.use_telemetry and self.is_server then
-		self._add_spawn_telemetry(self, "host")
+	if self.is_server then
+		Managers.telemetry.events:player_spawn(self, "host")
 	end
 
 	local level_settings = LevelHelper:current_level_settings()
@@ -201,20 +201,6 @@ PlayerBot.spawn = function (self, position, rotation, is_initial_spawn, ammo_mel
 	end
 
 	return unit
-end
-local telemetry_data = {}
-PlayerBot._add_spawn_telemetry = function (self, peer_type)
-	local hero = self.profile_display_name(self)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = self.bot_telemetry_id
-	telemetry_data.hero = hero
-	telemetry_data.peer_type = peer_type
-
-	Managers.telemetry:register_event("player_spawn", telemetry_data)
-
-	return 
 end
 PlayerBot.create_game_object = function (self)
 	local game_object_data_table = {

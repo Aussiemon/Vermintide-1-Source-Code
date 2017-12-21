@@ -158,16 +158,6 @@ if Development.parameter("quests_enabled") ~= nil then
 	GameSettingsDevelopment.backend_settings.quests_enabled = Development.parameter("quests_enabled")
 end
 
-GameSettingsDevelopment.local_telemetry_test = false and Development.parameter("local-telemetry-test")
-GameSettingsDevelopment.use_telemetry = rawget(_G, "Curl") and Development.parameter("use-telemetry") and ((rawget(_G, "Steam") and GameSettingsDevelopment.network_mode == "steam") or GameSettingsDevelopment.local_telemetry_test)
-GameSettingsDevelopment.use_session_survey = GameSettingsDevelopment.use_telemetry and Development.parameter("use-session-survey")
-GameSettingsDevelopment.use_tech_telemetry = GameSettingsDevelopment.use_telemetry and Development.parameter("use-tech-telemetry")
-GameSettingsDevelopment.telemetry_log_interval = GameSettingsDevelopment.use_telemetry and Development.parameter("telemetry-log-interval")
-GameSettingsDevelopment.telemetry_whitelist = GameSettingsDevelopment.use_telemetry and Development.parameter("telemetry-whitelist")
-GameSettingsDevelopment.telemetry_base_url = "ftp.fatshark.se/pub/bulldozer/telemetry/"
-GameSettingsDevelopment.telemetry_compress_data = true
-GameSettingsDevelopment.telemetry_auth_type = "none"
-
 if Application.platform() == "xb1" then
 	GameSettingsDevelopment.network_port = 0
 else

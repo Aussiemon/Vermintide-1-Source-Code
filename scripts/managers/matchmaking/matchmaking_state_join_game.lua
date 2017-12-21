@@ -161,17 +161,11 @@ MatchmakingStateJoinGame.handle_popup_result = function (self, result, t)
 
 		self.request_profile_from_host(self, hero_index)
 	else
-		if GameSettingsDevelopment.use_telemetry then
-			reason = (self.popup_join_lobby_handler.cancel_timer < 0 and "timed_out") or "cancelled"
-			local player_manager = Managers.player
-			local player = player_manager.local_player(player_manager, 1)
-			local current_hero_name = player.profile_display_name(player)
-			local telemetry_id = player.telemetry_id(player)
-			local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
-			local telemetry_manager = Managers.telemetry
+		local player = Managers.player:local_player(1)
+		local reason = (self.popup_join_lobby_handler.cancel_timer < 0 and "timed_out") or "cancelled"
+		local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
 
-			telemetry_manager.add_matchmaking_select_player_telemetry(telemetry_manager, telemetry_id, current_hero_name, reason, selected_hero_name, time_taken)
-		end
+		Managers.telemetry.events:ui_matchmaking_select_player(player, selected_hero_name, reason, time_taken)
 
 		self._exit_to_search_game = true
 		local lobby_id = self.lobby_client:id()
@@ -290,15 +284,10 @@ MatchmakingStateJoinGame.rpc_matchmaking_request_profile_reply = function (self,
 		self.show_popup = true
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local telemetry_id = player.telemetry_id(player)
-		local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
-		local telemetry_manager = Managers.telemetry
+	local player = Managers.player:local_player(1)
+	local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
 
-		telemetry_manager.add_matchmaking_select_player_telemetry(telemetry_manager, telemetry_id, current_hero_name, reason, selected_hero_name, time_taken)
-	end
+	Managers.telemetry.events:ui_matchmaking_select_player(player, selected_hero_name, reason, time_taken)
 
 	return 
 end

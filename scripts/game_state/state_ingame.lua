@@ -249,11 +249,22 @@ StateIngame.on_enter = function (self)
 		Managers.state.controller_features = ControllerFeaturesManager:new(self.is_in_inn)
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local difficulty = Managers.state.difficulty:get_difficulty()
+	Managers.telemetry.rpc_listener:register(self.network_event_delegate)
+	Managers.telemetry:reset()
 
-		self._add_session_started_telemetry(self, level_key, difficulty, is_server)
-		Managers.telemetry:register_network_event_delegate(network_event_delegate)
+	local engine_revision = script_data.build_identifier
+	local content_revision = script_data.settings.content_revision
+
+	Managers.telemetry.events:header(engine_revision, content_revision)
+
+	local difficulty = Managers.state.difficulty:get_difficulty()
+
+	Managers.telemetry.events:game_started(is_server, level_key, difficulty)
+
+	if is_server then
+		local session_id = Managers.state.network:session_id()
+
+		Managers.telemetry.events:session_id(session_id)
 	end
 
 	local event_manager = Managers.state.event
@@ -472,30 +483,20 @@ StateIngame.on_enter = function (self)
 		self.network_client:on_game_entered()
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local my_peer_id = self.network_transmit.peer_id
-		local player = player_manager.player_from_peer_id(player_manager, my_peer_id)
-		local telemetry_id = player.telemetry_id(player)
-		local difficulty = Managers.state.difficulty:get_difficulty()
+	local fullscreen = Application.user_setting("fullscreen")
+	local borderless_fullscreen = Application.user_setting("borderless_fullscreen")
+	local windowed = not fullscreen and not borderless_fullscreen
+	local screen_mode = (fullscreen and "fullscreen") or (borderless_fullscreen and "borderless_fullscreen") or (windowed and "windowed")
+	local res_x, res_y = Application.resolution()
+	local resolution_string = string.format("%dx%d", res_x, res_y)
+	local graphics_quality = Application.user_setting("graphics_quality")
 
-		self._add_session_joined_telemetry(self, telemetry_id, level_key, difficulty)
+	Managers.telemetry.events:tech_settings(resolution_string, graphics_quality, screen_mode)
 
-		local fullscreen = Application.user_setting("fullscreen")
-		local borderless_fullscreen = Application.user_setting("borderless_fullscreen")
-		local windowed = not fullscreen and not borderless_fullscreen
-		local screen_mode = (fullscreen and "fullscreen") or (borderless_fullscreen and "borderless_fullscreen") or (windowed and "windowed")
-		local res_x, res_y = Application.resolution()
-		local resolution_string = string.format("%dx%d", res_x, res_y)
-		local graphics_quality = Application.user_setting("graphics_quality")
+	local system_info = Application.sysinfo()
+	local adapter_index = Application.user_setting("adapter_index")
 
-		self._add_settings_telemetry(self, resolution_string, graphics_quality, screen_mode, telemetry_id)
-
-		local system_info = Application.sysinfo()
-		local adapter_index = Application.user_setting("adapter_index")
-
-		self._add_system_info_telemetry(self, system_info, adapter_index)
-	end
+	Managers.telemetry.events:tech_system(system_info, adapter_index)
 
 	if Application.platform() == "xb1" then
 		Managers.account:set_presence("playing")
@@ -725,17 +726,6 @@ end
 local knoywloke = nil
 StateIngame.update = function (self, dt, main_t)
 	Vault.reseed()
-
-	if Application.plocmova() and not knoywloke then
-		local snlwpz = {
-			steam_id = Steam.user_id()
-		}
-
-		Managers.telemetry:register_event("rat_monger", snlwpz)
-		ScriptApplication.send_to_crashify("StateInGame", "rat_monger")
-
-		knoywloke = true
-	end
 
 	self.dt = dt
 
@@ -1350,17 +1340,23 @@ end
 StateIngame.on_exit = function (self, application_shutdown)
 	UPDATE_POSITION_LOOKUP()
 	UPDATE_PLAYER_LISTS()
+	self._check_and_add_end_game_telemetry(self, application_shutdown)
 
-	if GameSettingsDevelopment.use_telemetry then
-		self._check_and_add_end_game_telemetry(self, application_shutdown)
+	if TelemetrySettings.send then
+		local game_mode_key = Managers.state.game_mode:game_mode_key()
 
-		local fov = Application.user_setting("render_settings", "fov")
+		if game_mode_key == "inn" then
+			print("[StateIngame] Skipped uploading telemetry data for the inn level")
+		else
+			local token = Managers.telemetry:send()
 
-		self._add_fov_telemetry(self, fov)
-		Managers.telemetry:dispatch_events()
-		Managers.telemetry:unregister_network_event_delegate()
+			Managers.token:register_token(token)
+		end
+	else
+		printf("[StateIngame] Skipped uploading telemetry data")
 	end
 
+	Managers.telemetry.rpc_listener:unregister(self.network_event_delegate)
 	DebugKeyHandler.set_enabled(false)
 	DebugScreen.destroy()
 	self.network_timer_handler:unregister_rpcs()
@@ -1577,89 +1573,10 @@ StateIngame.on_exit = function (self, application_shutdown)
 
 	return 
 end
-local telemetry_data = {}
-StateIngame._add_session_started_telemetry = function (self, level_key, difficulty, is_server)
-	table.clear(telemetry_data)
-
-	telemetry_data.level_key = level_key
-	telemetry_data.difficulty = difficulty
-
-	Managers.telemetry:session_start(telemetry_data, is_server)
-
-	return 
-end
-StateIngame._add_session_joined_telemetry = function (self, player_id, level_key, difficulty)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	local join_type = nil
-
-	if rawget(_G, "Steam") and rawget(_G, "Friends") then
-		local invite_type = Friends.boot_invite()
-
-		if invite_type == Friends.INVITE_LOBBY then
-			join_type = "invite_lobby"
-		elseif invite_type == Friends.INVITE_SERVER then
-			join_type = "invite_server"
-		end
-	end
-
-	telemetry_data.join_type = join_type
-	telemetry_data.level_key = level_key
-	telemetry_data.difficulty = difficulty
-
-	Managers.telemetry:register_event("session_joined", telemetry_data)
-
-	return 
-end
-StateIngame._add_fov_telemetry = function (self, fov)
-	local player_manager = Managers.player
-	local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
-	local telemetry_id = player.telemetry_id(player)
-	local hero = player.profile_display_name(player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.fov = fov
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-
-	Managers.telemetry:register_event("tech_fov", telemetry_data)
-
-	return 
-end
-StateIngame._add_settings_telemetry = function (self, resolution, graphics_quality, screen_mode, player_id)
-	table.clear(telemetry_data)
-
-	telemetry_data.resolution = resolution
-	telemetry_data.graphics_quality = graphics_quality
-	telemetry_data.screen_mode = screen_mode
-	telemetry_data.player_id = player_id
-
-	Managers.telemetry:register_event("tech_settings", telemetry_data)
-
-	return 
-end
-StateIngame._add_system_info_telemetry = function (self, system_info, adapter_index)
-	if not adapter_index then
-		return 
-	end
-
-	table.clear(telemetry_data)
-
-	telemetry_data.system_info = system_info
-
-	Managers.telemetry:register_event("tech_system", telemetry_data)
-
-	return 
-end
 StateIngame._check_and_add_end_game_telemetry = function (self, application_shutdown)
-	local player_manager = Managers.player
-	local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
-	local telemetry_id = player.telemetry_id(player)
+	local player = Managers.player:player_from_peer_id(self.peer_id)
 	local level_key = self.level_key
 	local difficulty = Managers.state.difficulty:get_difficulty()
-	local hero = player.profile_display_name(player)
 	local reason = self.exit_type
 
 	if application_shutdown then
@@ -1679,60 +1596,10 @@ StateIngame._check_and_add_end_game_telemetry = function (self, application_shut
 			elseif Managers.state.game_mode:game_lost() then
 				reason = "lost"
 			end
-
-			if self.is_server then
-				self._add_game_ended_telemetry_bots(self, level_key, difficulty, reason)
-			end
 		end
 	end
 
-	self._add_game_ended_telemetry(self, telemetry_id, level_key, difficulty, hero, reason)
-
-	return 
-end
-StateIngame._add_game_ended_telemetry_bots = function (self, level_key, difficulty, reason)
-	assert(self.is_server, "Trying to log bot telemetry when not being server!")
-
-	local player_manager = Managers.player
-	local players = player_manager.human_and_bot_players(player_manager)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.level_key = level_key
-	telemetry_data.difficulty = difficulty
-	telemetry_data.end_reason = reason
-
-	for _, player in pairs(players) do
-		if player.bot_player then
-			local telemetry_id = player.telemetry_id(player)
-			local hero = player.profile_display_name(player)
-			telemetry_data.player_id = telemetry_id
-			telemetry_data.hero = hero
-			telemetry_data.is_bot = true
-
-			Managers.telemetry:register_event("game_ended", telemetry_data)
-		end
-	end
-
-	return 
-end
-StateIngame._add_game_ended_telemetry = function (self, telemetry_id, level_key, difficulty, hero, reason)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.level_key = level_key
-	telemetry_data.difficulty = difficulty
-	telemetry_data.hero = hero
-	telemetry_data.is_bot = false
-	telemetry_data.end_reason = reason
-	local telemetry_manager = Managers.telemetry
-
-	telemetry_manager.register_event(telemetry_manager, "animal", {
-		hippo = MODE.hippo or false,
-		wildebeest = MODE.wildebeest or false,
-		gnu = MODE.gnu or false
-	})
-	telemetry_manager.register_event(telemetry_manager, "game_ended", telemetry_data)
+	Managers.telemetry.events:game_ended(player, self.is_server, level_key, difficulty, reason)
 
 	return 
 end

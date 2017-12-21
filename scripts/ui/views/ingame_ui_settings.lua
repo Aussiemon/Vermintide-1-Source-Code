@@ -89,7 +89,7 @@ local transitions = {
 
 		local telemetry_survey_view = self.views.telemetry_survey
 		local level_key = Managers.state.game_mode:level_key()
-		local use_survey = GameSettingsDevelopment.use_session_survey
+		local use_survey = TelemetrySettings.send and TelemetrySettings.use_session_survey
 		local is_answered = telemetry_survey_view.is_survey_answered(telemetry_survey_view)
 		local is_timed_out = telemetry_survey_view.is_survey_timed_out(telemetry_survey_view)
 

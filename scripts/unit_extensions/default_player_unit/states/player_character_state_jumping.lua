@@ -72,13 +72,7 @@ PlayerCharacterStateJumping.on_enter = function (self, unit, input, dt, context,
 
 	local position = POSITION_LOOKUP[unit]
 
-	if GameSettingsDevelopment.use_telemetry then
-		local telemetry_id = player.telemetry_id(player)
-		local hero = player.profile_display_name(player)
-
-		self._add_jump_telemetry(self, position, telemetry_id, hero)
-	end
-
+	Managers.telemetry.events:player_jump(player, position)
 	ScriptUnit.extension(unit, "whereabouts_system"):set_jumped()
 
 	local start_jump_height = position_lookup[unit].z
@@ -189,20 +183,6 @@ PlayerCharacterStateJumping.update = function (self, unit, input, dt, context, t
 
 		return 
 	end
-
-	return 
-end
-local telemetry_data = {}
-PlayerCharacterStateJumping._add_jump_telemetry = function (self, position, telemetry_id, hero)
-	local telemetry_manager = Managers.telemetry
-
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-	telemetry_data.position = position
-
-	telemetry_manager.register_event(telemetry_manager, "player_jump", telemetry_data)
 
 	return 
 end

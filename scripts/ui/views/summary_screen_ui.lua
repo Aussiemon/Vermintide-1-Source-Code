@@ -859,32 +859,14 @@ SummaryScreenUI.display_bar_progress = function (self)
 		local player_level = nil
 		player_level, experience = self.rewards:get_level_start()
 		local new_experience = experience + total_experience_gained
+		local player = Managers.player:local_player()
 
-		if GameSettingsDevelopment.use_telemetry then
-			local player_manager = Managers.player
-			local player = player_manager.local_player(player_manager)
-			local hero = player.profile_display_name(player)
-			local player_id = player.telemetry_id(player)
-
-			self._add_experience_gain_telemetry(self, total_experience_gained, player_id, hero)
-		end
+		Managers.telemetry.events:player_experience_gain(player, total_experience_gained)
 	else
 		print("Failed initialized experience for experience bar")
 	end
 
 	self.add_bar_progress(self, "hero_bar", experience, self.experience_bar_hero_widget, total_experience_gained)
-
-	return 
-end
-local telemetry_data = {}
-SummaryScreenUI._add_experience_gain_telemetry = function (self, gained_experience, player_id, hero)
-	table.clear(telemetry_data)
-
-	telemetry_data.gained_experience = gained_experience
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-
-	Managers.telemetry:register_event("player_experience_gain", telemetry_data)
 
 	return 
 end

@@ -23,8 +23,6 @@ PlayerUnitLocomotionExtension.init = function (self, extension_init_context, uni
 	self.time_since_last_down_collide = 0
 	self.rotate_along_direction = true
 	self.debugging_animations = false
-	self.telemetry_timer = 0
-	self.telemetry_log_interval = tonumber(GameSettingsDevelopment.telemetry_log_interval) or 1
 
 	self._initialize_sample_velocities(self)
 

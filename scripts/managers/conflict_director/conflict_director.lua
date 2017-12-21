@@ -1648,9 +1648,7 @@ ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn
 		Unit.flow_event(ai_unit, "climate_type_set")
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		self._add_ai_spawn_telemetry(self, breed.name, spawn_pos)
-	end
+	Managers.telemetry.events:ai_spawn(breed.name, spawn_pos)
 
 	local blackboard = Unit.get_data(ai_unit, "blackboard")
 	blackboard.spawn_animation = spawn_animation
@@ -1684,38 +1682,6 @@ ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn
 	Profiler.stop("conflict spawn unit")
 
 	return ai_unit
-end
-local telemetry_data = {}
-ConflictDirector._add_ai_spawn_telemetry = function (self, breed_name, spawn_pos)
-	table.clear(telemetry_data)
-
-	telemetry_data.breed = breed_name
-	telemetry_data.position = spawn_pos
-
-	Managers.telemetry:register_event("ai_spawn", telemetry_data)
-
-	return 
-end
-ConflictDirector._add_ai_death_telemetry = function (self, breed_name, death_pos)
-	table.clear(telemetry_data)
-
-	telemetry_data.breed = breed_name
-	telemetry_data.position = death_pos
-
-	Managers.telemetry:register_event("ai_death", telemetry_data)
-
-	return 
-end
-ConflictDirector._add_ai_despawn_telemetry = function (self, breed_name, despawn_pos, reason)
-	table.clear(telemetry_data)
-
-	telemetry_data.breed = breed_name
-	telemetry_data.position = despawn_pos
-	telemetry_data.reason = reason
-
-	Managers.telemetry:register_event("ai_despawn", telemetry_data)
-
-	return 
 end
 ConflictDirector.set_disabled = function (self, state)
 	self.disabled = state
@@ -1800,24 +1766,19 @@ ConflictDirector.register_unit_killed = function (self, unit, blackboard, killer
 	self._remove_unit_from_spawned(self, unit, blackboard)
 	self.pacing:enemy_killed(unit, player_and_bot_units)
 
-	if GameSettingsDevelopment.use_telemetry then
-		local breed_name = blackboard.breed.name
-		local death_pos = POSITION_LOOKUP[unit]
+	local breed_name = blackboard.breed.name
+	local death_pos = POSITION_LOOKUP[unit]
 
-		self._add_ai_death_telemetry(self, breed_name, death_pos)
-	end
+	Managers.telemetry.events:ai_death(breed_name, death_pos)
 
 	return 
 end
 ConflictDirector.destroy_unit = function (self, unit, blackboard, reason)
 	if Unit.alive(unit) then
-		if GameSettingsDevelopment.use_telemetry then
-			local breed_name = blackboard.breed.name
-			local despawn_pos = POSITION_LOOKUP[unit]
+		local breed_name = blackboard.breed.name
+		local despawn_pos = POSITION_LOOKUP[unit]
 
-			self._add_ai_despawn_telemetry(self, breed_name, despawn_pos, reason or "unknown")
-		end
-
+		Managers.telemetry.events:ai_despawn(breed_name, despawn_pos, reason)
 		self._remove_unit_from_spawned(self, unit, blackboard)
 		Managers.state.unit_spawner:mark_for_deletion(unit)
 	end
@@ -1835,15 +1796,12 @@ ConflictDirector.destroy_all_units = function (self)
 
 	for k, unit in ipairs(self._spawned) do
 		if Unit.alive(unit) then
-			if GameSettingsDevelopment.use_telemetry then
-				local reason = "destroy_all_units"
-				local breed = Unit.get_data(unit, "breed")
-				local breed_name = breed.name
-				local despawn_pos = POSITION_LOOKUP[unit]
+			local reason = "destroy_all_units"
+			local breed = Unit.get_data(unit, "breed")
+			local breed_name = breed.name
+			local despawn_pos = POSITION_LOOKUP[unit]
 
-				self._add_ai_despawn_telemetry(self, breed_name, despawn_pos, reason)
-			end
-
+			Managers.telemetry.events:ai_despawn(breed_name, despawn_pos, reason)
 			Managers.state.unit_spawner:mark_for_deletion(unit)
 		end
 	end
@@ -1891,15 +1849,11 @@ ConflictDirector.destroy_close_units = function (self, except_unit, dist_squared
 
 		if remove_unit then
 			local blackboard = Unit.get_data(unit, "blackboard")
+			local reason = "destroy_close_units"
+			local breed_name = blackboard.breed.name
+			local despawn_pos = POSITION_LOOKUP[unit]
 
-			if GameSettingsDevelopment.use_telemetry then
-				local reason = "destroy_close_units"
-				local breed_name = blackboard.breed.name
-				local despawn_pos = POSITION_LOOKUP[unit]
-
-				self._add_ai_despawn_telemetry(self, breed_name, despawn_pos, reason)
-			end
-
+			Managers.telemetry.events:ai_despawn(breed_name, despawn_pos, reason)
 			self._remove_unit_from_spawned(self, unit, blackboard)
 
 			list_size = list_size - 1
@@ -1922,14 +1876,12 @@ ConflictDirector.destroy_specials = function (self)
 		local unit = alive_specials[k]
 
 		if Unit.alive(unit) then
-			if GameSettingsDevelopment.use_telemetry then
-				local reason = "destroy_specials"
-				local breed = Unit.get_data(unit, "breed")
-				local breed_name = breed.name
-				local despawn_pos = POSITION_LOOKUP[unit]
+			local reason = "destroy_specials"
+			local breed = Unit.get_data(unit, "breed")
+			local breed_name = breed.name
+			local despawn_pos = POSITION_LOOKUP[unit]
 
-				self._add_ai_despawn_telemetry(self, breed_name, despawn_pos, reason)
-			end
+			Managers.telemetry.events:ai_despawn(breed_name, despawn_pos, reason)
 
 			local blackboard = Unit.get_data(unit, "blackboard")
 

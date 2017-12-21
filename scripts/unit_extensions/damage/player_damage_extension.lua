@@ -45,35 +45,23 @@ PlayerDamageExtension.add_damage = function (self, attacker_unit, damage_amount,
 		self._mission_system:increment_goal_mission_counter("dwarf_exterior_survive", math.max(damage_amount, 0), true)
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		self._add_player_damage_telemetry(self, damage_type, damage_source_name or "n/a")
-	end
+	self._add_player_damage_telemetry(self, damage_type, damage_source_name or "n/a")
 
 	return 
 end
 PlayerDamageExtension._add_player_damage_telemetry = function (self, damage_type, damage_source)
-	local player_manager = Managers.player
 	local unit = self.unit
-	local owner = player_manager.owner(player_manager, unit)
-	local network_manager = Managers.state.network
-	local is_server = network_manager.is_server
+	local owner = Managers.player:owner(unit)
+	local is_server = Managers.state.network.is_server
 
 	if owner then
 		local local_player = owner.local_player
 		local is_bot = owner.bot_player
 
 		if (is_bot and is_server) or local_player then
-			local telemetry_id = owner.telemetry_id(owner)
 			local position = POSITION_LOOKUP[unit]
-			local hero = owner.profile_display_name(owner)
-			local player_damage_telemetry = self.player_damage_telemetry
-			player_damage_telemetry.damage_type = damage_type
-			player_damage_telemetry.position = position
-			player_damage_telemetry.player_id = telemetry_id
-			player_damage_telemetry.hero = hero
-			player_damage_telemetry.damage_source = damage_source
 
-			Managers.telemetry:register_event("player_damage", player_damage_telemetry)
+			Managers.telemetry.events:player_damage(owner, damage_type, damage_source, position)
 		end
 	end
 

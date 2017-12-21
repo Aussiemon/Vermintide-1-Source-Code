@@ -27,16 +27,10 @@ ActionInteraction.client_owner_post_update = function (self, dt, t, world, can_d
 	return 
 end
 ActionInteraction.finish = function (self, reason)
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.unit_owner(player_manager, self.owner_unit)
-		local player_id = player.telemetry_id(player)
-		local hero = player.profile_display_name(player)
-		local position = POSITION_LOOKUP[self.owner_unit]
+	local player = Managers.player:unit_owner(self.owner_unit)
+	local position = POSITION_LOOKUP[self.owner_unit]
 
-		Managers.telemetry:add_item_use_telemetry(player_id, hero, self.item_name, position)
-	end
-
+	Managers.telemetry.events:player_use_item(player, self.item_name, position)
 	self.status_extension:set_blocking(false)
 
 	return 

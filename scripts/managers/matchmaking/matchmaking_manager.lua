@@ -814,18 +814,13 @@ MatchmakingManager.cancel_matchmaking = function (self)
 		return 
 	end
 
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local started_matchmaking_t = self.started_matchmaking_t
-		local time_manager = Managers.time
-		local t = time_manager.time(time_manager, "game") or started_matchmaking_t
-		local time_taken = t - started_matchmaking_t
-		local connection_state = "cancelled"
-		local telemetry_manager = Managers.telemetry
+	local player = Managers.player:local_player(1)
+	local connection_state = "cancelled"
+	local started_matchmaking_t = self.started_matchmaking_t
+	local t = Managers.time:time("game") or started_matchmaking_t
+	local time_taken = t - started_matchmaking_t
 
-		telemetry_manager.add_matchmaking_connection_telemetry(telemetry_manager, player, connection_state, time_taken)
-	end
+	Managers.telemetry.events:matchmaking_connection(player, connection_state, time_taken)
 
 	if self._state then
 		if self._state.lobby_client then

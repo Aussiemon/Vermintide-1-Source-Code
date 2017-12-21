@@ -63,34 +63,6 @@ GenericAmmoUserExtension.reset = function (self)
 
 	return 
 end
-local telemetry_data = {}
-
-local function _add_ammo_depleted_telemetry(player_id, hero, weapon_name, position)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.weapon_name = weapon_name
-	telemetry_data.position = position
-
-	Managers.telemetry:register_event("player_ammo_depleted", telemetry_data)
-
-	return 
-end
-
-local function _add_ammo_refilled_telemetry(player_id, hero, weapon_name, position)
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = player_id
-	telemetry_data.hero = hero
-	telemetry_data.weapon_name = weapon_name
-	telemetry_data.position = position
-
-	Managers.telemetry:register_event("player_ammo_refilled", telemetry_data)
-
-	return 
-end
-
 GenericAmmoUserExtension.update = function (self, unit, input, dt, context, t)
 	if 0 < self.shots_fired then
 		self.current_ammo = self.current_ammo - self.shots_fired
@@ -107,15 +79,12 @@ GenericAmmoUserExtension.update = function (self, unit, input, dt, context, t)
 
 					inventory_extension.destroy_slot(inventory_extension, self.slot_name)
 					inventory_extension.wield_previous_weapon(inventory_extension)
-				elseif GameSettingsDevelopment.use_telemetry then
-					local player_manager = Managers.player
-					local player = player_manager.unit_owner(player_manager, self.owner_unit)
-					local player_id = player.telemetry_id(player)
-					local hero = player.profile_display_name(player)
+				else
+					local player = Managers.player:unit_owner(self.owner_unit)
 					local item_name = self.item_name
 					local position = POSITION_LOOKUP[self.owner_unit]
 
-					_add_ammo_depleted_telemetry(player_id, hero, item_name, position)
+					Managers.telemetry.events:player_ammo_depleted(player, item_name, position)
 				end
 
 				Unit.flow_event(unit, "used_last_ammo")
@@ -207,17 +176,11 @@ end
 GenericAmmoUserExtension.add_ammo = function (self)
 	if self.available_ammo == 0 and self.current_ammo == 0 then
 		self.reloaded_from_zero_ammo = true
+		local player = Managers.player:unit_owner(self.owner_unit)
+		local item_name = self.item_name
+		local position = POSITION_LOOKUP[self.owner_unit]
 
-		if GameSettingsDevelopment.use_telemetry then
-			local player_manager = Managers.player
-			local player = player_manager.unit_owner(player_manager, self.owner_unit)
-			local player_id = player.telemetry_id(player)
-			local hero = player.profile_display_name(player)
-			local item_name = self.item_name
-			local position = POSITION_LOOKUP[self.owner_unit]
-
-			_add_ammo_refilled_telemetry(player_id, hero, item_name, position)
-		end
+		Managers.telemetry.events:player_ammo_refilled(player, item_name, position)
 	end
 
 	if self.ammo_immediately_available then

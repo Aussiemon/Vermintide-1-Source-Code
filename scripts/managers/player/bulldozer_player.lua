@@ -198,12 +198,9 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 	player_manager.assign_unit_ownership(player_manager, unit, self, is_player_unit)
 	Managers.state.event:trigger("level_start_local_player_spawned", is_initial_spawn)
 
-	if GameSettingsDevelopment.use_telemetry then
-		local peer_type = (self.is_server and "host") or "client"
+	local peer_type = (self.is_server and "host") or "client"
 
-		self._add_spawn_telemetry(self, peer_type)
-	end
-
+	Managers.telemetry.events:player_spawn(self, peer_type)
 	Managers.state.event:trigger("camera_teleported")
 
 	return unit
@@ -217,7 +214,6 @@ BulldozerPlayer.create_boon_handler = function (self, world)
 
 	return 
 end
-local telemetry_data = {}
 BulldozerPlayer._get_initial_inventory = function (self, healthkit, potion, grenade)
 	local initial_inventory = {
 		slot_packmaster_claw = "packmaster_claw",
@@ -227,27 +223,6 @@ BulldozerPlayer._get_initial_inventory = function (self, healthkit, potion, gren
 	}
 
 	return initial_inventory
-end
-BulldozerPlayer._add_spawn_telemetry = function (self, peer_type)
-	local telemetry_manager = Managers.telemetry
-	local telemetry_id = self.telemetry_id(self)
-	local hero = self.profile_display_name(self)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-	telemetry_data.peer_type = peer_type
-
-	if rawget(_G, "Steam") and GameSettingsDevelopment.network_mode == "steam" then
-		local country_code = Steam.user_country_code()
-		local country_name = (country_code and telemetry_manager.country_name_from_2char_code(telemetry_manager, country_code)) or "unknown"
-		telemetry_data.user_country = country_name
-	end
-
-	telemetry_manager.register_event(telemetry_manager, "player_spawn", telemetry_data)
-
-	return 
 end
 BulldozerPlayer.create_game_object = function (self)
 	local empty_boon_id = NetworkLookup.boons["n/a"]
