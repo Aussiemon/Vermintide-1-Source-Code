@@ -3242,6 +3242,24 @@ BuffTemplates = {
 			}
 		}
 	},
+	trinket_reduce_grimoire_penalty_spring = {
+		description = "trinket_reduce_grimoire_penalty_description",
+		display_name = "trinket_reduce_grimoire_penalty",
+		unique_id = "trinket_reduce_grimoire_penalty",
+		icon = "trinket_reduce_grimoire_penalty_spring_01",
+		description_values = {
+			"multiplier"
+		},
+		buffs = {
+			{
+				multiplier = -0.25,
+				name = "curse_protection",
+				remove_buff_func = "remove_curse_protection",
+				apply_buff_func = "apply_curse_protection",
+				stat_buff = StatBuffIndex.CURSE_PROTECTION
+			}
+		}
+	},
 	trinket_grenade_radius_tier1 = {
 		description = "trinket_grenade_radius_tier1_description",
 		display_name = "trinket_grenade_radius_tier1",

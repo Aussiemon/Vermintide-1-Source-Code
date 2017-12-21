@@ -137,6 +137,7 @@ return {
 	"units/beings/player/generic_trophies/trophy_wine_bottle_01/trophy_wine_bottle_01",
 	"units/beings/player/generic_trophies/trophy_zhufbar_karak_vlag_ancestral_badge/trophy_karak_vlag_ancestral_badge_01",
 	"units/beings/player/generic_trophies/trophy_zhufbar_karak_vlag_ancestral_badge/trophy_zhufbar_ancestral_badge_01",
+	"units/beings/player/generic_trophies/trophy_flower_flask/trophy_flower_flask_01",
 	"units/beings/player/way_watcher/first_person_base/chr_first_person_mesh",
 	"units/beings/player/way_watcher/headpiece/ww_hood_01",
 	"units/beings/player/way_watcher/headpiece/ww_hood_02",

@@ -259,6 +259,9 @@ return {
 			1.6
 		}
 	},
+	__neewollah_kcul_esaercni_teknirt = {
+		{}
+	},
 	__2reit_kcatta_nosiop_teknirt = {
 		{
 			0.32
@@ -281,9 +284,7 @@ return {
 	__eviver_noitpurretni_on_teknirt = {
 		{}
 	},
-	__neewollah_kcul_esaercni_teknirt = {
-		{}
-	},
+	__reidlos_eripme_sa_ecid_llor_teknirt = {},
 	__1reit_noitartenep_desaercni_nopaew_degnar = {
 		{
 			6.4,
@@ -296,14 +297,14 @@ return {
 			0.64
 		}
 	},
-	__reidlos_eripme_sa_ecid_llor_teknirt = {},
+	__fle_doow_sa_ecid_llor_teknirt = {},
 	__3reit_kcapdem_emusnoc_ton_teknirt = {
 		{
 			1.6
 		}
 	},
-	__fle_doow_sa_ecid_llor_teknirt = {},
 	__regnar_frawd_sa_ecid_llor_teknirt = {},
+	__retnuh_hctiw_sa_ecid_llor_teknirt = {},
 	__kaew_noitop_ytilibarenluvni = {
 		{}
 	},
@@ -313,14 +314,16 @@ return {
 			1.2
 		}
 	},
-	__retnuh_hctiw_sa_ecid_llor_teknirt = {},
-	__kcolb_ymene_ot_egamad_esaercni_nopaew_eelem = {
-		{}
-	},
 	__egamad_derahs_teknirt = {
 		{}
 	},
+	__kcolb_ymene_ot_egamad_esaercni_nopaew_eelem = {
+		{}
+	},
 	__3reit_rennug_gniltar_noitcetorp_teknirt = {
+		{}
+	},
+	__1reit_nwapser_retsaf_teknirt = {
 		{}
 	},
 	__3t_tod_W3_gninrub = {
@@ -335,7 +338,7 @@ return {
 	__deelb_nwodkconk = {
 		{}
 	},
-	__1reit_nwapser_retsaf_teknirt = {
+	__3reit_suidar_edanerg_teknirt = {
 		{}
 	},
 	__1reit_yvaeh_corp_egrahcrevo_nopaew_eelem = {
@@ -352,7 +355,7 @@ return {
 			2
 		}
 	},
-	__3reit_suidar_edanerg_teknirt = {
+	__gnirps_ytlanep_eriomirg_ecuder_teknirt = {
 		{}
 	},
 	__ytlanep_eriomirg_ecuder_teknirt = {

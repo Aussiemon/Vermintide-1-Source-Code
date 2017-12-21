@@ -1365,6 +1365,13 @@ JournalPageLayout = {
 										images = EMPIRE_IMAGES
 									},
 									{
+										page_text = "dlc1_3_lb_vt_world_nations_empire_reikshammer",
+										category_name = "dlc1_3_lb_vt_world_nations_empire_reikshammer_title",
+										page_title = "dlc1_3_lb_vt_world_nations_empire_reikshammer_title",
+										unlock_level = "any",
+										images = EMPIRE_IMAGES
+									},
+									{
 										category_name = "dlc1_3_lb_vt_world_nations_empire_settlements_title",
 										page_text = "dlc1_3_lb_vt_world_nations_empire_settlements",
 										page_title = "dlc1_3_lb_vt_world_nations_empire_settlements_title",
