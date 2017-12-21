@@ -22,6 +22,12 @@ LightWeightProjectileParticleEffects = {
 			link = "p_fx",
 			unit_function = INVENTORY_UNIT
 		}
+	},
+	throwing_star = {
+		{
+			particle_name = "fx/wpnfx_skaven_gutter_runner_throw_01",
+			kill_policy = "destroy"
+		}
 	}
 }
 

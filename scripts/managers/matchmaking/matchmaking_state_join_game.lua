@@ -338,7 +338,7 @@ MatchmakingStateJoinGame.set_state_to_start_lobby = function (self)
 	self.matchmaking_manager.debug.text = "starting_game"
 	self.next_transition_state = "start_lobby"
 
-	if Application.platform() == "ps4" and self.state_context.game_search_data then
+	if PLATFORM == "ps4" and self.state_context.game_search_data then
 		local statistics_db = self.statistics_db
 		local state_context = self.state_context
 		local game_search_data = state_context.game_search_data

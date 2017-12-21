@@ -21,7 +21,7 @@ local tip_type_max_range = {
 	tip = 42,
 	ferry_lady = 2,
 	khazalid = 33,
-	lore = 41
+	lore = 55
 }
 local tip_type_list = {
 	"lore",

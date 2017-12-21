@@ -156,6 +156,29 @@ go_type_table = {
 
 			return data_table
 		end,
+		ai_unit_gutter_runner = function (unit, unit_name, unit_template, gameobject_functor_context)
+			local mover = Unit.mover(unit)
+			local breed = Unit.get_data(unit, "breed")
+			local ai_extension = ScriptUnit.extension(unit, "ai_system")
+			local size_variation, size_variation_normalized = ai_extension.size_variation(ai_extension)
+			local inventory_configuration_name = ScriptUnit.extension(unit, "ai_inventory_system").inventory_configuration_name
+			local data_table = {
+				has_teleported = 1,
+				go_type = NetworkLookup.go_types.ai_unit_gutter_runner,
+				husk_unit = NetworkLookup.husks[unit_name],
+				health = ScriptUnit.extension(unit, "health_system"):get_max_health(),
+				position = (mover and Mover.position(mover)) or Unit.local_position(unit, 0),
+				rotation = Unit.local_rotation(unit, 0),
+				velocity = Vector3(0, 0, 0),
+				breed_name = NetworkLookup.breeds[breed.name],
+				size_variation_normalized = size_variation_normalized,
+				inventory_configuration = NetworkLookup.ai_inventory[inventory_configuration_name],
+				bt_action_name = NetworkLookup.bt_action_names["n/a"],
+				heroic_archetype_index = ScriptUnit.extension(unit, "ai_heroic_enemy_system"):archetype_index()
+			}
+
+			return data_table
+		end,
 		ai_unit_pack_master = function (unit, unit_name, unit_template, gameobject_functor_context)
 			local mover = Unit.mover(unit)
 			local breed = Unit.get_data(unit, "breed")
@@ -919,6 +942,13 @@ go_type_table = {
 					profile_index = profile_id
 				}
 			}
+			local level_settings = LevelHelper:current_level_settings()
+
+			if level_settings.climate_type then
+				Unit.set_flow_variable(unit, "climate_type", level_settings.climate_type)
+				Unit.flow_event(unit, "climate_type_set")
+			end
+
 			local unit_template_name = "player_bot_unit"
 
 			return unit_template_name, extension_init_data
@@ -967,6 +997,9 @@ go_type_table = {
 					go_id = game_object_id,
 					game = game_session
 				},
+				ai_heroic_enemy_system = {
+					breed = breed
+				},
 				locomotion_system = {
 					go_id = game_object_id,
 					breed = breed,
@@ -979,6 +1012,54 @@ go_type_table = {
 					is_husk = true,
 					death_reaction_template = breed.death_reaction,
 					disable_second_hit_ragdoll = breed.disable_second_hit_ragdoll
+				},
+				hit_reaction_system = {
+					is_husk = true,
+					hit_reaction_template = breed.hit_reaction,
+					hit_effect_template = breed.hit_effect_template
+				},
+				ai_inventory_system = {
+					inventory_configuration_name = inventory_configuration_name
+				},
+				dialogue_system = {
+					faction = "enemy",
+					breed_name = breed_name
+				}
+			}
+			local unit_template_name = breed.unit_template
+
+			return unit_template_name, extension_init_data
+		end,
+		ai_unit_gutter_runner = function (game_session, game_object_id, owner_id, unit, gameobject_functor_context)
+			local breed, breed_name = enemy_unit_common_extractor(unit, game_session, game_object_id)
+			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, game_object_id, "inventory_configuration")]
+			local health = GameSession.game_object_field(game_session, game_object_id, "health")
+			local archetype_index = GameSession.game_object_field(game_session, game_object_id, "heroic_archetype_index")
+
+			if archetype_index == 0 then
+				archetype_index = nil
+			end
+
+			local extension_init_data = {
+				ai_system = {
+					go_id = game_object_id,
+					game = game_session
+				},
+				ai_heroic_enemy_system = {
+					breed = breed,
+					archetype_index = archetype_index
+				},
+				locomotion_system = {
+					go_id = game_object_id,
+					breed = breed,
+					game = game_session
+				},
+				health_system = {
+					health = health
+				},
+				death_system = {
+					is_husk = true,
+					death_reaction_template = breed.death_reaction
 				},
 				hit_reaction_system = {
 					is_husk = true,

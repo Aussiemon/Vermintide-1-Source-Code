@@ -6,7 +6,6 @@ require("scripts/network/network_event_delegate")
 require("scripts/network/network_server")
 require("scripts/network/network_client")
 require("scripts/network/network_transmit")
-require("scripts/ui/views/title_loading_ui")
 
 StateLoadingRestartNetwork = class(StateLoadingRestartNetwork)
 StateLoadingRestartNetwork.NAME = "StateLoadingRestartNetwork"

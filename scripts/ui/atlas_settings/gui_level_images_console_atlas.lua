@@ -5,12 +5,12 @@ level_images_console_atlas = {
 			170
 		},
 		uv00 = {
-			0.413574,
-			0.910156
+			0.55127,
+			0.154297
 		},
 		uv11 = {
-			0.486816,
-			0.993164
+			0.624512,
+			0.237305
 		}
 	},
 	level_image_dlc_dwarf_exterior = {
@@ -19,12 +19,12 @@ level_images_console_atlas = {
 			198
 		},
 		uv00 = {
-			0.413574,
-			0.811523
+			0.861816,
+			0.000977
 		},
 		uv11 = {
-			0.499023,
-			0.908203
+			0.947266,
+			0.097656
 		}
 	},
 	level_image_dlc_dwarf_interior = {
@@ -33,12 +33,12 @@ level_images_console_atlas = {
 			198
 		},
 		uv00 = {
-			0.413574,
-			0.712891
+			0.775391,
+			0.000977
 		},
 		uv11 = {
-			0.499023,
-			0.80957
+			0.86084,
+			0.097656
 		}
 	},
 	level_image_dlc_beacons = {
@@ -47,15 +47,57 @@ level_images_console_atlas = {
 			198
 		},
 		uv00 = {
+			0.688965,
+			0.000977
+		},
+		uv11 = {
+			0.774414,
+			0.097656
+		}
+	},
+	level_image_farm = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.55127,
+			0.000977
+		},
+		uv11 = {
+			0.687988,
+			0.152344
+		}
+	},
+	level_image_dlc_challenge_wizard = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.413574,
+			0.767578
+		},
+		uv11 = {
+			0.550293,
+			0.918945
+		}
+	},
+	level_image_dlc_portals = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
 			0.413574,
 			0.614258
 		},
 		uv11 = {
-			0.499023,
-			0.710938
+			0.550293,
+			0.765625
 		}
 	},
-	level_image_merchant = {
+	level_image_dlc_reikwald_forest = {
 		size = {
 			560,
 			310
@@ -69,7 +111,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_sewers = {
+	level_image_level_list = {
 		size = {
 			560,
 			310
@@ -83,7 +125,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_tunnels = {
+	level_image_end_boss = {
 		size = {
 			560,
 			310
@@ -97,7 +139,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_dlc_stromdorf_town = {
+	level_image_dlc_reikwald_river = {
 		size = {
 			560,
 			310
@@ -109,76 +151,6 @@ level_images_console_atlas = {
 		uv11 = {
 			0.550293,
 			0.152344
-		}
-	},
-	level_image_any = {
-		size = {
-			560,
-			310
-		},
-		uv00 = {
-			0.275879,
-			0.767578
-		},
-		uv11 = {
-			0.412598,
-			0.918945
-		}
-	},
-	level_image_level_list = {
-		size = {
-			560,
-			310
-		},
-		uv00 = {
-			0.275879,
-			0.614258
-		},
-		uv11 = {
-			0.412598,
-			0.765625
-		}
-	},
-	level_image_survival_01 = {
-		size = {
-			560,
-			310
-		},
-		uv00 = {
-			0.275879,
-			0.460938
-		},
-		uv11 = {
-			0.412598,
-			0.612305
-		}
-	},
-	level_image_docks = {
-		size = {
-			560,
-			310
-		},
-		uv00 = {
-			0.275879,
-			0.307617
-		},
-		uv11 = {
-			0.412598,
-			0.458984
-		}
-	},
-	level_image_survival_02 = {
-		size = {
-			560,
-			310
-		},
-		uv00 = {
-			0.275879,
-			0.154297
-		},
-		uv11 = {
-			0.412598,
-			0.305664
 		}
 	},
 	level_image_dlc_stromdorf_hills = {
@@ -188,6 +160,76 @@ level_images_console_atlas = {
 		},
 		uv00 = {
 			0.275879,
+			0.767578
+		},
+		uv11 = {
+			0.412598,
+			0.918945
+		}
+	},
+	level_image_magnus = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.275879,
+			0.614258
+		},
+		uv11 = {
+			0.412598,
+			0.765625
+		}
+	},
+	level_image_merchant = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.275879,
+			0.460938
+		},
+		uv11 = {
+			0.412598,
+			0.612305
+		}
+	},
+	level_image_city_wall = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.275879,
+			0.307617
+		},
+		uv11 = {
+			0.412598,
+			0.458984
+		}
+	},
+	level_image_survival_01 = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.275879,
+			0.154297
+		},
+		uv11 = {
+			0.412598,
+			0.305664
+		}
+	},
+	level_image_dlc_stromdorf_town = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.275879,
 			0.000977
 		},
 		uv11 = {
@@ -195,7 +237,7 @@ level_images_console_atlas = {
 			0.152344
 		}
 	},
-	level_image_city_wall = {
+	level_image_forest_ambush = {
 		size = {
 			560,
 			310
@@ -207,20 +249,6 @@ level_images_console_atlas = {
 		uv11 = {
 			0.274902,
 			0.918945
-		}
-	},
-	level_image_wizard = {
-		size = {
-			560,
-			310
-		},
-		uv00 = {
-			0.138184,
-			0.614258
-		},
-		uv11 = {
-			0.274902,
-			0.765625
 		}
 	},
 	level_image_cemetery = {
@@ -230,6 +258,20 @@ level_images_console_atlas = {
 		},
 		uv00 = {
 			0.138184,
+			0.614258
+		},
+		uv11 = {
+			0.274902,
+			0.765625
+		}
+	},
+	level_image_courtyard = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.138184,
 			0.460938
 		},
 		uv11 = {
@@ -237,7 +279,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_bridge = {
+	level_image_dlc_castle_dungeon = {
 		size = {
 			560,
 			310
@@ -251,7 +293,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_magnus = {
+	level_image_tunnels = {
 		size = {
 			560,
 			310
@@ -265,7 +307,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_courtyard = {
+	level_image_wizard = {
 		size = {
 			560,
 			310
@@ -279,7 +321,7 @@ level_images_console_atlas = {
 			0.152344
 		}
 	},
-	level_image_dlc_castle_dungeon = {
+	level_image_bridge = {
 		size = {
 			560,
 			310
@@ -293,7 +335,7 @@ level_images_console_atlas = {
 			0.918945
 		}
 	},
-	level_image_end_boss = {
+	level_image_docks = {
 		size = {
 			560,
 			310
@@ -307,7 +349,7 @@ level_images_console_atlas = {
 			0.765625
 		}
 	},
-	level_image_farm = {
+	level_image_survival_02 = {
 		size = {
 			560,
 			310
@@ -321,7 +363,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_forest_ambush = {
+	level_image_any = {
 		size = {
 			560,
 			310
@@ -335,7 +377,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_dlc_portals = {
+	level_image_dlc_castle = {
 		size = {
 			560,
 			310
@@ -349,7 +391,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_dlc_castle = {
+	level_image_sewers = {
 		size = {
 			560,
 			310

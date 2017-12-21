@@ -111,7 +111,7 @@ RemotePlayer.name = function (self)
 			name = clan_tag .. Steam.user_name(self.network_id(self))
 			self._cached_name = name
 		end
-	elseif Application.platform() == "xb1" or Application.platform() == "ps4" then
+	elseif PLATFORM == "xb1" or PLATFORM == "ps4" then
 		if self._cached_name then
 			return self._cached_name
 		end

@@ -23,12 +23,12 @@ local legal_texts = {
 TitleMainUI = class(TitleMainUI)
 TitleMainUI.init = function (self, world)
 	self._world = world
-	local platform = Application.platform()
+	local platform = PLATFORM
 	self.platform = platform
 	self.render_settings = {
 		snap_pixel_positions = true
 	}
-	self._ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_title_screen", "material", "materials/ui/ui_1080p_start_screen", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_ingame_common", "material", attract_mode_video.video_name)
+	self._ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_title_screen", "material", "materials/ui/ui_1080p_start_screen", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_ingame_common", "material", "video/dwarfs_trailer", "material", "video/stromdorf_trailer", "material", "video/survival_ruins_trailer", "material", "video/drachenfels_trailer", "material", attract_mode_video.video_name)
 
 	UISetupFontHeights(self._ui_renderer.gui)
 
@@ -127,6 +127,31 @@ TitleMainUI._create_ui_elements = function (self)
 
 	UIRenderer.clear_scenegraph_queue(self._ui_renderer)
 
+	if PLATFORM == "xb1" then
+		local menu_option_index = menu_item_index_lookup.additional_content
+
+		if menu_option_index then
+			self._dlc_option_index = menu_option_index
+			self._new_dlc_left = nil
+			self._new_dlc_right = nil
+			self._new_dlc_left = UIWidget.init(single_widget_definitions.new_dlc_left)
+			self._new_dlc_right = UIWidget.init(single_widget_definitions.new_dlc_right)
+			local widget = self._menu_widgets[menu_option_index]
+
+			if widget then
+				local text_style = widget.style.text
+				local text = widget.content.text_field
+				local text_width = self._get_text_size(self, Localize(text), text_style)
+				local spacing = 60
+				local offset_x = text_width*0.5 + spacing*0.5
+				local left_scenegraph = self._ui_scenegraph[self._new_dlc_left.scenegraph_id]
+				left_scenegraph.position[1] = -offset_x
+				local right_scenegraph = self._ui_scenegraph[self._new_dlc_right.scenegraph_id]
+				right_scenegraph.position[1] = offset_x
+			end
+		end
+	end
+
 	return 
 end
 TitleMainUI.update = function (self, dt, t, render_background_only)
@@ -138,6 +163,8 @@ TitleMainUI.update = function (self, dt, t, render_background_only)
 
 		DO_RELOAD = false
 	end
+
+	script_data.title = self
 
 	for name, ui_animation in pairs(self._ui_animations) do
 		UIAnimation.update(ui_animation, dt)
@@ -310,6 +337,16 @@ TitleMainUI._draw = function (self, dt, render_background_only)
 				if self._current_menu_index then
 					UIRenderer.draw_widget(ui_renderer, self._menu_selection_left)
 					UIRenderer.draw_widget(ui_renderer, self._menu_selection_right)
+
+					if self._current_menu_index ~= self._dlc_option_index and not PlayerData.additional_content_data.dlc_menu_shown then
+						if self._new_dlc_left then
+							UIRenderer.draw_widget(ui_renderer, self._new_dlc_left)
+						end
+
+						if self._new_dlc_right then
+							UIRenderer.draw_widget(ui_renderer, self._new_dlc_right)
+						end
+					end
 				end
 
 				if self._draw_gamertag then
@@ -598,7 +635,7 @@ TitleMainUI.set_user_name = function (self, username)
 	self._draw_gamertag = true
 	self._user_gamertag_widget.content.text = username
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		self._switch_profile_blocked = true
 	end
 

@@ -86,6 +86,24 @@ BTNinjaVanishAction.vanish = function (unit, blackboard)
 
 	ping_system.remove_ping_from_unit(ping_system, unit)
 
+	local heroic_extension = ScriptUnit.extension(unit, "ai_heroic_enemy_system")
+	local breed = blackboard.breed
+	local archetype = breed.heroic_archetypes[heroic_extension.archetype_index(heroic_extension)]
+
+	if archetype and archetype.name == "decoy" then
+		heroic_extension.respawn_decoys(heroic_extension)
+	end
+
+	local hp_threshold = blackboard.ninja_vanish_at_health_percent_treshold
+
+	if hp_threshold then
+		local hp_percent = ScriptUnit.extension(unit, "health_system"):current_health_percent()
+
+		if hp_percent < blackboard.ninja_vanish_at_health_percent then
+			blackboard.ninja_vanish_at_health_percent = hp_percent - hp_threshold
+		end
+	end
+
 	return 
 end
 BTNinjaVanishAction.play_foff = function (unit, blackboard, network_manager, pos, pos2)

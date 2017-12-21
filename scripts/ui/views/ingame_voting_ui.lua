@@ -5,7 +5,7 @@ IngameVotingUI.init = function (self, ingame_ui_context)
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
 	self.voting_manager = ingame_ui_context.voting_manager
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 
 	self.create_ui_elements(self)
 	rawset(_G, "ingame_voting_ui", self)
@@ -324,7 +324,7 @@ IngameVotingUI.on_gamepad_activated = function (self, active_voting)
 	if not self.has_voted then
 	end
 
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" then
 		platform = "xb1"

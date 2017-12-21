@@ -25,14 +25,14 @@ local meta = {
 
 setmetatable(_G, meta)
 
-if Application.platform() == "ps4" or Application.platform() == "xb1" then
+if PLATFORM == "ps4" or PLATFORM == "xb1" then
 	if rawget(_G, "FREEN_LOLS") then
 		return 
 	end
 
 	rawset(_G, "FREEN_LOLS", true)
 
-	local P = Application.platform()
+	local P = PLATFORM
 
 	if not Wwise then
 		local NilMeta = {

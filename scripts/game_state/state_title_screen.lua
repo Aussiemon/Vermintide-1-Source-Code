@@ -10,11 +10,11 @@ StateTitleScreen.NAME = "StateTitleScreen"
 StateTitleScreen.on_enter = function (self, params)
 	print("[Gamestate] Enter StateTitleScreen")
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Application.set_kinect_enabled(true)
 	end
 
-	if Application.platform() == "ps4" and rawget(_G, "LobbyInternal") and LobbyInternal.network_initialized() then
+	if PLATFORM == "ps4" and rawget(_G, "LobbyInternal") and LobbyInternal.network_initialized() then
 		LobbyInternal.shutdown_client()
 	end
 
@@ -31,7 +31,7 @@ StateTitleScreen.on_enter = function (self, params)
 		end
 	end
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		Application.set_time_step_policy("throttle", 60)
 	end
 
@@ -135,7 +135,7 @@ StateTitleScreen.cb_ui_packages_loaded = function (self)
 		self._init_beta_overlay(self)
 	end
 
-	self._platform = Application.platform()
+	self._platform = PLATFORM
 
 	if self._platform == "ps4" and PS4.signed_in() then
 		Managers.account:set_presence("title_screen")
@@ -159,7 +159,7 @@ StateTitleScreen._setup_state_machine = function (self)
 
 	if loading_context.skip_signin then
 		loading_context.skip_signin = nil
-		self._machine = StateMachine:new(self, StateTitleScreenMainMenu, {
+		self._machine = GameStateMachine:new(self, StateTitleScreenMainMenu, {
 			skip_signin = true,
 			world = self._world,
 			ui = self._title_start_ui,
@@ -167,7 +167,7 @@ StateTitleScreen._setup_state_machine = function (self)
 			auto_start = self._auto_start
 		}, true)
 	else
-		self._machine = StateMachine:new(self, StateTitleScreenMain, {
+		self._machine = GameStateMachine:new(self, StateTitleScreenMain, {
 			world = self._world,
 			ui = self._title_start_ui,
 			viewport = self._viewport,
@@ -291,7 +291,7 @@ StateTitleScreen.show_menu = function (self, show)
 	return 
 end
 StateTitleScreen.on_exit = function (self, application_shutdown)
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local max_fps = Application.user_setting("max_fps")
 
 		if max_fps == nil or max_fps == 0 then

@@ -27,14 +27,31 @@ BTConditions.stagger = function (blackboard)
 
 	return 
 end
+BTConditions.teleport_immune_stagger = function (blackboard)
+	if blackboard.stagger then
+		if blackboard.is_climbing or blackboard.is_teleporting then
+			blackboard.stagger = false
+		else
+			return true
+		end
+	end
+
+	return 
+end
 BTConditions.fling_skaven = function (blackboard)
 	return blackboard.fling_skaven
 end
 BTConditions.secondary_target = function (blackboard)
-	return blackboard.secondary_target
+	return blackboard.target_unit or blackboard.secondary_target
 end
 BTConditions.quick_jump = function (blackboard)
 	return blackboard.high_ground_opportunity
+end
+BTConditions.throw_throwing_stars = function (blackboard)
+	return Unit.alive(blackboard.throw_projectile_at) or blackboard.throw_data
+end
+BTConditions.uninterruptable_ninja_vanish = function (blackboard)
+	return blackboard.ninja_vanish_at_health_percent and ScriptUnit.extension(blackboard.unit, "health_system"):current_health_percent() < blackboard.ninja_vanish_at_health_percent
 end
 BTConditions.ninja_vanish = function (blackboard)
 	return blackboard.ninja_vanish

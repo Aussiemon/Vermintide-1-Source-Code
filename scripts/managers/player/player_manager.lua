@@ -51,6 +51,10 @@ PlayerManager.rpc_to_client_spawn_player = function (self, sender, local_player_
 		printf("PlayerManager:rpc_to_client_spawn_player(%s, %s, %s, %s)", tostring(sender), tostring(profile_index), tostring(position), tostring(rotation))
 	end
 
+	if self.is_server and not Managers.state.network:in_game_session() then
+		return 
+	end
+
 	local ammo_melee = ammo_melee_percent_int*0.01
 	local ammo_ranged = ammo_ranged_percent_int*0.01
 	local player = self.player(self, Network.peer_id(), local_player_id)
@@ -215,13 +219,6 @@ PlayerManager.add_bot_player = function (self, player_name, bot_player_peer_id, 
 	self._statistics_db:register(stats_id, "player")
 
 	return player
-end
-PlayerManager.clear_all_players = function (self)
-	for unique_id, player in pairs(self._players) do
-		self.remove_player(self, player.network_id(player), player.local_player_id(player))
-	end
-
-	return 
 end
 PlayerManager.remove_all_players_from_peer = function (self, peer_id)
 	local peer_table = self._players_by_peer[peer_id]

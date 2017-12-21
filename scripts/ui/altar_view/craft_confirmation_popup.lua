@@ -631,7 +631,7 @@ CraftConfirmationPopup.update = function (self, dt)
 	return 
 end
 CraftConfirmationPopup.get_gamepad_input_texture_data = function (self, input_service, input_action, ignore_keybinding)
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if ignore_keybinding then
 		if platform == "win32" then

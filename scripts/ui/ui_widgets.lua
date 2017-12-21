@@ -6762,7 +6762,7 @@ UIWidgets.create_splash_texture = function (input)
 		scenegraph_id = input.scenegraph_id
 	}
 end
-local is_ps4 = Application.platform() == "ps4"
+local is_ps4 = PLATFORM == "ps4"
 UIWidgets.create_loader_icon = function (scenegraph_id)
 	return {
 		element = {

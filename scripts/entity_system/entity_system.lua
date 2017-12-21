@@ -62,6 +62,7 @@ require("scripts/unit_extensions/human/ai_player_unit/ai_anim_utils")
 require("scripts/unit_extensions/human/ai_player_unit/ai_husk_base_extension")
 require("scripts/unit_extensions/human/ai_player_unit/ai_simple_extension")
 require("scripts/unit_extensions/human/ai_player_unit/ai_utils")
+require("scripts/unit_extensions/human/ai_player_unit/ai_heroic_enemy_extension")
 require("scripts/unit_extensions/generic/perlin_light_extension")
 require("scripts/unit_extensions/generic/bot_nav_transition_extension")
 require("scripts/unit_extensions/generic/generic_aggroable_extension")
@@ -159,6 +160,9 @@ EntitySystem._init_systems = function (self, entity_system_creation_context)
 	self._add_system(self, "ai_bot_group_system", AIBotGroupSystem, entity_system_creation_context)
 	self._add_system(self, "target_override_system", ExtensionSystemBase, entity_system_creation_context, {
 		"TargetOverrideExtension"
+	})
+	self._add_system(self, "ai_heroic_enemy_system", ExtensionSystemBase, entity_system_creation_context, {
+		"AiHeroicEnemyExtension"
 	})
 	self._add_system(self, "ai_system", AISystem, entity_system_creation_context)
 	self._add_system(self, "ai_melee_line_of_sight_system", AIMeleeLineOfSightSystem, entity_system_creation_context)

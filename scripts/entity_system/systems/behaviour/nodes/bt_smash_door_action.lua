@@ -115,8 +115,9 @@ BTSmashDoorAction.StateInit.update = function (self, dt, t)
 	local unit = self.unit
 	local blackboard = self.blackboard
 	local unit_position = POSITION_LOOKUP[unit]
+	local distance_squared = Vector3.distance_squared(self.entrance_pos:unbox(), unit_position)
 
-	if Vector3.distance(self.entrance_pos:unbox(), unit_position) < 1 then
+	if distance_squared < 1 then
 		local locomotion_extension = blackboard.locomotion_extension
 
 		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
@@ -131,7 +132,7 @@ BTSmashDoorAction.StateInit.update = function (self, dt, t)
 
 			return BTSmashDoorAction.StateMovingToSmartObjectEntrance
 		else
-			print("BTSmashDoorAction - failing to use smart object")
+			print("BTSmashDoorAction - Failing to use smart object")
 
 			blackboard.smash_door.failed = true
 		end
@@ -153,17 +154,20 @@ end
 BTSmashDoorAction.StateMovingToSmartObjectEntrance.update = function (self, dt, t)
 	local unit = self.unit
 	local blackboard = self.blackboard
+	local action = blackboard.action
 	local unit_position = POSITION_LOOKUP[unit]
 	local entrance_pos = self.entrance_pos:unbox()
 	local vector_to_target = entrance_pos - unit_position
-	local distance_to_target = Vector3.length(vector_to_target)
+	local distance_to_target_sq = Vector3.length_squared(vector_to_target)
+	local wanted_distance_sq = (action.door_attack_distance or 0.1)^2
 
-	if (blackboard.action.door_attack_distance or 0.1) < distance_to_target then
+	if wanted_distance_sq < distance_to_target_sq then
 		local look_direction_wanted = self.exit_lookat_direction:unbox()
 		local direction_to_target = Vector3.normalize(vector_to_target)
 		local locomotion_extension = blackboard.locomotion_extension
+		local move_speed = action.move_speed or blackboard.breed.walk_speed
 
-		locomotion_extension.set_wanted_velocity(locomotion_extension, direction_to_target*blackboard.breed.walk_speed)
+		locomotion_extension.set_wanted_velocity(locomotion_extension, direction_to_target*move_speed)
 		locomotion_extension.set_wanted_rotation(locomotion_extension, Quaternion.look(look_direction_wanted))
 	else
 		local preferred_door_action = blackboard.preferred_door_action
@@ -293,20 +297,19 @@ end
 BTSmashDoorAction.StateMovingToSmartObjectExit.update = function (self, dt, t)
 	local unit = self.unit
 	local blackboard = self.blackboard
-	local locomotion_extension = blackboard.locomotion_extension
 	local unit_position = POSITION_LOOKUP[unit]
 	local exit_pos = self.exit_pos:unbox()
-	local vector_to_target = exit_pos - unit_position
+	local vector_to_target = Vector3.flat(exit_pos - unit_position)
+	local distance_to_target_sq = Vector3.length_squared(vector_to_target)
+	local wanted_distance_sq = 0.010000000000000002
 
-	Vector3.set_z(vector_to_target, 0)
-
-	local distance_to_target = Vector3.length(vector_to_target)
-
-	if 0.1 < distance_to_target then
+	if wanted_distance_sq < distance_to_target_sq then
 		local look_direction_wanted = self.exit_lookat_direction:unbox()
 		local direction_to_target = Vector3.normalize(vector_to_target)
+		local locomotion_extension = blackboard.locomotion_extension
+		local move_speed = blackboard.action.move_speed or blackboard.breed.walk_speed
 
-		locomotion_extension.set_wanted_velocity(locomotion_extension, direction_to_target*blackboard.breed.walk_speed)
+		locomotion_extension.set_wanted_velocity(locomotion_extension, direction_to_target*move_speed)
 		locomotion_extension.set_wanted_rotation(locomotion_extension, Quaternion.look(look_direction_wanted))
 	else
 		blackboard.smash_door.done = true

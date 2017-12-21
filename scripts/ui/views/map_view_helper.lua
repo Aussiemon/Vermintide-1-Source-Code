@@ -53,14 +53,15 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 		return "locked", tooltip_text
 	end
 
-	if is_dlc_level then
-		local fulfills_stat_dependencies = true
+	local fulfills_stat_dependencies = true
+	local reason = ""
 
-		if dlc_stat_dependency_func then
-			fulfills_stat_dependencies = dlc_stat_dependency_func(statistics_db, player_stats_id)
-		end
+	if dlc_stat_dependency_func then
+		fulfills_stat_dependencies, reason = dlc_stat_dependency_func(statistics_db, player_stats_id)
+	end
 
-		if fulfills_stat_dependencies then
+	if fulfills_stat_dependencies then
+		if is_dlc_level then
 			if is_dlc_unlocked then
 				return "visible"
 			else
@@ -68,9 +69,11 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 
 				return "dlc", tooltip_text
 			end
-		else
-			return "hidden"
 		end
+	elseif PLATFORM == "win32" then
+		return "hidden"
+	else
+		return "locked", reason
 	end
 
 	if current_act_key then

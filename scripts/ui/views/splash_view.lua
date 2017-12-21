@@ -366,7 +366,7 @@ local splash_content = {
 }
 SplashView = class(SplashView)
 SplashView.init = function (self, input_manager, world)
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		PS4.hide_splash_screen()
 	end
 
@@ -410,7 +410,7 @@ SplashView.init = function (self, input_manager, world)
 	return 
 end
 SplashView._next_splash = function (self, override_skip)
-	if not override_skip and (Application.platform() == "xb1" or Application.platform() == "ps4") and not self._allow_console_skip then
+	if not override_skip and (PLATFORM == "xb1" or PLATFORM == "ps4") and not self._allow_console_skip then
 		self._update_func = "_wait_for_allow_console_skip"
 		self._video_complete = true
 
@@ -491,7 +491,7 @@ SplashView._update_texture = function (self, gui, dt)
 	return 
 end
 
-if Application.platform() == "xb1" or Application.platform() == "ps4" then
+if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	SplashView._wait_for_allow_console_skip = function (self)
 		if self._allow_console_skip then
 			self._next_splash(self)
@@ -509,7 +509,7 @@ SplashView.set_index = function (self, index)
 	return 
 end
 SplashView.update = function (self, dt)
-	if Application.platform() == "win32" and self._fram_skip_hack < 1 then
+	if PLATFORM == "win32" and self._fram_skip_hack < 1 then
 		self._fram_skip_hack = self._fram_skip_hack + 1
 
 		return 
@@ -517,14 +517,14 @@ SplashView.update = function (self, dt)
 
 	local w, h = Gui.resolution()
 	local ui_renderer = self.ui_renderer
-	local input_service = (Application.platform() == "win32" and self.input_manager:get_service("splash_view")) or false
+	local input_service = (PLATFORM == "win32" and self.input_manager:get_service("splash_view")) or false
 
 	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_filler)
 
 	local skip = nil
 
-	if Application.platform() == "xb1" or Application.platform() == "ps4" then
+	if PLATFORM == "xb1" or PLATFORM == "ps4" then
 		skip = self._get_console_input(self)
 	else
 		skip = input_service.get(input_service, "skip_splash")
@@ -553,7 +553,7 @@ SplashView.update = function (self, dt)
 	return 
 end
 
-if Application.platform() == "xb1" or Application.platform() == "ps4" then
+if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	SplashView.allow_console_skip = function (self)
 		self._allow_console_skip = true
 

@@ -69,8 +69,23 @@ BTBlockedAction.run = function (self, unit, blackboard, t, dt)
 		elseif result == "navmesh_use_mover" then
 			local breed = blackboard.breed
 			local override_mover_move_distance = breed.override_mover_move_distance
+			local ignore_forced_mover_kill = true
+			local successful = locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance, ignore_forced_mover_kill)
 
-			locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
+			if not successful then
+				local mover = Unit.mover(unit)
+				local radius = Mover.radius(mover)
+
+				QuickDrawerStay:sphere(position, radius, Colors.get("red"))
+				QuickDrawerStay:line(position, position + Vector3(0, 0, 5), Colors.get("red"))
+
+				local debug_text = string.format("LD should check the Navmesh here, Mover separation failed for %s!", breed.name)
+
+				Debug.world_sticky_text(position + Vector3(0, 0, 5), debug_text, "red")
+				locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
+
+				blackboard.stagger_hit_wall = true
+			end
 		end
 
 		Profiler.stop("checking navmesh")

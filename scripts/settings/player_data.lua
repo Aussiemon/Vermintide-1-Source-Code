@@ -1,11 +1,14 @@
-PlayerData = PlayerData or {
+DefaultPlayerData = {
 	controls_version = 9,
 	new_lorebook_data_version = 1,
 	new_item_data_version = 1,
+	additional_content_version = 1,
 	new_item_ids = {},
 	controls = {},
-	new_lorebook_ids = {}
+	new_lorebook_ids = {},
+	additional_content_data = {}
 }
+PlayerData = PlayerData or table.clone(DefaultPlayerData)
 
 function populate_player_data_from_save(save_data, id, version_match)
 	if not save_data.player_data then
@@ -13,7 +16,7 @@ function populate_player_data_from_save(save_data, id, version_match)
 	end
 
 	if not save_data.player_data[id] then
-		local new_player_data = table.clone(PlayerData)
+		local new_player_data = table.clone(DefaultPlayerData)
 
 		if save_data.controls then
 			new_player_data.controls = save_data.controls
@@ -56,6 +59,13 @@ function populate_player_data_from_save(save_data, id, version_match)
 
 			player_save_data.new_lorebook_ids = {}
 			player_save_data.new_lorebook_data_version = PlayerData.new_lorebook_data_version
+		end
+
+		if PlayerData.additional_content_version ~= player_save_data.additional_content_version then
+			print("Wrong additional_content_version for save file, saved: ", player_save_data.additional_content_version, " current: ", PlayerData.additional_content_version)
+
+			player_save_data.additional_content_data = {}
+			player_save_data.additional_content_version = PlayerData.additional_content_version
 		end
 	end
 

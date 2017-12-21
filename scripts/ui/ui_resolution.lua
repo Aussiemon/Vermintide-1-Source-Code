@@ -44,10 +44,10 @@ local function resolution_supported(width, height)
 end
 
 local function determine_native_aspect_ratio_and_resolution()
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		native_screen_height = RESOLUTION_PS4[2]
 		native_screen_width = RESOLUTION_PS4[1]
-	elseif Application.platform() == "xb1" then
+	elseif PLATFORM == "xb1" then
 		native_screen_height = RESOLUTION_XB1[2]
 		native_screen_width = RESOLUTION_XB1[1]
 	else
@@ -427,9 +427,9 @@ function InitVideo()
 
 	local resolution_setting = nil
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		resolution_setting = RESOLUTION_PS4
-	elseif Application.platform() == "xb1" then
+	elseif PLATFORM == "xb1" then
 		resolution_setting = RESOLUTION_XB1
 	else
 		resolution_setting = Application.user_setting("screen_resolution")

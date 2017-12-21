@@ -8,8 +8,8 @@ PlayerBotNavigation.init = function (self, extension_init_context, unit, extensi
 	self._traverse_data = Managers.state.bot_nav_transition:traverse_logic()
 	self._has_queued_target = false
 	self._queued_target_position = Vector3Box(0, 0, 0)
-	self._active_nav_transitions = {}
-	self._is_inside_transition = false
+	self._available_nav_transitions = {}
+	self._active_nav_transition = nil
 	self._astar = GwNavAStar.create()
 	self._running_astar = false
 	self._path = nil
@@ -37,8 +37,6 @@ PlayerBotNavigation.update = function (self, unit, input, dt, context, t)
 		self._teleported = false
 	end
 
-	self._update_nav_transitions(self, dt, t)
-
 	if self._running_astar then
 		self._update_astar(self, t)
 	end
@@ -57,7 +55,9 @@ PlayerBotNavigation.move_to = function (self, target_position, callback)
 		return false
 	end
 
-	if self._is_inside_transition and not self._final_goal_reached and (self._path or self._running_astar) then
+	local transition = self._current_transition
+
+	if transition and Managers.time:time("game") - transition.t < 10 then
 		return false
 	end
 
@@ -90,6 +90,7 @@ PlayerBotNavigation.move_to = function (self, target_position, callback)
 	end
 
 	self._path = nil
+	self._current_transition = nil
 	self._path_index = 0
 	self._close_to_goal_time = nil
 	self._final_goal_reached = false
@@ -119,13 +120,34 @@ PlayerBotNavigation.teleport = function (self, destination)
 
 	self._successive_failed_paths = 0
 	self._close_to_goal_time = nil
+	self._last_path = nil
+	self._last_path_index = nil
+	self._current_transition = nil
 
 	return 
 end
+
+local function is_same_point(p1, p2)
+	local diff = p1 - p2
+
+	if 0.1 < math.abs(diff.z) then
+		return false
+	else
+		local x = diff.x
+		local y = diff.y
+
+		return x*x + y*y < 0.0001
+	end
+
+	return 
+end
+
 PlayerBotNavigation._update_path = function (self, t)
 	local path = self._path
 
 	if not path or self._final_goal_reached then
+		self._current_transition = nil
+
 		return 
 	end
 
@@ -136,7 +158,16 @@ PlayerBotNavigation._update_path = function (self, t)
 
 	if goal_reached then
 		self._path_index = self._path_index + 1
-		self._final_goal_reached = #path < self._path_index
+		local final_reached = #path < self._path_index
+		self._final_goal_reached = final_reached
+
+		if final_reached then
+			self._current_transition = nil
+		else
+			local new_goal = path[self._path_index]:unbox()
+
+			self._reevaluate_current_nav_transition(self, position, current_goal, new_goal)
+		end
 	end
 
 	if script_data.ai_bots_debug then
@@ -151,6 +182,60 @@ PlayerBotNavigation._update_path = function (self, t)
 
 		for i = 1, #self._path - 1, 1 do
 			drawer.vector(drawer, self._path[i]:unbox(), self._path[i + 1]:unbox() - self._path[i]:unbox(), color)
+		end
+	end
+
+	return 
+end
+PlayerBotNavigation._reevaluate_current_nav_transition = function (self, self_position, current_goal, new_goal)
+	local old_transition = self._current_transition
+	self._current_transition = nil
+	local best_ladder = nil
+	local best_ladder_dist = math.huge
+
+	for unit, data in pairs(self._available_nav_transitions) do
+		if data.type == "ladder" then
+			local dist = Vector3.distance_squared(self_position, (data.from:unbox() + data.to:unbox())*0.5)
+
+			if dist < best_ladder_dist then
+				best_ladder_dist = dist
+				best_ladder = data
+			end
+		else
+			local waypoint = data.waypoint:unbox()
+			local from = data.from:unbox()
+			local to = data.to:unbox()
+			local goal = nil
+
+			if is_same_point(current_goal, from) and is_same_point(new_goal, waypoint) then
+				goal = "waypoint"
+			elseif is_same_point(current_goal, waypoint) and is_same_point(new_goal, to) then
+				goal = "to"
+			end
+
+			if goal then
+				data.goal = goal
+				self._current_transition = data
+
+				if data ~= old_transition then
+					data.t = Managers.time:time("game")
+				end
+
+				return 
+			end
+		end
+	end
+
+	if old_transition and old_transition.type ~= "ladder" and is_same_point(current_goal, old_transition.waypoint:unbox()) and is_same_point(new_goal, old_transition.to:unbox()) then
+		old_transition.goal = "to"
+		self._current_transition = old_transition
+
+		return 
+	elseif best_ladder then
+		self._current_transition = best_ladder
+
+		if best_ladder ~= old_transition then
+			best_ladder.t = Managers.time:time("game")
 		end
 	end
 
@@ -330,64 +415,48 @@ PlayerBotNavigation._debug_draw_path = function (self)
 
 	return 
 end
-PlayerBotNavigation._update_nav_transitions = function (self, dt, t)
-	local transitions = self._active_nav_transitions
-	local was_inside = self._is_inside_transition
-	local best_t = -math.huge
-
-	for unit, data in pairs(transitions) do
-		local enter_time = data.t
-
-		if not Unit.alive(unit) then
-			transitions[unit] = nil
-		elseif best_t < enter_time then
-			best_t = enter_time
-		end
-	end
-
-	if t < best_t + 10 then
-		self._is_inside_transition = true
-	else
-		self._is_inside_transition = false
-	end
-
-	return 
-end
 PlayerBotNavigation.is_in_transition = function (self)
-	return self._is_inside_transition
+	return self._current_transition ~= nil
 end
 PlayerBotNavigation.transition_requires_jump = function (self, position, direction)
 	local current_goal = self.current_goal(self)
 
-	if not self._is_inside_transition or not current_goal then
-		return false
-	end
+	fassert(self._current_transition, "Trying to check if transition requires jump with now active transition")
+	fassert(current_goal, "Current transition but no current goal?")
 
-	for unit, data in pairs(self._active_nav_transitions) do
-		local from = data.position:unbox()
+	local data = self._current_transition
 
-		if data.type == "bot_leap_of_faith" and Vector3.dot(from - position, direction) < 0 and 0.981 < Vector3.dot(Vector3.normalize(data.to:unbox() - from), Vector3.normalize(current_goal - position)) then
-			return true
-		end
+	if data.type == "bot_leap_of_faith" and data.goal == "to" and Vector3.distance_squared(self._path[self._path_index - 1]:unbox(), position) < 1 then
+		return true
 	end
 
 	return false
 end
 PlayerBotNavigation.flow_cb_entered_nav_transition = function (self, transition_unit, actor)
-	local transitions = self._active_nav_transitions
+	local transitions = self._available_nav_transitions
 	local index = Unit.get_data(transition_unit, "bot_nav_transition_manager_index")
-	local type, from, to = Managers.state.bot_nav_transition:transition_data(transition_unit)
-	transitions[transition_unit] = {
-		t = Managers.time:time("game"),
+	local type, from, to, waypoint = Managers.state.bot_nav_transition:transition_data(transition_unit)
+	local transition = {
 		type = type,
-		position = Vector3Box(from),
+		from = Vector3Box(from),
 		to = Vector3Box(to)
 	}
+
+	if type ~= "ladder" then
+		transition.waypoint = Vector3Box(waypoint)
+	end
+
+	transitions[transition_unit] = transition
+
+	if type == "ladder" and not self._current_transition then
+		self._current_transition = transition
+		transition.t = Managers.time:time("game")
+	end
 
 	return 
 end
 PlayerBotNavigation.flow_cb_left_nav_transition = function (self, transition_unit, actor)
-	local transitions = self._active_nav_transitions
+	local transitions = self._available_nav_transitions
 	local index = Unit.get_data(transition_unit, "bot_nav_transition_manager_index")
 	transitions[transition_unit] = nil
 

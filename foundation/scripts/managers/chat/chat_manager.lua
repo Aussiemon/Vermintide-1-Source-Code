@@ -1,6 +1,6 @@
 require("scripts/ui/views/chat_gui")
 
-if Application.platform() ~= "win32" then
+if PLATFORM ~= "win32" then
 	ChatGuiNull = class(ChatGuiNull)
 
 	for name, func in pairs(ChatGui) do
@@ -30,7 +30,7 @@ ChatManager.create_chat_gui = function (self)
 		chat_manager = self
 	}
 
-	if Application.platform() ~= "win32" then
+	if PLATFORM ~= "win32" then
 		self.chat_gui = ChatGuiNull
 	else
 		self.chat_gui = ChatGui:new(context)
@@ -141,7 +141,7 @@ ChatManager.register_channel = function (self, channel_id, members_func)
 
 	local channels = self.channels
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		if channels[channel_id] then
 			Application.warning(string.format("[ChatManager] Tried to add already registered channel %q", channel_id))
 		end

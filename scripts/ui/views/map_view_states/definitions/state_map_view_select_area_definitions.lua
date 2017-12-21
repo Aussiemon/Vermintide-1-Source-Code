@@ -143,7 +143,7 @@ local generic_input_actions = {
 		{
 			input_action = "confirm",
 			priority = 2,
-			description_text = (Application.platform() == "xb1" and "dlc1_4_input_description_storepage_xb1") or "dlc1_4_input_description_storepage"
+			description_text = (PLATFORM == "xb1" and "dlc1_4_input_description_storepage_xb1") or "dlc1_4_input_description_storepage"
 		},
 		{
 			input_action = "back",

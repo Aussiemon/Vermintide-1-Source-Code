@@ -37,36 +37,52 @@ UnlockSettings = {
 				class = "AlwaysUnlocked"
 			},
 			survival_ruins = {
+				id = "437070",
+				purchase_type = "dlc",
 				class = "UnlockDlc",
-				id = "437070"
+				index = 1
 			},
 			drachenfels = {
+				id = "453280",
+				purchase_type = "dlc",
 				class = "UnlockDlc",
-				id = "453280"
+				index = 2
 			},
 			dwarfs = {
+				id = "463791",
+				purchase_type = "dlc",
 				class = "UnlockDlc",
-				id = "463791"
+				index = 3
 			},
 			witch_hunter_skin_01 = {
+				id = "463790",
+				purchase_type = "skin",
 				class = "UnlockDlc",
-				id = "463790"
+				index = 1
 			},
 			bright_wizard_skin_01 = {
+				id = "463796",
+				purchase_type = "skin",
 				class = "UnlockDlc",
-				id = "463796"
+				index = 2
 			},
 			dwarf_ranger_skin_01 = {
+				id = "463799",
+				purchase_type = "skin",
 				class = "UnlockDlc",
-				id = "463799"
+				index = 3
 			},
 			wood_elf_skin_01 = {
+				id = "463798",
+				purchase_type = "skin",
 				class = "UnlockDlc",
-				id = "463798"
+				index = 4
 			},
 			empire_soldier_skin_01 = {
+				id = "463797",
+				purchase_type = "skin",
 				class = "UnlockDlc",
-				id = "463797"
+				index = 5
 			}
 		},
 		unlock_script = GameSettingsDevelopment.backend_settings.dlcs_unlock_script
@@ -94,5 +110,18 @@ for _, dlc in pairs(DLCSettings) do
 		end
 	end
 end
+
+CommunityUnlocks = {}
+GrantDlcSettings = {
+	grants = {
+		owns_vermintide_two = {
+			grant_unlock = "reikwald",
+			use_fallback = true,
+			class = "GrantDlcFromOwnership",
+			host_address = "http://backup01.i.fatshark.se:8080",
+			app_id_to_check = "552500"
+		}
+	}
+}
 
 return 

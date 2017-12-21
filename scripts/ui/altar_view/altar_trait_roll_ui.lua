@@ -650,7 +650,7 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 	self._update_trait_alignment(self, number_of_traits_on_item, false)
 	self._set_selected_trait(self, 1)
 
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local description_text = "altar_trait_roll_description_2"
 
 	if (platform == "win32" and gamepad_active) or platform == "xb1" then
@@ -667,7 +667,7 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 	self._clear_new_trait_slots(self, true)
 	self.set_traits_info(self, self.current_traits_data, 1, num_traits)
 
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local description_text = "altar_trait_roll_description_2"
 
 	if (platform == "win32" and gamepad_active) or platform == "xb1" then

@@ -4,6 +4,7 @@ weapon_template.actions = {
 	action_one = {
 		default = {
 			kind = "dummy",
+			anim_time_scale = 1.4,
 			anim_end_event = "attack_finished",
 			anim_event = "attack_swing_charge_left_down",
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -41,12 +42,12 @@ weapon_template.actions = {
 					sub_action = "heavy_attack_left",
 					start_time = 0.4,
 					action = "action_one",
-					end_time = 1.4,
+					end_time = 1.1,
 					input = "action_one_release"
 				},
 				{
 					sub_action = "heavy_attack_left_charged",
-					start_time = 1.4,
+					start_time = 1.1,
 					action = "action_one",
 					input = "action_one_release"
 				},
@@ -76,6 +77,7 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
+			anim_time_scale = 1.4,
 			kind = "dummy",
 			anim_end_event = "attack_finished",
 			anim_event = "attack_swing_charge_right_down",
@@ -114,12 +116,12 @@ weapon_template.actions = {
 					sub_action = "heavy_attack_right",
 					start_time = 0.4,
 					action = "action_one",
-					end_time = 1.4,
+					end_time = 1.1,
 					input = "action_one_release"
 				},
 				{
 					sub_action = "heavy_attack_right_charged",
-					start_time = 1.4,
+					start_time = 1.1,
 					action = "action_one",
 					input = "action_one_release"
 				},
@@ -149,6 +151,7 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
+			anim_time_scale = 1.4,
 			kind = "dummy",
 			anim_end_event = "attack_finished",
 			anim_event = "attack_swing_charge_left_down",
@@ -187,12 +190,12 @@ weapon_template.actions = {
 					sub_action = "heavy_attack_left",
 					start_time = 0.4,
 					action = "action_one",
-					end_time = 1.4,
+					end_time = 1.1,
 					input = "action_one_release"
 				},
 				{
 					sub_action = "heavy_attack_left_charged",
-					start_time = 1.4,
+					start_time = 1.1,
 					action = "action_one",
 					input = "action_one_release"
 				},
@@ -255,14 +258,14 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default_right",
-					start_time = 0.95,
+					start_time = 0.8,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default_right",
-					start_time = 0.95,
+					start_time = 0.8,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one_hold"
@@ -340,14 +343,14 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default_left",
-					start_time = 0.95,
+					start_time = 0.8,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default_left",
-					start_time = 0.95,
+					start_time = 0.8,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one_hold"
@@ -396,7 +399,7 @@ weapon_template.actions = {
 		},
 		heavy_attack_left_charged = {
 			damage_window_start = 0.3,
-			range_mod = 1.35,
+			range_mod = 1.5,
 			anim_time_scale = 1,
 			kind = "sweep",
 			first_person_hit_anim = "attack_hit_alt_effect",
@@ -478,7 +481,7 @@ weapon_template.actions = {
 		},
 		heavy_attack_left = {
 			damage_window_start = 0.3,
-			range_mod = 1.35,
+			range_mod = 1.45,
 			anim_end_event = "attack_finished",
 			kind = "sweep",
 			first_person_hit_anim = "attack_hit_alt_effect",
@@ -559,7 +562,7 @@ weapon_template.actions = {
 		},
 		heavy_attack_right_charged = {
 			damage_window_start = 0.35,
-			range_mod = 1.35,
+			range_mod = 1.5,
 			anim_time_scale = 1,
 			kind = "sweep",
 			first_person_hit_anim = "attack_hit_alt_effect",
@@ -634,7 +637,7 @@ weapon_template.actions = {
 		},
 		heavy_attack_right = {
 			damage_window_start = 0.35,
-			range_mod = 1.35,
+			range_mod = 1.45,
 			anim_end_event = "attack_finished",
 			kind = "sweep",
 			first_person_hit_anim = "attack_hit_alt_effect",

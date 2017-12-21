@@ -27,12 +27,12 @@ LobbyFinderState.SEARCHING = "searching"
 LobbyFinderState.IDLE = "idle"
 LobbyState = LobbyState or {}
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	LobbyState.WORKING = "working"
 	LobbyState.JOINED = "joined"
 	LobbyState.FAILED = "failed"
 	LobbyState.SHUTDOWN = "shutdown"
-elseif Application.platform() == "ps4" then
+elseif PLATFORM == "ps4" then
 	LobbyState.WAITING_TO_CREATE = "waiting_to_create"
 	LobbyState.CREATING = "creating"
 	LobbyState.JOINING = "joining"
@@ -79,7 +79,7 @@ LobbyAux.get_unique_server_name = function ()
 	if not unique_name or unique_name == "" then
 		if rawget(_G, "Steam") then
 			unique_name = Steam.user_name()
-		elseif Application.platform() == "xb1" then
+		elseif PLATFORM == "xb1" then
 			unique_name = LobbyInternal.SESSION_NAME
 		else
 			unique_name = Network.peer_id()

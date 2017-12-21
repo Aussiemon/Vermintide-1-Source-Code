@@ -289,7 +289,7 @@ return {
 	},
 	__2reit_edanerg_emusnoc_ton_teknirt = {
 		{
-			2.4
+			2
 		}
 	},
 	__egamad_derahs_teknirt = {
@@ -395,7 +395,7 @@ return {
 	},
 	__3reit_edanerg_emusnoc_ton_teknirt = {
 		{
-			3.2
+			2.4
 		}
 	},
 	__3reit_kcatta_nosiop_teknirt = {

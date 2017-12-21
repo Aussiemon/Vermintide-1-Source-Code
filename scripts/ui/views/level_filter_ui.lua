@@ -214,7 +214,7 @@ LevelFilterUI._align_elements = function (self)
 		total_height = total_height + entry_height + height_offset + height_spacing
 	end
 
-	self.ui_scenegraph.element_pivot.local_position[2] = total_height*0.5
+	self.ui_scenegraph.element_pivot.local_position[2] = total_height*0.5 - 50
 	self.ui_scenegraph.bg_rect.size[2] = total_height + 10
 
 	return 

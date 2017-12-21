@@ -48,6 +48,11 @@ BTNinjaApproachAction.enter = function (self, unit, blackboard, t)
 
 	local skulk_data = blackboard.skulk_data
 
+	if blackboard.need_to_recalculate_skulk_pos then
+		blackboard.need_to_recalculate_skulk_pos = false
+		blackboard.skulk_pos = nil
+	end
+
 	if blackboard.skulk_pos then
 		local pos = blackboard.skulk_pos:unbox()
 		local ai_navigation = ScriptUnit.extension(unit, "ai_navigation_system")
@@ -58,12 +63,16 @@ BTNinjaApproachAction.enter = function (self, unit, blackboard, t)
 	return 
 end
 BTNinjaApproachAction.leave = function (self, unit, blackboard, t, reason)
-	if reason == "aborted" then
-	end
-
+	local action = blackboard.action
 	blackboard.in_los = nil
 	blackboard.action = nil
 	blackboard.ninja_approach = false
+
+	if blackboard.dodge_target then
+		blackboard.throw_projectile_at = (action.can_throw and blackboard.dodge_target) or nil
+		blackboard.dodge_target = nil
+	end
+
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
@@ -76,6 +85,7 @@ local close_range = 8
 BTNinjaApproachAction.run = function (self, unit, blackboard, t, dt)
 	local locomotion = blackboard.locomotion_extension
 	local breed = blackboard.breed
+	local action = blackboard.action
 
 	if not position_lookup[blackboard.target_unit] then
 		blackboard.target_unit = nil
@@ -106,12 +116,20 @@ BTNinjaApproachAction.run = function (self, unit, blackboard, t, dt)
 		end
 	end
 
+	local can_throw = action.can_throw
+
 	if blackboard.dodging then
 		if blackboard.dodging < t then
 			blackboard.dodging = nil
+			local dodge_target = blackboard.dodge_target
+
+			if can_throw and Unit.alive(dodge_target) then
+				blackboard.throw_projectile_at = dodge_target
+				blackboard.dodge_target = nil
+			end
 		end
 	else
-		local dodge_vec, aim_vec = LocomotionUtils.in_crosshairs_dodge(unit, blackboard, t, 1, nil)
+		local dodge_vec, aim_vec, aiming_unit = LocomotionUtils.in_crosshairs_dodge(unit, blackboard, t, 1, nil)
 
 		if dodge_vec then
 			self.dodge(self, unit, blackboard, dodge_vec, aim_vec)
@@ -120,7 +138,8 @@ BTNinjaApproachAction.run = function (self, unit, blackboard, t, dt)
 
 			network_manager.anim_event(network_manager, unit, "dodge_run_fwd")
 
-			blackboard.dodging = t + 1.5
+			blackboard.dodging = t + action.crosshair_dodge_delay
+			blackboard.dodge_target = aiming_unit
 		end
 	end
 
@@ -153,32 +172,40 @@ BTNinjaApproachAction.run = function (self, unit, blackboard, t, dt)
 		if blackboard.target_skulk_time < t or in_close_range then
 			if dist < breed.jump_range then
 				blackboard.skulk_jump_tries = blackboard.skulk_jump_tries + 1
-				local rand = math.random()
+				local rand = Math.random()
 				local growing_aggro = rand < blackboard.skulk_jump_tries/3
 
 				if growing_aggro then
-					blackboard.in_los = self.check_free_los(self, unit, blackboard)
-
-					if blackboard.in_los then
-						blackboard.skulk_jump_tries = 0
-
-						debug3d(unit, "SkulkAction in LOS done!", "green")
-
-						return "done"
+					if can_throw and Math.random() < action.throw_stars_probability and PerceptionUtils.raycast_spine_to_spine(unit, blackboard.target_unit, World.get_data(blackboard.world, "physics_world")) then
+						blackboard.throw_projectile_at = blackboard.target_unit
 					else
-						self.get_new_goal(self, unit, blackboard, t)
+						blackboard.in_los = self.check_free_los(self, unit, blackboard)
+
+						if blackboard.in_los then
+							blackboard.skulk_jump_tries = 0
+
+							debug3d(unit, "SkulkAction in LOS done!", "green")
+
+							return "done"
+						else
+							self.get_new_goal(self, unit, blackboard, t)
+						end
+
+						debug3d(unit, "ApproachAction not in LOS", "yellow")
 					end
-
-					debug3d(unit, "ApproachAction not in LOS", "yellow")
 				elseif in_close_range then
-					blackboard.in_los = self.check_free_los(self, unit, blackboard)
+					if can_throw and Math.random() < action.throw_stars_probability and PerceptionUtils.raycast_spine_to_spine(unit, blackboard.target_unit, World.get_data(blackboard.world, "physics_world")) then
+						blackboard.throw_projectile_at = blackboard.target_unit
+					else
+						blackboard.in_los = self.check_free_los(self, unit, blackboard)
 
-					if blackboard.in_los then
-						blackboard.skulk_jump_tries = 0
+						if blackboard.in_los then
+							blackboard.skulk_jump_tries = 0
 
-						debug3d(unit, "SkulkAction in LOS(close) done!", "green")
+							debug3d(unit, "SkulkAction in LOS(close) done!", "green")
 
-						return "done"
+							return "done"
+						end
 					end
 
 					self.get_new_goal(self, unit, blackboard, t)

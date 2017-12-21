@@ -564,6 +564,65 @@ DeathReactions.templates = {
 			end
 		}
 	},
+	gutter_runner_decoy = {
+		unit = {
+			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+				local killer_unit = killing_blow[DamageDataIndex.ATTACKER]
+				local damaged_by_other = unit ~= killer_unit
+
+				if damaged_by_other then
+					local ai_extension = ScriptUnit.extension(unit, "ai_system")
+
+					AiUtils.alert_nearby_friends_of_enemy(unit, ai_extension.blackboard(ai_extension).group_blackboard.broadphase, killer_unit)
+				end
+
+				local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+
+				ScriptUnit.extension(unit, "ai_system"):die(killer_unit, killing_blow)
+				locomotion.set_affected_by_gravity(locomotion, false)
+				locomotion.set_movement_type(locomotion, "script_driven")
+				locomotion.set_wanted_velocity(locomotion, Vector3.zero())
+				locomotion.set_collision_disabled(locomotion, "death_reaction", true)
+				Unit.flow_event(unit, "disable_despawn_fx")
+				World.create_particles(context.world, "fx/chr_gutter_foff", POSITION_LOOKUP[unit], Unit.local_rotation(unit, 0))
+				ScriptUnit.extension(unit, "ai_navigation_system"):release_bot()
+				Unit.set_unit_visibility(unit, false)
+
+				return {
+					despawn_after_time = t + 2
+				}, DeathReactions.IS_NOT_DONE
+			end,
+			update = function (unit, dt, context, t, data)
+				if data.despawn_after_time and data.despawn_after_time < t then
+					Managers.state.unit_spawner:mark_for_deletion(unit)
+
+					return DeathReactions.IS_DONE
+				end
+
+				return DeathReactions.IS_NOT_DONE
+			end
+		},
+		husk = {
+			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+				if ScriptUnit.has_extension(unit, "locomotion_system") then
+					local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+
+					locomotion.set_mover_disable_reason(locomotion, "husk_death_reaction", true)
+					locomotion.set_collision_disabled(locomotion, "husk_death_reaction", true)
+					locomotion.destroy(locomotion)
+				end
+
+				Unit.flow_event(unit, "disable_despawn_fx")
+				World.create_particles(context.world, "fx/chr_gutter_foff", POSITION_LOOKUP[unit], Unit.local_rotation(unit, 0))
+				Unit.set_unit_visibility(unit, false)
+
+				return {}, DeathReactions.IS_DONE
+			end,
+			update = function (unit, dt, context, t, data)
+				return DeathReactions.IS_DONE
+			end
+		}
+	},
 	poison_globadier = {
 		unit = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)

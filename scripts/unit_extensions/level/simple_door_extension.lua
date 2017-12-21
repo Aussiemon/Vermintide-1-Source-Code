@@ -5,7 +5,8 @@ SimpleDoorExtension.init = function (self, extension_init_context, unit, extensi
 	self.unit = unit
 	self.world = extension_init_context.world
 	self.is_server = Managers.player.is_server
-	self.current_state = "open_forward"
+	local door_state = Unit.get_data(unit, "door_state")
+	self.current_state = (door_state == 0 and "open_forward") or (door_state == 1 and "closed")
 	self.animation_stop_time = 0
 
 	return 

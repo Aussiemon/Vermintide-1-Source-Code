@@ -614,7 +614,7 @@ PopupHandler.update = function (self, dt, from_manager)
 	return 
 end
 PopupHandler.get_gamepad_input_texture_data = function (self, input_service, input_action, ignore_keybinding)
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" then
 		platform = "xb1"

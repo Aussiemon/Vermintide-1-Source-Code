@@ -17,7 +17,6 @@ COLD_CAMERA_BACKLIGHT = {
 }
 
 dofile("scripts/settings/level_settings_dlc_dwarf")
-dofile("scripts/settings/level_settings_dlc_challenge_wizard")
 
 for _, dlc in pairs(DLCSettings) do
 	local level_settings = dlc.level_settings
@@ -589,9 +588,10 @@ LevelSettings.merchant = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 2,
 		icon = "level_location_long_icon_02",
+		area = "ubersreik",
+		console_sorting = 3,
 		wwise_events = {
 			"nik_map_brief_merchant_district_01",
 			"nik_map_brief_merchant_district_02"
@@ -688,9 +688,10 @@ LevelSettings.tunnels = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 10,
 		icon = "level_location_long_icon_06",
+		area = "ubersreik",
+		console_sorting = 11,
 		wwise_events = {
 			"nik_map_brief_skaven_tunnels_01",
 			"nik_map_brief_skaven_tunnels_02"
@@ -830,9 +831,10 @@ LevelSettings.farm = {
 		"location_farm_right"
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 9,
 		icon = "level_location_short_icon_06",
+		area = "ubersreik",
+		console_sorting = 10,
 		wwise_events = {
 			"nik_map_brief_farm_01",
 			"nik_map_brief_farm_02"
@@ -947,9 +949,10 @@ LevelSettings.city_wall = {
 		}
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 7,
 		icon = "level_location_short_icon_05",
+		area = "ubersreik",
+		console_sorting = 8,
 		wwise_events = {
 			"nik_map_brief_city_wall_01",
 			"nik_map_brief_city_wall_02"
@@ -1040,9 +1043,10 @@ LevelSettings.cemetery = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 8,
 		icon = "level_location_long_icon_05",
+		area = "ubersreik",
+		console_sorting = 9,
 		wwise_events = {
 			"nik_map_brief_cemetary_01",
 			"nik_map_brief_cemetary_02"
@@ -1140,9 +1144,10 @@ LevelSettings.courtyard_level = {
 		"location_courtyard_courtyard"
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 11,
 		icon = "level_location_short_icon_03",
+		area = "ubersreik",
+		console_sorting = 12,
 		wwise_events = {
 			"nik_map_brief_courtyard_01",
 			"nik_map_brief_courtyard_02"
@@ -1234,9 +1239,10 @@ LevelSettings.sewers_short = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 3,
 		icon = "level_location_short_icon_01",
+		area = "ubersreik",
+		console_sorting = 4,
 		wwise_events = {
 			"nik_map_brief_sewers_01",
 			"nik_map_brief_sewers_02"
@@ -1333,9 +1339,10 @@ LevelSettings.wizard = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 4,
 		icon = "level_location_long_icon_03",
+		area = "ubersreik",
+		console_sorting = 5,
 		wwise_events = {
 			"nik_map_brief_wizard_tower_01",
 			"nik_map_brief_wizard_tower_02"
@@ -1432,9 +1439,10 @@ LevelSettings.magnus = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 1,
 		icon = "level_location_long_icon_01",
+		area = "ubersreik",
+		console_sorting = 2,
 		wwise_events = {
 			"nik_map_brief_magnus_tower_01",
 			"nik_map_brief_magnus_tower_02"
@@ -1515,9 +1523,10 @@ LevelSettings.end_boss = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 13,
 		icon = "level_location_long_icon_07",
+		area = "ubersreik",
+		console_sorting = 14,
 		wwise_events = {
 			"nik_map_brief_end_boss_01",
 			"nik_map_brief_end_boss_02"
@@ -1610,9 +1619,10 @@ LevelSettings.forest_ambush = {
 		composition = false
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 6,
 		icon = "level_location_long_icon_04",
+		area = "ubersreik",
+		console_sorting = 7,
 		wwise_events = {
 			"nik_map_brief_forest_ambush_01",
 			"nik_map_brief_forest_ambush_02"
@@ -1694,9 +1704,10 @@ LevelSettings.docks_short_level = {
 		"location_docks_lumberyard"
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 12,
 		icon = "level_location_short_icon_04",
+		area = "ubersreik",
+		console_sorting = 13,
 		wwise_events = {
 			"nik_map_brief_docks_01",
 			"nik_map_brief_docks_02"
@@ -1784,9 +1795,10 @@ LevelSettings.dlc_castle = {
 		composition = false
 	},
 	map_settings = {
-		area = "drachenfels",
 		sorting = 16,
 		icon = "level_location_dlc_icon_castle",
+		area = "drachenfels",
+		console_sorting = 17,
 		wwise_events = {
 			"nik_map_brief_castle_a_01",
 			"nik_map_brief_castle_a_02"
@@ -1798,19 +1810,19 @@ LevelSettings.dlc_castle = {
 	}
 }
 LevelSettings.dlc_castle_dungeon = {
-	default_surface_material = "stone",
-	display_name = "dlc1_4_level_castle_dungeon",
 	level_name = "levels/dlc_castle_dungeon/world",
+	display_name = "dlc1_4_level_castle_dungeon",
 	environment_state = "interior",
 	player_aux_bus_name = "environment_reverb_castle_medium_hall",
-	level_image = "level_image_dlc_castle_dungeon",
+	game_mode = "adventure",
 	loading_bg_image = "loading_screen_dlc_castle_dungeon",
 	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_dlc_castle_dungeon",
-	game_mode = "adventure",
+	level_image = "level_image_dlc_castle_dungeon",
 	dlc_name = "drachenfels",
 	ambient_sound_event = "ambience_dlc_castle_inside_hall_corridor",
 	required_act_completed = "prologue",
 	boss_spawning_method = "hand_placed",
+	default_surface_material = "stone",
 	knocked_down_setting = "knocked_down",
 	package_name = "resource_packages/levels/dlc_castle_dungeon",
 	source_aux_bus_name = "environment_reverb_castle_medium_hall_source",
@@ -1821,12 +1833,14 @@ LevelSettings.dlc_castle_dungeon = {
 		"nik_loading_screen_dungeon_01",
 		"nik_loading_screen_dungeon_02"
 	},
-	darkness_volumes = {
-		"environment_catacombs_dark",
-		"environment_tunnels_darker",
-		"environment_catacombs_dark_1",
-		"environment_catacombs_dark_trans_01",
-		"environment_catacombs_dark_first"
+	darkness_settings = {
+		volumes = {
+			"environment_catacombs_dark",
+			"environment_tunnels_darker",
+			"environment_catacombs_dark_1",
+			"environment_catacombs_dark_trans_01",
+			"environment_catacombs_dark_first"
+		}
 	},
 	pickup_settings = {
 		{
@@ -1882,9 +1896,10 @@ LevelSettings.dlc_castle_dungeon = {
 		composition = mini_patrol
 	},
 	map_settings = {
-		area = "drachenfels",
 		sorting = 17,
 		icon = "level_location_dlc_icon_dungeon",
+		area = "drachenfels",
+		console_sorting = 18,
 		wwise_events = {
 			"nik_map_brief_dungeon_01",
 			"nik_map_brief_dungeon_02"
@@ -1969,9 +1984,10 @@ LevelSettings.dlc_portals = {
 		composition = false
 	},
 	map_settings = {
-		area = "drachenfels",
 		sorting = 18,
 		icon = "level_location_dlc_icon_portals",
+		area = "drachenfels",
+		console_sorting = 19,
 		wwise_events = {
 			"nik_map_brief_portals_01",
 			"nik_map_brief_portals_02"
@@ -2259,9 +2275,10 @@ LevelSettings.dlc_survival_ruins = {
 		"survival_hardest"
 	},
 	map_settings = {
-		area = "world",
 		sorting = 15,
 		icon = "level_location_dlc_icon_01",
+		area = "world",
+		console_sorting = 16,
 		wwise_events = {
 			"nik_map_brief_dlc_survival_ruins_01",
 			"nik_map_brief_dlc_survival_ruins_02"
@@ -2312,9 +2329,10 @@ LevelSettings.dlc_survival_magnus = {
 		"survival_hardest"
 	},
 	map_settings = {
-		area = "world",
 		sorting = 14,
 		icon = "level_location_dlc_icon_02",
+		area = "world",
+		console_sorting = 15,
 		wwise_events = {
 			"nik_map_brief_dlc_survival_general_01",
 			"nik_map_brief_dlc_survival_general_02",
@@ -2402,9 +2420,10 @@ LevelSettings.bridge = {
 		"location_bridge_underbelly"
 	},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 5,
 		icon = "level_location_short_icon_02",
+		area = "ubersreik",
+		console_sorting = 6,
 		wwise_events = {
 			"nik_map_brief_bridge_01",
 			"nik_map_brief_bridge_02"
@@ -2486,9 +2505,10 @@ LevelSettings.jansson = {
 	},
 	locations = {},
 	map_settings = {
-		area = "ubersreik",
 		sorting = 5,
 		icon = "level_location_short_icon_02",
+		area = "ubersreik",
+		console_sorting = 6,
 		wwise_events = {
 			"nik_map_brief_bridge_01",
 			"nik_map_brief_bridge_02"

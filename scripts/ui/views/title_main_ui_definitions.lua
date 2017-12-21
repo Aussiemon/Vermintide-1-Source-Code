@@ -431,7 +431,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			90,
+			120,
 			10
 		},
 		size = {
@@ -445,12 +445,54 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			30,
+			60,
 			10
 		},
 		size = {
 			1000,
 			60
+		}
+	},
+	additional_content = {
+		vertical_alignment = "center",
+		parent = "menu_anchor_point",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			1000,
+			60
+		}
+	},
+	new_star_left = {
+		vertical_alignment = "center",
+		parent = "additional_content",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			64,
+			64
+		}
+	},
+	new_star_right = {
+		vertical_alignment = "center",
+		parent = "additional_content",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			64,
+			64
 		}
 	},
 	options = {
@@ -459,7 +501,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-30,
+			-60,
 			10
 		},
 		size = {
@@ -473,7 +515,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-90,
+			-120,
 			10
 		},
 		size = {
@@ -539,7 +581,7 @@ local scenegraph_definition = {
 	}
 }
 
-if Application.platform() == "ps4" then
+if PLATFORM == "ps4" then
 	scenegraph_definition.user_gamertag.position[1] = 61
 	scenegraph_definition.user_gamertag.position[2] = 45
 end
@@ -593,6 +635,8 @@ local single_widget_definitions = {
 	}),
 	start_screen_selection_left = UIWidgets.create_simple_texture("start_screen_selection_left", "selection_glow_left"),
 	start_screen_selection_right = UIWidgets.create_simple_texture("start_screen_selection_right", "selection_glow_right"),
+	new_dlc_left = UIWidgets.create_simple_texture("new_dlc", "new_star_left"),
+	new_dlc_right = UIWidgets.create_simple_texture("new_dlc", "new_star_right"),
 	lock_center = UIWidgets.create_simple_rotated_texture("start_screen_menu_lock_part_05", 0, {
 		25,
 		25
@@ -899,9 +943,9 @@ local animations = {
 				local widget_bottom = widgets.frame_bottom
 				local anim_progress = math.ease_out_quad(local_progress)
 				local default_frame_bottom_position = scenegraph_definition.frame_bottom.position
-				ui_scenegraph.frame_top.local_position[2] = anim_progress*140
-				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] + anim_progress*-140
-				ui_scenegraph.frame_background.size[2] = anim_progress*280
+				ui_scenegraph.frame_top.local_position[2] = anim_progress*170
+				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] + anim_progress*-170
+				ui_scenegraph.frame_background.size[2] = anim_progress*340
 
 				return 
 			end,
@@ -923,9 +967,9 @@ local animations = {
 				local widget_bottom = widgets.frame_bottom
 				local default_frame_bottom_position = scenegraph_definition.frame_bottom.position
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				ui_scenegraph.frame_top.local_position[2] = anim_progress*140
-				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] - anim_progress*140
-				ui_scenegraph.frame_background.size[2] = anim_progress*280
+				ui_scenegraph.frame_top.local_position[2] = anim_progress*170
+				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] - anim_progress*170
+				ui_scenegraph.frame_background.size[2] = anim_progress*340
 
 				return 
 			end,
@@ -1267,19 +1311,88 @@ local animations = {
 		}
 	}
 }
+
+function create_dlc_button(scenegraph_id, text, font_size, optional_offset)
+	return {
+		element = {
+			passes = {
+				{
+					pass_type = "hotspot",
+					content_id = "button_text"
+				},
+				{
+					style_id = "text_hover",
+					pass_type = "text",
+					text_id = "text_field",
+					content_check_function = function (content)
+						return content.button_text.is_hover
+					end
+				},
+				{
+					style_id = "text",
+					pass_type = "text",
+					text_id = "text_field",
+					content_check_function = function (content)
+						return not content.button_text.is_hover
+					end
+				}
+			}
+		},
+		content = {
+			new_texture_id = "new_dlc",
+			button_text = {},
+			text_field = text,
+			default_font_size = font_size
+		},
+		style = {
+			text = {
+				vertical_alignment = "center",
+				localize = true,
+				horizontal_alignment = "left",
+				word_wrap = true,
+				font_type = "hell_shark",
+				font_size = font_size,
+				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
+				offset = optional_offset or {
+					0,
+					0,
+					4
+				}
+			},
+			text_hover = {
+				vertical_alignment = "center",
+				localize = true,
+				horizontal_alignment = "left",
+				word_wrap = true,
+				font_type = "hell_shark",
+				font_size = font_size,
+				text_color = Colors.get_color_table_with_alpha("white", 255),
+				offset = optional_offset or {
+					0,
+					0,
+					4
+				}
+			}
+		},
+		scenegraph_id = scenegraph_id
+	}
+end
+
 local menu_item_index_lookup = {
-	options = 3,
-	credits = 4,
+	credits = 5,
+	tutorial = 2,
+	options = 4,
 	start_game = 1,
-	tutorial = 2
+	additional_content = 3
 }
 local menu_button_font_size = 24
 local menu_button_definitions = nil
 
-if Application.build() == "dev" or Application.build() == "debug" then
+if BUILD == "dev" or BUILD == "debug" then
 	menu_button_definitions = {
 		UIWidgets.create_text_button("start_game_button", "start_game_menu_button_name", menu_button_font_size),
 		UIWidgets.create_text_button("tutorial", "tutorial_menu_button_name", menu_button_font_size),
+		create_dlc_button("additional_content", "console_dlc_view_title", menu_button_font_size),
 		UIWidgets.create_text_button("options", "options_menu_button_name", menu_button_font_size),
 		UIWidgets.create_text_button("credits", "credits_menu_button_name", menu_button_font_size)
 	}
@@ -1287,6 +1400,7 @@ else
 	menu_button_definitions = {
 		UIWidgets.create_text_button("start_game_button", "start_game_menu_button_name", menu_button_font_size),
 		UIWidgets.create_text_button("tutorial", "tutorial_menu_button_name", menu_button_font_size),
+		create_dlc_button("additional_content", "console_dlc_view_title", menu_button_font_size),
 		UIWidgets.create_text_button("options", "options_menu_button_name", menu_button_font_size),
 		UIWidgets.create_text_button("credits", "credits_menu_button_name", menu_button_font_size)
 	}

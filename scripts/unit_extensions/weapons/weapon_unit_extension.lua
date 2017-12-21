@@ -343,7 +343,7 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 				end
 			end
 
-			if Application.platform() ~= "win32" and event == "attack_shoot" then
+			if PLATFORM ~= "win32" and event == "attack_shoot" then
 				anim_time_scale = anim_time_scale*1.2
 			end
 

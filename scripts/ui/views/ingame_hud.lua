@@ -58,7 +58,7 @@ IngameHud.init = function (self, ingame_ui_context)
 	self.observer_ui = ObserverUI:new(ingame_ui_context)
 	self.overcharge_bar_ui = OverchargeBarUI:new(ingame_ui_context)
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		self.player_inventory_ui = PlayerInventoryUI:new(ingame_ui_context)
 	end
 
@@ -208,7 +208,7 @@ end
 IngameHud.is_own_player_dead = function (self)
 	local peer_id = self.peer_id
 	local my_player = self.player_manager:player_from_peer_id(peer_id)
-	local player_unit = my_player.player_unit
+	local player_unit = my_player and my_player.player_unit
 
 	if not player_unit or not Unit.alive(player_unit) then
 		return true

@@ -50,7 +50,7 @@ local widget_definitions = {
 IngameNewsTickerUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.ui_animations = {}
 
 	self.create_ui_elements(self)
@@ -139,6 +139,10 @@ IngameNewsTickerUI.handle_delay = function (self, dt)
 	return 
 end
 IngameNewsTickerUI.handle_message_refresh_delay = function (self, dt)
+	if PLATFORM ~= "win32" then
+		return true
+	end
+
 	local delay_time = self.message_refresh_delay
 
 	if delay_time then

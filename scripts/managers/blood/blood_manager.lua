@@ -129,13 +129,16 @@ BloodManager._update_distance_fade = function (self, dt, t)
 
 	local local_player = Managers.player:local_player()
 
-	if local_player and Unit.alive(local_player.player_unit) then
-		local player_pos = Unit.local_position(local_player.player_unit, 0)
+	if local_player then
+		local viewport_name = local_player.viewport_name
+		local viewport = ScriptWorld.viewport(self._world, viewport_name)
+		local camera = ScriptViewport.camera(viewport)
+		local camera_pos = Camera.world_position(camera)
 
 		for unit, time in pairs(self._blood_fades) do
 			if Unit.alive(unit) then
 				local pos = Unit.local_position(unit, 0)
-				local distance_sq = Vector3.distance_squared(pos, player_pos)
+				local distance_sq = Vector3.distance_squared(pos, camera_pos)
 
 				if t + 2 < time and BloodSettings.blood_decals.distance_despawn*BloodSettings.blood_decals.distance_despawn <= distance_sq then
 					self._set_fade_values(self, unit, t, 2)

@@ -1,4 +1,4 @@
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	require("scripts/managers/input/input_manager")
 	require("scripts/utils/visual_assert_log")
 	require("foundation/scripts/util/garbage_leak_detector")
@@ -16,7 +16,7 @@ StateSplashScreen.packages_to_load = {
 	"resource_packages/menu_assets_start_screen"
 }
 
-if Application.platform() == "xb1" or Application.platform() == "ps4" then
+if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	StateSplashScreen.delayed_global_packages = {
 		"resource_packages/game_scripts",
 		"backend/local_backend/local_backend",
@@ -30,11 +30,11 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 end
 
 StateSplashScreen.on_enter = function (self)
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		Application.set_time_step_policy("no_smoothing", "clear_history", "throttle", 60)
 	end
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local assert_on_leak = true
 
 		GarbageLeakDetector.run_leak_detection(assert_on_leak)
@@ -45,19 +45,19 @@ StateSplashScreen.on_enter = function (self)
 	Managers.transition:force_fade_in()
 	self.setup_world(self)
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		self.setup_input(self)
 	end
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		self.setup_splash_screen_view(self)
-	elseif Application.platform() == "ps4" then
+	elseif PLATFORM == "ps4" then
 		if PS4.title_id() == "CUSA02133_00" then
 			self.setup_esrb_logo(self)
 		else
 			Managers.package:load("resource_packages/start_menu_splash", "StateSplashScreen", callback(self, "cb_splashes_loaded"), true, true)
 		end
-	elseif Application.platform() == "xb1" then
+	elseif PLATFORM == "xb1" then
 		if self._is_in_esrb_terratory(self) then
 			self.setup_esrb_logo(self)
 		else
@@ -86,7 +86,7 @@ StateSplashScreen.on_enter = function (self)
 		end
 	end
 
-	if Application.platform() == "win32" and not self._skip_splash then
+	if PLATFORM == "win32" and not self._skip_splash then
 		self.parent.loading_context.show_profile_on_startup = true
 		loading_context.first_time = true
 	end
@@ -174,7 +174,7 @@ StateSplashScreen.setup_world = function (self)
 	return 
 end
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	StateSplashScreen.setup_input = function (self)
 		self.input_manager = InputManager:new()
 		Managers.input = self.input_manager
@@ -205,7 +205,7 @@ StateSplashScreen.setup_splash_screen_view = function (self)
 	return 
 end
 StateSplashScreen.update = function (self, dt, t)
-	if Application.platform() ~= "xb1" and Application.platform() ~= "ps4" then
+	if PLATFORM ~= "xb1" and PLATFORM ~= "ps4" then
 		Debug.update(t, dt)
 		self.input_manager:update(dt, t)
 	end
@@ -237,7 +237,7 @@ StateSplashScreen.next_state = function (self)
 		return 
 	end
 
-	if Application.platform() == "win32" and not self.debug_setup then
+	if PLATFORM == "win32" and not self.debug_setup then
 		self.debug_setup = true
 
 		Debug.setup(self.world, "splash_ui")
@@ -292,7 +292,7 @@ StateSplashScreen.packages_loaded = function (self)
 		end
 	end
 
-	if Application.platform() == "xb1" or Application.platform() == "ps4" then
+	if PLATFORM == "xb1" or PLATFORM == "ps4" then
 		for i, name in ipairs(StateSplashScreen.delayed_global_packages) do
 			if not package_manager.has_loaded(package_manager, name) then
 				return false
@@ -304,10 +304,6 @@ StateSplashScreen.packages_loaded = function (self)
 		end
 
 		if not self._console_delayed_scripts_setup_and_required then
-			for i = 1, 10, 1 do
-				print("?????????????")
-			end
-
 			self._require_and_setup_delayed_scripts(self)
 
 			self._console_delayed_scripts_setup_and_required = true
@@ -327,7 +323,7 @@ StateSplashScreen.packages_loaded = function (self)
 	return true
 end
 
-if Application.platform() == "xb1" or Application.platform() == "ps4" then
+if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	StateSplashScreen._require_and_setup_delayed_scripts = function (self)
 		local function game_require(path, ...)
 			for _, s in ipairs({
@@ -360,7 +356,7 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		game_require("network", "unit_spawner", "unit_storage", "network_unit")
 		DefaultUserSettings.set_default_user_settings()
 		self._init_localizer(self)
-		game_require("ui", "views/ingame_ui")
+		game_require("ui", "ui_fonts", "views/show_cursor_stack", "views/ingame_ui", "views/end_of_level_ui", "views/title_loading_ui")
 		require("foundation/scripts/util/garbage_leak_detector")
 		parse_item_master_list()
 
@@ -391,7 +387,7 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 			DebugHelper.enable_physics_dump()
 		end
 
-		if Application.platform() == "xb1" then
+		if PLATFORM == "xb1" then
 			require("scripts/managers/events/xbox_event_manager")
 
 			Managers.xbox_events = XboxEventManager:new()
@@ -477,7 +473,7 @@ StateSplashScreen.cb_fade_in_done = function (self)
 	return 
 end
 StateSplashScreen.on_exit = function (self, application_shutdown)
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local max_fps = Application.user_setting("max_fps")
 
 		if max_fps == nil or max_fps == 0 then
@@ -503,7 +499,7 @@ StateSplashScreen.on_exit = function (self, application_shutdown)
 
 	self.world = nil
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		self.input_manager:destroy()
 
 		self.input_manager = nil

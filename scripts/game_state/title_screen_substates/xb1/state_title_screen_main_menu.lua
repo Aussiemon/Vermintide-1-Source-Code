@@ -1,3 +1,5 @@
+require("scripts/ui/views/console_dlc_view")
+
 StateTitleScreenMainMenu = class(StateTitleScreenMainMenu)
 StateTitleScreenMainMenu.NAME = "StateTitleScreenMainMenu"
 local menu_functions = {
@@ -20,6 +22,11 @@ local menu_functions = {
 		return 
 	end,
 	function (this)
+		this.activate_view(this, "console_dlc_view")
+
+		return 
+	end,
+	function (this)
 		local input_manager = Managers.input
 
 		input_manager.block_device_except_service(input_manager, "options_menu", "gamepad")
@@ -29,30 +36,6 @@ local menu_functions = {
 	end,
 	function (this)
 		this.activate_view(this, "credits_view")
-
-		return 
-	end,
-	function (this)
-		this._input_disabled = true
-
-		Managers.transition:show_loading_icon(false)
-		Managers.transition:fade_in(GameSettings.transition_fade_out_speed, callback(this, "cb_fade_in_done", "ai_benchmark"))
-
-		return 
-	end,
-	function (this)
-		this._input_disabled = true
-
-		Managers.transition:show_loading_icon(false)
-		Managers.transition:fade_in(GameSettings.transition_fade_out_speed, callback(this, "cb_fade_in_done", "ai_benchmark_cycle"))
-
-		return 
-	end,
-	function (this)
-		this._input_disabled = true
-
-		Managers.transition:show_loading_icon(false)
-		Managers.transition:fade_in(GameSettings.transition_fade_out_speed, callback(this, "cb_fade_in_done", "whitebox_combat"))
 
 		return 
 	end
@@ -121,7 +104,8 @@ StateTitleScreenMainMenu._init_menu_views = function (self)
 	}
 	self._views = {
 		credits_view = CreditsView:new(view_context),
-		options_view = OptionsView:new(view_context)
+		options_view = OptionsView:new(view_context),
+		console_dlc_view = ConsoleDLCView:new(view_context)
 	}
 
 	for name, view in pairs(self._views) do

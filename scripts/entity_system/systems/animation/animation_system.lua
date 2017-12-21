@@ -9,8 +9,6 @@ local RPCS = {
 	"rpc_sync_anim_state_4",
 	"rpc_sync_anim_state_5",
 	"rpc_sync_anim_state_7",
-	"rpc_sync_anim_state_9",
-	"rpc_sync_anim_state_11",
 	"rpc_sync_level_unit_anim_state_1",
 	"rpc_anim_event",
 	"rpc_anim_event_variable_float",
@@ -398,8 +396,6 @@ AnimationSystem.rpc_sync_anim_state_3 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_4 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_5 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_7 = AnimationSystem.rpc_sync_anim_state
-AnimationSystem.rpc_sync_anim_state_9 = AnimationSystem.rpc_sync_anim_state
-AnimationSystem.rpc_sync_anim_state_11 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_level_unit_anim_state_1 = AnimationSystem.rpc_sync_level_unit_anim_state
 AnimationSystem.rpc_anim_event_variable_float = function (self, sender, anim_id, go_id, variable_id, variable_value)
 	local unit = self.unit_storage:unit(go_id)

@@ -2,8 +2,17 @@ require("scripts/managers/news_ticker/news_ticker_token")
 
 NewsTickerManager = class(NewsTickerManager)
 NewsTickerManager.init = function (self)
-	self._loading_screen_url = Development.parameter("news_ticker_url") or "http://patch.fatshark.se/vermintide_news_ticker.txt"
-	self._ingame_url = Development.parameter("news_ticker_ingame_url") or "http://patch.fatshark.se/vermintide_news_ticker_ingame.txt"
+	self._platform = PLATFORM
+
+	if self._platform == "win32" then
+		self._loading_screen_url = Development.parameter("news_ticker_url") or "http://patch.fatshark.se/vermintide_news_ticker.txt"
+		self._ingame_url = Development.parameter("news_ticker_ingame_url") or "http://patch.fatshark.se/vermintide_news_ticker_ingame.txt"
+	else
+		self._server_name = "patch.fatshark.se"
+		self._loading_screen_url = "vermintide_news_ticker_" .. self._platform .. ".txt"
+		self._ingame_url = "vermintide_news_ticker_ingame_" .. self._platform .. ".txt"
+	end
+
 	self._loading_screen_text = nil
 	self._ingame_text = nil
 
@@ -31,10 +40,39 @@ NewsTickerManager.destroy = function (self)
 	return 
 end
 NewsTickerManager._load = function (self, url, callback)
-	local token = Curl.add_request(url)
-	local curl_token = CurlToken:new(token)
+	if self._platform == "win32" then
+		local token = Curl.add_request(url)
+		local curl_token = CurlToken:new(token)
 
-	Managers.token:register_token(curl_token, callback)
+		Managers.token:register_token(curl_token, callback)
+	else
+		local message = Http.get_uri(self._server_name, 80, url)
+
+		if message then
+			local is_ok = string.find(message, "HTTP/1.1 200 OK")
+
+			if is_ok then
+				local start_idx, end_idx = string.find(message, "\r\n\r\n")
+				local formatted_message = string.sub(message, end_idx + 1)
+				local info = {
+					done = true,
+					data = formatted_message
+				}
+
+				callback(info)
+
+				return 
+			end
+		end
+
+		local info = {
+			done = true,
+			data = ""
+		}
+
+		callback(info)
+		Application.warning(string.format("[NewsTickerManager] Could not retrieve news ticker text. INFO: %s", tostring(message)))
+	end
 
 	return 
 end
@@ -42,7 +80,7 @@ NewsTickerManager.refresh_loading_screen_message = function (self)
 	self._loading_screen_text = nil
 	self._refreshing_loading_screen_message = true
 
-	if not rawget(_G, "Curl") then
+	if self._platform == "win32" and not rawget(_G, "Curl") then
 		self.cb_loading_screen_loaded(self, {
 			done = true,
 			data = "This executable is built without Curl. News ticker will be unavailable."
@@ -77,7 +115,7 @@ NewsTickerManager.refresh_ingame_message = function (self)
 	self._ingame_text = nil
 	self._refreshing_ingame_message = true
 
-	if not rawget(_G, "Curl") then
+	if self._platform == "win32" and not rawget(_G, "Curl") then
 		self.cb_ingame_loaded(self, {
 			done = true,
 			data = "This executable is built without Curl. News ticker will be unavailable."

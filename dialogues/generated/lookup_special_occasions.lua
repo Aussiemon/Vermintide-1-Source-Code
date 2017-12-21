@@ -296,7 +296,6 @@ assert(DialogueLookup[DialogueLookup_n + 295] == nil)
 assert(DialogueLookup[DialogueLookup_n + 296] == nil)
 assert(DialogueLookup[DialogueLookup_n + 297] == nil)
 assert(DialogueLookup[DialogueLookup_n + 298] == nil)
-assert(DialogueLookup[DialogueLookup_n + 299] == nil)
 
 DialogueLookup[DialogueLookup_n + 1] = "pdr_gameplay_i_will_tank"
 DialogueLookup[DialogueLookup_n + 2] = "pes_gameplay_i_will_tank"
@@ -596,7 +595,6 @@ DialogueLookup[DialogueLookup_n + 295] = "pwe_gameplay_seeing_a_skaven_rat_ogre_
 DialogueLookup[DialogueLookup_n + 296] = "pwe_gameplay_seeing_a_skaven_patrol_stormvermin_ping"
 DialogueLookup[DialogueLookup_n + 297] = "pwe_gameplay_seeing_a_skaven_slaver_ping"
 DialogueLookup[DialogueLookup_n + 298] = "pwe_gameplay_seeing_a_skaven_ratling_gun_ping"
-DialogueLookup[DialogueLookup_n + 299] = "pes_gameplay_seeing_a_skaven_ratling_gun_test"
-DialogueLookup_n = DialogueLookup_n + 299
+DialogueLookup_n = DialogueLookup_n + 298
 
 return 

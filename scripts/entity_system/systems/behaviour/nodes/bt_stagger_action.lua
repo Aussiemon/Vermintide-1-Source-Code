@@ -7,17 +7,32 @@ BTStaggerAction.init = function (self, ...)
 	return 
 end
 BTStaggerAction.name = "BTStaggerAction"
-local NAV_CHECK_ABOVE = 0.25
-local NAV_CHECK_BELOW = 0.25
-local RAYCAST_LENGTH = 1.3
-local RAYCAST_LOW_HEIGHT = 0.4
-local EPSILON = 0.0001
+local DEFAULT_IN_AIR_MOVER_CHECK_RADIUS = 0.35
 BTStaggerAction.enter = function (self, unit, blackboard, t)
+	local locomotion_extension = blackboard.locomotion_extension
 	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, false)
 
 	local was_already_in_stagger = blackboard.staggering_id and blackboard.stagger ~= blackboard.staggering_id
+
+	if not was_already_in_stagger then
+		local breed = blackboard.breed
+		local overlap_radius = breed.stagger_in_air_mover_check_radius or DEFAULT_IN_AIR_MOVER_CHECK_RADIUS
+		local overlap_pos = POSITION_LOOKUP[unit]
+		local overlap_size = Vector3(overlap_radius, 1, overlap_radius)
+		local overlap_rotation = Quaternion.look(Vector3.down(), Vector3.forward())
+		local world = blackboard.world
+		local physics_world = World.get_data(world, "physics_world")
+		local _, actor_count = PhysicsWorld.immediate_overlap(physics_world, "position", overlap_pos, "rotation", overlap_rotation, "size", overlap_size, "shape", "capsule", "types", "both", "collision_filter", "filter_environment_overlap", "use_global_table")
+
+		if actor_count == 0 then
+			local override_mover_move_distance = breed.override_mover_move_distance
+
+			locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
+		end
+	end
+
 	blackboard.stagger_anim_done = false
 	blackboard.stagger_hit_wall = nil
 	blackboard.staggering_id = blackboard.stagger
@@ -51,6 +66,7 @@ BTStaggerAction.enter = function (self, unit, blackboard, t)
 
 	network_manager.anim_event(network_manager, unit, "idle")
 
+	blackboard.move_state = "idle"
 	local scale = blackboard.stagger_length
 
 	LocomotionUtils.set_animation_translation_scale(unit, Vector3(scale, scale, scale))
@@ -64,8 +80,6 @@ BTStaggerAction.enter = function (self, unit, blackboard, t)
 	else
 		LocomotionUtils.set_animation_driven_movement(unit, true, true, false)
 	end
-
-	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_rotation_speed(locomotion_extension, 100)
 	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
@@ -189,8 +203,23 @@ BTStaggerAction.run = function (self, unit, blackboard, t, dt)
 		elseif result == "navmesh_use_mover" then
 			local breed = blackboard.breed
 			local override_mover_move_distance = breed.override_mover_move_distance
+			local ignore_forced_mover_kill = true
+			local successful = locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance, ignore_forced_mover_kill)
 
-			locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
+			if not successful then
+				local mover = Unit.mover(unit)
+				local radius = Mover.radius(mover)
+
+				QuickDrawerStay:sphere(position, radius, Colors.get("red"))
+				QuickDrawerStay:line(position, position + Vector3(0, 0, 5), Colors.get("red"))
+
+				local debug_text = string.format("LD should check the Navmesh here, Mover separation failed for %s!", breed.name)
+
+				Debug.world_sticky_text(position + Vector3(0, 0, 5), debug_text, "red")
+				locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
+
+				blackboard.stagger_hit_wall = true
+			end
 		end
 
 		Profiler.stop("checking navmesh")

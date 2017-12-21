@@ -7,6 +7,7 @@ local RPCS = {
 	"rpc_interaction_denied",
 	"rpc_interaction_completed",
 	"rpc_interaction_abort",
+	"rpc_sync_interactable_used_state",
 	"rpc_sync_interaction_state"
 }
 local extensions = {
@@ -115,6 +116,13 @@ InteractionSystem.rpc_sync_interaction_state = function (self, sender, unit_id, 
 	local interactor_extension = ScriptUnit.extension(unit, "interactor_system")
 
 	interactor_extension.set_interaction_context(interactor_extension, state, interaction_type, interactable_unit, start_time, duration)
+
+	return 
+end
+InteractionSystem.rpc_sync_interactable_used_state = function (self, sender, interactable_unit_id, is_level_object, is_used)
+	local interactable_unit = Managers.state.network:game_object_or_level_unit(interactable_unit_id, is_level_object)
+
+	Unit.set_data(interactable_unit, "interaction_data", "used", is_used)
 
 	return 
 end

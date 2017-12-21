@@ -193,7 +193,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 	end
 
 	local node_abide = children[8]
-	local condition_result = blackboard.secondary_target
+	local condition_result = blackboard.target_unit or blackboard.secondary_target
 
 	if condition_result then
 		self.set_running_child(self, unit, blackboard, t, node_abide, "aborted")

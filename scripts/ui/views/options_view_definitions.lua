@@ -818,7 +818,7 @@ end
 
 local function create_gamepad_layout_widget(texture, texture_size, texture2, texture_size2, scenegraph_id, base_offset)
 	base_offset[2] = base_offset[2] - texture_size[2]
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local definition = nil
 
 	if platform == "win32" then

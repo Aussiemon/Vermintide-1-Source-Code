@@ -922,6 +922,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 	end
 
 	local new_action, new_sub_action, current_action_settings, current_action_extension, current_action_hand = nil
+	local buff_extension = ScriptUnit.extension(unit, "buff_system")
 	current_action_settings, current_action_extension, current_action_hand = CharacterStateHelper._get_current_action_data(left_hand_weapon_extension, right_hand_weapon_extension)
 	local item_template = BackendUtils.get_item_template(item_data)
 	local recent_damage_type = damage_extension.recently_damaged(damage_extension)
@@ -943,7 +944,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 			end
 		end
 
-		if (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible or reloading or is_bot_player then
+		if (buff_extension and buff_extension.has_buff_type(buff_extension, "damage_reduction_from_proc")) or (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible or reloading or is_bot_player then
 			can_interrupt = false
 		else
 			can_interrupt = status_extension.hitreact_interrupt(status_extension)

@@ -1523,8 +1523,8 @@ local function create_performance_time_entry(scenegraph_id, difficulty_title, us
 	}
 end
 
-local party_text = (Application.platform() == "xb1" and "map_party_title_xb1") or "map_party_title"
-local num_players_tooltip = (Application.platform() == "xb1" and "map_number_of_players_tooltip_xb1") or "map_number_of_players_tooltip"
+local party_text = (PLATFORM == "xb1" and "map_party_title_xb1") or "map_party_title"
+local num_players_tooltip = (PLATFORM == "xb1" and "map_number_of_players_tooltip_xb1") or "map_number_of_players_tooltip"
 local widgets = {
 	gamepad_button_selection = UIWidgets.create_gamepad_selection("gamepad_button_selection", nil, nil, {
 		70,
@@ -3228,7 +3228,7 @@ local default_input = {
 	}
 }
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	table.remove(default_input, 2)
 	Application.warning("[MapViewDefinitions] Removed switch settings for lite optional cert")
 end

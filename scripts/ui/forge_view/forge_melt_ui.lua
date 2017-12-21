@@ -137,7 +137,7 @@ ForgeMeltUI.toggle_melt_mode = function (self, enabled, used_by_gamepad, force_s
 	local widgets_by_name = self.widgets_by_name
 	local description_widget = widgets_by_name.description_text_1
 	local melt_button_widget = widgets_by_name.melt_button_widget
-	local used_by_gamepad = Application.platform() ~= "win32" or used_by_gamepad
+	local used_by_gamepad = PLATFORM ~= "win32" or used_by_gamepad
 
 	if not used_by_gamepad then
 		melt_button_widget.content.is_selected = enabled

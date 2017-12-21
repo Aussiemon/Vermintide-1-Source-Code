@@ -202,9 +202,9 @@ EndScreenUI.show_text_screen = function (self, is_victory)
 	if use_overlay then
 		widget.style.banner_effect_texture.color = {
 			255,
-			220,
-			24,
-			23
+			0,
+			255,
+			0
 		}
 	end
 

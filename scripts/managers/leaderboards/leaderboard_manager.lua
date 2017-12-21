@@ -4,7 +4,7 @@ require("scripts/managers/leaderboards/leaderboard_settings")
 
 LeaderboardManager = class(LeaderboardManager)
 LeaderboardManager.init = function (self)
-	self._platform = Application.platform()
+	self._platform = PLATFORM
 
 	if self._platform == "win32" and rawget(_G, "Steam") then
 		self._score_template = LeaderboardSettings.template

@@ -126,7 +126,15 @@ AiBreedSnippets.on_storm_vermin_champion_death = function (unit, blackboard)
 	local conflict_director = Managers.state.conflict
 
 	conflict_director.freeze_intensity_decay(conflict_director, 1)
-	conflict_director.add_unit_to_bosses(conflict_director, unit)
+	conflict_director.remove_unit_from_bosses(conflict_director, unit)
+
+	return 
+end
+AiBreedSnippets.on_storm_vermin_champion_despawn = function (unit, blackboard)
+	local conflict_director = Managers.state.conflict
+
+	conflict_director.freeze_intensity_decay(conflict_director, 1)
+	conflict_director.remove_unit_from_bosses(conflict_director, unit)
 
 	return 
 end
@@ -148,20 +156,19 @@ local breed_data = {
 	smart_targeting_outer_width = 1,
 	has_inventory = true,
 	poison_resistance = 100,
-	armor_category = 2,
 	hit_reaction = "ai_default",
-	stagger_immune = true,
+	armor_category = 2,
 	wield_inventory_on_spawn = true,
 	default_inventory_template = "halberd",
-	is_bot_aid_threat = true,
+	no_stagger_duration = true,
 	dialogue_source_name = "skaven_storm_vermin_champion",
 	hit_effect_template = "HitEffectsStormVerminChampion",
 	radius = 1,
-	bot_opportunity_target_melee_range = 7,
+	is_bot_aid_threat = true,
 	boss = true,
+	bot_opportunity_target_melee_range = 7,
 	death_sound_event = "Play_stormvermin_die_vce",
 	headshot_coop_stamina_fatigue_type = "headshot_special",
-	target_selection = "pick_rat_ogre_target_with_weights",
 	bot_optimal_melee_distance = 2,
 	has_running_attack = true,
 	disable_second_hit_ragdoll = true,
@@ -170,10 +177,11 @@ local breed_data = {
 	perception = "perception_rat_ogre",
 	player_locomotion_constrain_radius = 1,
 	bot_opportunity_target_melee_range_while_ranged = 5,
+	target_selection = "pick_rat_ogre_target_with_weights",
 	angry_run_speed = 6,
 	weapon_reach = 2,
 	bone_lod_level = 1,
-	no_stagger_duration = true,
+	stagger_immune = true,
 	override_mover_move_distance = 1.5,
 	perception_continuous = "perception_continuous_rat_ogre",
 	base_unit = "units/beings/enemies/skaven_stormvermin_champion/chr_skaven_stormvermin_champion",
@@ -183,6 +191,7 @@ local breed_data = {
 	run_on_death = AiBreedSnippets.on_storm_vermin_champion_death,
 	run_on_update = AiBreedSnippets.on_storm_vermin_champion_update,
 	run_on_husk_spawn = AiBreedSnippets.on_storm_vermin_champion_husk_spawn,
+	run_on_despawn = AiBreedSnippets.on_storm_vermin_champion_despawn,
 	hot_join_sync = AiBreedSnippets.on_storm_vermin_hot_join_sync,
 	detection_radius = math.huge,
 	perception_weights = {

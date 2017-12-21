@@ -6,6 +6,7 @@ require("scripts/network/lobby_members")
 require("scripts/network/smartmatch_xb1")
 require("scripts/network/lobby_unclaimed")
 require("scripts/network/voice_chat_xb1")
+require("scripts/network_lookup/network_lookup")
 
 LobbyInternal = LobbyInternal or {}
 LobbyInternal.HOPPER_NAME = "new_stage_hopper"
@@ -208,7 +209,11 @@ XboxLiveLobby.enable_smartmatch = function (self, enable, params, timeout)
 	return 
 end
 XboxLiveLobby.reissue_smartmatch_ticket = function (self, params, timeout)
-	fassert(self._smartmatch_enabled, "[XboxLiveLobby] You need to be matchmaking to be able to reissue a ticket")
+	if not self._smartmatch_enabled then
+		Application.warning("[XboxLiveLobby] You need to be matchmaking to be able to reissue a ticket")
+
+		return 
+	end
 
 	self._smartmatch_ticket_params = params
 	self._timeout = timeout
@@ -496,7 +501,7 @@ end
 XboxLiveLobby.leave = function (self, skip_voice_chat)
 	dprintf("Destroying Lobby --> session_id: %s - session_name: %s", self._session_id, self._data.session_name)
 
-	if not skip_voice_chat then
+	if not skip_voice_chat and Managers.voice_chat then
 		Managers.voice_chat:shutdown()
 	end
 

@@ -2,7 +2,7 @@ require("scripts/utils/input_helper")
 
 DebugKeymap = {}
 DebugInputFilters = {}
-local valid_debug_build = Application.build() == "dev" or Application.build() == "debug"
+local valid_debug_build = BUILD == "dev" or BUILD == "debug"
 local use_synergy = script_data.synergy ~= nil and valid_debug_build
 local keyboard_device = (use_synergy and "synergy_keyboard") or "keyboard"
 local keyboard_keymaps = {

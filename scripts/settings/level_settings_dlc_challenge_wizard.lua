@@ -11,9 +11,8 @@ LevelSettings.dlc_challenge_wizard = {
 	loading_screen_gamemode_prefix = "level_gamemode_prefix_2",
 	loading_screen_gamemode_name = "level_gamemode_defend",
 	level_image = "level_image_dlc_challenge_wizard",
-	dlc_level = true,
+	act = "prologue",
 	boss_spawning_method = "hand_placed",
-	dlc_name = "challenge_wizard",
 	conflict_settings = "challenge",
 	default_surface_material = "stone",
 	knocked_down_setting = "knocked_down",
@@ -76,12 +75,22 @@ LevelSettings.dlc_challenge_wizard = {
 		composition = false
 	},
 	dlc_stat_dependency_func = function (statistics_db, stats_id)
-		return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_challenge_wizard")
+		if PLATFORM ~= "win32" then
+			local title_properties = Managers.backend:get_interface("title_properties")
+			local dlc_challenge_wizard_enabled = title_properties.get_value(title_properties, "dlc_challenge_wizard_enabled")
+
+			return dlc_challenge_wizard_enabled, Localize("map_level_community_tooltip")
+		else
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_challenge_wizard")
+		end
+
+		return 
 	end,
 	map_settings = {
-		area = "ubersreik",
 		sorting = 4,
 		icon = "level_location_long_icon_03",
+		area = "ubersreik",
+		console_sorting = 1,
 		wwise_events = {
 			"nik_map_brief_wizard_tower_01",
 			"nik_map_brief_wizard_tower_02"
@@ -92,5 +101,9 @@ LevelSettings.dlc_challenge_wizard = {
 		}
 	}
 }
+
+if PLATFORM == "ps4" then
+	LevelSettings.dlc_challenge_wizard.level_image = "level_image_any"
+end
 
 return 

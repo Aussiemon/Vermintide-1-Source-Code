@@ -942,6 +942,13 @@ local gamepad_settings_definition = {
 		widget_type = "stepper"
 	},
 	{
+		setup = "cb_gamepad_legacy_controller_input_setup",
+		saved_value = "cb_gamepad_legacy_controller_input_saved_value",
+		callback = "cb_gamepad_legacy_controller_input",
+		tooltip_text = "tooltip_gamepad_legacy_controller_input",
+		widget_type = "stepper"
+	},
+	{
 		setup = "cb_gamepad_look_sensitivity_setup",
 		saved_value = "cb_gamepad_look_sensitivity_saved_value",
 		callback = "cb_gamepad_look_sensitivity",

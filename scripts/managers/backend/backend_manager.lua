@@ -356,7 +356,7 @@ BackendManager._format_error_message_console = function (self, reason, details_m
 
 	if not self.profiles_loaded(self) then
 		if reason == Backend.ERR_AUTH then
-			if Application.platform() == "xb1" then
+			if PLATFORM == "xb1" then
 				return "backend_err_auth_xb1", button
 			else
 				return "backend_err_auth_ps4", button
@@ -411,7 +411,7 @@ BackendManager._show_error_dialog = function (self, reason, details_message)
 	local error_topic = Localize("backend_error_topic")
 	local error_text, button_1, button_2 = nil
 
-	if Application.platform() == "xb1" or Application.platform() == "ps4" then
+	if PLATFORM == "xb1" or PLATFORM == "ps4" then
 		error_text, button_1 = self._format_error_message_console(self, reason, details_message)
 	else
 		error_text, button_1, button_2 = self._format_error_message_windows(self, reason, details_message)
@@ -436,7 +436,7 @@ end
 BackendManager.available = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		if settings.quests_enabled then
 			return rawget(_G, "Backend") ~= nil and rawget(_G, "Steam") ~= nil and self._interfaces.quests:initiated()
 		else

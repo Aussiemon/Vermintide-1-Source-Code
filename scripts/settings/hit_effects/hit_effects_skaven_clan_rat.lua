@@ -687,6 +687,48 @@ HitEffectsSkavenClanRat = {
 			"death_decapitate_6"
 		}
 	},
+	heavy_blunt_burning_smiter_death = {
+		inherits = "default_death",
+		do_dismember = false,
+		extra_conditions = {
+			death = true,
+			damage_type = {
+				"heavy_blunt_burning_smiter"
+			}
+		},
+		animations = {
+			"ragdoll"
+		},
+		push = {
+			distal_force = 20,
+			vertical_force = -150,
+			lateral_force = 0
+		},
+		flow_event = {
+			"burn",
+			"explode_head",
+			"dismember_left_arm",
+			"dismember_right_arm"
+		}
+	},
+	heavy_blunt_burning_smiter_death_leg = {
+		inherits = "heavy_blunt_burning_smiter_death",
+		extra_conditions = {
+			hit_zone = {
+				"left_leg",
+				"right_leg"
+			}
+		},
+		animations = {
+			"ragdoll"
+		},
+		flow_event = {
+			"burn",
+			"explode_head",
+			"dismember_left_leg",
+			"dismember_right_leg"
+		}
+	},
 	heavy_blunt_smiter_death = {
 		inherits = "default_death",
 		do_dismember = false,
@@ -1350,6 +1392,25 @@ HitEffectsSkavenClanRat = {
 			"ragdoll"
 		}
 	},
+	dagger_burning_tank = {
+		inherits = "default_death",
+		do_dismember = false,
+		flow_event = "burn",
+		extra_conditions = {
+			death = true,
+			damage_type = {
+				"dagger_burning_tank"
+			}
+		},
+		animations = {
+			"ragdoll"
+		},
+		push = {
+			distal_force = 100,
+			vertical_force = 70,
+			lateral_force = 0
+		}
+	},
 	burning_tank_death = {
 		inherits = "default_death",
 		do_dismember = false,
@@ -1392,9 +1453,52 @@ HitEffectsSkavenClanRat = {
 			"death_decapitate_6"
 		}
 	},
+	burning_blunt_tank_death = {
+		inherits = "default_death",
+		do_dismember = false,
+		flow_event = "burn",
+		extra_conditions = {
+			death = true,
+			damage_type = {
+				"burning_blunt_tank"
+			}
+		},
+		animations = {
+			"ragdoll",
+			"death_burn",
+			"death_burn_2",
+			"death_burn_3",
+			"death_burn_4",
+			"death_burn_5"
+		},
+		push = {
+			distal_force = 10,
+			vertical_force = 0,
+			lateral_force = 50
+		}
+	},
+	burning_blunt_tank_death_head = {
+		inherits = "burning_blunt_tank_death",
+		flow_event = "explode_head",
+		extra_conditions = {
+			hit_zone = {
+				"neck",
+				"head"
+			}
+		},
+		animations = {
+			"ragdoll",
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
+		}
+	},
 	heavy_burning_tank_death = {
 		inherits = "default_death",
-		do_dismember = true,
+		do_dismember = false,
 		flow_event = "burn",
 		extra_conditions = {
 			death = true,
@@ -1426,6 +1530,48 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll"
+		}
+	},
+	heavy_blunt_burning_tank_death = {
+		inherits = "default_death",
+		do_dismember = false,
+		extra_conditions = {
+			death = true,
+			damage_type = {
+				"heavy_blunt_burning_tank"
+			}
+		},
+		animations = {
+			"ragdoll"
+		},
+		push = {
+			distal_force = 20,
+			vertical_force = 50,
+			lateral_force = 150
+		},
+		flow_event = {
+			"burn",
+			"explode_head",
+			"dismember_left_arm",
+			"dismember_right_arm"
+		}
+	},
+	heavy_blunt_burning_tank_death_leg = {
+		inherits = "heavy_blunt_burning_tank_death",
+		extra_conditions = {
+			hit_zone = {
+				"left_leg",
+				"right_leg"
+			}
+		},
+		animations = {
+			"ragdoll"
+		},
+		flow_event = {
+			"burn",
+			"explode_head",
+			"dismember_left_leg",
+			"dismember_right_leg"
 		}
 	},
 	light_burning_linesman_death = {
@@ -2574,8 +2720,10 @@ HitEffectsSkavenClanRat = {
 		inherits = "default",
 		extra_conditions = {
 			damage_type = {
+				"dagger_burning_tank",
 				"burning_tank",
 				"heavy_burning_tank",
+				"heavy_blunt_burning_smiter",
 				"burning_stab_fencer"
 			}
 		}

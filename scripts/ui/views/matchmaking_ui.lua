@@ -417,7 +417,7 @@ MatchmakingUI.get_input_texture_data = function (self, input_action)
 	local input_manager = self.input_manager
 	local input_service = input_manager.get_service(input_manager, "ingame_menu")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" and gamepad_active then
 		platform = "xb1"

@@ -436,13 +436,15 @@ local unit_templates = {
 	},
 	ai_unit_gutter_runner = {
 		base_template = "ai_unit_base",
-		go_type = "ai_unit_with_inventory",
+		go_type = "ai_unit_gutter_runner",
 		self_owned_extensions = {
+			"AiHeroicEnemyExtension",
 			"AIInventoryExtension",
 			"PingTargetExtension",
 			"EnemyOutlineExtension"
 		},
 		husk_extensions = {
+			"AiHeroicEnemyExtension",
 			"AIInventoryExtension",
 			"PingTargetExtension",
 			"EnemyOutlineExtension"

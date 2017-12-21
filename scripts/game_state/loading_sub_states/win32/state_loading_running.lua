@@ -43,7 +43,7 @@ StateLoadingRunning._init_network = function (self)
 			self.parent:setup_chat_manager(lobby_client, lobby_client.lobby_host(lobby_client), Network.peer_id(), false)
 		end
 
-		if loading_context.start_lobby_data.initialize_voip and Application.platform() == "xb1" and Managers.account:has_privilege(UserPrivilege.COMMUNICATION_VOICE_INGAME) then
+		if loading_context.start_lobby_data.initialize_voip and PLATFORM == "xb1" and Managers.account:has_privilege(UserPrivilege.COMMUNICATION_VOICE_INGAME) then
 			if not Managers.voice_chat then
 				Managers.voice_chat = VoiceChatXboxOneManager:new()
 			elseif Managers.voice_chat then
@@ -69,7 +69,7 @@ StateLoadingRunning._init_network = function (self)
 	return 
 end
 StateLoadingRunning.update = function (self, dt)
-	if Application.platform() == "xb1" and self.parent:waiting_for_cleanup() then
+	if PLATFORM == "xb1" and self.parent:waiting_for_cleanup() then
 		return 
 	end
 

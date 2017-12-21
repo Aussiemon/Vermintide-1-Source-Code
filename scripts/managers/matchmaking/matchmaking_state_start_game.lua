@@ -81,7 +81,7 @@ MatchmakingStateStartGame.start_game = function (self)
 
 	Managers.telemetry.events:matchmaking_starting_game(player, nr_friends)
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		local statistics_db = self.statistics_db
 		local state_context = self.state_context
 		local game_search_data = state_context.game_search_data

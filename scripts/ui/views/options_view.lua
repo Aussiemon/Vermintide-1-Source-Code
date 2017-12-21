@@ -202,7 +202,7 @@ OptionsView.init = function (self, ingame_ui_context)
 	self.render_settings = {
 		snap_pixel_positions = true
 	}
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	local input_manager = ingame_ui_context.input_manager
 
 	input_manager.create_input_service(input_manager, "options_menu", "IngameMenuKeymaps", "IngameMenuFilters")
@@ -529,7 +529,7 @@ OptionsView.create_ui_elements = function (self)
 	}
 	local settings_lists = {}
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		if rawget(_G, "Tobii") then
 			settings_lists.tobii_eyetracking_settings = self.build_settings_list(self, settings_definitions.tobii_settings_definition, "tobii_eyetracking_settings_list")
 		end
@@ -802,7 +802,7 @@ OptionsView.clear_gamepad_layout_widget = function (self)
 	widget_content.background2 = background2_texture
 	widget_content.saved_value_cb = saved_value_cb
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local gamepad_use_ps4_style_input_icons = assigned(self.changed_user_settings.gamepad_use_ps4_style_input_icons, Application.user_setting("gamepad_use_ps4_style_input_icons"))
 		widget_content.use_texture2_layout = gamepad_use_ps4_style_input_icons
 	end
@@ -1140,9 +1140,29 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		end
 	end
 
+	local char_texture_quality = user_settings.char_texture_quality
+
+	if char_texture_quality then
+		local char_texture_settings = TextureQuality.characters[char_texture_quality]
+
+		for id, setting in ipairs(char_texture_settings) do
+			Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
+		end
+	end
+
+	local env_texture_quality = user_settings.env_texture_quality
+
+	if env_texture_quality then
+		local char_texture_settings = TextureQuality.environment[env_texture_quality]
+
+		for id, setting in ipairs(char_texture_settings) do
+			Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
+		end
+	end
+
 	local save_error_code, error_path = nil
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		save_error_code, error_path = Application.save_user_settings()
 		save_error_code = save_error_code and ((0 < save_error_code and save_error_code) or nil)
 	else
@@ -1150,27 +1170,7 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 	end
 
 	if not save_error_code then
-		local char_texture_quality = user_settings.char_texture_quality
-
-		if char_texture_quality then
-			local char_texture_settings = TextureQuality.characters[char_texture_quality]
-
-			for id, setting in ipairs(char_texture_settings) do
-				Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
-			end
-		end
-
-		local env_texture_quality = user_settings.env_texture_quality
-
-		if env_texture_quality then
-			local char_texture_settings = TextureQuality.environment[env_texture_quality]
-
-			for id, setting in ipairs(char_texture_settings) do
-				Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
-			end
-		end
-
-		if Application.platform() == "win32" then
+		if PLATFORM == "win32" then
 			local max_fps = user_settings.max_fps
 
 			if max_fps then
@@ -1236,8 +1236,10 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		if voip_bus_volume then
 			self.voip:set_volume(voip_bus_volume)
 
-			if Application.platform() == "xb1" then
+			if PLATFORM == "xb1" then
 				Managers.voice_chat:set_chat_volume(voip_bus_volume)
+			else
+				self.voip:set_volume(voip_bus_volume)
 			end
 		end
 
@@ -1246,8 +1248,10 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		if voip_enabled ~= nil then
 			self.voip:set_enabled(voip_enabled)
 
-			if Application.platform() == "xb1" then
+			if PLATFORM == "xb1" then
 				Managers.voice_chat:set_enabled(voip_enabled)
+			else
+				self.voip:set_enabled(voip_enabled)
 			end
 		end
 
@@ -1399,16 +1403,16 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 			local look_filter = input_filters.look_controller
 			local function_data = look_filter.function_data
-			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			function_data.inverted_y = gamepad_look_invert_y
 			local look_filter = input_filters.look_controller_melee
 			local function_data = look_filter.function_data
-			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			function_data.inverted_y = gamepad_look_invert_y
 			local look_filter = input_filters.look_controller_ranged
 			local function_data = look_filter.function_data
-			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			function_data.inverted_y = gamepad_look_invert_y
 			local look_filter = input_filters.look_controller_zoom
 			local function_data = look_filter.function_data
-			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			function_data.inverted_y = gamepad_look_invert_y
 		end
 
 		local gamepad_use_ps4_style_input_icons = user_settings.gamepad_use_ps4_style_input_icons
@@ -1659,7 +1663,7 @@ OptionsView.apply_keymap_changes = function (self, keymaps_data, save_keymaps)
 	end
 
 	if save_keymaps then
-		if Application.platform() == "win32" then
+		if PLATFORM == "win32" then
 			Managers.save:auto_save(SaveFileName, SaveData)
 		else
 			Managers.save:auto_save(SaveFileName, SaveData, callback(self, "cb_save_done"))
@@ -1695,7 +1699,7 @@ OptionsView._apply_keybinding_changes = function (self, keybinding_table_name, k
 			assert(device, "[OptionsView] - Trying to keybind unrecognized device for action %s in keybinds %s, %s", action, keybinding_table_name, keybinding_table_key)
 		end
 
-		input_manager.change_keybinding(input_manager, keybinding_table_name, keybinding_table_key, action, button_index, device)
+		input_manager.change_keybinding(input_manager, keybinding_table_name, keybinding_table_key, action, button_index, device, input_type)
 	else
 		input_manager.clear_keybinding(input_manager, keybinding_table_name, keybinding_table_key, action)
 	end
@@ -2070,7 +2074,7 @@ OptionsView.update_apply_button = function (self)
 	return 
 end
 OptionsView.handle_apply_changes = function (self)
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		self._handle_apply_changes(self)
 	else
 		Managers.transition:show_loading_icon()
@@ -4253,7 +4257,7 @@ OptionsView.cb_motion_blur = function (self, content, called_from_graphics_quali
 	local value = content.options_values[content.current_selection]
 	self.changed_render_settings.motion_blur_enabled = value
 
-	if Application.platform() == "win32" and not called_from_graphics_quality then
+	if PLATFORM == "win32" and not called_from_graphics_quality then
 		self.force_set_widget_value(self, "graphics_quality_settings", "custom")
 	end
 
@@ -4978,7 +4982,7 @@ OptionsView.cb_max_upload_speed_setup = function (self)
 		},
 		{
 			value = 2048,
-			text = Localize("menu_settings_2mbit+")
+			text = Localize("menu_settings_2mbit")
 		}
 	}
 	local default_value = DefaultUserSettings.get("user_settings", "max_upload_speed")
@@ -5071,16 +5075,16 @@ OptionsView.cb_gamepad_look_invert_y_setup = function (self)
 	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller
 	local function_data = look_filter.function_data
-	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+	function_data.inverted_y = invert_gamepad_y
 	local look_filter = input_filters.look_controller_ranged
 	local function_data = look_filter.function_data
-	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+	function_data.inverted_y = invert_gamepad_y
 	local look_filter = input_filters.look_controller_melee
 	local function_data = look_filter.function_data
-	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+	function_data.inverted_y = invert_gamepad_y
 	local look_filter = input_filters.look_controller_zoom
 	local function_data = look_filter.function_data
-	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+	function_data.inverted_y = invert_gamepad_y
 	local selection = (invert_gamepad_y and 2) or 1
 	local default_option = (default_value and 2) or 1
 
@@ -5096,6 +5100,52 @@ OptionsView.cb_gamepad_look_invert_y = function (self, content)
 	local options_values = content.options_values
 	local current_selection = content.current_selection
 	self.changed_user_settings.gamepad_look_invert_y = options_values[current_selection]
+
+	return 
+end
+OptionsView.cb_gamepad_legacy_controller_input_setup = function (self)
+	local options = {
+		{
+			value = false,
+			text = Localize("menu_settings_off")
+		},
+		{
+			value = true,
+			text = Localize("menu_settings_on")
+		}
+	}
+	local default_value = DefaultUserSettings.get("user_settings", "gamepad_legacy_controller") or false
+	local gamepad_legacy_controller = Application.user_setting("gamepad_legacy_controller")
+	local input_service = self.input_manager:get_service("Player")
+	local platform_key = (self.platform == "win32" and "xb1") or self.platform
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
+	local look_filter = input_filters.look_controller
+	local function_data = look_filter.function_data
+	function_data.filter_type = (gamepad_legacy_controller and "scale_vector3_xy_accelerated_x_legacy") or "scale_vector3_xy_accelerated_x"
+	local look_filter = input_filters.look_controller_ranged
+	local function_data = look_filter.function_data
+	function_data.filter_type = (gamepad_legacy_controller and "scale_vector3_xy_accelerated_x_legacy") or "scale_vector3_xy_accelerated_x"
+	local look_filter = input_filters.look_controller_melee
+	local function_data = look_filter.function_data
+	function_data.filter_type = (gamepad_legacy_controller and "scale_vector3_xy_accelerated_x_legacy") or "scale_vector3_xy_accelerated_x"
+	local look_filter = input_filters.look_controller_zoom
+	local function_data = look_filter.function_data
+	function_data.filter_type = (gamepad_legacy_controller and "scale_vector3_xy_accelerated_x_legacy") or "scale_vector3_xy_accelerated_x"
+	local selection = (gamepad_legacy_controller and 2) or 1
+	local default_option = (default_value and 2) or 1
+
+	return selection, options, "legacy_controls_xb1", default_option
+end
+OptionsView.cb_gamepad_legacy_controller_input_saved_value = function (self, widget)
+	local gamepad_legacy_controller = assigned(self.changed_user_settings.gamepad_legacy_controller, Application.user_setting("gamepad_legacy_controller")) or false
+	widget.content.current_selection = (gamepad_legacy_controller and 2) or 1
+
+	return 
+end
+OptionsView.cb_gamepad_legacy_controller_input = function (self, content)
+	local options_values = content.options_values
+	local current_selection = content.current_selection
+	self.changed_user_settings.gamepad_legacy_controller = options_values[current_selection]
 
 	return 
 end
@@ -5782,10 +5832,10 @@ OptionsView.cb_voip_bus_volume = function (self, content)
 	local value = content.value
 	self.changed_user_settings.voip_bus_volume = value
 
-	self.voip:set_volume(value)
-
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.voice_chat:set_chat_volume(value)
+	else
+		self.voip:set_volume(value)
 	end
 
 	return 
@@ -5812,7 +5862,7 @@ OptionsView.cb_voip_enabled_setup = function (self)
 		self.voip:set_enabled(voip_enabled)
 	end
 
-	if Application.platform() == "xb1" and Managers.voice_chat then
+	if PLATFORM == "xb1" and Managers.voice_chat then
 		Managers.voice_chat:set_enabled(voip_enabled)
 	end
 
@@ -5857,10 +5907,10 @@ OptionsView.cb_voip_enabled = function (self, content)
 	local value = content.options_values[content.current_selection]
 	self.changed_user_settings.voip_is_enabled = value
 
-	self.voip:set_enabled(value)
-
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.voice_chat:set_enabled(value)
+	else
+		self.voip:set_enabled(value)
 	end
 
 	return 
@@ -6999,7 +7049,7 @@ OptionsView.cb_keybind_saved_value = function (self, widget)
 
 	local controller_type = actions_info[1].keybind[1]
 	local mapped_key = actions_info[1].keybind[2]
-	widget.content.selected_key = get_button_locale_name(controller_type, mapped_key)
+	widget.content.selected_key = (mapped_key == "left button **" and "") or get_button_locale_name(controller_type, mapped_key)
 	widget.content.mapped_key = mapped_key
 	widget.content.actions_info = actions_info
 
@@ -7054,7 +7104,7 @@ OptionsView.cb_keybind_changed = function (self, new_key, device, content)
 	end
 
 	self.changed_keymaps = true
-	content.selected_key = get_button_locale_name(device, new_key)
+	content.selected_key = (new_key == "left button **" and "") or get_button_locale_name(device, new_key)
 
 	return 
 end

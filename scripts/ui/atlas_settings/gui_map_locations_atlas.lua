@@ -6,6 +6,20 @@ map_locations_atlas = {
 		},
 		uv00 = {
 			0.000488,
+			0.753418
+		},
+		uv11 = {
+			0.335938,
+			0.940674
+		}
+	},
+	map_karak_azgaraz = {
+		size = {
+			1374,
+			767
+		},
+		uv00 = {
+			0.000488,
 			0.565186
 		},
 		uv11 = {
@@ -13,7 +27,7 @@ map_locations_atlas = {
 			0.752441
 		}
 	},
-	map_karak_azgaraz = {
+	map_last_stand = {
 		size = {
 			1374,
 			767
@@ -27,7 +41,7 @@ map_locations_atlas = {
 			0.564209
 		}
 	},
-	map_last_stand = {
+	map_reikwald = {
 		size = {
 			1374,
 			767

@@ -1,3 +1,5 @@
+local_require("scripts/ui/ui_widgets")
+
 local MAXIMUM_TIP_WIDTH = 1400
 local ICON_SIZE = {
 	26,

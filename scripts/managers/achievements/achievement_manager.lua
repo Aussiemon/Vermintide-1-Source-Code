@@ -164,7 +164,7 @@ AchievementManager.init = function (self, world, statistics_db)
 	self.in_progress = {}
 	self.hero_stat_table = {}
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		self.completed_achievements = Managers.account:get_unlocked_achievement_list()
 	else
 		self.completed_achievements = {}
@@ -172,7 +172,7 @@ AchievementManager.init = function (self, world, statistics_db)
 
 	self.next_achievement_to_process_index = 1
 	self.initialized_achievements = false
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local use_debug_platform = Development.parameter("achievement_debug_platform")
 
 	if platform == "win32" or platform == "win64" then
@@ -408,7 +408,7 @@ AchievementManager.reset = function (self)
 
 	platform_functions.reset()
 
-	if Application.platform() ~= "xb1" then
+	if PLATFORM ~= "xb1" then
 		self.completed_achievements = {}
 	end
 
@@ -465,7 +465,7 @@ AchievementManager.debug_draw = function (self)
 	return 
 end
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	AchievementManager.initialize_hero_stats = function (self)
 		table.clear(self.hero_stat_table)
 

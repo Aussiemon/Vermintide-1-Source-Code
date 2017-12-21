@@ -153,6 +153,20 @@ DialogueSettings.level_specific_load_files = {
 	},
 	dlc_challenge_wizard = {
 		"dialogues/generated/dlc_challenge_wizard"
+	},
+	dlc_reikwald_forest = {
+		"dialogues/generated/witch_hunter_reikwald_forest",
+		"dialogues/generated/empire_soldier_reikwald_forest",
+		"dialogues/generated/wood_elf_reikwald_forest",
+		"dialogues/generated/bright_wizard_reikwald_forest",
+		"dialogues/generated/dwarf_ranger_reikwald_forest"
+	},
+	dlc_reikwald_river = {
+		"dialogues/generated/witch_hunter_reikwald_river",
+		"dialogues/generated/empire_soldier_reikwald_river",
+		"dialogues/generated/wood_elf_reikwald_river",
+		"dialogues/generated/bright_wizard_reikwald_river",
+		"dialogues/generated/dwarf_ranger_reikwald_river"
 	}
 }
 

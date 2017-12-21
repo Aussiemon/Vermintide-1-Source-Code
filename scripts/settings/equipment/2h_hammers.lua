@@ -345,7 +345,7 @@ weapon_template.actions = {
 		light_attack_left = {
 			damage_window_start = 0.3,
 			anim_time_scale = 1,
-			range_mod = 1.3,
+			range_mod = 1.35,
 			kind = "sweep",
 			first_person_hit_anim = "attack_hit",
 			no_damage_impact_sound_event = "blunt_hit_armour",
@@ -429,7 +429,7 @@ weapon_template.actions = {
 		},
 		light_attack_right = {
 			damage_window_start = 0.35,
-			range_mod = 1.3,
+			range_mod = 1.35,
 			anim_time_scale = 1,
 			kind = "sweep",
 			first_person_hit_anim = "attack_hit",

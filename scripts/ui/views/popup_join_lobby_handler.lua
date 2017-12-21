@@ -1197,7 +1197,7 @@ end
 PopupJoinLobbyHandler.update_lobby_data = function (self, lobby_data)
 	self.lobby_data = lobby_data
 
-	if Application.platform() == "win32" and not Managers.input:is_device_active("gamepad") then
+	if PLATFORM == "win32" and not Managers.input:is_device_active("gamepad") then
 		self.set_selected_hero(self, self.selected_hero_name)
 	else
 		self._update_controller_input_description(self)

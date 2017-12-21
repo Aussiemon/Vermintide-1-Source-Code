@@ -1,4 +1,5 @@
 require("scripts/managers/backend/statistics_util")
+require("scripts/settings/breeds")
 
 StatisticsDefinitions = {
 	session = {
@@ -277,6 +278,13 @@ StatisticsDefinitions = {
 			value = 0,
 			database_name = "executor_headshot"
 		},
+		equipped_ceremonial_daggers = {
+			value = 0
+		},
+		ceremonial_dagger_burn = {
+			value = 0,
+			database_name = "ceremonial_dagger_burn"
+		},
 		event_items_found = {
 			value = 0
 		},
@@ -295,7 +303,7 @@ for _, difficulty_name in ipairs(SurvivalDifficulties) do
 	}
 end
 
-local platform = Application.platform()
+local platform = PLATFORM
 
 if platform == "ps4" then
 	StatisticsDefinitions.player.matchmaking_unix_timestamp = {
@@ -377,6 +385,13 @@ if platform == "ps4" then
 	StatisticsDefinitions.player.matchmaking_first_client_joined_total_time = {
 		value = 0,
 		database_name = "matchmaking_first_client_joined_total_time"
+	}
+end
+
+if platform ~= "win32" then
+	StatisticsDefinitions.player.total_kills_consoles = {
+		value = 0,
+		database_name = "total_kills_consoles"
 	}
 end
 

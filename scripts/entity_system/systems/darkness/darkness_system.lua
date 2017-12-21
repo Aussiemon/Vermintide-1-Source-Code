@@ -13,9 +13,24 @@ DarknessSystem.init = function (self, entity_system_creation_context, system_nam
 	self._light_source_data = {}
 	self._player_unit_darkness_data = {}
 	local level_settings = LevelHelper:current_level_settings()
-	local volumes = level_settings.darkness_volumes
-	self._darkness_volumes = volumes
-	self._num_volumes = volumes and #volumes
+	local darkness_settings = level_settings.darkness_settings
+
+	if darkness_settings then
+		local volumes = darkness_settings.volumes
+
+		assert(volumes, "Missing volumes table in darkness settings.")
+
+		self._darkness_volumes = volumes
+		self._num_volumes = #volumes
+		local local_player_light_intensity = darkness_settings.local_player_light_intensity
+
+		if local_player_light_intensity then
+			self.set_local_players_light_intensity(self, local_player_light_intensity)
+		end
+	else
+		self._num_volumes = 0
+	end
+
 	self._in_darkness = false
 	self._screen_fx_name = "fx/screenspace_darkness_flash"
 	self._global_darkness = false

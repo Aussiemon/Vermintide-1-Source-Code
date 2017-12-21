@@ -137,6 +137,7 @@ PlayerBotBase.extensions_ready = function (self, world, unit)
 	self._health_extension = health_ext
 	self._status_extension = status_ext
 	self._locomotion_extension = locomotion_ext
+	self._navigation_extension = nav_ext
 	blackboard.input_extension = input_ext
 	blackboard.inventory_extension = inventory_ext
 	blackboard.navigation_extension = nav_ext
@@ -165,9 +166,6 @@ PlayerBotBase._init_brain = function (self)
 	self._brain = AIBrain:new(self._world, self._unit, self._blackboard, self._bot_profile, self._bot_profile.behavior)
 
 	return 
-end
-PlayerBotBase.navigation = function (self)
-	return self._navigation
 end
 PlayerBotBase.brain = function (self)
 	return self._brain
@@ -213,7 +211,9 @@ PlayerBotBase.update = function (self, unit, input, dt, context, t)
 
 		local is_disabled = status_extension.is_disabled(status_extension)
 
-		if not is_disabled then
+		if is_disabled then
+			self._navigation_extension:teleport(POSITION_LOOKUP[unit])
+		else
 			Profiler.start("update movement target")
 			self._update_movement_target(self, dt, t)
 			Profiler.stop("update movement target")

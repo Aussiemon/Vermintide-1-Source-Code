@@ -22,7 +22,7 @@ StateMapViewSelectArea.on_enter = function (self, params)
 		snap_pixel_positions = true
 	}
 	self._map_view = params.map_view
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.ui_animations = {}
 	local input_service = self.input_manager:get_service("map_menu")
 	local gui_layer = UILayer.default + 30

@@ -86,7 +86,7 @@ AIMeleeLineOfSightSystem.update = function (self, context, t)
 		return 
 	end
 
-	local is_win32 = Application.platform() == Application.WIN32
+	local is_win32 = PLATFORM == Application.WIN32
 	local MAX_RAYCASTS = (is_win32 and 10) or 2
 	local MAX_DIST_SQUARED = 36
 	local BENEATH_ABOVE_EPSILON = 0.1

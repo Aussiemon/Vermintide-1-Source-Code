@@ -53,15 +53,43 @@ function force_render(dt)
 	return 
 end
 
+Boot.pre_state_machine_update = function (self, dt)
+	local mods_loaded = nil
+
+	if Managers.mod then
+		Managers.mod:update(dt)
+
+		mods_loaded = Managers.mod:state() == "done"
+	else
+		mods_loaded = true
+	end
+
+	if mods_loaded then
+		Bulldozer:_init_managers()
+
+		local state_machine_class, start_state, params = Bulldozer.entrypoint()
+
+		self._setup_statemachine(self, state_machine_class, start_state, params)
+
+		Boot.has_pre_state_machine_update = nil
+	end
+
+	return 
+end
 Boot.update = function (self, dt)
 	if PlayerUnitLocomotionExtension then
 		PlayerUnitLocomotionExtension.set_new_frame()
+	end
+
+	if Managers.mod then
+		Managers.mod:update(dt)
 	end
 
 	UPDATE_RESOLUTION_LOOKUP()
 	Managers.perfhud:update(dt)
 	Managers.debug_updator:update(dt)
 	Boot:foundation_update(dt)
+	Managers.curl:update(true)
 	Managers.news_ticker:update(dt)
 	Managers.transition:update(dt)
 
@@ -94,7 +122,7 @@ Boot.update = function (self, dt)
 		Managers.beta_overlay:update(dt)
 	end
 
-	if (Application.build() == "dev" or Application.build() == "debug") and SynergyMouse.connected() then
+	if (BUILD == "dev" or BUILD == "debug") and SynergyMouse.connected() then
 		print("[Boot] SynergyMouse enabled")
 	end
 
@@ -117,7 +145,7 @@ Bulldozer = Bulldozer or {}
 function project_setup()
 	Bulldozer:setup()
 
-	return Bulldozer.entrypoint()
+	return 
 end
 
 Bulldozer.setup = function (self)
@@ -203,7 +231,7 @@ Bulldozer.setup = function (self)
 		print("[Boot] Link to build log:", build_url)
 	end
 
-	print("[Boot] Application build:", Application.build())
+	print("[Boot] Application build:", BUILD)
 	print("[Boot] Engine revision:", script_data.build_identifier)
 	print("[Boot] Content revision:", script_data.settings.content_revision)
 
@@ -250,14 +278,20 @@ Bulldozer.setup = function (self)
 
 	self._init_random(self)
 	self._init_mouse(self)
-	self._init_managers(self)
-	require("scripts/ui/views/ingame_ui")
 
 	if rawget(_G, "Steam") then
 		print("[Boot] User ID:", Steam.user_id(), Steam.user_name())
 	end
 
-	if (Application.build() == "dev" or Application.build() == "debug") and Development.parameter("synergy") then
+	local is_dev_debug = BUILD == "dev" or BUILD == "debug"
+
+	if is_dev_debug then
+		Window.set_resizable(true)
+	else
+		Window.set_resizable(false)
+	end
+
+	if is_dev_debug and Development.parameter("synergy") then
 		print("[Boot] Connecting to Synergy")
 
 		local resx, resy = Application.resolution()
@@ -267,10 +301,15 @@ Bulldozer.setup = function (self)
 		Synergy.connect(synergy_settings.ip, synergy_settings.client_name, resx, resy)
 	end
 
-	if Application.build() == "dev" or Application.build() == "debug" then
-		Window.set_resizable(true)
-	else
-		Window.set_resizable(false)
+	self._init_localization_manager(self)
+	require("scripts/ui/views/ingame_ui")
+	require("scripts/ui/views/end_of_level_ui")
+	require("scripts/ui/views/title_loading_ui")
+	require("scripts/network_lookup/network_lookup")
+	parse_item_master_list()
+
+	if PLATFORM == "win32" then
+		Managers.mod = ModManager:new()
 	end
 
 	return 
@@ -311,18 +350,15 @@ Bulldozer._require_scripts = function (self)
 	Managers.package:load("backend/local_backend/local_backend", "boot")
 	Managers.package:load("resource_packages/level_scripts", "boot")
 	foundation_require("managers", "localization/localization_manager", "event/event_manager")
-	game_require("utils", "assert", "patches", "script_unit", "colors", "table", "random_table", "global_utils", "function_call_stats")
-	game_require("settings", "game_settings_development", "controller_settings", "default_user_settings", "synergy_settings")
-	game_require("game_state", "state_context")
+	foundation_require("util", "local_require")
+	game_require("utils", "assert", "patches", "script_unit", "colors", "table", "random_table", "global_utils", "function_call_stats", "util", "loaded_dice", "script_application", "script_world")
+	game_require("ui", "views/show_cursor_stack", "ui_fonts")
+	game_require("settings", "equipment/item_master_list", "game_settings_development", "controller_settings", "default_user_settings", "synergy_settings")
 	game_require("entity_system", "entity_system")
-	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "popup/simple_popup", "light_fx/light_fx_manager", "play_go/play_go_manager", "controller_features/controller_features_manager", "leaderboards/leaderboard_manager", "telemetry/telemetry_create")
+	game_require("game_state", "game_state_machine", "state_context", "state_splash_screen", "state_loading", "state_ingame")
+	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "popup/simple_popup", "light_fx/light_fx_manager", "play_go/play_go_manager", "controller_features/controller_features_manager", "leaderboards/leaderboard_manager", "mod/mod_manager", "curl/curl_manager", "telemetry/telemetry_create")
 	game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 	game_require("network", "unit_spawner", "unit_storage", "network_unit")
-	game_require("utils", "table")
-	game_require("utils", "util")
-	game_require("utils", "loaded_dice")
-	game_require("utils", "script_application")
-	game_require("utils", "script_world")
 
 	return 
 end
@@ -404,14 +440,13 @@ Bulldozer._init_mouse = function (self)
 	return 
 end
 Bulldozer._init_managers = function (self)
-	self._setup_macros(self)
-	parse_item_master_list()
+	print("init managers")
 
 	Managers.save = SaveManager:new(script_data.settings.disable_cloud_save)
 
 	self._init_backend(self)
 
-	if Application.platform() ~= "win32" then
+	if PLATFORM ~= "win32" then
 		Managers.splitscreen = SplitscreenTester:new()
 	end
 
@@ -420,6 +455,7 @@ Bulldozer._init_managers = function (self)
 	Managers.music = MusicManager:new()
 	Managers.transition = TransitionManager:new()
 	Managers.play_go = PlayGoManager:new()
+	Managers.curl = CurlManager:new()
 	Managers.telemetry = CreateTelemetryManager()
 	Managers.player = PlayerManager:new()
 	Managers.free_flight = FreeFlightManager:new()
@@ -441,7 +477,7 @@ Bulldozer._init_backend = function (self)
 	return 
 end
 Bulldozer._load_user_settings = function (self)
-	if Application.platform() ~= "win32" then
+	if PLATFORM ~= "win32" then
 		return 
 	end
 
@@ -473,7 +509,7 @@ Bulldozer._init_localizer = function (self)
 
 	return 
 end
-Bulldozer._setup_macros = function (self)
+Bulldozer._init_localization_manager = function (self)
 	Managers.localizer = LocalizationManager:new("localization/game")
 
 	local function tweak_parser(tweak_name)
@@ -566,6 +602,10 @@ Bulldozer.entrypoint = function (self)
 
 	print("[Boot] use baked enemy meshes:", script_data.use_optimized_breed_units, " package: ", breed_package)
 
+	local params = {
+		notify_mod_manager = true
+	}
+
 	if GameSettingsDevelopment.start_state == "game" then
 		local ingame_package = (LEVEL_EDITOR_TEST and "resource_packages/ingame_light") or "resource_packages/ingame"
 
@@ -585,7 +625,7 @@ Bulldozer.entrypoint = function (self)
 
 		require("scripts/game_state/state_splash_screen")
 
-		return StateSplashScreen
+		return GameStateMachine, StateSplashScreen, params
 	elseif GameSettingsDevelopment.start_state == "menu" then
 		Boot.loading_context = {
 			show_splash_screens = true
@@ -594,13 +634,13 @@ Bulldozer.entrypoint = function (self)
 		Managers.package:load(breed_package, "global")
 		require("scripts/game_state/state_splash_screen")
 
-		return StateSplashScreen
+		return GameStateMachine, StateSplashScreen, params
 	end
 
-	return StateSplashScreen
+	return GameStateMachine, StateSplashScreen, params
 end
 script_data = script_data or {}
 __dgaa = 11.59
-__dgaa = 12.44
+__dgaa = 12.29
 
 return 

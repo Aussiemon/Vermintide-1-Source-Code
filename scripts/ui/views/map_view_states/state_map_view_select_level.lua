@@ -27,7 +27,7 @@ StateMapViewSelectLevel.on_enter = function (self, params)
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.level_filter = params.level_filter
 	self.wwise_world = ingame_ui_context.dialogue_system.wwise_world
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.open = true
 	self._filter_unplayable_path = "filter_unplayable"
 
@@ -1265,8 +1265,9 @@ StateMapViewSelectLevel._show_store_page = function (self, dlc_name)
 		end
 	elseif self.platform == "xb1" then
 		local user_id = Managers.account:user_id()
+		local product_id = Managers.unlock:dlc_id(dlc_name)
 
-		XboxLive.show_marketplace(user_id)
+		XboxLive.show_product_details(user_id, product_id)
 	elseif self.platform == "ps4" then
 		local user_id = Managers.account:user_id()
 		local product_label = Managers.unlock:ps4_dlc_product_label(dlc_name)

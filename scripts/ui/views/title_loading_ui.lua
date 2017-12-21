@@ -897,7 +897,7 @@ end
 
 TitleLoadingUI = class(TitleLoadingUI)
 TitleLoadingUI.init = function (self, world, params, force_done)
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		Application.set_time_step_policy("no_smoothing", "clear_history", "throttle", 60)
 	end
 
@@ -983,7 +983,7 @@ TitleLoadingUI.setup_gamma_menu = function (self)
 	gamma_adjuster.content.gamepad_accept_icon = texture_data.texture
 	self._ui_scenegraph.console_input_icon_2.size[1] = texture_data.size[1]
 	self._ui_scenegraph.console_input_icon_2.size[2] = texture_data.size[2]
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local texture_data, input_text = ButtonTextureByName("d_horizontal", (platform == "win32" and "xb1") or platform)
 	gamma_adjuster.content.gamepad_navigation_icon = texture_data.texture
 	self._ui_scenegraph.console_input_icon_1.size[1] = texture_data.size[1]
@@ -1025,20 +1025,20 @@ TitleLoadingUI._update_gamma_adjuster = function (self, dt)
 		self._done_button.content.button_hotspot.on_release = nil
 		local gamma = gamma_adjuster_content.value
 
-		if Application.platform() == "win32" then
+		if PLATFORM == "win32" then
 			Application.set_user_setting("render_settings", "gamma", gamma)
 			Application.save_user_settings()
 
 			SaveData.gamma_corrected = true
 
 			Managers.save:auto_save(SaveFileName, SaveData)
-		elseif Application.platform() == "xb1" then
+		elseif PLATFORM == "xb1" then
 			Application.set_user_setting("render_settings", "gamma", gamma)
 
 			SaveData.gamma_corrected = true
 
 			Managers.save:auto_save(SaveFileName, SaveData)
-		elseif Application.platform() == "ps4" then
+		elseif PLATFORM == "ps4" then
 			Application.set_user_setting("render_settings", "gamma", gamma)
 
 			SaveData.gamma_corrected = true
@@ -1125,7 +1125,7 @@ TitleLoadingUI._get_input_texture_data = function (self, input_action)
 	local input_service = Managers.input:get_service("title_loading_ui")
 
 	if Managers.input:is_device_active("keyboard") or Managers.input:is_device_active("mouse") then
-		local platform = Application.platform()
+		local platform = PLATFORM
 		local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
 		local device_type = keymap_binding[1]
 		local key_index = keymap_binding[2]
@@ -1361,7 +1361,7 @@ TitleLoadingUI.destroy = function (self)
 	Managers.music:stop_all_sounds()
 	UIRenderer.destroy(self._ui_renderer, self._world)
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local max_fps = Application.user_setting("max_fps")
 
 		if max_fps == nil or max_fps == 0 then

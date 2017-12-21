@@ -29,7 +29,7 @@ StateMapViewStart.on_enter = function (self, params)
 	}
 	self._map_view = params.map_view
 	self.difficulty_manager = Managers.state.difficulty
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.ui_animations = {}
 	local player_manager = Managers.player
 	local local_player = player_manager.local_player(player_manager)
@@ -55,7 +55,7 @@ StateMapViewStart.on_enter = function (self, params)
 	self._map_view:animate_title_text(self._title_text_widget)
 	self._map_view:set_mask_enabled(true)
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		local region = Managers.account:region()
 		local matchmaking_region = Application.user_setting("matchmaking_region")
 		local matchmaking_region_not_set = matchmaking_region == nil or matchmaking_region == "auto"
@@ -77,11 +77,11 @@ StateMapViewStart._get_start_difficulty_rank = function (self, saved_rank, game_
 			local closest_difficulty_rank = self._get_closest_unlocked_rank(self, saved_rank, difficulty_data)
 			local highest_difficulty_rank = self._get_highest_unlocked_rank(self, difficulty_data)
 
-			if not highest_difficulty_rank_total or highest_difficulty_rank_total < highest_difficulty_rank then
+			if not highest_difficulty_rank_total or (highest_difficulty_rank and highest_difficulty_rank_total < highest_difficulty_rank) then
 				highest_difficulty_rank_total = highest_difficulty_rank
 			end
 
-			if not closest_difficulty_rank_total or math.abs(closest_difficulty_rank - saved_rank) < math.abs(closest_difficulty_rank_total - saved_rank) then
+			if not closest_difficulty_rank_total or (closest_difficulty_rank and math.abs(closest_difficulty_rank - saved_rank) < math.abs(closest_difficulty_rank_total - saved_rank)) then
 				closest_difficulty_rank_total = closest_difficulty_rank
 			end
 		end
@@ -400,7 +400,7 @@ StateMapViewStart._handle_input = function (self, dt, t)
 			local return_to_game = not self.parent.ingame_ui.menu_active
 
 			self.parent:exit(return_to_game)
-		elseif Application.platform() == "ps4" and GameSettingsDevelopment.lobby_browser_enabled and input_service.get(input_service, "refresh") then
+		elseif PLATFORM == "ps4" and GameSettingsDevelopment.lobby_browser_enabled and input_service.get(input_service, "refresh") then
 			self.parent:exit(nil, "lobby_browser_view")
 		elseif self._selection_index and self._selection_index == 1 then
 			if input_service.get(input_service, "confirm") then

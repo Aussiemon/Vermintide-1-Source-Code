@@ -644,6 +644,28 @@ UIPasses.texture_uv = {
 		local texture = ui_content[pass_definition.texture_id or "texture_id"]
 		local color = ui_style.color
 
+		if ui_style then
+			local texture_size = ui_style.texture_size
+
+			if texture_size then
+				if ui_style.horizontal_alignment == "right" then
+					position[1] = (position[1] + size[1]) - texture_size[1]
+				elseif ui_style.horizontal_alignment == "center" then
+					position[1] = position[1] + (size[1] - texture_size[1])/2
+				end
+
+				local inv_scale = RESOLUTION_LOOKUP.inv_scale
+
+				if ui_style.vertical_alignment == "center" then
+					position[2] = position[2] + (size[2] - texture_size[2])/2
+				elseif ui_style.vertical_alignment == "top" then
+					position[2] = (position[2] + size[2]) - texture_size[2]
+				end
+
+				size = texture_size
+			end
+		end
+
 		if pass_definition.retained_mode then
 			local retained_id = pass_definition.retained_mode and ((pass_data.retained_id and pass_data.retained_id) or true)
 			retained_id = UIRenderer_draw_texture_uv(ui_renderer, texture, position, size, uvs, color, ui_style and ui_style.masked, retained_id)
@@ -736,6 +758,28 @@ UIPasses.rect = {
 		return nil
 	end,
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
+		if ui_style then
+			local rect_size = ui_style.rect_size
+
+			if rect_size then
+				if ui_style.horizontal_alignment == "right" then
+					position[1] = (position[1] + size[1]) - rect_size[1]
+				elseif ui_style.horizontal_alignment == "center" then
+					position[1] = position[1] + (size[1] - rect_size[1])/2
+				end
+
+				local inv_scale = RESOLUTION_LOOKUP.inv_scale
+
+				if ui_style.vertical_alignment == "center" then
+					position[2] = position[2] + (size[2] - rect_size[2])/2
+				elseif ui_style.vertical_alignment == "top" then
+					position[2] = (position[2] + size[2]) - rect_size[2]
+				end
+
+				size = rect_size
+			end
+		end
+
 		return UIRenderer.draw_rect(ui_renderer, position, size, ui_style.color)
 	end
 }
@@ -901,7 +945,7 @@ UIPasses.text_area_chat = {
 
 		local _, num_texts_to_draw = nil
 
-		if Application.platform() == "xb1" then
+		if PLATFORM == "xb1" then
 			num_texts_to_draw = math.floor(size[2]/ui_style.font_size) + 1
 		else
 			num_texts_to_draw = math.floor(size[2]/ui_style.font_size) + 1
@@ -920,7 +964,7 @@ UIPasses.text_area_chat = {
 		local num_texts_to_scale_on = (percent_num_texts_to_draw - 1)*num_texts
 		local start_index, discrepancy, _ = nil
 
-		if Application.platform() == "xb1" then
+		if PLATFORM == "xb1" then
 			_, start_index = math.modf((num_texts_to_scale_on + 1)*text_start_offset)
 		else
 			start_index, discrepancy = math.modf((num_texts_to_scale_on + 1)*text_start_offset)
@@ -1549,7 +1593,7 @@ UIPasses.viewport = {
 		local ui_renderer = nil
 
 		if style.enable_sub_gui then
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
 			else
 				ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")

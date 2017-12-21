@@ -1,51 +1,77 @@
 local breed_data = {
 	detection_radius = 9999999,
 	target_selection = "pick_ninja_approach_target",
-	flingable = true,
-	no_stagger_duration = true,
-	awards_positive_reinforcement_message = true,
-	death_reaction = "gutter_runner",
-	has_inventory = true,
+	walk_speed = 3,
+	pounce_bonus_dmg_per_meter = 1,
 	run_speed = 9,
+	awards_positive_reinforcement_message = true,
+	stagger_in_air_mover_check_radius = 0.2,
+	flingable = true,
+	has_inventory = true,
 	exchange_order = 2,
 	animation_sync_rpc = "rpc_sync_anim_state_3",
-	walk_speed = 3,
-	initial_is_passive = false,
+	default_inventory_template = "gutter_runner",
+	poison_resistance = 100,
+	armor_category = 1,
 	allow_fence_jumping = true,
+	no_stagger_duration = true,
 	approaching_switch_radius = 10,
+	headshot_coop_stamina_fatigue_type = "headshot_special",
 	hit_reaction = "ai_default",
 	jump_speed = 25,
 	time_to_unspawn_after_death = 1,
-	bone_lod_level = 1,
+	behavior = "gutter_runner",
 	special = true,
-	default_inventory_template = "gutter_runner",
+	debug_flag = "ai_gutter_runner_behavior",
 	smart_targeting_outer_width = 0.6,
 	hit_effect_template = "HitEffectsGutterRunner",
 	smart_targeting_height_multiplier = 1.6,
 	radius = 1,
-	pounce_bonus_dmg_per_meter = 1,
+	bone_lod_level = 1,
 	unit_template = "ai_unit_gutter_runner",
-	debug_flag = "ai_gutter_runner_behavior",
-	perception = "perception_all_seeing_re_evaluate",
-	headshot_coop_stamina_fatigue_type = "headshot_special",
-	combat_spawn_stinger = "enemy_gutterrunner_stinger",
 	smart_object_template = "special",
+	combat_spawn_stinger = "enemy_gutterrunner_stinger",
 	force_despawn = true,
 	proximity_system_check = true,
-	poison_resistance = 100,
-	armor_category = 1,
+	death_reaction = "gutter_runner",
+	perception = "perception_all_seeing_re_evaluate",
 	player_locomotion_constrain_radius = 0.7,
 	jump_gravity = 9.82,
 	jump_range = 20,
 	smart_targeting_width = 0.3,
 	is_bot_aid_threat = true,
-	behavior = "gutter_runner",
+	initial_is_passive = false,
 	base_unit = "units/beings/enemies/skaven_gutter_runner/chr_skaven_gutter_runner",
+	pounce_impact_damage = {
+		5,
+		7
+	},
+	perception_weights = {
+		sticky_bonus = 5,
+		dog_pile_penalty = -5,
+		distance_weight = 10,
+		max_distance = 40
+	},
 	size_variation_range = {
 		1,
 		1
 	},
+	max_health = {
+		10,
+		12,
+		14,
+		16,
+		20
+	},
+	debug_class = DebugGutterRunner,
+	debug_color = {
+		255,
+		200,
+		200,
+		0
+	},
 	disabled = Development.setting("disable_gutter_runner") or false,
+	run_on_death = AiBreedSnippets.spawn_event_item_special,
 	hit_zones = {
 		full = {
 			prio = 1,
@@ -155,84 +181,41 @@ local breed_data = {
 			}
 		}
 	},
-	perception_weights = {
-		sticky_bonus = 5,
-		dog_pile_penalty = -5,
-		distance_weight = 10,
-		max_distance = 40
-	},
-	max_health = {
-		10,
-		12,
-		14,
-		16,
-		20
-	},
-	pounce_impact_damage = {
-		5,
-		7
-	},
-	difficulty_pounce_impact_damage = {
-		easy = {
-			4,
-			6
-		},
-		normal = {
-			5,
-			7
-		},
-		hard = {
-			6,
-			8
-		},
-		survival_hard = {
-			6,
-			8
-		},
-		harder = {
-			7,
-			10
-		},
-		survival_harder = {
-			7,
-			10
-		},
-		hardest = {
-			8,
-			11
-		},
-		survival_hardest = {
-			12,
-			16.5
+	heroic_archetypes = {
+		{
+			name = "decoy",
+			breed_name = "skaven_gutter_runner_decoy",
+			behaviour = "gutter_runner_heroic",
+			health_multiplier = 5,
+			blackboard = {
+				ninja_vanish_at_health_percent = 0.6666666666666666,
+				ninja_vanish_at_health_percent_treshold = 0.3333333333333333
+			}
 		}
-	},
-	difficulty_pounce_bonus_dmg_per_meter = {
-		harder = 1.5,
-		normal = 1,
-		hard = 1.25,
-		survival_hard = 1.25,
-		survival_harder = 1.5,
-		hardest = 2,
-		survival_hardest = 2,
-		easy = 0.75
-	},
-	num_push_anims = {
-		push_backward = 1
-	},
-	debug_color = {
-		255,
-		200,
-		200,
-		0
-	},
-	debug_class = DebugGutterRunner,
-	run_on_death = AiBreedSnippets.spawn_event_item_special
+	}
 }
+local archetype_lookup = {}
+
+for i, data in ipairs(breed_data.heroic_archetypes) do
+	archetype_lookup[data.name] = i
+end
+
+breed_data.heroic_archetype_lookup = archetype_lookup
 Breeds.skaven_gutter_runner = table.create_copy(Breeds.skaven_gutter_runner, breed_data)
+Breeds.skaven_gutter_runner_decoy = table.create_copy(Breeds.skaven_gutter_runner_decoy, breed_data)
+Breeds.skaven_gutter_runner_decoy.max_health = {
+	1,
+	1,
+	1,
+	1,
+	1
+}
+Breeds.skaven_gutter_runner_decoy.behavior = "gutter_runner_decoy"
+Breeds.skaven_gutter_runner_decoy.death_reaction = "gutter_runner_decoy"
 local action_data = {
 	target_pounced = {
 		stab_until_target_is_killed = true,
-		foff_after_pounce_kill = true,
+		foff_after_pounce_complete_probability = 1,
 		time_before_ramping_damage = 5,
 		cooldown = 1.5,
 		fatigue_type = "blocked_attack",
@@ -304,9 +287,141 @@ local action_data = {
 			allow_push = true
 		}
 	},
+	target_pounced_heroic = {
+		stab_until_target_is_killed = false,
+		foff_after_pounce_complete_probability = 0.5,
+		time_before_ramping_damage = 5,
+		cooldown = 1.5,
+		fatigue_type = "blocked_attack",
+		far_impact_radius = 6,
+		close_impact_radius = 2,
+		impact_speed_given = 10,
+		damage_type = "cutting",
+		attack_anim = "attack_loop",
+		final_damage_multiplier = 5,
+		range = 1.5,
+		time_to_reach_final_damage_multiplier = 10,
+		maximum_pounce_time = 2,
+		move_anim = "move_fwd",
+		attack_time = 1.5,
+		damage = {
+			1.5,
+			1.5,
+			1.5,
+			1.5
+		},
+		difficulty_damage = {
+			easy = {
+				1,
+				0.5,
+				0.25
+			},
+			normal = {
+				1.5,
+				1,
+				0.5
+			},
+			hard = {
+				2,
+				1,
+				0.5
+			},
+			survival_hard = {
+				2,
+				1,
+				0.5
+			},
+			harder = {
+				2.5,
+				1.5,
+				0.5
+			},
+			survival_harder = {
+				2.5,
+				1.5,
+				0.5
+			},
+			hardest = {
+				5,
+				2,
+				0.5
+			},
+			survival_hardest = {
+				7.5,
+				3,
+				0.75
+			}
+		},
+		ignore_staggers = {
+			true,
+			false,
+			false,
+			true,
+			false,
+			false,
+			allow_push = true
+		}
+	},
 	skulking = {},
 	skulk_idle = {},
-	approaching = {},
+	approaching = {
+		can_throw = false,
+		crosshair_dodge_delay = 1.5,
+		throw_stars_probability = 0
+	},
+	approaching_heroic = {
+		can_throw = true,
+		crosshair_dodge_delay = 0.75,
+		throw_stars_probability = 0.3
+	},
+	ninja_vanish_uninterruptable = {
+		stalk_lonliest_player = true,
+		foff_anim_length = 0.32,
+		effect_name = "fx/chr_gutter_foff",
+		ignore_staggers = {
+			true,
+			true,
+			true,
+			true,
+			true,
+			true,
+			allow_push = false
+		}
+	},
+	throw_throwing_stars = {
+		light_weight_projectile_particle_effect = "throwing_star",
+		collision_filter = "filter_enemy_player_ray_projectile",
+		attacks = {
+			{
+				projectile_speed = 10,
+				num_projectiles = 5,
+				pattern_name = "ninja_star_arc",
+				projectile_max_range = 50,
+				attack_anim = "attack_shuriken"
+			},
+			{
+				projectile_speed = 10,
+				num_projectiles = 7,
+				pattern_name = "ninja_star_cluster",
+				projectile_max_range = 50,
+				attack_anim = "attack_shuriken_roll"
+			}
+		},
+		impact_data = {
+			max_penetrations = 1,
+			can_be_blocked_by_parry = true,
+			afro_hit_sound = "bullet_pass_by",
+			hit_effect = "nodecals",
+			attack_template = "shot_machinegun"
+		},
+		attack_template_damage_type = {
+			"ratlinggun_easy",
+			"ratlinggun_normal",
+			"ratlinggun_hard",
+			"ratlinggun_very_hard",
+			"ratlinggun_very_hard"
+		}
+	},
 	ninja_vanish = {
 		stalk_lonliest_player = true,
 		foff_anim_length = 0.32,
@@ -318,12 +433,15 @@ local action_data = {
 		damage_type = "cutting",
 		move_anim = "move_fwd",
 		attack_anim = "smash_door",
-		door_attack_distance = 1,
 		damage = {
 			5,
 			5,
 			5
 		}
+	},
+	circle_prey = {},
+	circle_prey_decoy = {
+		despawn_on_outside_navmesh = true
 	},
 	stagger = {
 		stagger_anims = {

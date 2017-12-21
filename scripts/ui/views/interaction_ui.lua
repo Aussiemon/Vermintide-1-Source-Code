@@ -316,7 +316,7 @@ InteractionUI.init = function (self, ingame_ui_context)
 	self.peer_id = ingame_ui_context.peer_id
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.world = ingame_ui_context.world
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.interaction_animations = {}
 
 	self.create_ui_elements(self)

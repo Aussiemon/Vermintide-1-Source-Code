@@ -13,11 +13,11 @@ local generic_input_actions = {
 		description_text = "input_description_close"
 	}
 }
-local leave_party_button_text = (Application.platform() == "xb1" and "leave_party_menu_button_name_xb1") or "leave_party_menu_button_name"
-local disband_party_button_text = (Application.platform() == "xb1" and "disband_party_menu_button_name_xb1") or "disband_party_menu_button_name"
+local leave_party_button_text = (PLATFORM == "xb1" and "leave_party_menu_button_name_xb1") or "leave_party_menu_button_name"
+local disband_party_button_text = (PLATFORM == "xb1" and "disband_party_menu_button_name_xb1") or "disband_party_menu_button_name"
 local menu_layouts = {}
 
-if Application.platform() == "ps4" then
+if PLATFORM == "ps4" then
 	menu_layouts = {
 		in_menu = {
 			alone = {
@@ -244,7 +244,7 @@ if Application.platform() == "ps4" then
 			}
 		}
 	}
-elseif Application.platform() == "xb1" then
+elseif PLATFORM == "xb1" then
 	menu_layouts = {
 		in_menu = {
 			alone = {
@@ -724,21 +724,21 @@ IngameView.init = function (self, ingame_ui_context)
 	self.is_server = ingame_ui_context.is_server
 	local local_menu_layouts = table.clone(menu_layouts)
 
-	if GameSettingsDevelopment.lorebook_enabled and Application.platform() ~= "win32" then
+	if GameSettingsDevelopment.lorebook_enabled and PLATFORM ~= "win32" then
 		table.insert(local_menu_layouts.in_menu.alone, 4, {
 			fade = false,
 			transition = "lorebook_menu",
-			display_name = "lorebook_menu_button_name"
+			display_name = "dlc1_3_interact_open_journal"
 		})
 		table.insert(local_menu_layouts.in_menu.host, 4, {
 			fade = false,
 			transition = "lorebook_menu",
-			display_name = "lorebook_menu_button_name"
+			display_name = "dlc1_3_interact_open_journal"
 		})
 		table.insert(local_menu_layouts.in_menu.client, 4, {
 			fade = false,
 			transition = "lorebook_menu",
-			display_name = "lorebook_menu_button_name"
+			display_name = "dlc1_3_interact_open_journal"
 		})
 	end
 

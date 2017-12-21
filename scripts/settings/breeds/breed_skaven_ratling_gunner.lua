@@ -161,11 +161,11 @@ local breed_data = {
 		}
 	},
 	max_health = {
-		5,
-		6,
-		7,
 		8,
-		10
+		9,
+		11,
+		14,
+		20
 	},
 	detection_radius = math.huge,
 	num_push_anims = {
@@ -272,7 +272,7 @@ local action_data = {
 		arc_of_sight_nav_obstacle_half_extents = Vector3Box(5, 5, 1),
 		ignore_staggers = {
 			true,
-			false,
+			true,
 			false,
 			true,
 			true,

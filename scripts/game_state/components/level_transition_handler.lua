@@ -1,5 +1,3 @@
-require("scripts/network_lookup/network_lookup")
-
 local function check_bool_string(text)
 	if text == "false" then
 		return false

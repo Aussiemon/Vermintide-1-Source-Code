@@ -4,6 +4,10 @@ StatisticsSystem = class(StatisticsSystem, ExtensionSystemBase)
 local extensions = {
 	"StatisticsExtension"
 }
+local RPCS = {
+	"rpc_register_kill",
+	"rpc_set_unsigned_number_session_stat"
+}
 StatisticsSystem.init = function (self, context, name)
 	StatisticsSystem.super.init(self, context, name, extensions)
 
@@ -12,7 +16,7 @@ StatisticsSystem.init = function (self, context, name)
 	self.network_event_delegate = network_event_delegate
 
 	if not self.is_server then
-		network_event_delegate.register(network_event_delegate, self, "rpc_set_unsigned_number_session_stat")
+		network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
 	end
 
 	return 
@@ -158,6 +162,26 @@ StatisticsSystem.rpc_set_unsigned_number_session_stat = function (self, sender, 
 	TEMP_ARGS[num_indices + 1] = value
 
 	statistics_db.set_stat(statistics_db, "session", unpack(TEMP_ARGS))
+
+	return 
+end
+StatisticsSystem.rpc_register_kill = function (self, sender, victim_unit_go_id)
+	local unit_storage = self.unit_storage
+	local victim_unit = unit_storage.unit(unit_storage, victim_unit_go_id)
+
+	table.clear(TEMP_ARGS)
+
+	TEMP_ARGS[DamageDataIndex.DAMAGE_AMOUNT] = NetworkConstants.damage.max
+	TEMP_ARGS[DamageDataIndex.DAMAGE_TYPE] = "forced"
+	TEMP_ARGS[DamageDataIndex.ATTACKER] = victim_unit
+	TEMP_ARGS[DamageDataIndex.HIT_ZONE] = "full"
+	TEMP_ARGS[DamageDataIndex.DIRECTION] = Vector3.down()
+	TEMP_ARGS[DamageDataIndex.DAMAGE_SOURCE_NAME] = "suicide"
+	TEMP_ARGS[DamageDataIndex.HIT_RAGDOLL_ACTOR_NAME] = "n/a"
+	TEMP_ARGS[DamageDataIndex.DAMAGING_UNIT] = "n/a"
+	local statistics_db = self.statistics_db
+
+	StatisticsUtil.register_kill(victim_unit, TEMP_ARGS, statistics_db, false)
 
 	return 
 end

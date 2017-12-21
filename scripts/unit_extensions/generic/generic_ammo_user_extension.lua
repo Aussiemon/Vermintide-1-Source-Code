@@ -95,8 +95,14 @@ GenericAmmoUserExtension.update = function (self, unit, input, dt, context, t)
 	if self.next_reload_time and self.next_reload_time < t then
 		if not self.start_reloading then
 			local reload_amount = self.ammo_per_clip - self.current_ammo
+			local buff_extension = self.owner_buff_extension
 			reload_amount = math.min(reload_amount, self.available_ammo)
 			self.current_ammo = self.current_ammo + reload_amount
+
+			if buff_extension and buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
+				reload_amount = 0
+			end
+
 			self.available_ammo = self.available_ammo - reload_amount
 		end
 
@@ -201,14 +207,15 @@ GenericAmmoUserExtension.add_ammo_to_reserve = function (self, amount)
 	return 
 end
 GenericAmmoUserExtension.use_ammo = function (self, ammo_used)
-	local buff_extension = self.owner_buff_extension
 	local use_ammo = true
 
 	if not self.destroy_when_out_of_ammo and script_data.infinite_ammo then
 		ammo_used = 0
 	end
 
-	if buff_extension and buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
+	local buff_extension = self.owner_buff_extension
+
+	if buff_extension and buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") and self.using_single_clip(self) then
 		ammo_used = 0
 	end
 

@@ -478,7 +478,7 @@ LocomotionUtils.new_random_goal_uniformly_distributed_with_inside_from_outside_o
 	local above = above or 30
 	local below = below or 30
 	local horizontal = horizontal or 3
-	local distance_from_obstacle = 0
+	local distance_from_obstacle = 0.1
 	local tries = 0
 
 	while tries < max_tries do
@@ -494,15 +494,15 @@ LocomotionUtils.new_random_goal_uniformly_distributed_with_inside_from_outside_o
 			test_points[#test_points + 1] = Vector3Box(pos)
 		end
 
-		if tries < max_tries - 1 then
-			local success, altitude = GwNavQueries.triangle_from_position(nav_world, pos, above, below)
+		local success, altitude = GwNavQueries.triangle_from_position(nav_world, pos, above, below)
 
-			if success then
-				pos.z = altitude
+		if success then
+			pos.z = altitude
 
-				return pos
-			end
-		else
+			return pos
+		end
+
+		if tries == max_tries - 1 then
 			local clamped_position = GwNavQueries.inside_position_from_outside_position(nav_world, pos, above, below, horizontal, distance_from_obstacle)
 
 			if clamped_position then
@@ -971,7 +971,7 @@ LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_
 							aim_time = t + in_crosshairs_time
 							aim_times[player_unit] = aim_time
 						elseif aim_time < t then
-							return miss_vec, aim_direction
+							return miss_vec, aim_direction, player_unit
 						end
 
 						if debug_ai_movement then
@@ -981,7 +981,7 @@ LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_
 
 						bulls_eye = true
 					else
-						return miss_vec, aim_direction
+						return miss_vec, aim_direction, player_unit
 					end
 				elseif debug_ai_movement then
 					QuickDrawer:sphere(pos, radius)
@@ -1003,20 +1003,23 @@ LocomotionUtils.separate_mover_fallbacks = function (mover, seprarate_dist)
 		Mover.set_position(mover, new_position)
 	end
 
-	return 
+	local success = (is_colliding and new_position) or not is_colliding
+
+	return success
 end
 LocomotionUtils.on_alerted_dodge = function (unit, blackboard, alerting_unit, enemy_unit)
 	local pos = Unit.world_position(unit, Unit.node(unit, "j_neck"))
 	local enemy_pos, rotation = nil
+	local real_attacker_unit = AiUtils.get_actual_attacker_unit(enemy_unit)
 
-	if Managers.player:owner(enemy_unit) then
-		local locomotion_extension = ScriptUnit.has_extension(enemy_unit, "locomotion_system")
-		local node = Unit.has_node(enemy_unit, "camera_attach") and Unit.node(enemy_unit, "camera_attach")
+	if DamageUtils.is_player_unit(real_attacker_unit) then
+		local locomotion_extension = ScriptUnit.has_extension(real_attacker_unit, "locomotion_system")
+		local node = Unit.has_node(real_attacker_unit, "camera_attach") and Unit.node(real_attacker_unit, "camera_attach")
 		rotation = locomotion_extension.current_rotation(locomotion_extension)
-		enemy_pos = Unit.world_position(enemy_unit, node)
+		enemy_pos = Unit.world_position(real_attacker_unit, node)
 	else
-		rotation = Unit.world_rotation(enemy_unit, 0)
-		enemy_pos = Unit.world_position(enemy_unit, 0)
+		rotation = Unit.world_rotation(real_attacker_unit, 0)
+		enemy_pos = Unit.world_position(real_attacker_unit, 0)
 	end
 
 	local to_rat = pos - enemy_pos

@@ -1,5 +1,4 @@
 require("scripts/ui/ui_layer")
-require("scripts/ui/ui_fonts")
 require("scripts/ui/ui_renderer")
 require("scripts/ui/ui_elements")
 require("scripts/ui/ui_element")
@@ -9,7 +8,6 @@ require("scripts/ui/views/ingame_view")
 require("scripts/ui/views/ingame_hud")
 require("scripts/ui/views/popup_handler")
 require("scripts/ui/views/popup_join_lobby_handler")
-require("scripts/ui/views/show_cursor_stack")
 require("scripts/ui/views/end_screen_ui")
 require("scripts/ui/views/cutscene_ui")
 require("scripts/ui/views/matchmaking_ui")
@@ -157,7 +155,7 @@ IngameUI.get_ingame_menu_keymap = function (self)
 	local ingame_menu_keymap = table.clone(IngameMenuKeymaps)
 
 	if loaded_menu_controls and loaded_menu_controls.keymap then
-		local platform = Application.platform()
+		local platform = PLATFORM
 
 		table.merge_recursive(ingame_menu_keymap[platform], loaded_menu_controls.keymap)
 	end
@@ -244,7 +242,7 @@ IngameUI.is_quests_unlocked = function (self)
 	return can_use
 end
 IngameUI.is_lorebook_enabled = function (self)
-	if Application.platform() ~= "win32" then
+	if PLATFORM ~= "win32" then
 		return GameSettingsDevelopment.lorebook_enabled
 	else
 		return true
@@ -737,7 +735,7 @@ IngameUI.add_local_system_message = function (self, message)
 		local pop_chat = true
 		local localized_message = Localize(message)
 
-		if Application.platform() == "win32" then
+		if PLATFORM == "win32" then
 			Managers.chat:add_local_system_message(channel_id, localized_message, pop_chat)
 		else
 			local local_player = Managers.player:local_player()
@@ -1071,7 +1069,7 @@ IngameUI._render_fps = function (self, dt)
 	local text = string.format("%i FPS", fps)
 	local color = nil
 	local red_cap = 30
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "ps4" or platform == "xb1" then
 		red_cap = 28

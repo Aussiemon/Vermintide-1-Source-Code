@@ -447,7 +447,7 @@ PickupSystem.update = function (self, dt, t)
 	if self.is_server then
 		local switch_pickup = false
 
-		if Application.platform() == "xb1" or Application.platform() == "ps4" then
+		if PLATFORM == "xb1" or PLATFORM == "ps4" then
 			switch_pickup = DebugKeyHandler.key_pressed("n_switch", "switch pickup", "pickups")
 		else
 			switch_pickup = DebugKeyHandler.key_pressed("n", "switch pickup", "pickups", "left shift")

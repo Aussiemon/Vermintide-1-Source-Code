@@ -158,7 +158,7 @@ AIDebugger.update = function (self, t, dt)
 			self.show_behavior_tree = not self.show_behavior_tree
 		end
 
-		local platform = Application.platform()
+		local platform = PLATFORM
 
 		if (platform == "ps4" or platform == "xb1") and DebugKeyHandler.key_pressed("show_behaviour", "show behaviour graph", "ai debugger") then
 			self.show_behavior_tree = not self.show_behavior_tree

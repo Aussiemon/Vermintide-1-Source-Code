@@ -324,18 +324,21 @@ UIAnimation.init = function (...)
 	while i < num_varargs do
 		i = i + 1
 		local animation_type = select(i, ...)
-		local num_args = animation_type.num_args
 
-		assert(i + num_args <= num_varargs)
+		if animation_type and type(animation_type) == "table" then
+			local num_args = animation_type.num_args
 
-		data_array[current_index + 1] = animation_type
+			assert(i + num_args <= num_varargs)
 
-		for j = 1, num_args, 1 do
-			data_array[current_index + 1 + j] = select(i + j, ...)
+			data_array[current_index + 1] = animation_type
+
+			for j = 1, num_args, 1 do
+				data_array[current_index + 1 + j] = select(i + j, ...)
+			end
+
+			current_index = current_index + 1 + num_args + animation_type.num_data
+			i = i + num_args
 		end
-
-		current_index = current_index + 1 + num_args + animation_type.num_data
-		i = i + num_args
 	end
 
 	local num_args = data_array[1].num_args

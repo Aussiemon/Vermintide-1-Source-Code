@@ -175,7 +175,7 @@ weapon_template.actions = {
 		},
 		heavy_attack_right = {
 			damage_window_start = 0.3,
-			range_mod = 1.4,
+			range_mod = 1.5,
 			anim_time_scale = 1.1,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
@@ -252,7 +252,7 @@ weapon_template.actions = {
 		},
 		heavy_attack_left = {
 			damage_window_start = 0.3,
-			range_mod = 1.4,
+			range_mod = 1.5,
 			anim_time_scale = 1.1,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
@@ -332,7 +332,7 @@ weapon_template.actions = {
 		},
 		light_attack_left = {
 			damage_window_start = 0.3,
-			range_mod = 1.2,
+			range_mod = 1.35,
 			anim_end_event = "attack_finished",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			kind = "sweep",
@@ -372,7 +372,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default_left",
-					start_time = 1,
+					start_time = 0.8,
 					action = "action_one",
 					end_time = 1.8,
 					input = "action_one"
@@ -404,7 +404,7 @@ weapon_template.actions = {
 		},
 		light_attack_right = {
 			damage_window_start = 0.35,
-			range_mod = 1.2,
+			range_mod = 1.35,
 			anim_end_event = "attack_finished",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			kind = "sweep",
@@ -444,7 +444,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default_right",
-					start_time = 1,
+					start_time = 0.8,
 					action = "action_one",
 					end_time = 1.8,
 					input = "action_one"

@@ -12,10 +12,17 @@ DamageUtils.get_breed_armor = function (target_unit)
 
 	return target_unit_armor
 end
+local DEFAULT_DAMAGE_TABLE = {
+	0,
+	0,
+	0,
+	0
+}
 DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_unit, hit_zone_name, headshot_multiplier, backstab_multiplier, hawkeye_multiplier)
 	local target_unit_armor = DamageUtils.get_breed_armor(target_unit)
 	local breed = target_unit and Unit.get_data(target_unit, "breed")
 	local blackboard = nil
+	damage_table = damage_table or DEFAULT_DAMAGE_TABLE
 
 	if breed then
 		blackboard = Unit.get_data(target_unit, "blackboard")
@@ -765,7 +772,7 @@ DamageUtils.add_damage_network = function (attacked_unit, attacker_unit, origina
 	return 
 end
 local buff_params = {}
-DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
+DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type, predicted_damage)
 	local network_manager = Managers.state.network
 	local buff_extension = ScriptUnit.extension(unit, "buff_system")
 	local health_extension = ScriptUnit.extension(unit, "health_system")
@@ -927,7 +934,7 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 		_, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.LIGHT_KILLING_BLOW_PROC)
 	end
 
-	if procced then
+	if procced and 0 < predicted_damage then
 		DamageUtils.buff_attack_hit(inventory_extension, unit, hit_unit, "killing_blow_proc")
 
 		return "killing_blow"
@@ -1116,6 +1123,7 @@ DamageUtils.heal_network = function (healed_unit, healer_unit, heal_amount, heal
 	local shared_medpack = false
 	heal_amount, shared_medpack = DamageUtils.apply_buffs_to_heal(healed_unit, healer_unit, heal_amount, heal_type, healed_units)
 	heal_amount = DamageUtils.networkify_damage(heal_amount)
+	heal_amount = heal_amount or 0
 	local num_healed_units = #healed_units
 
 	for i = 1, num_healed_units, 1 do
@@ -1331,7 +1339,7 @@ DamageUtils.check_block = function (attacking_unit, target_unit, fatigue_type)
 
 	return false
 end
-DamageUtils.check_ranged_block = function (attacking_unit, target_unit, attack_direction, fatigue_type)
+DamageUtils.check_ranged_block = function (attacking_unit, target_unit, attack_direction, fatigue_type, can_be_blocked_by_parry)
 	local status_extension = ScriptUnit.extension(target_unit, "status_system")
 	local network_manager = Managers.state.network
 	local player = Managers.player
@@ -1344,7 +1352,7 @@ DamageUtils.check_ranged_block = function (attacking_unit, target_unit, attack_d
 			return false
 		end
 
-		if not weapon_data.can_block_ranged_attacks then
+		if not can_be_blocked_by_parry and not weapon_data.can_block_ranged_attacks then
 			return false
 		end
 
@@ -1703,7 +1711,7 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 					local deal_damage = true
 
 					if hit_unit_player then
-						deal_damage = not DamageUtils.check_ranged_block(owner_unit, hit_unit, attack_direction, "blocked_ranged")
+						deal_damage = not DamageUtils.check_ranged_block(owner_unit, hit_unit, attack_direction, "blocked_ranged", current_action.can_be_blocked_by_parry)
 					end
 
 					if deal_damage then

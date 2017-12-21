@@ -373,7 +373,7 @@ weapon_template.actions = {
 			end,
 			default_target = {
 				attack_template_damage_type = "one_h_smiter_H",
-				attack_template = "stab_smiter"
+				attack_template = "stab_smiter_1"
 			},
 			targets = {}
 		},

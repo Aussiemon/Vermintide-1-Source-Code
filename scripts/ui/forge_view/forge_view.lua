@@ -357,7 +357,7 @@ ForgeView.transitioning = function (self)
 		return not self.active
 	end
 
-	if Application.platform() == "xb1" and BackendManagerLocalEnabled then
+	if PLATFORM == "xb1" and BackendManagerLocalEnabled then
 		Managers.save:auto_save(SaveFileName, SaveData)
 	end
 

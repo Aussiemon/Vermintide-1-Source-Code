@@ -74,7 +74,8 @@ UnlockableLevelsByGameMode = {
 		"docks_short_level",
 		"dlc_portals",
 		"dlc_castle",
-		"dlc_castle_dungeon"
+		"dlc_castle_dungeon",
+		"dlc_challenge_wizard"
 	},
 	survival = {
 		"dlc_survival_ruins",
@@ -87,6 +88,20 @@ UnlockableLevelsByDLC = {
 			"dlc_dwarf_interior",
 			"dlc_dwarf_exterior",
 			"dlc_dwarf_beacons"
+		},
+		survival = {}
+	},
+	stromdorf = {
+		adventure = {
+			"dlc_stromdorf_town",
+			"dlc_stromdorf_hills"
+		},
+		survival = {}
+	},
+	reikwald = {
+		adventure = {
+			"dlc_reikwald_forest",
+			"dlc_reikwald_river"
 		},
 		survival = {}
 	}
@@ -109,7 +124,8 @@ MainGameLevels = {
 NoneActLevels = {
 	"dlc_portals",
 	"dlc_castle",
-	"dlc_castle_dungeon"
+	"dlc_castle_dungeon",
+	"dlc_challenge_wizard"
 }
 SurvivalLevels = {
 	"dlc_survival_ruins",
@@ -161,6 +177,7 @@ LengthTypeByLevel = {
 	dlc_survival_magnus = "short",
 	merchant = "long"
 }
+local platform = PLATFORM
 
 dofile("scripts/settings/level_unlock_settings_dlc_dwarf")
 
@@ -210,7 +227,7 @@ LevelUnlockUtils = {
 			return prologue_act_order_index
 		end
 
-		fassert(Application.build() ~= "release", "Trying to get required progression for level %q which is not included in progress", level_key)
+		fassert(BUILD ~= "release", "Trying to get required progression for level %q which is not included in progress", level_key)
 
 		return 0
 	end,
@@ -253,7 +270,7 @@ LevelUnlockUtils.unlocked_level_difficulty_index = function (statistics_db, play
 	local level_settings = LevelSettings[level_key]
 	local game_mode = level_settings.game_mode
 
-	if game_mode == "adventure" and Application.platform() ~= "win32" then
+	if game_mode == "adventure" and PLATFORM ~= "win32" then
 		local difficulties, starting_difficulty = Managers.state.difficulty:get_level_difficulties(level_key)
 		local automatic_difficulty_unlock_index = table.find(difficulties, starting_difficulty)
 		local highest_available_difficulty_index = #difficulties
@@ -316,10 +333,20 @@ local function sort_levels_by_order(a, b)
 	local level_settings = LevelSettings
 	local a_settings = level_settings[a].map_settings
 	local b_settings = level_settings[b].map_settings
-	local a_order = a_settings.sorting or 99
-	local b_order = b_settings.sorting or 99
 
-	return a_order < b_order
+	if platform == "win32" then
+		local a_order = a_settings.sorting or 99
+		local b_order = b_settings.sorting or 99
+
+		return a_order < b_order
+	else
+		a_order = a_settings.console_sorting or 99
+		local b_order = b_settings.console_sorting or 99
+
+		return a_order < b_order
+	end
+
+	return 
 end
 
 LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats_id, current_level_key)

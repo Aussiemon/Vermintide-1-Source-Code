@@ -395,7 +395,17 @@ MissionTemplates = {
 			return 
 		end,
 		update_text = function (data)
-			if data.wave_state == data.states.wave then
+			if PLATFORM == "xb1" then
+				if data.wave_state == data.states.wave then
+					data.text = data.mission_text .. " " .. data.wave
+				elseif data.wave_state == data.states.completed then
+					data.text = data.mission_text .. " " .. data.wave .. " " .. data.wave_completed_text
+				elseif data.wave_state == data.states.prepare then
+					data.text = data.wave_prepare_text .. " " .. data.wave + 1
+				else
+					data.text = data.mission_text .. " " .. data.wave
+				end
+			elseif data.wave_state == data.states.wave then
 				data.text = data.mission_text .. " " .. data.wave - data.starting_wave
 			elseif data.wave_state == data.states.completed then
 				data.text = data.mission_text .. " " .. data.wave - data.starting_wave .. " " .. data.wave_completed_text

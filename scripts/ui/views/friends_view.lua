@@ -7,7 +7,7 @@ FriendsView = class(FriendsView)
 local INVITE_COOLDOWN_TIMER = 2
 local FRIENDS_REFRESH_STEP, FRIENDS_LIST_LIMIT = nil
 
-if Application.platform() == "ps4" then
+if PLATFORM == "ps4" then
 	FRIENDS_REFRESH_STEP = 20
 	FRIENDS_LIST_LIMIT = 500
 else
@@ -127,7 +127,7 @@ FriendsView.init = function (self, ingame_ui_context)
 
 	self.menu_input_description:set_input_description(nil)
 
-	if Application.platform() ~= "xb1" then
+	if PLATFORM ~= "xb1" then
 		self.refresh_friends(self)
 	end
 
@@ -180,7 +180,7 @@ FriendsView.is_active = function (self)
 	return self.active
 end
 FriendsView.on_enter = function (self)
-	if Application.platform() == "xb1" and Managers.account:setup_friendslist() then
+	if PLATFORM == "xb1" and Managers.account:setup_friendslist() then
 		self.updating_friend_info = true
 		self.friends_update_timer = FRIENDS_REFRESH_STEP
 	end
@@ -274,11 +274,11 @@ FriendsView.create_friend_entry = function (self, i)
 	local size_y = definitions.scenegraph_definition.friend_list.size[2]
 	local offset_y = size_y*-1
 	local content = {
-		name = "n/a",
 		selected = false,
 		hover_texture = "friends_list_window_entry_select",
 		button_hotspot = {},
-		controller_button_hotspot = {}
+		controller_button_hotspot = {},
+		name = Localize("dlc1_2_difficulty_unavailable")
 	}
 	local style = {
 		list_member_offset = {
@@ -299,7 +299,7 @@ FriendsView.create_friend_entry = function (self, i)
 			offset = {
 				10,
 				0,
-				1
+				10
 			}
 		},
 		hover_texture = {
@@ -320,7 +320,7 @@ FriendsView.create_friend_entry = function (self, i)
 end
 
 local function format_friend_data(data)
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		local this_title_id = Managers.account:np_title_id()
 		local friend_list = data.friendList
 
@@ -578,7 +578,7 @@ FriendsView.cb_refresh_friends_done = function (self, friends_list, use_cached_f
 		self.scroll_field_widget.content.scroll_step = steps_possible
 	end
 
-	if Application.platform() == "ps4" and not use_cached_friends_list then
+	if PLATFORM == "ps4" and not use_cached_friends_list then
 		self.refresh_psn_room_data(self, friends, playing_bulldozer_friends)
 	end
 
@@ -606,7 +606,7 @@ FriendsView.refresh_psn_room_data = function (self, friends, playing_bulldozer_f
 	return 
 end
 FriendsView.setup_widget = function (self, friend_data, id, content, style)
-	local name = (friend_data and friend_data.name) or "n/a"
+	local name = (friend_data and friend_data.name and friend_data.name ~= "" and friend_data.name) or Localize("dlc1_2_difficulty_unavailable")
 	content.name = (PLAYER_NAME_MAX_LENGTH < UTF8Utils.string_length(name) and UIRenderer.crop_text_width(self.ui_renderer, name, 370, style.name)) or name
 	content.id = id
 
@@ -777,7 +777,7 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 			else
 				has_lobby_data = false
 			end
-		elseif Application.platform() == "xb1" then
+		elseif PLATFORM == "xb1" then
 			local token = Presence.get_async(Managers.account:user_id(), friend_data.xbox_user_id)
 
 			if token ~= -1 then
@@ -815,7 +815,7 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 		self.update_input_description(self, false, false)
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		disable_join = true
 	end
 
@@ -831,7 +831,7 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 	self.invite_button.content.button_hotspot.disabled = self.disable_invite_button or (self.invite_cooldown_list[id] and true) or false
 	local ui_scenegraph = self.ui_scenegraph
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		self.updating_friend_info = first_update
 	else
 		self.updating_friend_info = (first_update or not has_lobby_data) and friend_data.playing_this_game
@@ -847,7 +847,7 @@ FriendsView.on_join_button_clicked = function (self)
 	local id = self.selected_id
 	local friend_data = self.friends[id]
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		XboxLive.show_gamercard(Managers.account:user_id(), friend_data.xbox_user_id)
 	elseif self.network_server and not self.network_server:are_all_peers_ingame() then
 		self.popup_id = Managers.popup:queue_popup(Localize("popup_join_blocked_by_joining_player"), Localize("popup_invite_not_installed_header"), "ok", Localize("menu_ok"))
@@ -886,7 +886,7 @@ FriendsView.on_invite_button_clicked = function (self, gamepad_active)
 
 	if rawget(_G, "Steam") and rawget(_G, "Friends") then
 		Friends.invite(id, self.network_lobby.lobby)
-	elseif Application.platform() == "ps4" or Application.platform() == "xb1" then
+	elseif PLATFORM == "ps4" or PLATFORM == "xb1" then
 		Managers.account:send_session_invitation(id, lobby)
 	else
 		print("FriendsView:on_invite_button_clicked(), Join not supported..")
@@ -900,7 +900,7 @@ FriendsView.on_invite_button_clicked = function (self, gamepad_active)
 end
 FriendsView.on_show_gamercard_clicked = function (self)
 	local id = self.selected_id
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" and rawget(_G, "Steam") then
 		local dec_id = Steam.id_hex_to_dec(id)
@@ -945,7 +945,7 @@ FriendsView.on_entry_pressed = function (self, id, index, first_update)
 	self.selected_id = id
 	self.selected_index = index
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		self.cb_refresh_friends_done(self, nil, true)
 	else
 		self.refresh_friends(self)
@@ -1195,7 +1195,7 @@ FriendsView.update_buttons = function (self, dt, optional_select_index)
 			self.play_sound(self, "Play_hud_hover")
 		end
 
-		local platform = Application.platform()
+		local platform = PLATFORM
 
 		if platform ~= "xb1" and not join_button_content.button_hotspot.disabled and (join_button_content.button_hotspot.on_release or input_service.get(input_service, "special_1")) then
 			self.play_sound(self, "Play_hud_select")
@@ -1367,7 +1367,7 @@ FriendsView.update_input_description = function (self, can_invite, can_join)
 
 	table.clear(actions)
 
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local availaible_actions = input_actions[platform]
 
 	if availaible_actions.show_profile then

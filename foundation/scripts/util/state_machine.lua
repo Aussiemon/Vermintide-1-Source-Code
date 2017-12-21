@@ -89,35 +89,14 @@ StateMachine._change_state = function (self, new_state, params)
 
 	return 
 end
-StateMachine.pre_update = function (self, dt, t)
-	if self._state and self._state.pre_update then
-		self._state:pre_update(dt, t)
-	end
-
-	return 
+StateMachine.state = function (self)
+	return self._state
 end
 StateMachine.update = function (self, dt, t)
 	local new_state = self._state:update(dt, t)
 
 	if new_state then
 		self._change_state(self, new_state, self._params)
-	end
-
-	return 
-end
-StateMachine.state = function (self)
-	return self._state
-end
-StateMachine.post_update = function (self, dt, t)
-	if self._state and self._state.post_update then
-		self._state:post_update(dt, t)
-	end
-
-	return 
-end
-StateMachine.render = function (self)
-	if self._state and self._state.render then
-		self._state:render()
 	end
 
 	return 

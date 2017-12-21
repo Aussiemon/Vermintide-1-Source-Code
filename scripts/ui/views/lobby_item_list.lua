@@ -606,7 +606,13 @@ end
 local function create_lobby_list_entry_content(lobby_data)
 	local my_peer_id = Network:peer_id()
 	local host = lobby_data.host or lobby_data.Host
-	local title_text = make_utf8_valid(lobby_data.server_name or lobby_data.unique_server_name or lobby_data.host or lobby_data.Host)
+	local title_text = nil
+
+	if PLATFORM == "ps4" then
+		title_text = make_utf8_valid(lobby_data.host_name or lobby_data.server_name or lobby_data.unique_server_name or lobby_data.host or lobby_data.Host)
+	else
+		title_text = make_utf8_valid(lobby_data.server_name or lobby_data.unique_server_name or lobby_data.host or lobby_data.Host)
+	end
 
 	if host == my_peer_id or not title_text then
 		return 

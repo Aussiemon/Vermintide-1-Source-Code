@@ -898,7 +898,12 @@ AltarView.handle_index_changes = function (self)
 	local craft_item_remove_request = craft_ui_page.item_remove_request
 
 	if craft_item_remove_request then
-		items_page.set_backend_id_disabled_state(items_page, craft_ui_page.active_item_id, false)
+		local active_item_id = craft_ui_page.active_item_id
+
+		if active_item_id then
+			items_page.set_backend_id_disabled_state(items_page, active_item_id, false)
+		end
+
 		craft_ui_page.remove_item(craft_ui_page)
 		items_page.refresh_items_status(items_page)
 		items_page.set_gamepad_focus(items_page, true)

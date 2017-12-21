@@ -110,6 +110,7 @@ ConflictDirector.init = function (self, world, level_key, network_event_delegate
 		player_info_by_travel_distance = {}
 	}
 	self._main_path_obstacles = {}
+	self._next_progression_percent = 0.1
 	self._next_outside_navmesh_intervention_time = 6.15
 	self.outside_navmesh_intervention_data = {}
 	self._next_rushing_intervention_time = 5.1
@@ -444,6 +445,12 @@ ConflictDirector.update_main_path_player_info = function (self, t)
 
 			if path_index then
 				main_path_info.current_path_index = math.max(path_index, main_path_info.current_path_index)
+			end
+
+			if self._next_progression_percent <= move_percent then
+				Managers.telemetry.events:level_progression(self._next_progression_percent)
+
+				self._next_progression_percent = self._next_progression_percent + 0.1
 			end
 
 			if main_path_info.ahead_percent <= move_percent or main_path_info.ahead_unit == unit then
@@ -1453,7 +1460,7 @@ ConflictDirector.get_free_flight_pos = function (self)
 
 	return position
 end
-ConflictDirector.spawn_queued_unit = function (self, breed, boxed_spawn_pos, boxed_spawn_rot, spawn_category, spawn_animation, spawn_type, inventory_template, group_data, unit_data)
+ConflictDirector.spawn_queued_unit = function (self, breed, boxed_spawn_pos, boxed_spawn_rot, spawn_category, spawn_animation, spawn_type, inventory_template, group_data, unit_data, archetype_index)
 	local spawn_queue = self.spawn_queue
 	local spawn_index = self.first_spawn_index + self.spawn_queue_size
 	self.spawn_queue_size = self.spawn_queue_size + 1
@@ -1473,6 +1480,7 @@ ConflictDirector.spawn_queued_unit = function (self, breed, boxed_spawn_pos, box
 		data[8] = group_data
 		data[9] = unit_data
 		data[10] = self.spawn_queue_id
+		data[11] = archetype_index
 	else
 		data = {
 			breed,
@@ -1484,7 +1492,8 @@ ConflictDirector.spawn_queued_unit = function (self, breed, boxed_spawn_pos, box
 			inventory_template,
 			group_data,
 			unit_data,
-			self.spawn_queue_id
+			self.spawn_queue_id,
+			archetype_index
 		}
 		spawn_queue[spawn_index] = data
 	end
@@ -1550,7 +1559,7 @@ ConflictDirector.update_spawn_queue = function (self, t)
 		local first_spawn_index = self.first_spawn_index
 		local spawn_queue = self.spawn_queue
 		local d = spawn_queue[first_spawn_index]
-		local unit = self.spawn_unit(self, d[1], d[2]:unbox(), d[3]:unbox(), d[4], d[5], d[6], d[7], d[8])
+		local unit = self.spawn_unit(self, d[1], d[2]:unbox(), d[3]:unbox(), d[4], d[5], d[6], d[7], d[8], d[11])
 		first_spawn_index = first_spawn_index + 1
 		self.spawn_queue_size = self.spawn_queue_size - 1
 		local unit_data = d[9]
@@ -1571,7 +1580,7 @@ end
 local dialogue_system_init_data = {
 	faction = "enemy"
 }
-ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn_category, spawn_animation, spawn_type, inventory_template, group_data)
+ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn_category, spawn_animation, spawn_type, inventory_template, group_data, archetype_index)
 	Profiler.start("conflict spawn unit")
 
 	local breed_unit_field = (script_data.use_optimized_breed_units and breed.opt_base_unit) or breed.base_unit
@@ -1601,15 +1610,25 @@ ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn
 
 	Profiler.start("create ai extensions")
 
+	local max_health = breed.max_health[difficulty_rank]
+
+	if archetype_index then
+		max_health = max_health*breed.heroic_archetypes[archetype_index].health_multiplier
+	end
+
 	local extension_init_data = {
 		health_system = {
-			health = breed.max_health[difficulty_rank]
+			health = max_health
 		},
 		ai_system = {
 			breed = breed,
 			nav_world = nav_world,
 			spawn_type = spawn_type,
 			spawn_category = spawn_category
+		},
+		ai_heroic_enemy_system = {
+			breed = breed,
+			archetype_index = archetype_index
 		},
 		locomotion_system = {
 			nav_world = nav_world
@@ -1632,6 +1651,10 @@ ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn
 		dialogue_system = dialogue_system_init_data,
 		aim_system = aim_init_data
 	}
+
+	if archetype_index then
+		extension_init_data.ai_system.override_behaviour = breed.heroic_archetypes[archetype_index].behaviour
+	end
 
 	Profiler.stop("create ai extensions")
 	Profiler.start("spawn ai_unit")
@@ -2123,7 +2146,22 @@ ConflictDirector.aim_spawning = function (self, breed, on_navmesh, optional_dela
 
 	local spawn_category = "debug_spawn"
 	local rot = Quaternion(Vector3.up(), math.degrees_to_radians(Math.random(1, 360)))
-	local unit = self.spawn_unit(self, breed, spawn_pos, rot, spawn_category, nil)
+	local archetype_index = nil
+	local debug_archetype = 1
+
+	if debug_archetype then
+		print(breed)
+
+		if breed.heroic_archetypes then
+			if breed.heroic_archetypes[debug_archetype] then
+				archetype_index = debug_archetype
+			else
+				archetype_index = Math.random(1, #breed.heroic_archetypes)
+			end
+		end
+	end
+
+	local unit = self.spawn_unit(self, breed, spawn_pos, rot, spawn_category, nil, nil, nil, nil, archetype_index)
 
 	if breed.special then
 		self._alive_specials[#self._alive_specials + 1] = unit
@@ -2210,30 +2248,30 @@ ConflictDirector.spawn_group = function (self, breed, on_navmesh, patrol_templat
 
 	return 
 end
-ConflictDirector.spawn_one = function (self, breed, optional_pos)
+ConflictDirector.spawn_one = function (self, breed, optional_pos, archetype_index)
 	local spawn_category = "spawn_one"
 	local center_pos = player_positions[1]
 	local spawn_pos = optional_pos or ConflictUtils.get_spawn_pos_on_circle(self.nav_world, center_pos, 20, 8, 30)
 
 	if spawn_pos then
 		local rot = Quaternion(Vector3.up(), math.degrees_to_radians(Math.random(1, 360)))
-		local unit = self.spawn_queued_unit(self, breed, Vector3Box(spawn_pos), QuaternionBox(rot), spawn_category, nil)
+		local unit = self.spawn_queued_unit(self, breed, Vector3Box(spawn_pos), QuaternionBox(rot), spawn_category, nil, nil, nil, nil, nil, archetype_index)
 
 		return unit
 	end
 
 	return 
 end
-ConflictDirector.spawn_at_raw_spawner = function (self, breed, spawner_id)
+ConflictDirector.spawn_at_raw_spawner = function (self, breed, archetype_index, spawner_id)
 	local spawner_system = Managers.state.entity:system("spawner_system")
 	local spawner_unit = spawner_system.get_raw_spawner_unit(spawner_system, spawner_id)
 
 	if spawner_unit then
 		local pos = Unit.local_position(spawner_unit, 0)
 		local rot = Unit.local_rotation(spawner_unit, 0)
-		local ai_unit = self.spawn_unit(self, breed, pos, rot, "raw_spawner")
+		local ai_unit = self.spawn_unit(self, breed, pos, rot, "raw_spawner", nil, nil, nil, nil, archetype_index)
 
-		if Application.platform() ~= "win32" then
+		if PLATFORM ~= "win32" then
 			Managers.state.entity:system("play_go_tutorial_system"):register_unit(spawner_unit, ai_unit)
 		end
 	end

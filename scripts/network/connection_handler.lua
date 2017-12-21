@@ -99,7 +99,7 @@ ConnectionHandler.update = function (self, dt)
 		end
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		for i, peer_id in ipairs(running_connections) do
 			if not current_connections[peer_id] and not pending_connects[peer_id] and not pending_disconnects[peer_id] and not Network.is_used(peer_id) then
 				ch_printf("Destroying connection to peer %q since not used.", peer_id)

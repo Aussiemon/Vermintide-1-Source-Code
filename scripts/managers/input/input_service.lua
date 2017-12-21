@@ -2,7 +2,7 @@
 --   Code may be incomplete or incorrect.
 InputService = class(InputService)
 InputService.init = function (self, input_service_name, keymaps_name, filters_name, block_reasons)
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.mapped_devices = {
 		gamepad = {},
 		mouse = {},

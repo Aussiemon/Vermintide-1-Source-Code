@@ -970,6 +970,100 @@ function flow_callback_register_transport_navmesh_units(params)
 	return 
 end
 
+function flow_callback_start_transport(params)
+	local interactable_unit = params.transport_unit
+	local local_player = Managers.player:local_player()
+	local interactor_unit = local_player.player_unit
+	local transportation_extension = ScriptUnit.extension(interactable_unit, "transportation_system")
+
+	transportation_extension.interacted_with(transportation_extension, interactor_unit)
+
+	return 
+end
+
+function flow_callback_enemies_on_transport(params)
+	local unit = params.transport_unit
+	local bounding_box_mesh_name = Unit.get_data(unit, "transportation_data", "bounding_box_mesh")
+	local oobb_mesh_max_extent, oobb_pose, oobb_size = nil
+
+	if bounding_box_mesh_name ~= "" then
+		local mesh = Unit.mesh(unit, bounding_box_mesh_name)
+		local _, size = Mesh.box(mesh)
+		local max_extent = math.max(size.x, size.y, size.z)
+		oobb_mesh_max_extent = max_extent
+		oobb_pose, oobb_size = Mesh.box(mesh)
+	end
+
+	local ai_system = Managers.state.entity:system("ai_system")
+	local ai_broadphase = ai_system.broadphase
+	local position = Unit.world_position(unit, 0)
+	local nearby_ai_units = FrameTable.alloc_table()
+	local num_nearby_ai_units = Broadphase.query(ai_broadphase, position, oobb_mesh_max_extent + 1, nearby_ai_units)
+	flow_return_table.no_enemies_on_transport = true
+
+	for i = 1, num_nearby_ai_units, 1 do
+		local u = nearby_ai_units[i]
+
+		if AiUtils.unit_alive(u) then
+			local u_pos = Unit.world_position(u, 0)
+			local is_inside = math.point_is_inside_oobb(u_pos, oobb_pose, oobb_size)
+
+			if is_inside then
+				flow_return_table.no_enemies_on_transport = false
+				flow_return_table.enemies_on_transport = true
+
+				break
+			end
+		end
+	end
+
+	return flow_return_table
+end
+
+function flow_callback_all_humans_on_transport(params)
+	local unit = params.transport_unit
+	local bounding_box_mesh_name = Unit.get_data(unit, "transportation_data", "bounding_box_mesh")
+	local oobb_mesh_max_extent, oobb_pose, oobb_size = nil
+
+	if bounding_box_mesh_name ~= "" then
+		local mesh = Unit.mesh(unit, bounding_box_mesh_name)
+		local _, size = Mesh.box(mesh)
+		local max_extent = math.max(size.x, size.y, size.z)
+		oobb_mesh_max_extent = max_extent
+		oobb_pose, oobb_size = Mesh.box(mesh)
+	end
+
+	local players = Managers.player:human_players()
+	local unit_list = FrameTable.alloc_table()
+	local unit_list_n = 0
+
+	for index, player in pairs(players) do
+		local player_unit = player.player_unit
+
+		if Unit.alive(player_unit) and ScriptUnit.extension(player_unit, "health_system"):is_alive() and not ScriptUnit.extension(player_unit, "status_system"):is_disabled() then
+			unit_list_n = unit_list_n + 1
+			unit_list[unit_list_n] = player_unit
+		end
+	end
+
+	flow_return_table.all_humans_on_transport = true
+
+	for i = 1, unit_list_n, 1 do
+		local u = unit_list[i]
+		local u_pos = Unit.world_position(u, 0)
+		local is_inside = math.point_is_inside_oobb(u_pos, oobb_pose, oobb_size)
+
+		if not is_inside then
+			flow_return_table.all_humans_on_transport = false
+			flow_return_table.not_all_humans_on_transport = true
+
+			break
+		end
+	end
+
+	return flow_return_table
+end
+
 function flow_callback_set_door_state_and_duration(params)
 	local unit = params.unit
 	local new_door_state = params.new_door_state

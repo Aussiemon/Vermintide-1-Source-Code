@@ -1,5 +1,6 @@
 require("scripts/managers/unlock/unlock_clan")
 require("scripts/managers/unlock/unlock_dlc")
+require("scripts/managers/unlock/grant_dlc_from_ownership")
 require("scripts/managers/unlock/always_unlocked")
 require("scripts/managers/unlock/always_locked")
 require("scripts/settings/unlock_settings")
@@ -8,24 +9,36 @@ UnlockManager = class(UnlockManager)
 UnlockManager.init = function (self)
 	self._init_unlocks(self)
 
+	if PLATFORM == "win32" then
+		self._init_grant_dlcs(self)
+	end
+
 	self._state = "query_unlocked"
+	self._query_grant_index = 1
 	self._query_unlocked_index = 0
 	self._dlc_status_changed = nil
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		self._licensed_packages = XboxDLC.licensed_packages()
 	end
 
 	self._award_queue = {}
 	self._award_queue_id = 0
 
-	if Application.platform() == "win32" and rawget(_G, "Steam") then
+	if PLATFORM == "win32" and rawget(_G, "Steam") then
 		self._load_vr_progress_save(self)
 	else
 		self._vr_status_done = true
 	end
 
 	return 
+end
+UnlockManager.done = function (self)
+	if PLATFORM ~= "win32" then
+		return true
+	end
+
+	return self._state == "done"
 end
 UnlockManager._load_vr_progress_save = function (self)
 	local vr_unlocks = {
@@ -63,6 +76,38 @@ UnlockManager._load_vr_progress_save = function (self)
 
 	return 
 end
+UnlockManager._init_grant_dlcs = function (self)
+	self._grant_dlcs = {}
+	self._grant_dlcs_indexed = {}
+	local grants_dlcs = self._grant_dlcs
+	local grant_dlcs_indexed = self._grant_dlcs_indexed
+	local index = 1
+
+	if not rawget(_G, "Steam") then
+		return 
+	end
+
+	local current_app_id = Steam.app_id()
+
+	for grant_dlc_name, grant_dlc_config in pairs(GrantDlcSettings.grants) do
+		local class_name = grant_dlc_config.class
+		local grant_unlock = grant_dlc_config.grant_unlock
+		local app_id_to_check = grant_dlc_config.app_id_to_check
+		local host_address = grant_dlc_config.host_address
+		local use_fallback = grant_dlc_config.use_fallback
+		local unlock_class = self._unlocks[grant_unlock]
+
+		if unlock_class and not unlock_class.unlocked(unlock_class) then
+			local class = rawget(_G, class_name)
+			local instance = class.new(class, grant_dlc_name, current_app_id, app_id_to_check, unlock_class, host_address, use_fallback)
+			grants_dlcs[grant_dlc_name] = instance
+			grant_dlcs_indexed[index] = instance
+			index = index + 1
+		end
+	end
+
+	return 
+end
 UnlockManager._init_unlocks = function (self)
 	local unlocks = {}
 	local unlocks_indexed = {}
@@ -91,7 +136,7 @@ UnlockManager.update = function (self, dt)
 		return 
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		self._dlc_status_changed = nil
 		local status = XboxDLC.status()
 
@@ -172,17 +217,41 @@ end
 UnlockManager._update_backend_unlocks = function (self)
 	Profiler.start("UnlockManager:_update_backend_unlocks()")
 
+	if self._state == "done" then
+		Profiler.stop("UnlockManager:_update_backend_unlocks()")
+
+		return 
+	end
+
 	if self._state == "poll_update_required_popup" then
 		local result = Managers.popup:query_result(self._update_required_popup_id)
 
 		if result then
 			Application.quit()
 		end
+	elseif self._state == "query_grant_dlc" then
+		if not rawget(_G, "Steam") then
+			self._state = "done"
+		else
+			self._query_grants(self)
+		end
+	elseif self._state == "reevaluate_unlocks" then
+		for _, unlock in ipairs(self._unlocks_indexed) do
+			if unlock and unlock.reevaluate then
+				unlock.reevaluate(unlock)
+			end
+		end
+
+		self._state = "done"
 	elseif self._state == "query_unlocked" then
 		if Managers.backend:profiles_loaded() then
 			if not Managers.backend:available() then
 				self._state = "backend_not_available"
 
+				return 
+			end
+
+			if not ScriptBackendItem.data_server_script then
 				return 
 			end
 
@@ -194,7 +263,7 @@ UnlockManager._update_backend_unlocks = function (self)
 				local startup_script_name = GameSettingsDevelopment.backend_settings.startup_script
 				local startup_script_params = {}
 
-				if Application.platform() == "win32" then
+				if PLATFORM == "win32" then
 					queue.register_executor(queue, "revision_check", callback(self, "_executor_revision_check"))
 
 					local engine_revision = script_data.build_identifier
@@ -226,7 +295,13 @@ UnlockManager._update_backend_unlocks = function (self)
 			local index = self._query_unlocked_index + 1
 
 			if #self._unlocks_indexed < index then
-				self._state = "done"
+				if PLATFORM ~= "win32" then
+					self._state = "done"
+				else
+					self._state = "query_grant_dlc"
+				end
+
+				Profiler.start("UnlockManager:_update_backend_unlocks()")
 
 				return 
 			end
@@ -326,6 +401,26 @@ UnlockManager._update_backend_unlocks = function (self)
 
 	return 
 end
+UnlockManager._query_grants = function (self)
+	if not self._current_grant_query then
+		self._current_grant_query = self._grant_dlcs_indexed[self._query_grant_index]
+
+		if self._current_grant_query then
+			self._current_grant_query:execute()
+
+			self._grants_handled = true
+		elseif self._grants_handled then
+			self._state = "reevaluate_unlocks"
+		else
+			self._state = "done"
+		end
+	elseif self._current_grant_query and self._current_grant_query:done() then
+		self._query_grant_index = self._query_grant_index + 1
+		self._current_grant_query = nil
+	end
+
+	return 
+end
 UnlockManager._executor_revision_check = function (self, revision_check_data)
 	local valid_engine = revision_check_data.valid_engine
 	local valid_content = revision_check_data.valid_content
@@ -382,7 +477,7 @@ UnlockManager.dlc_id = function (self, name)
 	return unlock.id(unlock)
 end
 UnlockManager.ps4_dlc_product_label = function (self, name)
-	assert(Application.platform() == "ps4", "Only call this function on a PS4")
+	assert(PLATFORM == "ps4", "Only call this function on a PS4")
 
 	local unlock = self._unlocks[name]
 

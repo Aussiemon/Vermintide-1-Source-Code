@@ -1,4 +1,4 @@
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	require("scripts/helpers/debug_helper")
 end
 
@@ -6,14 +6,14 @@ require("scripts/settings/backend_settings")
 
 CONSOLE_DISABLED_INTERACTIONS = CONSOLE_DISABLED_INTERACTIONS or {}
 
-if Application.platform() ~= "win32" then
+if PLATFORM ~= "win32" then
 	CONSOLE_DISABLED_INTERACTIONS = {
 		altar_access = true,
 		quest_access = true
 	}
 end
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	Application.warning("Unlocking all levels for Lite Optional Cert")
 
 	script_data.unlock_all_levels = true
@@ -31,7 +31,7 @@ GameSettingsDevelopment.quicklaunch_params = GameSettingsDevelopment.quicklaunch
 GameSettingsDevelopment.quicklaunch_params.level_key = (LEVEL_EDITOR_TEST and "editor_level") or "castle_01"
 GameSettingsDevelopment.start_state = (LEVEL_EDITOR_TEST and "game") or "menu"
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	GameSettingsDevelopment.skip_start_screen = true
 end
 
@@ -59,7 +59,7 @@ GameSettingsDevelopment.use_engine_optimized_ai_locomotion = true
 local script_data = script_data
 script_data.debug_behaviour_trees = (script_data.debug_behaviour_trees ~= nil and script_data.debug_behaviour_trees) or false
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	GameSettingsDevelopment.use_backend = not Development.parameter("use_local_backend")
 else
 	GameSettingsDevelopment.use_backend = false
@@ -84,7 +84,7 @@ if Development.parameter("gdc") then
 	end
 end
 
-if Application.platform() == "xb1" and Application.build() == "public_dev" then
+if PLATFORM == "xb1" and BUILD == "public_dev" then
 	script_data.debug_enabled = false
 end
 
@@ -122,26 +122,26 @@ if settings.steam or Development.parameter("force_steam") then
 	else
 		Application.quit_with_message("Warhammer: End Times - Vermintide. You need to have the Steam Client running to play the game.")
 	end
-elseif Application.platform() == "ps4" then
-	if Application.build() == "dev" or Application.build() == "debug" or Application.build() == "public_dev" then
+elseif PLATFORM == "ps4" then
+	if BUILD == "dev" or BUILD == "debug" or BUILD == "public_dev" then
 		GameSettingsDevelopment.backend_settings = BackendSettings.ps4
 		GameSettingsDevelopment.network_mode = (LEVEL_EDITOR_TEST and "lan") or "lan"
 	end
 
 	GameSettingsDevelopment.show_fps = true
-elseif Application.platform() == "xb1" then
-	if Application.build() == "dev" or Application.build() == "debug" or Application.build() == "public_dev" then
+elseif PLATFORM == "xb1" then
+	if BUILD == "dev" or BUILD == "debug" or BUILD == "public_dev" then
 		GameSettingsDevelopment.backend_settings = BackendSettings.xb1
 		GameSettingsDevelopment.network_mode = (LEVEL_EDITOR_TEST and "lan") or "lan"
 	end
 
-	if Application.build() == "public_dev" then
+	if BUILD == "public_dev" then
 		GameSettingsDevelopment.show_version_info = false
 		GameSettingsDevelopment.show_fps = false
 	else
 		GameSettingsDevelopment.show_fps = true
 	end
-elseif Application.build() == "dev" or Application.build() == "debug" then
+elseif BUILD == "dev" or BUILD == "debug" then
 	GameSettingsDevelopment.network_mode = (LEVEL_EDITOR_TEST and "lan") or (Development.parameter("force_steam") and "steam") or "lan"
 	GameSettingsDevelopment.show_fps = Development.parameter("show_fps") == nil or Development.parameter("show_fps")
 	script_data.unlock_all_levels = Development.parameter("unlock-all-levels")
@@ -152,13 +152,13 @@ else
 end
 
 GameSettingsDevelopment.disable_crafting = Development.parameter("disable-crafting")
-GameSettingsDevelopment.disable_free_flight = Development.parameter("disable-free-flight") or Application.build() == "release"
+GameSettingsDevelopment.disable_free_flight = Development.parameter("disable-free-flight") or BUILD == "release"
 
 if Development.parameter("quests_enabled") ~= nil then
 	GameSettingsDevelopment.backend_settings.quests_enabled = Development.parameter("quests_enabled")
 end
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	GameSettingsDevelopment.network_port = 0
 else
 	GameSettingsDevelopment.network_port = 10003
@@ -188,7 +188,7 @@ if GameSettingsDevelopment.bone_lod_husks.lod_multiplier == nil then
 	GameSettingsDevelopment.bone_lod_husks.lod_multiplier = 1
 end
 
-if Application.build() == "release" then
+if BUILD == "release" then
 	GameSettingsDevelopment.remove_debug_stuff = false
 else
 	GameSettingsDevelopment.remove_debug_stuff = false
@@ -292,8 +292,6 @@ GameSettingsDevelopment.ignored_rpc_logs = {
 	"rpc_sync_anim_state_4",
 	"rpc_sync_anim_state_5",
 	"rpc_sync_anim_state_7",
-	"rpc_sync_anim_state_9",
-	"rpc_sync_anim_state_11",
 	"rpc_create_bot_nav_transition",
 	"rpc_pacing_changed",
 	"rpc_play_dialogue_event",

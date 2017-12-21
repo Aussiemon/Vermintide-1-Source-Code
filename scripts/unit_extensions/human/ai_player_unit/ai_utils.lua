@@ -26,35 +26,6 @@ AiUtils.special_dead_cleanup = function (unit, blackboard)
 	return 
 end
 local broadphase_query_result = {}
-AiUtils.aggro_nearby_friends_of_enemy = function (unit, broadphase, enemy_unit)
-	enemy_unit = AiUtils.get_actual_attacker_unit(enemy_unit)
-
-	if not unit_alive(enemy_unit) then
-		return 
-	end
-
-	Profiler.start("aggro_nearby_friends_of_enemy")
-
-	local num_broadphase_query_result = Broadphase.query(broadphase, Unit.local_position(unit, 0), 5, broadphase_query_result)
-
-	for i = 1, num_broadphase_query_result, 1 do
-		local other_unit = broadphase_query_result[i]
-
-		if other_unit ~= unit then
-			local ai_simple_extension = ScriptUnit.has_extension(unit, "ai_system")
-
-			if ai_simple_extension then
-				ai_simple_extension.enemy_aggro(ai_simple_extension, unit, enemy_unit)
-			end
-		end
-
-		broadphase_query_result[i] = nil
-	end
-
-	Profiler.stop("aggro_nearby_friends_of_enemy")
-
-	return 
-end
 AiUtils.aggro_unit_of_enemy = function (unit, enemy_unit)
 	enemy_unit = AiUtils.get_actual_attacker_unit(enemy_unit)
 
@@ -396,6 +367,10 @@ AiUtils.show_polearm = function (packmaster_unit, show)
 end
 AiUtils.is_of_interest_to_gutter_runner = function (gutter_runner_unit, enemy_unit, blackboard, ignore_knocked_down)
 	if not unit_alive(enemy_unit) then
+		return 
+	end
+
+	if blackboard.last_completed_pounce_target == enemy_unit and blackboard.last_completed_pounce_time + 10 < Managers.state.time:time("game") then
 		return 
 	end
 

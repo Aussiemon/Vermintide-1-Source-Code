@@ -1,5 +1,5 @@
 local definitions = local_require("scripts/ui/views/scoreboard_ui_definitions")
-local leave_party_text = (Application.platform() == "xb1" and "input_description_leave_party_xb1") or "input_description_leave_party"
+local leave_party_text = (PLATFORM == "xb1" and "input_description_leave_party_xb1") or "input_description_leave_party"
 local generic_input_actions = {
 	default = {
 		{
@@ -55,7 +55,7 @@ local generic_input_actions = {
 		{
 			input_action = "confirm",
 			priority = 2,
-			description_text = (Application.platform() == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
+			description_text = (PLATFORM == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -100,7 +100,7 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "mouse")
 	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "gamepad")
 
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.vote_manager = Managers.state.voting
 
 	print("ScoreboardUI INIT:", self.vote_manager:vote_in_progress())

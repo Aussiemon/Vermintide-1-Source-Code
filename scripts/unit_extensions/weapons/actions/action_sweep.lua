@@ -434,8 +434,10 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 						end
 					end
 
+					local predicted_damage = 0
+
 					if breed or is_pvp_friendly_fire_melee then
-						self._play_character_impact(self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier, is_pvp_friendly_fire_melee)
+						predicted_damage = self._play_character_impact(self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier, is_pvp_friendly_fire_melee)
 					end
 
 					if Managers.state.controller_features and self.owner.local_player and not self.has_played_rumble_effect then
@@ -457,8 +459,16 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 					end
 
 					local charge_value = current_action.charge_value
-					local buff_result = DamageUtils.buff_on_attack(owner_unit, hit_unit, charge_value)
+					local buff_result = DamageUtils.buff_on_attack(owner_unit, hit_unit, charge_value, predicted_damage)
 					local show_blood = breed and not breed.no_blood_splatter_on_damage
+					local statistics_db = Managers.player:statistics_db()
+					local stat = current_action.increment_stat_on_hit
+
+					if stat then
+						local stats_id = self.owner:stats_id()
+
+						statistics_db.increment_stat(statistics_db, stats_id, stat)
+					end
 
 					if show_blood then
 						self.weapon_system:rpc_weapon_blood(nil, attacker_unit_id, attack_template_damage_type_id)
@@ -746,7 +756,7 @@ ActionSweep._play_character_impact = function (self, is_server, owner_unit, curr
 		Unit.animation_event(hit_unit, hit_anim)
 	end
 
-	return 
+	return predicted_damage
 end
 ActionSweep.hit_level_object = function (self, hit_units, hit_unit, owner_unit, current_action, attack_direction, level_index)
 	hit_units[hit_unit] = true
@@ -779,7 +789,11 @@ ActionSweep.hit_level_object = function (self, hit_units, hit_unit, owner_unit, 
 
 	return 
 end
-ActionSweep.finish = function (self)
+ActionSweep.finish = function (self, reason, data)
+	if reason == "interacting" then
+		Unit.flow_event(self.weapon_unit, "lua_finish_interacting")
+	end
+
 	if not script_data.debug_weapons_always_hit_target then
 		return 
 	end
@@ -805,6 +819,15 @@ ActionSweep.finish = function (self)
 	local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 
 	DamageUtils.buff_on_attack(self.owner_unit, target_breed_unit, self.current_action.charge_value)
+
+	local stat = self.current_action.increment_stat_on_hit
+
+	if stat then
+		local statistics_db = Managers.player:statistics_db()
+		local stats_id = self.owner:stats_id()
+
+		statistics_db.increment_stat(statistics_db, stats_id, stat)
+	end
 
 	local backstab_multiplier = 1
 	local hawkeye_multiplier = 0

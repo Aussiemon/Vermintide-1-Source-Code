@@ -14,6 +14,19 @@ if s3d then
 	import(s3d)
 end
 
+BUILD = Application.build()
+PLATFORM = Application.platform()
+Application.build = function ()
+	error("Trying to use BUILD, use global variable BUILD instead.")
+
+	return 
+end
+Application.platform = function ()
+	error("Trying to use Application.platform(), use global variable PLATFORM instead.")
+
+	return 
+end
+
 if ijdbg then
 	print("Using ijdbg")
 	ijdbg.init()
@@ -105,7 +118,7 @@ end
 Boot = Boot or {}
 local controlled_exit = false
 Boot.setup = function (self)
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" or platform == "macosx" then
 		Window.set_focus()
@@ -126,9 +139,13 @@ Boot.setup = function (self)
 	FrameTable.init()
 	self._init_managers(self)
 
-	local start_state, params = project_setup()
+	local state_machine_class, start_state, params = project_setup()
 
-	self._setup_statemachine(self, start_state, params)
+	if start_state then
+		self._setup_statemachine(self, state_machine_class, start_state, params)
+	else
+		Boot.has_pre_state_machine_update = true
+	end
 
 	return 
 end
@@ -211,21 +228,27 @@ Boot.post_update = function (self, dt)
 end
 Boot.render = function (self)
 	Managers.world:render()
-	self._machine:render()
+
+	if not Boot.has_pre_state_machine_update then
+		self._machine:render()
+	end
 
 	return 
 end
-Boot._setup_statemachine = function (self, start_state, params)
+Boot._setup_statemachine = function (self, state_machine_class, start_state, params)
 	Profiler.start("Boot:_setup_statemachine()")
 
-	self._machine = StateMachine:new(self, start_state, params, true)
+	self._machine = state_machine_class.new(state_machine_class, self, start_state, params, true)
 
 	Profiler.stop("Boot:_setup_statemachine()")
 
 	return 
 end
 Boot.shutdown = function (self)
-	self._machine:destroy(true)
+	if not Boot.has_pre_state_machine_update then
+		self._machine:destroy(true)
+	end
+
 	Managers:destroy()
 
 	return 
@@ -239,15 +262,19 @@ function init()
 end
 
 function update(dt)
-	Profiler.start("LUA pre_update")
-	pre_update(dt)
-	Profiler.stop("LUA pre_update")
-	Profiler.start("LUA update")
-	Boot:update(dt)
-	Profiler.stop("LUA update")
-	Profiler.start("LUA post_update")
-	Boot:post_update(dt)
-	Profiler.stop("LUA post_update")
+	if Boot.has_pre_state_machine_update then
+		Boot:pre_state_machine_update(dt)
+	else
+		Profiler.start("LUA pre_update")
+		pre_update(dt)
+		Profiler.stop("LUA pre_update")
+		Profiler.start("LUA update")
+		Boot:update(dt)
+		Profiler.stop("LUA update")
+		Profiler.start("LUA post_update")
+		Boot:post_update(dt)
+		Profiler.stop("LUA post_update")
+	end
 
 	return 
 end

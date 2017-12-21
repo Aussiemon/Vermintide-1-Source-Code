@@ -190,7 +190,7 @@ end
 NetworkClient.rpc_game_started = function (self, sender, round_id)
 	Application.error(string.format("SETTING ROUND ID %s", tostring(round_id)))
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.account:set_round_id(round_id)
 	end
 

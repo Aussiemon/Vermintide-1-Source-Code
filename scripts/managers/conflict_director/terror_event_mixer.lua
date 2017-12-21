@@ -24,9 +24,17 @@ TerrorEventMixer.init_functions = {
 	end,
 	spawn_at_raw = function (event, element, t)
 		if Managers.player.is_server then
+			local breed = Breeds[element.breed_name]
+			local archetype_index = nil
+			local heroic_archetype = element.heroic_archetype_name
+
+			if heroic_archetype then
+				archetype_index = breed.heroic_archetype_lookup[heroic_archetype]
+			end
+
 			local conflict_director = Managers.state.conflict
 
-			conflict_director.spawn_at_raw_spawner(conflict_director, Breeds[element.breed_name], element.spawner_id)
+			conflict_director.spawn_at_raw_spawner(conflict_director, breed, archetype_index, element.spawner_id)
 		end
 
 		return 
@@ -80,6 +88,11 @@ TerrorEventMixer.init_functions = {
 		local conflict_director = Managers.state.conflict
 		local horde_data = conflict_director.event_horde(conflict_director, t, element.spawner_id, element.composition_type, element.limit_spawners, element.horde_silent)
 		element.horde_data = horde_data
+
+		return 
+	end,
+	reset_event_horde = function (event, element, t)
+		Managers.state.entity:system("spawner_system"):reset_spawners_with_event_id(element.event_id)
 
 		return 
 	end,
@@ -195,7 +208,15 @@ TerrorEventMixer.init_functions = {
 TerrorEventMixer.run_functions = {
 	spawn = function (event, element, t, dt)
 		local conflict_director = Managers.state.conflict
-		local unit = conflict_director.spawn_one(conflict_director, Breeds[element.breed_name], event.optional_pos and event.optional_pos:unbox())
+		local breed = Breeds[element.breed_name]
+		local archetype_index = nil
+		local heroic_archetype = element.heroic_archetype_name
+
+		if heroic_archetype then
+			archetype_index = breed.heroic_archetype_lookup[heroic_archetype]
+		end
+
+		local unit = conflict_director.spawn_one(conflict_director, breed, (event.optional_pos and event.optional_pos:unbox()) or nil, archetype_index)
 
 		if unit then
 			return true
@@ -232,6 +253,9 @@ TerrorEventMixer.run_functions = {
 		end
 
 		return 
+	end,
+	reset_event_horde = function (event, element, t, dt)
+		return true
 	end,
 	force_horde = function (event, element, t, dt)
 		if event.ends_at < t then
@@ -390,6 +414,9 @@ TerrorEventMixer.debug_functions = {
 		end
 
 		return 
+	end,
+	reset_event_horde = function (event, element, t, dt)
+		return string.format(element.event_id)
 	end,
 	force_horde = function (event, element, t, dt)
 		return string.format(element.horde_type)

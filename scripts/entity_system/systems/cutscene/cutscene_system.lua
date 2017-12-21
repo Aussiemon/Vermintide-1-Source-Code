@@ -110,7 +110,7 @@ CutsceneSystem.flow_cb_activate_cutscene_camera = function (self, camera_unit, t
 	self.ingame_hud_enabled = ingame_hud_enabled
 	self._should_hide_loading_icon = true
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		Managers.account:set_realtime_multiplay_state("cinematic", true)
 	end
 
@@ -130,7 +130,7 @@ CutsceneSystem.flow_cb_deactivate_cutscene_cameras = function (self)
 		self._should_hide_loading_icon = nil
 	end
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		Managers.account:set_realtime_multiplay_state("cinematic", false)
 	end
 

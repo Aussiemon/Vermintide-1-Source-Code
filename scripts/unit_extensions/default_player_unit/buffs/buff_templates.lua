@@ -1599,7 +1599,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "increased_zoom",
-				bonus = 2,
+				bonus = 1,
 				stat_buff = StatBuffIndex.HAWKEYE
 			}
 		}
@@ -2516,8 +2516,9 @@ BuffTemplates = {
 	infinite_ammo_from_proc = {
 		buffs = {
 			{
-				duration = 3,
+				non_stacking = true,
 				name = "infinite_ammo_from_proc",
+				duration = 5,
 				stat_buff = StatBuffIndex.INFINITE_AMMO_FROM_PROC
 			}
 		}
@@ -2644,7 +2645,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.3,
+				proc_chance = 0.25,
 				name = "not_consume_grenade",
 				stat_buff = StatBuffIndex.NOT_CONSUME_GRENADE
 			}
@@ -2660,7 +2661,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.4,
+				proc_chance = 0.3,
 				name = "not_consume_grenade",
 				stat_buff = StatBuffIndex.NOT_CONSUME_GRENADE
 			}
@@ -3298,7 +3299,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "movement_speed",
-				multiplier = 1.08,
+				multiplier = 1.06,
 				remove_buff_func = "remove_movement_buff",
 				apply_buff_func = "apply_movement_buff",
 				path_to_movement_setting_to_modify = {
@@ -3318,7 +3319,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "movement_speed",
-				multiplier = 1.12,
+				multiplier = 1.08,
 				remove_buff_func = "remove_movement_buff",
 				apply_buff_func = "apply_movement_buff",
 				path_to_movement_setting_to_modify = {
@@ -3373,7 +3374,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.4,
+				multiplier = 0.2,
 				name = "grenade_radius",
 				stat_buff = StatBuffIndex.GRENADE_RADIUS
 			}
@@ -3389,7 +3390,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.5,
+				multiplier = 0.3,
 				name = "grenade_radius",
 				stat_buff = StatBuffIndex.GRENADE_RADIUS
 			}
@@ -3405,7 +3406,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.6,
+				multiplier = 0.4,
 				name = "grenade_radius",
 				stat_buff = StatBuffIndex.GRENADE_RADIUS
 			}

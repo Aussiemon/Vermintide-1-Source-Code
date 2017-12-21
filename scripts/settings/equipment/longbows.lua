@@ -150,7 +150,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "shoot_charged",
-					start_time = 0.65,
+					start_time = 0.75,
 					action = "action_one",
 					input = "action_one",
 					end_time = math.huge
@@ -203,7 +203,7 @@ weapon_template.ammo_data = {
 	ammo_hand = "left",
 	ammo_per_clip = 1,
 	ammo_unit_3p = "units/weapons/player/wpn_we_quiver_t1/wpn_we_arrow_t1_3p",
-	max_ammo = 54,
+	max_ammo = 46,
 	reload_on_ammo_pickup = true,
 	reload_time = 0,
 	ammo_unit_attachment_node_linking = AttachmentNodeLinking.arrow

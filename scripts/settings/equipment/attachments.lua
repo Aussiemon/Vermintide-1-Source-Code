@@ -1,3 +1,5 @@
+require("scripts/settings/attachment_node_linking")
+
 FirstPersonAttachments = {
 	witch_hunter = {
 		unit = "units/beings/player/witch_hunter/first_person_base/chr_first_person_mesh",
@@ -163,6 +165,17 @@ local bw_gates = {
 	buffs = {}
 }
 Attachments.bw_gates = table.clone(bw_gates)
+local bw_gates_small = {
+	unit = "",
+	display_unit = "units/weapons/weapon_display/display_helmet_bw_gate_small",
+	show_attachments_event = "lua_show_breastplate",
+	attachment_node_linking = AttachmentNodeLinking.bw_gate,
+	slots = {
+		"slot_hat"
+	},
+	buffs = {}
+}
+Attachments.bw_gates_small = table.clone(bw_gates_small)
 local bw_gates_facemask = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",

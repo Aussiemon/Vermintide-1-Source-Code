@@ -316,7 +316,7 @@ BulldozerPlayer.name = function (self)
 
 			return name
 		end
-	elseif Application.platform() == "xb1" or Application.platform() == "ps4" then
+	elseif PLATFORM == "xb1" or PLATFORM == "ps4" then
 		if self._cached_name then
 			return self._cached_name
 		end

@@ -1,7 +1,7 @@
 Development = Development or {}
 PATCHED_USER_SETTINGS = PATCHED_USER_SETTINGS or false
 
-if Application.platform() == "ps4" or (Application.platform() == "xb1" and not PATCHED_USER_SETTINGS) then
+if PLATFORM == "ps4" or (PLATFORM == "xb1" and not PATCHED_USER_SETTINGS) then
 	UserSettings = UserSettings or {}
 	Application.set_user_setting = function (...)
 		local t = UserSettings
@@ -57,7 +57,7 @@ Development.init_user_settings = function ()
 		macosx = true,
 		xb1 = true
 	}
-	local current_platform = Application.platform()
+	local current_platform = PLATFORM
 
 	if not enabled_platforms[current_platform] then
 		Development.user_setting_disable()
@@ -65,7 +65,7 @@ Development.init_user_settings = function ()
 		return 
 	end
 
-	if Application.build() == "release" then
+	if BUILD == "release" then
 		Development.user_setting_disable()
 
 		return 

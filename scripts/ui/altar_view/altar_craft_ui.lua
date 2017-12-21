@@ -949,7 +949,7 @@ AltarCraftUI.add_item = function (self, backend_item_id)
 	widget.style.icon_frame_texture_id.color = Colors.get_table(rarity)
 	self.active_item_id = backend_item_id
 	self.active_item_data = item_data
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local description_text = "altar_craft_description_2"
 
 	if (platform == "win32" and gamepad_active) or platform == "xb1" then
@@ -1005,7 +1005,7 @@ AltarCraftUI.get_craft_cost = function (self)
 	local selected_slot_name = self.selected_slot_name(self)
 	local traits_cost = 0
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		if selected_slot_name == "any" then
 			traits_cost = rarity_settings.random
 		else

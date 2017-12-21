@@ -6,14 +6,14 @@ LobbyHost.init = function (self, network_options, lobby)
 	local project_hash = network_options.project_hash
 	self.network_hash = LobbyAux.create_network_hash(config_file_name, project_hash)
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		assert(network_options.max_members, "Must provide max members to LobbyHost")
 	end
 
-	self.max_members = Application.platform() == "win32" and network_options.max_members
+	self.max_members = PLATFORM == "win32" and network_options.max_members
 	self.lobby = lobby or LobbyInternal.create_lobby(network_options)
 	self.peer_id = Network.peer_id()
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 
 	return 
 end
@@ -52,7 +52,7 @@ LobbyHost.update = function (self, dt)
 		self.state = new_state
 
 		if new_state == LobbyState.JOINED then
-			if Application.platform() == "ps4" then
+			if PLATFORM == "ps4" then
 				local lobby_data_table = self.lobby_data_table or {}
 				lobby_data_table.network_hash = self.network_hash
 
@@ -75,7 +75,7 @@ LobbyHost.update = function (self, dt)
 		end
 	end
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		lobby.update(lobby, dt)
 	end
 
@@ -91,7 +91,7 @@ LobbyHost.set_lobby_data = function (self, lobby_data_table)
 	if self.state == LobbyState.JOINED then
 		local lobby = self.lobby
 
-		if Application.platform() == "ps4" then
+		if PLATFORM == "ps4" then
 			lobby.set_data_table(lobby, lobby_data_table)
 		else
 			for key, value in pairs(lobby_data_table) do

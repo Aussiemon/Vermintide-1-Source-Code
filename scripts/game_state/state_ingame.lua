@@ -52,7 +52,7 @@ require("scripts/managers/leaderboards/leaderboard_manager")
 StateIngame = class(StateIngame)
 StateIngame.NAME = "StateIngame"
 StateIngame.on_enter = function (self)
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Application.set_kinect_enabled(false)
 	end
 
@@ -94,7 +94,7 @@ StateIngame.on_enter = function (self)
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "mouse")
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "gamepad")
 
-		if Application.platform() == "win32" and (Application.build() == "dev" or Application.build() == "debug") then
+		if PLATFORM == "win32" and (BUILD == "dev" or BUILD == "debug") then
 			input_manager.initialize_device(input_manager, "synergy_keyboard")
 			input_manager.initialize_device(input_manager, "synergy_mouse")
 			input_manager.map_device_to_service(input_manager, "Debug", "synergy_keyboard")
@@ -261,6 +261,13 @@ StateIngame.on_enter = function (self)
 
 	Managers.telemetry.events:game_started(is_server, level_key, difficulty)
 
+	if TelemetrySettings.collect_memory then
+		local memory_tree = Profiler.memory_tree()
+		local memory_resources = Profiler.memory_resources("all")
+
+		Managers.telemetry.events:memory_statistics(memory_tree, memory_resources)
+	end
+
 	if is_server then
 		local session_id = Managers.state.network:session_id()
 
@@ -289,7 +296,7 @@ StateIngame.on_enter = function (self)
 
 			loading_context.checkpoint_data = nil
 		else
-			Managers.state.conflict.level_analysis:set_random_seed(checkpoint_data)
+			Managers.state.conflict.level_analysis:set_random_seed()
 		end
 	end
 
@@ -345,7 +352,7 @@ StateIngame.on_enter = function (self)
 
 		Managers.player:add_player(nil, viewport_name, self.world_name, i)
 
-		self.machines[i] = StateMachine:new(self, StateInGameRunning, params, true)
+		self.machines[i] = GameStateMachine:new(self, StateInGameRunning, params, true)
 	end
 
 	Profiler.stop("sub_states")
@@ -387,7 +394,7 @@ StateIngame.on_enter = function (self)
 
 	Profiler.stop("level_stuff")
 
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" then
 		Window.set_mouse_focus(true)
@@ -439,7 +446,7 @@ StateIngame.on_enter = function (self)
 		WwiseWorld.set_global_parameter(wwise_world, "dynamic_range_sound", value)
 	end
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local sound_quality = Application.user_setting("sound_quality")
 
 		SoundQualitySettings.set_sound_quality(wwise_world, sound_quality)
@@ -498,7 +505,7 @@ StateIngame.on_enter = function (self)
 
 	Managers.telemetry.events:tech_system(system_info, adapter_index)
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.account:set_presence("playing")
 	elseif platform == "ps4" then
 		if self.is_in_inn then
@@ -574,20 +581,28 @@ StateIngame._setup_world = function (self)
 
 	return 
 end
-StateIngame.physics_async_update = function (self, dt)
-	local game_mode_ended = Managers.state.game_mode:is_game_mode_ended()
+StateIngame._safe_to_do_entity_update = function (self)
 	local network_manager = Managers.state.network
+
+	if network_manager.has_left_game(network_manager) or not network_manager.in_game_session(network_manager) then
+		return false
+	end
+
+	local t = Managers.time:time("game")
+	local game_mode_ended = Managers.state.game_mode:is_game_mode_ended()
+	local left_game_mode = game_mode_ended and self.game_mode_end_timer and self.game_mode_end_timer <= t
+
+	return not left_game_mode
+end
+StateIngame.physics_async_update = function (self, dt)
 	local t = Managers.time:time("game")
 
 	Profiler.start("Music manager")
 	Managers.music:update(self.dt, t)
 	Profiler.stop("Music manager")
 
-	if not network_manager.has_left_game(network_manager) then
-		if game_mode_ended and self.game_mode_end_timer and self.game_mode_end_timer <= t then
-		else
-			self.entity_system:physics_async_update()
-		end
+	if self._safe_to_do_entity_update(self) then
+		self.entity_system:physics_async_update()
 	end
 
 	return 
@@ -712,13 +727,8 @@ StateIngame.pre_update = function (self, dt)
 	Profiler.stop("spawn")
 	self.entity_system:commit_and_remove_pending_units()
 
-	local game_mode_ended = Managers.state.game_mode:is_game_mode_ended()
-
-	if not network_manager.has_left_game(network_manager) then
-		if game_mode_ended and self.game_mode_end_timer and self.game_mode_end_timer <= t then
-		else
-			self.entity_system:pre_update(dt, t)
-		end
+	if self._safe_to_do_entity_update(self) then
+		self.entity_system:pre_update(dt, t)
 	end
 
 	return 
@@ -835,13 +845,8 @@ StateIngame.update = function (self, dt, main_t)
 		self.game_mode_end_timer = t + 0.2
 	end
 
-	local network_manager = Managers.state.network
-
-	if not network_manager.has_left_game(network_manager) then
-		if game_mode_ended and self.game_mode_end_timer <= t then
-		else
-			self.entity_system:update(dt, t)
-		end
+	if self._safe_to_do_entity_update(self) then
+		self.entity_system:update(dt, t)
 	end
 
 	if is_server then
@@ -905,7 +910,7 @@ StateIngame.connected_to_network = function (self, t)
 
 	local connected_to_network = true
 
-	if Application.platform() == "win32" and rawget(_G, "Steam") then
+	if PLATFORM == "win32" and rawget(_G, "Steam") then
 		connected_to_network = Steam.connected()
 	end
 
@@ -932,7 +937,7 @@ end
 StateIngame._check_exit = function (self, t)
 	local network_manager = Managers.state.network
 	local lobby = self._lobby_host or self._lobby_client
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local backend_manager = Managers.backend
 	local waiting_user_input = backend_manager.is_waiting_for_user_input(backend_manager)
 	local rerolling = ScriptBackendItem.get_rerolling_trait_state() and not backend_manager.is_disconnected(backend_manager)
@@ -950,7 +955,7 @@ StateIngame._check_exit = function (self, t)
 			transition = "restart_game"
 
 			Development.set_parameter("auto_join", true)
-		elseif Application.platform() == "xb1" and Managers.account:leaving_game() then
+		elseif PLATFORM == "xb1" and Managers.account:leaving_game() then
 			transition = "return_to_title_screen"
 		end
 
@@ -1210,7 +1215,7 @@ StateIngame._check_exit = function (self, t)
 			self.parent.loading_context.restart_network = true
 
 			if exit_type == "lobby_state_failed" then
-				if Application.platform() == "xb1" then
+				if PLATFORM == "xb1" then
 					return StateLoading
 				else
 					return StateTitleScreen
@@ -1340,7 +1345,23 @@ end
 StateIngame.on_exit = function (self, application_shutdown)
 	UPDATE_POSITION_LOOKUP()
 	UPDATE_PLAYER_LISTS()
+
+	if PLATFORM ~= "win32" then
+		local game_mode_key = Managers.state.game_mode:game_mode_key()
+
+		if game_mode_key ~= "inn" then
+			StatisticsUtil.register_console_specific_stats(self.statistics_db)
+		end
+	end
+
 	self._check_and_add_end_game_telemetry(self, application_shutdown)
+
+	if TelemetrySettings.collect_memory then
+		local memory_tree = Profiler.memory_tree()
+		local memory_resources = Profiler.memory_resources("all")
+
+		Managers.telemetry.events:memory_statistics(memory_tree, memory_resources)
+	end
 
 	if TelemetrySettings.send then
 		local game_mode_key = Managers.state.game_mode:game_mode_key()
@@ -1425,7 +1446,7 @@ StateIngame.on_exit = function (self, application_shutdown)
 		self.network_client:unregister_rpcs()
 	end
 
-	if self.network_server then
+	if self.network_server and not application_shutdown then
 		self.network_server:on_level_exit()
 	end
 
@@ -1509,7 +1530,7 @@ StateIngame.on_exit = function (self, application_shutdown)
 	else
 		self.profile_synchronizer:unregister_network_events()
 
-		if self.is_server and not self.is_in_inn and not self.is_in_tutorial and Application.platform() == "xb1" then
+		if self.is_server and not self.is_in_inn and not self.is_in_tutorial and PLATFORM == "xb1" then
 			local level_key = self.level_transition_handler:get_next_level_key()
 			local difficulty = current_difficulty
 
@@ -1561,7 +1582,7 @@ StateIngame.on_exit = function (self, application_shutdown)
 
 	Managers.transition:show_loading_icon()
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		if self.is_in_tutorial then
 			Managers.account:set_realtime_multiplay_state("tutorial", false)
 		end
@@ -1621,7 +1642,7 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 
 	network_manager.register_event_delegate(network_manager, network_event_delegate)
 
-	local build = Application.build()
+	local build = BUILD
 
 	if build == "debug" or build == "dev" then
 		self._debug_event_manager_rpc = DebugEventManagerRPC:new(network_event_delegate)

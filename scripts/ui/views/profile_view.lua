@@ -296,7 +296,7 @@ ProfileView.handle_input = function (self, input_service, dt)
 	if not transitioning then
 		if input_manager.is_device_active(input_manager, "gamepad") then
 			self.profile_world_view:handle_controller_input(input_service, dt)
-		elseif Application.platform() == "win32" then
+		elseif PLATFORM == "win32" then
 			self.profile_world_view:handle_mouse_input(input_service, dt)
 		end
 	end

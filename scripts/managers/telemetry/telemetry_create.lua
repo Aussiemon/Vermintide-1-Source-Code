@@ -11,7 +11,7 @@ function CreateTelemetryManager()
 		print("[TelemetryManager] No cjson interface found! Fallback to dummy...")
 
 		return TelemetryManagerDummy:new()
-	elseif Application.platform() ~= "win32" then
+	elseif PLATFORM ~= "win32" then
 		print("[TelemetryManager] Only supported on win32 currently! Fallback to dummy...")
 
 		return TelemetryManagerDummy:new()

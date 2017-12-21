@@ -5,12 +5,12 @@ require("scripts/managers/input/input_aux")
 require("scripts/managers/input/input_filters")
 require("scripts/managers/input/input_debugger")
 
-local most_recent_input_device = most_recent_input_device or (Application.platform() == "win32" and Keyboard) or Pad1
-local most_recent_input_device_type = most_recent_input_device_type or (Application.platform() == "win32" and "keyboard") or "gamepad"
+local most_recent_input_device = most_recent_input_device or (PLATFORM == "win32" and Keyboard) or Pad1
+local most_recent_input_device_type = most_recent_input_device_type or (PLATFORM == "win32" and "keyboard") or "gamepad"
 local gamepad_disabled = Development.parameter("disable_gamepad")
 InputManager = class(InputManager)
 InputManager.init = function (self)
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.input_services = {}
 	self.input_devices = {}
 	self.stored_keymaps_data = {}
@@ -811,7 +811,7 @@ InputManager.clear_keybinding = function (self, keybinding_table_name, keybindin
 
 	return 
 end
-InputManager.change_keybinding = function (self, keybinding_table_name, keybinding_table_key, keymap_name, new_button_index, new_device_type)
+InputManager.change_keybinding = function (self, keybinding_table_name, keybinding_table_key, keymap_name, new_button_index, new_device_type, new_state_type)
 	assert(type(new_button_index) == "number", "New button index must be a number.")
 
 	local keymaps_data = self.keymaps_data(self, keybinding_table_name)
@@ -831,8 +831,10 @@ InputManager.change_keybinding = function (self, keybinding_table_name, keybindi
 	assert(keymapping, "No such keymap name %s", keymap_name)
 	assert(InputAux.input_device_mapping[new_device_type], "No such input device type %s", new_device_type)
 
-	keymapping[2] = new_button_index
 	keymapping[1] = new_device_type
+	keymapping[2] = new_button_index
+	keymapping[3] = new_state_type
+	keymapping.n = 3
 
 	return 
 end

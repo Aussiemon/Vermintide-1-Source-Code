@@ -873,6 +873,8 @@ DialogueSystem.physics_async_update = function (self, context, t)
 					playing_dialogues[dialogue] = category_setting
 					playing_units[dialogue_actor_unit] = extension
 
+					fassert(extension.last_query, "Trying to add extension to playing units with no last_query.")
+
 					if source_id ~= 0 then
 						Managers.telemetry.events:vo_play_event(sound_event, result, speaker_name)
 					end
@@ -1517,6 +1519,8 @@ DialogueSystem.rpc_play_dialogue_event = function (self, sender, go_id, is_level
 	if not dialogue_actor_unit then
 		return 
 	end
+
+	fassert(not self.is_server, "rpc_play_dialogue_event only allowed on clients")
 
 	local dialogue_name = NetworkLookup.dialogues[dialogue_id]
 	local dialogue = self.dialogues[dialogue_name]

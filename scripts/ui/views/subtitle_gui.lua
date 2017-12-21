@@ -46,7 +46,6 @@ SubtitleGui.init = function (self, ingame_ui_context)
 	self.input_manager = ingame_ui_context.input_manager
 	self.playing_dialogues = {}
 	self.subtitles_to_display = {}
-	local localizers = {}
 	self.subtitle_list = {}
 	self._subtitle_text = ""
 	local level_key, _ = ingame_ui_context.level_transition_handler:get_current_level_keys()
@@ -54,32 +53,6 @@ SubtitleGui.init = function (self, ingame_ui_context)
 	local auto_load_files = DialogueSettings.auto_load_files
 	local level_specific_load_files = DialogueSettings.level_specific_load_files[level_key]
 	local blocked_auto_load = DialogueSettings.blocked_auto_load_files[level_key]
-
-	if Application.can_get("strings", dialogue_filename) then
-		localizers[level_key] = Localizer(dialogue_filename)
-	end
-
-	if not blocked_auto_load then
-		for i, file_name in ipairs(auto_load_files) do
-			if Application.can_get("strings", file_name) then
-				local last_slash = string.match(file_name, "^.*()/")
-				local database_name = string.sub(file_name, last_slash + 1)
-				localizers[database_name] = Localizer(file_name)
-			end
-		end
-	end
-
-	if level_specific_load_files then
-		for i, file_name in ipairs(level_specific_load_files) do
-			if Application.can_get("strings", file_name) then
-				local last_slash = string.match(file_name, "^.*()/")
-				local database_name = string.sub(file_name, last_slash + 1)
-				localizers[database_name] = Localizer(file_name)
-			end
-		end
-	end
-
-	self.localizers = localizers
 
 	self.create_ui_elements(self)
 
@@ -98,7 +71,6 @@ SubtitleGui.create_ui_elements = function (self)
 	return 
 end
 SubtitleGui.destroy = function (self)
-	self.localizers = nil
 	self.playing_dialogues = nil
 
 	GarbageLeakDetector.register_object(self, "subtitle_gui")
@@ -167,13 +139,12 @@ SubtitleGui.update = function (self, dt)
 		if currently_playing_dialogue then
 			if dialogue_changed then
 				remake_text = true
-				local localizers = self.localizers
-				local localizer = localizers[currently_playing_dialogue.database]
+				local text_id = currently_playing_dialogue.currently_playing_subtitle
 
-				if localizer then
-					local dialogue_text = Localizer.lookup(localizer, currently_playing_dialogue.currently_playing_subtitle)
+				if Managers.localizer:exists(text_id) then
+					local dialogue_text = Localize(text_id)
 
-					if dialogue_text ~= nil and dialogue_text ~= "" then
+					if dialogue_text ~= "" then
 						if self._has_subtitle_for_unit(self, unit) then
 							self._remove_subtitle(self, unit)
 						end

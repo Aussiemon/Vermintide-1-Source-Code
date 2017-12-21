@@ -9,7 +9,7 @@ local accepted_slots = {
 	slot_melee = true
 }
 OverchargeBarUI.init = function (self, ingame_ui_context)
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
 	self.slot_equip_animations = {}

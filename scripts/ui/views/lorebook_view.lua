@@ -5,6 +5,7 @@
 require("scripts/ui/views/lorebook_page_layout")
 require("scripts/ui/views/lorebook_pages")
 
+local BaseLocalize = Localize
 local Localize = LocalizeLorebook
 local HOVER_TEXTURE_SPACING = 25
 local STATUS_TEXTURE_SPACING = -5
@@ -1359,6 +1360,10 @@ LorebookView.on_enter = function (self)
 	self.change_tab_index(self, 1, false)
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
+	if PLATFORM ~= "win32" and not SaveData.has_shown_lorebook_popup then
+		self._popup_id = Managers.popup:queue_popup(BaseLocalize("popup_lorebook_not_localized"), BaseLocalize("popup_info_topic"), "ok", BaseLocalize("menu_ok"))
+	end
+
 	return 
 end
 LorebookView.on_exit = function (self)
@@ -1366,6 +1371,10 @@ LorebookView.on_exit = function (self)
 
 	self.exiting = nil
 	self.active = nil
+
+	if self._popup_id then
+		Managers.popup:cancel_popup(self._popup_id)
+	end
 
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
@@ -1412,9 +1421,27 @@ LorebookView.update_animations = function (self, dt)
 	local ui_animator = self.ui_animator
 
 	ui_animator.update(ui_animator, dt)
+	self._handle_popup(self)
 
 	if self.page_reveal_anim_id and ui_animator.is_animation_completed(ui_animator, self.page_reveal_anim_id) then
 		self.page_reveal_anim_id = nil
+	end
+
+	return 
+end
+LorebookView._handle_popup = function (self)
+	if self._popup_id then
+		local result = Managers.popup:query_result(self._popup_id)
+
+		if result then
+			if result == "ok" then
+				SaveData.has_shown_lorebook_popup = true
+
+				Managers.save:auto_save(SaveFileName, SaveData)
+			end
+
+			self._popup_id = nil
+		end
 	end
 
 	return 

@@ -72,7 +72,7 @@ StateTitleScreenLoadSave.update = function (self, dt, t)
 			self._check_invite(self)
 			title_start_ui.set_information_text(title_start_ui, Localize("loading_checking_invites"))
 		elseif self._state == "signin_to_xsts" then
-			title_start_ui.set_information_text(title_start_ui, Localize("loading_acquiring_ xsts_token"))
+			title_start_ui.set_information_text(title_start_ui, Localize("loading_acquiring_xsts_token"))
 			self._signin_to_xsts(self)
 		elseif self._state == "delete_save" then
 			self._delete_save(self)
@@ -381,6 +381,7 @@ end
 StateTitleScreenLoadSave._create_save = function (self)
 	self._state = "waiting_for_save"
 	SaveData = table.clone(DefaultSaveData)
+	SaveData.player_data_version = nil
 
 	Managers.save:auto_save(SaveFileName, SaveData, callback(self, "cb_save_done"))
 
@@ -394,6 +395,7 @@ StateTitleScreenLoadSave.cb_save_done = function (self, data)
 		self._state = "check_popup"
 	elseif Managers.account:is_guest() then
 		SaveData = table.clone(DefaultSaveData)
+		SaveData.player_data_version = nil
 
 		populate_save_data(SaveData)
 

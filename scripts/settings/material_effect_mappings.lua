@@ -618,7 +618,7 @@ MaterialEffectMappings.melee_hit_sword_2h = MaterialEffectMappings.melee_hit_swo
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "sword_2h_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -876,7 +876,7 @@ MaterialEffectMappings.melee_hit_sword_1h = MaterialEffectMappings.melee_hit_swo
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "sword_1h_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -1134,7 +1134,7 @@ MaterialEffectMappings.melee_hit_dagger = MaterialEffectMappings.melee_hit_dagge
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "dagger_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -1392,7 +1392,7 @@ MaterialEffectMappings.melee_hit_axes_2h = MaterialEffectMappings.melee_hit_axes
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "axe_2h_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -1650,7 +1650,7 @@ MaterialEffectMappings.melee_hit_axes_1h = MaterialEffectMappings.melee_hit_axes
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "axe_1h_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -1892,7 +1892,7 @@ MaterialEffectMappings.melee_hit_hammers_2h = MaterialEffectMappings.melee_hit_h
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "hammer_2h_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -2134,7 +2134,7 @@ MaterialEffectMappings.melee_hit_hammers_1h = MaterialEffectMappings.melee_hit_h
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "hammer_1h_hit_statics",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -2374,7 +2374,7 @@ MaterialEffectMappings.punch_hit = MaterialEffectMappings.punch_hit or {
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "Play_melee_punch_hit_static",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",
@@ -2598,7 +2598,7 @@ MaterialEffectMappings.wooden_sword_hit = MaterialEffectMappings.wooden_sword_hi
 			}
 		},
 		flesh = {
-			event = "melee_hit",
+			event = "Play_weapon_wooden_sword_hit_static",
 			parameters = {
 				weapon_type = "1h_sword",
 				material = "cloth",

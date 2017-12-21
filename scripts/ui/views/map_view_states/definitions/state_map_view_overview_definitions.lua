@@ -848,7 +848,7 @@ local function create_difficulty_banner(scenegraph_id, gui)
 	}
 end
 
-local num_players_tooltip = (Application.platform() == "xb1" and "map_number_of_players_tooltip_xb1") or "map_number_of_players_tooltip"
+local num_players_tooltip = (PLATFORM == "xb1" and "map_number_of_players_tooltip_xb1") or "map_number_of_players_tooltip"
 local widgets = {
 	frame_left = UIWidgets.create_simple_texture("game_mode_fade", "frame_left"),
 	frame_right = UIWidgets.create_simple_uv_texture("game_mode_fade", {
@@ -932,7 +932,7 @@ local widgets = {
 		}
 	})
 }
-local platform = Application.platform()
+local platform = PLATFORM
 local generic_input_actions = {
 	default = {
 		{

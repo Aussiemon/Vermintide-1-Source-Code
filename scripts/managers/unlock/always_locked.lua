@@ -4,6 +4,7 @@ AlwaysLocked.init = function (self, name, app_id, backend_id)
 	self._id = "0"
 	self._backend_id = nil
 	self._unlocked = false
+	self._owned = false
 
 	return 
 end
@@ -15,6 +16,9 @@ AlwaysLocked.backend_id = function (self)
 end
 AlwaysLocked.unlocked = function (self)
 	return self._unlocked
+end
+AlwaysLocked.owned = function (self)
+	return self._owned
 end
 
 return 

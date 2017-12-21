@@ -58,6 +58,7 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_advance_towards_player
 require("scripts/entity_system/systems/behaviour/nodes/bt_move_to_players_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_observe_poison_wind_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_switch_to_combat_state_action")
+require("scripts/entity_system/systems/behaviour/nodes/bt_throw_simple_projectile_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_pack_master_skulk_around_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_pack_master_follow_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_pack_master_attack_action")
@@ -86,6 +87,8 @@ require("scripts/entity_system/systems/behaviour/utility/utility")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_critter_pig")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_critter_rat")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_gutter_runner")
+require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_gutter_runner_heroic")
+require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_gutter_runner_decoy")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_horde_rat")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_horde_vermin")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_loot_rat")
@@ -96,6 +99,7 @@ require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_ska
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_skaven_ratling_gunner")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin_commander")
+require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin_champion")
 
 for _, dlc in pairs(DLCSettings) do
 	local nodes = dlc.behaviour_tree_nodes

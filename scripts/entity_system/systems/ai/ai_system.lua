@@ -49,7 +49,7 @@ AISystem.init = function (self, context, name)
 	self._nav_world = nav_world
 	GLOBAL_AI_NAVWORLD = nav_world
 
-	if Application.platform() ~= Application.WIN32 then
+	if PLATFORM ~= Application.WIN32 then
 		GwNavWorld.set_pathfinder_budget(nav_world, 0.0045)
 	end
 
@@ -561,9 +561,13 @@ local function update_blackboard(unit, blackboard, t, dt)
 
 	local health_extension = ScriptUnit.extension(unit, "health_system")
 	blackboard.current_health_percent = health_extension.current_health_percent(health_extension)
-	local destination = blackboard.navigation_extension:destination()
 	local current_position = POSITION_LOOKUP[unit]
-	blackboard.destination_dist = Vector3_distance(current_position, destination)
+	local navigation_extension = blackboard.navigation_extension
+
+	if navigation_extension then
+		blackboard.destination_dist = navigation_extension.distance_to_destination(navigation_extension, current_position)
+	end
+
 	local ai_slot_system = Managers.state.entity:system("ai_slot_system")
 	blackboard.have_slot = (ai_slot_system.ai_unit_have_slot(ai_slot_system, unit) and 1) or 0
 	blackboard.wait_slot_distance = ai_slot_system.ai_unit_wait_slot_distance(ai_slot_system, unit)
@@ -645,7 +649,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 	return false
 end
 
-local MAX_PRIO_UPDATES_PER_FRAME = (Application.platform() == "win32" and 40) or 20
+local MAX_PRIO_UPDATES_PER_FRAME = (PLATFORM == "win32" and 40) or 20
 AISystem.update_ai_blackboards_prioritized = function (self, t, dt)
 	Profiler.start("prio")
 

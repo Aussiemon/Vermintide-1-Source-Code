@@ -209,7 +209,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 
 					if progress == 1 then
 						if current_number_of_members < MatchmakingSettings.MAX_NUMBER_OF_PLAYERS then
-							local text_key = (Application.platform() == "xb1" and "popup_matchmaking_start_without_full_party_xb1") or "popup_matchmaking_start_without_full_party"
+							local text_key = (PLATFORM == "xb1" and "popup_matchmaking_start_without_full_party_xb1") or "popup_matchmaking_start_without_full_party"
 							self._popup_id = Managers.popup:queue_popup(Localize(text_key), Localize("popup_notice_topic"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 
 							self.matchmaking_ui:set_ready_progress(0)

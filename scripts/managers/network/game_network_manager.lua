@@ -1,7 +1,5 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
-require("scripts/network_lookup/network_lookup")
-
 local game_object_templates = dofile("scripts/network/game_object_templates")
 
 local function debug_print(format, ...)
@@ -330,7 +328,7 @@ GameNetworkManager.game_object_or_level_id = function (self, unit)
 		return level_index, true
 	end
 
-	return 
+	return nil, false
 end
 GameNetworkManager.level_object_id = function (self, unit)
 	local current_level = LevelHelper:current_level(self._world)
@@ -572,6 +570,8 @@ GameNetworkManager.game_object_migrated_to_me = function (self, go_id, old_peer_
 	return 
 end
 GameNetworkManager.game_session_disconnect = function (self, host_id)
+	debug_print("Engine called game_session_disconnect callback")
+
 	self._game_session_disconnect = true
 
 	for game_object_id, callback in pairs(self._game_object_disconnect_callbacks) do

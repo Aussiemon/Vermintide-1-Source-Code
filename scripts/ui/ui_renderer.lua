@@ -230,9 +230,9 @@ UIRenderer.create_video_player = function (self, world, resource, set_loop)
 
 	return 
 end
-UIRenderer.destroy_video_player = function (self)
+UIRenderer.destroy_video_player = function (self, world)
 	assert(self.video_player)
-	World.destroy_video_player(self.world, self.video_player)
+	World.destroy_video_player(world or self.world, self.video_player)
 
 	self.video_player = nil
 
@@ -411,7 +411,19 @@ UIRenderer.draw_element = function (self, ui_element, ui_style, ui_style_global,
 			end
 		end
 
+		local style_data = ui_style
 		local style_id = pass_info.style_id
+
+		if style_id then
+			style_data = ui_style[style_id]
+
+			if style_data then
+				style_data.parent = ui_style
+			else
+				style_data = ui_style
+			end
+		end
+
 		local style_data = (style_id and ui_style[style_id]) or ui_style
 
 		assert(not style_id or (style_id and style_data), "No style data for style with id %s", style_id)
@@ -707,7 +719,9 @@ UIRenderer.draw_gradient_mask_texture = function (self, material, lower_left_cor
 	local texture_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(material)
 	local gui_material = Gui.material((retained_id and gui_retained) or gui, (texture_settings and texture_settings.material_name) or material)
 
-	Material.set_scalar(gui_material, "gradient_threshold", gradient_threshold)
+	if gui_material then
+		Material.set_scalar(gui_material, "gradient_threshold", gradient_threshold)
+	end
 
 	if retained_id == true then
 		return UIRenderer.script_draw_bitmap(self.gui_retained, self.render_settings, material, gui_position, gui_size, color, masked, nil, nil)
@@ -1091,13 +1105,19 @@ UIRenderer.draw_justified_text = function (self, text, font_material, font_size,
 
 	return 
 end
-UIRenderer.word_wrap = function (self, text, font_material, size, width, ...)
+UIRenderer.word_wrap = function (self, text, font_material, size, width, option)
 	local whitespace = " "
 	local soft_dividers = "-+&/*"
 	local return_dividers = "\n"
 	local reuse_global_table = true
 	local scale = RESOLUTION_LOOKUP.scale
-	local rows, return_indices = Gui.word_wrap(self.gui, text, font_material, size, width*scale, whitespace, soft_dividers, return_dividers, reuse_global_table, ...)
+	local rows, return_indices = nil
+
+	if option then
+		rows, return_indices = Gui.word_wrap(self.gui, text, font_material, size, width*scale, whitespace, soft_dividers, return_dividers, reuse_global_table, option)
+	else
+		rows, return_indices = Gui.word_wrap(self.gui, text, font_material, size, width*scale, whitespace, soft_dividers, return_dividers, reuse_global_table)
+	end
 
 	return rows, return_indices
 end

@@ -3,6 +3,7 @@ require("scripts/ui/views/map_view_helper")
 local definitions = local_require("scripts/ui/views/map_view_area_handler_definitions")
 local game_mode_level_area_textures = definitions.game_mode_level_area_textures
 MapViewAreaHandler = class(MapViewAreaHandler)
+local platform = PLATFORM
 
 local function sort_level_information_list(a, b)
 	local a_level_key = a.level_key
@@ -22,10 +23,20 @@ local function sort_level_information_list(a, b)
 	local area_settings = AreaSettings
 	local a_settings = (a_is_area and area_settings[a_area]) or level_settings[a_level_key].map_settings
 	local b_settings = (b_is_area and area_settings[b_area]) or level_settings[b_level_key].map_settings
-	local a_order = a_settings.sorting or 99
-	local b_order = b_settings.sorting or 99
 
-	return a_order < b_order
+	if platform == "win32" then
+		local a_order = a_settings.sorting or 99
+		local b_order = b_settings.sorting or 99
+
+		return a_order < b_order
+	else
+		a_order = a_settings.console_sorting or 99
+		local b_order = b_settings.console_sorting or 99
+
+		return a_order < b_order
+	end
+
+	return 
 end
 
 local function sort_level_list(a, b)
@@ -46,10 +57,20 @@ local function sort_level_list(a, b)
 	local area_settings = AreaSettings
 	local a_settings = (a_is_area and area_settings[a_area]) or level_settings[a_level_key].map_settings
 	local b_settings = (b_is_area and area_settings[b_area]) or level_settings[b_level_key].map_settings
-	local a_order = a_settings.sorting or 99
-	local b_order = b_settings.sorting or 99
 
-	return a_order < b_order
+	if platform == "win32" then
+		local a_order = a_settings.sorting or 99
+		local b_order = b_settings.sorting or 99
+
+		return a_order < b_order
+	else
+		a_order = a_settings.console_sorting or 99
+		local b_order = b_settings.console_sorting or 99
+
+		return a_order < b_order
+	end
+
+	return 
 end
 
 MapViewAreaHandler.init = function (self, ingame_ui_context, map_save_data, player_stats_id)
@@ -97,7 +118,7 @@ MapViewAreaHandler._create_ui_elements = function (self)
 	}
 	local area_widgets = {}
 
-	if Application.platform() ~= "ps4" then
+	if PLATFORM == "win32" then
 		for area_key, settings in pairs(AreaSettings) do
 			if area_key ~= "world" then
 				area_widgets[area_key] = create_area_widget(area_key)

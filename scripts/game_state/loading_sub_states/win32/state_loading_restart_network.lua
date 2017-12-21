@@ -6,7 +6,6 @@ require("scripts/network/network_event_delegate")
 require("scripts/network/network_server")
 require("scripts/network/network_client")
 require("scripts/network/network_transmit")
-require("scripts/ui/views/title_loading_ui")
 
 StateLoadingRestartNetwork = class(StateLoadingRestartNetwork)
 StateLoadingRestartNetwork.NAME = "StateLoadingRestartNetwork"
@@ -43,7 +42,7 @@ StateLoadingRestartNetwork._init_network = function (self)
 	self.parent:setup_network_options()
 
 	LOBBY_PORT_INCREMENT = LOBBY_PORT_INCREMENT + 1
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if not rawget(_G, "LobbyInternal") or not LobbyInternal.network_initialized() then
 		if platform == "win32" then
@@ -65,7 +64,7 @@ StateLoadingRestartNetwork._init_network = function (self)
 		end
 
 		LobbyInternal.init_client(self.parent:network_options())
-	elseif Application.platform() == "xb1" then
+	elseif PLATFORM == "xb1" then
 		require("scripts/network/lobby_xbox_live")
 		LobbyInternal.init_client(self.parent:network_options())
 	end

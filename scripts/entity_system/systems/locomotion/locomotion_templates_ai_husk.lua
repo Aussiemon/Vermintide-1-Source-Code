@@ -194,11 +194,26 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_
 					local mover_move_distance = breed.override_mover_move_distance or ALLOWED_MOVER_MOVE_DISTANCE
 
 					Mover.set_position(mover, current_position)
-					LocomotionUtils.separate_mover_fallbacks(mover, mover_move_distance)
 
-					local mover_position = Mover.position(mover)
+					local success = LocomotionUtils.separate_mover_fallbacks(mover, mover_move_distance)
 
-					Unit.set_local_position(unit, 0, mover_position)
+					if success then
+						local mover_position = Mover.position(mover)
+
+						Unit.set_local_position(unit, 0, mover_position)
+					else
+						local radius = Mover.radius(mover)
+
+						QuickDrawerStay:sphere(current_position, radius, Colors.get("red"))
+						QuickDrawerStay:line(current_position, current_position + Vector3(0, 0, 5), Colors.get("red"))
+
+						local debug_text = string.format("LD should check the Navmesh here, Mover separation failed for %s!", breed.name)
+
+						Debug.world_sticky_text(current_position + Vector3(0, 0, 5), debug_text, "red")
+						extension.set_mover_disable_reason(extension, "not_constrained_by_mover", true)
+
+						extension.hit_wall = true
+					end
 				end
 			end
 		end

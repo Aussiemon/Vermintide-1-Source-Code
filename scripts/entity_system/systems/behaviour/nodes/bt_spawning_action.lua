@@ -127,7 +127,7 @@ BTSpawningAction.run = function (self, unit, blackboard, t, dt)
 					Managers.state.network:anim_event(unit, "jump_down")
 				end
 			else
-				if Application.build() ~= "release" then
+				if BUILD ~= "release" then
 					QuickDrawerStay:sphere(current_pos + Vector3.up(), 1, Colors.get("orange"))
 					QuickDrawerStay:vector(current_pos, Vector3.down(), Colors.get("orange"))
 					QuickDrawerStay:vector(current_pos, Vector3.down()*20, Colors.get("orange"))

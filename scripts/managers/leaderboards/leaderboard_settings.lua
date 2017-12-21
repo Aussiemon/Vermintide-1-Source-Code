@@ -1,6 +1,6 @@
 LeaderboardSettings = {}
 
-if Application.platform() == "win32" and rawget(_G, "Leaderboard") then
+if PLATFORM == "win32" and rawget(_G, "Leaderboard") then
 	LeaderboardSettings.template = {
 		Leaderboard.INT(32),
 		Leaderboard.INT(32),
@@ -33,7 +33,7 @@ if Application.platform() == "win32" and rawget(_G, "Leaderboard") then
 		"dlc_survival_ruins_witch_hunter",
 		"dlc_survival_ruins_wood_elf"
 	}
-elseif Application.platform() == "xb1" then
+elseif PLATFORM == "xb1" then
 	LeaderboardSettings.xdp_leaderboard_stats = {
 		dlc_survival_ruins_bright_wizard = "LBRuinsBrightScore",
 		dlc_survival_ruins_empire_soldier = "LBRuinsEmpireScore",

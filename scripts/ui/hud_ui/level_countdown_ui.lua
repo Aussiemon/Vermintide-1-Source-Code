@@ -97,9 +97,9 @@ LevelCountdownUI.start_enter_game_counter = function (self)
 	widget_content.timer_text = self.total_start_game_time
 	local input_manager = self.input_manager
 
-	input_manager.block_device_except_service(input_manager, nil, "keyboard", 1)
-	input_manager.block_device_except_service(input_manager, nil, "mouse", 1)
-	input_manager.block_device_except_service(input_manager, nil, "gamepad", 1)
+	input_manager.block_device_except_service(input_manager, "popup", "keyboard", 1)
+	input_manager.block_device_except_service(input_manager, "popup", "mouse", 1)
+	input_manager.block_device_except_service(input_manager, "popup", "gamepad", 1)
 	self.play_sound(self, "Play_hud_matchmaking_countdown_enter")
 
 	return 

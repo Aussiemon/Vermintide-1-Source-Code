@@ -35,11 +35,11 @@ StateLoading.on_enter = function (self, param_block)
 		Managers.play_go:set_install_speed("suspended")
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Application.set_kinect_enabled(true)
 	end
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		Application.set_time_step_policy("throttle", 60)
 	end
 
@@ -65,12 +65,12 @@ StateLoading.on_enter = function (self, param_block)
 	self._loading_view_setup_done = false
 	self._menu_setup_done = false
 
-	if Application.platform() == "xb1" and self._lobby_host then
+	if PLATFORM == "xb1" and self._lobby_host then
 		Managers.account:set_round_id()
 		Managers.account:update_popup_status()
 	end
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		Managers.account:set_realtime_multiplay_state("loading", true)
 	end
 
@@ -103,7 +103,7 @@ StateLoading._setup_input = function (self)
 	self._input_manager:initialize_device("mouse", 1)
 	self._input_manager:initialize_device("gamepad", 1)
 
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local loaded_player_controls = PlayerData.controls and PlayerData.controls.Player
 	local player_control_keymap = table.clone(PlayerControllerKeymaps)
 
@@ -168,7 +168,7 @@ StateLoading._setup_first_time_ui = function (self)
 	if (loading_context.first_time or loading_context.gamma_correct or loading_context.play_trailer) and not GameSettingsDevelopment.disable_intro_trailer then
 		local auto_skip = nil
 		local params = {}
-		local platform = Application.platform()
+		local platform = PLATFORM
 
 		if platform == "win32" then
 			local level_name = (Boot.loading_context and Boot.loading_context.level_key) or LevelSettings.default_start_level
@@ -185,6 +185,16 @@ StateLoading._setup_first_time_ui = function (self)
 
 			if params.gamma or params.trailer then
 				auto_skip = false
+			end
+		end
+
+		if loading_context.gamma_correct then
+			local package_name = "resource_packages/title_screen_gamma"
+			local reference_name = "state_splash_screen"
+			local package_manager = Managers.package
+
+			if not package_manager.has_loaded(package_manager, package_name, reference_name) then
+				package_manager.load(package_manager, package_name, reference_name)
 			end
 		end
 
@@ -300,7 +310,7 @@ end
 StateLoading.setup_menu_assets = function (self)
 	local reference_name = "menu_assets"
 	local package_name_ingame = "resource_packages/menu_assets"
-	local package_name_inn = (Application.platform() == "win32" and "resource_packages/menu_assets_inn") or "resource_packages/menu_assets_inn_console"
+	local package_name_inn = (PLATFORM == "win32" and "resource_packages/menu_assets_inn") or "resource_packages/menu_assets_inn_console"
 	local package_manager = Managers.package
 	local ingame_package_loaded = package_manager.has_loaded(package_manager, package_name_ingame, reference_name) or package_manager.is_loading(package_manager, package_name_ingame, reference_name)
 	local inn_package_loaded = package_manager.has_loaded(package_manager, package_name_inn, reference_name) or package_manager.is_loading(package_manager, package_name_inn, reference_name)
@@ -416,11 +426,11 @@ StateLoading._setup_state_machine = function (self)
 	}
 
 	if self.parent.loading_context.restart_network then
-		self._machine = StateMachine:new(self, StateLoadingRestartNetwork, params, true)
+		self._machine = GameStateMachine:new(self, StateLoadingRestartNetwork, params, true)
 	elseif self.parent.loading_context.host_migration_info then
-		self._machine = StateMachine:new(self, StateLoadingMigrateHost, params, true)
+		self._machine = GameStateMachine:new(self, StateLoadingMigrateHost, params, true)
 	else
-		self._machine = StateMachine:new(self, StateLoadingRunning, params, true)
+		self._machine = GameStateMachine:new(self, StateLoadingRunning, params, true)
 	end
 
 	return 
@@ -442,7 +452,7 @@ StateLoading.update = function (self, dt, t)
 	Network.update_receive(dt, self._network_event_delegate.event_table)
 	self._update_network(self, dt)
 
-	if Application.platform() == "ps4" and not self._popup_id and not self._handled_psn_client_error and self._level_transition_handler:all_packages_loaded() and Managers.backend:profiles_loaded() and self.global_packages_loaded(self) then
+	if PLATFORM == "ps4" and not self._popup_id and not self._handled_psn_client_error and self._level_transition_handler:all_packages_loaded() and Managers.backend:profiles_loaded() and self.global_packages_loaded(self) then
 		local psn_client_error = Managers.account:psn_client_error()
 
 		if psn_client_error then
@@ -515,7 +525,7 @@ StateLoading._update_network = function (self, dt)
 
 			self.create_popup(self, self._network_client.fail_reason or "fail reason is nil", "popup_error_topic", "restart_as_server", "menu_accept")
 
-			if Application.platform() == "ps4" then
+			if PLATFORM == "ps4" then
 				self._network_client:destroy()
 
 				self._network_client = nil
@@ -559,7 +569,7 @@ StateLoading._update_lobbies = function (self, dt, t)
 		elseif self._lobby_host.state == LobbyState.FAILED and not self._popup_id then
 			local text_id = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				if rawget(_G, "Steam") then
 					if Steam.connected() then
 						text_id = "failure_start_steam_lobby_create"
@@ -569,13 +579,13 @@ StateLoading._update_lobbies = function (self, dt, t)
 				else
 					text_id = "failure_start_no_lan"
 				end
-			elseif Application.platform() == "xb1" then
+			elseif PLATFORM == "xb1" then
 				if not Network.xboxlive_client_exists() then
 					text_id = "failure_start_xbox_live_client"
 				else
 					text_id = "failure_start_xbox_lobby_create"
 				end
-			elseif Application.platform() == "ps4" then
+			elseif PLATFORM == "ps4" then
 				text_id = "failure_start_psn_lobby_create"
 			else
 				text_id = "failure_start"
@@ -623,7 +633,7 @@ StateLoading._update_lobbies = function (self, dt, t)
 		end
 	end
 
-	if Application.platform() == "xb1" and self._waiting_for_cleanup and Managers.account:all_lobbies_freed() then
+	if PLATFORM == "xb1" and self._waiting_for_cleanup and Managers.account:all_lobbies_freed() then
 		self.setup_join_lobby(self, true)
 
 		self._waiting_for_cleanup = nil
@@ -830,7 +840,7 @@ StateLoading._try_next_state = function (self)
 		local can_go_to_next_state = self._wanted_state and ui_done and not self._popup_id
 
 		if can_go_to_next_state then
-			local ready_to_go_to_next_state = self._permission_to_go_to_next_state and packages_loaded
+			local ready_to_go_to_next_state = self._permission_to_go_to_next_state and packages_loaded and Managers.unlock:done()
 			local backend_is_disconnected = Managers.backend:is_disconnected()
 
 			if ready_to_go_to_next_state or backend_is_disconnected then
@@ -943,7 +953,7 @@ StateLoading._backend_broken = function (self)
 		self._first_time_view:force_done()
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.account:initiate_leave_game()
 	end
 
@@ -955,7 +965,7 @@ StateLoading._set_packages_loaded = function (self)
 	return 
 end
 StateLoading.on_exit = function (self, application_shutdown)
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		local max_fps = Application.user_setting("max_fps")
 
 		if max_fps == nil or max_fps == 0 then
@@ -1059,7 +1069,12 @@ StateLoading.on_exit = function (self, application_shutdown)
 	ScriptWorld.destroy_viewport(self._world, self._viewport_name)
 	Managers.world:destroy_world(self._world)
 	Managers.music:trigger_event("Stop_loading_screen_music")
-	fassert(application_shutdown or self._popup_id == nil, "StateLoading added a popup right before exiting")
+
+	if application_shutdown or self._popup_id == nil then
+		print("StateLoading added a popup right before exiting")
+	end
+
+	Managers.popup:cancel_all_popups()
 	Managers.popup:remove_input_manager(application_shutdown)
 	Managers.chat:set_input_manager(nil)
 	Managers.chat:enable_gui(true)
@@ -1068,7 +1083,7 @@ StateLoading.on_exit = function (self, application_shutdown)
 		Managers.play_go:set_install_speed("slow")
 	end
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		Managers.account:set_realtime_multiplay_state("loading", false)
 	end
 
@@ -1290,7 +1305,7 @@ StateLoading.waiting_for_cleanup = function (self)
 	return self._waiting_for_cleanup
 end
 StateLoading.setup_join_lobby = function (self)
-	if Application.platform() == "xb1" and not Managers.account:all_lobbies_freed() then
+	if PLATFORM == "xb1" and not Managers.account:all_lobbies_freed() then
 		self._waiting_for_cleanup = true
 
 		return 
@@ -1549,7 +1564,7 @@ StateLoading.set_lobby_host_data = function (self, level_key)
 		local game_mode = LevelSettings[level_key].game_mode
 		stored_lobby_host_data.game_mode = game_mode
 
-		if Application.platform() == "ps4" then
+		if PLATFORM == "ps4" then
 			local region = Managers.account:region()
 			local primary, secondary = MatchmakingRegionsHelper.get_matchmaking_regions(region)
 			stored_lobby_host_data.primary_region = primary

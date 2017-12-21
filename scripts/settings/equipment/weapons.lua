@@ -6,6 +6,7 @@ dofile("scripts/settings/explosion_templates")
 dofile("scripts/settings/equipment/projectiles")
 require("scripts/settings/action_templates")
 dofile("scripts/settings/equipment/1h_swords")
+dofile("scripts/settings/equipment/1h_dagger_wizard")
 dofile("scripts/settings/equipment/1h_swords_wood_elf")
 dofile("scripts/settings/equipment/1h_swords_wizard")
 dofile("scripts/settings/equipment/1h_swords_shield")
@@ -23,6 +24,7 @@ dofile("scripts/settings/equipment/2h_swords")
 dofile("scripts/settings/equipment/2h_axes")
 dofile("scripts/settings/equipment/2h_axes_wood_elf")
 dofile("scripts/settings/equipment/2h_hammers")
+dofile("scripts/settings/equipment/2h_hammers_wizard")
 dofile("scripts/settings/equipment/2h_picks")
 dofile("scripts/settings/equipment/shortbows")
 dofile("scripts/settings/equipment/shortbows_bodkin")
@@ -664,7 +666,7 @@ AttackDamageValues = {
 		1
 	},
 	one_h_ninja_L_t3 = {
-		3,
+		3.5,
 		0,
 		12,
 		1
@@ -933,9 +935,27 @@ AttackDamageValues = {
 		24,
 		4
 	},
+	sniper_arrow = {
+		5,
+		2,
+		16,
+		3
+	},
+	sniper_arrow_t2 = {
+		7.5,
+		3,
+		20,
+		3.5
+	},
+	sniper_arrow_t3 = {
+		10,
+		4,
+		24,
+		4
+	},
 	sniper_AP = {
 		5,
-		6,
+		5,
 		25,
 		3.5
 	},
@@ -954,19 +974,19 @@ AttackDamageValues = {
 	sniper_shot_AP = {
 		12,
 		8,
-		25,
+		26,
 		6
 	},
 	sniper_shot_AP_t2 = {
 		16,
 		10,
-		30,
+		31,
 		8
 	},
 	sniper_shot_AP_t3 = {
 		20,
 		12,
-		35,
+		36,
 		10
 	},
 	carbine = {
@@ -1960,6 +1980,28 @@ AttackTemplates = {
 			0
 		}
 	},
+	heavy_blunt_burning_smiter = {
+		dot_template_name = "burning_1W_dot",
+		sound_type = "heavy",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		dot_type = "burning_dot",
+		damage_type = "heavy_blunt_burning_smiter",
+		stagger_angle = "down",
+		stagger_length = 1,
+		stagger_impact = {
+			2,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			0.75,
+			0.5,
+			0,
+			0
+		}
+	},
 	light_blunt_fencer = {
 		stagger_angle = "stab",
 		sound_type = "light",
@@ -2168,12 +2210,56 @@ AttackTemplates = {
 		attack_type = "damage",
 		damage_type = "light_stab_smiter"
 	},
+	burning_stab_smiter = {
+		damage_type = "stab_smiter",
+		stagger_type = "ai_stagger",
+		sound_type = "medium",
+		dot_template_name = "burning_3W_dot_t2",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		dot_type = "burning_dot",
+		stagger_angle = "smiter",
+		stagger_length = 0.75,
+		stagger_impact = {
+			5,
+			5,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			0.5,
+			0,
+			0
+		}
+	},
 	stab_smiter = {
 		sound_type = "medium",
 		damage_type = "stab_smiter",
 		stagger_type = "ai_stagger",
 		stagger_angle = "smiter",
 		attack_type = "damage",
+		stagger_length = 0.75,
+		stagger_impact = {
+			5,
+			5,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			0.5,
+			0,
+			0
+		}
+	},
+	stab_smiter_1 = {
+		stagger_type = "ai_stagger",
+		sound_type = "medium",
+		headshot_multiplier = "2.5",
+		attack_type = "damage_headshot",
+		damage_type = "stab_smiter",
+		stagger_angle = "smiter",
 		stagger_length = 0.75,
 		stagger_impact = {
 			5,
@@ -2275,7 +2361,7 @@ AttackTemplates = {
 		damage_type = "burning_stab_fencer",
 		stagger_type = "ai_stagger",
 		sound_type = "medium",
-		dot_template_name = "burning_1W_dot",
+		dot_template_name = "burning_3W_dot_t2",
 		headshot_multiplier = 2,
 		attack_type = "damage_headshot",
 		dot_type = "burning_dot",
@@ -2368,13 +2454,55 @@ AttackTemplates = {
 			0
 		}
 	},
-	burning_tank = {
+	dagger_burning_tank = {
 		dot_template_name = "burning_1W_dot",
 		sound_type = "medium",
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
 		dot_type = "burning_dot",
+		damage_type = "dagger_burning_tank",
+		stagger_length = 0.8,
+		stagger_impact = {
+			3,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.25,
+			0.4,
+			0,
+			0
+		}
+	},
+	burning_tank = {
+		dot_template_name = "burning_3W_dot",
+		sound_type = "medium",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		dot_type = "burning_dot",
 		damage_type = "burning_tank",
+		stagger_length = 0.8,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.25,
+			0.4,
+			0,
+			0
+		}
+	},
+	burning_blunt_tank = {
+		dot_template_name = "burning_1W_dot",
+		sound_type = "medium",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		dot_type = "burning_dot",
+		damage_type = "burning_blunt_tank",
 		stagger_length = 0.8,
 		stagger_impact = {
 			2,
@@ -2410,6 +2538,27 @@ AttackTemplates = {
 			0
 		}
 	},
+	heavy_blunt_burning_tank = {
+		dot_type = "burning_dot",
+		sound_type = "heavy",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		dot_template_name = "burning_1W_dot",
+		damage_type = "heavy_blunt_burning_tank",
+		stagger_length = 1.25,
+		stagger_impact = {
+			3,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.5,
+			1,
+			0,
+			0
+		}
+	},
 	basic_sweep_push = {
 		is_push = true,
 		sound_type = "stun_heavy",
@@ -2433,6 +2582,27 @@ AttackTemplates = {
 		stagger_angle = "stab",
 		sound_type = "heavy",
 		stagger_type = "ai_stagger",
+		stagger_length = 0.65,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2,
+			0.75,
+			0,
+			0
+		}
+	},
+	burning_shield_slam = {
+		dot_type = "burning_dot",
+		sound_type = "heavy",
+		stagger_type = "ai_stagger",
+		dot_template_name = "burning_1W_dot",
+		is_push = true,
+		stagger_angle = "stab",
 		stagger_length = 0.65,
 		stagger_impact = {
 			2,

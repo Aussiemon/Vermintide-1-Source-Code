@@ -815,14 +815,168 @@ BreedBehaviors.gutter_runner = {
 	},
 	{
 		"BTCirclePreyAction",
+		name = "abide",
 		condition = "secondary_target",
-		name = "abide"
+		action_data = BreedActions.skaven_gutter_runner.circle_prey
 	},
 	{
 		"BTIdleAction",
 		name = "idle"
 	},
 	name = "gutter_runner"
+}
+BreedBehaviors.gutter_runner_heroic = {
+	"BTSelector",
+	{
+		"BTFallAction",
+		condition = "is_gutter_runner_falling",
+		name = "falling"
+	},
+	{
+		"BTNinjaVanishAction",
+		name = "uninterruptable_ninja_vanish",
+		condition = "uninterruptable_ninja_vanish",
+		action_data = BreedActions.skaven_gutter_runner.ninja_vanish_uninterruptable
+	},
+	{
+		"BTStaggerAction",
+		name = "stagger",
+		condition = "stagger",
+		action_data = BreedActions.skaven_gutter_runner.stagger
+	},
+	{
+		"BTSpawningAction",
+		condition = "spawn",
+		name = "spawn"
+	},
+	{
+		"BTSelector",
+		{
+			"BTTeleportAction",
+			condition = "at_teleport_smartobject",
+			name = "teleport"
+		},
+		{
+			"BTJumpAcrossAction",
+			condition = "at_jump_smartobject",
+			name = "jump_across"
+		},
+		{
+			"BTSmashDoorAction",
+			name = "smash_door",
+			condition = "at_door_smartobject",
+			action_data = BreedActions.skaven_gutter_runner.smash_door
+		},
+		{
+			"BTNinjaHighGroundAction",
+			condition = "at_climb_smartobject",
+			name = "climb"
+		},
+		condition = "gutter_runner_at_smartobject",
+		name = "smartobject"
+	},
+	{
+		"BTNinjaVanishAction",
+		name = "ninja_vanish",
+		condition = "ninja_vanish",
+		action_data = BreedActions.skaven_gutter_runner.ninja_vanish
+	},
+	{
+		"BTThrowSimpleProjectileAction",
+		name = "throw_throwing_stars",
+		condition = "throw_throwing_stars",
+		action_data = BreedActions.skaven_gutter_runner.throw_throwing_stars
+	},
+	{
+		"BTSequence",
+		{
+			"BTNinjaApproachAction",
+			name = "approaching",
+			action_data = BreedActions.skaven_gutter_runner.approaching_heroic
+		},
+		{
+			"BTPrepareForCrazyJumpAction",
+			name = "prepare_crazy_jump"
+		},
+		{
+			"BTCrazyJumpAction",
+			name = "crazy_jump"
+		},
+		{
+			"BTTargetPouncedAction",
+			name = "target_pounced",
+			action_data = BreedActions.skaven_gutter_runner.target_pounced_heroic
+		},
+		condition = "comitted_to_target",
+		name = "approach_target"
+	},
+	{
+		"BTCirclePreyAction",
+		name = "abide",
+		condition = "secondary_target",
+		action_data = BreedActions.skaven_gutter_runner.circle_prey
+	},
+	{
+		"BTIdleAction",
+		name = "idle"
+	},
+	name = "gutter_runner"
+}
+BreedBehaviors.gutter_runner_decoy = {
+	"BTSelector",
+	{
+		"BTFallAction",
+		condition = "is_gutter_runner_falling",
+		name = "falling"
+	},
+	{
+		"BTStaggerAction",
+		name = "stagger",
+		condition = "stagger",
+		action_data = BreedActions.skaven_gutter_runner.stagger
+	},
+	{
+		"BTSpawningAction",
+		condition = "spawn",
+		name = "spawn"
+	},
+	{
+		"BTSelector",
+		{
+			"BTTeleportAction",
+			condition = "at_teleport_smartobject",
+			name = "teleport"
+		},
+		{
+			"BTJumpAcrossAction",
+			condition = "at_jump_smartobject",
+			name = "jump_across"
+		},
+		{
+			"BTSmashDoorAction",
+			name = "smash_door",
+			condition = "at_door_smartobject",
+			action_data = BreedActions.skaven_gutter_runner.smash_door
+		},
+		{
+			"BTNinjaHighGroundAction",
+			condition = "at_climb_smartobject",
+			name = "climb"
+		},
+		condition = "gutter_runner_at_smartobject",
+		name = "smartobject"
+	},
+	{
+		"BTCirclePreyAction",
+		name = "abide",
+		condition = "secondary_target",
+		action_data = BreedActions.skaven_gutter_runner.circle_prey_decoy
+	},
+	{
+		"BTIdleAction",
+		name = "idle"
+	},
+	name = "gutter_runner_decoy"
 }
 BreedBehaviors.pack_master = {
 	"BTSelector",

@@ -6,7 +6,7 @@ local LobbyBrowseDefinitions = require("scripts/ui/views/lobby_browse_view_defin
 DO_RELOAD = false
 LobbyBrowseView = class(LobbyBrowseView)
 local input_delay_before_start_new_search = 0
-local platform = Application.platform()
+local platform = PLATFORM
 
 if platform ~= "ps4" or not {
 	LobbyDistanceFilter.CLOSE,
@@ -104,7 +104,7 @@ LobbyBrowseView.init = function (self, ingame_ui_context)
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
-	self._draw_invalid_checkbox = Application.build() == "dev" or Application.build() == "debug"
+	self._draw_invalid_checkbox = BUILD == "dev" or BUILD == "debug"
 	self.gamepad_selected_page = "filters"
 
 	return 

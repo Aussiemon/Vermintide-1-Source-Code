@@ -16,7 +16,7 @@ end
 
 DLCSettings = {
 	stromdorf = {
-		product_label = "",
+		product_label = "VTMAPPACK0000002",
 		unit_extension_templates = "scripts/network/unit_extension_templates_stromdorf",
 		level_settings = "scripts/settings/level_settings_dlc_stromdorf",
 		package_name = "resource_packages/dlcs/stromdorf/stromdorf",
@@ -38,8 +38,8 @@ DLCSettings = {
 					17
 				},
 				console_map_textures = {
-					selected = "area_image_karak_azgaraz_01",
-					normal = "area_image_karak_azgaraz_02"
+					selected = "area_image_stromdorf_01",
+					normal = "area_image_stromdorf_01"
 				},
 				banner_texture_size = {
 					48,
@@ -49,8 +49,26 @@ DLCSettings = {
 		},
 		unlock_settings = {
 			stromdorf = {
+				id = "463795",
+				index = 4,
 				class = "UnlockDlc",
-				id = "463795"
+				purchase_type = "dlc"
+			}
+		},
+		unlock_settings_xb1 = {
+			stromdorf = {
+				id = "EDC6C5F6-4564-4783-9853-8C69E23A9C32",
+				index = 4,
+				class = "UnlockDlc",
+				purchase_type = "dlc"
+			}
+		},
+		unlock_settings_ps4 = {
+			stromdorf = {
+				id = "6c4fa61ec654d8b64e6febcd126acd6c",
+				index = 4,
+				class = "UnlockDlc",
+				purchase_type = "dlc"
 			}
 		},
 		weapons = {
@@ -262,12 +280,32 @@ DLCSettings = {
 				class = "AlwaysUnlocked"
 			}
 		},
+		unlock_settings_xb1 = {
+			challenge_wizard = {
+				class = "AlwaysLocked"
+			}
+		},
+		unlock_settings_ps4 = {
+			challenge_wizard = {
+				class = "AlwaysLocked"
+			}
+		},
 		weapons = {},
 		breeds = {},
 		behaviour_trees_precompiled = {},
 		behaviour_tree_nodes = {},
 		behaviour_trees = {},
 		terror_event_blueprints = {
+			challenge_pacing_off = {
+				{
+					"control_pacing",
+					enable = false
+				},
+				{
+					"control_specials",
+					enable = false
+				}
+			},
 			snow_boss = {
 				{
 					"set_master_event_running",
@@ -875,6 +913,1722 @@ DLCSettings = {
 				"dialogues/generated/dlc_challenge_wizard"
 			}
 		}
+	},
+	reikwald = {
+		level_settings = "scripts/settings/level_settings_dlc_reikwald",
+		package_name = "resource_packages/dlcs/reikwald/reikwald",
+		level_unlock_settings = "scripts/settings/level_unlock_settings_dlc_reikwald",
+		area_settings = {
+			reikwald = {
+				area_icon_background_texture = "reikwald_location_icon",
+				display_name = "dlc1_10_area_reikwald",
+				sorting = 6,
+				map_icon = "level_location_any_icon",
+				area_icon_hover_texture = "reikwald_location_icon_glow",
+				banner_texture = "reikwald_location_icon_banner",
+				dlc_name = "reikwald",
+				dlc_url = "http://store.steampowered.com/app/741420",
+				level_image = "level_image_dlc_reikwald_forest",
+				map_texture = "map_reikwald",
+				map_position = {
+					595,
+					140
+				},
+				console_map_textures = {
+					selected = "area_image_karak_azgaraz_01",
+					normal = "area_image_karak_azgaraz_02"
+				},
+				banner_texture_size = {
+					48,
+					160
+				}
+			}
+		},
+		unlock_settings = {
+			reikwald = {
+				id = "741420",
+				index = 5,
+				class = "UnlockDlc",
+				purchase_type = "dlc"
+			}
+		},
+		unlock_settings_xb1 = {
+			reikwald = {
+				index = 5,
+				purchase_type = "dlc",
+				class = "UnlockDlc"
+			}
+		},
+		unlock_settings_ps4 = {
+			reikwald = {
+				index = 5,
+				purchase_type = "dlc",
+				class = "UnlockDlc"
+			}
+		},
+		weapons = {},
+		breeds = {},
+		behaviour_trees_precompiled = {},
+		behaviour_tree_nodes = {},
+		behaviour_trees = {},
+		terror_event_blueprints = {
+			reikwald_mid_event_start = {
+				{
+					"play_stinger",
+					stinger_name = "enemy_horde_stinger"
+				},
+				{
+					"control_pacing",
+					enable = false
+				}
+			},
+			reikwald_mid_event = {
+				{
+					"set_master_event_running",
+					name = "reikwald_mid_starting"
+				},
+				{
+					"control_pacing",
+					enable = false
+				},
+				{
+					"play_stinger",
+					stinger_name = "enemy_horde_stinger"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_mid_spawner_raw01",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_mid_spawner_raw02",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_mid_spawner_raw03",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_large"
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_large"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_mid_event_done"
+				},
+				{
+					"control_pacing",
+					enable = true
+				}
+			},
+			reikwald_mid_event_loop = {
+				{
+					"control_pacing",
+					enable = false
+				},
+				{
+					"control_specials",
+					enable = false
+				},
+				{
+					"set_master_event_running",
+					name = "reikwald_mid_starting"
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_mid_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = 2
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_mid_event_loop_done"
+				}
+			},
+			reikwald_mid_event_loop_extra_spice = {
+				{
+					"set_master_event_running",
+					name = "reikwald_mid_starting"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner_spice",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_mid_spawner_spice",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_mid_event_loop_extra_spice_done"
+				}
+			},
+			reikwald_end_event = {
+				{
+					"set_master_event_running",
+					name = "reikwald_end_starting"
+				},
+				{
+					"control_pacing",
+					enable = false
+				},
+				{
+					"control_specials",
+					enable = false
+				},
+				{
+					"disable_kick"
+				},
+				{
+					"play_stinger",
+					stinger_name = "enemy_horde_stinger"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_large"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_end_spawner_raw01",
+					breed_name = "skaven_rat_ogre"
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"control_pacing",
+					enable = true
+				}
+			},
+			reikwald_end_event_loop_extra_spice = {
+				{
+					"set_master_event_running",
+					name = "reikwald_end_spice_starting"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner_spice",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_end_spawner_spice",
+					composition_type = "event_smaller"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_end_event_loop_extra_spice_done"
+				}
+			},
+			reikwald_wharf_event = {
+				{
+					"set_master_event_running",
+					name = "reikwald_wharf_starting"
+				},
+				{
+					"play_stinger",
+					stinger_name = "enemy_horde_stinger"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_wharf_spawner_raw01",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_wharf_spawner_raw02",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "reikwald_wharf_spawner_raw03",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 20,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_docks_warehouse_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_docks_warehouse_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_docks_warehouse_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				}
+			},
+			reikwald_wharf_event_part2 = {
+				{
+					"set_master_event_running",
+					name = "reikwald_wharf_starting"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_large"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_docks_warehouse_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_docks_warehouse_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					limit_spawners = 2,
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_generic_long_level_extra_spice"
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_large"
+				},
+				{
+					"continue_when",
+					duration = 40,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						9,
+						11
+					}
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner",
+					composition_type = "event_medium"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"delay",
+					duration = {
+						3,
+						4
+					}
+				},
+				{
+					"continue_when",
+					duration = 50,
+					condition = function (t)
+						return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"control_pacing",
+					enable = true
+				}
+			},
+			reikwald_wharf_event_loop_extra_spice = {
+				{
+					"set_master_event_running",
+					name = "reikwald_wharf_spice_starting"
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner_spice",
+					composition_type = "event_small"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"event_horde",
+					spawner_id = "reikwald_wharf_spawner_spice",
+					composition_type = "event_smaller"
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_wharf_event_loop_extra_spice_done"
+				}
+			},
+			reikwald_river_plaza_01 = {
+				{
+					"delay",
+					duration = 5
+				}
+			},
+			reikwald_river_sea_battle_landside_01 = {
+				{
+					"control_pacing",
+					enable = false
+				},
+				{
+					"control_specials",
+					enable = false
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_landside_raw_01",
+					breed_name = "skaven_ratling_gunner"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_landside_raw_01",
+					breed_name = "skaven_ratling_gunner"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_landside_raw_01",
+					breed_name = "skaven_poison_wind_globadier"
+				}
+			},
+			reikwald_river_sea_battle_right_01 = {
+				{
+					"event_horde",
+					spawner_id = "sea_battle_right_01",
+					composition_type = "event_medium"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_right_01",
+					composition_type = "event_large"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_right_01_done"
+				}
+			},
+			reikwald_river_sea_battle_left_01 = {
+				{
+					"event_horde",
+					spawner_id = "sea_battle_left_01",
+					composition_type = "event_medium"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_left_01",
+					composition_type = "event_large"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_left_01_done"
+				}
+			},
+			reikwald_river_sea_battle_right_02 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_right_02_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_right_02_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_right_02",
+					composition_type = "event_medium"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_right_02",
+					composition_type = "event_large"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_right_02_done"
+				}
+			},
+			reikwald_river_sea_battle_left_02 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_left_02_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_left_02_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_left_02",
+					composition_type = "event_medium"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_left_02",
+					composition_type = "event_large"
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_left_02_done"
+				}
+			},
+			reikwald_river_sea_battle_right_03 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_right_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_right_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_right_03",
+					composition_type = "event_medium"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_right_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_right_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_right_03",
+					composition_type = "event_large"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_right_03_done"
+				}
+			},
+			reikwald_river_sea_battle_left_03 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_left_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_left_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_left_03",
+					composition_type = "event_small"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "sea_battle_left_03_storm",
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_left_03",
+					composition_type = "event_large"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_left_03_done"
+				}
+			},
+			reikwald_river_sea_battle_front_03 = {
+				{
+					"event_horde",
+					spawner_id = "sea_battle_front_03",
+					composition_type = "event_small"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 2 and count_breed("skaven_slave") < 2
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "sea_battle_front_03",
+					composition_type = "event_small"
+				},
+				{
+					"delay",
+					duration = 10
+				},
+				{
+					"continue_when",
+					duration = 80,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "reikwald_river_sea_battle_front_03_done"
+				}
+			},
+			reikwald_river_pacing_on = {
+				{
+					"control_pacing",
+					enable = true
+				},
+				{
+					"control_specials",
+					enable = true
+				}
+			},
+			reikwald_river_pacing_off = {
+				{
+					"control_pacing",
+					enable = false
+				},
+				{
+					"control_specials",
+					enable = false
+				}
+			},
+			reikwald_river_sea_battle_replace_left_01 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_01_clan_01",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_01_clan_02",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_01_clan_03",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_01_clan_04",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_01_captain",
+					breed_name = "skaven_storm_vermin_commander"
+				}
+			},
+			reikwald_river_sea_battle_replace_right_01 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_01_clan_01",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_01_clan_02",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_01_clan_03",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_01_clan_04",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_01_captain",
+					breed_name = "skaven_storm_vermin_commander"
+				}
+			},
+			reikwald_river_sea_battle_replace_left_02 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_02_clan_01",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_02_clan_02",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_02_clan_03",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_02_clan_04",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_02_captain",
+					breed_name = "skaven_storm_vermin_commander"
+				}
+			},
+			reikwald_river_sea_battle_replace_right_02 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_02_clan_01",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_02_clan_02",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_02_clan_03",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_02_clan_04",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_02_captain",
+					breed_name = "skaven_storm_vermin_commander"
+				}
+			},
+			reikwald_river_sea_battle_replace_left_03 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_03_clan_01",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_03_clan_02",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_03_clan_03",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_03_clan_04",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_left_03_captain",
+					breed_name = "skaven_storm_vermin_commander"
+				}
+			},
+			reikwald_river_sea_battle_replace_right_03 = {
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_03_clan_01",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_03_clan_02",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_03_clan_03",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_03_clan_04",
+					breed_name = "skaven_clan_rat"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "raw_skaven_ship_right_03_captain",
+					breed_name = "skaven_storm_vermin_commander"
+				}
+			},
+			reikwald_river_shore_crash_01 = {
+				{
+					"event_horde",
+					spawner_id = "shore_crash_01",
+					composition_type = "event_reikwald_shore_mix"
+				}
+			},
+			reikwald_river_gauntlet_01 = {
+				{
+					"event_horde",
+					spawner_id = "gauntlet_01_front",
+					composition_type = "event_reikwald_gauntlet_front_mix"
+				},
+				{
+					"event_horde",
+					spawner_id = "gauntlet_01",
+					composition_type = "event_reikwald_gauntlet_mix"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					duration = 30,
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 5 and count_breed("skaven_slave") < 5
+					end
+				},
+				{
+					"event_horde",
+					spawner_id = "gauntlet_01",
+					composition_type = "event_reikwald_gauntlet_mix"
+				}
+			},
+			reset_event_right_01 = {
+				{
+					"reset_event_horde",
+					spawner_id = "sea_battle_right_01"
+				}
+			},
+			reset_event_left_01 = {
+				{
+					"reset_event_horde",
+					spawner_id = "sea_battle_left_01"
+				}
+			},
+			reset_event_right_02 = {
+				{
+					"reset_event_horde",
+					spawner_id = "sea_battle_right_02"
+				}
+			},
+			reset_event_left_02 = {
+				{
+					"reset_event_horde",
+					spawner_id = "sea_battle_left_02"
+				}
+			},
+			reset_event_right_03 = {
+				{
+					"reset_event_horde",
+					spawner_id = "sea_battle_right_03"
+				}
+			},
+			reset_event_left_03 = {
+				{
+					"reset_event_horde",
+					spawner_id = "sea_battle_left_03"
+				}
+			}
+		},
+		weighted_random_terror_events = {},
+		missions = {
+			dlc1_10_mission_forest_reikwald_reach_river = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_forest_reikwald_reach_river"
+			},
+			dlc1_10_mission_forest_reikwald_through_camp = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_forest_reikwald_through_camp"
+			},
+			dlc1_10_mission_forest_reikwald_follow_river = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_forest_reikwald_follow_river"
+			},
+			dlc1_10_mission_forest_reikwald_extinguish = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_forest_reikwald_extinguish"
+			},
+			dlc1_10_mission_forest_reikwald_find_ship = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_forest_reikwald_find_ship"
+			},
+			dlc1_10_mission_reik_find_dawnrunner = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_find_dawnrunner"
+			},
+			dlc1_10_mission_reik_find_a_way_out_01 = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_find_a_way_out_01"
+			},
+			dlc1_10_mission_reik_find_a_way_out_02 = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_find_a_way_out_02"
+			},
+			dlc1_10_mission_reik_goto_ship = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_goto_ship"
+			},
+			dlc1_10_mission_reik_use_ship = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_use_ship"
+			},
+			dlc1_10_mission_reik_search_dawnrunner = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_search_dawnrunner"
+			},
+			dlc1_10_mission_reik_burn_everything_dawnrunner = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_burn_everything_dawnrunner"
+			},
+			dlc1_10_mission_reik_search_thief = {
+				mission_template_name = "goal",
+				text = "dlc1_10_mission_reik_search_thief"
+			}
+		},
+		dialogue_lookup = {
+			"dialogues/generated/lookup_witch_hunter_reikwald_forest",
+			"dialogues/generated/lookup_empire_soldier_reikwald_forest",
+			"dialogues/generated/lookup_wood_elf_reikwald_forest",
+			"dialogues/generated/lookup_bright_wizard_reikwald_forest",
+			"dialogues/generated/lookup_dwarf_ranger_reikwald_forest",
+			"dialogues/generated/lookup_witch_hunter_reikwald_river",
+			"dialogues/generated/lookup_empire_soldier_reikwald_river",
+			"dialogues/generated/lookup_wood_elf_reikwald_river",
+			"dialogues/generated/lookup_bright_wizard_reikwald_river",
+			"dialogues/generated/lookup_dwarf_ranger_reikwald_river"
+		},
+		dialogue_settings = {
+			"dialogues/generated/witch_hunter_reikwald_forest",
+			"dialogues/generated/empire_soldier_reikwald_forest",
+			"dialogues/generated/wood_elf_reikwald_forest",
+			"dialogues/generated/bright_wizard_reikwald_forest",
+			"dialogues/generated/dwarf_ranger_reikwald_forest",
+			"dialogues/generated/witch_hunter_reikwald_river",
+			"dialogues/generated/empire_soldier_reikwald_river",
+			"dialogues/generated/wood_elf_reikwald_river",
+			"dialogues/generated/bright_wizard_reikwald_river",
+			"dialogues/generated/dwarf_ranger_reikwald_river"
+		},
+		horde_settings_compositions = {
+			event_reikwald_shore_mix = {
+				{
+					name = "few_stormvermins",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							5,
+							8
+						}
+					}
+				},
+				{
+					name = "some_slaves",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							22,
+							23
+						}
+					}
+				},
+				{
+					name = "few_clanrats",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							5,
+							6
+						}
+					}
+				}
+			},
+			event_reikwald_gauntlet_mix = {
+				{
+					name = "some_slaves",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							27,
+							29
+						}
+					}
+				},
+				{
+					name = "few_clanrats",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							6,
+							7
+						}
+					}
+				}
+			},
+			event_reikwald_gauntlet_front_mix = {
+				{
+					name = "few_stormvermins",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							3,
+							4
+						}
+					}
+				}
+			}
+		},
+		lorebook_pages = {}
 	}
 }
 

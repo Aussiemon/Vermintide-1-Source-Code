@@ -13,7 +13,7 @@ FreeFlightManager.init = function (self)
 	self._max_players = 4
 	self._input_service_wrapper = {
 		get = function (self, id)
-			local platform = Application.platform()
+			local platform = PLATFORM
 			local filter = FreeFlightFilters[platform][id]
 
 			if filter then
@@ -307,7 +307,7 @@ FreeFlightManager._update_global_free_flight = function (self, dt, data, input_s
 		local x_trans = input_service.get(input_service, "move_right") - input_service.get(input_service, "move_left")
 		local y_trans = input_service.get(input_service, "move_forward") - input_service.get(input_service, "move_back")
 
-		if Application.platform() == "xb1" then
+		if PLATFORM == "xb1" then
 			local move = input_service.get(input_service, "move_controller")
 			x_trans = move.x
 			y_trans = move.y

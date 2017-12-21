@@ -36,7 +36,7 @@ TutorialUI.init = function (self, ingame_ui_context)
 	self.camera_manager = ingame_ui_context.camera_manager
 	self.world_manager = ingame_ui_context.world_manager
 	self.peer_id = ingame_ui_context.peer_id
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.render_settings = {
 		alpha_multiplier = 1
 	}
@@ -150,9 +150,9 @@ TutorialUI.get_player_first_person_extension = function (self)
 	else
 		local peer_id = self.peer_id
 		local my_player = self.player_manager:player_from_peer_id(peer_id)
-		local player_unit = my_player.player_unit
+		local player_unit = my_player and my_player.player_unit
 
-		if player_unit and ScriptUnit.has_extension(player_unit, "first_person_system") then
+		if Unit.alive(player_unit) and ScriptUnit.has_extension(player_unit, "first_person_system") then
 			local first_person_extension = ScriptUnit.extension(player_unit, "first_person_system")
 			self._first_person_extension = first_person_extension
 
@@ -302,9 +302,9 @@ TutorialUI.pre_render_update = function (self, dt, t)
 	local ui_renderer = self.ui_renderer
 	local peer_id = self.peer_id
 	local my_player = self.player_manager:player_from_peer_id(peer_id)
-	local player_unit = my_player.player_unit
+	local player_unit = my_player and my_player.player_unit
 
-	if not player_unit then
+	if not Unit.alive(player_unit) then
 		return 
 	end
 

@@ -1,7 +1,7 @@
 GraphHelper = GraphHelper or {}
 GraphHelper._known_stats = GraphHelper._known_stats or {}
 GraphHelper._known_graphs = GraphHelper._known_graphs or {}
-local build = Application.build()
+local build = BUILD
 local console_command = Application.console_command
 local record_statistics = Profiler.record_statistics
 

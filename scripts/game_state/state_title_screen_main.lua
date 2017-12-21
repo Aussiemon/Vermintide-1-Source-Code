@@ -23,7 +23,7 @@ StateTitleScreenMain.on_enter = function (self, params)
 
 	self._error_popups = {}
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		if not Managers.account:should_teardown_xboxlive() then
 			Managers.account:reset()
 		end
@@ -57,7 +57,7 @@ StateTitleScreenMain.on_enter = function (self, params)
 		end
 	}
 
-	if (Application.platform() == "xb1" or Application.platform() == "ps4") and not self._params.menu_screen_music_playing then
+	if (PLATFORM == "xb1" or PLATFORM == "ps4") and not self._params.menu_screen_music_playing then
 		Managers.music:trigger_event("Play_menu_screen_music")
 
 		self._params.menu_screen_music_playing = true
@@ -137,6 +137,7 @@ StateTitleScreenMain._update_attract_mode = function (self, dt, t)
 		self._attract_mode_timer = self._attract_mode_timer - dt
 
 		if self._attract_mode_timer <= 0 then
+			self._enter_attract_mode(self)
 		end
 	end
 
@@ -171,7 +172,7 @@ StateTitleScreenMain._handle_continue_input = function (self, dt, t)
 		self._start_pressed = true
 	end
 
-	if input_service.has(input_service, "delete_save") and input_service.get(input_service, "delete_save") and Application.build() ~= "release" then
+	if input_service.has(input_service, "delete_save") and input_service.get(input_service, "delete_save") and BUILD ~= "release" then
 		StateTitleScreenLoadSave.DELETE_SAVE = true
 	end
 
@@ -191,7 +192,7 @@ StateTitleScreenMain._user_exists = function (self, user_id)
 	return false
 end
 StateTitleScreenMain._update_input = function (self, dt, t)
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local controller = Managers.input:get_most_recent_device()
 
 	if platform == "ps4" and Managers.invite:has_invitation() and not self._state then

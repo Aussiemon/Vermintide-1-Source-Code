@@ -690,7 +690,7 @@ local show_lobbies_array = {
 	"lb_show_joinable",
 	"lb_show_all"
 }
-local distance_array = (Application.platform() == "ps4" and {
+local distance_array = (PLATFORM == "ps4" and {
 	"map_zone_options_2",
 	"map_zone_options_3",
 	"map_zone_options_5"

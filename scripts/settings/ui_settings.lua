@@ -781,7 +781,7 @@ function ButtonTextureByName(button_name, platform)
 end
 
 UISettings.get_gamepad_input_texture_data = function (input_service, input_action, gamepad_active)
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" and gamepad_active then
 		platform = "xb1"

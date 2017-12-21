@@ -781,6 +781,14 @@ CameraEffectSettings = {
 			duration = 10000,
 			fade_in = 2,
 			octaves = 6
+		},
+		boat_impact_large = {
+			persistance = 0.9,
+			fade_out = 3,
+			amplitude = 3,
+			duration = 0.5,
+			fade_in = 0.1,
+			octaves = 6
 		}
 	}
 }

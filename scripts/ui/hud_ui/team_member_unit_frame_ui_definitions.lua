@@ -29,7 +29,7 @@ local scenegraph_definition = {
 		}
 	}
 }
-local platform = Application.platform()
+local platform = PLATFORM
 local inventory_consumable_icons = (platform == "win32" and {
 	wpn_grimoire_01 = "teammate_consumable_icon_grimoire",
 	potion_speed_boost_01 = "teammate_consumable_icon_speed",

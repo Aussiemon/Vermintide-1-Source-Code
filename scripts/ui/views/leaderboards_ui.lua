@@ -1,3 +1,5 @@
+require("scripts/managers/leaderboards/leaderboard_settings")
+
 local definitions = local_require("scripts/ui/views/leaderboards_ui_definitions")
 local LEADERBOARD_DEBUG = false
 
@@ -41,10 +43,10 @@ LeaderboardsUI.init = function (self, context, input_service_name)
 	self._ui_renderer = context.ui_renderer
 	self._stats_id = context.stats_id
 	self._statistics_db = context.statistics_db
-	self._platform = Application.platform()
+	self._platform = PLATFORM
 	self._enabled = false
 	self._entries = {}
-	self._platform = Application.platform()
+	self._platform = PLATFORM
 	self._input_service_name = input_service_name
 	self._current_leaderboard_type = 1
 
@@ -123,11 +125,11 @@ LeaderboardsUI.on_open_complete = function (self)
 		}
 		self._current_leaderboard = leaderboard_name
 
-		if Application.platform() == "win32" then
+		if PLATFORM == "win32" then
 			self._updating_leaderboard = true
 
 			Managers.leaderboards:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 1, 20)
-		elseif Application.platform() == "xb1" then
+		elseif PLATFORM == "xb1" then
 			self._updating_leaderboard = true
 
 			Managers.account:get_leaderboard(leaderboard_name, Leaderboards.OVERALL, callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
@@ -237,7 +239,7 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 	self._entries = {}
 	self._updating_leaderboard = false
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		if leaderboard_data and 0 < leaderboard_data.entry_count then
 			for idx, entry in ipairs(leaderboard_data.scores) do
 				local time_in_sec = entry.data[7] or math.random(86400)
@@ -251,7 +253,7 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 		else
 			self._entries[#self._entries + 1] = definitions.create_empty_entry()
 		end
-	elseif Application.platform() == "xb1" then
+	elseif PLATFORM == "xb1" then
 		if leaderboard_data and leaderboard_data.error then
 			self._entries[#self._entries + 1] = definitions.create_empty_entry()
 		elseif leaderboard_data and 0 < leaderboard_data.num_rows then
@@ -298,11 +300,11 @@ LeaderboardsUI.update = function (self, dt)
 		self._create_ui_elements(self)
 
 		if self._current_leaderboard then
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				self._updating_leaderboard = true
 
 				Managers.leaderboards:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 1, 20)
-			elseif Application.platform() == "xb1" then
+			elseif PLATFORM == "xb1" then
 				self._updating_leaderboard = true
 
 				Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
@@ -385,28 +387,43 @@ LeaderboardsUI._handle_input = function (self, dt)
 	local gamepad_active = Managers.input:is_device_active("gamepad")
 	local has_entries = self._has_entries
 	local input_service = Managers.input:get_service(self._input_service_name)
+	self._current_index = self._current_index or 1
 	local controller_cooldown = (gamepad_active and self._controller_cooldown) or 0
 
 	if controller_cooldown and 0 < controller_cooldown then
 		self._controller_cooldown = controller_cooldown - dt
 	elseif has_entries and input_service.get(input_service, "move_down_hold") then
-		self._entries[self._current_index].content.highlight_enabled = nil
+		if self._entries[self._current_index] and self._entries[self._current_index].content then
+			self._entries[self._current_index].content.highlight_enabled = nil
+		end
+
 		self._current_index = math.clamp(self._current_index + 1, 1, #self._entries)
-		self._entries[self._current_index].content.highlight_enabled = true
+
+		if self._entries[self._current_index] and self._entries[self._current_index].content then
+			self._entries[self._current_index].content.highlight_enabled = true
+		end
+
 		self._controller_cooldown = GamepadSettings.menu_cooldown
 
 		self.play_sound(self, "Play_hud_select")
 	elseif has_entries and input_service.get(input_service, "move_up_hold") then
-		self._entries[self._current_index].content.highlight_enabled = nil
+		if self._entries[self._current_index] and self._entries[self._current_index].content then
+			self._entries[self._current_index].content.highlight_enabled = nil
+		end
+
 		self._current_index = math.clamp(self._current_index - 1, 1, #self._entries)
-		self._entries[self._current_index].content.highlight_enabled = true
+
+		if self._entries[self._current_index] and self._entries[self._current_index].content then
+			self._entries[self._current_index].content.highlight_enabled = true
+		end
+
 		self._controller_cooldown = GamepadSettings.menu_cooldown
 
 		self.play_sound(self, "Play_hud_select")
 	end
 
 	if has_entries and input_service.get(input_service, "confirm") then
-		if Application.platform() == "xb1" then
+		if PLATFORM == "xb1" and self._entries[self._current_index] and self._entries[self._current_index].content then
 			local xuid = self._entries[self._current_index].content.id
 
 			if xuid then
@@ -432,11 +449,11 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 			self.play_sound(self, "Play_hud_select")
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				self._updating_leaderboard = true
 
 				Managers.leaderboards:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 1, 20)
-			elseif Application.platform() == "xb1" then
+			elseif PLATFORM == "xb1" then
 				self._updating_leaderboard = true
 
 				Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
@@ -462,9 +479,9 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 			self._updating_leaderboard = true
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				Managers.leaderboards:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 1, 20)
-			elseif Application.platform() == "xb1" then
+			elseif PLATFORM == "xb1" then
 				Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
 			end
 		end
@@ -478,9 +495,9 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 		self._updating_leaderboard = true
 
-		if Application.platform() == "win32" then
+		if PLATFORM == "win32" then
 			Managers.leaderboards:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 1, 20)
-		elseif Application.platform() == "xb1" then
+		elseif PLATFORM == "xb1" then
 			Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
 		end
 	end

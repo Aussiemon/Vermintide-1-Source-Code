@@ -1718,7 +1718,7 @@ MapView._update_invite_friends = function (self)
 	return 
 end
 MapView.on_friends_pressed = function (self)
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		self._xbox_trying_to_open_invite_friends = true
 	else
 		self.friends:set_active(true)
@@ -2160,7 +2160,7 @@ MapView.handle_gamepad_navigation_input = function (self, dt)
 				return 
 			end
 
-			if Application.platform() ~= "xb1" then
+			if PLATFORM ~= "xb1" then
 				if input_service.get(input_service, "left_stick_press") then
 					self.play_sound(self, "Play_hud_select")
 

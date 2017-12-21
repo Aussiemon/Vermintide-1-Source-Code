@@ -4,7 +4,7 @@ require("scripts/managers/input/input_manager")
 
 SplitscreenTester = class(SplitscreenTester)
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	SplitScreenTesterKeymaps = {
 		toggle_splitscreen = {
 			input_mappings = {
@@ -16,7 +16,7 @@ if Application.platform() == "win32" then
 			}
 		}
 	}
-elseif Application.platform() == "xb1" then
+elseif PLATFORM == "xb1" then
 	SplitScreenTesterKeymaps = {
 		toggle_splitscreen = {
 			combination_type = "and",
@@ -34,7 +34,7 @@ elseif Application.platform() == "xb1" then
 			}
 		}
 	}
-elseif Application.platform() == "ps4" then
+elseif PLATFORM == "ps4" then
 	SplitScreenTesterKeymaps = {
 		toggle_splitscreen = {
 			combination_type = "and",
@@ -100,7 +100,7 @@ SplitscreenTester._setup_input = function (self)
 	self.input_manager:initialize_device("mouse", 1)
 	self.input_manager:initialize_device("gamepad")
 
-	if Application.platform() ~= "xb1" and Application.platform() ~= "ps4" then
+	if PLATFORM ~= "xb1" and PLATFORM ~= "ps4" then
 	end
 
 	self.input_manager:create_input_service("splitscreen_tester", "SplitScreenTesterKeymaps")

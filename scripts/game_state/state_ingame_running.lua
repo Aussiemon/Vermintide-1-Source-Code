@@ -6,7 +6,6 @@ require("scripts/settings/unit_variation_settings")
 require("scripts/helpers/level_helper")
 require("scripts/utils/edit_ai_utility")
 require("scripts/utils/keystroke_helper")
-require("scripts/ui/views/end_of_level_ui")
 require("scripts/game_state/components/dice_keeper")
 require("scripts/ui/views/loading_view")
 require("scripts/entity_system/systems/mission/rewards")
@@ -14,7 +13,7 @@ require("scripts/entity_system/systems/mission/rewards")
 StateInGameRunning = class(StateInGameRunning)
 StateInGameRunning.NAME = "StateInGameRunning"
 local dicegame_resource_path = "resource_packages/levels/dicegame"
-local menu_assets_resource_path = (Application.platform() == "win32" and "resource_packages/menu_assets_postgame") or "resource_packages/menu_assets_postgame_console"
+local menu_assets_resource_path = (PLATFORM == "win32" and "resource_packages/menu_assets_postgame") or "resource_packages/menu_assets_postgame_console"
 StateInGameRunning.on_enter = function (self, params)
 	GarbageLeakDetector.register_object(self, "StateInGameRunning")
 
@@ -37,7 +36,7 @@ StateInGameRunning.on_enter = function (self, params)
 	self.is_in_tutorial = params.is_in_tutorial
 	self.end_conditions_met = false
 	local loaded_player_controls = PlayerData.controls and PlayerData.controls.Player
-	local platform = Application.platform()
+	local platform = PLATFORM
 	local player_control_keymap = table.clone(PlayerControllerKeymaps)
 	local player_control_filters = table.clone(PlayerControllerFilters)
 
@@ -94,7 +93,7 @@ StateInGameRunning.on_enter = function (self, params)
 	event_manager.register(event_manager, self, "checkpoint_vote_cancelled", "on_checkpoint_vote_cancelled")
 	event_manager.register(event_manager, self, "conflict_director_setup_done", "event_conflict_director_setup_done")
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		event_manager.register(event_manager, self, "trigger_xbox_round_end", "event_trigger_xbox_round_end")
 	end
 
@@ -189,7 +188,7 @@ StateInGameRunning.on_enter = function (self, params)
 	Managers.state.camera:apply_level_particle_effects(LevelSettings[level_key].level_particle_effects, viewport_name)
 	Managers.state.camera:apply_level_screen_effects(LevelSettings[level_key].level_screen_effects, viewport_name)
 
-	if Application.platform() == "ps4" then
+	if PLATFORM == "ps4" then
 		Managers.account:set_realtime_multiplay_state("pre_game", true)
 	end
 
@@ -241,7 +240,7 @@ StateInGameRunning.setup_end_of_level_UI = function (self)
 		self.end_of_level_ui_context.scoreboard_session_data = scoreboard_session_data
 		self.end_of_level_ui = EndOfLevelUI:new(self.end_of_level_ui_context, game_won)
 
-		if Application.platform() == "ps4" then
+		if PLATFORM == "ps4" then
 			Managers.account:set_presence("dice_game")
 			Managers.account:set_realtime_multiplay_state("end_screen", true)
 		end
@@ -312,7 +311,7 @@ StateInGameRunning.wanted_transition = function (self)
 
 	wanted_transition = wanted_transition or Managers.state.game_mode:wanted_transition()
 
-	if wanted_transition and Application.platform() == "xb1" and not self.is_in_inn and not self.is_in_tutorial then
+	if wanted_transition and PLATFORM == "xb1" and not self.is_in_inn and not self.is_in_tutorial then
 		if Development.parameter("auto-host-level") ~= nil then
 		elseif not self._xbox_event_end_triggered then
 			Application.warning("MultiplyerRoundStart was triggered without end conditions met")
@@ -358,7 +357,7 @@ StateInGameRunning.rpc_client_next_level_vote_started = function (self)
 	return 
 end
 StateInGameRunning.rpc_register_online_leaderboards = function (self, sender, score)
-	StatisticsUtil.register_online_leaderboards_data_client(self.statistics_db, score)
+	StatisticsUtil.register_online_leaderboards_data(self.statistics_db, score)
 
 	return 
 end
@@ -439,7 +438,7 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 		Managers.package:load(dicegame_resource_path, "state_ingame_running", nil, true)
 		Managers.package:load(menu_assets_resource_path, "menu_assets_postgame", nil, true)
 
-		if Application.platform() == "ps4" then
+		if PLATFORM == "ps4" then
 			local level_key = Managers.state.game_mode:level_key()
 			local level_display_name = LevelSettings[level_key].display_name
 			local difficulty_display_name = Managers.state.difficulty:get_difficulty_settings().display_name
@@ -475,7 +474,7 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 		return 
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		if not self._xbox_event_end_triggered then
 			self._xbone_end_of_round_events(self, self.statistics_db)
 		end
@@ -525,7 +524,7 @@ StateInGameRunning._debug_update_rooms = function (self, dt, t)
 	return 
 end
 
-if Application.platform() ~= "win32" and (Application.build() == "dev" or Application.build() == "debug") then
+if PLATFORM ~= "win32" and (BUILD == "dev" or BUILD == "debug") then
 	function RELOAD_CONTROLS()
 		Managers.input:create_input_service("Player", "PlayerControllerKeymaps", "PlayerControllerFilters")
 		Managers.input:map_device_to_service("Player", "keyboard")
@@ -619,7 +618,7 @@ StateInGameRunning._update_invites = function (self, dt, t)
 	local invite_data = Managers.invite:get_invited_lobby_data()
 
 	if invite_data then
-		local platform = Application.platform()
+		local platform = PLATFORM
 		local lobby_id = invite_data.id or invite_data.name
 		local current_lobby_id = nil
 
@@ -656,7 +655,7 @@ StateInGameRunning._update_invites = function (self, dt, t)
 		end
 
 		if not self.popup_id then
-			if self._lobby_client or not self.is_in_inn then
+			if self._lobby_client or not self.is_in_inn or platform == "xb1" then
 				self._invite_lobby_data = invite_data
 			else
 				Managers.matchmaking:request_join_lobby(invite_data, {
@@ -787,7 +786,7 @@ StateInGameRunning.post_update = function (self, dt, t)
 				ScriptWorld.activate_viewport(world, viewport)
 			end
 
-			if Application.platform() == "ps4" then
+			if PLATFORM == "ps4" then
 				Managers.account:set_realtime_multiplay_state("end_screen", false)
 			end
 
@@ -818,7 +817,7 @@ StateInGameRunning.on_exit = function (self)
 
 		self.end_of_level_ui = nil
 
-		if Application.platform() == "ps4" then
+		if PLATFORM == "ps4" then
 			Managers.account:set_realtime_multiplay_state("end_screen", false)
 		end
 	end
@@ -871,14 +870,14 @@ StateInGameRunning.event_game_started = function (self)
 		return 
 	end
 
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		self._xbone_round_start_events(self)
 	end
 
 	return 
 end
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	StateInGameRunning.event_trigger_xbox_round_end = function (self)
 		self._xbone_end_of_round_events(self, self.statistics_db)
 
@@ -988,7 +987,7 @@ StateInGameRunning.event_local_player_spawned = function (self, is_initial_spawn
 end
 StateInGameRunning.game_actually_starts = function (self)
 	if not self._spawn_initialized and self._player_has_spawned and (not self.is_server or self._conflict_directory_is_ready) then
-		local platform = Application.platform()
+		local platform = PLATFORM
 		local loading_context = self.parent.parent.loading_context
 		local first_hero_selection_made = SaveData.first_hero_selection_made
 		local show_profile_on_startup = loading_context.show_profile_on_startup
@@ -1016,7 +1015,7 @@ StateInGameRunning.game_actually_starts = function (self)
 
 		Managers.transition:hide_loading_icon()
 
-		if Application.platform() == "ps4" then
+		if PLATFORM == "ps4" then
 			Managers.account:set_realtime_multiplay_state("pre_game", false)
 		end
 
@@ -1024,7 +1023,7 @@ StateInGameRunning.game_actually_starts = function (self)
 			return 
 		end
 
-		if Application.platform() == "xb1" then
+		if PLATFORM == "xb1" then
 			Managers.state.achievement:initialize_hero_stats()
 		end
 	end

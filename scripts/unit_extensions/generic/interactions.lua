@@ -319,7 +319,7 @@ InteractionDefinitions.pull_up = {
 		end,
 		stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 			if result == InteractionResult.SUCCESS then
-				StatusUtils.set_pulled_up_network(interactable_unit, true, interactor_unit)
+				StatusUtils.set_pulled_up_network(interactable_unit, true, (Unit.alive(interactor_unit) and interactor_unit) or nil)
 			end
 
 			return 
@@ -335,28 +335,30 @@ InteractionDefinitions.pull_up = {
 	client = {
 		start = function (world, interactor_unit, interactable_unit, data, config, t)
 			data.start_time = t
-			local revive_time_variable = Unit.animation_find_variable(interactor_unit, "revive_time")
-
-			Unit.animation_set_variable(interactable_unit, revive_time_variable, config.duration)
-			Unit.animation_event(interactable_unit, "revive_start")
-
 			local interaction_duration_variable = Unit.animation_find_variable(interactor_unit, "interaction_duration")
 
 			Unit.animation_set_variable(interactor_unit, interaction_duration_variable, config.duration)
 			Unit.animation_event(interactor_unit, "interaction_revive")
 
-			if ScriptUnit.has_extension(interactable_unit, "first_person_system") then
-				local first_person_extension = ScriptUnit.extension(interactable_unit, "first_person_system")
+			if Unit.alive(interactable_unit) then
+				local revive_time_variable = Unit.animation_find_variable(interactable_unit, "revive_time")
 
-				first_person_extension.set_wanted_player_height(first_person_extension, "stand", t, config.duration)
+				Unit.animation_set_variable(interactable_unit, revive_time_variable, config.duration)
+				Unit.animation_event(interactable_unit, "revive_start")
+
+				if ScriptUnit.has_extension(interactable_unit, "first_person_system") then
+					local first_person_extension = ScriptUnit.extension(interactable_unit, "first_person_system")
+
+					first_person_extension.set_wanted_player_height(first_person_extension, "stand", t, config.duration)
+				end
+
+				local dialogue_input = ScriptUnit.extension_input(interactor_unit, "dialogue_system")
+				local event_data = FrameTable.alloc_table()
+				event_data.target = interactable_unit
+				event_data.target_name = ScriptUnit.extension(interactable_unit, "dialogue_system").context.player_profile
+
+				dialogue_input.trigger_dialogue_event(dialogue_input, "start_revive", event_data)
 			end
-
-			local dialogue_input = ScriptUnit.extension_input(interactor_unit, "dialogue_system")
-			local event_data = FrameTable.alloc_table()
-			event_data.target = interactable_unit
-			event_data.target_name = ScriptUnit.extension(interactable_unit, "dialogue_system").context.player_profile
-
-			dialogue_input.trigger_dialogue_event(dialogue_input, "start_revive", event_data)
 
 			return 
 		end,
@@ -369,9 +371,11 @@ InteractionDefinitions.pull_up = {
 			Unit.animation_event(interactor_unit, "interaction_end")
 
 			if result == InteractionResult.SUCCESS then
-				Unit.animation_event(interactable_unit, "revive_complete")
-				StatisticsUtil.register_pull_up(interactor_unit, interactable_unit, data.statistics_db)
-			else
+				if Unit.alive(interactable_unit) then
+					StatisticsUtil.register_pull_up(interactor_unit, interactable_unit, data.statistics_db)
+					Unit.animation_event(interactable_unit, "revive_complete")
+				end
+			elseif Unit.alive(interactable_unit) then
 				Unit.animation_event(interactable_unit, "revive_abort")
 
 				if ScriptUnit.has_extension(interactable_unit, "first_person_system") then
@@ -814,7 +818,7 @@ InteractionDefinitions.pickup_object = {
 				elseif pickup_settings.type == "lorebook_page" and local_human then
 					local level_key = Managers.state.game_mode:level_key()
 					local pages = table.clone(LorebookCollectablePages[level_key])
-					local any_level_pages = table.clone(LorebookCollectablePages.any)
+					local any_level_pages = LorebookCollectablePages.any
 
 					table.append(pages, any_level_pages)
 					table.shuffle(pages)
@@ -845,17 +849,11 @@ InteractionDefinitions.pickup_object = {
 
 							break
 						end
-
-						unique_mission_id = nil
 					end
 
 					if not unique_mission_id then
 						if pickup_settings.hide_on_pickup then
 							pickup_extension.hide(pickup_extension)
-						end
-
-						if Application.platform() == "win32" then
-							ScriptApplication.send_to_crashify("[Interactions]", "Someone picked up an unavailable lorebook page (Peer ID: %s - Steam User ID: %s - Steam User Name)", Network.peer_id(), Steam.user_id(), Steam.user_name())
 						end
 
 						return 

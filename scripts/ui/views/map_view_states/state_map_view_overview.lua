@@ -64,7 +64,7 @@ StateMapViewOverview.on_enter = function (self, params)
 
 	self._setup_game_information(self)
 
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.ui_animations = {}
 
 	self.create_ui_elements(self)

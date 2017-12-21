@@ -16,7 +16,7 @@ IngamePlayerListUI.init = function (self, ingame_ui_context)
 	self.is_in_inn = ingame_ui_context.is_in_inn
 	self.voip = ingame_ui_context.voip
 	self.map_save_data = PlayerData.map_view_data or {}
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.is_server = ingame_ui_context.is_server
 	self.network_server = ingame_ui_context.network_server
 	local input_manager = self.input_manager
@@ -334,7 +334,7 @@ IngamePlayerListUI.remove_ignore_chat_message_from_peer_id = function (self, pee
 	return 
 end
 IngamePlayerListUI.muted_peer_id = function (self, peer_id)
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		return Managers.voice_chat:is_peer_muted(peer_id)
 	else
 		return self.voip:peer_muted(peer_id)
@@ -343,7 +343,7 @@ IngamePlayerListUI.muted_peer_id = function (self, peer_id)
 	return 
 end
 IngamePlayerListUI.ignore_voice_message_from_peer_id = function (self, peer_id)
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.voice_chat:mute_peer(peer_id)
 	else
 		self.voip:mute_member(peer_id)
@@ -352,7 +352,7 @@ IngamePlayerListUI.ignore_voice_message_from_peer_id = function (self, peer_id)
 	return 
 end
 IngamePlayerListUI.remove_ignore_voice_message_from_peer_id = function (self, peer_id)
-	if Application.platform() == "xb1" then
+	if PLATFORM == "xb1" then
 		Managers.voice_chat:unmute_peer(peer_id)
 	else
 		self.voip:unmute_member(peer_id)

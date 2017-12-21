@@ -1,4 +1,4 @@
-local platform = Application.platform()
+local platform = PLATFORM
 
 if platform == "win32" then
 	SoundQualitySettings = {

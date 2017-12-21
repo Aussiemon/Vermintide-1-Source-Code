@@ -17,7 +17,7 @@ StateMapViewSummary.on_enter = function (self, params)
 	}
 	self._map_view = params.map_view
 	self.ingame_ui = ingame_ui_context.ingame_ui
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	local input_service = self.input_manager:get_service("map_menu")
 	local gui_layer = UILayer.default + 30
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 2, gui_layer, generic_input_actions.default)

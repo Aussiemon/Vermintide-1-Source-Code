@@ -27,7 +27,6 @@ NavigationGroupManager.setup = function (self, world, nav_world)
 
 	return 
 end
-local max_nodes_per_frame = (Application.platform() == "win32" and 1000) or 400
 NavigationGroupManager.form_groups = function (self, radius, finish_point, optional_level_name)
 	print("Forming navigation groups")
 	assert(finish_point ~= nil, "Got nil for finish_point")
@@ -126,7 +125,7 @@ NavigationGroupManager.form_groups_start = function (self, radius, finish_point,
 
 	return 
 end
-local max_nodes_per_frame = 1000
+local max_nodes_per_frame = (PLATFORM == "win32" and 1000) or 400
 NavigationGroupManager.form_groups_update = function (self)
 	print("NavigationGroupManager -> form_groups_update")
 	Debug.text("NavigationGroupManager: %d ", self._sum_iter_count)
@@ -307,8 +306,10 @@ end
 NavigationGroupManager.refine_groups = function (self)
 	for group, _ in pairs(self._navigation_groups) do
 		local group_area = group.get_group_area(group)
+		local group_neighbours = group.get_group_neighbours(group)
+		local num_neightbours = table.size(group_neighbours)
 
-		if group_area < MIN_AREA then
+		if group_area < MIN_AREA and 0 < num_neightbours then
 			local group_polygons = group.get_group_polygons(group)
 			local new_group = self.find_smallest_neighbour_group(self, group)
 			local a, b, c = Script.temp_count()
@@ -320,8 +321,6 @@ NavigationGroupManager.refine_groups = function (self)
 			end
 
 			Script.set_temp_count(a, b, c)
-
-			local group_neighbours = group.get_group_neighbours(group)
 
 			for neighbour_group, _ in pairs(group_neighbours) do
 				neighbour_group.remove_neighbour_group(neighbour_group, group)
@@ -398,43 +397,17 @@ NavigationGroupManager.make_sure_group_centers_are_on_mesh = function (self)
 
 	return 
 end
-NavigationGroupManager.make_sure_group_centers_are_on_meshX = function (self)
-	for group, _ in pairs(self._navigation_groups) do
-		local pos = group._group_center:unbox()
-		local triangle = GwNavTraversal.get_seed_triangle(self.nav_world, pos)
-
-		if triangle then
-			local p1, p2, p3 = GwNavTraversal.get_triangle_vertices(self.nav_world, triangle)
-			local tri_center = (p1 + p2 + p3)/3
-
-			group._group_center:store(tri_center)
-			QuickDrawerStay:sphere(tri_center, 0.8, Color(255, 0, 0))
-		else
-			local p = GwNavQueries.inside_position_from_outside_position(self.nav_world, pos + Vector3(0, 0, 2), 0, 4, 4, 0.1)
-
-			if p then
-				group._group_center:store(p)
-				QuickDrawerStay:sphere(p, 0.8, Color(0, 0, 255))
-			else
-				QuickDrawerStay:line(pos, pos + Vector3(0, 0, 20), Color(0, 255, 0))
-				QuickDrawerStay:line(pos, pos + Vector3(0.1, 0, 20), Color(0, 255, 0))
-				QuickDrawerStay:line(pos, pos + Vector3(0.1, 0.1, 20), Color(0, 255, 0))
-				QuickDrawerStay:line(pos, pos + Vector3(0, 0.1, 20), Color(0, 255, 0))
-			end
-		end
-	end
-
-	return 
-end
 NavigationGroupManager.find_smallest_neighbour_group = function (self, group)
 	local group_neighbours = group.get_group_neighbours(group)
-	local smallest_neighbour_group = next(group_neighbours, nil) or group
+	local smallest_neighbour_group = next(group_neighbours, nil)
+	local smallest_area = smallest_neighbour_group.get_group_area(smallest_neighbour_group)
 
 	for neighbour_group, _ in pairs(group_neighbours) do
-		local group_area = smallest_neighbour_group.get_group_area(smallest_neighbour_group)
+		local group_area = neighbour_group.get_group_area(neighbour_group)
 
-		if neighbour_group.get_group_area(neighbour_group) < group_area then
+		if group_area < smallest_area then
 			smallest_neighbour_group = neighbour_group
+			smallest_area = group_area
 		end
 	end
 
@@ -587,8 +560,6 @@ NavigationGroupManager.get_group_from_position = function (self, position)
 
 	return group
 end
-local triangle_lookup = {}
-local fallback_loop = 0
 NavigationGroupManager.get_polygon_group = function (self, triangle, dont_clear)
 	local triangle_hash = self.get_poly_hash(self, triangle)
 	local group = self._registered_polygons[triangle_hash]
@@ -616,18 +587,13 @@ NavigationGroupManager.draw_tri = function (self, triangle, h, col)
 end
 local b_queue = {}
 local patch_list = {}
+local triangle_lookup = {}
 NavigationGroupManager.breadth_first_search_neighbours = function (self, root_triangle)
-	for key, _ in pairs(triangle_lookup) do
-		triangle_lookup[key] = nil
-	end
-
-	for key, _ in pairs(patch_list) do
-		patch_list[key] = nil
-	end
+	table.clear(triangle_lookup)
+	table.clear(patch_list)
 
 	local count = 1
 	local b_queue = b_queue
-	local num_to_path = 0
 	local b_start = 1
 	local b_last = 1
 	b_queue[1] = root_triangle
@@ -637,7 +603,6 @@ NavigationGroupManager.breadth_first_search_neighbours = function (self, root_tr
 	while b_start <= b_last do
 		local node_tri = b_queue[b_start]
 		local node_hash = self.get_poly_hash(self, node_tri)
-		patch_list[node_hash] = node_tri
 		b_start = b_start + 1
 		count = count + 1
 		local group = self._registered_polygons[node_hash]
@@ -650,6 +615,7 @@ NavigationGroupManager.breadth_first_search_neighbours = function (self, root_tr
 			return group
 		end
 
+		patch_list[node_hash] = node_tri
 		local neighbours = {
 			GwNavTraversal.get_neighboring_triangles(node_tri)
 		}
@@ -749,7 +715,7 @@ NavigationGroupManager.print_groups = function (self, world, nav_world)
 
 	Script.set_temp_count(a, b, c)
 
-	if self._line_objext then
+	if self._line_object then
 		LineObject.dispatch(world, self._line_object)
 	end
 
@@ -835,15 +801,11 @@ end
 NavigationGroupManager.knit_groups_with_ledges = function (self)
 	local nav_graph_system = Managers.state.entity:system("nav_graph_system")
 	local smart_objects = nav_graph_system.smart_objects
-	local col = Color(255, 0, 255, 10)
-	local h = Vector3(0, 0, 0.25)
-	local groups = self._navigation_groups
 
 	for smart_object_id, smart_object_data in pairs(smart_objects) do
 		for i = 1, #smart_object_data, 1 do
 			local smart_object = smart_object_data[i]
 			local smart_object_type = smart_object.smart_object_type or "ledges"
-			local layer_id = LAYER_ID_MAPPING[smart_object_type]
 			local p1 = Vector3Aux.unbox(smart_object.pos1)
 			local group1 = self.get_group_from_position(self, p1)
 
@@ -851,7 +813,7 @@ NavigationGroupManager.knit_groups_with_ledges = function (self)
 				local p2 = Vector3Aux.unbox(smart_object.pos2)
 				local group2 = self.get_group_from_position(self, p2)
 
-				if group2 then
+				if group2 and group1 ~= group2 then
 					if not group1._group_neighbours[group2] then
 						group1._group_neighbours[group2] = true
 					end

@@ -49,7 +49,7 @@ UnitFramesHandler.init = function (self, ingame_ui_context)
 	local network_transmit = network_manager.network_transmit
 	local server_peer_id = network_transmit.server_peer_id
 	self.host_peer_id = server_peer_id or network_transmit.peer_id
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self._unit_frames = {}
 	self.unit_frame_index_by_ui_id = {}
 
@@ -226,11 +226,21 @@ UnitFramesHandler._handle_unit_frame_assigning = function (self)
 		local own_player = player == my_player
 
 		if not own_player then
-			if not unit_frame_index_by_ui_id[player_ui_id] then
-				local avaiable_unit_frame, unit_frame_index = self._get_unit_frame_by_connecting_peer_id(self, player_peer_id)
+			local unit_frame_index = unit_frame_index_by_ui_id[player_ui_id]
+			local unit_frame = unit_frame_index and self._unit_frames[unit_frame_index]
+			local different_player = unit_frame and unit_frame.player_data.player ~= player
 
-				if not avaiable_unit_frame then
-					avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+			if not unit_frame_index or different_player then
+				local avaiable_unit_frame, unit_frame_index = nil
+
+				if different_player then
+					avaiable_unit_frame = unit_frame
+				else
+					avaiable_unit_frame, unit_frame_index = self._get_unit_frame_by_connecting_peer_id(self, player_peer_id)
+
+					if not avaiable_unit_frame then
+						avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+					end
 				end
 
 				if avaiable_unit_frame then

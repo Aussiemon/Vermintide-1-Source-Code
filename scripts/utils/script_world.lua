@@ -1,4 +1,4 @@
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 end
 
 ScriptWorld.foundation_create_viewport = ScriptWorld.create_viewport

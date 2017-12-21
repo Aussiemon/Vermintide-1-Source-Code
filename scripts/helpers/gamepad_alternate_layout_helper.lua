@@ -1,4 +1,4 @@
-local platform = Application.platform()
+local platform = PLATFORM
 local default_keymaps_data = rawget(_G, GamepadLayoutKeymapsTableName)
 local gamepad_platform_key = (platform ~= "ps4" and "xb1") or platform
 DefaultPlayerControllerKeymaps = PlayerControllerKeymaps[gamepad_platform_key]

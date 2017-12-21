@@ -261,7 +261,7 @@ PeerStates.WaitingForGameObjectSync = {
 
 		if self.server.peers_completed_game_object_sync[peer_id] then
 			if not self.game_started then
-				if Application.platform() == "xb1" then
+				if PLATFORM == "xb1" then
 					self.server.network_transmit:send_rpc("rpc_game_started", self.peer_id, Managers.account:round_id() or "")
 				else
 					self.server.network_transmit:send_rpc("rpc_game_started", self.peer_id, "")

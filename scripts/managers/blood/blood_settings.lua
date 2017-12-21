@@ -45,7 +45,7 @@ BloodSettingsDefault = BloodSettingsDefault or {
 }
 BloodSettings = BloodSettings or table.clone(BloodSettingsDefault)
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	local num_decals = Application.user_setting("num_blood_decal") or BloodSettings.blood_decals.num_decals
 	BloodSettings.blood_decals.num_decals = num_decals
 end

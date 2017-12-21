@@ -942,8 +942,12 @@ SpawnManager._spawn_player = function (self, status)
 	local ammo = status.ammo
 	local ammo_melee_percent_int = math.floor(ammo.slot_melee*100)
 	local ammo_ranged_percent_int = math.floor(ammo.slot_ranged*100)
+	local session = Managers.state.network:game()
 
-	Managers.state.network.network_transmit:send_rpc("rpc_to_client_spawn_player", peer_id, local_player_id, profile_index, position, rotation, is_initial_spawn, ammo_melee_percent_int, ammo_ranged_percent_int, unpack(CONSUMABLES_TEMP))
+	if session then
+		Managers.state.network.network_transmit:send_rpc("rpc_to_client_spawn_player", peer_id, local_player_id, profile_index, position, rotation, is_initial_spawn, ammo_melee_percent_int, ammo_ranged_percent_int, unpack(CONSUMABLES_TEMP))
+	end
+
 	table.clear(CONSUMABLES_TEMP)
 
 	status.spawn_state = (is_initial_spawn and "initial_spawning") or "spawning"

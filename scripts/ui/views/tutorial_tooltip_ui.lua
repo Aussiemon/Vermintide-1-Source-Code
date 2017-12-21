@@ -3,7 +3,7 @@ TutorialTooltipUI = class(TutorialTooltipUI)
 TutorialTooltipUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	self.tutorial_tooltip_animations = {}
 	self.tutorial_tooltip_input_widgets = {}
 
@@ -29,7 +29,7 @@ end
 TutorialTooltipUI.button_texture_data_by_input_action = function (self, input_action, alt_button_name)
 	local input_manager = self.input_manager
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" and gamepad_active then
 		platform = "xb1"

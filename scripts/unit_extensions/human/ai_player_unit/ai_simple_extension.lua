@@ -84,7 +84,7 @@ AISimpleExtension.init = function (self, extension_init_context, unit, extension
 
 	self._init_event_handler(self)
 	self.init_perception(self, breed, is_horde)
-	self._init_brain(self, breed, is_horde)
+	self._init_brain(self, breed, is_horde, extension_init_data.override_behaviour)
 	self._init_size_variation(self, unit, breed)
 	GarbageLeakDetector.register_object(blackboard, "ai_blackboard")
 
@@ -223,8 +223,8 @@ AISimpleExtension._init_event_handler = function (self)
 
 	return 
 end
-AISimpleExtension._init_brain = function (self, breed, is_horde)
-	local behavior = (is_horde and breed.horde_behavior) or breed.behavior
+AISimpleExtension._init_brain = function (self, breed, is_horde, override_behaviour)
+	local behavior = override_behaviour or (is_horde and breed.horde_behavior) or breed.behavior
 	self._brain = AIBrain:new(self._world, self._unit, self._blackboard, self._breed, behavior)
 
 	return 

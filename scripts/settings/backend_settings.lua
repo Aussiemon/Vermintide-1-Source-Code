@@ -1,9 +1,9 @@
 require("scripts/utils/script_application")
 
 BackendSettings = BackendSettings or {}
-local build = Application.build()
+local build = BUILD
 local allow_local = build == "dev" or build == "debug"
-local platform = Application.platform()
+local platform = PLATFORM
 
 if platform == "ps4" then
 	allow_local = false
@@ -12,8 +12,8 @@ elseif platform == "xb1" then
 end
 
 BackendSettings.main = {
-	qnc_get_state_script = "qnc_get_state_2",
-	pray_for_loot_script = "pray_for_loot_script_2",
+	qnc_get_state_script = "qnc_get_state_3",
+	pray_for_loot_script = "pray_for_loot_script_3",
 	enable_sessions = false,
 	startup_script = "script_startup_2",
 	dlcs_unlock_script = "dlc_unlock_script_2",
@@ -23,8 +23,8 @@ BackendSettings.main = {
 	clan_unlock_script = "clan_unlock_script_2",
 	allow_local = false,
 	quests_enabled = true,
-	forge_script = "fuse_script_4",
-	dice_script = "dice_script_5",
+	forge_script = "fuse_script_5",
+	dice_script = "dice_script_6",
 	environment = rawget(_G, "Backend") and Backend.ENV_PROD
 }
 BackendSettings.beta = {

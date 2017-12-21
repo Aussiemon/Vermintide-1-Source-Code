@@ -20,6 +20,31 @@ local temp_rewards = {
 		item_key = "bw_gate_0012"
 	}
 }
+local community_unlocks = {
+	level = {
+		unlock_header = "gift_popup_community_goal_completed",
+		description_str = "",
+		unlock_str = "gift_popup_unlock_str",
+		header_str = "",
+		gift_popup_button_text = "gift_popup_button_text",
+		gift_popup_main_title = "gift_popup_main_title_community_event",
+		rewards = {
+			{
+				no_package = true,
+				unit_name = "units/props/generic/generic_prop_keychain_01",
+				item_key = "trinket_not_consume_medpack_tier1",
+				unit_attachment_node_linking = {
+					{
+						target = 0,
+						source = "anim_point"
+					}
+				}
+			},
+			camera_offset_up = 0.15,
+			camera_offset_dir_multiplier = 0.4
+		}
+	}
+}
 local GIFT_POLL_COOLDOWN = 1.5
 local chest_idle_animations = {
 	"loot_chest_jump",
@@ -78,6 +103,74 @@ GiftPopupUI._destroy_world = function (self)
 		self.reward_world = nil
 		self.reward_viewport = nil
 	end
+
+	return 
+end
+GiftPopupUI._create_ui_elements_level_unlock = function (self, rewards, unlock_settings)
+	local rewards = community_unlocks.level.rewards
+	local title_text = community_unlocks.level.gift_popup_main_title
+	local level_settings = LevelSettings[unlock_settings.level_id]
+	local description_text = unlock_settings.event_name or level_settings.display_name
+	local button_text = community_unlocks.level.gift_popup_button_text
+
+	self._create_world(self)
+
+	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
+	local widget_definitions = definitions.widget_definitions
+	self.reward_text_widgets = {
+		title_text = UIWidget.init(widget_definitions.title_text),
+		description_text = UIWidget.init(widget_definitions.description_text),
+		reward_name_text = UIWidget.init(widget_definitions.reward_name_text),
+		reward_type_text = UIWidget.init(widget_definitions.reward_type_text)
+	}
+	self.reward_text_widgets.title_text.content.text = title_text
+	self.reward_text_widgets.description_text.content.text = description_text
+	local unlock_header_str = Localize(community_unlocks.level.unlock_header)
+	local unlock_str = Localize(community_unlocks.level.unlock_str)
+	local level_display_name = Localize(level_settings.display_name)
+	local display_str = string.format(unlock_str, level_display_name)
+	self.reward_text_widgets.reward_name_text.content.text = unlock_header_str
+	self.reward_text_widgets.reward_type_text.content.text = display_str
+	self.hero_icon_widgets = {}
+	self.thumb_widgets = {}
+	self.claim_button_widget = UIWidget.init(widget_definitions.claim_button)
+	self.close_button_widget = UIWidget.init(widget_definitions.close_button)
+	self.background_widget = UIWidget.init(widget_definitions.background)
+	self.divider_widget = UIWidget.init(widget_definitions.divider)
+	self.popup_bg_widget = UIWidget.init(widget_definitions.popup_bg)
+	self.button_glow_widget = UIWidget.init(widget_definitions.button_glow)
+	local button_glow_color = self.button_glow_widget.style.texture_id.color
+	button_glow_color[1] = 0
+	local button_glow_animation = UIAnimation.init(UIAnimation.pulse_animation, button_glow_color, 1, 50, 255, 2.5)
+	self.button_glow_widget.animations[button_glow_animation] = true
+	local start_alpha = 0
+	self.popup_bg_widget.style.texture_id.color[1] = start_alpha
+	self.divider_widget.style.texture_id.color[1] = start_alpha
+	self.reward_text_widgets.title_text.style.text.text_color[1] = start_alpha
+	self.reward_text_widgets.description_text.style.text.text_color[1] = start_alpha
+	self.reward_text_widgets.reward_name_text.style.text.text_color[1] = start_alpha
+	self.reward_text_widgets.reward_type_text.style.text.text_color[1] = start_alpha
+	self.reward_text_widgets.reward_name_text.style.text.localize = false
+	self.reward_text_widgets.reward_type_text.style.text.localize = false
+	local claim_button = self.claim_button_widget
+	claim_button.style.texture.color[1] = start_alpha
+	claim_button.style.text.text_color[1] = start_alpha
+	claim_button.style.text_hover.text_color[1] = start_alpha
+	claim_button.style.text_selected.text_color[1] = start_alpha
+	claim_button.style.text_disabled.text_color[1] = start_alpha
+	self.claim_button_widget.content.text_field = button_text
+
+	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
+
+	self.ui_animator = UIAnimator:new(self.ui_scenegraph, animation_definitions)
+
+	self._start_level_presentation(self, rewards)
+
+	local input_service = self.input_manager:get_service(self.input_service_name)
+	local gui_layer = UILayer.item_display_popup + 30
+	self.menu_input_description = MenuInputDescriptionUI:new(self.ingame_ui_context, self.ui_renderer, input_service, 5, gui_layer, generic_input_actions.default)
+
+	self.menu_input_description:set_input_description(nil)
 
 	return 
 end
@@ -244,6 +337,35 @@ end
 GiftPopupUI.active = function (self)
 	return self.presentation_started
 end
+GiftPopupUI._start_level_presentation = function (self, rewards)
+	self.presentation_started = true
+
+	if not self.cursor_pushed then
+		ShowCursorStack.push()
+
+		self.cursor_pushed = true
+	end
+
+	self.rewards = rewards
+	local input_service_name = self.input_service_name
+
+	self.input_manager:block_device_except_service(input_service_name, "keyboard", 1)
+	self.input_manager:block_device_except_service(input_service_name, "mouse", 1)
+	self.input_manager:block_device_except_service(input_service_name, "gamepad", 1)
+
+	self.ui_animator = UIAnimator:new(self.ui_scenegraph, animation_definitions)
+
+	self.spawn_chest_unit(self)
+
+	self.reward_units_to_spawn = {
+		community_unlocks.level.rewards
+	}
+
+	ScriptWorld.activate_viewport(self.reward_world, self.reward_viewport)
+	self.play_sound(self, "hud_reward_chest_spin")
+
+	return 
+end
 GiftPopupUI.start = function (self, rewards)
 	self.presentation_started = true
 
@@ -323,7 +445,14 @@ GiftPopupUI.event_initialize_poll = function (self)
 
 	return 
 end
+local DO_RELOAD = true
 GiftPopupUI.update = function (self, dt, t)
+	if DO_RELOAD then
+		DO_RELOAD = false
+
+		self.stop(self)
+	end
+
 	if not self.presentation_started then
 		return 
 	end
@@ -481,6 +610,23 @@ GiftPopupUI._poll_new_rewards = function (self, dt)
 				return true
 			end
 		end
+
+		for _, unlock in ipairs(CommunityUnlocks) do
+			local title_property = unlock.title_property
+			local title_properties = Managers.backend:get_interface("title_properties")
+			local title_property_enabled = title_properties.get_value(title_properties, title_property)
+
+			if title_property_enabled and not SaveData[title_property .. "_unlocked"] then
+				local unlock_type = unlock.type
+				local rewards = unlock.rewards
+
+				self["_create_ui_elements_" .. unlock_type](self, rewards or {}, unlock)
+
+				SaveData[title_property .. "_unlocked"] = true
+
+				Managers.save:auto_save(SaveFileName, SaveData, nil)
+			end
+		end
 	end
 
 	return 
@@ -524,7 +670,7 @@ GiftPopupUI._handle_gamepad_input = function (self, dt)
 				new_selection_index = math.max(self._selection_index - 1, 1)
 			elseif input_service.get(input_service, "move_right") then
 				local num_thumb_widgets = #self.thumb_widgets
-				new_selection_index = math.min(self._selection_index + 1, num_thumb_widgets)
+				new_selection_index = math.min(self._selection_index + 1, math.max(num_thumb_widgets, 1))
 			end
 
 			if new_selection_index and new_selection_index ~= self._selection_index then
@@ -546,6 +692,7 @@ GiftPopupUI._draw = function (self, dt)
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
+	local platform = PLATFORM
 	local input_service = input_manager.get_service(input_manager, self.input_service_name)
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
@@ -586,7 +733,9 @@ GiftPopupUI._draw = function (self, dt)
 			UIRenderer.draw_widget(ui_top_renderer, widget)
 		end
 
-		UIRenderer.draw_widget(ui_top_renderer, self.close_button_widget)
+		if platform == "win32" then
+			UIRenderer.draw_widget(ui_top_renderer, self.close_button_widget)
+		end
 	end
 
 	UIRenderer.end_pass(ui_top_renderer)
@@ -859,37 +1008,48 @@ GiftPopupUI._set_selection = function (self, index)
 
 	self._previous_index = self._selection_index
 	self._selection_index = index
+	local first_time = nil
+	local play_reward_sound = true
 	local widget = self.thumb_widgets[index]
-	local widget_content = widget.content
-	local first_time = widget_content.first_time
-	widget_content.first_time = false
-	local display_name = widget_content.display_name
-	local item_type = widget_content.item_type
-	local reward_name_text = self.reward_text_widgets.reward_name_text
-	local reward_type_text = self.reward_text_widgets.reward_type_text
-	reward_name_text.content.text = display_name
-	reward_type_text.content.text = item_type
-	local draw_hero_icon = widget_content.draw_hero_icon
-	self.draw_hero_icon = draw_hero_icon
 
-	if draw_hero_icon then
-		local key = widget_content.hero_key
-		local hero_icon_texture = UISettings.hero_icons.medium[key]
-		local hero_icon_tooltip = UISettings.hero_tooltips[key]
-		local hero_icon_widgets = self.hero_icon_widgets
-		hero_icon_widgets.hero_icon.content.texture_id = hero_icon_texture
-		hero_icon_widgets.hero_icon_tooltip.content.tooltip_text = Localize(hero_icon_tooltip)
-	end
+	if widget then
+		local widget_content = widget.content
+		first_time = widget_content.first_time
+		widget_content.first_time = false
+		play_reward_sound = first_time
+		local display_name = widget_content.display_name
+		local item_type = widget_content.item_type
+		local reward_name_text = self.reward_text_widgets.reward_name_text
+		local reward_type_text = self.reward_text_widgets.reward_type_text
+		reward_name_text.content.text = display_name
+		reward_type_text.content.text = item_type
+		local draw_hero_icon = widget_content.draw_hero_icon
+		self.draw_hero_icon = draw_hero_icon
 
-	local widget_animations = widget.animations
+		if draw_hero_icon then
+			local key = widget_content.hero_key
+			local hero_icon_texture = UISettings.hero_icons.medium[key]
+			local hero_icon_tooltip = UISettings.hero_tooltips[key]
+			local hero_icon_widgets = self.hero_icon_widgets
+			hero_icon_widgets.hero_icon.content.texture_id = hero_icon_texture
+			hero_icon_widgets.hero_icon_tooltip.content.tooltip_text = Localize(hero_icon_tooltip)
+		end
 
-	table.clear(widget_animations)
+		local widget_animations = widget.animations
 
-	local icon_glow_color = widget.style.icon_glow.color
+		table.clear(widget_animations)
 
-	if 0 < icon_glow_color[1] then
-		local animation = UIAnimation.init(UIAnimation.function_by_time, icon_glow_color, 1, icon_glow_color[1], 0, 0.2, math.easeOutCubic)
-		widget_animations[animation] = true
+		local icon_glow_color = widget.style.icon_glow.color
+
+		if 0 < icon_glow_color[1] then
+			local animation = UIAnimation.init(UIAnimation.function_by_time, icon_glow_color, 1, icon_glow_color[1], 0, 0.2, math.easeOutCubic)
+			widget_animations[animation] = true
+		end
+	else
+		local reward_name_text = self.reward_text_widgets.reward_name_text
+		local reward_type_text = self.reward_text_widgets.reward_type_text
+		reward_name_text.style.text.text_color[1] = 255
+		reward_type_text.style.text.text_color[1] = 255
 	end
 
 	for i, widget in ipairs(self.thumb_widgets) do
@@ -899,14 +1059,14 @@ GiftPopupUI._set_selection = function (self, index)
 
 	local reward_units_to_spawn = self.reward_units_to_spawn
 
-	if reward_units_to_spawn then
+	if 0 < table.size(reward_units_to_spawn) then
 		local units_data = reward_units_to_spawn[index]
 		local units_loaded = true
 
 		for _, data in ipairs(units_data) do
 			local unit_name = data.unit_name
 
-			if not self.loaded_packages[unit_name] then
+			if not self.loaded_packages[unit_name] and not data.no_package then
 				units_loaded = false
 
 				break
@@ -916,15 +1076,17 @@ GiftPopupUI._set_selection = function (self, index)
 		if units_loaded then
 			local item_data = self.rewards[index]
 			local item_key = item_data.item_key
+			local offset_z = units_data.camera_offset_up
+			local offset_dir_multiplier = units_data.camera_offset_dir_multiplier
 
-			self.spawn_link_unit(self, item_key)
-			self.spawn_reward_units(self, units_data, first_time)
+			self.spawn_link_unit(self, item_key, offset_z, offset_dir_multiplier)
+			self.spawn_reward_units(self, units_data, first_time, play_reward_sound)
 		end
 	end
 
 	return 
 end
-GiftPopupUI.spawn_link_unit = function (self, item_key)
+GiftPopupUI.spawn_link_unit = function (self, item_key, camera_offset_z, camera_offset_dir_multiplier)
 	if self.link_unit then
 		World.destroy_unit(self.reward_world, self.link_unit)
 
@@ -933,6 +1095,8 @@ GiftPopupUI.spawn_link_unit = function (self, item_key)
 
 	local item_template = ItemHelper.get_template_by_item_name(item_key)
 	local item_data = ItemMasterList[item_key]
+	local camera_offset_z = camera_offset_z or nil
+	local camera_offset_dir_multiplier = camera_offset_dir_multiplier or 1
 	local unit_name = item_template.display_unit
 	local camera_rotation = self.get_camera_rotation(self)
 	local camera_forward_vector = Quaternion.forward(camera_rotation)
@@ -940,8 +1104,8 @@ GiftPopupUI.spawn_link_unit = function (self, item_key)
 	local horizontal_rotation = Quaternion.axis_angle(Vector3.up(), math.pi*1)
 	local unit_spawn_rotation = Quaternion.multiply(camera_look_rotation, horizontal_rotation)
 	local camera_position = self.get_camera_position(self)
-	local unit_spawn_position = camera_position + camera_forward_vector
-	unit_spawn_position.z = unit_spawn_position.z + 0.05
+	local unit_spawn_position = camera_position + camera_forward_vector*camera_offset_dir_multiplier
+	unit_spawn_position.z = unit_spawn_position.z + (camera_offset_z or 0.05)
 	local reward_world = self.reward_world
 	local link_unit = World.spawn_unit(reward_world, unit_name, unit_spawn_position, unit_spawn_rotation)
 	local unit_box, box_dimension = Unit.box(link_unit)
@@ -984,7 +1148,7 @@ GiftPopupUI.spawn_link_unit = function (self, item_key)
 
 	return 
 end
-GiftPopupUI.spawn_reward_units = function (self, data, first_time)
+GiftPopupUI.spawn_reward_units = function (self, data, first_time, play_reward_sound)
 	if self.reward_units then
 		local reward_world = self.reward_world
 
@@ -1032,7 +1196,7 @@ GiftPopupUI.spawn_reward_units = function (self, data, first_time)
 
 		self.units_spawned = true
 
-		if first_time then
+		if play_reward_sound then
 			self.play_sound(self, "hud_dice_game_reward_sound")
 		else
 			self.play_sound(self, "Play_hud_select")

@@ -175,7 +175,7 @@ PositiveReinforcementUI.add_event = function (self, hash, local_player, color_fr
 		local debug_widget_text_color_3 = debug_widget_text_color and debug_widget_text_color[3]
 		local debug_widget_text_color_4 = debug_widget_text_color and debug_widget_text_color[4]
 
-		if Application.platform() ~= "win32" then
+		if PLATFORM ~= "win32" then
 			self._animations["text_color_fade_1_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style.text_color, 2, color_from[2], color_to[2], 0.8)
 			self._animations["text_color_fade_2_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style.text_color, 3, color_from[3], color_to[3], 0.8)
 			self._animations["text_color_fade_3_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style.text_color, 4, color_from[4], color_to[4], 0.8)

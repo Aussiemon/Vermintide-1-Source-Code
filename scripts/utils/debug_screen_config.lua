@@ -5461,7 +5461,7 @@ Features that make player mechanics nicer to work with.
 		end
 	}
 }
-local platform = Application.platform()
+local platform = PLATFORM
 
 if platform == "ps4" then
 	local settings_ps4 = {

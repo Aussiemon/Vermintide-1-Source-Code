@@ -182,7 +182,7 @@ weapon_template.ammo_data = {
 	max_ammo = 24,
 	ammo_per_clip = 1,
 	play_reload_anim_on_wield_reload = true,
-	reload_time = 2.5,
+	reload_time = 2,
 	reload_on_ammo_pickup = true
 }
 weapon_template.attack_meta_data = {

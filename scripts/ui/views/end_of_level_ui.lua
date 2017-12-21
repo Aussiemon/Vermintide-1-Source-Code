@@ -1,5 +1,4 @@
 require("scripts/ui/ui_elements")
-require("scripts/ui/ui_fonts")
 require("scripts/ui/views/reward_ui")
 require("scripts/ui/views/summary_screen_ui")
 require("scripts/game_state/components/dice_roller")
@@ -35,7 +34,7 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 		input_manager.block_device_except_service(input_manager, "ingame_menu", "gamepad")
 	end
 
-	if Application.platform() == "win32" then
+	if PLATFORM == "win32" then
 		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_postgame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images", "material", "materials/fonts/gw_fonts")
 	else
 		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_postgame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/fonts/gw_fonts")

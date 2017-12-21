@@ -636,7 +636,7 @@ local function create_voting_widget(scenegraph_id, gamepad_selection_scenegraph_
 	}
 end
 
-local leave_party_text = (Application.platform() == "xb1" and "leave_party_xb1") or "leave_party"
+local leave_party_text = (PLATFORM == "xb1" and "leave_party_xb1") or "leave_party"
 local widgets = {
 	gamepad_slot_selection = UIWidgets.create_gamepad_selection("voting_widget_1_gamepad_selection", nil, nil, {
 		70,

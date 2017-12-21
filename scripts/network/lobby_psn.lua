@@ -129,6 +129,7 @@ LobbyInternal.get_lobby = function (room_browser, index)
 	local data_table = LobbyInternal.unserialize_psn_data(data_string)
 	data_table.id = network_psn_room_info.id
 	data_table.name = network_psn_room_info.name
+	data_table.host_name = room_browser.host_user_name(room_browser, index)
 
 	return data_table
 end
@@ -484,6 +485,9 @@ PSNRoomBrowser.clear_filters = function (self)
 	PsnRoomBrowser.clear_filters(self.browser)
 
 	return 
+end
+PSNRoomBrowser.host_user_name = function (self, index)
+	return PsnRoomBrowser.room_owner_np_id(self.browser, index)
 end
 
 return 

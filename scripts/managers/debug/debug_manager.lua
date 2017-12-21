@@ -91,7 +91,7 @@ DebugManager.drawer = function (self, options)
 	options = options or {}
 	local drawer_name = options.name
 	local drawer = nil
-	local drawer_api = (Application.build() == "release" and DebugDrawerRelease) or DebugDrawer
+	local drawer_api = (BUILD == "release" and DebugDrawerRelease) or DebugDrawer
 
 	if drawer_name == nil then
 		local line_object = World.create_line_object(self._world)

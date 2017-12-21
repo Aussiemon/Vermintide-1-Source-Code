@@ -20,7 +20,7 @@ require("scripts/managers/matchmaking/matchmaking_state_ingame")
 require("scripts/managers/matchmaking/matchmaking_state_friend_client")
 require("scripts/managers/matchmaking/matchmaking_handshaker")
 
-if Application.platform() == "xb1" then
+if PLATFORM == "xb1" then
 	require("scripts/managers/matchmaking/matchmaking_state_start_host_game")
 end
 
@@ -529,7 +529,7 @@ MatchmakingManager.update = function (self, dt, t)
 	local searching_for_games = self._state.NAME == "MatchmakingStateSearchGame"
 	local update_lobby_finder = (is_in_inn and lobby_browser_active) or searching_for_games
 
-	if update_lobby_finder and Application.platform() ~= "xb1" then
+	if update_lobby_finder and PLATFORM ~= "xb1" then
 		self.lobby_finder_timer = self.lobby_finder_timer - dt
 
 		if self.lobby_finder_timer < 0 then
@@ -1120,7 +1120,7 @@ MatchmakingManager.lobby_match = function (self, lobby_data, level_key, difficul
 
 		for i = 1, 5, 1 do
 			if MatchmakingSettings.hero_search_filter[i] == true then
-				local hero_available = self.hero_available_in_lobby_data(self, wanted_profile_id, lobby_data)
+				local hero_available = self.hero_available_in_lobby_data(self, i, lobby_data)
 
 				if hero_available then
 					any_allowed_hero_available = true

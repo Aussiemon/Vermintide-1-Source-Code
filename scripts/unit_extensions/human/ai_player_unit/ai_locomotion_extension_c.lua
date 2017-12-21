@@ -161,9 +161,9 @@ local movement_types = {
 	constrained_by_mover = 2,
 	disabled = 3
 }
-AILocomotionExtensionC.set_movement_type = function (self, movement_type, override_mover_move_distance)
+AILocomotionExtensionC.set_movement_type = function (self, movement_type, override_mover_move_distance, ignore_forced_mover_kill)
 	if movement_type == self.movement_type then
-		return 
+		return true
 	end
 
 	self.movement_type = movement_type
@@ -179,14 +179,14 @@ AILocomotionExtensionC.set_movement_type = function (self, movement_type, overri
 	local breed = self._breed
 	local kill = EngineOptimizedExtensions.ai_locomotion_set_movement_type(self._engine_extension_id, movement_types[movement_type], override_mover_move_distance)
 
-	if kill and not breed.ignore_forced_mover_kill then
+	if kill and not ignore_forced_mover_kill then
 		local damage_type = "forced"
 		local damage_direction = Vector3(0, 0, -1)
 
 		AiUtils.kill_unit(self._unit, nil, nil, damage_type, damage_direction)
 	end
 
-	return 
+	return not kill
 end
 AILocomotionExtensionC.current_velocity = function (self)
 	return EngineOptimizedExtensions.ai_locomotion_get_velocity(self._engine_extension_id)

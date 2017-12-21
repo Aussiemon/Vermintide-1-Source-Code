@@ -1,5 +1,5 @@
 local function debug_print(str, ...)
-	if script_data.ai_bots_debug then
+	if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 		printf("[BotNavTransitionManager] " .. str, ...)
 	end
 
@@ -54,7 +54,7 @@ BotNavTransitionManager.traverse_logic = function (self)
 	return self._traverse_logic
 end
 BotNavTransitionManager.update = function (self, dt, t)
-	if not script_data.ai_bots_debug then
+	if not script_data.ai_bots_debug and not script_data.ai_bot_transition_debug then
 		return 
 	end
 
@@ -66,10 +66,12 @@ BotNavTransitionManager.update = function (self, dt, t)
 	for _, transition in pairs(self._bot_nav_transitions) do
 		local from = transition.from:unbox()
 		local to = transition.to:unbox()
+		local waypoint = transition.waypoint:unbox()
 		local g = math.cos(math.pi*0.5*(t%2 - 1))*200 + 50
 		local color = Color(50, g, 50)
 
-		drawer.line(drawer, from, to, color)
+		drawer.line(drawer, from, waypoint, color)
+		drawer.line(drawer, waypoint, to, color)
 		drawer.sphere(drawer, from, 0.3, color)
 		drawer.cone(drawer, to - Vector3.normalize(from - to)*0.25, to, 0.3, color, 9, 9)
 	end
@@ -158,7 +160,14 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 		return 
 	end
 
-	local waypoint = (via - from)*1.5 + from
+	local waypoint = nil
+
+	if player_jumped then
+		waypoint = via
+	else
+		waypoint = (via - from)*1.5 + from
+	end
+
 	local nav_world = self._nav_world
 	local found_nav_mesh, z = GwNavQueries.triangle_from_position(nav_world, wanted_to, 0.1, 0.3, self._layerless_traverse_logic)
 	local world = self._world
@@ -186,7 +195,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 
 			debug_print("fallback success")
 		else
-			if script_data.ai_bots_debug then
+			if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 				local drawer = QuickDrawerStay
 				local color = Color(150, 50, 50)
 
@@ -205,7 +214,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 	local to = Vector3(wanted_to.x, wanted_to.y, z)
 
 	if GwNavQueries.raycango(nav_world, from, to, self._traverse_logic) then
-		if script_data.ai_bots_debug then
+		if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 			local drawer = QuickDrawerStay
 			local color = Color(255, 50, 0, 255)
 
@@ -254,6 +263,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 	transitions[index] = {
 		graph = graph,
 		from = Vector3Box(from),
+		waypoint = Vector3Box(waypoint),
 		to = Vector3Box(to),
 		unit = unit,
 		type = layer_name,
@@ -290,7 +300,7 @@ BotNavTransitionManager.transition_data = function (self, unit)
 		local index = self._bot_nav_transition_lookup[unit]
 		local transition = self._bot_nav_transitions[index]
 
-		return transition.type, transition.from:unbox(), transition.to:unbox()
+		return transition.type, transition.from:unbox(), transition.to:unbox(), transition.waypoint:unbox()
 	end
 
 	return 
@@ -315,7 +325,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 	local ray_length = length + 10
 	local hit, hit_position = PhysicsWorld.immediate_raycast(ph_world, ray_from, down, ray_length, "closest", "collision_filter", "filter_bot_nav_transition_ladder_ray")
 
-	if script_data.ai_bots_debug then
+	if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 		local ray_to = ray_from + down*ray_length
 		local drawer = Managers.state.debug:drawer({
 			mode = "retained",
@@ -352,7 +362,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 		for step_index = 1, max_steps, 1 do
 			local check_pos = transition_to - flat_back*step_size*step_index
 
-			if script_data.ai_bots_debug then
+			if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 				local drawer = Managers.state.debug:drawer({
 					mode = "retained",
 					name = "BotNavTransitionManager_retained"
@@ -394,7 +404,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 		for step_index = 1, max_steps, 1 do
 			local check_pos = hit_position + flat_back*step_size*step_index
 
-			if script_data.ai_bots_debug then
+			if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 				local drawer = Managers.state.debug:drawer({
 					mode = "retained",
 					name = "BotNavTransitionManager_retained"

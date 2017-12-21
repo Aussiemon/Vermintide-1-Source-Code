@@ -80,9 +80,10 @@ LevelSettings.dlc_dwarf_interior = {
 		composition = false
 	},
 	map_settings = {
-		area = "dwarfs",
 		sorting = 23,
 		icon = "level_location_dlc_icon_dwarf_interior",
+		area = "dwarfs",
+		console_sorting = 24,
 		wwise_events = {
 			"nik_map_brief_dwarf_int_01",
 			"nik_map_brief_dwarf_int_02"
@@ -178,9 +179,10 @@ LevelSettings.dlc_dwarf_exterior = {
 		composition = false
 	},
 	map_settings = {
-		area = "dwarfs",
 		sorting = 24,
 		icon = "level_location_dlc_icon_dwarf_exterior",
+		area = "dwarfs",
+		console_sorting = 25,
 		wwise_events = {
 			"nik_map_brief_dwarf_ext_01",
 			"nik_map_brief_dwarf_ext_02"
@@ -271,9 +273,10 @@ LevelSettings.dlc_dwarf_beacons = {
 		composition = false
 	},
 	map_settings = {
-		area = "dwarfs",
 		sorting = 25,
 		icon = "level_location_dlc_icon_dwarf_beacon",
+		area = "dwarfs",
+		console_sorting = 26,
 		wwise_events = {
 			"nik_map_brief_beacons_01",
 			"nik_map_brief_beacons_02"

@@ -56,7 +56,7 @@ ConsoleMapView.init = function (self, ingame_ui_context)
 		snap_pixel_positions = true
 	}
 	self.timeline_enabled = true
-	self.platform = Application.platform()
+	self.platform = PLATFORM
 	local player = Managers.player:local_player()
 	local player_stats_id = player.stats_id(player)
 	local input_manager = ingame_ui_context.input_manager

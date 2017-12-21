@@ -16,7 +16,7 @@ TelemetryEvents.header = function (self, engine_revision, content_revision)
 
 	params.version = TelemetrySettings.version
 	params.created_at = timestamp()
-	params.platform = Application.platform()
+	params.platform = PLATFORM
 	params.engine_revision = engine_revision
 	params.content_revision = content_revision
 
@@ -451,6 +451,25 @@ TelemetryEvents.vo_play_event = function (self, sound_event, dialogue, unit_name
 	params.unit_name = unit_name
 
 	self.manager:register_event("vo_play_event", params)
+
+	return 
+end
+TelemetryEvents.level_progression = function (self, percent)
+	table.clear(params)
+
+	params.percent = percent
+
+	self.manager:register_event("level_progression", params)
+
+	return 
+end
+TelemetryEvents.memory_statistics = function (self, memory_tree, memory_resources)
+	table.clear(params)
+
+	params.memory_tree = memory_tree
+	params.memory_resources = memory_resources
+
+	self.manager:register_event("memory_statistics", params)
 
 	return 
 end

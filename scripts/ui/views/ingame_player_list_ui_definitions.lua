@@ -1118,7 +1118,7 @@ local function player_widget_definition(index)
 	return definition
 end
 
-local platform = Application.platform()
+local platform = PLATFORM
 local generic_input_actions = {
 	own_player = {
 		{
@@ -1319,7 +1319,7 @@ local generic_input_actions = {
 	}
 }
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	generic_input_actions.server_default[#generic_input_actions.server_default + 1] = {
 		input_action = "mute_chat",
 		priority = 2,

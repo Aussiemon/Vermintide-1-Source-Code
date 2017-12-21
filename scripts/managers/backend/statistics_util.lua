@@ -365,6 +365,23 @@ StatisticsUtil.register_collected_tomes = function (collected_tomes, statistics_
 
 	return 
 end
+StatisticsUtil.register_console_specific_stats = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local kills_total = statistics_db.get_stat(statistics_db, stats_id, "kills_total")
+	local current_total_kills_consoles = statistics_db.get_persistent_stat(statistics_db, stats_id, "total_kills_consoles")
+	local new_total_kills_consoles = current_total_kills_consoles + kills_total
+
+	statistics_db.set_stat(statistics_db, stats_id, "total_kills_consoles", new_total_kills_consoles)
+
+	local new_stats = {
+		total_kills_consoles = tostring(new_total_kills_consoles)
+	}
+
+	Managers.backend:set_stats(new_stats)
+
+	return 
+end
 StatisticsUtil.register_complete_level = function (statistics_db)
 	local level_settings = LevelHelper:current_level_settings()
 	local level_id = level_settings.level_id
@@ -574,9 +591,9 @@ StatisticsUtil.register_online_leaderboards_data = function (statistics_db, scor
 		skaven_storm_vermins,
 		skaven_specials,
 		skaven_rat_ogre,
-		math.floor(wave_completed_time + 0.5)
+		math.floor(wave_completed_time)
 	}
-	local platform = Application.platform()
+	local platform = PLATFORM
 
 	if platform == "win32" then
 		Managers.leaderboards:register_score(leaderboard_name, total_score, score_data)

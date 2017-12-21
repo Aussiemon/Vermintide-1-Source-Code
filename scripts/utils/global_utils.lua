@@ -1,4 +1,4 @@
-local release_build = Application.build() == "release"
+local release_build = BUILD == "release"
 local script_data = script_data
 script_data.disable_debug_position_lookup = (release_build and true) or nil
 local unit_alive = Unit.alive

@@ -948,7 +948,9 @@ DebugScreen.update_search = function (input_manager, input_service, gui, t, dt)
 			DebugScreen.active_id = nil
 			DebugScreen.search_string = DebugScreen.search_string .. stroke
 		elseif stroke == Keyboard.BACKSPACE and 0 < #DebugScreen.search_string then
-			DebugScreen.search_string = DebugScreen.search_string:sub(1, #DebugScreen.search_string - 1)
+			local string_length = string.len(DebugScreen.search_string)
+			local character_index = Utf8.location(DebugScreen.search_string, string_length)
+			DebugScreen.search_string = DebugScreen.search_string:sub(1, character_index - 1)
 		end
 	end
 

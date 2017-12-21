@@ -15,8 +15,11 @@ BTTargetPouncedAction.enter = function (self, unit, blackboard, t)
 	blackboard.active_node = BTTargetPouncedAction
 	blackboard.start_pouncing_time = t
 	local jump_data = blackboard.jump_data
+	jump_data.pounce_until_time = t + (action.maximum_pounce_time or math.huge)
 	local target_unit = jump_data.target_unit
 	local target_position = POSITION_LOOKUP[target_unit]
+
+	table.dump(action)
 
 	if not AiUtils.is_of_interest_to_gutter_runner(unit, jump_data.target_unit, blackboard, true) then
 		blackboard.already_pounced = true
@@ -138,15 +141,24 @@ BTTargetPouncedAction.run = function (self, unit, blackboard, t, dt)
 	end
 
 	local jump_data = blackboard.jump_data
+	local action_data = blackboard.action
+	local pounce_until_time = jump_data.pounce_until_time
+	local timeout = pounce_until_time < t
 
-	if not AiUtils.is_of_interest_to_gutter_runner(unit, jump_data.target_unit, blackboard, blackboard.action.stab_until_target_is_killed) then
+	Debug.text("time left %f", pounce_until_time - t)
+
+	if not AiUtils.is_of_interest_to_gutter_runner(unit, jump_data.target_unit, blackboard, blackboard.action.stab_until_target_is_killed) or timeout then
 		local network_manager = Managers.state.network
+		local foff_probability = action_data.foff_after_pounce_complete_probability
 
-		if blackboard.action.foff_after_pounce_kill then
+		if (foff_probability and Math.random() < foff_probability) or timeout then
 			blackboard.ninja_vanish = true
 		else
 			network_manager.anim_event(network_manager, unit, "idle")
 		end
+
+		blackboard.last_completed_pounce_target = unit
+		blackboard.last_completed_pounce_time = t
 
 		return "failed"
 	end
@@ -201,6 +213,7 @@ BTTargetPouncedAction.direct_damage = function (unit, blackboard)
 		return 
 	end
 
+	blackboard.pounce_hit = true
 	local t = Managers.time:time("game")
 	local pounced_time = (t - blackboard.start_pouncing_time - action.time_before_ramping_damage)/action.time_to_reach_final_damage_multiplier
 	local normalized_time = math.clamp(pounced_time, 0, 1)

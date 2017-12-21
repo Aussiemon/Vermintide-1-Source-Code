@@ -238,6 +238,22 @@ SpawnerSystem._try_spawn_breed = function (self, breed_name, spawn_list_per_bree
 
 	return active_enemies
 end
+SpawnerSystem.reset_spawners_with_event_id = function (self, event_id)
+	local spawners = self._id_lookup[event_id]
+
+	if spawners then
+		for i = 1, #spawners, 1 do
+			local spawner = spawners[i]
+			local ai_spawner = ScriptUnit.has_extension(spawner, "spawner_system")
+
+			if ai_spawner then
+				ai_spawner.on_deactivate(ai_spawner)
+			end
+		end
+	end
+
+	return 
+end
 SpawnerSystem.spawn_horde_from_terror_event_id = function (self, event_id, composition_type, limit_spawners, group_template, strictly)
 	local ConflictUtils = ConflictUtils
 	local spawners = nil

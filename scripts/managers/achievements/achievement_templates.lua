@@ -74,6 +74,18 @@ local function get_hard_mode_completed_mission_data(mission_name, difficulty)
 	return completed_missions[mission_name]
 end
 
+local function add_level_complete_achievement(AchievementTemplates, level_name, xb1_id, ps4_id)
+	AchievementTemplates["complete_" .. level_name] = {
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_name)
+		end,
+		ID_XB1 = xb1_id,
+		ID_PS4 = ps4_id
+	}
+
+	return 
+end
+
 AchievementTemplates = {
 	complete_the_horn_of_magnus = {
 		ID_XB1 = "Prologue",
@@ -137,7 +149,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local level_list = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				level_list = LevelSettingsCampaign.level_list
 			else
 				level_list = LevelSettingsCampaign.console_level_list
@@ -160,7 +172,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local level_list = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				level_list = LevelSettingsCampaign.level_list
 			else
 				level_list = LevelSettingsCampaign.console_level_list
@@ -183,7 +195,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local level_list = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				level_list = LevelSettingsCampaign.level_list
 			else
 				level_list = LevelSettingsCampaign.console_level_list
@@ -213,7 +225,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local level_list = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				level_list = LevelSettingsCampaign.level_list
 			else
 				level_list = LevelSettingsCampaign.console_level_list
@@ -425,7 +437,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local level_list = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				level_list = LevelSettingsCampaign.level_list
 			else
 				level_list = LevelSettingsCampaign.console_level_list
@@ -446,7 +458,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local levels_with_tomes = nil
 
-			if Application.platform() == "win32" then
+			if PLATFORM == "win32" then
 				levels_with_tomes = LevelSettingsCampaign.levels_with_tomes
 			else
 				levels_with_tomes = LevelSettingsCampaign.console_levels_with_tomes
@@ -742,14 +754,27 @@ AchievementTemplates = {
 			return 5 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
 		end
 	},
+	complete_drachenfels_castle_dungeon = {
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle_dungeon")
+		end
+	},
 	magnus_hard_mode_nightmare = {
+		ID_XB1 = "Hornblower",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("magnus_speed_run", "harder")
 
-			return mission_data and mission_data.end_time <= 180
+			if PLATFORM == "win32" then
+				return mission_data and mission_data.end_time <= 180
+			else
+				return mission_data and mission_data.end_time <= 240
+			end
+
+			return 
 		end
 	},
 	supply_and_demand_hard_mode_nightmare = {
+		ID_XB1 = "LowSupplyHighDemand",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("merchant_no_healing", "harder")
 
@@ -757,6 +782,7 @@ AchievementTemplates = {
 		end
 	},
 	city_wall_hard_mode_nightmare = {
+		ID_XB1 = "Unchained",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("city_wall_timed", "harder")
 
@@ -764,6 +790,7 @@ AchievementTemplates = {
 		end
 	},
 	engines_of_war_hard_mode_nightmare = {
+		ID_XB1 = "ControlledDemolition",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("engines_of_war_timed", "harder")
 
@@ -771,13 +798,21 @@ AchievementTemplates = {
 		end
 	},
 	white_rat_hard_mode_nightmare = {
+		ID_XB1 = "CollateralBenefit",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("white_rat_kill_stormvermin", "harder")
 
-			return mission_data and 13 <= mission_data.generic_counter
+			if PLATFORM == "win32" then
+				return mission_data and 13 <= mission_data.generic_counter
+			else
+				return mission_data and 5 <= mission_data.generic_counter
+			end
+
+			return 
 		end
 	},
 	well_watch_hard_mode_nightmare = {
+		ID_XB1 = "NotOnYourWatch",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("well_watch_keep_wells_alive", "harder")
 
@@ -785,13 +820,21 @@ AchievementTemplates = {
 		end
 	},
 	waterfront_hard_mode_nightmare = {
+		ID_XB1 = "CoordinatedAssault",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("waterfront_speed_run", "harder")
 
-			return mission_data and mission_data.end_time <= 45
+			if PLATFORM == "win32" then
+				return mission_data and mission_data.end_time <= 45
+			else
+				return mission_data and mission_data.end_time <= 60
+			end
+
+			return 
 		end
 	},
 	garden_of_morr_hard_mode_nightmare = {
+		ID_XB1 = "AWorthySacrifice",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("cemetery_tome_and_grim_bury", "harder")
 
@@ -799,13 +842,21 @@ AchievementTemplates = {
 		end
 	},
 	enemy_below_hard_mode_nightmare = {
+		ID_XB1 = "TheBellTolls",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("enemy_below_kill_gutter_runners", "harder")
 
-			return mission_data and 20 <= mission_data.generic_counter
+			if PLATFORM == "win32" then
+				return mission_data and 20 <= mission_data.generic_counter
+			else
+				return mission_data and 13 <= mission_data.generic_counter
+			end
+
+			return 
 		end
 	},
 	black_powder_hard_mode_nightmare = {
+		ID_XB1 = "HighAsAKite",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("black_powder_dont_kill_rat_ogre", "harder")
 
@@ -813,6 +864,7 @@ AchievementTemplates = {
 		end
 	},
 	wheat_and_chaff_hard_mode_nightmare = {
+		ID_XB1 = "SpecialDelivery",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("farm_dont_drop_sacks", "harder")
 
@@ -820,13 +872,21 @@ AchievementTemplates = {
 		end
 	},
 	smugglers_run_hard_mode_nightmare = {
+		ID_XB1 = "ThirstForPowder",
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("smugglers_bring_barrels", "harder")
 
-			return mission_data and mission_data.generic_counter == 4
+			if PLATFORM == "win32" then
+				return mission_data and mission_data.generic_counter == 4
+			else
+				return mission_data and mission_data.generic_counter == 3
+			end
+
+			return 
 		end
 	},
 	wizards_tower_hard_mode_nightmare = {
+		ID_XB1 = "PierceTheVeil",
 		evaluate = function (statistics_db, stats_id)
 			if not Managers.state.entity then
 				return 
@@ -962,7 +1022,7 @@ AchievementTemplates = {
 	}
 }
 
-if Application.platform() == "win32" then
+if PLATFORM == "win32" then
 	AchievementTemplates.complete_dwarf_exterior = {
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
@@ -978,38 +1038,52 @@ if Application.platform() == "win32" then
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
 		end
 	}
-
-	local function add_level_complete_achievement(AchievementTemplates, level_name)
-		AchievementTemplates["complete_" .. level_name] = {
-			evaluate = function (statistics_db, stats_id)
-				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_name)
-			end
-		}
-
-		return 
-	end
-
-	add_level_complete_achievement(AchievementTemplates, "dlc_stromdorf_hills")
-	add_level_complete_achievement(AchievementTemplates, "dlc_stromdorf_town")
-
-	AchievementTemplates.dodged_krench = {
-		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_stat(statistics_db, stats_id, "dodged_storm_vermin_champion")
-		end
-	}
-	AchievementTemplates.equipped_executioners_sword = {
-		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "equipped_executioners_sword")
-		end
-	}
-	AchievementTemplates.executor_headshots = {
-		evaluate = function (statistics_db, stats_id)
-			return 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "executor_headshot")
-		end
-	}
 end
 
-if Application.platform() ~= "win32" then
+add_level_complete_achievement(AchievementTemplates, "dlc_stromdorf_hills", "TheParley", "051")
+add_level_complete_achievement(AchievementTemplates, "dlc_stromdorf_town", "ThunderwaterAle", "052")
+
+AchievementTemplates.dodged_krench = {
+	ID_XB1 = "Krench",
+	ID_PS4 = "053",
+	evaluate = function (statistics_db, stats_id)
+		return 3 <= statistics_db.get_stat(statistics_db, stats_id, "dodged_storm_vermin_champion")
+	end
+}
+AchievementTemplates.equipped_executioners_sword = {
+	ID_XB1 = "HeadsWillRoll",
+	ID_PS4 = "054",
+	evaluate = function (statistics_db, stats_id)
+		return 0 < statistics_db.get_stat(statistics_db, stats_id, "equipped_executioners_sword")
+	end
+}
+AchievementTemplates.executor_headshots = {
+	ID_XB1 = "HeadingForDecapitation",
+	ID_PS4 = "055",
+	evaluate = function (statistics_db, stats_id)
+		return 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "executor_headshot")
+	end
+}
+
+add_level_complete_achievement(AchievementTemplates, "dlc_reikwald_forest", "ReikwaldRomp", "56")
+add_level_complete_achievement(AchievementTemplates, "dlc_reikwald_river", "BargeAtLarge", "57")
+
+AchievementTemplates.equipped_ceremonial_daggers = {
+	ID_XB1 = "BladesOfAqshy",
+	ID_PS4 = "058",
+	evaluate = function (statistics_db, stats_id)
+		return 0 < statistics_db.get_stat(statistics_db, stats_id, "equipped_ceremonial_daggers")
+	end
+}
+AchievementTemplates.ceremonial_dagger_burn = {
+	ID_XB1 = "Cauterizer",
+	ID_PS4 = "059",
+	evaluate = function (statistics_db, stats_id)
+		return 100 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "ceremonial_dagger_burn")
+	end
+}
+
+if PLATFORM ~= "win32" then
 	AchievementTemplates.rescue_bardin_goreksson_from_the_skaven = {
 		ID_XB1 = "Wutelgi",
 		ID_PS4 = "039",
@@ -1021,14 +1095,14 @@ if Application.platform() ~= "win32" then
 		ID_XB1 = "ByValaya",
 		ID_PS4 = "043",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
 		end
 	}
 	AchievementTemplates.complete_dwarf_interior = {
 		ID_XB1 = "SmashAndGrab",
 		ID_PS4 = "044",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
 		end
 	}
 	AchievementTemplates.complete_dwarf_beacons = {
