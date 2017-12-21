@@ -90,7 +90,7 @@ IngameVotingUI.start_vote = function (self, active_voting)
 
 			print(string.format("[IngameVotingUI] - Terminating vote request (%s) due to the requirements to start was not fulfilled.", text))
 
-			return 
+			return false
 		end
 	end
 
@@ -133,7 +133,7 @@ IngameVotingUI.start_vote = function (self, active_voting)
 	self.option_no.content.result_text = tostring(0)
 	self.gamepad_active = self.input_manager:is_device_active("gamepad")
 
-	return 
+	return true
 end
 IngameVotingUI.update_vote = function (self, votes)
 	local result_boxes = self.result_boxes
@@ -255,7 +255,11 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 				self.stop_finish(self)
 			end
 
-			self.start_vote(self, voting_manager.active_voting)
+			local start_successful = self.start_vote(self, voting_manager.active_voting)
+
+			if not start_successful then
+				return 
+			end
 		end
 
 		hold_input_pressed = self.update_input_progress(self, voting_manager.active_voting)

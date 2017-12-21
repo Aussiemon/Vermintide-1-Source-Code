@@ -299,7 +299,10 @@ StateTitleScreen.on_exit = function (self, application_shutdown)
 		end
 	end
 
-	self._machine:destroy()
+	if self._machine then
+		self._machine:destroy()
+	end
+
 	VisualAssertLog.cleanup()
 
 	if self._title_start_ui then

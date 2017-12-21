@@ -256,7 +256,7 @@ PlayerProjectileHuskExtension.hit_enemy_damage = function (self, damage_data, hi
 
 	local breed = hit_unit and Unit.get_data(hit_unit, "breed")
 
-	if breed.armor_category == 2 then
+	if breed.armor_category == 2 or breed.armor_category == 3 then
 		self.hit_targets = self.num_targets
 	end
 

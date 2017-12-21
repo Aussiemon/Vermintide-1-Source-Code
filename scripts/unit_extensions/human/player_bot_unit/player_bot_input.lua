@@ -281,10 +281,13 @@ PlayerBotInput._update_movement = function (self, dt, t)
 	elseif self._aiming then
 		wanted_rotation = Quaternion_look(self._aim_target:unbox() - camera_position, up)
 	elseif current_goal and on_ladder then
-		local dir = current_goal - position
+		local dir = current_goal - POSITION_LOOKUP[self.unit]
 		local ladder_up = Quaternion.up(Unit.local_rotation(ladder_unit, 0))
+		local z = dir.z
 
-		if dir.z < 0 then
+		if math.abs(z) < 0.05 then
+			wanted_rotation = rotation
+		elseif z < 0 then
 			wanted_rotation = Quaternion_look(-ladder_up, up)
 		else
 			wanted_rotation = Quaternion_look(ladder_up, up)

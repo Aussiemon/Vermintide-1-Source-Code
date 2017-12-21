@@ -146,6 +146,7 @@ GenericAmmoUserExtension.update = function (self, unit, input, dt, context, t)
 
 			if self.play_reload_animation then
 				Unit.set_flow_variable(self.unit, "wwise_reload_speed", unmodded_reload_time/reload_time)
+				Unit.set_flow_variable(self.unit, "wwise_reload_time", reload_time)
 				self.start_reload_animation(self, reload_time)
 
 				if not Managers.player:owner(self.owner_unit).bot_player then

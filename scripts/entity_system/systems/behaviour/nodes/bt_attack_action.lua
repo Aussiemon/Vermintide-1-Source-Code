@@ -52,7 +52,7 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 		local breed = blackboard.breed
 		local should_backstab = breed.use_backstab_vo and blackboard.total_slots_count < 5
 
-		DialogueSystem:TriggerBackstab(blackboard.target_unit, unit, should_backstab)
+		DialogueSystem:TriggerBackstab(blackboard.target_unit, unit, should_backstab, blackboard)
 
 		if should_backstab then
 			blackboard.backstab_attack_trigger = true

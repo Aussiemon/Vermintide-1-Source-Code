@@ -86,6 +86,7 @@ BTStormVerminAttackAction._init_attack = function (self, unit, blackboard, actio
 		blackboard.last_attack_overlap_position_time = t
 		blackboard.overlap_start_time = t + action.overlap_start_time
 		blackboard.overlap_end_time = t + action.overlap_end_time
+		blackboard.overlap_walls_check_time = t + (action.overlap_check_walls_time or math.huge)
 	elseif action.mode == "radial_cylinder" then
 		blackboard.overlap_start_time = t + action.overlap_start_time
 		blackboard.overlap_end_time = t + action.overlap_end_time
@@ -261,6 +262,8 @@ BTStormVerminAttackAction.leave = function (self, unit, blackboard, t, reason, d
 		blackboard.last_attack_overlap_position = nil
 		blackboard.overlap_start_time = nil
 		blackboard.overlap_end_time = nil
+		blackboard.overlap_wall_collision_time = nil
+		blackboard.overlap_walls_check_time = nil
 	elseif action.mode == "radial_cylinder" then
 	end
 
@@ -282,6 +285,16 @@ BTStormVerminAttackAction.run = function (self, unit, blackboard, t, dt)
 
 	if catapulted_players and catapulted_players[1] then
 		self._catapult_players(self, unit, blackboard, action, catapulted_players)
+	end
+
+	local collision_time = blackboard.overlap_wall_collision_time
+
+	if collision_time then
+		if collision_time < t then
+			return "done"
+		else
+			return "running"
+		end
 	end
 
 	if blackboard.attack_next_sequence_ready(unit, blackboard, t) then
@@ -424,6 +437,32 @@ BTStormVerminAttackAction._update_overlap = function (self, unit, blackboard, ac
 		end
 
 		self._deal_damage(self, unit, blackboard, action, from, hit_actors, actor_count, true)
+
+		if blackboard.overlap_walls_check_time < t then
+			local above = 0.3
+			local below = 0.3
+			local nav_world = blackboard.nav_world
+			local success, z = GwNavQueries.triangle_from_position(nav_world, from, above, below)
+			local collision = false
+
+			if success then
+				local length = action.overlap_check_walls_range + dt*Vector3.length(ScriptUnit.extension(unit, "locomotion_system"):current_velocity())
+				local to = from + forward*length
+				local success2, z2 = GwNavQueries.triangle_from_position(nav_world, to, math.max(above, length), math.max(below, length))
+
+				if not success2 or not GwNavQueries.raycango(nav_world, Vector3(from.x, from.y, z), Vector3(to.x, to.y, z2)) then
+					collision = true
+				end
+			else
+				collision = true
+			end
+
+			if collision then
+				blackboard.overlap_wall_collision_time = t + action.wall_collision_stun_time
+
+				Managers.state.network:anim_event(unit, randomize(action.wall_collision_anim))
+			end
+		end
 	end
 
 	blackboard.last_attack_overlap_position:store(new_pos)

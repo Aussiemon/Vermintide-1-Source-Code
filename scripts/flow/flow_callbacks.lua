@@ -2492,12 +2492,6 @@ function flow_callback_set_particles_light_intensity_exponent(params)
 end
 
 function flow_callback_set_camera_far_range(params)
-	if Application.platform() == "win32" then
-		Application.warning("[flow_callback_set_camera_far_range] This flow callback is not allowed on win32 - early out")
-
-		return 
-	end
-
 	local world_name = params.world_name
 	local viewport_name = params.viewport_name
 	local far_range = params.far_range
@@ -2583,6 +2577,78 @@ function flow_callback_unregister_level_effects_volume(params)
 	local camera_manager = Managers.state.camera
 
 	camera_manager.unregister_level_effects_volume(camera_manager, volume_name)
+
+	return 
+end
+
+function flow_callback_enforce_player_positions(params)
+	if not Managers.player.is_server then
+		print("flow_callback_enforce_player_positions() run on client, doing nothing")
+
+		return 
+	end
+
+	local volume_name = params.volume_name
+	local force = params.force
+	local inside = nil
+
+	if force == "inside" then
+		inside = true
+	elseif force == "outside" then
+		inside = false
+	else
+		fassert(false, "Trying to enforce players position with unknown state %s", tostring(force))
+	end
+
+	local world = Application.flow_callback_context_world()
+	local level = LevelHelper:current_level(world)
+	local player_manager = Managers.player
+	local damage_system = Managers.state.entity:system("damage_system")
+	local valid_position = nil
+
+	for i, unit in pairs(PLAYER_UNITS) do
+		local pos = PLAYER_POSITIONS[i]
+		local pos_ok = Level.is_point_inside_volume(level, volume_name, pos) == inside
+
+		if pos_ok then
+			valid_position = pos
+		else
+			local status_ext = ScriptUnit.extension(unit, "status_system")
+
+			if status_ext.is_disabled(status_ext) and not status_ext.is_ready_for_assisted_respawn(status_ext) and not status_ext.is_dead(status_ext) then
+				damage_system.suicide(damage_system, unit)
+			end
+		end
+	end
+
+	for i, unit in pairs(PLAYER_AND_BOT_UNITS) do
+		local owner = player_manager.owner(player_manager, unit)
+
+		if owner and not owner.is_player_controlled(owner) then
+			local pos = PLAYER_AND_BOT_POSITIONS[i]
+			local pos_ok = Level.is_point_inside_volume(level, volume_name, pos) == inside
+
+			if not pos_ok then
+				local status_ext = ScriptUnit.extension(unit, "status_system")
+				local disabled = status_ext.is_disabled(status_ext)
+				local in_respawn = status_ext.is_ready_for_assisted_respawn(status_ext)
+				local dead = status_ext.is_dead(status_ext)
+
+				if disabled and not in_respawn and not dead then
+					damage_system.suicide(damage_system, unit)
+				elseif not in_respawn and not dead and valid_position then
+					local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+					local current_rotation = locomotion_extension.current_rotation(locomotion_extension)
+
+					locomotion_extension.teleport_to(locomotion_extension, valid_position, current_rotation)
+				end
+			end
+		end
+	end
+
+	if valid_position then
+		Managers.state.spawn:teleport_despawned_players(valid_position)
+	end
 
 	return 
 end

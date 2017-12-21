@@ -345,7 +345,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 					end
 
 					local targets = current_action.targets
-					local actual_hit_enemy_index = (0 < self.number_of_hit_enemies and self.number_of_hit_enemies) or 1
+					local actual_hit_enemy_index = math.max(self.number_of_hit_enemies, 1)
 					local attack_target_settings = targets[actual_hit_enemy_index] or current_action.default_target
 					attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(attack_target_settings, self.is_critical_strike)
 				end
@@ -490,7 +490,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 					else
 						self.hit_units[hit_unit] = hit_unit
 						local targets = current_action.targets
-						local attack_target_settings = targets[self.number_of_hit_enemies] or current_action.default_target
+						local attack_target_settings = targets[math.max(self.number_of_hit_enemies, 1)] or current_action.default_target
 						local attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(attack_target_settings, self.is_critical_strike)
 						local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
 						local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]

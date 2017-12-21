@@ -739,6 +739,23 @@ SpawnManager.get_status = function (self, _player)
 
 	return nil
 end
+SpawnManager.teleport_despawned_players = function (self, position)
+	local statuses = self._player_statuses
+	local player_manager = Managers.player
+
+	for i = 1, NUM_PLAYERS, 1 do
+		local status = statuses[i]
+		local peer_id = status.peer_id
+		local local_player_id = status.local_player_id
+		local player = peer_id and local_player_id and player_manager.player(player_manager, peer_id, local_player_id)
+
+		if not player or not player.player_unit then
+			status.position:store(position)
+		end
+	end
+
+	return 
+end
 SpawnManager._update_available_profiles = function (self, profile_synchronizer, available_profile_order, available_profiles)
 	local delta = 0
 	local bots = 0

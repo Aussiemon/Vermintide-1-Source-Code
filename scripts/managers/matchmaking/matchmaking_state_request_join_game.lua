@@ -146,32 +146,11 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 	return nil
 end
 MatchmakingStateRequestJoinGame.join_game_success = function (self, t)
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
-		local time_taken = t - started_matchmaking_t
-		local connection_state = "join_game_success"
-		local telemetry_manager = Managers.telemetry
-
-		telemetry_manager.add_matchmaking_connection_telemetry(telemetry_manager, player, connection_state, time_taken)
-	end
-
 	self.state_context.lobby_client = self.lobby_client
 
 	return MatchmakingStateRequestProfiles, self.state_context
 end
 MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, reason, t, is_bad_connection)
-	if GameSettingsDevelopment.use_telemetry then
-		local player_manager = Managers.player
-		local player = player_manager.local_player(player_manager, 1)
-		local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
-		local time_taken = t - started_matchmaking_t
-		local telemetry_manager = Managers.telemetry
-
-		telemetry_manager.add_matchmaking_connection_telemetry(telemetry_manager, player, reason, time_taken)
-	end
-
 	self.matchmaking_manager:add_broken_lobby(lobby_id, t, is_bad_connection)
 	self.lobby_client:destroy()
 

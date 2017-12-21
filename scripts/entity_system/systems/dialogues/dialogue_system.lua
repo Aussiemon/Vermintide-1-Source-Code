@@ -1300,7 +1300,7 @@ DialogueSystem.TriggerBackstab = function (self, player_unit, enemy_unit, should
 		end
 
 		local unit_id = NetworkUnit.game_object_id(enemy_unit)
-		local general_event = breed.attack_general_sound_event
+		local general_event = breed.attack_general_sound_event or "general_event"
 
 		if Managers.player:local_player().player_unit == player_unit then
 			local audio_system_extension = Managers.state.entity:system("audio_system")

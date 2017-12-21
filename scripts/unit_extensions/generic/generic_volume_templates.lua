@@ -79,6 +79,21 @@ GenericVolumeTemplates.functions = {
 		}
 	},
 	trigger_volume = {
+		all_alive_humans_outside = {
+			on_exit = function (unit, data)
+				local volume_system = Managers.state.entity:system("volume_system")
+
+				if not volume_system.volume_has_units_inside(volume_system, data.volume_name) then
+					local event = data.params.event_on_triggered
+
+					if event then
+						Level.trigger_event(data.level, event)
+					end
+				end
+
+				return 
+			end
+		},
 		all_alive_players_outside = {
 			on_exit = function (unit, data)
 				local volume_system = Managers.state.entity:system("volume_system")

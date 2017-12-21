@@ -841,7 +841,8 @@ NetworkLookup.anims = {
 	"turn_right",
 	"defensive_idle",
 	"attack_sweep_left",
-	"attack_sweep_right"
+	"attack_sweep_right",
+	"charge_attack_lunge_miss"
 }
 NetworkLookup.lobby_data = {
 	"level_key",
@@ -1278,7 +1279,10 @@ NetworkLookup.sound_events = {
 	"player_combat_weapon_staff_fire_beam_husk",
 	"stop_player_combat_weapon_staff_fire_beam_husk",
 	"executioner_sword_critical",
-	"Play_enemy_stormvermin_champion_electric_floor"
+	"Play_enemy_stormvermin_champion_electric_floor",
+	"general_event",
+	"Play_stormvermin_attack_vce",
+	"Play_slave_rat_attack_vce"
 }
 NetworkLookup.global_parameter_names = {
 	"occupied_slots_percentage"

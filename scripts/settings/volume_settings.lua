@@ -220,6 +220,13 @@ VolumeExtensionSettings = VolumeExtensionSettings or {
 		}
 	},
 	trigger_volume = {
+		all_alive_humans_outside = {
+			[PLAYER] = {
+				filters = {
+					unit_disabled = false
+				}
+			}
+		},
 		all_alive_players_outside = {
 			[PLAYER] = {
 				filters = {

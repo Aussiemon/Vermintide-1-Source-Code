@@ -278,11 +278,10 @@ QuestManager._calculate_contract_session_progress = function (self, contract, pa
 
 			return get_stat("completed_checkpoints"), negative_progress
 		elseif task_type == "avoid_deaths_team" then
-			local allowed_deaths = 0
 			local starting_points = 4
 			local deaths = statistics_db.get_stat(statistics_db, "session", "deaths")
 
-			return starting_points - math.max(0, deaths - allowed_deaths)
+			return math.max(0, starting_points - deaths)
 		elseif task_type == "avoid_specials_damage_team" then
 			local allowed_damage = 150
 			local damage = 0

@@ -371,13 +371,15 @@ StateLoading.cb_loading_screen_loaded = function (self, level_key, act_progressi
 	return 
 end
 StateLoading.cb_loading_screen_change_fade = function (self, level_key, act_progression_index, skip_fade)
-	local game_difficulty = self._get_game_difficulty(self)
+	if self._loading_view then
+		local game_difficulty = self._get_game_difficulty(self)
 
-	self._loading_view:texture_resource_loaded(level_key, act_progression_index, game_difficulty)
-	self._trigger_loading_view(self, level_key, act_progression_index)
+		self._loading_view:texture_resource_loaded(level_key, act_progression_index, game_difficulty)
+		self._trigger_loading_view(self, level_key, act_progression_index)
 
-	if not skip_fade then
-		Managers.transition:fade_out(3)
+		if not skip_fade then
+			Managers.transition:fade_out(3)
+		end
 	end
 
 	return 
