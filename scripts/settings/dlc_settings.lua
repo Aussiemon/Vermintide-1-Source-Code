@@ -299,18 +299,38 @@ DLCSettings = {
 				{
 					"continue_when",
 					condition = function (t)
+						return count_breed("skaven_rat_ogre") <= 1
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "snow_boss_killed_one"
+				},
+				{
+					"continue_when",
+					condition = function (t)
 						return count_breed("skaven_rat_ogre") == 0
 					end
 				},
 				{
 					"flow_event",
-					flow_event_name = "snow_boss_killed"
+					flow_event_name = "snow_boss_killed_two"
 				}
 			},
 			general_wizard = {
 				{
 					"set_master_event_running",
 					name = "general_wizard"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 8 and count_breed("skaven_slave") < 8 and count_breed("skaven_storm_vermin_commander") < 4
+					end
 				},
 				{
 					"event_horde",
@@ -338,6 +358,16 @@ DLCSettings = {
 					name = "general_forest"
 				},
 				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 8 and count_breed("skaven_slave") < 8 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
 					"event_horde",
 					spawner_id = "general_forest",
 					composition_type = "event_general_trickle"
@@ -361,6 +391,16 @@ DLCSettings = {
 				{
 					"set_master_event_running",
 					name = "general_town"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 8 and count_breed("skaven_slave") < 8 and count_breed("skaven_storm_vermin_commander") < 4
+					end
 				},
 				{
 					"event_horde",
@@ -388,6 +428,16 @@ DLCSettings = {
 					name = "general_snow"
 				},
 				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 8 and count_breed("skaven_slave") < 8 and count_breed("skaven_storm_vermin_commander") < 4
+					end
+				},
+				{
 					"event_horde",
 					spawner_id = "general_snow",
 					composition_type = "event_general_trickle"
@@ -411,6 +461,16 @@ DLCSettings = {
 				{
 					"set_master_event_running",
 					name = "general_escher"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 8 and count_breed("skaven_slave") < 8 and count_breed("skaven_storm_vermin_commander") < 4
+					end
 				},
 				{
 					"event_horde",
@@ -731,6 +791,11 @@ DLCSettings = {
 				text = "objective_foolhardy_snow_search_cargo_for_keys",
 				mission_template_name = "collect",
 				collect_amount = 3
+			},
+			dlc_challenge_wizard_snow_kill = {
+				text = "objective_foolhardy_snow_slain",
+				mission_template_name = "collect",
+				collect_amount = 2
 			},
 			dlc_challenge_wizard_forest_break_seals = {
 				text = "objective_foolhardy_forest_break_seals",

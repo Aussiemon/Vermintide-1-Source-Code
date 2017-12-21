@@ -2651,8 +2651,6 @@ function flow_callback_teleporter(params)
 	local network_manager = Managers.state.network
 
 	if Unit.alive(unit) then
-		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
-		local peer_id = Network.peer_id()
 		local local_player = Managers.player:local_player()
 		local player_unit = local_player.player_unit
 
@@ -2660,16 +2658,24 @@ function flow_callback_teleporter(params)
 			if ScriptUnit.has_extension(unit, "locomotion_system") then
 				local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 				local status_extension = ScriptUnit.extension(unit, "status_system")
-				local source_matrix = Matrix4x4.from_quaternion(entrance_node_rotation)
-				local destionationFlipRotation = Matrix4x4.from_quaternion(Quaternion.axis_angle(Vector3.up(), math.pi*2))
-				local sourveInvMat = Matrix4x4.multiply(destionationFlipRotation, Matrix4x4.inverse(source_matrix))
-				local player_world_rot = Unit.world_rotation(unit, 0)
-				local RotationInSourceSpace = Quaternion.multiply(Quaternion.from_matrix4x4(sourveInvMat), player_world_rot)
-				local new_rot = Quaternion.multiply(exit_node_rotation, RotationInSourceSpace)
-				local rx, ry, rz = Quaternion.to_euler_angles_xyz(new_rot)
-				local new_rot_180 = Quaternion.from_euler_angles_xyz(rx, ry, rz + 180)
+				local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
+				local unit_rotation = first_person_extension.current_rotation(first_person_extension)
+				local entrance_forward = Quaternion.forward(entrance_node_rotation)
+				local unit_forward = Quaternion.forward(unit_rotation)
+				entrance_forward = Vector3.normalize(entrance_forward)
+				unit_forward = Vector3.normalize(unit_forward)
+				local angle = Vector3.flat_angle(unit_forward, entrance_forward)
+				local cross_dot = Vector3.dot(unit_forward, Vector3.up())
 
-				locomotion.teleport_to(locomotion, exit_position, new_rot_180)
+				if cross_dot < 0 then
+					angle = -angle
+				end
+
+				local new_rotation = Quaternion(Vector3.up(), angle)
+				local new_exit_rotation = Quaternion.multiply(exit_node_rotation, new_rotation)
+				local new_exit_rotation_flip = Quaternion.multiply(new_exit_rotation, Quaternion.axis_angle(Vector3.up(), math.pi))
+
+				locomotion.teleport_to(locomotion, exit_position, new_exit_rotation_flip)
 				status_extension.reset_falling_height(status_extension)
 			end
 

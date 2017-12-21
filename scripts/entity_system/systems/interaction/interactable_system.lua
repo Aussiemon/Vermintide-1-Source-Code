@@ -88,7 +88,11 @@ InteractableSystem._handle_standard_interact_request = function (self, interacti
 		local level = LevelHelper:current_level(self.world)
 		interactable_unit = Level.unit_by_index(level, interactable_id)
 
-		assert(interactable_unit, "Interactable unit was not found in level")
+		if not interactable_unit then
+			InteractionHelper:deny_request(sender, interactor_id)
+
+			return 
+		end
 	else
 		interactable_unit = self.unit_storage:unit(interactable_id)
 	end

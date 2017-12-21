@@ -694,11 +694,15 @@ InteractionDefinitions.smartobject = {
 
 			Unit.animation_event(interactor_unit, "interaction_end")
 
-			if result == InteractionResult.SUCCESS and Unit.get_data(interactable_unit, "interaction_data", "only_once") then
+			local interactable_alive = Unit.alive(interactable_unit)
+
+			if result == InteractionResult.SUCCESS and interactable_alive and Unit.get_data(interactable_unit, "interaction_data", "only_once") then
 				Unit.set_data(interactable_unit, "interaction_data", "used", true)
 			end
 
-			Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+			if interactable_alive then
+				Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+			end
 
 			return 
 		end,
