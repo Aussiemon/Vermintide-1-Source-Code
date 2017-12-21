@@ -881,6 +881,18 @@ InteractionDefinitions.pickup_object = {
 
 						unique_mission_id = nil
 					end
+
+					if not unique_mission_id then
+						if pickup_settings.hide_on_pickup then
+							pickup_extension.hide(pickup_extension)
+						end
+
+						if Application.platform() == "win32" then
+							ScriptApplication.send_to_crashify("[Interactions]", "Someone picked up an unavailable lorebook page (Peer ID: %s - Steam User ID: %s - Steam User Name)", Network.peer_id(), Steam.user_id(), Steam.user_name())
+						end
+
+						return 
+					end
 				end
 
 				local local_pickup_sound = pickup_settings.local_pickup_sound

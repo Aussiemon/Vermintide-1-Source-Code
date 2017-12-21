@@ -43,6 +43,19 @@ end
 LobbyFinder._select_level_exists_locally = function (self, lobby)
 	return not not rawget(LevelSettings, lobby.selected_level_key)
 end
+LobbyFinder._verify_lobby_data = function (self, lobby)
+	if not self._select_level_exists_locally(self, lobby) then
+		return false
+	end
+
+	local difficulty = lobby.difficulty
+
+	if difficulty and not DifficultySettings[difficulty] then
+		return false
+	end
+
+	return true
+end
 LobbyFinder.update = function (self, dt)
 	local lobby_browser = LobbyInternal.lobby_browser()
 	local is_refreshing = lobby_browser.is_refreshing(lobby_browser)
@@ -59,7 +72,7 @@ LobbyFinder.update = function (self, dt)
 		for i = 0, num_lobbies - 1, 1 do
 			local lobby = LobbyInternal.get_lobby(lobby_browser, i)
 
-			if self._select_level_exists_locally(self, lobby) then
+			if self._verify_lobby_data(self, lobby) then
 				lobbies[#lobbies + 1] = lobby
 
 				if lobby.network_hash == self.network_hash then

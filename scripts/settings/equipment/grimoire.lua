@@ -118,6 +118,9 @@ Weapons.wpn_side_objective_tome_01.actions = {
 				return end_reason ~= "new_interupting_action"
 			end,
 			total_time = math.huge,
+			enter_function = function (attacker_unit, input_extension)
+				return input_extension.reset_release_input(input_extension)
+			end,
 			buff_data = {
 				{
 					start_time = 0,

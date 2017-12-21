@@ -216,8 +216,6 @@ QuestManager._calculate_contract_session_progress = function (self, contract, pa
 
 			return num_collected
 		end
-
-		fassert(false, "trying to calculate session progress on a contract with an unsuported task: %s", task_type)
 	end
 
 	return 0

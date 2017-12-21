@@ -40,12 +40,8 @@ weapon_template.actions = {
 					sub_action = "default",
 					start_time = 0.4,
 					action = "action_two",
-					end_time = 0.7,
 					input = "action_two"
-				}
-			},
-			push_radius = push_radius,
-			allowed_chain_actions = {
+				},
 				{
 					sub_action = "default",
 					start_time = 0.3,
@@ -53,6 +49,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				}
 			},
+			push_radius = push_radius,
 			chain_condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
@@ -73,6 +70,9 @@ weapon_template.actions = {
 				return end_reason ~= "new_interupting_action"
 			end,
 			total_time = math.huge,
+			enter_function = function (attacker_unit, input_extension)
+				return input_extension.reset_release_input(input_extension)
+			end,
 			buff_data = {
 				{
 					start_time = 0,

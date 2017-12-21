@@ -31,7 +31,7 @@ weapon_template.actions = {
 					action = "action_one",
 					sound_time_offset = -0.05,
 					chain_ready_sound = "weapon_gun_ready",
-					release_required = "action_one_hold",
+					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{
@@ -88,7 +88,7 @@ weapon_template.actions = {
 					sub_action = "default",
 					start_time = 0.7,
 					action = "action_one",
-					release_required = "action_one_hold",
+					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{

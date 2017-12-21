@@ -1225,7 +1225,13 @@ QuestView._assign_widget_data = function (self, widget, data)
 			local map_settings = level_settings.map_settings
 			local display_name = level_settings.display_name
 			local level_icon = map_settings.icon
-			content.level_texture = level_icon .. "_quest_screen"
+			local level_texture = level_icon .. "_quest_screen"
+
+			if not UIAtlasHelper.has_atlas_settings_by_texture_name(level_texture) then
+				level_texture = QuestSettings.quest_icon_unknown_fallback
+			end
+
+			content.level_texture = level_texture
 			content.level_tooltip_text = Localize(display_name)
 			local level_unlocked = LevelUnlockUtils.level_unlocked(self.statistics_db, self.player_stats_id, level_key)
 			content.locked = not level_unlocked

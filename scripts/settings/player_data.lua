@@ -1,8 +1,10 @@
 PlayerData = PlayerData or {
+	controls_version = 9,
+	new_lorebook_data_version = 1,
 	new_item_data_version = 1,
-	controls_version = 11,
 	new_item_ids = {},
-	controls = {}
+	controls = {},
+	new_lorebook_ids = {}
 }
 
 function populate_player_data_from_save(save_data, id, version_match)
@@ -21,6 +23,11 @@ function populate_player_data_from_save(save_data, id, version_match)
 		if save_data.new_item_ids then
 			new_player_data.new_item_ids = save_data.new_item_ids
 			save_data.new_item_ids = nil
+		end
+
+		if save_data.new_lorebook_ids then
+			new_player_data.new_lorebook_ids = save_data.new_lorebook_ids
+			save_data.new_lorebook_ids = nil
 		end
 
 		save_data.player_data[id] = new_player_data
@@ -42,6 +49,13 @@ function populate_player_data_from_save(save_data, id, version_match)
 
 			player_save_data.new_item_ids = {}
 			player_save_data.new_item_data_version = PlayerData.new_item_data_version
+		end
+
+		if PlayerData.new_lorebook_data_version ~= player_save_data.new_lorebook_data_version then
+			print("Wrong new_lorebook_data_version for save file, saved: ", player_save_data.new_lorebook_data_version, " current: ", PlayerData.new_lorebook_data_version)
+
+			player_save_data.new_lorebook_ids = {}
+			player_save_data.new_lorebook_data_version = PlayerData.new_lorebook_data_version
 		end
 	end
 

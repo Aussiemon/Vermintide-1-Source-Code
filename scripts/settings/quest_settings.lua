@@ -1,11 +1,12 @@
 QuestSettings = {
-	MAX_NUMBER_OF_POPUP_QUEST_LINKS_PER_ROW = 10,
+	quest_icon_unknown_fallback = "level_location_long_icon_01_quest_screen",
 	PREPARE_MENU_FOR_SYNC_DURATION = 8,
-	MAX_NUMBER_OF_BOARD_CONTRACTS = 2,
 	NUMBER_OF_SEAL_VARIATIONS_BG = 4,
+	LOG_CONTRACTS_HEIGHT_SPACING = 3,
+	MAX_NUMBER_OF_POPUP_QUEST_LINKS_PER_ROW = 10,
+	MAX_NUMBER_OF_BOARD_CONTRACTS = 2,
 	EXPIRE_CHECK_MARGIN = 5,
 	MAX_NUMBER_OF_LOG_QUESTS = 1,
-	LOG_CONTRACTS_HEIGHT_SPACING = 3,
 	MAX_NUMBER_OF_BOARD_PAGES = 3,
 	EXPIRE_CHECK_COOLDOWN = 45,
 	MAX_NUMBER_OF_LOG_CONTRACTS = 3,
@@ -88,6 +89,9 @@ QuestSettings = {
 		},
 		level = {
 			"dlc1_3_1_task_title_level_01"
+		},
+		unknown = {
+			"dlc1_3_1_task_title_unknown"
 		}
 	},
 	task_type_requirement_text = {
@@ -105,25 +109,31 @@ QuestSettings = {
 		},
 		quest = {
 			"dlc1_3_1_task_requirement_key_01"
+		},
+		unknown = {
+			"dlc1_3_1_task_requirement_unknown"
 		}
 	},
 	task_type_to_icon_lookup = {
-		level = "quest_icon_map",
+		unknown = "quest_icon_map",
 		tome = "quest_icon_tome",
+		ogre = "quest_icon_rat_ogre",
 		grimoire = "quest_icon_grimoire",
-		ogre = "quest_icon_rat_ogre"
+		level = "quest_icon_map"
 	},
 	task_type_to_name_lookup = {
-		level = "dlc1_3_1_complete_level",
+		unknown = "dlc1_3_1_unknown",
 		tome = "dlc1_3_1_tomes",
+		ogre = "dlc1_3_1_rat_ogres",
 		grimoire = "dlc1_3_1_grimoires",
-		ogre = "dlc1_3_1_rat_ogres"
+		level = "dlc1_3_1_complete_level"
 	},
 	task_type_to_task_description_lookup = {
-		level = "dlc1_3_1_complete",
+		unknown = "dlc1_3_1_unknown",
 		tome = "dlc1_3_1_collect",
+		ogre = "dlc1_3_1_kill",
 		grimoire = "dlc1_3_1_collect",
-		ogre = "dlc1_3_1_kill"
+		level = "dlc1_3_1_complete"
 	},
 	token_type_to_icon_lookup = {
 		iron_tokens = "quest_screen_token_icon_01",
@@ -212,5 +222,27 @@ QuestTextSettings = {
 		"rickard"
 	}
 }
+local meta = {
+	__index = function (t, k)
+		return t.unknown
+	end
+}
+local replace_list = {
+	"task_type_titles",
+	"task_type_requirement_text",
+	"task_type_to_icon_lookup",
+	"task_type_to_name_lookup",
+	"task_type_to_task_description_lookup"
+}
+
+for _, key in ipairs(replace_list) do
+	setmetatable(QuestSettings[key], meta)
+end
+
+setmetatable(QuestTextSettings.task_type_max_range, {
+	__index = function (t, k)
+		return 1
+	end
+})
 
 return 
