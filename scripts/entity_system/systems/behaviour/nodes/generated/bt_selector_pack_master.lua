@@ -35,7 +35,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -57,7 +57,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_falling.run(node_falling, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("falling")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -83,7 +83,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -96,29 +96,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_stunned = children[4]
-	local condition_result = blackboard.stunned
-
-	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_stunned, "aborted")
-		Profiler_start("stunned")
-
-		local result, evaluate = node_stunned.run(node_stunned, unit, blackboard, t, dt)
-
-		Profiler_stop()
-
-		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
-		end
-
-		if result ~= "failed" then
-			return result, evaluate
-		end
-	elseif node_stunned == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
-	end
-
-	local node_smartobject = children[5]
+	local node_smartobject = children[4]
 	local smartobject_is_next = blackboard.next_smart_object_data.next_smart_object_id ~= nil
 	local is_in_smartobject_range = blackboard.is_in_smartobject_range
 	local is_smart_objecting = blackboard.is_smart_objecting
@@ -130,7 +108,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -143,7 +121,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_get_new_hook = children[6]
+	local node_get_new_hook = children[5]
 	local condition_result = blackboard.needs_hook
 
 	if condition_result then
@@ -152,7 +130,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_get_new_hook.run(node_get_new_hook, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("get_new_hook")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -165,7 +143,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_enemy_spotted = children[7]
+	local node_enemy_spotted = children[6]
 	local condition_result = unit_alive(blackboard.target_unit)
 
 	if condition_result then
@@ -174,7 +152,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_enemy_spotted.run(node_enemy_spotted, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("enemy_spotted")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -187,10 +165,10 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_trigger_move_to = children[8]
+	local node_trigger_move_to = children[7]
 	local t = Managers.time:time("game")
 	local trigger_time = blackboard.trigger_time or 0
-	local condition_result = trigger_time < t
+	local condition_result = trigger_time < t and unit_alive(blackboard.target_unit)
 
 	if condition_result then
 		self.set_running_child(self, unit, blackboard, t, node_trigger_move_to, "aborted")
@@ -198,7 +176,7 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_trigger_move_to.run(node_trigger_move_to, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("trigger_move_to")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -211,14 +189,14 @@ BTSelector_pack_master.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_idle = children[9]
+	local node_idle = children[8]
 
 	self.set_running_child(self, unit, blackboard, t, node_idle, "aborted")
 	Profiler_start("idle")
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

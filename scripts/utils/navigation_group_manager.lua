@@ -5,16 +5,7 @@ require("scripts/utils/navigation_group")
 
 NavigationGroupManager = class(NavigationGroupManager)
 local MIN_AREA = 20
-
-local function dprint(...)
-	if script_data.debug_navigation_group_manager then
-		print(...)
-	end
-
-	return 
-end
-
-NavigationGroupManager.init = function (self)
+NavigationGroupManager.init = function (self, using_editor)
 	self._navigation_groups = {}
 	self._registered_polygons = {}
 	self._world = nil
@@ -25,6 +16,7 @@ NavigationGroupManager.init = function (self)
 	self._num_groups = 0
 	self._printing_groups = false
 	self._numb = 0
+	self._using_editor = using_editor
 
 	return 
 end
@@ -35,8 +27,9 @@ NavigationGroupManager.setup = function (self, world, nav_world)
 
 	return 
 end
+local max_nodes_per_frame = (Application.platform() == "win32" and 1000) or 400
 NavigationGroupManager.form_groups = function (self, radius, finish_point, optional_level_name)
-	dprint("Forming navigation groups")
+	print("Forming navigation groups")
 	assert(finish_point ~= nil, "Got nil for finish_point")
 	Profiler.start("form_groups")
 
@@ -65,7 +58,7 @@ NavigationGroupManager.form_groups = function (self, radius, finish_point, optio
 
 	local time2 = os.clock()
 
-	dprint("NavigationGroupManager -> calulation time A:", time2 - time1)
+	print("NavigationGroupManager -> calulation time A:", time2 - time1)
 
 	for i, unit_index in ipairs(unit_indices) do
 		local pos = LevelResource.unit_position(level_name, unit_index)
@@ -81,14 +74,18 @@ NavigationGroupManager.form_groups = function (self, radius, finish_point, optio
 
 	local time3 = os.clock()
 
-	dprint("NavigationGroupManager -> calulation time B:", time3 - time2)
-	dprint("number of nav groups: ", self._num_groups)
+	print("NavigationGroupManager -> calulation time B:", time3 - time2)
+	print("number of nav groups: ", self._num_groups)
 	self.refine_groups(self)
-	dprint("number of refined nav groups : ", self._num_groups)
+	print("number of refined nav groups : ", self._num_groups)
 	self.calc_distances_from_finish_for_all(self, in_group_queue)
-	self.make_sure_group_centers_are_on_mesh(self)
-	self.knit_groups_with_ledges(self)
-	dprint("NavigationGroupManager -> calulation time C:", os.clock() - time3)
+
+	if not self._using_editor then
+		self.make_sure_group_centers_are_on_mesh(self)
+		self.knit_groups_with_ledges(self)
+	end
+
+	print("NavigationGroupManager -> calulation time C:", os.clock() - time3)
 	Profiler.stop()
 
 	return 
@@ -129,10 +126,12 @@ NavigationGroupManager.form_groups_start = function (self, radius, finish_point,
 
 	return 
 end
-local max_nodes_per_frame = (Application.platform() == "win32" and 1000) or 400
+local max_nodes_per_frame = 1000
 NavigationGroupManager.form_groups_update = function (self)
-	dprint("NavigationGroupManager -> form_groups_update")
+	print("NavigationGroupManager -> form_groups_update")
+	Debug.text("NavigationGroupManager: %d ", self._sum_iter_count)
 
+	local time1 = os.clock()
 	self._iter_count = 0
 	local all_work_done = false
 	self.form_groups_running = true
@@ -142,11 +141,15 @@ NavigationGroupManager.form_groups_update = function (self)
 		local completed = not b
 		self._sum_iter_count = self._sum_iter_count + self._iter_count
 
+		print("\t\tworking on group -> count:", self._iter_count)
+
 		if completed then
 			self._spawn_point_index = self._spawn_point_index + 1
 			local unit_index = self._seedpoint_unit_indices[self._spawn_point_index]
 
 			if unit_index then
+				print("\t\tpop next seed point")
+
 				local pos = LevelResource.unit_position(self._level_name, unit_index)
 				local first_poly = GwNavTraversal.get_seed_triangle(self.nav_world, pos)
 				self._in_group_queue = {}
@@ -171,17 +174,24 @@ NavigationGroupManager.form_groups_update = function (self)
 		end
 	end
 
+	print("\t-> time:", os.clock() - time1, "sum:", self._sum_iter_count)
+
 	return all_work_done
 end
 NavigationGroupManager.form_groups_end = function (self)
-	print("NavigationGroupManager -> form_groups_end")
-	dprint("\t-> number of nav groups: ", tostring(self._num_groups))
+	local time1 = os.clock()
+
+	print("\t-> number of nav groups: ", self._num_groups)
 	self.refine_groups(self)
-	dprint("\t-> number of refined nav groups : ", self._num_groups)
+	print("\t-> number of refined nav groups : ", self._num_groups)
 	self.calc_distances_from_finish_for_all(self, self._backup_group_queue)
-	self.make_sure_group_centers_are_on_mesh(self)
-	self.knit_groups_with_ledges(self)
-	print("NavigationGroupManager -> done!")
+
+	if not self._using_editor then
+		self.make_sure_group_centers_are_on_mesh(self)
+		self.knit_groups_with_ledges(self)
+	end
+
+	print("NavigationGroupManager -> form_groups_end time:", os.clock() - time1)
 
 	return 
 end
@@ -722,7 +732,7 @@ NavigationGroupManager.print_groups = function (self, world, nav_world)
 			mode = "perm",
 			name = "nav_group"
 		})
-		self._debug_world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "material", "materials/fonts/arial")
+		self._debug_world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "material", "materials/fonts/gw_fonts")
 		local debug_world_gui = self._debug_world_gui
 		local a, b, c = Script.temp_count()
 
@@ -739,7 +749,7 @@ NavigationGroupManager.print_groups = function (self, world, nav_world)
 
 	Script.set_temp_count(a, b, c)
 
-	if self._line_object then
+	if self._line_objext then
 		LineObject.dispatch(world, self._line_object)
 	end
 
@@ -806,7 +816,17 @@ NavigationGroupManager.draw_group_connections = function (self)
 
 	for group, _ in pairs(self._navigation_groups) do
 		for n_group, _ in pairs(group._group_neighbours) do
-			QuickDrawerStay:line(group._group_center:unbox() + h, n_group._group_center:unbox() + h, col)
+			local p1 = group._group_center:unbox() + h
+			local p2 = n_group._group_center:unbox() + h
+			local to_dir = Vector3.normalize(p2 - p1)
+			local arrow = Vector3.cross(to_dir, Vector3.up())/2
+
+			QuickDrawerStay:line(p1, p2, col)
+
+			local p3 = p2 - to_dir
+
+			QuickDrawerStay:line(p3, p3 - to_dir*0.45 + arrow, col)
+			QuickDrawerStay:line(p3, p3 - to_dir*0.45 - arrow, col)
 		end
 	end
 
@@ -816,17 +836,15 @@ NavigationGroupManager.knit_groups_with_ledges = function (self)
 	local nav_graph_system = Managers.state.entity:system("nav_graph_system")
 	local smart_objects = nav_graph_system.smart_objects
 	local col = Color(255, 0, 255, 10)
+	local h = Vector3(0, 0, 0.25)
 	local groups = self._navigation_groups
 
 	for smart_object_id, smart_object_data in pairs(smart_objects) do
-		local a, b, c = Script.temp_count()
-
 		for i = 1, #smart_object_data, 1 do
 			local smart_object = smart_object_data[i]
 			local smart_object_type = smart_object.smart_object_type or "ledges"
 			local layer_id = LAYER_ID_MAPPING[smart_object_type]
 			local p1 = Vector3Aux.unbox(smart_object.pos1)
-			local p2 = Vector3Aux.unbox(smart_object.pos2)
 			local group1 = self.get_group_from_position(self, p1)
 
 			if group1 then
@@ -838,13 +856,11 @@ NavigationGroupManager.knit_groups_with_ledges = function (self)
 						group1._group_neighbours[group2] = true
 					end
 
-					if not group2._group_neighbours[group1] then
+					if smart_object.data.is_bidirectional and not group2._group_neighbours[group1] then
 						group2._group_neighbours[group1] = true
 					end
 				end
 			end
-
-			Script.set_temp_count(a, b, c)
 		end
 	end
 

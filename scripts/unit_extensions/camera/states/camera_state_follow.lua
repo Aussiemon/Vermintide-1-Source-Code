@@ -64,6 +64,7 @@ CameraStateFollow.update = function (self, unit, input, dt, context, t)
 		local camera_pose = self.camera_start_pose:unbox()
 		local lerp_pose = Matrix4x4.lerp(camera_pose, camera_target_pose, smoothstep)
 
+		assert(Matrix4x4.is_valid(lerp_pose), "Camera unit lerp pose invalid.")
 		Unit.set_local_pose(unit, 0, lerp_pose)
 
 		if progress == 1 then

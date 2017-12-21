@@ -5,6 +5,7 @@ local RPCS = {}
 local extensions = {}
 local SOURCE_WEIGHT = 0.5
 local LISTENER_WEIGHT = SOURCE_WEIGHT - 1
+local FULL_WEIGHT = 1
 SoundEnvironmentSystem.init = function (self, entity_system_creation_context, system_name)
 	SoundEnvironmentSystem.super.init(self, entity_system_creation_context, system_name, extensions)
 
@@ -85,10 +86,14 @@ SoundEnvironmentSystem._highest_prio_environment_at_position = function (self, p
 	return highest_prio_env_name
 end
 SoundEnvironmentSystem.set_source_environment = function (self, source, position)
+	if not GameSettingsDevelopment.fade_environments then
+		return 
+	end
+
 	local volume_name = self._highest_prio_environment_at_position(self, position)
 	local environments = self._environments
-	local bus_name = environments[volume_name or "global"].source_aux_bus_name
 	local wwise_world = self.wwise_world
+	local bus_name = environments[volume_name or "global"].source_aux_bus_name
 
 	assert(bus_name, "No source aux environment in %s", volume_name or "global")
 	WwiseWorld.reset_environment_for_source(wwise_world, source)
@@ -181,23 +186,25 @@ SoundEnvironmentSystem.update = function (self, context, t)
 		self.enter_environment(self, t, "global", self._current_environment)
 	end
 
-	self._update_fade(self, t)
+	if GameSettingsDevelopment.fade_environments then
+		self._update_fade(self, t)
 
-	if script_data.debug_sound_environments then
-		local current_environment = self._current_environment
+		if script_data.debug_sound_environments then
+			local current_environment = self._current_environment
 
-		Debug.text("SoundEnvironmentSystem: Inside volume %q", current_environment)
+			Debug.text("SoundEnvironmentSystem: Inside volume %q", current_environment)
 
-		local environments = self._environments
+			local environments = self._environments
 
-		for volume_name, data in pairs(environments) do
-			local fade_info = data.fade_info
+			for volume_name, data in pairs(environments) do
+				local fade_info = data.fade_info
 
-			Debug.text("%q has aux_bus_value == %.2f", volume_name, fade_info.current_value)
+				Debug.text("%q has aux_bus_value == %.2f", volume_name, fade_info.current_value)
+			end
 		end
-	end
 
-	self._update_source_environments(self)
+		self._update_source_environments(self)
+	end
 
 	return 
 end
@@ -270,27 +277,33 @@ SoundEnvironmentSystem._clamp_num_fade_environments = function (self)
 end
 SoundEnvironmentSystem.enter_environment = function (self, t, volume_name, current_environment_name)
 	local environment = self._environments[volume_name]
-	local fade_time = environment.fade_time
-	local fade_info = environment.fade_info
 
-	if 0 < fade_info.current_value then
-		local current_value = fade_info.current_value
-		local target_value = 1
-		local delta = target_value - current_value
-		fade_time = fade_time*delta
+	if GameSettingsDevelopment.fade_environments then
+		local fade_time = environment.fade_time
+		local fade_info = environment.fade_info
 
-		if fade_time < 0.001 then
-			fade_time = 0.001
+		if 0 < fade_info.current_value then
+			local current_value = fade_info.current_value
+			local target_value = 1
+			local delta = target_value - current_value
+			fade_time = fade_time*delta
+
+			if fade_time < 0.001 then
+				fade_time = 0.001
+			end
 		end
+
+		self._add_fade_environment(self, t, volume_name, fade_time, 1)
+
+		if current_environment_name then
+			self._add_fade_environment(self, t, current_environment_name, fade_time, 0)
+		end
+
+		self._clamp_num_fade_environments(self)
+	else
+		self._set_environment(self, volume_name)
 	end
 
-	self._add_fade_environment(self, t, volume_name, fade_time, 1)
-
-	if current_environment_name then
-		self._add_fade_environment(self, t, current_environment_name, fade_time, 0)
-	end
-
-	self._clamp_num_fade_environments(self)
 	Wwise.set_state("interior_exterior", environment.environment_state)
 
 	local wwise_world = self.wwise_world
@@ -311,6 +324,16 @@ SoundEnvironmentSystem.enter_environment = function (self, t, volume_name, curre
 	end
 
 	self._current_environment = volume_name
+
+	return 
+end
+SoundEnvironmentSystem._set_environment = function (self, volume_name)
+	local wwise_world = self.wwise_world
+	local environments = self._environments
+	local environment = environments[volume_name]
+
+	WwiseWorld.reset_aux_environment(wwise_world)
+	WwiseWorld.set_environment(wwise_world, environment.player_aux_bus_name, FULL_WEIGHT)
 
 	return 
 end

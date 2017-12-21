@@ -217,7 +217,7 @@ ScriptWorld.update = function (world, dt, anim_callback, scene_callback)
 			World.update_scene(world, dt)
 		end
 
-		Profiler.stop()
+		Profiler.stop(ScriptWorld.name(world))
 	else
 		World.update_timer(world, dt)
 	end
@@ -313,7 +313,7 @@ ScriptWorld.load_level = function (world, name, object_sets, position, rotation,
 
 	fassert(levels[name] == nil, "Level %q already loaded", name)
 
-	local level = World.load_level_with_object_sets(world, name, object_sets or {}, {}, position or Vector3.zero(), rotation or Quaternion.identity())
+	local level = World.load_level_with_object_sets(world, name, object_sets or {}, {}, position or Vector3.zero(), rotation or Quaternion.identity(), Vector3(1, 1, 1), name, "force_render")
 	levels[name] = level
 
 	Profiler.start("shading_env_name")
@@ -341,7 +341,7 @@ ScriptWorld.load_level = function (world, name, object_sets, position, rotation,
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("shading_env_name")
 
 	return level
 end

@@ -298,8 +298,9 @@ PlayerProjectileUnitExtension.hit_enemy = function (self, impact_data, hit_unit,
 	end
 
 	local aoe_data = impact_data.aoe
+	local grenade = impact_data.grenade or nil
 
-	if aoe_data then
+	if grenade or (aoe_data and self.hit_targets == self.num_targets) then
 		self.do_aoe(self, aoe_data, hit_position)
 		self.mark_for_deletion(self)
 
@@ -335,19 +336,18 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	local hit_zone_name = hit_zone.name
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 	local attack_direction = hit_direction
-	local hit_targets = self.hit_targets + 1
-	self.hit_targets = hit_targets
+	local hit_targets = self.hit_targets
+
+	if AiUtils.unit_alive(hit_unit) then
+		hit_targets = hit_targets + 1
+		self.hit_targets = hit_targets
+	end
+
 	local target_settings = (enemy_impact_data.targets and enemy_impact_data.targets[hit_targets]) or enemy_impact_data.default_target
 	local attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(target_settings, false)
 	local attack_template = AttackTemplates[attack_template_name]
-	local attack_template_id = attack_template.lookup_id
-	local attack_template_damage_type_id = -1
-
-	if attack_template_damage_type_name then
-		local attack_damage_value = AttackDamageValues[attack_template_damage_type_name]
-		attack_template_damage_type_id = attack_damage_value.lookup_id
-	end
-
+	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+	local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
 	local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
 	local wall_nail = action.projectile_info.impact_data.wall_nail
@@ -449,7 +449,7 @@ PlayerProjectileUnitExtension.hit_player = function (self, impact_data, hit_unit
 	if hit then
 		local aoe_data = impact_data.aoe
 
-		if aoe_data then
+		if aoe_data and self.hit_targets == self.num_targets then
 			self.do_aoe(self, aoe_data, hit_position)
 			self.mark_for_deletion(self)
 
@@ -539,16 +539,10 @@ PlayerProjectileUnitExtension.hit_player_damage = function (self, damage_data, h
 	local target_settings = (enemy_impact_data.targets and enemy_impact_data.targets[hit_targets]) or enemy_impact_data.default_target
 	local attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(target_settings, false)
 	local attack_template = AttackTemplates[attack_template_name]
-	local attack_template_id = attack_template.lookup_id
+	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+	local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 	local hit_zone_name = "torso"
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-	local attack_template_damage_type_id = -1
-
-	if attack_template_damage_type_name then
-		local attack_damage_value = AttackDamageValues[attack_template_damage_type_name]
-		attack_template_damage_type_id = attack_damage_value.lookup_id
-	end
-
 	local hit_ragdoll_actor = NetworkLookup.hit_ragdoll_actors["n/a"]
 	local backstab_multiplier = 1
 
@@ -690,17 +684,11 @@ PlayerProjectileUnitExtension.hit_non_level_damagable_unit = function (self, dam
 	local attack_template_name = level_impact_data.attack_template
 	local attack_template = AttackTemplates[attack_template_name]
 	local attack_damage_value_type = level_impact_data.attack_template_damage_type
+	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+	local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_damage_value_type or "n/a"]
 	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, self.owner_unit)
 	local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
-	local attack_template_id = attack_template.lookup_id
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-	local attack_template_damage_type_id = 0
-
-	if attack_damage_value_type then
-		local attack_template_damage_type = AttackDamageValues[attack_damage_value_type]
-		attack_template_damage_type_id = attack_template_damage_type.lookup_id
-	end
-
 	local backstab_multiplier = 1
 
 	self.weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, hit_normal, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)

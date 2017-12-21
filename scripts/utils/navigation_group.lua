@@ -144,6 +144,12 @@ NavigationGroup.print_group = function (self, world, nav_world, line_object, lin
 	local color_node_c = math.random(0, 255)
 	local color = Color(color_node_a, color_node_b, color_node_c)
 
+	print("group", self, "has neighbours:")
+
+	for group_neighbour, _ in pairs(self._group_neighbours) do
+		print(group_neighbour)
+	end
+
 	for _, poly in pairs(self._group_polygons) do
 		self.draw_poly_lines(self, poly, color, nav_world, line_object, debug_world_gui)
 	end
@@ -154,14 +160,14 @@ NavigationGroup.print_group = function (self, world, nav_world, line_object, lin
 	cent.z = store_var
 	local m = Matrix4x4.identity()
 	local font_size = 1.2
-	local font_material = "materials/fonts/arial"
-	local font = "arial"
+	local font_material = "materials/fonts/gw_arial_16"
+	local font = "gw_arial_16"
 
 	line_drawer.sphere(line_drawer, self._group_center:unbox(), 0.07, Color(255, 255, 255))
-	Gui.text_3d(debug_world_gui, "C", font_material, font_size, "arial", m, cent, 3, Color(255, 255, 255))
-	Gui.text_3d(debug_world_gui, "C", font_material, font_size + 0.1, "arial", m, cent - Vector3(0.05, 0, 0), 2, Color(0, 0, 0))
-	Gui.text_3d(debug_world_gui, "id=" .. self._group_number, font_material, font_size - 0.8, "arial", m, cent + Vector3(0, 1.4, 0), 3, Color(255, 255, 255))
-	Gui.text_3d(debug_world_gui, "dist=" .. self._distance_from_finish, font_material, font_size - 0.8, "arial", m, cent + Vector3(0, 0.9, 0), 3, Color(255, 255, 255))
+	Gui.text_3d(debug_world_gui, "C", font_material, font_size, font, m, cent, 3, Color(255, 255, 255))
+	Gui.text_3d(debug_world_gui, "C", font_material, font_size + 0.1, font, m, cent - Vector3(0.05, 0, 0), 2, Color(0, 0, 0))
+	Gui.text_3d(debug_world_gui, "id=" .. self._group_number, font_material, font_size - 0.8, font, m, cent + Vector3(0, 1.4, 0), 3, Color(255, 255, 255))
+	Gui.text_3d(debug_world_gui, "dist=" .. self._distance_from_finish, font_material, font_size - 0.8, font, m, cent + Vector3(0, 0.9, 0), 3, Color(255, 255, 255))
 
 	return 
 end

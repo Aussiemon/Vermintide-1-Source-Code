@@ -77,7 +77,7 @@ GameObjectSystem.extensions_ready = function (self, world, unit, extension_name)
 			extension.game_object_id = game_object_id
 
 			self.unit_storage:add_unit_info(unit, game_object_id, go_type, self.own_peer_id)
-			Profiler.stop()
+			Profiler.stop("make unit networked")
 		end
 	end
 

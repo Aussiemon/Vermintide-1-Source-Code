@@ -40,12 +40,12 @@ BTMeleeSlamAction.init_attack = function (self, unit, blackboard, action, t)
 	local attack_anim, anim_driven = LocomotionUtils.get_attack_anim(unit, blackboard, action.attack_anims)
 	blackboard.attack_anim_driven = anim_driven
 
-	LocomotionUtils.set_animation_driven_movement(unit, anim_driven)
-
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+	LocomotionUtils.set_animation_driven_movement(unit, anim_driven, false, false)
 
 	if anim_driven then
-		locomotion.use_lerp_rotation(locomotion, false)
+		local locomotion_extension = blackboard.locomotion_extension
+
+		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
 	else
 		blackboard.navigation_extension:stop()
 	end
@@ -58,10 +58,10 @@ BTMeleeSlamAction.init_attack = function (self, unit, blackboard, action, t)
 end
 BTMeleeSlamAction.leave = function (self, unit, blackboard, t)
 	if blackboard.attack_anim_driven then
-		local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+		local locomotion_extension = blackboard.locomotion_extension
 
 		LocomotionUtils.set_animation_driven_movement(unit, false)
-		locomotion.use_lerp_rotation(locomotion, true)
+		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
 	end
 
 	blackboard.attack_anim_driven = nil
@@ -119,7 +119,7 @@ BTMeleeSlamAction.anim_cb_ratogre_slam = function (self, unit, blackboard)
 			end
 
 			if not dodge then
-				if target_status_extension.knocked_down then
+				if target_status_extension.is_disabled(target_status_extension) then
 					damage = action.damage
 				elseif DamageUtils.check_block(unit, hit_unit, action.fatigue_type) then
 					local blocked_velocity = action.player_push_speed_blocked*Vector3.normalize(POSITION_LOOKUP[hit_unit] - self_pos)
@@ -161,10 +161,10 @@ end
 BTMeleeSlamAction.run = function (self, unit, blackboard, t, dt)
 	if t < blackboard.anim_locked then
 		if not blackboard.attack_anim_driven then
-			local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+			local locomotion_extension = blackboard.locomotion_extension
 			local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 
-			locomotion.set_wanted_rotation(locomotion, rot)
+			locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
 		end
 
 		return "running"

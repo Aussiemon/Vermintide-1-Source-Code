@@ -94,7 +94,7 @@ BreedBehaviors = {
 					name = "jump_slam",
 					action_data = BreedActions.skaven_rat_ogre.jump_slam
 				},
-				condition = "target_reachable",
+				condition = "ratogre_target_reachable",
 				name = "in_combat"
 			},
 			{
@@ -134,11 +134,6 @@ BreedBehaviors = {
 			name = "blocked",
 			condition = "blocked",
 			action_data = BreedActions.skaven_clan_rat.blocked
-		},
-		{
-			"BTStunnedAction",
-			condition = "stunned",
-			name = "stunned"
 		},
 		{
 			"BTSelector",
@@ -181,13 +176,11 @@ BreedBehaviors = {
 			{
 				"BTAttackAction",
 				name = "running_attack",
-				condition = "ask_target_before_attacking",
 				action_data = BreedActions.skaven_clan_rat.running_attack
 			},
 			{
 				"BTAttackAction",
 				name = "normal_attack",
-				condition = "ask_target_before_attacking",
 				action_data = BreedActions.skaven_clan_rat.normal_attack
 			},
 			{
@@ -261,11 +254,6 @@ BreedBehaviors = {
 			action_data = BreedActions.skaven_clan_rat.blocked
 		},
 		{
-			"BTStunnedAction",
-			condition = "stunned",
-			name = "stunned"
-		},
-		{
 			"BTSelector",
 			{
 				"BTTeleportAction",
@@ -301,11 +289,13 @@ BreedBehaviors = {
 			{
 				"BTAttackAction",
 				name = "running_attack",
+				condition = "ask_target_before_attacking",
 				action_data = BreedActions.skaven_clan_rat.running_attack
 			},
 			{
 				"BTAttackAction",
 				name = "normal_attack",
+				condition = "ask_target_before_attacking",
 				action_data = BreedActions.skaven_clan_rat.normal_attack
 			},
 			{
@@ -578,6 +568,11 @@ BreedBehaviors.loot_rat = {
 	{
 		"BTSelector",
 		{
+			"BTTeleportAction",
+			condition = "at_teleport_smartobject",
+			name = "teleport"
+		},
+		{
 			"BTClimbAction",
 			condition = "at_climb_smartobject",
 			name = "climb"
@@ -601,12 +596,6 @@ BreedBehaviors.loot_rat = {
 		name = "dodge",
 		condition = "loot_rat_dodge",
 		action_data = BreedActions.skaven_loot_rat.dodge
-	},
-	{
-		"BTLootRatLookPlayersAction",
-		name = "look_players",
-		condition = "look_for_players",
-		action_data = BreedActions.skaven_loot_rat.look_for_players
 	},
 	{
 		"BTLootRatFleeAction",
@@ -768,7 +757,7 @@ BreedBehaviors.gutter_runner = {
 			condition = "at_climb_smartobject",
 			name = "climb"
 		},
-		condition = "at_smartobject",
+		condition = "gutter_runner_at_smartobject",
 		name = "smartobject"
 	},
 	{
@@ -842,11 +831,6 @@ BreedBehaviors.pack_master = {
 		name = "stagger",
 		condition = "stagger",
 		action_data = BreedActions.skaven_pack_master.stagger
-	},
-	{
-		"BTStunnedAction",
-		condition = "stunned",
-		name = "stunned"
 	},
 	{
 		"BTSelector",
@@ -944,11 +928,6 @@ BreedBehaviors.skaven_ratling_gunner = {
 		name = "stagger",
 		condition = "stagger",
 		action_data = BreedActions.skaven_ratling_gunner.stagger
-	},
-	{
-		"BTStunnedAction",
-		condition = "stunned",
-		name = "stunned"
 	},
 	{
 		"BTSelector",

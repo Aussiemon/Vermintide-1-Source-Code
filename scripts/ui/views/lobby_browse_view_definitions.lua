@@ -483,7 +483,7 @@ local function sort_level_list(a, b)
 	return a_map_settings.sorting < b_map_settings.sorting
 end
 
-local function setup_game_mode_data()
+local function setup_game_mode_data(statistics_db, player_stats_id)
 	local game_mode_data = {}
 	local game_modes = {}
 	local only_release = GameSettingsDevelopment.release_levels_only
@@ -495,38 +495,26 @@ local function setup_game_mode_data()
 			if not only_release or not debug_level then
 				local game_mode = data.game_mode
 
-				if game_mode and table.find(UnlockableLevels, name) then
-					local add_level = false
-
-					if data.dlc_name then
-						if Managers.unlock:is_dlc_unlocked(data.dlc_name) then
-							add_level = true
-						end
-					else
-						add_level = true
+				if game_mode and table.find(UnlockableLevels, name) and LevelUnlockUtils.level_unlocked(statistics_db, player_stats_id, name) then
+					if not game_modes[game_mode] then
+						local index = #game_mode_data + 1
+						local game_mode_settings = GameModeSettings[game_mode]
+						local game_mode_difficulties = game_mode_settings.difficulties
+						local game_mode_display_name = game_mode_settings.display_name
+						local difficulties = table.clone(game_mode_difficulties)
+						difficulties[#difficulties + 1] = "any"
+						game_modes[game_mode] = index
+						game_mode_data[index] = {
+							levels = {},
+							difficulties = difficulties,
+							game_mode_key = game_mode,
+							game_mode_display_name = game_mode_display_name
+						}
 					end
 
-					if add_level then
-						if not game_modes[game_mode] then
-							local index = #game_mode_data + 1
-							local game_mode_settings = GameModeSettings[game_mode]
-							local game_mode_difficulties = game_mode_settings.difficulties
-							local game_mode_display_name = game_mode_settings.display_name
-							local difficulties = table.clone(game_mode_difficulties)
-							difficulties[#difficulties + 1] = "any"
-							game_modes[game_mode] = index
-							game_mode_data[index] = {
-								levels = {},
-								difficulties = difficulties,
-								game_mode_key = game_mode,
-								game_mode_display_name = game_mode_display_name
-							}
-						end
-
-						local data = game_mode_data[game_modes[game_mode]]
-						local levels = data.levels
-						levels[#levels + 1] = name
-					end
+					local data = game_mode_data[game_modes[game_mode]]
+					local levels = data.levels
+					levels[#levels + 1] = name
 				end
 			end
 		end
@@ -547,7 +535,11 @@ local show_lobbies_array = {
 	"lb_show_joinable",
 	"lb_show_all"
 }
-local distance_array = {
+local distance_array = (Application.platform() == "ps4" and {
+	"map_zone_options_2",
+	"map_zone_options_3",
+	"map_zone_options_5"
+}) or {
 	"map_zone_options_2",
 	"map_zone_options_3",
 	"map_zone_options_4",

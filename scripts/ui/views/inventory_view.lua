@@ -8,19 +8,23 @@ require("scripts/ui/views/inventory_equipment_ui")
 require("scripts/ui/views/inventory_compare_ui")
 require("scripts/ui/views/inventory_items_ui")
 
+local RELOAD_INVENTORY_GUI = false
 local generic_input_actions = {
-	{
-		input_action = "l1_r1",
-		priority = 1,
-		description_text = "input_description_toggle_hero",
-		ignore_keybinding = true
+	default = {
+		{
+			input_action = "l2_r2",
+			priority = 0,
+			description_text = "input_description_rotate_hero",
+			ignore_keybinding = true
+		},
+		{
+			input_action = "l1_r1",
+			priority = 1,
+			description_text = "input_description_toggle_hero",
+			ignore_keybinding = true
+		}
 	},
-	{
-		input_action = "d_vertical",
-		priority = 2,
-		description_text = "input_description_navigate",
-		ignore_keybinding = true
-	}
+	ingame = {}
 }
 local input_description_data = {
 	gamepad_support = true,
@@ -86,7 +90,7 @@ InventoryView.init = function (self, ingame_ui_context)
 	self.input_manager = input_manager
 	self.ingame_ui = ingame_ui_context.ingame_ui
 
-	input_manager.create_input_service(input_manager, "inventory_menu", self.ingame_ui:get_ingame_menu_keymap())
+	input_manager.create_input_service(input_manager, "inventory_menu", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "inventory_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "inventory_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "inventory_menu", "gamepad")
@@ -121,7 +125,8 @@ InventoryView.init = function (self, ingame_ui_context)
 	local input_service = self.input_manager:get_service("inventory_menu")
 	local number_of_actvie_descriptions = 5
 	local gui_layer = scenegraph_definition.root.position[3]
-	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, number_of_actvie_descriptions, gui_layer, generic_input_actions)
+	local input_description = (self.is_in_inn and generic_input_actions.default) or generic_input_actions.ingame
+	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, number_of_actvie_descriptions, gui_layer, input_description)
 
 	self.menu_input_description:set_input_description(nil)
 
@@ -340,7 +345,6 @@ InventoryView.draw = function (self, dt)
 
 	return 
 end
-local RELOAD_INVENTORY_GUI = true
 InventoryView.update = function (self, dt)
 	if self.waiting_for_post_update_enter then
 		return 

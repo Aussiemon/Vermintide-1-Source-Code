@@ -5,7 +5,7 @@ weapon_template.actions = {
 		default = {
 			damage_window_start = 0.1,
 			ammo_usage = 1,
-			total_time_secondary = 2.5,
+			total_time_secondary = 2,
 			kind = "shotgun",
 			alert_sound_range_fire = 15,
 			alert_sound_range_hit = 4,
@@ -21,33 +21,32 @@ weapon_template.actions = {
 			charge_value = "light_attack",
 			fire_time = 0.1,
 			anim_event_secondary = "reload",
+			active_reload_time = 0.35,
 			anim_event = "attack_shoot",
 			reload_time = 2.5,
-			total_time = 1,
+			total_time = 0.66,
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.75,
 					action = "action_one",
-					release_required = "action_one_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default",
-					start_time = 2.5,
+					start_time = 0.5,
 					action = "action_one",
-					release_required = "action_one_hold",
 					input = "action_one_hold"
 				},
 				{
 					sub_action = "default",
-					start_time = 2.3,
+					start_time = 0.25,
 					action = "action_two",
 					input = "action_two"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.1,
+					start_time = 0.5,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -84,9 +83,15 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.75,
+					start_time = 0.3,
 					action = "action_one",
 					input = "action_one"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.75,
+					action = "action_two",
+					input = "action_two"
 				},
 				{
 					sub_action = "default",
@@ -126,6 +131,9 @@ weapon_template.wield_anim_no_ammo = "to_grudge_raker_noammo"
 weapon_template.crosshair_style = "default"
 weapon_template.reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 1
 weapon_template.wwise_dep_right_hand = {
 	"wwise/rakegun"
 }
@@ -147,7 +155,9 @@ weapon_template.compare_statistics = {
 		}
 	},
 	perks = {
-		light_attack = {},
+		light_attack = {
+			"armor_penetration"
+		},
 		heavy_attack = {}
 	}
 }

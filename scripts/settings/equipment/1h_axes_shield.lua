@@ -3,9 +3,12 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
-			uninterruptible = true,
+			aim_assist_ramp_multiplier = 0.2,
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			uninterruptible = true,
 			anim_event = "attack_swing_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -58,9 +61,12 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
-			uninterruptible = true,
+			aim_assist_ramp_multiplier = 0.2,
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			uninterruptible = true,
 			anim_event = "attack_swing_charge_right",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -113,9 +119,12 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
-			uninterruptible = true,
+			aim_assist_ramp_multiplier = 0.2,
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			uninterruptible = true,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -180,10 +189,13 @@ weapon_template.actions = {
 			hit_time = 0.2,
 			hit_effect = "melee_hit_axes_1h",
 			weapon_action_hand = "left",
+			aim_assist_ramp_multiplier = 0.2,
 			damage_window_end = 0.25,
 			impact_sound_event = "shield_hit",
 			charge_value = "action_push",
 			anim_end_event = "attack_finished",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0.1,
 			dedicated_target_range = 2,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy",
@@ -244,10 +256,13 @@ weapon_template.actions = {
 			hit_time = 0.2,
 			hit_effect = "melee_hit_axes_1h",
 			weapon_action_hand = "left",
+			aim_assist_ramp_multiplier = 0.2,
 			damage_window_end = 0.25,
 			impact_sound_event = "shield_hit",
 			charge_value = "action_push",
 			anim_end_event = "attack_finished",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0.2,
 			dedicated_target_range = 2,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy_left",
@@ -308,10 +323,13 @@ weapon_template.actions = {
 			hit_time = 0.2,
 			hit_effect = "melee_hit_axes_1h",
 			weapon_action_hand = "left",
+			aim_assist_ramp_multiplier = 0.2,
 			damage_window_end = 0.25,
 			impact_sound_event = "shield_hit",
 			charge_value = "action_push",
 			anim_end_event = "attack_finished",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0.2,
 			dedicated_target_range = 2,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy_right",
@@ -673,12 +691,23 @@ weapon_template.dodge_count = 1
 weapon_template.can_block_ranged_attacks = true
 weapon_template.attack_meta_data = {
 	tap_attack = {
-		penetrating = false,
+		penetrating = true,
 		arc = 1
 	},
 	hold_attack = {
 		penetrating = true,
 		arc = 0
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0,
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
 	}
 }
 weapon_template.compare_statistics = {

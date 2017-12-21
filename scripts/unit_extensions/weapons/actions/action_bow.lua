@@ -16,13 +16,6 @@ ActionBow.init = function (self, world, item_name, is_server, owner_unit, damage
 end
 ActionBow.client_owner_start_action = function (self, new_action, t, chain_action_data)
 	self.current_action = new_action
-
-	if chain_action_data then
-		self.charge_value = chain_action_data.charge_level or 0
-	else
-		self.charge_value = 1
-	end
-
 	local input_extension = ScriptUnit.extension(self.owner_unit, "input_system")
 
 	input_extension.reset_input_buffer(input_extension)
@@ -43,24 +36,33 @@ ActionBow.client_owner_post_update = function (self, dt, t, world, can_damage)
 	if self.state == "shooting" then
 		local buff_extension = ScriptUnit.extension(self.owner_unit, "buff_system")
 		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
-		local add_spread = true
+		local add_spread = not self.extra_buff_shot
+
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "bow_fire"
+			})
+		end
+
+		self.fire(self, current_action, add_spread)
 
 		if procced and not self.extra_buff_shot then
 			self.state = "waiting_to_shoot"
 			self.time_to_shoot = t + 0.1
 			self.extra_buff_shot = true
-			add_spread = false
 		else
 			self.state = "shot"
 		end
 
-		self.fire(self, current_action, add_spread)
+		local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
+
+		if self.current_action.reset_aim_on_attack then
+			first_person_extension.reset_aim_assist_multiplier(first_person_extension)
+		end
 
 		local fire_sound_event = self.current_action.fire_sound_event
 
 		if fire_sound_event then
-			local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
-
 			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event)
 		end
 	end
@@ -86,9 +88,10 @@ end
 ActionBow.fire = function (self, current_action, add_spread)
 	local owner_unit = self.owner_unit
 	local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
-	local charge_value = self.charge_value
-	local speed = math.lerp(current_action.min_speed, current_action.max_speed or current_action.min_speed, charge_value)
+	local speed = current_action.speed
 	local rotation = first_person_extension.current_rotation(first_person_extension)
+	local position = first_person_extension.current_position(first_person_extension)
+	local auto_hit_chance = current_action.aim_assist_auto_hit_chance or 0
 	local spread_extension = self.spread_extension
 
 	if spread_extension then

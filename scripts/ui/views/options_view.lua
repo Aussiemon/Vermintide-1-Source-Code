@@ -1,17 +1,14 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/ui/views/ui_calibration_view")
 
 OptionsView = class(OptionsView)
 local definitions = local_require("scripts/ui/views/options_view_definitions")
+local settings_definitions = local_require("scripts/ui/views/options_view_settings")
 local gamepad_frame_widget_definitions = definitions.gamepad_frame_widget_definitions
 local background_widget_definitions = definitions.background_widget_definitions
 local widget_definitions = definitions.widget_definitions
-local title_button_definitions = definitions.title_button_definitions
+local title_button_definitions = settings_definitions.title_button_definitions
 local button_definitions = definitions.button_definitions
 local child_input_services = definitions.child_input_services
 local SettingsMenuNavigation = SettingsMenuNavigation
@@ -38,12 +35,6 @@ local generic_input_actions = {
 	main_menu = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 49,
 				description_text = "input_description_select"
@@ -55,12 +46,6 @@ local generic_input_actions = {
 			}
 		},
 		reset = {
-			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 48,
@@ -78,12 +63,6 @@ local generic_input_actions = {
 			}
 		},
 		reset_and_apply = {
-			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 47,
@@ -106,12 +85,6 @@ local generic_input_actions = {
 			}
 		},
 		apply = {
-			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "refresh",
 				priority = 49,
@@ -127,12 +100,6 @@ local generic_input_actions = {
 	sub_menu = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "cycle_previous",
 				priority = 49,
 				description_text = "input_description_information"
@@ -144,12 +111,6 @@ local generic_input_actions = {
 			}
 		},
 		reset = {
-			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "cycle_previous",
 				priority = 48,
@@ -167,12 +128,6 @@ local generic_input_actions = {
 			}
 		},
 		reset_and_apply = {
-			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "cycle_previous",
 				priority = 47,
@@ -195,12 +150,6 @@ local generic_input_actions = {
 			}
 		},
 		apply = {
-			{
-				input_action = "d_vertical",
-				priority = 1,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "cycle_previous",
 				priority = 48,
@@ -228,9 +177,9 @@ local disabled_mouse_input_table = {
 	}
 }
 
-local function mouse_input_allowed(content_keys, mouse_input)
-	for _, content_key in ipairs(content_keys) do
-		local disabled_mouse_inputs = disabled_mouse_input_table[content_key]
+local function mouse_input_allowed(content_actions, mouse_input)
+	for _, content_action in ipairs(content_actions) do
+		local disabled_mouse_inputs = disabled_mouse_input_table[content_action]
 
 		if disabled_mouse_inputs then
 			for _, disabled_mouse_input in ipairs(disabled_mouse_inputs) do
@@ -250,16 +199,20 @@ OptionsView.init = function (self, ingame_ui_context)
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.level_transition_handler = ingame_ui_context.level_transition_handler
 	self.voip = ingame_ui_context.voip
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
+	self.platform = Application.platform()
 	local input_manager = ingame_ui_context.input_manager
 
-	input_manager.create_input_service(input_manager, "options_menu", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "options_menu", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "options_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "options_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "options_menu", "gamepad")
 
 	self.input_manager = input_manager
 	self.controller_cooldown = 0
-	local world = ingame_ui_context.world_manager:world("level_world")
+	local world = ingame_ui_context.world_manager:world("music_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 	self.ui_animations = {}
 
@@ -281,18 +234,14 @@ OptionsView.init = function (self, ingame_ui_context)
 		slider = function (widget, input_source)
 			if widget.content.changed then
 				widget.content.changed = nil
-				self.disable_all_input = true
 
 				widget.content.callback(widget.content)
 			end
 
-			if self.disable_all_input then
-				if not input_source.get(input_source, "left_hold") then
-					widget.content.altering_value = nil
-					self.disable_all_input = nil
-				else
-					widget.content.altering_value = true
-				end
+			if not input_source.get(input_source, "left_hold") then
+				widget.content.altering_value = nil
+			else
+				widget.content.altering_value = true
 			end
 
 			return 
@@ -432,7 +381,7 @@ OptionsView.init = function (self, ingame_ui_context)
 
 				if not stop and button ~= nil then
 					local new_key = Mouse.button_name(button)
-					local input_allowed = mouse_input_allowed(content.keys, new_key)
+					local input_allowed = mouse_input_allowed(content.actions, new_key)
 
 					if input_allowed then
 						content.callback(new_key, "mouse", content)
@@ -459,6 +408,9 @@ OptionsView.init = function (self, ingame_ui_context)
 		end,
 		image = function ()
 			return 
+		end,
+		gamepad_layout = function ()
+			return 
 		end
 	}
 
@@ -468,6 +420,12 @@ OptionsView.input_service = function (self)
 	return self.input_manager:get_service("options_menu")
 end
 OptionsView.cleanup_popups = function (self)
+	if self.save_data_error_popup_id then
+		Managers.popup:cancel_popup(self.save_data_error_popup_id)
+
+		self.save_data_error_popup_id = nil
+	end
+
 	if self.apply_popup_id then
 		Managers.popup:cancel_popup(self.apply_popup_id)
 
@@ -542,6 +500,7 @@ OptionsView.create_ui_elements = function (self)
 	self.right_frame_glow_widget = UIWidget.init(gamepad_frame_widget_definitions.right_frame_glow)
 	self.gamepad_tooltip_text_widget = UIWidget.init(gamepad_frame_widget_definitions.gamepad_tooltip_text)
 	self.gamepad_reset_text_widget = UIWidget.init(gamepad_frame_widget_definitions.gamepad_reset_text)
+	self.gamepad_button_selection_widget = UIWidget.init(gamepad_frame_widget_definitions.gamepad_button_selection)
 	self.title_buttons = {}
 	local title_buttons_n = 0
 
@@ -555,6 +514,7 @@ OptionsView.create_ui_elements = function (self)
 	self.apply_button = UIWidget.init(button_definitions.apply_button)
 	self.reset_to_default = UIWidget.init(button_definitions.reset_to_default)
 	self.scrollbar = UIWidget.init(definitions.scrollbar_definition)
+	self.scrollbar.content.disable_frame = true
 	local calibrate_ui_settings_list_dummy = {
 		hide_reset = true,
 		widgets_n = 0,
@@ -564,16 +524,26 @@ OptionsView.create_ui_elements = function (self)
 	local settings_lists = {}
 
 	if Application.platform() == "win32" then
-		settings_lists.video_settings = self.build_settings_list(self, definitions.video_settings_definition, "video_settings_list")
-		settings_lists.audio_settings = self.build_settings_list(self, definitions.audio_settings_definition, "audio_settings_list")
-		settings_lists.gameplay_settings = self.build_settings_list(self, definitions.gameplay_settings_definition, "gameplay_settings_list")
-		settings_lists.display_settings = self.build_settings_list(self, definitions.display_settings_definition, "display_settings_list")
-		settings_lists.keybind_settings = self.build_settings_list(self, definitions.keybind_settings_definition, "keybind_settings_list")
-		settings_lists.gamepad_settings = self.build_settings_list(self, definitions.gamepad_settings_definition, "gamepad_settings_list")
+		settings_lists.video_settings = self.build_settings_list(self, settings_definitions.video_settings_definition, "video_settings_list")
+		settings_lists.audio_settings = self.build_settings_list(self, settings_definitions.audio_settings_definition, "audio_settings_list")
+		settings_lists.gameplay_settings = self.build_settings_list(self, settings_definitions.gameplay_settings_definition, "gameplay_settings_list")
+		settings_lists.display_settings = self.build_settings_list(self, settings_definitions.display_settings_definition, "display_settings_list")
+		settings_lists.keybind_settings = self.build_settings_list(self, settings_definitions.keybind_settings_definition, "keybind_settings_list")
+		settings_lists.gamepad_settings = self.build_settings_list(self, settings_definitions.gamepad_settings_definition, "gamepad_settings_list")
+		settings_lists.video_settings.hide_reset = true
+		settings_lists.video_settings.needs_apply_confirmation = true
+	else
+		if (Managers.voice_chat and Managers.voice_chat:initiated()) or self.voip then
+			settings_lists.audio_settings = self.build_settings_list(self, settings_definitions.audio_settings_definition, "audio_settings_list")
+		else
+			settings_lists.audio_settings = self.build_settings_list(self, settings_definitions.audio_settings_definition_without_voip, "audio_settings_list")
+		end
+
+		settings_lists.gameplay_settings = self.build_settings_list(self, settings_definitions.gameplay_settings_definition, "gameplay_settings_list")
+		settings_lists.display_settings = self.build_settings_list(self, settings_definitions.display_settings_definition, "display_settings_list")
+		settings_lists.gamepad_settings = self.build_settings_list(self, settings_definitions.gamepad_settings_definition, "gamepad_settings_list")
 	end
 
-	settings_lists.video_settings.hide_reset = true
-	settings_lists.video_settings.needs_apply_confirmation = true
 	self.settings_lists = settings_lists
 	self.selected_widget = nil
 	self.selected_title = nil
@@ -614,6 +584,12 @@ OptionsView.build_settings_list = function (self, definition, scenegraph_id)
 			widget = self.build_keybind_widget(self, element, scenegraph_id_start, base_offset)
 		elseif widget_type == "image" then
 			widget = self.build_image(self, element, scenegraph_id_start, base_offset)
+		elseif widget_type == "gamepad_layout" then
+			widget = self.build_gamepad_layout(self, element, scenegraph_id_start, base_offset)
+			self.gamepad_layout_widget = widget
+			local using_left_handed_option = assigned(self.changed_user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
+
+			self.update_gamepad_layout_widget(self, DefaultGamepadLayoutKeymaps, using_left_handed_option)
 		elseif widget_type == "empty" then
 			size_y = element.size_y
 		else
@@ -699,19 +675,29 @@ OptionsView.make_callback = function (self, callback_name)
 	local function new_callback(...)
 		self[callback_name](self, ...)
 
+		local changed_user_settings = self.changed_user_settings
 		local original_user_settings = self.original_user_settings
 
-		for setting, value in pairs(self.changed_user_settings) do
+		for setting, value in pairs(changed_user_settings) do
 			if not original_user_settings[setting] then
 				original_user_settings[setting] = Application.user_setting(setting)
 			end
+
+			if value == original_user_settings[setting] then
+				changed_user_settings[setting] = nil
+			end
 		end
 
+		local changed_render_settings = self.changed_render_settings
 		local original_render_settings = self.original_render_settings
 
 		for setting, value in pairs(self.changed_render_settings) do
 			if not original_render_settings[setting] then
 				original_render_settings[setting] = Application.user_setting("render_settings", setting)
+			end
+
+			if value == original_render_settings[setting] then
+				changed_render_settings[setting] = nil
 			end
 		end
 
@@ -789,6 +775,92 @@ OptionsView.build_image = function (self, element, scenegraph_id, base_offset)
 
 	return widget
 end
+OptionsView.clear_gamepad_layout_widget = function (self)
+	local using_left_handed_option = assigned(self.changed_user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
+	local default_gamepad_actions_by_key = (using_left_handed_option and AlternatateGamepadSettings.left_handed.default_gamepad_actions_by_key) or AlternatateGamepadSettings.default.default_gamepad_actions_by_key
+	local widget = self.gamepad_layout_widget
+	local widget_content = widget.content
+	local background_texture = widget_content.background
+	local background1_texture = widget_content.background1
+	local background2_texture = widget_content.background2
+	local saved_value_cb = widget_content.saved_value_cb
+
+	table.clear(widget_content)
+
+	widget_content.background = background_texture
+	widget_content.background1 = background1_texture
+	widget_content.background2 = background2_texture
+	widget_content.saved_value_cb = saved_value_cb
+
+	if Application.platform() == "win32" then
+		local gamepad_use_ps4_style_input_icons = assigned(self.changed_user_settings.gamepad_use_ps4_style_input_icons, Application.user_setting("gamepad_use_ps4_style_input_icons"))
+		widget_content.use_texture2_layout = gamepad_use_ps4_style_input_icons
+	end
+
+	for input_key, action_name in pairs(default_gamepad_actions_by_key) do
+		widget_content[input_key] = Localize(action_name)
+	end
+
+	return 
+end
+OptionsView.update_gamepad_layout_widget = function (self, keymaps, using_left_handed_option)
+	local widget = self.gamepad_layout_widget
+	local widget_content = widget.content
+	local display_keybinds = {}
+
+	self.clear_gamepad_layout_widget(self)
+
+	local ignore_gamepad_action_names = (using_left_handed_option and AlternatateGamepadSettings.left_handed.ignore_gamepad_action_names) or AlternatateGamepadSettings.default.ignore_gamepad_action_names
+
+	for keymaps_table_name, keymaps_table in pairs(keymaps) do
+		for keybindings_name, keybindings in pairs(keymaps_table) do
+			for action_name, keybind in pairs(keybindings) do
+				if not settings_definitions.ignore_keybind[action_name] then
+					if ignore_gamepad_action_names and ignore_gamepad_action_names[action_name] then
+					else
+						local num_variables = #keybind
+
+						if num_variables < 3 then
+						else
+							local button_name = keybind[2]
+							local actions = display_keybinds[button_name] or {}
+							display_keybinds[button_name] = actions
+							actions[#actions + 1] = action_name
+						end
+					end
+				end
+			end
+		end
+	end
+
+	for button_name, actions in pairs(display_keybinds) do
+		for i = 1, #actions, 1 do
+			local action_name = actions[i]
+
+			if not widget_content[button_name] then
+				widget_content[button_name] = Localize(action_name)
+			else
+				local display_text = widget_content[button_name] .. "/" .. Localize(action_name)
+				widget_content[button_name] = display_text
+			end
+		end
+	end
+
+	return 
+end
+OptionsView.build_gamepad_layout = function (self, element, scenegraph_id, base_offset)
+	local widget = definitions.create_gamepad_layout_widget(element.bg_image, element.bg_image_size, element.bg_image2, element.bg_image_size2, scenegraph_id, base_offset)
+	local widget_content = widget.content
+	widget_content.callback = function ()
+		return 
+	end
+	widget_content.saved_value_cb = function ()
+		return 
+	end
+	widget_content.disabled = true
+
+	return widget
+end
 OptionsView.build_checkbox_widget = function (self, element, scenegraph_id, base_offset)
 	local callback_name = element.callback
 	local callback_func = self.make_callback(self, callback_name)
@@ -811,13 +883,14 @@ end
 OptionsView.build_keybind_widget = function (self, element, scenegraph_id, base_offset)
 	local callback_func = callback(self, "cb_keybind_changed")
 	local saved_value_cb = callback(self, "cb_keybind_saved_value")
-	local selected_key, key_info, default_value = self.cb_keybind_setup(self, element.input_service_name, element.keys)
-	local widget = definitions.create_keybind_widget(selected_key, element.keys, key_info, scenegraph_id, base_offset)
+	local selected_key, actions_info, default_value = self.cb_keybind_setup(self, element.keymappings_key, element.keymappings_table_key, element.actions)
+	local widget = definitions.create_keybind_widget(selected_key, element.actions, actions_info, scenegraph_id, base_offset)
 	local content = widget.content
 	content.callback = callback_func
 	content.saved_value_cb = saved_value_cb
 	content.default_value = default_value
-	content.input_service_name = element.input_service_name
+	content.keymappings_key = element.keymappings_key
+	content.keymappings_table_key = element.keymappings_table_key
 
 	return widget
 end
@@ -933,42 +1006,76 @@ OptionsView.transitioning = function (self)
 
 	return 
 end
-OptionsView.get_saved_keymaps = function (self)
-	local keymaps = {
-		Player = {
-			settings_name = "PlayerControllerKeymaps",
-			keymap = table.clone(PlayerControllerKeymaps)
-		},
-		ingame_menu = {
-			settings_name = "IngameMenuKeymaps",
-			keymap = table.clone(IngameMenuKeymaps)
-		},
-		player_list_input = {
-			settings_name = "IngamePlayerListKeymaps",
-			keymap = table.clone(IngamePlayerListKeymaps)
-		},
-		chat_input = {
-			settings_name = "ChatControllerSettings",
-			keymap = table.clone(ChatControllerSettings)
-		}
-	}
+OptionsView.get_keymaps = function (self, include_saved_keybinds, optional_platform_key)
+	local keybindings_mappings = {}
+	local kebindings_definitions = settings_definitions.keybind_settings_definition
 
-	if PlayerData.controls then
-		for input_service_name, data in pairs(keymaps) do
-			if PlayerData.controls[input_service_name] then
-				local saved_keymaps = PlayerData.controls[input_service_name].keymap
+	if not kebindings_definitions then
+		return 
+	end
 
-				table.merge_recursive(data.keymap, saved_keymaps)
+	for index, kebinding_definition in ipairs(kebindings_definitions) do
+		local keymappings_key = kebinding_definition.keymappings_key
+		local actions = kebinding_definition.actions
+
+		if actions then
+			local keymappings_table_key = kebinding_definition.keymappings_table_key
+
+			if not keybindings_mappings[keymappings_key] then
+				keybindings_mappings[keymappings_key] = {}
+			end
+
+			local keymapping_table = keybindings_mappings[keymappings_key]
+			local keymaps_table = rawget(_G, keymappings_key)
+
+			for keymaps_table_key, keymaps in pairs(keymaps_table) do
+				if not optional_platform_key or optional_platform_key == keymaps_table_key then
+					if not keymapping_table[keymaps_table_key] then
+						keymapping_table[keymaps_table_key] = {}
+					end
+
+					local keymaps_sub_table = keymapping_table[keymaps_table_key]
+
+					for action, keybinding in pairs(keymaps) do
+						if table.contains(actions, action) then
+							keymaps_sub_table[action] = table.clone(keybinding)
+						end
+					end
+				end
 			end
 		end
 	end
 
-	return keymaps
+	if include_saved_keybinds then
+		local saved_controls = PlayerData.controls or {}
+
+		for keymappings_key, keymappings in pairs(keybindings_mappings) do
+			local saved_keybindings_table = saved_controls[keymappings_key]
+
+			if saved_keybindings_table then
+				for saved_keybinding_table_key, saved_keybindings in pairs(saved_keybindings_table) do
+					if not optional_platform_key or optional_platform_key == saved_keybinding_table_key then
+						for action, keybinding in pairs(saved_keybindings) do
+							local original_keymappings = keymappings[saved_keybinding_table_key]
+
+							if original_keymappings and original_keymappings[action] then
+								local saved_action_keybind = table.clone(keybinding)
+								original_keymappings[action] = saved_action_keybind
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return keybindings_mappings
 end
 OptionsView.reset_changed_settings = function (self)
 	self.changed_user_settings = {}
 	self.changed_render_settings = {}
-	self.keymaps = self.get_saved_keymaps(self)
+	local include_saved_keybinds = true
+	self.session_keymaps = self.get_keymaps(self, include_saved_keybinds, "win32")
 	self.changed_keymaps = false
 
 	return 
@@ -976,7 +1083,8 @@ end
 OptionsView.set_original_settings = function (self)
 	self.original_user_settings = {}
 	self.original_render_settings = {}
-	self.original_keymaps = self.get_saved_keymaps(self)
+	local include_saved_keybinds = true
+	self.original_keymaps = self.get_keymaps(self, include_saved_keybinds, "win32")
 
 	return 
 end
@@ -988,7 +1096,7 @@ end
 OptionsView.changes_been_made = function (self)
 	return 0 < table.size(self.changed_user_settings) or 0 < table.size(self.changed_render_settings) or self.changed_keymaps
 end
-local needs_reload_settings = definitions.needs_reload_settings
+local needs_reload_settings = settings_definitions.needs_reload_settings
 OptionsView.apply_changes = function (self, user_settings, render_settings, pending_user_settings)
 	local needs_reload = false
 
@@ -1028,13 +1136,15 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		end
 	end
 
-	local max_fps = user_settings.max_fps
+	if Application.platform() == "win32" then
+		local max_fps = user_settings.max_fps
 
-	if max_fps then
-		if max_fps == 0 then
-			Application.set_time_step_policy("no_throttle")
-		else
-			Application.set_time_step_policy("throttle", max_fps)
+		if max_fps then
+			if max_fps == 0 then
+				Application.set_time_step_policy("no_throttle")
+			else
+				Application.set_time_step_policy("throttle", max_fps)
+			end
 		end
 	end
 
@@ -1095,8 +1205,12 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 
 	local voip_enabled = user_settings.voip_is_enabled
 
-	if voip_enabled then
+	if voip_enabled ~= nil then
 		self.voip:set_enabled(voip_enabled)
+
+		if Application.platform() == "xb1" then
+			Managers.voice_chat:set_enabled(voip_enabled)
+		end
 	end
 
 	local voip_push_to_talk = user_settings.voip_push_to_talk
@@ -1138,7 +1252,9 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		local fov_multiplier = fov/base_fov
 		local camera_manager = Managers.state.camera
 
-		camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
+		if camera_manager then
+			camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
+		end
 	end
 
 	local enabled_crosshairs = user_settings.enabled_crosshairs
@@ -1147,12 +1263,14 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		self.ingame_ui.ingame_hud.crosshair:set_enabled_crosshair_styles(enabled_crosshairs)
 	end
 
+	local player_input_service = self.input_manager:get_service("Player")
 	local mouse_look_sensitivity = user_settings.mouse_look_sensitivity
 
 	if mouse_look_sensitivity then
-		local base_look_multiplier = PlayerControllerFilters.look.multiplier
-		local input_service = self.input_manager:get_service("Player")
-		local input_filters = input_service.input_filters
+		local platform_key = "win32"
+		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+		local base_look_multiplier = base_filter.look.multiplier
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 		local look_filter = input_filters.look
 		local function_data = look_filter.function_data
 		function_data.multiplier = base_look_multiplier*0.85^(-mouse_look_sensitivity)
@@ -1161,8 +1279,8 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 	local mouse_look_invert_y = user_settings.mouse_look_invert_y
 
 	if mouse_look_invert_y ~= nil then
-		local input_service = self.input_manager:get_service("Player")
-		local input_filters = input_service.input_filters
+		local platform_key = "win32"
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 		local look_filter = input_filters.look
 		local function_data = look_filter.function_data
 		function_data.filter_type = (mouse_look_invert_y and "scale_vector3") or "scale_vector3_invert_y"
@@ -1171,37 +1289,85 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 	local gamepad_look_sensitivity = user_settings.gamepad_look_sensitivity
 
 	if gamepad_look_sensitivity then
-		local base_look_multiplier = PlayerControllerFilters.look_controller.multiplier_x
-		local input_service = self.input_manager:get_service("Player")
-		local input_filters = input_service.input_filters
+		local platform_key = (self.platform == "win32" and "xb1") or self.platform
+		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+		local base_look_multiplier = base_filter.look_controller.multiplier_x
+		local base_melee_look_multiplier = base_filter.look_controller_melee.multiplier_x
+		local base_ranged_look_multiplier = base_filter.look_controller_ranged.multiplier_x
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 		local look_filter = input_filters.look_controller
 		local function_data = look_filter.function_data
 		function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_look_sensitivity)
-		function_data.min_multiplier_x = function_data.multiplier_x*0.25
+		function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+		local melee_look_filter = input_filters.look_controller_melee
+		local function_data = melee_look_filter.function_data
+		function_data.multiplier_x = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity)
+		function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+		local ranged_look_filter = input_filters.look_controller_ranged
+		local function_data = ranged_look_filter.function_data
+		function_data.multiplier_x = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity)
+		function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+	end
+
+	local gamepad_look_sensitivity_y = user_settings.gamepad_look_sensitivity_y
+
+	if gamepad_look_sensitivity_y then
+		local platform_key = (self.platform == "win32" and "xb1") or self.platform
+		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+		local base_look_multiplier = base_filter.look_controller.multiplier_y
+		local base_melee_look_multiplier = base_filter.look_controller.multiplier_y
+		local base_ranged_look_multiplier = base_filter.look_controller.multiplier_y
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+		local look_filter = input_filters.look_controller
+		local function_data = look_filter.function_data
+		function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+		local melee_look_filter = input_filters.look_controller_melee
+		local function_data = melee_look_filter.function_data
+		function_data.multiplier_y = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+		local ranged_look_filter = input_filters.look_controller_ranged
+		local function_data = ranged_look_filter.function_data
+		function_data.multiplier_y = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
 	end
 
 	local gamepad_zoom_sensitivity = user_settings.gamepad_zoom_sensitivity
 
 	if gamepad_zoom_sensitivity then
-		local base_look_multiplier = PlayerControllerFilters.look_controller_zoom.multiplier_x
-		local input_service = self.input_manager:get_service("Player")
-		local input_filters = input_service.input_filters
+		local platform_key = (self.platform == "win32" and "xb1") or self.platform
+		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+		local base_look_multiplier = base_filter.look_controller_zoom.multiplier_x
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 		local look_filter = input_filters.look_controller_zoom
 		local function_data = look_filter.function_data
 		function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity)
-		function_data.min_multiplier_x = function_data.multiplier_x*0.25
+		function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x*0.85^(-gamepad_zoom_sensitivity)) or function_data.multiplier_x*0.25
+	end
+
+	local gamepad_zoom_sensitivity_y = user_settings.gamepad_zoom_sensitivity_y
+
+	if gamepad_zoom_sensitivity_y then
+		local platform_key = (self.platform == "win32" and "xb1") or self.platform
+		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+		local base_look_multiplier = base_filter.look_controller_zoom.multiplier_y
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+		local look_filter = input_filters.look_controller_zoom
+		local function_data = look_filter.function_data
+		function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity_y)
 	end
 
 	local gamepad_look_invert_y = user_settings.gamepad_look_invert_y
 
 	if gamepad_look_invert_y ~= nil then
-		local input_service = self.input_manager:get_service("Player")
-		local input_filters = input_service.input_filters
+		local platform_key = (self.platform == "win32" and "xb1") or self.platform
+		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 		local look_filter = input_filters.look_controller
 		local function_data = look_filter.function_data
 		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
-		local input_service = self.input_manager:get_service("Player")
-		local input_filters = input_service.input_filters
+		local look_filter = input_filters.look_controller_melee
+		local function_data = look_filter.function_data
+		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+		local look_filter = input_filters.look_controller_ranged
+		local function_data = look_filter.function_data
+		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
 		local look_filter = input_filters.look_controller_zoom
 		local function_data = look_filter.function_data
 		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
@@ -1211,6 +1377,29 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 
 	if gamepad_use_ps4_style_input_icons ~= nil then
 		UISettings.use_ps4_input_icons = gamepad_use_ps4_style_input_icons
+	end
+
+	local changed_gamepad_layout = user_settings.gamepad_layout ~= nil
+	local changed_gamepad_left_handed = user_settings.gamepad_left_handed ~= nil
+
+	if changed_gamepad_layout or changed_gamepad_left_handed then
+		local default_value = DefaultUserSettings.get("user_settings", "gamepad_layout") or "default"
+		local gamepad_layout = assigned(user_settings.gamepad_layout, Application.user_setting("gamepad_layout")) or default_value
+
+		if gamepad_layout then
+			local using_left_handed_option = assigned(user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
+			local gamepad_keymaps_layout = nil
+
+			if using_left_handed_option then
+				gamepad_keymaps_layout = AlternatateGamepadKeymapsLayoutsLeftHanded
+			else
+				gamepad_keymaps_layout = AlternatateGamepadKeymapsLayouts
+			end
+
+			local gamepad_keymaps = gamepad_keymaps_layout[gamepad_layout]
+
+			self.apply_gamepad_changes(self, gamepad_keymaps, using_left_handed_option)
+		end
 	end
 
 	local animation_lod_distance_multiplier = user_settings.animation_lod_distance_multiplier
@@ -1238,7 +1427,7 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 	local toggle_crouch = user_settings.toggle_crouch
 
 	if toggle_crouch ~= nil then
-		local units = Managers.state.entity:get_entities("PlayerInputExtension")
+		local units = (Managers.state.entity and Managers.state.entity:get_entities("PlayerInputExtension")) or {}
 
 		for unit, extension in pairs(units) do
 			local player = Managers.player:owner(unit)
@@ -1246,6 +1435,51 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			if player.local_player and not player.bot_player then
 				local input_extension = ScriptUnit.extension(unit, "input_system")
 				input_extension.toggle_crouch = toggle_crouch
+			end
+		end
+	end
+
+	local double_tap_dodge = user_settings.double_tap_dodge
+
+	if double_tap_dodge ~= nil then
+		local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+		for unit, extension in pairs(units) do
+			local player = Managers.player:owner(unit)
+
+			if player.local_player and not player.bot_player then
+				local input_extension = ScriptUnit.extension(unit, "input_system")
+				input_extension.double_tap_dodge = double_tap_dodge
+			end
+		end
+	end
+
+	local dodge_on_jump_key = user_settings.dodge_on_jump_key
+
+	if dodge_on_jump_key ~= nil then
+		local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+		for unit, extension in pairs(units) do
+			local player = Managers.player:owner(unit)
+
+			if player.local_player and not player.bot_player then
+				local input_extension = ScriptUnit.extension(unit, "input_system")
+				input_extension.dodge_on_jump_key = dodge_on_jump_key
+			end
+		end
+	end
+
+	local dodge_on_forward_diagonal = user_settings.dodge_on_forward_diagonal
+
+	if dodge_on_forward_diagonal ~= nil then
+		local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+		for unit, extension in pairs(units) do
+			local player = Managers.player:owner(unit)
+
+			if player.local_player and not player.bot_player then
+				local input_extension = ScriptUnit.extension(unit, "input_system")
+				input_extension.dodge_on_forward_diagonal = dodge_on_forward_diagonal
 			end
 		end
 	end
@@ -1321,7 +1555,11 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		self.reload_language(self, language_id)
 	end
 
-	Application.save_user_settings()
+	if Application.platform() == "win32" then
+		Application.save_user_settings()
+	else
+		Managers.save:auto_save(SaveFileName, SaveData, callback(self, "cb_save_done"))
+	end
 
 	if needs_reload then
 		Application.apply_user_settings()
@@ -1332,53 +1570,103 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 
 	return 
 end
-OptionsView.apply_keymap_changes = function (self, keymaps)
-	PlayerData.controls = PlayerData.controls or {}
+OptionsView.apply_keymap_changes = function (self, keymaps_data, save_keymaps)
+	if not PlayerData.controls then
+		PlayerData.controls = {}
+	end
 
-	for input_service_name, data in pairs(keymaps) do
-		PlayerData.controls[input_service_name] = PlayerData.controls[input_service_name] or {}
-		PlayerData.controls[input_service_name].keymap = data.keymap
-		local input_service = Managers.input:get_service(input_service_name)
+	local saved_controls = save_keymaps and PlayerData.controls
 
-		self._apply_keymap_changes_to_service(self, input_service, data)
+	for keybinding_table_name, keybinding_table in pairs(keymaps_data) do
+		for keybindings_table_key, keybindings in pairs(keybinding_table) do
+			for action, keybind in pairs(keybindings) do
+				if save_keymaps then
+					if not saved_controls[keybinding_table_name] then
+						saved_controls[keybinding_table_name] = {}
+					end
 
-		if child_input_services and child_input_services[input_service_name] then
-			for _, service_name in ipairs(child_input_services[input_service_name]) do
-				local service = Managers.input:get_service(service_name)
+					local saved_keybinding_data = saved_controls[keybinding_table_name]
 
-				self._apply_keymap_changes_to_service(self, service, data)
+					if not saved_keybinding_data[keybindings_table_key] then
+						saved_keybinding_data[keybindings_table_key] = {}
+					end
+
+					local saved_keybindings = saved_keybinding_data[keybindings_table_key]
+					local changed = keybind.changed
+
+					if changed then
+						saved_keybindings[action] = table.clone(keybind)
+					else
+						saved_keybindings[action] = nil
+					end
+				end
+
+				self._apply_keybinding_changes(self, keybinding_table_name, keybindings_table_key, action, keybind)
 			end
 		end
 	end
 
-	Managers.save:auto_save(SaveFileName, SaveData)
+	if save_keymaps then
+		if Application.platform() == "win32" then
+			Managers.save:auto_save(SaveFileName, SaveData)
+		else
+			Managers.save:auto_save(SaveFileName, SaveData, callback(self, "cb_save_done"))
+		end
+	end
 
 	return 
 end
-OptionsView._apply_keymap_changes_to_service = function (self, input_service, data)
-	if not input_service then
-		return 
-	end
+OptionsView._apply_keybinding_changes = function (self, keybinding_table_name, keybinding_table_key, action, keybind)
+	local input_manager = Managers.input
 
-	for key, map in pairs(data.keymap) do
-		if definitions.ignore_keybind[key] then
-		else
-			for i, inputs in ipairs(map.input_mappings) do
-				local num_inputs = #inputs/3
+	if 3 <= #keybind then
+		local device = keybind[1]
+		local button_name = keybind[2]
+		local input_type = keybind[3]
+		local button_index = nil
 
-				for j = 1, num_inputs, 1 do
-
-					-- decompilation error in this vicinity
-					local ij = (j - 1)*3
-					local device = inputs[ij + 1]
-					local button_name = inputs[ij + 2]
-					local button_index = nil
-				end
+		if device == "gamepad" then
+			if input_type == "axis" then
+				button_index = Pad1.axis_index(button_name)
+			else
+				button_index = Pad1.button_index(button_name)
 			end
+		elseif device == "keyboard" then
+			button_index = Keyboard.button_index(button_name)
+		elseif device == "mouse" then
+			if input_type == "axis" then
+				button_index = Mouse.axis_index(button_name)
+			else
+				button_index = Mouse.button_index(button_name)
+			end
+		else
+			assert(device, "[OptionsView] - Trying to keybind unrecognized device for action %s in keybinds %s, %s", action, keybinding_table_name, keybinding_table_key)
 		end
+
+		input_manager.change_keybinding(input_manager, keybinding_table_name, keybinding_table_key, action, button_index, device)
+	else
+		input_manager.clear_keybinding(input_manager, keybinding_table_name, keybinding_table_key, action)
 	end
 
 	return 
+end
+OptionsView.cb_save_done = function (self, result)
+	Managers.transition:hide_loading_icon()
+
+	self.disable_all_input = false
+
+	return 
+end
+OptionsView.apply_gamepad_changes = function (self, keymaps, using_left_handed_option)
+	local save_keymaps = false
+
+	self.apply_keymap_changes(self, keymaps, save_keymaps)
+	self.update_gamepad_layout_widget(self, keymaps, using_left_handed_option)
+
+	return 
+end
+OptionsView.has_popup = function (self)
+	return self.exit_popup_id or self.title_popup_id or self.apply_popup_id
 end
 OPTIONS_VIEW_PRINT_ORIGINAL_VALUES = false
 OptionsView.update = function (self, dt)
@@ -1413,21 +1701,51 @@ OptionsView.update = function (self, dt)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local selected_widget = self.selected_widget
 
-	if gamepad_active and not self.exit_popup_id and not transitioning then
-		self.handle_controller_navigation_input(self, dt, input_service)
+	if gamepad_active then
+		if not self.gamepad_active_last_frame then
+			self.gamepad_active_last_frame = true
+
+			self.on_gamepad_activated(self)
+		end
+	elseif self.gamepad_active_last_frame then
+		self.gamepad_active_last_frame = false
+
+		self.on_gamepad_deactivated(self)
 	end
 
-	self.draw_widgets(self, dt, disable_all_input)
+	self.update_apply_button(self)
+
+	if gamepad_active and not self.has_popup(self) and not transitioning and not disable_all_input then
+		self.handle_controller_navigation_input(self, dt, input_service)
+	end
 
 	if not transitioning then
 		self.update_mouse_scroll_input(self, disable_all_input)
 
-		local allow_gamepad_input = gamepad_active and not self.draw_gamepad_tooltip
+		local allow_gamepad_input = gamepad_active and not self.draw_gamepad_tooltip and not disable_all_input
 
 		self.handle_apply_button(self, input_service, allow_gamepad_input)
 
 		if self.selected_settings_list then
 			self.handle_reset_to_default_button(self, input_service, allow_gamepad_input)
+		end
+	end
+
+	self.draw_widgets(self, dt, disable_all_input)
+
+	if self.save_data_error_popup_id then
+		local result = Managers.popup:query_result(self.save_data_error_popup_id)
+
+		if result then
+			if result == "delete" then
+				Managers.save:delete_save(SaveFileName, callback(self, "cb_delete_save"))
+
+				self.disable_all_input = true
+			end
+
+			Managers.popup:cancel_popup(self.save_data_error_popup_id)
+
+			self.save_data_error_popup_id = nil
 		end
 	end
 
@@ -1497,10 +1815,41 @@ OptionsView.update = function (self, dt)
 			WwiseWorld.trigger_event(self.wwise_world, "Play_hud_hover")
 		end
 
-		if not disable_all_input and not self.draw_gamepad_tooltip and ((not selected_widget and input_service.get(input_service, "toggle_menu")) or (exit_button_hotspot.is_hover and exit_button_hotspot.on_release)) then
+		if not disable_all_input and not self.has_popup(self) and not self.draw_gamepad_tooltip and ((not selected_widget and input_service.get(input_service, "toggle_menu")) or (exit_button_hotspot.is_hover and exit_button_hotspot.on_release)) then
 			WwiseWorld.trigger_event(self.wwise_world, "Play_hud_select")
 			self.on_exit_pressed(self)
 		end
+	end
+
+	return 
+end
+OptionsView.cb_delete_save = function (self, result)
+	if result.error then
+		Application.warning(string.format("[StateTitleScreenLoadSave] Error when overriding save data %q", result.error))
+	end
+
+	self.disable_all_input = false
+
+	return 
+end
+OptionsView.on_gamepad_activated = function (self)
+	local title_buttons = self.title_buttons
+	local title_buttons_n = self.title_buttons_n
+
+	for i = 1, title_buttons_n, 1 do
+		local widget = title_buttons[i]
+		widget.content.disable_side_textures = true
+	end
+
+	return 
+end
+OptionsView.on_gamepad_deactivated = function (self)
+	local title_buttons = self.title_buttons
+	local title_buttons_n = self.title_buttons_n
+
+	for i = 1, title_buttons_n, 1 do
+		local widget = title_buttons[i]
+		widget.content.disable_side_textures = false
 	end
 
 	return 
@@ -1515,7 +1864,7 @@ OptionsView.on_exit_pressed = function (self)
 
 	return 
 end
-local needs_restart_settings = definitions.needs_restart_settings
+local needs_restart_settings = settings_definitions.needs_restart_settings
 OptionsView.handle_apply_popup_results = function (self, result)
 	if result == "keep_changes" then
 		local needs_restart = false
@@ -1553,7 +1902,7 @@ OptionsView.handle_apply_popup_results = function (self, result)
 		self.reset_changed_settings(self)
 	elseif result == "revert_changes" then
 		if self.changed_keymaps then
-			self.apply_keymap_changes(self, self.original_keymaps)
+			self.apply_keymap_changes(self, self.original_keymaps, true)
 		else
 			self.apply_changes(self, self.original_user_settings, self.original_render_settings)
 		end
@@ -1571,8 +1920,7 @@ OptionsView.handle_apply_popup_results = function (self, result)
 		end
 	elseif result == "restart" then
 		self.unsuspend(self)
-		self.level_transition_handler:set_next_level("inn_level")
-		self.ingame_ui:handle_transition("restart_game")
+		self.restart(self)
 	elseif result == "continue" then
 		self.unsuspend(self)
 
@@ -1587,10 +1935,16 @@ OptionsView.handle_apply_popup_results = function (self, result)
 
 	return 
 end
+OptionsView.restart = function (self)
+	self.level_transition_handler:set_next_level("inn_level")
+	self.ingame_ui:handle_transition("restart_game")
+
+	return 
+end
 OptionsView.handle_title_buttons_popup_results = function (self, result)
 	if result == "revert_changes" then
 		if self.changed_keymaps then
-			self.apply_keymap_changes(self, self.original_keymaps)
+			self.apply_keymap_changes(self, self.original_keymaps, true)
 		else
 			self.apply_changes(self, self.original_user_settings, self.original_render_settings)
 		end
@@ -1618,7 +1972,7 @@ end
 OptionsView.handle_exit_button_popup_results = function (self, result)
 	if result == "revert_changes" then
 		if self.changed_keymaps then
-			self.apply_keymap_changes(self, self.original_keymaps)
+			self.apply_keymap_changes(self, self.original_keymaps, true)
 		else
 			self.apply_changes(self, self.original_user_settings, self.original_render_settings)
 		end
@@ -1648,8 +2002,34 @@ OptionsView.update_apply_button = function (self)
 	return 
 end
 OptionsView.handle_apply_changes = function (self)
+	if Application.platform() == "win32" then
+		self._handle_apply_changes(self)
+	else
+		Managers.transition:show_loading_icon()
+
+		self.disable_all_input = true
+
+		Managers.save:auto_load(SaveFileName, callback(self, "cb_load_done"))
+	end
+
+	return 
+end
+OptionsView.cb_load_done = function (self, result)
+	if result.error and result.error ~= "NOT_FOUND" then
+		self.save_data_error_popup_id = Managers.popup:queue_popup(Localize("ps4_save_error_broken"), Localize("popup_error_topic"), "delete", Localize("button_delete_save"), "back_to_title", Localize("button_back_to_title"))
+
+		Managers.transition:hide_loading_icon()
+
+		self.disable_all_input = false
+	else
+		self._handle_apply_changes(self)
+	end
+
+	return 
+end
+OptionsView._handle_apply_changes = function (self)
 	if self.changed_keymaps then
-		self.apply_keymap_changes(self, self.keymaps)
+		self.apply_keymap_changes(self, self.session_keymaps, true)
 	else
 		self.apply_changes(self, self.changed_user_settings, self.changed_render_settings)
 	end
@@ -1684,7 +2064,22 @@ OptionsView.handle_apply_button = function (self, input_service, allow_gamepad_i
 
 	if (apply_button_hotspot.is_hover and apply_button_hotspot.on_release) or (allow_gamepad_input and input_service.get(input_service, "refresh")) then
 		WwiseWorld.trigger_event(self.wwise_world, "Play_hud_select")
-		self.handle_apply_changes(self)
+
+		if self.apply_popup_id then
+			local gamepad_active = self.input_manager:is_device_active("gamepad")
+			local changes_been_made = self.changes_been_made(self)
+			local num_popups = Managers.popup._handler.n_popups
+
+			table.dump(Managers.popup._handler.popups, "popups", 2)
+
+			local blocked_input_services = {}
+
+			self.input_manager:get_blocked_services(nil, nil, blocked_input_services)
+			table.dump(blocked_input_services, "blocked_input_services", 2)
+			ScriptApplication.send_to_crashify("OptionsView", "Apply button wasn't disabled, even though we had an apply popup...")
+		else
+			self.handle_apply_changes(self)
+		end
 	end
 
 	return 
@@ -1810,7 +2205,7 @@ OptionsView.draw_widgets = function (self, dt, disable_all_input)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local draw_gamepad_tooltip = self.draw_gamepad_tooltip
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local background_widgets = self.background_widgets
 	local background_widgets_n = self.background_widgets_n
@@ -1824,7 +2219,6 @@ OptionsView.draw_widgets = function (self, dt, disable_all_input)
 	end
 
 	self.handle_title_buttons(self, ui_renderer, disable_all_input)
-	self.update_apply_button(self)
 
 	self.reset_to_default.content.button_hotspot.disable_button = disable_all_input
 	self.apply_button.content.button_hotspot.disable_button = disable_all_input
@@ -1842,6 +2236,7 @@ OptionsView.draw_widgets = function (self, dt, disable_all_input)
 			UIRenderer.draw_widget(ui_renderer, self.right_frame_glow_widget)
 		else
 			UIRenderer.draw_widget(ui_renderer, self.left_frame_glow_widget)
+			UIRenderer.draw_widget(ui_renderer, self.gamepad_button_selection_widget)
 		end
 
 		if draw_gamepad_tooltip then
@@ -1860,9 +2255,9 @@ OptionsView.draw_widgets = function (self, dt, disable_all_input)
 	end
 
 	if gamepad_active then
-		local popup_active = self.exit_popup_id or self.title_popup_id or self.apply_popup_id
+		local popup_active = self.save_data_error_popup_id or self.exit_popup_id or self.title_popup_id or self.apply_popup_id
 
-		if not popup_active then
+		if not popup_active and not self.disable_all_input then
 			self.menu_input_description:draw(ui_renderer, dt)
 		end
 	end
@@ -1887,7 +2282,7 @@ OptionsView.update_settings_list = function (self, settings_list, ui_renderer, u
 
 	local scenegraph_id_start = settings_list.scenegraph_id_start
 	local list_position = UISceneGraph.get_world_position(ui_scenegraph, scenegraph_id_start)
-	local mask_pos = Vector3.copy(UISceneGraph.get_world_position(ui_scenegraph, "list_mask"))
+	local mask_pos = Vector3.deprecated_copy(UISceneGraph.get_world_position(ui_scenegraph, "list_mask"))
 	local mask_size = UISceneGraph.get_size(ui_scenegraph, "list_mask")
 	local selected_widget = self.selected_widget
 	local widgets = settings_list.widgets
@@ -2101,6 +2496,10 @@ end
 OptionsView.deselect_settings_list_widget = function (self, widget)
 	widget.content.is_highlighted = false
 
+	if widget.content.highlight_hotspot then
+		table.clear(widget.content.highlight_hotspot)
+	end
+
 	self.menu_input_description:set_input_description(nil)
 
 	return 
@@ -2127,7 +2526,13 @@ OptionsView.select_settings_title = function (self, i)
 
 	local title_buttons = self.title_buttons
 	local widget = title_buttons[i]
+	local widget_scenegraph_id = widget.scenegraph_id
+	local widget_current_position = self.ui_scenegraph[widget_scenegraph_id].local_position
 	widget.content.button_hotspot.is_selected = true
+	local gamepad_selection_scenegraph_id = self.gamepad_button_selection_widget.scenegraph_id
+	local gamepad_selection_default_position = definitions.scenegraph_definition[gamepad_selection_scenegraph_id].position
+	local gamepad_selection_current_position = self.ui_scenegraph[gamepad_selection_scenegraph_id].local_position
+	gamepad_selection_current_position[2] = gamepad_selection_default_position[2] + widget_current_position[2]
 
 	self.trigger_menu_button_animation(self, widget)
 
@@ -2307,6 +2712,12 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 
 	if 0 < self.controller_cooldown then
 		self.controller_cooldown = self.controller_cooldown - dt
+		local speed_multiplier = self.speed_multiplier or 1
+		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
+		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
+		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
+
+		return 
 	else
 		local in_settings_sub_menu = self.in_settings_sub_menu
 
@@ -2347,21 +2758,18 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 					self.title_popup_id = Managers.popup:queue_popup(text, Localize("popup_discard_changes_topic"), "apply_changes", Localize("menu_settings_apply"), "revert_changes", Localize("popup_choice_discard"))
 				end
 			end
-		else
-			if input_service.get(input_service, "confirm") then
-				in_settings_sub_menu = true
-				self.in_settings_sub_menu = in_settings_sub_menu
+		elseif input_service.get(input_service, "confirm") then
+			in_settings_sub_menu = true
+			self.in_settings_sub_menu = in_settings_sub_menu
 
-				self.set_console_setting_list_selection(self, 1, true, false)
-			end
-
-			if input_service.get(input_service, "back", true) then
-				WwiseWorld.trigger_event(self.wwise_world, "Play_hud_select")
-				self.on_exit_pressed(self)
-			end
+			self.set_console_setting_list_selection(self, 1, true, false)
+		elseif input_service.get(input_service, "back", true) then
+			WwiseWorld.trigger_event(self.wwise_world, "Play_hud_select")
+			self.on_exit_pressed(self)
 		end
 
 		if in_settings_sub_menu then
+			local speed_multiplier = self.speed_multiplier or 1
 			local selected_settings_list = self.selected_settings_list
 			local list_widgets = selected_settings_list.widgets
 			local selected_list_index = selected_settings_list.selected_index or 0
@@ -2369,40 +2777,51 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 			local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 			if move_up or move_up_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 
 				self.set_console_setting_list_selection(self, selected_list_index - 1, false)
-			else
-				local move_down = input_service.get(input_service, "move_down")
-				local move_down_hold = input_service.get(input_service, "move_down_hold")
 
-				if move_down or move_down_hold then
-					self.controller_cooldown = GamepadSettings.menu_cooldown
+				return 
+			end
 
-					self.set_console_setting_list_selection(self, selected_list_index + 1, true)
-				end
+			local move_down = input_service.get(input_service, "move_down")
+			local move_down_hold = input_service.get(input_service, "move_down_hold")
+
+			if move_down or move_down_hold then
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+
+				self.set_console_setting_list_selection(self, selected_list_index + 1, true)
+
+				return 
 			end
 		else
-			selected_title_index = self.selected_title or 0
+			speed_multiplier = self.speed_multiplier or 1
+			local selected_title_index = self.selected_title or 0
 			local move_up = input_service.get(input_service, "move_up")
 			local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 			if move_up or move_up_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 
 				self.set_console_title_selection(self, selected_title_index - 1)
-			else
-				local move_down = input_service.get(input_service, "move_down")
-				local move_down_hold = input_service.get(input_service, "move_down_hold")
 
-				if move_down or move_down_hold then
-					self.controller_cooldown = GamepadSettings.menu_cooldown
+				return 
+			end
 
-					self.set_console_title_selection(self, selected_title_index + 1)
-				end
+			local move_down = input_service.get(input_service, "move_down")
+			local move_down_hold = input_service.get(input_service, "move_down_hold")
+
+			if move_down or move_down_hold then
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+
+				self.set_console_title_selection(self, selected_title_index + 1)
+
+				return 
 			end
 		end
 	end
+
+	self.speed_multiplier = 1
 
 	return 
 end
@@ -2492,7 +2911,7 @@ OptionsView.set_console_setting_list_selection = function (self, index, incremen
 	return 
 end
 OptionsView.is_widget_selectable = function (self, widget)
-	return widget and widget.type ~= "image"
+	return widget and widget.type ~= "image" and widget.type ~= "gamepad_layout"
 end
 OptionsView.clear_console_setting_list_selection = function (self)
 	local selected_settings_list = self.selected_settings_list
@@ -2525,7 +2944,7 @@ OptionsView.move_scrollbar_based_on_selection = function (self, index)
 		local max_offset_y = selected_settings_list.max_offset_y
 		local ui_scenegraph = self.ui_scenegraph
 		local scenegraph_id_start = selected_settings_list.scenegraph_id_start
-		local mask_pos = Vector3.copy(UISceneGraph.get_world_position(ui_scenegraph, "list_mask"))
+		local mask_pos = Vector3.deprecated_copy(UISceneGraph.get_world_position(ui_scenegraph, "list_mask"))
 		local mask_size = UISceneGraph.get_size(ui_scenegraph, "list_mask")
 		local list_position = UISceneGraph.get_world_position(ui_scenegraph, scenegraph_id_start)
 
@@ -3321,6 +3740,8 @@ OptionsView.cb_gamma_setup = function (self)
 	local value = get_slider_value(min, max, gamma)
 	local default_value = math.clamp(DefaultUserSettings.get("render_settings", "gamma"), min, max)
 
+	Application.set_render_setting("gamma", gamma)
+
 	return value, min, max, 1, "menu_settings_gamma", default_value
 end
 OptionsView.cb_gamma_saved_value = function (self, widget)
@@ -3749,7 +4170,7 @@ OptionsView.cb_motion_blur_setup = function (self)
 			text = Localize("menu_settings_on")
 		}
 	}
-	local motion_blur_enabled = Application.user_setting("render_settings", "motion_blur_enabled")
+	local motion_blur_enabled = Application.user_setting("render_settings", "motion_blur_enabled") or true
 	local selected_option = (motion_blur_enabled and 2) or 1
 
 	return selected_option, options, "menu_settings_motion_blur"
@@ -3765,7 +4186,7 @@ OptionsView.cb_motion_blur = function (self, content, called_from_graphics_quali
 	local value = content.options_values[content.current_selection]
 	self.changed_render_settings.motion_blur_enabled = value
 
-	if not called_from_graphics_quality then
+	if Application.platform() == "win32" and not called_from_graphics_quality then
 		self.force_set_widget_value(self, "graphics_quality_settings", "custom")
 	end
 
@@ -4254,9 +4675,11 @@ OptionsView.cb_mouse_look_sensitivity_setup = function (self)
 	local default_value = DefaultUserSettings.get("user_settings", "mouse_look_sensitivity")
 	local value = get_slider_value(min, max, sensitivity)
 	sensitivity = math.clamp(sensitivity, min, max)
-	local base_look_multiplier = PlayerControllerFilters.look.multiplier
+	local platform_key = "win32"
+	local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+	local base_look_multiplier = base_filter.look.multiplier
 	local input_service = self.input_manager:get_service("Player")
-	local input_filters = input_service.input_filters
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look
 	local function_data = look_filter.function_data
 	function_data.multiplier = base_look_multiplier*0.85^(-sensitivity)
@@ -4286,13 +4709,25 @@ OptionsView.cb_gamepad_look_sensitivity_setup = function (self)
 	local default_value = DefaultUserSettings.get("user_settings", "gamepad_look_sensitivity")
 	local value = get_slider_value(min, max, sensitivity)
 	sensitivity = math.clamp(sensitivity, min, max)
-	local base_look_multiplier = PlayerControllerFilters.look_controller.multiplier_x
+	local platform_key = (self.platform == "win32" and "xb1") or self.platform
+	local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+	local base_look_multiplier = base_filter.look_controller.multiplier_x
+	local base_melee_look_multiplier = base_filter.look_controller_melee.multiplier_x
+	local base_ranged_look_multiplier = base_filter.look_controller_ranged.multiplier_x
 	local input_service = self.input_manager:get_service("Player")
-	local input_filters = input_service.input_filters
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller
 	local function_data = look_filter.function_data
 	function_data.multiplier_x = base_look_multiplier*0.85^(-sensitivity)
-	function_data.min_multiplier_x = function_data.multiplier_x*0.25
+	function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
+	local melee_look_filter = input_filters.look_controller_melee
+	local function_data = melee_look_filter.function_data
+	function_data.multiplier_x = base_melee_look_multiplier*0.85^(-sensitivity)
+	function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
+	local ranged_look_filter = input_filters.look_controller_ranged
+	local function_data = ranged_look_filter.function_data
+	function_data.multiplier_x = base_ranged_look_multiplier*0.85^(-sensitivity)
+	function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
 
 	return value, min, max, 1, "menu_settings_gamepad_look_sensitivity", default_value
 end
@@ -4312,6 +4747,48 @@ OptionsView.cb_gamepad_look_sensitivity = function (self, content)
 
 	return 
 end
+OptionsView.cb_gamepad_look_sensitivity_y_setup = function (self)
+	local min = -10
+	local max = 10
+	local sensitivity = Application.user_setting("gamepad_look_sensitivity_y") or 0
+	local default_value = DefaultUserSettings.get("user_settings", "gamepad_look_sensitivity_y")
+	local value = get_slider_value(min, max, sensitivity)
+	sensitivity = math.clamp(sensitivity, min, max)
+	local platform_key = (self.platform == "win32" and "xb1") or self.platform
+	local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+	local base_look_multiplier = base_filter.look_controller.multiplier_y
+	local base_melee_look_multiplier = base_filter.look_controller_melee.multiplier_y
+	local base_ranged_look_multiplier = base_filter.look_controller_ranged.multiplier_y
+	local input_service = self.input_manager:get_service("Player")
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
+	local look_filter = input_filters.look_controller
+	local function_data = look_filter.function_data
+	function_data.multiplier_y = base_look_multiplier*0.85^(-sensitivity)
+	local melee_look_filter = input_filters.look_controller_melee
+	local function_data = melee_look_filter.function_data
+	function_data.multiplier_y = base_melee_look_multiplier*0.85^(-sensitivity)
+	local ranged_look_filter = input_filters.look_controller_ranged
+	local function_data = ranged_look_filter.function_data
+	function_data.multiplier_y = base_ranged_look_multiplier*0.85^(-sensitivity)
+
+	return value, min, max, 1, "menu_settings_gamepad_look_sensitivity_y", default_value
+end
+OptionsView.cb_gamepad_look_sensitivity_y_saved_value = function (self, widget)
+	local content = widget.content
+	local min = content.min
+	local max = content.max
+	local sensitivity = assigned(self.changed_user_settings.gamepad_look_sensitivity_y, Application.user_setting("gamepad_look_sensitivity_y")) or 0
+	sensitivity = math.clamp(sensitivity, min, max)
+	content.internal_value = get_slider_value(min, max, sensitivity)
+	content.value = sensitivity
+
+	return 
+end
+OptionsView.cb_gamepad_look_sensitivity_y = function (self, content)
+	self.changed_user_settings.gamepad_look_sensitivity_y = content.value
+
+	return 
+end
 OptionsView.cb_gamepad_zoom_sensitivity_setup = function (self)
 	local min = -10
 	local max = 10
@@ -4319,13 +4796,15 @@ OptionsView.cb_gamepad_zoom_sensitivity_setup = function (self)
 	local default_value = DefaultUserSettings.get("user_settings", "gamepad_zoom_sensitivity")
 	local value = get_slider_value(min, max, sensitivity)
 	sensitivity = math.clamp(sensitivity, min, max)
-	local base_look_multiplier = PlayerControllerFilters.look_controller_zoom.multiplier_x
+	local platform_key = (self.platform == "win32" and "xb1") or self.platform
+	local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+	local base_look_multiplier = base_filter.look_controller_zoom.multiplier_x
 	local input_service = self.input_manager:get_service("Player")
-	local input_filters = input_service.input_filters
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller_zoom
 	local function_data = look_filter.function_data
 	function_data.multiplier_x = base_look_multiplier*0.85^(-sensitivity)
-	function_data.min_multiplier_x = function_data.multiplier_x*0.25
+	function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
 
 	return value, min, max, 1, "menu_settings_gamepad_zoom_sensitivity", default_value
 end
@@ -4342,6 +4821,40 @@ OptionsView.cb_gamepad_zoom_sensitivity_saved_value = function (self, widget)
 end
 OptionsView.cb_gamepad_zoom_sensitivity = function (self, content)
 	self.changed_user_settings.gamepad_zoom_sensitivity = content.value
+
+	return 
+end
+OptionsView.cb_gamepad_zoom_sensitivity_y_setup = function (self)
+	local min = -10
+	local max = 10
+	local sensitivity = Application.user_setting("gamepad_zoom_sensitivity_y") or 0
+	local default_value = DefaultUserSettings.get("user_settings", "gamepad_zoom_sensitivity_y")
+	local value = get_slider_value(min, max, sensitivity)
+	sensitivity = math.clamp(sensitivity, min, max)
+	local platform_key = (self.platform == "win32" and "xb1") or self.platform
+	local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+	local base_look_multiplier = base_filter.look_controller_zoom.multiplier_y
+	local input_service = self.input_manager:get_service("Player")
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
+	local look_filter = input_filters.look_controller_zoom
+	local function_data = look_filter.function_data
+	function_data.multiplier_y = base_look_multiplier*0.85^(-sensitivity)
+
+	return value, min, max, 1, "menu_settings_gamepad_zoom_sensitivity_y", default_value
+end
+OptionsView.cb_gamepad_zoom_sensitivity_y_saved_value = function (self, widget)
+	local content = widget.content
+	local min = content.min
+	local max = content.max
+	local sensitivity = assigned(self.changed_user_settings.gamepad_zoom_sensitivity_y, Application.user_setting("gamepad_zoom_sensitivity_y")) or 0
+	sensitivity = math.clamp(sensitivity, min, max)
+	content.internal_value = get_slider_value(min, max, sensitivity)
+	content.value = sensitivity
+
+	return 
+end
+OptionsView.cb_gamepad_zoom_sensitivity_y = function (self, content)
+	self.changed_user_settings.gamepad_zoom_sensitivity_y = content.value
 
 	return 
 end
@@ -4420,7 +4933,8 @@ OptionsView.cb_mouse_look_invert_y_setup = function (self)
 	local default_value = DefaultUserSettings.get("user_settings", "mouse_look_invert_y")
 	local invert_mouse_y = Application.user_setting("mouse_look_invert_y")
 	local input_service = self.input_manager:get_service("Player")
-	local input_filters = input_service.input_filters
+	local platform_key = "win32"
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look
 	local function_data = look_filter.function_data
 	function_data.filter_type = (invert_mouse_y and "scale_vector3") or "scale_vector3_invert_y"
@@ -4456,12 +4970,17 @@ OptionsView.cb_gamepad_look_invert_y_setup = function (self)
 	local default_value = DefaultUserSettings.get("user_settings", "gamepad_look_invert_y") or false
 	local invert_gamepad_y = Application.user_setting("gamepad_look_invert_y")
 	local input_service = self.input_manager:get_service("Player")
-	local input_filters = input_service.input_filters
+	local platform_key = (self.platform == "win32" and "xb1") or self.platform
+	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller
 	local function_data = look_filter.function_data
 	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
-	local input_service = self.input_manager:get_service("Player")
-	local input_filters = input_service.input_filters
+	local look_filter = input_filters.look_controller_ranged
+	local function_data = look_filter.function_data
+	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+	local look_filter = input_filters.look_controller_melee
+	local function_data = look_filter.function_data
+	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
 	local look_filter = input_filters.look_controller_zoom
 	local function_data = look_filter.function_data
 	function_data.filter_type = (invert_gamepad_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
@@ -4514,6 +5033,37 @@ OptionsView.cb_gamepad_auto_aim_enabled = function (self, content)
 
 	return 
 end
+OptionsView.cb_gamepad_rumble_enabled_setup = function (self)
+	local options = {
+		{
+			value = true,
+			text = Localize("menu_settings_on")
+		},
+		{
+			value = false,
+			text = Localize("menu_settings_off")
+		}
+	}
+	local default_value = DefaultUserSettings.get("user_settings", "gamepad_rumble_enabled") or true
+	local enable_rumble = Application.user_setting("gamepad_rumble_enabled")
+	local selection = (enable_rumble and 1) or 2
+	local default_option = (default_value and 1) or 2
+
+	return selection, options, "menu_settings_gamepad_rumble_enabled", default_option
+end
+OptionsView.cb_gamepad_rumble_enabled_saved_value = function (self, widget)
+	local gamepad_rumble_enabled = assigned(self.changed_user_settings.gamepad_rumble_enabled, Application.user_setting("gamepad_rumble_enabled"))
+	widget.content.current_selection = (gamepad_rumble_enabled and 1) or 2
+
+	return 
+end
+OptionsView.cb_gamepad_rumble_enabled = function (self, content)
+	local options_values = content.options_values
+	local current_selection = content.current_selection
+	self.changed_user_settings.gamepad_rumble_enabled = options_values[current_selection]
+
+	return 
+end
 OptionsView.cb_gamepad_use_ps4_style_input_icons_setup = function (self)
 	local options = {
 		{
@@ -4542,6 +5092,115 @@ OptionsView.cb_gamepad_use_ps4_style_input_icons = function (self, content)
 	local options_values = content.options_values
 	local current_selection = content.current_selection
 	self.changed_user_settings.gamepad_use_ps4_style_input_icons = options_values[current_selection]
+	local gamepad_layout_widget = self.gamepad_layout_widget
+	local gamepad_use_ps4_style_input_icons = assigned(self.changed_user_settings.gamepad_use_ps4_style_input_icons, Application.user_setting("gamepad_use_ps4_style_input_icons"))
+	gamepad_layout_widget.content.use_texture2_layout = gamepad_use_ps4_style_input_icons
+
+	return 
+end
+OptionsView.cb_gamepad_layout_setup = function (self)
+	local options = AlternatateGamepadKeymapsOptionsMenu
+	local default_value = DefaultUserSettings.get("user_settings", "gamepad_layout") or "default"
+	local gamepad_layout = Application.user_setting("gamepad_layout")
+	local selected_option = 1
+	local default_option = nil
+
+	for i = 1, #options, 1 do
+		local option = options[i]
+
+		if gamepad_layout == option.value then
+			selected_option = i
+		end
+
+		if default_value == option.value then
+			default_option = i
+		end
+
+		if not option.localized then
+			option.localized = true
+			option.text = Localize(option.text)
+		end
+	end
+
+	return selected_option, options, "menu_settings_gamepad_layout", default_option
+end
+OptionsView.cb_gamepad_layout_saved_value = function (self, widget)
+	local gamepad_layout = assigned(self.changed_user_settings.gamepad_layout, Application.user_setting("gamepad_layout"))
+	local options_values = widget.content.options_values
+	local selected_option = 1
+
+	for i = 1, #options_values, 1 do
+		if gamepad_layout == options_values[i] then
+			selected_option = i
+		end
+	end
+
+	widget.content.current_selection = selected_option
+
+	return 
+end
+OptionsView.cb_gamepad_layout = function (self, content)
+	local value = content.options_values[content.current_selection]
+	self.changed_user_settings.gamepad_layout = value
+	local using_left_handed_option = assigned(self.changed_user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
+	local gamepad_keymaps_layout = nil
+
+	if using_left_handed_option then
+		gamepad_keymaps_layout = AlternatateGamepadKeymapsLayoutsLeftHanded
+	else
+		gamepad_keymaps_layout = AlternatateGamepadKeymapsLayouts
+	end
+
+	local gamepad_keymaps = gamepad_keymaps_layout[value]
+
+	self.update_gamepad_layout_widget(self, gamepad_keymaps, using_left_handed_option)
+
+	return 
+end
+OptionsView.using_left_handed_gamepad_layout = function (self)
+	local default_left_handed_option = Application.user_setting("gamepad_left_handed")
+	local changed_left_handed_option = self.changed_user_settings.gamepad_left_handed
+	local using_left_handed_option = nil
+
+	if changed_left_handed_option ~= nil then
+		using_left_handed_option = changed_left_handed_option
+	else
+		using_left_handed_option = default_left_handed_option
+	end
+
+	return using_left_handed_option
+end
+OptionsView.cb_gamepad_left_handed_enabled_setup = function (self)
+	local options = {
+		{
+			value = true,
+			text = Localize("menu_settings_on")
+		},
+		{
+			value = false,
+			text = Localize("menu_settings_off")
+		}
+	}
+	local default_value = DefaultUserSettings.get("user_settings", "gamepad_left_handed") or false
+	local enable_left_handed = Application.user_setting("gamepad_left_handed")
+	local selection = (enable_left_handed and 1) or 2
+	local default_option = (default_value and 1) or 2
+
+	return selection, options, "menu_settings_gamepad_left_handed_enabled", default_option
+end
+OptionsView.cb_gamepad_left_handed_enabled_saved_value = function (self, widget)
+	local gamepad_left_handed = assigned(self.changed_user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
+	widget.content.current_selection = (gamepad_left_handed and 1) or 2
+
+	return 
+end
+OptionsView.cb_gamepad_left_handed_enabled = function (self, content)
+	local options_values = content.options_values
+	local current_selection = content.current_selection
+	self.changed_user_settings.gamepad_left_handed = options_values[current_selection]
+	local gamepad_layout = assigned(self.changed_user_settings.gamepad_layout, Application.user_setting("gamepad_layout"))
+
+	self.force_set_widget_value(self, "gamepad_layout", gamepad_layout)
 
 	return 
 end
@@ -4604,6 +5263,68 @@ OptionsView.cb_toggle_stationary_dodge = function (self, content)
 	local options_values = content.options_values
 	local current_selection = content.current_selection
 	self.changed_user_settings.toggle_stationary_dodge = options_values[current_selection]
+
+	return 
+end
+OptionsView.cb_matchmaking_region_setup = function (self)
+	local temp = {}
+
+	for region_type, regions in pairs(MatchmakingRegions) do
+		for region, _ in pairs(regions) do
+			temp[region] = true
+		end
+	end
+
+	local options = {
+		{
+			value = "auto",
+			text = Localize("menu_settings_auto")
+		}
+	}
+
+	for region, _ in pairs(temp) do
+		options[#options + 1] = {
+			text = Localize(region),
+			value = region
+		}
+	end
+
+	local default_value = DefaultUserSettings.get("user_settings", "matchmaking_region")
+	local saved_value = Application.user_setting("matchmaking_region")
+	local default_option = 1
+	local selected_option = 1
+
+	for i, option in ipairs(options) do
+		if option.value == saved_value then
+			selected_option = i
+
+			break
+		end
+	end
+
+	return selected_option, options, "menu_settings_matchmaking_region", default_option
+end
+OptionsView.cb_matchmaking_region_saved_value = function (self, widget)
+	local matchmaking_region = assigned(self.changed_user_settings.matchmaking_region, Application.user_setting("matchmaking_region"))
+	local current_selection = 1
+
+	for i, value in ipairs(widget.content.options_values) do
+		if value == matchmaking_region then
+			current_selection = i
+
+			break
+		end
+	end
+
+	widget.content.current_selection = current_selection
+
+	return 
+end
+OptionsView.cb_matchmaking_region = function (self, content)
+	local selected_index = content.current_selection
+	local options_values = content.options_values
+	local value = options_values[selected_index]
+	self.changed_user_settings.matchmaking_region = value
 
 	return 
 end
@@ -4671,16 +5392,6 @@ OptionsView.cb_double_tap_dodge = function (self, content)
 	local options_values = content.options_values
 	local current_selection = content.current_selection
 	self.changed_user_settings.double_tap_dodge = options_values[current_selection]
-	local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-	for unit, extension in pairs(units) do
-		local player = Managers.player:owner(unit)
-
-		if player.local_player and not player.bot_player then
-			local input_extension = ScriptUnit.extension(unit, "input_system")
-			input_extension.double_tap_dodge = options_values[current_selection]
-		end
-	end
 
 	return 
 end
@@ -4722,16 +5433,6 @@ OptionsView.cb_dodge_on_jump_key = function (self, content)
 	local options_values = content.options_values
 	local current_selection = content.current_selection
 	self.changed_user_settings.dodge_on_jump_key = options_values[current_selection]
-	local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-	for unit, extension in pairs(units) do
-		local player = Managers.player:owner(unit)
-
-		if player.local_player and not player.bot_player then
-			local input_extension = ScriptUnit.extension(unit, "input_system")
-			input_extension.dodge_on_jump_key = options_values[current_selection]
-		end
-	end
 
 	return 
 end
@@ -4773,16 +5474,6 @@ OptionsView.cb_dodge_on_forward_diagonal = function (self, content)
 	local options_values = content.options_values
 	local current_selection = content.current_selection
 	self.changed_user_settings.dodge_on_forward_diagonal = options_values[current_selection]
-	local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-	for unit, extension in pairs(units) do
-		local player = Managers.player:owner(unit)
-
-		if player.local_player and not player.bot_player then
-			local input_extension = ScriptUnit.extension(unit, "input_system")
-			input_extension.dodge_on_forward_diagonal = options_values[current_selection]
-		end
-	end
 
 	return 
 end
@@ -5010,7 +5701,9 @@ OptionsView.cb_voip_enabled_setup = function (self)
 		voip_enabled = default_value
 	end
 
-	self.voip:set_enabled(voip_enabled)
+	if self.voip then
+		self.voip:set_enabled(voip_enabled)
+	end
 
 	local selected_option = 1
 
@@ -5403,7 +6096,9 @@ OptionsView.cb_fov_setup = function (self)
 	local fov_multiplier = fov/base_fov
 	local camera_manager = Managers.state.camera
 
-	camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
+	if camera_manager then
+		camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
+	end
 
 	local default_value = math.clamp(DefaultUserSettings.get("render_settings", "fov"), min, max)
 
@@ -6013,18 +6708,6 @@ OptionsView.cb_player_outlines = function (self, content)
 	return 
 end
 
-local function get_key_map(keymaps, key)
-	local index = 1
-	local map = keymaps[key].input_mappings[1]
-
-	if map[1] == "gamepad" then
-		index = 2
-		map = keymaps[key].input_mappings[2]
-	end
-
-	return map, index
-end
-
 local function get_button_locale_name(controller_type, button_name)
 	local button_locale_name = nil
 
@@ -6033,90 +6716,118 @@ local function get_button_locale_name(controller_type, button_name)
 		button_locale_name = Keyboard.button_locale_name(button_index)
 	elseif controller_type == "mouse" then
 		button_locale_name = string.format("%s %s", "mouse", button_name)
+	elseif controller_type == "gamepad" then
+		local button_index = Pad1.button_index(button_name)
+		button_locale_name = Pad1.button_locale_name(button_index) ~= "" or button_name
 	end
-
-	fassert(button_locale_name, "No button_locale_name found")
 
 	return button_locale_name
 end
 
-OptionsView.cb_keybind_setup = function (self, input_service_name, keys)
-	local key_info = {}
+OptionsView.cb_keybind_setup = function (self, keymappings_key, keymappings_table_key, actions)
+	local session_keymaps = self.session_keymaps
+	local session_keybindings = session_keymaps[keymappings_key][keymappings_table_key]
+	local actions_info = {}
 
-	for i, key in ipairs(keys) do
-		local map, index = get_key_map(self.keymaps[input_service_name].keymap, key)
-		key_info[i] = {
-			key = key,
-			map = map,
-			index = index
+	for i, action in ipairs(actions) do
+		local keybind = session_keybindings[action]
+		actions_info[i] = {
+			action = action,
+			keybind = table.clone(keybind)
 		}
 	end
 
-	local mapped_key = get_button_locale_name(key_info[1].map[1], key_info[1].map[2])
-	local map, index = get_key_map(rawget(_G, self.keymaps[input_service_name].settings_name), keys[1])
+	local controller_type = actions_info[1].keybind[1]
+	local mapped_key = actions_info[1].keybind[2]
+	local button_locale_name = get_button_locale_name(controller_type, mapped_key)
+	local default_keymappings_data = rawget(_G, keymappings_key)
+	local default_keymappings = default_keymappings_data[keymappings_table_key]
+	local default_keybind = default_keymappings[actions[1]]
 	local default_value = {
-		controller = map[1],
-		key = map[2]
+		controller = default_keybind[1],
+		key = default_keybind[2]
 	}
 
-	return mapped_key, key_info, default_value
+	return button_locale_name, actions_info, default_value
 end
 OptionsView.cb_keybind_saved_value = function (self, widget)
-	local keys = widget.content.keys
-	local input_service_name = widget.content.input_service_name
-	local key_info = {}
+	local actions = widget.content.actions
 
-	for i, key in ipairs(keys) do
-		local map, index = get_key_map(self.original_keymaps[input_service_name].keymap, key)
-		key_info[i] = {
-			key = key,
-			map = map,
-			index = index
+	if not actions then
+		return 
+	end
+
+	local keymappings_key = widget.content.keymappings_key
+	local keymappings_table_key = widget.content.keymappings_table_key
+	local keymaps = self.original_keymaps
+	local keybindings = keymaps[keymappings_key][keymappings_table_key]
+	local actions_info = {}
+
+	for i, action in ipairs(actions) do
+		local keybind = keybindings[action]
+		actions_info[i] = {
+			action = action,
+			keybind = table.clone(keybind)
 		}
 	end
 
-	local controller_type = key_info[1].map[1]
-	local mapped_key = key_info[1].map[2]
+	local controller_type = actions_info[1].keybind[1]
+	local mapped_key = actions_info[1].keybind[2]
 	widget.content.selected_key = get_button_locale_name(controller_type, mapped_key)
-	widget.content.key_info = key_info
+	widget.content.actions_info = actions_info
 
 	return 
 end
-OptionsView.cleanup_duplicates = function (self, key, controller, input_service_name)
+OptionsView.cleanup_duplicates = function (self, key, device)
 	local selected_settings_list = self.selected_settings_list
 	local widgets = selected_settings_list.widgets
 	local widgets_n = selected_settings_list.widgets_n
-	local locale_key = get_button_locale_name(controller, key)
+	local button_locale_name = get_button_locale_name(device, key)
 
 	for i = 1, widgets_n, 1 do
 		local widget = widgets[i]
 		local content = widget.content
 
-		if content.selected_key == locale_key then
+		if content.selected_key == button_locale_name then
 			content.callback("delete", "keyboard", content)
 		end
 	end
 
 	return 
 end
-OptionsView.cb_keybind_changed = function (self, new_key, controller, content)
-	local key_info = content.key_info
-	local input_service_name = content.input_service_name
+OptionsView.cb_keybind_changed = function (self, new_key, device, content)
+	local actions_info = content.actions_info
 
-	if new_key == "delete" and controller == "keyboard" then
-		new_key = "left button **"
-	else
-		self.cleanup_duplicates(self, new_key, controller, input_service_name)
+	if not actions_info then
+		return 
 	end
 
-	for i, info in ipairs(key_info) do
-		local input_mappings = self.keymaps[input_service_name].keymap[info.key].input_mappings[info.index]
-		input_mappings[1] = controller
-		input_mappings[2] = new_key
+	local session_keymaps = self.session_keymaps
+	local keymappings_key = content.keymappings_key
+	local keymappings_table_key = content.keymappings_table_key
+
+	if new_key == "delete" and device == "keyboard" then
+		new_key = "left button **"
+	else
+		self.cleanup_duplicates(self, new_key, device)
+	end
+
+	local input_manager = Managers.input
+
+	for i, info in ipairs(actions_info) do
+		local keybind = info.keybind
+		local action = info.action
+		keybind[1] = device
+		keybind[2] = new_key
+		keybind.changed = true
+		local session_keybind = session_keymaps[keymappings_key][keymappings_table_key][action]
+		session_keybind[1] = device
+		session_keybind[2] = new_key
+		session_keybind.changed = true
 	end
 
 	self.changed_keymaps = true
-	content.selected_key = get_button_locale_name(controller, new_key)
+	content.selected_key = get_button_locale_name(device, new_key)
 
 	return 
 end

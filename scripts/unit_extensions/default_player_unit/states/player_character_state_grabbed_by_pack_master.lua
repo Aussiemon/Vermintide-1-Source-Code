@@ -18,15 +18,19 @@ PlayerCharacterStateGrabbedByPackMaster.init = function (self, character_state_i
 	return 
 end
 PlayerCharacterStateGrabbedByPackMaster.on_enter = function (self, unit, input, dt, context, t, previous_state, params)
-	CharacterStateHelper.stop_weapon_actions(self.inventory_extension, "grabbed")
-	self.inventory_extension:check_and_drop_pickups("grabbed_by_pack_master")
+	local inventory_extension = self.inventory_extension
+
+	CharacterStateHelper.stop_weapon_actions(inventory_extension, "grabbed")
+	inventory_extension.check_and_drop_pickups(inventory_extension, "grabbed_by_pack_master")
 	CharacterStateHelper.change_camera_state(self.player, "follow_third_person")
-	self.first_person_extension:set_first_person_mode(false)
-	self.inventory_extension:wield("slot_packmaster_claw")
-	self.locomotion_extension:enable_script_driven_no_mover_movement()
+
+	local first_person_extension = self.first_person_extension
+
+	first_person_extension.set_first_person_mode(first_person_extension, false)
 	self.locomotion_extension:enable_rotation_towards_velocity(false)
 
-	local packmaster_unit = self.status_extension:get_pack_master_grabber()
+	local status_extension = self.status_extension
+	local packmaster_unit = status_extension.get_pack_master_grabber(status_extension)
 	local packmaster_unit_position = position_lookup[packmaster_unit]
 	local position = position_lookup[unit]
 	local num_initial_crumbs = self.bread_crumb_trail_n/2
@@ -41,12 +45,12 @@ PlayerCharacterStateGrabbedByPackMaster.on_enter = function (self, unit, input, 
 
 	if self.ai_extension == nil then
 		local wwise_world = Managers.world:wwise_world(self.world)
-		slot13, slot14 = WwiseWorld.trigger_event(wwise_world, "start_strangled_state", self.first_person_extension:get_first_person_unit())
+		slot16, slot17 = WwiseWorld.trigger_event(wwise_world, "start_strangled_state", first_person_extension.get_first_person_unit(first_person_extension))
 	end
 
 	self.last_valid_position:store(position)
 
-	self.pack_master_status = CharacterStateHelper.pack_master_status(self.status_extension)
+	self.pack_master_status = CharacterStateHelper.pack_master_status(status_extension)
 	local states = PlayerCharacterStateGrabbedByPackMaster.states
 
 	if states[self.pack_master_status].enter then
@@ -56,22 +60,28 @@ PlayerCharacterStateGrabbedByPackMaster.on_enter = function (self, unit, input, 
 	return 
 end
 PlayerCharacterStateGrabbedByPackMaster.on_exit = function (self, unit, input, dt, context, t, next_state)
+	local first_person_extension = self.first_person_extension
 	local status_extension = self.status_extension
 
 	if not status_extension.is_knocked_down(status_extension) and not status_extension.is_dead(status_extension) then
 		CharacterStateHelper.change_camera_state(self.player, "follow")
-		self.first_person_extension:toggle_visibility(CameraTransitionSettings.perspective_transition_time)
-		self.locomotion_extension:enable_script_driven_movement()
-		self.locomotion_extension:enable_rotation_towards_velocity(true)
+		first_person_extension.toggle_visibility(first_person_extension, CameraTransitionSettings.perspective_transition_time)
+
+		local locomotion_extension = self.locomotion_extension
+
+		locomotion_extension.enable_script_driven_movement(locomotion_extension)
+		locomotion_extension.enable_rotation_towards_velocity(locomotion_extension, true)
 	end
 
-	if self.inventory_extension:get_wielded_slot_name() == "slot_packmaster_claw" and Managers.state.network:game() then
-		self.inventory_extension:wield_previous()
+	local inventory_extension = self.inventory_extension
+
+	if inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_packmaster_claw" and Managers.state.network:game() then
+		inventory_extension.wield_previous_weapon(inventory_extension)
 	end
 
 	if self.ai_extension == nil then
 		local wwise_world = Managers.world:wwise_world(self.world)
-		slot9, slot10 = WwiseWorld.trigger_event(wwise_world, "stop_strangled_state", self.first_person_extension:get_first_person_unit())
+		slot11, slot12 = WwiseWorld.trigger_event(wwise_world, "stop_strangled_state", first_person_extension.get_first_person_unit(first_person_extension))
 	end
 
 	return 
@@ -105,6 +115,21 @@ end
 
 PlayerCharacterStateGrabbedByPackMaster.states = {
 	pack_master_pulling = {
+		enter = function (parent, unit)
+			parent.locomotion_extension:enable_animation_driven_movement()
+
+			local inventory_extension = parent.inventory_extension
+
+			if inventory_extension.get_wielded_slot_name(inventory_extension) ~= "slot_packmaster_claw" then
+				inventory_extension.wield(inventory_extension, "slot_packmaster_claw", true)
+			else
+				CharacterStateHelper.show_inventory_3p(unit, true, true, Managers.player.is_server)
+			end
+
+			Managers.state.network:anim_event(unit, "packmaster_hooked")
+
+			return 
+		end,
 		run = function (parent, unit)
 			parent.last_valid_position:store(position_lookup[unit])
 
@@ -113,6 +138,16 @@ PlayerCharacterStateGrabbedByPackMaster.states = {
 	},
 	pack_master_dragging = {
 		enter = function (parent, unit)
+			parent.locomotion_extension:enable_script_driven_no_mover_movement()
+
+			local inventory_extension = parent.inventory_extension
+
+			if inventory_extension.get_wielded_slot_name(inventory_extension) ~= "slot_packmaster_claw" then
+				inventory_extension.wield(inventory_extension, "slot_packmaster_claw", true)
+			else
+				CharacterStateHelper.show_inventory_3p(unit, true, true, Managers.player.is_server)
+			end
+
 			CharacterStateHelper.play_animation_event_first_person(parent.first_person_extension, "move_bwd")
 
 			return 
@@ -206,13 +241,13 @@ PlayerCharacterStateGrabbedByPackMaster.states = {
 				csm.change_state(csm, "dead")
 			elseif CharacterStateHelper.is_knocked_down(status_extension) then
 				if parent.inventory_extension:get_wielded_slot_name() == "slot_packmaster_claw" then
-					parent.inventory_extension:wield_previous()
+					parent.inventory_extension:wield_previous_weapon()
 				end
 
 				csm.change_state(csm, "knocked_down", parent.temp_params)
 			else
 				if parent.inventory_extension:get_wielded_slot_name() == "slot_packmaster_claw" then
-					parent.inventory_extension:wield_previous()
+					parent.inventory_extension:wield_previous_weapon()
 				end
 
 				csm.change_state(csm, "standing")
@@ -231,7 +266,7 @@ PlayerCharacterStateGrabbedByPackMaster.update = function (self, unit, input, dt
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local pack_master_status = CharacterStateHelper.pack_master_status(self.status_extension)
 
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 
 	local states = PlayerCharacterStateGrabbedByPackMaster.states
 	local last_state = self.pack_master_status

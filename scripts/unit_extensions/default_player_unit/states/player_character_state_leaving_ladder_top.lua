@@ -103,7 +103,7 @@ PlayerCharacterStateLeavingLadderTop.update = function (self, unit, input, dt, c
 
 	local max_radians = math.degrees_to_radians(movement_settings_table.ladder.look_horizontal_max_degrees)
 
-	CharacterStateHelper.look_limited_rotation_freedom(input_extension, self.player.viewport_name, self.first_person_extension, self.ladder_unit, unit, max_radians, nil, status_extension)
+	CharacterStateHelper.look_limited_rotation_freedom(input_extension, self.player.viewport_name, self.first_person_extension, self.ladder_unit, unit, max_radians, nil, status_extension, self.inventory_extension)
 
 	return 
 end

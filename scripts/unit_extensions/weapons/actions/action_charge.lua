@@ -7,6 +7,7 @@ ActionCharge.init = function (self, world, item_name, is_server, owner_unit, dam
 	self.weapon_system = weapon_system
 	self.item_name = item_name
 	self.wwise_world = Managers.world:wwise_world(world)
+	self._rumble_effect_id = nil
 
 	if ScriptUnit.has_extension(owner_unit, "inventory_system") then
 		local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
@@ -91,6 +92,14 @@ ActionCharge.client_owner_start_action = function (self, new_action, t)
 		end
 	end
 
+	local loaded_projectile_settings = new_action.loaded_projectile_settings
+
+	if loaded_projectile_settings then
+		local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
+
+		inventory_extension.set_loaded_projectile_override(inventory_extension, loaded_projectile_settings)
+	end
+
 	return 
 end
 ActionCharge.client_owner_post_update = function (self, dt, t, world, can_damage)
@@ -164,6 +173,12 @@ ActionCharge.client_owner_post_update = function (self, dt, t, world, can_damage
 		end
 	end
 
+	if 1 <= charge_level and not Managers.player:owner(self.owner_unit).bot_player and not self._rumble_effect_id then
+		self._rumble_effect_id = Managers.state.controller_features:add_effect("persistent_rumble", {
+			rumble_effect = "reload_start"
+		})
+	end
+
 	self.charge_level = charge_level
 
 	return 
@@ -196,6 +211,12 @@ ActionCharge.finish = function (self, reason)
 		Unit.flow_event(first_person_unit, "lua_charge_cancel")
 	end
 
+	if self._rumble_effect_id then
+		Managers.state.controller_features:stop_effect(self._rumble_effect_id)
+
+		self._rumble_effect_id = nil
+	end
+
 	local charging_sound_id = self.charging_sound_id
 
 	if charging_sound_id then
@@ -214,6 +235,10 @@ ActionCharge.finish = function (self, reason)
 
 		status_extension.set_zooming(status_extension, false)
 	end
+
+	local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
+
+	inventory_extension.set_loaded_projectile_override(inventory_extension, nil)
 
 	local charge_sound_husk_stop_event = current_action.charge_sound_husk_stop_event
 
@@ -245,6 +270,12 @@ ActionCharge.destroy = function (self)
 
 		self.wwise_source_id = nil
 		self.charging_sound_id = nil
+	end
+
+	if self._rumble_effect_id then
+		Managers.state.controller_features:stop_effect(self._rumble_effect_id)
+
+		self._rumble_effect_id = nil
 	end
 
 	return 

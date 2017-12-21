@@ -24,6 +24,7 @@ MatchmakingStateStartGame.init = function (self, params)
 	self.level_transition_handler = params.level_transition_handler
 	self.handshaker_host = params.handshaker_host
 	self.network_server = params.network_server
+	self.statistics_db = params.statistics_db
 
 	return 
 end
@@ -80,14 +81,15 @@ MatchmakingStateStartGame.update_start_game_timer = function (self, dt)
 	return 
 end
 MatchmakingStateStartGame.start_game = function (self)
+	local lobby_members = self.lobby:members()
+	local members = lobby_members.get_members(lobby_members)
+
 	if GameSettingsDevelopment.use_telemetry then
 		local player_manager = Managers.player
 		local player = player_manager.local_player(player_manager, 1)
-		local lobby_members = self.lobby:members()
-		local members_joined = lobby_members.get_members_joined(lobby_members)
 		local nr_friends = 0
 
-		for _, peer_id in pairs(members_joined) do
+		for _, peer_id in pairs(members) do
 			if rawget(_G, "Steam") and rawget(_G, "Friends") then
 				local is_friend = Friends.in_category(peer_id, Friends.FRIEND_FLAG)
 
@@ -98,6 +100,25 @@ MatchmakingStateStartGame.start_game = function (self)
 		end
 
 		_add_matchmaking_starting_game_telemetry(player, nr_friends)
+	end
+
+	if Application.platform() == "ps4" then
+		local statistics_db = self.statistics_db
+		local state_context = self.state_context
+		local game_search_data = state_context.game_search_data
+		local started_matchmaking_t = game_search_data.started_matchmaking_t
+		local time_manager = Managers.time
+		local t = time_manager.time(time_manager, "game") or started_matchmaking_t
+		local time_taken = t - started_matchmaking_t
+		local nr_members = table.size(members)
+
+		StatisticsUtil.register_matchmaking_game_started(statistics_db)
+		StatisticsUtil.register_matchmaking_game_started_total_time(statistics_db, time_taken)
+		StatisticsUtil.register_matchmaking_game_started_player_amount(statistics_db, nr_members)
+
+		if nr_members == 4 then
+			StatisticsUtil.register_matchmaking_game_started_full_team(statistics_db)
+		end
 	end
 
 	self.handshaker_host:send_rpc_to_clients("rpc_matchmaking_join_game")

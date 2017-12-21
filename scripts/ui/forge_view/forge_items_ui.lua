@@ -22,6 +22,9 @@ ForgeItemsUI.init = function (self, parent, position, animation_definitions, ing
 	self.widget_definitions = definitions.widget_definitions
 	self.scenegraph_definition = definitions.scenegraph_definition
 	self.scenegraph_definition.page_root.position = position
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
@@ -66,7 +69,21 @@ ForgeItemsUI.set_gamepad_press_input_enabled = function (self, enabled)
 	return 
 end
 ForgeItemsUI.set_gamepad_focus = function (self, enabled)
+	if self.use_gamepad and not enabled then
+		self.inventory_item_list:on_focus_lost()
+	end
+
 	self.use_gamepad = enabled
+
+	return 
+end
+ForgeItemsUI.on_focus_lost = function (self)
+	self.inventory_item_list:on_focus_lost()
+
+	return 
+end
+ForgeItemsUI.disable_input = function (self, disable)
+	self.inventory_item_list:disable_input(disable)
 
 	return 
 end
@@ -191,11 +208,6 @@ ForgeItemsUI.current_profile_name = function (self)
 end
 ForgeItemsUI.set_selected_hero = function (self, hero)
 	self.inventory_item_list:set_selected_profile_name(hero)
-
-	local item_filter = self.item_filter
-
-	self.inventory_item_list:populate_inventory_list(nil, nil, item_filter)
-	self.on_inventory_item_selected(self, 1)
 
 	self.character_changed = nil
 
@@ -347,20 +359,23 @@ ForgeItemsUI.set_drag_enabled = function (self, enabled)
 end
 ForgeItemsUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
+	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
 	local input_service = input_manager.get_service(input_manager, "forge_view")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	for _, widget in ipairs(self.background_widgets) do
 		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
-	UIRenderer.draw_widget(ui_renderer, self.inventory_selection_bar_widget)
 	UIRenderer.end_pass(ui_renderer)
-	self.inventory_item_list:draw(dt)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.draw_widget(ui_top_renderer, self.inventory_selection_bar_widget)
+	UIRenderer.end_pass(ui_top_renderer)
+	self.inventory_item_list:draw(dt, self.use_gamepad)
 
 	return 
 end

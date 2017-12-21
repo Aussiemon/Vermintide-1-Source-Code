@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.3,
+			aim_assist_ramp_multiplier = 0.1,
 			anim_event = "attack_swing_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -57,8 +60,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.3,
+			aim_assist_ramp_multiplier = 0.1,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -111,8 +117,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.3,
+			aim_assist_ramp_multiplier = 0.1,
 			anim_event = "attack_swing_charge_right",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -331,7 +340,7 @@ weapon_template.actions = {
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "fire_hit_armour",
-			max_targets = 2,
+			max_targets = 3,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.52,
 			impact_sound_event = "fire_hit",
@@ -397,7 +406,7 @@ weapon_template.actions = {
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "fire_hit_armour",
-			max_targets = 2,
+			max_targets = 3,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.5,
 			impact_sound_event = "fire_hit",
@@ -512,7 +521,7 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_linesman_L_1",
+				attack_template_damage_type = "one_h_smiter_L",
 				attack_template = "burning_stab_fencer"
 			},
 			targets = {}
@@ -554,6 +563,13 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
+					start_time = 0.4,
+					action = "action_one",
+					release_required = "action_two_hold",
+					input = "action_one_hold"
+				},
+				{
+					sub_action = "default",
 					start_time = 0.5,
 					action = "action_two",
 					send_buffer = true,
@@ -592,7 +608,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.5,
+					external_multiplier = 0.8,
 					buff_name = "planted_decrease_movement"
 				}
 			},
@@ -629,6 +645,9 @@ weapon_template.display_unit = "units/weapons/weapon_display/display_1h_weapon"
 weapon_template.wield_anim = "to_1h_sword"
 weapon_template.buff_type = BuffTypes.MELEE
 weapon_template.max_fatigue_points = 6
+weapon_template.dodge_distance = 1.2
+weapon_template.dodge_speed = 1.2
+weapon_template.dodge_count = 3
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,
@@ -637,6 +656,17 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = true,
 		arc = 1
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0.025,
+	effective_max_range = 3,
+	breed_scalars = {
+		skaven_storm_vermin = 0.25,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
 	}
 }
 weapon_template.compare_statistics = {
@@ -655,7 +685,9 @@ weapon_template.compare_statistics = {
 		}
 	},
 	perks = {
-		light_attack = {},
+		light_attack = {
+			"head_shot"
+		},
 		heavy_attack = {
 			"armor_penetration",
 			"burn"
@@ -679,7 +711,7 @@ Weapons.flaming_sword_template_1_t2.actions.action_one.light_attack_left.default
 Weapons.flaming_sword_template_1_t2.actions.action_one.light_attack_left.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t2"
 Weapons.flaming_sword_template_1_t2.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "one_h_linesman_L_t2"
 Weapons.flaming_sword_template_1_t2.actions.action_one.light_attack_right.targets[1].attack_template_damage_type = "one_h_linesman_L_t2"
-Weapons.flaming_sword_template_1_t2.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_linesman_L_1_t2"
+Weapons.flaming_sword_template_1_t2.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
 Weapons.flaming_sword_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.375
 Weapons.flaming_sword_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.5
 Weapons.flaming_sword_template_1_t3 = table.clone(weapon_template)
@@ -691,7 +723,7 @@ Weapons.flaming_sword_template_1_t3.actions.action_one.light_attack_left.default
 Weapons.flaming_sword_template_1_t3.actions.action_one.light_attack_left.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t3"
 Weapons.flaming_sword_template_1_t3.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "one_h_linesman_L_t3"
 Weapons.flaming_sword_template_1_t3.actions.action_one.light_attack_right.targets[1].attack_template_damage_type = "one_h_linesman_L_t3"
-Weapons.flaming_sword_template_1_t3.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_linesman_L_1_t2"
+Weapons.flaming_sword_template_1_t3.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
 Weapons.flaming_sword_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.4583333333333333
 Weapons.flaming_sword_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.5625
 Weapons.flaming_sword_template_1_t3_un = table.clone(Weapons.flaming_sword_template_1_t3)

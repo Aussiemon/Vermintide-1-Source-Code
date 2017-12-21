@@ -28,7 +28,7 @@ require("scripts/utils/pool_table_visualizer")
 require("scripts/utils/visual_assert_log")
 require("scripts/helpers/graph_helper")
 require("scripts/network/network_event_delegate")
-require("scripts/managers/input/input_manager2")
+require("scripts/managers/input/input_manager")
 require("scripts/utils/debug_keymap")
 require("scripts/utils/vault")
 require("scripts/settings/render_settings_templates")
@@ -75,7 +75,7 @@ StateIngame.on_enter = function (self)
 	CLEAR_POSITION_LOOKUP()
 	Profiler.start("input")
 
-	local input_manager = InputManager2:new()
+	local input_manager = InputManager:new()
 	self.input_manager = input_manager
 	Managers.input = self.input_manager
 
@@ -84,11 +84,11 @@ StateIngame.on_enter = function (self)
 	input_manager.initialize_device(input_manager, "gamepad")
 
 	if script_data.debug_enabled then
-		input_manager.create_input_service(input_manager, "Debug", DebugKeymap)
+		input_manager.create_input_service(input_manager, "Debug", "DebugKeymap", "DebugInputFilters")
 		input_manager.map_device_to_service(input_manager, "Debug", "keyboard")
 		input_manager.map_device_to_service(input_manager, "Debug", "mouse")
 		input_manager.map_device_to_service(input_manager, "Debug", "gamepad")
-		input_manager.create_input_service(input_manager, "DebugMenu", DebugKeymap)
+		input_manager.create_input_service(input_manager, "DebugMenu", "DebugKeymap", "DebugInputFilters")
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "keyboard")
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "mouse")
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "gamepad")
@@ -103,13 +103,14 @@ StateIngame.on_enter = function (self)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("input")
 	Managers.popup:set_input_manager(input_manager)
 
 	self.level_transition_handler = loading_context.level_transition_handler
 	local level_key = self.level_transition_handler:get_current_level_keys()
 	self.level_key = level_key
 	self.is_in_inn = level_key == "inn_level"
+	self.is_in_tutorial = level_key == "tutorial"
 
 	Managers.light_fx:set_lightfx_color_scheme((self.is_in_inn and "inn_level") or "ingame")
 
@@ -156,6 +157,7 @@ StateIngame.on_enter = function (self)
 
 		self.profile_synchronizer = self.network_server.profile_synchronizer
 
+		self.network_server.voip:set_input_manager(self.input_manager)
 		print("[StateIngame] Server ingame")
 	elseif self.network_client then
 		print("[StateIngame] Client ingame")
@@ -165,6 +167,8 @@ StateIngame.on_enter = function (self)
 		self.network_client:register_rpcs(network_event_delegate, self.network_transmit)
 
 		self.profile_synchronizer = self.network_client.profile_synchronizer
+
+		self.network_client.voip:set_input_manager(self.input_manager)
 	end
 
 	self.network_transmit:set_network_event_delegate(network_event_delegate)
@@ -173,7 +177,7 @@ StateIngame.on_enter = function (self)
 
 	loading_context.network_transmit = self.network_transmit
 
-	Profiler.stop()
+	Profiler.stop("network_stuff")
 	Profiler.start("debug_stuff")
 	Debug.setup(world, self.world_name)
 
@@ -189,7 +193,7 @@ StateIngame.on_enter = function (self)
 		DebugKeyHandler.set_enabled(false)
 	end
 
-	Profiler.stop()
+	Profiler.stop("debug_stuff")
 
 	local difficulty = nil
 
@@ -231,6 +235,10 @@ StateIngame.on_enter = function (self)
 	self.level_transition_handler:register_rpcs(network_event_delegate)
 
 	Managers.state.quest = QuestManager:new(self.statistics_db, level_key)
+
+	if rawget(_G, "ControllerFeaturesManager") then
+		Managers.state.controller_features = ControllerFeaturesManager:new(self.is_in_inn)
+	end
 
 	if GameSettingsDevelopment.use_telemetry then
 		local level_name = LevelSettings[level_key].level_name
@@ -280,7 +288,7 @@ StateIngame.on_enter = function (self)
 		ScriptUnit.optimize(unit)
 	end
 
-	Profiler.stop()
+	Profiler.stop("Optimizing Level Units")
 	InputDebugger:setup(world, self.input_manager)
 	Profiler.start("sub_states")
 
@@ -298,6 +306,7 @@ StateIngame.on_enter = function (self)
 			local_player_id = i,
 			viewport_name = viewport_name,
 			is_in_inn = self.is_in_inn,
+			is_in_tutorial = self.is_in_tutorial,
 			is_server = is_server,
 			network_options = network_options,
 			input_manager = self.input_manager,
@@ -322,7 +331,7 @@ StateIngame.on_enter = function (self)
 		self.machines[i] = StateMachine:new(self, StateInGameRunning, params, true)
 	end
 
-	Profiler.stop()
+	Profiler.stop("sub_states")
 
 	if checkpoint_data then
 		Managers.state.entity:system("mission_system"):load_checkpoint_data(checkpoint_data.mission)
@@ -359,19 +368,9 @@ StateIngame.on_enter = function (self)
 		Level.trigger_level_loaded(level)
 	end
 
-	Profiler.stop()
+	Profiler.stop("level_stuff")
 
 	local platform = Application.platform()
-
-	if platform == "ps4" then
-		if self.is_in_inn then
-			Managers.account:set_presence("inn")
-		else
-			local level_display_name = LevelSettings[self.level_key].display_name
-
-			Managers.account:set_presence("playing", level_display_name)
-		end
-	end
 
 	if platform == "win32" then
 		Window.set_mouse_focus(true)
@@ -391,11 +390,15 @@ StateIngame.on_enter = function (self)
 		volume_system.ai_ready(volume_system)
 	end
 
+	Profiler.start("populate pickups")
+
 	if self.is_server and checkpoint_data then
 		Managers.state.entity:system("pickup_system"):populate_pickups(checkpoint_data.pickup)
 	elseif self.is_server then
 		Managers.state.entity:system("pickup_system"):populate_pickups()
 	end
+
+	Profiler.stop("populate pickups")
 
 	local dynamic_range_sound = Application.user_setting("dynamic_range_sound")
 
@@ -487,6 +490,23 @@ StateIngame.on_enter = function (self)
 		self._add_system_info_telemetry(self, system_info, adapter_index, telemetry_id)
 	end
 
+	if Application.platform() == "xb1" then
+		Managers.account:set_presence("playing")
+	elseif platform == "ps4" then
+		if self.is_in_inn then
+			Managers.account:set_presence("inn")
+			Managers.account:set_realtime_multiplay_state("inn", true)
+		else
+			if self.is_in_tutorial then
+				Managers.account:set_realtime_multiplay_state("tutorial", true)
+			end
+
+			local level_display_name = LevelSettings[self.level_key].display_name
+
+			Managers.account:set_presence("playing", level_display_name)
+		end
+	end
+
 	return 
 end
 StateIngame.event_xbox_one_hack_start_game = function (self, level_key, difficulty)
@@ -538,7 +558,7 @@ StateIngame.physics_async_update = function (self, dt)
 
 	Profiler.start("Music manager")
 	Managers.music:update(self.dt, t)
-	Profiler.stop()
+	Profiler.stop("Music manager")
 
 	if not network_manager.has_left_game(network_manager) then
 		if game_mode_ended and self.game_mode_end_timer and self.game_mode_end_timer <= t then
@@ -641,7 +661,7 @@ StateIngame._create_level = function (self)
 	Managers.state.entity:add_and_register_units(self.world, World.units(self.world))
 	game_mode_manager.register_object_sets(game_mode_manager, object_sets)
 	Level.spawn_background(level)
-	Profiler.stop()
+	Profiler.stop("create_level")
 
 	return level
 end
@@ -663,10 +683,10 @@ StateIngame.pre_update = function (self, dt)
 		self.network_client:update(dt)
 	end
 
-	Profiler.stop()
+	Profiler.stop("Network Client/Server update")
 	Profiler.start("spawn")
 	Managers.state.spawn:update(dt, t)
-	Profiler.stop()
+	Profiler.stop("spawn")
 	self.entity_system:commit_and_remove_pending_units()
 
 	local game_mode_ended = Managers.state.game_mode:is_game_mode_ended()
@@ -708,25 +728,25 @@ StateIngame.update = function (self, dt, main_t)
 	Managers.state.network:update(dt)
 	Profiler.start("BackendManager update")
 	Managers.backend:update(dt)
-	Profiler.stop()
+	Profiler.stop("backend")
 	Profiler.start("input_manager")
 	self.input_manager:update(dt, main_t)
-	Profiler.stop()
+	Profiler.stop("input_manager")
 	Profiler.start("free flight")
 
 	local debug_input_service = self.input_manager:get_service("DebugMenu")
 
 	self.free_flight_manager:update(dt)
-	Profiler.stop()
+	Profiler.stop("free flight")
 	Profiler.start("level_transition_handler")
 	self.level_transition_handler:update()
-	Profiler.stop()
+	Profiler.stop("level_transition_handler")
 
 	local t = Managers.time:time("game")
 
 	Profiler.start("Ducking handler")
 	self._ducking_handler:update(dt)
-	Profiler.stop()
+	Profiler.stop("Ducking handler")
 	Profiler.start("Lobby Update")
 
 	if self._lobby_host then
@@ -737,24 +757,28 @@ StateIngame.update = function (self, dt, main_t)
 		self._lobby_client:update(dt)
 	end
 
-	Profiler.stop()
+	Profiler.stop("Lobby Update")
 	Profiler.start("voting")
 	Managers.state.voting:update(dt, t)
-	Profiler.stop()
+	Profiler.stop("voting")
 	Profiler.start("matchmaking")
 	Managers.matchmaking:update(dt, main_t)
-	Profiler.stop()
+	Profiler.stop("matchmaking")
 	Profiler.start("achievement")
 	Managers.state.achievement:update(dt, t)
-	Profiler.stop()
+	Profiler.stop("achievement")
 
 	if GameSettingsDevelopment.backend_settings.quests_enabled then
 		Profiler.start("quest")
 		Managers.state.quest:update(self.statistics_db, dt, t)
-		Profiler.stop()
+		Profiler.stop("quest")
 	end
 
 	Managers.state.blood:update(dt, t)
+
+	if Managers.state.controller_features then
+		Managers.state.controller_features:update(dt, t)
+	end
 
 	if is_server then
 		Managers.state.conflict:reset_data()
@@ -809,27 +833,44 @@ StateIngame.update = function (self, dt, main_t)
 	end
 
 	if is_server then
+		if script_data.debug_enabled and not self.is_in_inn then
+			local ai_system = Managers.state.entity:system("ai_system")
+			local ai_debugger = ai_system.ai_debugger
+
+			ai_debugger.update(ai_debugger, t, dt)
+		end
+
 		Profiler.start("Game Mode Server")
 		Managers.state.game_mode:server_update(dt, t)
-		Profiler.stop()
+		Profiler.stop("Game Mode Server")
 	end
 
-	local new_state = self._check_exit(self, t)
+	if not self._new_state then
+		self._new_state = self._check_exit(self, t)
+	end
 
-	if new_state then
+	if self.exit_type then
+		for _, machine in pairs(self.machines) do
+			machine._state:disable_ui()
+		end
+	end
+
+	if self._new_state then
 		if self.parent.loading_context.restart_network then
 			self.leave_lobby = true
 		end
 
-		return new_state
+		if not Managers.popup:has_popup() then
+			return self._new_state
+		end
 	end
 
 	Managers.state.bot_nav_transition:update(dt, t)
+	Managers.state.performance:update(dt, t)
 
 	if script_data.debug_enabled then
 		Profiler.start("DebugUpdate")
 		Managers.state.debug:update(dt, t)
-		Managers.state.performance:update(dt, t)
 		Debug.update(t, dt)
 		VisualAssertLog.update(dt)
 		DebugScreen.update(dt, t, debug_input_service, self.input_manager)
@@ -837,7 +878,7 @@ StateIngame.update = function (self, dt, main_t)
 		DebugKeyHandler.frame_clear()
 		FunctionCallProfiler.render()
 		PoolTableVisualizer.render(t)
-		Profiler.stop()
+		Profiler.stop("DebugUpdate")
 	end
 
 	VALIDATE_POSITION_LOOKUP()
@@ -879,12 +920,14 @@ end
 StateIngame._check_exit = function (self, t)
 	local network_manager = Managers.state.network
 	local lobby = self._lobby_host or self._lobby_client
+	local platform = Application.platform()
 	local backend_manager = Managers.backend
-	local waiting_user_input = backend_manager.is_waiting_for_user_input(backend_manager) or ScriptBackendItem.get_rerolling_trait_state()
-	local waiting_for_item_poll = ScriptBackendItem.num_current_item_server_requests() ~= 0 or UISettings.waiting_for_response
+	local waiting_user_input = backend_manager.is_waiting_for_user_input(backend_manager)
+	local rerolling = ScriptBackendItem.get_rerolling_trait_state() and not backend_manager.is_disconnected(backend_manager)
+	local waiting_for_item_poll = (ScriptBackendItem.num_current_item_server_requests() ~= 0 or UISettings.waiting_for_response) and not backend_manager.is_disconnected(backend_manager)
 	local connected_to_network = self.connected_to_network(self, t)
 
-	if not self.exit_type and not waiting_user_input and not waiting_for_item_poll then
+	if not self.exit_type and not waiting_user_input and not waiting_for_item_poll and not rerolling then
 		local transition, join_lobby_data = nil
 
 		for _, machine in pairs(self.machines) do
@@ -895,6 +938,8 @@ StateIngame._check_exit = function (self, t)
 			transition = "restart_game"
 
 			Development.set_parameter("auto_join", true)
+		elseif Application.platform() == "xb1" and Managers.account:leaving_game() then
+			transition = "return_to_title_screen"
 		end
 
 		local level_transition_type = self.level_transition_handler.transition_type
@@ -907,8 +952,13 @@ StateIngame._check_exit = function (self, t)
 
 				network_manager.leave_game(network_manager, force_diconnect)
 			end
-		elseif Application.platform() == "xb1" and Managers.account:leaving_game() then
-			self.exit_type = "profile_disconnected"
+
+			self.leave_lobby = true
+
+			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
+		elseif transition == "return_to_title_screen" then
+			self.exit_type = "return_to_title_screen"
 
 			if network_manager.in_game_session(network_manager) then
 				local force_diconnect = true
@@ -916,10 +966,17 @@ StateIngame._check_exit = function (self, t)
 				network_manager.leave_game(network_manager, force_diconnect)
 			end
 
+			self.leave_lobby = true
+
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif self.network_client and self.network_client.state == "denied_enter_game" then
-			if self.network_client.host_to_migrate_to == nil then
+			if self.network_client.host_to_migrate_to == nil or platform == "xb1" then
 				self.exit_type = "join_lobby_failed"
+
+				if self.network_client.host_to_migrate_to ~= nil and platform == "xb1" then
+					Application.error("[StateIngame] XBOXONE doesn't support host migration yet")
+				end
 			else
 				self.exit_type = "perform_host_migration"
 			end
@@ -931,9 +988,14 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif (lobby and lobby.state == LobbyState.FAILED) or (self.network_client and self.network_client.state == "lost_connection_to_host") then
-			if self.network_client == nil or self.network_client.host_to_migrate_to == nil then
+			if self.network_client == nil or self.network_client.host_to_migrate_to == nil or platform == "xb1" then
 				self.exit_type = "lobby_state_failed"
+
+				if self.network_client ~= nil and self.network_client.host_to_migrate_to ~= nil and platform == "xb1" then
+					Application.error("[StateIngame] XBOXONE doesn't support host migration yet")
+				end
 			else
 				self.exit_type = "perform_host_migration"
 			end
@@ -945,6 +1007,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif not connected_to_network then
 			self.exit_type = "lobby_state_failed"
 
@@ -955,6 +1018,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif self.kicked_by_server then
 			self.kicked_by_server = nil
 			self.exit_type = "kicked_by_server"
@@ -972,6 +1036,20 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
+		elseif transition == "finish_tutorial" then
+			self.exit_type = "finished_tutorial"
+
+			self.network_server:disconnect_all_peers("host_left_game")
+
+			if network_manager.in_game_session(network_manager) then
+				local force_diconnect = true
+
+				network_manager.leave_game(network_manager, force_diconnect)
+			end
+
+			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
+			Managers.transition:show_loading_icon()
 		elseif level_transition_type == "reload_level" then
 			self.exit_type = "reload_level"
 
@@ -981,6 +1059,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif level_transition_type then
 			self.exit_type = "load_next_level"
 
@@ -997,6 +1076,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif transition == "leave_game" then
 			self.exit_type = "left_game"
 
@@ -1017,6 +1097,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
+			Managers.transition:show_loading_icon()
 		elseif transition == "afk_kick" then
 			self.exit_type = "afk_kick"
 
@@ -1027,6 +1108,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
+			Managers.transition:show_loading_icon()
 		elseif transition == "join_lobby" then
 			self.exit_type = "join_game"
 
@@ -1037,6 +1119,7 @@ StateIngame._check_exit = function (self, t)
 			self.parent.loading_context.join_lobby_data = join_lobby_data
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
+			Managers.transition:show_loading_icon()
 		elseif transition == "start_lobby" then
 			self.exit_type = "join_game"
 
@@ -1047,6 +1130,7 @@ StateIngame._check_exit = function (self, t)
 			self.parent.loading_context.start_lobby_data = join_lobby_data
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
+			Managers.transition:show_loading_icon()
 		elseif transition == "restart_game" then
 			self.exit_type = "restart_game"
 
@@ -1055,6 +1139,7 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
+			Managers.transition:show_loading_icon()
 		end
 
 		if self.exit_type then
@@ -1069,6 +1154,10 @@ StateIngame._check_exit = function (self, t)
 			input_manager.block_device_except_service(input_manager, nil, "gamepad", 1)
 			Managers.popup:cancel_all_popups()
 			self.level_transition_handler:set_transition_exit_type(self.exit_type)
+
+			if platform == "xb1" then
+				self.machines[1]:state():trigger_xbox_multiplayer_round_end_events()
+			end
 		end
 	end
 
@@ -1076,113 +1165,109 @@ StateIngame._check_exit = function (self, t)
 
 	if self.exit_time and self.exit_time <= t then
 		local exit_type = self.exit_type
+		local has_left = network_manager.has_left_game(network_manager)
+		local game_session_is_closed = has_left or not network_manager.in_game_session(network_manager)
+
+		if not game_session_is_closed and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
+			print("Session leave timeout reached, force disconnecting")
+			network_manager.force_disconnect_from_session(network_manager)
+
+			return 
+		elseif not game_session_is_closed then
+			return 
+		end
 
 		if exit_type == "join_lobby_failed" or exit_type == "left_game" or exit_type == "lobby_state_failed" or exit_type == "kicked_by_server" or exit_type == "afk_kick" then
-			local game = network_manager.game(network_manager)
+			printf("[StateIngame] Transition to StateLoadingRestartNetwork on %q", self.exit_type)
+			self.level_transition_handler:set_next_level(self.level_transition_handler:default_level_key())
 
-			if game and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif not game then
-				printf("[StateIngame] Transition to StateLoadingRestartNetwork on %q", self.exit_type)
-				self.level_transition_handler:set_next_level(self.level_transition_handler:default_level_key())
-
-				if exit_type == "lobby_state_failed" and not self.is_server then
-					self.parent.loading_context.previous_session_error = "lobby_disconnected"
-				elseif exit_type == "kicked_by_server" then
-					self.parent.loading_context.previous_session_error = "kicked_by_server"
-				elseif exit_type == "join_lobby_failed" and self.network_client then
-					self.parent.loading_context.previous_session_error = self.network_client.fail_reason
-				elseif exit_type == "afk_kick" then
-					self.parent.loading_context.previous_session_error = "afk_kick"
-				end
-
-				self.parent.loading_context.restart_network = true
-
-				if exit_type == "lobby_state_failed" then
-					return StateTitleScreen
+			if exit_type == "lobby_state_failed" then
+				if self.is_server then
+					self.parent.loading_context.previous_session_error = "broken_connection"
 				else
-					return StateLoading
+					self.parent.loading_context.previous_session_error = "lobby_disconnected"
 				end
+			elseif exit_type == "kicked_by_server" then
+				self.parent.loading_context.previous_session_error = "kicked_by_server"
+			elseif exit_type == "join_lobby_failed" and self.network_client then
+				self.parent.loading_context.previous_session_error = self.network_client.fail_reason
+			elseif exit_type == "afk_kick" then
+				self.parent.loading_context.previous_session_error = "afk_kick"
 			end
+
+			self.parent.loading_context.restart_network = true
+
+			if exit_type == "lobby_state_failed" then
+				if Application.platform() == "xb1" then
+					return StateLoading
+				else
+					return StateTitleScreen
+				end
+			else
+				return StateLoading
+			end
+		elseif exit_type == "finished_tutorial" then
+			Managers.backend:stop_tutorial()
+
+			local loading_context = self.parent.loading_context
+			loading_context.play_trailer = true
+			loading_context.finished_tutorial = true
+
+			if Managers.play_go:installed() then
+				loading_context.restart_network = true
+
+				self.level_transition_handler:set_next_level(self.level_transition_handler:default_level_key())
+				printf("[StateIngame] Transition to StateLoadingRestartNetwork on %q", exit_type)
+			else
+				loading_context.restart_network = nil
+
+				printf("[StateIngame] Transition to StateLoadingRunning on %q", exit_type)
+			end
+
+			return StateLoading
 		elseif exit_type == "perform_host_migration" then
-			local game = network_manager.game(network_manager)
+			self.parent.loading_context.host_to_migrate_to = self.network_client.host_to_migrate_to
+			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
+			self.leave_lobby = true
 
-			if game and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif not game then
-				self.parent.loading_context.host_to_migrate_to = self.network_client.host_to_migrate_to
-				self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
-				self.leave_lobby = true
-
-				return StateLoading
-			end
+			return StateLoading
 		elseif exit_type == "backend_disconnected" then
-			local has_left = network_manager.has_left_game(network_manager)
+			printf("[StateIngame] Transition to StateTitleScreen on %q", self.exit_type)
 
-			if not has_left and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif has_left then
-				printf("[StateIngame] Transition to StateTitleScreen on %q", self.exit_type)
-				self.level_transition_handler:set_next_level(self.level_transition_handler:default_level_key())
+			self.release_level_resources = true
+			self.parent.loading_context = {}
 
-				self.parent.loading_context.restart_network = true
+			return StateTitleScreen
+		elseif exit_type == "return_to_title_screen" then
+			printf("[StateIngame] Transition to StateTitleScreen on %q", self.exit_type)
 
-				return StateTitleScreen
-			end
-		elseif exit_type == "profile_disconnected" then
-			local has_left = network_manager.has_left_game(network_manager)
+			self.release_level_resources = true
+			self.parent.loading_context = {}
 
-			if not has_left and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif has_left then
-				printf("[StateIngame] Transition to StateTitleScreen on %q", self.exit_type)
-				self.level_transition_handler:set_next_level(self.level_transition_handler:default_level_key())
-
-				self.parent.loading_context.restart_network = true
-
-				return StateTitleScreen
-			end
+			return StateTitleScreen
 		elseif exit_type == "load_next_level" or exit_type == "reload_level" then
-			local game = network_manager.game(network_manager)
+			self.parent.loading_context.checkpoint_data = self.level_transition_handler.checkpoint_data
+			self.parent.loading_context.lobby_host = self._lobby_host
+			self.parent.loading_context.lobby_client = self._lobby_client
+			self.parent.loading_context.matchmaking_loading_context = Managers.matchmaking:loading_context()
+			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
 
-			if game and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif not game then
-				self.parent.loading_context.checkpoint_data = self.level_transition_handler.checkpoint_data
-				self.parent.loading_context.lobby_host = self._lobby_host
-				self.parent.loading_context.lobby_client = self._lobby_client
-				self.parent.loading_context.matchmaking_loading_context = Managers.matchmaking:loading_context()
-				self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
-
-				return StateLoading
-			end
+			return StateLoading
 		elseif exit_type == "join_game" then
-			local game = network_manager.game(network_manager)
+			self.leave_lobby = true
+			self.parent.loading_context.matchmaking_loading_context = Managers.matchmaking:loading_context()
+			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
 
-			if game and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif not game then
-				self.leave_lobby = true
-				self.parent.loading_context.matchmaking_loading_context = Managers.matchmaking:loading_context()
-				self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
-
-				return StateLoading
-			end
+			return StateLoading
 		elseif exit_type == "restart_game" then
-			local game = network_manager.game(network_manager)
+			printf("[StateIngame] Transition to StateSplashScreen on %q", self.exit_type)
 
-			if game and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
-				network_manager.force_disconnect_from_session(network_manager)
-			elseif not game then
-				printf("[StateIngame] Transition to StateSplashScreen on %q", self.exit_type)
+			self.leave_lobby = true
+			self.release_level_resources = true
+			self.parent.loading_context.restart_network = true
+			self.parent.loading_context.reload_packages = true
 
-				self.leave_lobby = true
-				self.release_level_resources = true
-				self.parent.loading_context.restart_network = true
-				self.parent.loading_context.reload_packages = true
-
-				return StateSplashScreen
-			end
+			return StateSplashScreen
 		end
 	end
 
@@ -1218,6 +1303,10 @@ StateIngame.post_update = function (self, dt)
 	self.entity_system:commit_and_remove_pending_units()
 	Managers.state.spawn:post_unit_destroy_update()
 	network_manager.update_transmit(network_manager, dt)
+
+	if Managers.voice_chat then
+		Managers.voice_chat:update(dt, t)
+	end
 
 	return 
 end
@@ -1282,7 +1371,7 @@ StateIngame.on_exit = function (self, application_shutdown)
 
 	self.entity_system:destroy()
 	self.entity_system_bag:destroy()
-	Profiler.stop()
+	Profiler.stop("destroy units")
 	ScriptBackendSession.leave()
 	Managers.player:exit_ingame()
 	self._teardown_level(self)
@@ -1305,6 +1394,14 @@ StateIngame.on_exit = function (self, application_shutdown)
 
 	if self.network_server then
 		self.network_server:on_level_exit()
+	end
+
+	if self.network_client then
+		self.network_client.voip:set_input_manager(nil)
+	end
+
+	if self.network_server then
+		self.network_server.voip:set_input_manager(nil)
 	end
 
 	Managers.matchmaking:unregister_rpcs()
@@ -1376,6 +1473,19 @@ StateIngame.on_exit = function (self, application_shutdown)
 		self.network_transmit = nil
 	else
 		self.profile_synchronizer:unregister_network_events()
+
+		if self.is_server and not self.is_in_inn and not self.is_in_tutorial and Application.platform() == "xb1" then
+			local level_key = self.level_transition_handler:get_next_level_key()
+			local difficulty = current_difficulty
+
+			if level_key == "inn_level" or level_key == "tutorial" then
+				Application.warning("Cancelling matchmaking")
+				self._lobby_host:enable_matchmaking(false)
+			else
+				Application.warning(string.format("Reissuing Ticket for %s and difficulty %s", level_key, difficulty))
+				Managers.matchmaking:reissue_smartmatch_ticket(level_key, difficulty, self.game_mode_key)
+			end
+		end
 	end
 
 	self.free_flight_manager:unregister_input_manager()
@@ -1413,7 +1523,21 @@ StateIngame.on_exit = function (self, application_shutdown)
 		self.level_transition_handler:release_level_resources(self.level_key)
 	end
 
+	if Managers.backend and Managers.backend:item_script_type() == "tutorial" then
+		Managers.backend:stop_tutorial()
+	end
+
 	Managers.transition:show_loading_icon()
+
+	if Application.platform() == "ps4" then
+		if self.is_in_tutorial then
+			Managers.account:set_realtime_multiplay_state("tutorial", false)
+		end
+
+		if self.is_in_inn then
+			Managers.account:set_realtime_multiplay_state("inn", false)
+		end
+	end
 
 	return 
 end
@@ -1780,9 +1904,10 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 	else
 		local level_settings = LevelSettings[level_key]
 		local level_game_mode = level_settings.game_mode
-		game_mode_key = (level_game_mode and level_game_mode) or "adventure"
+		game_mode_key = level_game_mode
 	end
 
+	self.game_mode_key = game_mode_key
 	Managers.state.game_mode = GameModeManager:new(world, self._lobby_host, self._lobby_client, self.level_transition_handler, network_event_delegate, self.statistics_db, game_mode_key, self.network_server)
 	Managers.state.networked_flow_state = NetworkedFlowStateManager:new(world, is_server, network_event_delegate)
 
@@ -1819,8 +1944,8 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 
 	Managers.state.entity:set_extension_extractor_function(extension_extractor_function)
 
-	self._debug_gui = World.create_screen_gui(world, "material", "materials/fonts/arial")
-	self._debug_gui_immediate = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	self._debug_gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts")
+	self._debug_gui_immediate = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 	Managers.state.debug_text = DebugTextManager:new(world, self._debug_gui, is_server, network_event_delegate)
 	Managers.state.performance = PerformanceManager:new(self._debug_gui_immediate, is_server, level_key)
 	local voting_params = {
@@ -1940,7 +2065,9 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 	return 
 end
 StateIngame.rpc_kick_peer = function (self)
-	self.kicked_by_server = true
+	if not self.is_server then
+		self.kicked_by_server = true
+	end
 
 	return 
 end

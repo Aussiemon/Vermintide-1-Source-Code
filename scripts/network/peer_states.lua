@@ -1,9 +1,14 @@
 PeerStates = {}
+local time_between_resend_rpc_notify_connected = 2
 PeerStates.Connecting = {
 	on_enter = function (self, previous_state)
 		self.server.network_transmit:send_rpc("rpc_notify_connected", self.peer_id)
 
 		self.loaded_level = nil
+		self.resend_timer = time_between_resend_rpc_notify_connected
+		self.resend_post_game_timer = time_between_resend_rpc_notify_connected
+
+		printf("[PSM] Sending rpc_notify_connected to Peer %s", tostring(self.peer_id))
 
 		return 
 	end,
@@ -18,27 +23,61 @@ PeerStates.Connecting = {
 
 		return 
 	end,
+	rpc_post_game_notified = function (self, in_post_game)
+		self._has_been_notfied_of_post_game_state = true
+		self._in_post_game = in_post_game
+
+		return 
+	end,
 	rpc_level_loaded = function (self, level_id)
 		self.loaded_level = NetworkLookup.level_keys[level_id]
 
 		return 
 	end,
 	update = function (self, dt)
-		if Application.platform() == "xb1" and not self.has_received_rpc_notify_lobby_joined then
-			self.server.network_transmit:send_rpc("rpc_notify_connected", self.peer_id)
+		if not self.has_received_rpc_notify_lobby_joined then
+			self.resend_timer = self.resend_timer - dt
+			local resend_rpc_notify_connected = self.resend_timer < 0
+
+			if resend_rpc_notify_connected then
+				self.server.network_transmit:send_rpc("rpc_notify_connected", self.peer_id)
+				printf("[PSM] Resendind rpc_notify_connected to Peer %s", tostring(self.peer_id))
+
+				self.resend_timer = time_between_resend_rpc_notify_connected
+			end
 		end
 
 		local server_in_post_game = self.server:is_in_post_game()
 
-		if not server_in_post_game and self.has_received_rpc_notify_lobby_joined then
-			self.has_received_rpc_notify_lobby_joined = false
+		if self._has_been_notfied_of_post_game_state then
+			if not server_in_post_game then
+				local server_was_in_post_game = self._in_post_game
 
-			return PeerStates.Loading
+				if server_was_in_post_game then
+					self._has_been_notfied_of_post_game_state = nil
+				elseif self.has_received_rpc_notify_lobby_joined then
+					return PeerStates.Loading
+				end
+			end
+		else
+			self.resend_post_game_timer = self.resend_post_game_timer - dt
+			local resend_rpc_notify_in_post_game = self.resend_post_game_timer < 0
+
+			if resend_rpc_notify_in_post_game then
+				self.server.network_transmit:send_rpc("rpc_notify_in_post_game", self.peer_id, server_in_post_game)
+				printf("[PSM] Sending rpc_notify_in_post_game to Peer %s", tostring(self.peer_id))
+
+				self.resend_post_game_timer = time_between_resend_rpc_notify_connected
+			end
 		end
 
 		return 
 	end,
 	on_exit = function (self, new_state)
+		self._has_been_notfied_of_post_game_state = nil
+		self.has_received_rpc_notify_lobby_joined = nil
+		self._in_post_game = nil
+
 		return 
 	end
 }
@@ -222,7 +261,11 @@ PeerStates.WaitingForGameObjectSync = {
 
 		if self.server.peers_completed_game_object_sync[peer_id] then
 			if not self.game_started then
-				self.server.network_transmit:send_rpc("rpc_game_started", self.peer_id)
+				if Application.platform() == "xb1" then
+					self.server.network_transmit:send_rpc("rpc_game_started", self.peer_id, Managers.account:round_id() or "")
+				else
+					self.server.network_transmit:send_rpc("rpc_game_started", self.peer_id, "")
+				end
 
 				self.game_started = true
 			end

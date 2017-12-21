@@ -105,7 +105,9 @@ end
 Boot = Boot or {}
 local controlled_exit = false
 Boot.setup = function (self)
-	if Application.platform() == "win32" or Application.platform() == "macosx" then
+	local platform = Application.platform()
+
+	if platform == "win32" or platform == "macosx" then
 		Window.set_focus()
 		Window.set_mouse_focus(true)
 	end
@@ -116,7 +118,7 @@ Boot.setup = function (self)
 
 	local window_title = Development.parameter("window-title")
 
-	if window_title then
+	if window_title and platform == "win32" then
 		Window.set_title(window_title)
 	end
 

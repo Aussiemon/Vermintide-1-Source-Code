@@ -1,5 +1,13 @@
 MatchmakingStateFriendClient = class(MatchmakingStateFriendClient)
 MatchmakingStateFriendClient.NAME = "MatchmakingStateFriendClient"
+local fake_input_service = {
+	get = function ()
+		return 
+	end,
+	has = function ()
+		return 
+	end
+}
 MatchmakingStateFriendClient.init = function (self, params)
 	self.matchmaking_ui = params.matchmaking_ui
 	self.matchmaking_manager = params.matchmaking_manager
@@ -38,7 +46,22 @@ MatchmakingStateFriendClient.update = function (self, dt, t)
 		return 
 	end
 
+	local gamepad_active_last_frame = self._gamepad_active_last_frame
+	local gamepad_active = Managers.input:is_device_active("gamepad")
+
+	if gamepad_active ~= gamepad_active_last_frame then
+		if not gamepad_active then
+			self.matchmaking_ui:set_ready_progress(1)
+			self.matchmaking_ui:set_cancel_progress(1)
+		else
+			self.matchmaking_ui:set_ready_progress(0)
+			self.matchmaking_ui:set_cancel_progress(0)
+		end
+	end
+
 	if self.handshaker_client:handshake_done() then
+		local peer_id = Network.peer_id()
+
 		if not self.request_data_done then
 			self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_ready_data")
 			self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_selected_level")
@@ -46,78 +69,86 @@ MatchmakingStateFriendClient.update = function (self, dt, t)
 			self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_status_message")
 
 			self.request_data_done = true
-			local peer_id = Network.peer_id()
 
 			if MatchmakingSettings.auto_ready and not self.ready then
 				self.ready = true
 
 				self.handshaker_client:send_rpc_to_host("rpc_matchmaking_set_ready", peer_id, self.ready)
-				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready", "matchmaking_ready")
+				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready")
 				self.matchmaking_ui:large_window_stop_ready_pulse()
 			else
-				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready", "matchmaking_ready")
+				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
 				self.matchmaking_ui:large_window_start_ready_pulse()
 			end
 
 			self.matchmaking_manager.ready_peers[peer_id] = self.ready
 		else
-			local input_service = Managers.input:get_service("ingame_menu")
+			local player_manager = Managers.player
+			local player = player_manager.player(player_manager, peer_id, 1)
+			local can_use_input = player and Unit.alive(player.player_unit)
+			local input_service = (can_use_input and Managers.input:get_service("ingame_menu")) or fake_input_service
 
 			if self.controller_cooldown and 0 < self.controller_cooldown then
 				self.controller_cooldown = self.controller_cooldown - dt
-			elseif input_service and input_service.get(input_service, "matchmaking_ready", true) then
-				local ready_changed = false
+			else
+				if input_service and input_service.get(input_service, "matchmaking_ready_instigate") then
+					self._started_readying = true
+				end
 
-				if Managers.input:is_device_active("gamepad") then
-					local total_time = 1
-					local cancel_timer = self.cancel_timer
-					cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-					local progress = math.min(cancel_timer/total_time, 1)
+				if input_service and input_service.get(input_service, "matchmaking_ready") and self._started_readying then
+					local ready_changed = false
 
-					if progress == 1 then
-						self.ready = not self.ready
-						self.cancel_timer = nil
-						ready_changed = true
+					if gamepad_active then
+						local total_time = 1
+						local cancel_timer = self.cancel_timer
+						cancel_timer = (cancel_timer and cancel_timer + dt) or dt
+						local progress = math.min(cancel_timer/total_time, 1)
 
-						self.matchmaking_ui:set_ready_progress(0)
+						if progress == 1 then
+							self.ready = not self.ready
+							ready_changed = true
 
-						self.controller_cooldown = GamepadSettings.menu_cooldown
+							self.matchmaking_ui:set_ready_progress(0)
+
+							self._started_readying = false
+							self.controller_cooldown = GamepadSettings.menu_cooldown
+						else
+							self.cancel_timer = cancel_timer
+
+							self.matchmaking_ui:set_ready_progress(progress)
+						end
 					else
-						self.cancel_timer = cancel_timer
-
-						self.matchmaking_ui:set_ready_progress(progress)
+						self.ready = not self.ready
+						ready_changed = true
+						self.cancel_timer = nil
+						self._started_readying = false
 					end
-				else
-					self.ready = not self.ready
-					ready_changed = true
+
+					if ready_changed then
+						self.handshaker_client:send_rpc_to_host("rpc_matchmaking_set_ready", peer_id, self.ready)
+
+						if self.ready then
+							self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready")
+							self.matchmaking_ui:large_window_stop_ready_pulse()
+						else
+							self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
+							self.matchmaking_ui:large_window_start_ready_pulse()
+						end
+					end
+
+					self.matchmaking_manager.ready_peers[peer_id] = self.ready
+				elseif self.cancel_timer then
+					self.cancel_timer = nil
 
 					self.matchmaking_ui:set_ready_progress(0)
 
-					self.controller_cooldown = GamepadSettings.menu_cooldown
+					self._started_readying = false
 				end
-
-				local peer_id = Network.peer_id()
-
-				if ready_changed then
-					self.handshaker_client:send_rpc_to_host("rpc_matchmaking_set_ready", peer_id, self.ready)
-
-					if self.ready then
-						self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready", "matchmaking_ready")
-						self.matchmaking_ui:large_window_stop_ready_pulse()
-					else
-						self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready", "matchmaking_ready")
-						self.matchmaking_ui:large_window_start_ready_pulse()
-					end
-				end
-
-				self.matchmaking_manager.ready_peers[peer_id] = self.ready
-			else
-				self.cancel_timer = nil
-
-				self.matchmaking_ui:set_ready_progress(0)
 			end
 		end
 	end
+
+	self._gamepad_active_last_frame = gamepad_active
 
 	return 
 end

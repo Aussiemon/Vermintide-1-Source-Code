@@ -201,18 +201,20 @@ BuffFunctionTemplates.functions = {
 		local health_extension = ScriptUnit.extension(unit, "health_system")
 		local unmodified_max_health = health_extension.unmodified_max_health
 		local buff_extension = ScriptUnit.extension(unit, "buff_system")
-		local multiplier = buff_extension.apply_buffs_to_value(buff_extension, params.multiplier, StatBuffIndex.CURSE_PROTECTION)
+		local multiplier = params.multiplier
+		local new_multiplier = buff_extension.apply_buffs_to_value(buff_extension, multiplier, StatBuffIndex.CURSE_PROTECTION)
+		local current_max_health = health_extension.health
 
-		if health_extension.health == math.huge then
+		if current_max_health == math.huge then
 			return 
 		end
 
-		local max_health = health_extension.health - multiplier*unmodified_max_health
+		local max_health = current_max_health - new_multiplier*unmodified_max_health
 
 		health_extension.set_max_health(health_extension, max_health, false)
 
 		local damage = health_extension.damage
-		local new_damage = damage - multiplier*damage
+		local new_damage = damage - new_multiplier*damage
 
 		if max_health <= new_damage then
 			new_damage = max_health - 1
@@ -229,18 +231,20 @@ BuffFunctionTemplates.functions = {
 		if unmodified_max_health_changed then
 			local unmodified_max_health = health_extension.unmodified_max_health
 			local buff_extension = ScriptUnit.extension(unit, "buff_system")
-			local multiplier = buff_extension.apply_buffs_to_value(buff_extension, params.multiplier, StatBuffIndex.CURSE_PROTECTION)
+			local multiplier = params.multiplier
+			local new_multiplier = buff_extension.apply_buffs_to_value(buff_extension, multiplier, StatBuffIndex.CURSE_PROTECTION)
+			local current_max_health = health_extension.health
 
-			if health_extension.health == math.huge then
+			if current_max_health == math.huge then
 				return 
 			end
 
-			local max_health = health_extension.health - multiplier*unmodified_max_health
+			local max_health = current_max_health - new_multiplier*unmodified_max_health
 
 			health_extension.set_max_health(health_extension, max_health, false)
 
 			local damage = health_extension.damage
-			local new_damage = damage - multiplier*damage
+			local new_damage = damage - new_multiplier*damage
 
 			if max_health <= new_damage then
 				new_damage = max_health - 1
@@ -253,8 +257,9 @@ BuffFunctionTemplates.functions = {
 	end,
 	remove_max_health_debuff = function (unit, buff, params)
 		local health_extension = ScriptUnit.extension(unit, "health_system")
+		local current_max_health = health_extension.health
 
-		if health_extension.health == math.huge then
+		if current_max_health == math.huge then
 			return 
 		end
 
@@ -263,9 +268,10 @@ BuffFunctionTemplates.functions = {
 		health_extension.set_max_health(health_extension, unmodified_max_health, true)
 
 		local buff_extension = ScriptUnit.extension(unit, "buff_system")
-		local multiplier = buff_extension.apply_buffs_to_value(buff_extension, params.multiplier, StatBuffIndex.CURSE_PROTECTION)
+		local multiplier = params.multiplier
+		local new_multiplier = buff_extension.apply_buffs_to_value(buff_extension, multiplier, StatBuffIndex.CURSE_PROTECTION)
 		local damage = health_extension.damage
-		local new_damage = damage/(multiplier - 1)
+		local new_damage = damage/(new_multiplier - 1)
 
 		if unmodified_max_health <= new_damage then
 			new_damage = unmodified_max_health - 1
@@ -346,6 +352,10 @@ BuffFunctionTemplates.functions = {
 	start_dot_damage = function (unit, buff, params)
 		buff.next_poison_damage_time = params.t + math.random(buff.template.time_between_dot_damages*0.75, buff.template.time_between_dot_damages*1.25)
 
+		if buff.template.start_flow_event then
+			Unit.flow_event(unit, buff.template.start_flow_event)
+		end
+
 		return 
 	end,
 	apply_dot_damage = function (unit, buff, params)
@@ -354,7 +364,7 @@ BuffFunctionTemplates.functions = {
 
 			if health_extension.is_alive(health_extension) then
 				local buff_template = buff.template
-				buff.next_poison_damage_time = buff.next_poison_damage_time + math.random(buff.template.time_between_dot_damages*0.5, buff.template.time_between_dot_damages*1.5)
+				buff.next_poison_damage_time = buff.next_poison_damage_time + math.random(buff.template.time_between_dot_damages*0.75, buff.template.time_between_dot_damages*1.25)
 
 				if Unit.alive(params.attacker_unit) then
 					local damage = DamageUtils.calculate_damage(AttackDamageValues[buff_template.attack_damage_template], unit, params.attacker_unit, "full", 1)
@@ -362,6 +372,13 @@ BuffFunctionTemplates.functions = {
 					DamageUtils.add_damage_network(unit, params.attacker_unit, damage, "full", buff_template.damage_type, Vector3(1, 0, 0), "dot_debuff")
 				end
 			end
+		end
+
+		return 
+	end,
+	remove_dot_damage = function (unit, buff, params)
+		if buff.template.end_flow_event then
+			Unit.flow_event(unit, buff.template.end_flow_event)
 		end
 
 		return 

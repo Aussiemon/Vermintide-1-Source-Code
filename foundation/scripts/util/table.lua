@@ -183,7 +183,7 @@ table.dump = function (t, tag, max_depth, print_func)
 	print_func = print_func or print
 
 	if tag then
-		printf("<%s>", tag)
+		print_func(string.format("<%s>", tag))
 	end
 
 	for key, value in pairs(t) do
@@ -191,7 +191,7 @@ table.dump = function (t, tag, max_depth, print_func)
 	end
 
 	if tag then
-		printf("</%s>", tag)
+		print_func(string.format("</%s>", tag))
 	end
 
 	return 

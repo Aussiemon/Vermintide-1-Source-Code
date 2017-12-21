@@ -23,7 +23,10 @@ local function extract_lines(text)
 end
 
 SubtitleTimedGui.init = function (self, subtitle_timing_name, target_widgets)
-	self.texts = extract_lines(Localize(subtitle_timing_name))
+	if subtitle_timing_name ~= "" and not Localize(subtitle_timing_name) then
+	end
+
+	self.texts = extract_lines(subtitle_timing_name)
 	self.text_scroll_height = 0
 	self.next_text_index = 0
 	self.text_speed = 20
@@ -34,6 +37,8 @@ SubtitleTimedGui.init = function (self, subtitle_timing_name, target_widgets)
 	return 
 end
 SubtitleTimedGui.update = function (self, dt)
+	local target_widgets = self.target_widgets
+
 	if reload then
 		reload = false
 		self.texts = extract_lines(Localize(self.subtitle_timing_name))
@@ -44,8 +49,6 @@ SubtitleTimedGui.update = function (self, dt)
 			widget.style.text.offset[2] = widget.style.text.start_offset_y
 		end
 	end
-
-	local target_widgets = self.target_widgets
 
 	for i = 1, #target_widgets, 1 do
 		local widget = target_widgets[i]

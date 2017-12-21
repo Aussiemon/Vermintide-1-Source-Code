@@ -6,16 +6,19 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "bow",
-			min_speed = 5000,
 			ammo_usage = 1,
+			kind = "bow",
 			max_penetrations = 1,
 			anim_event = "attack_shoot_fast",
 			apply_recoil = true,
+			aim_assist_max_ramp_multiplier = 0.5,
+			aim_assist_ramp_decay_delay = 0.3,
 			anim_event_last_ammo = "attack_shoot_fast_last",
 			charge_value = "arrow_hit",
 			weapon_action_hand = "left",
 			fire_sound_event = "player_combat_weapon_bow_fire_light_poison",
+			speed = 5000,
+			aim_assist_ramp_multiplier = 0.2,
 			total_time = 0.83,
 			buff_data = {
 				{
@@ -60,17 +63,17 @@ weapon_template.actions = {
 		},
 		shoot_charged = {
 			attack_template_damage_type = "sniper",
-			max_speed = 8000,
-			anim_end_event = "to_unzoom",
 			kind = "bow",
-			min_speed = 5000,
-			max_penetrations = 2,
 			attack_template = "arrow_sniper",
+			max_penetrations = 2,
 			charge_value = "zoomed_arrow_hit",
 			weapon_action_hand = "left",
+			reset_aim_on_attack = true,
 			anim_event_last_ammo = "attack_shoot_last",
 			ammo_usage = 1,
+			anim_end_event = "to_unzoom",
 			fire_sound_event = "player_combat_weapon_bow_fire_heavy_poison",
+			speed = 8000,
 			hold_input = "action_two_hold",
 			anim_event = "attack_shoot",
 			allow_hold_toggle = true,
@@ -111,12 +114,15 @@ weapon_template.actions = {
 			aim_zoom_delay = 0.25,
 			kind = "aim",
 			anim_end_event = "draw_cancel",
+			aim_assist_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0.3,
 			aim_sound_delay = 0.5,
 			aim_sound_event = "player_combat_weapon_bow_tighten_grip_loop",
 			minimum_hold_time = 0.2,
 			ammo_usage = 1,
 			weapon_action_hand = "left",
 			unaim_sound_event = "stop_player_combat_weapon_bow_tighten_grip_loop",
+			aim_assist_max_ramp_multiplier = 0.8,
 			hold_input = "action_two_hold",
 			anim_event = "draw_bow",
 			allow_hold_toggle = true,
@@ -161,6 +167,13 @@ weapon_template.actions = {
 			end,
 			unzoom_condition_function = function (end_reason)
 				return end_reason ~= "new_interupting_action"
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -186,6 +199,19 @@ weapon_template.ammo_data = {
 	reload_time = 0.4,
 	ammo_unit_attachment_node_linking = AttachmentNodeLinking.arrow
 }
+weapon_template.aim_assist_settings = {
+	max_range = 50,
+	no_aim_input_multiplier = 0,
+	always_auto_aim = true,
+	base_multiplier = 0,
+	target_node = "j_neck",
+	effective_max_range = 30,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
+}
 weapon_template.attack_meta_data = {
 	aim_at_node = "j_spine",
 	charged_attack_action_name = "shoot_charged",
@@ -198,6 +224,12 @@ weapon_template.attack_meta_data = {
 	ignore_enemies_for_obstruction = false,
 	charge_against_armoured_enemy = true
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "longbow"
 weapon_template.left_hand_unit = "units/weapons/player/wpn_we_bow_01_t1/wpn_we_bow_01_t1"
 weapon_template.display_unit = "units/weapons/weapon_display/display_bow"
@@ -206,6 +238,10 @@ weapon_template.wield_anim = "to_longbow"
 weapon_template.wield_anim_no_ammo = "to_bow_noammo"
 weapon_template.crosshair_style = "default"
 weapon_template.no_ammo_reload_event = "reload"
+weapon_template.default_projectile_action = weapon_template.actions.action_one.default
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 6
 weapon_template.wwise_dep_left_hand = {
 	"wwise/bow"
 }

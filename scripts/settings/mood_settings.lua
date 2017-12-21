@@ -22,6 +22,9 @@ MoodSettings = {
 		particle_effects_on_enter = {
 			"fx/screenspace_knocked_down"
 		},
+		no_particles_on_enter_from = {
+			"menu"
+		},
 		particle_effects_on_exit = {}
 	},
 	heal_medikit = {

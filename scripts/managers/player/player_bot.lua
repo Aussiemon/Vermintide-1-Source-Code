@@ -30,6 +30,9 @@ end
 PlayerBot.stats_id = function (self)
 	return self._unique_id
 end
+PlayerBot.ui_id = function (self)
+	return self._unique_id
+end
 PlayerBot.local_player_id = function (self)
 	return self._local_player_id
 end

@@ -120,12 +120,14 @@ ScoreboardHelper.get_sorted_topic_statistics = function (statistics_db, profile_
 		local player_name = player.name(player)
 		local stats_id = player.stats_id(player)
 		local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, player_peer_id, player.local_player_id(player))
+		local is_player_controlled = player.is_player_controlled(player)
 		player_list[stats_id] = {
 			name = player_name,
 			peer_id = player_peer_id,
 			local_player_id = player.local_player_id(player),
 			stats_id = stats_id,
-			profile_index = profile_index
+			profile_index = profile_index,
+			is_player_controlled = is_player_controlled
 		}
 
 		if is_local_player then

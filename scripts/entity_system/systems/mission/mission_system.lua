@@ -11,6 +11,9 @@ local RPCS = {
 	"rpc_update_mission",
 	"rpc_request_mission_update"
 }
+local ACHIEVEMENT_MISSION_STATS = {
+	tutorial_revive_ally = true
+}
 local extensions = {}
 script_data.debug_mission_system = script_data.debug_mission_system or Development.parameter("debug_mission_system")
 MissionSystem.init = function (self, entity_system_creation_context, system_name)
@@ -24,6 +27,7 @@ MissionSystem.init = function (self, entity_system_creation_context, system_name
 
 	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
 
+	self.statistics_db = entity_system_creation_context.statistics_db
 	local network_manager = Managers.state.network
 	self.network_manager = network_manager
 	self.network_transmit = network_manager.network_transmit
@@ -114,7 +118,7 @@ MissionSystem.update = function (self, context, t)
 	end
 
 	self._update_level_progress(self, dt)
-	Profiler.stop()
+	Profiler.stop("MissionSystem:update()")
 
 	if script_data.debug_mission_system then
 		self.debug_draw(self, dt)
@@ -206,10 +210,10 @@ MissionSystem.end_mission = function (self, mission_name, sync)
 	if not data.mission_data.hidden then
 		if completed then
 			self.tutorial_ui:complete_mission_info_slate(info_slate_type, data.entry_id)
-			self.mission_objective_ui:complete_mission(mission_name)
+			self.mission_objective_ui:complete_mission(mission_name, data.mission_data.dont_show_mission_end_tooltip)
 		else
 			self.tutorial_ui:complete_mission_info_slate(info_slate_type, data.entry_id)
-			self.mission_objective_ui:complete_mission(mission_name)
+			self.mission_objective_ui:complete_mission(mission_name, data.mission_data.dont_show_mission_end_tooltip)
 		end
 	end
 
@@ -259,6 +263,12 @@ MissionSystem.update_mission = function (self, mission_name, positive, dt, sync)
 
 	if done then
 		self.end_mission(self, mission_name, sync)
+
+		if ACHIEVEMENT_MISSION_STATS[mission_name] then
+			local stats_id = Managers.player:local_player():stats_id()
+
+			self.statistics_db:increment_stat(stats_id, "tutorial_revive_ally")
+		end
 	end
 
 	return 

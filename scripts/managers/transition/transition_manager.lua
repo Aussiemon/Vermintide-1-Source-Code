@@ -14,26 +14,44 @@ TransitionManager.init = function (self)
 end
 TransitionManager._setup_names = function (self)
 	self._world_name = "top_ingame_view"
-	self._transition_world_name = "transition"
+
+	return 
+end
+TransitionManager.set_multiplayer_values = function (self, type, data, string)
+	self._multiplayer_tracking = self._multiplayer_tracking or {}
+	self._multiplayer_tracking[type] = self._multiplayer_tracking[type] or {}
+	self._multiplayer_tracking[type][#self._multiplayer_tracking[type] + 1] = data
+	self._multiplayer_tracking.string = self._multiplayer_tracking.string or {}
+	self._multiplayer_tracking.string[#self._multiplayer_tracking.string + 1] = string
+
+	return 
+end
+TransitionManager.dump_multiplayer_data = function (self)
+	Application.warning(" ")
+	Application.warning("##################################")
+	Application.warning(" ")
+	Application.warning("############## START #############")
+	table.dump(self._multiplayer_tracking.start or {}, "MultiplayerRoundStart", 2, Application.warning)
+	Application.warning(" ")
+	Application.warning("############### END ##############")
+	table.dump(self._multiplayer_tracking.end or {}, "MultiplayerRoundEnd", 2, Application.warning)
+	Application.warning(" ")
+	Application.warning("############# STRINGS ############")
+	table.dump(self._multiplayer_tracking.string or {}, "Strings", 2, Application.warning)
+	Application.warning(" ")
+	Application.warning("##################################")
+	Application.warning(" ")
 
 	return 
 end
 TransitionManager._setup_world = function (self)
 	local world = Managers.world:create_world(self._world_name, GameSettingsDevelopment.default_environment, nil, 991, Application.DISABLE_PHYSICS, Application.DISABLE_APEX_CLOTH)
 
-	ScriptWorld.deactivate(world)
+	ScriptWorld.activate(world)
 
 	self._loading_icon_viewport = ScriptWorld.create_viewport(world, "top_ingame_view_viewport", "overlay", 1)
 	self._world = world
-	self._transition_world = Managers.world:create_world(self._transition_world_name, GameSettingsDevelopment.default_environment, nil, 990, Application.DISABLE_PHYSICS, Application.DISABLE_APEX_CLOTH)
-
-	ScriptWorld.deactivate(self._transition_world)
-
-	self._transition_viewport = ScriptWorld.create_viewport(self._transition_world, "transition_viewport", "overlay", 1, nil, nil, nil, true)
-
-	ScriptWorld.deactivate_viewport(self._transition_world, self._transition_viewport)
-
-	self._gui = World.create_screen_gui(self._transition_world, "immediate")
+	self._gui = World.create_screen_gui(self._world, "immediate")
 
 	return 
 end
@@ -43,7 +61,6 @@ TransitionManager.destroy = function (self)
 	self._loading_icon_view = nil
 
 	Managers.world:destroy_world(self._world_name)
-	Managers.world:destroy_world(self._transition_world_name)
 
 	return 
 end
@@ -154,6 +171,17 @@ TransitionManager._render = function (self, dt)
 
 	return 
 end
+TransitionManager.force_render = function (self, dt)
+	local is_loading_icon_active = self.loading_icon_active(self)
+
+	if is_loading_icon_active then
+		self._loading_icon_view:update(dt)
+	end
+
+	self._render(self)
+
+	return 
+end
 TransitionManager.update = function (self, dt)
 	local is_loading_icon_active = self.loading_icon_active(self)
 
@@ -162,24 +190,16 @@ TransitionManager.update = function (self, dt)
 	end
 
 	if self._fade_state == "out" then
-		if Viewport.get_data(self._transition_viewport, "active") then
-			ScriptWorld.deactivate_viewport(self._transition_world, self._transition_viewport)
-		end
-
 		return 
 	end
 
 	if self._fade_state == "in" then
-		if not Viewport.get_data(self._transition_viewport, "active") then
-			ScriptWorld.activate_viewport(self._transition_world, self._transition_viewport)
-		end
-
 		self._render(self, dt)
 
 		return 
 	end
 
-	self._fade = self._fade + self._fade_speed*math.min(dt, 0.03333333333333333)
+	self._fade = math.clamp(self._fade + self._fade_speed*math.min(dt, 0.03333333333333333), 0, 1)
 
 	if self._fade_state == "fade_in" and 1 <= self._fade then
 		self._fade = 1
@@ -206,13 +226,7 @@ TransitionManager.update = function (self, dt)
 	end
 
 	if self._fade_state ~= "out" then
-		if not Viewport.get_data(self._transition_viewport, "active") then
-			ScriptWorld.activate_viewport(self._transition_world, self._transition_viewport)
-		end
-
 		self._render(self, dt)
-	elseif Viewport.get_data(self._transition_viewport, "active") then
-		ScriptWorld.deactivate_viewport(self._transition_world, self._transition_viewport)
 	end
 
 	return 

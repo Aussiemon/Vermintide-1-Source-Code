@@ -43,6 +43,25 @@ PlayerUnitAttachmentExtension.extensions_ready = function (self, world, unit)
 
 	return 
 end
+PlayerUnitAttachmentExtension.game_object_initialized = function (self, unit, unit_go_id)
+	local attachments = self._attachments
+	local slots = attachments.slots
+	local network_manager = Managers.state.network
+	local is_server = self._is_server
+
+	for slot_name, slot_data in pairs(slots) do
+		local slot_id = NetworkLookup.equipment_slots[slot_name]
+		local item_id = NetworkLookup.item_names[slot_data.item_data.name]
+
+		if is_server then
+			network_manager.network_transmit:send_rpc_clients("rpc_create_attachment", unit_go_id, slot_id, item_id)
+		else
+			network_manager.network_transmit:send_rpc_server("rpc_create_attachment", unit_go_id, slot_id, item_id)
+		end
+	end
+
+	return 
+end
 PlayerUnitAttachmentExtension.destroy = function (self)
 	local slots = self._attachments.slots
 
@@ -138,9 +157,6 @@ PlayerUnitAttachmentExtension.create_attachment_in_slot = function (self, slot_n
 		slot_id = slot_name,
 		item_data = item_data
 	}
-
-	self.update_gameobject(self, slot_name, item_name)
-
 	self.resync_loadout_needed = true
 
 	return 
@@ -177,11 +193,6 @@ PlayerUnitAttachmentExtension.resync_loadout = function (self, equipment_to_spaw
 	local resync_id = network_manager.profile_synchronizer:resync_loadout(self._profile_index, self._player)
 
 	return resync_id
-end
-PlayerUnitAttachmentExtension.update_gameobject = function (self, slot_id, item_name)
-	GearUtils.update_gameobject(self._unit, slot_id, item_name)
-
-	return 
 end
 PlayerUnitAttachmentExtension.all_clients_loaded_resource = function (self, resync_id)
 	local profile_synchronizer = Managers.state.network.profile_synchronizer

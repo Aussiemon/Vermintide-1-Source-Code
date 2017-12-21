@@ -9,7 +9,7 @@ end
 BTBotMeleeAction.name = "BTBotMeleeAction"
 local OPTIMAL_MELEE_RANGE = 1.4
 local MAXIMAL_MELEE_RANGE = 3
-local PATROL_PASSIVE_RANGE = 30
+local PATROL_PASSIVE_RANGE = 50
 
 local function check_angle(nav_world, target_position, start_direction, angle, distance)
 	local direction = Quaternion.rotate(Quaternion(Vector3.up(), angle), start_direction)
@@ -184,7 +184,6 @@ BTBotMeleeAction._is_in_engage_range = function (self, self_unit, blackboard, ai
 	if follow_position then
 		local distance_to_follow_pos = Vector3.length(current_position - follow_position)
 		local passive_patrol = false
-		local target_unit = blackboard.target_unit
 		local ai_groups = Managers.state.entity:system("ai_group_system").groups
 		local self_travel_dist = Managers.state.conflict:get_player_unit_travel_distance(self_unit) or -math.huge
 
@@ -241,6 +240,15 @@ BTBotMeleeAction._allow_engage = function (self, self_unit, target_unit, blackbo
 		local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
 
 		if self_segment and target_segment and self_segment < target_segment then
+			return false
+		end
+	end
+
+	if blackboard.target_ally_needs_aid then
+		local ai_bot_group_system = Managers.state.entity:system("ai_bot_group_system")
+		local is_prioritized_ally = ai_bot_group_system.is_prioritized_ally(ai_bot_group_system, self_unit, blackboard.target_ally_unit)
+
+		if is_prioritized_ally then
 			return false
 		end
 	end

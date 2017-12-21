@@ -42,7 +42,7 @@ BloodManager.update = function (self, dt, t)
 	end
 
 	self._update_blood_effects(self)
-	Profiler.stop()
+	Profiler.stop("Blood Manager Update")
 
 	return 
 end
@@ -65,7 +65,7 @@ BloodManager._update_weapon_blood = function (self, dt, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("_update_weapon_blood")
 
 	return 
 end
@@ -93,7 +93,7 @@ BloodManager._update_blood_decals = function (self, dt, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("_update_blood_decals")
 
 	return 
 end
@@ -121,7 +121,7 @@ BloodManager._handle_delayed_fade_units = function (self, dt, t)
 
 	self._delayed_fade_units = nil
 
-	Profiler.stop()
+	Profiler.stop("_handle_delayed_fade_units")
 
 	return 
 end
@@ -149,7 +149,7 @@ BloodManager._update_distance_fade = function (self, dt, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("_handle_delayed_fade_units")
 
 	return 
 end
@@ -181,7 +181,9 @@ BloodManager._update_debug = function (self, dt, t)
 		drawer.vector(drawer, position, vector, Color(0, 255, 0))
 	end
 
-	if Keyboard.pressed(Keyboard.button_index("b")) then
+	local active_controller = Managers.account:active_controller()
+
+	if Keyboard.pressed(Keyboard.button_index("b")) or active_controller.pressed(active_controller.button_index("left_thumb")) then
 		self._world = self._world or Application.main_world()
 		local player = Managers.player:local_player()
 		local player_pos = Unit.local_position(player.player_unit, 0)
@@ -189,7 +191,10 @@ BloodManager._update_debug = function (self, dt, t)
 		self._blood_units = self._blood_units or {}
 
 		if BloodSettings.blood_decals.num_decals < #self._blood_units then
-			World.destroy_unit(self._world, self._blood_units[1])
+			if Unit.alive(self._blood_units[1]) then
+				World.destroy_unit(self._world, self._blood_units[1])
+			end
+
 			table.remove(self._blood_units, 1)
 		end
 
@@ -276,7 +281,9 @@ BloodManager.clear_weapon_blood = function (self, attacker, weapon)
 end
 BloodManager.clear_blood_decals = function (self)
 	for _, unit in pairs(self._blood_units) do
-		World.destroy_unit(self._world, unit)
+		if Unit.alive(unit) then
+			World.destroy_unit(self._world, unit)
+		end
 	end
 
 	self._blood_units = {}
@@ -376,7 +383,10 @@ BloodManager.add_blood_decal = function (self, touched_unit, actor, my_unit, pos
 	self._blood_units = self._blood_units or {}
 
 	if BloodSettings.blood_decals.num_decals <= #self._blood_units then
-		World.destroy_unit(self._world, self._blood_units[1])
+		if Unit.alive(self._blood_units[1]) then
+			World.destroy_unit(self._world, self._blood_units[1])
+		end
+
 		table.remove(self._blood_units, 1)
 	end
 

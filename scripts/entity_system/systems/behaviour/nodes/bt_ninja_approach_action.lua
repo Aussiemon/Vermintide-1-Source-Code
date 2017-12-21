@@ -261,8 +261,6 @@ BTNinjaApproachAction.run = function (self, unit, blackboard, t, dt)
 	local is_computing_path = GwNavBot.is_computing_new_path(bot)
 
 	if blackboard.waiting_for_path then
-		local is_path_found = GwNavBot.is_following_path(bot)
-
 		if is_path_found then
 			blackboard.waiting_for_path = nil
 
@@ -342,7 +340,7 @@ local dodge_dist = 2
 local dodge_dist_check = dodge_dist - 0.3
 BTNinjaApproachAction.dodge = function (self, unit, blackboard, dodge_vec, aim_vec)
 	local pos = position_lookup[unit]
-	local velocity = blackboard.locomotion_extension:get_velocity()
+	local velocity = blackboard.locomotion_extension:current_velocity()
 	local normalized_velocity = Vector3.normalize(velocity)
 	local normalized_dodge_vec = Vector3.normalize(dodge_vec)
 	local left_right = Vector3.cross(-aim_vec, Vector3.up())

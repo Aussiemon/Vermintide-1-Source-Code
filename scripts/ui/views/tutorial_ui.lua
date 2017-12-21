@@ -2,6 +2,7 @@
 --   Code may be incomplete or incorrect.
 require("foundation/scripts/util/local_require")
 require("scripts/ui/ui_animator")
+require("scripts/ui/views/tutorial_tooltip_ui")
 
 local definitions = local_require("scripts/ui/views/tutorial_ui_definitions")
 script_data.disable_tutorial_ui = script_data.disable_tutorial_ui or Development.parameter("disable_tutorial_ui")
@@ -48,6 +49,8 @@ TutorialUI.init = function (self, ingame_ui_context)
 	self.entry_id_count = 0
 	self.health_bars = {}
 	self.objective_tooltip_widget_holders = {}
+	self.widgets_for_update = {}
+	self.num_widgets_for_update = 0
 	self._objective_tooltip_position_lookup = {}
 	self.queued_info_slate_entries = {
 		mission_goal = {},
@@ -60,13 +63,15 @@ TutorialUI.init = function (self, ingame_ui_context)
 
 	self.create_ui_elements(self)
 
+	self.tutorial_tooltip_ui = TutorialTooltipUI:new(ingame_ui_context)
+
 	return 
 end
 TutorialUI.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph)
-	self.tooltip_widget = UIWidget.init(definitions.widgets.tooltip)
+	self.floating_icons_ui_scene_graph = UISceneGraph.init_scenegraph(definitions.floating_icons_scene_graph)
 	self.tooltip_mission_widget = UIWidget.init(definitions.widgets.tooltip_mission)
 	self.info_slate_mask = UIWidget.init(definitions.widgets.info_slate_mask)
 
@@ -123,83 +128,6 @@ TutorialUI.destroy = function (self)
 
 	return 
 end
-TutorialUI.set_visible = function (self, visible)
-	self._is_visible = visible
-	local ui_renderer = self.ui_renderer
-
-	for _, widget in pairs(self._widgets) do
-		UIRenderer.set_element_visible(ui_renderer, widget.element, visible)
-
-		widget.element.dirty = true
-	end
-
-	return 
-end
-TutorialUI.button_texture_data_by_input_action = function (self, input_action)
-	local platform = self.platform
-	local active_devices, active_platform = nil
-	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-
-	if platform == "ps4" or platform == "xb1" then
-		active_devices = {
-			"gamepad"
-		}
-		active_platform = platform
-	elseif platform == "win32" then
-		if gamepad_active then
-			active_devices = {
-				"gamepad"
-			}
-			active_platform = "xb1"
-		else
-			active_devices = {
-				"keyboard",
-				"mouse"
-			}
-			active_platform = platform
-		end
-	end
-
-	local input_service = input_manager.get_service(input_manager, "Player")
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
-	local button_texture_data, button_text = nil
-
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-			local hold = input_mapping[j + 3]
-
-			for k = 1, #active_devices, 1 do
-				local active_device = active_devices[k]
-
-				if device_type == active_device then
-					if active_device == "keyboard" then
-						button_texture_data = ButtonTextureByName(nil, active_platform)
-						button_text = Keyboard.button_locale_name(key_index)
-					elseif active_device == "mouse" then
-						button_texture_data = ButtonTextureByName(nil, active_platform)
-						button_text = Mouse.button_name(key_index)
-					else
-						local button_name = Pad1.button_name(key_index)
-						button_texture_data = ButtonTextureByName(button_name, active_platform)
-					end
-
-					hold = key_action_type == "held"
-
-					return button_texture_data, button_text, hold
-				end
-			end
-		end
-	end
-
-	return 
-end
 TutorialUI.get_player_first_person_extension = function (self)
 	if self._first_person_extension then
 		return self._first_person_extension
@@ -235,16 +163,12 @@ TutorialUI.update = function (self, dt, t)
 	local resolution_modified = RESOLUTION_LOOKUP.modified
 
 	if resolution_modified then
-		self.tooltip_widget.element.dirty = true
-
 		for i = 1, definitions.NUMBER_OF_INFO_SLATE_ENTRIES, 1 do
 			local widget = self.info_slate_widgets[i]
 			widget.element.dirty = true
 		end
-	end
 
-	if next(self.tooltip_animations) ~= nil then
-		self.tooltip_widget.element.dirty = true
+		self.tutorial_tooltip_ui:set_dirty()
 	end
 
 	for name, ui_animation in pairs(self.tooltip_animations) do
@@ -260,34 +184,50 @@ TutorialUI.update = function (self, dt, t)
 	local player_unit = my_player.player_unit
 
 	if not player_unit then
-		Profiler.stop()
+		Profiler.stop("TutorialUI")
 
 		return 
 	end
 
+	local render_tooltip_ui = false
 	local tutorial_extension = ScriptUnit.extension(player_unit, "tutorial_system")
+	self.mission_tutorial_tooltip_to_update = nil
 
 	if tutorial_extension then
 		local tooltip_tutorial = tutorial_extension.tooltip_tutorial
+		local active_template = tooltip_tutorial and TutorialTemplates[tooltip_tutorial.name]
 
 		if tooltip_tutorial.active then
-			local active_template = TutorialTemplates[tooltip_tutorial.name]
-
 			if active_template.is_mission_tutorial then
 				Profiler.start("mission_tooltip")
-				self.update_mission_tooltip(self, tooltip_tutorial, player_unit, dt)
-				Profiler.stop()
+
+				self.mission_tutorial_tooltip_to_update = tooltip_tutorial
+
+				self.tutorial_tooltip_ui:hide()
+				Profiler.stop("mission_tooltip")
 			else
 				Profiler.start("default_tooltip")
-				self.update_default_tooltip(self, tooltip_tutorial, player_unit, dt)
-				Profiler.stop()
+
+				local tooltip_widget, tooltip_name = self.tutorial_tooltip_ui:update(tooltip_tutorial, player_unit, dt)
+
+				if tooltip_widget and tooltip_name then
+					self.active_tooltip_widget = tooltip_widget
+					self.active_tooltip_name = tooltip_name
+				end
+
+				render_tooltip_ui = true
+
+				Profiler.stop("default_tooltip")
 			end
 		elseif self.active_tooltip_name or self.active_tooltip_widget then
-			UIRenderer.set_element_visible(ui_renderer, self.active_tooltip_widget.element, false)
+			if active_template.is_mission_tutorial then
+				UIRenderer.set_element_visible(ui_renderer, self.active_tooltip_widget.element, false)
+			else
+				self.tutorial_tooltip_ui:hide()
+			end
 
-			self.active_tooltip_widget.element.dirty = true
-			self.active_tooltip_name = nil
 			self.active_tooltip_widget = nil
+			self.active_tooltip_name = nil
 		end
 
 		local objective_tooltips = tutorial_extension.objective_tooltips
@@ -304,16 +244,14 @@ TutorialUI.update = function (self, dt, t)
 	Profiler.start("info slates")
 	self.ui_animator:update(dt)
 	self.update_info_slate_entries(self, dt, t)
-	Profiler.stop()
-	self.update_health_bars(self, dt, player_unit)
+	Profiler.stop("info slates")
 
-	if not script_data.disable_tutorial_ui and self._is_visible then
-		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
-
-		if self.active_tooltip_widget then
-			UIRenderer.draw_widget(ui_renderer, self.active_tooltip_widget)
+	if not script_data.disable_tutorial_ui then
+		if render_tooltip_ui then
+			self.tutorial_tooltip_ui:draw(dt, t)
 		end
 
+		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 		Profiler.start("widgets")
 		UIRenderer.draw_widget(ui_renderer, self.info_slate_mask)
 
@@ -325,9 +263,59 @@ TutorialUI.update = function (self, dt, t)
 			end
 		end
 
-		Profiler.stop()
+		UIRenderer.end_pass(ui_renderer)
+		Profiler.stop("widgets")
+	end
+
+	Profiler.stop("TutorialUI")
+
+	return 
+end
+TutorialUI.pre_render_update = function (self, dt, t)
+	Profiler.start("TutorialUI:pre_render_update")
+
+	local ui_scenegraph = self.floating_icons_ui_scene_graph
+	local ui_renderer = self.ui_renderer
+	local peer_id = self.peer_id
+	local my_player = self.player_manager:player_from_peer_id(peer_id)
+	local player_unit = my_player.player_unit
+
+	if not player_unit then
+		return 
+	end
+
+	local input_manager = self.input_manager
+	local input_service = input_manager.get_service(input_manager, "Player")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local tutorial_extension = ScriptUnit.extension(player_unit, "tutorial_system")
+
+	Profiler.start("update positions")
+
+	local widgets_for_update = self.widgets_for_update
+
+	for i = 1, self.num_widgets_for_update, 1 do
+		local data = widgets_for_update[i]
+
+		self.update_objective_tooltip_widget(self, data[1], data[2], dt)
+	end
+
+	self.update_health_bars(self, dt, player_unit)
+
+	local tooltip_tutorial = self.mission_tutorial_tooltip_to_update
+	self.mission_tutorial_tooltip_to_update = nil
+
+	if tooltip_tutorial then
+		self.update_mission_tooltip(self, tooltip_tutorial, player_unit, dt)
+	end
+
+	Profiler.stop("update positions")
+
+	if not script_data.disable_tutorial_ui then
+		Profiler.start("draw")
 
 		local first_person_extension = self.get_player_first_person_extension(self)
+
+		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 		if first_person_extension.first_person_mode then
 			Profiler.start("objective_tooltip_widgets")
@@ -342,8 +330,14 @@ TutorialUI.update = function (self, dt, t)
 				end
 			end
 
-			Profiler.stop()
+			Profiler.stop("objective_tooltip_widgets")
+		end
 
+		if self.active_tooltip_widget and tooltip_tutorial then
+			UIRenderer.draw_widget(ui_renderer, self.active_tooltip_widget)
+		end
+
+		if first_person_extension.first_person_mode then
 			local health_bars = self.health_bars
 
 			for i = 1, definitions.NUMBER_OF_HEALTH_BARS, 1 do
@@ -356,120 +350,10 @@ TutorialUI.update = function (self, dt, t)
 		end
 
 		UIRenderer.end_pass(ui_renderer)
+		Profiler.stop("draw")
 	end
 
-	Profiler.stop()
-
-	return 
-end
-TutorialUI.update_default_tooltip = function (self, tooltip_tutorial, player_unit, dt)
-	local ui_renderer = self.ui_renderer
-	local ui_scenegraph = self.ui_scenegraph
-	local tooltip_name = tooltip_tutorial.name
-	local active_template = TutorialTemplates[tooltip_name]
-	local active_tooltip_name = self.active_tooltip_name
-	local widget_style = self.tooltip_widget.style
-	local widget_content = self.tooltip_widget.content
-	local text_style = widget_style.text
-
-	if not active_tooltip_name then
-		local icon_style = widget_style.icon_styles
-		local hold_text_style = widget_style.hold_text
-		local button_text_style = widget_style.button_text
-		local fade_in_time = 0.1
-		self.tooltip_animations.tooltip_icon_fade = UIAnimation.init(UIAnimation.function_by_time, icon_style.color, 1, 0, 255, fade_in_time, math.easeInCubic)
-		self.tooltip_animations.tooltip_hold_text_fade = UIAnimation.init(UIAnimation.function_by_time, hold_text_style.text_color, 1, 0, 255, fade_in_time, math.easeInCubic)
-		self.tooltip_animations.tooltip_button_text_fade = UIAnimation.init(UIAnimation.function_by_time, button_text_style.text_color, 1, 0, 255, fade_in_time, math.easeInCubic)
-		self.tooltip_animations.tooltip_text_fade = UIAnimation.init(UIAnimation.function_by_time, text_style.text_color, 1, 0, 255, fade_in_time, math.easeInCubic)
-	end
-
-	text = (active_template.text and Localize(active_template.text)) or "-no text assigned-"
-	local tooltip_action = active_template.action
-	local texture_size_y = 0
-	local texture_size_x = 0
-
-	if tooltip_action then
-		local gamepad_active = self.input_manager:is_device_active("gamepad")
-
-		if tooltip_name ~= active_tooltip_name or gamepad_active ~= widget_content.using_gamepad_input then
-			self.tooltip_widget.element.dirty = true
-			widget_content.using_gamepad_input = gamepad_active
-			widget_content.input_set = true
-			local button_texture_data, button_text, hold = self.button_texture_data_by_input_action(self, tooltip_action)
-
-			assert(button_texture_data, "Could not find button texture(s) for action: %q", tooltip_action)
-
-			if button_texture_data then
-				widget_content.hold = hold
-
-				if button_texture_data.texture then
-					widget_content.button_text = ""
-					widget_content.icon_textures = {
-						button_texture_data.texture
-					}
-					widget_style.icon_styles.texture_sizes = {
-						button_texture_data.size
-					}
-					texture_size_x = button_texture_data.size[1]
-					texture_size_y = button_texture_data.size[2]
-				else
-					local textures = {}
-					local sizes = {}
-					local tile_sizes = {}
-					local button_text_style = widget_style.button_text
-					local font, scaled_font_size = UIFontByResolution(button_text_style)
-					local text_width, text_height, min = UIRenderer.text_size(ui_renderer, button_text, font[1], scaled_font_size)
-
-					for i = 1, #button_texture_data, 1 do
-						textures[i] = button_texture_data[i].texture
-						sizes[i] = button_texture_data[i].size
-
-						if button_texture_data[i].tileable then
-							tile_sizes[i] = {
-								text_width,
-								sizes[i][2]
-							}
-							texture_size_x = texture_size_x + text_width
-
-							if texture_size_y < sizes[i][2] then
-								if not sizes[i][2] then
-								end
-							end
-						else
-							texture_size_x = texture_size_x + sizes[i][1]
-
-							if texture_size_y < sizes[i][2] and not sizes[i][2] then
-							end
-						end
-					end
-
-					widget_content.icon_textures = textures
-					widget_content.button_text = button_text
-					widget_style.icon_styles.texture_sizes = sizes
-					widget_style.icon_styles.tile_sizes = tile_sizes
-				end
-
-				ui_scenegraph.tooltip_icon.size[1] = texture_size_x
-				ui_scenegraph.tooltip_icon.size[2] = texture_size_y
-			end
-
-			local font, scaled_font_size = UIFontByResolution(text_style)
-			local width, height, min = UIRenderer.text_size(ui_renderer, text, font[1], scaled_font_size)
-			local text_width = width*0.5
-			widget_content.text = text
-			ui_scenegraph.tooltip.position[1] = -((width + texture_size_x)*0.5)
-			self.active_tooltip_name = tooltip_name
-			self.active_tooltip_widget = self.tooltip_widget
-			self.tooltip_widget.element.dirty = true
-		end
-	elseif widget_content.input_set ~= false then
-		widget_content.input_set = false
-		widget_content.icon_textures = {}
-		widget_content.button_text = ""
-		ui_scenegraph.tooltip_icon.size[1] = 1
-		ui_scenegraph.tooltip_icon.size[2] = 1
-		self.tooltip_widget.element.dirty = true
-	end
+	Profiler.stop("TutorialUI:pre_render_update")
 
 	return 
 end
@@ -478,7 +362,7 @@ local center_position = {
 	definitions.scenegraph.root.size[2]*0.5
 }
 TutorialUI.update_mission_tooltip = function (self, tooltip_tutorial, player_unit, dt)
-	local ui_scenegraph = self.ui_scenegraph
+	local ui_scenegraph = self.floating_icons_ui_scene_graph
 	local widget = self.tooltip_mission_widget
 	local mission_tooltip_settings = UISettings.tutorial.mission_tooltip
 	local tooltip_name = tooltip_tutorial.name
@@ -610,6 +494,8 @@ TutorialUI.update_objective_tooltip = function (self, objective_tooltips, player
 	local objective_units_n = objective_tooltips.units_n
 	local objective_tooltip_widget_holders = self.objective_tooltip_widget_holders
 	local NUMBER_OF_OBJECTIVE_TOOLTIPS = definitions.NUMBER_OF_OBJECTIVE_TOOLTIPS
+	local num_widgets_for_update = 0
+	local widgets_for_update = self.widgets_for_update
 
 	table.clear(unit_widget_lookup)
 
@@ -646,8 +532,16 @@ TutorialUI.update_objective_tooltip = function (self, objective_tooltips, player
 					end
 				end
 
-				self.update_objective_tooltip_widget(self, widget_holder, player_unit, dt)
+				num_widgets_for_update = num_widgets_for_update + 1
+				local data = widgets_for_update[num_widgets_for_update]
 
+				if not data then
+					data = {}
+					widgets_for_update[num_widgets_for_update] = data
+				end
+
+				data[1] = widget_holder
+				data[2] = player_unit
 				widget_holder.updated = true
 			else
 				new_units_n = new_units_n + 1
@@ -680,10 +574,21 @@ TutorialUI.update_objective_tooltip = function (self, objective_tooltips, player
 		widget_holder.unit = new_units[i]
 
 		self.setup_objective_tooltip_widget(self, widget_holder, objective_tooltips, player_unit, dt)
-		self.update_objective_tooltip_widget(self, widget_holder, player_unit, dt)
 
+		num_widgets_for_update = num_widgets_for_update + 1
+		local data = widgets_for_update[num_widgets_for_update]
+
+		if not data then
+			data = {}
+			widgets_for_update[num_widgets_for_update] = data
+		end
+
+		data[1] = widget_holder
+		data[2] = player_unit
 		widget_holder.updated = true
 	end
+
+	self.num_widgets_for_update = num_widgets_for_update
 
 	return 
 end
@@ -752,9 +657,14 @@ TutorialUI.update_objective_tooltip_widget = function (self, widget_holder, play
 	end
 
 	local objective_unit = widget_holder.unit
+
+	if not objective_unit or not Unit.alive(objective_unit) then
+		return 
+	end
+
 	local objective_unit_position = Unit.world_position(objective_unit, 0) + Vector3.up()
-	local player_position = Vector3.copy(POSITION_LOOKUP[player_unit])
 	local first_person_extension = self.get_player_first_person_extension(self)
+	local player_position = first_person_extension.current_position(first_person_extension)
 	local player_rotation = first_person_extension.current_rotation(first_person_extension)
 	local player_direction_forward = Quaternion.forward(player_rotation)
 	player_direction_forward = Vector3.normalize(Vector3.flat(player_direction_forward))
@@ -766,7 +676,7 @@ TutorialUI.update_objective_tooltip_widget = function (self, widget_holder, play
 	local right_dot = Vector3.dot(player_direction_right, direction)
 	local x_pos, y_pos = self.convert_world_to_screen_position(self, camera, objective_unit_position)
 	local x, y, is_clamped, is_behind = self.get_floating_icon_position(self, x_pos, y_pos, forward_dot, right_dot, objective_tooltip_settings)
-	local ui_scenegraph = self.ui_scenegraph
+	local ui_scenegraph = self.floating_icons_ui_scene_graph
 	local widget = widget_holder.widget
 	local animation_in_time = widget_holder.animation_in_time
 
@@ -1001,17 +911,8 @@ end
 TutorialUI.convert_world_to_screen_position = function (self, camera, world_position)
 	if camera then
 		local world_to_screen = Camera.world_to_screen(camera, world_position)
-		local dir = world_position - Camera.world_position(camera)
-		local camera_rot = Camera.world_rotation(camera)
-		local z1 = Vector3.normalize(dir).z
-		local z2 = Quaternion.forward(camera_rot).z
-		local angle_y = math.asin(z1) - math.asin(z2)
-		local y = angle_y/Camera.vertical_fov(camera)
-		local rez_x = RESOLUTION_LOOKUP.res_w
-		local rez_y = RESOLUTION_LOOKUP.res_h
-		local screen_y = rez_y*(y + 0.5)
 
-		return world_to_screen.x, screen_y
+		return world_to_screen.x, world_to_screen.y
 	end
 
 	return 
@@ -1039,7 +940,7 @@ TutorialUI.add_info_slate_entries = function (self)
 	for i = 1, definitions.NUMBER_OF_INFO_SLATE_ENTRIES, 1 do
 		local widget = self.info_slate_widgets[i]
 		local scenegraph_id = widget.scenegraph_id
-		widget.style.background_texture.color[1] = 255
+		widget.style.background_texture.color[1] = 0
 		local text_scenegraph_id = scenegraph_id .. "_text"
 		local icon_scenegraph_id = scenegraph_id .. "_icon"
 		local icon_root_scenegraph_id = scenegraph_id .. "_icon_root"
@@ -1218,6 +1119,18 @@ TutorialUI.update_info_slate_entries = function (self, dt, t)
 						self.mission_objective_entry = entry
 						widget.content.description_text = text
 						self.mission_objective_anim_id = ui_animator.start_animation(ui_animator, "info_slate_enter", widget, scenegraph_definition, anim_params[(i == 1 and "slot_1") or "slot_2"])
+						local entry_size = definitions.INFO_SLATE_ENTRY_SIZE
+						local text_scenegraph_id = info_slate.text_scenegraph_id
+						local icon_scenegraph_id = info_slate.icon_scenegraph_id
+						local text_style = widget.style.description_text
+						local text_height, num_texts = self.info_slate_text_height(self, text, text_style)
+						local entry_height = math.max(entry_size[2], text_height)
+						ui_scenegraph[text_scenegraph_id].size[2] = entry_height
+						local std_height = ui_scenegraph[widget.scenegraph_id].size[2]
+						ui_scenegraph[widget.scenegraph_id].size[2] = entry_height
+						ui_scenegraph[widget.scenegraph_id].position[2] = ui_scenegraph[widget.scenegraph_id].position[2] - entry_height + entry_size[2]
+						ui_scenegraph[info_slate.icon_root_scenegraph_id].vertical_alignment = (1 < num_texts and "top") or "center"
+						ui_scenegraph[info_slate.icon_root_scenegraph_id].position[2] = (1 < num_texts and -10) or 0
 
 						self.play_sound(self, "hud_info_slate_mission_entry")
 
@@ -1459,18 +1372,17 @@ TutorialUI.add_health_bar = function (self, unit)
 			local widget = UIWidget.init(widget_definition)
 			widget.style.texture_fg.color = Colors.get_table(color)
 			self.health_bars[i] = {
+				visible = true,
 				init_position = true,
 				visible_time = 0,
 				health_percent = 1,
-				visible = true,
 				damage_time = 0,
 				active = false,
 				unit = unit,
 				health_extension = ScriptUnit.extension(unit, "health_system"),
 				damage_extension = ScriptUnit.extension(unit, "damage_system"),
 				widget = widget,
-				scenegraph_definition = self.ui_scenegraph[widget_definition.scenegraph_id],
-				previous_position = {}
+				scenegraph_definition = self.floating_icons_ui_scene_graph[widget_definition.scenegraph_id]
 			}
 
 			break
@@ -1554,31 +1466,8 @@ TutorialUI.update_health_bars = function (self, dt, player_unit)
 				local x_pos, y_pos = self.convert_world_to_screen_position(self, camera, world_position)
 				local scenegraph_definition = health_bar.scenegraph_definition
 				local ui_local_position = scenegraph_definition.local_position
-				local x_pos_scaled = math.round(x_pos*inverse_scale)
-				local y_pos_scaled = math.round(y_pos*inverse_scale)
-
-				if health_bar.init_position then
-					ui_local_position[1] = x_pos_scaled
-					ui_local_position[2] = y_pos_scaled
-					health_bar.init_position = false
-				else
-					local snap_range = 2
-					local previous_position = health_bar.previous_position
-
-					if math.abs(previous_position.x - x_pos_scaled) < snap_range then
-						x_pos_scaled = previous_position.x
-					end
-
-					if math.abs(previous_position.y - y_pos_scaled) < snap_range then
-						y_pos_scaled = previous_position.y
-					end
-
-					ui_local_position[1] = math.lerp(ui_local_position[1], x_pos_scaled, 0.9)
-					ui_local_position[2] = math.lerp(ui_local_position[2], y_pos_scaled, 0.9)
-				end
-
-				health_bar.previous_position.x = x_pos_scaled
-				health_bar.previous_position.y = y_pos_scaled
+				ui_local_position[1] = math.round(x_pos*inverse_scale)
+				ui_local_position[2] = math.round(y_pos*inverse_scale)
 				local size = scenegraph_definition.size
 				local style = health_bar.widget.style
 				style.texture_fg.size[1] = size[1]*health_percent_current
@@ -1589,7 +1478,12 @@ TutorialUI.update_health_bars = function (self, dt, player_unit)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("healthbars")
+
+	return 
+end
+TutorialUI.set_visible = function (self, visible)
+	self.tutorial_tooltip_ui:set_visible(visible)
 
 	return 
 end

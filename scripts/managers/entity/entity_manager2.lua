@@ -126,10 +126,10 @@ EntityManager2.add_unit_extensions = function (self, world, unit, unit_template_
 		self_units[unit][extension_name] = extension
 
 		assert(extension ~= EMPTY_TABLE)
-		Profiler.stop()
+		Profiler.stop(extension_name)
 	end
 
-	Profiler.stop()
+	Profiler.stop("creating extensions")
 	Profiler.start("extensions_ready")
 
 	local extensions = self_units[unit]
@@ -152,13 +152,34 @@ EntityManager2.add_unit_extensions = function (self, world, unit, unit_template_
 			system.extensions_ready(system, world, unit, extension_name)
 		end
 
-		Profiler.stop()
+		Profiler.stop(extension_name)
 	end
 
-	Profiler.stop()
+	Profiler.stop("extensions_ready")
 	Unit.flow_event(unit, "unit_registered")
 
 	return true
+end
+EntityManager2.sync_unit_extensions = function (self, unit, go_id)
+	Profiler.start("sync_extensions")
+
+	local extensions = self._units[unit]
+
+	if extensions then
+		for extension_name, extension in pairs(extensions) do
+			Profiler.start(extension_name)
+
+			if extension.game_object_initialized ~= nil then
+				extension.game_object_initialized(extension, unit, go_id)
+			end
+
+			Profiler.stop(extension_name)
+		end
+	end
+
+	Profiler.stop("sync_extensions")
+
+	return 
 end
 EntityManager2.hot_join_sync = function (self, unit)
 	local unit_extensions = ScriptUnit.extensions(unit)
@@ -219,7 +240,7 @@ EntityManager2.add_and_register_units = function (self, world, unit_list, num_un
 		self.register_units_extensions(self, added_list, num_added)
 	end
 
-	Profiler.stop()
+	Profiler.stop("add_and_register_units")
 
 	return 
 end
@@ -243,7 +264,7 @@ EntityManager2.register_units_extensions = function (self, unit_list, num_units)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("register_units_extensions")
 
 	return 
 end
@@ -278,7 +299,7 @@ EntityManager2.remove_extensions_from_unit = function (self, unit, extensions_to
 		self_extensions[extension_name][unit] = nil
 	end
 
-	Profiler.stop()
+	Profiler.stop("remove_extensions_from_unit")
 
 	return 
 end
@@ -348,12 +369,12 @@ EntityManager2.unregister_units = function (self, units, num_units)
 				self_units[unit] = nil
 				unit_extensions_list[unit] = nil
 
-				Profiler.stop()
+				Profiler.stop("unit")
 			end
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("destroy extensions")
 
 	return 
 end

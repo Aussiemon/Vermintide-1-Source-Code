@@ -150,6 +150,37 @@ VolumeExtensionSettings = VolumeExtensionSettings or {
 					3
 				}
 			}
+		},
+		catacombs_corpse_pit = {
+			[PLAYER] = {
+				time_between_damage = 0.5,
+				damage = {
+					1,
+					1,
+					1,
+					1
+				}
+			},
+			[BOT] = {
+				traversal_cost = "medium",
+				time_between_damage = 0.5,
+				damage = {
+					1,
+					1,
+					1,
+					1
+				}
+			},
+			[AI] = {
+				traversal_cost = "medium",
+				time_between_damage = 0.5,
+				damage = {
+					1,
+					1,
+					1,
+					1
+				}
+			}
 		}
 	},
 	movement_volume = {
@@ -195,6 +226,16 @@ VolumeExtensionSettings = VolumeExtensionSettings or {
 					unit_disabled = false
 				}
 			}
+		},
+		ai_inside = {
+			[AI] = {}
+		},
+		players_and_bots_inside = {
+			[PLAYER] = {},
+			[BOT] = {}
+		},
+		players_inside = {
+			[PLAYER] = {}
 		}
 	},
 	despawn_volume = {

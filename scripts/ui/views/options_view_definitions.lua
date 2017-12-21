@@ -45,13 +45,27 @@ local scenegraph_definition = {
 			1080
 		}
 	},
+	frame_divider = {
+		vertical_alignment = "top",
+		parent = "background",
+		horizontal_alignment = "left",
+		position = {
+			420,
+			-90,
+			2
+		},
+		size = {
+			36,
+			746
+		}
+	},
 	left_frame = {
 		vertical_alignment = "bottom",
 		parent = "background",
 		horizontal_alignment = "left",
 		position = {
-			266,
-			110,
+			40,
+			88,
 			2
 		},
 		size = {
@@ -64,41 +78,41 @@ local scenegraph_definition = {
 		parent = "left_frame",
 		horizontal_alignment = "right",
 		position = {
-			915,
-			0,
+			1455,
+			37,
 			2
 		},
 		size = {
-			900,
+			1420,
 			902
 		}
 	},
 	left_frame_glow = {
 		vertical_alignment = "center",
-		parent = "left_frame",
+		parent = "frame_divider",
 		horizontal_alignment = "center",
 		position = {
-			0,
+			-72,
 			0,
 			-1
 		},
 		size = {
-			402,
-			941
+			144,
+			758
 		}
 	},
 	right_frame_glow = {
 		vertical_alignment = "center",
-		parent = "right_frame",
+		parent = "frame_divider",
 		horizontal_alignment = "center",
 		position = {
-			0,
+			72,
 			0,
 			-1
 		},
 		size = {
-			939,
-			942
+			144,
+			758
 		}
 	},
 	gamepad_tooltip_text = {
@@ -149,12 +163,40 @@ local scenegraph_definition = {
 		horizontal_alignment = "left",
 		position = {
 			18,
-			-30,
+			-45,
 			2
 		},
 		size = {
-			840,
-			762
+			1340,
+			732
+		}
+	},
+	list_edge_fade_bottom = {
+		vertical_alignment = "bottom",
+		parent = "list_mask",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			-15,
+			2
+		},
+		size = {
+			1340,
+			15
+		}
+	},
+	list_edge_fade_top = {
+		vertical_alignment = "top",
+		parent = "list_mask",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			15,
+			2
+		},
+		size = {
+			1340,
+			15
 		}
 	},
 	scrollbar_root = {
@@ -162,7 +204,7 @@ local scenegraph_definition = {
 		parent = "list_mask",
 		horizontal_alignment = "right",
 		position = {
-			24,
+			74,
 			0,
 			10
 		},
@@ -187,11 +229,11 @@ local scenegraph_definition = {
 	},
 	apply_button = {
 		vertical_alignment = "bottom",
-		parent = "right_frame",
+		parent = "background",
 		horizontal_alignment = "right",
 		position = {
-			-25,
-			15,
+			-50,
+			110,
 			1
 		},
 		size = {
@@ -213,13 +255,13 @@ local scenegraph_definition = {
 			62
 		}
 	},
-	gameplay_settings_button = {
+	settings_button_1 = {
 		vertical_alignment = "top",
 		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-22,
+			0,
 			1
 		},
 		size = {
@@ -227,9 +269,9 @@ local scenegraph_definition = {
 			84
 		}
 	},
-	display_settings_button = {
+	settings_button_2 = {
 		vertical_alignment = "top",
-		parent = "gameplay_settings_button",
+		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
@@ -241,13 +283,13 @@ local scenegraph_definition = {
 			84
 		}
 	},
-	video_settings_button = {
+	settings_button_3 = {
 		vertical_alignment = "top",
-		parent = "display_settings_button",
+		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-100,
+			-200,
 			1
 		},
 		size = {
@@ -255,13 +297,13 @@ local scenegraph_definition = {
 			84
 		}
 	},
-	sound_settings_button = {
+	settings_button_4 = {
 		vertical_alignment = "top",
-		parent = "video_settings_button",
+		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-100,
+			-300,
 			1
 		},
 		size = {
@@ -269,13 +311,13 @@ local scenegraph_definition = {
 			84
 		}
 	},
-	keybind_settings_button = {
+	settings_button_5 = {
 		vertical_alignment = "top",
-		parent = "sound_settings_button",
+		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-100,
+			-400,
 			1
 		},
 		size = {
@@ -283,13 +325,13 @@ local scenegraph_definition = {
 			84
 		}
 	},
-	gamepad_settings_button = {
+	settings_button_6 = {
 		vertical_alignment = "top",
-		parent = "keybind_settings_button",
+		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-100,
+			-500,
 			1
 		},
 		size = {
@@ -297,18 +339,32 @@ local scenegraph_definition = {
 			84
 		}
 	},
-	calibrate_ui_button = {
+	settings_button_7 = {
 		vertical_alignment = "top",
-		parent = "keybind_settings_button",
+		parent = "left_frame",
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-100,
+			-600,
 			1
 		},
 		size = {
 			318,
 			84
+		}
+	},
+	settings_button_gamepad_selection = {
+		vertical_alignment = "top",
+		parent = "left_frame",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			21,
+			4
+		},
+		size = {
+			369,
+			127
 		}
 	},
 	calibrate_ui_dummy = {
@@ -341,8 +397,12 @@ local gamepad_tooltip_style = {
 	}
 }
 local gamepad_frame_widget_definitions = {
-	left_frame_glow = UIWidgets.create_simple_texture("selected_window_glow_settings_01", "left_frame_glow"),
-	right_frame_glow = UIWidgets.create_simple_texture("selected_window_glow_settings_02", "right_frame_glow"),
+	gamepad_button_selection = UIWidgets.create_gamepad_selection("settings_button_gamepad_selection", nil, nil, {
+		70,
+		70
+	}),
+	left_frame_glow = UIWidgets.create_simple_texture("options_menu_divider_glow_01", "left_frame_glow"),
+	right_frame_glow = UIWidgets.create_simple_texture("options_menu_divider_glow_02", "right_frame_glow"),
 	gamepad_tooltip_text = UIWidgets.create_simple_text("", "gamepad_tooltip_text", nil, nil, gamepad_tooltip_style),
 	gamepad_reset_text = UIWidgets.create_simple_text("options_menu_gamepad_reset_text", "gamepad_reset_text", 28, Colors.get_color_table_with_alpha("cheeseburger", 0))
 }
@@ -355,11 +415,11 @@ local background_widget_definitions = {
 		},
 		style = {}
 	},
-	left_frame = {
-		scenegraph_id = "left_frame",
+	frame_divider = {
+		scenegraph_id = "frame_divider",
 		element = UIElements.SimpleTexture,
 		content = {
-			texture_id = "settings_window_01"
+			texture_id = "options_menu_divider"
 		},
 		style = {}
 	},
@@ -368,8 +428,14 @@ local background_widget_definitions = {
 		element = {
 			passes = {
 				{
-					pass_type = "texture",
-					texture_id = "texture_id"
+					style_id = "edge_fade_top_id",
+					pass_type = "texture_uv",
+					content_id = "edge_fade_top_id"
+				},
+				{
+					style_id = "edge_fade_bottom_id",
+					pass_type = "texture_uv",
+					content_id = "edge_fade_bottom_id"
 				},
 				{
 					pass_type = "scroll",
@@ -385,10 +451,55 @@ local background_widget_definitions = {
 			}
 		},
 		content = {
+			internal_scroll_value = 0,
 			texture_id = "settings_window_02",
-			internal_scroll_value = 0
+			edge_fade_top_id = {
+				texture_id = "mask_rect_edge_fade",
+				uvs = {
+					{
+						0,
+						0
+					},
+					{
+						1,
+						1
+					}
+				}
+			},
+			edge_fade_bottom_id = {
+				texture_id = "mask_rect_edge_fade",
+				uvs = {
+					{
+						0,
+						1
+					},
+					{
+						1,
+						0
+					}
+				}
+			}
 		},
-		style = {}
+		style = {
+			edge_fade_bottom_id = {
+				scenegraph_id = "list_edge_fade_bottom",
+				color = {
+					255,
+					255,
+					255,
+					255
+				}
+			},
+			edge_fade_top_id = {
+				scenegraph_id = "list_edge_fade_top",
+				color = {
+					255,
+					255,
+					255,
+					255
+				}
+			}
+		}
 	},
 	list_mask = {
 		scenegraph_id = "list_mask",
@@ -474,14 +585,6 @@ local button_definitions = {
 	exit_button = UIWidgets.create_menu_button_medium("menu_settings_exit", "exit_button"),
 	apply_button = UIWidgets.create_menu_button_medium("menu_settings_apply", "apply_button"),
 	reset_to_default = UIWidgets.create_menu_button_medium("menu_settings_reset_to_default", "reset_to_default")
-}
-local title_button_definitions = {
-	UIWidgets.create_menu_button("settings_view_gameplay", "gameplay_settings_button"),
-	UIWidgets.create_menu_button("settings_view_display", "display_settings_button"),
-	UIWidgets.create_menu_button("settings_view_video", "video_settings_button"),
-	UIWidgets.create_menu_button("settings_view_sound", "sound_settings_button"),
-	UIWidgets.create_menu_button("settings_view_keybind", "keybind_settings_button"),
-	UIWidgets.create_menu_button("settings_view_gamepad", "gamepad_settings_button")
 }
 local scrollbar_size_y = scenegraph_definition.scrollbar_root.size[2]
 local scrollbar_definition = UIWidgets.create_scrollbar(scrollbar_size_y, "scrollbar_root")
@@ -700,8 +803,24 @@ local function create_simple_texture_widget(texture, texture_size, scenegraph_id
 	return UIWidget.init(definition)
 end
 
+local function create_gamepad_layout_widget(texture, texture_size, texture2, texture_size2, scenegraph_id, base_offset)
+	base_offset[2] = base_offset[2] - texture_size[2]
+	local platform = Application.platform()
+	local definition = nil
+
+	if platform == "win32" then
+		definition = UIWidgets.create_gamepad_layout_win32(texture, texture_size, texture2, texture_size2, base_offset, scenegraph_id)
+	elseif platform == "xb1" then
+		definition = UIWidgets.create_gamepad_layout_xb1(texture, texture_size, base_offset, scenegraph_id)
+	elseif platform == "ps4" then
+		definition = UIWidgets.create_gamepad_layout_ps4(texture, texture_size, base_offset, scenegraph_id)
+	end
+
+	return UIWidget.init(definition)
+end
+
 local SLIDER_WIDGET_SIZE = {
-	795,
+	1315,
 	50
 }
 
@@ -917,12 +1036,17 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 				}
 			},
 			tooltip_text = {
-				font_size = 24,
-				max_width = 600,
+				font_type = "hell_shark",
 				localize = true,
+				font_size = 24,
 				horizontal_alignment = "left",
 				vertical_alignment = "top",
-				font_type = "hell_shark",
+				cursor_side = "left",
+				max_width = 600,
+				cursor_offset = {
+					-10,
+					-27
+				},
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				line_colors = {
 					Colors.get_color_table_with_alpha("cheeseburger", 255)
@@ -936,7 +1060,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 			frame = {
 				masked = true,
 				offset = {
-					base_offset[1] + 523,
+					base_offset[1] + 523 + 520,
 					base_offset[2] + 5 + 10,
 					base_offset[3] + 11
 				},
@@ -948,7 +1072,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 			frame_bg = {
 				masked = true,
 				offset = {
-					base_offset[1] + 523,
+					base_offset[1] + 523 + 520,
 					base_offset[2] + 5 + 10,
 					base_offset[3] + 1
 				},
@@ -971,7 +1095,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 			},
 			slider_box = {
 				offset = {
-					base_offset[1] + 523 + 5,
+					base_offset[1] + 523 + 5 + 520,
 					base_offset[2] + 5 + 5,
 					base_offset[3] + 10
 				},
@@ -993,7 +1117,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 				dynamic_font = true,
 				font_type = "hell_shark_masked",
 				offset = {
-					base_offset[1] + 523 + 255,
+					base_offset[1] + 523 + 255 + 520,
 					base_offset[2] + 6,
 					base_offset[3]
 				},
@@ -1004,7 +1128,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 			slider = {
 				masked = true,
 				offset = {
-					base_offset[1] + 523 + 5,
+					base_offset[1] + 523 + 5 + 520,
 					base_offset[2] + 5 + 16,
 					base_offset[3] + 10
 				},
@@ -1022,7 +1146,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 			slider_icon = {
 				masked = true,
 				offset = {
-					base_offset[1] + 523,
+					base_offset[1] + 523 + 520,
 					base_offset[2] + 5 + 5,
 					base_offset[3] + 15
 				},
@@ -1069,7 +1193,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 end
 
 local DROP_DOWN_WIDGET_SIZE = {
-	795,
+	1315,
 	50
 }
 
@@ -1313,7 +1437,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 				active = false,
 				start_index = 1,
 				offset = {
-					base_offset[1] + 521 + 4,
+					base_offset[1] + 521 + 4 + 520,
 					(base_offset[2] + 9) - 26,
 					base_offset[3]
 				},
@@ -1339,12 +1463,17 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 				}
 			},
 			tooltip_text = {
-				font_size = 24,
-				max_width = 600,
+				font_type = "hell_shark",
 				localize = true,
+				font_size = 24,
 				horizontal_alignment = "left",
 				vertical_alignment = "top",
-				font_type = "hell_shark",
+				cursor_side = "left",
+				max_width = 600,
+				cursor_offset = {
+					-10,
+					-27
+				},
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				line_colors = {
 					Colors.get_color_table_with_alpha("cheeseburger", 255)
@@ -1358,7 +1487,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 			frame = {
 				masked = true,
 				offset = {
-					base_offset[1] + 521,
+					base_offset[1] + 521 + 520,
 					base_offset[2] + 9,
 					base_offset[3]
 				},
@@ -1382,7 +1511,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 			arrow = {
 				masked = true,
 				offset = {
-					base_offset[1] + 521 + 231,
+					base_offset[1] + 521 + 231 + 520,
 					base_offset[2] + 9 + 8,
 					base_offset[3]
 				},
@@ -1407,7 +1536,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 				font_size = 20,
 				font_type = "hell_shark_masked",
 				offset = {
-					base_offset[1] + 521 + 8,
+					base_offset[1] + 521 + 8 + 520,
 					base_offset[2] + 9,
 					base_offset[3] + 10
 				},
@@ -1418,7 +1547,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 			selected_bg = {
 				masked = true,
 				offset = {
-					base_offset[1] + 521 + 4,
+					base_offset[1] + 521 + 4 + 520,
 					(base_offset[2] + 9) - selected_bg_y,
 					base_offset[3] + 20
 				},
@@ -1437,7 +1566,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 				masked = true,
 				color = Colors.get_color_table_with_alpha("black", 180),
 				offset = {
-					base_offset[1] + 521,
+					base_offset[1] + 521 + 520,
 					base_offset[2] + 9 + 2,
 					base_offset[3] + 11
 				},
@@ -1478,7 +1607,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 end
 
 local STEPPER_WIDGET_SIZE = {
-	795,
+	1315,
 	50
 }
 
@@ -1677,12 +1806,17 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 				}
 			},
 			tooltip_text = {
-				font_size = 24,
-				max_width = 600,
+				font_type = "hell_shark",
 				localize = true,
+				font_size = 24,
 				horizontal_alignment = "left",
 				vertical_alignment = "top",
-				font_type = "hell_shark",
+				cursor_side = "left",
+				max_width = 600,
+				cursor_offset = {
+					-10,
+					-27
+				},
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				line_colors = {
 					Colors.get_color_table_with_alpha("cheeseburger", 255)
@@ -1696,7 +1830,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			left_arrow = {
 				masked = true,
 				offset = {
-					base_offset[1] + 520,
+					base_offset[1] + 520 + 520,
 					base_offset[2] + 5 + 2,
 					base_offset[3]
 				},
@@ -1714,7 +1848,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			left_arrow_hover = {
 				masked = true,
 				offset = {
-					base_offset[1] + 520,
+					base_offset[1] + 520 + 520,
 					base_offset[2] + 5 + 2,
 					base_offset[3]
 				},
@@ -1731,7 +1865,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			},
 			left_arrow_hotspot = {
 				offset = {
-					base_offset[1] + 520,
+					base_offset[1] + 520 + 520,
 					base_offset[2] + 5 + 2,
 					base_offset[3]
 				},
@@ -1743,7 +1877,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			right_arrow = {
 				masked = true,
 				offset = {
-					base_offset[1] + 750,
+					base_offset[1] + 750 + 520,
 					base_offset[2] + 5 + 2,
 					base_offset[3]
 				},
@@ -1766,7 +1900,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			right_arrow_hover = {
 				masked = true,
 				offset = {
-					base_offset[1] + 750,
+					base_offset[1] + 750 + 520,
 					base_offset[2] + 5 + 2,
 					base_offset[3]
 				},
@@ -1788,7 +1922,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			},
 			right_arrow_hotspot = {
 				offset = {
-					(base_offset[1] + 750) - 101,
+					(base_offset[1] + 750) - 101 + 520,
 					base_offset[2] + 5 + 2,
 					base_offset[3]
 				},
@@ -1815,7 +1949,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 				font_type = "hell_shark_masked",
 				horizontal_alignment = "center",
 				offset = {
-					base_offset[1] + 650,
+					base_offset[1] + 650 + 520,
 					base_offset[2] + 6,
 					base_offset[3]
 				},
@@ -1854,11 +1988,11 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 end
 
 local KEYBIND_WIDGET_SIZE = {
-	795,
+	1315,
 	50
 }
 
-local function create_keybind_widget(selected_key, keys, key_info, scenegraph_id, base_offset)
+local function create_keybind_widget(selected_key, actions, actions_info, scenegraph_id, base_offset)
 	base_offset[2] = base_offset[2] - KEYBIND_WIDGET_SIZE[2]
 	local definition = {
 		element = {
@@ -1951,9 +2085,9 @@ local function create_keybind_widget(selected_key, keys, key_info, scenegraph_id
 			active_t = 0,
 			hotspot = {},
 			highlight_hotspot = {},
-			text = keys[1],
-			keys = keys,
-			key_info = key_info,
+			text = actions[1],
+			actions = actions,
+			actions_info = actions_info,
 			selected_key = selected_key,
 			hotspot_content_ids = {
 				"hotspot"
@@ -1992,7 +2126,7 @@ local function create_keybind_widget(selected_key, keys, key_info, scenegraph_id
 				font_type = "hell_shark_masked",
 				horizontal_alignment = "center",
 				offset = {
-					base_offset[1] + 650,
+					base_offset[1] + 650 + 520,
 					base_offset[2] + 7,
 					base_offset[3]
 				},
@@ -2002,7 +2136,7 @@ local function create_keybind_widget(selected_key, keys, key_info, scenegraph_id
 			},
 			selected_rect = {
 				offset = {
-					base_offset[1] + 635,
+					base_offset[1] + 635 + 520,
 					base_offset[2] + 7,
 					base_offset[3]
 				},
@@ -2043,14 +2177,6 @@ local function create_keybind_widget(selected_key, keys, key_info, scenegraph_id
 	return UIWidget.init(definition)
 end
 
-SettingsMenuNavigation = {
-	"gameplay_settings",
-	"display_settings",
-	"video_settings",
-	"audio_settings",
-	"keybind_settings",
-	"gamepad_settings"
-}
 SettingsWidgetTypeTemplate = {
 	drop_down = {
 		input_function = function (widget, input_service)
@@ -2179,12 +2305,6 @@ SettingsWidgetTypeTemplate = {
 			gamepad_support = true,
 			actions = {
 				{
-					input_action = "d_vertical",
-					priority = 1,
-					description_text = "input_description_navigate",
-					ignore_keybinding = true
-				},
-				{
 					input_action = "back",
 					priority = 3,
 					description_text = "input_description_back"
@@ -2276,6 +2396,17 @@ SettingsWidgetTypeTemplate = {
 	slider = {
 		input_function = function (widget, input_service, dt)
 			local content = widget.content
+			local input_cooldown = content.input_cooldown
+			local input_cooldown_multiplier = content.input_cooldown_multiplier
+			local on_cooldown_last_frame = false
+
+			if input_cooldown then
+				on_cooldown_last_frame = true
+				local new_cooldown = math.max(input_cooldown - dt, 0)
+				input_cooldown = (0 < new_cooldown and new_cooldown) or nil
+				content.input_cooldown = input_cooldown
+			end
+
 			local internal_value = content.internal_value
 			local num_decimals = content.num_decimals
 			local min = content.min
@@ -2283,15 +2414,30 @@ SettingsWidgetTypeTemplate = {
 			local diff = max - min
 			local total_step = diff*10^num_decimals
 			local step = total_step/1
+			local input_been_made = false
 
 			if input_service.get(input_service, "move_left_hold") then
-				content.changed = true
-				content.internal_value = math.clamp(internal_value - step, 0, 1)
-
-				return true
-			elseif input_service.get(input_service, "move_right_hold") then
-				content.changed = true
+				if not input_cooldown then
+					content.internal_value = math.clamp(internal_value - step, 0, 1)
+					input_been_made = true
+				end
+			elseif input_service.get(input_service, "move_right_hold") and not input_cooldown then
 				content.internal_value = math.clamp(internal_value + step, 0, 1)
+				input_been_made = true
+			end
+
+			if input_been_made then
+				content.changed = true
+
+				if on_cooldown_last_frame then
+					input_cooldown_multiplier = math.max(input_cooldown_multiplier - 0.1, 0.1)
+					content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+					content.input_cooldown_multiplier = input_cooldown_multiplier
+				else
+					input_cooldown_multiplier = 1
+					content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+					content.input_cooldown_multiplier = input_cooldown_multiplier
+				end
 
 				return true
 			end
@@ -2320,1033 +2466,17 @@ SettingsWidgetTypeTemplate = {
 			gamepad_support = true,
 			actions = {}
 		}
-	}
-}
-
-local function assigned(a, b)
-	if a == nil then
-		return b
-	else
-		return a
-	end
-
-	return 
-end
-
-local function set_function(self, user_setting_name, content, value_set_function)
-	local options_values = content.options_values
-	local current_selection = content.current_selection
-	local new_value = options_values[current_selection]
-	self.changed_user_settings[user_setting_name] = new_value
-
-	value_set_function(new_value)
-
-	return 
-end
-
-local function setup_function(self, user_setting_name, options)
-	local default_value = DefaultUserSettings.get("user_settings", user_setting_name)
-	local current_value = Application.user_setting(user_setting_name)
-	local selection, default_option = nil
-
-	for index, option in ipairs(options) do
-		local value = option.value
-
-		if value == current_value then
-			selection = index
-		end
-
-		if value == default_value then
-			default_option = index
-		end
-	end
-
-	fassert(default_option, "Default value %q for %q does not exist in passed options table", tostring(default_value), user_setting_name)
-
-	selection = selection or default_option
-
-	return selection, options, "menu_settings_" .. user_setting_name, default_option
-end
-
-local function saved_value_function(self, user_setting_name, widget)
-	local saved_value = assigned(self.changed_user_settings[user_setting_name], Application.user_setting(user_setting_name))
-	local default_value = DefaultUserSettings.get("user_settings", user_setting_name)
-
-	if saved_value == nil then
-		saved_value = default_value
-	end
-
-	local saved_index, default_index = nil
-	local content = widget.content
-
-	for index, value in pairs(content.options_values) do
-		if value == saved_value then
-			saved_index = index
-		end
-
-		if value == default_value then
-			default_index = index
-		end
-	end
-
-	content.current_selection = saved_index or default_index
-
-	return 
-end
-
-local video_settings_definition = {
-	{
-		setup = "cb_graphics_quality_setup",
-		name = "graphics_quality_settings",
-		saved_value = "cb_graphics_quality_saved_value",
-		callback = "cb_graphics_quality",
-		tooltip_text = "tooltip_graphics_quality",
-		widget_type = "stepper"
 	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_char_texture_quality_setup",
-		saved_value = "cb_char_texture_quality_saved_value",
-		callback = "cb_char_texture_quality",
-		tooltip_text = "tooltip_char_texture_quality",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_env_texture_quality_setup",
-		saved_value = "cb_env_texture_quality_saved_value",
-		callback = "cb_env_texture_quality",
-		tooltip_text = "tooltip_env_texture_quality",
-		widget_type = "stepper"
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_particles_resolution_setup",
-		saved_value = "cb_particles_resolution_saved_value",
-		callback = "cb_particles_resolution",
-		tooltip_text = "tooltip_low_resolution_transparency",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_particles_quality_setup",
-		saved_value = "cb_particles_quality_saved_value",
-		callback = "cb_particles_quality",
-		tooltip_text = "tooltip_particle_quality",
-		widget_type = "stepper"
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_sun_shadows_setup",
-		saved_value = "cb_sun_shadows_saved_value",
-		callback = "cb_sun_shadows",
-		tooltip_text = "tooltip_sun_shadows",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_local_light_shadow_quality_setup",
-		saved_value = "cb_local_light_shadow_quality_saved_value",
-		callback = "cb_local_light_shadow_quality",
-		tooltip_text = "tooltip_local_light_shadows",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_maximum_shadow_casting_lights_setup",
-		saved_value = "cb_maximum_shadow_casting_lights_saved_value",
-		callback = "cb_maximum_shadow_casting_lights",
-		tooltip_text = "tooltip_max_local_light_shadows",
-		widget_type = "slider"
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_animation_lod_distance_setup",
-		saved_value = "cb_animation_lod_distance_saved_value",
-		callback = "cb_animation_lod_distance",
-		tooltip_text = "tooltip_animation_lod_distance",
-		widget_type = "slider"
-	},
-	{
-		setup = "cb_physic_debris_setup",
-		saved_value = "cb_physic_debris_saved_value",
-		callback = "cb_physic_debris",
-		tooltip_text = "tooltip_physics_debris",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_scatter_density_setup",
-		saved_value = "cb_scatter_density_saved_value",
-		callback = "cb_scatter_density",
-		tooltip_text = "tooltip_scatter_density",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_blood_decals_setup",
-		saved_value = "cb_blood_decals_saved_value",
-		callback = "cb_blood_decals",
-		tooltip_text = "tooltip_blood_decals",
-		widget_type = "slider"
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_anti_aliasing_setup",
-		saved_value = "cb_anti_aliasing_saved_value",
-		callback = "cb_anti_aliasing",
-		tooltip_text = "tooltip_anti_aliasing",
-		widget_type = "drop_down"
-	},
-	{
-		setup = "cb_motion_blur_setup",
-		saved_value = "cb_motion_blur_saved_value",
-		callback = "cb_motion_blur",
-		tooltip_text = "tooltip_motion_blur",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_ssao_setup",
-		saved_value = "cb_ssao_saved_value",
-		callback = "cb_ssao",
-		tooltip_text = "tooltip_ssao",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_ssr_setup",
-		saved_value = "cb_ssr_saved_value",
-		callback = "cb_ssr",
-		tooltip_text = "tooltip_ssr",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_dof_setup",
-		saved_value = "cb_dof_saved_value",
-		callback = "cb_dof",
-		tooltip_text = "tooltip_dof",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_bloom_setup",
-		saved_value = "cb_bloom_saved_value",
-		callback = "cb_bloom",
-		tooltip_text = "tooltip_bloom",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_light_shafts_setup",
-		saved_value = "cb_light_shafts_saved_value",
-		callback = "cb_light_shafts",
-		tooltip_text = "tooltip_light_shafts",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_skin_shading_setup",
-		saved_value = "cb_skin_shading_saved_value",
-		callback = "cb_skin_shading",
-		tooltip_text = "tooltip_skin_shading",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_high_quality_fur_setup",
-		saved_value = "cb_high_quality_fur_saved_value",
-		callback = "cb_high_quality_fur",
-		tooltip_text = "tooltip_high_quality_fur",
-		widget_type = "stepper"
-	}
-}
-local audio_settings_definition = {
-	{
-		setup = "cb_master_volume_setup",
-		saved_value = "cb_master_volume_saved_value",
-		callback = "cb_master_volume",
-		tooltip_text = "tooltip_master_volume",
-		widget_type = "slider"
-	},
-	{
-		setup = "cb_music_bus_volume_setup",
-		saved_value = "cb_music_bus_volume_saved_value",
-		callback = "cb_music_bus_volume",
-		tooltip_text = "tooltip_music_volume",
-		widget_type = "slider"
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_voip_enabled_setup",
-		saved_value = "cb_voip_enabled_saved_value",
-		callback = "cb_voip_enabled",
-		tooltip_text = "tooltip_voip_enabled",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_voip_push_to_talk_setup",
-		saved_value = "cb_voip_push_to_talk_saved_value",
-		callback = "cb_voip_push_to_talk",
-		tooltip_text = "tooltip_voip_push_to_talk",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_voip_bus_volume_setup",
-		saved_value = "cb_voip_bus_volume_saved_value",
-		callback = "cb_voip_bus_volume",
-		tooltip_text = "tooltip_voip_volume",
-		widget_type = "slider"
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_subtitles_setup",
-		saved_value = "cb_subtitles_saved_value",
-		callback = "cb_subtitles",
-		tooltip_text = "tooltip_subtitles",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_sound_quality_setup",
-		saved_value = "cb_sound_quality_saved_value",
-		callback = "cb_sound_quality",
-		tooltip_text = "tooltip_sound_quality",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_dynamic_range_sound_setup",
-		saved_value = "cb_dynamic_range_sound_saved_value",
-		callback = "cb_dynamic_range_sound",
-		tooltip_text = "tooltip_dynamic_range_sound",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_sound_panning_rule_setup",
-		saved_value = "cb_sound_panning_rule_saved_value",
-		callback = "cb_sound_panning_rule",
-		tooltip_text = "tooltip_panning_rule",
-		widget_type = "stepper"
-	}
-}
-local gameplay_settings_definition = {
-	{
-		setup = "cb_mouse_look_invert_y_setup",
-		saved_value = "cb_mouse_look_invert_y_saved_value",
-		callback = "cb_mouse_look_invert_y",
-		tooltip_text = "tooltip_mouselook_invert_y",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_mouse_look_sensitivity_setup",
-		saved_value = "cb_mouse_look_sensitivity_saved_value",
-		callback = "cb_mouse_look_sensitivity",
-		tooltip_text = "tooltip_mouselook_sensitivity",
-		widget_type = "slider"
-	},
-	{
-		setup = "cb_weapon_scroll_type_setup",
-		saved_value = "cb_weapon_scroll_type_saved_value",
-		callback = "cb_weapon_scroll_type",
-		tooltip_text = "tooltip_weapon_scroll_type",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_dodge_on_jump_key_setup",
-		saved_value = "cb_dodge_on_jump_key_saved_value",
-		callback = "cb_dodge_on_jump_key",
-		tooltip_text = "tooltip_dodge_on_jump_key",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_dodge_on_forward_diagonal_setup",
-		saved_value = "cb_dodge_on_forward_diagonal_saved_value",
-		callback = "cb_dodge_on_forward_diagonal",
-		tooltip_text = "tooltip_dodge_on_forward_diagonal",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_double_tap_dodge_setup",
-		saved_value = "cb_double_tap_dodge_saved_value",
-		callback = "cb_double_tap_dodge",
-		tooltip_text = "tooltip_double_tap_dodge",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_toggle_stationary_dodge_setup",
-		saved_value = "cb_toggle_stationary_dodge_saved_value",
-		callback = "cb_toggle_stationary_dodge",
-		tooltip_text = "tooltip_toggle_stationary_dodge",
-		widget_type = "stepper"
-	},
-	{
-		setting_name = "disable_intro_cinematic",
-		widget_type = "stepper",
-		options = {
-			{
-				value = true,
-				text = Localize("menu_settings_on")
-			},
-			{
-				value = false,
-				text = Localize("menu_settings_off")
-			}
-		}
-	},
-	{
-		setting_name = "disable_head_bob",
-		widget_type = "stepper",
-		options = {
-			{
-				value = true,
-				text = Localize("menu_settings_on")
-			},
-			{
-				value = false,
-				text = Localize("menu_settings_off")
-			}
-		}
-	},
-	{
-		setting_name = "disable_camera_shake",
-		widget_type = "stepper",
-		options = {
-			{
-				value = true,
-				text = Localize("menu_settings_on")
-			},
-			{
-				value = false,
-				text = Localize("menu_settings_off")
-			}
-		}
-	},
-	{
-		setup = "cb_max_upload_speed_setup",
-		saved_value = "cb_max_upload_speed_saved_value",
-		callback = "cb_max_upload_speed",
-		tooltip_text = "tooltip_max_upload_speed",
-		widget_type = "drop_down"
-	},
-	{
-		setup = "cb_tutorials_enabled_setup",
-		saved_value = "cb_tutorials_enabled_saved_value",
-		callback = "cb_tutorials_enabled",
-		tooltip_text = "tooltip_tutorials_enabled",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_player_outlines_setup",
-		saved_value = "cb_player_outlines_saved_value",
-		callback = "cb_player_outlines",
-		tooltip_text = "tooltip_outlines",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_fov_setup",
-		saved_value = "cb_fov_saved_value",
-		callback = "cb_fov",
-		tooltip_text = "tooltip_fov",
-		widget_type = "slider"
-	},
-	{
-		setup = "cb_enabled_crosshairs_setup",
-		saved_value = "cb_enabled_crosshairs_saved_value",
-		callback = "cb_enabled_crosshairs",
-		tooltip_text = "tooltip_enabled_crosshairs",
-		widget_type = "drop_down"
-	},
-	{
-		setup = "cb_blood_enabled_setup",
-		saved_value = "cb_blood_enabled_saved_value",
-		callback = "cb_blood_enabled",
-		tooltip_text = "tooltip_blood_enabled",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_chat_enabled_setup",
-		saved_value = "cb_chat_enabled_saved_value",
-		callback = "cb_chat_enabled",
-		tooltip_text = "tooltip_chat_enabled",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_chat_font_size_setup",
-		saved_value = "cb_chat_font_size_saved_value",
-		callback = "cb_chat_font_size",
-		tooltip_text = "tooltip_chat_font_size",
-		widget_type = "drop_down"
-	},
-	{
-		setup = "cb_toggle_crouch_setup",
-		saved_value = "cb_toggle_crouch_saved_value",
-		callback = "cb_toggle_crouch",
-		tooltip_text = "tooltip_toggle_crouch",
-		widget_type = "stepper"
-	},
-	{
-		setting_name = "toggle_alternate_attack",
-		widget_type = "stepper",
-		options = {
-			{
-				value = true,
-				text = Localize("menu_settings_on")
-			},
-			{
-				value = false,
-				text = Localize("menu_settings_off")
-			}
-		}
-	},
-	{
-		setup = "cb_overcharge_opacity_setup",
-		saved_value = "cb_overcharge_opacity_saved_value",
-		callback = "cb_overcharge_opacity",
-		tooltip_text = "tooltip_overcharge_opacity",
-		widget_type = "slider"
-	}
-}
-
-function generate_settings(settings_definition)
-	for _, definition in pairs(settings_definition) do
-		local setting_name = definition.setting_name
-
-		if setting_name then
-			local prefix = "cb_" .. setting_name
-			local callback_name = prefix
-			definition.callback = prefix
-			OptionsView[callback_name] = function (self, content)
-				return set_function(self, setting_name, content, definition.value_set_function or function ()
-					return 
-				end)
-			end
-			local setup_function_name = prefix .. "_setup"
-			definition.setup = setup_function_name
-			OptionsView[setup_function_name] = function (self)
-				return setup_function(self, setting_name, definition.options)
-			end
-			local saved_value_function_name = prefix .. "_saved_value"
-			definition.saved_value = saved_value_function_name
-			OptionsView[saved_value_function_name] = function (self, widget)
-				return saved_value_function(self, setting_name, widget)
-			end
-			definition.tooltip_text = "tooltip_" .. setting_name
-		end
-	end
-
-	return 
-end
-
-generate_settings(gameplay_settings_definition)
-generate_settings(video_settings_definition)
-
-if rawget(_G, "Steam") then
-	gameplay_settings_definition[#gameplay_settings_definition + 1] = {
-		setup = "cb_clan_tag_setup",
-		saved_value = "cb_clan_tag_saved_value",
-		callback = "cb_clan_tag",
-		tooltip_text = "tooltip_clan_tag",
-		widget_type = "stepper"
-	}
-end
-
-if rawget(_G, "LightFX") then
-	gameplay_settings_definition[#gameplay_settings_definition + 1] = {
-		setup = "cb_alien_fx_setup",
-		saved_value = "cb_alien_fx_saved_value",
-		callback = "cb_alien_fx",
-		tooltip_text = "tooltip_alien_fx",
-		widget_type = "stepper"
-	}
-end
-
-local display_settings_definition = {
-	{
-		setup = "cb_resolutions_setup",
-		name = "resolutions",
-		saved_value = "cb_resolutions_saved_value",
-		callback = "cb_resolutions",
-		tooltip_text = "tooltip_resolutions",
-		widget_type = "drop_down"
-	},
-	{
-		setup = "cb_fullscreen_setup",
-		saved_value = "cb_fullscreen_saved_value",
-		callback = "cb_fullscreen",
-		tooltip_text = "tooltip_screen_mode",
-		widget_type = "drop_down"
-	},
-	{
-		setup = "cb_hud_screen_fit_setup",
-		saved_value = "cb_hud_screen_fit_saved_value",
-		callback = "cb_hud_screen_fit",
-		tooltip_text = "tooltip_hud_screen_fit",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_vsync_setup",
-		saved_value = "cb_vsync_saved_value",
-		callback = "cb_vsync",
-		tooltip_text = "tooltip_vsync",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_lock_framerate_setup",
-		saved_value = "cb_lock_framerate_saved_value",
-		callback = "cb_lock_framerate",
-		tooltip_text = "tooltip_lock_framerate",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_max_stacking_frames_setup",
-		saved_value = "cb_max_stacking_frames_saved_value",
-		callback = "cb_max_stacking_frames",
-		tooltip_text = "tooltip_max_stacking_frames",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_gamma_setup",
-		saved_value = "cb_gamma_saved_value",
-		callback = "cb_gamma",
-		tooltip_text = "tooltip_gamma",
-		widget_type = "slider",
-		slider_image = {
-			slider_image = "settings_debug_gamma_correction",
-			size = {
-				879,
-				512
-			}
+	gamepad_layout = {
+		input_function = function ()
+			return 
+		end,
+		input_description = {
+			name = "gamepad_layout",
+			gamepad_support = true,
+			actions = {}
 		}
 	}
-}
-local keybind_settings_definition = {
-	{
-		widget_type = "keybind",
-		keys = {
-			"move_forward",
-			"move_forward_pressed"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"move_left",
-			"move_left_pressed"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"move_back",
-			"move_back_pressed"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"move_right",
-			"move_right_pressed"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"action_one",
-			"action_one_hold",
-			"action_one_release",
-			"action_one_mouse"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"action_two",
-			"action_two_hold",
-			"action_two_release"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"action_three",
-			"action_three_hold",
-			"action_three_release"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"weapon_reload",
-			"weapon_reload_hold"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"jump",
-			"dodge_left",
-			"dodge_right",
-			"dodge_back",
-			"dodge_hold"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"dodge"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"crouch",
-			"crouching"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"walk"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"interact",
-			"interacting"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_1"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_2"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_3"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_4"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_5"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_switch"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_next"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"wield_prev"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"character_inspecting"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"action_inspect",
-			"action_inspect_hold",
-			"action_inspect_release"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"ping"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"action_instant_heal_self",
-			"action_instant_heal_self_hold"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"action_instant_grenade_throw",
-			"action_instant_grenade_throw_hold",
-			"action_instant_grenade_throw_released"
-		}
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"ingame_vote_yes"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"ingame_vote_no"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"hotkey_map"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"hotkey_inventory"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"hotkey_forge"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"hotkey_lobby_browser"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"hotkey_altar"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"hotkey_quests"
-		}
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"matchmaking_ready"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"matchmaking_start"
-		}
-	},
-	{
-		input_service_name = "ingame_menu",
-		widget_type = "keybind",
-		keys = {
-			"cancel_matchmaking"
-		}
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"toggle_input_helper"
-		}
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		input_service_name = "player_list_input",
-		widget_type = "keybind",
-		keys = {
-			"ingame_player_list_pressed",
-			"ingame_player_list_held",
-			"ingame_player_list_exit"
-		}
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		input_service_name = "chat_input",
-		widget_type = "keybind",
-		keys = {
-			"activate_chat_input"
-		}
-	},
-	{
-		input_service_name = "chat_input",
-		widget_type = "keybind",
-		keys = {
-			"execute_chat_input"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"voip_push_to_talk"
-		}
-	}
-}
-
-for i, keybind_setting in ipairs(keybind_settings_definition) do
-	if not keybind_setting.input_service_name then
-		keybind_setting.input_service_name = "Player"
-	end
-end
-
-local ignore_keybind = {
-	scroll_axis = true,
-	wield_scroll = true,
-	look_raw = true,
-	cursor = true
-}
-local child_input_services = {
-	ingame_menu = {
-		"enchantment_view",
-		"forge_view",
-		"quest_view",
-		"friends_view",
-		"inventory_menu",
-		"lobby_browser",
-		"map_menu",
-		"lorebook_menu"
-	}
-}
-local gamepad_settings_definition = {
-	{
-		image = "temp_controller",
-		widget_type = "image",
-		image_size = {
-			808,
-			544
-		}
-	},
-	{
-		size_y = 50,
-		widget_type = "empty"
-	},
-	{
-		setup = "cb_gamepad_look_invert_y_setup",
-		saved_value = "cb_gamepad_look_invert_y_saved_value",
-		callback = "cb_gamepad_look_invert_y",
-		tooltip_text = "tooltip_gamepad_invert_y",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_gamepad_look_sensitivity_setup",
-		saved_value = "cb_gamepad_look_sensitivity_saved_value",
-		callback = "cb_gamepad_look_sensitivity",
-		tooltip_text = "tooltip_gamepad_look_sensitivity",
-		widget_type = "slider"
-	},
-	{
-		setup = "cb_gamepad_zoom_sensitivity_setup",
-		saved_value = "cb_gamepad_zoom_sensitivity_saved_value",
-		callback = "cb_gamepad_zoom_sensitivity",
-		tooltip_text = "tooltip_gamepad_zoom_sensitivity",
-		widget_type = "slider"
-	},
-	{
-		setup = "cb_gamepad_auto_aim_enabled_setup",
-		saved_value = "cb_gamepad_auto_aim_enabled_saved_value",
-		callback = "cb_gamepad_auto_aim_enabled",
-		tooltip_text = "tooltip_gamepad_auto_aim_enabled",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_gamepad_use_ps4_style_input_icons_setup",
-		saved_value = "cb_gamepad_use_ps4_style_input_icons_saved_value",
-		callback = "cb_gamepad_use_ps4_style_input_icons",
-		tooltip_text = "tooltip_gamepad_use_ps4_style_input_icons",
-		widget_type = "stepper"
-	}
-}
-local needs_reload_settings = {
-	"screen_resolution",
-	"fullscreen",
-	"borderless_fullscreen",
-	"vsync",
-	"gamma",
-	"bloom_enabled",
-	"light_shaft_enabled",
-	"skin_material_enabled",
-	"char_texture_quality",
-	"env_texture_quality",
-	"particles_quality",
-	"sun_shadows",
-	"sun_shadow_quality",
-	"fxaa_enabled",
-	"taa_enabled",
-	"graphics_quality",
-	"adapter_index",
-	"use_physic_debris",
-	"max_shadow_casting_lights",
-	"local_light_shadow_quality",
-	"lod_object_multiplier",
-	"lod_scatter_density",
-	"dof_enabled",
-	"bloom_enabled",
-	"ssr_enabled",
-	"ssr_high_quality",
-	"low_res_transparency"
-}
-local needs_restart_settings = {
-	"char_texture_quality",
-	"env_texture_quality",
-	"use_physic_debris"
 }
 
 return {
@@ -3354,23 +2484,13 @@ return {
 	background_widget_definitions = background_widget_definitions,
 	gamepad_frame_widget_definitions = gamepad_frame_widget_definitions,
 	widget_definitions = widget_definitions,
-	title_button_definitions = title_button_definitions,
 	button_definitions = button_definitions,
 	scrollbar_definition = scrollbar_definition,
-	video_settings_definition = video_settings_definition,
-	audio_settings_definition = audio_settings_definition,
-	gameplay_settings_definition = gameplay_settings_definition,
-	display_settings_definition = display_settings_definition,
-	keybind_settings_definition = keybind_settings_definition,
-	gamepad_settings_definition = gamepad_settings_definition,
-	needs_restart_settings = needs_restart_settings,
-	needs_reload_settings = needs_reload_settings,
-	ignore_keybind = ignore_keybind,
-	child_input_services = child_input_services,
 	create_checkbox_widget = create_checkbox_widget,
 	create_slider_widget = create_slider_widget,
 	create_drop_down_widget = create_drop_down_widget,
 	create_stepper_widget = create_stepper_widget,
 	create_keybind_widget = create_keybind_widget,
-	create_simple_texture_widget = create_simple_texture_widget
+	create_simple_texture_widget = create_simple_texture_widget,
+	create_gamepad_layout_widget = create_gamepad_layout_widget
 }

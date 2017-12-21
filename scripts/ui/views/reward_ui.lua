@@ -1,3 +1,5 @@
+require("scripts/ui/views/menu_input_description_ui")
+
 local definitions = local_require("scripts/ui/views/reward_ui_definitions")
 local scenegraph_definition = definitions.scenegraph_definition
 local animation_definitions = definitions.animations
@@ -49,13 +51,37 @@ local fake_input_service = {
 		return 
 	end
 }
+local generic_input_actions = {
+	default = {
+		{
+			input_action = "cycle_previous_hold",
+			priority = 1,
+			description_text = "input_description_show_traits"
+		},
+		{
+			input_action = "confirm",
+			priority = 2,
+			description_text = "input_description_continue"
+		}
+	},
+	no_traits = {
+		{
+			input_action = "confirm",
+			priority = 1,
+			description_text = "input_description_continue"
+		}
+	}
+}
 RewardUI = class(RewardUI)
 RewardUI.init = function (self, end_of_level_ui_context, ui_world)
 	local input_manager = end_of_level_ui_context.input_manager
 	self.ui_renderer = end_of_level_ui_context.ui_renderer
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "reward_ui", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "reward_ui", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "reward_ui", "keyboard")
 	input_manager.map_device_to_service(input_manager, "reward_ui", "mouse")
 	input_manager.map_device_to_service(input_manager, "reward_ui", "gamepad")
@@ -78,6 +104,11 @@ RewardUI.init = function (self, end_of_level_ui_context, ui_world)
 		self.draw_intro_description = true
 		self.continue_timer = continue_timers.intro_description
 	end
+
+	local gui_layer = scenegraph_definition.root.position[3]
+	self.menu_input_description = MenuInputDescriptionUI:new(end_of_level_ui_context, self.ui_renderer, self.input_service(self), 2, gui_layer, generic_input_actions.default)
+
+	self.menu_input_description:set_input_description(nil)
 
 	return 
 end
@@ -189,6 +220,18 @@ RewardUI.create_ui_elements = function (self)
 		icon = UIWidget.init(widgets.hero_icon),
 		tooltip = UIWidget.init(widgets.hero_icon_tooltip)
 	}
+	self.preview_widgets_by_name = {
+		background_widgets = {
+			preview_frame = UIWidget.init(widgets.preview_frame),
+			preview_frame_background = UIWidget.init(widgets.preview_frame_background)
+		},
+		trait_widgets = {
+			trait_preview_1 = UIWidget.init(widgets.trait_preview_1),
+			trait_preview_2 = UIWidget.init(widgets.trait_preview_2),
+			trait_preview_3 = UIWidget.init(widgets.trait_preview_3),
+			trait_preview_4 = UIWidget.init(widgets.trait_preview_4)
+		}
+	}
 	self.viewport_widget = UIWidget.init(widgets.reward_viewport)
 	local preview_pass_data = self.viewport_widget.element.pass_data[1]
 	self.reward_world = preview_pass_data.world
@@ -276,12 +319,18 @@ RewardUI.on_exit = function (self)
 	end
 
 	if self.viewport_widget then
-		UIWidget.destroy(self.viewport_widget)
+		UIWidget.destroy(self.ui_renderer, self.viewport_widget)
 
 		self.viewport_widget = nil
 	end
 
 	self.reward_world = nil
+
+	if self.menu_input_description then
+		self.menu_input_description:destroy()
+
+		self.menu_input_description = nil
+	end
 
 	self.unload_packages(self)
 	table.clear(self.loaded_packages)
@@ -350,6 +399,14 @@ RewardUI.set_traits_info = function (self, item, traits)
 	self.number_of_traits_on_item = number_of_traits_on_item
 
 	self.update_trait_alignment(self, number_of_traits_on_item)
+
+	if 0 < number_of_traits_on_item then
+		self.menu_input_description:change_generic_actions(generic_input_actions.default)
+	else
+		self.menu_input_description:change_generic_actions(generic_input_actions.no_traits)
+	end
+
+	self._set_preview_traits(self, traits, item.rarity)
 
 	return 
 end
@@ -870,7 +927,13 @@ RewardUI.update = function (self, dt)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local ui_renderer = self.ui_renderer
 
-	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, (draw_intro_description and fake_input_service) or input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, (draw_intro_description and fake_input_service) or input_service, dt, nil, self.render_settings)
+
+	if gamepad_active and input_service.get(input_service, "cycle_previous_hold") then
+		self._show_traits_preview = true
+	else
+		self._show_traits_preview = nil
+	end
 
 	if draw_intro_description then
 		local description_text_widgets = self.description_text_widgets
@@ -939,11 +1002,17 @@ RewardUI.update = function (self, dt)
 			local roll_button_hotspot = roll_button_widget.content.button_hotspot
 
 			if gamepad_active then
-				if input_manager.any_input_pressed(input_manager) then
-					roll_button_hotspot.on_release = true
-				end
+				if self.display_reward_texts then
+					if input_service.get(input_service, "confirm_press") then
+						roll_button_hotspot.on_release = true
+					end
+				else
+					if input_manager.any_input_pressed(input_manager) then
+						roll_button_hotspot.on_release = true
+					end
 
-				UIRenderer.draw_widget(ui_renderer, self.gamepad_continue_text_widget)
+					UIRenderer.draw_widget(ui_renderer, self.gamepad_continue_text_widget)
+				end
 			else
 				UIRenderer.draw_widget(ui_renderer, roll_button_widget)
 				UIRenderer.draw_widget(ui_renderer, self.roll_button_eye_glow_widget)
@@ -991,6 +1060,16 @@ RewardUI.update = function (self, dt)
 				UIRenderer.draw_widget(ui_renderer, widget)
 			end
 		end
+
+		if 0 < self.number_of_traits_on_item and self._show_traits_preview then
+			local preview_widgets = self.preview_widgets_by_name
+
+			for list_name, widget_list in pairs(preview_widgets) do
+				for key, widget in pairs(widget_list) do
+					UIRenderer.draw_widget(ui_renderer, widget)
+				end
+			end
+		end
 	end
 
 	if self.display_reward_world then
@@ -1002,6 +1081,10 @@ RewardUI.update = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
+
+	if self.display_reward_texts and self.continue_timer ~= nil and gamepad_active then
+		self.menu_input_description:draw(ui_renderer, dt)
+	end
 
 	return 
 end
@@ -1262,6 +1345,143 @@ RewardUI.on_save_ended_callback = function (self)
 	print("[RewardUI] - dice game intro shown saved")
 
 	return 
+end
+RewardUI._set_preview_traits = function (self, traits, rarity)
+	local widgets_by_name = self.widgets_by_name
+	local num_traits = ForgeSettings.num_traits
+	local trait_locked_text = Localize("tooltip_trait_locked")
+	local traits_data = {}
+
+	for i = 1, num_traits, 1 do
+		local trait_name = traits and traits[i]
+
+		if trait_name then
+			local trait_template = BuffTemplates[trait_name]
+			local item_has_trait = false
+
+			if trait_template then
+				local display_name = trait_template.display_name or "Unknown"
+				local description_text = BackendUtils.get_trait_description(trait_name, rarity)
+
+				if not item_has_trait then
+					description_text = description_text .. "\n" .. trait_locked_text
+				end
+
+				local icon = trait_template.icon or "icons_placeholder"
+				traits_data[i] = {
+					trait_name = trait_name,
+					display_name = display_name,
+					description_text = description_text,
+					icon = icon or "trait_icon_empty",
+					locked = not item_has_trait
+				}
+			end
+		end
+	end
+
+	self.set_preview_traits_info(self, traits_data, 1, num_traits)
+
+	return 
+end
+RewardUI.set_preview_traits_info = function (self, traits_data, start_index, end_index)
+	local num_total_traits = ForgeSettings.num_traits
+	local number_of_traits_on_item = 0
+	local is_trinket = false
+	local never_locked = false
+	local trait_locked_text = Localize("tooltip_trait_locked")
+	local tooltip_trait_unique_text = Localize("unique_trait_description")
+	local total_traits_height = 0
+	local trait_start_spacing = 25
+	local trait_end_spacing = 25
+	local icon_height = 40
+	local divider_height = 60
+	local description_text_spacing = 15
+	local trait_preview_widgets_by_name = self.preview_widgets_by_name.trait_widgets
+	local ui_scenegraph = self.ui_scenegraph
+
+	for i = start_index, end_index, 1 do
+		local is_first_widget = i == start_index
+		local trait_data = traits_data[i]
+		local trait_name = trait_data and trait_data.trait_name
+		local trait_widget = trait_preview_widgets_by_name["trait_preview_" .. i]
+		local trait_widget_style = trait_widget.style
+		local trait_widget_content = trait_widget.content
+		trait_widget_content.visible = (trait_name and true) or false
+
+		if trait_name then
+			local trait_template = BuffTemplates[trait_name]
+
+			if trait_template then
+				local trait_unlocked = not trait_data.locked
+				local display_name = trait_data.display_name or "Unknown"
+				local description_text = trait_data.description_text
+				local trait_display_name = Localize(display_name)
+				local description_text = description_text
+
+				if not is_trinket and trait_unlocked then
+					trait_widget_style.description_text.last_line_color = nil
+				else
+					trait_widget_style.description_text.last_line_color = Colors.get_color_table_with_alpha("red", trait_widget_style.description_text.text_color[1])
+				end
+
+				local icon = trait_data.icon or "icons_placeholder"
+				trait_widget_content.texture_id = icon
+				trait_widget_content.use_background = false
+				trait_widget_content.use_glow = false
+				trait_widget_content.use_divider = not is_first_widget
+				trait_widget.content.locked = not trait_unlocked
+				trait_widget.content.title_text = trait_display_name
+				trait_widget.content.description_text = description_text
+				local trait_scenegraph_name = "trait_preview_" .. i
+				local description_scenegraph_id = "trait_description_" .. i
+				local description_field_scenegraph = ui_scenegraph[description_scenegraph_id]
+				local _, description_text_height = self.get_word_wrap_size(self, description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
+				local trait_total_height = icon_height + description_text_spacing + description_text_height
+
+				if not is_first_widget then
+					trait_total_height = trait_total_height + divider_height
+				end
+
+				local position = ui_scenegraph[trait_scenegraph_name].local_position
+				position[2] = (not is_first_widget or 0) and -(total_traits_height + divider_height)
+				total_traits_height = total_traits_height + trait_total_height
+			end
+
+			number_of_traits_on_item = number_of_traits_on_item + 1
+		end
+	end
+
+	total_traits_height = total_traits_height + 120
+	local height_percentage = total_traits_height/819
+	local new_uvs = {
+		{
+			0,
+			height_percentage - 1
+		},
+		{
+			1,
+			height_percentage
+		}
+	}
+	local background_widgets = self.preview_widgets_by_name.background_widgets
+	background_widgets.preview_frame_background.content.uvs = new_uvs
+	ui_scenegraph.preview_frame_background.size[2] = total_traits_height
+	ui_scenegraph.preview_frame.size[2] = total_traits_height
+
+	return 
+end
+RewardUI.get_text_size = function (self, localized_text, text_style)
+	local font, scaled_font_size = UIFontByResolution(text_style)
+	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, localized_text, font[1], scaled_font_size)
+
+	return text_width, text_height
+end
+RewardUI.get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
+	local font, scaled_font_size = UIFontByResolution(text_style)
+	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
+	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
+
+	return text_width, text_height*#lines
 end
 
 return 

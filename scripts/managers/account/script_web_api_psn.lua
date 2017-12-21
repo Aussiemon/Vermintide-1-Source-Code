@@ -73,6 +73,10 @@ ScriptWebApiPsn._handle_request_response = function (self, request_index, succes
 	return 
 end
 ScriptWebApiPsn.send_request = function (self, np_id, api_group, path, method, content, response_callback, response_format)
+	if np_id == nil then
+		return 
+	end
+
 	local id = web_api.send_request(np_id, api_group, path, method, content)
 	self._requests[#self._requests + 1] = {
 		id = id,

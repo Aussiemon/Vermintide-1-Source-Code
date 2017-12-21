@@ -128,7 +128,7 @@ local function update_wall_nail(unit, dt, t, data)
 
 			fassert(0 < ray_dist, "Ray distance is not greater than 0")
 
-			local collision_filter = "filter_ai_line_of_sight_check"
+			local collision_filter = "filter_weapon_nailing"
 			local hit, hit_position, hit_distance, hit_normal, hit_actor = PhysicsWorld.immediate_raycast(World.get_data(world, "physics_world"), position, dir, (data.nailed and math.min(ray_dist, 0.4)) or ray_dist, "closest", "collision_filter", collision_filter)
 
 			if hit then
@@ -161,7 +161,7 @@ local function update_wall_nail(unit, dt, t, data)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_wall_nail")
 
 	return 
 end
@@ -464,13 +464,22 @@ DeathReactions.templates = {
 		unit = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 				local data, result = ai_default_unit_start(unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+				data.despawn_after_time = t + 2
 
 				StatisticsUtil.register_kill(unit, killing_blow, context.statistics_db, true)
 				trigger_unit_dialogue_death_event(unit, killing_blow[DamageDataIndex.ATTACKER], killing_blow[DamageDataIndex.HIT_ZONE], killing_blow[DamageDataIndex.DAMAGE_TYPE])
 				trigger_player_killing_blow_ai_buffs(unit, killing_blow[DamageDataIndex.ATTACKER], true)
-				Unit.set_unit_visibility(unit, false)
 
-				return nil, DeathReactions.IS_DONE
+				return data, result
+			end,
+			update = function (unit, dt, context, t, data)
+				if data.despawn_after_time and data.despawn_after_time < t then
+					Managers.state.unit_spawner:mark_for_deletion(unit)
+
+					return DeathReactions.IS_DONE
+				end
+
+				return DeathReactions.IS_NOT_DONE
 			end
 		},
 		husk = {
@@ -479,9 +488,11 @@ DeathReactions.templates = {
 
 				StatisticsUtil.register_kill(unit, killing_blow, context.statistics_db)
 				trigger_player_killing_blow_ai_buffs(unit, killing_blow[DamageDataIndex.ATTACKER], false)
-				Unit.set_unit_visibility(unit, false)
 
-				return nil, DeathReactions.IS_DONE
+				return data, result
+			end,
+			update = function (unit, dt, context, t, data)
+				return DeathReactions.IS_DONE
 			end
 		}
 	},
@@ -700,12 +711,14 @@ DeathReactions.templates = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 				local network_time = Managers.state.network:network_time()
 				local fuse_time = (Unit.has_data(unit, "fuse_time") and Unit.get_data(unit, "fuse_time")) or 6
+				local enemies_ignore_fuse = Unit.get_data(unit, "enemies_ignore_fuse")
 				local explode_time = network_time + fuse_time
 				local data = {
 					played_fuse_out = false,
 					explode_time = explode_time,
 					killer_unit = killing_blow[DamageDataIndex.ATTACKER],
-					fuse_time = fuse_time
+					fuse_time = fuse_time,
+					enemies_ignore_fuse = enemies_ignore_fuse
 				}
 
 				Unit.flow_event(unit, "exploding_barrel_fuse_init")
@@ -713,13 +726,14 @@ DeathReactions.templates = {
 				return data, DeathReactions.IS_NOT_DONE
 			end,
 			update = function (unit, dt, context, t, data)
-				local fuse_time_left = data.explode_time - t
+				local network_time = Managers.state.network:network_time()
+				local fuse_time_left = data.explode_time - network_time
 				local fuse_time = data.fuse_time
 				local fuse_time_percent = fuse_time_left/fuse_time
 
 				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
 
-				if not data.exploded then
+				if not data.exploded and not data.enemies_ignore_fuse then
 					if data.starting_pos then
 						local unit_pos = POSITION_LOOKUP[unit]
 						local distance_squared = Vector3.distance_squared(data.starting_pos:unbox(), unit_pos)
@@ -771,7 +785,7 @@ DeathReactions.templates = {
 							local slot_name = equipment.wielded_slot
 
 							inventory_extension.destroy_slot(inventory_extension, slot_name)
-							inventory_extension.wield(inventory_extension, "slot_melee")
+							inventory_extension.wield_previous_weapon(inventory_extension)
 						end
 					else
 						local position = POSITION_LOOKUP[unit]
@@ -813,7 +827,8 @@ DeathReactions.templates = {
 				return data, DeathReactions.IS_NOT_DONE
 			end,
 			update = function (unit, dt, context, t, data)
-				local fuse_time_left = data.explode_time - t
+				local network_time = Managers.state.network:network_time()
+				local fuse_time_left = data.explode_time - network_time
 				local fuse_time = data.fuse_time
 				local fuse_time_percent = fuse_time_left/fuse_time
 
@@ -843,7 +858,7 @@ DeathReactions.templates = {
 						local slot_name = equipment.wielded_slot
 
 						inventory_extension.destroy_slot(inventory_extension, slot_name)
-						inventory_extension.wield(inventory_extension, "slot_melee")
+						inventory_extension.wield_previous_weapon(inventory_extension)
 					end
 
 					data.exploded = true

@@ -58,7 +58,7 @@ MatchmakingSettings = {
 	START_GAME_TIME = 5,
 	REQUEST_JOIN_LOBBY_REPLY_TIME = 30,
 	MIN_STATUS_MESSAGE_TIME = 2,
-	TOTAL_GAME_SEARCH_TIME = 10,
+	TOTAL_GAME_SEARCH_TIME = 90,
 	afk_force_stop_mm_timer = 180,
 	afk_warn_timer = 150,
 	MAX_NUMBER_OF_PLAYERS = 4,
@@ -119,7 +119,7 @@ MatchmakingManager.init = function (self, params)
 	self.handshaker_host = MatchmakingHandshakerHost:new(self.network_transmit)
 	self.handshaker_client = MatchmakingHandshakerClient:new()
 	self.peers_to_sync = {}
-	local lobby_finder = LobbyFinder:new(network_options, MatchmakingSettings.MAX_NUM_LOBBIES)
+	local lobby_finder = LobbyFinder:new(network_options, MatchmakingSettings.MAX_NUM_LOBBIES, true)
 	self.lobby_finder = lobby_finder
 	params.lobby_finder = lobby_finder
 	params.network_options = network_options
@@ -143,6 +143,7 @@ MatchmakingManager.init = function (self, params)
 
 	if not self.is_server then
 		self.handshaker_client:start_handshake(self.lobby:lobby_host())
+		self._change_state(self, MatchmakingStateIdle, self.params, {})
 	end
 
 	self.portrait_index_table = {}
@@ -201,16 +202,14 @@ MatchmakingManager.setup_post_init_data = function (self, post_init_data)
 		self.cancel_matchmaking(self)
 	end
 
-	local is_matchmaking = self.lobby:lobby_data("matchmaking")
+	if self.is_server then
+		local is_matchmaking = self.lobby:lobby_data("matchmaking")
 
-	if is_matchmaking == "true" then
-		if self.is_server then
+		if is_matchmaking == "true" then
 			self._change_state(self, MatchmakingStateIngame, self.params, {})
 		else
-			self._change_state(self, MatchmakingStateFriendClient, self.params, {})
+			self._change_state(self, MatchmakingStateIdle, self.params, {})
 		end
-	else
-		self._change_state(self, MatchmakingStateIdle, self.params, {})
 	end
 
 	local map_save_data = SaveData.map_save_data
@@ -388,7 +387,7 @@ MatchmakingManager.update = function (self, dt, t)
 				lobby.set_lobby_data(lobby, stored_lobby_data)
 			end
 
-			Profiler.stop()
+			Profiler.stop("Update profile slots")
 		end
 
 		state_name = self._state and self._state.NAME
@@ -515,7 +514,7 @@ MatchmakingManager.update = function (self, dt, t)
 			end
 		end
 
-		Profiler.stop()
+		Profiler.stop("update_portraits")
 	end
 
 	if self.started_matchmaking_t then
@@ -526,7 +525,7 @@ MatchmakingManager.update = function (self, dt, t)
 
 	local level_key = self.level_transition_handler:get_current_level_keys()
 	local is_in_inn = level_key and level_key == "inn_level"
-	local lobby_browser_active = self.lobby_browser_view_ui.active
+	local lobby_browser_active = self.lobby_browser_view_ui and self.lobby_browser_view_ui.active
 	local searching_for_games = self._state.NAME == "MatchmakingStateSearchGame"
 	local update_lobby_finder = (is_in_inn and lobby_browser_active) or searching_for_games
 
@@ -539,7 +538,7 @@ MatchmakingManager.update = function (self, dt, t)
 
 			self.lobby_finder_timer = MatchmakingSettings.LOBBY_FINDER_UPDATE_INTERVAL
 
-			Profiler.stop()
+			Profiler.stop("lobby_finder")
 		end
 	end
 
@@ -607,9 +606,6 @@ MatchmakingManager.update_cancel_input = function (self, dt)
 	if is_matchmaking then
 		if self.controller_cooldown and 0 < self.controller_cooldown then
 			self.controller_cooldown = self.controller_cooldown - dt
-			local input_service = Managers.input:get_service("Player")
-
-			input_service.get(input_service, "crouch_gamepad", true)
 		else
 			local input_service = Managers.input:get_service("ingame_menu")
 
@@ -664,20 +660,21 @@ end
 MatchmakingManager.is_join_popup_visible = function (self)
 	return self.params.popup_join_lobby_handler and self.params.popup_join_lobby_handler.visible
 end
-MatchmakingManager.get_random_level = function (self, level_area, game_mode, difficulty_rank, statistics_db, player_stats_id)
+MatchmakingManager.get_random_level = function (self, level_area, game_mode, difficulty_rank, statistics_db, player_stats_id, optional_level_filter)
 	if game_mode == "adventure" then
-		return self.get_random_adventure_level(self, level_area, difficulty_rank, statistics_db, player_stats_id)
+		return self.get_random_adventure_level(self, level_area, difficulty_rank, statistics_db, player_stats_id, optional_level_filter)
 	elseif game_mode == "survival" then
-		return self.get_random_survival_level(self, level_area, difficulty_rank, statistics_db, player_stats_id)
+		return self.get_random_survival_level(self, level_area, difficulty_rank, statistics_db, player_stats_id, optional_level_filter)
 	end
 
 	return 
 end
-MatchmakingManager.get_random_adventure_level = function (self, level_area, difficulty_rank, statistics_db, player_stats_id)
+MatchmakingManager.get_random_adventure_level = function (self, level_area, difficulty_rank, statistics_db, player_stats_id, optional_level_list)
 	local random_level_list = {}
+	local levels = optional_level_list or UnlockableLevels
 
-	for i = 1, #UnlockableLevels, 1 do
-		local random_level_key = UnlockableLevels[i]
+	for i = 1, #levels, 1 do
+		local random_level_key = levels[i]
 		local random_level_settings = LevelSettings[random_level_key]
 		local game_mode = random_level_settings.game_mode
 
@@ -695,9 +692,9 @@ MatchmakingManager.get_random_adventure_level = function (self, level_area, diff
 
 	return level_key
 end
-MatchmakingManager.get_random_survival_level = function (self, level_area, difficulty_rank, statistics_db, player_stats_id)
+MatchmakingManager.get_random_survival_level = function (self, level_area, difficulty_rank, statistics_db, player_stats_id, optional_level_list)
 	local random_level_list = {}
-	local playable_levels = SurvivalLevels
+	local playable_levels = optional_level_list or SurvivalLevels
 
 	for i = 1, #playable_levels, 1 do
 		local random_level_key = playable_levels[i]
@@ -723,22 +720,30 @@ MatchmakingManager.level_unlocked_at_difficulty = function (self, level_key, dif
 
 	local level_unlocked_difficulty_index = LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
 	local difficulties, starting_difficulty = Managers.state.difficulty:get_level_difficulties(level_key)
-	local level_unlocked_difficulty = difficulties[level_unlocked_difficulty_index]
-	local level_unlocked_difficulty_rank = DifficultySettings[level_unlocked_difficulty].rank
-	local levels_settings = LevelSettings[level_key]
-	local starting_difficulty_rank = DifficultySettings[starting_difficulty].rank
-	level_unlocked_difficulty_rank = math.max(level_unlocked_difficulty_rank, starting_difficulty_rank)
+	local starting_difficulty_index = table.find(difficulties, starting_difficulty)
+	level_unlocked_difficulty_index = math.max(level_unlocked_difficulty_index, starting_difficulty_index)
+	local selected_difficulty_index = nil
 
-	if difficulty_rank <= level_unlocked_difficulty_rank then
+	for _, difficulty_name in ipairs(difficulties) do
+		local settings = DifficultySettings[difficulty_name]
+
+		if settings.rank == difficulty_rank then
+			selected_difficulty_index = table.find(difficulties, difficulty_name)
+
+			break
+		end
+	end
+
+	if selected_difficulty_index <= level_unlocked_difficulty_index then
 		return true
 	end
 
 	return false
 end
-MatchmakingManager.find_game = function (self, level_key, difficulty, private_game, quick_game, game_mode, area, t)
+MatchmakingManager.find_game = function (self, level_key, difficulty, private_game, quick_game, game_mode, area, t, level_filter)
 	if self.is_server then
 		table.clear(self.ready_peers)
-		mm_printf("Starting to search for a game with settings: level_key=%s, difficulty=%s, private_game=%s, quick_game=%s", level_key, difficulty, tostring(private_game), tostring(quick_game))
+		mm_printf("Starting to search for a game with settings: level_key=%s, difficulty=%s, private_game=%s, quick_game=%s, level_filter=%s", level_key, difficulty, tostring(private_game), tostring(quick_game), (level_filter and "yes") or "no")
 		self.profile_synchronizer:update_lobby_profile_data()
 
 		local player_manager = Managers.player
@@ -751,8 +756,14 @@ MatchmakingManager.find_game = function (self, level_key, difficulty, private_ga
 
 		assert(difficulty_rank, "Could not get the difficulty rank from difficulty: ", difficulty)
 
-		if quick_game then
-			level_key = self.get_random_level(self, area, game_mode, difficulty_rank, statistics_db, player_stats_id)
+		if quick_game or level_filter then
+			if level_filter then
+				area = nil
+
+				table.shuffle(level_filter)
+			end
+
+			level_key = self.get_random_level(self, area, game_mode, difficulty_rank, statistics_db, player_stats_id, level_filter)
 			local levels_settings = LevelSettings[level_key]
 			local map_settings = levels_settings.map_settings
 			game_mode = levels_settings.game_mode
@@ -763,6 +774,7 @@ MatchmakingManager.find_game = function (self, level_key, difficulty, private_ga
 			player_peer_id = self.peer_id,
 			difficulty = difficulty,
 			level_key = level_key,
+			level_filter = level_filter,
 			game_mode = game_mode,
 			area = area,
 			quick_game = quick_game,
@@ -1321,8 +1333,9 @@ MatchmakingManager.hot_join_sync = function (self, peer_id)
 		local lobby = self.lobby
 		local stored_lobby_data = lobby.get_stored_lobby_data(lobby)
 		local peer_name = profile_owner.peer_id .. ":1"
-		stored_lobby_data[player_slot_name] = lobby.set_lobby_data(lobby, stored_lobby_data)
+		stored_lobby_data[player_slot_name] = peer_name
 
+		lobby.set_lobby_data(lobby, stored_lobby_data)
 		mm_printf("Assigned player %s to slot %s when hot join syncing", peer_name, player_slot_name)
 	end
 
@@ -1357,8 +1370,8 @@ MatchmakingManager.everyone_has_profile = function (self)
 
 	return num_peers == num_profiles_taken
 end
-MatchmakingManager.all_peers_ready = function (self)
-	if not self.ready_peers[Network.peer_id()] then
+MatchmakingManager.all_peers_ready = function (self, ignore_self)
+	if not ignore_self and not self.ready_peers[Network.peer_id()] then
 		return false
 	end
 
@@ -1373,6 +1386,10 @@ MatchmakingManager.all_peers_ready = function (self)
 	return true
 end
 MatchmakingManager.set_status_message = function (self, status_message)
+	if status_message == self.current_status_message then
+		return 
+	end
+
 	self.current_status_message = status_message
 
 	self.matchmaking_ui:large_window_set_status_message(status_message)
@@ -1450,7 +1467,7 @@ MatchmakingManager.add_filter_requirements = function (self, distance_filter)
 		}
 	}
 
-	if not game_search_data.quick_game then
+	if not game_search_data.quick_game and not game_search_data.level_filter then
 		requirements.filters.selected_level_key = {
 			value = game_search_data.level_key,
 			comparison = LobbyComparison.EQUAL
@@ -1509,7 +1526,9 @@ end
 MatchmakingManager.cancel_join_lobby = function (self, reason)
 	self.state_context.join_by_lobby_browser = nil
 
-	self.lobby_browser_view_ui:cancel_join_lobby(reason)
+	if self.lobby_browser_view_ui then
+		self.lobby_browser_view_ui:cancel_join_lobby(reason)
+	end
 
 	return 
 end

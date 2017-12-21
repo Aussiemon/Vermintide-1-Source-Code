@@ -1,5 +1,6 @@
 local definitions = local_require("scripts/ui/views/ingame_player_list_ui_definitions")
 local generic_input_actions = definitions.generic_input_actions
+local PLAYER_NAME_MAX_LENGTH = 16
 IngamePlayerListUI = class(IngamePlayerListUI)
 IngamePlayerListUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -9,20 +10,18 @@ IngamePlayerListUI.init = function (self, ingame_ui_context)
 	self.player_manager = ingame_ui_context.player_manager
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.level_transition_handler = ingame_ui_context.level_transition_handler
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.is_in_inn = ingame_ui_context.is_in_inn
 	self.voip = ingame_ui_context.voip
 	self.map_save_data = PlayerData.map_view_data or {}
 	self.platform = Application.platform()
-	local loaded_player_list_controls = PlayerData.controls and PlayerData.controls.player_list_input
-	local player_list_keymap = table.clone(IngamePlayerListKeymaps)
-
-	if loaded_player_list_controls and loaded_player_list_controls.keymap then
-		table.merge_recursive(player_list_keymap, loaded_player_list_controls.keymap)
-	end
-
+	self.is_server = ingame_ui_context.is_server
+	self.network_server = ingame_ui_context.network_server
 	local input_manager = self.input_manager
 
-	input_manager.create_input_service(input_manager, "player_list_input", player_list_keymap)
+	input_manager.create_input_service(input_manager, "player_list_input", "IngamePlayerListKeymaps", "IngamePlayerListFilters")
 	input_manager.map_device_to_service(input_manager, "player_list_input", "keyboard")
 	input_manager.map_device_to_service(input_manager, "player_list_input", "mouse")
 	input_manager.map_device_to_service(input_manager, "player_list_input", "gamepad")
@@ -43,6 +42,15 @@ IngamePlayerListUI.init = function (self, ingame_ui_context)
 	local input_service = input_manager.get_service(input_manager, "player_list_input")
 	local gui_layer = definitions.scenegraph_definition.root.position[3]
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 6, gui_layer, generic_input_actions.default)
+	local gamemode_settings = Managers.state.game_mode:settings()
+	local private_only = gamemode_settings.private_only
+	self.private_only = private_only
+	self.private_setting_enabled = not private_only and not self.is_in_inn and self.local_player.is_server and self.platform ~= "xb1"
+
+	if self.private_setting_enabled then
+		self.menu_input_description:set_input_description(definitions.private_input_description)
+	end
+
 	local network_manager = Managers.state.network
 	local network_transmit = network_manager.network_transmit
 	local server_peer_id = network_transmit.server_peer_id
@@ -66,6 +74,7 @@ IngamePlayerListUI.create_ui_elements = function (self)
 	self.player_list_widgets = player_list_widgets
 	self.popup_list = UIWidget.init(definitions.popup_widget_definition)
 	self.private_checkbox_widget = UIWidget.init(definitions.widget_definitions.private_checkbox)
+	self.private_text_gamepad_widget = UIWidget.init(definitions.widget_definitions.private_text_gamepad)
 
 	return 
 end
@@ -104,22 +113,21 @@ IngamePlayerListUI.set_difficulty_name = function (self, name)
 end
 IngamePlayerListUI.add_player = function (self, player)
 	local is_local_player = player.local_player
-	local level = ExperienceSettings.get_player_level(player) or "n/a"
+	local player_level = ExperienceSettings.get_player_level(player)
 	local peer_id = player.network_id(player)
 	local is_player_server = self.host_peer_id == peer_id
-	local player_name_max_length = 22
-	local player_name = player.name(player)
-	local player = {
+	local player_data = {
 		is_local_player = is_local_player,
 		peer_id = peer_id,
 		local_player_id = player.local_player_id(player),
 		player = player,
-		player_name = UIRenderer.crop_text(player_name, player_name_max_length),
-		level = level,
+		player_name = player.name(player),
+		level = player_level or "n/a",
+		resync_player_level = not player_level,
 		is_server = is_player_server
 	}
 	self.num_players = self.num_players + 1
-	self.players[self.num_players] = player
+	self.players[self.num_players] = player_data
 
 	return 
 end
@@ -154,16 +162,28 @@ IngamePlayerListUI.update_widgets = function (self)
 	local can_start_vote = Managers.state.voting:can_start_vote("kick_player")
 	local vote_kick_enabled = Managers.state.voting:vote_kick_enabled()
 	local private_game = Managers.matchmaking:is_game_private()
-	local can_kick = can_start_vote and vote_kick_enabled and not private_game
+	local can_kick = can_start_vote and vote_kick_enabled
 	local is_pc = self.platform == "win32"
 
 	for i = 1, num_players, 1 do
-		local player = players[i]
-		local is_local_player = player.is_local_player
-		local is_server = player.is_server
+		local player_data = players[i]
+		local is_local_player = player_data.is_local_player
+		local is_server = player_data.is_server
+		local can_kick_player = not is_server and (can_kick or self.can_host_solo_kick(self))
 		local widget = self.player_list_widgets[i]
 		local widget_content = widget.content
 		widget_content.show_host = is_server
+		local resync_player_level = player_data.resync_player_level
+
+		if resync_player_level then
+			local player = player_data.player
+			local player_level = ExperienceSettings.get_player_level(player)
+
+			if player_level then
+				player_data.level = player_level
+				player_data.resync_player_level = nil
+			end
+		end
 
 		if is_local_player then
 			widget_content.show_chat_button = false
@@ -176,12 +196,12 @@ IngamePlayerListUI.update_widgets = function (self)
 			widget_content.voice_button_hotspot.disable_button = true
 			widget_content.profile_button_hotspot.disable_button = true
 		else
-			if is_server or not can_kick then
-				widget_content.show_kick_button = false
-				widget_content.kick_button_hotspot.disable_button = true
-			else
+			if can_kick_player then
 				widget_content.show_kick_button = true
 				widget_content.kick_button_hotspot.disable_button = false
+			else
+				widget_content.show_kick_button = false
+				widget_content.kick_button_hotspot.disable_button = true
 			end
 
 			widget_content.show_profile_button = true
@@ -191,13 +211,16 @@ IngamePlayerListUI.update_widgets = function (self)
 			widget_content.profile_button_hotspot.disable_button = false
 			widget_content.chat_button_hotspot.disable_button = not is_pc
 			widget_content.voice_button_hotspot.disable_button = false
-			widget_content.chat_button_hotspot.is_selected = self.ignoring_chat_peer_id(self, player.peer_id)
-			widget_content.voice_button_hotspot.is_selected = self.muted_peer_id(self, player.peer_id)
+			widget_content.chat_button_hotspot.is_selected = self.ignoring_chat_peer_id(self, player_data.peer_id)
+			widget_content.voice_button_hotspot.is_selected = self.muted_peer_id(self, player_data.peer_id)
 		end
+
+		local name = player_data.player_name
+		player_data.player_name = (PLAYER_NAME_MAX_LENGTH < UTF8Utils.string_length(name) and UIRenderer.crop_text_width(self.ui_renderer, name, 370, widget.style.name)) or name
 
 		self.align_player_buttons(self, widget)
 
-		player.widget = widget
+		player_data.widget = widget
 	end
 
 	return 
@@ -389,17 +412,20 @@ IngamePlayerListUI.update = function (self, dt)
 				WwiseWorld.trigger_event(self.wwise_world, "Play_hud_hover")
 			end
 
-			if private_checkbox_hotspot.on_release or (gamepad_active and input_service.get(input_service, "special_1")) then
+			if self.private_setting_enabled and (private_checkbox_hotspot.on_release or (gamepad_active and input_service.get(input_service, "toggle_private"))) then
 				local map_save_data = self.map_save_data
 				map_save_data.private_enabled = not map_save_data.private_enabled
 
 				WwiseWorld.trigger_event(self.wwise_world, "Play_hud_select")
-				self.set_privacy_enabled(self, map_save_data.private_enabled)
+				self.set_privacy_enabled(self, map_save_data.private_enabled, true)
 
 				PlayerData.map_view_data = map_save_data
 
 				Managers.save:auto_save(SaveFileName, SaveData, callback(self, "on_save_ended_callback"))
-				Managers.matchmaking:set_in_progress_game_privacy(map_save_data.private_enabled)
+
+				local matchmaking_manager = Managers.matchmaking
+
+				matchmaking_manager.set_in_progress_game_privacy(matchmaking_manager, map_save_data.private_enabled)
 			end
 		end
 
@@ -411,6 +437,7 @@ IngamePlayerListUI.update = function (self, dt)
 			end
 
 			self.handle_gamepad_navigation_input(self, dt)
+			self._update_gamepad_private_text_animation(self, dt)
 		elseif self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = false
 
@@ -422,9 +449,48 @@ IngamePlayerListUI.update = function (self, dt)
 
 	return 
 end
-IngamePlayerListUI.set_privacy_enabled = function (self, enabled)
+IngamePlayerListUI.set_privacy_enabled = function (self, enabled, animate)
 	local widget = self.private_checkbox_widget
 	widget.content.selected = enabled
+	local text = (enabled and "map_screen_private_button") or "map_public_setting"
+	self.private_text_gamepad_widget.content.text = Localize(text)
+
+	if animate then
+		self._private_timer = 0
+	end
+
+	return 
+end
+IngamePlayerListUI._update_gamepad_private_text_animation_timer = function (self, dt)
+	local timer = self._private_timer
+
+	if timer then
+		local total_time = 0.15
+
+		if timer == total_time then
+			self._private_timer = nil
+
+			return 
+		else
+			timer = math.min(timer + dt, total_time)
+			self._private_timer = timer
+
+			return timer/total_time
+		end
+	end
+
+	return 
+end
+IngamePlayerListUI._update_gamepad_private_text_animation = function (self, dt, instant)
+	local progress = self._update_gamepad_private_text_animation_timer(self, dt)
+
+	if not progress then
+		return 
+	end
+
+	local anim_progress = math.ease_pulse(progress)
+	local text_style = self.private_text_gamepad_widget.style.text
+	text_style.font_size = anim_progress*10 + 22
 
 	return 
 end
@@ -557,21 +623,29 @@ IngamePlayerListUI.update_input_description = function (self)
 			local voice_mute_enabled = widget_content.show_voice_button
 			local chat_muted = widget_content.chat_button_hotspot.is_selected
 			local voice_muted = widget_content.voice_button_hotspot.is_selected
+			local can_start_vote = Managers.state.voting:can_start_vote("kick_player")
+			local vote_kick_enabled = Managers.state.voting:vote_kick_enabled()
+			local private_game = Managers.matchmaking:is_game_private()
+			local can_kick = can_start_vote and vote_kick_enabled and not private_game
 
 			if chat_muted and voice_muted then
-				if is_server then
+				if is_server or not can_kick then
 					actions_name_to_use = "server_voice_and_chat_muted"
 				else
 					actions_name_to_use = "voice_and_chat_muted"
 				end
 			elseif chat_muted then
-				if is_server then
+				if is_server or not can_kick then
 					actions_name_to_use = "server_chat_muted"
 				else
 					actions_name_to_use = "chat_muted"
 				end
+			elseif not can_kick and not voice_muted and not is_server then
+				actions_name_to_use = "kick_unavailable"
+			elseif not can_kick and voice_muted and not is_server then
+				actions_name_to_use = "voice_and_kick_unavailable"
 			elseif voice_muted then
-				if is_server then
+				if is_server or not can_kick then
 					actions_name_to_use = "server_voice_muted"
 				else
 					actions_name_to_use = "voice_muted"
@@ -794,7 +868,7 @@ IngamePlayerListUI.draw = function (self, dt)
 	local input_service = input_manager.get_service(input_manager, "player_list_input")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if not gamepad_active and not self.cursor_active then
 		UIRenderer.draw_widget(ui_renderer, self.input_description_text_widget)
@@ -803,8 +877,12 @@ IngamePlayerListUI.draw = function (self, dt)
 	UIRenderer.draw_widget(ui_renderer, self.background)
 	UIRenderer.draw_widget(ui_renderer, self.headers)
 
-	if self.local_player.is_server and not self.is_in_inn then
-		UIRenderer.draw_widget(ui_renderer, self.private_checkbox_widget)
+	if self.private_setting_enabled then
+		if gamepad_active then
+			UIRenderer.draw_widget(ui_renderer, self.private_text_gamepad_widget)
+		else
+			UIRenderer.draw_widget(ui_renderer, self.private_checkbox_widget)
+		end
 	end
 
 	local players = self.players
@@ -825,13 +903,22 @@ IngamePlayerListUI.draw = function (self, dt)
 
 	return 
 end
+IngamePlayerListUI.can_host_solo_kick = function (self)
+	return self.is_server and Managers.player:num_human_players() == 2
+end
 IngamePlayerListUI.kick_player = function (self, player)
-	local vote_data = {
-		kick_peer_id = player.peer_id
-	}
+	local kick_peer_id = player.peer_id
 
-	Managers.state.voting:request_vote("kick_player", vote_data, Network.peer_id())
-	self.set_active(self, false)
+	if self.can_host_solo_kick(self) then
+		self.network_server:kick_peer(kick_peer_id)
+	else
+		local vote_data = {
+			kick_peer_id = kick_peer_id
+		}
+
+		Managers.state.voting:request_vote("kick_player", vote_data, Network.peer_id())
+		self.set_active(self, false)
+	end
 
 	return 
 end
@@ -856,6 +943,16 @@ IngamePlayerListUI.show_profile_by_peer_id = function (self, peer_id)
 		local url = "http://steamcommunity.com/profiles/" .. id
 
 		Steam.open_url(url)
+	elseif platform == "xb1" then
+		local xuid = self.network_lobby.lobby:xuid(peer_id)
+
+		if xuid then
+			XboxLive.show_gamercard(Managers.account:user_id(), xuid)
+		end
+	elseif platform == "ps4" then
+		local np_id = self.network_lobby.lobby:np_id_from_peer_id(peer_id)
+
+		Managers.account:show_player_profile_with_np_id(np_id)
 	end
 
 	return 

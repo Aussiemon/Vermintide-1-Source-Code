@@ -1,7 +1,8 @@
 local function debug_print(format, ...)
-	if script_data.package_debug then
-		print(string.format("[PackageManager] " .. format, ...))
+	if not script_data.package_debug then
 	end
+
+	print(string.format("[PackageManager] " .. format, ...))
 
 	return 
 end
@@ -28,7 +29,7 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 			if callback then
 				Profiler.start("PACKAGE CALLBACK")
 				callback()
-				Profiler.stop()
+				Profiler.stop("PACKAGE CALLBACK")
 			end
 		elseif not asynchronous and self._queued_async_packages[package_name] then
 			self.force_load_queued_package(self, package_name)
@@ -36,7 +37,7 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 			if callback then
 				Profiler.start("PACKAGE CALLBACK")
 				callback()
-				Profiler.stop()
+				Profiler.stop("PACKAGE CALLBACK")
 			end
 		elseif self._asynch_packages[package_name] then
 			local callbacks = self._asynch_packages[package_name].callbacks
@@ -54,7 +55,7 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 		elseif callback then
 			Profiler.start("PACKAGE CALLBACK")
 			callback()
-			Profiler.stop()
+			Profiler.stop("PACKAGE CALLBACK")
 		end
 	else
 		assert(self._packages[package_name] == nil, "Package '" .. tostring(package_name) .. "' is already loaded")
@@ -86,7 +87,7 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 
 			self._packages[package_name] = resource_handle
 
-			Profiler.stop()
+			Profiler.stop(string.format("Load: %q", package_name))
 		else
 			local resource_handle = Application.resource_package(package_name)
 
@@ -115,7 +116,7 @@ PackageManager.force_load = function (self, package_name)
 	assert(not self._packages[package_name], "Package %q is already loaded", package_name)
 	Profiler.start("Flush resource package")
 	ResourcePackage.flush(resource_handle)
-	Profiler.stop()
+	Profiler.stop("Flush resource package")
 
 	self._packages[package_name] = resource_handle
 	self._asynch_packages[package_name] = nil
@@ -127,7 +128,7 @@ PackageManager.force_load = function (self, package_name)
 			callback()
 		end
 
-		Profiler.stop()
+		Profiler.stop("PACKAGE CALLBACK")
 	end
 
 	self._pop_queue(self)
@@ -147,7 +148,7 @@ PackageManager.force_load_queued_package = function (self, package_name)
 	assert(not self._packages[package_name], "Package %q is already loaded", package_name)
 	Profiler.start("Flush resource package")
 	ResourcePackage.flush(resource_handle)
-	Profiler.stop()
+	Profiler.stop("Flush resource package")
 
 	self._packages[package_name] = resource_handle
 	self._queued_async_packages[package_name] = nil
@@ -159,7 +160,7 @@ PackageManager.force_load_queued_package = function (self, package_name)
 			callback()
 		end
 
-		Profiler.stop()
+		Profiler.stop("PACKAGE CALLBACK")
 	end
 
 	local index = table.find(self._queue_order, package_name)
@@ -301,7 +302,7 @@ PackageManager.update = function (self)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("Update()")
 
 	return 
 end

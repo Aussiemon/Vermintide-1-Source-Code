@@ -35,7 +35,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -57,7 +57,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_falling.run(node_falling, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("falling")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -83,7 +83,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -105,7 +105,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_blocked.run(node_blocked, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("blocked")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -130,7 +130,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -152,7 +152,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_in_combat.run(node_in_combat, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("in_combat")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -174,7 +174,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_move_to_goal.run(node_move_to_goal, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("move_to_goal")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -196,7 +196,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_alerted.run(node_alerted, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("alerted")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -216,7 +216,7 @@ BTSelector_storm_vermin.run = function (self, unit, blackboard, t, dt)
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

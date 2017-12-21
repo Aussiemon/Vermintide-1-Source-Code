@@ -100,7 +100,7 @@ local function create_input_description_widgets(amount)
 			horizontal_alignment = "left",
 			parent = scenegraph_icon_id,
 			size = {
-				400,
+				500,
 				40
 			},
 			position = {
@@ -164,6 +164,9 @@ MenuInputDescriptionUI.init = function (self, ingame_ui_context, ui_renderer, in
 	self.input_service = input_service
 	self.ui_renderer = ui_renderer
 	self.generic_actions = generic_actions
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	scenegraph_definition.root.position[3] = layer + 10 or UILayer.controller_description
 
 	self.create_ui_elements(self, ui_renderer, number_of_elements)
@@ -183,7 +186,7 @@ MenuInputDescriptionUI.draw = function (self, dt)
 	local input_service = self.input_service
 	local ui_renderer = self.ui_renderer
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local number_of_descriptions_in_use = self.number_of_descriptions_in_use
 	local console_description_widgets = self.console_input_description_widgets
@@ -372,39 +375,16 @@ end
 MenuInputDescriptionUI.get_gamepad_input_texture_data = function (self, input_action, ignore_keybinding)
 	local platform = Application.platform()
 
-	if ignore_keybinding then
-		if platform == "win32" then
-			platform = "xb1"
-		end
+	if platform == "win32" then
+		platform = "xb1"
+	end
 
+	if ignore_keybinding then
 		return ButtonTextureByName(input_action, platform)
 	else
 		local input_service = self.input_service
-		local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-		local input_mappings = keymap_bindings.input_mappings
 
-		for i = 1, #input_mappings, 1 do
-			local input_mapping = input_mappings[i]
-
-			for j = 1, input_mapping.n, 3 do
-				local device_type = input_mapping[j]
-				local key_index = input_mapping[j + 1]
-				local key_action_type = input_mapping[j + 2]
-
-				if device_type == "gamepad" then
-					local button_name = Pad1.button_name(key_index)
-					local button_texture_data = nil
-
-					if platform == "xb1" or platform == "win32" then
-						button_texture_data = ButtonTextureByName(button_name, "xb1")
-					else
-						button_texture_data = ButtonTextureByName(button_name, "ps4")
-					end
-
-					return button_texture_data, button_name
-				end
-			end
-		end
+		return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 	end
 
 	return 

@@ -4,8 +4,13 @@ RagdollSettings = {
 }
 
 if Application.platform() == "xb1" then
-	RagdollSettings.min_num_ragdolls = 0
-	RagdollSettings.max_num_ragdolls = 0
+	RagdollSettings.min_num_ragdolls = 5
+	RagdollSettings.max_num_ragdolls = 5
+end
+
+if Application.platform() == "ps4" then
+	RagdollSettings.min_num_ragdolls = 5
+	RagdollSettings.max_num_ragdolls = 5
 end
 
 return 

@@ -12,6 +12,8 @@ ActionGeiser.init = function (self, world, item_name, is_server, owner_unit, dam
 		self.overcharge_extension = ScriptUnit.extension(weapon_unit, "overcharge_system")
 	end
 
+	self._damage_buffer = {}
+	self._damage_buffer_index = 1
 	self.network_transmit = Managers.state.network.network_transmit
 
 	return 
@@ -26,6 +28,10 @@ ActionGeiser.client_owner_start_action = function (self, new_action, t, chain_ac
 	self.position = chain_action_data.position
 	self.targeting_effect_id = chain_action_data.targeting_effect_id
 
+	table.clear(self._damage_buffer)
+
+	self._damage_buffer_index = 1
+
 	return 
 end
 ActionGeiser.client_owner_post_update = function (self, dt, t, world, can_damage)
@@ -38,7 +44,15 @@ ActionGeiser.client_owner_post_update = function (self, dt, t, world, can_damage
 	if self.state == "shooting" then
 		self.fire(self)
 
-		self.state = "shot"
+		self.state = "doing_damage"
+	end
+
+	if self.state == "doing_damage" then
+		local done = self._update_damage(self)
+
+		if done then
+			self.state = "shot"
+		end
 	end
 
 	return 
@@ -48,6 +62,8 @@ ActionGeiser.finish = function (self, reason)
 		World.destroy_particles(self.world, self.targeting_effect_id)
 	end
 
+	self.position = nil
+
 	return 
 end
 ActionGeiser.fire = function (self, reason)
@@ -55,21 +71,33 @@ ActionGeiser.fire = function (self, reason)
 	local world = self.world
 	local is_server = self.is_server
 	local owner_unit = self.owner_unit
+	local weapon_system = Managers.state.entity:system("weapon_system")
 	local radius = self.radius
 	local half_height = self.height*0.5
 	local position = self.position:unbox()
 	local physics_world = World.get_data(self.world, "physics_world")
+	local network_manager = Managers.state.network
 	local start_pos = position + Vector3(0, 0, half_height)
 	local source_pos = position
-	local hit_actors, num_actors = PhysicsWorld.immediate_overlap(physics_world, "shape", "capsule", "position", start_pos, "size", Vector3(radius, half_height + radius, radius), "rotation", Quaternion.look(Vector3.up(), Vector3.up()), "collision_filter", "filter_enemy_unit", "use_global_table")
+	local hit_actors, num_actors = PhysicsWorld.immediate_overlap(physics_world, "shape", "capsule", "position", start_pos, "size", Vector3(radius, half_height + radius, radius), "rotation", Quaternion.look(Vector3.up(), Vector3.up()), "collision_filter", "filter_character_trigger", "use_global_table")
 	local charge_value = self.charge_value
 	local effect_name = current_action.particle_effect
 	local size = "_large"
+	local overcharge = current_action.overcharge_type
+	local ignore_hitting_allies = not Managers.state.difficulty:get_difficulty_settings().friendly_fire_ranged
 
 	if charge_value < 0.33 then
 		size = "_small"
 	elseif charge_value < 0.66 then
 		size = "_medium"
+	elseif 1 <= charge_value and not global_is_inside_inn then
+		local owner_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+		local damage_source_id = NetworkLookup.damage_sources.dot_debuff
+		local explosion_template_name = current_action.aoe_name
+		local explosion_template_id = NetworkLookup.explosion_templates[explosion_template_name]
+		overcharge = current_action.overcharge_type_heavy
+
+		self.network_transmit:send_rpc_server("rpc_client_create_aoe", owner_unit_id, source_pos, damage_source_id, explosion_template_id)
 	end
 
 	effect_name = effect_name .. size
@@ -81,7 +109,7 @@ ActionGeiser.fire = function (self, reason)
 	self.network_transmit:send_rpc_server("rpc_play_simple_particle_with_vector_variable", effect_id, position, variable_id, radius_variable)
 
 	if self.overcharge_extension then
-		self.overcharge_extension:add_charge(current_action.overcharge_type, charge_value)
+		self.overcharge_extension:add_charge(overcharge, charge_value)
 	end
 
 	local fire_sound_event = self.current_action.fire_sound_event
@@ -93,6 +121,10 @@ ActionGeiser.fire = function (self, reason)
 		first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event, nil, play_on_husk)
 	end
 
+	local damage_buffer = self._damage_buffer
+	local hit_units = {}
+	local num_hit = 0
+
 	if 0 < num_actors then
 		for i = 1, num_actors, 1 do
 			local hit_actor = hit_actors[i]
@@ -100,17 +132,10 @@ ActionGeiser.fire = function (self, reason)
 			local hit_position = POSITION_LOOKUP[hit_unit]
 			local breed = Unit.get_data(hit_unit, "breed")
 
-			if breed then
-				DamageUtils.buff_on_attack(owner_unit, hit_unit, "aoe")
-
-				local network_manager = Managers.state.network
-				local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
-				local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
-				local hit_zone_id = NetworkLookup.hit_zones.torso
+			if not hit_units[hit_unit] and (breed or (table.contains(PLAYER_AND_BOT_UNITS, hit_unit) and not ignore_hitting_allies)) then
 				local attack_vector = hit_position - source_pos
 				local attack_distance = Vector3.length(attack_vector)
-				local attack_direction = Vector3.normalize(attack_vector)
-				local attack_template = AttackTemplates[current_action.attack_template]
+				local attack_template_name = nil
 
 				if current_action.attack_template_list then
 					local proximity_factor = attack_distance/radius
@@ -122,27 +147,23 @@ ActionGeiser.fire = function (self, reason)
 						pick_this_one = 2
 					end
 
-					attack_template = AttackTemplates[current_action.attack_template_list[pick_this_one]]
-				end
-
-				local attack_template_id = attack_template.lookup_id
-				local attack_template_damage_type_name = current_action.attack_template_damage_type
-				local attack_template_damage_type_id = 0
-
-				if attack_template_damage_type_name then
-					local attack_template_damage_type = AttackDamageValues[attack_template_damage_type_name]
-					attack_template_damage_type_id = attack_template_damage_type.lookup_id
-				end
-
-				local backstab_multiplier = 1
-
-				if is_server or LEVEL_EDITOR_TEST then
-					local weapon_system = Managers.state.entity:system("weapon_system")
-
-					weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+					attack_template_name = current_action.attack_template_list[pick_this_one]
 				else
-					network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+					attack_template_name = current_action.attack_template
 				end
+
+				local attack_template_damage_type_name = current_action.attack_template_damage_type
+				local backstab_multiplier = 1
+				hit_units[hit_unit] = true
+				local damage_data = {
+					hit_ragdoll_actor = "n/a",
+					hit_zone_name = "torso",
+					unit = hit_unit,
+					attack_template_name = attack_template_name,
+					attack_template_damage_type_name = attack_template_damage_type_name or "n/a",
+					backstab_multiplier = backstab_multiplier
+				}
+				damage_buffer[#damage_buffer + 1] = damage_data
 			end
 		end
 	end
@@ -150,6 +171,54 @@ ActionGeiser.fire = function (self, reason)
 	if current_action.alert_enemies then
 		Managers.state.entity:system("ai_system"):alert_enemies_within_range(owner_unit, source_pos, current_action.alert_sound_range_fire)
 	end
+
+	return 
+end
+local UNITS_PER_FRAME = 1
+ActionGeiser._update_damage = function (self)
+	local damage_buffer = self._damage_buffer
+	local damage_buffer_index = self._damage_buffer_index
+	local num_units = (damage_buffer_index + UNITS_PER_FRAME) - 1
+	local network_manager = Managers.state.network
+	local weapon_system = Managers.state.entity:system("weapon_system")
+	local is_server = self.is_server
+	local owner_unit = self.owner_unit
+	local damage_source_id = NetworkLookup.damage_sources[self.item_name]
+	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+	local position = self.position:unbox()
+
+	for i = damage_buffer_index, num_units, 1 do
+		local damage_data = damage_buffer[i]
+
+		if not damage_data then
+			return true
+		end
+
+		local unit = damage_data.unit
+
+		if not Unit.alive(unit) then
+		else
+			DamageUtils.buff_on_attack(owner_unit, unit, "aoe")
+
+			local hit_unit_id = network_manager.unit_game_object_id(network_manager, unit)
+			local attack_template_id = NetworkLookup.attack_templates[damage_data.attack_template_name]
+			local hit_zone_id = NetworkLookup.hit_zones[damage_data.hit_zone_name]
+			local hit_position = POSITION_LOOKUP[unit]
+			local attack_vector = hit_position - position
+			local attack_direction = Vector3.normalize(attack_vector)
+			local attack_template_damage_type_id = NetworkLookup.attack_damage_values[damage_data.attack_template_damage_type_name]
+			local hit_ragdoll_actor_id = NetworkLookup.hit_ragdoll_actors[damage_data.hit_ragdoll_actor]
+			local backstab_multiplier = damage_data.backstab_multiplier
+
+			if is_server or LEVEL_EDITOR_TEST then
+				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
+			else
+				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
+			end
+		end
+	end
+
+	self._damage_buffer_index = num_units + 1
 
 	return 
 end

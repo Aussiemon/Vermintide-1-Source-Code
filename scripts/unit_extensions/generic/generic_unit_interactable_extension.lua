@@ -1,8 +1,8 @@
 GenericUnitInteractableExtension = class(GenericUnitInteractableExtension)
 GenericUnitInteractableExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.unit = unit
-	self.active = false
 	self.interactable_type = Unit.get_data(unit, "interaction_data", "interaction_type")
+	self.interactor_unit = nil
 
 	fassert(self.interactable_type, "Unit: %s missing interaction_type in its unit data, should it have an interaction extension?", unit)
 
@@ -14,15 +14,19 @@ end
 GenericUnitInteractableExtension.interaction_type = function (self)
 	return self.interactable_type
 end
-GenericUnitInteractableExtension.set_is_being_interacted_with = function (self, active)
-	assert(self.active ~= active, "Tried changing active state to what it already was.")
+GenericUnitInteractableExtension.set_is_being_interacted_with = function (self, interactor_unit)
+	if self.interactor_unit then
+		assert(interactor_unit == nil, "Interactor unit was already set.")
+	else
+		assert(interactor_unit ~= nil, "Interactor unit was already nil.")
+	end
 
-	self.active = active
+	self.interactor_unit = interactor_unit
 
 	return 
 end
 GenericUnitInteractableExtension.is_being_interacted_with = function (self)
-	return self.active
+	return self.interactor_unit
 end
 
 return 

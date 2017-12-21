@@ -17,8 +17,8 @@ local has_steam = rawget(_G, "Steam") and rawget(_G, "Steam").connected() and no
 local disable_voip = Development.parameter("disable_voip")
 
 if has_steam and not disable_voip then
-	Voip.init = function (self, is_server, my_peer_id, connection_handler)
-		self.connection_handler = connection_handler
+	Voip.init = function (self, params)
+		self.connection_handler = params.connection_handler
 
 		voip_info_print("[VOIP] Initializing Steam Voip")
 
@@ -43,10 +43,12 @@ if has_steam and not disable_voip then
 		local added_members = {}
 		self.added_members = added_members
 		self.muted_peers = {}
+		local my_peer_id = params.my_peer_id
 		self.peer_id = my_peer_id
 		self.push_to_talk = Application.user_setting("voip_push_to_talk")
 		self.push_to_talk_active = false
 		self.enabled = Application.user_setting("voip_is_enabled")
+		local is_server = params.is_server
 
 		if is_server then
 			voip_info_print("[VOIP] Is server. Creating room / joining my own room.")
@@ -92,6 +94,9 @@ if has_steam and not disable_voip then
 
 		return 
 	end
+	Voip.set_input_manager = function (self, input_manager)
+		return 
+	end
 	Voip.register_rpcs = function (self, network_event_delegate, network_transmit)
 		self.network_transmit = network_transmit
 		self.network_event_delegate = network_event_delegate
@@ -118,7 +123,15 @@ if has_steam and not disable_voip then
 		return 
 	end
 	Voip.rpc_voip_room_request = function (self, sender, enter)
-		local room_members = SteamVoipRoom.members(self.room_id)
+		local room_id = self.room_id
+
+		if not self.is_server then
+			voip_warning_print("[VOIP] Got request from %s to %s but is not server", sender, (enter and "enter") or "leave")
+
+			return 
+		end
+
+		local room_members = SteamVoipRoom.members(room_id)
 		local member_is_in_room = table.find(room_members, sender)
 
 		if enter and not member_is_in_room then
@@ -170,7 +183,7 @@ if has_steam and not disable_voip then
 
 		return 
 	end
-	Voip.update = function (self)
+	Voip.update = function (self, dt)
 		SteamVoip.update(self)
 
 		if self.voip_client then
@@ -398,8 +411,14 @@ if has_steam and not disable_voip then
 
 		return 
 	end
+	Voip.is_talking = function (self, peer_id)
+		return false
+	end
 else
 	Voip.init = function (self)
+		return 
+	end
+	Voip.set_input_manager = function (self, input_manager)
 		return 
 	end
 	Voip.destroy = function (self)
@@ -436,6 +455,9 @@ else
 		return 
 	end
 	Voip.set_push_to_talk = function (self)
+		return 
+	end
+	Voip.is_talking = function (self)
 		return 
 	end
 end

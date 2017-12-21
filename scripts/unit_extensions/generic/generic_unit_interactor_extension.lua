@@ -3,6 +3,7 @@ require("scripts/unit_extensions/generic/interactions")
 
 GenericUnitInteractorExtension = class(GenericUnitInteractorExtension)
 INTERACT_RAY_DISTANCE = 2.5
+local chest_interactables = {}
 GenericUnitInteractorExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	local world = extension_init_context.world
 	local dice_keeper = extension_init_context.dice_keeper
@@ -64,19 +65,22 @@ GenericUnitInteractorExtension.destroy = function (self)
 	return 
 end
 local IGNORED_DAMAGE_TYPES = {
-	volume_generic_dot = true,
+	buff_shared_medpack = true,
 	buff = true,
-	aoe_poison_dot = true,
 	arrow_poison_dot = true,
+	volume_generic_dot = true,
+	heal = true,
 	damage_over_time = true,
 	poison = true,
 	globadier_gas_dot = true,
 	wounded_dot = true,
-	heal = true,
+	aoe_poison_dot = true,
 	burninating = true
 }
 GenericUnitInteractorExtension.update = function (self, unit, input, dt, context, t)
 	local world = self.world
+
+	table.clear(chest_interactables)
 
 	if self.state ~= "waiting_to_interact" and not Unit.alive(self.interaction_context.interactable_unit) then
 		InteractionHelper.printf("[GenericUnitInteractorExtension] not Unit.alive(self.interaction_context.interactable_unit)")
@@ -121,6 +125,10 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 	end
 
 	if self.state == "waiting_to_interact" and not self.status_extension:is_disabled() then
+		local res_w = RESOLUTION_LOOKUP.res_w
+		local res_h = RESOLUTION_LOOKUP.res_h
+		local center_x = res_w*0.5
+		local center_y = res_h*0.5
 		local interaction_context = self.interaction_context
 
 		if interaction_context.interactable_unit then
@@ -146,6 +154,9 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 			local camera_forward = Quaternion.forward(camera_rotation)
 			local hits, hits_n = self.physics_world:immediate_raycast(camera_position, camera_forward, INTERACT_RAY_DISTANCE, "all", "collision_filter", "filter_ray_interaction")
 			local hit_non_interaction_unit = false
+			local camera = self._get_player_camera(self)
+			local distance_score = math.huge
+			local selected_interaction_unit, selected_interaction_type = nil
 
 			for i = 1, hits_n, 1 do
 				local hit = hits[i]
@@ -162,18 +173,27 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 								local target_extension = ScriptUnit.extension(hit_unit, "interactable_system")
 								local target_interaction_type = target_extension.interaction_type(target_extension)
 								local can_interact, fail_reason, interaction_type = self.can_interact(self, hit_unit, target_interaction_type)
+								local is_in_chest = self._check_if_interactable_in_chest(self, hit_unit, camera_position)
 
-								if can_interact then
+								if (can_interact or fail_reason) and not is_in_chest then
 									local interaction_template = InteractionDefinitions[interaction_type]
 									local config = interaction_template.config or interaction_template.get_config()
 									local does_not_require_line_of_sight = config.does_not_require_line_of_sight
+									local score = self._claculate_interaction_distance_score(self, hit_unit, camera_position, center_x, center_y, camera)
+									local block_other_interactions = config.block_other_interactions
 
 									if (hit_non_interaction_unit and does_not_require_line_of_sight) or not hit_non_interaction_unit then
-										interaction_context.interactable_unit = hit_unit
-										interaction_context.interaction_type = interaction_type
-									end
+										if block_other_interactions then
+											interaction_context.interactable_unit = hit_unit
+											interaction_context.interaction_type = interaction_type
 
-									return 
+											return 
+										elseif score < distance_score then
+											selected_interaction_unit = hit_unit
+											selected_interaction_type = interaction_type
+											distance_score = score
+										end
+									end
 								end
 							else
 								hit_non_interaction_unit = true
@@ -183,6 +203,13 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 						end
 					end
 				end
+			end
+
+			if selected_interaction_unit then
+				interaction_context.interactable_unit = selected_interaction_unit
+				interaction_context.interaction_type = selected_interaction_type
+
+				return 
 			end
 
 			local self_pos = POSITION_LOOKUP[self.unit]
@@ -196,13 +223,17 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 				if actor then
 					local hit_unit = Actor.unit(actor)
 
-					if hit_unit and hit_unit ~= self.unit and ScriptUnit.has_extension(hit_unit, "interactable_system") then
-						local pos = POSITION_LOOKUP[hit_unit] or Unit.local_position(hit_unit, 0)
-						local dist = Vector3.distance_squared(self_pos, pos)
+					if hit_unit and hit_unit ~= self.unit then
+						local is_in_chest = self._check_if_interactable_in_chest(self, hit_unit, camera_position)
 
-						if dist < best_dist then
-							best_dist = dist
-							best_unit = hit_unit
+						if ScriptUnit.has_extension(hit_unit, "interactable_system") and not is_in_chest then
+							local pos = POSITION_LOOKUP[hit_unit] or Unit.local_position(hit_unit, 0)
+							local dist = Vector3.distance_squared(self_pos, pos)
+
+							if dist < best_dist then
+								best_dist = dist
+								best_unit = hit_unit
+							end
 						end
 					end
 				end
@@ -210,8 +241,13 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 
 			if best_unit then
 				local target_extension = ScriptUnit.extension(best_unit, "interactable_system")
-				interaction_context.interactable_unit = best_unit
-				interaction_context.interaction_type = target_extension.interaction_type(target_extension)
+				local target_interaction_type = target_extension.interaction_type(target_extension)
+				local can_interact, fail_reason, interaction_type = self.can_interact(self, best_unit, target_interaction_type)
+
+				if can_interact then
+					interaction_context.interactable_unit = best_unit
+					interaction_context.interaction_type = interaction_type
+				end
 			end
 		end
 	end
@@ -256,6 +292,49 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 
 	return 
 end
+GenericUnitInteractorExtension._check_if_interactable_in_chest = function (self, interactable_unit, camera_position)
+	if chest_interactables[interactable_unit] then
+		return true
+	end
+
+	local has_pickup_extension = ScriptUnit.has_extension(interactable_unit, "pickup_system")
+
+	if not has_pickup_extension then
+		return false
+	end
+
+	local unit_center_matrix, _ = Unit.box(interactable_unit)
+	local unit_pos = Matrix4x4.translation(unit_center_matrix)
+	local dir = Vector3.normalize(unit_pos - camera_position)
+	local distance = Vector3.length(unit_pos - camera_position)
+	local found_collision, collisionPos, distance, normal, hit_actor = PhysicsWorld.immediate_raycast(self.physics_world, unit_pos, dir, distance, "closest", "types", "both", "collision_filter", "filter_interactable_in_chest")
+
+	if found_collision then
+		chest_interactables[interactable_unit] = true
+
+		return true
+	end
+
+	return false
+end
+GenericUnitInteractorExtension._claculate_interaction_distance_score = function (self, interactable_unit, camera_position, half_width, half_height, camera)
+	local unit_pos = Unit.world_position(interactable_unit, 0)
+	local ray_distance = INTERACT_RAY_DISTANCE
+	local world_score = Vector3.distance_squared(unit_pos, camera_position)/(ray_distance*ray_distance)
+	local unit_screen_pos = Camera.world_to_screen(camera, unit_pos)
+	local middle_offset = Vector3(half_width - unit_screen_pos.x, half_height - unit_screen_pos.z, 0)
+	local screen_score = Vector3.length(middle_offset)/(half_width*2)
+
+	return world_score*screen_score
+end
+GenericUnitInteractorExtension._get_player_camera = function (self)
+	local player = Managers.player:owner(self.unit)
+	local viewport_name = player.viewport_name
+	local viewport = ScriptWorld.viewport(self.world, viewport_name)
+	local camera = ScriptViewport.camera(viewport)
+
+	return camera
+end
 GenericUnitInteractorExtension._stop_interaction = function (self, interactable_unit, t)
 	local world = self.world
 	local unit = self.unit
@@ -289,11 +368,7 @@ GenericUnitInteractorExtension._stop_interaction = function (self, interactable_
 
 	self.state = "waiting_to_interact"
 	local flow_event = "lua_interaction_stopped_" .. interaction_type .. "_" .. InteractionResult[interaction_result]
-	local position_of_interactor = Unit.local_position(unit, 0)
-	local position_of_interactable_object = Unit.local_position(interactable_unit, 0)
-	local direction_to_interacble_object = Vector3.normalize(position_of_interactable_object - position_of_interactor)
 
-	Unit.set_flow_variable(interactable_unit, "lua_direction_to_interacble_object", direction_to_interacble_object)
 	Unit.flow_event(interactable_unit, flow_event)
 
 	return 
@@ -353,11 +428,6 @@ GenericUnitInteractorExtension.can_interact = function (self, interactable_unit,
 
 	return true, nil, interaction_type
 end
-GenericUnitInteractorExtension.interaction_type = function (self)
-	assert(self.is_interacting(self), "Attempted to get interaction type when interactor unit wasn't interacting.")
-
-	return self.interaction_context.interaction_type
-end
 GenericUnitInteractorExtension.interaction_config = function (self)
 	local interaction_type = self.interaction_context.interaction_type
 	local interaction_template = InteractionDefinitions[interaction_type]
@@ -368,13 +438,13 @@ end
 GenericUnitInteractorExtension.interaction_description = function (self, fail_reason, interaction_type)
 	local interaction_type = interaction_type or self.interaction_context.interaction_type
 	local interaction_template = InteractionDefinitions[interaction_type]
-	local hud_description = interaction_template.client.hud_description(self.interaction_context.interactable_unit, interaction_template.config, fail_reason, self.unit)
+	local hud_description, extra_param = interaction_template.client.hud_description(self.interaction_context.interactable_unit, interaction_template.config, fail_reason, self.unit)
 
 	if hud_description == nil then
 		return "<ERROR: UNSPECIFIED INTERACTION HUD DESCRIPTION>"
 	end
 
-	return hud_description
+	return hud_description, extra_param
 end
 GenericUnitInteractorExtension.interaction_hold_input = function (self)
 	return self.interaction_context.hold_input

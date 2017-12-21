@@ -160,10 +160,13 @@ AIInterestPointSystem.on_add_extension = function (self, world, unit, extension_
 				local point_rotation = Unit.world_rotation(unit, node)
 				local animations = {}
 				local anim_i = 0
+				local x = point_position.x
+				local y = point_position.y
+				local z = point_position.z
 				local is_position_on_navmesh, altitude = GwNavQueries.triangle_from_position(nav_world, point_position, 0.3, 0.3)
 
 				if is_position_on_navmesh then
-					point_position.z = altitude
+					z = altitude
 
 					if Unit.has_data(unit, "interest_point", "points", point_i, "animations") then
 						while Unit.has_data(unit, "interest_point", "points", point_i, "animations", anim_i) do
@@ -193,9 +196,9 @@ AIInterestPointSystem.on_add_extension = function (self, world, unit, extension_
 
 				local point = {
 					position = {
-						point_position.x,
-						point_position.y,
-						point_position.z
+						x,
+						y,
+						z
 					},
 					animations = animations,
 					animations_n = anim_i,
@@ -566,7 +569,7 @@ AIInterestPointSystem.resolve_requests = function (self)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("resolve_requests")
 
 	return 
 end

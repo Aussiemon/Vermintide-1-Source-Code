@@ -4,7 +4,7 @@ NetworkTimerHandler.init = function (self, world, network_clock, is_server)
 	self._world = world
 	self._network_clock = network_clock
 	self.is_server = is_server
-	self._gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	self._gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 
 	return 
 end
@@ -79,9 +79,9 @@ NetworkTimerHandler._render_timer = function (self)
 	Gui.rect(self._gui, pos, size, Color(150, 102, 255, 102))
 
 	local text_pos = Vector3(20, 15, 110)
-	local font = "materials/fonts/arial_26"
+	local material = "gw_arial_32"
+	local font = "materials/fonts/" .. material
 	local font_size = 30
-	local material = "arial_26"
 
 	Gui.text(self._gui, time_left, font, font_size, material, text_pos, Color(255, 0, 0, 0))
 

@@ -94,7 +94,7 @@ PlayerHuskLocomotionExtension.update = function (self, unit, input, dt, context,
 
 	if self._disabled then
 		self._run_func(unit, dt, self)
-		Profiler.stop()
+		Profiler.stop("PlayerHuskLocomotionExtension:update")
 
 		return 
 	end
@@ -117,7 +117,7 @@ PlayerHuskLocomotionExtension.update = function (self, unit, input, dt, context,
 	end
 
 	self._update_last_position_on_navmesh(self)
-	Profiler.stop()
+	Profiler.stop("PlayerHuskLocomotionExtension:update")
 
 	return 
 end
@@ -220,12 +220,14 @@ PlayerHuskLocomotionExtension._extrapolation_movement = function (self, unit, dt
 
 	local previous_velocity = self.velocity_current:unbox()
 
-	if Vector3.length(velocity - previous_velocity) < NetworkConstants.VELOCITY_EPSILON then
+	if NetworkConstants.VELOCITY_EPSILON < Vector3.length(velocity - previous_velocity) then
 		self._velocity_lerp_time = 0
 	end
 
 	if DISCONNECT_GRACE_TIME < self._pos_lerp_time and DISCONNECT_GRACE_TIME < self._velocity_lerp_time then
 		pos = new_pos
+
+		Unit.set_data(unit, "accumulated_movement", Vector3(0, 0, 0))
 	end
 
 	local mover = Unit.mover(unit)

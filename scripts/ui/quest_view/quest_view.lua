@@ -130,7 +130,7 @@ QuestView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "quest_view", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "quest_view", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "quest_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "quest_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "quest_view", "gamepad")
@@ -398,7 +398,7 @@ QuestView.draw = function (self, dt, input_service)
 
 	UIRenderer.end_pass(ui_renderer)
 
-	if gamepad_active and not reward_screen_active and not self._decline_contract_popup_id and not self._decline_quest_popup_id then
+	if gamepad_active and not reward_screen_active and not self._decline_contract_popup_id and not self._decline_quest_popup_id and not self._turn_in_contract_popup_id then
 		self.menu_input_description:draw(ui_top_renderer, dt)
 	end
 
@@ -510,7 +510,6 @@ QuestView._poll_popups = function (self)
 			Managers.popup:cancel_popup(self._decline_contract_popup_id)
 
 			self._decline_contract_popup_id = nil
-			self._popup_active = nil
 		end
 
 		if popup_result == "yes" then
@@ -522,8 +521,6 @@ QuestView._poll_popups = function (self)
 
 				self._decline_contract(self, id)
 			end
-
-			self._popup_active = nil
 		end
 	end
 
@@ -534,7 +531,6 @@ QuestView._poll_popups = function (self)
 			Managers.popup:cancel_popup(self._decline_quest_popup_id)
 
 			self._decline_quest_popup_id = nil
-			self._popup_active = nil
 		end
 
 		if popup_result == "yes" then
@@ -546,8 +542,27 @@ QuestView._poll_popups = function (self)
 
 				self._decline_quest(self, id)
 			end
+		end
+	end
 
-			self._popup_active = nil
+	if self._turn_in_contract_popup_id then
+		local popup_result = Managers.popup:query_result(self._turn_in_contract_popup_id)
+
+		if popup_result then
+			Managers.popup:cancel_popup(self._turn_in_contract_popup_id)
+
+			self._turn_in_contract_popup_id = nil
+		end
+
+		if popup_result == "yes" then
+			local selected_contract_list_widget = self._selected_widget
+
+			if selected_contract_list_widget then
+				local data = selected_contract_list_widget.content.data
+				local id = data.id
+
+				self._turn_in_contract(self, id)
+			end
 		end
 	end
 
@@ -591,6 +606,8 @@ QuestView.on_exit = function (self)
 
 	ScriptWorld.activate_viewport(world, viewport)
 	self.reward_screen:exit()
+	self._terminate_all_popups(self)
+	self._deselect_selection_widget(self)
 
 	return 
 end
@@ -630,6 +647,9 @@ QuestView.suspend = function (self)
 	self.input_manager:device_unblock_all_services("gamepad", 1)
 
 	self.suspended = true
+
+	self._terminate_all_popups(self)
+	self._deselect_selection_widget(self)
 
 	return 
 end
@@ -984,6 +1004,7 @@ QuestView._on_accept_pressed = function (self)
 
 			if active_contract then
 				local id = data.id
+				local data_type = data.type
 				local is_quest = data.is_quest
 				local requirements_met = data.requirements_met
 				local expired = data.ttl <= 0
@@ -992,7 +1013,13 @@ QuestView._on_accept_pressed = function (self)
 					if is_quest then
 						self._turn_in_quest(self, id)
 					else
-						self._turn_in_contract(self, id)
+						local has_key = data_type == "main"
+
+						if has_key then
+							self._request_turn_in_contract(self, id)
+						else
+							self._turn_in_contract(self, id)
+						end
 					end
 				elseif is_quest then
 					self._request_decline_quest(self, id, expired)
@@ -1065,6 +1092,12 @@ QuestView._terminate_all_popups = function (self)
 		Managers.popup:cancel_popup(self._decline_contract_popup_id)
 
 		self._decline_contract_popup_id = nil
+	end
+
+	if self._turn_in_contract_popup_id then
+		Managers.popup:cancel_popup(self._turn_in_contract_popup_id)
+
+		self._turn_in_contract_popup_id = nil
 	end
 
 	return 
@@ -1681,6 +1714,17 @@ QuestView._decline_contract = function (self, contract_id)
 	self.play_sound(self, "Play_hud_quest_menu_decline_quest")
 	self.quest_manager:decline_contract_by_id(contract_id)
 	self._deselect_selection_widget(self)
+
+	return 
+end
+QuestView._request_turn_in_contract = function (self, contract_id)
+	local has_no_quest = not self._num_log_quests or self._num_log_quests == 0
+
+	if has_no_quest then
+		self._turn_in_contract_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_key_contract_warning_text"), Localize("dlc1_3_1_key_contract_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
+	else
+		self._turn_in_contract(self, contract_id)
+	end
 
 	return 
 end

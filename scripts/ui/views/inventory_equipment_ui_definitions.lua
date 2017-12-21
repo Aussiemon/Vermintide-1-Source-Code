@@ -141,7 +141,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			3,
-			-10,
+			-9.5,
 			1
 		}
 	},
@@ -172,9 +172,27 @@ local scenegraph_definition = {
 			102,
 			900
 		}
+	},
+	gamepad_slot_selection = {
+		vertical_alignment = "bottom",
+		parent = "character_equipment_bar",
+		horizontal_alignment = "left",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			110,
+			110
+		}
 	}
 }
 local widget_definitions = {
+	gamepad_slot_selection = UIWidgets.create_gamepad_selection("gamepad_slot_selection", nil, nil, {
+		70,
+		70
+	}),
 	preview_viewport_overlay = UIWidgets.create_simple_rect("preview_viewport_overlay", Colors.get_color_table_with_alpha("black", 0)),
 	preview_viewport_loading = UIWidgets.create_simple_rotated_texture("matchmaking_connecting_icon", 0, {
 		25,
@@ -607,6 +625,7 @@ local function create_equipment_selection_bar(textures, icons, tooltips, offset,
 		local locked_text_id = string.format("item_lock_text_%d", i)
 		local button_click_style_name = string.format("button_click_style_%d", i)
 		local icon_click_texture_id = string.format("icon_click_%d", i)
+		local gamepad_selection_id = string.format("gamepad_selection_%d", i)
 
 		table.append_varargs(passes, {
 			pass_type = "hotspot",
@@ -763,6 +782,20 @@ local function create_equipment_selection_bar(textures, icons, tooltips, offset,
 				7
 			}
 		}
+		scenegraph_definition[gamepad_selection_id] = {
+			vertical_alignment = "center",
+			horizontal_alignment = "center",
+			parent = icon_background_texture_id,
+			size = {
+				120,
+				117
+			},
+			position = {
+				0,
+				0,
+				10
+			}
+		}
 		content_data[button_hotspot_name] = {}
 		content_data[tooltip_text] = tooltips[i]
 		content_data[button_style_name] = textures.texture_hover_id
@@ -880,7 +913,7 @@ local function create_equipment_selection_bar(textures, icons, tooltips, offset,
 			offset = {
 				0,
 				0,
-				2
+				1
 			},
 			size = icon_size
 		}
@@ -908,6 +941,13 @@ local function create_equipment_selection_bar(textures, icons, tooltips, offset,
 				0,
 				2
 			}
+		}
+		style[gamepad_selection_id] = {
+			texture_size = {
+				60,
+				60
+			},
+			scenegraph_id = gamepad_selection_id
 		}
 	end
 

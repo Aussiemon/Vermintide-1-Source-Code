@@ -143,7 +143,7 @@ local scenegraph_definition = {
 		position = {
 			0,
 			230,
-			720
+			0
 		}
 	},
 	partner_splash_umbra = {
@@ -174,17 +174,17 @@ local scenegraph_definition = {
 			0
 		}
 	},
-	partner_splash_black = {
+	partner_splash_nordic_games = {
 		vertical_alignment = "bottom",
 		parent = "partner_splash_dts",
 		horizontal_alignment = "center",
 		size = {
-			222,
-			139
+			385,
+			90
 		},
 		position = {
 			0,
-			-260,
+			-240,
 			0
 		}
 	},
@@ -211,9 +211,23 @@ local scenegraph_definition = {
 			107
 		},
 		position = {
-			0,
+			-225,
 			-230,
-			720
+			0
+		}
+	},
+	partner_splash_black = {
+		vertical_alignment = "center",
+		parent = "bld_splash_partners",
+		horizontal_alignment = "center",
+		size = {
+			222,
+			139
+		},
+		position = {
+			225,
+			-230,
+			0
 		}
 	},
 	texts = {
@@ -250,15 +264,16 @@ local splash_content = {
 	},
 	{
 		scenegraph_id = "gw_splash",
-		time = 3,
-		axis = 2,
 		type = "texture",
-		pixel_perfect = false,
+		axis = 2,
+		time = 3,
+		text_vertical_alignment = "bottom",
 		spacing = 5,
 		text_horizontal_alignment = "center",
-		texts_scenegraph_id = "texts",
+		pixel_perfect = false,
 		dynamic_font = false,
 		direction = 1,
+		texts_scenegraph_id = "texts",
 		font_type = "hell_shark",
 		localize = true,
 		font_size = 13,
@@ -275,21 +290,22 @@ local splash_content = {
 		},
 		offset = {
 			0,
-			71,
+			110,
 			0
 		}
 	},
 	{
 		scenegraph_id = "autodesk_splash",
-		time = 3,
-		axis = 2,
 		type = "texture",
-		pixel_perfect = false,
+		axis = 2,
+		time = 3,
+		text_vertical_alignment = "bottom",
 		spacing = 5,
 		text_horizontal_alignment = "center",
-		texts_scenegraph_id = "texts",
+		pixel_perfect = false,
 		dynamic_font = false,
 		direction = 1,
+		texts_scenegraph_id = "texts",
 		font_type = "hell_shark",
 		localize = true,
 		font_size = 13,
@@ -303,7 +319,7 @@ local splash_content = {
 		},
 		offset = {
 			0,
-			19,
+			55,
 			0
 		}
 	},
@@ -318,25 +334,33 @@ local splash_content = {
 		text_horizontal_alignment = "center",
 		dynamic_font = false,
 		spacing = 5,
-		localize = true,
+		text_vertical_alignment = "bottom",
 		font_type = "hell_shark",
+		localize = true,
 		texture_materials = {
 			"dolby",
 			"dts",
 			"umbra",
 			"pixeldiet",
-			"black",
+			"nordic_games",
 			"wwise",
-			"simplygon"
+			"simplygon",
+			"black"
+		},
+		offset = {
+			0,
+			110,
+			0
 		},
 		texture_scenegraph_ids = {
 			"partner_splash_dobly",
 			"partner_splash_dts",
 			"partner_splash_umbra",
 			"partner_splash_pixeldiet",
-			"partner_splash_black",
+			"partner_splash_nordic_games",
 			"partner_splash_wwise",
-			"partner_splash_simplygon"
+			"partner_splash_simplygon",
+			"partner_splash_black"
 		}
 	}
 }
@@ -349,9 +373,12 @@ SplashView.init = function (self, input_manager, world)
 	self._fram_skip_hack = 0
 	self.gdc_build = Development.parameter("gdc")
 	self.force_debug_enabled = Development.parameter("force_debug_enabled")
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self._world = world
 	self._current_index = 1
-	self.ui_renderer = UIRenderer.create(world, "material", "video/fatshark_splash", "material", "video/trailer", "material", "video/logo", "material", "video/physx_splash", "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_splash_screen")
+	self.ui_renderer = UIRenderer.create(world, "material", "video/fatshark_splash", "material", "video/trailer", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_splash_screen")
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self.dead_space_filler = UIWidget.init(dead_space_filler)
 	self._splash_widgets = {}
@@ -371,7 +398,7 @@ SplashView.init = function (self, input_manager, world)
 	end
 
 	if input_manager then
-		input_manager.create_input_service(input_manager, "splash_view", SplashScreenKeymaps)
+		input_manager.create_input_service(input_manager, "splash_view", "SplashScreenKeymaps", "SplashScreenFilters")
 		input_manager.map_device_to_service(input_manager, "splash_view", "keyboard")
 		input_manager.map_device_to_service(input_manager, "splash_view", "gamepad")
 
@@ -383,8 +410,9 @@ SplashView.init = function (self, input_manager, world)
 	return 
 end
 SplashView._next_splash = function (self, override_skip)
-	if not override_skip and Application.platform() == "xb1" and not self._allow_xb1_skip then
-		self._update_func = "_wait_for_allow_xb1_skip"
+	if not override_skip and (Application.platform() == "xb1" or Application.platform() == "ps4") and not self._allow_console_skip then
+		self._update_func = "_wait_for_allow_console_skip"
+		self._video_complete = true
 
 		return 
 	end
@@ -440,6 +468,7 @@ SplashView._update_texture = function (self, gui, dt)
 	local timer = self._current_splash_data.timer
 	local texts = self._current_splash_data.texts
 	local total_time = self._current_splash_data.time
+	dt = math.min(dt, 0.03333333333333333)
 
 	if total_time - 0.5 < timer then
 		local value = (timer - total_time - 0.5)/0.5*255
@@ -462,9 +491,9 @@ SplashView._update_texture = function (self, gui, dt)
 	return 
 end
 
-if Application.platform() == "xb1" then
-	SplashView._wait_for_allow_xb1_skip = function (self)
-		if self._allow_xb1_skip then
+if Application.platform() == "xb1" or Application.platform() == "ps4" then
+	SplashView._wait_for_allow_console_skip = function (self)
+		if self._allow_console_skip then
 			self._next_splash(self)
 		end
 
@@ -480,7 +509,7 @@ SplashView.set_index = function (self, index)
 	return 
 end
 SplashView.update = function (self, dt)
-	if Application.platform() ~= "xb1" and self._fram_skip_hack < 1 then
+	if Application.platform() == "win32" and self._fram_skip_hack < 1 then
 		self._fram_skip_hack = self._fram_skip_hack + 1
 
 		return 
@@ -488,15 +517,15 @@ SplashView.update = function (self, dt)
 
 	local w, h = Gui.resolution()
 	local ui_renderer = self.ui_renderer
-	local input_service = (Application.platform() ~= "xb1" and self.input_manager:get_service("splash_view")) or false
+	local input_service = (Application.platform() == "win32" and self.input_manager:get_service("splash_view")) or false
 
-	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_filler)
 
 	local skip = nil
 
-	if Application.platform() == "xb1" then
-		skip = self._get_xb1_input(self)
+	if Application.platform() == "xb1" or Application.platform() == "ps4" then
+		skip = self._get_console_input(self)
 	else
 		skip = input_service.get(input_service, "skip_splash")
 	end
@@ -524,14 +553,14 @@ SplashView.update = function (self, dt)
 	return 
 end
 
-if Application.platform() == "xb1" then
-	SplashView.allow_xb1_skip = function (self)
-		self._allow_xb1_skip = true
+if Application.platform() == "xb1" or Application.platform() == "ps4" then
+	SplashView.allow_console_skip = function (self)
+		self._allow_console_skip = true
 
 		return 
 	end
-	SplashView._get_xb1_input = function (self)
-		if not self._allow_xb1_skip then
+	SplashView._get_console_input = function (self)
+		if not self._allow_console_skip then
 			return 
 		end
 
@@ -552,6 +581,9 @@ end
 
 SplashView.render = function (self)
 	return 
+end
+SplashView.video_complete = function (self)
+	return self._video_complete
 end
 SplashView.destroy = function (self)
 	Managers.music:stop_all_sounds()

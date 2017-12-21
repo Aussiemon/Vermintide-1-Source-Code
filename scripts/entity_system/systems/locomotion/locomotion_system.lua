@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 LocomotionSystem = class(LocomotionSystem, ExtensionSystemBase)
 
 require("scripts/unit_extensions/default_player_unit/player_unit_locomotion_extension")
@@ -172,11 +170,13 @@ LocomotionSystem.update_extensions = function (self, context, t)
 	Profiler.start("extension templates")
 
 	if GameSettingsDevelopment.use_engine_optimized_ai_locomotion then
-		LocomotionTemplates.AILocomotionExtensionC.update(nil, t, dt)
+		if self.is_server then
+			LocomotionTemplates.AILocomotionExtensionC.update(nil, t, dt)
+		else
+			local data = self.template_data.AiHuskLocomotionExtension
 
-		local data = self.template_data.AiHuskLocomotionExtension
-
-		LocomotionTemplates.AiHuskLocomotionExtension.update(data, t, dt)
+			LocomotionTemplates.AiHuskLocomotionExtension.update(data, t, dt)
+		end
 
 		local data = self.template_data.PlayerUnitLocomotionExtension
 
@@ -249,8 +249,42 @@ LocomotionSystem.update_actor_proximity_shapes = function (self)
 	return 
 end
 LocomotionSystem.debug_draw = function (self)
+	if script_data.show_engine_locomotion_debug and GameSettingsDevelopment.use_engine_optimized_ai_locomotion then
+		local num_all, num_free, num_script_driven, num_get_to_navmesh, num_snap_to_navmesh, num_mover_constrained, num_animation_driven, num_affected_by_gravity, num_rotation_speed, num_animation_and_script = EngineOptimizedExtensions.ai_locomotion_get_debug_info()
+		local s = self.stats
 
-	-- decompilation error in this vicinity
+		if not s then
+			s = {
+				num_get_to_navmesh = 0,
+				num_free = 0,
+				num_affected_by_gravity = 0,
+				num_snap_to_navmesh = 0,
+				num_script_driven = 0,
+				num_mover_constrained = 0,
+				num_rotation_speed = 0,
+				num_animation_and_script = 0,
+				num_all = 0,
+				num_animation_driven = 0
+			}
+			self.stats = s
+		end
+
+		s.num_all = math.max(num_all, s.num_all)
+		s.num_free = math.max(num_free, s.num_free)
+		s.num_script_driven = math.max(num_script_driven, s.num_script_driven)
+		s.num_get_to_navmesh = math.max(num_get_to_navmesh, s.num_get_to_navmesh)
+		s.num_snap_to_navmesh = math.max(num_snap_to_navmesh, s.num_snap_to_navmesh)
+		s.num_mover_constrained = math.max(num_mover_constrained, s.num_mover_constrained)
+		s.num_animation_driven = math.max(num_animation_driven, s.num_animation_driven)
+		s.num_affected_by_gravity = math.max(num_affected_by_gravity, s.num_affected_by_gravity)
+		s.num_rotation_speed = math.max(num_rotation_speed, s.num_rotation_speed)
+		s.num_animation_and_script = math.max(num_animation_and_script, s.num_animation_and_script)
+
+		Debug.text("EngineLocomotion amount for each category: right now/peak in game")
+		Debug.text("Num all: %d/%d, free: %d/%d, script_driven: %d/%d, snap_to_navmesh: %d/%d, animation_driven: %d/%d, mover_constrained: %d/%d, get_to_navmesh %d/%d", num_all, s.num_all, num_free, s.num_free, num_script_driven, s.num_script_driven, num_snap_to_navmesh, s.num_snap_to_navmesh, num_animation_driven, s.num_animation_driven, num_mover_constrained, s.num_mover_constrained, num_get_to_navmesh, s.num_get_to_navmesh)
+		Debug.text("Num affected_by_gravity: %d/%d, rotation_speed: %d/%d, animation_and_script: %d/%d", num_affected_by_gravity, s.num_affected_by_gravity, num_rotation_speed, s.num_rotation_speed, num_animation_and_script, s.num_animation_and_script)
+	end
+
 	local unit = script_data.debug_unit
 
 	if not Unit.alive(unit) or not script_data.debug_ai_movement then
@@ -302,7 +336,7 @@ LocomotionSystem.rpc_set_animation_driven_movement = function (self, sender, gam
 	locomotion_extension.set_animation_driven(locomotion_extension, animation_driven, is_affected_by_gravity, script_driven_rotation)
 
 	if animation_driven then
-		locomotion_extension.teleport_to(locomotion_extension, position, rotation, locomotion_extension.get_velocity(locomotion_extension))
+		locomotion_extension.teleport_to(locomotion_extension, position, rotation, locomotion_extension.current_velocity(locomotion_extension))
 	end
 
 	return 
@@ -318,7 +352,7 @@ LocomotionSystem.rpc_set_animation_driven = function (self, sender, game_object_
 	return 
 end
 LocomotionSystem.rpc_set_script_driven = function (self, sender, game_object_id, position, rotation, is_affected_by_gravity)
-	self.rpc_set_animation_driven_movement(self, sender, game_object_id, false, true, is_affected_by_gravity)
+	self.rpc_set_animation_driven_movement(self, sender, game_object_id, false, true, is_affected_by_gravity, nil)
 
 	return 
 end

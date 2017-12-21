@@ -43,6 +43,10 @@ OverChargeExtension.init = function (self, extension_init_context, unit, extensi
 
 	self.set_screen_particle_opacity_modifier(self, Application.user_setting("overcharge_opacity"))
 
+	self._overcharge_rumble_effect_id = nil
+	self._overcharge_rumble_critical_effect_id = nil
+	self._overcharge_rumble_overcharged_effect_id = nil
+
 	return 
 end
 OverChargeExtension.set_screen_particle_opacity_modifier = function (self, value)
@@ -63,6 +67,23 @@ OverChargeExtension.destroy = function (self)
 	if self.onscreen_particles_id then
 		World.destroy_particles(self.world, self.onscreen_particles_id)
 		World.destroy_particles(self.world, self.critical_onscreen_particles_id)
+	end
+
+	local buff_extension = self.buff_extension
+	local overcharged_critical_buff_id = self.overcharged_critical_buff_id
+	local overcharged_buff_id = self.overcharged_buff_id
+	local has_buff_extension = ScriptUnit.has_extension(self.owner_unit, "buff_system")
+
+	if overcharged_critical_buff_id and has_buff_extension then
+		buff_extension.remove_buff(buff_extension, overcharged_critical_buff_id)
+
+		self.overcharged_critical_buff_id = nil
+	end
+
+	if overcharged_buff_id and self.overcharge_value < self.overcharge_limit and has_buff_extension then
+		buff_extension.remove_buff(buff_extension, overcharged_buff_id)
+
+		self.overcharged_buff_id = nil
 	end
 
 	return 
@@ -183,8 +204,48 @@ OverChargeExtension.update = function (self, unit, input, dt, context, t)
 
 					self.overcharged_buff_id = nil
 				end
+
+				local overcharge_rumble_critical_effect_id = self._overcharge_rumble_critical_effect_id
+				local overcharge_rumble_overcharged_effect_id = self._overcharge_rumble_overcharged_effect_id
+				local overcharge_rumble_effect_id = self._overcharge_rumble_effect_id
+
+				if overcharge_rumble_critical_effect_id and self.overcharge_value < self.overcharge_critical_limit then
+					Managers.state.controller_features:stop_effect(overcharge_rumble_critical_effect_id)
+
+					self._overcharge_rumble_critical_effect_id = nil
+					self._overcharge_rumble_overcharged_effect_id = Managers.state.controller_features:add_effect("rumble", {
+						rumble_effect = "overcharge_rumble_overcharged"
+					})
+				elseif overcharge_rumble_overcharged_effect_id and self.overcharge_value < self.overcharge_limit then
+					Managers.state.controller_features:stop_effect(overcharge_rumble_overcharged_effect_id)
+
+					self._overcharge_rumble_overcharged_effect_id = nil
+					self._overcharge_rumble_effect_id = Managers.state.controller_features:add_effect("rumble", {
+						rumble_effect = "overcharge_rumble"
+					})
+				elseif not self.above_threshold and overcharge_rumble_effect_id then
+					Managers.state.controller_features:stop_effect(overcharge_rumble_effect_id)
+				end
 			end
 		elseif self.has_overcharge then
+			if self._overcharge_rumble_critical_effect_id then
+				Managers.state.controller_features:stop_effect(self._overcharge_rumble_critical_effect_id)
+
+				self._overcharge_rumble_critical_effect_id = nil
+			end
+
+			if self._overcharge_rumble_overcharged_effect_id then
+				Managers.state.controller_features:stop_effect(self._overcharge_rumble_overcharged_effect_id)
+
+				self._overcharge_rumble_overcharged_effect_id = nil
+			end
+
+			if self._overcharge_rumble_effect_id then
+				Managers.state.controller_features:stop_effect(self._overcharge_rumble_effect_id)
+
+				self._overcharge_rumble_effect_id = nil
+			end
+
 			self.has_overcharge = false
 
 			Unit.animation_set_variable(self.first_person_unit, self.overcharge_blend_id, 0)
@@ -304,18 +365,40 @@ OverChargeExtension.add_charge = function (self, overcharge_type, charge_level)
 			end
 		end
 
-		if self.overcharge_critical_limit <= current_overcharge_value and not self.overcharged_critical_buff_id then
-			local overcharged_buff_id = self.overcharged_buff_id
+		if self.overcharge_critical_limit <= current_overcharge_value then
+			if not self.overcharged_critical_buff_id then
+				local overcharged_buff_id = self.overcharged_buff_id
 
-			if overcharged_buff_id then
-				buff_extension.remove_buff(buff_extension, overcharged_buff_id)
+				if overcharged_buff_id then
+					buff_extension.remove_buff(buff_extension, overcharged_buff_id)
 
-				self.overcharged_buff_id = false
+					self.overcharged_buff_id = false
 
-				OverChargeExtension:hud_sound(self.overcharge_warning_high_sound_event or "staff_overcharge_warning_high", self.first_person_extension)
+					OverChargeExtension:hud_sound(self.overcharge_warning_high_sound_event or "staff_overcharge_warning_high", self.first_person_extension)
+				end
+
+				self.overcharged_critical_buff_id = buff_extension.add_buff(buff_extension, "overcharged_critical")
 			end
 
-			self.overcharged_critical_buff_id = buff_extension.add_buff(buff_extension, "overcharged_critical")
+			local overcharge_rumble_overcharged_effect_id = self._overcharge_rumble_overcharged_effect_id
+
+			if overcharge_rumble_overcharged_effect_id then
+				Managers.state.controller_features:stop_effect(overcharge_rumble_overcharged_effect_id)
+
+				self._overcharge_rumble_overcharged_effect_id = false
+			end
+
+			local overcharge_rumble_critical_effect_id = self._overcharge_rumble_critical_effect_id
+
+			if overcharge_rumble_critical_effect_id then
+				Managers.state.controller_features:stop_effect(overcharge_rumble_critical_effect_id)
+
+				self._overcharge_rumble_critical_effect_id = false
+			end
+
+			self._overcharge_rumble_critical_effect_id = Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "overcharge_rumble_crit"
+			})
 		elseif self.overcharge_limit <= current_overcharge_value then
 			local dialogue_input = ScriptUnit.extension_input(self.owner_unit, "dialogue_system")
 			local event_data = FrameTable.alloc_table()
@@ -328,6 +411,38 @@ OverChargeExtension.add_charge = function (self, overcharge_type, charge_level)
 
 				self.overcharged_buff_id = buff_extension.add_buff(buff_extension, "overcharged")
 			end
+
+			local overcharge_rumble_effect_id = self._overcharge_rumble_effect_id
+
+			if overcharge_rumble_effect_id then
+				Managers.state.controller_features:stop_effect(overcharge_rumble_effect_id)
+
+				self._overcharge_rumble_effect_id = false
+			end
+
+			local overcharge_rumble_overcharged_effect_id = self._overcharge_rumble_overcharged_effect_id
+
+			if overcharge_rumble_overcharged_effect_id then
+				Managers.state.controller_features:stop_effect(overcharge_rumble_overcharged_effect_id)
+
+				self._overcharge_rumble_overcharged_effect_id = false
+			end
+
+			self._overcharge_rumble_overcharged_effect_id = Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "overcharge_rumble_overcharged"
+			})
+		else
+			local overcharge_rumble_effect_id = self._overcharge_rumble_effect_id
+
+			if overcharge_rumble_effect_id then
+				Managers.state.controller_features:stop_effect(overcharge_rumble_effect_id)
+
+				self._overcharge_rumble_effect_id = false
+			end
+
+			self._overcharge_rumble_effect_id = Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "overcharge_rumble"
+			})
 		end
 	end
 

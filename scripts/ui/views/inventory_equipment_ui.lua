@@ -48,6 +48,9 @@ InventoryEquipmentUI.init = function (self, parent, window_position, animation_d
 	self.scenegraph_definition = definitions.scenegraph_definition
 	self.scenegraph_definition.page_root.position = window_position
 	self.bar_animations = {}
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 
@@ -63,7 +66,7 @@ InventoryEquipmentUI.set_gamepad_focus = function (self, enabled)
 	return 
 end
 InventoryEquipmentUI.on_enter = function (self)
-	local preview_viewport_widget = UIWidget.init(self.widgets_definitions.preview_viewport)
+	local preview_viewport_widget = self.preview_viewport_widget or UIWidget.init(self.widgets_definitions.preview_viewport)
 	self.preview_viewport_widget = preview_viewport_widget
 
 	self.inventory_previewer:on_enter(preview_viewport_widget)
@@ -80,7 +83,7 @@ InventoryEquipmentUI.destroy_preview_viewport_widget = function (self)
 	if self.preview_viewport_widget then
 		self.inventory_previewer:prepare_exit()
 		self.inventory_previewer:on_exit()
-		UIWidget.destroy(self.preview_viewport_widget)
+		UIWidget.destroy(self.ui_renderer, self.preview_viewport_widget)
 
 		self.preview_viewport_widget = nil
 	end
@@ -135,6 +138,7 @@ InventoryEquipmentUI.create_ui_elements = function (self)
 	self.preview_viewport_overlay_widget = UIWidget.init(self.widgets_definitions.preview_viewport_overlay)
 	self.preview_viewport_loading_widget = UIWidget.init(self.widgets_definitions.preview_viewport_loading)
 	self.character_display_text_widget = UIWidget.init(self.widgets_definitions.character_display_text_widget)
+	self.gamepad_slot_selection_widget = UIWidget.init(self.widgets_definitions.gamepad_slot_selection)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -150,6 +154,12 @@ InventoryEquipmentUI.handle_gamepad_input = function (self, dt)
 
 	if controller_cooldown and 0 < controller_cooldown then
 		self.controller_cooldown = controller_cooldown - dt
+		local speed_multiplier = self.speed_multiplier or 1
+		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
+		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
+		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
+
+		return 
 	else
 		if self.is_in_inn then
 			local selected_profile_index = self.selected_profile_index
@@ -174,20 +184,21 @@ InventoryEquipmentUI.handle_gamepad_input = function (self, dt)
 		local selected_equipment_index = self.selected_equipment_index
 
 		if selected_equipment_index and use_gamepad then
+			local speed_multiplier = self.speed_multiplier or 1
 			local new_equipment_index = nil
 			local move_down = input_service.get(input_service, "move_down")
 			local move_down_hold = input_service.get(input_service, "move_down_hold")
 
 			if move_down or move_down_hold then
 				new_equipment_index = math.max(selected_equipment_index - 1, 1)
-				self.controller_cooldown = GamepadSettings.menu_cooldown
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 			else
 				local move_up = input_service.get(input_service, "move_up")
 				local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 				if move_up or move_up_hold then
 					new_equipment_index = math.min(selected_equipment_index + 1, NUM_EQUIPMENT_SLOT_BUTTONS)
-					self.controller_cooldown = GamepadSettings.menu_cooldown
+					self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 				end
 			end
 
@@ -196,6 +207,8 @@ InventoryEquipmentUI.handle_gamepad_input = function (self, dt)
 			end
 		end
 	end
+
+	self.speed_multiplier = 1
 
 	return 
 end
@@ -291,10 +304,11 @@ InventoryEquipmentUI.draw = function (self, dt)
 	local input_service = input_manager.get_service(input_manager, "inventory_menu")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if gamepad_active and self.use_gamepad then
 		UIRenderer.draw_widget(ui_renderer, self.controller_window_highlight)
+		UIRenderer.draw_widget(ui_renderer, self.gamepad_slot_selection_widget)
 	end
 
 	for _, widget in ipairs(self.background_widgets) do
@@ -303,8 +317,10 @@ InventoryEquipmentUI.draw = function (self, dt)
 
 	UIRenderer.draw_widget(ui_renderer, self.character_display_text_widget)
 	UIRenderer.draw_widget(ui_renderer, self.equipment_selection_bar_widget)
-	UIRenderer.draw_widget(ui_renderer, self.character_selection_bar_widget)
 	UIRenderer.end_pass(ui_renderer)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.draw_widget(ui_top_renderer, self.character_selection_bar_widget)
+	UIRenderer.end_pass(ui_top_renderer)
 
 	return 
 end
@@ -492,6 +508,7 @@ InventoryEquipmentUI.on_equipment_slot_selected = function (self, slot)
 	local selection_index = slot.inventory_button_index
 	local equipment_selection_bar_widget = self.equipment_selection_bar_widget
 	local equipment_selection_content = equipment_selection_bar_widget.content
+	local equipment_selection_style = equipment_selection_bar_widget.style
 	local animate = selection_index ~= self.selected_equipment_index
 
 	if animate and self.selected_equipment_index then
@@ -499,7 +516,7 @@ InventoryEquipmentUI.on_equipment_slot_selected = function (self, slot)
 			self.ui_animator:stop_animation(self.equipment_bar_select_anim_id)
 		end
 
-		self.ui_animator:start_animation("bar_item_deselect", equipment_selection_bar_widget, self.scenegraph_definition, {
+		self.ui_animator:start_animation("item_deselect", equipment_selection_bar_widget, self.scenegraph_definition, {
 			scenegraph_base = "character_equipment_bar",
 			selected_index = self.selected_equipment_index
 		})
@@ -518,10 +535,24 @@ InventoryEquipmentUI.on_equipment_slot_selected = function (self, slot)
 	end
 
 	if animate then
-		self.equipment_bar_select_anim_id = self.ui_animator:start_animation("bar_item_select", equipment_selection_bar_widget, self.scenegraph_definition, {
+		self.equipment_bar_select_anim_id = self.ui_animator:start_animation("item_select", equipment_selection_bar_widget, self.scenegraph_definition, {
 			scenegraph_base = "character_equipment_bar",
 			selected_index = selection_index
 		})
+	end
+
+	local gamepad_selection_id = string.format("gamepad_selection_%d", selection_index)
+	local gamepad_selection_style = equipment_selection_style[gamepad_selection_id]
+
+	if gamepad_selection_style then
+		local scenegraph_id = gamepad_selection_style.scenegraph_id
+		local texture_size = gamepad_selection_style.texture_size
+		self.gamepad_slot_selection_widget.scenegraph_id = scenegraph_id
+		local gamepad_widget_style = self.gamepad_slot_selection_widget.style
+		gamepad_widget_style.texture_top_left.texture_size = texture_size
+		gamepad_widget_style.texture_top_right.texture_size = texture_size
+		gamepad_widget_style.texture_bottom_left.texture_size = texture_size
+		gamepad_widget_style.texture_bottom_right.texture_size = texture_size
 	end
 
 	return 

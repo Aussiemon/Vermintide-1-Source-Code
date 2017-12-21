@@ -30,7 +30,7 @@ PlayerCharacterStateWalking.on_enter = function (self, unit, input, dt, context,
 	local damage_extension = self.damage_extension
 
 	self.last_input_direction:store(Vector3(0, 0, 0))
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, damage_extension)
 
 	self.walking = false
@@ -106,16 +106,20 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 
 	local gamepad_active = Managers.input:is_device_active("gamepad")
 
-	if not csm.state_next and input_extension.get(input_extension, "jump") and not status_extension.is_crouching(status_extension) and self.locomotion_extension:jump_allowed() and (gamepad_active or not Application.user_setting("dodge_on_jump_key") or status_extension.can_override_dodge_with_jump(status_extension, t) or 0 <= Vector3.y(CharacterStateHelper.get_movement_input(input_extension))) then
-		if Vector3.y(CharacterStateHelper.get_movement_input(input_extension)) < 0 then
-			self.temp_params.backward_jump = true
-		else
-			self.temp_params.backward_jump = false
+	if not csm.state_next and input_extension.get(input_extension, "jump") and not status_extension.is_crouching(status_extension) and self.locomotion_extension:jump_allowed() then
+		local movement_input = CharacterStateHelper.get_movement_input(input_extension)
+
+		if (not input_extension.dodge_on_jump_key and not gamepad_active) or status_extension.can_override_dodge_with_jump(status_extension, t) or 0 <= Vector3.y(movement_input) or Vector3.length(movement_input) <= input_extension.minimum_dodge_input then
+			if Vector3.y(CharacterStateHelper.get_movement_input(input_extension)) < 0 then
+				self.temp_params.backward_jump = true
+			else
+				self.temp_params.backward_jump = false
+			end
+
+			csm.change_state(csm, "jumping", self.temp_params)
+
+			return 
 		end
-
-		csm.change_state(csm, "jumping", self.temp_params)
-
-		return 
 	end
 
 	local is_moving = CharacterStateHelper.is_moving(input_extension)
@@ -232,6 +236,7 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 		if not config.allow_movement then
 			local params = self.temp_params
 			params.swap_to_3p = config.swap_to_3p
+			params.show_weapons = config.show_weapons
 
 			csm.change_state(csm, "interacting", params)
 		end
@@ -240,7 +245,7 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 	end
 
 	CharacterStateHelper.move_on_ground(first_person_extension, input_extension, self.locomotion_extension, move_input_direction, move_speed, unit)
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 	CharacterStateHelper.reload(input_extension, inventory_extension, status_extension)
 
@@ -250,6 +255,7 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 		if not config.allow_movement then
 			local params = self.temp_params
 			params.swap_to_3p = config.swap_to_3p
+			params.show_weapons = config.show_weapons
 
 			csm.change_state(csm, "interacting", params)
 		end

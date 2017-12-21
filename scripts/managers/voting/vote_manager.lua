@@ -84,7 +84,7 @@ VoteManager.can_start_vote = function (self, name, vote_data)
 
 	local active_voting = self.active_voting
 
-	if active_voting and vote_template.priority < active_voting.template.priority then
+	if active_voting and vote_template.priority <= active_voting.template.priority then
 		return false
 	end
 
@@ -245,7 +245,7 @@ VoteManager.vote_result = function (self, vote_time_ended)
 
 	if vote_time_ended or num_of_votes == number_of_voters then
 		for vote_option, vote_option_count in ipairs(current_vote_results) do
-			local vote_success_ratio = vote_option_count/number_of_voters
+			local vote_success_ratio = vote_option_count/num_of_votes
 
 			if success_percent <= vote_success_ratio then
 				return vote_option
@@ -478,7 +478,11 @@ VoteManager.set_vote_kick_enabled = function (self, is_enabled)
 	return 
 end
 VoteManager.vote_kick_enabled = function (self)
-	return self._vote_kick_enabled
+	if self._vote_kick_enabled then
+		return 2 < Managers.player:num_human_players()
+	end
+
+	return false
 end
 
 return 

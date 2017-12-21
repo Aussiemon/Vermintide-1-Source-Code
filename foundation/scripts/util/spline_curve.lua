@@ -122,7 +122,7 @@ end
 SplineMovementMetered.update = function (self, dt)
 	Profiler.start("SplineMovementMetered:update(dt)")
 	self.move(self, dt*self._speed)
-	Profiler.stop()
+	Profiler.stop("SplineMovementMetered:update(dt)")
 
 	return 
 end

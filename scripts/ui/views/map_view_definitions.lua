@@ -329,7 +329,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			-62,
-			130,
+			130.5,
 			1
 		}
 	},
@@ -431,6 +431,174 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	gamepad_selection_pivot = {
+		vertical_alignment = "bottom",
+		parent = "frame",
+		horizontal_alignment = "left",
+		size = {
+			0,
+			0
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	gamepad_button_selection = {
+		vertical_alignment = "center",
+		parent = "gamepad_selection_pivot",
+		horizontal_alignment = "center",
+		size = {
+			300,
+			170
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	gamepad_node_level_stepper = {
+		vertical_alignment = "center",
+		parent = "level_preview",
+		horizontal_alignment = "center",
+		size = {
+			395,
+			260
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_difficulty_stepper = {
+		vertical_alignment = "center",
+		parent = "difficulty_stepper",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			85
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_search_zone_stepper = {
+		vertical_alignment = "center",
+		parent = "stepper_search_zone",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_host_setting_stepper = {
+		vertical_alignment = "center",
+		parent = "stepper_host_setting",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_ready_setting_stepper = {
+		vertical_alignment = "center",
+		parent = "stepper_ready_setting",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_wanted_hero_list = {
+		vertical_alignment = "center",
+		parent = "wanted_hero_list",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_player_list_slot_1 = {
+		vertical_alignment = "center",
+		parent = "player_list_slot_1",
+		horizontal_alignment = "center",
+		size = {
+			400,
+			60
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_player_list_slot_2 = {
+		vertical_alignment = "center",
+		parent = "player_list_slot_2",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_player_list_slot_3 = {
+		vertical_alignment = "center",
+		parent = "player_list_slot_3",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
+	gamepad_node_player_list_slot_4 = {
+		vertical_alignment = "center",
+		parent = "player_list_slot_4",
+		horizontal_alignment = "center",
+		size = {
+			330,
+			75
+		},
+		position = {
+			0,
+			0,
+			10
+		}
+	},
 	player_list_conuter_text = {
 		vertical_alignment = "bottom",
 		parent = "frame",
@@ -455,7 +623,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			82,
-			340,
+			340.5,
 			1
 		}
 	},
@@ -483,7 +651,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			82,
-			605,
+			605.5,
 			1
 		}
 	},
@@ -511,7 +679,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			82,
-			920,
+			920.5,
 			1
 		}
 	},
@@ -539,7 +707,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			82,
-			805,
+			805.5,
 			1
 		}
 	},
@@ -567,7 +735,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			82,
-			685,
+			685.5,
 			1
 		}
 	},
@@ -595,7 +763,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			82,
-			565,
+			565.5,
 			1
 		}
 	},
@@ -692,9 +860,9 @@ local scenegraph_definition = {
 			314
 		},
 		position = {
-			2,
-			6,
-			4
+			4,
+			5.5,
+			1
 		}
 	},
 	performance_window_icon = {
@@ -1355,7 +1523,13 @@ local function create_performance_time_entry(scenegraph_id, difficulty_title, us
 	}
 end
 
+local party_text = (Application.platform() == "xb1" and "map_party_title_xb1") or "map_party_title"
+local num_players_tooltip = (Application.platform() == "xb1" and "map_number_of_players_tooltip_xb1") or "map_number_of_players_tooltip"
 local widgets = {
+	gamepad_button_selection = UIWidgets.create_gamepad_selection("gamepad_button_selection", nil, nil, {
+		70,
+		70
+	}),
 	description_background = UIWidgets.create_simple_texture("gradient_credits_menu", "description_background"),
 	description_title = UIWidgets.create_simple_text("dlc1_2_game_mode_info_survival_title", "description_title", nil, nil, {
 		vertical_alignment = "center",
@@ -1408,11 +1582,11 @@ local widgets = {
 	game_mode_selection_bar_bg = UIWidgets.create_simple_texture("survival_button_bg", "game_mode_selection_bar_bg"),
 	performance_window = UIWidgets.create_simple_texture("map_performance_window", "performance_window"),
 	performance_window_icon = UIWidgets.create_simple_texture("level_location_any_icon", "performance_window_icon"),
-	player_list_slot_1 = UIWidgets.create_map_player_entry("player_list_slot_1"),
-	player_list_slot_2 = UIWidgets.create_map_player_entry("player_list_slot_2"),
-	player_list_slot_3 = UIWidgets.create_map_player_entry("player_list_slot_3"),
-	player_list_slot_4 = UIWidgets.create_map_player_entry("player_list_slot_4"),
-	player_list_conuter_text = UIWidgets.create_simple_text_tooltip("", "map_number_of_players_tooltip", "player_list_conuter_text", nil, nil, {
+	player_list_slot_1 = UIWidgets.create_map_player_entry("player_list_slot_1", "gamepad_node_player_list_slot_1"),
+	player_list_slot_2 = UIWidgets.create_map_player_entry("player_list_slot_2", "gamepad_node_player_list_slot_2"),
+	player_list_slot_3 = UIWidgets.create_map_player_entry("player_list_slot_3", "gamepad_node_player_list_slot_3"),
+	player_list_slot_4 = UIWidgets.create_map_player_entry("player_list_slot_4", "gamepad_node_player_list_slot_4"),
+	player_list_conuter_text = UIWidgets.create_simple_text_tooltip("", num_players_tooltip, "player_list_conuter_text", nil, nil, {
 		vertical_alignment = "bottom",
 		word_wrap = true,
 		font_type = "hell_shark",
@@ -1442,8 +1616,9 @@ local widgets = {
 					texture_id = "hover_texture",
 					content_check_function = function (content)
 						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
 
-						return button_hotspot.is_selected or button_hotspot.is_hover
+						return not gamepad_active and (button_hotspot.is_selected or button_hotspot.is_hover)
 					end
 				},
 				{
@@ -1467,7 +1642,16 @@ local widgets = {
 					style_id = "left_button_texture",
 					texture_id = "left_button_texture",
 					content_check_function = function (content)
-						return not content.left_button_hotspot.disabled
+						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
+
+						if gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
 					end
 				},
 				{
@@ -1475,7 +1659,16 @@ local widgets = {
 					style_id = "right_button_texture",
 					texture_id = "right_button_texture",
 					content_check_function = function (content)
-						return not content.right_button_hotspot.disabled
+						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
+
+						if gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
 					end
 				},
 				{
@@ -1713,6 +1906,13 @@ local widgets = {
 			right_button_hotspot = {}
 		},
 		style = {
+			gamepad_selection = {
+				scenegraph_id = "gamepad_node_difficulty_stepper",
+				texture_size = {
+					40,
+					40
+				}
+			},
 			hover_texture = {
 				size = {
 					410,
@@ -2013,8 +2213,9 @@ local widgets = {
 					texture_id = "hover_texture",
 					content_check_function = function (content)
 						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
 
-						return button_hotspot.is_selected or button_hotspot.is_hover
+						return not gamepad_active and (button_hotspot.is_selected or button_hotspot.is_hover)
 					end
 				},
 				{
@@ -2037,13 +2238,21 @@ local widgets = {
 					style_id = "left_button_texture",
 					texture_id = "left_button_texture",
 					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
 						local left_button_hotspot = content.left_button_hotspot
 
 						if left_button_hotspot.disable_button then
 							return false
 						end
 
-						return true
+						if gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
 					end
 				},
 				{
@@ -2051,24 +2260,56 @@ local widgets = {
 					style_id = "right_button_texture",
 					texture_id = "right_button_texture",
 					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
 						local right_button_hotspot = content.right_button_hotspot
 
 						if right_button_hotspot.disable_button then
 							return false
 						end
 
-						return true
+						if gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
 					end
 				},
 				{
 					pass_type = "texture",
 					style_id = "left_button_texture_clicked",
-					texture_id = "left_button_texture_clicked"
+					texture_id = "left_button_texture_clicked",
+					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
+
+						if gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
+					end
 				},
 				{
 					pass_type = "rotated_texture",
 					style_id = "right_button_texture_clicked",
-					texture_id = "right_button_texture_clicked"
+					texture_id = "right_button_texture_clicked",
+					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+						local gamepad_active = button_hotspot.gamepad_active
+
+						if gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
+					end
 				}
 			}
 		},
@@ -2094,6 +2335,13 @@ local widgets = {
 					-48.5,
 					-19.5,
 					0
+				}
+			},
+			gamepad_selection = {
+				scenegraph_id = "gamepad_node_level_stepper",
+				texture_size = {
+					90,
+					90
 				}
 			},
 			left_button_texture = {
@@ -2551,7 +2799,7 @@ local widgets = {
 		}
 	}),
 	button_eye_glow_widget = UIWidgets.create_simple_texture("forge_button_03_glow_effect", "confirm_button_eye_glow"),
-	banner_party_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", "map_party_title", "map_party_setting_tooltip", "banner_party", "banner_party_text", {
+	banner_party_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", party_text, "map_party_setting_tooltip", "banner_party", "banner_party_text", {
 		vertical_alignment = "center",
 		scenegraph_id = "banner_party_text",
 		localize = true,
@@ -2623,11 +2871,11 @@ local widgets = {
 		font_type = "hell_shark",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255)
 	}),
-	stepper_ready_setting = UIWidgets.create_map_settings_stepper("stepper_ready_setting"),
-	stepper_host_setting = UIWidgets.create_map_settings_stepper("stepper_host_setting"),
-	stepper_search_zone = UIWidgets.create_map_settings_stepper("stepper_search_zone"),
+	stepper_ready_setting = UIWidgets.create_map_settings_stepper("stepper_ready_setting", "gamepad_node_ready_setting_stepper"),
+	stepper_host_setting = UIWidgets.create_map_settings_stepper("stepper_host_setting", "gamepad_node_host_setting_stepper"),
+	stepper_search_zone = UIWidgets.create_map_settings_stepper("stepper_search_zone", "gamepad_node_search_zone_stepper"),
 	stepper_game_mode = UIWidgets.create_map_settings_stepper("stepper_game_mode"),
-	wanted_hero_list = UIWidgets.create_map_hero_list_widget("wanted_hero_list"),
+	wanted_hero_list = UIWidgets.create_map_hero_list_widget("wanted_hero_list", "gamepad_node_wanted_hero_list"),
 	level_preview_text = UIWidgets.create_simple_text("test", "preview_text", 18, Colors.get_color_table_with_alpha("red", 255), {
 		vertical_alignment = "center",
 		scenegraph_id = "preview_text",
@@ -2679,14 +2927,7 @@ MapWidgetsGamepadController = {
 		input_description = {
 			name = "stepper",
 			gamepad_support = true,
-			actions = {
-				{
-					input_action = "d_horizontal",
-					priority = 4,
-					description_text = "input_description_change",
-					ignore_keybinding = true
-				}
-			}
+			actions = {}
 		},
 		disabled_input_description = {
 			name = "stepper",
@@ -2698,14 +2939,8 @@ MapWidgetsGamepadController = {
 			gamepad_support = true,
 			actions = {
 				{
-					input_action = "d_horizontal",
-					priority = 4,
-					description_text = "input_description_change",
-					ignore_keybinding = true
-				},
-				{
 					input_action = "confirm",
-					priority = 5,
+					priority = 8,
 					description_text = "input_description_open"
 				}
 			}
@@ -2730,14 +2965,7 @@ MapWidgetsGamepadController = {
 		input_description = {
 			name = "stepper",
 			gamepad_support = true,
-			actions = {
-				{
-					input_action = "d_horizontal",
-					priority = 4,
-					description_text = "input_description_change",
-					ignore_keybinding = true
-				}
-			}
+			actions = {}
 		},
 		disabled_input_description = {
 			name = "stepper",
@@ -2776,19 +3004,7 @@ MapWidgetsGamepadController = {
 		input_description = {
 			name = "stepper",
 			gamepad_support = true,
-			actions = {
-				{
-					input_action = "d_horizontal",
-					priority = 4,
-					description_text = "input_description_select",
-					ignore_keybinding = true
-				},
-				{
-					input_action = "confirm",
-					priority = 5,
-					description_text = "input_description_change"
-				}
-			}
+			actions = {}
 		}
 	},
 	player_entry = {
@@ -2809,7 +3025,7 @@ MapWidgetsGamepadController = {
 			actions = {
 				{
 					input_action = "confirm",
-					priority = 4,
+					priority = 6,
 					description_text = "map_setting_kick_player"
 				}
 			}
@@ -3002,7 +3218,7 @@ local default_input = {
 	},
 	{
 		input_action = "special_1",
-		priority = 48,
+		priority = 5,
 		description_text = "input_description_toggle_private"
 	},
 	{
@@ -3011,6 +3227,12 @@ local default_input = {
 		description_text = "input_description_close"
 	}
 }
+
+if Application.platform() == "xb1" then
+	table.remove(default_input, 2)
+	Application.warning("[MapViewDefinitions] Removed switch settings for lite optional cert")
+end
+
 generic_input_actions.play_disabled = table.clone(default_input)
 generic_input_actions.default = table.clone(default_input)
 generic_input_actions.default[#generic_input_actions.default + 1] = {

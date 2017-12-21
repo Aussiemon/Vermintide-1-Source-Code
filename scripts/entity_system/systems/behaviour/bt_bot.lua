@@ -138,7 +138,8 @@ BotBehaviors = {
 				name = "ranged_priority_target",
 				condition = "has_target_and_ammo_greater_than",
 				condition_args = {
-					overcharge_limit = 0.4,
+					overcharge_limit_type = "maximum",
+					overcharge_limit = 0.9,
 					ammo_percentage = 0
 				}
 			},
@@ -181,7 +182,8 @@ BotBehaviors = {
 					name = "ranged",
 					condition = "has_target_and_ammo_greater_than",
 					condition_args = {
-						overcharge_limit = 0.4,
+						overcharge_limit_type = "threshold",
+						overcharge_limit = 0.9,
 						ammo_percentage = 0.5
 					}
 				},

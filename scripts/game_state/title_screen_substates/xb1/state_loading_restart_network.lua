@@ -7,7 +7,6 @@ require("scripts/network/network_server")
 require("scripts/network/network_client")
 require("scripts/network/network_transmit")
 require("scripts/ui/views/title_loading_ui")
-require("scripts/ui/views/information_view")
 
 StateLoadingRestartNetwork = class(StateLoadingRestartNetwork)
 StateLoadingRestartNetwork.NAME = "StateLoadingRestartNetwork"
@@ -15,7 +14,6 @@ StateLoadingRestartNetwork.on_enter = function (self, params)
 	print("[Gamestate] Enter Substate StateLoadingRestartNetwork")
 	self._init_params(self, params)
 	self._init_network(self)
-	self._setup_view(self)
 
 	return 
 end
@@ -23,11 +21,6 @@ StateLoadingRestartNetwork._init_params = function (self, params)
 	self._world = params.world
 	self._viewport = params.viewport
 	self._loading_view = params.loading_view
-
-	return 
-end
-StateLoadingRestartNetwork._setup_view = function (self)
-	self._information_view = InformationView:new(self._world)
 
 	return 
 end

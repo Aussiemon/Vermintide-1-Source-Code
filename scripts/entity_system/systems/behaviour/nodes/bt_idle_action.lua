@@ -2,6 +2,8 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTIdleAction = class(BTIdleAction, BTNode)
 BTIdleAction.name = "BTIdleAction"
+local PLAYER_POSITIONS = PLAYER_POSITIONS
+local PLAYER_UNITS = PLAYER_UNITS
 BTIdleAction.init = function (self, ...)
 	BTIdleAction.super.init(self, ...)
 
@@ -38,34 +40,31 @@ BTIdleAction.leave = function (self, unit, blackboard, t)
 	return 
 end
 
-local function min_player_distance(unit)
+local function player_within_distance(unit, sqr_near_dist)
 	local pos = POSITION_LOOKUP[unit]
-	local player_units = PLAYER_UNITS
 	local player_positions = PLAYER_POSITIONS
-	local distance = math.huge
-	local closest_player_unit = nil
 
-	for i = 1, #player_units, 1 do
-		local player_unit = player_units[i]
+	for i = 1, #player_positions, 1 do
 		local player_pos = player_positions[i]
-		local dist = Vector3.distance_squared(pos, player_pos)
+		local sqr_dist = Vector3.distance_squared(pos, player_pos)
 
-		if dist < distance then
-			distance = dist
-			closest_player_unit = player_unit
+		if sqr_dist < sqr_near_dist then
+			print("lootrat jingle")
+
+			return PLAYER_UNITS[i]
 		end
 	end
 
-	return distance, closest_player_unit
+	return 
 end
 
 BTIdleAction._discovery_sound_when_close = function (self, unit, blackboard)
-	local dist = blackboard.action and blackboard.action.sound_when_near_distance
+	local near_distance_sqr = blackboard.action and blackboard.action.sound_when_near_distance_sqr
 
-	if dist and not blackboard.sound_when_near_played then
-		local min_dist, player_unit = min_player_distance(unit)
+	if near_distance_sqr and not blackboard.sound_when_near_played then
+		local player_unit = player_within_distance(unit, near_distance_sqr)
 
-		if min_dist < dist then
+		if player_unit then
 			local player = Managers.player:unit_owner(player_unit)
 			local peer_id = player.network_id(player)
 			local network_manager = Managers.state.network

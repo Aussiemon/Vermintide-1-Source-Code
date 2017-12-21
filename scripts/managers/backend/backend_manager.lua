@@ -5,6 +5,7 @@ require("scripts/managers/backend/script_backend_profile_attribute")
 require("scripts/managers/backend/script_backend_session")
 require("scripts/managers/backend/backend_boons")
 require("scripts/managers/backend/backend_quests")
+require("scripts/managers/backend/backend_profile_hash")
 
 cjson = cjson.stingray_init()
 local DEBUG_QUESTS_AND_CONTRACTS = false
@@ -14,7 +15,7 @@ if GameSettingsDevelopment.backend_settings.allow_local then
 end
 
 if GameSettingsDevelopment.backend_settings.allow_tutorial then
-	require("backend/tutorial_backend/tutorial_backend")
+	require("scripts/managers/backend/tutorial_backend/tutorial_backend")
 end
 
 local ERROR_CODES = {}
@@ -77,6 +78,7 @@ BackendManager.init = function (self)
 		end
 	end
 
+	self._interfaces.profile_hash = BackendProfileHash:new()
 	self._button_retry = "button_ok"
 	self._button_quit = "button_quit"
 	self._button_local_backend = "button_local_backend"
@@ -94,7 +96,7 @@ BackendManager.reset = function (self)
 
 	return 
 end
-BackendManager.signin = function (self)
+BackendManager.signin = function (self, authentication_token)
 	local plugin_loaded = rawget(_G, "Backend") ~= nil
 	local allow_local = GameSettingsDevelopment.backend_settings.allow_local
 	local use_backend = GameSettingsDevelopment.use_backend
@@ -135,7 +137,7 @@ BackendManager.signin = function (self)
 
 	print("[BackendManager] Backend Enabled")
 
-	self._backend = ScriptBackend:new()
+	self._backend = ScriptBackend:new(authentication_token)
 
 	if not self._backend:authenticated() then
 		print("[BackendManager] BackendManager self._need_signin = true")
@@ -157,6 +159,9 @@ BackendManager._destroy_backend = function (self)
 	end
 
 	return 
+end
+BackendManager.item_script_type = function (self)
+	return ScriptBackendItem.type()
 end
 BackendManager.get_interface = function (self, interface_name, player_id)
 	fassert(self._interfaces[interface_name], "Requesting unknown interface %q", interface_name)
@@ -184,15 +189,20 @@ BackendManager.disable = function (self)
 
 	return 
 end
-BackendManager.make_tutorial = function (self)
-	print("[BackendManager] Backend Disabled Tutorial")
+BackendManager.start_tutorial = function (self)
+	fassert(self._script_backend_items_backup == nil, "Tutorial already started")
 
-	self._disable_backend = true
+	self._script_backend_items_backup = ScriptBackendItem
 
-	self._destroy_backend(self)
+	make_script_backend_item_tutorial()
 
-	Managers.backend = BackendManagerTutorial:new()
-	self._should_disable = false
+	return 
+end
+BackendManager.stop_tutorial = function (self)
+	fassert(self._script_backend_items_backup ~= nil, "Stopping tutorial without starting it")
+
+	ScriptBackendItem = self._script_backend_items_backup
+	self._script_backend_items_backup = nil
 
 	return 
 end
@@ -214,6 +224,8 @@ BackendManager._update_state = function (self)
 			if settings.quests_enabled then
 				self._interfaces.quests:setup(self._data_server_queue)
 			end
+
+			self._interfaces.profile_hash:on_authenticated()
 		end
 	else
 		local result_data = self._backend:update_state()
@@ -250,6 +262,8 @@ BackendManager._update_error_handling = function (self, dt)
 				self._is_disconnected = true
 			elseif result == self._button_quit then
 				Application.quit()
+			elseif result == self._button_restart then
+				self._is_disconnected = true
 			elseif result == self._button_local_backend then
 				self._should_disable = true
 			end
@@ -313,6 +327,9 @@ BackendManager.update = function (self, dt)
 	self._update_error_handling(self, dt)
 
 	return 
+end
+BackendManager.authenticated = function (self)
+	return self._backend and self._backend:authenticated()
 end
 BackendManager._post_error = function (self, error_data)
 	ScriptApplication.send_to_crashify("Backend_Error", "ERROR: %s", error_data.details)
@@ -413,10 +430,16 @@ end
 BackendManager.available = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 
-	if settings.quests_enabled then
-		return rawget(_G, "Backend") ~= nil and rawget(_G, "Steam") ~= nil and self._interfaces.quests:initiated()
+	if Application.platform() == "win32" then
+		if settings.quests_enabled then
+			return rawget(_G, "Backend") ~= nil and rawget(_G, "Steam") ~= nil and self._interfaces.quests:initiated()
+		else
+			return rawget(_G, "Backend") ~= nil and rawget(_G, "Steam") ~= nil
+		end
+	elseif settings.quests_enabled then
+		return rawget(_G, "Backend") ~= nil and self._interfaces.quests:initiated()
 	else
-		return rawget(_G, "Backend") ~= nil and rawget(_G, "Steam") ~= nil
+		return rawget(_G, "Backend") ~= nil
 	end
 
 	return 

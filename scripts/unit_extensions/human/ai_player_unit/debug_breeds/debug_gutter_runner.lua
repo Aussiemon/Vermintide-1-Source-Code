@@ -25,6 +25,8 @@ DebugGutterRunner.update = function (unit, blackboard, t)
 	end
 
 	local special_targets_text = (target_unit and blackboard.group_blackboard.special_targets[target_unit] == unit and "YES") or "NO"
+	local next_smart_object_data = (blackboard.next_smart_object_data.next_smart_object_id ~= nil and "YES") or "NO"
+	local in_smartobj_range = (blackboard.is_in_smartobject_range and "YES") or "NO"
 
 	DebugGlobadier.debug_hud_print("Gutter runner:", nil, 1)
 	DebugGlobadier.debug_hud_print("behavior:", ai_node, 2)
@@ -35,15 +37,17 @@ DebugGutterRunner.update = function (unit, blackboard, t)
 	DebugGlobadier.debug_hud_print("skulk time:", skulk, 9)
 	DebugGlobadier.debug_hud_print("growing_aggro:", growing_aggro, 10)
 	DebugGlobadier.debug_hud_print("special_targets:", special_targets_text, 11)
+	DebugGlobadier.debug_hud_print("nxt smartobj:", next_smart_object_data, 12)
+	DebugGlobadier.debug_hud_print("in smartobj range:", in_smartobj_range, 13)
 	DebugGlobadier.debug_hud_background(11)
 
 	return 
 end
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 local row_height = 17
-DebugGlobadier.debug_hud_print = function (caption, value, index, valid)
+DebugGutterRunner.debug_hud_print = function (caption, value, index, valid)
 	local gui = Debug.gui
 	local y = index*row_height - 220
 	local caption_pos = Vector3(20, y, 100)
@@ -70,7 +74,7 @@ DebugGlobadier.debug_hud_print = function (caption, value, index, valid)
 
 	return 
 end
-DebugGlobadier.debug_hud_background = function (max_index)
+DebugGutterRunner.debug_hud_background = function (max_index)
 	local gui = Debug.gui
 	local width = 300
 	local height = max_index*row_height + 30

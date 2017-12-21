@@ -274,8 +274,8 @@ InventoryPackageSynchronizerClient.update = function (self, dt)
 		local gui = DebugScreen.gui
 
 		if gui then
-			local font = "arial_13"
-			local material = "materials/fonts/arial_13"
+			local font = "gw_arial_16"
+			local material = "materials/fonts/" .. font
 			local font_size = 13
 			local start_x, start_y = Application.resolution()
 			start_x = start_x - 300

@@ -39,12 +39,6 @@ local input_actions = {
 	merge = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 49,
 				description_text = "input_description_add"
@@ -52,24 +46,12 @@ local input_actions = {
 		},
 		item_added_and_selected = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 49,
 				description_text = "input_description_remove"
 			}
 		},
 		item_added_not_selected = {
-			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 48,
@@ -83,12 +65,6 @@ local input_actions = {
 		},
 		all_items_added = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 48,
 				description_text = "input_description_remove"
@@ -100,12 +76,6 @@ local input_actions = {
 			}
 		},
 		item_added_not_selected_can_afford = {
-			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 47,
@@ -122,40 +92,14 @@ local input_actions = {
 				description_text = "input_description_merge"
 			}
 		},
-		disabled_item = {
-			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			}
-		}
+		disabled_item = {}
 	},
 	melt = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "refresh",
 				priority = 49,
 				description_text = "input_description_melt"
-			}
-		},
-		melting = {
-			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
-				input_action = "special_1",
-				priority = 49,
-				description_text = "input_description_cancel"
 			}
 		},
 		disabled_item = {}
@@ -163,24 +107,12 @@ local input_actions = {
 	upgrade = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 49,
 				description_text = "input_description_add"
 			}
 		},
 		item_added_and_selected = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 48,
@@ -193,12 +125,6 @@ local input_actions = {
 			}
 		},
 		item_added_not_selected = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 47,
@@ -217,24 +143,12 @@ local input_actions = {
 		},
 		item_added_and_selected_upgrade_disabled = {
 			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 49,
 				description_text = "input_description_remove"
 			}
 		},
 		item_added_not_selected_upgrade_disabled = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 48,
@@ -248,12 +162,6 @@ local input_actions = {
 		},
 		item_added_not_selected_upgrade_disabled_item_disabled = {
 			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 49,
 				description_text = "input_description_remove"
@@ -261,6 +169,14 @@ local input_actions = {
 		},
 		disabled_item = {}
 	}
+}
+local fake_input_service = {
+	get = function ()
+		return 
+	end,
+	has = function ()
+		return 
+	end
 }
 ForgeView = class(ForgeView)
 ForgeView.init = function (self, ingame_ui_context)
@@ -273,13 +189,16 @@ ForgeView.init = function (self, ingame_ui_context)
 	self.peer_id = ingame_ui_context.peer_id
 	self.local_player_id = ingame_ui_context.local_player_id
 	self.is_server = ingame_ui_context.is_server
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "forge_view", self.ingame_ui:get_ingame_menu_keymap())
+	input_manager.create_input_service(input_manager, "forge_view", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "forge_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "forge_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "forge_view", "gamepad")
@@ -304,6 +223,9 @@ ForgeView.init = function (self, ingame_ui_context)
 	self.ingame_ui_context = ingame_ui_context
 
 	return 
+end
+ForgeView.page_input_service = function (self)
+	return (self.input_blocked and fake_input_service) or self.input_manager:get_service("forge_view")
 end
 ForgeView.input_service = function (self)
 	return self.input_manager:get_service("forge_view")
@@ -416,6 +338,7 @@ ForgeView.post_update_on_enter = function (self)
 	local profile_name = SPProfiles[my_profile].display_name
 
 	ui_pages.items:select_hero_by_name(profile_name, true)
+	self._apply_item_filter(self, self.item_filter, true)
 
 	local selected_item = ui_pages.items:selected_item()
 	local item_backend_id = selected_item and selected_item.backend_id
@@ -430,6 +353,10 @@ ForgeView.transitioning = function (self)
 		return true
 	else
 		return not self.active
+	end
+
+	if Application.platform() == "xb1" and BackendManagerLocalEnabled then
+		Managers.save:auto_save(SaveFileName, SaveData)
 	end
 
 	return 
@@ -452,6 +379,7 @@ ForgeView.exit = function (self, return_to_game)
 	merge_ui_page.remove_all_items(merge_ui_page)
 	upgrade_ui_page.remove_item(upgrade_ui_page)
 	melt_ui_page.clear(melt_ui_page)
+	items_page.on_focus_lost(items_page)
 	self.ingame_ui:transition_with_fade(exit_transition)
 	self.play_sound(self, "Play_hud_button_close")
 
@@ -517,7 +445,7 @@ ForgeView.post_update = function (self, dt)
 	end
 
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "forge_view")
+	local input_service = self.page_input_service(self)
 	local transitioning = self.transitioning(self)
 
 	self.ui_animator:update(dt)
@@ -568,7 +496,7 @@ ForgeView.post_update = function (self, dt)
 			self.play_sound(self, "Play_hud_hover")
 		end
 
-		if exit_button_widget.content.button_hotspot.on_release or input_service.get(input_service, "toggle_menu") then
+		if not self.input_blocked and (exit_button_widget.content.button_hotspot.on_release or input_service.get(input_service, "toggle_menu")) then
 			local return_to_game = not self.ingame_ui.menu_active
 
 			self.play_sound(self, "Play_hud_hover")
@@ -669,6 +597,28 @@ ForgeView.on_forge_selection_bar_index_changed = function (self, index, ignore_s
 
 	return 
 end
+ForgeView._apply_item_filter = function (self, item_filter, update_list)
+	local ui_pages = self.ui_pages
+	local items_page = ui_pages.items
+	self.item_filter = item_filter
+	local current_profile_name = items_page.current_profile_name(items_page)
+
+	if item_filter and current_profile_name and current_profile_name ~= "all" then
+		local can_wield_name = "can_wield_" .. current_profile_name
+		item_filter = item_filter .. " and " .. can_wield_name .. " == true"
+	end
+
+	items_page.set_item_filter(items_page, item_filter)
+
+	if update_list then
+		local play_sound = false
+
+		items_page.refresh(items_page)
+		items_page.on_inventory_item_selected(items_page, 1, play_sound)
+	end
+
+	return 
+end
 ForgeView.activate_merge_view = function (self, ignore_sound)
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
@@ -676,10 +626,10 @@ ForgeView.activate_merge_view = function (self, ignore_sound)
 	local merge_ui_page = ui_pages.merge
 	local compare_ui_page = ui_pages.compare
 	local upgrade_ui_page = ui_pages.upgrade
-	upgrade_ui_page.active = false
-	merge_ui_page.active = true
-	melt_ui_page.active = false
 
+	merge_ui_page.set_active(merge_ui_page, true)
+	melt_ui_page.set_active(melt_ui_page, false)
+	upgrade_ui_page.set_active(upgrade_ui_page, false)
 	melt_ui_page.clear(melt_ui_page)
 	merge_ui_page.remove_all_items(merge_ui_page)
 	upgrade_ui_page.remove_item(upgrade_ui_page)
@@ -699,6 +649,10 @@ ForgeView.activate_merge_view = function (self, ignore_sound)
 
 	items_page.set_rarity(items_page, nil)
 	items_page.set_drag_enabled(items_page, true)
+
+	local item_filter = "item_rarity ~= promo and ( slot_type == melee or slot_type == ranged )"
+
+	self._apply_item_filter(self, item_filter, true)
 
 	if slot_type_changed then
 		local selected_item = items_page.selected_item(items_page)
@@ -729,6 +683,9 @@ ForgeView.activate_melt_view = function (self, ignore_sound)
 	merge_ui_page.active = false
 	melt_ui_page.active = true
 
+	melt_ui_page.set_active(melt_ui_page, true)
+	merge_ui_page.set_active(merge_ui_page, false)
+	upgrade_ui_page.set_active(upgrade_ui_page, false)
 	merge_ui_page.remove_all_items(merge_ui_page)
 	upgrade_ui_page.remove_item(upgrade_ui_page)
 
@@ -751,7 +708,9 @@ ForgeView.activate_melt_view = function (self, ignore_sound)
 		"trinket",
 		"hat"
 	})
+	local item_filter = "item_rarity ~= promo and ( slot_type == trinket or slot_type == melee or slot_type == ranged or slot_type == hat )"
 
+	self._apply_item_filter(self, item_filter, true)
 	items_page.set_rarity(items_page, nil)
 	items_page.set_drag_enabled(items_page, true)
 
@@ -771,6 +730,14 @@ ForgeView.activate_melt_view = function (self, ignore_sound)
 		self.play_sound(self, "Play_hud_forge_switch_to_melt")
 	end
 
+	local input_manager = self.input_manager
+	local input_service = input_manager.get_service(input_manager, "forge_view")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+
+	if gamepad_active then
+		melt_ui_page.toggle_melt_mode(melt_ui_page, true, true)
+	end
+
 	return 
 end
 ForgeView.activate_upgrade_view = function (self, ignore_sound)
@@ -780,10 +747,10 @@ ForgeView.activate_upgrade_view = function (self, ignore_sound)
 	local merge_ui_page = ui_pages.merge
 	local compare_ui_page = ui_pages.compare
 	local upgrade_ui_page = ui_pages.upgrade
-	upgrade_ui_page.active = true
-	merge_ui_page.active = false
-	melt_ui_page.active = false
 
+	upgrade_ui_page.set_active(upgrade_ui_page, true)
+	merge_ui_page.set_active(merge_ui_page, false)
+	melt_ui_page.set_active(melt_ui_page, false)
 	melt_ui_page.clear(melt_ui_page)
 	merge_ui_page.remove_all_items(merge_ui_page)
 	upgrade_ui_page.remove_item(upgrade_ui_page)
@@ -804,6 +771,10 @@ ForgeView.activate_upgrade_view = function (self, ignore_sound)
 
 	items_page.set_rarity(items_page, nil)
 	items_page.set_drag_enabled(items_page, true)
+
+	local item_filter = "item_rarity ~= promo and ( slot_type == melee or slot_type == ranged )"
+
+	self._apply_item_filter(self, item_filter, true)
 
 	if slot_type_changed then
 		local selected_item = items_page.selected_item(items_page)
@@ -846,7 +817,7 @@ ForgeView.toggle_melt_mode = function (self, force_shutdown, used_by_gamepad)
 		Window.set_cursor("gui/cursors/mouse_cursor")
 	end
 
-	melt_ui_page.toggle_melt_mode(melt_ui_page, self.melt_active, force_shutdown)
+	melt_ui_page.toggle_melt_mode(melt_ui_page, self.melt_active, used_by_gamepad, force_shutdown)
 	items_page.set_drag_enabled(items_page, not self.melt_active)
 
 	return 
@@ -914,7 +885,7 @@ ForgeView.draw = function (self, dt)
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "forge_view")
+	local input_service = self.page_input_service(self)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local widgets_by_name = self.widgets_by_name
 
@@ -923,12 +894,17 @@ ForgeView.draw = function (self, dt)
 	local forge_selection_bar = self.forge_selection_bar_widget
 
 	UIRenderer.draw_widget(ui_renderer, forge_selection_bar)
+	UIRenderer.end_pass(ui_renderer)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local token_widgets = self.token_widgets
 
 	for i = 1, #token_widgets, 1 do
 		UIRenderer.draw_widget(ui_renderer, token_widgets[i])
 	end
+
+	UIRenderer.end_pass(ui_renderer)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	for widget_name, widget in pairs(widgets_by_name) do
 		if widget_name ~= "exit_button_widget" and widget_name ~= "forge_selection_bar" then
@@ -957,7 +933,9 @@ ForgeView.draw = function (self, dt)
 	return 
 end
 ForgeView.handle_index_changes = function (self)
-	local gamepad_active = self.input_manager:is_device_active("gamepad")
+	local input_manager = self.input_manager
+	local input_service = input_manager.get_service(input_manager, "forge_view")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
 	local melt_ui_page = ui_pages.melt
@@ -970,6 +948,10 @@ ForgeView.handle_index_changes = function (self)
 
 	if character_changed then
 		items_page.set_selected_hero(items_page, character_changed)
+
+		local item_filter = self.item_filter
+
+		self._apply_item_filter(self, item_filter, true)
 	end
 
 	local list_item_pressed, inventory_list_index_pressed = items_page.is_list_item_pressed(items_page)
@@ -1052,12 +1034,15 @@ ForgeView.handle_index_changes = function (self)
 			local backend_manager = Managers.backend
 
 			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-				local stats_id = Managers.player:local_player():stats_id()
+				local player = Managers.player:local_player()
+				local stats_id = player.stats_id(player)
 				local statistics_db = Managers.player:statistics_db()
 				local current_amount = statistics_db.get_persistent_stat(statistics_db, stats_id, "fused_items")
 				local new_amount = current_amount + 5
 
 				statistics_db.set_stat(statistics_db, stats_id, "fused_items", new_amount)
+				Managers.player:set_stats_backend(player)
+				Managers.backend:commit()
 			end
 		end
 	end
@@ -1197,6 +1182,8 @@ ForgeView.handle_index_changes = function (self)
 		elseif ScriptBackendItem.is_salvageable(backend_id_to_melt) then
 			melt_ui_page.start_melt_progress(melt_ui_page, backend_id_to_melt)
 		end
+	elseif melt_ui_page.active and melt_ui_page.melting and gamepad_active and (not input_service.get(input_service, "refresh_hold") or input_service.get(input_service, "move_up") or input_service.get(input_service, "move_down")) then
+		melt_ui_page.abort_melt(melt_ui_page)
 	end
 
 	if melt_ui_page.active and not melt_ui_page.melting then
@@ -1215,10 +1202,13 @@ ForgeView.handle_index_changes = function (self)
 				local backend_manager = Managers.backend
 
 				if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-					local stats_id = Managers.player:local_player():stats_id()
+					local player = Managers.player:local_player()
+					local stats_id = player.stats_id(player)
 					local statistics_db = Managers.player:statistics_db()
 
 					statistics_db.increment_stat(statistics_db, stats_id, "salvaged_items")
+					Managers.player:set_stats_backend(player)
+					Managers.backend:commit()
 				end
 
 				melt_ui_page.melt(melt_ui_page, item_name, number_of_tokens)
@@ -1349,15 +1339,13 @@ ForgeView.update_button_bar_animation = function (self, widget, widget_name, dt)
 	return 
 end
 ForgeView.set_input_blocked = function (self, blocked)
-	if blocked then
-		self.input_manager:block_device_except_service(nil, "keyboard", 1)
-		self.input_manager:block_device_except_service(nil, "mouse", 1)
-		self.input_manager:block_device_except_service(nil, "gamepad", 1)
-	else
-		self.input_manager:block_device_except_service("forge_view", "keyboard", 1)
-		self.input_manager:block_device_except_service("forge_view", "mouse", 1)
-		self.input_manager:block_device_except_service("forge_view", "gamepad", 1)
-	end
+	self.input_blocked = blocked
+	local ui_pages = self.ui_pages
+	local items_page = ui_pages.items
+	local compare_ui_page = ui_pages.compare
+
+	items_page.disable_input(items_page, blocked)
+	compare_ui_page.disable_input(compare_ui_page, blocked)
 
 	return 
 end
@@ -1449,6 +1437,8 @@ ForgeView.set_gamepad_page_focus = function (self, name)
 		ui_pages[gamepad_selected_page]:set_gamepad_focus(false)
 	end
 
+	ui_pages.items:on_focus_lost()
+
 	if ui_pages[name].set_gamepad_focus then
 		ui_pages[name]:set_gamepad_focus(true)
 	end
@@ -1488,7 +1478,9 @@ ForgeView.update_input_description = function (self)
 			end
 		end
 
-		if num_merge_item_ids == 5 or (0 < num_merge_item_ids and page.enough_tokens_available(page)) then
+		if page.merging then
+			actions_name_to_use = "disabled_item"
+		elseif num_merge_item_ids == 5 or (0 < num_merge_item_ids and page.enough_tokens_available(page)) then
 			if page.is_merge_possible(page) then
 				if num_merge_item_ids ~= 5 and is_active and not same_item then
 					actions_name_to_use = "item_added_not_selected_can_afford"
@@ -1546,6 +1538,12 @@ ForgeView.update_input_description = function (self)
 		if selected_item then
 			local selected_item_backend_id = selected_item.backend_id
 
+			if selected_item_backend_id then
+				local is_salvageable = ScriptBackendItem.is_salvageable(selected_item_backend_id)
+
+				ui_pages.melt:can_melt_selected_item(is_salvageable)
+			end
+
 			if page.melting then
 				if selected_item_backend_id == page.item_id_to_melt then
 					actions_name_to_use = "melting"
@@ -1584,7 +1582,7 @@ ForgeView.handle_gamepad_input = function (self, dt)
 	self.update_input_description(self)
 
 	local ui_pages = self.ui_pages
-	local input_service = self.input_manager:get_service("forge_view")
+	local input_service = self.page_input_service(self)
 	local gamepad_selected_page = self.gamepad_selected_page
 	local controller_cooldown = self.controller_cooldown
 
@@ -1633,7 +1631,7 @@ ForgeView.handle_gamepad_input = function (self, dt)
 				self.toggle_melt_mode(self, nil, used_by_gamepad)
 			end
 
-			if input_service.get(input_service, "refresh") then
+			if input_service.get(input_service, "refresh_press") then
 				self.gamepad_request_melt_item = true
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end

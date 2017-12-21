@@ -36,7 +36,7 @@ UIElement.init = function (element_definition, content, style, style_global)
 		passes = element_definition.passes
 	}
 end
-UIElement.destroy = function (element)
+UIElement.destroy = function (ui_renderer, element)
 	for i, pass in ipairs(element.passes) do
 		local pass_type = pass.pass_type
 
@@ -49,7 +49,7 @@ UIElement.destroy = function (element)
 		local pass_data = element.pass_data[i]
 
 		if ui_pass.destroy then
-			ui_pass.destroy(pass_data)
+			ui_pass.destroy(ui_renderer, pass_data, pass)
 		end
 	end
 
@@ -60,6 +60,7 @@ UIWidget.init = function (widget_definition)
 	local content = table.clone(widget_definition.content)
 	local style = table.clone(widget_definition.style or {})
 	local style_global = table.clone(widget_definition.style_global or {})
+	local offset = widget_definition.offset and table.clone(widget_definition.offset)
 
 	return {
 		element = UIElement.init(widget_definition.element, content, style, style_global),
@@ -67,12 +68,12 @@ UIWidget.init = function (widget_definition)
 		style = style,
 		style_global = style_global,
 		scenegraph_id = widget_definition.scenegraph_id,
-		offset = widget_definition.offset,
+		offset = offset,
 		animations = {}
 	}
 end
-UIWidget.destroy = function (widget)
-	UIElement.destroy(widget.element)
+UIWidget.destroy = function (ui_renderer, widget)
+	UIElement.destroy(ui_renderer, widget.element)
 
 	return 
 end

@@ -100,7 +100,6 @@ require("scripts/unit_extensions/default_player_unit/states/player_character_sta
 require("scripts/unit_extensions/default_player_unit/states/player_character_state_dodging")
 require("scripts/unit_extensions/default_player_unit/states/player_character_state_waiting_for_assisted_respawn")
 require("scripts/unit_extensions/default_player_unit/states/player_character_state_catapulted")
-require("scripts/unit_extensions/default_player_unit/states/player_character_state_hammer_leap")
 require("scripts/unit_extensions/default_player_unit/states/player_character_state_stunned")
 require("scripts/unit_extensions/default_player_unit/states/player_character_state_using_transport")
 require("scripts/unit_extensions/default_player_unit/states/player_character_state_grabbed_by_pack_master")
@@ -119,6 +118,7 @@ require("scripts/unit_extensions/default_player_unit/target_override_extension")
 require("scripts/unit_extensions/death/explosive_barrel_death_extension")
 require("scripts/unit_extensions/cutscene_camera/cutscene_camera")
 require("scripts/unit_extensions/damage/loot_rat_damage_extension")
+require("scripts/unit_extensions/smart_targeting/player_unit_smart_targeting_extension")
 
 local projectile_locomotion_extensions = {
 	"ProjectilePhysicsHuskLocomotionExtension",
@@ -186,6 +186,9 @@ EntitySystem._init_systems = function (self, entity_system_creation_context)
 	self._add_system(self, "aggro_system", AggroSystem, entity_system_creation_context)
 	self._add_system(self, "objective_socket_system", ObjectiveSocketSystem, entity_system_creation_context)
 	self._add_system(self, "ping_system", PingSystem, entity_system_creation_context)
+	self._add_system(self, "smart_targeting_system", ExtensionSystemBase, entity_system_creation_context, {
+		"PlayerUnitSmartTargetingExtension"
+	})
 	self._add_system(self, "weapon_system", WeaponSystem, entity_system_creation_context)
 	self._add_system(self, "projectile_locomotion_system", ProjectileLocomotionSystem, entity_system_creation_context, projectile_locomotion_extensions)
 	self._add_system(self, "projectile_impact_system", ProjectileImpactSystem, entity_system_creation_context)
@@ -288,21 +291,21 @@ end
 EntitySystem.pre_update = function (self, dt)
 	Profiler.start("EntitySystem:pre_update")
 	self.system_update(self, "pre_update", dt)
-	Profiler.stop()
+	Profiler.stop("EntitySystem:pre_update")
 
 	return 
 end
 EntitySystem.update = function (self, dt)
 	Profiler.start("EntitySystem:update")
 	self.system_update(self, "update", dt)
-	Profiler.stop()
+	Profiler.stop("EntitySystem:update")
 
 	return 
 end
 EntitySystem.post_update = function (self, dt)
 	Profiler.start("EntitySystem:post_update")
 	self.system_update(self, "post_update", dt)
-	Profiler.stop()
+	Profiler.stop("EntitySystem:post_update")
 
 	return 
 end
@@ -322,6 +325,10 @@ EntitySystem.system_update = function (self, update_func, dt)
 	entity_system_update_context.network_transmit = self.network_transmit
 	entity_system_update_context.statistics_db = self.statistics_db
 	entity_system_update_context.dice_keeper = self.dice_keeper
+
+	if World.get_data(entity_system_update_context.world, "paused") then
+		return 
+	end
 
 	self.entity_system_bag:update(entity_system_update_context, update_func)
 
@@ -353,7 +360,7 @@ EntitySystem.destroy = function (self)
 	self.system_update_context = nil
 
 	GarbageLeakDetector.register_object(self, "EntitySystem")
-	Profiler.stop()
+	Profiler.stop("EntitySystem:destroy")
 
 	return 
 end

@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -27,7 +30,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "heavy_attack_down_first",
-					start_time = 0.75,
+					start_time = 0.65,
 					action = "action_one",
 					input = "action_one_release"
 				},
@@ -44,7 +47,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				},
 				{
-					start_time = 0.75,
+					start_time = 0.85,
 					end_time = 1.5,
 					input = "action_one_hold"
 				},
@@ -57,8 +60,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -81,7 +87,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "heavy_attack_down_first",
-					start_time = 0.75,
+					start_time = 0.65,
 					action = "action_one",
 					input = "action_one_release"
 				},
@@ -98,7 +104,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				},
 				{
-					start_time = 0.75,
+					start_time = 0.85,
 					end_time = 1.5,
 					input = "action_one_hold"
 				},
@@ -111,8 +117,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -135,7 +144,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "heavy_attack_down_first",
-					start_time = 0.75,
+					start_time = 0.65,
 					action = "action_one",
 					input = "action_one_release"
 				},
@@ -152,7 +161,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				},
 				{
-					start_time = 0.75,
+					start_time = 0.85,
 					end_time = 1.5,
 					input = "action_one_hold"
 				},
@@ -238,20 +247,20 @@ weapon_template.actions = {
 			},
 			default_target = {
 				attack_template_damage_type = "two_h_linesman_L",
-				attack_template = "heavy_slashing_linesman"
+				attack_template = "heavy_slashing_linesman_hs"
 			},
 			targets = {
 				{
 					attack_template_damage_type = "two_h_linesman_L_2",
-					attack_template = "heavy_slashing_linesman"
+					attack_template = "heavy_slashing_linesman_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_linesman_L_1",
-					attack_template = "heavy_slashing_linesman"
+					attack_template = "heavy_slashing_linesman_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_linesman_L",
-					attack_template = "heavy_slashing_linesman"
+					attack_template = "heavy_slashing_linesman_hs"
 				}
 			}
 		},
@@ -332,20 +341,20 @@ weapon_template.actions = {
 			end,
 			default_target = {
 				attack_template_damage_type = "two_h_linesman_L",
-				attack_template = "heavy_slashing_linesman"
+				attack_template = "heavy_slashing_linesman_hs"
 			},
 			targets = {
 				{
 					attack_template_damage_type = "two_h_linesman_L_2",
-					attack_template = "heavy_slashing_linesman"
+					attack_template = "heavy_slashing_linesman_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_linesman_L_1",
-					attack_template = "heavy_slashing_linesman"
+					attack_template = "heavy_slashing_linesman_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_linesman_L",
-					attack_template = "heavy_slashing_linesman"
+					attack_template = "heavy_slashing_linesman_hs"
 				}
 			}
 		},
@@ -361,10 +370,13 @@ weapon_template.actions = {
 			max_targets = 1,
 			hit_shield_stop_anim = "attack_hit_shield",
 			hit_effect = "melee_hit_axes_2h",
+			aim_assist_ramp_multiplier = 0.3,
+			aim_assist_max_ramp_multiplier = 0.6,
 			damage_window_end = 0.45,
 			impact_sound_event = "slashing_hit",
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
+			aim_assist_ramp_decay_delay = 0.1,
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy_left",
@@ -387,6 +399,13 @@ weapon_template.actions = {
 				}
 			},
 			allowed_chain_actions = {
+				{
+					sub_action = "default",
+					start_time = 0,
+					action = "action_two",
+					end_time = 0.15,
+					input = "action_two_hold"
+				},
 				{
 					sub_action = "heavy_attack_down_second",
 					start_time = 0.6,
@@ -415,7 +434,7 @@ weapon_template.actions = {
 			},
 			default_target = {
 				attack_template_damage_type = "two_h_linesman_L_2",
-				attack_template = "heavy_slashing_linesman"
+				attack_template = "heavy_slashing_upper"
 			},
 			targets = {}
 		},
@@ -431,10 +450,13 @@ weapon_template.actions = {
 			max_targets = 1,
 			hit_shield_stop_anim = "attack_hit_shield",
 			hit_effect = "melee_hit_axes_2h",
+			aim_assist_ramp_multiplier = 0.3,
+			aim_assist_max_ramp_multiplier = 0.8,
 			damage_window_end = 0.5,
 			impact_sound_event = "slashing_hit",
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
+			aim_assist_ramp_decay_delay = 0.1,
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy_down",
@@ -604,6 +626,17 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = false,
 		arc = 1
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0,
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 0.5,
+		skaven_slave = 0.5
 	}
 }
 weapon_template.wwise_dep_right_hand = {

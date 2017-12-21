@@ -87,8 +87,7 @@ HitEffectsStormVermin = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 10,
@@ -225,8 +224,7 @@ HitEffectsStormVermin = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 10,
@@ -306,8 +304,7 @@ HitEffectsStormVermin = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 0,
@@ -337,8 +334,7 @@ HitEffectsStormVermin = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 5,
@@ -465,8 +461,7 @@ HitEffectsStormVermin = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 10,
@@ -558,7 +553,6 @@ HitEffectsStormVermin = {
 		},
 		animations = {
 			"ragdoll",
-			"death_crawl",
 			"death_shot_body"
 		},
 		push = {
@@ -590,8 +584,7 @@ HitEffectsStormVermin = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 30,
@@ -2139,6 +2132,7 @@ HitEffectsStormVermin = {
 	gib_killing_blow_death = {
 		inherits = "default_death",
 		extra_conditions = {
+			death = true,
 			damage_type = "killing_blow"
 		},
 		animations = {
@@ -2146,6 +2140,11 @@ HitEffectsStormVermin = {
 		},
 		flow_event = {
 			"dismember_gib"
+		},
+		push = {
+			distal_force = 300,
+			vertical_force = 140,
+			lateral_force = 0
 		}
 	},
 	wound_default = {

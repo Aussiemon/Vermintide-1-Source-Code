@@ -14,6 +14,31 @@ weapon_template.actions = {
 			allowed_chain_actions = {}
 		}
 	},
+	action_instant_throw_grimoire = {
+		default = {
+			kind = "dummy",
+			weapon_action_hand = "left",
+			total_time = 0,
+			allowed_chain_actions = {}
+		},
+		instant_throw = {
+			anim_end_event = "attack_finished",
+			ammo_usage = 1,
+			kind = "throw_grimoire",
+			weapon_action_hand = "left",
+			uninterruptible = true,
+			anim_event = "attack_throw",
+			auto_validate_on_gamepad = true,
+			total_time = 0.7,
+			anim_end_event_condition_func = function (unit, end_reason)
+				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
+			end,
+			condition_func = function ()
+				return true
+			end,
+			allowed_chain_actions = {}
+		}
+	},
 	action_inspect = ActionTemplates.action_inspect_left,
 	action_wield = ActionTemplates.wield_left,
 	action_instant_grenade_throw = ActionTemplates.instant_equip_grenade,
@@ -37,6 +62,10 @@ weapon_template.left_hand_attachment_node_linking = AttachmentNodeLinking.one_ha
 weapon_template.wield_anim = "to_first_aid"
 weapon_template.gui_texture = "icons_placeholder_melee_01"
 weapon_template.is_grimoire = true
+weapon_template.max_fatigue_points = 1
+weapon_template.dodge_distance = 1.2
+weapon_template.dodge_speed = 1.2
+weapon_template.dodge_count = 3
 Weapons = Weapons or {}
 Weapons.wpn_grimoire_01 = weapon_template
 Weapons.wpn_side_objective_tome_01 = table.clone(weapon_template)
@@ -89,6 +118,13 @@ Weapons.wpn_side_objective_tome_01.actions = {
 				return end_reason ~= "new_interupting_action"
 			end,
 			total_time = math.huge,
+			buff_data = {
+				{
+					start_time = 0,
+					external_multiplier = 0.75,
+					buff_name = "planted_decrease_movement"
+				}
+			},
 			allowed_chain_actions = {
 				{
 					sub_action = "push",
@@ -101,14 +137,8 @@ Weapons.wpn_side_objective_tome_01.actions = {
 	},
 	action_inspect = ActionTemplates.action_inspect_left,
 	action_wield = ActionTemplates.wield_left,
-	action_instant_grenade_throw = ActionTemplates.instant_equip_grenade,
-	action_instant_heal_self = ActionTemplates.instant_equip_and_heal_self,
-	action_instant_heal_other = ActionTemplates.instant_equip_and_heal_other,
-	action_instant_drink_potion = ActionTemplates.instant_equip_and_drink_potion,
-	action_instant_equip_tome = ActionTemplates.instant_equip_tome,
-	action_instant_equip_grimoire = ActionTemplates.instant_equip_grimoire,
-	action_instant_equip_grenade = ActionTemplates.instant_equip_grenade_only,
-	action_instant_equip_healing_draught = ActionTemplates.instant_equip_and_drink_healing_draught
+	action_instant_grenade_throw = ActionTemplates.instant_grenade_throw,
+	action_instant_heal_self = ActionTemplates.instant_equip_and_heal_self
 }
 Weapons.wpn_side_objective_tome_01.pickup_data = {
 	pickup_name = "tome"

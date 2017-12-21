@@ -177,7 +177,7 @@ end
 GameNetworkManager.update_transmit = function (self, dt)
 	Profiler.start("GameNetworkManager:update_transmit()")
 	Network.update_transmit()
-	Profiler.stop()
+	Profiler.stop("GameNetworkManager:update_transmit()")
 
 	return 
 end
@@ -639,7 +639,7 @@ GameNetworkManager._hot_join_sync = function (self, peer_id)
 	self._object_synchronizing_clients[peer_id] = nil
 
 	self.network_transmit:remove_peer_ignore(peer_id)
-	Profiler.stop()
+	Profiler.stop("hot_join_sync")
 
 	return 
 end

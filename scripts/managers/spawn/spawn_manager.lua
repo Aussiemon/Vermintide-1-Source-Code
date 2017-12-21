@@ -927,6 +927,9 @@ SpawnManager.ready_to_spawn = function (self, peer_id, local_player_id)
 		status.spawn_state = "spawned"
 
 		RPC.rpc_set_observer_camera(peer_id, local_player_id)
+
+		status.respawn_timer = nil
+		status.ready_for_respawn = true
 	else
 		status.spawn_state = (is_initial_spawn and "is_initial_spawn") or "spawn"
 	end

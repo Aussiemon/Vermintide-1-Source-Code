@@ -234,7 +234,11 @@ BackendUtils.item_has_trait = function (backend_id, trait_name)
 end
 BackendUtils.add_trait = function (item_id, trait_name, variable, chance)
 	if BackendUtils.item_has_trait(item_id, trait_name) then
-		print(string.format("item_id: %d has the trait: %s with proc chance: %d", item_id, trait_name, chance))
+		if chance then
+			print(string.format("item_id: %d has the trait: %s with proc chance: %d", item_id, trait_name, chance))
+		else
+			print(string.format("item_id: %d has the trait: %s", item_id, trait_name))
+		end
 
 		return 
 	end
@@ -263,6 +267,25 @@ BackendUtils.remove_tokens = function (amount, token_type)
 	ScriptBackendProfileAttribute.set(token_type, num_tokens)
 
 	return 
+end
+BackendUtils.format_profile_hash = function (hash, num_chars, block_length, block_divider)
+	if not hash then
+		return "n/a"
+	end
+
+	local str = ""
+
+	for ii = 1, num_chars, block_length do
+		local block = string.sub(hash, ii, (ii + block_length) - 1)
+
+		if str == "" then
+			str = block
+		else
+			str = string.format("%s%s%s", str, block_divider, block)
+		end
+	end
+
+	return str
 end
 
 return 

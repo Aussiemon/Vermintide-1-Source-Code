@@ -51,7 +51,7 @@ BTUtilityNode.run = function (self, unit, blackboard, t, dt)
 
 		result, evaluate_next_frame = running_node.evaluate(running_node, unit, blackboard, t, dt)
 
-		Profiler.stop()
+		Profiler.stop(running_node._identifier)
 
 		if result ~= "failed" then
 			blackboard.evaluate = evaluate_next_frame
@@ -68,7 +68,7 @@ BTUtilityNode.run = function (self, unit, blackboard, t, dt)
 
 	local num_actions = randomize_actions(unit, actions, blackboard, t)
 
-	Profiler.stop()
+	Profiler.stop("randomize_actions")
 
 	for i = 1, num_actions, 1 do
 		local action = actions[i]
@@ -88,7 +88,7 @@ BTUtilityNode.run = function (self, unit, blackboard, t, dt)
 
 		result, evaluate_next_frame = node.evaluate(node, unit, blackboard, t, dt)
 
-		Profiler.stop()
+		Profiler.stop(node._identifier)
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)

@@ -951,131 +951,161 @@ BuffTemplates = {
 	burning_dot = {
 		buffs = {
 			{
-				duration = 3,
+				attack_damage_template = "burning_dot",
 				name = "burning dot",
+				duration = 3,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1,
 				damage_type = "burninating",
 				non_stacking = true,
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage",
-				attack_damage_template = "burning_dot"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	beam_burning_dot = {
 		buffs = {
 			{
-				duration = 3,
+				attack_damage_template = "beam_burning_dot",
 				name = "burning dot",
+				duration = 3,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1,
 				damage_type = "burninating",
-				attack_damage_template = "beam_burning_dot",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	beam_burning_dot_t2 = {
 		buffs = {
 			{
-				duration = 3,
+				attack_damage_template = "beam_burning_dot_t2",
 				name = "burning dot",
+				duration = 3,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 0.75,
 				damage_type = "burninating",
-				attack_damage_template = "beam_burning_dot_t2",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	beam_burning_dot_t3 = {
 		buffs = {
 			{
-				duration = 3,
+				attack_damage_template = "beam_burning_dot_t3",
 				name = "burning dot",
+				duration = 3,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 0.6,
 				damage_type = "burninating",
-				attack_damage_template = "beam_burning_dot_t3",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	burning_1W_dot = {
 		buffs = {
 			{
-				duration = 2,
+				attack_damage_template = "burning_dot",
 				name = "burning dot",
+				duration = 2,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1.5,
 				damage_type = "burninating",
-				attack_damage_template = "burning_dot",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	burning_1W_dot_t2 = {
 		buffs = {
 			{
-				duration = 2,
+				attack_damage_template = "burning_dot_t2",
 				name = "burning dot",
+				duration = 2,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1.25,
 				damage_type = "burninating",
-				attack_damage_template = "burning_dot_t2",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	burning_1W_dot_t3 = {
 		buffs = {
 			{
-				duration = 2,
+				attack_damage_template = "burning_dot_t3",
 				name = "burning dot",
+				duration = 2,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1,
 				damage_type = "burninating",
-				attack_damage_template = "burning_dot_t3",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	burning_3W_dot = {
 		buffs = {
 			{
-				duration = 4,
+				attack_damage_template = "burning_dot",
 				name = "burning dot",
+				duration = 4,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1.25,
 				damage_type = "burninating",
-				attack_damage_template = "burning_dot",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	burning_3W_dot_t2 = {
 		buffs = {
 			{
-				duration = 4,
+				attack_damage_template = "burning_dot_t2",
 				name = "burning dot",
+				duration = 4,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 1,
 				damage_type = "burninating",
-				attack_damage_template = "burning_dot_t2",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
 	burning_3W_dot_t3 = {
 		buffs = {
 			{
-				duration = 4,
+				attack_damage_template = "burning_dot_t3",
 				name = "burning dot",
+				duration = 4,
+				end_flow_event = "smoke",
+				start_flow_event = "burn",
+				remove_buff_func = "remove_dot_damage",
+				apply_buff_func = "start_dot_damage",
 				time_between_dot_damages = 0.8,
 				damage_type = "burninating",
-				attack_damage_template = "burning_dot_t3",
-				update_func = "apply_dot_damage",
-				apply_buff_func = "start_dot_damage"
+				update_func = "apply_dot_damage"
 			}
 		}
 	},
@@ -1472,7 +1502,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.5,
+				multiplier = -0.25,
 				name = "reload_speed",
 				stat_buff = StatBuffIndex.RELOAD_SPEED
 			}

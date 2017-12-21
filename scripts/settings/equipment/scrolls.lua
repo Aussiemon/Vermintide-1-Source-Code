@@ -56,27 +56,11 @@ aoe_damage_scroll_action = {
 	total_time = 1,
 	allowed_chain_actions = {}
 }
-local push_scroll_action = push_scroll_action or {}
-push_scroll_action = {
-	effect_name = "fx/scroll_push_back",
-	push_radius = 5,
-	ammo_usage = 1,
-	kind = "scroll_push",
-	weapon_action_hand = "left",
-	attack_template = "scroll_aoe_push",
-	anim_event = "parry_pose",
-	total_time = 1,
-	allowed_chain_actions = {}
-}
 Weapons = Weapons or {}
 Weapons.scroll = weapon_template
 Weapons.aoe_damage_scroll = Weapons.aoe_damage_scroll or table.clone(weapon_template)
 Weapons.aoe_damage_scroll.left_hand_unit = "units/weapons/player/wpn_scroll/wpn_scroll"
 Weapons.aoe_damage_scroll.actions.action_one.default = Weapons.aoe_damage_scroll.actions.action_one.default or table.clone(aoe_damage_scroll_action)
 Weapons.aoe_damage_scroll.gui_texture = "hud_consumable_icon_potion"
-Weapons.push_scroll = Weapons.push_scroll or table.clone(weapon_template)
-Weapons.push_scroll.left_hand_unit = "units/weapons/player/wpn_scroll/wpn_scroll"
-Weapons.push_scroll.actions.action_one.default = Weapons.push_scroll.actions.action_one.default or table.clone(push_scroll_action)
-Weapons.push_scroll.gui_texture = "hud_consumable_icon_potion"
 
 return 

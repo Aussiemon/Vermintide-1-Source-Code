@@ -333,20 +333,9 @@ end
 TagQueryDatabase.init = function (self)
 	self.database = RuleDatabase.initialize(4096)
 	self.rule_id_mapping = {}
-	self.context_variable_indexes = {
-		global_context = {},
-		query_context = {},
-		user_context = {},
-		user_memory = {},
-		faction_memory = {}
-	}
-	self.string_lookups = {}
-	self.string_lookups_n = 0
 	self.rules_n = 0
 	self.contexts_by_object = {}
 	self.queries = {}
-	self.debug_rules_table = {}
-	self.criteria_type_is_string = {}
 
 	return 
 end
@@ -355,12 +344,8 @@ TagQueryDatabase.destroy = function (self)
 
 	self.database = nil
 	self.rule_id_mapping = nil
-	self.context_variable_indexes = nil
-	self.string_lookups = nil
 	self.contexts_by_object = nil
 	self.queries = nil
-	self.debug_rules_table = nil
-	self.criteria_type_is_string = nil
 
 	return 
 end
@@ -424,37 +409,16 @@ TagQueryDatabase.define_rule = function (self, rule_definition)
 	rule_definition.real_criterias = real_criterias
 	local num_criterias = #criterias
 	local context_indexes = context_indexes
-	local context_variable_indexes = self.context_variable_indexes
-	local string_lookups = self.string_lookups
-	local string_lookups_n = self.string_lookups_n
 	rule_definition.n_criterias = num_criterias
 
-	assert(num_criterias <= (RuleDatabase.RULE_MAX_NUM_CRITERIAS or 8), "Too many criterias in dialogue %s", dialogue_name)
+	assert(num_criterias <= (RuleDatabase.RULE_MAX_NUM_CRITERIA or 8), "Too many criteria in dialogue %s", dialogue_name)
 
 	for i = 1, num_criterias, 1 do
 		local criteria = criterias[i]
-
-		assert(#criteria <= 5, "Max num criterias is currently 5, rule %s must be malformed with %d criterias.", rule_definition.name, #criteria)
-
 		local context_name = criteria[1]
-		local variable_indexes = context_variable_indexes[context_name]
 
-		assert(variable_indexes, "No such context name %q in rule %q", tostring(context_name), tostring(rule_definition.name))
+		assert(context_indexes[context_name], "No such context name %q", context_name)
 
-		criteria[1] = context_indexes[context_name]
-
-		assert(criteria[1], "No such context name %q", context_name)
-
-		local context_variable = criteria[2]
-		local variable_index = variable_indexes[context_variable]
-
-		if not variable_index then
-			variable_index = #variable_indexes + 1
-			variable_indexes[variable_index] = context_variable
-			variable_indexes[context_variable] = variable_index
-		end
-
-		criteria[2] = variable_index
 		local operator = criteria[3]
 		local value = nil
 
@@ -467,6 +431,7 @@ TagQueryDatabase.define_rule = function (self, rule_definition)
 			criteria[5] = true
 		else
 			value = criteria[4]
+			criteria[5] = false
 		end
 
 		local operator_index = operator_lookup[operator]
@@ -477,31 +442,23 @@ TagQueryDatabase.define_rule = function (self, rule_definition)
 		local value_type = type(value)
 
 		if value_type == "string" then
-			self.criteria_type_is_string[context_variable] = true
-			local looked_up_value = string_lookups[value]
-
-			if not looked_up_value then
-				string_lookups_n = string_lookups_n + 1
-				string_lookups[value] = string_lookups_n
-				value = string_lookups_n
-			else
-				value = looked_up_value
-			end
+			criteria[4] = value
 		elseif value_type == "boolean" then
 			if value then
 				value = 1
 			else
 				value = 0
 			end
+
+			criteria[4] = value
 		else
 			assert(value_type == "number")
-		end
 
-		criteria[4] = value
+			criteria[4] = value
+		end
 	end
 
-	self.string_lookups_n = string_lookups_n
-	local rule_id = RuleDatabase.add_rule(self.database, criterias, num_criterias)
+	local rule_id = RuleDatabase.add_rule(self.database, dialogue_name, num_criterias, criterias)
 	self.rule_id_mapping[rule_id] = rule_definition
 	self.rule_id_mapping[rule_definition.name] = rule_id
 	self.rules_n = self.rules_n + 1
@@ -530,82 +487,7 @@ TagQueryDatabase.iterate_queries = function (self, t)
 
 	return best_query
 end
-TagQueryDatabase.add_context_to_request = function (self, context_name, context_data, request_array)
-	Profiler.start(context_name)
-
-	local context_variable_indexes = self.context_variable_indexes
-	local string_lookups_n = self.string_lookups_n
-	local string_lookups = self.string_lookups
-	local context_index = context_indexes[context_name]
-
-	assert(context_index, "No such predefined context name %s", context_name)
-
-	local data_array = FrameTable.alloc_table()
-	local variable_indexes = context_variable_indexes[context_name]
-	local highest_index = 0
-
-	for key, value in pairs(context_data) do
-		local key_index = variable_indexes[key]
-		local value_type = type(value)
-
-		if value_type ~= "userdata" then
-			if not key_index then
-				key_index = #variable_indexes + 1
-				variable_indexes[key] = key_index
-				variable_indexes[key_index] = key
-			end
-
-			if value_type == "string" then
-				local looked_up_value = string_lookups[value]
-
-				if not looked_up_value then
-					string_lookups_n = string_lookups_n + 1
-					string_lookups[value] = string_lookups_n
-					value = string_lookups_n
-				else
-					value = looked_up_value
-				end
-			elseif value_type == "boolean" then
-				if value then
-					value = 1
-				else
-					value = 0
-				end
-			else
-				assert(value_type == "number")
-			end
-
-			highest_index = math.max(highest_index, key_index)
-			data_array[key_index] = value
-		end
-	end
-
-	for i = 1, highest_index, 1 do
-		if not data_array[i] then
-			data_array[i] = 0
-		end
-	end
-
-	self.string_lookups_n = string_lookups_n
-	request_array[context_index] = data_array
-
-	Profiler.stop()
-
-	return 
-end
-local rule_result_lookup = {
-	[RuleDatabase.RULE_STATUS_SUCCESS] = "SUCCESS",
-	[RuleDatabase.RULE_STATUS_FAILED] = "FAILED",
-	[RuleDatabase.RULE_STATUS_NOT_PROCESSED] = "NOT_PROCESSED",
-	[RuleDatabase.RULE_STATUS_NOT_QUERIED] = "NOT_QUERIED"
-}
-local criteria_result_lookup = {
-	[RuleDatabase.CRITERIA_SUCCESS] = "SUCCESS",
-	[RuleDatabase.CRITERIA_FAILED] = "FAILED",
-	[RuleDatabase.CRITERIA_NOT_PROCESSED] = "NOT PROCESSED"
-}
-local requested_debug_rules_temp_table = {}
-local request_array = {}
+local dummy_table = {}
 TagQueryDatabase.iterate_query = function (self, t)
 	local query = table.remove(self.queries, 1)
 
@@ -621,68 +503,34 @@ TagQueryDatabase.iterate_query = function (self, t)
 		return query
 	end
 
-	Profiler.start("Iterate Query")
-
 	local DEBUG_QUERY = script_data.dialogue_debug_queries
 
 	if DEBUG_QUERY then
 		DebugPrintQuery(query, user_context_list, self.global_context)
 	end
 
-	local request_context_data = request_array
+	Profiler.start("Table concat")
 
-	if self.global_context then
-		self.add_context_to_request(self, "global_context", self.global_context, request_array)
-	end
+	local nice_array = {
+		self.global_context or dummy_table,
+		query_context or dummy_table,
+		user_context_list.user_context or dummy_table,
+		user_context_list.user_memory or dummy_table,
+		user_context_list.faction_memory or dummy_table
+	}
 
-	self.add_context_to_request(self, "query_context", query_context, request_array)
-
-	for name, context in pairs(user_context_list) do
-		self.add_context_to_request(self, name, context, request_array)
-	end
-
-	local rule_index_found = nil
-
+	Profiler.stop("Table concat")
 	Profiler.start("Engine call")
 
-	local requested_debug_rules = requested_debug_rules
+	local rule_index_found = RuleDatabase.iterate_query(self.database, nice_array, t)
 
-	if requested_debug_rules then
-		for i, debug_rule_name in ipairs(requested_debug_rules) do
-			requested_debug_rules_temp_table[i] = self.rule_id_mapping[debug_rule_name]
-		end
-
-		table.clear(self.debug_rules_table)
-
-		rule_index_found = RuleDatabase.iterate_query_debug(self.database, request_context_data, t, requested_debug_rules_temp_table, self.debug_rules_table)
-
-		for i, rule_data in ipairs(self.debug_rules_table) do
-			rule_data.rule_result = rule_result_lookup[rule_data.rule_result]
-			rule_data.rule = self.rule_id_mapping[rule_data.rule_index]
-			local rule_result = rule_data.rule_result
-
-			if rule_result ~= "NOT_PROCESSED" then
-				local criteria_results = rule_data.criteria_results
-
-				for i, criteria_result in ipairs(criteria_results) do
-					criteria_results[i] = criteria_result_lookup[criteria_result]
-				end
-			end
-		end
-	else
-		rule_index_found = RuleDatabase.iterate_query(self.database, request_context_data, t)
-	end
-
-	Profiler.stop()
+	Profiler.stop("Engine call")
 
 	if rule_index_found then
 		local rule = self.rule_id_mapping[rule_index_found]
 		query.validated_rule = rule
 		query.result = rule.response
 	end
-
-	Profiler.stop()
-	table.clear(request_array)
 
 	return query
 end

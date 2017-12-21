@@ -15,22 +15,6 @@ PlayerHuskAttachmentExtension.init = function (self, extension_init_context, uni
 end
 PlayerHuskAttachmentExtension.extensions_ready = function (self, world, unit)
 	self.buff_extension = ScriptUnit.extension(unit, "buff_system")
-	local attachments = self._attachments
-
-	for slot_name, item_data in pairs(self._slots) do
-		local slot = InventorySettings.slots_by_name[slot_name]
-		local slot_category = slot.category
-
-		if slot_category ~= "attachment" then
-		elseif not item_data then
-		else
-			local slot_data = AttachmentUtils.create_attachment(world, unit, attachments, slot_name, item_data, true)
-
-			AttachmentUtils.apply_attachment_buffs(self.current_item_buffs, self.buff_extension, slot_name, item_data)
-
-			attachments.slots[slot_name] = slot_data
-		end
-	end
 
 	return 
 end

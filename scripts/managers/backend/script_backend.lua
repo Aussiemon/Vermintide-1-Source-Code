@@ -238,9 +238,7 @@ ScriptBackend.set_stats = function (self, nice_stats)
 	end
 
 	for stat_name, stat_value in pairs(new_stats) do
-		print("[Backend] Creating new stat", stat_name, stat_value)
-		print_result(BackendStats.set_stat(-1, stat_name, stat_value), "Set stat")
-		ScriptApplication.send_to_crashify("ScriptBackend", "Creating duplicate stat")
+		ScriptApplication.send_to_crashify("ScriptBackend", "Tried to set unregistered stat %s, value: %s", tostring(stat_name), tostring(stat_value))
 	end
 
 	self.commit(self)
@@ -331,7 +329,7 @@ end
 ScriptBackend.commit_status = function (self, commit_id)
 	fassert(commit_id, "Querying status for commit_id %s", tostring(commit_id))
 
-	if commit_id == self._commit_queued_id then
+	if commit_id == self._commit_queue_id then
 		return Backend.COMMIT_WAITING
 	end
 

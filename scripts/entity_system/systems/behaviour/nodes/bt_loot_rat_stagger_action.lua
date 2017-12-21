@@ -102,7 +102,7 @@ BTLootRatStaggerAction.leave = function (self, unit, blackboard, t)
 end
 BTLootRatStaggerAction.dodge = function (self, unit, blackboard, dodge_vector, threat_vector)
 	local unit_position = position_lookup[unit]
-	local velocity = blackboard.locomotion_extension:get_velocity()
+	local velocity = blackboard.locomotion_extension:current_velocity()
 	local normalized_velocity = Vector3.normalize(velocity)
 	local normalized_dodge_vector = Vector3.normalize(dodge_vector)
 	local left_right = Vector3.cross(-threat_vector, Vector3.up())

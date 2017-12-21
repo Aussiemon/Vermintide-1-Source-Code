@@ -57,27 +57,7 @@ weapon_template.actions = {
 				return not status_extension.fatigued(status_extension)
 			end
 		},
-		give_item = {
-			interaction_priority = 5,
-			ammo_usage = 1,
-			anim_end_event = "attack_finished",
-			kind = "interaction",
-			interaction_type = "give_item",
-			weapon_action_hand = "left",
-			uninterruptible = true,
-			hold_input = "action_two_hold",
-			anim_event = "parry_pose",
-			total_time = 0,
-			anim_end_event_condition_func = function (unit, end_reason)
-				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
-			end,
-			allowed_chain_actions = {},
-			condition_func = function (attacker_unit)
-				local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
-
-				return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "give_item")
-			end
-		}
+		give_item = ActionTemplates.give_item_on_defend
 	},
 	action_instant_drink_healing_draught = {
 		default = {
@@ -94,6 +74,7 @@ weapon_template.actions = {
 			damage_window_start = 0.05,
 			weapon_action_hand = "left",
 			block_pickup = true,
+			uninterruptible = true,
 			dialogue_event = "on_healing_draught",
 			anim_event = "attack_heal",
 			auto_validate_on_gamepad = true,
@@ -111,9 +92,11 @@ weapon_template.actions = {
 			end
 		}
 	},
+	action_instant_give_item = ActionTemplates.instant_give_item,
 	action_inspect = ActionTemplates.action_inspect_left,
 	action_wield = ActionTemplates.wield_left,
 	action_instant_grenade_throw = ActionTemplates.instant_equip_grenade,
+	action_instant_heal_self = ActionTemplates.instant_equip_and_heal_self,
 	action_instant_heal_other = ActionTemplates.instant_equip_and_heal_other,
 	action_instant_drink_potion = ActionTemplates.instant_equip_and_drink_potion,
 	action_instant_equip_tome = ActionTemplates.instant_equip_tome,
@@ -150,7 +133,7 @@ weapon_template.left_hand_unit = "units/weapons/player/wpn_potion/wpn_potion"
 weapon_template.left_hand_attachment_node_linking = AttachmentNodeLinking.potion
 weapon_template.wield_anim = "to_potion"
 weapon_template.gui_texture = "hud_consumable_icon_potion"
-weapon_template.max_fatigue_points = 4
+weapon_template.max_fatigue_points = 1
 weapon_template.can_heal_self = true
 weapon_template.fast_heal = true
 weapon_template.can_give_other = true

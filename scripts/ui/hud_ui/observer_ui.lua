@@ -1,5 +1,5 @@
 local definitions = local_require("scripts/ui/hud_ui/observer_ui_definitions")
-local RELOAD_UI = false
+local RELOAD_UI = true
 local MIN_HEALTH_DIVIDERS = 0
 local MAX_HEALTH_DIVIDERS = 10
 ObserverUI = class(ObserverUI)
@@ -13,7 +13,6 @@ ObserverUI.init = function (self, ingame_ui_context)
 	self.local_player = Managers.player:local_player()
 	self.player_shielded = false
 	self._is_visible = false
-	self._is_own_player_dead = false
 
 	self.create_ui_elements(self)
 
@@ -26,6 +25,10 @@ ObserverUI.create_ui_elements = function (self)
 	self.hero_name_widget = UIWidget.init(definitions.widget_definitions.hero_name)
 	self.hp_bar_widget = UIWidget.init(definitions.widget_definitions.hp_bar)
 	self.player_name_widget.style.text.localize = false
+	RELOAD_UI = false
+
+	self.set_visible(self, false)
+	self.draw(self)
 
 	return 
 end
@@ -92,15 +95,9 @@ ObserverUI.stop_draw_observer_ui = function (self)
 
 	return 
 end
-ObserverUI.update = function (self, dt, t, is_own_player_dead, is_in_inn)
-	if is_in_inn then
-		return 
-	end
-
-	if self._is_own_player_dead ~= is_own_player_dead then
-		self._is_own_player_dead = is_own_player_dead
-
-		self.set_visible(self, not self._is_visible)
+ObserverUI.update = function (self, dt, t)
+	if RELOAD_UI then
+		self.create_ui_elements(self)
 	end
 
 	if not self._is_visible then
@@ -110,8 +107,8 @@ ObserverUI.update = function (self, dt, t, is_own_player_dead, is_in_inn)
 	self.handle_observer_player_changed(self)
 
 	if self.observing_player_id then
-		self.update_health_animations(self, dt)
 		self.update_follow_player_health_bar(self, self.observing_player_id)
+		self.update_health_animations(self, dt)
 
 		self._skip_bar_animation = nil
 	end
@@ -174,6 +171,9 @@ ObserverUI.set_visible = function (self, visible)
 	end
 
 	return 
+end
+ObserverUI.is_visible = function (self)
+	return self._is_visible
 end
 ObserverUI.update_follow_player_health_bar = function (self, peer_id)
 	Profiler.start("update_follow_player_health_bar")
@@ -263,11 +263,17 @@ ObserverUI.update_follow_player_health_bar = function (self, peer_id)
 		local max_health_divider_style = hp_bar_widget.style.hp_bar_max_health_divider
 		local default_bar_length = definitions.scenegraph_definition.hp_bar_grimoire_debuff_fill.size[1]
 		local bar_value = bar_content.hp_bar_grimoire_debuff.bar_value
-		local bar_offset = -bar_value*default_bar_length
-		max_health_divider_style.offset[1] = bar_offset
-		grimoire_icon_content.active = true
+		local bar_offset = bar_value*default_bar_length
 		local grimoire_icon_style = hp_bar_widget.style.hp_bar_grimoire_icon
-		grimoire_icon_style.offset[1] = bar_offset/2
+		grimoire_icon_content.active = true
+		local current_offset = grimoire_icon_style.offset[1]
+		local new_offset = -bar_offset/2
+		max_health_divider_style.offset[1] = bar_offset
+
+		if current_offset ~= new_offset then
+			grimoire_icon_style.offset[1] = new_offset
+			modified_bar = true
+		end
 	end
 
 	local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, player.peer_id, local_player_id)
@@ -290,9 +296,6 @@ ObserverUI.update_follow_player_health_bar = function (self, peer_id)
 	if modified_bar or resolution_modified then
 		hp_bar_widget.element.dirty = true
 		self._dirty = true
-		self.divider_widget.element.dirty = true
-		self.player_name_widget.element.dirty = true
-		self.hero_name_widget.element.dirty = true
 	end
 
 	Profiler.stop()

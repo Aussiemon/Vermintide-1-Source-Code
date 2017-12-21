@@ -1,5 +1,5 @@
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 local serialize = require("scripts/utils/serialize")
 script_data.input_debug_device_state = script_data.input_debug_device_state or Development.parameter("input_debug_device_state")
@@ -7,7 +7,7 @@ script_data.input_debug_filters = script_data.input_debug_filters or Development
 InputDebugger = InputDebugger or {}
 InputDebugger.setup = function (self, world, input_manager)
 	self.input_device_data = {}
-	self.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	self.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 	self.num_updated_devices = 0
 	self.input_manager = input_manager
 	self.hold_timer = 0

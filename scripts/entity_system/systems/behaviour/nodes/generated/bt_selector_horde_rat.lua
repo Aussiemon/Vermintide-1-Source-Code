@@ -35,7 +35,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -57,7 +57,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_falling.run(node_falling, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("falling")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -83,7 +83,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -105,7 +105,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_blocked.run(node_blocked, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("blocked")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -118,29 +118,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_stunned = children[5]
-	local condition_result = blackboard.stunned
-
-	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_stunned, "aborted")
-		Profiler_start("stunned")
-
-		local result, evaluate = node_stunned.run(node_stunned, unit, blackboard, t, dt)
-
-		Profiler_stop()
-
-		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
-		end
-
-		if result ~= "failed" then
-			return result, evaluate
-		end
-	elseif node_stunned == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
-	end
-
-	local node_smartobject = children[6]
+	local node_smartobject = children[5]
 	local smartobject_is_next = blackboard.next_smart_object_data.next_smart_object_id ~= nil
 	local is_in_smartobject_range = blackboard.is_in_smartobject_range
 	local is_smart_objecting = blackboard.is_smart_objecting
@@ -152,7 +130,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -165,7 +143,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_in_combat = children[7]
+	local node_in_combat = children[6]
 	local condition_result = unit_alive(blackboard.target_unit)
 
 	if condition_result then
@@ -174,7 +152,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_in_combat.run(node_in_combat, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("in_combat")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -187,7 +165,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_move_to_goal = children[8]
+	local node_move_to_goal = children[7]
 	local condition_result = blackboard.goal_destination ~= nil
 
 	if condition_result then
@@ -196,7 +174,7 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_move_to_goal.run(node_move_to_goal, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("move_to_goal")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -209,14 +187,14 @@ BTSelector_horde_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_idle = children[9]
+	local node_idle = children[8]
 
 	self.set_running_child(self, unit, blackboard, t, node_idle, "aborted")
 	Profiler_start("idle")
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

@@ -1,5 +1,5 @@
-if Application.platform() ~= "xb1" then
-	require("scripts/managers/input/input_manager2")
+if Application.platform() == "win32" then
+	require("scripts/managers/input/input_manager")
 	require("scripts/utils/visual_assert_log")
 	require("foundation/scripts/util/garbage_leak_detector")
 	require("scripts/managers/debug/debug")
@@ -10,13 +10,16 @@ StateSplashScreen.NAME = "StateSplashScreen"
 StateSplashScreen.packages_to_load = {
 	"resource_packages/title_screen",
 	"resource_packages/menu",
-	"resource_packages/platform_specific/platform_specific"
+	"resource_packages/platform_specific/platform_specific",
+	"resource_packages/menu_assets",
+	"resource_packages/loading_screens/loading_bg_default"
 }
 
-if Application.platform() == "xb1" then
+if Application.platform() == "xb1" or Application.platform() == "ps4" then
 	StateSplashScreen.delayed_global_packages = {
 		"resource_packages/game_scripts",
 		"backend/local_backend/local_backend",
+		"resource_packages/tutorial_backend",
 		"resource_packages/level_scripts",
 		"resource_packages/post_localization_boot",
 		"resource_packages/levels/debug_levels",
@@ -30,7 +33,7 @@ StateSplashScreen.on_enter = function (self)
 		Application.set_time_step_policy("no_smoothing", "clear_history", "throttle", 60)
 	end
 
-	if Application.platform() ~= "xb1" then
+	if Application.platform() == "win32" then
 		local assert_on_leak = true
 
 		GarbageLeakDetector.run_leak_detection(assert_on_leak)
@@ -41,14 +44,24 @@ StateSplashScreen.on_enter = function (self)
 	Managers.transition:force_fade_in()
 	self.setup_world(self)
 
-	if Application.platform() ~= "xb1" then
+	if Application.platform() == "win32" then
 		self.setup_input(self)
 	end
 
 	if Application.platform() == "win32" then
 		self.setup_splash_screen_view(self)
-	else
-		self.setup_esrb_logo(self)
+	elseif Application.platform() == "ps4" then
+		if PS4.title_id() == "CUSA02133_00" then
+			self.setup_esrb_logo(self)
+		else
+			Managers.package:load("resource_packages/start_menu_splash", "StateSplashScreen", callback(self, "cb_splashes_loaded"), true, true)
+		end
+	elseif Application.platform() == "xb1" then
+		if self._is_in_esrb_terratory(self) then
+			self.setup_esrb_logo(self)
+		else
+			Managers.package:load("resource_packages/start_menu_splash", "StateSplashScreen", callback(self, "cb_splashes_loaded"), true, true)
+		end
 	end
 
 	local loading_context = self.parent.loading_context
@@ -72,21 +85,30 @@ StateSplashScreen.on_enter = function (self)
 		end
 	end
 
-	if not self._skip_splash then
+	if Application.platform() == "win32" and not self._skip_splash then
 		self.parent.loading_context.show_profile_on_startup = true
-
-		if not GameSettingsDevelopment.disable_intro_trailer and not Application.user_setting("disable_intro_cinematic") then
-			loading_context.first_time = true
-		end
+		loading_context.first_time = true
 	end
 
 	return 
+end
+StateSplashScreen._is_in_esrb_terratory = function (self)
+	local esrb_regions = {
+		CA = true,
+		US = true,
+		MX = true
+	}
+	local region_info = XboxLive.region_info()
+	local iso2 = region_info.GEO_ISO2
+
+	return esrb_regions[iso2]
 end
 StateSplashScreen.setup_esrb_logo = function (self)
 	self.gui = World.create_screen_gui(self.world, "material", "materials/ui/esrb_console_logo", "immediate")
 
 	Managers.package:load("resource_packages/start_menu_splash", "StateSplashScreen", callback(self, "cb_splashes_loaded"), true, true)
 
+	self.showing_esrb = true
 	self.esrb_timer = 0
 
 	return 
@@ -107,22 +129,23 @@ StateSplashScreen.update_esrb_logo = function (self, dt, t)
 		1200,
 		576
 	}
+	local bitmap_name = "esrb_logo"
 
 	if total_time - 0.5 < timer then
-		alpha = (timer - total_time - 0.5)/0.5*255
+		alpha = math.clamp((total_time - timer)/0.5, 0, 1)*255 - 255
 	elseif timer <= 0.5 then
-		alpha = (timer/0.5 - 1)*255
+		alpha = math.clamp(timer/0.5 - 1, 0, 255)*255
 	end
 
 	local w, h = Application.resolution()
 
 	Gui.rect(self.gui, Vector3(0, 0, 0), Vector2(w, h), Color(255, 0, 0, 0))
-	Gui.bitmap(self.gui, "esrb_logo", Vector3(w*0.5 - size[1]*0.5, h*0.5 - size[2]*0.5, 1), Vector2(size[1], size[2]))
+	Gui.bitmap(self.gui, bitmap_name, Vector3(w*0.5 - size[1]*0.5, h*0.5 - size[2]*0.5, 1), Vector2(size[1], size[2]))
 	Gui.rect(self.gui, Vector3(0, 0, 2), Vector2(w, h), Color(alpha, 0, 0, 0))
 
-	self.esrb_timer = math.clamp(self.esrb_timer + math.clamp(dt, 0, 0.1), 0, (self.splashes_loaded and total_time) or 4.5)
+	self.esrb_timer = math.clamp(self.esrb_timer + math.clamp(dt, 0, 0.1), 0, total_time)
 
-	if total_time <= self.esrb_timer then
+	if total_time <= self.esrb_timer and self.splashes_loaded then
 		self.setup_splash_screen_view(self)
 		Managers.transition:force_fade_in()
 	end
@@ -131,6 +154,13 @@ StateSplashScreen.update_esrb_logo = function (self, dt, t)
 end
 StateSplashScreen.cb_splashes_loaded = function (self)
 	self.splashes_loaded = true
+
+	if not self.showing_esrb then
+		self.setup_splash_screen_view(self)
+		Application.error("##########################")
+		Application.error("######## RENDERING #######")
+		Application.error("##########################")
+	end
 
 	return 
 end
@@ -143,9 +173,9 @@ StateSplashScreen.setup_world = function (self)
 	return 
 end
 
-if Application.platform() ~= "xb1" then
+if Application.platform() == "win32" then
 	StateSplashScreen.setup_input = function (self)
-		self.input_manager = InputManager2:new()
+		self.input_manager = InputManager:new()
 		Managers.input = self.input_manager
 
 		self.input_manager:initialize_device("keyboard", 1)
@@ -174,14 +204,14 @@ StateSplashScreen.setup_splash_screen_view = function (self)
 	return 
 end
 StateSplashScreen.update = function (self, dt, t)
-	if Application.platform() ~= "xb1" then
+	if Application.platform() ~= "xb1" and Application.platform() ~= "ps4" then
 		Debug.update(t, dt)
 		self.input_manager:update(dt, t)
 	end
 
 	if self.splash_view then
 		self.splash_view:update(dt)
-	else
+	elseif self.showing_esrb then
 		self.update_esrb_logo(self, dt, t)
 	end
 
@@ -206,7 +236,7 @@ StateSplashScreen.next_state = function (self)
 		return 
 	end
 
-	if Application.platform() ~= "xb1" and not self.debug_setup then
+	if Application.platform() == "win32" and not self.debug_setup then
 		self.debug_setup = true
 
 		Debug.setup(self.world, "splash_ui")
@@ -259,25 +289,25 @@ StateSplashScreen.packages_loaded = function (self)
 		end
 	end
 
-	if Application.platform() == "xb1" then
+	if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		for i, name in ipairs(StateSplashScreen.delayed_global_packages) do
 			if not package_manager.has_loaded(package_manager, name) then
 				return false
 			end
 		end
 
-		if not self.splash_view then
+		if not self.splash_view or not self.splash_view:video_complete() then
 			return false
 		end
 
-		if not self._xbone_delayed_scripts_setup_and_required then
+		if not self._console_delayed_scripts_setup_and_required then
 			self._require_and_setup_delayed_scripts(self)
 
-			self._xbone_delayed_scripts_setup_and_required = true
+			self._console_delayed_scripts_setup_and_required = true
 		end
 	end
 
-	if Application.platform() ~= "ps4" and not GlobalResources.loaded then
+	if not GlobalResources.loaded then
 		for i, name in ipairs(GlobalResources) do
 			if not package_manager.has_loaded(package_manager, name) then
 				package_manager.load(package_manager, name, "global", nil, true)
@@ -290,7 +320,7 @@ StateSplashScreen.packages_loaded = function (self)
 	return true
 end
 
-if Application.platform() == "xb1" then
+if Application.platform() == "xb1" or Application.platform() == "ps4" then
 	StateSplashScreen._require_and_setup_delayed_scripts = function (self)
 		local function game_require(path, ...)
 			for _, s in ipairs({
@@ -317,8 +347,8 @@ if Application.platform() == "xb1" then
 		game_require("settings", "default_user_settings", "synergy_settings", "controller_settings")
 		game_require("game_state", "state_context")
 		game_require("entity_system", "entity_system")
-		game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "backend/backend_manager", "splitscreen/splitscreen_tester", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "input/input_manager2", "debug/debug", "invite/invite_manager")
-		game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "ui_atlas_helper", "scoreboard_helper")
+		game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "backend/backend_manager", "splitscreen/splitscreen_tester", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "input/input_manager", "debug/debug", "invite/invite_manager", "controller_features/controller_features_manager")
+		game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 		game_require("network", "unit_spawner", "unit_storage", "network_unit")
 		DefaultUserSettings.set_default_user_settings()
 		self._init_localizer(self)
@@ -327,13 +357,21 @@ if Application.platform() == "xb1" then
 		parse_item_master_list()
 
 		Managers.save = SaveManager:new(script_data.settings.disable_cloud_save)
-		Managers.splitscreen = SplitscreenTester:new()
+
+		if SPLITSCREEN_ENABLED then
+			Managers.splitscreen = SplitscreenTester:new()
+		end
+
 		Managers.perfhud = PerfhudManager:new()
 		Managers.debug_updator = Updator:new()
 		Managers.player = PlayerManager:new()
 		Managers.free_flight = FreeFlightManager:new()
 		Managers.smoketest = SmoketestManager:new()
-		Managers.news_ticker = NewsTickerManager:new()
+
+		if not script_data.disable_news_ticker then
+			Managers.news_ticker = NewsTickerManager:new()
+		end
+
 		Managers.light_fx = LightFXManager:new()
 		Managers.invite = InviteManager:new()
 
@@ -345,15 +383,20 @@ if Application.platform() == "xb1" then
 			DebugHelper.enable_physics_dump()
 		end
 
-		self.splash_view:allow_xb1_skip()
+		if Application.platform() == "xb1" then
+			require("scripts/managers/events/xbox_event_manager")
+
+			Managers.xbox_events = XboxEventManager:new()
+		end
+
+		self.splash_view:allow_console_skip()
 
 		return 
 	end
 end
 
 StateSplashScreen._init_localizer = function (self)
-	local language_id = Application.user_setting("language_id") or "en"
-	Managers.localizer = LocalizationManager:new("localization/game", language_id)
+	Managers.localizer = LocalizationManager:new("localization/game")
 
 	local function tweak_parser(tweak_name)
 		return LocalizerTweakData[tweak_name] or "<missing LocalizerTweakData \"" .. tweak_name .. "\">"
@@ -444,9 +487,11 @@ StateSplashScreen.on_exit = function (self, application_shutdown)
 		end
 	end
 
-	self.splash_view:destroy()
+	if self.splash_view then
+		self.splash_view:destroy()
 
-	self.splash_view = nil
+		self.splash_view = nil
+	end
 
 	ScriptWorld.destroy_viewport(self.world, "splash_view_viewport")
 
@@ -458,18 +503,13 @@ StateSplashScreen.on_exit = function (self, application_shutdown)
 
 	self.world = nil
 
-	if Application.platform() ~= "xb1" then
+	if Application.platform() == "win32" then
 		self.input_manager:destroy()
 
 		self.input_manager = nil
 		Managers.input = nil
-	end
 
-	if Application.platform() == "win32" then
 		Managers.package:unload("resource_packages/start_menu_splash", "StateSplashScreen")
-	end
-
-	if Application.platform() ~= "xb1" then
 		VisualAssertLog.cleanup()
 	end
 

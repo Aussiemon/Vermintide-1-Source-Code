@@ -15,6 +15,10 @@ BTCirclePreyAction.enter = function (self, unit, blackboard, t)
 
 	network_manager.anim_event(network_manager, unit, "to_combat")
 
+	if not blackboard.skulk_pos then
+		self.get_new_goal(self, unit, blackboard)
+	end
+
 	local is_position_on_navmesh = GwNavQueries.triangle_from_position(blackboard.nav_world, POSITION_LOOKUP[unit], 0.5, 0.5)
 
 	if is_position_on_navmesh then
@@ -47,17 +51,20 @@ BTCirclePreyAction.leave = function (self, unit, blackboard, t, reason)
 	return 
 end
 BTCirclePreyAction.run = function (self, unit, blackboard, t, dt)
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
-	local breed = blackboard.breed
+	local locomotion = blackboard.locomotion_extension
+	local ai_navigation = blackboard.navigation_extension
 
 	if not blackboard.skulk_pos then
-		self.get_new_goal(self, unit, blackboard)
+		local pos = self.get_new_goal(self, unit, blackboard)
+
+		if pos then
+			ai_navigation.move_to(ai_navigation, pos)
+		end
 
 		return "running"
 	end
 
 	local goal_pos = blackboard.skulk_pos:unbox()
-	local ai_navigation = ScriptUnit.extension(unit, "ai_navigation_system")
 
 	ai_navigation.move_to(ai_navigation, goal_pos)
 	locomotion.set_wanted_rotation(locomotion, nil)
@@ -77,6 +84,8 @@ BTCirclePreyAction.get_new_goal = function (self, unit, blackboard)
 
 		if pos then
 			blackboard.skulk_pos = Vector3Box(pos)
+
+			return pos
 		end
 	end
 

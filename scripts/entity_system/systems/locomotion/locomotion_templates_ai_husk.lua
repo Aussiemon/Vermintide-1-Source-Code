@@ -41,11 +41,13 @@ LocomotionTemplates.AiHuskLocomotionExtension.update = function (data, t, dt)
 	if LOLUPDATE then
 		LocomotionTemplates.AiHuskLocomotionExtension.update_alive(data, t, dt)
 		LocomotionTemplates.AiHuskLocomotionExtension.update_pure_network_update_units(data, t, dt)
+		LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_check(data, t, dt)
 		LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units(data, t, dt)
 	else
+		LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_check(data, t, dt)
 		Profiler.start("EngineOptimizedExtensions")
 		EngineOptimizedExtensions.ai_husk_locomotion_update(dt, game, data.all_update_units)
-		Profiler.stop()
+		Profiler.stop("EngineOptimizedExtensions")
 	end
 
 	return 
@@ -68,7 +70,7 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_alive = function (data, t, 
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_alive")
 
 	return 
 end
@@ -155,17 +157,54 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_pure_network_update_units =
 
 		assert(mover == nil, "remove this assert if you see this")
 
-		if mover ~= nil then
-			Mover.set_position(mover, lerp_pos)
-		end
-
 		local flat_velocity = Vector3(network_velocity.x, network_velocity.y, 0)
 		local speed = Vector3.length(flat_velocity)
 
 		Unit.animation_set_variable(unit, extension._move_speed_anim_var, math_max(speed, WALK_THRESHOLD))
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_pure_network_update_units")
+
+	return 
+end
+local ALLOWED_MOVER_MOVE_DISTANCE = 0.5
+LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_check = function (data, t, dt)
+	Profiler.start("update_other_update_units_navmesh_check")
+
+	local nav_world = data.nav_world
+	local physics_world, traverse_logic = nil
+
+	for unit, extension in pairs(data.other_update_units) do
+		if not extension.is_network_driven and not extension.hit_wall and Unit.mover(unit) == nil then
+			local current_position = Unit.local_position(unit, 0)
+			traverse_logic = traverse_logic or extension.traverse_logic(extension)
+			physics_world = physics_world or World.physics_world(extension._world)
+			local velocity = extension.current_velocity(extension)
+			local result = LocomotionUtils.navmesh_movement_check(current_position, velocity, nav_world, physics_world, traverse_logic)
+
+			if result == "navmesh_hit_wall" then
+				extension.hit_wall = true
+			elseif result == "navmesh_use_mover" then
+				extension.set_mover_disable_reason(extension, "not_constrained_by_mover", false)
+
+				local mover = Unit.mover(unit)
+
+				if mover then
+					local breed = extension._breed
+					local mover_move_distance = breed.override_mover_move_distance or ALLOWED_MOVER_MOVE_DISTANCE
+
+					Mover.set_position(mover, current_position)
+					LocomotionUtils.separate_mover_fallbacks(mover, mover_move_distance)
+
+					local mover_position = Mover.position(mover)
+
+					Unit.set_local_position(unit, 0, mover_position)
+				end
+			end
+		end
+	end
+
+	Profiler.stop("update_other_update_units_navmesh_check")
 
 	return 
 end
@@ -179,13 +218,15 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 	local Unit_set_local_rotation = Unit.set_local_rotation
 	local Unit_local_rotation = Unit.local_rotation
 	local Quaternion_lerp = Quaternion.lerp
-	local POSITION_LOOKUP = POSITION_LOOKUP
 	local WALK_THRESHOLD = 0.97
 	local game = data.game
 	local unit_storage = Managers.state.unit_storage
-	local rotation_lerp_amount = math.min(dt*15, 1)
+	local nav_world = data.nav_world
+	local traverse_logic = nil
 
 	for unit, extension in pairs(data.other_update_units) do
+		local current_position = Unit.local_position(unit, 0)
+		traverse_logic = traverse_logic or extension.traverse_logic(extension)
 		local wanted_pose = Unit.animation_wanted_root_pose(unit)
 		local wanted_position = Matrix4x4.translation(wanted_pose)
 		local wanted_rotation = nil
@@ -204,7 +245,6 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 			wanted_rotation = Quaternion.multiply(current_rotation, Quaternion(up_vector, yaw_rotation_radians))
 		end
 
-		local current_position = POSITION_LOOKUP[unit]
 		local wanted_velocity = (wanted_position - current_position)/dt
 		wanted_velocity = Vector3.multiply_elements(wanted_velocity, extension._animation_translation_scale:unbox())
 		local final_position, final_velocity = nil
@@ -225,15 +265,16 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 				final_velocity.z = wanted_velocity.z
 			end
 		else
-			final_position = current_position + wanted_velocity*dt
+			final_position = GwNavQueries.move_on_navmesh(nav_world, current_position, wanted_velocity, dt, traverse_logic)
+			final_velocity = wanted_velocity
 		end
 
 		if extension.is_constrained then
 			final_position = Vector3.clamp_3d(final_position, extension.constrain_min, extension.constrain_max)
 		end
 
-		Unit.set_local_position(unit, 0, final_position)
-		Unit.set_local_rotation(unit, 0, wanted_rotation)
+		Unit_set_local_position(unit, 0, final_position)
+		Unit_set_local_rotation(unit, 0, wanted_rotation)
 		extension._velocity:store(final_velocity)
 
 		extension._pos_lerp_time = 0
@@ -247,12 +288,12 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 		end
 
 		local flat_velocity = Vector3(final_velocity.x, final_velocity.y, 0)
-		local speed = Vector3.length(flat_velocity)
+		local speed = Vector3_length(flat_velocity)
 
 		Unit.animation_set_variable(unit, extension._move_speed_anim_var, math.max(speed, WALK_THRESHOLD))
 	end
 
-	Profiler.stop()
+	Profiler.stop("animation_update_units")
 
 	return 
 end

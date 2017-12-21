@@ -50,12 +50,10 @@ BTPrepareForCrazyJumpAction.leave = function (self, unit, blackboard, t, reason)
 
 	navigation_extension.set_max_speed(navigation_extension, default_move_speed)
 
-	if reason == "aborted" then
-		blackboard.jump_data = nil
-	end
-
 	if reason ~= "done" then
 		Managers.state.network:anim_event(unit, "to_upright")
+
+		blackboard.jump_data = nil
 	end
 
 	return 

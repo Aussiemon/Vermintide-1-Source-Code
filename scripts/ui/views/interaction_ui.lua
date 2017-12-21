@@ -345,52 +345,16 @@ InteractionUI.destroy = function (self)
 end
 InteractionUI.button_texture_data_by_input_action = function (self, input_action)
 	local input_manager = self.input_manager
-	local input_service = self.input_manager:get_service("Player")
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
-	local platform = Application.platform()
+	local input_service = input_manager.get_service(input_manager, "Player")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-			local button_texture_data, button_name = nil
-
-			if input_manager.is_device_active(input_manager, "keyboard") or input_manager.is_device_active(input_manager, "mouse") then
-				if device_type == "keyboard" then
-					button_texture_data = ButtonTextureByName(nil, "win32")
-					button_name = Keyboard.button_locale_name(key_index)
-
-					return button_texture_data, button_name
-				elseif device_type == "mouse" then
-					button_texture_data = ButtonTextureByName(nil, "win32")
-					button_name = Mouse.button_name(key_index)
-
-					return button_texture_data, button_name
-				end
-			elseif input_manager.is_device_active(input_manager, "gamepad") and device_type == "gamepad" then
-				button_name = Pad1.button_name(key_index)
-
-				if platform == "xb1" or platform == "win32" then
-					button_texture_data = ButtonTextureByName(button_name, "xb1")
-				else
-					button_texture_data = ButtonTextureByName(button_name, "ps4")
-				end
-
-				return button_texture_data, button_name
-			end
-		end
-	end
-
-	return nil, ""
+	return UISettings.get_gamepad_input_texture_data(input_service, input_action, gamepad_active)
 end
 InteractionUI.update = function (self, dt, t, my_player)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("Player")
+	local console_disabled = false
 	local player_unit = my_player.player_unit
 
 	if not player_unit then
@@ -428,16 +392,21 @@ InteractionUI.update = function (self, dt, t, my_player)
 			widget_content.bar.bar_value = progress
 		end
 	elseif not interactor_extension.is_interacting(interactor_extension) and not interactor_extension.is_waiting_for_interaction_approval(interactor_extension) then
-		local hud_description_text, interact_action = nil
+		local hud_description_text, extra_param, interact_action = nil
 		local can_interact, failed_reason, interaction_type = interactor_extension.can_interact(interactor_extension)
 
-		if (can_interact or failed_reason) and interaction_type ~= "heal" then
+		if (can_interact or failed_reason) and interaction_type ~= "heal" and interaction_type ~= "give_item" then
 			interact_action = "interact"
 
 			if can_interact then
-				hud_description_text = interactor_extension.interaction_description(interactor_extension)
+				hud_description_text, extra_param = interactor_extension.interaction_description(interactor_extension)
 			elseif failed_reason then
-				hud_description_text = interactor_extension.interaction_description(interactor_extension, failed_reason)
+				hud_description_text, extra_param = interactor_extension.interaction_description(interactor_extension, failed_reason)
+			end
+
+			if CONSOLE_DISABLED_INTERACTIONS[interaction_type] then
+				hud_description_text = "Currently Disabled"
+				console_disabled = true
 			end
 		else
 			local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
@@ -453,7 +422,7 @@ InteractionUI.update = function (self, dt, t, my_player)
 						local interaction_priority = action_settings.interaction_priority or -1000
 
 						if action_settings.interaction_type ~= nil and highest_prio < interaction_priority and action_settings.condition_func(player_unit) then
-							local input_device_supports_action = self.button_texture_data_by_input_action(self, action_settings.hold_input)
+							local input_device_supports_action = self.button_texture_data_by_input_action(self, action_settings.hold_input or action_name)
 
 							if input_device_supports_action then
 								highest_prio = action_settings.interaction_priority
@@ -476,15 +445,15 @@ InteractionUI.update = function (self, dt, t, my_player)
 					local can_interact = can_interact_func(player_unit, interactable_unit, interactor_extension.interaction_context.data, interaction_template.config, self.world)
 
 					if can_interact then
-						hud_description_text = interaction_template.client.hud_description(interactable_unit, interaction_template.config, nil, player_unit)
+						hud_description_text, extra_param = interaction_template.client.hud_description(interactable_unit, interaction_template.config, nil, player_unit)
 					else
-						hud_description_text = interaction_template.client.hud_description(nil, interaction_template.config, nil, player_unit)
+						hud_description_text, extra_param = interaction_template.client.hud_description(nil, interaction_template.config, nil, player_unit)
 					end
 				else
-					hud_description_text = interaction_template.client.hud_description(nil, interaction_template.config, nil, player_unit)
+					hud_description_text, extra_param = interaction_template.client.hud_description(nil, interaction_template.config, nil, player_unit)
 				end
 
-				interact_action = action_settings.hold_input
+				interact_action = action_settings.hold_input or best_action_name
 			end
 		end
 
@@ -497,7 +466,11 @@ InteractionUI.update = function (self, dt, t, my_player)
 
 			assert(button_texture_data, "Could not find button texture(s) for action: %s", interact_action)
 
-			local text = Localize(hud_description_text)
+			local text = (console_disabled and hud_description_text) or Localize(hud_description_text)
+
+			if extra_param then
+				text = string.format(text, Localize(extra_param))
+			end
 
 			if hud_description_text == "interact_heal_ally" or hud_description_text == "interact_give_ally" then
 				local interactable_unit = interactor_extension.interactable_unit(interactor_extension)
@@ -516,7 +489,7 @@ InteractionUI.update = function (self, dt, t, my_player)
 			local texture_size_x = 0
 			local texture_size_y = 0
 
-			if button_texture_data then
+			if button_texture_data and not failed_reason then
 				if button_texture_data.texture then
 					widget_content.button_text = ""
 					widget_content.icon_textures = {
@@ -585,9 +558,10 @@ InteractionUI.update = function (self, dt, t, my_player)
 				local button_text_style = widget_style.button_text
 				local text_style = widget_style.text
 				local fade_in_time = 0.1
-				self.interaction_animations.tooltip_icon_fade = UIAnimation.init(UIAnimation.function_by_time, icon_style.color, 1, 0, 255, fade_in_time, math.easeInCubic)
-				self.interaction_animations.tooltip_button_text_fade = UIAnimation.init(UIAnimation.function_by_time, button_text_style.text_color, 1, 0, 255, fade_in_time, math.easeInCubic)
-				self.interaction_animations.tooltip_text_fade = UIAnimation.init(UIAnimation.function_by_time, text_style.text_color, 1, 0, 255, fade_in_time, math.easeInCubic)
+				local target_alpha = (console_disabled and 128) or 255
+				self.interaction_animations.tooltip_icon_fade = UIAnimation.init(UIAnimation.function_by_time, icon_style.color, 1, 0, target_alpha, fade_in_time, math.easeInCubic)
+				self.interaction_animations.tooltip_button_text_fade = UIAnimation.init(UIAnimation.function_by_time, button_text_style.text_color, 1, 0, target_alpha, fade_in_time, math.easeInCubic)
+				self.interaction_animations.tooltip_text_fade = UIAnimation.init(UIAnimation.function_by_time, text_style.text_color, 1, 0, target_alpha, fade_in_time, math.easeInCubic)
 			end
 		end
 

@@ -40,20 +40,13 @@ ChatGui.set_wwise_world = function (self, wwise_world)
 end
 ChatGui.set_input_manager = function (self, input_manager)
 	if input_manager then
-		local loaded_chat_controls = PlayerData.controls and PlayerData.controls.chat_input
-		local chat_keymap = table.clone(ChatControllerSettings)
-
-		if loaded_chat_controls and loaded_chat_controls.keymap then
-			table.merge_recursive(chat_keymap, loaded_chat_controls.keymap)
-		end
-
 		local block_reasons = {
 			keybind = true,
 			debug_screen = true,
 			free_flight = true
 		}
 
-		input_manager.create_input_service(input_manager, "chat_input", chat_keymap, nil, block_reasons)
+		input_manager.create_input_service(input_manager, "chat_input", "ChatControllerSettings", "ChatControllerFilters", block_reasons)
 		input_manager.map_device_to_service(input_manager, "chat_input", "keyboard")
 		input_manager.map_device_to_service(input_manager, "chat_input", "mouse")
 	end
@@ -109,7 +102,12 @@ end
 ChatGui.set_font_size = function (self, font_size)
 	self.chat_output_widget.style.text.font_size = font_size
 	self.chat_input_widget.style.text.font_size = font_size + 2
-	self.chat_input_widget.style.background.size[2] = font_size + 4
+	self.chat_input_widget.style.background.size[2] = definitions.CHAT_HEIGHT - 26 - (font_size + 4) - 200
+	self.chat_input_widget.style.text.caret_size[2] = font_size + 6
+	local ui_scenegraph = self.ui_scenegraph
+	local scenegraph_definition = definitions.scenegraph_definition
+	ui_scenegraph[self.chat_input_widget.style.text.scenegraph_id].size[2] = definitions.CHAT_HEIGHT - 26 - (font_size + 4) - 200
+	ui_scenegraph[self.chat_output_widget.style.text.scenegraph_id].size[2] = definitions.CHAT_HEIGHT - 26 - (font_size + 4)
 
 	return 
 end
@@ -231,7 +229,7 @@ ChatGui.update = function (self, dt, menu_active, menu_input_service, no_unblock
 	end
 
 	self._draw_widgets(self, dt, input_service, chat_enabled)
-	Profiler.stop()
+	Profiler.stop("ChatGui")
 
 	return 
 end
@@ -498,13 +496,7 @@ ChatGui._update_input = function (self, input_service, menu_input_service, dt, n
 
 		if tab_hotspot.on_pressed or (input_service.get(input_service, "deactivate_chat_input") and not block_chat_activation) or menu_close_press_outside_area or auto_close then
 			if chat_focused and (tab_hotspot.on_pressed or (input_service.get(input_service, "deactivate_chat_input") and not block_chat_activation) or menu_close_press_outside_area) then
-				if self.menu_active then
-					local input_service_name = menu_input_service.name
-
-					self.block_input(self, input_service_name)
-				else
-					self.unblock_input(self, no_unblock)
-				end
+				self._handle_input_service_release(self, self.menu_active, menu_input_service, no_unblock)
 			end
 
 			chat_closed = true
@@ -551,17 +543,7 @@ ChatGui._update_input = function (self, input_service, menu_input_service, dt, n
 					chat_focused = false
 				end
 
-				if self.menu_active then
-					local input_service_name = menu_input_service.name
-
-					self.block_input(self, input_service_name)
-				elseif menu_input_service and menu_input_service.name ~= "chat_input" then
-					local input_service_name = menu_input_service.name
-
-					self.block_input(self, input_service_name)
-				else
-					self.unblock_input(self, no_unblock)
-				end
+				self._handle_input_service_release(self, self.menu_active, menu_input_service, no_unblock)
 			elseif self.chat_index <= ChatGui.MAX_CHARS then
 				local keystrokes = Keyboard.keystrokes()
 				self.chat_message, self.chat_index, self.chat_mode = KeystrokeHelper.parse_strokes(self.chat_message, self.chat_index, self.chat_mode, keystrokes)
@@ -617,7 +599,23 @@ ChatGui._update_input = function (self, input_service, menu_input_service, dt, n
 
 	return chat_focused, chat_closed, chat_close_time
 end
+ChatGui._handle_input_service_release = function (self, menu_active, menu_input_service, no_unblock)
+	if menu_active then
+		local input_service_name = menu_input_service.name
+
+		self.block_input(self, input_service_name)
+	elseif menu_input_service and menu_input_service.name ~= "chat_input" then
+		local input_service_name = menu_input_service.name
+
+		self.block_input(self, input_service_name)
+	else
+		self.unblock_input(self, no_unblock)
+	end
+
+	return 
+end
 ChatGui._draw_widgets = function (self, dt, input_service, chat_enabled)
+	local gamepad_active = self.input_manager:is_device_active("gamepad")
 	local chat_close_time = self.chat_close_time
 	local menu_active = self.menu_active
 
@@ -676,7 +674,7 @@ ChatGui._draw_widgets = function (self, dt, input_service, chat_enabled)
 		UIRenderer.draw_widget(ui_renderer, scrollbar_widget)
 	end
 
-	if menu_active and chat_enabled then
+	if not gamepad_active and menu_active and chat_enabled then
 		UIRenderer.draw_widget(ui_renderer, tab_widget)
 	end
 

@@ -21,8 +21,9 @@ weapon_template.actions = {
 			alert_sound_range_fire = 20,
 			fire_time = 0.1,
 			anim_event_secondary = "reload",
+			active_reload_time = 0.35,
 			alert_sound_range_hit = 5,
-			total_time = 1,
+			total_time = 0.66,
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
@@ -38,7 +39,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.25,
 					action = "action_two",
 					input = "action_two"
 				},
@@ -54,7 +55,7 @@ weapon_template.actions = {
 	action_two = {
 		default = {
 			damage_window_start = 0.2,
-			push_radius = 2,
+			push_radius = 1.5,
 			anim_end_event = "attack_finished",
 			kind = "shield_slam",
 			anim_time_scale = 1.25,
@@ -76,9 +77,15 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.75,
+					start_time = 0.3,
 					action = "action_one",
 					input = "action_one"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.75,
+					action = "action_two",
+					input = "action_two"
 				},
 				{
 					sub_action = "default",
@@ -118,6 +125,9 @@ weapon_template.wield_anim_no_ammo = "to_blunderbuss_noammo"
 weapon_template.crosshair_style = "default"
 weapon_template.reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 3
 weapon_template.wwise_dep_right_hand = {
 	"wwise/blunderbuss"
 }
@@ -139,7 +149,9 @@ weapon_template.compare_statistics = {
 		}
 	},
 	perks = {
-		light_attack = {},
+		light_attack = {
+			"armor_penetration"
+		},
 		heavy_attack = {}
 	}
 }

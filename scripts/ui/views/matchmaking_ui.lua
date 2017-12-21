@@ -17,6 +17,9 @@ MatchmakingUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.countdown_ui = self.ingame_ui.countdown_ui
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.is_in_inn = ingame_ui_context.is_in_inn
 	self.is_server = ingame_ui_context.is_server
 	self.matchmaking_manager = Managers.matchmaking
@@ -28,6 +31,9 @@ MatchmakingUI.init = function (self, ingame_ui_context)
 
 	self.num_players_text = Localize("number_of_players")
 	self.max_number_of_players = MatchmakingSettings.MAX_NUMBER_OF_PLAYERS
+
+	self.set_ready_progress(self, 1)
+	self.set_cancel_progress(self, 1)
 
 	return 
 end
@@ -53,26 +59,33 @@ MatchmakingUI.create_ui_elements = function (self)
 	self._input_to_widget_mapping = {
 		matchmaking_ready = {
 			text_widget = self.large_window_widgets.ready_text,
-			text_widget_surfix = self.large_window_widgets.ready_text_surfix,
+			text_widget_prefix = self.large_window_widgets.ready_text_prefix,
+			text_widget_suffix = self.large_window_widgets.ready_text_suffix,
 			input_icon_widget = self.large_window_widgets.ready_input_icon,
 			input_icon_widget_bar = self.large_window_widgets.ready_input_icon_bar,
 			input_icon_bar_width = self.ui_scenegraph.window_ready_input_icon_bar.size[1]
 		},
 		matchmaking_start = {
 			text_widget = self.large_window_widgets.action_text,
-			text_widget_surfix = self.large_window_widgets.action_text_surfix,
+			text_widget_prefix = self.large_window_widgets.action_text_prefix,
+			text_widget_suffix = self.large_window_widgets.action_text_suffix,
 			input_icon_widget = self.large_window_widgets.action_input_icon,
 			input_icon_widget_bar = self.large_window_widgets.action_input_icon_bar,
 			input_icon_bar_width = self.ui_scenegraph.window_action_input_icon_bar.size[1]
 		},
 		cancel_matchmaking = {
 			text_widget = self.large_window_widgets.cancel_text,
-			text_widget_surfix = self.large_window_widgets.cancel_text_surfix,
+			text_widget_prefix = self.large_window_widgets.cancel_text_prefix,
+			text_widget_suffix = self.large_window_widgets.cancel_text_suffix,
 			input_icon_widget = self.large_window_widgets.cancel_input_icon,
 			input_icon_widget_bar = self.large_window_widgets.cancel_input_icon_bar,
 			input_icon_bar_width = self.ui_scenegraph.window_cancel_input_icon_bar.size[1]
 		}
 	}
+	self.large_window_widgets.cancel_button_bg.content.texture_id.uvs[1][1] = 1
+	self.ui_scenegraph.window_cancel_bg.size[1] = 0
+	self.large_window_widgets.ready_button_bg.content.texture_id.uvs[1][1] = 1
+	self.ui_scenegraph.window_ready_bg.size[1] = 0
 
 	return 
 end
@@ -131,6 +144,12 @@ MatchmakingUI.set_minimize = function (self, set)
 	end
 
 	self.minimize = set
+
+	self.animate_large_window(self, self.minimize)
+
+	return 
+end
+MatchmakingUI.animate_large_window = function (self, minimize)
 	local widgets = self.large_window_widgets
 	widgets.action_button_bg.style.texture_id.masked = true
 	widgets.action_button_fg.style.texture_id.masked = true
@@ -138,9 +157,9 @@ MatchmakingUI.set_minimize = function (self, set)
 	local default_position = scenegraph_definition.large_window.position
 	local ui_animations = self.ui_animations
 	local animation_name = "minimize"
-	local to_position_y = (set and default_position[2] + 200) or default_position[2]
+	local to_position_y = (minimize and default_position[2] + 200) or default_position[2]
 	local default_time = 0.5
-	local anim_func = (set and math.easeOutCubic) or math.easeInCubic
+	local anim_func = (minimize and math.easeOutCubic) or math.easeInCubic
 	local time_to_animate = (default_time*math.abs(local_position[2] - to_position_y))/100
 
 	if 0 < time_to_animate then
@@ -150,12 +169,15 @@ MatchmakingUI.set_minimize = function (self, set)
 	return 
 end
 MatchmakingUI.draw = function (self, ui_renderer, input_service, is_matchmaking, dt)
-	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if is_matchmaking then
-		if not self.minimize then
+		if not self.minimize and not self.matchmaking_manager:is_join_popup_visible() then
 			for widget_name, widget in pairs(self.large_window_widgets) do
-				UIRenderer.draw_widget(ui_renderer, widget)
+				if widget_name == "ready_button_glow" and not self.input_manager:is_device_active("gamepad") then
+				else
+					UIRenderer.draw_widget(ui_renderer, widget)
+				end
 			end
 		else
 			UIRenderer.draw_widget(ui_renderer, self.status_box_widget)
@@ -241,38 +263,42 @@ MatchmakingUI.update_button_prompts = function (self)
 
 	for input_action, widgets in pairs(self._input_to_widget_mapping) do
 		local text_widget = widgets.text_widget
-		local text_widget_surfix = widgets.text_widget_surfix
+		local text_widget_prefix = widgets.text_widget_prefix
+		local text_widget_suffix = widgets.text_widget_suffix
 		local input_icon_widget = widgets.input_icon_widget
 		local input_icon_widget_bar = widgets.input_icon_widget_bar
 		local input_icon_bar_width = widgets.input_icon_bar_width
-		local texture_data, input_text = self.get_input_texture_data(self, input_action)
+		local texture_data, input_text, prefix_text = self.get_input_texture_data(self, input_action)
+		text_widget_prefix.content.text = (prefix_text and Localize(prefix_text)) or ""
 
 		if not texture_data then
-			if text_widget.content.text ~= input_text then
-				text_widget.content.text = input_text
-			end
-
+			text_widget.content.text = input_text
 			input_icon_widget.content.texture_id = nil
-		elseif texture_data.texture ~= input_icon_widget.content.ready_input_icon then
+		elseif texture_data.texture then
 			text_widget.content.text = ""
 			input_icon_widget.content.texture_id = texture_data.texture
 		end
 
-		local text = (text_widget.style.text.localize and Localize(text_widget.content.text)) or text_widget.content.text
-		local text_surfix = (text_widget_surfix.style.text.localize and Localize(text_widget_surfix.content.text)) or text_widget_surfix.content.text
-		local font, scaled_font_size = UIFontByResolution(text_widget.style.text)
-		local font_surfix, scaled_font_size_surfix = UIFontByResolution(text_widget_surfix.style.text)
-		local text_width, _, _ = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
-		local text_width_surfix, _, _ = UIRenderer.text_size(self.ui_renderer, text_surfix, font_surfix[1], scaled_font_size_surfix)
-		local icon_scenegraph = ui_scenegraph[input_icon_widget.style.texture_id.scenegraph_id]
+		local text_input = text_widget.content.text
+		local text_prefix = text_widget_prefix.content.text
+		local text_suffix = Localize(text_widget_suffix.content.text)
+		local font_input, scaled_font_input_size = UIFontByResolution(text_widget.style.text)
+		local font_prefix, scaled_font_size_prefix = UIFontByResolution(text_widget_prefix.style.text)
+		local font_suffix, scaled_font_size_suffix = UIFontByResolution(text_widget_suffix.style.text)
+		local text_width_input = UIRenderer.text_size(self.ui_renderer, text_input, font_input[1], scaled_font_input_size)
+		local text_width_prefix = UIRenderer.text_size(self.ui_renderer, text_prefix, font_prefix[1], scaled_font_size_prefix)
+		local text_width_suffix = UIRenderer.text_size(self.ui_renderer, text_suffix, font_suffix[1], scaled_font_size_suffix)
+		local offset = -text_width_suffix*0.5 + text_width_prefix*0.5
 
 		if not texture_data then
-			text_widget_surfix.style.text.offset[1] = text_width/2
-			text_widget.style.text.offset[1] = -text_width_surfix/2
+			text_widget.style.text.offset[1] = offset
+			text_widget_prefix.style.text.offset[1] = -text_width_prefix*0.5 - text_width_input*0.5 + offset
+			text_widget_suffix.style.text.offset[1] = text_width_suffix*0.5 + text_width_input*0.5 + offset
 		else
-			text_widget_surfix.style.text.offset[1] = input_icon_bar_width/2
-			icon_scenegraph.position[1] = -text_width_surfix/2
-			icon_scenegraph.size = texture_data.size
+			input_icon_widget.style.texture_id.offset[1] = offset
+			input_icon_widget_bar.style.texture_id.offset[1] = offset
+			text_widget_prefix.style.text.offset[1] = -text_width_prefix*0.5 - input_icon_bar_width*0.5 + offset
+			text_widget_suffix.style.text.offset[1] = text_width_suffix*0.5 + input_icon_bar_width*0.5 + offset
 		end
 	end
 
@@ -389,38 +415,33 @@ MatchmakingUI.destroy = function (self)
 end
 MatchmakingUI.get_input_texture_data = function (self, input_action)
 	local input_manager = self.input_manager
-	local input_service = self.input_manager:get_service("ingame_menu")
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
+	local input_service = input_manager.get_service(input_manager, "ingame_menu")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local platform = Application.platform()
 
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
+	if platform == "win32" and gamepad_active then
+		platform = "xb1"
+	end
 
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
+	local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
+	local device_type = keymap_binding[1]
+	local key_index = keymap_binding[2]
+	local key_action_type = keymap_binding[3]
+	local prefix_text = nil
 
-			if input_manager.is_device_active(input_manager, "keyboard") or input_manager.is_device_active(input_manager, "mouse") then
-				if device_type == "keyboard" then
-					return nil, Keyboard.button_locale_name(key_index)
-				elseif device_type == "mouse" then
-					return nil, Mouse.button_name(key_index)
-				end
-			elseif input_manager.is_device_active(input_manager, "gamepad") and device_type == "gamepad" then
-				local button_name = Pad1.button_name(key_index)
-				local button_texture_data = nil
+	if key_action_type == "held" then
+		prefix_text = "matchmaking_prefix_hold"
+	end
 
-				if platform == "xb1" or platform == "win32" then
-					button_texture_data = ButtonTextureByName(button_name, "xb1")
-				else
-					button_texture_data = ButtonTextureByName(button_name, "ps4")
-				end
+	if device_type == "keyboard" then
+		return nil, Keyboard.button_locale_name(key_index), prefix_text
+	elseif device_type == "mouse" then
+		return nil, Mouse.button_name(key_index), prefix_text
+	elseif device_type == "gamepad" then
+		local button_name = Pad1.button_name(key_index)
+		local button_texture_data = ButtonTextureByName(button_name, platform)
 
-				return button_texture_data, button_name
-			end
-		end
+		return button_texture_data, button_name, prefix_text
 	end
 
 	return nil, ""
@@ -472,28 +493,42 @@ MatchmakingUI.large_window_set_player_connecting = function (self, index, is_con
 
 	return 
 end
-MatchmakingUI.large_window_set_cancel_button_text = function (self, surfix_text, input_text)
+MatchmakingUI.large_window_set_cancel_button_text = function (self, suffix_text)
 	local widgets = self.large_window_widgets
-	widgets.cancel_text_surfix.content.text = surfix_text
-	widgets.cancel_text.content.text = input_text
+	widgets.cancel_text_suffix.content.text = suffix_text
 
 	return 
 end
-MatchmakingUI.large_window_set_ready_button_text = function (self, surfix_text, input_action)
-	local ready_text_surfix_widget = self.large_window_widgets.ready_text_surfix
-	ready_text_surfix_widget.content.text = Localize(surfix_text)
+MatchmakingUI.large_window_set_ready_button_text = function (self, suffix_text)
+	local widgets = self.large_window_widgets
+	widgets.ready_text_suffix.content.text = suffix_text
+	widgets.ready_error_text.content.text = ""
 
 	return 
 end
-MatchmakingUI.large_window_set_action_button_text = function (self, surfix_text, input_action)
-	local action_text_surfix_widget = self.large_window_widgets.action_text_surfix
-	action_text_surfix_widget.content.text = Localize(surfix_text)
+MatchmakingUI.large_window_set_action_button_text = function (self, suffix_text)
+	local widgets = self.large_window_widgets
+	widgets.action_text_suffix.content.text = suffix_text
 
 	return 
 end
 MatchmakingUI.set_ready_progress = function (self, progress)
-	local widget = self.large_window_widgets.ready_input_icon_bar
-	widget.style.texture_id.gradient_threshold = progress or 0
+	local widget = self.large_window_widgets.ready_button_bg
+	local widget_default_size = scenegraph_definition.window_ready_bg.size
+	local uvs = widget.content.texture_id.uvs
+	local size = self.ui_scenegraph.window_ready_bg.size
+	uvs[2][1] = progress - 1
+	size[1] = widget_default_size[1]*progress
+
+	if 0 < progress then
+		local widgets = self.large_window_widgets
+		local glow_widget = widgets.ready_button_glow
+		glow_widget.style.texture_id.color[1] = 75
+	else
+		local widgets = self.large_window_widgets
+		local glow_widget = widgets.ready_button_glow
+		glow_widget.style.texture_id.color[1] = 0
+	end
 
 	return 
 end
@@ -504,8 +539,12 @@ MatchmakingUI.set_start_progress = function (self, progress)
 	return 
 end
 MatchmakingUI.set_cancel_progress = function (self, progress)
-	local widget = self.large_window_widgets.cancel_input_icon_bar
-	widget.style.texture_id.gradient_threshold = progress or 0
+	local widget = self.large_window_widgets.cancel_button_bg
+	local widget_default_size = scenegraph_definition.window_cancel_bg.size
+	local uvs = widget.content.texture_id.uvs
+	local size = self.ui_scenegraph.window_cancel_bg.size
+	uvs[1][1] = progress - 1
+	size[1] = widget_default_size[1]*progress
 
 	return 
 end
@@ -516,8 +555,10 @@ MatchmakingUI.large_window_start_ready_pulse = function (self)
 	if not ui_animations[animation_name] then
 		local widgets = self.large_window_widgets
 		local widget = widgets.ready_button_bg
+		local glow_widget = widgets.ready_button_glow
 		local animation_speed = 3
 		ui_animations[animation_name] = UIAnimation.init(UIAnimation.pulse_animation, widget.style.texture_id.color, 1, 150, 255, animation_speed)
+		ui_animations[animation_name .. "_glow"] = UIAnimation.init(UIAnimation.pulse_animation, glow_widget.style.texture_id.color, 1, 25, 75, animation_speed)
 	end
 
 	return 
@@ -526,9 +567,12 @@ MatchmakingUI.large_window_stop_ready_pulse = function (self)
 	local ui_animations = self.ui_animations
 	local animation_name = "ready_pulse"
 	ui_animations[animation_name] = nil
+	ui_animations[animation_name .. "_glow"] = nil
 	local widgets = self.large_window_widgets
-	local widget = widgets.ready_button_bg
+	local widget = widgets.ready_button_glow
+	local glow_widget = widgets.ready_button_glow
 	widget.style.texture_id.color[1] = 150
+	glow_widget.style.texture_id.color[1] = 0
 
 	return 
 end
@@ -547,8 +591,9 @@ MatchmakingUI.large_window_ready_enable = function (self, enable)
 	local widgets = self.large_window_widgets
 	local widget = widgets.ready_button_bg
 	widget.style.texture_id.color = tint_color
+	widgets.ready_text_prefix.content.visible = enable
 	widgets.ready_text.content.visible = enable
-	widgets.ready_text_surfix.content.visible = enable
+	widgets.ready_text_suffix.content.visible = enable
 	widgets.ready_input_icon.content.visible = enable
 	widgets.ready_input_icon_bar.content.visible = enable
 
@@ -569,14 +614,15 @@ MatchmakingUI.large_window_cancel_enable = function (self, enable)
 	local widgets = self.large_window_widgets
 	local widget = widgets.cancel_button_bg
 	widget.style.texture_id.color = tint_color
+	widgets.cancel_text_prefix.content.visible = enable
 	widgets.cancel_text.content.visible = enable
-	widgets.cancel_text_surfix.content.visible = enable
+	widgets.cancel_text_suffix.content.visible = enable
 	widgets.cancel_input_icon.content.visible = enable
 	widgets.cancel_input_icon_bar.content.visible = enable
 
 	return 
 end
-MatchmakingUI.large_window_set_level = function (self, level_key)
+MatchmakingUI.large_window_set_level = function (self, level_key, optional_name, optional_image)
 
 	-- decompilation error in this vicinity
 	local widgets = self.large_window_widgets
@@ -607,12 +653,30 @@ MatchmakingUI.set_search_zone_host_title = function (self, text)
 
 	return 
 end
-MatchmakingUI.set_action_area_visible = function (self, visible)
+MatchmakingUI.set_ready_area_enabled = function (self, enabled, error_message)
+	local widgets = self.large_window_widgets
+	widgets.ready_text_prefix.content.visible = enabled
+	widgets.ready_text.content.visible = enabled
+	widgets.ready_text_suffix.content.visible = enabled
+	widgets.ready_input_icon.content.visible = enabled
+	widgets.ready_error_text.content.visible = not enabled
+	widgets.ready_error_text.content.text = (error_message and Localize(error_message)) or ""
+
+	return 
+end
+MatchmakingUI.set_action_area_visible = function (self, visible, instant_hide)
 	local widgets = self.large_window_widgets
 	widgets.action_button_bg.style.texture_id.masked = true
 	widgets.action_button_fg.style.texture_id.masked = true
-	widgets.ready_input_icon.style.texture_id.masked = true
-	widgets.ready_input_icon_bar.style.texture_id.masked = true
+	widgets.action_input_icon.style.texture_id.masked = true
+	widgets.action_input_icon_bar.style.texture_id.masked = true
+	widgets.action_button_bg.content.visible = not instant_hide
+	widgets.action_button_fg.content.visible = not instant_hide
+	widgets.action_text_suffix.content.visible = not instant_hide
+	widgets.action_text_prefix.content.visible = not instant_hide
+	widgets.action_text.content.visible = not instant_hide
+	widgets.action_input_icon.content.visible = not instant_hide
+	widgets.action_input_icon_bar.content.visible = not instant_hide
 	local bg_size = self.ui_scenegraph.window_action_area.size
 	local fg_size = self.ui_scenegraph.window_action_area_fg.size
 	local default_fg_size = scenegraph_definition.window_action_area_fg.size

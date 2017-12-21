@@ -1,7 +1,7 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
 LocalizationManager = class(LocalizationManager)
-LocalizationManager.init = function (self, path, language_id)
+LocalizationManager.init = function (self, path)
 	self.path = path
 
 	assert(not self._localizer, "LocalizationManager already initialized")
@@ -9,7 +9,6 @@ LocalizationManager.init = function (self, path, language_id)
 	self._localizer = Localizer(path)
 	self._macros = {}
 	self._find_macro_callback_to_self = callback(self._find_macro, self)
-	self.language_id = language_id
 
 	return 
 end
@@ -30,7 +29,7 @@ LocalizationManager.lookup = function (self, text_id)
 	return self.apply_macro(self, str)
 end
 LocalizationManager.apply_macro = function (self, str)
-	local result, _ = string.gsub(str, "%b$;[%a_]*:", self._find_macro_callback_to_self)
+	local result, _ = string.gsub(str, "%b$;[%a%d_]*:", self._find_macro_callback_to_self)
 
 	return result
 end

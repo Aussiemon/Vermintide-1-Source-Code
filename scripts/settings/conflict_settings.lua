@@ -1331,6 +1331,120 @@ HordeSettings = {
 						}
 					}
 				}
+			},
+			event_catacombs_sorcerer_group = {
+				{
+					name = "storm_clanrats",
+					weight = 3,
+					breeds = {
+						"skaven_clan_rat",
+						7,
+						"skaven_storm_vermin_commander",
+						3
+					}
+				}
+			},
+			event_chamber_slaves_small = {
+				{
+					name = "slaves_small",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							10,
+							12
+						}
+					}
+				}
+			},
+			event_chamber_slaves_large = {
+				{
+					name = "slaves_large",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							28,
+							32
+						}
+					}
+				}
+			},
+			event_chamber_clanrats = {
+				{
+					name = "clanrats",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							10,
+							14
+						}
+					}
+				}
+			},
+			event_chamber_mixed_a = {
+				{
+					name = "mixed_a",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							8,
+							10
+						},
+						"skaven_slave",
+						{
+							10,
+							15
+						}
+					}
+				}
+			},
+			event_chamber_mixed_b = {
+				{
+					name = "mixed_b",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							7,
+							8
+						},
+						"skaven_slave",
+						{
+							20,
+							30
+						},
+						"skaven_storm_vermin_commander",
+						1
+					}
+				}
+			},
+			event_chamber_mixed_c = {
+				{
+					name = "mixed_c",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						8,
+						"skaven_storm_vermin_commander",
+						2
+					}
+				}
+			},
+			event_chamber_stormvermin = {
+				{
+					name = "stormvermin",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							3,
+							4
+						}
+					}
+				}
 			}
 		},
 		ambush = {

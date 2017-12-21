@@ -1,6 +1,6 @@
 PlayerData = PlayerData or {
 	new_item_data_version = 1,
-	controls_version = 7,
+	controls_version = 9,
 	new_item_ids = {},
 	controls = {}
 }
@@ -30,7 +30,7 @@ function populate_player_data_from_save(save_data, id, version_match)
 
 	if version_match then
 		if PlayerData.controls_version ~= player_save_data.controls_version then
-			player_save_data.controls = nil
+			player_save_data.controls = {}
 
 			print("Wrong controls_version for save file, saved: ", player_save_data.controls_version, " current: ", PlayerData.controls_version)
 
@@ -46,6 +46,11 @@ function populate_player_data_from_save(save_data, id, version_match)
 	end
 
 	PlayerData = player_save_data
+	local input_manager = Managers.input
+
+	if input_manager then
+		input_manager.apply_saved_keymaps(input_manager)
+	end
 
 	return 
 end

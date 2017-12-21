@@ -42,7 +42,7 @@ BTNode.run = function (self, unit, ai_data, t, dt)
 
 	return 
 end
-BTNode.set_running_child = function (self, unit, blackboard, t, node, reason)
+BTNode.set_running_child = function (self, unit, blackboard, t, node, reason, destroy)
 	Profiler.start("set_running_child")
 
 	local old_node = blackboard.running_nodes[self._identifier]
@@ -56,10 +56,10 @@ BTNode.set_running_child = function (self, unit, blackboard, t, node, reason)
 	blackboard.running_nodes[self._identifier] = node
 
 	if old_node then
-		old_node.set_running_child(old_node, unit, blackboard, t, nil, reason)
-		old_node.leave(old_node, unit, blackboard, t, reason)
+		old_node.set_running_child(old_node, unit, blackboard, t, nil, reason, destroy)
+		old_node.leave(old_node, unit, blackboard, t, reason, destroy)
 	elseif self._parent ~= nil and node ~= nil then
-		self._parent:set_running_child(unit, blackboard, t, self, "aborted")
+		self._parent:set_running_child(unit, blackboard, t, self, "aborted", destroy)
 	end
 
 	if node then

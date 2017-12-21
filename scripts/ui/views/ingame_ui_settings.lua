@@ -19,6 +19,23 @@ local transitions = {
 
 		return 
 	end,
+	return_to_title_screen = function (self)
+		if self.popup_id then
+			Managers.popup:cancel_popup(self.popup_id)
+		end
+
+		local network_server = Managers.state.network.network_server
+
+		if network_server and not network_server.are_all_peers_ingame(network_server) then
+			local text = Localize("player_join_block_exit_game")
+			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_error_topic"), "cancel_popup", Localize("menu_ok"))
+		else
+			local text = Localize("exit_game_popup_text_xb1")
+			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_exit_game_topic_xb1"), "do_return_to_title_screen", Localize("popup_choice_yes"), "cancel_popup", Localize("popup_choice_no"))
+		end
+
+		return 
+	end,
 	prestige = function (self)
 		if self.popup_id then
 			Managers.popup:cancel_popup(self.popup_id)
@@ -77,6 +94,11 @@ local transitions = {
 
 			telemetry_survey_view.set_transition(telemetry_survey_view, "end_game")
 		end
+
+		return 
+	end,
+	do_return_to_title_screen = function (self)
+		self.return_to_title_screen = true
 
 		return 
 	end,
@@ -371,18 +393,29 @@ local transitions = {
 view_settings = {
 	ingame = {
 		ui_renderer_function = function (world)
-			return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			if Application.platform() == "win32" then
+				return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			else
+				return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			end
+
+			return 
 		end,
 		ui_top_renderer_function = function (top_world)
-			return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			if Application.platform() == "win32" then
+				return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			else
+				return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			end
+
+			return 
 		end,
 		views_function = function (ingame_ui_context)
 			return {
-				lobby_browser_view = LobbyBrowseView:new(ingame_ui_context),
 				credits_view = CreditsView:new(ingame_ui_context),
 				inventory_view = InventoryView:new(ingame_ui_context),
 				telemetry_survey = TelemetrySurveyView:new(ingame_ui_context),
-				options_view = (Application.platform() == "win32" and OptionsView:new(ingame_ui_context)) or nil,
+				options_view = OptionsView:new(ingame_ui_context),
 				friends_view = FriendsView:new(ingame_ui_context)
 			}
 		end,
@@ -403,23 +436,35 @@ view_settings = {
 	},
 	inn = {
 		ui_renderer_function = function (world)
-			return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			if Application.platform() == "win32" then
+				return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			else
+				return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			end
+
+			return 
 		end,
 		ui_top_renderer_function = function (top_world)
-			return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			if Application.platform() == "win32" then
+				return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			else
+				return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			end
+
+			return 
 		end,
 		views_function = function (ingame_ui_context)
 			return {
 				profile_view = ProfileView:new(ingame_ui_context),
-				lobby_browser_view = LobbyBrowseView:new(ingame_ui_context),
+				lobby_browser_view = (GameSettingsDevelopment.lobby_browser_enabled and LobbyBrowseView:new(ingame_ui_context)) or nil,
 				credits_view = CreditsView:new(ingame_ui_context),
 				inventory_view = InventoryView:new(ingame_ui_context),
 				lorebook_view = LorebookView:new(ingame_ui_context),
 				unlock_key_view = UnlockKeyView:new(ingame_ui_context),
 				forge_view = ForgeView:new(ingame_ui_context),
 				telemetry_survey = TelemetrySurveyView:new(ingame_ui_context),
-				options_view = (Application.platform() == "win32" and OptionsView:new(ingame_ui_context)) or nil,
-				map_view = MapView:new(ingame_ui_context),
+				options_view = OptionsView:new(ingame_ui_context),
+				map_view = (Application.platform() == "win32" and MapView:new(ingame_ui_context)) or ConsoleMapView:new(ingame_ui_context),
 				friends_view = FriendsView:new(ingame_ui_context),
 				altar_view = AltarView:new(ingame_ui_context),
 				quest_view = (GameSettingsDevelopment.backend_settings.quests_enabled and QuestView:new(ingame_ui_context)) or nil
@@ -458,27 +503,40 @@ view_settings = {
 				in_transition = "inventory_view_force",
 				in_transition_menu = "inventory_view"
 			},
-			hotkey_lobby_browser = {
+			hotkey_lobby_browser = (GameSettingsDevelopment.lobby_browser_enabled and {
 				view = "lobby_browser_view",
+				can_interact_func = "can_view_lobby_browser",
 				in_transition = "lobby_browser_view_force",
 				in_transition_menu = "lobby_browser_view"
-			},
-			hotkey_quests = {
+			}) or nil,
+			hotkey_quests = (GameSettingsDevelopment.backend_settings.quests_enabled and {
 				can_interact_func = "is_quests_unlocked",
 				in_transition = "quest_view_force",
 				error_message = "dlc1_3_1_matchmaking_ready_interaction_message_quests",
 				view = "quest_view",
 				in_transition_menu = "quest_view"
-			}
+			}) or nil
 		},
 		blocked_transitions = {}
 	},
 	development = {
 		ui_renderer_function = function (world)
-			return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			if Application.platform() == "win32" then
+				return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			else
+				return UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			end
+
+			return 
 		end,
 		ui_top_renderer_function = function (top_world)
-			return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			if Application.platform() == "win32" then
+				return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			else
+				return UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+			end
+
+			return 
 		end,
 		views_function = function (ingame_ui_context)
 			return {
@@ -490,8 +548,8 @@ view_settings = {
 				unlock_key_view = UnlockKeyView:new(ingame_ui_context),
 				forge_view = ForgeView:new(ingame_ui_context),
 				telemetry_survey = TelemetrySurveyView:new(ingame_ui_context),
-				options_view = (Application.platform() == "win32" and OptionsView:new(ingame_ui_context)) or nil,
-				map_view = MapView:new(ingame_ui_context),
+				options_view = OptionsView:new(ingame_ui_context),
+				map_view = (Application.platform() == "win32" and MapView:new(ingame_ui_context)) or ConsoleMapView:new(ingame_ui_context),
 				friends_view = FriendsView:new(ingame_ui_context),
 				altar_view = AltarView:new(ingame_ui_context),
 				quest_view = (GameSettingsDevelopment.backend_settings.quests_enabled and QuestView:new(ingame_ui_context)) or nil
@@ -532,6 +590,7 @@ view_settings = {
 			},
 			hotkey_lobby_browser = {
 				view = "lobby_browser_view",
+				can_interact_func = "can_view_lobby_browser",
 				in_transition = "lobby_browser_view_force",
 				in_transition_menu = "lobby_browser_view"
 			},

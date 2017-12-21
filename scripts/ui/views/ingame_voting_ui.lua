@@ -15,6 +15,7 @@ end
 local RELOAD_UI = false
 IngameVotingUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
+	self.scenegraph_definition = definitions.scenegraph_definition
 	local widget_definitions = definitions.widget_definitions
 	self.background = UIWidget.init(widget_definitions.background)
 	self.option_yes = UIWidget.init(widget_definitions.option_yes)
@@ -32,11 +33,32 @@ IngameVotingUI.destroy = function (self)
 
 	return 
 end
-IngameVotingUI.setup_option_input = function (self, option_widget, option)
+IngameVotingUI.get_text_width = function (self, text, text_style)
+	local font = UIFontByResolution(text_style)
+	local font_size = text_style.font_size
+	local text_width, _ = UIRenderer.text_size(self.ui_renderer, text, font[1], font_size)
+
+	return text_width
+end
+IngameVotingUI.setup_option_input = function (self, option_widget, option, gamepad_active)
+	local total_width = 35
 	local text = option.text
-	local button_texture_data, input_text = self.button_texture_data_by_input_action(self, option.input)
+	local input_action = option.input
+	local input_manager = self.input_manager
+	local input_service = input_manager.get_service(input_manager, "ingame_menu")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local button_texture_data, input_text = UISettings.get_gamepad_input_texture_data(input_service, input_action, gamepad_active)
+
+	if not gamepad_active then
+		button_texture_data = nil
+	end
+
 	option_widget.content.input_text = (button_texture_data and "") or sprintf("(%s)", input_text)
 	option_widget.content.input_icon = (button_texture_data and button_texture_data.texture) or nil
+	local option_text = Localize(text)
+	option_widget.content.option_text = option_text
+	local option_text_style = option_widget.style.option_text
+	total_width = total_width + self.get_text_width(self, option_text, option_text_style)
 
 	if button_texture_data then
 		local input_icon_scenegraph_id = option_widget.style.input_icon.scenegraph_id
@@ -45,6 +67,14 @@ IngameVotingUI.setup_option_input = function (self, option_widget, option)
 		input_icon_size[2] = button_texture_data.size[2]
 	end
 
+	local left_side = option_widget.content.left_side
+	local scenegraph_id = option_widget.scenegraph_id
+	local horizontal_offset = total_width/2 + 10
+	self.ui_scenegraph[scenegraph_id].local_position[1] = (left_side and -horizontal_offset) or horizontal_offset
+
+	return 
+end
+IngameVotingUI.align_option_inputs = function (self)
 	return 
 end
 IngameVotingUI.start_vote = function (self, active_voting)
@@ -77,17 +107,7 @@ IngameVotingUI.start_vote = function (self, active_voting)
 	local lines = UIRenderer.word_wrap(self.ui_renderer, title_text, font[1], info_text_style.font_size, width)
 	local text_width, text_height = UIRenderer.text_size(self.ui_renderer, title_text, font[1], info_text_style.font_size)
 	text_height = text_height*RESOLUTION_LOOKUP.scale
-	local size_y = text_height*#lines
-
-	if size_y < 53 then
-		size_y = 53
-	end
-
-	local vote_options = vote_template.vote_options
-
-	self.setup_option_input(self, self.option_yes, vote_options[1])
-	self.setup_option_input(self, self.option_no, vote_options[2])
-
+	local size_y = math.max(text_height*#lines, 53)
 	self.voters = {}
 	self.vote_results = {
 		[1.0] = 0,
@@ -95,6 +115,17 @@ IngameVotingUI.start_vote = function (self, active_voting)
 	}
 	self.vote_started = true
 	self.has_voted = false
+	local gamepad_active = self.input_manager:is_device_active("gamepad")
+
+	if gamepad_active then
+		self.on_gamepad_activated(self, active_voting)
+	else
+		local vote_options = vote_template.vote_options
+
+		self.setup_option_input(self, self.option_yes, vote_options[1], gamepad_active)
+		self.setup_option_input(self, self.option_no, vote_options[2], gamepad_active)
+	end
+
 	self.option_yes.content.has_voted = false
 	self.option_no.content.has_voted = false
 	self.background.content.has_voted = false
@@ -208,6 +239,7 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 		self.vote_started = false
 	end
 
+	local draw = false
 	local voting_manager = self.voting_manager
 	local hold_input_pressed = false
 
@@ -248,7 +280,7 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 			end
 		end
 
-		self.draw(self, dt, hold_input_pressed)
+		draw = true
 	elseif self.vote_started then
 		local previous_voting_info = voting_manager.previous_vote_info(voting_manager)
 
@@ -259,7 +291,65 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 
 	if self.on_finish then
 		self.update_finish(self, dt, t)
-		self.draw(self, dt)
+
+		draw = true
+	end
+
+	if draw then
+		local input_manager = self.input_manager
+		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+
+		if gamepad_active then
+			if not self.gamepad_active_last_frame then
+				self.gamepad_active_last_frame = true
+
+				self.on_gamepad_activated(self, voting_manager.active_voting)
+			end
+		elseif self.gamepad_active_last_frame then
+			self.gamepad_active_last_frame = false
+
+			self.on_gamepad_deactivated(self, voting_manager.active_voting)
+		end
+
+		self.draw(self, dt, hold_input_pressed)
+	end
+
+	return 
+end
+IngameVotingUI.on_gamepad_activated = function (self, active_voting)
+	if not self.has_voted then
+	end
+
+	local platform = Application.platform()
+
+	if platform == "win32" then
+		platform = "xb1"
+	end
+
+	local texture_data = ButtonTextureByName("d_vertical", platform)
+	local input_texture = texture_data.texture
+	self.background.content.gamepad_input_icon = input_texture
+
+	if active_voting then
+		local vote_template = active_voting.template
+		local vote_options = vote_template.vote_options
+
+		self.setup_option_input(self, self.option_yes, vote_options[1], true)
+		self.setup_option_input(self, self.option_no, vote_options[2], true)
+	end
+
+	return 
+end
+IngameVotingUI.on_gamepad_deactivated = function (self, active_voting)
+	if not self.has_voted then
+	end
+
+	if active_voting then
+		local vote_template = active_voting.template
+		local vote_options = vote_template.vote_options
+
+		self.setup_option_input(self, self.option_yes, vote_options[1])
+		self.setup_option_input(self, self.option_no, vote_options[2])
 	end
 
 	return 
@@ -307,49 +397,6 @@ IngameVotingUI.update_can_vote = function (self, enabled)
 	self.voting_manager:allow_vote_input(enabled)
 
 	return 
-end
-IngameVotingUI.button_texture_data_by_input_action = function (self, input_action)
-	local input_manager = self.input_manager
-	local input_service = self.input_manager:get_service("ingame_menu")
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
-	local platform = Application.platform()
-
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-			local button_name = nil
-
-			if input_manager.is_device_active(input_manager, "keyboard") or input_manager.is_device_active(input_manager, "mouse") then
-				if device_type == "keyboard" then
-					button_name = Keyboard.button_locale_name(key_index)
-
-					return nil, button_name
-				elseif device_type == "mouse" then
-					button_name = Mouse.button_name(key_index)
-
-					return nil, button_name
-				end
-			elseif input_manager.is_device_active(input_manager, "gamepad") and device_type == "gamepad" then
-				local button_texture_data = nil
-				button_name = Pad1.button_name(key_index)
-
-				if platform == "xb1" or platform == "win32" then
-					button_texture_data = ButtonTextureByName(button_name, "xb1")
-				else
-					button_texture_data = ButtonTextureByName(button_name, "ps4")
-				end
-
-				return button_texture_data, button_name
-			end
-		end
-	end
-
-	return nil, ""
 end
 local math_ease_cubic = math.easeCubic
 IngameVotingUI.animate_option_get_vote = function (self, option)

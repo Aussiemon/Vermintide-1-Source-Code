@@ -1,7 +1,6 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTRatlingGunnerShootAction = class(BTRatlingGunnerShootAction, BTNode)
-BTRatlingGunnerShootAction.name = "BTRatlingGunnerShootAction"
 local PI = math.pi
 local TWO_PI = PI*2
 BTRatlingGunnerShootAction.init = function (self, ...)
@@ -9,6 +8,7 @@ BTRatlingGunnerShootAction.init = function (self, ...)
 
 	return 
 end
+BTRatlingGunnerShootAction.name = "BTRatlingGunnerShootAction"
 BTRatlingGunnerShootAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	local data = blackboard.attack_pattern_data or {}
@@ -224,7 +224,7 @@ BTRatlingGunnerShootAction._update_shooting = function (self, unit, blackboard, 
 		self._shoot(self, unit, blackboard, t, dt)
 	end
 
-	Profiler.stop()
+	Profiler.stop("shoot")
 
 	if self._use_obstacle then
 		local fire_extents = blackboard.action.line_of_fire_nav_obstacle_half_extents:unbox()
@@ -350,7 +350,6 @@ BTRatlingGunnerShootAction._update_target = function (self, unit, blackboard, ac
 
 	return switched_target
 end
-local MIN_SPREAD_ANGLE = 0.2
 BTRatlingGunnerShootAction._calculate_wanted_target_position = function (self, unit, target_unit, data)
 	local target_position, unit_position = nil
 	local obscured = data.target_obscured
@@ -434,10 +433,14 @@ BTRatlingGunnerShootAction._update_align_towards_target = function (self, unit, 
 	data.align_speed = speed
 	local angle = speed*dt + 0
 	local new_rot = Quaternion.multiply(current_rotation, Quaternion(Vector3.up(), angle))
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_wanted_rotation(locomotion_extension, new_rot)
-	data.shoot_direction_box:store(Vector3.lerp(data.shoot_direction_box:unbox(), Quaternion.forward(new_rot), dt*3))
+
+	local lerp_value = math.min(dt*3, 1)
+	local new_shoot_direction = Vector3.lerp(data.shoot_direction_box:unbox(), Quaternion.forward(new_rot), lerp_value)
+
+	data.shoot_direction_box:store(new_shoot_direction)
 
 	return math.abs(speed) < STOP_SPEED and math.abs(angle_left) < STOP_ANGLE
 end
@@ -554,7 +557,7 @@ BTRatlingGunnerShootAction._shoot = function (self, unit, blackboard)
 	local projectile_system = Managers.state.entity:system("projectile_system")
 
 	projectile_system.create_light_weight_projectile(projectile_system, Unit.get_data(unit, "breed").name, unit, from_position, spread_direction, action.projectile_speed, action.projectile_max_range, collision_filter, action_data, action.light_weight_projectile_particle_effect)
-	Profiler.stop()
+	Profiler.stop("create projectile")
 
 	return 
 end

@@ -1,4 +1,5 @@
 local definitions = local_require("scripts/ui/views/scoreboard_ui_definitions")
+local leave_party_text = (Application.platform() == "xb1" and "input_description_leave_party_xb1") or "input_description_leave_party"
 local generic_input_actions = {
 	default = {
 		{
@@ -8,20 +9,14 @@ local generic_input_actions = {
 			ignore_keybinding = true
 		},
 		{
-			input_action = "d_vertical",
-			priority = 2,
-			description_text = "input_description_navigate_vote_option",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "refresh",
+			input_action = "confirm",
 			priority = 3,
 			description_text = "input_description_vote"
 		},
 		{
 			input_action = "back",
 			priority = 4,
-			description_text = "input_description_leave_party"
+			description_text = leave_party_text
 		}
 	},
 	already_voted = {
@@ -34,12 +29,44 @@ local generic_input_actions = {
 		{
 			input_action = "back",
 			priority = 3,
-			description_text = "input_description_leave_party"
+			description_text = leave_party_text
+		}
+	},
+	player_list = {
+		{
+			input_action = "l1_r1",
+			priority = 1,
+			description_text = "input_description_change_score",
+			ignore_keybinding = true
+		},
+		{
+			input_action = "back",
+			priority = 3,
+			description_text = leave_party_text
+		}
+	},
+	player_list_profile = {
+		{
+			input_action = "l1_r1",
+			priority = 1,
+			description_text = "input_description_change_score",
+			ignore_keybinding = true
+		},
+		{
+			input_action = "confirm",
+			priority = 2,
+			description_text = (Application.platform() == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
+		},
+		{
+			input_action = "back",
+			priority = 3,
+			description_text = leave_party_text
 		}
 	}
 }
 ScoreboardUI = class(ScoreboardUI)
 local TOPICS_PER_PAGE = 3
+local PLAYER_NAME_MAX_LENGTH = 16
 ScoreboardUI.init = function (self, end_of_level_ui_context)
 	self.game_won = end_of_level_ui_context.game_won
 
@@ -55,6 +82,9 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 		}
 	end
 
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.ingame_ui = end_of_level_ui_context.ingame_ui
 	self.popup_handler = self.ingame_ui.popup_handler
 	self.ui_renderer = end_of_level_ui_context.ui_renderer
@@ -62,13 +92,15 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	local input_manager = end_of_level_ui_context.input_manager
 	self.input_manager = input_manager
 	self.world_manager = end_of_level_ui_context.world_manager
+	self.network_lobby = end_of_level_ui_context.network_lobby
 	self.voting_manager = Managers.state.voting
 
-	input_manager.create_input_service(input_manager, "scoreboard_ui", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "scoreboard_ui", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "keyboard")
 	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "mouse")
 	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "gamepad")
 
+	self.platform = Application.platform()
 	self.vote_manager = Managers.state.voting
 
 	print("ScoreboardUI INIT:", self.vote_manager:vote_in_progress())
@@ -83,6 +115,13 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	local scoreboard_session_data = end_of_level_ui_context.scoreboard_session_data
 	self.topic_score_data = scoreboard_session_data[1]
 	self.player_list = scoreboard_session_data[2]
+	local num_players = 0
+
+	for stats_id, data in pairs(self.player_list) do
+		num_players = num_players + 1
+	end
+
+	self._num_players = num_players
 	self.number_of_topics = #self.topic_score_data
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
@@ -109,6 +148,7 @@ ScoreboardUI.create_ui_elements = function (self)
 	self.controller_info_widget = UIWidget.init(definitions.widgets.controller_info)
 	self.topic_arrow_widget_left = UIWidget.init(definitions.widgets.topic_arrow_button_left)
 	self.topic_arrow_widget_right = UIWidget.init(definitions.widgets.topic_arrow_button_right)
+	self.gamepad_slot_selection_widget = UIWidget.init(definitions.widgets.gamepad_slot_selection)
 	local topic_widgets = {}
 	local topic_widgets_definitions = definitions.topic_widgets
 
@@ -381,7 +421,7 @@ ScoreboardUI.draw = function (self, dt)
 	local input_service = input_manager.get_service(input_manager, "scoreboard_ui")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.window_widget)
 	UIRenderer.draw_widget(ui_renderer, self.topic_index_counter_widget)
 	UIRenderer.draw_widget(ui_renderer, self.level_vote_texts)
@@ -439,6 +479,10 @@ ScoreboardUI.draw = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, player_entry_widgets[i])
 	end
 
+	if not self._selected_player_index and not self.voting_disabled and active_vote_list and gamepad_active and not self.popup_id then
+		UIRenderer.draw_widget(ui_renderer, self.gamepad_slot_selection_widget)
+	end
+
 	UIRenderer.end_pass(ui_renderer)
 
 	if gamepad_active and not self.popup_id then
@@ -478,7 +522,13 @@ end
 ScoreboardUI.update_input_description = function (self)
 	local actions_name_to_use = "default"
 
-	if self.voting_disabled then
+	if self._selected_player_index then
+		if self.get_player_widget_peer_id_by_index(self, self._selected_player_index) then
+			actions_name_to_use = "player_list_profile"
+		else
+			actions_name_to_use = "player_list"
+		end
+	elseif self.voting_disabled then
 		actions_name_to_use = "already_voted"
 	end
 
@@ -554,34 +604,87 @@ ScoreboardUI.handle_interaction = function (self, dt)
 			if controller_cooldown and 0 < controller_cooldown then
 				self.controller_cooldown = controller_cooldown - dt
 			elseif not self.topic_animation_time then
+				local selected_player_index = self._selected_player_index
 				local can_vote = self.is_voting_possible(self)
-				local vote_selection_index = self.vote_selection_index
 
-				if can_vote and vote_selection_index and input_service.get(input_service, "move_up") then
-					local new_vote_selection_index = math.max(vote_selection_index - 1, 1)
-
-					if new_vote_selection_index ~= vote_selection_index then
-						self.on_vote_selection_index_changed(self, new_vote_selection_index)
-
-						self.controller_cooldown = GamepadSettings.menu_cooldown
-
-						self.play_sound(self, "Play_hud_select")
-					end
-				elseif can_vote and vote_selection_index and input_service.get(input_service, "move_down") then
-					local active_vote_list = self.active_vote_list
-					local new_vote_selection_index = math.min(vote_selection_index + 1, #active_vote_list)
-
-					if new_vote_selection_index ~= vote_selection_index then
-						self.on_vote_selection_index_changed(self, new_vote_selection_index)
-
-						self.controller_cooldown = GamepadSettings.menu_cooldown
-
-						self.play_sound(self, "Play_hud_select")
-					end
-				elseif can_vote and vote_selection_index and input_service.get(input_service, "refresh") then
-					self.on_vote_level_pressed(self, vote_selection_index)
+				if not selected_player_index and input_service.get(input_service, "move_left") then
+					self.set_player_widget_highlight_by_index(self, 1, true)
 
 					self.controller_cooldown = GamepadSettings.menu_cooldown
+
+					self.play_sound(self, "Play_hud_select")
+				elseif selected_player_index and can_vote and input_service.get(input_service, "move_right") then
+					self.set_player_widget_highlight_by_index(self, nil, true)
+
+					self.controller_cooldown = GamepadSettings.menu_cooldown
+
+					self.play_sound(self, "Play_hud_select")
+				elseif input_service.get(input_service, "move_up") then
+					if selected_player_index then
+						local new_player_index = math.max(selected_player_index - 1, 1)
+
+						if new_player_index ~= selected_player_index then
+							self.set_player_widget_highlight_by_index(self, new_player_index, true)
+
+							self.controller_cooldown = GamepadSettings.menu_cooldown
+
+							self.play_sound(self, "Play_hud_select")
+						end
+					elseif can_vote and self.vote_selection_index then
+						local current_vote_selection_index = self.vote_selection_index
+						local new_vote_selection_index = math.max(current_vote_selection_index - 1, 1)
+
+						if new_vote_selection_index ~= current_vote_selection_index then
+							self.on_vote_selection_index_changed(self, new_vote_selection_index)
+
+							self.controller_cooldown = GamepadSettings.menu_cooldown
+
+							self.play_sound(self, "Play_hud_select")
+						end
+					end
+				elseif input_service.get(input_service, "move_down") then
+					if selected_player_index then
+						local num_players = self._num_players
+						local new_player_index = math.min(selected_player_index + 1, num_players)
+
+						if new_player_index ~= selected_player_index then
+							self.set_player_widget_highlight_by_index(self, new_player_index, true)
+
+							self.controller_cooldown = GamepadSettings.menu_cooldown
+
+							self.play_sound(self, "Play_hud_select")
+						end
+					elseif can_vote and self.vote_selection_index then
+						local current_vote_selection_index = self.vote_selection_index
+						local active_vote_list = self.active_vote_list
+						local new_vote_selection_index = math.min(current_vote_selection_index + 1, #active_vote_list)
+
+						if new_vote_selection_index ~= current_vote_selection_index then
+							self.on_vote_selection_index_changed(self, new_vote_selection_index)
+
+							self.controller_cooldown = GamepadSettings.menu_cooldown
+
+							self.play_sound(self, "Play_hud_select")
+						end
+					end
+				elseif input_service.get(input_service, "confirm") and not self._selected_player_index then
+					local current_vote_selection_index = self.vote_selection_index
+
+					if can_vote and current_vote_selection_index then
+						self.on_vote_level_pressed(self, current_vote_selection_index)
+
+						self.controller_cooldown = GamepadSettings.menu_cooldown
+
+						self.set_player_widget_highlight_by_index(self, 1, true)
+					end
+				elseif input_service.get(input_service, "confirm") and self._selected_player_index then
+					local player_peer_id = self.get_player_widget_peer_id_by_index(self, self._selected_player_index)
+
+					if player_peer_id then
+						self.show_selected_player_gamercard(self, player_peer_id)
+
+						self.controller_cooldown = GamepadSettings.menu_cooldown
+					end
 				elseif input_service.get(input_service, "cycle_previous") then
 					delay_auto_pilot = true
 					local number_of_topics = self.number_of_topics
@@ -993,8 +1096,15 @@ ScoreboardUI.set_player_list_data_by_index = function (self, index)
 		self.set_player_widget_score_by_index(self, i, score)
 
 		local player_data = self.player_data_by_stats_id(self, score_data.stats_id)
+		local player_name = player_data.name
+		local player_peer_id = player_data.peer_id
+		local is_player_controlled = player_data.is_player_controlled
 
-		self.set_player_widget_name_by_index(self, i, player_data.name)
+		self.set_player_widget_name_by_index(self, i, player_name)
+
+		if is_player_controlled then
+			self.set_player_widget_peer_id_by_index(self, i, player_peer_id)
+		end
 
 		local is_own_player = self.stats_id == score_data.stats_id
 
@@ -1006,10 +1116,6 @@ ScoreboardUI.set_player_list_data_by_index = function (self, index)
 		local icon_texture = self.hero_icon_by_profile_index(self, player_data.profile_index, icon_mapping)
 
 		self.set_player_widget_icon_by_index(self, i, icon_texture)
-	end
-
-	if my_index then
-		self.set_player_widget_highlight_by_index(self, my_index, true)
 	end
 
 	self.update_player_list = nil
@@ -1025,9 +1131,27 @@ ScoreboardUI.set_player_widget_score_by_index = function (self, index, score)
 end
 ScoreboardUI.set_player_widget_name_by_index = function (self, index, name)
 	local player_entry_widgets = self.player_entry_widgets
-	player_entry_widgets[index].content.title_text = name
+	local widget = player_entry_widgets[index]
+	local player_name = ""
+
+	if name then
+		player_name = (PLAYER_NAME_MAX_LENGTH < UTF8Utils.string_length(name) and UIRenderer.crop_text_width(self.ui_renderer, name, 500, widget.style.title_text)) or name
+	end
+
+	widget.content.title_text = player_name
 
 	return 
+end
+ScoreboardUI.set_player_widget_peer_id_by_index = function (self, index, peer_id)
+	local player_entry_widgets = self.player_entry_widgets
+	player_entry_widgets[index].content.peer_id = peer_id
+
+	return 
+end
+ScoreboardUI.get_player_widget_peer_id_by_index = function (self, index)
+	local player_entry_widgets = self.player_entry_widgets
+
+	return player_entry_widgets[index].content.peer_id
 end
 ScoreboardUI.set_player_widget_icon_by_index = function (self, index, icon_texture)
 	local player_entry_widgets = self.player_entry_widgets
@@ -1047,6 +1171,8 @@ ScoreboardUI.set_player_widget_highlight_by_index = function (self, index, reset
 	if index then
 		player_entry_widgets[index].content.highlight_enabled = true
 	end
+
+	self._selected_player_index = index
 
 	return 
 end
@@ -1228,12 +1354,28 @@ ScoreboardUI.on_vote_selection_index_changed = function (self, new_index)
 			if is_active then
 				local widget = vote_option_data.widget
 				local widget_content = widget.content
-				widget_content.selected = new_index and index == new_index
+				local selected = new_index and index == new_index
+				widget_content.selected = selected
 				widget.style.gamepad_texture_selected_id.offset = {
 					-35.5,
 					-5.5,
 					-1
 				}
+
+				if selected then
+					local gamepad_selection_style = widget.style.gamepad_selection
+
+					if gamepad_selection_style then
+						local scenegraph_id = gamepad_selection_style.scenegraph_id
+						local texture_size = gamepad_selection_style.texture_size
+						self.gamepad_slot_selection_widget.scenegraph_id = scenegraph_id
+						local gamepad_widget_style = self.gamepad_slot_selection_widget.style
+						gamepad_widget_style.texture_top_left.texture_size = texture_size
+						gamepad_widget_style.texture_top_right.texture_size = texture_size
+						gamepad_widget_style.texture_bottom_left.texture_size = texture_size
+						gamepad_widget_style.texture_bottom_right.texture_size = texture_size
+					end
+				end
 			end
 		end
 	end
@@ -1262,7 +1404,7 @@ ScoreboardUI.update_vote_counts = function (self)
 		vote_complete = true
 	end
 
-	local vote_marker_texture = "vote_marker"
+	local vote_marker_texture = "matchmaking_checkbox"
 	local highest_vote_count = 0
 	local highest_vote_option_index = 0
 	local active_vote_list = self.active_vote_list
@@ -1555,10 +1697,35 @@ ScoreboardUI.set_compact_topic_data = function (self, topic_index, topic_data_in
 	local animation_name = "topic_widget_" .. topic_index
 	local hover_animation_name = "topic_widget_hover_" .. topic_index
 	local animation_duration = UISettings.scoreboard.topic_data_fade_in_duration
+	local name = ""
+
+	if player_name then
+		name = (PLAYER_NAME_MAX_LENGTH < UTF8Utils.string_length(player_name) and UIRenderer.crop_text_width(self.ui_renderer, player_name, 250, widget_style.player_name)) or player_name
+	end
+
 	widget_content.topic_data_index = topic_data_index
-	widget_content.title_text = (title and Localize(title)) or ""
+	local localized_title = (title and Localize(title)) or ""
+	local title_style = widget_style.title_text
+	local font, scaled_font_size = UIFontByResolution(title_style)
+	local text_width, _, _ = UIRenderer.text_size(self.ui_renderer, localized_title, font[1], scaled_font_size)
+
+	if 235 <= text_width then
+		title_style.word_wrap = true
+		title_style.font_size = 22
+		title_style.offset[1] = 52
+		title_style.offset[2] = -25
+		title_style.size[1] = 200
+	else
+		title_style.word_wrap = false
+		title_style.font_size = 28
+		title_style.offset[1] = 12
+		title_style.offset[2] = -30
+		title_style.size[1] = 280
+	end
+
+	widget_content.title_text = localized_title
 	widget_content.score_text = (score and score) or ""
-	widget_content.player_name = (player_name and player_name) or ""
+	widget_content.player_name = name
 	self.handle_input_wait_time = animation_duration
 
 	return 
@@ -1685,6 +1852,30 @@ ScoreboardUI.update_topic_widgets_mouse_input = function (self)
 
 	if delay_auto_pilot then
 		self.auto_pilot_wait_time = UISettings.scoreboard.auto_pilot_wait_time
+	end
+
+	return 
+end
+ScoreboardUI.show_selected_player_gamercard = function (self, peer_id)
+	if peer_id then
+		local platform = self.platform
+
+		if platform == "win32" and rawget(_G, "Steam") then
+			local id = Steam.id_hex_to_dec(peer_id)
+			local url = "http://steamcommunity.com/profiles/" .. id
+
+			Steam.open_url(url)
+		elseif platform == "xb1" then
+			local xuid = self.network_lobby.lobby:xuid(peer_id)
+
+			if xuid then
+				XboxLive.show_gamercard(Managers.account:user_id(), xuid)
+			end
+		elseif platform == "ps4" then
+			local np_id = self.network_lobby.lobby:np_id_from_peer_id(peer_id)
+
+			Managers.account:show_player_profile_with_np_id(np_id)
+		end
 	end
 
 	return 

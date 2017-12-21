@@ -17,6 +17,7 @@ require("scripts/settings/ui_settings")
 require("scripts/ui/hud_ui/level_countdown_ui")
 require("scripts/ui/views/item_display_popup")
 require("scripts/ui/views/item_display_popup_definitions")
+require("scripts/ui/help_screen/help_screen_ui")
 require("scripts/ui/views/lobby_browse_view")
 require("scripts/ui/views/profile_view")
 require("scripts/ui/views/credits_view")
@@ -24,6 +25,7 @@ require("scripts/ui/views/inventory_view")
 require("scripts/ui/views/lorebook_view")
 require("scripts/ui/views/options_view")
 require("scripts/ui/views/map_view")
+require("scripts/ui/views/console_map_view")
 require("scripts/ui/forge_view/forge_view")
 require("scripts/ui/altar_view/altar_view")
 require("scripts/ui/views/unlock_key_view")
@@ -40,6 +42,9 @@ local transitions = settings.transitions
 IngameUI = class(IngameUI)
 local ALWAYS_LOAD_ALL_VIEWS = script_data.always_load_all_views or Development.parameter("always_load_all_views")
 IngameUI.init = function (self, ingame_ui_context)
+	printf("[IngameUI] init")
+
+	self.unlock_manager = Managers.unlock
 	self.world_manager = ingame_ui_context.world_manager
 	self.camera_manager = ingame_ui_context.camera_manager
 	self.is_in_inn = ingame_ui_context.is_in_inn
@@ -56,8 +61,8 @@ IngameUI.init = function (self, ingame_ui_context)
 	self.top_world = top_world
 
 	if Development.parameter("gdc") then
-		self.ui_renderer = UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
-		self.ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+		self.ui_renderer = UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+		self.ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 	elseif ALWAYS_LOAD_ALL_VIEWS then
 		self.ui_renderer = view_settings.development.ui_renderer_function(world)
 		self.ui_top_renderer = view_settings.development.ui_renderer_function(top_world)
@@ -98,7 +103,7 @@ IngameUI.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "ingame_menu", self.get_ingame_menu_keymap(self))
+	input_manager.create_input_service(input_manager, "ingame_menu", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "ingame_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "ingame_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "ingame_menu", "gamepad")
@@ -107,6 +112,7 @@ IngameUI.init = function (self, ingame_ui_context)
 	ingame_ui_context.ui_top_renderer = self.ui_top_renderer
 	ingame_ui_context.ingame_ui = self
 	self.peer_id = ingame_ui_context.peer_id
+	self.local_player_id = ingame_ui_context.local_player_id
 	self.ingame_hud = IngameHud:new(ingame_ui_context)
 	self.countdown_ui = LevelCountdownUI:new(ingame_ui_context)
 	self.popup_join_lobby_handler = PopupJoinLobbyHandler:new(ingame_ui_context)
@@ -114,28 +120,21 @@ IngameUI.init = function (self, ingame_ui_context)
 	self.last_resolution_x, self.last_resolution_y = Application.resolution()
 
 	InitVideo()
+	self.setup_views(self, ingame_ui_context)
+
+	if self.views.map_view then
+		self.views.map_view:set_friends_view(self.views.friends_view)
+	end
 
 	self.ingame_menu = IngameView:new(ingame_ui_context)
-
-	if ALWAYS_LOAD_ALL_VIEWS then
-		self.views = view_settings.development.views_function(ingame_ui_context)
-	elseif self.is_in_inn then
-		self.views = view_settings.inn.views_function(ingame_ui_context)
-	else
-		self.views = view_settings.ingame.views_function(ingame_ui_context)
-	end
-
-	if ALWAYS_LOAD_ALL_VIEWS then
-		self.hotkey_mapping = view_settings.development.hotkey_mapping
-	elseif self.is_in_inn then
-		self.hotkey_mapping = view_settings.inn.hotkey_mapping
-	else
-		self.hotkey_mapping = view_settings.ingame.hotkey_mapping
-	end
-
 	self.end_screen = EndScreenUI:new(ingame_ui_context)
 	self.voting_manager = ingame_ui_context.voting_manager
 	self.ingame_voting_ui = IngameVotingUI:new(ingame_ui_context)
+
+	if GameSettingsDevelopment.help_screen_enabled then
+		self.help_screen = HelpScreenUI:new(ingame_ui_context)
+	end
+
 	local cutscene_system = Managers.state.entity:system("cutscene_system")
 	self.cutscene_ui = CutsceneUI:new(ingame_ui_context, cutscene_system)
 	self.cutscene_system = cutscene_system
@@ -152,8 +151,10 @@ IngameUI.init = function (self, ingame_ui_context)
 	Managers.chat:set_profile_synchronizer(ingame_ui_context.profile_synchronizer)
 	Managers.chat:set_wwise_world(self.world_manager:wwise_world(self.world))
 	Managers.chat:set_input_manager(input_manager)
+	Managers.state.event:register(self, "event_dlc_status_changed", "event_dlc_status_changed")
 
 	self.telemetry_time_view_enter = 0
+	self.ingame_ui_context = ingame_ui_context
 
 	return 
 end
@@ -162,10 +163,45 @@ IngameUI.get_ingame_menu_keymap = function (self)
 	local ingame_menu_keymap = table.clone(IngameMenuKeymaps)
 
 	if loaded_menu_controls and loaded_menu_controls.keymap then
-		table.merge_recursive(ingame_menu_keymap, loaded_menu_controls.keymap)
+		local platform = Application.platform()
+
+		table.merge_recursive(ingame_menu_keymap[platform], loaded_menu_controls.keymap)
 	end
 
 	return ingame_menu_keymap
+end
+IngameUI.setup_views = function (self, ingame_ui_context)
+	if ALWAYS_LOAD_ALL_VIEWS then
+		self.views = view_settings.development.views_function(ingame_ui_context)
+	elseif self.is_in_inn then
+		self.views = view_settings.inn.views_function(ingame_ui_context)
+	else
+		self.views = view_settings.ingame.views_function(ingame_ui_context)
+	end
+
+	if ALWAYS_LOAD_ALL_VIEWS then
+		self.hotkey_mapping = view_settings.development.hotkey_mapping
+	elseif self.is_in_inn then
+		self.hotkey_mapping = view_settings.inn.hotkey_mapping
+	else
+		self.hotkey_mapping = view_settings.ingame.hotkey_mapping
+	end
+
+	return 
+end
+IngameUI.setup_specific_view = function (self, key, class_name)
+	printf("[IngameUI] setup_specific_view %s", class_name)
+
+	local class = rawget(_G, class_name)
+
+	if self.views[key] and self.views[key].destroy then
+		self.views[key]:destroy()
+		printf("[IngameUI] setup_specific_view destroy %s", class_name)
+	end
+
+	self.views[key] = class.new(class, self.ingame_ui_context)
+
+	return 
 end
 IngameUI.is_local_player_ready_for_game = function (self)
 	if self.is_in_inn then
@@ -178,6 +214,12 @@ IngameUI.is_local_player_ready_for_game = function (self)
 	end
 
 	return 
+end
+IngameUI.can_view_lobby_browser = function (self)
+	local is_server = self.is_server
+	local is_game_matchmaking = Managers.matchmaking:is_game_matchmaking()
+
+	return is_server and not is_game_matchmaking
 end
 IngameUI.is_forge_unlocked = function (self)
 	local experience = ScriptBackendProfileAttribute.get("experience")
@@ -196,6 +238,10 @@ IngameUI.is_altar_unlocked = function (self)
 	return can_use
 end
 IngameUI.is_quests_unlocked = function (self)
+	if script_data.unlock_all_levels then
+		return true
+	end
+
 	local player_manager = Managers.player
 	local statistics_db = player_manager.statistics_db(player_manager)
 	local player = player_manager.local_player(player_manager)
@@ -270,6 +316,12 @@ IngameUI.destroy = function (self)
 
 	self.countdown_ui = nil
 
+	if self.help_screen then
+		self.help_screen:destroy()
+
+		self.help_screen = nil
+	end
+
 	self.popup_join_lobby_handler:destroy()
 
 	self.popup_join_lobby_handler = nil
@@ -289,6 +341,9 @@ IngameUI.destroy = function (self)
 	if self.popup_id then
 		Managers.popup:cancel_popup(self.popup_id)
 	end
+
+	Managers.state.event:unregister("event_dlc_status_changed", self)
+	printf("[IngameUI] destroy")
 
 	return 
 end
@@ -359,6 +414,15 @@ IngameUI.handle_menu_hotkeys = function (self, dt, input_service, hotkeys_enable
 
 	return 
 end
+IngameUI.event_dlc_status_changed = function (self)
+	if self.current_view == "map_view" then
+		self.handle_transition(self, "exit_menu")
+	end
+
+	self.setup_specific_view(self, "map_view", "ConsoleMapView")
+
+	return 
+end
 IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 	Profiler.start("IngameUI")
 	self._update_fade_transition(self)
@@ -391,20 +455,15 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("popup_handler")
 
 	if self.survey_active then
 		self._survey_update(self, dt)
 	end
 
-	local hud_should_be_visible = not self.menu_active and not self.current_view and not countdown_ui.is_enter_game(countdown_ui) and not disable_ingame_ui and not end_of_level_ui and not end_screen.is_active
-	local hud_is_visible = self.hud_is_visible
+	local in_score_screen = end_of_level_ui ~= nil
 
-	if hud_should_be_visible ~= hud_is_visible then
-		self.hud_is_visible = hud_should_be_visible
-
-		ingame_hud.set_visible(ingame_hud, hud_should_be_visible)
-	end
+	self._update_hud_visibility(self, disable_ingame_ui, in_score_screen)
 
 	if not disable_ingame_ui then
 		if self.current_view then
@@ -412,7 +471,7 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 
 			Profiler.start(current_view)
 			views[current_view]:update(dt, t)
-			Profiler.stop()
+			Profiler.stop(current_view)
 		end
 
 		if not menu_suspended then
@@ -426,12 +485,12 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 				local inverse_scale = RESOLUTION_LOOKUP.inv_scale
 
 				UIRenderer.draw_texture(ui_renderer, "gradient_main_menu", Vector3(0, 0, UILayer.menu_gradient), Vector2(w*inverse_scale, h*inverse_scale))
-				Profiler.stop()
+				Profiler.stop("ingame menu")
 			end
 
 			local gdc_build = Development.parameter("gdc")
 
-			if not self.pending_transition(self) and not end_screen_active and not self.menu_active and not self.leave_game and not gdc_build and not self.popup_join_lobby_handler.visible and not input_helper_ui.active and input_service.get(input_service, "toggle_menu", true) then
+			if not self.pending_transition(self) and not end_screen_active and not self.menu_active and not self.leave_game and not self.return_to_title_screen and not gdc_build and not self.popup_join_lobby_handler.visible and not input_helper_ui.active and input_service.get(input_service, "toggle_menu", true) then
 				self.handle_transition(self, "ingame_menu")
 
 				MOOD_BLACKBOARD.menu = true
@@ -445,42 +504,49 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 			local player_unit = local_player and local_player.player_unit
 
 			if player_unit and Unit.alive(player_unit) then
-				local enable_hotkeys = is_in_inn and not end_screen_active and not disable_ingame_ui and not end_of_level_ui and not input_helper_ui.active
+				local enable_hotkeys = is_in_inn and not end_screen_active and not disable_ingame_ui and not in_score_screen and not input_helper_ui.active
 
 				self.handle_menu_hotkeys(self, dt, input_service, enable_hotkeys, self.menu_active)
 			end
 
-			Profiler.stop()
+			Profiler.stop("hotkeys")
 		end
 
 		Profiler.start("Countdown UI")
 		countdown_ui.update(countdown_ui, dt)
-		Profiler.stop()
+		Profiler.stop("Countdown UI")
 		Profiler.start("matchmaking")
 		self.matchmaking_ui:update(dt, t)
-		Profiler.stop()
+		Profiler.stop("matchmaking")
 		Profiler.start("popup_handler")
 		self.popup_join_lobby_handler:update(dt)
-		Profiler.stop()
+		Profiler.stop("popup_handler")
 		Profiler.start("endscreen")
 		end_screen.update(end_screen, dt)
-		Profiler.stop()
+		Profiler.stop("endscreen")
+
+		if self.help_screen then
+			Profiler.start("help_screen")
+			self.help_screen:update(dt)
+			Profiler.stop("help_screen")
+		end
 
 		if not end_of_level_ui and not end_screen.is_active then
 			Profiler.start("cutscene_ui")
 			self.cutscene_ui:update(dt)
-			Profiler.stop()
-			self._update_ingame_hud(self, hud_should_be_visible, dt, t)
+			Profiler.stop("cutscene_ui")
+			self._update_ingame_hud(self, self.hud_visible, dt, t)
 		end
 	end
 
 	self._update_chat_ui(self, dt, t, input_service, end_of_level_ui)
 	self._render_debug_ui(self, dt, t)
-	Profiler.stop()
+	self._update_fade_transition(self)
+	Profiler.stop("IngameUI")
 
 	return 
 end
-IngameUI.post_update = function (self, dt, t, disable_ingame_ui)
+IngameUI.post_update = function (self, dt, t)
 	self._post_handle_transition(self)
 
 	local current_view = self.current_view
@@ -493,14 +559,36 @@ IngameUI.post_update = function (self, dt, t, disable_ingame_ui)
 		end
 	end
 
+	if self.hud_visible then
+		local cutscene_system = self.cutscene_system
+		local active_cutscene = (cutscene_system.active_camera or self.popup_join_lobby_handler.visible) and not cutscene_system.ingame_hud_enabled
+
+		self.ingame_hud:post_update(dt, t, active_cutscene)
+	end
+
+	return 
+end
+IngameUI._update_hud_visibility = function (self, disable_ingame_ui, in_score_screen)
+	local current_view = self.current_view
 	local cutscene_system = self.cutscene_system
-	local active_cutscene = (cutscene_system.active_camera or self.popup_join_lobby_handler.visible) and not cutscene_system.ingame_hud_enabled
+	local join_game_popup_active = self.popup_join_lobby_handler.visible
 	local is_enter_game = self.countdown_ui:is_enter_game()
 	local end_screen = self.end_screen
 	local menu_active = self.menu_active
+	local draw_hud = nil
 
-	if not disable_ingame_ui and not menu_active and not current_view and not is_enter_game and not end_screen.active then
-		self.ingame_hud:post_update(dt, t, active_cutscene)
+	if not disable_ingame_ui and not menu_active and not current_view and not is_enter_game and not in_score_screen and not end_screen.active and not join_game_popup_active then
+		draw_hud = true
+	else
+		draw_hud = false
+	end
+
+	local hud_visible = self.hud_visible
+
+	if draw_hud ~= hud_visible then
+		self.hud_visible = draw_hud
+
+		self.ingame_hud:set_visible(draw_hud)
 	end
 
 	return 
@@ -604,7 +692,7 @@ IngameUI._render_debug_ui = function (self, dt, t)
 		self._render_fps(self, dt)
 	end
 
-	Profiler.stop()
+	Profiler.stop("debug_stuff")
 
 	return 
 end
@@ -667,7 +755,14 @@ IngameUI.add_local_system_message = function (self, message)
 		local pop_chat = true
 		local localized_message = Localize(message)
 
-		Managers.chat:add_local_system_message(channel_id, localized_message, pop_chat)
+		if Application.platform() == "win32" then
+			Managers.chat:add_local_system_message(channel_id, localized_message, pop_chat)
+		else
+			local local_player = Managers.player:local_player()
+			local stats_id = local_player.stats_id(local_player)
+
+			Managers.state.event:trigger("add_personal_interaction_warning", stats_id .. message, message)
+		end
 
 		self.last_sent_system_message = message
 		self.system_message_delay = 1.5
@@ -713,12 +808,14 @@ IngameUI._post_handle_transition = function (self)
 	local old_view = self.views[self.new_transition_old_view]
 
 	if old_view and old_view.post_update_on_exit then
+		printf("[IngameUI] menu view post_update_on_exit %s", old_view)
 		old_view.post_update_on_exit(old_view, unpack(transition_params))
 	end
 
 	local new_view = self.views[self.current_view]
 
 	if new_view and new_view.post_update_on_enter then
+		printf("[IngameUI] menu view post_update_on_enter %s", new_view)
 		new_view.post_update_on_enter(new_view, unpack(transition_params))
 	end
 
@@ -746,6 +843,11 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 	local transition_params = {
 		...
 	}
+
+	if self.new_transition_old_view then
+		return 
+	end
+
 	local old_view = self.current_view
 
 	transitions[new_transition](self, unpack(transition_params))
@@ -754,6 +856,7 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 
 	if old_view ~= new_view then
 		if self.views[old_view] and self.views[old_view].on_exit then
+			printf("[IngameUI] menu view on_exit %s", old_view)
 			self.views[old_view]:on_exit(unpack(transition_params))
 		end
 
@@ -781,6 +884,7 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 		end
 
 		if new_view and self.views[new_view] and self.views[new_view].on_enter then
+			printf("[IngameUI] menu view on_enter %s", new_view)
 			self.views[new_view]:on_enter(unpack(transition_params))
 		end
 	end
@@ -793,6 +897,18 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 	return 
 end
 IngameUI.transition_with_fade = function (self, new_transition, ...)
+	local blocked_transitions = self.blocked_transitions
+
+	if blocked_transitions and blocked_transitions[new_transition] then
+		return 
+	end
+
+	local previous_transition = self._previous_transition
+
+	if not self.is_transition_allowed(self, new_transition) or (previous_transition and previous_transition == new_transition) then
+		return 
+	end
+
 	self._transition_fade_data = {
 		new_transition = new_transition,
 		transition_params = {
@@ -827,11 +943,13 @@ IngameUI._update_fade_transition = function (self)
 	return 
 end
 IngameUI.pending_transition = function (self)
-	return self._transition_fade_data ~= nil
+	return self._transition_fade_data ~= nil or self.new_transition_old_view ~= nil
 end
 IngameUI.get_transition = function (self)
 	if self.leave_game then
 		return "leave_game"
+	elseif self.return_to_title_screen then
+		return "return_to_title_screen"
 	elseif self.join_lobby then
 		return "join_lobby", self.join_lobby
 	elseif self.restart_game then
@@ -847,6 +965,7 @@ IngameUI.suspend_active_view = function (self)
 		local view = self.views[current_view]
 
 		if view.suspend then
+			printf("[IngameUI] menu view suspend %s", current_view)
 			view.suspend(view)
 		end
 	end
@@ -868,6 +987,7 @@ IngameUI.unsuspend_active_view = function (self)
 		local view = self.views[current_view]
 
 		if view.unsuspend then
+			printf("[IngameUI] menu view unsuspend %s", current_view)
 			view.unsuspend(view)
 		end
 	end
@@ -938,7 +1058,7 @@ IngameUI.show_input_helper = function (self)
 
 	return 
 end
-local debug_font = "arial_18"
+local debug_font = "gw_arial_16"
 local debug_font_mtrl = "materials/fonts/" .. debug_font
 local position = {}
 local white_color = Colors.color_definitions.white
@@ -997,7 +1117,7 @@ IngameUI._render_fps = function (self, dt)
 	local platform = Application.platform()
 
 	if platform == "ps4" or platform == "xb1" then
-		red_cap = 20
+		red_cap = 28
 	end
 
 	if fps < red_cap then

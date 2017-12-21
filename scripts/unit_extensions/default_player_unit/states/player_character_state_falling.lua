@@ -56,7 +56,7 @@ PlayerCharacterStateFalling.on_enter = function (self, unit, input, dt, context,
 	self.jumped = params.jumped
 	local inventory_extension = self.inventory_extension
 
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 
 	self.is_active = true
@@ -139,12 +139,6 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	if CharacterStateHelper.is_hammer_leaping(status_extension) then
-		csm.change_state(csm, "hammer_leap")
-
-		return 
-	end
-
 	if not csm.state_next and CharacterStateHelper.is_colliding_down(unit) then
 		if CharacterStateHelper.is_moving(input_extension) then
 			csm.change_state(csm, "walking")
@@ -204,7 +198,7 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 	move_speed = move_speed*movement_settings_table.player_air_speed_scale
 
 	CharacterStateHelper.move_in_air(self.first_person_extension, input_extension, self.locomotion_extension, move_speed, unit)
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 	CharacterStateHelper.reload(input_extension, inventory_extension, status_extension)
 

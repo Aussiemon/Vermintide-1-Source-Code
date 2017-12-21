@@ -4,6 +4,7 @@ require("scripts/network/voip")
 require("scripts/game_state/components/profile_synchronizer")
 
 local DISCONNECT_TIMER = 4
+local KICK_PEER_WAIT_TIMER = 5
 
 local function network_printf(format, ...)
 	if script_data.network_debug_connections then
@@ -26,13 +27,20 @@ NetworkServer.init = function (self, player_manager, lobby_host, initial_level, 
 	self.player_manager = player_manager
 	self.lobby_host = lobby_host
 	self.peer_state_machines = {}
+	self.kicked_peers_disconnect_timer = {}
 	self.level_transition_handler = level_transition_handler
 
 	self.set_current_level(self, initial_level)
 
 	local is_server = true
 	self.profile_synchronizer = ProfileSynchronizer:new(is_server, lobby_host, self)
-	self.voip = Voip:new(is_server, my_peer_id, self.connection_handler)
+	local voip_params = {
+		is_server = is_server,
+		my_peer_id = my_peer_id,
+		connection_handler = self.connection_handler,
+		lobby = lobby_host
+	}
+	self.voip = Voip:new(voip_params)
 	self.wanted_profile_index = wanted_profile_index
 
 	return 
@@ -51,6 +59,17 @@ NetworkServer.rpc_notify_connected = function (self, sender)
 		local profile_index = wanted_profile_index or self.profile_synchronizer:get_first_free_profile()
 
 		self.peer_state_machines[sender].rpc_notify_lobby_joined(profile_index)
+	end
+
+	return 
+end
+NetworkServer.rpc_notify_in_post_game = function (self, sender, in_post_game)
+	if sender == self.my_peer_id then
+		local peer_state_machine = self.peer_state_machines[sender]
+
+		if peer_state_machine.has_function(peer_state_machine, "rpc_post_game_notified") then
+			peer_state_machine.rpc_post_game_notified(in_post_game)
+		end
 	end
 
 	return 
@@ -182,7 +201,7 @@ NetworkServer.destroy = function (self)
 	return 
 end
 NetworkServer.register_rpcs = function (self, network_event_delegate, network_transmit)
-	network_event_delegate.register(network_event_delegate, self, "rpc_client_connection_state", "rpc_notify_lobby_joined", "rpc_to_client_spawn_player", "rpc_want_to_spawn_player", "rpc_level_loaded", "rpc_game_started", "rpc_is_ingame", "game_object_sync_done", "rpc_notify_connected", "rpc_loading_synced", "rpc_clear_peer_state", "rpc_client_respawn_player")
+	network_event_delegate.register(network_event_delegate, self, "rpc_client_connection_state", "rpc_notify_lobby_joined", "rpc_to_client_spawn_player", "rpc_post_game_notified", "rpc_want_to_spawn_player", "rpc_level_loaded", "rpc_game_started", "rpc_is_ingame", "game_object_sync_done", "rpc_notify_connected", "rpc_loading_synced", "rpc_clear_peer_state", "rpc_notify_in_post_game", "rpc_client_respawn_player")
 
 	self.network_event_delegate = network_event_delegate
 
@@ -244,6 +263,21 @@ NetworkServer.kick_peer = function (self, peer_id)
 
 	return 
 end
+NetworkServer.update_disconnect_kicked_peers_by_time = function (self, dt)
+	local kicked_peers_disconnect_timer = self.kicked_peers_disconnect_timer
+
+	for peer_id, time_left in pairs(kicked_peers_disconnect_timer) do
+		if time_left == 0 then
+			kicked_peers_disconnect_timer[peer_id] = nil
+
+			self.force_disconnect_client_by_peer_id(self, peer_id)
+		else
+			kicked_peers_disconnect_timer[peer_id] = math.max(time_left - dt, 0)
+		end
+	end
+
+	return 
+end
 NetworkServer.disconnect_all_peers = function (self, reason)
 	local reason_id = NetworkLookup.connection_fails[reason]
 	local peer_state_machines = self.peer_state_machines
@@ -269,6 +303,20 @@ NetworkServer.force_disconnect_all_client_peers = function (self)
 
 	return 
 end
+NetworkServer.force_disconnect_client_by_peer_id = function (self, peer_id)
+	local peer_state_machines = self.peer_state_machines
+
+	if peer_id and peer_state_machines[peer_id] then
+		local peer_state_machine = peer_state_machines[peer_id]
+		local client = peer_id ~= self.my_peer_id
+
+		if client and peer_state_machine.current_state ~= PeerStates.Disconnecting and peer_state_machine.current_state ~= PeerStates.Disconnected then
+			peer_state_machine.state_data:change_state(PeerStates.Disconnecting)
+		end
+	end
+
+	return 
+end
 NetworkServer.rpc_client_connection_state = function (self, sender, peer_id, peer_state)
 	return 
 end
@@ -282,6 +330,20 @@ NetworkServer.rpc_notify_lobby_joined = function (self, sender, wanted_profile_i
 		RPC.rpc_connection_failed(sender, NetworkLookup.connection_fails.no_peer_data_on_join)
 	else
 		peer_state_machine.rpc_notify_lobby_joined(wanted_profile_index, clan_tag)
+	end
+
+	return 
+end
+NetworkServer.rpc_post_game_notified = function (self, sender, in_post_game)
+	network_printf("Peer %s has sent rpc_post_game_notified", tostring(sender))
+
+	local peer_state_machine = self.peer_state_machines[sender]
+
+	if not peer_state_machine or not peer_state_machine.has_function(peer_state_machine, "rpc_post_game_notified") then
+		network_printf("RPC.rpc_connection_failed(sender, NetworkLookup.connection_fails.no_peer_data_on_join)", "rpc_post_game_notified")
+		RPC.rpc_connection_failed(sender, NetworkLookup.connection_fails.no_peer_data_on_join)
+	else
+		peer_state_machine.rpc_post_game_notified(in_post_game)
 	end
 
 	return 
@@ -424,7 +486,7 @@ NetworkServer.update = function (self, dt)
 	end
 
 	if not LEVEL_EDITOR_TEST then
-		self.voip:update()
+		self.voip:update(dt)
 	end
 
 	return 
@@ -475,6 +537,13 @@ NetworkServer.are_all_peers_ingame = function (self, ignore_map)
 	end
 
 	return true
+end
+NetworkServer.is_peer_ingame = function (self, peer_id)
+	local peer_state_machines = self.peer_state_machines
+	local peer_state_machine = peer_state_machines[peer_id]
+	local state_name = peer_state_machine and peer_state_machine.current_state.state_name
+
+	return state_name == "InGame"
 end
 NetworkServer.are_all_peers_ready = function (self)
 	local peer_state_machines = self.peer_state_machines

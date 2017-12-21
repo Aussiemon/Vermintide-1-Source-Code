@@ -3,12 +3,6 @@ require("scripts/ui/views/menu_input_description_ui")
 
 local generic_input_actions = {
 	{
-		input_action = "d_vertical",
-		priority = 1,
-		description_text = "input_description_navigate",
-		ignore_keybinding = true
-	},
-	{
 		input_action = "confirm",
 		priority = 2,
 		description_text = "input_description_open"
@@ -19,9 +13,11 @@ local generic_input_actions = {
 		description_text = "input_description_close"
 	}
 }
+local leave_party_button_text = (Application.platform() == "xb1" and "leave_party_menu_button_name_xb1") or "leave_party_menu_button_name"
+local disband_party_button_text = (Application.platform() == "xb1" and "disband_party_menu_button_name_xb1") or "disband_party_menu_button_name"
 local menu_layouts = {}
 
-if Application.platform() == "xb1" or Application.platform() == "ps4" then
+if Application.platform() == "ps4" then
 	menu_layouts = {
 		in_menu = {
 			alone = {
@@ -41,14 +37,19 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 					display_name = "profile_menu_button_name"
 				},
 				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
 				},
 				{
 					fade = false,
-					transition = "quit_game",
-					display_name = "quit_menu_button_name"
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			},
 			host = {
@@ -68,6 +69,11 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 					display_name = "profile_menu_button_name"
 				},
 				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
@@ -75,12 +81,12 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "disband_party_menu_button_name"
+					display_name = disband_party_button_text
 				},
 				{
 					fade = false,
-					transition = "quit_game",
-					display_name = "quit_menu_button_name"
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			},
 			client = {
@@ -100,6 +106,11 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 					display_name = "profile_menu_button_name"
 				},
 				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
@@ -107,12 +118,12 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "leave_party_menu_button_name"
+					display_name = leave_party_button_text
 				},
 				{
 					fade = false,
-					transition = "quit_game",
-					display_name = "quit_menu_button_name"
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			}
 		},
@@ -129,6 +140,11 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 					display_name = "friends_menu_button_name"
 				},
 				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
@@ -140,8 +156,8 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 				},
 				{
 					fade = false,
-					transition = "quit_game",
-					display_name = "quit_menu_button_name"
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			},
 			host = {
@@ -156,6 +172,11 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 					display_name = "friends_menu_button_name"
 				},
 				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
@@ -163,12 +184,12 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "disband_party_menu_button_name"
+					display_name = disband_party_button_text
 				},
 				{
 					fade = false,
-					transition = "quit_game",
-					display_name = "quit_menu_button_name"
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			},
 			client = {
@@ -183,6 +204,11 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 					display_name = "friends_menu_button_name"
 				},
 				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
@@ -190,12 +216,257 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "leave_party_menu_button_name"
+					display_name = leave_party_button_text
 				},
 				{
 					fade = false,
-					transition = "quit_game",
-					display_name = "quit_menu_button_name"
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			},
+			tutorial = {
+				{
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			}
+		}
+	}
+elseif Application.platform() == "xb1" then
+	menu_layouts = {
+		in_menu = {
+			alone = {
+				{
+					fade = false,
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					fade = false,
+					transition = "friends_view",
+					display_name = "friends_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "profile_view",
+					display_name = "profile_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			},
+			host = {
+				{
+					fade = false,
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					fade = false,
+					transition = "friends_view",
+					display_name = "friends_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "profile_view",
+					display_name = "profile_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "leave_group",
+					display_name = disband_party_button_text
+				},
+				{
+					fade = false,
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			},
+			client = {
+				{
+					fade = false,
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					fade = false,
+					transition = "friends_view",
+					display_name = "friends_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "profile_view",
+					display_name = "profile_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "leave_group",
+					display_name = leave_party_button_text
+				},
+				{
+					fade = false,
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			}
+		},
+		in_game = {
+			alone = {
+				{
+					fade = false,
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					fade = false,
+					transition = "friends_view",
+					display_name = "friends_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "leave_group",
+					display_name = "leave_game_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			},
+			host = {
+				{
+					fade = false,
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					fade = false,
+					transition = "friends_view",
+					display_name = "friends_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "leave_group",
+					display_name = disband_party_button_text
+				},
+				{
+					fade = false,
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			},
+			client = {
+				{
+					fade = false,
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					fade = false,
+					transition = "friends_view",
+					display_name = "friends_menu_button_name"
+				},
+				{
+					fade = true,
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "leave_group",
+					display_name = leave_party_button_text
+				},
+				{
+					fade = false,
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
+				}
+			},
+			tutorial = {
+				{
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					transition = "return_to_title_screen",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			}
 		}
@@ -274,7 +545,7 @@ else
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "disband_party_menu_button_name"
+					display_name = disband_party_button_text
 				},
 				{
 					fade = false,
@@ -300,11 +571,6 @@ else
 				},
 				{
 					fade = true,
-					transition = "lobby_browser_view",
-					display_name = "lobby_browser_button_name"
-				},
-				{
-					fade = true,
 					transition = "options_menu",
 					display_name = "options_menu_button_name"
 				},
@@ -316,7 +582,7 @@ else
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "leave_party_menu_button_name"
+					display_name = leave_party_button_text
 				},
 				{
 					fade = false,
@@ -382,7 +648,7 @@ else
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "disband_party_menu_button_name"
+					display_name = disband_party_button_text
 				},
 				{
 					fade = false,
@@ -414,12 +680,30 @@ else
 				{
 					fade = false,
 					transition = "leave_group",
-					display_name = "leave_party_menu_button_name"
+					display_name = leave_party_button_text
 				},
 				{
 					fade = false,
 					transition = "quit_game",
 					display_name = "quit_menu_button_name"
+				}
+			},
+			tutorial = {
+				{
+					transition = "exit_menu",
+					display_name = "return_to_game_button_name"
+				},
+				{
+					transition = "options_menu",
+					display_name = "options_menu_button_name"
+				},
+				{
+					transition = "credits_menu",
+					display_name = "credits_menu_button_name"
+				},
+				{
+					transition = "quit_game",
+					display_name = "quit_menu_button_name_xb1"
 				}
 			}
 		}
@@ -432,6 +716,9 @@ IngameView.init = function (self, ingame_ui_context)
 	self.input_manager = ingame_ui_context.input_manager
 	self.menu_active = false
 	self.ingame_ui = ingame_ui_context.ingame_ui
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.network_lobby = ingame_ui_context.network_lobby
 	local is_in_inn = ingame_ui_context.is_in_inn
 	self.is_server = ingame_ui_context.is_server
@@ -466,6 +753,15 @@ IngameView.on_enter = function (self, menu_to_enter)
 	self.controller_cooldown = 0.2
 
 	self.update_menu_options(self)
+	self.update_menu_options_enabled_states(self)
+
+	if self.controller_selection_index then
+		local data = self.active_button_data[self.controller_selection_index]
+
+		if data.widget.content.button_hotspot.disabled then
+			self.setup_controller_selection(self)
+		end
+	end
 
 	return 
 end
@@ -484,6 +780,7 @@ IngameView.create_ui_elements = function (self)
 	}
 	self.background_top_widget = UIWidget.init(widgets.background_top_widget)
 	self.background_bottom_widget = UIWidget.init(widgets.background_bottom_widget)
+	self.gamepad_button_selection_widget = UIWidget.init(widgets.gamepad_button_selection)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(self.menu_definition.scenegraph_definition)
 
 	return 
@@ -553,8 +850,11 @@ IngameView.update_menu_options = function (self)
 			self.num_players = num_human_players
 			local layout_list = self.layout_list
 			local new_menu_layout = nil
+			local level_key = Managers.state.game_mode:level_key()
 
-			if num_human_players == 1 then
+			if level_key == "tutorial" then
+				new_menu_layout = layout_list.tutorial
+			elseif num_human_players == 1 then
 				new_menu_layout = layout_list.alone
 			elseif self.is_server then
 				new_menu_layout = layout_list.host
@@ -573,6 +873,8 @@ IngameView.update_menu_options_enabled_states = function (self)
 
 	if active_button_data then
 		local player_ready_for_game = self.ingame_ui:is_local_player_ready_for_game()
+		local is_game_matchmaking = Managers.matchmaking:is_game_matchmaking()
+		local is_server = self.is_server
 
 		for index, menu_option in ipairs(active_button_data) do
 			local transition = menu_option.transition
@@ -580,11 +882,12 @@ IngameView.update_menu_options_enabled_states = function (self)
 			if transition == "profile_view" or transition == "forge_view" or transition == "inventory_view" or transition == "lobby_browser_view" or transition == "quest_view" then
 				local widget = menu_option.widget
 				local widget_button_hotspot = widget.content.button_hotspot
+				local transition_not_allowed_in_matchmaking = not is_server and is_game_matchmaking and transition == "lobby_browser_view"
 
-				if player_ready_for_game and not widget_button_hotspot.disabled then
+				if (player_ready_for_game or transition_not_allowed_in_matchmaking) and not widget_button_hotspot.disabled then
 					widget_button_hotspot.disabled = true
 					widget_button_hotspot.on_release = nil
-				elseif not player_ready_for_game and widget_button_hotspot.disabled then
+				elseif not player_ready_for_game and not transition_not_allowed_in_matchmaking and widget_button_hotspot.disabled then
 					widget_button_hotspot.disabled = false
 				end
 			end
@@ -618,6 +921,12 @@ IngameView.setup_button_layout = function (self, layout_data)
 		}
 	end
 
+	local controller_selection_index = self.controller_selection_index
+
+	if controller_selection_index and #active_button_data < controller_selection_index then
+		self.controller_select_button_index(self, #active_button_data, true)
+	end
+
 	self.set_background_height(self, #active_button_data)
 
 	return 
@@ -637,9 +946,9 @@ IngameView.set_background_height = function (self, num_buttons)
 	local dead_area = 50
 	local button_height = 84
 	local total_button_height = num_buttons*button_height
-	local background_height = math.max(math.min(total_button_height, max), min)
+	local background_height = math.ceil(math.max(math.min(total_button_height, max), min))
 	local background_fraction = (dead_area + background_height)/background_bottom_default_size[2]
-	self.ui_scenegraph.background_bottom.size[2] = background_bottom_default_size[2]*background_fraction
+	self.ui_scenegraph.background_bottom.size[2] = math.ceil(background_bottom_default_size[2]*background_fraction)
 	self.background_bottom_widget.content.texture_id.uvs[1][2] = background_fraction - 1
 
 	return 
@@ -666,9 +975,17 @@ IngameView.update = function (self, dt)
 
 	local ui_scenegraph = self.ui_scenegraph
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	if gamepad_active and not self.gamepad_active_last_frame then
+		self.setup_controller_selection(self)
+	end
+
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.background_top_widget)
 	UIRenderer.draw_widget(ui_renderer, self.background_bottom_widget)
+
+	if gamepad_active then
+		UIRenderer.draw_widget(ui_renderer, self.gamepad_button_selection_widget)
+	end
 
 	local active_button_data = self.active_button_data
 	local ingame_ui = self.ingame_ui
@@ -715,10 +1032,6 @@ IngameView.update = function (self, dt)
 		if not ingame_ui.popup_id then
 			self.menu_input_description:draw(ui_renderer, dt)
 		end
-
-		if not self.gamepad_active_last_frame then
-			self.setup_controller_selection(self)
-		end
 	elseif self.gamepad_active_last_frame then
 		self.clear_controller_selection(self)
 	end
@@ -747,9 +1060,20 @@ IngameView.controller_select_button_index = function (self, index, ignore_sound)
 		return selection_accepted
 	end
 
+	local gamepad_selection_scenegraph_id = self.gamepad_button_selection_widget.scenegraph_id
+	local gamepad_selection_default_position = self.menu_definition.scenegraph_definition[gamepad_selection_scenegraph_id].position
+	local gamepad_selection_current_position = self.ui_scenegraph[gamepad_selection_scenegraph_id].local_position
+
 	for i, data in ipairs(active_button_data) do
 		local widget = data.widget
-		widget.content.button_hotspot.is_selected = i == index
+		local is_selected = i == index
+		widget.content.button_hotspot.is_selected = is_selected
+
+		if is_selected then
+			local widget_scenegraph_id = widget.scenegraph_id
+			local widget_current_position = self.ui_scenegraph[widget_scenegraph_id].local_position
+			gamepad_selection_current_position[2] = gamepad_selection_default_position[2] - i*84
+		end
 	end
 
 	if not ignore_sound and index ~= self.controller_selection_index then
@@ -776,7 +1100,14 @@ IngameView.update_controller_input = function (self, input_service, dt)
 
 	if 0 < self.controller_cooldown then
 		self.controller_cooldown = self.controller_cooldown - dt
+		local speed_multiplier = self.speed_multiplier or 1
+		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
+		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
+		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
+
+		return 
 	else
+		speed_multiplier = self.speed_multiplier or 1
 		local move_up = input_service.get(input_service, "move_up")
 		local move_up_hold = input_service.get(input_service, "move_up_hold")
 		local controller_selection_index = self.controller_selection_index
@@ -790,24 +1121,30 @@ IngameView.update_controller_input = function (self, input_service, dt)
 				selection_accepted = self.controller_select_button_index(self, new_index)
 			end
 
-			self.controller_cooldown = GamepadSettings.menu_cooldown
-		else
-			local move_down = input_service.get(input_service, "move_down")
-			local move_down_hold = input_service.get(input_service, "move_down_hold")
+			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 
-			if move_down or move_down_hold then
-				local new_index = math.min(controller_selection_index + 1, num_buttons)
-				local selection_accepted = self.controller_select_button_index(self, new_index)
+			return 
+		end
 
-				while not selection_accepted do
-					new_index = math.min(new_index + 1, num_buttons)
-					selection_accepted = self.controller_select_button_index(self, new_index)
-				end
+		local move_down = input_service.get(input_service, "move_down")
+		local move_down_hold = input_service.get(input_service, "move_down_hold")
 
-				self.controller_cooldown = GamepadSettings.menu_cooldown
+		if move_down or move_down_hold then
+			local new_index = math.min(controller_selection_index + 1, num_buttons)
+			local selection_accepted = self.controller_select_button_index(self, new_index)
+
+			while not selection_accepted do
+				new_index = math.min(new_index + 1, num_buttons)
+				selection_accepted = self.controller_select_button_index(self, new_index)
 			end
+
+			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+
+			return 
 		end
 	end
+
+	self.speed_multiplier = 1
 
 	return 
 end

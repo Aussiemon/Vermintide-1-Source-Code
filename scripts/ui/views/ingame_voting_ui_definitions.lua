@@ -112,29 +112,57 @@ local scenegraph_definition = {
 	option_yes = {
 		vertical_alignment = "top",
 		parent = "option_box",
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		position = {
-			15,
-			-17,
-			1
+			0,
+			21,
+			2
 		},
 		size = {
-			328,
-			26
+			31,
+			25
 		}
 	},
 	option_no = {
 		vertical_alignment = "top",
-		parent = "option_yes",
-		horizontal_alignment = "left",
+		parent = "option_box",
+		horizontal_alignment = "center",
 		position = {
 			0,
-			-30,
+			21,
 			0
 		},
 		size = {
-			328,
-			26
+			31,
+			25
+		}
+	},
+	input_bar_option_no = {
+		vertical_alignment = "bottom",
+		parent = "option_box",
+		horizontal_alignment = "left",
+		position = {
+			6,
+			5,
+			1
+		},
+		size = {
+			346,
+			34
+		}
+	},
+	input_bar_option_yes = {
+		vertical_alignment = "bottom",
+		parent = "option_box",
+		horizontal_alignment = "left",
+		position = {
+			6,
+			39,
+			1
+		},
+		size = {
+			346,
+			34
 		}
 	}
 }
@@ -265,6 +293,14 @@ local widget_definitions = {
 					style_id = "info_text",
 					pass_type = "text",
 					text_id = "info_text"
+				},
+				{
+					pass_type = "texture",
+					style_id = "gamepad_input_icon",
+					texture_id = "gamepad_input_icon",
+					content_check_function = function (content)
+						return content.gamepad_input_icon and content.is_gamepad_active and not content.has_voted
+					end
 				}
 			}
 		},
@@ -395,6 +431,7 @@ local widget_definitions = {
 			has_voted = false,
 			result_text = "0",
 			gamepad_active = false,
+			left_side = true,
 			option_text = "",
 			bar_bg = "voting_bar_01",
 			bar = {
@@ -461,11 +498,6 @@ local widget_definitions = {
 				}
 			},
 			option_texture = {
-				scenegraph_id = "info_box",
-				size = {
-					31,
-					25
-				},
 				color = {
 					255,
 					255,
@@ -473,7 +505,7 @@ local widget_definitions = {
 					255
 				},
 				offset = {
-					144.5,
+					0,
 					10,
 					1
 				}
@@ -493,35 +525,33 @@ local widget_definitions = {
 				}
 			},
 			option_text = {
-				scenegraph_id = "info_box",
+				font_size = 24,
 				localize = false,
 				horizontal_alignment = "left",
 				word_wrap = false,
 				pixel_perfect = true,
-				font_size = 24,
 				vertical_alignment = "bottom",
 				dynamic_font = true,
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					174.5,
+					35,
 					3,
 					1
 				}
 			},
 			result_text = {
-				scenegraph_id = "info_box",
+				font_size = 24,
 				localize = false,
 				horizontal_alignment = "left",
 				word_wrap = false,
 				pixel_perfect = true,
-				font_size = 24,
 				vertical_alignment = "bottom",
 				dynamic_font = true,
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					174.5,
+					35,
 					3,
 					1
 				}
@@ -621,11 +651,6 @@ local widget_definitions = {
 				}
 			},
 			option_texture = {
-				scenegraph_id = "info_box",
-				size = {
-					31,
-					25
-				},
 				color = {
 					255,
 					255,
@@ -633,7 +658,7 @@ local widget_definitions = {
 					255
 				},
 				offset = {
-					254.5,
+					0,
 					10,
 					1
 				}
@@ -653,31 +678,29 @@ local widget_definitions = {
 				}
 			},
 			option_text = {
-				font_size = 24,
-				scenegraph_id = "info_box",
-				localize = false,
-				word_wrap = false,
-				horizontal_alignment = "left",
 				vertical_alignment = "bottom",
+				localize = false,
+				font_size = 24,
+				horizontal_alignment = "left",
 				font_type = "hell_shark",
+				word_wrap = false,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					284.5,
+					35,
 					3,
 					1
 				}
 			},
 			result_text = {
-				font_size = 24,
-				scenegraph_id = "info_box",
-				localize = false,
-				word_wrap = false,
-				horizontal_alignment = "left",
 				vertical_alignment = "bottom",
+				localize = false,
+				font_size = 24,
+				horizontal_alignment = "left",
 				font_type = "hell_shark",
+				word_wrap = false,
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					284.5,
+					35,
 					3,
 					1
 				}

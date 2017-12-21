@@ -76,7 +76,7 @@ EntitySystemBag.hot_join_sync = function (self, sender)
 		if system.hot_join_sync then
 			Profiler.start(system.NAME)
 			system.hot_join_sync(system, sender)
-			Profiler.stop()
+			Profiler.stop(system.NAME)
 		end
 	end
 

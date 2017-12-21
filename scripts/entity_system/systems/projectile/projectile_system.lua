@@ -20,7 +20,8 @@ local RPCS = {
 	"rpc_player_projectile_impact_level",
 	"rpc_player_projectile_impact_dynamic",
 	"rpc_client_spawn_light_weight_projectile",
-	"rpc_client_despawn_light_weight_projectile"
+	"rpc_client_despawn_light_weight_projectile",
+	"rpc_client_create_aoe"
 }
 local extensions = {
 	"GenericImpactProjectileUnitExtension",
@@ -612,7 +613,7 @@ ProjectileSystem.create_light_weight_projectile = function (self, damage_source,
 
 		projectile.raycast = PhysicsWorld.make_raycast(physics_world, cb, "all", "types", "both", "collision_filter", collision_filter)
 
-		Profiler.stop()
+		Profiler.stop("make_raycast")
 
 		projectile.distance_moved = 0
 		projectile.range = range
@@ -670,6 +671,17 @@ ProjectileSystem.rpc_client_despawn_light_weight_projectile = function (self, se
 	local data = self._light_weight
 
 	self._remove_light_weight_projectile(self, data, index)
+
+	return 
+end
+ProjectileSystem.rpc_client_create_aoe = function (self, sender, owner_unit_id, position, damage_source_id, explosion_template_id)
+	local world = self.world
+	local owner_unit = self.unit_storage:unit(owner_unit_id)
+	local damage_source = NetworkLookup.damage_sources[damage_source_id]
+	local explosion_template_name = NetworkLookup.explosion_templates[explosion_template_id]
+	local explosion_template = ExplosionTemplates[explosion_template_name]
+
+	DamageUtils.create_aoe(world, owner_unit, position, damage_source, explosion_template)
 
 	return 
 end
@@ -732,7 +744,7 @@ ProjectileSystem._update_light_weight_projectiles = function (self, dt, t, data)
 		self._client_update_light_weight_projectiles(self, dt, t, data)
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_light_weight_projectiles")
 
 	return 
 end

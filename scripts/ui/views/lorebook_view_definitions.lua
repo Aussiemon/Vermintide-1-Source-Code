@@ -1424,12 +1424,6 @@ local input_actions = {
 	},
 	selection = {
 		{
-			input_action = "d_vertical",
-			priority = 2,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "confirm",
 			priority = 3,
 			description_text = "input_description_select"
@@ -1441,12 +1435,6 @@ local input_actions = {
 		}
 	},
 	selection_includes_pages = {
-		{
-			input_action = "d_vertical",
-			priority = 2,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
 		{
 			input_action = "confirm",
 			priority = 3,
@@ -1466,24 +1454,12 @@ local input_actions = {
 	},
 	selection_locked = {
 		{
-			input_action = "d_vertical",
-			priority = 2,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "back",
 			priority = 49,
 			description_text = "input_description_back"
 		}
 	},
 	selection_locked_includes_pages = {
-		{
-			input_action = "d_vertical",
-			priority = 2,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
 		{
 			input_action = "l1_r1",
 			priority = 4,

@@ -1,5 +1,13 @@
 require("scripts/hub_elements/ai_spawner")
 
+local function D(...)
+	if script_data.debug_hordes then
+		printf(...)
+	end
+
+	return 
+end
+
 SpawnerSystem = class(SpawnerSystem, ExtensionSystemBase)
 local extensions = {
 	"AISpawner"
@@ -22,6 +30,7 @@ SpawnerSystem.init = function (self, context, system_name)
 	event_manager.register(event_manager, self, "spawn_horde", "spawn_horde")
 
 	self.hidden_spawners_broadphase = Broadphase(40, 512)
+	self._breed_limits = {}
 
 	return 
 end
@@ -144,7 +153,93 @@ local function copy_array(source, index_a, index_b, dest)
 	return 
 end
 
-SpawnerSystem.spawn_horde_from_terror_event_id = function (self, event_id, composition_type, limit_spawners, group_template)
+SpawnerSystem.set_breed_event_horde_spawn_limit = function (self, breed_name, limit)
+	self._breed_limits[breed_name] = limit
+
+	return 
+end
+local temp_spawn_list_per_breed = {}
+local exchange_order = {}
+local i = 1
+
+for name, data in pairs(Breeds) do
+	exchange_order[i] = name
+	i = i + 1
+end
+
+table.sort(exchange_order, function (name1, name2)
+	return Breeds[name1].exchange_order < Breeds[name2].exchange_order
+end)
+table.dump(exchange_order)
+
+SpawnerSystem._try_spawn_breed = function (self, breed_name, spawn_list_per_breed, spawn_list, breed_limits, active_enemies, group_template)
+	local amount = spawn_list_per_breed[breed_name]
+
+	if amount then
+		D("trying to spawn %i %s", amount, breed_name)
+
+		local limit = breed_limits[breed_name]
+
+		if limit then
+			local overflow = math.min((active_enemies + amount) - limit.max_active_enemies, amount)
+
+			D("overflow is %i (active:%i max:%i)", overflow, active_enemies, limit.max_active_enemies)
+
+			local ratio = limit.exchange_ratio
+
+			if ratio < overflow then
+				local exchanged_amount = math.floor(overflow/ratio)
+				amount = amount - exchanged_amount*ratio
+				local exchange_breed = limit.spawn_breed
+
+				if type(exchange_breed) == "table" then
+					local num_breeds = #exchange_breed
+
+					for i = 1, exchanged_amount, 1 do
+						local breed_index = Math.random(1, num_breeds)
+						local exchange_breed_name = exchange_breed[breed_index]
+						spawn_list_per_breed[exchange_breed_name] = (spawn_list_per_breed[exchange_breed_name] or 0) + 1
+
+						D("replacing %i %s with %i %s", ratio, breed_name, 1, exchange_breed_name)
+					end
+
+					for i = 1, num_breeds, 1 do
+						active_enemies = active_enemies + self._try_spawn_breed(self, exchange_breed[i], spawn_list_per_breed, spawn_list, breed_limits, active_enemies, group_template)
+					end
+				else
+					D("replacing %i %s with %i %s", exchanged_amount*ratio, breed_name, exchanged_amount, exchange_breed)
+
+					spawn_list_per_breed[exchange_breed] = (spawn_list_per_breed[exchange_breed] or 0) + exchanged_amount
+					active_enemies = active_enemies + self._try_spawn_breed(self, exchange_breed, spawn_list_per_breed, spawn_list, breed_limits, active_enemies, group_template)
+				end
+			end
+		end
+
+		D("amount remaining %i", amount)
+
+		local start = #spawn_list + 1
+		active_enemies = active_enemies + amount
+
+		if group_template then
+			group_template.size = group_template.size + amount
+			breed_data = {
+				breed_name,
+				group_template
+			}
+
+			for j = start, (start + amount) - 1, 1 do
+				spawn_list[j] = breed_data
+			end
+		else
+			for j = start, (start + amount) - 1, 1 do
+				spawn_list[j] = breed_name
+			end
+		end
+	end
+
+	return active_enemies
+end
+SpawnerSystem.spawn_horde_from_terror_event_id = function (self, event_id, composition_type, limit_spawners, group_template, strictly)
 	local ConflictUtils = ConflictUtils
 	local spawners = nil
 	local dont_remove_this = math.random()
@@ -162,10 +257,14 @@ SpawnerSystem.spawn_horde_from_terror_event_id = function (self, event_id, compo
 
 		copy_array(source_spawners, 1, #source_spawners, spawners)
 	else
-		spawners = ConflictUtils.filter_horde_spawners(player_positions, self._enabled_spawners, 10, 35)
+		if strictly then
+			spawners = ConflictUtils.filter_horde_spawners_strictly(player_positions, self._enabled_spawners, 10, 35)
+		else
+			spawners = ConflictUtils.filter_horde_spawners(player_positions, self._enabled_spawners, 10, 35)
+		end
 
 		if not spawners then
-			print("No horde spawners found within range for terror event ", event_id)
+			D("No horde spawners found within range for terror event %s", tostring(event_id))
 
 			return 
 		end
@@ -184,39 +283,37 @@ SpawnerSystem.spawn_horde_from_terror_event_id = function (self, event_id, compo
 	local spawn_list = spawn_list
 
 	table.clear_array(spawn_list, #spawn_list)
-
-	if script_data.debug_hordes then
-		print("Spawning horde from terror event id: '" .. tostring(event_id) .. "', composition_type: " .. tostring(composition_type) .. ", limit_spawners: " .. tostring(limit_spawners))
-	end
+	D("Spawning horde from terror event id: %q, composition_type: %s, limit_spawners: %s", event_id, composition_type, tostring(limit_spawners))
 
 	for i = 1, #breed_list, 2 do
 		local breed_name = breed_list[i]
 		local amount = breed_list[i + 1]
-		local num_to_spawn = ConflictUtils.random_interval(amount)
+		local num_to_spawn = nil
 
-		if script_data.debug_hordes then
-			print("\t ...will spawn " .. num_to_spawn .. " of " .. breed_name .. "( " .. amount[1] .. "->" .. amount[2] .. " )")
-		end
+		if type(amount) == "table" then
+			num_to_spawn = Math.random(amount[1], amount[2])
 
-		local start = #spawn_list
-
-		if group_template then
-			group_template.size = group_template.size + num_to_spawn
-			breed_data = {
-				breed_name,
-				group_template
-			}
-
-			for j = start + 1, start + num_to_spawn, 1 do
-				spawn_list[j] = breed_data
-			end
+			D("\t ...will spawn %i of %s (%i->%i)", num_to_spawn, breed_name, amount[1], amount[2])
 		else
-			for j = start + 1, start + num_to_spawn, 1 do
-				spawn_list[j] = breed_name
-			end
+			num_to_spawn = amount
+
+			D("\t ...will spawn %i of %s (%i)", num_to_spawn, breed_name, amount)
 		end
+
+		temp_spawn_list_per_breed[breed_name] = num_to_spawn
 	end
 
+	local breed_limits = self._breed_limits
+	local num_breeds = #exchange_order
+	local active_enemies = Managers.state.performance:num_active_enemies()
+
+	for i = 1, num_breeds, 1 do
+		local breed_name = exchange_order[i]
+
+		self._try_spawn_breed(self, breed_name, temp_spawn_list_per_breed, spawn_list, breed_limits, active_enemies, group_template)
+	end
+
+	table.clear(temp_spawn_list_per_breed)
 	table.shuffle(spawners)
 
 	if limit_spawners then
@@ -236,9 +333,7 @@ SpawnerSystem.spawn_horde_from_terror_event_id = function (self, event_id, compo
 	for i = 1, num_spawners, 1 do
 		local to_spawn = math.floor(total_amount/(num_spawners - i + 1))
 
-		if script_data.debug_hordes then
-			print("\t spawner " .. i .. " gets " .. to_spawn .. " rats.")
-		end
+		D("\t spawner %i gets %i rats.", i, to_spawn)
 
 		total_amount = total_amount - to_spawn
 		local spawner = spawners[i]

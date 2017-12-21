@@ -1,9 +1,9 @@
 local serialize = require("scripts/utils/serialize")
 local font_size = 26
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local tiny_font_size = 16
-local tiny_font = "arial_16"
+local tiny_font = "gw_arial_16"
 local tiny_font_mtrl = "materials/fonts/" .. tiny_font
 local status = {}
 local resx, resy = Application.resolution()
@@ -89,8 +89,8 @@ end
 EditAiUtility = class(EditAiUtility)
 EditAiUtility.init = function (self, world)
 	self.world = world
-	self.world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "immediate", "material", "materials/fonts/arial")
-	self.screen_gui = World.create_screen_gui(self.world, "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts", "material", "materials/fonts/arial", "immediate")
+	self.world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "immediate", "material", "materials/fonts/gw_fonts")
+	self.screen_gui = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 
 	return 
 end

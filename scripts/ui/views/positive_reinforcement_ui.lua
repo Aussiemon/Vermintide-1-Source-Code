@@ -24,6 +24,7 @@ PositiveReinforcementUI.init = function (self, ingame_ui_context)
 	Managers.state.event:register(self, "add_coop_feedback", "event_add_positive_enforcement")
 	Managers.state.event:register(self, "add_coop_feedback_kill", "event_add_positive_enforcement_kill")
 	Managers.state.event:register(self, "add_personal_feedback", "event_add_lorebook_page_pickup")
+	Managers.state.event:register(self, "add_personal_interaction_warning", "event_add_interaction_warning")
 
 	return 
 end
@@ -160,16 +161,44 @@ PositiveReinforcementUI.add_event = function (self, hash, local_player, color_fr
 		widget_text_style.text_color[1] = 255
 		widget_icon_style.color[1] = 255
 		local color_to = event_colors.fade_to
-		self._animations["text_color_fade" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale_color, widget_text_style.text_color, color_from[2], color_from[3], color_from[4], color_to[2], color_to[3], color_to[4], 0.8)
-		self._animations["text_pulse" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale, widget_text_style, "font_size", 18, 24, 0.2, UIAnimation.linear_scale, widget_text_style, "font_size", 24, 18, 0.3)
-		self._animations["icon_pulse" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale2, widget_icon_style.size, 20, 20, 26, 26, 0.2, UIAnimation.linear_scale2, widget_icon_style.size, 26, 26, 20, 20, 0.3)
-		self._animations["icon_move" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale2, widget_icon_style.offset, -20, -20, -26, -26, 0.2, UIAnimation.linear_scale2, widget_icon_style.offset, -26, -26, -20, -20, 0.3)
+		local debug_color_from_1 = color_from[1]
+		local debug_color_from_2 = color_from[2]
+		local debug_color_from_3 = color_from[3]
+		local debug_color_from_4 = color_from[4]
+		local debug_color_to_1 = color_to[1]
+		local debug_color_to_2 = color_to[2]
+		local debug_color_to_3 = color_to[3]
+		local debug_color_to_4 = color_to[4]
+		local debug_widget_text_color = widget_text_style.text_color
+		local debug_widget_text_color_1 = debug_widget_text_color and debug_widget_text_color[1]
+		local debug_widget_text_color_2 = debug_widget_text_color and debug_widget_text_color[2]
+		local debug_widget_text_color_3 = debug_widget_text_color and debug_widget_text_color[3]
+		local debug_widget_text_color_4 = debug_widget_text_color and debug_widget_text_color[4]
+
+		if Application.platform() ~= "win32" then
+			self._animations["text_color_fade_1_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style.text_color, 2, color_from[2], color_to[2], 0.8)
+			self._animations["text_color_fade_2_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style.text_color, 3, color_from[3], color_to[3], 0.8)
+			self._animations["text_color_fade_3_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style.text_color, 4, color_from[4], color_to[4], 0.8)
+			self._animations["text_pulse_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale, widget_text_style, "font_size", 18, 24, 0.2, UIAnimation.linear_scale, widget_text_style, "font_size", 24, 18, 0.3)
+			self._animations["icon_pulse_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale2, widget_icon_style.size, 20, 20, 26, 26, 0.2, UIAnimation.linear_scale2, widget_icon_style.size, 26, 26, 20, 20, 0.3)
+			self._animations["icon_move_" .. full_hash] = UIAnimation.init_debug(UIAnimation.linear_scale2, widget_icon_style.offset, -20, -20, -26, -26, 0.2, UIAnimation.linear_scale2, widget_icon_style.offset, -26, -26, -20, -20, 0.3)
+		else
+			self._animations["text_color_fade_1_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale, widget_text_style.text_color, 2, color_from[2], color_to[2], 0.8)
+			self._animations["text_color_fade_2_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale, widget_text_style.text_color, 3, color_from[3], color_to[3], 0.8)
+			self._animations["text_color_fade_3_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale, widget_text_style.text_color, 4, color_from[4], color_to[4], 0.8)
+			self._animations["text_pulse_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale, widget_text_style, "font_size", 18, 24, 0.2, UIAnimation.linear_scale, widget_text_style, "font_size", 24, 18, 0.3)
+			self._animations["icon_pulse_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale2, widget_icon_style.size, 20, 20, 26, 26, 0.2, UIAnimation.linear_scale2, widget_icon_style.size, 26, 26, 20, 20, 0.3)
+			self._animations["icon_move_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale2, widget_icon_style.offset, -20, -20, -26, -26, 0.2, UIAnimation.linear_scale2, widget_icon_style.offset, -26, -26, -20, -20, 0.3)
+		end
 	end
 
 	return 
 end
 PositiveReinforcementUI.event_add_positive_enforcement = function (self, hash, local_player, event_type, player1, player2)
-	self.add_event(self, hash, local_player, event_colors.default, event_type, player1 and player1.name(player1), player2 and player2.name(player2))
+	local player_1_name = (player1 and player1.name(player1)) or nil
+	local player_2_name = (player2 and player2.name(player2)) or nil
+
+	self.add_event(self, hash, local_player, event_colors.default, event_type, player_1_name, player_2_name)
 
 	if event_type == "aid" and local_player then
 		local player_one_unit = player1 and player1.player_unit
@@ -189,6 +218,11 @@ PositiveReinforcementUI.event_add_positive_enforcement_kill = function (self, ha
 end
 PositiveReinforcementUI.event_add_lorebook_page_pickup = function (self, hash, local_player, event_type, page_id)
 	self.add_event(self, hash, local_player, event_colors.personal, event_type, page_id)
+
+	return 
+end
+PositiveReinforcementUI.event_add_interaction_warning = function (self, hash, message)
+	self.add_event(self, hash, true, event_colors.kill, "interaction_warning", Localize(message))
 
 	return 
 end

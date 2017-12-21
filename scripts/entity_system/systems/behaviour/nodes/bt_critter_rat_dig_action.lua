@@ -11,6 +11,10 @@ BTCritterRatDigAction.enter = function (self, unit, blackboard, t)
 	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, false)
+
+	local locomotion_extension = blackboard.locomotion_extension
+
+	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
 	Managers.state.network:anim_event(unit, "dig_ground")
 
 	return 

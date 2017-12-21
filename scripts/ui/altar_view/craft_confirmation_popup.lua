@@ -420,7 +420,7 @@ CraftConfirmationPopup.init = function (self, context, position)
 	self.input_manager = input_manager
 
 	if not input_manager.get_input_service(input_manager) then
-		input_manager.create_input_service(input_manager, "craft_popup", IngameMenuKeymaps)
+		input_manager.create_input_service(input_manager, "craft_popup", "IngameMenuKeymaps", "IngameMenuFilters")
 		input_manager.map_device_to_service(input_manager, "craft_popup", "keyboard")
 		input_manager.map_device_to_service(input_manager, "craft_popup", "mouse")
 		input_manager.map_device_to_service(input_manager, "craft_popup", "gamepad")
@@ -640,31 +640,7 @@ CraftConfirmationPopup.get_gamepad_input_texture_data = function (self, input_se
 
 		return ButtonTextureByName(input_action, platform)
 	else
-		local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-		local input_mappings = keymap_bindings.input_mappings
-
-		for i = 1, #input_mappings, 1 do
-			local input_mapping = input_mappings[i]
-
-			for j = 1, input_mapping.n, 3 do
-				local device_type = input_mapping[j]
-				local key_index = input_mapping[j + 1]
-				local key_action_type = input_mapping[j + 2]
-
-				if device_type == "gamepad" then
-					local button_name = Pad1.button_name(key_index)
-					local button_texture_data = nil
-
-					if platform == "xb1" or platform == "win32" then
-						button_texture_data = ButtonTextureByName(button_name, "xb1")
-					else
-						button_texture_data = ButtonTextureByName(button_name, "ps4")
-					end
-
-					return button_texture_data, button_name
-				end
-			end
-		end
+		return UISettings.get_gamepad_input_texture_data(input_service, input_action)
 	end
 
 	return 

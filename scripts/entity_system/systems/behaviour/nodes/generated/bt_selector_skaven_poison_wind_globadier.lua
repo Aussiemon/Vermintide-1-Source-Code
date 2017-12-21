@@ -35,7 +35,7 @@ BTSelector_skaven_poison_wind_globadier.run = function (self, unit, blackboard, 
 
 		local result, evaluate = node_suicide_stagger.run(node_suicide_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("suicide_stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -61,7 +61,7 @@ BTSelector_skaven_poison_wind_globadier.run = function (self, unit, blackboard, 
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -83,7 +83,7 @@ BTSelector_skaven_poison_wind_globadier.run = function (self, unit, blackboard, 
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -108,7 +108,7 @@ BTSelector_skaven_poison_wind_globadier.run = function (self, unit, blackboard, 
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -130,7 +130,7 @@ BTSelector_skaven_poison_wind_globadier.run = function (self, unit, blackboard, 
 
 		local result, evaluate = node_in_combat.run(node_in_combat, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("in_combat")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -150,7 +150,7 @@ BTSelector_skaven_poison_wind_globadier.run = function (self, unit, blackboard, 
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

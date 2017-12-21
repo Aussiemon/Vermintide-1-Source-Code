@@ -11,7 +11,7 @@ local function network_printf(format, ...)
 	return 
 end
 
-NetworkClient.init = function (self, level_transition_handler, server_peer_id, level_index, wanted_profile_index, clear_peer_states)
+NetworkClient.init = function (self, level_transition_handler, server_peer_id, level_index, wanted_profile_index, clear_peer_states, lobby_client)
 	self.level_transition_handler = level_transition_handler
 
 	self.set_state(self, "connecting")
@@ -20,6 +20,7 @@ NetworkClient.init = function (self, level_transition_handler, server_peer_id, l
 	self.server_peer_id = server_peer_id
 	self.profile_synchronizer = ProfileSynchronizer:new(false)
 	self.wanted_profile_index = wanted_profile_index or SaveData.wanted_profile_index or 1
+	self.lobby_client = lobby_client
 	local profile = SPProfiles[self.wanted_profile_index]
 	local display_name = (profile and profile.display_name) or "no profile wanted"
 
@@ -33,7 +34,12 @@ NetworkClient.init = function (self, level_transition_handler, server_peer_id, l
 	end
 
 	local is_server = false
-	self.voip = Voip:new(is_server, nil, self.connection_handler)
+	local voip_params = {
+		is_server = is_server,
+		connection_handler = self.connection_handler,
+		lobby = lobby_client
+	}
+	self.voip = Voip:new(voip_params)
 	self.connecting_timeout = 0
 
 	return 
@@ -52,12 +58,15 @@ NetworkClient.destroy = function (self)
 	self.profile_synchronizer = nil
 
 	self.connection_handler:update(0)
+
+	self.lobby_client = nil
+
 	GarbageLeakDetector.register_object(self, "Network Client")
 
 	return 
 end
 NetworkClient.register_rpcs = function (self, network_message_router, network_transmit)
-	network_message_router.register(network_message_router, self, "rpc_loading_synced", "rpc_reload_level", "rpc_load_level", "rpc_game_started", "rpc_disconnect_peer", "rpc_connection_failed", "rpc_notify_connected", "rpc_set_migration_host")
+	network_message_router.register(network_message_router, self, "rpc_loading_synced", "rpc_notify_in_post_game", "rpc_reload_level", "rpc_load_level", "rpc_game_started", "rpc_disconnect_peer", "rpc_connection_failed", "rpc_notify_connected", "rpc_set_migration_host")
 
 	self.network_message_router = network_message_router
 
@@ -106,6 +115,18 @@ NetworkClient.rpc_notify_connected = function (self, sender)
 	end
 
 	return 
+end
+NetworkClient.rpc_notify_in_post_game = function (self, sender, in_post_game)
+	if self._is_in_post_game ~= in_post_game then
+		self._is_in_post_game = in_post_game
+
+		RPC.rpc_post_game_notified(self.server_peer_id, in_post_game)
+	end
+
+	return 
+end
+NetworkClient.is_in_post_game = function (self)
+	return self._is_in_post_game
 end
 NetworkClient.rpc_disconnect_peer = function (self, sender, peer_id)
 	self.connection_handler:disconnect_peers(peer_id)
@@ -166,7 +187,13 @@ NetworkClient.on_game_entered = function (self)
 
 	return 
 end
-NetworkClient.rpc_game_started = function (self, sender)
+NetworkClient.rpc_game_started = function (self, sender, round_id)
+	Application.error(string.format("SETTING ROUND ID %s", tostring(round_id)))
+
+	if Application.platform() == "xb1" then
+		Managers.account:set_round_id(round_id)
+	end
+
 	network_printf("rpc_game_started")
 	self.set_state(self, "game_started")
 	Managers.state.event:trigger("game_started")
@@ -227,7 +254,7 @@ NetworkClient.update = function (self, dt)
 		end
 	end
 
-	self.voip:update()
+	self.voip:update(dt)
 
 	return 
 end

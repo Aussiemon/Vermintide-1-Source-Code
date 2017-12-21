@@ -1,3 +1,5 @@
+require("scripts/entity_system/systems/behaviour/nodes/bt_node")
+
 BTPackMasterFollowAction = class(BTPackMasterFollowAction, BTNode)
 BTPackMasterFollowAction.init = function (self, ...)
 	BTPackMasterFollowAction.super.init(self, ...)
@@ -10,7 +12,6 @@ BTPackMasterFollowAction.name = "BTPackMasterFollowAction"
 BTPackMasterFollowAction.enter = function (self, unit, blackboard, t)
 	blackboard.action = self._tree_node.action_data
 	blackboard.time_to_next_evaluate = t + 0.1
-	self.old_distance = nil
 	local template_id = NetworkLookup.tutorials.elite_enemies
 	local message_id = NetworkLookup.tutorials[blackboard.breed.name]
 
@@ -26,8 +27,7 @@ BTPackMasterFollowAction.enter = function (self, unit, blackboard, t)
 	return 
 end
 BTPackMasterFollowAction.leave = function (self, unit, blackboard, t, reason)
-	self.toggle_start_move_animation_lock(self, unit, false)
-
+	blackboard.action = nil
 	blackboard.start_anim_locked = nil
 	blackboard.anim_cb_rotation_start = nil
 	blackboard.anim_cb_move = nil
@@ -35,7 +35,9 @@ BTPackMasterFollowAction.leave = function (self, unit, blackboard, t, reason)
 
 	blackboard.navigation_extension:set_enabled(true)
 
-	if reason == "failed" then
+	if reason == "aborted" then
+		blackboard.move_state = nil
+	elseif reason == "failed" then
 		blackboard.target_unit = nil
 	end
 
@@ -51,7 +53,8 @@ BTPackMasterFollowAction.run = function (self, unit, blackboard, t, dt)
 	local current_position = POSITION_LOOKUP[unit]
 	local target_position = POSITION_LOOKUP[target_unit]
 	local hook_time = 0.4
-	local extrapolated_target_position = target_position + ScriptUnit.extension(target_unit, "locomotion_system"):average_velocity()*hook_time
+	local target_locomotion_extension = ScriptUnit.extension(target_unit, "locomotion_system")
+	local extrapolated_target_position = target_position + target_locomotion_extension.average_velocity(target_locomotion_extension)*hook_time
 	local distance_sq = Vector3.distance_squared(current_position, extrapolated_target_position)
 	local attack_distance = blackboard.action.distance_to_attack
 
@@ -63,6 +66,8 @@ BTPackMasterFollowAction.run = function (self, unit, blackboard, t, dt)
 		end
 	end
 
+	local navigation_extension = blackboard.navigation_extension
+
 	if blackboard.start_anim_done then
 		local whereabouts_extension = ScriptUnit.extension(target_unit, "whereabouts_system")
 		local pos_list, player_position_on_mesh = whereabouts_extension.closest_positions_when_outside_navmesh(whereabouts_extension)
@@ -70,17 +75,17 @@ BTPackMasterFollowAction.run = function (self, unit, blackboard, t, dt)
 		if player_position_on_mesh then
 			local position = POSITION_LOOKUP[target_unit]
 
-			blackboard.navigation_extension:move_to(position)
+			navigation_extension.move_to(navigation_extension, position)
 		elseif 0 < #pos_list then
 			local position = pos_list[1]
 
-			blackboard.navigation_extension:move_to(position.unbox(position))
+			navigation_extension.move_to(navigation_extension, position.unbox(position))
 		else
 			return "failed"
 		end
 	end
 
-	if blackboard.navigation_extension:has_reached_destination() then
+	if navigation_extension.has_reached_destination(navigation_extension) then
 		return "failed"
 	end
 
@@ -91,7 +96,6 @@ BTPackMasterFollowAction.run = function (self, unit, blackboard, t, dt)
 		blackboard.time_to_next_evaluate = t + 0.1
 	end
 
-	local navigation_extension = blackboard.navigation_extension
 	local is_computing_path = navigation_extension.is_computing_path(navigation_extension)
 
 	if blackboard.move_state ~= "moving" and not is_computing_path then
@@ -99,24 +103,10 @@ BTPackMasterFollowAction.run = function (self, unit, blackboard, t, dt)
 		blackboard.move_state = "moving"
 
 		network_manager.anim_event(network_manager, unit, "move_fwd")
-		blackboard.navigation_extension:set_enabled(true)
+		navigation_extension.set_enabled(navigation_extension, true)
 	end
 
 	return "running", should_evaluate
-end
-BTPackMasterFollowAction.toggle_start_move_animation_lock = function (self, unit, should_lock_anim)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
-
-	if should_lock_anim then
-		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
-		LocomotionUtils.set_animation_driven_movement(unit, true)
-	else
-		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
-		LocomotionUtils.set_animation_driven_movement(unit, false)
-		LocomotionUtils.set_animation_rotation_scale(unit, 1)
-	end
-
-	return 
 end
 
 return 

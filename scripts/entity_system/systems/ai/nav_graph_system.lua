@@ -56,6 +56,7 @@ NavGraphSystem.init = function (self, context, system_name)
 	self.fallback_smart_object_index = 0
 	self.smart_object_types = {}
 	self.smart_object_data = {}
+	self.smart_object_ids = {}
 	self.line_object = World.create_line_object(self.world)
 	self.initialized_unit_nav_graphs = {}
 
@@ -183,6 +184,7 @@ NavGraphSystem.on_add_extension = function (self, world, unit, extension_name)
 		local smart_object_id = self._level_unit_smart_object_id(self, unit)
 		local smart_object = self.smart_object_from_unit_data(self, unit, smart_object_id)
 		self.smart_objects[smart_object_id] = smart_object
+		self.smart_object_ids[unit] = smart_object_id
 
 		self.init_nav_graphs(self, unit, smart_object_id, extension)
 	end
@@ -335,6 +337,12 @@ NavGraphSystem.get_smart_object_type = function (self, smart_object_id)
 end
 NavGraphSystem.get_smart_object_data = function (self, smart_object_id)
 	return self.smart_object_data[smart_object_id]
+end
+NavGraphSystem.get_smart_objects = function (self, smart_object_id)
+	return self.smart_objects[smart_object_id]
+end
+NavGraphSystem.get_smart_object_id = function (self, unit)
+	return self.smart_object_ids[unit]
 end
 
 return 

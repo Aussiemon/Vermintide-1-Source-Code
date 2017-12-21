@@ -98,7 +98,7 @@ PlayerCharacterStateCatapulted.update = function (self, unit, input, dt, context
 
 	local first_person_extension = self.first_person_extension
 
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 
 	return 
 end

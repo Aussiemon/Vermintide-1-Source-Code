@@ -1,7 +1,9 @@
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
 require("scripts/entity_system/systems/tutorial/tutorial_templates")
 
 local TIME_TO_WAIT_BETWEEN_SHOWS = 30
-local TOOLTIP_MINIMUM_SHOW_TIME = 0.1
+local TOOLTIP_MINIMUM_SHOW_TIME = 0.3
 local INFOSLATE_COOLDOWN = 100
 local DO_TUT_RELOAD = true
 
@@ -45,7 +47,7 @@ TutorialSystem.init = function (self, entity_system_creation_context, system_nam
 	self.dice_keeper = entity_system_creation_context.dice_keeper
 	self.health_extensions = {}
 	self.raycast_units = {}
-	self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/arial", "immediate")
+	self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 	local network_event_delegate = entity_system_creation_context.network_event_delegate
 	self.network_event_delegate = network_event_delegate
 
@@ -189,24 +191,24 @@ TutorialSystem.physics_async_update = function (self, context, t)
 			extension.tooltip_tutorial.active = false
 		end
 
-		Profiler.stop()
+		Profiler.stop("is_looking_at_interactable")
 
 		local status_extension = ScriptUnit.extension(unit, "status_system")
 
 		if not is_looking_at_interactable and not status_extension.is_disabled(status_extension) then
 			Profiler.start("iterate_tooltips")
 			self.iterate_tooltips(self, t, unit, extension, raycast_unit, world)
-			Profiler.stop()
+			Profiler.stop("iterate_tooltips")
 		end
 
 		Profiler.start("iterate_objective_tooltips")
 		self.iterate_objective_tooltips(self, t, unit, extension, raycast_unit, world)
-		Profiler.stop()
+		Profiler.stop("iterate_objective_tooltips")
 
-		if self.pacing == "pacing_peak_fade" or self.pacing == "pacing_relax" then
+		if (self.pacing == "pacing_peak_fade" or self.pacing == "pacing_relax") and not script_data.info_slates_disabled then
 			Profiler.start("iterate_info_slates")
 			self.iterate_info_slates(self, t, unit, extension, raycast_unit, world)
-			Profiler.stop()
+			Profiler.stop("iterate_info_slates")
 		end
 
 		if extension.tooltip_tutorial.active then
@@ -264,45 +266,55 @@ TutorialSystem.physics_async_update = function (self, context, t)
 		end
 	end
 
+	local ingame_ui = self.ingame_ui
+	local tutorial_ui_enabled = ingame_ui.hud_visible
+
+	if tutorial_ui_enabled then
+		local ingame_hud = ingame_ui.ingame_hud
+		local is_own_player_dead = ingame_hud.is_own_player_dead(ingame_hud)
+		local active_cutscene = ingame_hud.is_cutscene_active(ingame_hud)
+
+		if not is_own_player_dead and not active_cutscene then
+			local dt = context.dt or 0
+
+			self.tutorial_ui:update(dt, t)
+		end
+	end
+
 	DO_TUT_RELOAD = false
+
+	return 
+end
+TutorialSystem.pre_render_update = function (self, dt, t)
+	local ingame_ui = self.ingame_ui
+	local tutorial_ui_enabled = ingame_ui.hud_visible
+
+	if tutorial_ui_enabled then
+		local ingame_hud = ingame_ui.ingame_hud
+		local is_own_player_dead = ingame_hud.is_own_player_dead(ingame_hud)
+		local active_cutscene = ingame_hud.is_cutscene_active(ingame_hud)
+
+		if not is_own_player_dead and not active_cutscene then
+			self.tutorial_ui:pre_render_update(dt, t)
+		end
+	end
 
 	return 
 end
 TutorialSystem.iterate_tooltips = function (self, t, unit, extension, raycast_unit, world)
 	local tooltip_templates = TutorialTooltipTemplates
 	local tooltip_templates_n = TutorialTooltipTemplates_n
+	local in_play_go = Managers.state.entity:system("play_go_tutorial_system"):active()
+
+	if not in_play_go and not Application.user_setting("tutorials_enabled") then
+		return 
+	end
 
 	for i = 1, tooltip_templates_n, 1 do
+
+		-- decompilation error in this vicinity
 		local template = tooltip_templates[i]
 		local name = template.name
-
-		template.update_data(t, unit, extension.data)
-
-		local ok, world_position = template.can_show(t, unit, extension.data, raycast_unit, world)
-
-		if not ok then
-		else
-			if template.get_text then
-				template.text = template.get_text(extension.data)
-			end
-
-			if template.get_action then
-				template.action = template.get_action(extension.data)
-			end
-
-			extension.tooltip_tutorial.active = true
-			extension.tooltip_tutorial.name = name
-
-			if world_position then
-				extension.tooltip_tutorial.world_position = Vector3Box(world_position)
-			else
-				extension.tooltip_tutorial.world_position = nil
-			end
-
-			extension.shown_times[name] = t
-
-			return 
-		end
 	end
 
 	return 
@@ -335,7 +347,7 @@ TutorialSystem.iterate_objective_tooltips = function (self, t, unit, extension, 
 
 		local ok, objective_units, objective_units_n = template.can_show(t, unit, extension.data, raycast_unit, world)
 
-		Profiler.stop()
+		Profiler.stop(template.name)
 
 		if not ok then
 		else
@@ -456,7 +468,15 @@ TutorialSystem.rpc_objective_unit_set_active = function (self, sender, level_obj
 
 	return 
 end
-TutorialSystem.set_tutorial_ui = function (self, tutorial_ui)
+TutorialSystem.set_ingame_ui = function (self, ingame_ui)
+	self.ingame_ui = ingame_ui
+	local tutorial_ui = ingame_ui.ingame_hud.tutorial_ui
+
+	self._set_tutorial_ui(self, tutorial_ui)
+
+	return 
+end
+TutorialSystem._set_tutorial_ui = function (self, tutorial_ui)
 	self.tutorial_ui = tutorial_ui
 
 	for unit, extension in pairs(self.health_extensions) do
@@ -550,7 +570,7 @@ TutorialSystem.update = function (self, context, t)
 		raycast_units[unit] = raycast_unit
 	end
 
-	Profiler.stop()
+	Profiler.stop("raycast")
 
 	return 
 end

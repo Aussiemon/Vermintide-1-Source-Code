@@ -26,17 +26,31 @@ CharacterStateHelper.get_square_movement_input = function (input_extension)
 
 	return movement
 end
-CharacterStateHelper.get_look_input = function (input_extension, status_extension, is_3p)
+CharacterStateHelper.get_look_input = function (input_extension, status_extension, inventory_extension, is_3p)
+	local hacky_unit = status_extension.unit
+	local targeting_data = nil
+
+	if ScriptUnit.has_extension(hacky_unit, "smart_targeting_system") then
+		local targeting_extension = ScriptUnit.extension(hacky_unit, "smart_targeting_system")
+		targeting_data = targeting_extension.get_targeting_data(targeting_extension)
+	end
+
 	local look_input = input_extension.get(input_extension, "look")
 	local look_input_gamepad = nil
 	local is_zooming = status_extension.is_zooming(status_extension)
 	local gamepad_enabled = not Development.parameter("disable_gamepad")
+	local wielded_slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+	local weapon_template = inventory_extension.get_wielded_slot_item_template(inventory_extension)
 
 	if gamepad_enabled then
 		if is_zooming then
 			look_input_gamepad = input_extension.get(input_extension, "look_controller_zoom")
 		elseif is_3p then
 			look_input_gamepad = input_extension.get(input_extension, "look_controller_3p")
+		elseif wielded_slot_name == "slot_ranged" then
+			look_input_gamepad = input_extension.get(input_extension, "look_controller_ranged")
+		elseif wielded_slot_name == "slot_melee" and targeting_data and targeting_data.targets_within_range then
+			look_input_gamepad = input_extension.get(input_extension, "look_controller_melee")
 		else
 			look_input_gamepad = input_extension.get(input_extension, "look_controller")
 		end
@@ -67,47 +81,24 @@ local DOUBLE_TAP_DODGES = {
 	move_back_pressed = Vector3Box(-Vector3.forward())
 }
 CharacterStateHelper.check_to_start_dodge = function (unit, input_extension, status_extension, t)
-	if status_extension.dodge_locked(status_extension) then
+	if status_extension.dodge_locked(status_extension) or not status_extension.can_dodge(status_extension, t) then
 		return false
 	end
 
-	if not status_extension.can_dodge(status_extension, t) then
-		return false
-	end
-
-	local start_dodge = false
-	local dodge_direction = Vector3(0, 0, 0)
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local input = CharacterStateHelper.get_movement_input(input_extension)
 	local dodge_on_jump_key = input_extension.dodge_on_jump_key
 	local dodge_on_forward_diagonal = input_extension.dodge_on_forward_diagonal
 	local double_tap_dodge = input_extension.double_tap_dodge
+	local start_dodge = false
+	local dodge_direction = Vector3(0, 0, 0)
 	local dodge_hold = input_extension.get(input_extension, "dodge_hold")
 	local dodge_input = input_extension.get(input_extension, "dodge") or (dodge_on_jump_key and dodge_hold)
 	local input_length = Vector3.length(input)
 	local using_keyboard = not Managers.input:is_device_active("gamepad")
 	local stationary_dodge = Application.user_setting("toggle_stationary_dodge")
 
-	if 0 < input_length then
-		local normalized_input = input/input_length
-		local x = normalized_input.x
-		local y = normalized_input.y
-		local abs_x = math.abs(x)
-		local forward_ok = y <= 0 or (not using_keyboard and 0.9239 < abs_x) or (dodge_on_forward_diagonal and 0.707 < abs_x)
-
-		if forward_ok and dodge_input then
-			start_dodge = true
-
-			if 0 < y then
-				dodge_direction = Vector3(math.sign(x), 0, 0)
-			else
-				dodge_direction = normalized_input
-			end
-		end
-	elseif dodge_input and stationary_dodge then
-		start_dodge = true
-		dodge_direction = -Vector3.forward()
-	elseif double_tap_dodge then
+	if double_tap_dodge then
 		for input, dir in pairs(DOUBLE_TAP_DODGES) do
 			if input_extension.get(input_extension, input) then
 				local was_double_tap = input_extension.was_double_tap(input_extension, input, t, Application.user_setting("double_tap_dodge_threshold"))
@@ -128,6 +119,27 @@ CharacterStateHelper.check_to_start_dodge = function (unit, input_extension, sta
 				break
 			end
 		end
+	end
+
+	if not start_dodge and dodge_input and input_extension.minimum_dodge_input < input_length then
+		local normalized_input = input/input_length
+		local x = normalized_input.x
+		local y = normalized_input.y
+		local abs_x = math.abs(x)
+		local forward_ok = y <= 0 or (not using_keyboard and 0.9239 < abs_x) or (dodge_on_forward_diagonal and 0.707 < abs_x)
+
+		if forward_ok then
+			start_dodge = true
+
+			if 0 < y then
+				dodge_direction = Vector3(math.sign(x), 0, 0)
+			else
+				dodge_direction = normalized_input
+			end
+		end
+	elseif dodge_input and stationary_dodge then
+		start_dodge = true
+		dodge_direction = -Vector3.forward()
 	end
 
 	if start_dodge then
@@ -335,25 +347,25 @@ CharacterStateHelper.force_velocity = function (unit, locomotion_extension, velo
 
 	return 
 end
-CharacterStateHelper.look = function (input_extension, viewport_name, first_person_extension, status_extension)
+CharacterStateHelper.look = function (input_extension, viewport_name, first_person_extension, status_extension, inventory_extension)
 	Profiler.start("look")
 
 	local camera_manager = Managers.state.camera
 	local look_sensitivity = (camera_manager.has_viewport(camera_manager, viewport_name) and camera_manager.fov(camera_manager, viewport_name)/0.785) or 1
 	local is_3p = false
-	local look_delta = CharacterStateHelper.get_look_input(input_extension, status_extension, is_3p)
+	local look_delta = CharacterStateHelper.get_look_input(input_extension, status_extension, inventory_extension, is_3p)
 	look_delta = look_delta*look_sensitivity
 
 	first_person_extension.set_look_delta(first_person_extension, look_delta)
-	Profiler.stop()
+	Profiler.stop("look")
 
 	return 
 end
-CharacterStateHelper.look_limited_rotation_freedom = function (input_extension, viewport_name, first_person_extension, ledge_unit, unit, max_radians_yaw, max_radians_pitch, status_extension)
+CharacterStateHelper.look_limited_rotation_freedom = function (input_extension, viewport_name, first_person_extension, ledge_unit, unit, max_radians_yaw, max_radians_pitch, status_extension, inventory_extension)
 	local camera_manager = Managers.state.camera
 	local look_sensitivity = (camera_manager.has_viewport(camera_manager, viewport_name) and Managers.state.camera:fov(viewport_name)/0.785) or 1
 	local is_3p = false
-	local look_delta = CharacterStateHelper.get_look_input(input_extension, status_extension, is_3p)
+	local look_delta = CharacterStateHelper.get_look_input(input_extension, status_extension, inventory_extension, is_3p)
 	look_delta = look_delta*look_sensitivity
 	local new_look_delta = look_delta
 
@@ -523,6 +535,8 @@ CharacterStateHelper.set_is_on_ledge = function (ledge_unit, unit, on_ledge, is_
 	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 	local ledge_level_index, is_level_unit = network_manager.game_object_or_level_id(network_manager, ledge_unit)
 
+	status_extension.set_crouching(status_extension, false)
+
 	if Managers.state.network:game() and not LEVEL_EDITOR_TEST then
 		status_extension.set_is_ledge_hanging(status_extension, on_ledge, ledge_unit)
 		network_manager.network_transmit:send_rpc_server("rpc_status_change_bool", NetworkLookup.statuses.ledge_hanging, on_ledge, unit_id, ledge_level_index)
@@ -530,11 +544,15 @@ CharacterStateHelper.set_is_on_ledge = function (ledge_unit, unit, on_ledge, is_
 
 	return 
 end
-CharacterStateHelper.get_buffered_input = function (input_id, input_extension, no_buffer, doubleclick_window)
+CharacterStateHelper.get_buffered_input = function (input_id, input_extension, no_buffer, doubleclick_window, softbutton_threshold)
 	local input = nil
 
 	if input_id then
 		input = input_extension.get(input_extension, input_id)
+
+		if input and softbutton_threshold and input < softbutton_threshold then
+			return false
+		end
 
 		if not no_buffer then
 			if input then
@@ -581,15 +599,12 @@ CharacterStateHelper.wield_input = function (input_extension, inventory_extensio
 		end
 	end
 
-	local scroll_input = input_extension.get(input_extension, "wield_scroll")
-	local scroll_value = (scroll_input and -Vector3.y(scroll_input)) or 0
+	local scroll_value = 0
 
-	if scroll_value == 0 then
-		if input_extension.get(input_extension, "wield_scroll_up") or input_extension.get(input_extension, "wield_prev") then
-			scroll_value = -1
-		elseif input_extension.get(input_extension, "wield_scroll_down") or input_extension.get(input_extension, "wield_next") then
-			scroll_value = 1
-		end
+	if input_extension.get(input_extension, "wield_prev") then
+		scroll_value = -1
+	elseif input_extension.get(input_extension, "wield_next") then
+		scroll_value = 1
 	end
 
 	local changing_debug_speed = DebugKeyHandler.key_pressed("left shift") or DebugKeyHandler.key_pressed("left alt")
@@ -763,13 +778,26 @@ CharacterStateHelper._get_chain_action_data = function (item_template, current_a
 	for i = 1, #chain_actions, 1 do
 		local action_data = chain_actions[i]
 		local release_required = action_data.release_required
-		local released_input = true
+		local input_extra_requirement = true
 
 		if release_required then
-			released_input = input_extension.released_input(input_extension, release_required)
+			input_extra_requirement = input_extension.released_input(input_extension, release_required)
+		end
+
+		local hold_required = action_data.hold_required
+
+		if hold_required then
+			for index, hold_require in pairs(hold_required) do
+				if input_extension.released_input(input_extension, hold_require) then
+					input_extra_requirement = false
+
+					break
+				end
+			end
 		end
 
 		local input_id = action_data.input
+		local softbutton_threshold = action_data.softbutton_threshold
 		local input = nil
 		local no_buffer = action_data.no_buffer
 		local doubleclick_window = action_data.doubleclick_window
@@ -780,8 +808,8 @@ CharacterStateHelper._get_chain_action_data = function (item_template, current_a
 			blocked = input_extension.get(input_extension, blocking_input)
 		end
 
-		if released_input and not blocked then
-			input = CharacterStateHelper.get_buffered_input(input_id, input_extension, no_buffer, doubleclick_window)
+		if input_extra_requirement and not blocked then
+			input = CharacterStateHelper.get_buffered_input(input_id, input_extension, no_buffer, doubleclick_window, softbutton_threshold)
 		end
 
 		if not input then
@@ -789,23 +817,33 @@ CharacterStateHelper._get_chain_action_data = function (item_template, current_a
 			input = wield_input
 		end
 
-		if input and action_data.softbutton_threshold then
-			if action_data.softbutton_threshold <= input then
-				input = true
-			else
-				input = false
-			end
-		end
-
 		local select_chance = action_data.select_chance or 1
 		local is_selected = math.random() <= select_chance
 		local chain_action_available = current_action_extension.is_chain_action_available(current_action_extension, action_data, t)
 
 		if (input or action_data.auto_chain) and chain_action_available and is_selected then
-			new_action = action_data.action
-			new_sub_action = action_data.sub_action
-			send_buffer = action_data.send_buffer
-			clear_buffer = action_data.clear_buffer
+			local sub_action = action_data.sub_action
+
+			if not sub_action and action_data.first_possible_sub_action then
+				local sub_actions = item_template.actions[action_data.action]
+
+				for sub_action_name, data in pairs(sub_actions) do
+					local condition_func = data.chain_condition_func
+
+					if not condition_func or condition_func(unit) then
+						sub_action = sub_action_name
+
+						break
+					end
+				end
+			end
+
+			if sub_action then
+				new_action = action_data.action
+				new_sub_action = sub_action
+				send_buffer = action_data.send_buffer
+				clear_buffer = action_data.clear_buffer
+			end
 
 			break
 		end
@@ -829,23 +867,22 @@ CharacterStateHelper._get_chain_action_data = function (item_template, current_a
 	return new_action, new_sub_action, wield_input
 end
 
-local function validate_action(unit, action_name, sub_action_name, action_settings, input_extension, inventory_extension)
-	local auto_validate_on_gamepad = action_settings.auto_validate_on_gamepad and Managers.input:is_device_active("gamepad")
+local function validate_action(unit, action_name, sub_action_name, action_settings, input_extension, inventory_extension, only_check_condition, ammo_extension)
 	local skip_hold = action_settings.do_not_validate_with_hold
 	local hold_input = not skip_hold and action_settings.hold_input
 	local wield_input = CharacterStateHelper.wield_input(input_extension, inventory_extension, action_name)
 	local buffered_input = input_extension.get_buffer(input_extension, action_name)
 	local action_input = input_extension.get(input_extension, action_name)
 	local action_hold_input = hold_input and input_extension.get(input_extension, hold_input)
-	local allow_toggle = action_settings.allow_hold_toggle
+	local allow_toggle = action_settings.allow_hold_toggle and input_extension.toggle_alternate_attack
 	local hold_or_toggle_input = (allow_toggle and action_input) or (not allow_toggle and (action_input or action_hold_input))
 
-	if auto_validate_on_gamepad or wield_input or buffered_input or hold_or_toggle_input then
+	if only_check_condition or wield_input or buffered_input or hold_or_toggle_input then
 		local condition_func = action_settings.condition_func
 		local condition_passed = nil
 
 		if condition_func then
-			condition_passed = condition_func(unit, input_extension)
+			condition_passed = condition_func(unit, input_extension, ammo_extension)
 		else
 			condition_passed = true
 		end
@@ -874,7 +911,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 	table.clear(interupting_action_data)
 
 	if not item_data then
-		Profiler.stop()
+		Profiler.stop("weapon_action")
 
 		return 
 	end
@@ -899,7 +936,10 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 			end
 		end
 
-		if (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible or reloading then
+		local player = Managers.player:owner(unit)
+		local is_bot_player = player and player.bot_player
+
+		if (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible or reloading or is_bot_player then
 			can_interrupt = false
 		else
 			can_interrupt = status_extension.hitreact_interrupt(status_extension)
@@ -914,7 +954,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 
 			CharacterStateHelper.play_animation_event(unit, "hit_reaction")
 			status_extension.set_pushed(status_extension, true)
-			Profiler.stop()
+			Profiler.stop("weapon_action")
 
 			return 
 		end
@@ -947,11 +987,12 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 	elseif item_template.next_action then
 		local action_data = item_template.next_action
 		local action_name = action_data.action
+		local only_check_condition = true
 		local sub_actions = item_template.actions[action_name]
 
 		for sub_action_name, action_settings in pairs(sub_actions) do
 			if sub_action_name ~= "default" and action_settings.condition_func then
-				new_action, new_sub_action = validate_action(unit, action_name, sub_action_name, action_settings, input_extension, inventory_extension)
+				new_action, new_sub_action = validate_action(unit, action_name, sub_action_name, action_settings, input_extension, inventory_extension, only_check_condition)
 
 				if new_action and new_sub_action then
 					break
@@ -961,15 +1002,17 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 
 		if not new_action then
 			local action_settings = item_template.actions[action_name].default
-			new_action, new_sub_action = validate_action(unit, action_name, "default", action_settings, input_extension, inventory_extension)
+			new_action, new_sub_action = validate_action(unit, action_name, "default", action_settings, input_extension, inventory_extension, only_check_condition)
 		end
 
 		item_template.next_action = nil
 	else
+		ammo_extension = (left_hand_weapon_extension and left_hand_weapon_extension.ammo_extension) or (right_hand_weapon_extension and right_hand_weapon_extension.ammo_extension)
+
 		for action_name, sub_actions in pairs(item_template.actions) do
 			for sub_action_name, action_settings in pairs(sub_actions) do
 				if sub_action_name ~= "default" and action_settings.condition_func then
-					new_action, new_sub_action = validate_action(unit, action_name, sub_action_name, action_settings, input_extension, inventory_extension)
+					new_action, new_sub_action = validate_action(unit, action_name, sub_action_name, action_settings, input_extension, inventory_extension, false, ammo_extension)
 
 					if new_action and new_sub_action then
 						break
@@ -979,7 +1022,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 
 			if not new_action then
 				local action_settings = item_template.actions[action_name].default
-				new_action, new_sub_action = validate_action(unit, action_name, "default", action_settings, input_extension, inventory_extension)
+				new_action, new_sub_action = validate_action(unit, action_name, "default", action_settings, input_extension, inventory_extension, false, ammo_extension)
 			end
 
 			if new_action then
@@ -994,7 +1037,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 		local weapon_action_hand = new_action_settings.weapon_action_hand or "right"
 
 		if weapon_action_hand == "both" then
-			Profiler.stop()
+			Profiler.stop("weapon_action")
 
 			return 
 		end
@@ -1018,7 +1061,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 			end
 
 			left_hand_weapon_extension.start_action(left_hand_weapon_extension, new_action, new_sub_action, item_template.actions, t)
-			Profiler.stop()
+			Profiler.stop("weapon_action")
 
 			return 
 		end
@@ -1032,7 +1075,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 		right_hand_weapon_extension.start_action(right_hand_weapon_extension, new_action, new_sub_action, item_template.actions, t)
 	end
 
-	Profiler.stop()
+	Profiler.stop("weapon_action")
 
 	return 
 end
@@ -1065,6 +1108,13 @@ CharacterStateHelper.reload = function (input_extension, inventory_extension, st
 		return false
 	end
 
+	local item_data, right_hand_weapon_extension, left_hand_weapon_extension = CharacterStateHelper._get_item_data_and_weapon_extensions(inventory_extension)
+	local current_action_settings, current_action_extension, current_action_hand = CharacterStateHelper._get_current_action_data(left_hand_weapon_extension, right_hand_weapon_extension)
+
+	if current_action_settings and current_action_settings.active_reload_time then
+		return false
+	end
+
 	local ammo_extension = nil
 
 	if equipment.right_hand_wielded_unit ~= nil and ScriptUnit.has_extension(equipment.right_hand_wielded_unit, "ammo_system") then
@@ -1090,14 +1140,12 @@ CharacterStateHelper.crouch = function (unit, input_extension, status_extension,
 	local crouch = is_crouching
 	local toggle_input = input_extension.get(input_extension, "crouch")
 	local hold_toggle_input = input_extension.get(input_extension, "crouching")
-	local gamepad_toggle_input = input_extension.get(input_extension, "crouch_gamepad")
-	local gamepad_hold_toggle_input = input_extension.get(input_extension, "crouching_gamepad")
 
-	if toggle_crouch and (toggle_input or gamepad_toggle_input) then
+	if toggle_crouch and (toggle_input or ((input_extension.get(input_extension, "dodge") or input_extension.get(input_extension, "dodge_right")) and status_extension.is_crouching(status_extension))) then
 		crouch = status_extension.crouch_toggle(status_extension)
-	elseif not toggle_crouch and not hold_toggle_input and not gamepad_hold_toggle_input then
+	elseif not toggle_crouch and not hold_toggle_input then
 		crouch = false
-	elseif not toggle_crouch and (hold_toggle_input or gamepad_hold_toggle_input) then
+	elseif not toggle_crouch and hold_toggle_input then
 		crouch = true
 
 		status_extension.free_crouch_toggle_lock(status_extension)
@@ -1127,12 +1175,12 @@ CharacterStateHelper.crouch = function (unit, input_extension, status_extension,
 			status_extension.set_crouching(status_extension, false)
 		end
 
-		Profiler.stop()
+		Profiler.stop("crouch")
 
 		return crouch
 	end
 
-	Profiler.stop()
+	Profiler.stop("crouch")
 
 	return is_crouching
 end
@@ -1194,9 +1242,6 @@ end
 CharacterStateHelper.pack_master_status = function (status_extension)
 	return status_extension.pack_master_status
 end
-CharacterStateHelper.is_hammer_leaping = function (status_extension)
-	return status_extension.is_hammer_leaping(status_extension)
-end
 CharacterStateHelper.is_waiting_for_assisted_respawn = function (status_extension)
 	return status_extension.is_ready_for_assisted_respawn(status_extension)
 end
@@ -1224,7 +1269,11 @@ end
 CharacterStateHelper.is_starting_interaction = function (input_extension, interactor_extension)
 	local can_interact, fail_reason, interaction_type = interactor_extension.can_interact(interactor_extension)
 
-	return can_interact and interaction_type ~= "heal" and input_extension.get(input_extension, "interact", true)
+	if CONSOLE_DISABLED_INTERACTIONS[interaction_type] then
+		return false
+	end
+
+	return can_interact and interaction_type ~= "heal" and interaction_type ~= "give_item" and input_extension.get(input_extension, "interact", true)
 end
 CharacterStateHelper.is_interacting = function (interactor_extension)
 	return interactor_extension.is_interacting(interactor_extension)

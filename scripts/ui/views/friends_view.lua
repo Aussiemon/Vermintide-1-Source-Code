@@ -1,30 +1,24 @@
 require("scripts/helpers/steam_helper")
 require("scripts/utils/base64")
 
-local DO_RELOAD = true
+local DO_RELOAD = false
 local definitions = local_require("scripts/ui/views/friends_view_definitions")
 FriendsView = class(FriendsView)
 local INVITE_COOLDOWN_TIMER = 2
 local FRIENDS_REFRESH_STEP, FRIENDS_LIST_LIMIT = nil
 
 if Application.platform() == "ps4" then
-	FRIENDS_REFRESH_STEP = 12
-	FRIENDS_LIST_LIMIT = 300
+	FRIENDS_REFRESH_STEP = 20
+	FRIENDS_LIST_LIMIT = 500
 else
 	FRIENDS_REFRESH_STEP = 3
 	FRIENDS_LIST_LIMIT = 400
 end
 
-local player_name_max_length = 35
+local PLAYER_NAME_MAX_LENGTH = 18
 local player_name_max_length_info = 15
 script_data.debug_friends_view = script_data.debug_friends_view or Development.parameter("debug_friends_view")
 local generic_input_actions = {
-	{
-		input_action = "d_vertical",
-		priority = 1,
-		description_text = "input_description_navigate",
-		ignore_keybinding = true
-	},
 	{
 		input_action = "back",
 		priority = 50,
@@ -32,19 +26,56 @@ local generic_input_actions = {
 	}
 }
 local input_description_data = {
+	name = "friendslist",
 	gamepad_support = true,
-	name = "friendslist"
+	actions = {}
 }
 local input_actions = {
-	invite = {
-		input_action = "refresh",
-		priority = 3,
-		description_text = "input_description_invite"
+	win32 = {
+		invite = {
+			input_action = "refresh",
+			priority = 3,
+			description_text = "input_description_invite"
+		},
+		join = {
+			input_action = "special_1",
+			priority = 2,
+			description_text = "input_description_join"
+		},
+		show_profile = {
+			input_action = "confirm",
+			priority = 4,
+			description_text = "input_description_show_profile"
+		}
 	},
-	join = {
-		input_action = "special_1",
-		priority = 2,
-		description_text = "input_description_join"
+	xb1 = {
+		invite = {
+			input_action = "refresh",
+			priority = 3,
+			description_text = "input_description_invite"
+		},
+		show_profile = {
+			input_action = "confirm",
+			priority = 4,
+			description_text = "input_description_show_profile_xb1"
+		}
+	},
+	ps4 = {
+		invite = {
+			input_action = "refresh",
+			priority = 3,
+			description_text = "input_description_invite"
+		},
+		join = {
+			input_action = "special_1",
+			priority = 2,
+			description_text = "input_description_join"
+		},
+		show_profile = {
+			input_action = "confirm",
+			priority = 4,
+			description_text = "input_description_show_profile"
+		}
 	}
 }
 local telemetry_data = {}
@@ -77,14 +108,18 @@ local function _add_player_invite_send_telemetry(sending_player)
 	return 
 end
 
-FriendsView.init = function (self, ingame_ui_context, sub_menu)
+FriendsView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.network_lobby = ingame_ui_context.network_lobby
 	self.matchmaking_manager = ingame_ui_context.matchmaking_manager
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
+	self.network_server = ingame_ui_context.network_server
 	local input_manager = ingame_ui_context.input_manager
 
-	input_manager.create_input_service(input_manager, "friends_view", self.ingame_ui:get_ingame_menu_keymap())
+	input_manager.create_input_service(input_manager, "friends_view", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "friends_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "friends_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "friends_view", "gamepad")
@@ -109,7 +144,6 @@ FriendsView.init = function (self, ingame_ui_context, sub_menu)
 
 	self.create_ui_elements(self)
 
-	self.is_sub_menu = sub_menu
 	self.scenegraph_button_map = {
 		invite_button = self.invite_button,
 		join_button = self.join_button
@@ -120,7 +154,10 @@ FriendsView.init = function (self, ingame_ui_context, sub_menu)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, number_of_actvie_descriptions, gui_layer, generic_input_actions)
 
 	self.menu_input_description:set_input_description(nil)
-	self.refresh_friends(self)
+
+	if Application.platform() ~= "xb1" then
+		self.refresh_friends(self)
+	end
 
 	return 
 end
@@ -159,6 +196,8 @@ FriendsView.set_active = function (self, active)
 				end
 			end
 		end
+
+		self.set_scroll_amount(self, 0)
 	else
 		self.play_sound(self, "Play_hud_button_close")
 	end
@@ -169,6 +208,11 @@ FriendsView.is_active = function (self)
 	return self.active
 end
 FriendsView.on_enter = function (self)
+	if Application.platform() == "xb1" and Managers.account:setup_friendslist() then
+		self.updating_friend_info = true
+		self.friends_update_timer = FRIENDS_REFRESH_STEP
+	end
+
 	self.set_active(self, true)
 
 	return 
@@ -281,7 +325,7 @@ FriendsView.create_friend_entry = function (self, i)
 			offline_color = Colors.get_color_table_with_alpha("gray", 255),
 			text_color = Colors.get_color_table_with_alpha("white", 255),
 			offset = {
-				40,
+				10,
 				0,
 				1
 			}
@@ -330,7 +374,8 @@ local function format_friend_data(data)
 				status = presence_info.onlineStatus,
 				playing_this_game = playing_this_game,
 				playing_game = playing_game,
-				presence_status = presence_info.gameStatus
+				presence_status = presence_info.gameStatus,
+				np_id = (script_data.debug_friends and "") or WebApi.convert_np_id(friend.npId)
 			}
 		end
 
@@ -338,9 +383,6 @@ local function format_friend_data(data)
 		data.start = nil
 		data.size = nil
 		data.totalResults = nil
-	end
-
-	if Application.platform() == "xb1" then
 	end
 
 	return 
@@ -568,7 +610,7 @@ FriendsView.cb_refresh_friends_done = function (self, friends_list, use_cached_f
 		self.refresh_psn_room_data(self, friends, playing_bulldozer_friends)
 	end
 
-	Profiler.stop()
+	Profiler.stop("FriendsView:cb_refresh_friends_done()")
 
 	return 
 end
@@ -593,7 +635,7 @@ FriendsView.refresh_psn_room_data = function (self, friends, playing_bulldozer_f
 end
 FriendsView.setup_widget = function (self, friend_data, id, content, style)
 	local name = (friend_data and friend_data.name) or "n/a"
-	content.name = UIRenderer.crop_text(name, player_name_max_length)
+	content.name = (PLAYER_NAME_MAX_LENGTH < UTF8Utils.string_length(name) and UIRenderer.crop_text_width(self.ui_renderer, name, 370, style.name)) or name
 	content.id = id
 
 	if self.selected_id == id then
@@ -613,6 +655,82 @@ FriendsView.setup_widget = function (self, friend_data, id, content, style)
 	else
 		name_style.text_color = name_style.online_color
 	end
+
+	return 
+end
+FriendsView._extract_level_and_difficulty_from_presence = function (self, presence)
+	local low_presence = string.lower(presence)
+	local ret_level_name, ret_level_image, ret_num_players = nil
+	local ret_difficulty = "-"
+	local levels = table.clone(UnlockableLevels)
+	levels[#levels + 1] = "inn_level"
+
+	for _, level_name in pairs(levels) do
+		for _, localized_level_name in pairs(LEVEL_TRANSLATIONS[level_name]) do
+			if string.find(low_presence, string.lower(localized_level_name)) then
+				local level_settings = LevelSettings[level_name]
+				ret_level_name = Localize(level_settings.display_name)
+				ret_level_image = level_settings.level_image
+
+				break
+			end
+		end
+	end
+
+	for _, difficulty in pairs(Difficulties) do
+		local difficulty_settings = DifficultySettings[difficulty]
+
+		for _, localized_difficulty in pairs(DIFFICULTY_TRANSLATIONS[difficulty]) do
+			if string.find(low_presence, string.lower(localized_difficulty)) then
+				ret_difficulty = localized_difficulty
+
+				break
+			end
+		end
+	end
+
+	local index = string.find(presence, "/")
+
+	if index then
+		local new_str = string.sub(presence, index - 1)
+		new_str = string.sub(new_str, 1, -2)
+		ret_num_players = new_str
+		presence = string.sub(presence, 1, index - 3)
+	end
+
+	return ret_level_name, ret_difficulty, ret_level_image, ret_num_players, presence
+end
+FriendsView.cb_presence_async_done = function (self, friend_data, xuid, data)
+	if data.presence then
+		local presence = data.presence
+		local level_name, difficulty, level_image, num_players, presence = self._extract_level_and_difficulty_from_presence(self, presence or "")
+		friend_data.content.difficulty_name = difficulty or ""
+		friend_data.content.level_name = level_name or ""
+		friend_data.content.num_players = num_players or ""
+		friend_data.content.level_image = level_image or "level_image_any"
+		friend_data.content.info_title = presence
+		self._current_friend_data = friend_data
+		self.updating_friend_info = false
+		friend_data.content.display_game_info = presence ~= "" and presence ~= "Inn menus" and presence ~= "Playing tutorial"
+		friend_data.content.in_idle = presence ~= "" and presence ~= "Inn menus"
+		self._show_level_info = presence ~= "" and presence ~= "Inn menus"
+		self._show_game_info = presence ~= "" and presence ~= "Inn menus" and presence ~= "Playing tutorial"
+		local num_human_players = Managers.player:num_human_players()
+		local current_level = Managers.state.game_mode:level_key()
+		local disable_invite = num_human_players == 4 or current_level == "tutorial" or presence == ""
+		self._disable_invite = disable_invite
+
+		self.update_input_description(self, not disable_invite, false)
+	else
+		friend_data.content.display_game_info = false
+		friend_data.content.in_idle = false
+		self._show_level_info = false
+		self._disable_invite = true
+
+		self.update_input_description(self, false, false)
+	end
+
+	self._current_xbox_user_id = xuid
 
 	return 
 end
@@ -646,11 +764,11 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 
 	if friend_data.playing_this_game then
 		local level, level_image, num_players, difficulty = nil
-		local lobby_id = friend_data.playing_game.lobby
+		local lobby_id = friend_data.playing_game and friend_data.playing_game.lobby
 		local lobby_data = lobby_id and LobbyInternal.get_lobby_data_from_id(lobby_id)
 
 		if lobby_data then
-			if lobby_data.level_key then
+			if lobby_data.level_key and lobby_data.level_key ~= "tutorial" then
 				local level_settings = rawget(LevelSettings, lobby_data.level_key)
 
 				if level_settings then
@@ -671,8 +789,9 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 			local is_full_group = (num_players and 4 <= tonumber(num_players)) or false
 			num_players = (num_players and string.format("%s/4", num_players)) or nil
 			local network_hash = lobby_data.network_hash
+			local host = lobby_data.host or lobby_data.Host
 
-			if not is_full_group and network_hash == self.network_lobby.network_hash then
+			if not is_full_group and network_hash == self.network_lobby.network_hash and lobby_data.level_key ~= "tutorial" and host ~= Network.peer_id() then
 				disable_join = false
 			end
 
@@ -687,11 +806,46 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 			else
 				has_lobby_data = false
 			end
+		elseif Application.platform() == "xb1" then
+			local token = Presence.get_async(Managers.account:user_id(), friend_data.xbox_user_id)
+
+			if token ~= -1 then
+				local presence_token = ScriptPresenceToken:new(token)
+
+				Managers.token:register_token(presence_token, callback(self, "cb_presence_async_done", friend_info, friend_data.xbox_user_id))
+
+				first_update = friend_data.xbox_user_id ~= self._current_xbox_user_id
+				self._show_level_info = (not first_update and self._show_level_info) or nil
+				friend_info.content.display_game_info = (not first_update and self._show_game_info) or nil
+
+				if first_update then
+					disable_invite = true
+				else
+					disable_invite = self._disable_invite
+				end
+			else
+				friend_info.content.display_game_info = false
+				friend_info.content.in_idle = false
+				self._show_level_info = false
+				self._disable_invite = true
+
+				self.update_input_description(self, false, false)
+			end
 		else
 			idle_in_menu = true
 		end
 	else
 		friend_info.content.info_title = ""
+		friend_info.content.display_game_info = false
+		friend_info.content.in_idle = false
+		self._show_level_info = false
+		self._disable_invite = true
+
+		self.update_input_description(self, false, false)
+	end
+
+	if Application.platform() == "xb1" then
+		disable_join = true
 	end
 
 	if idle_in_menu then
@@ -705,9 +859,14 @@ FriendsView.setup_info_window = function (self, friend_data, id, first_update)
 	self.disable_invite_button = disable_invite
 	self.invite_button.content.button_hotspot.disabled = self.disable_invite_button or (self.invite_cooldown_list[id] and true) or false
 	local ui_scenegraph = self.ui_scenegraph
-	friend_info.content.in_idle = idle_in_menu
-	friend_info.content.display_game_info = has_lobby_data and not idle_in_menu
-	self.updating_friend_info = (first_update or not has_lobby_data) and friend_data.playing_this_game
+
+	if Application.platform() == "xb1" then
+		self.updating_friend_info = first_update
+	else
+		self.updating_friend_info = (first_update or not has_lobby_data) and friend_data.playing_this_game
+		friend_info.content.display_game_info = has_lobby_data and not idle_in_menu
+		friend_info.content.in_idle = idle_in_menu
+	end
 
 	self.update_input_description(self, not disable_invite, not disable_join)
 
@@ -716,20 +875,27 @@ end
 FriendsView.on_join_button_clicked = function (self)
 	local id = self.selected_id
 	local friend_data = self.friends[id]
-	local lobby_id = friend_data.playing_game.lobby
 
-	if lobby_id then
-		local lobby_data = LobbyInternal.get_lobby_data_from_id(lobby_id)
-		lobby_data.id = lobby_id
+	if Application.platform() == "xb1" then
+		XboxLive.show_gamercard(Managers.account:user_id(), friend_data.xbox_user_id)
+	elseif self.network_server and not self.network_server:are_all_peers_ingame() then
+		self.popup_id = Managers.popup:queue_popup(Localize("popup_join_blocked_by_joining_player"), Localize("popup_invite_not_installed_header"), "ok", Localize("menu_ok"))
+	else
+		local lobby_id = friend_data.playing_game.lobby
 
-		if GameSettingsDevelopment.use_telemetry then
-			local player_manager = Managers.player
-			local joining_player = player_manager.local_player(player_manager, 1)
+		if lobby_id then
+			local lobby_data = LobbyInternal.get_lobby_data_from_id(lobby_id)
+			lobby_data.id = lobby_id
 
-			_add_player_join_telemetry(joining_player)
+			if GameSettingsDevelopment.use_telemetry then
+				local player_manager = Managers.player
+				local joining_player = player_manager.local_player(player_manager, 1)
+
+				_add_player_join_telemetry(joining_player)
+			end
+
+			self.ingame_ui:handle_transition("join_lobby", lobby_data)
 		end
-
-		self.ingame_ui:handle_transition("join_lobby", lobby_data)
 	end
 
 	return 
@@ -740,8 +906,6 @@ FriendsView.on_invite_button_clicked = function (self, gamepad_active)
 	self.invite_cooldown_list[id] = INVITE_COOLDOWN_TIMER
 	self.invite_button.content.button_hotspot.disabled = true
 
-	print("LoL")
-
 	if GameSettingsDevelopment.use_telemetry then
 		local player_manager = Managers.player
 		local sending_player = player_manager.local_player(player_manager, 1)
@@ -749,16 +913,40 @@ FriendsView.on_invite_button_clicked = function (self, gamepad_active)
 		_add_player_invite_send_telemetry(sending_player)
 	end
 
+	local lobby = self.network_lobby.lobby
+
 	if rawget(_G, "Steam") and rawget(_G, "Friends") then
 		Friends.invite(id, self.network_lobby.lobby)
-	elseif Application.platform() == "ps4" then
-		Managers.account:send_session_invitation(id)
+	elseif Application.platform() == "ps4" or Application.platform() == "xb1" then
+		Managers.account:send_session_invitation(id, lobby)
 	else
 		print("FriendsView:on_invite_button_clicked(), Join not supported..")
 	end
 
 	if gamepad_active then
 		self.start_invite_text_animation(self)
+	end
+
+	return 
+end
+FriendsView.on_show_gamercard_clicked = function (self)
+	local id = self.selected_id
+	local platform = Application.platform()
+
+	if platform == "win32" and rawget(_G, "Steam") then
+		local dec_id = Steam.id_hex_to_dec(id)
+		local url = "http://steamcommunity.com/profiles/" .. dec_id
+
+		Steam.open_url(url)
+	elseif platform == "xb1" then
+		local friend_data = self.friends[id]
+
+		XboxLive.show_gamercard(Managers.account:user_id(), friend_data.xbox_user_id)
+	elseif platform == "ps4" then
+		local friend_data = self.friends[id]
+		local np_id = friend_data.np_id
+
+		Managers.account:show_player_profile_with_np_id(np_id)
 	end
 
 	return 
@@ -781,7 +969,7 @@ FriendsView.on_close_button_clicked = function (self)
 	return on_release
 end
 FriendsView.on_entry_pressed = function (self, id, index, first_update)
-	if self.selected_id == id then
+	if self.selected_id == id or not id then
 		return 
 	end
 
@@ -811,7 +999,7 @@ FriendsView.start_invite_text_animation = function (self, text)
 
 	return 
 end
-FriendsView.update = function (self, dt)
+FriendsView.update = function (self, dt, t, is_sub_menu)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
@@ -831,6 +1019,15 @@ FriendsView.update = function (self, dt)
 	end
 
 	Profiler.start("FriendsView:update()")
+
+	if self.popup_id then
+		local result = Managers.popup:query_result(self.popup_id)
+
+		if result then
+			self.popup_id = nil
+		end
+	end
+
 	self.update_invite_cooldowns(self, dt)
 
 	local friends_update_timer = self.friends_update_timer + dt
@@ -886,7 +1083,7 @@ FriendsView.update = function (self, dt)
 		local input_service = input_manager.get_service(input_manager, "friends_view")
 		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-		if not self.is_sub_menu and (self.on_close_button_clicked(self) or input_service.get(input_service, "toggle_menu", true) or input_service.get(input_service, "back", true)) then
+		if not is_sub_menu and (self.on_close_button_clicked(self) or input_service.get(input_service, "toggle_menu", true) or input_service.get(input_service, "back", true)) then
 			if gamepad_active then
 				self.play_sound(self, "Play_hud_select")
 			end
@@ -902,7 +1099,7 @@ FriendsView.update = function (self, dt)
 		self.handle_controller_navigation_input(self, input_service, dt)
 	end
 
-	Profiler.stop()
+	Profiler.stop("FriendsView:update()")
 
 	return 
 end
@@ -932,12 +1129,12 @@ FriendsView.draw = function (self, gamepad_active, dt)
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("friends_view")
 	ui_scenegraph.background_statue_left.local_position = {
-		5,
+		-20,
 		39,
 		10
 	}
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.fade_background)
 	UIRenderer.draw_widget(ui_renderer, self.background)
 	UIRenderer.draw_widget(ui_renderer, self.background_statue_left)
@@ -945,7 +1142,11 @@ FriendsView.draw = function (self, gamepad_active, dt)
 	UIRenderer.draw_widget(ui_renderer, self.info_title)
 	UIRenderer.draw_widget(ui_renderer, self.scrollbar_widget)
 	UIRenderer.draw_widget(ui_renderer, self.scroll_field_widget)
-	UIRenderer.draw_widget(ui_renderer, self.close_button)
+
+	if not gamepad_active then
+		UIRenderer.draw_widget(ui_renderer, self.close_button)
+	end
+
 	UIRenderer.draw_widget(ui_renderer, self.friend_list)
 
 	if self.selected_id then
@@ -1025,7 +1226,9 @@ FriendsView.update_buttons = function (self, dt, optional_select_index)
 			self.play_sound(self, "Play_hud_hover")
 		end
 
-		if not join_button_content.button_hotspot.disabled and (join_button_content.button_hotspot.on_release or input_service.get(input_service, "special_1")) then
+		local platform = Application.platform()
+
+		if platform ~= "xb1" and not join_button_content.button_hotspot.disabled and (join_button_content.button_hotspot.on_release or input_service.get(input_service, "special_1")) then
 			self.play_sound(self, "Play_hud_select")
 			self.on_join_button_clicked(self)
 		elseif not invite_button_content.button_hotspot.disabled and (invite_button_content.button_hotspot.on_release or input_service.get(input_service, "refresh")) then
@@ -1034,6 +1237,9 @@ FriendsView.update_buttons = function (self, dt, optional_select_index)
 			invite_button_content.button_hotspot.on_release = nil
 
 			self.on_invite_button_clicked(self, gamepad_active)
+		elseif input_service.get(input_service, "confirm") then
+			self.play_sound(self, "Play_hud_select")
+			self.on_show_gamercard_clicked(self)
 		end
 	end
 
@@ -1104,22 +1310,29 @@ FriendsView.handle_controller_navigation_input = function (self, input_service, 
 
 	if 0 < self.controller_cooldown then
 		self.controller_cooldown = self.controller_cooldown - dt
+		local speed_multiplier = self.speed_multiplier or 1
+		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
+		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
+		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
+
+		return 
 	else
 		local friends_n = self.friends_n
 		local selection_index = self.selected_index or 0
+		local speed_multiplier = self.speed_multiplier or 1
 		local new_selection_index = nil
 		local move_up = input_service.get(input_service, "move_up")
 		local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 		if move_up or move_up_hold then
-			self.controller_cooldown = GamepadSettings.menu_cooldown
+			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 			new_selection_index = math.max(selection_index - 1, 1)
 		else
 			local move_down = input_service.get(input_service, "move_down")
 			local move_down_hold = input_service.get(input_service, "move_down_hold")
 
 			if move_down or move_down_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
 				new_selection_index = math.min(selection_index + 1, friends_n)
 			end
 		end
@@ -1152,8 +1365,12 @@ FriendsView.handle_controller_navigation_input = function (self, input_service, 
 					end
 				end
 			end
+
+			return 
 		end
 	end
+
+	self.speed_multiplier = 1
 
 	return 
 end
@@ -1177,15 +1394,23 @@ FriendsView.set_console_selection = function (self, index)
 	return 
 end
 FriendsView.update_input_description = function (self, can_invite, can_join)
-	local use_input_actions = can_invite or can_join
-	input_description_data.actions = (use_input_actions and {}) or nil
+	local actions = input_description_data.actions
 
-	if can_invite then
-		input_description_data.actions[#input_description_data.actions + 1] = input_actions.invite
+	table.clear(actions)
+
+	local platform = Application.platform()
+	local availaible_actions = input_actions[platform]
+
+	if availaible_actions.show_profile then
+		actions[#actions + 1] = availaible_actions.show_profile
 	end
 
-	if can_join then
-		input_description_data.actions[#input_description_data.actions + 1] = input_actions.join
+	if can_invite and availaible_actions.invite then
+		actions[#actions + 1] = availaible_actions.invite
+	end
+
+	if can_join and availaible_actions.join then
+		actions[#actions + 1] = availaible_actions.join
 	end
 
 	self.menu_input_description:set_input_description(input_description_data)

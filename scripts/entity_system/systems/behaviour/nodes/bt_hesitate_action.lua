@@ -31,7 +31,7 @@ BTHesitateAction.enter = function (self, unit, blackboard, t)
 	blackboard.hesitation = 0
 
 	blackboard.locomotion_extension:use_lerp_rotation(true)
-	LocomotionUtils.set_animation_driven_movement(unit, true, true, true)
+	LocomotionUtils.set_animation_driven_movement(unit, true, false, true)
 	LocomotionUtils.set_animation_rotation_scale(unit, 1)
 	Managers.state.network:anim_event(unit, "to_combat")
 	self._select_new_hesitate_anim(self, unit, blackboard)
@@ -114,7 +114,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 
 			blackboard.hesitate_wall_position = nil
 
-			LocomotionUtils.set_animation_driven_movement(unit, true, true, true)
+			LocomotionUtils.set_animation_driven_movement(unit, true, false, true)
 		end
 	end
 

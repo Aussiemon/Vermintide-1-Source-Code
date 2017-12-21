@@ -1356,7 +1356,7 @@ local scenegraph_definition = {
 		parent = "overlay",
 		horizontal_alignment = "center",
 		size = {
-			300,
+			400,
 			60
 		},
 		position = {
@@ -1390,6 +1390,174 @@ local scenegraph_definition = {
 		position = {
 			0,
 			150,
+			1
+		}
+	},
+	preview_frame = {
+		vertical_alignment = "top",
+		parent = "menu_root",
+		horizontal_alignment = "center",
+		size = {
+			534,
+			598
+		},
+		position = {
+			0,
+			-240,
+			-6
+		}
+	},
+	preview_frame_background = {
+		vertical_alignment = "top",
+		parent = "preview_frame",
+		horizontal_alignment = "center",
+		size = {
+			534,
+			598
+		},
+		position = {
+			0,
+			0,
+			-4
+		}
+	},
+	preview_window = {
+		vertical_alignment = "top",
+		parent = "preview_frame_background",
+		horizontal_alignment = "center",
+		size = {
+			550,
+			780
+		},
+		position = {
+			0,
+			0,
+			0
+		}
+	},
+	preview_trait_root = {
+		vertical_alignment = "top",
+		parent = "preview_window",
+		horizontal_alignment = "left",
+		size = {
+			0,
+			0
+		},
+		position = {
+			40,
+			-60,
+			1
+		}
+	},
+	trait_preview_1 = {
+		vertical_alignment = "top",
+		parent = "preview_trait_root",
+		horizontal_alignment = "left",
+		size = {
+			40,
+			40
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	trait_preview_2 = {
+		vertical_alignment = "top",
+		parent = "preview_trait_root",
+		horizontal_alignment = "left",
+		size = {
+			40,
+			40
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	trait_preview_3 = {
+		vertical_alignment = "top",
+		parent = "preview_trait_root",
+		horizontal_alignment = "left",
+		size = {
+			40,
+			40
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	trait_preview_4 = {
+		vertical_alignment = "top",
+		parent = "preview_trait_root",
+		horizontal_alignment = "left",
+		size = {
+			40,
+			40
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	trait_description_1 = {
+		vertical_alignment = "top",
+		parent = "trait_preview_1",
+		horizontal_alignment = "left",
+		size = {
+			460,
+			40
+		},
+		position = {
+			0,
+			-55,
+			1
+		}
+	},
+	trait_description_2 = {
+		vertical_alignment = "top",
+		parent = "trait_preview_2",
+		horizontal_alignment = "left",
+		size = {
+			460,
+			40
+		},
+		position = {
+			0,
+			-55,
+			1
+		}
+	},
+	trait_description_3 = {
+		vertical_alignment = "top",
+		parent = "trait_preview_3",
+		horizontal_alignment = "left",
+		size = {
+			460,
+			40
+		},
+		position = {
+			0,
+			-55,
+			1
+		}
+	},
+	trait_description_4 = {
+		vertical_alignment = "top",
+		parent = "trait_preview_4",
+		horizontal_alignment = "left",
+		size = {
+			460,
+			40
+		},
+		position = {
+			0,
+			-55,
 			1
 		}
 	}
@@ -1712,9 +1880,9 @@ local widgets = {
 	banner = UIWidgets.create_simple_texture("dice_game_text_bg", "banner"),
 	banner_title = UIWidgets.create_simple_text("dice_game_title", "banner_title", nil, nil, {
 		vertical_alignment = "top",
-		font_size = 36,
+		font_size = 32,
 		localize = true,
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		word_wrap = true,
 		font_type = "hell_shark_header",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
@@ -1740,9 +1908,9 @@ local widgets = {
 	}),
 	banner_ratio_title = UIWidgets.create_simple_text("dice_game_dice_ratio_title", "banner_ratio_title", nil, nil, {
 		vertical_alignment = "bottom",
-		font_size = 32,
+		font_size = 28,
 		localize = true,
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		word_wrap = true,
 		font_type = "hell_shark_header",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
@@ -1846,7 +2014,7 @@ local widgets = {
 				vertical_alignment = "top",
 				horizontal_alignment = "center",
 				localize = true,
-				font_size = 32,
+				font_size = 28,
 				font_type = "hell_shark_header",
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
@@ -2096,7 +2264,34 @@ local widgets = {
 				scenegraph_id = "fl_right_pillar_bottom"
 			}
 		}
-	}
+	},
+	preview_frame = UIWidgets.create_simple_frame("gold_frame_01_complete", {
+		198,
+		199
+	}, {
+		66,
+		66
+	}, {
+		12,
+		66
+	}, {
+		66,
+		12
+	}, "preview_frame"),
+	preview_frame_background = UIWidgets.create_simple_uv_texture("compare_window_bg_large", {
+		{
+			0,
+			0.27
+		},
+		{
+			1,
+			0.73
+		}
+	}, "preview_frame_background"),
+	trait_preview_1 = UIWidgets.create_compare_menu_trait_widget("trait_preview_1", "trait_description_1"),
+	trait_preview_2 = UIWidgets.create_compare_menu_trait_widget("trait_preview_2", "trait_description_2"),
+	trait_preview_3 = UIWidgets.create_compare_menu_trait_widget("trait_preview_3", "trait_description_3"),
+	trait_preview_4 = UIWidgets.create_compare_menu_trait_widget("trait_preview_4", "trait_description_4")
 }
 local lock_open_time_multiplier = 0.5
 local animations = {
@@ -2461,6 +2656,10 @@ local animations = {
 				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
+				local reward_box_final_widget = widgets.reward_box_final_widget
+				reward_box_final_widget.style.frame.angle = 0
+				reward_box_final_widget.style.background.angle = 0
+
 				return 
 			end
 		},

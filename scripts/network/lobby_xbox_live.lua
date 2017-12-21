@@ -5,9 +5,10 @@ require("scripts/network/lobby_finder")
 require("scripts/network/lobby_members")
 require("scripts/network/smartmatch_xb1")
 require("scripts/network/lobby_unclaimed")
+require("scripts/network/voice_chat_xb1")
 
 LobbyInternal = LobbyInternal or {}
-LobbyInternal.HOPPER_NAME = "default_stage_hopper"
+LobbyInternal.HOPPER_NAME = "new_stage_hopper"
 LobbyInternal.SESSION_TEMPLATE_NAME = "default_game"
 LobbyInternal.SMARTMATCH_SESSION_TEMPLATE_NAME = "ticket_default"
 LobbyInternal.state_map = {
@@ -43,12 +44,12 @@ end
 LobbyInternal.network_initialized = function ()
 	return not not LobbyInternal.client
 end
-LobbyInternal.leave_lobby = function (xboxlive_lobby)
-	xboxlive_lobby.leave(xboxlive_lobby)
+LobbyInternal.leave_lobby = function (xboxlive_lobby, skip_voice_chat)
+	xboxlive_lobby.leave(xboxlive_lobby, skip_voice_chat)
 
 	return 
 end
-LobbyInternal.join_lobby = function (lobby_data)
+LobbyInternal.join_lobby = function (lobby_data, skip_voice_chat)
 	print("############## JOINING LOBBY ##############")
 
 	for name, value in pairs(lobby_data) do
@@ -62,7 +63,7 @@ LobbyInternal.join_lobby = function (lobby_data)
 	local session_template_name = lobby_data.session_template_name or LobbyInternal.SESSION_TEMPLATE_NAME
 	local session_id = Network.create_multiplayer_session_client(Managers.account:user_id(), name, session_template_name)
 
-	return XboxLiveLobby:new(session_id, name, session_template_name)
+	return XboxLiveLobby:new(session_id, name, session_template_name, skip_voice_chat)
 end
 LobbyInternal.create_keywords = function (data)
 	local push_table = {}
@@ -79,6 +80,15 @@ LobbyInternal.shutdown_client = function ()
 
 		LobbyInternal.xbox_live_lobby_browser = nil
 	end
+
+	return 
+end
+LobbyInternal.shutdown_xboxlive_client = function ()
+	if Network.xboxlive_client_exists() then
+		Network.shutdown_xboxlive_client()
+	end
+
+	LobbyInternal.client = nil
 
 	return 
 end
@@ -148,14 +158,19 @@ local HOPPER_PARAMS_LUT = {
 	default_stage_hopper = {
 		"difficulty",
 		"stage"
+	},
+	new_stage_hopper = {
+		"difficulty",
+		"level"
 	}
 }
 local HOPPER_PARAM_TYPE_LUT = {
+	stage = "number",
 	difficulty = "number",
-	stage = "number"
+	level = "collection"
 }
 XboxLiveLobby = class(XboxLiveLobby)
-XboxLiveLobby.init = function (self, session_id, unique_server_name, session_template_name)
+XboxLiveLobby.init = function (self, session_id, unique_server_name, session_template_name, skip_voice_chat)
 	self._user_id = Managers.account:user_id()
 	self._session_id = session_id
 	self._data = {
@@ -163,11 +178,19 @@ XboxLiveLobby.init = function (self, session_id, unique_server_name, session_tem
 		session_name = unique_server_name,
 		session_template_name = session_template_name
 	}
-	self._gamertags = {}
 	self._hopper_name = LobbyInternal.HOPPER_NAME
 	self._smartmatch_ticket_params = {}
+	self._activity_set = false
 
 	dprintf("Lobby created Session ID: %s - Name: %s - Template: %s", tostring(session_id), tostring(unique_server_name), tostring(session_template_name))
+
+	if not skip_voice_chat and Managers.account:has_privilege(UserPrivilege.COMMUNICATION_VOICE_INGAME) then
+		if not Managers.voice_chat then
+			Managers.voice_chat = VoiceChatXboxOneManager:new()
+		elseif Managers.voice_chat then
+			Managers.voice_chat:initate_voice_chat()
+		end
+	end
 
 	return 
 end
@@ -184,15 +207,25 @@ XboxLiveLobby.enable_smartmatch = function (self, enable, params, timeout)
 
 	return 
 end
+XboxLiveLobby.reissue_smartmatch_ticket = function (self, params, timeout)
+	fassert(self._smartmatch_enabled, "[XboxLiveLobby] You need to be matchmaking to be able to reissue a ticket")
+
+	self._smartmatch_ticket_params = params
+	self._timeout = timeout
+	self._reissue_host_smartmatch_ticket = true
+
+	return 
+end
 XboxLiveLobby._cancel_matchmaking = function (self)
 	if self._smartmatch_in_progress then
 		local session_data = {
 			destroy_session = false,
 			state = "_cleanup_ticket",
-			user_id = Managers.account:user_id(),
+			user_id = self._smartmatch_user_id,
 			session_id = self._session_id,
 			hopper_name = self._hopper_name,
-			session_name = self._data.session_name
+			session_name = self._data.session_name,
+			ticket_id = self._ticket_id
 		}
 
 		Managers.account:add_session_to_cleanup(session_data)
@@ -213,9 +246,18 @@ end
 XboxLiveLobby.state = function (self)
 	local state = MultiplayerSession.status(self._session_id)
 
-	if state == MultiplayerSession.READY and self._set_keywords then
+	if self._set_keywords and state == MultiplayerSession.READY and not Managers.account:user_detached() then
 		self.push_data_table(self)
 
+		local state = MultiplayerSession.status(self._session_id)
+
+		return state
+	end
+
+	if self._friends_to_invite and state == MultiplayerSession.READY and not Managers.account:user_detached() then
+		MultiplayerSession.invite_friends_list(Managers.account:user_id(), self._session_id, self._friends_to_invite)
+
+		self._friends_to_invite = nil
 		local state = MultiplayerSession.status(self._session_id)
 
 		return state
@@ -234,6 +276,45 @@ XboxLiveLobby.ready = function (self)
 
 	return self._smartmatch_state == MultiplayerSession.READY
 end
+XboxLiveLobby.invite_friends_list = function (self, friends_to_invite)
+	self._friends_to_invite = friends_to_invite
+
+	return 
+end
+XboxLiveLobby.update_activity = function (self, dt, level_key)
+	if Managers.account:user_detached() then
+		return 
+	end
+
+	local session_id = self._session_id
+	local user_id = self._user_id
+	local members = MultiplayerSession.members(session_id)
+	local num_members = table.size(members)
+
+	if MultiplayerSession.status(session_id) == MultiplayerSession.READY then
+		local game_mode_ended = Managers.state.game_mode and Managers.state.game_mode:is_game_mode_ended()
+
+		if num_members == MatchmakingSettings.MAX_NUMBER_OF_PLAYERS or level_key == "tutorial" or game_mode_ended then
+			if self._activity_set then
+				if not Network.fatal_error() then
+					Network.clear_activity(user_id)
+				end
+
+				self._activity_set = false
+			end
+
+			return 
+		end
+
+		if not self._activity_set then
+			Network.set_activity(user_id, session_id)
+
+			self._activity_set = true
+		end
+	end
+
+	return 
+end
 XboxLiveLobby.update_host_matchmaking = function (self, dt)
 	local state = MultiplayerSession.status(self._session_id)
 
@@ -247,6 +328,14 @@ XboxLiveLobby.update_host_matchmaking = function (self, dt)
 	return 
 end
 XboxLiveLobby._update_smartmatching = function (self, dt)
+	local session_id = self._session_id
+	local members = MultiplayerSession.members(session_id)
+	local num_members = table.size(members)
+
+	if 4 <= num_members and not self._smartmatch_in_progress then
+		return 
+	end
+
 	local smartmatch_state = MultiplayerSession.smartmatch_status(self._session_id)
 	local ticket_name = MultiplayerSession.start_smartmatch_result(self._session_id)
 
@@ -256,15 +345,26 @@ XboxLiveLobby._update_smartmatching = function (self, dt)
 		self._ticket_id = ticket_name
 	end
 
-	if smartmatch_state == SmartMatchStatus.SEARCHING then
-		if self._reissue_host_smartmatch_ticket and self._smartmatch_in_progress then
-			if ticket_name ~= "" then
-				dprintf("Deleting smartmatch ticket: %s due to reissue", ticket_name)
-				MultiplayerSession.delete_smartmatch_ticket(self._session_id, self._hopper_name, ticket_name)
-			end
+	if smartmatch_state == SmartMatchStatus.SEARCHING or smartmatch_state == SmartMatchStatus.UNKNOWN then
+		if self._reissue_host_smartmatch_ticket then
+			dprintf("Reissuing ticket - ticket name: %s", ticket_name)
 
-			self._smartmatch_in_progress = false
-			self._ticket_id = nil
+			if self._smartmatch_in_progress then
+				local session_data = {
+					destroy_session = false,
+					state = "_cleanup_ticket",
+					user_id = self._smartmatch_user_id,
+					session_id = self._session_id,
+					hopper_name = self._hopper_name,
+					session_name = self._data.session_name,
+					ticket_id = self._ticket_id
+				}
+
+				Managers.account:add_session_to_cleanup(session_data)
+
+				self._smartmatch_in_progress = false
+				self._ticket_id = nil
+			end
 		end
 
 		return 
@@ -275,18 +375,21 @@ XboxLiveLobby._update_smartmatching = function (self, dt)
 			dprintf("Smartmatching FOUND - ticket name: %s", ticket_name)
 		end
 
-		self._smartmatch_in_progress = false
-		self._ticket_id = nil
 		local session_data = {
 			destroy_session = false,
 			state = "_cleanup_ticket",
-			user_id = Managers.account:user_id(),
+			user_id = self._smartmatch_user_id,
 			session_id = self._session_id,
 			hopper_name = self._hopper_name,
-			session_name = self._data.session_name
+			session_name = self._data.session_name,
+			ticket_id = self._ticket_id
 		}
 
 		Managers.account:add_session_to_cleanup(session_data)
+
+		self._smartmatch_in_progress = false
+		self._ticket_id = nil
+
 		dprintf("Smartmatch in progress - DESTROYING")
 	end
 
@@ -296,6 +399,14 @@ XboxLiveLobby._update_smartmatching = function (self, dt)
 end
 XboxLiveLobby._handle_smartmatching_tickets = function (self, dt)
 	if self._smartmatch_in_progress then
+		return 
+	end
+
+	local session_id = self._session_id
+	local members = MultiplayerSession.members(session_id)
+	local num_members = table.size(members)
+
+	if 4 <= num_members then
 		return 
 	end
 
@@ -331,6 +442,18 @@ XboxLiveLobby._convert_to_json = function (self, hopper_name, params)
 			str = str .. string.format("%q:%i,", var, val)
 		elseif var_type == "string" then
 			str = str .. string.format("%q:%q,", var, val)
+		elseif var_type == "collection" then
+			str = str .. string.format("%q:[", var)
+
+			for idx, value in ipairs(val) do
+				if idx == 1 then
+					str = str .. string.format("%q", tostring(value))
+				else
+					str = str .. string.format(",%q", tostring(value))
+				end
+			end
+
+			str = str .. "],"
 		end
 	end
 
@@ -338,6 +461,8 @@ XboxLiveLobby._convert_to_json = function (self, hopper_name, params)
 		return 
 	else
 		str = string.sub(str, 1, -2)
+
+		print("Hopper name:", hopper_name, "JSON_DATA:", string.format("{%s}", str))
 
 		return string.format("{%s}", str)
 	end
@@ -361,18 +486,25 @@ XboxLiveLobby._create_smartmatch_broadcast = function (self, timeout)
 	dprintf("Starting SmartMatch with session_id: %s Hopper name: %s PreserveSessionMode: %s Ticket params: %s Timeout: %s", tostring(self._session_id), self._hopper_name, "ALWAYS", ticket_param_str, tostring(timeout_in_seconds))
 	MultiplayerSession.start_smartmatch(self._session_id, self._hopper_name, timeout_in_seconds, preserve_session_mode, ticket_param_str)
 
+	self._smartmatch_user_id = Managers.account:user_id()
+
 	return 
 end
 XboxLiveLobby.session_id = function (self)
 	return self._session_id
 end
-XboxLiveLobby.leave = function (self)
+XboxLiveLobby.leave = function (self, skip_voice_chat)
 	dprintf("Destroying Lobby --> session_id: %s - session_name: %s", self._session_id, self._data.session_name)
 
+	if not skip_voice_chat then
+		Managers.voice_chat:shutdown()
+	end
+
+	self._activity_set = false
 	local session_data = {
 		destroy_session = true,
 		state = "_cleanup_ticket",
-		user_id = Managers.account:user_id(),
+		user_id = self._smartmatch_user_id,
 		session_id = self._session_id,
 		hopper_name = self._hopper_name,
 		session_name = self._data.session_name
@@ -399,7 +531,6 @@ XboxLiveLobby.push_data_table = function (self)
 end
 XboxLiveLobby.set_data = function (self, key, value)
 	self._data[key] = value
-	self._set_keywords = true
 
 	return 
 end
@@ -407,8 +538,6 @@ XboxLiveLobby.set_data_table = function (self, data_table)
 	for key, value in pairs(data_table) do
 		self._data[key] = value
 	end
-
-	self._set_keywords = true
 
 	return 
 end
@@ -420,14 +549,32 @@ XboxLiveLobby.members = function (self)
 	local members = MultiplayerSession.members(self._session_id)
 
 	for _, member in pairs(members) do
-		self._gamertags[member.peer] = member.gamertag
 		peers[#peers + 1] = member.peer
 	end
 
 	return peers
 end
 XboxLiveLobby.user_name = function (self, peer_id)
-	return self._gamertags[peer_id]
+	local members = MultiplayerSession.members(self._session_id)
+
+	for _, member in pairs(members) do
+		if member.peer == peer_id then
+			return member.gamertag
+		end
+	end
+
+	return 
+end
+XboxLiveLobby.xuid = function (self, peer_id)
+	local members = MultiplayerSession.members(self._session_id)
+
+	for _, member in pairs(members) do
+		if member.peer == peer_id then
+			return member.xbox_user_id
+		end
+	end
+
+	return 
 end
 XboxLiveLobby.lobby_host = function (self)
 	return MultiplayerSession.host_peer(self._session_id)

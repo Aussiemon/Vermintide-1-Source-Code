@@ -61,22 +61,21 @@ function flow_callback_ai_kill(params)
 	local hit_zone_name = hit_zone.name
 	local network_manager = Managers.state.network
 	local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
-	local attack_template = AttackTemplates[attack_template_name]
-	local attack_template_id = attack_template.lookup_id
+	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 	local attack_direction = -hit_normal
 	local player = Managers.player:players()[1]
 	local player_unit = player.player_unit
 	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
-	local attack_template_damage_type_id = 0
+	local attack_damage_value_id = NetworkLookup.attack_damage_values["n/a"]
 	local damage_source = "flow"
 	local hit_ragdoll_actor = NetworkLookup.hit_ragdoll_actors["n/a"]
 	local backstab_multiplier = 1
 
 	if Managers.player.is_server or LEVEL_EDITOR_TEST then
-		Managers.state.entity:system("weapon_system"):rpc_attack_hit(nil, NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor, backstab_multiplier)
+		Managers.state.entity:system("weapon_system"):rpc_attack_hit(nil, NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_value_id, hit_ragdoll_actor, backstab_multiplier)
 	else
-		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor, backstab_multiplier)
+		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_value_id, hit_ragdoll_actor, backstab_multiplier)
 	end
 
 	return 
@@ -289,6 +288,14 @@ end
 function flow_callback_force_terror_event(params)
 	if Managers.player.is_server or LEVEL_EDITOR_TEST then
 		Managers.state.conflict:start_terror_event(params.event_type)
+	end
+
+	return 
+end
+
+function flow_callback_override_player_respawning(params)
+	if Managers.player.is_server or LEVEL_EDITOR_TEST then
+		Managers.state.spawn.respawn_handler:set_override_respawn_group(params.respawn_group_name, params.active)
 	end
 
 	return 

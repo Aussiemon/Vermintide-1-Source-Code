@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_diagonal",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -57,8 +60,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_diagonal",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -111,8 +117,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right_2 = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -165,8 +174,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_diagonal",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -219,8 +231,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left_last = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_diagonal",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -442,12 +457,15 @@ weapon_template.actions = {
 			anim_time_scale = 1.15,
 			weapon_action_hand = "right",
 			max_targets = 3,
+			aim_assist_max_ramp_multiplier = 0.6,
+			aim_assist_ramp_decay_delay = 0.1,
 			hit_effect = "melee_hit_dagger",
 			damage_window_end = 0.42,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "stab_hit_armour",
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_right_diagonal",
 			total_time = 2.1,
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -516,12 +534,15 @@ weapon_template.actions = {
 			sweep_z_offset = 0.05,
 			weapon_action_hand = "right",
 			max_targets = 2,
+			aim_assist_max_ramp_multiplier = 0.6,
 			hit_effect = "melee_hit_sword_1h",
+			aim_assist_ramp_decay_delay = 0.1,
 			damage_window_end = 0.35,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "stab_hit_armour",
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_left",
 			total_time = 2.1,
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -597,7 +618,10 @@ weapon_template.actions = {
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			anim_end_event = "attack_finished",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_decay_delay = 0.1,
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_right",
 			hit_stop_anim = "attack_hit",
 			total_time = 2.1,
@@ -662,12 +686,16 @@ weapon_template.actions = {
 			weapon_action_hand = "right",
 			use_target = true,
 			max_targets = 1,
+			aim_assist_max_ramp_multiplier = 0.8,
 			hit_effect = "melee_hit_dagger",
+			aim_assist_ramp_decay_delay = 0.1,
 			damage_window_end = 0.35,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "stab_hit_armour",
+			reset_aim_on_attack = true,
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_stab",
 			hit_stop_anim = "attack_hit",
 			total_time = 2.1,
@@ -752,11 +780,23 @@ weapon_template.actions = {
 					input = "action_one"
 				},
 				{
+					sub_action = "default",
+					start_time = 0.25,
+					action = "action_one",
+					release_required = "action_two_hold",
+					input = "action_one_hold"
+				},
+				{
 					sub_action = "push_stab",
 					start_time = 0.3,
 					action = "action_one",
+					doubleclick_window = 0,
 					end_time = 0.8,
-					input = "action_one_hold"
+					input = "action_one_hold",
+					hold_required = {
+						"action_two_hold",
+						"action_one_hold"
+					}
 				},
 				{
 					sub_action = "default",
@@ -788,12 +828,16 @@ weapon_template.actions = {
 			anim_time_scale = 1.4,
 			max_targets = 1,
 			use_target = false,
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_decay_delay = 0.1,
 			hit_effect = "melee_hit_sword_1h",
+			reset_aim_on_attack = true,
 			damage_window_end = 0.35,
 			impact_sound_event = "stab_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "stab_hit_armour",
 			dedicated_target_range = 3,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "push_stab",
 			hit_stop_anim = "attack_hit",
 			total_time = 2.1,
@@ -837,7 +881,7 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_ninja_L_1",
+				attack_template_damage_type = "one_h_smiter_L",
 				attack_template = "light_stab_fencer"
 			},
 			targets = {}
@@ -899,8 +943,8 @@ weapon_template.left_hand_attachment_node_linking = AttachmentNodeLinking.one_ha
 weapon_template.display_unit = "units/weapons/weapon_display/display_1h_weapon"
 weapon_template.buff_type = BuffTypes.MELEE
 weapon_template.max_fatigue_points = 6
-weapon_template.dodge_distance = 1.2
-weapon_template.dodge_speed = 1.2
+weapon_template.dodge_distance = 1.25
+weapon_template.dodge_speed = 1.25
 weapon_template.dodge_count = 100
 weapon_template.wield_anim = "to_dual_sword_dagger"
 weapon_template.attack_meta_data = {
@@ -911,6 +955,18 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = true,
 		arc = 0
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0,
+	target_node = "j_neck",
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 0.5,
+		skaven_slave = 0.5
 	}
 }
 weapon_template.compare_statistics = {
@@ -958,7 +1014,7 @@ Weapons.dual_wield_sword_dagger_template_1_t2.actions.action_one.light_attack_ri
 Weapons.dual_wield_sword_dagger_template_1_t2.actions.action_one.light_attack_right_second.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t2"
 Weapons.dual_wield_sword_dagger_template_1_t2.actions.action_one.light_attack_stab_left.default_target.attack_template_damage_type = "one_h_ninja_L_1_t2"
 Weapons.dual_wield_sword_dagger_template_1_t2.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_ninja_L_1_t2"
-Weapons.dual_wield_sword_dagger_template_1_t2.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_ninja_L_1_t2"
+Weapons.dual_wield_sword_dagger_template_1_t2.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
 Weapons.dual_wield_sword_dagger_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.359375
 Weapons.dual_wield_sword_dagger_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.5416666666666666
 Weapons.dual_wield_sword_dagger_template_1_t3 = table.clone(weapon_template)
@@ -971,7 +1027,7 @@ Weapons.dual_wield_sword_dagger_template_1_t3.actions.action_one.light_attack_ri
 Weapons.dual_wield_sword_dagger_template_1_t3.actions.action_one.light_attack_right_second.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t3"
 Weapons.dual_wield_sword_dagger_template_1_t3.actions.action_one.light_attack_stab_left.default_target.attack_template_damage_type = "one_h_ninja_L_1_t3"
 Weapons.dual_wield_sword_dagger_template_1_t3.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_ninja_L_1_t3"
-Weapons.dual_wield_sword_dagger_template_1_t3.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_ninja_L_1_t3"
+Weapons.dual_wield_sword_dagger_template_1_t3.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_smiter_L_t3"
 Weapons.dual_wield_sword_dagger_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.4375
 Weapons.dual_wield_sword_dagger_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.625
 Weapons.dual_wield_sword_dagger_template_1_t3_un = table.clone(Weapons.dual_wield_sword_dagger_template_1_t3)

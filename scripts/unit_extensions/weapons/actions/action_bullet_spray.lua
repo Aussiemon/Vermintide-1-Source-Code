@@ -2,11 +2,12 @@ ActionBulletSpray = class(ActionBulletSpray)
 local POSITION_TWEAK = -1
 local SPRAY_RANGE = math.abs(POSITION_TWEAK) + 5
 local SPRAY_RADIUS = 3.5
+local PLAYER_SPRAY_RADIUS = 2
 local MAX_TARGETS = 10
 local NODES = {
 	"j_leftshoulder",
 	"j_rightshoulder",
-	"j_spine1"
+	"j_spine"
 }
 ActionBulletSpray.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.owner_unit = owner_unit
@@ -56,6 +57,12 @@ ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_d
 
 	if #targets == 0 and not self.shot then
 		self._select_targets(self, world, true)
+
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "handgun_fire"
+			})
+		end
 
 		local fire_sound_event = self.current_action.fire_sound_event
 
@@ -137,28 +144,45 @@ ActionBulletSpray._select_targets = function (self, world, show_outline)
 	local player_position = POSITION_LOOKUP[owner_unit_1p]
 	local player_rotation = Unit.world_rotation(owner_unit_1p, 0)
 	local player_direction = Vector3.normalize(Quaternion.forward(player_rotation))
+	local ignore_hitting_allies = not Managers.state.difficulty:get_difficulty_settings().friendly_fire_ranged
 	local start_point = player_position + player_direction*POSITION_TWEAK + player_direction*SPRAY_RADIUS
 	local end_point = player_position + player_direction*POSITION_TWEAK + player_direction*(SPRAY_RANGE - SPRAY_RADIUS)
 
 	PhysicsWorld.prepare_actors_for_overlap(physics_world, start_point, SPRAY_RANGE*SPRAY_RANGE)
 
-	local result = PhysicsWorld.linear_sphere_sweep(physics_world, start_point, end_point, SPRAY_RADIUS, 100, "collision_filter", "filter_enemy_unit", "report_initial_overlap")
+	local result = PhysicsWorld.linear_sphere_sweep(physics_world, start_point, end_point, SPRAY_RADIUS, 100, "collision_filter", "filter_character_trigger", "report_initial_overlap")
 
 	if result then
 		local num_hits = #result
 		local targets = self.targets
 		local v, q, m = Script.temp_count()
+		local hit_units = {}
+		local num_hit = 0
 
 		for i = 1, num_hits, 1 do
 			local hit = result[i]
 			local hit_actor = hit.actor
 			local hit_unit = Actor.unit(hit_actor)
-			local breed = Unit.get_data(hit_unit, "breed")
+			local hit_position = hit.position
 
-			if breed and self._is_infront_player(self, player_position, player_direction, hit_unit) and self._check_within_cone(self, player_position, player_direction, hit_unit) then
-				targets[#targets + 1] = hit_unit
+			if not hit_units[hit_unit] then
+				local breed = Unit.get_data(hit_unit, "breed")
 
-				if MAX_TARGETS <= #targets then
+				if table.contains(PLAYER_AND_BOT_UNITS, hit_unit) and not ignore_hitting_allies then
+					if self._is_infront_player(self, player_position, player_direction, hit_position) and self._check_within_cone(self, player_position, player_direction, hit_unit, true) then
+						targets[#targets + 1] = hit_unit
+						hit_units[hit_unit] = true
+					end
+				elseif breed and self._is_infront_player(self, player_position, player_direction, hit_position) and self._check_within_cone(self, player_position, player_direction, hit_unit) then
+					targets[#targets + 1] = hit_unit
+					hit_units[hit_unit] = true
+
+					if ScriptUnit.extension(hit_unit, "health_system"):is_alive() then
+						num_hit = num_hit + 1
+					end
+				end
+
+				if MAX_TARGETS <= num_hit then
 					break
 				end
 			end
@@ -171,8 +195,14 @@ ActionBulletSpray._select_targets = function (self, world, show_outline)
 
 	return 
 end
-ActionBulletSpray._check_within_cone = function (self, player_position, player_direction, target)
+ActionBulletSpray._check_within_cone = function (self, player_position, player_direction, target, player)
 	local CONE_COS_ALPHA = self.CONE_COS_ALPHA
+
+	if player then
+		local cone_hypotenuse = math.sqrt(SPRAY_RANGE*SPRAY_RANGE + PLAYER_SPRAY_RADIUS*PLAYER_SPRAY_RADIUS)
+		CONE_COS_ALPHA = SPRAY_RANGE/cone_hypotenuse
+	end
+
 	local target_position = Unit.world_position(target, Unit.node(target, "j_neck"))
 	local target_direction = Vector3.normalize(target_position - player_position)
 	local target_cos_alpha = Vector3.dot(player_direction, target_direction)
@@ -183,9 +213,8 @@ ActionBulletSpray._check_within_cone = function (self, player_position, player_d
 
 	return false
 end
-ActionBulletSpray._is_infront_player = function (self, player_position, player_direction, hit_unit)
-	local hit_unit_position = Unit.world_position(hit_unit, 0)
-	local player_to_hit_unit_dir = Vector3.normalize(hit_unit_position - player_position)
+ActionBulletSpray._is_infront_player = function (self, player_position, player_direction, hit_position)
+	local player_to_hit_unit_dir = Vector3.normalize(hit_position - player_position)
 	local dot = Vector3.dot(player_to_hit_unit_dir, player_direction)
 
 	if 0 < dot then

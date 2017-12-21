@@ -9,24 +9,28 @@ weapon_template.actions = {
 			max_penetrations = 2,
 			total_time_secondary = 1.75,
 			charge_value = "bullet_hit",
-			attack_template = "shot_repeating_handgun",
+			attack_template = "shot_carbine",
 			alert_sound_range_fire = 10,
 			alert_sound_range_hit = 1.5,
 			reload_when_out_of_ammo = true,
 			apply_recoil = true,
 			hit_effect = "bullet_impact",
 			anim_event_last_ammo = "attack_shoot_last",
+			aim_assist_max_ramp_multiplier = 0.3,
+			aim_assist_auto_hit_chance = 0.5,
 			damage_window_end = 0,
+			aim_assist_ramp_decay_delay = 0.2,
 			ammo_usage = 1,
 			fire_time = 0,
 			anim_event_secondary = "reload",
+			aim_assist_ramp_multiplier = 0.1,
 			anim_event = "attack_shoot",
 			reload_time = 0.5,
 			total_time = 0.65,
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.4,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one"
@@ -56,22 +60,26 @@ weapon_template.actions = {
 			attack_template_damage_type = "carbine_AP",
 			max_penetrations = 2,
 			kind = "handgun",
-			charge_value = "bullet_hit",
+			recoil_factor = 0.6,
 			alert_sound_range_fire = 10,
-			attack_template = "shot_repeating_handgun",
+			attack_template = "shot_carbine",
 			alert_sound_range_hit = 1.5,
 			reload_when_out_of_ammo = true,
 			apply_recoil = true,
+			aim_assist_ramp_multiplier = 0.1,
 			hit_effect = "bullet_impact",
 			anim_event_last_ammo = "attack_shoot_last",
+			aim_assist_max_ramp_multiplier = 0.3,
 			damage_window_end = 0,
+			aim_assist_auto_hit_chance = 0.5,
 			ammo_usage = 1,
 			fire_time = 0,
+			aim_assist_ramp_decay_delay = 0.2,
+			charge_value = "bullet_hit",
 			anim_event_secondary = "reload",
 			hold_input = "action_two_hold",
 			anim_event = "attack_shoot",
 			reload_time = 0.5,
-			allow_hold_toggle = true,
 			total_time = 0.66,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
@@ -86,13 +94,13 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "bullet_spray",
-					start_time = 0.25,
+					start_time = 0.2,
 					action = "action_one",
 					auto_chain = true
 				},
 				{
 					sub_action = "bullet_spray",
-					start_time = 0.25,
+					start_time = 0.2,
 					action = "action_one",
 					input = "action_one_hold"
 				},
@@ -107,15 +115,14 @@ weapon_template.actions = {
 	},
 	action_two = {
 		default = {
-			anim_event = "lock_target",
-			allow_hold_toggle = true,
+			ammo_requirement = 1,
 			anim_end_event = "attack_finished",
 			kind = "aim",
 			unaim_sound_event = "stop_weapon_repeating_handgun_special_cylinder",
-			aim_sound_delay = 0.6,
-			ammo_requirement = 1,
-			hold_input = "action_two_hold",
 			can_abort_reload = true,
+			aim_sound_delay = 0.6,
+			hold_input = "action_two_hold",
+			anim_event = "lock_target",
 			aim_sound_event = "weapon_repeating_handgun_special_cylinder",
 			minimum_hold_time = 1.5,
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -132,7 +139,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "bullet_spray",
-					start_time = 0.75,
+					start_time = 0.6,
 					action = "action_one",
 					input = "action_one"
 				},
@@ -145,6 +152,13 @@ weapon_template.actions = {
 			},
 			zoom_condition_function = function ()
 				return false
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -165,7 +179,7 @@ weapon_template.ammo_data = {
 	max_ammo = 64,
 	ammo_per_clip = 8,
 	play_reload_anim_on_wield_reload = true,
-	reload_time = 1.75,
+	reload_time = 1.3,
 	reload_on_ammo_pickup = true
 }
 weapon_template.attack_meta_data = {
@@ -182,6 +196,21 @@ weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.crosshair_style = "default"
 weapon_template.default_spread_template = "repeating_handgun"
 weapon_template.spread_lerp_speed = 12
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 1
+weapon_template.aim_assist_settings = {
+	max_range = 22,
+	no_aim_input_multiplier = 0,
+	always_auto_aim = true,
+	base_multiplier = 0.15,
+	effective_max_range = 10,
+	breed_scalars = {
+		skaven_storm_vermin = 0.25,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
+}
 weapon_template.wwise_dep_right_hand = {
 	"wwise/repeating_handgun_pistol"
 }

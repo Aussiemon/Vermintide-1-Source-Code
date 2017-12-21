@@ -17,6 +17,10 @@ local sqrt = math.sqrt
 local unit_alive = Unit.alive
 script_data.disable_ai_perception = script_data.disable_ai_perception or Development.parameter("disable_ai_perception")
 local ai_trees_created = false
+local RPCS = {
+	"rpc_alert_enemies_within_range",
+	"rpc_set_allowed_nav_layer"
+}
 local extensions = {
 	"AISimpleExtension",
 	"AiHuskBaseExtension",
@@ -38,21 +42,26 @@ AISystem.init = function (self, context, name)
 
 	self.create_all_trees(self)
 
-	self._nav_world = GwNavWorld.create(Matrix4x4.identity())
-	GLOBAL_AI_NAVWORLD = self._nav_world
+	local nav_world = GwNavWorld.create(Matrix4x4.identity())
+	self._nav_world = nav_world
+	GLOBAL_AI_NAVWORLD = nav_world
+
+	if Application.platform() ~= Application.WIN32 then
+		GwNavWorld.set_pathfinder_budget(nav_world, 0.0045)
+	end
 
 	if not script_data.disable_crowd_dispersion then
-		GwNavWorld.enable_crowd_dispersion(self._nav_world)
+		GwNavWorld.enable_crowd_dispersion(nav_world)
 	end
 
 	if script_data.debug_enabled and script_data.navigation_visual_debug_enabled and not VISUAL_DEBUGGING_ENABLED then
 		VISUAL_DEBUGGING_ENABLED = true
 
-		GwNavWorld.init_visual_debug_server(self._nav_world, 4888)
+		GwNavWorld.init_visual_debug_server(nav_world, 4888)
 	end
 
 	if not script_data.navigation_thread_disabled then
-		GwNavWorld.init_async_update(self._nav_world)
+		GwNavWorld.init_async_update(nav_world)
 	end
 
 	local level_settings = LevelHelper:current_level_settings()
@@ -63,10 +72,10 @@ AISystem.init = function (self, context, name)
 	end
 
 	if not level_settings.no_bots_allowed then
-		self._nav_data = GwNavWorld.add_navdata(self._nav_world, level_name)
+		self._nav_data = GwNavWorld.add_navdata(nav_world, level_name)
 
 		if script_data.debug_enabled then
-			self.ai_debugger = AIDebugger:new(context.world, self._nav_world, self.group_blackboard, self.is_server, context.free_flight_manager)
+			self.ai_debugger = AIDebugger:new(context.world, nav_world, self.group_blackboard, self.is_server, context.free_flight_manager)
 		end
 	end
 
@@ -85,10 +94,31 @@ AISystem.init = function (self, context, name)
 	self.number_special_aggored_enemies = 0
 	self.start_prio_index = 1
 	local network_event_delegate = context.network_event_delegate
-
-	network_event_delegate.register(network_event_delegate, self, "rpc_alert_enemies_within_range")
-
 	self._network_event_delegate = network_event_delegate
+
+	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+
+	if not self.is_server then
+		self._initialize_client_traverse_logic(self, nav_world)
+	end
+
+	return 
+end
+AISystem._initialize_client_traverse_logic = function (self, nav_world)
+	local layer_costs = {
+		bot_poison_wind = 1,
+		bot_ratling_gun_fire = 1,
+		fire_grenade = 1,
+		smoke_grenade = 1
+	}
+
+	table.merge(layer_costs, NAV_TAG_VOLUME_LAYER_COST_AI)
+
+	self._traverse_logic = GwNavTraverseLogic.create(nav_world)
+	self._navtag_layer_cost_table = GwNavTagLayerCostTable.create()
+
+	AiUtils.initialize_cost_table(self._navtag_layer_cost_table, layer_costs)
+	GwNavTraverseLogic.set_navtag_layer_cost_table(self._traverse_logic, self._navtag_layer_cost_table)
 
 	return 
 end
@@ -109,6 +139,11 @@ AISystem.destroy = function (self)
 	self._network_event_delegate:unregister(self)
 
 	self._network_event_delegate = nil
+
+	if not self.is_server and self._traverse_logic ~= nil then
+		GwNavTagLayerCostTable.destroy(self._navtag_layer_cost_table)
+		GwNavTraverseLogic.destroy(self._traverse_logic)
+	end
 
 	return 
 end
@@ -233,10 +268,6 @@ AISystem.update = function (self, context, t)
 	end
 
 	Profiler.stop("AISimpleExtension")
-
-	if self.ai_debugger then
-		self.ai_debugger:update(t, dt)
-	end
 
 	for id, unit in pairs(self._units_to_destroy) do
 		local extension = self.ai_units_alive[unit]
@@ -696,8 +727,52 @@ end
 AISystem.nav_world = function (self)
 	return self._nav_world
 end
+AISystem.client_traverse_logic = function (self)
+	return self._traverse_logic
+end
 AISystem.get_tri_on_navmesh = function (self, pos)
 	return GwNavQueries.triangle_from_position(self._nav_world, pos, 30, 30)
+end
+AISystem.set_allowed_layer = function (self, layer_name, allowed)
+	if self.is_server then
+		local entity_manager = Managers.state.entity
+		local nav_world = self._nav_world
+		local layer_id = LAYER_ID_MAPPING[layer_name]
+		NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] = (allowed and 1) or 0
+		NAV_TAG_VOLUME_LAYER_COST_BOTS[layer_name] = (allowed and 1) or 0
+		local ai_extensions = entity_manager.get_entities(entity_manager, "AINavigationExtension")
+
+		for _, extension in pairs(ai_extensions) do
+			extension.allow_layer(extension, layer_name, allowed)
+
+			if not allowed then
+				local unit = extension._unit
+
+				if Unit.alive(unit) then
+					local unit_position = POSITION_LOOKUP[unit]
+
+					if NavTagVolumeUtils.inside_nav_tag_layer(nav_world, unit_position, 0.5, 0.5, layer_name) then
+						AiUtils.kill_unit(unit, nil, nil, "inside_forbidden_tag_volume", Vector3(0, 0, 0))
+					else
+						local destination_position = extension.destination(extension)
+
+						if NavTagVolumeUtils.inside_nav_tag_layer(nav_world, destination_position, 0.5, 0.5, layer_name) then
+							extension.reset_destination(extension)
+						end
+					end
+				end
+			end
+		end
+
+		local bot_nav_transition_manager = Managers.state.bot_nav_transition
+
+		bot_nav_transition_manager.allow_layer(bot_nav_transition_manager, layer_name, allowed)
+		Managers.state.entity:system("ai_slot_system"):set_allowed_layer(layer_name, allowed)
+		Managers.state.entity:system("ai_group_system"):set_allowed_layer(layer_name, allowed)
+		self.network_transmit:send_rpc_clients("rpc_set_allowed_nav_layer", layer_id, allowed)
+	end
+
+	return 
 end
 AISystem.alert_enemies_within_range = function (self, unit, position, radius)
 	if not NetworkUtils.network_safe_position(position) then
@@ -720,6 +795,31 @@ AISystem.rpc_alert_enemies_within_range = function (self, peer_id, unit_id, posi
 	local unit = Managers.state.unit_storage:unit(unit_id)
 
 	self.alert_enemies_within_range(self, unit, position, radius)
+
+	return 
+end
+AISystem.rpc_set_allowed_nav_layer = function (self, peer_id, layer_id, allowed)
+	local layer_name = LAYER_ID_MAPPING[layer_id]
+	NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] = (allowed and 1) or 0
+	NAV_TAG_VOLUME_LAYER_COST_BOTS[layer_name] = (allowed and 1) or 0
+
+	if allowed then
+		GwNavTagLayerCostTable.allow_layer(self._navtag_layer_cost_table, layer_id)
+	else
+		GwNavTagLayerCostTable.forbid_layer(self._navtag_layer_cost_table, layer_id)
+	end
+
+	return 
+end
+AISystem.hot_join_sync = function (self, sender)
+	local size = #LAYER_ID_MAPPING
+
+	for i = NavTagVolumeStartLayer, size, 1 do
+		local layer_name = LAYER_ID_MAPPING[i]
+		local allowed = 0 < NAV_TAG_VOLUME_LAYER_COST_AI[layer_name]
+
+		self.network_transmit:send_rpc("rpc_set_allowed_nav_layer", sender, i, allowed)
+	end
 
 	return 
 end

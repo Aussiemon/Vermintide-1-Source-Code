@@ -1,4 +1,8 @@
 local MAXIMUM_TIP_WIDTH = 1400
+local ICON_SIZE = {
+	26,
+	26
+}
 local scenegraph_definition = {
 	root = {
 		is_root = true,
@@ -98,10 +102,7 @@ local scenegraph_definition = {
 		vertical_alignment = "bottom",
 		parent = "background_image",
 		horizontal_alignment = "center",
-		size = {
-			26,
-			26
-		},
+		size = ICON_SIZE,
 		position = {
 			0,
 			65,
@@ -140,10 +141,7 @@ local scenegraph_definition = {
 		vertical_alignment = "bottom",
 		parent = "background_image",
 		horizontal_alignment = "center",
-		size = {
-			26,
-			26
-		},
+		size = ICON_SIZE,
 		position = {
 			0,
 			36,
@@ -192,7 +190,7 @@ local scenegraph_definition = {
 			3
 		}
 	},
-	game_difficulty = {
+	act_name = {
 		vertical_alignment = "top",
 		parent = "background_image",
 		horizontal_alignment = "left",
@@ -201,9 +199,79 @@ local scenegraph_definition = {
 			60
 		},
 		position = {
-			1331,
+			280,
 			-71,
-			2
+			4
+		}
+	},
+	act_name_bg = {
+		vertical_alignment = "center",
+		parent = "act_name",
+		horizontal_alignment = "center",
+		size = {
+			520,
+			60
+		},
+		position = {
+			0,
+			0,
+			-1
+		}
+	},
+	level_name = {
+		vertical_alignment = "top",
+		parent = "background_image",
+		horizontal_alignment = "center",
+		size = {
+			520,
+			60
+		},
+		position = {
+			0,
+			-71,
+			4
+		}
+	},
+	level_name_bg = {
+		vertical_alignment = "center",
+		parent = "level_name",
+		horizontal_alignment = "center",
+		size = {
+			320,
+			60
+		},
+		position = {
+			0,
+			0,
+			-1
+		}
+	},
+	game_difficulty = {
+		vertical_alignment = "top",
+		parent = "background_image",
+		horizontal_alignment = "right",
+		size = {
+			320,
+			60
+		},
+		position = {
+			-280,
+			-71,
+			4
+		}
+	},
+	game_difficulty_bg = {
+		vertical_alignment = "center",
+		parent = "game_difficulty",
+		horizontal_alignment = "center",
+		size = {
+			320,
+			60
+		},
+		position = {
+			0,
+			0,
+			-1
 		}
 	}
 }
@@ -353,6 +421,54 @@ local definitions = {
 	subtitle = subtitle,
 	subtitle_row_widgets = subtitle_row_widgets,
 	NUM_SUBTITLE_ROWS = NUM_SUBTITLE_ROWS,
+	act_name_widget = UIWidgets.create_simple_text("", "act_name", nil, nil, {
+		vertical_alignment = "center",
+		font_type = "hell_shark_header",
+		font_size = 36,
+		horizontal_alignment = "center",
+		text_color = Colors.get_color_table_with_alpha("loading_screen_stone", 255),
+		offset = {
+			0,
+			0,
+			2
+		}
+	}),
+	act_name_bg_widget = UIWidgets.create_simple_text("", "act_name_bg", nil, nil, {
+		vertical_alignment = "center",
+		font_type = "hell_shark_header",
+		font_size = 36,
+		horizontal_alignment = "center",
+		text_color = Colors.get_color_table_with_alpha("silver", 127),
+		offset = {
+			1,
+			-1,
+			-1
+		}
+	}),
+	level_name_widget = UIWidgets.create_simple_text("", "level_name", nil, nil, {
+		vertical_alignment = "center",
+		font_type = "hell_shark_header",
+		font_size = 44,
+		horizontal_alignment = "center",
+		text_color = Colors.get_color_table_with_alpha("loading_screen_stone", 255),
+		offset = {
+			0,
+			0,
+			2
+		}
+	}),
+	level_name_bg_widget = UIWidgets.create_simple_text("", "level_name_bg", nil, nil, {
+		vertical_alignment = "center",
+		font_type = "hell_shark_header",
+		font_size = 44,
+		horizontal_alignment = "center",
+		text_color = Colors.get_color_table_with_alpha("silver", 127),
+		offset = {
+			1,
+			-1,
+			-1
+		}
+	}),
 	game_difficulty_widget = UIWidgets.create_simple_text("", "game_difficulty", nil, nil, {
 		vertical_alignment = "center",
 		font_type = "hell_shark_header",
@@ -365,12 +481,24 @@ local definitions = {
 			2
 		}
 	}),
+	game_difficulty_bg_widget = UIWidgets.create_simple_text("", "game_difficulty_bg", nil, nil, {
+		vertical_alignment = "center",
+		font_type = "hell_shark_header",
+		font_size = 36,
+		horizontal_alignment = "center",
+		text_color = Colors.get_color_table_with_alpha("silver", 127),
+		offset = {
+			1,
+			-1,
+			-1
+		}
+	}),
 	tip_title_widget = UIWidgets.create_simple_text("loading_screen_tip_title", "tip_title", 32, Colors.get_color_table_with_alpha("cheeseburger", 255)),
 	tip_text_prefix_widget = UIWidgets.create_simple_text("", "tip_text_prefix", nil, nil, {
 		vertical_alignment = "center",
-		word_wrap = true,
+		word_wrap = false,
 		horizontal_alignment = "right",
-		font_size = 24,
+		font_size = 22,
 		font_type = "hell_shark",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 		offset = {
@@ -406,9 +534,9 @@ local definitions = {
 	},
 	tip_text_suffix_widget = UIWidgets.create_simple_text("", "tip_text_suffix", nil, nil, {
 		vertical_alignment = "center",
-		word_wrap = true,
+		word_wrap = false,
 		horizontal_alignment = "left",
-		font_size = 24,
+		font_size = 22,
 		font_type = "hell_shark",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 		offset = {
@@ -419,9 +547,9 @@ local definitions = {
 	}),
 	second_row_tip_text_prefix_widget = UIWidgets.create_simple_text("", "second_row_tip_text_prefix", nil, nil, {
 		vertical_alignment = "center",
-		word_wrap = true,
+		word_wrap = false,
 		horizontal_alignment = "right",
-		font_size = 24,
+		font_size = 22,
 		font_type = "hell_shark",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 		offset = {
@@ -457,9 +585,9 @@ local definitions = {
 	},
 	second_row_tip_text_suffix_widget = UIWidgets.create_simple_text("", "second_row_tip_text_suffix", nil, nil, {
 		vertical_alignment = "center",
-		word_wrap = true,
+		word_wrap = false,
 		horizontal_alignment = "left",
-		font_size = 24,
+		font_size = 22,
 		font_type = "hell_shark",
 		text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 		offset = {
@@ -481,7 +609,8 @@ local definitions = {
 		}
 	}),
 	news_ticker_mask_widget = UIWidgets.create_simple_texture("mask_rect", "news_ticker_mask"),
-	MAXIMUM_TIP_WIDTH = MAXIMUM_TIP_WIDTH
+	MAXIMUM_TIP_WIDTH = MAXIMUM_TIP_WIDTH,
+	ICON_SIZE = ICON_SIZE
 }
 
 return definitions

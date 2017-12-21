@@ -22,7 +22,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			150,
+			115,
 			0
 		}
 	},
@@ -50,7 +50,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			-30,
+			-18,
 			0
 		}
 	},
@@ -64,7 +64,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			30,
+			20,
 			0
 		}
 	},
@@ -74,7 +74,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-80,
+			-60,
 			0
 		},
 		size = {
@@ -189,8 +189,8 @@ local temp_offext = {
 }
 local widget_definitions = {
 	divider = UIWidgets.create_simple_texture("summary_screen_line_breaker", "divider", false, RETAINED_MODE_ENABLED),
-	player_name = UIWidgets.create_simple_text("text", "player_name", 28, Colors.get_table("white"), nil, nil, RETAINED_MODE_ENABLED),
-	hero_name = UIWidgets.create_simple_text("text", "hero_name", 24, Colors.get_table("cheeseburger"), nil, nil, RETAINED_MODE_ENABLED),
+	player_name = UIWidgets.create_simple_text("n/a", "player_name", 28, Colors.get_table("white"), nil, nil, RETAINED_MODE_ENABLED),
+	hero_name = UIWidgets.create_simple_text("n/a", "hero_name", 24, Colors.get_table("cheeseburger"), nil, nil, RETAINED_MODE_ENABLED),
 	hp_bar = {
 		scenegraph_id = "hp_bar",
 		element = {

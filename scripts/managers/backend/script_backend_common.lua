@@ -99,6 +99,9 @@ local filter_macros = {
 	item_rarity = function (item_data, backend_id)
 		return item_data.rarity
 	end,
+	slot_type = function (item_data, backend_id)
+		return item_data.slot_type
+	end,
 	item_type = function (item_data, backend_id)
 		return item_data.item_type
 	end,
@@ -129,6 +132,36 @@ local filter_macros = {
 		local hero_name = hero_data.display_name
 
 		return hero_name
+	end,
+	can_wield_bright_wizard = function (item_data, backend_id)
+		local hero_name = "bright_wizard"
+		local can_wield = item_data.can_wield
+
+		return table.contains(can_wield, hero_name)
+	end,
+	can_wield_dwarf_ranger = function (item_data, backend_id)
+		local hero_name = "dwarf_ranger"
+		local can_wield = item_data.can_wield
+
+		return table.contains(can_wield, hero_name)
+	end,
+	can_wield_empire_soldier = function (item_data, backend_id)
+		local hero_name = "empire_soldier"
+		local can_wield = item_data.can_wield
+
+		return table.contains(can_wield, hero_name)
+	end,
+	can_wield_witch_hunter = function (item_data, backend_id)
+		local hero_name = "witch_hunter"
+		local can_wield = item_data.can_wield
+
+		return table.contains(can_wield, hero_name)
+	end,
+	can_wield_wood_elf = function (item_data, backend_id)
+		local hero_name = "wood_elf"
+		local can_wield = item_data.can_wield
+
+		return table.contains(can_wield, hero_name)
 	end,
 	player_owns_item_key = function (item_data, backend_id)
 		local all_items = ScriptBackendItem.get_all_backend_items()

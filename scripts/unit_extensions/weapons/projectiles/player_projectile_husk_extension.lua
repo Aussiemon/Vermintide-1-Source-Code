@@ -191,8 +191,9 @@ PlayerProjectileHuskExtension.hit_enemy = function (self, impact_data, hit_unit,
 	end
 
 	local aoe_data = impact_data.aoe
+	local grenade = impact_data.grenade or nil
 
-	if aoe_data then
+	if grenade or (aoe_data and self.hit_targets == self.num_targets) then
 		self.do_aoe(self, aoe_data, hit_position)
 		self.stop(self)
 	end
@@ -283,7 +284,7 @@ PlayerProjectileHuskExtension.hit_player = function (self, impact_data, hit_unit
 	if hit then
 		local aoe_data = impact_data.aoe
 
-		if aoe_data then
+		if aoe_data and self.hit_targets == self.num_targets then
 			self.do_aoe(self, aoe_data, hit_position)
 			self.stop(self)
 		end
@@ -304,13 +305,6 @@ PlayerProjectileHuskExtension.hit_player_damage = function (self, damage_data, h
 	local attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(target_settings, false)
 	local attack_template = AttackTemplates[attack_template_name]
 	local hit_zone_name = "torso"
-	local attack_template_damage_type_id = -1
-
-	if attack_template_damage_type_name then
-		local attack_damage_value = AttackDamageValues[attack_template_damage_type_name]
-		attack_template_damage_type_id = attack_damage_value.lookup_id
-	end
-
 	local action = self.action
 	local hit_effect = action.hit_effect
 	local owner_unit = self.owner_unit

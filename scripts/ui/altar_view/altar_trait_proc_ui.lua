@@ -12,6 +12,9 @@ AltarTraitProcUI.init = function (self, parent, position, animation_definitions,
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.traits_list = {}
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
@@ -48,31 +51,39 @@ AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad then
 		if self.active_item_id then
-			if input_service.get(input_service, "special_1") then
+			local roll_button_widget = self.widgets_by_name.roll_button_widget
+			local roll_disabled = roll_button_widget.content.button_hotspot.disabled
+
+			if input_service.get(input_service, "special_1") or input_service.get(input_service, "back", true) then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_item_remove_request = true
-			elseif input_service.get(input_service, "refresh") and self.is_roll_possible(self) then
+			elseif input_service.get(input_service, "refresh_press") and not roll_disabled and not self.charging and self.is_roll_possible(self) then
+				self.start_charge_progress(self)
+			elseif self.charging and not input_service.get(input_service, "refresh_hold") then
+				self.abort_charge_progress(self)
+
 				self.controller_cooldown = GamepadSettings.menu_cooldown
-				self.gamepad_roll_request = true
 			end
 		end
 
-		local number_of_traits_on_item = self.number_of_traits_on_item
-		local selected_trait_index = self.selected_trait_index
+		if not self.charging then
+			local number_of_traits_on_item = self.number_of_traits_on_item
+			local selected_trait_index = self.selected_trait_index
 
-		if number_of_traits_on_item and selected_trait_index then
-			local new_trait_index = nil
+			if number_of_traits_on_item and selected_trait_index then
+				local new_trait_index = nil
 
-			if input_service.get(input_service, "move_right") then
-				new_trait_index = math.min(selected_trait_index + 1, number_of_traits_on_item)
-				self.controller_cooldown = GamepadSettings.menu_cooldown
-			elseif input_service.get(input_service, "move_left") then
-				new_trait_index = math.max(selected_trait_index - 1, 1)
-				self.controller_cooldown = GamepadSettings.menu_cooldown
-			end
+				if input_service.get(input_service, "move_right") then
+					new_trait_index = math.min(selected_trait_index + 1, number_of_traits_on_item)
+					self.controller_cooldown = GamepadSettings.menu_cooldown
+				elseif input_service.get(input_service, "move_left") then
+					new_trait_index = math.max(selected_trait_index - 1, 1)
+					self.controller_cooldown = GamepadSettings.menu_cooldown
+				end
 
-			if new_trait_index and new_trait_index ~= selected_trait_index then
-				self.gamepad_changed_selected_trait_index = new_trait_index
+				if new_trait_index and new_trait_index ~= selected_trait_index then
+					self.gamepad_changed_selected_trait_index = new_trait_index
+				end
 			end
 		end
 	end
@@ -93,6 +104,8 @@ AltarTraitProcUI.create_ui_elements = function (self)
 	self.widgets_by_name.trait_button_2.content.use_trait_cover = true
 	self.widgets_by_name.trait_button_3.content.use_trait_cover = true
 	self.widgets_by_name.trait_button_4.content.use_trait_cover = true
+	local roll_button_widget = self.widgets_by_name.roll_button_widget
+	roll_button_widget.content.enable_charge = true
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 	self._setup_candle_animations(self)
@@ -145,6 +158,21 @@ AltarTraitProcUI.update_animations = function (self, dt)
 	return 
 end
 AltarTraitProcUI.update = function (self, dt)
+	local input_manager = self.input_manager
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+
+	if gamepad_active then
+		if not self.gamepad_active_last_frame then
+			self.gamepad_active_last_frame = true
+
+			self.on_gamepad_activated(self)
+		end
+	elseif self.gamepad_active_last_frame then
+		self.gamepad_active_last_frame = false
+
+		self.on_gamepad_deactivated(self)
+	end
+
 	self.roll_completed = nil
 
 	self.update_animations(self, dt)
@@ -162,6 +190,8 @@ AltarTraitProcUI.update = function (self, dt)
 
 		if UIAnimation.completed(animation) then
 			self.animations[name] = nil
+
+			self.on_charge_animations_complete(self, name)
 		end
 	end
 
@@ -359,6 +389,14 @@ AltarTraitProcUI.update_selected_trait_description = function (self)
 	return 
 end
 AltarTraitProcUI.set_selected_trait = function (self, selected_index)
+	local widget = self.widgets_by_name.roll_button_widget
+
+	if self.charging or widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
 	local num_traits = AltarSettings.num_traits
 	local widgets_by_name = self.widgets_by_name
 	local trait_locked_text = Localize("tooltip_trait_locked")
@@ -575,7 +613,7 @@ AltarTraitProcUI.draw = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.parent:page_input_service()
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local num_widgets = #self.widgets
 
@@ -612,6 +650,14 @@ AltarTraitProcUI.set_description_text = function (self, text)
 	return 
 end
 AltarTraitProcUI.add_item = function (self, backend_item_id, is_equipped)
+	local roll_button_widget = self.widgets_by_name.roll_button_widget
+
+	if self.charging or roll_button_widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
 	self.clear_item_display_data(self)
 	self.play_sound(self, "Play_hud_inventory_drop_item")
 
@@ -835,6 +881,14 @@ AltarTraitProcUI.can_remove_item = function (self)
 	return self.active_item_id
 end
 AltarTraitProcUI.remove_item = function (self)
+	local roll_button_widget = self.widgets_by_name.roll_button_widget
+
+	if self.charging or roll_button_widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
 	if self.current_value_animation_id then
 		self.ui_animator:stop_animation(self.current_value_animation_id)
 
@@ -929,6 +983,140 @@ AltarTraitProcUI.animate_element_pulse = function (self, target, target_index, f
 	local new_animation = UIAnimation.init(UIAnimation.pulse_animation, target, target_index, from, to, time)
 
 	return new_animation
+end
+AltarTraitProcUI.start_charge_progress = function (self)
+	self.charging = true
+	local animation_name = "gamepad_charge_progress"
+	local animation_time = 1.5
+	local from = 0
+	local to = 307
+	local widget = self.widgets_by_name.roll_button_widget
+	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.roll_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
+	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
+
+	self.cancel_abort_animation(self)
+
+	widget.content.charging = true
+	widget.style.progress_fill.color[1] = 255
+
+	self.play_sound(self, "Play_hud_reroll_traits_charge")
+
+	return 
+end
+AltarTraitProcUI.abort_charge_progress = function (self, force_shutdown)
+	local animation_name = "gamepad_charge_progress"
+	self.animations[animation_name] = nil
+	self.animations[animation_name .. "_uv"] = nil
+	self.charging = nil
+	self.ui_scenegraph.roll_button_fill.size[1] = 0
+
+	self.play_sound(self, "Stop_hud_reroll_traits_charge")
+
+	if force_shutdown then
+		self.cancel_abort_animation(self)
+	else
+		self.start_abort_animation(self)
+	end
+
+	return 
+end
+AltarTraitProcUI.on_charge_complete = function (self)
+	self.charging = nil
+	self.gamepad_roll_request = true
+	local widget = self.widgets_by_name.roll_button_widget
+	widget.content.charging = false
+	local animation_name = "progress_bar_complete"
+	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, widget.style.progress_fill_glow.color, 1, 0, 255, 0.2, math.easeCubic, UIAnimation.function_by_time, self.ui_scenegraph.roll_button_fill.size, 1, 0, 0, 0.01, math.easeCubic, UIAnimation.function_by_time, widget.style.progress_fill_glow.color, 1, 255, 0, 0.2, math.easeOutCubic)
+	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, 0, 255, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, 0, 255, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.text.text_color, 1, 0, 255, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "5"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.text_disabled.text_color, 1, 0, 255, 0.3, math.easeInCubic)
+	widget.style.text.text_color[1] = 0
+	widget.style.token_text.text_color[1] = 0
+	widget.style.text_disabled.text_color[1] = 0
+	widget.style.texture_token_type.color[1] = 0
+
+	self.play_sound(self, "Stop_hud_reroll_traits_charge")
+
+	return 
+end
+AltarTraitProcUI.start_abort_animation = function (self)
+	local animation_name = "gamepad_charge_progress_abort"
+	local from = 0
+	local to = 255
+	local widget = self.widgets_by_name.roll_button_widget
+	widget.content.show_cancel_text = true
+	widget.content.charging = false
+	widget.style.progress_fill.color[1] = 0
+	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, widget.style.text_charge_cancelled.text_color, 1, from, to, 0.2, math.easeInCubic, UIAnimation.wait, 0.3, UIAnimation.function_by_time, widget.style.text_charge_cancelled.text_color, 1, to, from, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
+
+	return 
+end
+AltarTraitProcUI.cancel_abort_animation = function (self)
+	local animations = self.animations
+	animations.gamepad_charge_progress_abort = nil
+	animations.progress_bar_complete = nil
+
+	for i = 2, 4, 1 do
+		animations["gamepad_charge_progress_abort" .. i] = nil
+	end
+
+	for i = 2, 5, 1 do
+		animations["progress_bar_complete" .. i] = nil
+	end
+
+	local widget = self.widgets_by_name.roll_button_widget
+	widget.content.charging = false
+	widget.content.show_cancel_text = false
+	widget.style.progress_fill.color[1] = 0
+	widget.style.text_charge_cancelled.text_color[1] = 0
+	widget.style.texture_token_type.color[1] = 255
+	widget.style.token_text.text_color[1] = 255
+	widget.style.text_disabled.text_color[1] = 255
+	widget.style.text.text_color[1] = 255
+
+	return 
+end
+AltarTraitProcUI.on_charge_animations_complete = function (self, animation_name)
+	if animation_name == "gamepad_charge_progress" then
+		self.on_charge_complete(self)
+	end
+
+	if animation_name == "gamepad_charge_progress_abort" then
+		local widget = self.widgets_by_name.roll_button_widget
+		widget.content.show_cancel_text = false
+	end
+
+	return 
+end
+AltarTraitProcUI.on_gamepad_activated = function (self)
+	local input_manager = self.input_manager
+	local input_service = self.parent:page_input_service()
+	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
+	local button_texture = button_texture_data.texture
+	local button_size = button_texture_data.size
+	local widget = self.widgets_by_name.roll_button_widget
+	widget.content.progress_input_icon = button_texture
+
+	return 
+end
+AltarTraitProcUI.on_gamepad_deactivated = function (self)
+	return 
+end
+AltarTraitProcUI.set_active = function (self, active)
+	self.active = active
+	local widget = self.widgets_by_name.roll_button_widget
+
+	if self.charging or widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
+	return 
 end
 
 return 

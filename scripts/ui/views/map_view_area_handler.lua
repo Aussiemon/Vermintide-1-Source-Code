@@ -14,12 +14,38 @@ local function sort_level_information_list(a, b)
 		return false
 	end
 
-	local a_area = a.level_information.area
-	local b_area = b.level_information.area
+	local a_area = a.area
+	local b_area = b.area
+	local a_is_area = a.is_area
+	local b_is_area = b.is_area
 	local level_settings = LevelSettings
 	local area_settings = AreaSettings
-	local a_settings = area_settings[a_area] or level_settings[a_level_key].map_settings
-	local b_settings = area_settings[b_area] or level_settings[b_level_key].map_settings
+	local a_settings = (a_is_area and area_settings[a_area]) or level_settings[a_level_key].map_settings
+	local b_settings = (b_is_area and area_settings[b_area]) or level_settings[b_level_key].map_settings
+	local a_order = a_settings.sorting or 99
+	local b_order = b_settings.sorting or 99
+
+	return a_order < b_order
+end
+
+local function sort_level_list(a, b)
+	local a_level_key = a.level_key
+	local b_level_key = b.level_key
+
+	if a_level_key == "any" then
+		return true
+	elseif b_level_key == "any" then
+		return false
+	end
+
+	local a_area = a.level_information.area
+	local b_area = b.level_information.area
+	local a_is_area = a.level_information.is_area
+	local b_is_area = b.level_information.is_area
+	local level_settings = LevelSettings
+	local area_settings = AreaSettings
+	local a_settings = (a_is_area and area_settings[a_area]) or level_settings[a_level_key].map_settings
+	local b_settings = (b_is_area and area_settings[b_area]) or level_settings[b_level_key].map_settings
 	local a_order = a_settings.sorting or 99
 	local b_order = b_settings.sorting or 99
 
@@ -31,6 +57,9 @@ MapViewAreaHandler.init = function (self, ingame_ui_context, map_save_data, play
 	self.statistics_db = ingame_ui_context.statistics_db
 	self.player_stats_id = player_stats_id
 	self.only_release = GameSettingsDevelopment.release_levels_only
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.world = ingame_ui_context.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(self.world)
 	self.map_view_helper = MapViewHelper:new(self.statistics_db, player_stats_id)
@@ -97,9 +126,12 @@ end
 MapViewAreaHandler._setup_level_lists = function (self)
 	local map_view_helper = self.map_view_helper
 	local areas_level_list = {}
+	local level_list_by_game_mode = {}
 
 	for level_key, level_data in pairs(LevelSettings) do
-		if self._validate_level_data(self, level_key, level_data) then
+		local valid_level = self._validate_level_data(self, level_key, level_data)
+
+		if valid_level then
 			local map_settings = level_data.map_settings
 			local area = map_settings.area
 			local game_mode = level_data.game_mode
@@ -107,6 +139,7 @@ MapViewAreaHandler._setup_level_lists = function (self)
 			if game_mode then
 				if not areas_level_list[game_mode] then
 					areas_level_list[game_mode] = {}
+					level_list_by_game_mode[game_mode] = {}
 				end
 
 				local game_mode_level_list = areas_level_list[game_mode]
@@ -147,6 +180,7 @@ MapViewAreaHandler._setup_level_lists = function (self)
 				if visibility ~= "hidden" then
 					local difficulty_data = map_view_helper.get_difficulty_data(map_view_helper, level_key, level_data)
 					level_information.difficulty_data = difficulty_data
+					level_list_by_game_mode[game_mode][#level_list_by_game_mode[game_mode] + 1] = level_information
 				end
 			end
 		end
@@ -154,7 +188,14 @@ MapViewAreaHandler._setup_level_lists = function (self)
 
 	self._areas_level_list = areas_level_list
 
-	self.setup_game_modes_any_level(self)
+	for game_mode, level_list in pairs(level_list_by_game_mode) do
+		table.sort(level_list, sort_level_information_list)
+	end
+
+	self._level_list_by_game_mode = level_list_by_game_mode
+
+	self.setup_any_level_by_game_mode(self)
+	self.setup_any_level_by_area(self)
 
 	for game_mode, game_mode_area_list in pairs(areas_level_list) do
 		local world_area_level_list = game_mode_area_list.world
@@ -172,13 +213,13 @@ MapViewAreaHandler._setup_level_lists = function (self)
 				local level_image = area_settings.level_image
 				local level_information = self._create_summary_entry(self, area_list, area, display_name, map_icon, level_image)
 				level_information.is_area = true
-				level_information.dlc_name = area_settings.dlc_name
-				level_information.dlc_url = area_settings.dlc_url
 
-				if area_settings.dlc_url then
-					local tooltip_text = Localize("dlc1_4_dlc_dlc_soon_tooltip")
+				if area_settings.dlc_url and not Managers.unlock:is_dlc_unlocked(area_settings.dlc_name) then
+					local tooltip_text = Localize("dlc1_2_dlc_level_locked_tooltip")
 					level_information.visibility = "dlc"
 					level_information.visibility_tooltip = tooltip_text
+					level_information.dlc_name = area_settings.dlc_name
+					level_information.dlc_url = area_settings.dlc_url
 				end
 
 				level_information.position = area_settings.map_position
@@ -189,7 +230,7 @@ MapViewAreaHandler._setup_level_lists = function (self)
 
 	return 
 end
-MapViewAreaHandler.setup_game_modes_any_level = function (self)
+MapViewAreaHandler.setup_any_level_by_area = function (self)
 	local any_level_key = "any"
 	local display_name = "any_level"
 	local map_icon = "level_location_any_icon"
@@ -217,12 +258,117 @@ MapViewAreaHandler.setup_game_modes_any_level = function (self)
 				}
 				local textures = game_mode_level_area_textures[game_mode]
 				level_information.textures = table.clone(textures)
+				level_information.level_key = any_level_key
 				area_level_list[any_level_key] = level_information
 			end
 		end
 	end
 
 	return 
+end
+MapViewAreaHandler.setup_any_level_by_game_mode = function (self)
+	local random_levels_by_game_mode = {}
+
+	for game_mode, level_list in pairs(self._level_list_by_game_mode) do
+		local add_any_level = false
+		local area = nil
+
+		for index, level_information in ipairs(level_list) do
+			local level_visibility = level_information.visibility
+
+			if level_visibility == "visible" then
+				add_any_level = true
+				area = level_information.area
+
+				break
+			end
+		end
+
+		if add_any_level then
+			local any_level_key = "any"
+			local display_name = "any_level"
+			local map_icon = "level_location_any_icon"
+			local level_image = "level_image_any"
+			local level_information = self._create_summary_entry(self, level_list, area, display_name, map_icon, level_image)
+			level_information.position = {
+				-560,
+				290
+			}
+			local textures = game_mode_level_area_textures[game_mode]
+			level_information.textures = table.clone(textures)
+			level_information.level_key = any_level_key
+			random_levels_by_game_mode[game_mode] = level_information
+		end
+	end
+
+	self._random_levels_by_game_mode = random_levels_by_game_mode
+
+	return 
+end
+MapViewAreaHandler.get_levels_by_game_mode = function (self, game_mode, include_random_level)
+	if include_random_level then
+		local stored_level_list = self._level_list_by_game_mode[game_mode]
+		local random_level_information = self._random_levels_by_game_mode[game_mode]
+
+		if random_level_information then
+			local level_list = table.clone(stored_level_list)
+
+			table.insert(level_list, 1, random_level_information)
+
+			return level_list
+		else
+			return stored_level_list
+		end
+	else
+		return self._level_list_by_game_mode[game_mode]
+	end
+
+	return 
+end
+MapViewAreaHandler.get_level_information_by_game_mode = function (self, level_key, game_mode)
+	if level_key == "any" then
+		return self._random_levels_by_game_mode[game_mode]
+	else
+		local level_list = self._level_list_by_game_mode[game_mode]
+
+		for _, level_information in ipairs(level_list) do
+			if level_information.level_key == level_key then
+				return level_information
+			end
+		end
+	end
+
+	return 
+end
+MapViewAreaHandler.get_level_list_by_game_mode_and_area = function (self, game_mode_name, area_name)
+	for game_mode, game_mode_area_list in pairs(self._areas_level_list) do
+		if game_mode == game_mode_name then
+			for area, area_level_list in pairs(game_mode_area_list) do
+				if area_name and area_name == area then
+					return area_level_list
+				end
+			end
+
+			return game_mode_area_list
+		end
+	end
+
+	return 
+end
+MapViewAreaHandler.get_difficulty_data_by_game_mode = function (self, game_mode_name)
+	local map_view_helper = self.map_view_helper
+	local data = {}
+
+	for game_mode, game_mode_area_list in pairs(self._areas_level_list) do
+		if game_mode == game_mode_name then
+			for area, area_level_list in pairs(game_mode_area_list) do
+				local difficulty_data = map_view_helper.get_difficulty_data_summary(map_view_helper, area_level_list)
+				data[area] = difficulty_data
+			end
+		end
+	end
+
+	return data
 end
 MapViewAreaHandler._create_summary_entry = function (self, level_list, area, display_name, map_icon, level_image)
 	local map_view_helper = self.map_view_helper
@@ -271,11 +417,13 @@ MapViewAreaHandler.set_active_area = function (self, area)
 	local area_widgets = self._area_widgets
 	local areas_level_list = self._areas_level_list
 	local area_level_list = areas_level_list[game_mode][area]
+	local level_count = 0
 
 	if area_level_list then
 		local active_level_information_list = {}
 
 		for level_key, level_information in pairs(area_level_list) do
+			level_count = level_count + 1
 			local visibility = level_information.visibility
 
 			if visibility ~= "hidden" then
@@ -321,7 +469,7 @@ MapViewAreaHandler.set_active_area = function (self, area)
 			end
 		end
 
-		table.sort(active_level_information_list, sort_level_information_list)
+		table.sort(active_level_information_list, sort_level_list)
 
 		for index, data in ipairs(active_level_information_list) do
 			local level_key = data.level_key
@@ -361,6 +509,8 @@ MapViewAreaHandler.set_active_area = function (self, area)
 		self._active_area = nil
 		self._active_level_information_list = nil
 	end
+
+	self._active_level_count = level_count
 
 	return 
 end
@@ -510,7 +660,7 @@ MapViewAreaHandler._set_area_widget_title_text = function (self, widget, display
 	local widget_style = widget.style
 	local font, scaled_font_size = UIFontByResolution(widget_style.title_text)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, area_display_text, font[1], scaled_font_size)
-	text_width = text_width*0.8
+	text_width = math.ceil(text_width*0.8)
 	local text_background_center = widget_style.text_background_center
 	local scenegraph_id = text_background_center.scenegraph_id
 	self.ui_scenegraph[scenegraph_id].size[1] = text_width
@@ -550,7 +700,7 @@ MapViewAreaHandler.update = function (self, input_service, dt)
 	local back_button_widget = self.back_button_widget
 	local back_button_content = back_button_widget.content
 
-	if back_button_content.button_hotspot.on_pressed or input_service.get(input_service, "right_press") then
+	if back_button_content.button_hotspot.on_pressed or (input_service and input_service.get(input_service, "right_press")) then
 		self.zoom_out(self)
 	end
 
@@ -567,6 +717,7 @@ MapViewAreaHandler.zoom_out = function (self)
 		self.animate_map_overlay(self)
 
 		local level_index = self._get_widget_index_by_area_name(self, active_area)
+		self.selected_level_index = nil
 
 		if level_index then
 			self.set_selected_level(self, level_index, nil, true)
@@ -576,8 +727,6 @@ MapViewAreaHandler.zoom_out = function (self)
 
 		self.play_sound(self, "Play_hud_next_tab")
 		table.clear(self.back_button_widget.content.button_hotspot)
-
-		self.selected_level_index = nil
 	end
 
 	return 
@@ -601,7 +750,7 @@ MapViewAreaHandler.draw = function (self, input_service, gamepad_active, dt)
 	local ui_scenegraph = self.ui_scenegraph
 	local active_area = self.active_area(self)
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if active_area and self._draw_area_map then
 		UIRenderer.draw_widget(ui_renderer, self.map_area_widget)
@@ -661,18 +810,14 @@ MapViewAreaHandler._check_level_selection_mouse = function (self)
 			if button_hotspot.is_selected then
 				if button_hotspot.on_pressed then
 					if level_information.is_area then
-						if level_information.dlc_url then
-							self.show_level_store_page(self, index)
+						if not level_information.dlc_url then
+							local area = level_information.area
 
-							break
+							self.set_active_area(self, area)
+							self.animate_map_overlay(self)
+							self.select_level_after_level_list_change(self, true)
+							self.play_sound(self, "Play_hud_select")
 						end
-
-						local area = level_information.area
-
-						self.set_active_area(self, area)
-						self.animate_map_overlay(self)
-						self.select_level_after_level_list_change(self, true)
-						self.play_sound(self, "Play_hud_select")
 
 						break
 					end
@@ -682,14 +827,14 @@ MapViewAreaHandler._check_level_selection_mouse = function (self)
 					end
 
 					break
-				elseif button_hotspot.is_preview and widget_content.locked_dlc and widget_content.dlc_name then
+				elseif button_hotspot.is_preview and widget_content.locked_dlc and (widget_content.dlc_name or level_information.dlc_url) then
 					local preview_hotspot = widget_content.preview_hotspot
 
 					if preview_hotspot.on_release then
 						show_store_page = true
 					end
 				end
-			elseif button_hotspot.is_preview and widget_content.locked_dlc and widget_content.dlc_name then
+			elseif button_hotspot.is_preview and widget_content.locked_dlc and (widget_content.dlc_name or level_information.dlc_url) then
 				local preview_hotspot = widget_content.preview_hotspot
 
 				if preview_hotspot.on_release then
@@ -794,12 +939,11 @@ MapViewAreaHandler._area_already_viewed = function (self, level_key)
 	return false
 end
 MapViewAreaHandler.set_selected_level = function (self, index, play_sound, instant)
-	self._on_level_selected(self, index, play_sound, instant)
-
-	return 
+	return self._on_level_selected(self, index, play_sound, instant)
 end
 MapViewAreaHandler._on_level_selected = function (self, index, play_sound, instant)
 	local active_level_information_list = self._active_level_information_list
+	local index = (active_level_information_list[index] and index) or 1
 	local area_data = active_level_information_list[index]
 	local level_information = area_data.level_information
 
@@ -826,7 +970,7 @@ MapViewAreaHandler._on_level_selected = function (self, index, play_sound, insta
 	self._selected_level_index = index
 	self._level_hover_index = nil
 
-	return 
+	return level_information
 end
 MapViewAreaHandler._on_level_widget_select = function (self, widget, widget_index, play_sound, instant)
 	local ui_animations = self.ui_animations
@@ -1037,11 +1181,17 @@ end
 MapViewAreaHandler.active_area = function (self)
 	return self._active_area
 end
+MapViewAreaHandler.selected_level_index = function (self)
+	return self._selected_level_index
+end
 MapViewAreaHandler.area_changed = function (self)
 	return self._area_changed
 end
 MapViewAreaHandler.level_hover_index = function (self)
 	return self._level_hover_index
+end
+MapViewAreaHandler.active_level_count = function (self)
+	return self._active_level_count or 0
 end
 MapViewAreaHandler.selected_level = function (self)
 	local selected_level_index = self._selected_level_index

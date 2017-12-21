@@ -14,7 +14,7 @@ end
 
 FunctionCallProfiler.setup = function (world)
 	FunctionCallProfiler.world = world
-	FunctionCallProfiler.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	FunctionCallProfiler.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 
 	return 
 end
@@ -26,7 +26,7 @@ FunctionCallProfiler.destroy = function ()
 	return 
 end
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 FunctionCallProfiler.render = function ()
 	if not script_data.profile_function_calls then

@@ -10,7 +10,7 @@ BloodSettingsDefault = BloodSettingsDefault or {
 		life_time = 60,
 		enabled = true,
 		distance_despawn = 10,
-		num_decals = 300,
+		num_decals = 100,
 		scale = 2.5
 	},
 	enemy_blood = {

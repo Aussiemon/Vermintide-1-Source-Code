@@ -8,9 +8,9 @@ TrueFlightTemplates.machinegun = {
 	lerp_squared_distance_threshold = 2000
 }
 TrueFlightTemplates.carbine = {
-	speed_multiplier = 0.013,
+	speed_multiplier = 0.01,
 	lerp_constant = 50,
-	time_between_raycasts = 0.075,
+	time_between_raycasts = 0.05,
 	broadphase_radius = 5,
 	dot_threshold = 0.9999,
 	lerp_squared_distance_threshold = 2000

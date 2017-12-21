@@ -75,6 +75,7 @@ DebugManager.init = function (self, world, free_flight_manager, input_manager, n
 	})
 	self.time_paused = false
 	self.time_scale_index = table.find(time_scale_list, 100)
+	self.time_scale_accumulating_value = 0
 	self.speed_scale_index = table.find(speed_scale_list, 100)
 	self.graph_drawer = GraphDrawer:new(world, input_manager)
 	self.network_event_delegate = network_event_delegate
@@ -112,7 +113,9 @@ DebugManager.reset_drawer = function (self, drawer_name)
 	return 
 end
 DebugManager.update = function (self, dt, t)
-	self.update_time_scale(self)
+	local dt = dt/time_scale_list[self.time_scale_index]/100
+
+	self.update_time_scale(self, dt)
 
 	if Development.parameter("player_mechanics_goodness_debug") then
 		self._adjust_player_speed(self)
@@ -136,7 +139,7 @@ DebugManager.update = function (self, dt, t)
 	for drawer_name, drawer in pairs(self._drawers) do
 		Profiler.start(drawer_name)
 		drawer.update(drawer, self._world)
-		Profiler.stop()
+		Profiler.stop(drawer_name)
 	end
 
 	self.graph_drawer:update(self.input_service, t)
@@ -167,9 +170,10 @@ DebugManager.update = function (self, dt, t)
 
 	return 
 end
-DebugManager.update_time_scale = function (self)
+DebugManager.update_time_scale = function (self, dt)
 	local time_paused = self.time_paused
 	local time_scale_index = self.time_scale_index
+	local input_manager = Managers.input
 
 	if 0.5 < Keyboard.button(Keyboard.button_index("left shift")) then
 		local wheel_axis = Mouse.axis_index("wheel")
@@ -182,6 +186,28 @@ DebugManager.update_time_scale = function (self)
 			time_scale_index = math.max(time_scale_index - 1, 1)
 
 			self.set_time_scale(self, time_scale_index)
+		end
+	elseif input_manager.is_device_active(input_manager, "gamepad") then
+		local service = input_manager.get_service(input_manager, "Debug")
+
+		if service and service.get(service, "time_scale") then
+			self.time_scale_accumulating_value = self.time_scale_accumulating_value + service.get(service, "time_scale_axis")*dt*5
+
+			if 1 < self.time_scale_accumulating_value then
+				time_scale_index = math.min(time_scale_index + 1, #time_scale_list)
+
+				self.set_time_scale(self, time_scale_index)
+
+				self.time_scale_accumulating_value = self.time_scale_accumulating_value - 1
+			elseif self.time_scale_accumulating_value < -1 then
+				time_scale_index = math.max(time_scale_index - 1, 1)
+
+				self.set_time_scale(self, time_scale_index)
+
+				self.time_scale_accumulating_value = self.time_scale_accumulating_value + 1
+			end
+		else
+			self.time_scale_accumulating_value = 0
 		end
 	end
 
@@ -407,7 +433,7 @@ DebugManager.selected_unit = function (self)
 	return self._selected_unit
 end
 DebugManager._create_screen_gui = function (self)
-	self._screen_gui = World.create_screen_gui(self._world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts", "immediate")
+	self._screen_gui = World.create_screen_gui(self._world, "material", "materials/fonts/gw_fonts", "immediate")
 
 	return 
 end

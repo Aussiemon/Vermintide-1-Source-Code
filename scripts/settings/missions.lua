@@ -612,80 +612,300 @@ Missions.dwarf_beacons_leave = {
 }
 Missions.tutorial_movement = {
 	text = "mission_objective_tutorial_movement",
-	mission_template_name = "collect",
-	collect_amount = 3
+	mission_template_name = "simple",
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_move",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "move_forward"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "move_left_pressed"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "move_back_pressed"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "move_right_pressed"
+		}
+	},
+	tooltip_gamepad_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "move_forward"
+		}
+	}
 }
 Missions.tutorial_jumping = {
+	text = "mission_objective_tutorial_jumping",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_jumping"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_jump",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "dodge"
+		}
+	}
 }
 Missions.tutorial_dodge_left = {
+	text = "mission_objective_tutorial_dodge_left",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_dodge_left"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "mission_objective_tutorial_dodge_left",
+	tooltip_inputs = {
+		{
+			suffix = "+",
+			prefix = "input_hold",
+			action = "move_left"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "dodge"
+		}
+	}
 }
 Missions.tutorial_dodge_back = {
+	text = "mission_objective_tutorial_dodge_back",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_dodge_back"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "mission_objective_tutorial_dodge_back",
+	tooltip_inputs = {
+		{
+			suffix = "+",
+			prefix = "input_hold",
+			action = "move_back"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "dodge"
+		}
+	}
 }
 Missions.tutorial_dodge_right = {
+	text = "mission_objective_tutorial_dodge_right",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_dodge_right"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "mission_objective_tutorial_dodge_right",
+	tooltip_inputs = {
+		{
+			suffix = "+",
+			prefix = "input_hold",
+			action = "move_right"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "dodge"
+		}
+	}
 }
 Missions.tutorial_light_attack = {
 	text = "mission_objective_tutorial_light_attack",
+	collect_amount = 3,
 	mission_template_name = "collect",
-	collect_amount = 3
+	tooltip_text = "tutorial_tooltip_light_attack",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	}
 }
 Missions.tutorial_heavy_attack = {
+	text = "mission_objective_tutorial_heavy_attack",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_heavy_attack"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_heavy_attack",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "input_hold",
+			action = "action_one_hold"
+		}
+	}
 }
 Missions.tutorial_switch_weapon = {
+	text = "mission_objective_tutorial_switch_weapon",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_switch_weapon"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_switch_weapon",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "wield_switch"
+		}
+	}
 }
 Missions.tutorial_ranged_normal_attack = {
 	text = "mission_objective_tutorial_ranged_normal_attack",
+	collect_amount = 5,
 	mission_template_name = "collect",
-	collect_amount = 3
+	tooltip_text = "tutorial_tooltip_normal_attack",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	}
 }
 Missions.tutorial_ranged_alternative_attack = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_ranged_alternative_attack"
+	text = "mission_objective_tutorial_ranged_alternative_attack",
+	collect_amount = 3,
+	mission_template_name = "collect",
+	tooltip_text = "tutorial_tooltip_alternative_attack",
+	tooltip_inputs = {
+		{
+			suffix = "+",
+			prefix = "input_hold",
+			action = "action_two_hold"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	}
 }
 Missions.tutorial_blocking = {
 	text = "mission_objective_tutorial_blocking",
+	collect_amount = 3,
 	mission_template_name = "collect",
-	collect_amount = 3
+	tooltip_text = "tutorial_tooltip_block",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_two_hold"
+		}
+	}
 }
 Missions.tutorial_pushing = {
 	text = "mission_objective_tutorial_pushing",
+	collect_amount = 3,
 	mission_template_name = "collect",
-	collect_amount = 3
+	tooltip_text = "tutorial_tooltip_push",
+	tooltip_inputs = {
+		{
+			suffix = "+",
+			prefix = "input_hold",
+			action = "action_two_hold"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	}
 }
 Missions.tutorial_pickup_grenade = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_pickup_grenade"
+	text = "mission_objective_tutorial_pickup_grenade",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
+}
+Missions.tutorial_pickup_ammo = {
+	text = "mission_objective_tutorial_pickup_ammo",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_throw_grenade = {
+	text = "mission_objective_tutorial_throw_grenade",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_throw_grenade"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_throw_grenade",
+	tooltip_inputs = {
+		{
+			suffix = "->",
+			prefix = "",
+			action = "wield_5"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	},
+	tooltip_gamepad_inputs = {
+		{
+			suffix = "->",
+			prefix = "",
+			action = "wield_5"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	}
 }
 Missions.tutorial_pickup_potion = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_pickup_potion"
+	text = "mission_objective_tutorial_pickup_potion",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_use_potion = {
+	text = "mission_objective_tutorial_use_potion",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_use_potion"
+	dont_show_mission_end_tooltip = true,
+	hidden = true,
+	tooltip_text = "tutorial_tooltip_use_potion",
+	tooltip_inputs = {
+		{
+			suffix = "->",
+			prefix = "",
+			action = "wield_4"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one_hold"
+		}
+	},
+	tooltip_gamepad_inputs = {
+		{
+			suffix = "->",
+			prefix = "",
+			action = "wield_4"
+		},
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one_hold"
+		}
+	}
 }
 Missions.tutorial_pickup_barrel = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_pickup_barrel"
+	text = "mission_objective_tutorial_pickup_barrel",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_place_barrel = {
+	text = "mission_objective_tutorial_place_barrel",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_place_barrel"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_place_barrel",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "action_one"
+		}
+	}
 }
 Missions.tutorial_pickup_draught = {
 	mission_template_name = "simple",
@@ -696,32 +916,132 @@ Missions.tutorial_use_draught = {
 	text = "mission_objective_tutorial_use_draught"
 }
 Missions.tutorial_pickup_healthkit = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_pickup_healthkit"
+	text = "mission_objective_tutorial_pickup_healthkit",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_revive_ally = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_revive_ally"
+	text = "mission_objective_tutorial_revive_ally",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_heal_ally = {
+	text = "mission_objective_tutorial_heal_ally",
 	mission_template_name = "simple",
-	text = "mission_objective_tutorial_heal_ally"
+	dont_show_mission_end_tooltip = true,
+	tooltip_text = "tutorial_tooltip_heal_ally",
+	tooltip_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "wield_3"
+		}
+	},
+	tooltip_gamepad_inputs = {
+		{
+			suffix = "",
+			prefix = "",
+			action = "wield_3"
+		}
+	}
+}
+Missions.tutorial_continue = {
+	text = "mission_objective_tutorial_continue",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_survive_attack = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_survive_attack "
+	text = "mission_objective_tutorial_survive_attack",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_go_to_end = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_go_to_end "
+	text = "mission_objective_tutorial_go_to_end",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial_kill_remaining = {
-	mission_template_name = "simple",
-	text = "mission_objective_tutorial_kill_remaining"
+	text = "mission_objective_tutorial_kill_remaining",
+	dont_show_mission_end_tooltip = true,
+	mission_template_name = "simple"
 }
 Missions.tutorial = {
 	mission_template_name = "tutorial",
 	hidden = true
+}
+Missions.catacombs_search_building = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_search_building"
+}
+Missions.catacombs_follow_trail = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_follow_trail"
+}
+Missions.catacombs_open_door = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_open_door"
+}
+Missions.catacombs_find_ritual = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_find_ritual"
+}
+Missions.catacombs_disrupt_ritual = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_disrupt_ritual"
+}
+Missions.catacombs_crash_chandelier = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_crash_chandelier"
+}
+Missions.catacombs_escape = {
+	mission_template_name = "goal",
+	text = "mission_catacombs_escape"
+}
+Missions.catacombs_kill_sorcerers = {
+	text = "mission_catacombs_kill_sorcerers",
+	mission_template_name = "collect",
+	collect_amount = 3
+}
+Missions.chamber_inn = {
+	mission_template_name = "goal",
+	text = "mission_chamber_defend"
+}
+Missions.chamber_cellar = {
+	mission_template_name = "goal",
+	text = "mission_chamber_cellar"
+}
+Missions.chamber_sewer = {
+	mission_template_name = "goal",
+	text = "mission_chamber_sewer_hunt"
+}
+Missions.chamber_machine = {
+	mission_template_name = "goal",
+	text = "mission_chamber_stop_machine"
+}
+Missions.elven_ruins_get_to_ruins = {
+	mission_template_name = "goal",
+	text = "mission_elven_ruins_get_to_ruins"
+}
+Missions.elven_ruins_proceed_through_woods = {
+	mission_template_name = "goal",
+	text = "mission_elven_ruins_proceed_through_woods"
+}
+Missions.elven_ruins_break_through_maze = {
+	mission_template_name = "goal",
+	text = "mission_elven_ruins_break_through_maze"
+}
+Missions.elven_ruins_make_way_to_puzzle = {
+	mission_template_name = "goal",
+	text = "mission_elven_ruins_make_way_to_puzzle"
+}
+Missions.elven_ruins_realign_leylines = {
+	text = "mission_elven_ruins_realign_leylines",
+	mission_template_name = "collect",
+	collect_amount = 3
+}
+Missions.elven_ruins_escape_into_portal = {
+	mission_template_name = "goal",
+	text = "mission_elven_ruins_escape_into_portal"
 }
 
 for name, data in pairs(Missions) do

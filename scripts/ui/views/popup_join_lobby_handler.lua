@@ -1,5 +1,11 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
 require("scripts/ui/views/menu_input_description_ui")
 
 PopupJoinLobbyHandler = class(PopupJoinLobbyHandler)
@@ -493,12 +499,6 @@ local scenegraph_definition = {
 }
 local generic_input_actions = {
 	{
-		input_action = "d_horizontal",
-		priority = 1,
-		description_text = "input_description_navigate",
-		ignore_keybinding = true
-	},
-	{
 		input_action = "confirm",
 		priority = 2,
 		description_text = "input_description_select"
@@ -972,11 +972,14 @@ PopupJoinLobbyHandler.init = function (self, ingame_ui_context)
 	self.network_event_delegate = ingame_ui_context.network_event_delegate
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.peer_id = Network:peer_id()
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "popup_join_lobby_handler", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "popup_join_lobby_handler", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "popup_join_lobby_handler", "keyboard")
 	input_manager.map_device_to_service(input_manager, "popup_join_lobby_handler", "mouse")
 	input_manager.map_device_to_service(input_manager, "popup_join_lobby_handler", "gamepad")
@@ -1181,6 +1184,8 @@ PopupJoinLobbyHandler.update_profiles_data = function (self, profiles_data)
 	return 
 end
 PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
+
+	-- decompilation error in this vicinity
 	local gamepad_active = Managers.input:is_device_active("gamepad")
 
 	if gamepad_active and not self.gamepad_active_last_frame then
@@ -1191,7 +1196,7 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 
 	local swap_hero_active = self.swap_hero_active
 
-	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.background_widget)
 
 	if not gamepad_active then
@@ -1205,9 +1210,29 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 		UIRenderer.draw_widget(ui_renderer, self.swap_hero_text_widget)
 	end
 
-	if Application.platform() == "ps4" then
-		if input_service.get(input_service, "confirm") then
+	if gamepad_active then
+		if input_service.get(input_service, "move_right") then
+			self.controller_select_button_index(self, math.clamp(self.controller_selection_index + 1, 1, #self.active_button_data), nil, true)
+		end
+
+		if input_service.get(input_service, "move_left") then
+			self.controller_select_button_index(self, math.clamp(self.controller_selection_index - 1, 1, #self.active_button_data), nil, false)
+		end
+
+		if input_service.get(input_service, "confirm") and self.controller_select_button_index(self, self.controller_selection_index, true) then
+			local hero_name = nil
+			local selected_button = self.active_button_data[self.controller_selection_index]
+
+			for name, button in pairs(self.button_hero_widgets) do
+				if button == selected_button then
+					hero_name = name
+
+					break
+				end
+			end
+
 			local accepted = true
+			self.selected_hero_name = hero_name
 
 			self.set_result(self, accepted)
 		end
@@ -1217,78 +1242,42 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 
 			self.set_result(self, accepted)
 		end
-	else
+	end
 
-		-- decompilation error in this vicinity
-		if gamepad_active then
-			if input_service.get(input_service, "move_right") then
-				self.controller_select_button_index(self, math.clamp(self.controller_selection_index + 1, 1, #self.active_button_data), nil, true)
-			end
+	if self.button_confirm_widget.content.button_hotspot.on_release then
+		local accepted = true
 
-			if input_service.get(input_service, "move_left") then
-				self.controller_select_button_index(self, math.clamp(self.controller_selection_index - 1, 1, #self.active_button_data), nil, false)
-			end
+		self.set_result(self, accepted)
+	end
 
-			if input_service.get(input_service, "confirm") and self.controller_select_button_index(self, self.controller_selection_index, true) then
-				local hero_name = nil
-				local selected_button = self.active_button_data[self.controller_selection_index]
+	if self.button_decline_widget.content.button_hotspot.on_release or input_service.get(input_service, "toggle_menu") then
+		local accepted = false
 
-				for name, button in pairs(self.button_hero_widgets) do
-					if button == selected_button then
-						hero_name = name
+		self.set_result(self, accepted)
+	end
 
-						break
-					end
-				end
+	if swap_hero_active then
+		for name, widget in pairs(self.button_hero_widgets) do
+			UIRenderer.draw_widget(ui_renderer, widget)
 
+			if widget.content.button_hotspot.on_release then
 				local accepted = true
-				self.selected_hero_name = hero_name
-
-				self.set_result(self, accepted)
-			end
-
-			if input_service.get(input_service, "back") then
-				local accepted = false
+				self.selected_hero_name = name
 
 				self.set_result(self, accepted)
 			end
 		end
+	end
 
-		if self.button_confirm_widget.content.button_hotspot.on_release then
-			local accepted = true
+	if self.selected_hero_name then
+		self.button_confirm_widget.content.button_hotspot.disable_button = false
+	else
+		self.button_confirm_widget.content.button_hotspot.disable_button = true
+	end
 
-			self.set_result(self, accepted)
-		end
-
-		if self.button_decline_widget.content.button_hotspot.on_release or input_service.get(input_service, "toggle_menu") then
-			local accepted = false
-
-			self.set_result(self, accepted)
-		end
-
-		if swap_hero_active then
-			for name, widget in pairs(self.button_hero_widgets) do
-				UIRenderer.draw_widget(ui_renderer, widget)
-
-				if widget.content.button_hotspot.on_release then
-					local accepted = true
-					self.selected_hero_name = name
-
-					self.set_result(self, accepted)
-				end
-			end
-		end
-
-		if self.selected_hero_name then
-			self.button_confirm_widget.content.button_hotspot.disable_button = false
-		else
-			self.button_confirm_widget.content.button_hotspot.disable_button = true
-		end
-
-		if self.button_swap_hero_widget.content.button_hotspot.on_release then
-			self.button_swap_hero_widget.content.button_hotspot.on_release = false
-			self.swap_hero_active = not self.swap_hero_active
-		end
+	if self.button_swap_hero_widget.content.button_hotspot.on_release then
+		self.button_swap_hero_widget.content.button_hotspot.on_release = false
+		self.swap_hero_active = not self.swap_hero_active
 	end
 
 	UIRenderer.end_pass(ui_renderer)
@@ -1411,14 +1400,12 @@ PopupJoinLobbyHandler.set_selected_hero = function (self, selected_hero_name)
 
 	return 
 end
-PopupJoinLobbyHandler.set_selected_level = function (self, level)
-	fassert(LevelSettings[level], "no LevelSettings for level %s", level)
+PopupJoinLobbyHandler.set_selected_level = function (self, level_key)
 
-	local level_settings = LevelSettings[level]
-	local display_name = level_settings.display_name
+	-- decompilation error in this vicinity
+	local display_image, display_name = nil
 	self.background_widget.content.text_level = Localize("level") .. ": " .. Localize(display_name)
-	local level_image = level_settings.level_image
-	self.background_widget.content.level_texture = level_image
+	self.background_widget.content.level_texture = display_image
 
 	return 
 end

@@ -19,7 +19,7 @@ ProfileView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "profile_menu", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "profile_menu", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "profile_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "profile_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "profile_menu", "gamepad")
@@ -112,7 +112,7 @@ end
 ProfileView.post_update_on_exit = function (self)
 	if self.viewport_widget ~= nil then
 		self.profile_world_view:on_exit()
-		UIWidget.destroy(self.viewport_widget)
+		UIWidget.destroy(self.ui_renderer, self.viewport_widget)
 
 		self.viewport_widget = nil
 	end
@@ -120,7 +120,7 @@ ProfileView.post_update_on_exit = function (self)
 	return 
 end
 ProfileView.exit = function (self, return_to_game)
-	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
+	local exit_transition = "exit_menu"
 
 	if self.ingame_ui.initial_profile_view then
 		exit_transition = "exit_initial_profile_view"
@@ -198,7 +198,7 @@ end
 ProfileView.destroy = function (self)
 	if self.viewport_widget ~= nil then
 		self.profile_world_view:on_exit()
-		UIWidget.destroy(self.viewport_widget)
+		UIWidget.destroy(self.ui_renderer, self.viewport_widget)
 
 		self.viewport_widget = nil
 	end
@@ -271,7 +271,7 @@ ProfileView.update = function (self, dt)
 		self.draw_widgets(self, dt, input_service)
 	end
 
-	Profiler.stop()
+	Profiler.stop("ProfileView")
 
 	return 
 end

@@ -33,6 +33,10 @@ LobbyMembers.update = function (self)
 			members_joined[#members_joined + 1] = peer_id
 
 			printf("[LobbyMembers] Member joined %s", tostring(peer_id))
+
+			if Application.platform() == "xb1" then
+				Managers.account:query_bandwidth()
+			end
 		end
 
 		members[peer_id] = false
@@ -46,6 +50,11 @@ LobbyMembers.update = function (self)
 
 			members_left[#members_left + 1] = peer_id
 			members[peer_id] = nil
+
+			if Application.platform() == "xb1" and table.size(members) <= 1 then
+				Managers.voice_chat:initate_voice_chat()
+				Managers.account:reset_bandwidth_query()
+			end
 		end
 	end
 

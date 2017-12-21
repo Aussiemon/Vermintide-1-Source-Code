@@ -11,10 +11,11 @@ local scenegraph_definition = {
 }
 local ignored_damage_types = {
 	globadier_gas_dot = true,
-	damage_over_time = true,
+	buff_shared_medpack = true,
 	wounded_dot = true,
 	buff = true,
 	heal = true,
+	damage_over_time = true,
 	knockdown_bleed = true
 }
 local damage_indicator_widget_definition = {

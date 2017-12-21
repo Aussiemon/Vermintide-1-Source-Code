@@ -6,9 +6,8 @@ local ALERT_SOUND_RANGE_HIT = 2
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "bow",
-			min_speed = 5000,
 			ammo_usage = 1,
+			kind = "bow",
 			max_penetrations = 1,
 			anim_event = "attack_shoot_fast",
 			apply_recoil = true,
@@ -16,6 +15,7 @@ weapon_template.actions = {
 			charge_value = "arrow_hit",
 			weapon_action_hand = "left",
 			fire_sound_event = "player_combat_weapon_shortbow_fire_light",
+			speed = 5000,
 			total_time = 0.83,
 			buff_data = {
 				{
@@ -59,16 +59,15 @@ weapon_template.actions = {
 			alert_sound_range_hit = ALERT_SOUND_RANGE_HIT
 		},
 		shoot_charged = {
-			max_penetrations = 1,
-			max_speed = 9000,
-			anim_end_event = "to_unzoom",
-			ammo_usage = 1,
-			min_speed = 6500,
 			kind = "bow",
+			ammo_usage = 1,
+			max_penetrations = 1,
 			charge_value = "zoomed_arrow_hit",
 			weapon_action_hand = "left",
 			anim_event_last_ammo = "attack_shoot_last",
+			anim_end_event = "to_unzoom",
 			fire_sound_event = "player_combat_weapon_shortbow_fire_heavy",
+			speed = 9000,
 			hold_input = "action_two_hold",
 			anim_event = "attack_shoot",
 			allow_hold_toggle = true,
@@ -160,6 +159,13 @@ weapon_template.actions = {
 			end,
 			unzoom_condition_function = function (end_reason)
 				return end_reason ~= "new_interupting_action"
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -195,6 +201,12 @@ weapon_template.attack_meta_data = {
 	ignore_enemies_for_obstruction = true,
 	charge_against_armoured_enemy = true
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "bow"
 weapon_template.left_hand_unit = "units/weapons/player/wpn_we_bow_01_t1/wpn_we_bow_01_t1"
 weapon_template.display_unit = "units/weapons/weapon_display/display_bow"
@@ -204,9 +216,10 @@ weapon_template.wield_anim_no_ammo = "to_bow_noammo"
 weapon_template.crosshair_style = "default"
 weapon_template.no_ammo_reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
-weapon_template.dodge_distance = 1.25
-weapon_template.dodge_speed = 1.25
-weapon_template.dodge_count = 4
+weapon_template.default_projectile_action = weapon_template.actions.action_one.default
+weapon_template.dodge_distance = 1.5
+weapon_template.dodge_speed = 1.5
+weapon_template.dodge_count = 100
 weapon_template.wwise_dep_left_hand = {
 	"wwise/bow"
 }

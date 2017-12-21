@@ -1,9 +1,9 @@
 ActionPushStagger = class(ActionPushStagger)
 local PUSH_UPGRADES = {
 	basic_sweep_push = "heavy_sweep_push",
-	dagger_sweep_push = "heavy_sweep_push",
+	dagger_sweep_push = "upgraded_sweep_push",
 	heavy_sweep_push = "super_heavy_sweep_push",
-	weak_sweep_push = "heavy_sweep_push"
+	weak_sweep_push = "upgraded_sweep_push"
 }
 ActionPushStagger.init = function (self, world, item_name, is_server, owner_unit, weapon_unit, first_person_unit, weapon_unit, weapon_system)
 	self.owner_unit = owner_unit
@@ -12,6 +12,8 @@ ActionPushStagger.init = function (self, world, item_name, is_server, owner_unit
 	self.weapon_system = weapon_system
 	self.item_name = item_name
 	self._status_extension = ScriptUnit.extension(owner_unit, "status_system")
+	self.has_played_rumble_effect = false
+	self.owner = Managers.player:unit_owner(self.owner_unit)
 	self.hit_units = {}
 	self.waiting_for_callback = false
 
@@ -23,9 +25,16 @@ ActionPushStagger.init = function (self, world, item_name, is_server, owner_unit
 end
 ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
+	self.has_played_rumble_effect = false
 
 	for k, v in pairs(self.hit_units) do
 		self.hit_units[k] = nil
+	end
+
+	if not Managers.player:owner(self.owner_unit).bot_player then
+		Managers.state.controller_features:add_effect("rumble", {
+			rumble_effect = "light_swing"
+		})
 	end
 
 	local status_extension = self._status_extension
@@ -125,8 +134,9 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 					end
 
 					local attack_template = AttackTemplates[attack_template_name]
-					local attack_template_id = attack_template.lookup_id
-					local attack_template_damage_type_id = 0
+					local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+					local attack_template_damage_type_name = current_action.attack_template_damage_type
+					local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 					local hit_position = Unit.world_position(hit_unit, node)
 					local hit_effect = current_action.impact_particle_effect or "fx/impact_block_push"
 
@@ -146,6 +156,7 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 						local sound_event_id = NetworkLookup.sound_events[sound_event]
 						local sound_type_id = NetworkLookup.melee_impact_sound_types[sound_type]
 						local breed_name_id = NetworkLookup.breeds[breed_name]
+						hit_position = Vector3(math.clamp(hit_position.x, -600, 600), math.clamp(hit_position.y, -600, 600), math.clamp(hit_position.z, -600, 600))
 
 						if self.is_server then
 							network_manager.network_transmit:send_rpc_clients("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, breed_name_id)
@@ -168,11 +179,25 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 						buff_system.add_buff(buff_system, hit_unit, "increase_incoming_damage", owner_unit)
 					end
 
+					if Managers.state.controller_features and self.owner.local_player and not self.has_played_rumble_effect then
+						Managers.state.controller_features:add_effect("rumble", {
+							rumble_effect = "push_hit"
+						})
+
+						self.has_played_rumble_effect = true
+					end
+
 					Managers.state.entity:system("play_go_tutorial_system"):register_push(hit_unit)
 
 					hit_once = true
 				end
 			end
+		end
+
+		if hit_once and not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "hit_character_light"
+			})
 		end
 	end
 

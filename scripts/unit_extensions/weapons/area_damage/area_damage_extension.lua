@@ -29,6 +29,8 @@ AreaDamageExtension.init = function (self, extension_init_context, unit, extensi
 	self.enabled = false
 	self.ai_system = Managers.state.entity:system("ai_system")
 	self.player_unit_particles = {}
+	self._current_damage_buffer_index = 1
+	self._damage_buffer = {}
 
 	if self.invisible_unit then
 		Unit.set_unit_visibility(unit, false)
@@ -127,7 +129,11 @@ AreaDamageExtension.start = function (self)
 	local area_damage = AreaDamageTemplates.get_template(self.area_damage_template)
 
 	if self.is_server and self.aoe_init_damage then
-		area_damage.server.update(self.damage_source, self.unit, self.initial_radius, self.aoe_init_damage, 0, 0, 0, 0, self.damage_players, self.explosion_template_name)
+		local updated, damage_buffer = area_damage.server.update(self.damage_source, self.unit, self.initial_radius, self.aoe_init_damage, 0, 0, 0, 0, self.damage_players, self.explosion_template_name)
+
+		if updated then
+			self._add_to_damage_buffer(self, damage_buffer)
+		end
 	end
 
 	local particle_var_table = {
@@ -229,6 +235,8 @@ AreaDamageExtension.start = function (self)
 	return 
 end
 AreaDamageExtension.update = function (self, unit, input, dt, context, t)
+	self._update_damage_buffer(self)
+
 	if not self.area_damage_started then
 		return 
 	end
@@ -236,12 +244,19 @@ AreaDamageExtension.update = function (self, unit, input, dt, context, t)
 	local area_damage = AreaDamageTemplates.get_template(self.area_damage_template)
 
 	if self.is_server then
-		local updated = area_damage.server.update(self.damage_source, self.unit, self.radius, self.aoe_dot_damage, self.life_time, self.life_timer, self.aoe_dot_damage_interval, self.damage_timer, self.damage_players, self.explosion_template_name)
+		local updated, damage_buffer = area_damage.server.update(self.damage_source, self.unit, self.radius, self.aoe_dot_damage, self.life_time, self.life_timer, self.aoe_dot_damage_interval, self.damage_timer, self.damage_players, self.explosion_template_name)
+
+		if updated then
+			self._add_to_damage_buffer(self, damage_buffer)
+		end
 
 		if self.area_ai_random_death_template then
 			local ai_random_die = AreaDamageTemplates.get_template(self.area_ai_random_death_template)
+			local updated, damage_buffer = ai_random_die.server.update(self.damage_source, self.unit, self.radius, self.aoe_dot_damage_interval, self.damage_timer)
 
-			ai_random_die.server.update(self.damage_source, self.unit, self.radius, self.aoe_dot_damage_interval, self.damage_timer)
+			if updated then
+				self._add_to_damage_buffer(self, damage_buffer)
+			end
 		end
 
 		if updated then
@@ -256,6 +271,61 @@ AreaDamageExtension.update = function (self, unit, input, dt, context, t)
 
 	if script_data.debug_area_damage then
 		QuickDrawer:sphere(Unit.local_position(self.unit, 0), self.radius, Colors.get("hot_pink"))
+	end
+
+	return 
+end
+local NUM_UNITS_PER_FRAME = 1
+AreaDamageExtension._update_damage_buffer = function (self)
+	if not self.is_server then
+		return 
+	end
+
+	local damage_buffer = self._damage_buffer
+
+	if #damage_buffer == 0 then
+		return 
+	end
+
+	local current_damage_buffer_index = self._current_damage_buffer_index
+	local num_units_this_frame = (current_damage_buffer_index + NUM_UNITS_PER_FRAME) - 1
+	local reset = false
+
+	for i = current_damage_buffer_index, num_units_this_frame, 1 do
+		local damage_data = damage_buffer[i]
+
+		if not damage_data then
+			reset = true
+
+			break
+		end
+
+		local unit = damage_data.unit
+
+		if Unit.alive(unit) then
+			local area_damage = AreaDamageTemplates.get_template(damage_data.area_damage_template)
+
+			area_damage.server.do_damage(damage_data, self.unit)
+		end
+	end
+
+	if reset then
+		self._current_damage_buffer_index = 1
+
+		table.clear(damage_buffer)
+	else
+		self._current_damage_buffer_index = num_units_this_frame + 1
+	end
+
+	return 
+end
+AreaDamageExtension._add_to_damage_buffer = function (self, temp_damage_buffer)
+	local damage_buffer = self._damage_buffer
+	local num_units_in_buffer = #self._damage_buffer
+	local num_units_in_temp_buffer = #temp_damage_buffer
+
+	for i = 1, num_units_in_temp_buffer, 1 do
+		damage_buffer[num_units_in_buffer + i] = temp_damage_buffer[i]
 	end
 
 	return 

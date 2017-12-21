@@ -29,37 +29,12 @@ ActionAim.client_owner_start_action = function (self, new_action, t)
 		self.spread_extension:override_spread_template(spread_template_override)
 	end
 
-	local owner = Managers.player:owner(self.owner_unit)
+	local loaded_projectile_settings = new_action.loaded_projectile_settings
 
-	if Managers.input:is_device_active("gamepad") and owner.is_player_controlled(owner) and Application.user_setting("gamepad_auto_aim_enabled") then
-		local range = 60
-		local distance_bias = 0.6
-		local angle_bias = distance_bias - 1
+	if loaded_projectile_settings then
+		local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
 
-		assert(distance_bias + angle_bias == 1, "[ActionAim] distance_bias + angle_bias always have to equal 1.0")
-
-		local first_person_ext = ScriptUnit.extension(self.owner_unit, "first_person_system")
-		local current_position = first_person_ext.current_position(first_person_ext)
-		local current_direction = first_person_ext.current_rotation(first_person_ext)
-		local fwd_dir = Quaternion.forward(current_direction)
-		local physics_world = World.physics_world(self.world)
-		local unit = PhysicsWorld.find_best_unit_in_cone(physics_world, first_person_ext.current_position(first_person_ext), fwd_dir, range*range, math.degrees_to_radians(10), distance_bias, angle_bias)
-
-		if AiUtils.unit_alive(unit) then
-			local node_index = (Unit.has_node(unit, "j_hips") and Unit.node(unit, "j_hips")) or 0
-			local dir = Unit.world_position(unit, node_index) - current_position
-			local distance = Vector3.length(dir)
-
-			if distance < 4 then
-				return 
-			end
-
-			local hit = PhysicsWorld.immediate_raycast(physics_world, current_position, Vector3.normalize(dir), distance, "closest", "collision_filter", "filter_ai_line_of_sight_check")
-
-			if not hit then
-				ScriptUnit.extension(self.owner_unit, "first_person_system"):set_aim_assist_unit(unit, "j_hips", 5)
-			end
-		end
+		inventory_extension.set_loaded_projectile_override(inventory_extension, loaded_projectile_settings)
 	end
 
 	return 
@@ -86,6 +61,12 @@ ActionAim.client_owner_post_update = function (self, dt, t, world, can_damage)
 
 	if not self.played_aim_sound and self.aim_sound_time <= t then
 		local sound_event = current_action.aim_sound_event
+
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "aim_start"
+			})
+		end
 
 		if sound_event then
 			local wwise_world = Managers.world:wwise_world(self.world)
@@ -131,8 +112,23 @@ ActionAim.finish = function (self, reason)
 	local owner = Managers.player:owner(self.owner_unit)
 
 	if owner.is_player_controlled(owner) then
-		ScriptUnit.extension(self.owner_unit, "first_person_system"):set_aim_assist_unit(nil)
 	end
+
+	if not Managers.player:owner(self.owner_unit).bot_player then
+		Managers.state.controller_features:add_effect("rumble", {
+			rumble_effect = "full_stop"
+		})
+	end
+
+	if current_action.reset_aim_assist_on_exit then
+		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
+
+		first_person_extension.reset_aim_assist_multiplier(first_person_extension)
+	end
+
+	local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
+
+	inventory_extension.set_loaded_projectile_override(inventory_extension, nil)
 
 	return 
 end

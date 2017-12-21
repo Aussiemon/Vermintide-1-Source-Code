@@ -1046,7 +1046,7 @@ return function ()
 				"tutorial"
 			},
 			{
-				"faction_memory",
+				"user_memory",
 				"time_since_last_tutorial_armour_hit",
 				OP.TIMEDIFF,
 				OP.GT,
@@ -1055,7 +1055,7 @@ return function ()
 		},
 		on_done = {
 			{
-				"faction_memory",
+				"user_memory",
 				"time_since_last_tutorial_armour_hit",
 				OP.TIMEDIFF
 			}
@@ -1112,8 +1112,8 @@ return function ()
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_swap_to_bow",
 		name = "pwe_mono_tutorial_swap_to_bow",
+		response = "pwe_mono_tutorial_swap_to_bow",
 		criterias = {
 			{
 				"query_context",
@@ -1145,11 +1145,31 @@ return function ()
 				OP.EQ,
 				"tutorial"
 			}
+		},
+		on_done = {
+			{
+				"user_memory",
+				"set_tutorial_parry",
+				OP.ADD,
+				1
+			},
+			{
+				"user_memory",
+				"set_tutorial_pushing",
+				OP.ADD,
+				1
+			},
+			{
+				"user_memory",
+				"check_tutorial_geting_hit",
+				OP.ADD,
+				1
+			}
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_long_range",
 		name = "pwe_mono_tutorial_long_range",
+		response = "pwe_mono_tutorial_long_range",
 		criterias = {
 			{
 				"query_context",
@@ -1180,6 +1200,26 @@ return function ()
 				"current_level",
 				OP.EQ,
 				"tutorial"
+			}
+		},
+		on_done = {
+			{
+				"user_memory",
+				"set_tutorial_parry",
+				OP.ADD,
+				1
+			},
+			{
+				"user_memory",
+				"set_tutorial_pushing",
+				OP.ADD,
+				1
+			},
+			{
+				"user_memory",
+				"check_tutorial_geting_hit",
+				OP.ADD,
+				1
 			}
 		}
 	})
@@ -1223,6 +1263,12 @@ return function ()
 				OP.TIMEDIFF,
 				OP.GT,
 				30
+			},
+			{
+				"user_memory",
+				"set_tutorial_parry",
+				OP.EQ,
+				0
 			}
 		},
 		on_done = {
@@ -1272,6 +1318,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"user_memory",
+				"check_tutorial_geting_hit",
+				OP.EQ,
+				0
 			},
 			{
 				"global_context",
@@ -1335,6 +1387,12 @@ return function ()
 				OP.TIMEDIFF,
 				OP.GT,
 				30
+			},
+			{
+				"user_memory",
+				"set_tutorial_pushing",
+				OP.EQ,
+				0
 			}
 		},
 		on_done = {
@@ -1773,7 +1831,7 @@ return function ()
 		on_done = {
 			{
 				"user_memory",
-				"once_mono_tutorial_rat_ogre_02",
+				"once_mono_tutorial_rat_ogre_01",
 				OP.ADD,
 				1
 			}
@@ -1841,7 +1899,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_tutorial_dialogue_weather_05"
@@ -1929,7 +1987,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_weather_06"
@@ -1948,7 +2006,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_tutorial_dialogue_weather_02"
@@ -1967,7 +2025,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_after_battle_01"
@@ -1986,7 +2044,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_weather_05"
@@ -2107,7 +2165,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
 			database = "tutorial",
-			category = "seen_items",
+			category = "help_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
 				[1.0] = "pwe_mono_tutorial_spotting_grenade_01",
@@ -2207,7 +2265,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_tutorial_dialogue_weather_04"
@@ -2226,7 +2284,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_after_battle_02"
@@ -2278,7 +2336,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_tutorial_dialogue_weather_03"
@@ -2434,7 +2492,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_tutorial_dialogue_weather_01"
@@ -2453,7 +2511,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_weather_02"
@@ -2543,7 +2601,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_weather_04"
@@ -2663,7 +2721,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "help_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_weather_03"

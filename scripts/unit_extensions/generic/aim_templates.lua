@@ -56,9 +56,10 @@ AimTemplates.player = {
 			if game and go_id then
 				local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 				local aim_position = first_person_extension.current_position(first_person_extension)
+				local network_aim_position = NetworkUtils.network_clamp_position(aim_position)
 
 				GameSession.set_game_object_field(game, go_id, "aim_direction", aim_direction)
-				GameSession.set_game_object_field(game, go_id, "aim_position", aim_position)
+				GameSession.set_game_object_field(game, go_id, "aim_position", network_aim_position)
 			end
 
 			return 
@@ -264,8 +265,6 @@ AimTemplates.innkeeper = {
 				else
 					local head_index = Unit.node(best_player, "j_head")
 					aim_target = Unit.world_position(best_player, head_index)
-
-					QuickDrawer:sphere(aim_target, 0.32, Color(255, 0, 0))
 				end
 
 				if t < interpolation_time then

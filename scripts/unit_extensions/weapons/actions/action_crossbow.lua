@@ -28,6 +28,7 @@ ActionCrossbow.client_owner_start_action = function (self, new_action, t)
 	self.state = "waiting_to_shoot"
 	self.time_to_shoot = t + (new_action.fire_time or 0)
 	self.extra_buff_shot = false
+	self.active_reload_time = new_action.active_reload_time and t + new_action.active_reload_time
 
 	return 
 end
@@ -38,17 +39,12 @@ ActionCrossbow.client_owner_post_update = function (self, dt, t, world, can_dama
 
 	if self.state == "shooting" then
 		local owner_unit = self.owner_unit
-		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
-		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
-		local add_spread = true
+		local add_spread = not self.extra_buff_shot
 
-		if procced and not self.extra_buff_shot then
-			self.state = "waiting_to_shoot"
-			self.time_to_shoot = t + 0.1
-			self.extra_buff_shot = true
-			add_spread = false
-		else
-			self.state = "shot"
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "crossbow_fire"
+			})
 		end
 
 		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
@@ -133,6 +129,40 @@ ActionCrossbow.client_owner_post_update = function (self, dt, t, world, can_dama
 				self.ammo_extension:use_ammo(ammo_usage)
 			end
 		end
+
+		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
+
+		if procced and not self.extra_buff_shot then
+			self.state = "waiting_to_shoot"
+			self.time_to_shoot = t + 0.1
+			self.extra_buff_shot = true
+		else
+			self.state = "shot"
+		end
+
+		first_person_extension.reset_aim_assist_multiplier(first_person_extension)
+	end
+
+	if self.state == "shot" and self.active_reload_time then
+		local owner_unit = self.owner_unit
+		local input_extension = ScriptUnit.extension(owner_unit, "input_system")
+
+		if self.active_reload_time < t then
+			local ammo_extension = self.ammo_extension
+
+			if (input_extension.get(input_extension, "weapon_reload") or input_extension.get_buffer(input_extension, "weapon_reload")) and ammo_extension.can_reload(ammo_extension) then
+				local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
+
+				status_extension.set_zooming(status_extension, false)
+
+				local weapon_extension = ScriptUnit.extension(self.weapon_unit, "weapon_system")
+
+				weapon_extension.stop_action(weapon_extension, "reload")
+			end
+		elseif input_extension.get(input_extension, "weapon_reload") then
+			input_extension.add_buffer(input_extension, "weapon_reload", 0)
+		end
 	end
 
 	return 
@@ -141,15 +171,21 @@ ActionCrossbow.finish = function (self, reason)
 	local ammo_extension = self.ammo_extension
 	local current_action = self.current_action
 
-	if ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension.ammo_count(ammo_extension) == 0 and ammo_extension.can_reload(ammo_extension) then
-		local play_reload_animation = true
+	if reason ~= "new_interupting_action" then
+		local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
 
-		ammo_extension.start_reload(ammo_extension, play_reload_animation)
+		status_extension.set_zooming(status_extension, false)
+
+		if ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension.ammo_count(ammo_extension) == 0 and ammo_extension.can_reload(ammo_extension) then
+			local play_reload_animation = true
+
+			ammo_extension.start_reload(ammo_extension, play_reload_animation)
+		end
+
+		local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
+
+		status_extension.set_zooming(status_extension, false)
 	end
-
-	local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
-
-	status_extension.set_zooming(status_extension, false)
 
 	return 
 end

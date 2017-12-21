@@ -103,8 +103,9 @@ VoteTemplates = {
 		vote_options = {
 			{
 				text = "vote_kick_player_yes",
-				input_hold_time = 1,
 				vote = 1,
+				input_hold_time = 1,
+				gamepad_input = "ingame_vote_yes",
 				input = "ingame_vote_yes"
 			},
 			{

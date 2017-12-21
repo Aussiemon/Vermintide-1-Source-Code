@@ -4,21 +4,6 @@ dofile("scripts/settings/equipment/attachments")
 dofile("scripts/settings/equipment/item_master_list_local")
 dofile("scripts/settings/equipment/item_master_list_exported")
 
-ItemMasterList.drachenfels_statue = {
-	slot_type = "healthkit",
-	temporary_template = "drachenfels_statue",
-	inventory_icon = "menu_inventory_screen_icons_default",
-	item_type = "inventory_item",
-	left_hand_unit = "units/weapons/player/pup_drachenfels_statue/wpn_drachenfels_statue",
-	hud_icon = "consumables_icon_defence",
-	can_wield = {
-		"bright_wizard",
-		"dwarf_ranger",
-		"empire_soldier",
-		"witch_hunter",
-		"wood_elf"
-	}
-}
 all_item_types = {}
 local all_loot = {}
 
@@ -54,7 +39,7 @@ function parse_item_master_list()
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("Parse Item Master List")
 
 	return 
 end

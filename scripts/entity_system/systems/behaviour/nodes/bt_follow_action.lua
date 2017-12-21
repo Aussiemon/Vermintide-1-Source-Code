@@ -9,20 +9,23 @@ end
 BTFollowAction.name = "BTFollowAction"
 BTFollowAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
+	blackboard.action = action
+	local breed = blackboard.breed
+	local network_manager = Managers.state.network
 
-	Managers.state.network:anim_event(unit, "to_combat")
+	network_manager.anim_event(network_manager, unit, "to_combat")
 
 	local start_anim, anim_locked = LocomotionUtils.get_start_anim(unit, blackboard, action.start_anims)
 
 	if anim_locked then
 		blackboard.start_anim_locked_time = 0.2
 
-		LocomotionUtils.set_animation_driven_movement(unit, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 	else
 		LocomotionUtils.set_animation_driven_movement(unit, false)
 	end
 
-	Managers.state.network:anim_event(unit, start_anim or action.move_anim)
+	network_manager.anim_event(network_manager, unit, start_anim or action.move_anim)
 
 	blackboard.anim_locked = blackboard.anim_locked or t
 
@@ -36,9 +39,9 @@ BTFollowAction.enter = function (self, unit, blackboard, t)
 	end
 
 	local template_id = NetworkLookup.tutorials.elite_enemies
-	local message_id = NetworkLookup.tutorials[blackboard.breed.name]
+	local message_id = NetworkLookup.tutorials[breed.name]
 
-	Managers.state.network.network_transmit:send_rpc_all("rpc_tutorial_message", template_id, message_id)
+	network_manager.network_transmit:send_rpc_all("rpc_tutorial_message", template_id, message_id)
 
 	return 
 end
@@ -53,9 +56,9 @@ BTFollowAction.leave = function (self, unit, blackboard, t)
 	return 
 end
 BTFollowAction.run = function (self, unit, blackboard, t, dt)
-	local locomotion = blackboard.locomotion_extension
+	local locomotion_extension = blackboard.locomotion_extension
 
-	self.follow(self, unit, t, dt, blackboard, locomotion)
+	self.follow(self, unit, t, dt, blackboard, locomotion_extension)
 
 	blackboard.chasing_timer = blackboard.chasing_timer + dt
 
@@ -72,7 +75,6 @@ BTFollowAction._go_idle = function (self, unit, blackboard, locomotion)
 
 	return 
 end
-local hit_units = {}
 BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
 	local navigation_extension = blackboard.navigation_extension
 
@@ -108,7 +110,7 @@ BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
 
 	if navigation_extension.is_following_path(navigation_extension) and not blackboard.no_path_found and blackboard.move_state ~= "moving" and 0.5 < distance then
 		blackboard.move_state = "moving"
-		local action = self._tree_node.action_data
+		local action = blackboard.action
 		local start_anim, anim_driven = LocomotionUtils.get_start_anim(unit, blackboard, action.start_anims)
 
 		Managers.state.network:anim_event(unit, start_anim or action.move_anim)
@@ -140,6 +142,7 @@ BTFollowAction.check_fling_skaven = function (self, unit, blackboard, t)
 
 	return 
 end
+local hit_units = {}
 BTFollowAction.check_fling_skaven_expensive = function (self, unit, blackboard, t)
 	local forward = Quaternion.forward(Unit.local_rotation(unit, 0))
 	local check_pos = POSITION_LOOKUP[unit] + forward*2.6

@@ -121,9 +121,20 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 	particles = effect_settings.particles and effect_settings.particles[material]
 
 	if particles then
-		local normal_rotation = Quaternion.look(normal, Vector3.up())
+		local forward = -Quaternion.forward(rotation)
+		local normal_rotation = Quaternion.look(forward, normal)
 
 		World.create_particles(world, particles, position, normal_rotation)
+
+		if script_data.debug_material_effects then
+			local drawer = Managers.state.debug:drawer({
+				mode = "retained",
+				name = "DEBUG_DRAW_IMPACT_DECAL_HIT"
+			})
+
+			drawer.quaternion(drawer, position, normal_rotation)
+			printf("EffectHelper, creating partiles %s, %s", particles, effect_name)
+		end
 	end
 
 	return 
@@ -305,7 +316,7 @@ EffectHelper.flow_cb_play_footstep_surface_material_effects = function (effect_n
 
 	if hit then
 		local hit_unit = Actor.unit(actor)
-		local rotation = Quaternion.look(Vector3(0, 0, -1), foot_direction)
+		local rotation = Unit.world_rotation(unit, 0)
 
 		EffectHelper.play_surface_material_effects(effect_name, world, hit_unit, position, rotation, normal, sound_character, husk)
 	else
@@ -362,7 +373,7 @@ local material = {
 	"surface_material"
 }
 EffectHelper.query_material_surface = function (hit_unit, position, rotation)
-	local query_forward = Quaternion.forward(rotation)
+	local query_forward = Quaternion.up(rotation)
 	local query_vector = query_forward*MaterialEffectSettings.material_query_depth
 	local query_start_position = position - query_vector/2
 	local query_end_position = position + query_vector/2

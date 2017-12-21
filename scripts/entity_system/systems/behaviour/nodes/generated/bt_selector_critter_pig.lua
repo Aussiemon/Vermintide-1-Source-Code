@@ -35,7 +35,7 @@ BTSelector_critter_pig.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -55,7 +55,7 @@ BTSelector_critter_pig.run = function (self, unit, blackboard, t, dt)
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

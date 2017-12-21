@@ -27,6 +27,12 @@ weapon_template.actions = {
 				{
 					sub_action = "default",
 					start_time = 0.6,
+					action = "action_two",
+					input = "action_two_hold"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.2,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -130,6 +136,13 @@ weapon_template.actions = {
 			end,
 			unzoom_condition_function = function (end_reason)
 				return end_reason ~= "new_interupting_action"
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -167,6 +180,12 @@ weapon_template.attack_meta_data = {
 	charge_when_obstructed = false,
 	ignore_enemies_for_obstruction = false
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "crossbow"
 weapon_template.spread_lerp_speed = 2
 weapon_template.left_hand_unit = ""
@@ -178,6 +197,9 @@ weapon_template.wield_anim_not_loaded = "to_repeating_crossbow"
 weapon_template.crosshair_style = "default"
 weapon_template.reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 1
 weapon_template.wwise_dep_left_hand = {
 	"wwise/repeating_crossbow"
 }

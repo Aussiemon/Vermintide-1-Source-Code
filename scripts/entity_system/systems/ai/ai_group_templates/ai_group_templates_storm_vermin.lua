@@ -147,6 +147,15 @@ AIGroupTemplates.storm_vermin_formation_patrol = {
 		end
 
 		return 
+	end,
+	BT_debug = function (group)
+		return {
+			"GROUP_SYSTEM:",
+			tostring(group.template),
+			"state:" .. group.state,
+			"previous_state:" .. group.previous_state,
+			"num members: " .. group.members_n
+		}
 	end
 }
 
@@ -297,8 +306,7 @@ function find_position_on_navmesh(nav_world, position, fallback_position, check1
 	local found_position = nil
 
 	if success then
-		found_position = position
-		found_position.z = altitude
+		found_position = Vector3(position.x, position.y, altitude)
 	else
 		local nav_pos = GwNavQueries.inside_position_from_outside_position(nav_world, position, check2_up, check2_down, check2_side, check2_obstacle_distance)
 		local difference = nil
@@ -582,8 +590,10 @@ function enter_state_forming(nav_world, group)
 		local unit = indexed_members[i]
 		local blackboard = Unit.get_data(unit, "blackboard")
 
-		network_manager.anim_event(network_manager, unit, "to_passive")
-		unit_animation_event(group, unit, "move_fwd")
+		if not blackboard.climb_state then
+			network_manager.anim_event(network_manager, unit, "to_passive")
+			unit_animation_event(group, unit, "move_fwd")
+		end
 
 		local navigation_extension = blackboard.navigation_extension
 
@@ -811,7 +821,7 @@ function check_is_in_formation(group, dt)
 				local navigation_extension = blackboard.navigation_extension
 				local reached_start_position = navigation_extension.has_reached_destination(navigation_extension, 0.3)
 
-				if reached_start_position then
+				if reached_start_position and not blackboard.climb_state then
 					if group.animation_events[unit] ~= "idle" then
 						unit_animation_event(group, unit, "idle")
 					end
@@ -854,7 +864,10 @@ function enter_state_patrolling(group)
 		local navigation_extension = blackboard.navigation_extension
 
 		navigation_extension.set_max_speed(navigation_extension, WALK_SPEED)
-		unit_animation_event(group, unit, "move_fwd")
+
+		if not blackboard.climb_state then
+			unit_animation_event(group, unit, "move_fwd")
+		end
 	end
 
 	play_sound(group, "Play_stormvemin_patrol_formated")
@@ -1137,7 +1150,8 @@ function update_anchor_direction(nav_world, group, dt)
 			face_dir.y = math.sin(face_rad)
 		end
 
-		anchor.current_direction = Vector3Box(face_dir)
+		anchor.current_direction:store(face_dir)
+
 		local anchor_units = anchor.units
 
 		for j = 1, #anchor_units, 1 do
@@ -1304,6 +1318,10 @@ function check_for_players(nav_world, group, t, dt)
 		local unit = indexed_members[i]
 		local blackboard = Unit.get_data(unit, "blackboard")
 		local target_unit = blackboard.target_unit
+
+		if blackboard.climb_state then
+			return 
+		end
 
 		if is_valid_target_unit(target_unit) then
 			group_targets[target_unit] = true
@@ -1525,13 +1543,18 @@ function enter_state_controlled_advance(nav_world, group, t)
 			blackboard.goal_destination = Vector3Box(goal_destination)
 			local network_manager = Managers.state.network
 
-			network_manager.anim_event(network_manager, unit, "to_combat")
-			unit_animation_event(group, unit, "move_fwd_walk")
+			if not blackboard.climb_state then
+				network_manager.anim_event(network_manager, unit, "to_combat")
+				unit_animation_event(group, unit, "move_fwd_walk")
+			end
 		else
 			blackboard.goal_destination = nil
 
 			navigation_extension.stop(navigation_extension)
-			unit_animation_event(group, unit, "idle")
+
+			if not blackboard.climb_state then
+				unit_animation_event(group, unit, "idle")
+			end
 		end
 
 		local ai_slot_system = Managers.state.entity:system("ai_slot_system")

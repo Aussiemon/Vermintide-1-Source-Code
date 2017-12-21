@@ -1,36 +1,39 @@
 local breed_data = {
-	detection_radius = 12,
 	target_selection = "pick_closest_target_with_spillover",
 	using_first_attack = true,
 	run_speed = 4.75,
-	death_reaction = "ai_default",
 	has_inventory = true,
-	perception = "perception_regular",
-	horde_behavior = "horde_rat",
-	animation_sync_rpc = "rpc_sync_anim_state_7",
-	walk_speed = 2.75,
-	increase_incoming_damage_fx = "fx/chr_enemy_clanrat_damage_buff",
-	increase_incoming_damage_fx_node = "c_head",
-	hit_reaction = "ai_default",
-	allow_aoe_push = true,
 	bone_lod_level = 1,
-	has_running_attack = true,
-	default_inventory_template = "default",
-	hit_effect_template = "HitEffectsSkavenClanRat",
-	wwise_voice_switch_group = "clan_rat_vce",
-	passive_walk_speed = 2,
+	walk_speed = 2.75,
+	death_reaction = "ai_default",
+	exchange_order = 4,
+	animation_sync_rpc = "rpc_sync_anim_state_7",
+	armor_category = 1,
 	radius = 2,
+	increase_incoming_damage_fx = "fx/chr_enemy_clanrat_damage_buff",
+	wwise_voice_switch_group = "clan_rat_vce",
+	hit_reaction = "ai_default",
+	detection_radius = 12,
+	increase_incoming_damage_fx_node = "c_head",
+	default_inventory_template = "default",
+	has_running_attack = true,
+	smart_targeting_outer_width = 0.75,
+	hit_effect_template = "HitEffectsSkavenClanRat",
+	smart_targeting_height_multiplier = 2,
+	passive_walk_speed = 2,
+	horde_behavior = "horde_rat",
 	unit_template = "ai_unit_clan_rat",
 	perception_previous_attacker_stickyness_value = -7.75,
 	smart_object_template = "default_clan_rat",
 	stagger_duration_mod = 1,
 	poison_resistance = 70,
-	armor_category = 1,
+	perception = "perception_regular",
 	player_locomotion_constrain_radius = 0.7,
 	death_sound_event = "Play_clan_rat_die_vce",
 	weapon_reach = 2,
 	horde_target_selection = "horde_pick_closest_target_with_spillover",
 	use_backstab_vo = true,
+	smart_targeting_width = 0.2,
 	behavior = "pack_rat",
 	base_unit = "units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat",
 	aoe_height = 1.4,
@@ -1160,11 +1163,17 @@ local action_data = {
 			},
 			{
 				fwd = {
-					"stagger_fwd"
+					"stagger_fwd",
+					"stagger_fwd_2",
+					"stagger_fwd_3",
+					"stagger_fwd_4"
 				},
 				bwd = {
 					"stagger_bwd",
-					"stagger_bwd_2"
+					"stagger_bwd_2",
+					"stagger_bwd_3",
+					"stagger_bwd_4",
+					"stagger_bwd_5"
 				},
 				left = {
 					"stagger_left",
@@ -1188,17 +1197,25 @@ local action_data = {
 				},
 				bwd = {
 					"stagger_bwd_fall",
-					"stagger_bwd_fall_2"
+					"stagger_bwd_fall_2",
+					"stagger_bwd_heavy",
+					"stagger_bwd_heavy_2",
+					"stagger_bwd_heavy_3",
+					"stagger_bwd_heavy_4"
 				},
 				left = {
 					"stagger_left_heavy",
 					"stagger_left_heavy_2",
-					"stagger_left_heavy_3"
+					"stagger_left_heavy_3",
+					"stagger_left_heavy_4",
+					"stagger_left_heavy_5"
 				},
 				right = {
 					"stagger_right_heavy",
 					"stagger_right_heavy_2",
-					"stagger_right_heavy_3"
+					"stagger_right_heavy_3",
+					"stagger_right_heavy_4",
+					"stagger_right_heavy_5"
 				},
 				dwn = {
 					"stun_down"
@@ -1224,17 +1241,17 @@ local action_data = {
 			},
 			{
 				fwd = {
-					"stagger_fwd"
+					"stagger_fwd_stab"
 				},
 				bwd = {
 					"stagger_bwd_stab",
 					"stagger_bwd_stab_2"
 				},
 				left = {
-					"stagger_left"
+					"stagger_left_stab"
 				},
 				right = {
-					"stagger_right"
+					"stagger_right_stab"
 				}
 			},
 			{
@@ -1257,7 +1274,8 @@ local action_data = {
 			},
 			{
 				fwd = {
-					"stun_bwd_sword"
+					"stagger_short_fwd",
+					"stagger_short_fwd_2"
 				},
 				bwd = {
 					"stagger_short_bwd",
@@ -1270,15 +1288,15 @@ local action_data = {
 					"stun_left_sword",
 					"stun_left_sword_2",
 					"stun_left_sword_3",
-					"stagger_short_bwd_4",
-					"stagger_short_bwd_5"
+					"stagger_short_left",
+					"stagger_short_left_2"
 				},
 				right = {
 					"stun_right_sword",
 					"stun_right_sword_2",
 					"stun_right_sword_3",
-					"stagger_short_bwd_4",
-					"stagger_short_bwd_5"
+					"stagger_short_right",
+					"stagger_short_right_2"
 				},
 				dwn = {
 					"stun_down"

@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -57,8 +60,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -111,8 +117,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -165,8 +174,11 @@ weapon_template.actions = {
 			}
 		},
 		default_last = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -227,11 +239,15 @@ weapon_template.actions = {
 			use_target = true,
 			width_mod = 15,
 			max_targets = 1,
+			aim_assist_ramp_multiplier = 0.4,
 			hit_effect = "melee_hit_axes_1h",
+			aim_assist_max_ramp_multiplier = 0.6,
+			aim_assist_ramp_decay_delay = 0.1,
 			damage_window_end = 0.3,
 			impact_sound_event = "slashing_hit",
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
+			reset_aim_on_attack = true,
 			dedicated_target_range = 2,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy_down",
@@ -279,20 +295,20 @@ weapon_template.actions = {
 				return input_extension.reset_release_input(input_extension)
 			end,
 			default_target = {
-				attack_template_damage_type = "one_h_smiter_H",
+				attack_template_damage_type = "two_h_smiter_L_1",
 				attack_template = "slashing_smiter"
 			},
 			targets = {}
 		},
 		light_attack_left = {
 			damage_window_start = 0.38,
-			anim_time_scale = 1.1,
+			anim_time_scale = 1.25,
 			range_mod = 1.2,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			use_target = false,
-			width_mod = 20,
+			width_mod = 10,
 			max_targets = 1,
 			hit_effect = "melee_hit_axes_1h",
 			damage_window_end = 0.47,
@@ -324,6 +340,13 @@ weapon_template.actions = {
 					input = "action_one"
 				},
 				{
+					sub_action = "default_right",
+					start_time = 0.55,
+					action = "action_one",
+					end_time = 1.25,
+					input = "action_one_hold"
+				},
+				{
 					sub_action = "default",
 					start_time = 1.25,
 					action = "action_one",
@@ -331,7 +354,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.45,
+					start_time = 0,
 					action = "action_two",
 					input = "action_two_hold"
 				},
@@ -343,20 +366,20 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_smiter_L",
-				attack_template = "slashing_linesman"
+				attack_template_damage_type = "one_h_smiter_L_ap",
+				attack_template = "oneh_axe_slashing_smiter_ap"
 			},
 			targets = {}
 		},
 		light_attack_right = {
 			damage_window_start = 0.38,
-			anim_time_scale = 1.1,
+			anim_time_scale = 1.25,
 			range_mod = 1.2,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			use_target = false,
-			width_mod = 20,
+			width_mod = 10,
 			max_targets = 1,
 			hit_effect = "melee_hit_axes_1h",
 			damage_window_end = 0.47,
@@ -382,10 +405,17 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default_left",
-					start_time = 0.65,
+					start_time = 0.45,
 					action = "action_one",
 					end_time = 1.25,
 					input = "action_one"
+				},
+				{
+					sub_action = "default_left",
+					start_time = 0.45,
+					action = "action_one",
+					end_time = 1.25,
+					input = "action_one_hold"
 				},
 				{
 					sub_action = "default",
@@ -395,7 +425,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.45,
+					start_time = 0,
 					action = "action_two",
 					input = "action_two_hold"
 				},
@@ -407,26 +437,30 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_smiter_L",
-				attack_template = "slashing_linesman"
+				attack_template_damage_type = "one_h_smiter_L_ap",
+				attack_template = "oneh_axe_slashing_smiter_ap"
 			},
 			targets = {}
 		},
 		light_attack_down = {
 			damage_window_start = 0.38,
 			anim_time_scale = 1.3,
-			range_mod = 1.2,
+			range_mod = 1.25,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
+			sweep_z_offset = 0.2,
+			width_mod = 10,
 			use_target = false,
-			width_mod = 2,
 			max_targets = 1,
 			hit_effect = "melee_hit_axes_1h",
+			aim_assist_ramp_multiplier = 0.4,
+			aim_assist_max_ramp_multiplier = 0.8,
 			damage_window_end = 0.47,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			anim_end_event = "attack_finished",
+			aim_assist_ramp_decay_delay = 0,
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_down",
@@ -459,7 +493,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.45,
+					start_time = 0.47,
 					action = "action_two",
 					input = "action_two_hold"
 				},
@@ -471,20 +505,20 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_smiter_L",
+				attack_template_damage_type = "one_h_smiter_L_ap",
 				attack_template = "slashing_smiter"
 			},
 			targets = {}
 		},
 		light_attack_last = {
 			damage_window_start = 0.38,
-			anim_time_scale = 1.1,
+			anim_time_scale = 1.25,
 			range_mod = 1.2,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			use_target = false,
-			width_mod = 2,
+			width_mod = 10,
 			max_targets = 1,
 			hit_effect = "melee_hit_axes_1h",
 			damage_window_end = 0.5,
@@ -516,6 +550,13 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
+					start_time = 0.85,
+					action = "action_one",
+					end_time = 1.25,
+					input = "action_one_hold"
+				},
+				{
+					sub_action = "default",
 					start_time = 1.25,
 					action = "action_one",
 					input = "action_one"
@@ -534,8 +575,8 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_smiter_L",
-				attack_template = "slashing_linesman"
+				attack_template_damage_type = "one_h_smiter_L_ap",
+				attack_template = "oneh_axe_slashing_smiter_ap"
 			},
 			targets = {}
 		},
@@ -545,7 +586,7 @@ weapon_template.actions = {
 			anim_end_event = "attack_finished",
 			kind = "push_stagger",
 			damage_window_end = 0.2,
-			attack_template = "weak_sweep_push",
+			attack_template = "basic_sweep_push",
 			hit_effect = "melee_hit_axes_1h",
 			impact_sound_event = "blunt_hit",
 			no_damage_impact_sound_event = "blunt_hit_armour",
@@ -563,11 +604,32 @@ weapon_template.actions = {
 			},
 			allowed_chain_actions = {
 				{
-					sub_action = "default_last",
+					sub_action = "default",
 					start_time = 0.35,
 					action = "action_one",
-					release_required = "action_one_hold",
+					release_required = "action_two_hold",
+					doubleclick_window = 0,
 					input = "action_one"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.35,
+					action = "action_one",
+					release_required = "action_two_hold",
+					doubleclick_window = 0,
+					input = "action_one_hold"
+				},
+				{
+					sub_action = "light_attack_down",
+					start_time = 0.35,
+					action = "action_one",
+					doubleclick_window = 0,
+					end_time = 0.8,
+					input = "action_one_hold",
+					hold_required = {
+						"action_two_hold",
+						"action_one_hold"
+					}
 				},
 				{
 					sub_action = "default",
@@ -609,7 +671,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.75,
+					external_multiplier = 0.8,
 					buff_name = "planted_decrease_movement"
 				}
 			},
@@ -645,9 +707,10 @@ weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.one_h
 weapon_template.display_unit = "units/weapons/weapon_display/display_1h_weapon"
 weapon_template.wield_anim = "to_1h_axe"
 weapon_template.buff_type = BuffTypes.MELEE
-weapon_template.max_fatigue_points = 5
-weapon_template.dodge_distance = 0.9
-weapon_template.dodge_speed = 0.9
+weapon_template.max_fatigue_points = 6
+weapon_template.dodge_distance = 1.2
+weapon_template.dodge_speed = 1.2
+weapon_template.dodge_count = 3
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,
@@ -656,6 +719,18 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = true,
 		arc = 0
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	vertical_only = true,
+	base_multiplier = 0,
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 0.5,
+		skaven_slave = 0.5
 	}
 }
 weapon_template.compare_statistics = {
@@ -675,6 +750,7 @@ weapon_template.compare_statistics = {
 	},
 	perks = {
 		light_attack = {
+			"head_shot",
 			"armor_penetration"
 		},
 		heavy_attack = {
@@ -691,25 +767,23 @@ Weapons.one_hand_axe_template_1_co = table.clone(weapon_template)
 Weapons.one_hand_axe_template_1_co.compare_statistics.attacks.light_attack.damage = 0.4125
 Weapons.one_hand_axe_template_1_co.compare_statistics.attacks.heavy_attack.damage = 0.6875
 Weapons.one_hand_axe_template_1_t2 = table.clone(weapon_template)
-Weapons.one_hand_axe_template_1_t2.actions.action_one.heavy_attack.default_target.attack_template_damage_type = "one_h_smiter_H_t2"
-Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
-Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
-Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
-Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_down.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
+Weapons.one_hand_axe_template_1_t2.actions.action_one.heavy_attack.default_target.attack_template_damage_type = "two_h_smiter_L_1_t2"
+Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t2"
+Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t2"
+Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t2"
+Weapons.one_hand_axe_template_1_t2.actions.action_one.light_attack_down.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t2"
 Weapons.one_hand_axe_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.5
 Weapons.one_hand_axe_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.75
 Weapons.one_hand_axe_template_1_t3 = table.clone(weapon_template)
-Weapons.one_hand_axe_template_1_t3.actions.action_one.heavy_attack.default_target.attack_template_damage_type = "one_h_smiter_H_t3"
-Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "one_h_smiter_L_t3"
-Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "one_h_smiter_L_t3"
-Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_smiter_L_t3"
-Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_down.default_target.attack_template_damage_type = "one_h_smiter_L_t3"
+Weapons.one_hand_axe_template_1_t3.actions.action_one.heavy_attack.default_target.attack_template_damage_type = "two_h_smiter_L_1_t3"
+Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t3"
+Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t3"
+Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_last.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t3"
+Weapons.one_hand_axe_template_1_t3.actions.action_one.light_attack_down.default_target.attack_template_damage_type = "one_h_smiter_L_ap_t3"
 Weapons.one_hand_axe_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.625
 Weapons.one_hand_axe_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.875
 Weapons.one_hand_axe_template_2 = table.clone(weapon_template)
 Weapons.one_hand_axe_template_2_co = table.clone(weapon_template)
-Weapons.one_hand_axe_template_2_co.compare_statistics.attacks.light_attack.damage = 0.55
-Weapons.one_hand_axe_template_2_co.compare_statistics.attacks.heavy_attack.damage = 0.825
 Weapons.one_hand_axe_template_2_t2 = table.clone(Weapons.one_hand_axe_template_1_t2)
 Weapons.one_hand_axe_template_2_t3 = table.clone(Weapons.one_hand_axe_template_1_t3)
 Weapons.one_hand_axe_template_2.actions.action_one.light_attack_left.range_mod = 1
@@ -720,6 +794,7 @@ Weapons.one_hand_axe_template_2.actions.action_one.light_attack_last.range_mod =
 Weapons.one_hand_axe_template_2.actions.action_one.light_attack_last.anim_time_scale = 1.2
 Weapons.one_hand_axe_template_2.actions.action_one.light_attack_down.range_mod = 1
 Weapons.one_hand_axe_template_2.actions.action_one.light_attack_down.anim_time_scale = 1.5
+Weapons.one_hand_axe_template_2.dodge_distance = 1
 Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_left.range_mod = 1
 Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_left.anim_time_scale = 1.2
 Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_right.range_mod = 1
@@ -728,6 +803,7 @@ Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_last.range_mo
 Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_last.anim_time_scale = 1.2
 Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_down.range_mod = 1
 Weapons.one_hand_axe_template_2_t2.actions.action_one.light_attack_down.anim_time_scale = 1.5
+Weapons.one_hand_axe_template_2_t2.dodge_distance = 1
 Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_left.range_mod = 1
 Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_left.anim_time_scale = 1.2
 Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_right.range_mod = 1
@@ -736,6 +812,7 @@ Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_last.range_mo
 Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_last.anim_time_scale = 1.2
 Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_down.range_mod = 1
 Weapons.one_hand_axe_template_2_t3.actions.action_one.light_attack_down.anim_time_scale = 1.5
+Weapons.one_hand_axe_template_2_t3.dodge_distance = 1
 Weapons.one_hand_axe_template_1_t3_un = table.clone(Weapons.one_hand_axe_template_1_t3)
 Weapons.one_hand_axe_template_1_t3_un.actions.action_inspect.default.anim_event = "inspect_start_2"
 Weapons.one_hand_axe_template_1_t3_un.actions.action_inspect.default.anim_end_event = "inspect_end_2"

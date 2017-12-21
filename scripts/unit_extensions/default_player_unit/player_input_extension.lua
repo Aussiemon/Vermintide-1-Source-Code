@@ -37,6 +37,7 @@ PlayerInputExtension.init = function (self, extension_init_context, unit, extens
 	self.wield_scroll_value = nil
 	self.double_tap_timers = {}
 	self.dodge_on_jump_key = Application.user_setting("dodge_on_jump_key")
+	self.minimum_dodge_input = 0.3
 	self.dodge_on_forward_diagonal = Application.user_setting("dodge_on_forward_diagonal")
 	self.double_tap_dodge = Application.user_setting("double_tap_dodge")
 	self.toggle_crouch = Application.user_setting("toggle_crouch")
@@ -196,7 +197,7 @@ end
 PlayerInputExtension.add_buffer = function (self, input_key, doubleclick_window)
 	if input_key == "action_one_hold" or (self.priority_input[self.buffer_key] and not self.priority_input[input_key]) then
 		return 
-	elseif input_key == "action_two_hold" or input_key == "action_one_softbutton_gamepad" then
+	elseif input_key == "action_two_hold" then
 		return 
 	end
 

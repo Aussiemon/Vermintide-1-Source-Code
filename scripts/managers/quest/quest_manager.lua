@@ -46,9 +46,16 @@ QuestManager.evaluate_level_end = function (self, statistics_db, level_key)
 	if backend_settings.quests_enabled then
 		local params = self.evaluation_params
 		local active_contracts = self.active_contracts
+		local session_progress = self.session_progress
 
 		for contract_id, contract in pairs(active_contracts) do
 			self._commit_contract_progress(self, contract_id, contract, params)
+
+			local contract_session_progress = session_progress[contract_id]
+
+			if contract_session_progress then
+				contract_session_progress.commited = true
+			end
 		end
 	end
 
@@ -79,11 +86,16 @@ QuestManager.update = function (self, statistics_db, dt, t)
 
 	for contract_id, contract in pairs(active_contracts) do
 		if not self._progress_valid(self, contract, params) then
-			session_progress[contract_id] = nil
+			local contract_session_progress = session_progress[contract_id]
+
+			if contract_session_progress and not contract_session_progress.commited then
+				session_progress[contract_id] = nil
+			end
 		else
 			if not session_progress[contract_id] then
 				session_progress[contract_id] = {
 					changed = false,
+					commited = false,
 					amount = 0
 				}
 			end
@@ -100,8 +112,6 @@ QuestManager.update = function (self, statistics_db, dt, t)
 				local missing_progress = required - acquired
 				progress.amount = math.min(session_amount, missing_progress)
 				progress.changed = true
-			else
-				progress.changed = false
 			end
 		end
 	end
@@ -117,7 +127,10 @@ QuestManager.has_contract_session_changes = function (self, contract_id)
 	local progress = session_progress[contract_id]
 
 	if progress then
-		return progress.changed
+		local changed = progress.changed
+		progress.changed = false
+
+		return changed
 	end
 
 	return 
@@ -469,7 +482,7 @@ QuestManager.get_description_for_quest_id = function (self, quest_id)
 
 	return localization_key
 end
-QuestManager.refresh_expire_times = function (self)
+QuestManager._refresh_expire_times = function (self)
 	self.quest_interface:query_expire_times()
 
 	self._query_expire_times = true
@@ -498,11 +511,9 @@ QuestManager._update_expire_times = function (self, dt, t)
 			self._expire_check_cooldown = self._expire_check_cooldown - dt
 
 			if self._expire_check_cooldown <= 0 then
-				self.refresh_expire_times(self)
+				self._refresh_expire_times(self)
 			end
 		end
-	else
-		self.refresh_expire_times(self)
 	end
 
 	return 
@@ -569,7 +580,7 @@ QuestManager._poll_backend = function (self, dt, t)
 		if dirty then
 			self._query_quests_and_contracts = nil
 
-			self.refresh_expire_times(self)
+			self._refresh_expire_times(self)
 		end
 	else
 		self._update_expire_times(self, dt, t)

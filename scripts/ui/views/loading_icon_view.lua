@@ -23,12 +23,15 @@ local fake_input_service = {
 LoadingIconView.init = function (self, world)
 	self.world = world
 	self.ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_loading")
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 
 	self.create_ui_elements(self)
 
 	self._icon_fade_timer = 0
+	self._show_loading_icon = false
 	DO_RELOAD = false
-	self.loading_icon_draw_count = 0
 
 	return 
 end
@@ -39,12 +42,12 @@ LoadingIconView.create_ui_elements = function (self)
 	return 
 end
 LoadingIconView.show_loading_icon = function (self)
-	self.loading_icon_draw_count = self.loading_icon_draw_count + 1
+	self._show_loading_icon = true
 
 	return 
 end
 LoadingIconView.hide_loading_icon = function (self)
-	self.loading_icon_draw_count = math.max(self.loading_icon_draw_count - 1, 0)
+	self._show_loading_icon = false
 
 	return 
 end
@@ -61,7 +64,7 @@ LoadingIconView.hide_icon_background = function (self)
 	return 
 end
 LoadingIconView.active = function (self)
-	return 0 < self.loading_icon_draw_count or 0 < self._icon_fade_timer
+	return self._show_loading_icon or 0 < self._icon_fade_timer
 end
 LoadingIconView.update = function (self, dt)
 	if DO_RELOAD then
@@ -108,7 +111,7 @@ LoadingIconView.update_loading_icon = function (self, dt)
 		end
 	end
 
-	if 0 < self.loading_icon_draw_count then
+	if self._show_loading_icon then
 		self._icon_fade_timer = math.clamp(self._icon_fade_timer + dt, 0, FADE_TIME)
 	else
 		self._icon_fade_timer = math.clamp(self._icon_fade_timer - dt, 0, FADE_TIME)
@@ -122,7 +125,7 @@ LoadingIconView.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, fake_input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, fake_input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.loading_icon_widget)
 	UIRenderer.end_pass(ui_renderer)
 

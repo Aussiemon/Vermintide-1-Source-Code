@@ -3,18 +3,21 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "charged_projectile",
-			overcharge_type = "fireball_basic",
-			alert_sound_range_fire = 12,
-			fire_time = 0.27,
-			fire_sound_event_parameter = "drakegun_charge_fire",
-			charge_value = "light_attack",
-			speed = 7000,
-			hit_effect = "fireball_impact",
-			fire_sound_event = "player_combat_weapon_staff_fireball_fire",
 			alert_sound_range_hit = 2,
-			anim_event = "attack_shoot_fireball",
+			fire_time = 0.27,
+			alert_sound_range_fire = 12,
+			kind = "charged_projectile",
+			fire_sound_event_parameter = "drakegun_charge_fire",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_decay_delay = 0.3,
+			hit_effect = "fireball_impact",
+			overcharge_type = "fireball_basic",
+			charge_value = "light_attack",
+			fire_sound_event = "player_combat_weapon_staff_fireball_fire",
 			fire_sound_on_husk = true,
+			speed = 7000,
+			aim_assist_ramp_multiplier = 0.4,
+			anim_event = "attack_shoot_fireball",
 			total_time = 0.6,
 			allowed_chain_actions = {
 				{
@@ -52,19 +55,21 @@ weapon_template.actions = {
 		},
 		geiser_launch = {
 			damage_window_start = 0.1,
-			fire_time = 0,
-			anim_end_event = "attack_finished",
+			damage_window_end = 0,
+			aoe_name = "conflag_t1",
 			kind = "geiser",
 			particle_radius_variable = "spawn_cylinder",
-			damage_window_end = 0,
+			anim_end_event = "attack_finished",
 			attack_template = "wizard_staff_geiser",
-			fire_sound_event_parameter = "drakegun_charge_fire",
-			fire_sound_on_husk = true,
+			overcharge_type_heavy = "geiser_charged_2",
+			fire_sound_event = "player_combat_weapon_staff_geiser_fire",
 			alert_enemies = true,
+			fire_sound_on_husk = true,
+			fire_sound_event_parameter = "drakegun_charge_fire",
 			particle_effect = "fx/wpnfx_staff_geiser_fire",
 			overcharge_type = "geiser_charged",
 			alert_sound_range_fire = 12,
-			fire_sound_event = "player_combat_weapon_staff_geiser_fire",
+			fire_time = 0,
 			anim_event = "attack_geiser_placed",
 			total_time = 1,
 			buff_data = {
@@ -117,7 +122,7 @@ weapon_template.actions = {
 		default = {
 			charge_sound_stop_event = "player_combat_weapon_staff_charge_down",
 			height = 6,
-			charge_ready_sound_event = "weapon_staff_charge_ready",
+			charge_ready_sound_event = "hud_gameplay_stance_deactivate",
 			min_radius = 0.75,
 			kind = "geiser_targeting",
 			debug_draw = false,
@@ -133,7 +138,7 @@ weapon_template.actions = {
 			overcharge_type = "charging",
 			anim_end_event = "attack_geiser_end",
 			fire_time = 0.1,
-			charge_time = 1.2,
+			charge_time = 1.8,
 			speed = 15,
 			hold_input = "action_two_hold",
 			anim_event = "attack_geiser_start",
@@ -229,6 +234,12 @@ weapon_template.overcharge_data = {
 	time_until_overcharge_decreases = 0.5,
 	overcharge_value_decrease_rate = 1
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "fireball"
 weapon_template.right_hand_unit = "units/weapons/player/wpn_brw_skullstaff/wpn_brw_skullstaff"
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.staff
@@ -241,8 +252,21 @@ weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.wwise_dep_right_hand = {
 	"wwise/staff"
 }
-weapon_template.dodge_distance = 0.6
-weapon_template.dodge_speed = 0.6
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.aim_assist_settings = {
+	max_range = 50,
+	no_aim_input_multiplier = 0,
+	always_auto_aim = true,
+	base_multiplier = 0,
+	target_node = "j_spine1",
+	effective_max_range = 30,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
+}
 weapon_template.compare_statistics = {
 	attacks = {
 		light_attack = {
@@ -262,6 +286,7 @@ weapon_template.compare_statistics = {
 	},
 	perks = {
 		light_attack = {
+			"head_shot",
 			"armor_penetration"
 		},
 		heavy_attack = {
@@ -282,6 +307,7 @@ Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.geiser_launch.att
 	"wizard_staff_geiser_fryem_t2",
 	"wizard_staff_geiser_crit_t2"
 }
+Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.geiser_launch.projectile_info = Projectiles.conflag_aoe_t2
 Weapons.staff_fireball_geiser_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.625
 Weapons.staff_fireball_geiser_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.5
 Weapons.staff_fireball_geiser_template_1_t3 = table.clone(weapon_template)
@@ -292,6 +318,7 @@ Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.geiser_launch.att
 	"wizard_staff_geiser_fryem_t3",
 	"wizard_staff_geiser_crit_t3"
 }
+Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.geiser_launch.projectile_info = Projectiles.conflag_aoe_t3
 Weapons.staff_fireball_geiser_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.staff_fireball_geiser_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.625
 

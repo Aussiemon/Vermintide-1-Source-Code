@@ -6,6 +6,8 @@ require("scripts/settings/hit_effects/hit_effects_rat_ogre")
 require("scripts/settings/hit_effects/hit_effects_poison_wind")
 require("scripts/settings/hit_effects/hit_effects_critter_pig")
 require("scripts/settings/hit_effects/hit_effects_critter_rat")
+require("scripts/settings/hit_effects/hit_effects_skaven_pack_master")
+require("scripts/settings/hit_effects/hit_effects_skaven_loot_rat")
 
 Dismemberments = {}
 HitTemplates = {}

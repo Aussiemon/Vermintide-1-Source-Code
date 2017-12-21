@@ -38,6 +38,58 @@ dofile("dialogues/generated/lookup_tutorial")
 dofile("dialogues/generated/lookup_drachenfels")
 dofile("dialogues/generated/lookup_dlc_enemies_01")
 dofile("dialogues/generated/lookup_dwarf_dlc")
+dofile("dialogues/generated/lookup_bright_wizard_bridge")
+dofile("dialogues/generated/lookup_dwarf_ranger_bridge")
+dofile("dialogues/generated/lookup_witch_hunter_bridge")
+dofile("dialogues/generated/lookup_wood_elf_bridge")
+dofile("dialogues/generated/lookup_bright_wizard_cemetery")
+dofile("dialogues/generated/lookup_dwarf_ranger_cemetery")
+dofile("dialogues/generated/lookup_witch_hunter_cemetery")
+dofile("dialogues/generated/lookup_wood_elf_cemetery")
+dofile("dialogues/generated/lookup_bright_wizard_city_wall")
+dofile("dialogues/generated/lookup_dwarf_ranger_city_wall")
+dofile("dialogues/generated/lookup_witch_hunter_city_wall")
+dofile("dialogues/generated/lookup_wood_elf_city_wall")
+dofile("dialogues/generated/lookup_bright_wizard_courtyard")
+dofile("dialogues/generated/lookup_dwarf_ranger_courtyard")
+dofile("dialogues/generated/lookup_witch_hunter_courtyard")
+dofile("dialogues/generated/lookup_wood_elf_courtyard")
+dofile("dialogues/generated/lookup_bright_wizard_docks")
+dofile("dialogues/generated/lookup_dwarf_ranger_docks")
+dofile("dialogues/generated/lookup_witch_hunter_docks")
+dofile("dialogues/generated/lookup_wood_elf_docks")
+dofile("dialogues/generated/lookup_bright_wizard_end_boss")
+dofile("dialogues/generated/lookup_dwarf_ranger_end_boss")
+dofile("dialogues/generated/lookup_witch_hunter_end_boss")
+dofile("dialogues/generated/lookup_wood_elf_end_boss")
+dofile("dialogues/generated/lookup_bright_wizard_farm")
+dofile("dialogues/generated/lookup_dwarf_ranger_farm")
+dofile("dialogues/generated/lookup_witch_hunter_farm")
+dofile("dialogues/generated/lookup_wood_elf_farm")
+dofile("dialogues/generated/lookup_bright_wizard_forest_ambush")
+dofile("dialogues/generated/lookup_dwarf_ranger_forest_ambush")
+dofile("dialogues/generated/lookup_witch_hunter_forest_ambush")
+dofile("dialogues/generated/lookup_wood_elf_forest_ambush")
+dofile("dialogues/generated/lookup_bright_wizard_magnus_tower")
+dofile("dialogues/generated/lookup_dwarf_ranger_magnus_tower")
+dofile("dialogues/generated/lookup_witch_hunter_magnus_tower")
+dofile("dialogues/generated/lookup_wood_elf_magnus_tower")
+dofile("dialogues/generated/lookup_bright_wizard_merchant")
+dofile("dialogues/generated/lookup_dwarf_ranger_merchant")
+dofile("dialogues/generated/lookup_witch_hunter_merchant")
+dofile("dialogues/generated/lookup_wood_elf_merchant")
+dofile("dialogues/generated/lookup_bright_wizard_sewers")
+dofile("dialogues/generated/lookup_dwarf_ranger_sewers")
+dofile("dialogues/generated/lookup_witch_hunter_sewers")
+dofile("dialogues/generated/lookup_wood_elf_sewers")
+dofile("dialogues/generated/lookup_bright_wizard_skaven_tunnels")
+dofile("dialogues/generated/lookup_dwarf_ranger_skaven_tunnels")
+dofile("dialogues/generated/lookup_witch_hunter_skaven_tunnels")
+dofile("dialogues/generated/lookup_wood_elf_skaven_tunnels")
+dofile("dialogues/generated/lookup_bright_wizard_wizard_tower")
+dofile("dialogues/generated/lookup_dwarf_ranger_wizard_tower")
+dofile("dialogues/generated/lookup_witch_hunter_wizard_tower")
+dofile("dialogues/generated/lookup_wood_elf_wizard_tower")
 
 NetworkLookup = {
 	matchmaking_messages = {
@@ -118,7 +170,6 @@ NetworkLookup.breeds = {
 	"skaven_pack_master",
 	"skaven_ratling_gunner",
 	"skaven_rat_ogre",
-	"skaven_stormfiend",
 	"critter_pig",
 	"critter_rat",
 	"debug_ai_profile",
@@ -184,7 +235,6 @@ NetworkLookup.husks = {
 	"units/beings/enemies/skaven_wind_globadier/chr_skaven_wind_globadier",
 	"units/beings/enemies/skaven_gutter_runner/chr_skaven_gutter_runner",
 	"units/beings/enemies/skaven_rat_ogre/chr_skaven_rat_ogre",
-	"units/beings/enemies/skaven_stormfiend/chr_skaven_stormfiend",
 	"units/beings/critters/chr_critter_pig/chr_critter_pig",
 	"units/beings/critters/chr_critter_common_rat/chr_critter_common_rat",
 	"units/weapons/player/wpn_crossbow_quiver/wpn_crossbow_bolt_3ps",
@@ -225,6 +275,9 @@ NetworkLookup.husks = {
 	"units/weapons/player/pup_torch/pup_torch",
 	"units/weapons/player/pup_grimoire_01/pup_grimoire_01",
 	"units/weapons/player/pup_side_objective_tome/pup_side_objective_tome_01",
+	"units/weapons/player/pup_cannon_ball_01/pup_cannon_ball_01",
+	"units/weapons/player/wpn_cannon_ball_01/wpn_cannon_ball_01",
+	"units/weapons/player/wpn_cannon_ball_01/wpn_cannon_ball_01_3p",
 	"units/weapons/projectile/poison_wind_globe/poison_wind_globe",
 	"units/weapons/player/pup_sacks/pup_sacks_01_test",
 	"units/weapons/player/drakegun_projectile/drakegun_projectile_3ps",
@@ -339,6 +392,7 @@ NetworkLookup.heal_types = {
 	"potion",
 	"bandage",
 	"buff",
+	"buff_shared_medpack",
 	"heal_on_killing_blow",
 	"shield_by_assist"
 }
@@ -372,7 +426,8 @@ NetworkLookup.hit_zones = {
 	"tail",
 	"neck",
 	"n/a",
-	"full"
+	"full",
+	"aux"
 }
 NetworkLookup.anims = {
 	"attack_charge",
@@ -407,9 +462,11 @@ NetworkLookup.anims = {
 	"attack_staff_melee",
 	"attack_swing_left",
 	"attack_swing_left_diagonal",
+	"attack_swing_left_diagonal_axe",
 	"attack_swing_left_diagonal_last",
 	"attack_swing_right",
 	"attack_swing_right_diagonal",
+	"attack_swing_right_diagonal_axe",
 	"attack_swing_stab",
 	"attack_swing_stab_lh",
 	"attack_swing_stab_charge",
@@ -417,7 +474,9 @@ NetworkLookup.anims = {
 	"attack_swing_charge_diagonal_left",
 	"attack_swing_charge_diagonal_right",
 	"attack_swing_charge_left",
+	"attack_swing_charge_left_down",
 	"attack_swing_charge_right",
+	"attack_swing_charge_right_down",
 	"attack_swing_heavy",
 	"attack_swing_heavy_right",
 	"attack_swing_heavy_left",
@@ -430,7 +489,10 @@ NetworkLookup.anims = {
 	"attack_swing_heavy_down",
 	"attack_swing_down",
 	"attack_swing_down_left",
+	"attack_swing_down_left_axe",
 	"attack_swing_down_right",
+	"attack_swing_down_right_axe",
+	"attack_swing_up",
 	"cooldown_start",
 	"cooldown_loop",
 	"cooldown_end",
@@ -621,6 +683,7 @@ NetworkLookup.anims = {
 	"reload_loop",
 	"reset",
 	"run",
+	"run_away",
 	"attack_shoot_align",
 	"attack_shoot_start",
 	"screenshot_inn_00",
@@ -783,12 +846,18 @@ NetworkLookup.lobby_data = {
 	"session_id",
 	"is_private",
 	"time_of_search",
-	"required_progression"
+	"required_progression",
+	"game_mode"
 }
-NetworkLookup.lobby_data_matchmaking_values = {
+NetworkLookup.lobby_data_values = {
 	"false",
 	"true",
 	"searching"
+}
+NetworkLookup.game_modes = {
+	"adventure",
+	"survival",
+	"tutorial"
 }
 NetworkLookup.buff_proc_attack_types = {
 	"aoe",
@@ -1045,7 +1114,8 @@ end
 NetworkLookup.game_end_reasons = {
 	"won",
 	"lost",
-	"start_game"
+	"start_game",
+	"reload"
 }
 NetworkLookup.set_wounded_reasons = {
 	"healed",
@@ -1110,9 +1180,10 @@ NetworkLookup.effects = {
 	"fx/screenspace_poison_globe_impact",
 	"fx/wpnfx_fire_grenade_impact_remains",
 	"fx/wpnfx_poison_arrow_impact",
-	"fx/wpnfx_poison_arrow_impact_sniper",
-	"fx/wpnfx_poison_arrow_impact_machinegun",
-	"fx/wpnfx_poison_arrow_impact_carbine",
+	"fx/wpnfx_poison_arrow_impact_clan_rat",
+	"fx/wpnfx_poison_arrow_impact_storm_vermin",
+	"fx/wpnfx_poison_arrow_impact_globadier",
+	"fx/wpnfx_poison_arrow_impact_gutter_runner",
 	"fx/wpnfx_staff_beam_trail",
 	"fx/wpnfx_staff_beam_trail_3p",
 	"fx/wpnfx_staff_beam_target",
@@ -1241,6 +1312,7 @@ NetworkLookup.sound_events = {
 	"Play_clan_rat_attack_player_back_vce",
 	"Play_clan_rat_attack_player_vce",
 	"Play_clan_rat_attack_vce",
+	"Play_hud_matchmaking_countdown",
 	"Play_hud_enemy_attack_back_hit",
 	"player_combat_weapon_staff_charge_husk",
 	"stop_player_combat_weapon_staff_charge_husk",
@@ -1446,8 +1518,7 @@ NetworkLookup.tutorials = {
 	"skaven_gutter_runner",
 	"skaven_pack_master",
 	"skaven_ratling_gunner",
-	"skaven_rat_ogre",
-	"skaven_stormfiend"
+	"skaven_rat_ogre"
 }
 NetworkLookup.pacing = {
 	"pacing_build_up",
@@ -1469,6 +1540,42 @@ NetworkLookup.sync_names = {
 NetworkLookup.boons = {
 	"n/a"
 }
+NetworkLookup.matchmaking_regions = {
+	"south_east_asia",
+	"northern_europe",
+	"western_europe",
+	"eastern_europe",
+	"southern_europe",
+	"middle_east",
+	"russia",
+	"north_america",
+	"south_america",
+	"south_africa",
+	"australia",
+	"south_asia",
+	"china",
+	"europe",
+	"africa"
+}
+NetworkLookup.attack_templates = {
+	"n/a"
+}
+local i = #NetworkLookup.attack_templates
+
+for template_name, template in pairs(AttackTemplates) do
+	i = i + 1
+	NetworkLookup.attack_templates[i] = template_name
+end
+
+NetworkLookup.attack_damage_values = {
+	"n/a"
+}
+i = #NetworkLookup.attack_damage_values
+
+for value_name, values in pairs(AttackDamageValues) do
+	i = i + 1
+	NetworkLookup.attack_damage_values[i] = value_name
+end
 
 for name, data in pairs(BoonTemplates) do
 	NetworkLookup.boons[#NetworkLookup.boons + 1] = name

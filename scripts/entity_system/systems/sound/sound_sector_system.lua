@@ -1,6 +1,6 @@
 local font_size = 26
 local font_size_blackboard = 16
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local NUM_OF_SECTORS = 4
 local RPCS = {
@@ -37,7 +37,7 @@ SoundSectorSystem.init = function (self, context, system_name)
 		self._sector_sound_source_units[i] = sound_source_unit
 	end
 
-	self.debug_gui_screen = World.create_screen_gui(self.world, "material", "materials/fonts/arial", "immediate")
+	self.debug_gui_screen = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 	script_data.sound_sector_system_debug = script_data.sound_sector_system_debug or Development.parameter("sound_sector_system_debug")
 
 	return 

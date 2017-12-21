@@ -347,8 +347,6 @@ AISimpleExtension.enemy_aggro = function (self, alerting_unit, enemy_unit)
 	blackboard.no_hesitation = true
 	local self_unit = self._unit
 
-	ScriptUnit.extension(self_unit, "ai_navigation_system"):set_enabled(true)
-
 	if ScriptUnit.has_extension(self_unit, "ai_slot_system") then
 		ScriptUnit.extension(self_unit, "ai_slot_system").do_search = true
 	end

@@ -29,6 +29,13 @@ end
 ActionShieldSlam.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.target_breed_unit = nil
+
+	if not Managers.player:owner(self.owner_unit).bot_player then
+		Managers.state.controller_features:add_effect("rumble", {
+			rumble_effect = "light_swing"
+		})
+	end
+
 	local ammo_extension = self.ammo_extension
 
 	if ammo_extension and ammo_extension.is_reloading(ammo_extension) then
@@ -75,6 +82,12 @@ ActionShieldSlam.client_owner_post_update = function (self, dt, t, world, can_da
 
 	if self.state == "hitting" then
 		self._hit(self, world, can_damage, owner_unit, current_action)
+
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "hit_character_light"
+			})
+		end
 	end
 
 	return 
@@ -117,14 +130,15 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 				local hit_zone_name = hit_zone.name
 				local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
 				local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-				local attack_template = AttackTemplates[current_action.push_attack_template]
-				local attack_template_id = attack_template.lookup_id
+				local attack_template_id = NetworkLookup.attack_templates[current_action.push_attack_template]
+				local attack_template_damage_type_name = current_action.push_attack_template_damage_type
+				local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 				local backstab_multiplier = 1
 
 				if self.is_server or LEVEL_EDITOR_TEST then
-					self.weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, -1, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+					self.weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
 				else
-					network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, -1, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+					network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
 				end
 			end
 		end
@@ -141,17 +155,10 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 		local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 		local attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(self.current_action, self.is_critical_strike)
 		local attack_template = AttackTemplates[attack_template_name]
-		local attack_template_id = attack_template.lookup_id
+		local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+		local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 
 		ActionSweep._play_character_impact(self, self.is_server, owner_unit, self.current_action, attack_template, attack_template_damage_type_name, target_breed_unit, target_position, breed, hit_zone_name, attack_direction)
-
-		local attack_template_damage_type_id = -1
-
-		if attack_template_damage_type_name then
-			local attack_template_damage_type = AttackDamageValues[attack_template_damage_type_name]
-			attack_template_damage_type_id = attack_template_damage_type.lookup_id
-		end
-
 		DamageUtils.buff_on_attack(owner_unit, target_breed_unit, "heavy_attack")
 
 		local backstab_multiplier = 1
@@ -166,6 +173,12 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 			World.destroy_particles(self.world, self.critical_strike_particle_id)
 
 			self.critical_strike_particle_id = nil
+		end
+
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "handgun_fire"
+			})
 		end
 
 		self.hit_target_breed_unit = true

@@ -1,12 +1,12 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTRatlingGunnerMoveToShootAction = class(BTRatlingGunnerMoveToShootAction, BTNode)
-BTRatlingGunnerMoveToShootAction.name = "BTRatlingGunnerMoveToShootAction"
 BTRatlingGunnerMoveToShootAction.init = function (self, ...)
 	BTRatlingGunnerMoveToShootAction.super.init(self, ...)
 
 	return 
 end
+BTRatlingGunnerMoveToShootAction.name = "BTRatlingGunnerMoveToShootAction"
 BTRatlingGunnerMoveToShootAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	local attack_pattern_data = {}

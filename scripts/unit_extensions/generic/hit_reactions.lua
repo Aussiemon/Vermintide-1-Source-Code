@@ -1,6 +1,7 @@
 HitReactions = {}
 local DamageDataIndex = DamageDataIndex
 local ignored_damage_types = {
+	buff_shared_medpack = true,
 	kinetic = true,
 	wounded_dot = true,
 	buff = true,

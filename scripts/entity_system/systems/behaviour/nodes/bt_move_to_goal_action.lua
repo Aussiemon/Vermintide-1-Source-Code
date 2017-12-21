@@ -1,7 +1,6 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTMoveToGoalAction = class(BTMoveToGoalAction, BTNode)
-BTMoveToGoalAction = class(BTMoveToGoalAction, BTNode)
 BTMoveToGoalAction.init = function (self, ...)
 	BTMoveToGoalAction.super.init(self, ...)
 
@@ -21,7 +20,6 @@ BTMoveToGoalAction.enter = function (self, unit, blackboard, t)
 	network_manager.anim_event(network_manager, unit, "to_passive")
 
 	if ScriptUnit.has_extension(unit, "ai_inventory_system") then
-		local network_manager = Managers.state.network
 		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 
 		network_manager.network_transmit:send_rpc_all("rpc_ai_inventory_wield", unit_id)
@@ -32,7 +30,7 @@ end
 BTMoveToGoalAction.leave = function (self, unit, blackboard, t)
 	blackboard.move_state = nil
 
-	self.toggle_start_move_animation_lock(self, unit, false)
+	self.toggle_start_move_animation_lock(self, unit, false, blackboard)
 
 	blackboard.start_anim_locked = nil
 	blackboard.anim_cb_rotation_start = nil
@@ -50,7 +48,7 @@ BTMoveToGoalAction.run = function (self, unit, blackboard, t, dt)
 		blackboard.move_state = "moving"
 		blackboard.start_anim_locked = nil
 
-		self.toggle_start_move_animation_lock(self, unit, false)
+		self.toggle_start_move_animation_lock(self, unit, false, blackboard)
 	end
 
 	if not blackboard.start_anim_done then
@@ -66,7 +64,7 @@ BTMoveToGoalAction.run = function (self, unit, blackboard, t, dt)
 			blackboard.anim_cb_move = false
 			blackboard.move_state = "moving"
 
-			self.toggle_start_move_animation_lock(self, unit, false)
+			self.toggle_start_move_animation_lock(self, unit, false, blackboard)
 
 			blackboard.start_anim_locked = nil
 			blackboard.start_anim_done = true
@@ -97,7 +95,7 @@ BTMoveToGoalAction.run = function (self, unit, blackboard, t, dt)
 	return "running", should_evaluate
 end
 BTMoveToGoalAction.start_move_animation = function (self, unit, blackboard)
-	self.toggle_start_move_animation_lock(self, unit, true)
+	self.toggle_start_move_animation_lock(self, unit, true, blackboard)
 
 	local animation_name = "move_start_fwd"
 
@@ -110,7 +108,7 @@ BTMoveToGoalAction.start_move_animation = function (self, unit, blackboard)
 end
 BTMoveToGoalAction.start_move_rotation = function (self, unit, blackboard, t, dt)
 	if blackboard.move_animation_name == "move_start_fwd" then
-		self.toggle_start_move_animation_lock(self, unit, false)
+		self.toggle_start_move_animation_lock(self, unit, false, blackboard)
 	else
 		blackboard.anim_cb_rotation_start = false
 		local rot_scale = AiAnimUtils.get_animation_rotation_scale(unit, blackboard, blackboard.action)
@@ -120,12 +118,12 @@ BTMoveToGoalAction.start_move_rotation = function (self, unit, blackboard, t, dt
 
 	return 
 end
-BTMoveToGoalAction.toggle_start_move_animation_lock = function (self, unit, should_lock_ani)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+BTMoveToGoalAction.toggle_start_move_animation_lock = function (self, unit, should_lock_ani, blackboard)
+	local locomotion_extension = blackboard.locomotion_extension
 
 	if should_lock_ani then
 		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
-		LocomotionUtils.set_animation_driven_movement(unit, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 	else
 		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
 		LocomotionUtils.set_animation_driven_movement(unit, false)

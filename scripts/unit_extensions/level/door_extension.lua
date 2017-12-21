@@ -146,7 +146,7 @@ DoorExtension.update = function (self, unit, input, dt, context, t)
 		end
 	end
 
-	if not self.is_server or self.dead then
+	if self.dead then
 		return 
 	end
 

@@ -221,6 +221,12 @@ end
 PlayerBotUnitFirstPerson.animation_event = function (self, event)
 	return 
 end
+PlayerBotUnitFirstPerson.increase_aim_assist_multiplier = function (self)
+	return 
+end
+PlayerBotUnitFirstPerson.reset_aim_assist_multiplier = function (self)
+	return 
+end
 PlayerBotUnitFirstPerson.is_in_view = function (self, position)
 	return true
 end

@@ -58,13 +58,16 @@ AltarView.init = function (self, ingame_ui_context)
 	self.peer_id = ingame_ui_context.peer_id
 	self.local_player_id = ingame_ui_context.local_player_id
 	self.is_server = ingame_ui_context.is_server
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "enchantment_view", self.ingame_ui:get_ingame_menu_keymap())
+	input_manager.create_input_service(input_manager, "enchantment_view", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "enchantment_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "enchantment_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "enchantment_view", "gamepad")
@@ -88,6 +91,29 @@ AltarView.init = function (self, ingame_ui_context)
 
 	self.ingame_ui_context = ingame_ui_context
 	self.confirmation_popup = self.create_confirmation_popup(self)
+
+	self.fit_title(self)
+
+	return 
+end
+AltarView.fit_title = function (self)
+	local style = self.widgets_by_name.title_widget.style.text
+	local text = Localize(self.widgets_by_name.title_widget.content.text)
+	local temp_vectors, temp_quaternions, temp_matrices = Script.temp_count()
+	local continue = true
+
+	repeat
+		local font, scaled_font_size = UIFontByResolution(style)
+		local text_width = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
+
+		Script.set_temp_count(temp_vectors, temp_quaternions, temp_matrices)
+
+		if text_width <= 430 or style.font_size <= 1 then
+			continue = false
+		else
+			style.font_size = style.font_size - 1
+		end
+	until not continue
 
 	return 
 end
@@ -249,18 +275,22 @@ AltarView.on_exit = function (self)
 end
 AltarView.exit = function (self, return_to_game)
 	if self.menu_locked then
-		local text = Localize("dlc1_1_trait_roll_error_description")
-		self.popup_id = Managers.popup:queue_popup(text, Localize("dlc1_1_trait_roll_error_topic"), "cancel_popup", Localize("popup_choice_ok"))
+		if not self.popup_id then
+			local text = Localize("dlc1_1_trait_roll_error_description")
+			self.popup_id = Managers.popup:queue_popup(text, Localize("dlc1_1_trait_roll_error_topic"), "cancel_popup", Localize("popup_choice_ok"))
+		end
 
 		return 
 	end
 
-	exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
+	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
 
 	self.ingame_ui:transition_with_fade(exit_transition)
 	self.play_sound(self, "Play_hud_reroll_traits_window_minimize")
 
 	self.exiting = true
+
+	self.ui_pages.items:on_focus_lost()
 
 	return 
 end
@@ -503,10 +533,10 @@ AltarView.select_craft_page = function (self, ignore_sound)
 	local trait_proc_ui_page = ui_pages.trait_proc
 	local trait_reroll_ui_page = ui_pages.trait_reroll
 	local craft_ui_page = ui_pages.craft
-	craft_ui_page.active = true
-	trait_proc_ui_page.active = false
-	trait_reroll_ui_page.active = false
 
+	craft_ui_page.set_active(craft_ui_page, true)
+	trait_proc_ui_page.set_active(trait_proc_ui_page, false)
+	trait_reroll_ui_page.set_active(trait_reroll_ui_page, false)
 	trait_proc_ui_page.remove_item(trait_proc_ui_page)
 	trait_reroll_ui_page.remove_item(trait_reroll_ui_page)
 
@@ -529,6 +559,7 @@ AltarView.select_craft_page = function (self, ignore_sound)
 	items_page.set_item_filter(items_page, item_filter)
 	items_page.set_rarity(items_page, nil)
 	items_page.set_drag_enabled(items_page, true)
+	items_page.set_gamepad_focus(items_page, true)
 
 	local slot_type_changed = items_page.set_selected_slot_type(items_page, "trinket")
 
@@ -570,10 +601,10 @@ AltarView.select_trait_reroll_page = function (self, ignore_sound)
 	local trait_proc_ui_page = ui_pages.trait_proc
 	local trait_reroll_ui_page = ui_pages.trait_reroll
 	local craft_ui_page = ui_pages.craft
-	craft_ui_page.active = false
-	trait_proc_ui_page.active = false
-	trait_reroll_ui_page.active = true
 
+	craft_ui_page.set_active(craft_ui_page, false)
+	trait_proc_ui_page.set_active(trait_proc_ui_page, false)
+	trait_reroll_ui_page.set_active(trait_reroll_ui_page, true)
 	craft_ui_page.remove_item(craft_ui_page)
 	trait_proc_ui_page.remove_item(trait_proc_ui_page)
 
@@ -592,6 +623,7 @@ AltarView.select_trait_reroll_page = function (self, ignore_sound)
 	items_page.set_item_filter(items_page, nil)
 	items_page.set_rarity(items_page, nil)
 	items_page.set_drag_enabled(items_page, true)
+	items_page.set_gamepad_focus(items_page, true)
 
 	local slot_type_changed = items_page.set_selected_slot_type(items_page, "weapons")
 
@@ -633,10 +665,10 @@ AltarView.select_trait_proc_page = function (self, ignore_sound)
 	local trait_proc_ui_page = ui_pages.trait_proc
 	local trait_reroll_ui_page = ui_pages.trait_reroll
 	local craft_ui_page = ui_pages.craft
-	craft_ui_page.active = false
-	trait_proc_ui_page.active = true
-	trait_reroll_ui_page.active = false
 
+	craft_ui_page.set_active(craft_ui_page, false)
+	trait_proc_ui_page.set_active(trait_proc_ui_page, true)
+	trait_reroll_ui_page.set_active(trait_reroll_ui_page, false)
 	craft_ui_page.remove_item(craft_ui_page)
 	trait_reroll_ui_page.remove_item(trait_reroll_ui_page)
 
@@ -655,6 +687,7 @@ AltarView.select_trait_proc_page = function (self, ignore_sound)
 	items_page.set_item_filter(items_page, nil)
 	items_page.set_rarity(items_page, nil)
 	items_page.set_drag_enabled(items_page, true)
+	items_page.set_gamepad_focus(items_page, true)
 
 	local slot_type_changed = items_page.set_selected_slot_type(items_page, "weapons")
 
@@ -698,17 +731,22 @@ AltarView.draw = function (self, dt)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local widgets_by_name = self.widgets_by_name
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
 
 	local forge_selection_bar = self.forge_selection_bar_widget
 
-	UIRenderer.draw_widget(ui_renderer, forge_selection_bar)
+	UIRenderer.draw_widget(ui_top_renderer, forge_selection_bar)
+	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local token_widgets = self.token_widgets
 
 	for i = 1, #token_widgets, 1 do
-		UIRenderer.draw_widget(ui_renderer, token_widgets[i])
+		UIRenderer.draw_widget(ui_top_renderer, token_widgets[i])
 	end
+
+	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	for widget_name, widget in pairs(widgets_by_name) do
 		if widget_name ~= "exit_button_widget" and widget_name ~= "forge_selection_bar" then
@@ -718,8 +756,12 @@ AltarView.draw = function (self, dt)
 
 	if not gamepad_active then
 		UIRenderer.draw_widget(ui_renderer, self.exit_button_widget)
-	elseif self.ui_pages.items.active and not self.input_blocked then
-		UIRenderer.draw_widget(ui_renderer, self.page_center_glow_widget)
+	elseif not self.input_blocked then
+		if self.ui_pages.items.use_gamepad then
+			UIRenderer.draw_widget(ui_renderer, self.page_center_glow_widget)
+		elseif self.ui_pages.craft.use_gamepad then
+			UIRenderer.draw_widget(ui_renderer, self.page_left_glow_widget)
+		end
 	end
 
 	UIRenderer.end_pass(ui_renderer)
@@ -855,6 +897,7 @@ AltarView.handle_index_changes = function (self)
 		items_page.set_backend_id_disabled_state(items_page, craft_ui_page.active_item_id, false)
 		craft_ui_page.remove_item(craft_ui_page)
 		items_page.refresh_items_status(items_page)
+		items_page.set_gamepad_focus(items_page, true)
 	end
 
 	local pressed_item_backend_id = craft_ui_page.pressed_item_backend_id
@@ -1050,6 +1093,7 @@ AltarView.handle_page_requests = function (self)
 			craft_ui_page.add_item(craft_ui_page, item_selected_backend_id)
 			items_page.refresh_items_status(items_page)
 			items_page.set_backend_id_disabled_state(items_page, item_selected_backend_id, true)
+			items_page.set_gamepad_focus(items_page, false)
 		elseif craft_ui_page.craft_request then
 			local selected_slot_name = craft_ui_page.selected_slot_name(craft_ui_page)
 			local selected_token_rarity = craft_ui_page.selected_token_rarity(craft_ui_page)
@@ -1308,9 +1352,13 @@ AltarView.set_gamepad_page_focus = function (self, name)
 		ui_pages[gamepad_selected_page]:set_gamepad_focus(false)
 	end
 
+	ui_pages.items:on_focus_lost()
+
 	if ui_pages[name].set_gamepad_focus then
 		ui_pages[name]:set_gamepad_focus(true)
 	end
+
+	ui_pages.items:set_gamepad_press_input_enabled(name == "melt")
 
 	self.gamepad_selected_page = name
 	self.gamepad_active_actions_name = nil

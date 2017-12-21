@@ -23,7 +23,7 @@ BTTargetRageAction.enter = function (self, unit, blackboard, t)
 	blackboard.attack_anim_driven = anim_driven
 
 	locomotion_extension.use_lerp_rotation(locomotion_extension, not anim_driven)
-	LocomotionUtils.set_animation_driven_movement(unit, anim_driven)
+	LocomotionUtils.set_animation_driven_movement(unit, anim_driven, false, false)
 
 	if anim_driven then
 		blackboard.move_animation_name = rage_anim

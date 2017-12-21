@@ -1,28 +1,35 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTStaggerAction = class(BTStaggerAction, BTNode)
-BTStaggerAction.name = "BTStaggerAction"
 BTStaggerAction.init = function (self, ...)
 	BTStaggerAction.super.init(self, ...)
 
 	return 
 end
+BTStaggerAction.name = "BTStaggerAction"
+local NAV_CHECK_ABOVE = 0.25
+local NAV_CHECK_BELOW = 0.25
+local RAYCAST_LENGTH = 1.3
+local RAYCAST_LOW_HEIGHT = 0.4
+local EPSILON = 0.0001
 BTStaggerAction.enter = function (self, unit, blackboard, t)
 	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, false)
 
+	local was_already_in_stagger = blackboard.staggering_id and blackboard.stagger ~= blackboard.staggering_id
 	blackboard.stagger_anim_done = false
 	blackboard.stagger_hit_wall = nil
 	blackboard.staggering_id = blackboard.stagger
+	blackboard.attack_aborted = true
 	local action_data = self._tree_node.action_data
+	blackboard.action = action_data
 	local stagger_anims = action_data.stagger_anims[blackboard.stagger_type]
 
 	fassert(stagger_anims, "Stagger type %q", blackboard.stagger_type)
 
 	local impact_dir = blackboard.stagger_direction:unbox()
 	local push_anim, impact_rot = self._select_animation(self, unit, blackboard, impact_dir, stagger_anims)
-	blackboard.attack_aborted = true
 
 	Unit.set_local_rotation(unit, 0, impact_rot)
 
@@ -30,10 +37,8 @@ BTStaggerAction.enter = function (self, unit, blackboard, t)
 
 	network_manager.anim_event(network_manager, unit, "to_combat")
 
-	local anim_scale = 1
-
 	if action_data.scale_animation_speeds then
-		anim_scale = action_data.stagger_animation_scale or blackboard.stagger_animation_scale or 1
+		local anim_scale = action_data.stagger_animation_scale or blackboard.stagger_animation_scale or 1
 
 		network_manager.anim_event_with_variable_float(network_manager, unit, push_anim, "stagger_scale", anim_scale)
 	else
@@ -45,30 +50,24 @@ BTStaggerAction.enter = function (self, unit, blackboard, t)
 	local scale = blackboard.stagger_length
 
 	LocomotionUtils.set_animation_translation_scale(unit, Vector3(scale, scale, scale))
-	LocomotionUtils.set_animation_driven_movement(unit, true, true)
+
+	if was_already_in_stagger then
+		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+		local unit_position = POSITION_LOOKUP[unit]
+		local unit_rotation = impact_rot
+
+		network_manager.network_transmit:send_rpc_clients("rpc_teleport_unit_to", unit_id, unit_position, unit_rotation)
+	else
+		LocomotionUtils.set_animation_driven_movement(unit, true, true, false)
+	end
 
 	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_rotation_speed(locomotion_extension, 100)
-	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3(0, 0, 0))
-	locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
+	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
 	locomotion_extension.use_lerp_rotation(locomotion_extension, false)
 
-	local nav_world = blackboard.nav_world
-	local velocity = locomotion_extension.current_velocity(locomotion_extension)
-	local unit_position = POSITION_LOOKUP[unit]
-	local is_moving = 0 < Vector3.length_squared(velocity)
-	local direction = impact_dir
-	local target_position = unit_position + direction*0.5
-	local is_position_on_navmesh, altitude = GwNavQueries.triangle_from_position(nav_world, unit_position, 0.1, 0.1)
-	local raycango = is_position_on_navmesh and GwNavQueries.raycango(nav_world, unit_position, target_position)
-
-	if not script_data.ai_force_stagger_mover and raycango then
-	else
-		local action_data = self._tree_node.action_data
-
-		locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", action_data.override_mover_move_distance)
-	end
+	blackboard.spawn_to_running = nil
 
 	return 
 end
@@ -116,18 +115,18 @@ BTStaggerAction._select_animation = function (self, unit, blackboard, impact_vec
 
 	return anim, impact_rot
 end
-BTStaggerAction.leave = function (self, unit, blackboard, t, dt, new_action)
+BTStaggerAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.stagger_type = nil
 	blackboard.stagger = nil
 	blackboard.pushing_unit = nil
-	blackboard.staggering = nil
+	blackboard.staggering_id = nil
 	blackboard.stagger_direction = nil
 	blackboard.stagger_length = nil
 	blackboard.stagger_time = nil
 	blackboard.stagger_anim_done = nil
 	blackboard.stagger_hit_wall = nil
 
-	LocomotionUtils.set_animation_driven_movement(unit, false)
+	LocomotionUtils.set_animation_driven_movement(unit, false, false)
 
 	local locomotion_extension = blackboard.locomotion_extension
 
@@ -135,6 +134,7 @@ BTStaggerAction.leave = function (self, unit, blackboard, t, dt, new_action)
 	locomotion_extension.set_wanted_rotation(locomotion_extension, nil)
 	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
 	locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
 	LocomotionUtils.set_animation_translation_scale(unit, Vector3(1, 1, 1))
 
 	local network_manager = Managers.state.network
@@ -161,46 +161,35 @@ BTStaggerAction.run = function (self, unit, blackboard, t, dt)
 	local locomotion_extension = blackboard.locomotion_extension
 
 	if blackboard.stagger_anim_done then
-		LocomotionUtils.set_animation_driven_movement(unit, false)
-		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3(0, 0, 0))
-
 		if Unit.alive(blackboard.pushing_unit) then
 			local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.pushing_unit)
 
-			locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
+			locomotion_extension.use_lerp_rotation(locomotion_extension, true)
 			locomotion_extension.set_rotation_speed(locomotion_extension, 3)
+			locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
 		end
 	elseif locomotion_extension.movement_type ~= "constrained_by_mover" and not blackboard.stagger_hit_wall then
 		Profiler.start("checking navmesh")
 
-		local EPSILON = 0.0001
-		local nav_world = blackboard.nav_world
+		local position = POSITION_LOOKUP[unit]
 		local velocity = locomotion_extension.current_velocity(locomotion_extension)
-		local unit_position = POSITION_LOOKUP[unit]
-		local is_moving = EPSILON < Vector3.length_squared(velocity)
-		local direction = (is_moving and Vector3.normalize(velocity)) or Vector3.zero()
-		local target_position = unit_position + direction*0.3
-		local is_position_on_navmesh, altitude = GwNavQueries.triangle_from_position(nav_world, unit_position, 0.1, 0.1)
-		local raycango = is_position_on_navmesh and GwNavQueries.raycango(nav_world, unit_position, target_position)
+		local nav_world = blackboard.nav_world
+		local world = blackboard.world
+		local physics_world = World.physics_world(world)
+		local navigation_extension = blackboard.navigation_extension
+		local traverse_logic = navigation_extension.traverse_logic(navigation_extension)
+		local result = LocomotionUtils.navmesh_movement_check(position, velocity, nav_world, physics_world, traverse_logic)
 
-		if raycango and is_position_on_navmesh then
-		elseif is_moving then
-			local world = blackboard.world
-			local physics_world = World.physics_world(world)
-			local ray_source = unit_position + Vector3.up()*0.4
-			local ray_length = 1.3
-			local result, hit_position, hit_distance = PhysicsWorld.immediate_raycast(physics_world, ray_source, direction, ray_length, "closest", "collision_filter", "filter_ai_mover")
+		if result == "navmesh_hit_wall" then
+			blackboard.stagger_hit_wall = true
+		elseif result == "navmesh_use_mover" then
+			local breed = blackboard.breed
+			local override_mover_move_distance = breed.override_mover_move_distance
 
-			if result then
-				blackboard.stagger_hit_wall = true
-			else
-				local action_data = self._tree_node.action_data
-
-				locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", action_data.override_mover_move_distance)
-			end
+			locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
 		end
 
-		Profiler.stop()
+		Profiler.stop("checking navmesh")
 	end
 
 	if blackboard.stagger_time < t and blackboard.stagger_anim_done then

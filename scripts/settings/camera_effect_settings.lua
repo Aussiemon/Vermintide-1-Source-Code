@@ -740,6 +740,31 @@ CameraEffectSettings = {
 			duration = 12,
 			fade_in = 1,
 			octaves = 8
+		},
+		tutorial_thunder = {
+			persistance = 1,
+			fade_out = 0.5,
+			amplitude = 0.25,
+			duration = 1,
+			fade_in = 0.3,
+			octaves = 6
+		},
+		tutorial_storm_ambience = {
+			persistance = 0.5,
+			fade_out = 2,
+			amplitude = 0.4,
+			no_rumble = true,
+			duration = 1000,
+			fade_in = 2,
+			octaves = 6
+		},
+		dwarf_int_brewery_loop = {
+			persistance = 0.85,
+			fade_out = 2,
+			amplitude = 0.3,
+			duration = 5,
+			fade_in = 2,
+			octaves = 7
 		}
 	}
 }

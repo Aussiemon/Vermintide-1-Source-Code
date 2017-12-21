@@ -4,7 +4,7 @@ require("scripts/utils/draw_ai_behavior")
 script_data.ai_debugger_freeflight_only = script_data.ai_debugger_freeflight_only or Development.parameter("ai_debugger_freeflight_only")
 local font_size = 26
 local font_size_blackboard = 16
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 AIDebugger = class(AIDebugger)
 AIDebugger.init = function (self, world, nav_world, group_blackboard, is_server, free_flight_manager)
@@ -13,8 +13,8 @@ AIDebugger.init = function (self, world, nav_world, group_blackboard, is_server,
 	self.world = world
 	self.nav_world = nav_world
 	self.group_blackboard = group_blackboard
-	self.world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "immediate", "material", "materials/fonts/arial")
-	self.screen_gui = World.create_screen_gui(self.world, "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts", "material", "materials/fonts/arial", "immediate")
+	self.world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "immediate", "material", "materials/fonts/gw_fonts")
+	self.screen_gui = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 	self.show_navmesh = false
 	self.show_slots = false
 	self.follow_active = false
@@ -158,6 +158,12 @@ AIDebugger.update = function (self, t, dt)
 			self.show_behavior_tree = not self.show_behavior_tree
 		end
 
+		local platform = Application.platform()
+
+		if (platform == "ps4" or platform == "xb1") and DebugKeyHandler.key_pressed("show_behaviour", "show behaviour graph", "ai debugger") then
+			self.show_behavior_tree = not self.show_behavior_tree
+		end
+
 		if self.show_behavior_tree then
 			self.tree_x = self.tree_x or 0.45
 			local blackboard = Unit.get_data(self.active_unit, "blackboard")
@@ -169,12 +175,26 @@ AIDebugger.update = function (self, t, dt)
 
 				DrawAiBehaviour.tree_width(self.screen_gui, root_node)
 
-				local running_outside_offset = DrawAiBehaviour.draw_tree(bt, self.screen_gui, root_node, blackboard, 1, t, dt, self.tree_x, 0)
+				local extra_info = nil
+				local group_extension = ScriptUnit.extension(self.active_unit, "ai_group_system")
 
-				if DebugKeyHandler.key_pressed("mouse_middle_held", "pan behaviour graph", "ai debugger") then
+				if group_extension and group_extension.template then
+					local group_template = AIGroupTemplates[group_extension.template]
+					extra_info = group_template.BT_debug(group_extension.group)
+				end
+
+				local running_outside_offset = DrawAiBehaviour.draw_tree(bt, self.screen_gui, root_node, blackboard, 1, t, dt, self.tree_x, 0, nil, extra_info)
+				local right_shoulder_held = DebugKeyHandler.key_pressed("right_shoulder_held", "pan behaviour graph", "ai debugger")
+				local mouse_middle_held = DebugKeyHandler.key_pressed("mouse_middle_held", "pan behaviour graph", "ai debugger")
+
+				if mouse_middle_held then
 					local input_service = self.free_flight_manager.input_manager:get_service("Debug")
 					local look = input_service.get(input_service, "look")
 					self.tree_x = self.tree_x - look.x*0.001
+				elseif right_shoulder_held then
+					local input_service = self.free_flight_manager.input_manager:get_service("Debug")
+					local look = input_service.get(input_service, "look_raw")
+					self.tree_x = self.tree_x - look.x*0.1
 				end
 
 				if DebugKeyHandler.key_pressed("mouse_middle_held", "pan reset behaviour graph", "ai debugger", "left shift") then
@@ -290,7 +310,9 @@ AIDebugger.update_ingame_selection = function (self, in_free_flight)
 		self.active_unit = nil
 	end
 
-	if DebugKeyHandler.key_pressed("v", "select bot", "ai debugger") and self.closest_unit_in_aim_dir(self, in_free_flight) then
+	local select_target = DebugKeyHandler.key_pressed("right_thumb_pressed", "select target", "ai")
+
+	if (select_target or DebugKeyHandler.key_pressed("v", "select bot", "ai debugger")) and self.closest_unit_in_aim_dir(self, in_free_flight) then
 		if Unit.alive(self.active_unit) and script_data.anim_debug_ai_debug_target then
 			Unit.set_animation_logging(self.active_unit, false)
 		end

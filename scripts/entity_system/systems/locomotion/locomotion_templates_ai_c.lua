@@ -10,6 +10,8 @@ LocomotionTemplates.AILocomotionExtensionC = {
 			local conflict_director = Managers.state.conflict
 
 			for i = 1, #units_to_kill, 1 do
+				print("killing unit since outside mesh or world")
+
 				local unit = units_to_kill[i]
 				local ai_extension = ScriptUnit_extension(unit, "ai_system")
 				local blackboard = ai_extension._blackboard

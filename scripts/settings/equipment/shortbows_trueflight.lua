@@ -7,7 +7,6 @@ weapon_template.actions = {
 	action_one = {
 		default = {
 			max_penetrations = 1,
-			min_speed = 5000,
 			ammo_usage = 1,
 			kind = "bow",
 			apply_recoil = true,
@@ -16,6 +15,7 @@ weapon_template.actions = {
 			weapon_action_hand = "left",
 			fire_sound_event = "player_combat_weapon_shortbow_fire_light_homing",
 			fire_reason = "action_complete",
+			speed = 5000,
 			anim_event = "attack_shoot_fast",
 			total_time = 0.83,
 			allowed_chain_actions = {
@@ -52,21 +52,20 @@ weapon_template.actions = {
 			alert_sound_range_hit = ALERT_SOUND_RANGE_HIT
 		},
 		shoot_charged = {
-			max_speed = 6000,
-			anim_event = "attack_shoot",
-			min_speed = 6000,
-			max_penetrations = 1,
+			anim_event_last_ammo = "attack_shoot_last",
+			kind = "true_flight_bow",
 			sphere_sweep_dot_threshold = 0.75,
 			true_flight_template = "carbine",
-			kind = "true_flight_bow",
-			sphere_sweep_radius = 2,
+			max_penetrations = 1,
 			sphere_sweep_length = 50,
-			anim_event_last_ammo = "attack_shoot_last",
 			ammo_usage = 1,
+			sphere_sweep_radius = 2,
 			charge_value = "zoomed_arrow_hit",
 			weapon_action_hand = "left",
 			fire_sound_event = "player_combat_weapon_shortbow_fire_heavy_homing",
+			speed = 6000,
 			sphere_sweep_max_nr_of_results = 100,
+			anim_event = "attack_shoot",
 			total_time = 1.66,
 			allowed_chain_actions = {
 				{
@@ -126,7 +125,14 @@ weapon_template.actions = {
 					input = "action_wield",
 					end_time = math.huge
 				}
-			}
+			},
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
+			end
 		},
 		aim = {
 			allow_hold_toggle = true,
@@ -191,6 +197,12 @@ weapon_template.ammo_data = {
 	reload_time = 0.25,
 	ammo_unit_attachment_node_linking = AttachmentNodeLinking.arrow
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "bow"
 weapon_template.left_hand_unit = "units/weapons/player/wpn_we_bow_01_t1/wpn_we_bow_01_t1"
 weapon_template.display_unit = "units/weapons/weapon_display/display_bow"
@@ -200,6 +212,10 @@ weapon_template.wield_anim_no_ammo = "to_bow_noammo"
 weapon_template.crosshair_style = "default"
 weapon_template.no_ammo_reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.default_projectile_action = weapon_template.actions.action_one.default
+weapon_template.dodge_distance = 1.3
+weapon_template.dodge_speed = 1.3
+weapon_template.dodge_count = 100
 weapon_template.wwise_dep_left_hand = {
 	"wwise/bow"
 }

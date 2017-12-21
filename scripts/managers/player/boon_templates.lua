@@ -54,6 +54,7 @@ BoonTemplates = {
 	}
 }
 MaxBoonDuration = 0
+MaxDisplayableBoons = 4
 
 for _, data in pairs(BoonTemplates) do
 	local duration = data.duration

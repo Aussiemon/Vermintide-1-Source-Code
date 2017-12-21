@@ -295,6 +295,7 @@ local scenegraph_definition = {
 	}
 }
 local widgets_definitions = {
+	gamepad_input = UIWidgets.create_gamepad_bar_input_extension("progress_bar"),
 	progress_bar_bg = UIWidgets.create_simple_texture("forge_progress_bar_bg", "progress_bar_bg"),
 	progress_bar_fg = UIWidgets.create_simple_texture("forge_progress_bar_fg", "progress_bar_fg"),
 	progress_bar = UIWidgets.create_simple_texture("forge_progress_bar_fill", "progress_bar"),

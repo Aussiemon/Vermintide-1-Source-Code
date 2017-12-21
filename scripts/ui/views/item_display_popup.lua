@@ -16,6 +16,9 @@ ItemDisplayPopup.init = function (self, ingame_ui_context, world_name, spawn_eff
 	local input_manager = ingame_ui_context.input_manager
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.number_of_traits_on_item = 0
 	self.parent = parent
 	self.spawn_effect_event_name = spawn_effect_event_name
@@ -150,7 +153,7 @@ ItemDisplayPopup.destroy = function (self)
 	self.on_exit(self)
 
 	if self.viewport_widget then
-		UIWidget.destroy(self.viewport_widget)
+		UIWidget.destroy(self.ui_renderer, self.viewport_widget)
 
 		self.viewport_widget = nil
 	end
@@ -361,7 +364,7 @@ ItemDisplayPopup.update = function (self, dt, input_service)
 		local ui_top_renderer = self.ui_top_renderer
 		local input_service = input_service or fake_input_service
 
-		UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+		UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 		if self.display_reward_texts then
 			local reward_text_widgets = self.reward_text_widgets
@@ -395,7 +398,7 @@ ItemDisplayPopup.update = function (self, dt, input_service)
 		end
 
 		UIRenderer.end_pass(ui_top_renderer)
-		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, fake_input_service, dt)
+		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, fake_input_service, dt, nil, self.render_settings)
 
 		local viewport_widget = self.viewport_widget
 

@@ -11,6 +11,12 @@ end
 AccountManager.init = function (self)
 	return 
 end
+AccountManager.set_level_transition_handler = function (self, level_transition_handler)
+	return 
+end
+AccountManager.user_id = function (self)
+	return 
+end
 AccountManager.update = function (self, dt)
 	return 
 end
@@ -21,6 +27,12 @@ AccountManager.sign_in = function (self, user_id)
 end
 AccountManager.num_signed_in_users = function (self)
 	return 1
+end
+AccountManager.user_detached = function (self)
+	return false
+end
+AccountManager.acitve_controller = function (self)
+	return 
 end
 AccountManager.leaving_game = function (self)
 	return 

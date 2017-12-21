@@ -22,15 +22,14 @@ BTSpawningAction.enter = function (self, unit, blackboard, t)
 		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
 		locomotion_extension.set_movement_type(locomotion_extension, "script_driven")
 		LocomotionUtils.set_animation_driven_movement(unit, true)
-		locomotion_extension.set_affected_by_gravity(locomotion_extension, false)
 	else
 		blackboard.spawning_finished = true
 	end
 
 	local network_manager = Managers.state.network
-	local is_horde = blackboard.spawn_type == "horde" or blackboard.spawn_type == "horde_hidden"
 	local breed = blackboard.breed
 	local wield_inventory_on_spawn = breed.wield_inventory_on_spawn
+	local is_horde = blackboard.spawn_type == "horde" or blackboard.spawn_type == "horde_hidden"
 
 	if (is_horde or wield_inventory_on_spawn) and ScriptUnit.has_extension(unit, "ai_inventory_system") then
 		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
@@ -47,7 +46,7 @@ BTSpawningAction.enter = function (self, unit, blackboard, t)
 
 	return 
 end
-BTSpawningAction.leave = function (self, unit, blackboard, t)
+BTSpawningAction.leave = function (self, unit, blackboard, t, reason, destroy)
 	blackboard.spawn = nil
 	blackboard.spawning_finished = nil
 	blackboard.spawn_last_pos = nil
@@ -55,7 +54,7 @@ BTSpawningAction.leave = function (self, unit, blackboard, t)
 
 	ai_navigation.init_position(ai_navigation)
 
-	if blackboard.spawn_type == "horde" or blackboard.spawn_type == "horde_hidden" then
+	if (blackboard.spawn_type == "horde" or blackboard.spawn_type == "horde_hidden") and not destroy then
 		local ai_extension = ScriptUnit.extension(unit, "ai_system")
 
 		ai_extension.force_enemy_detection(ai_extension, t)
@@ -75,7 +74,7 @@ BTSpawningAction.leave = function (self, unit, blackboard, t)
 
 	if blackboard.spawn_type == "horde" then
 		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
-		LocomotionUtils.set_animation_driven_movement(unit, false, false)
+		LocomotionUtils.set_animation_driven_movement(unit, false)
 
 		blackboard.spawn_landing_state = nil
 		blackboard.jump_climb_finished = nil
@@ -123,6 +122,10 @@ BTSpawningAction.run = function (self, unit, blackboard, t, dt)
 
 				blackboard.constrained_on_client = true
 				blackboard.landing_destination = Vector3Box(current_pos.x, current_pos.y, altitude)
+
+				if not blackboard.spawn_animation then
+					Managers.state.network:anim_event(unit, "jump_down")
+				end
 			else
 				if Application.build() ~= "release" then
 					QuickDrawerStay:sphere(current_pos + Vector3.up(), 1, Colors.get("orange"))
@@ -153,10 +156,15 @@ BTSpawningAction.run = function (self, unit, blackboard, t, dt)
 			network_manager.network_transmit:send_rpc_clients("rpc_teleport_unit_to", unit_id, landing_destination, Unit.local_rotation(unit, 0))
 			locomotion_extension.teleport_to(locomotion_extension, landing_destination)
 			locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
-			LocomotionUtils.set_animation_driven_movement(unit, true, false)
-			Managers.state.network:anim_event(unit, "jump_down_land")
 
-			blackboard.spawn_landing_state = "landing"
+			if blackboard.spawn_animation then
+				LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
+				Managers.state.network:anim_event(unit, "jump_down_land")
+
+				blackboard.spawn_landing_state = "landing"
+			else
+				return "done"
+			end
 		end
 	elseif blackboard.spawn_landing_state == "landing" and blackboard.jump_climb_finished then
 		return "done"

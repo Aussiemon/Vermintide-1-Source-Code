@@ -30,6 +30,7 @@ PlayerBotInput.init = function (self, extension_init_context, unit, extension_in
 	self.dodge_on_jump_key = DefaultUserSettings.get("user_settings", "dodge_on_jump_key")
 	self.dodge_on_forward_diagonal = DefaultUserSettings.get("user_settings", "dodge_on_forward_diagonal")
 	self.double_tap_dodge = DefaultUserSettings.get("user_settings", "double_tap_dodge")
+	self.minimum_dodge_input = 0
 	self._input = {}
 	self._world = extension_init_context.world
 	self._nav_world = Managers.state.entity:system("ai_system"):nav_world()

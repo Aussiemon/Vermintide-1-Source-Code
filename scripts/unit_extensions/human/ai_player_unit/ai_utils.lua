@@ -51,7 +51,7 @@ AiUtils.aggro_nearby_friends_of_enemy = function (unit, broadphase, enemy_unit)
 		broadphase_query_result[i] = nil
 	end
 
-	Profiler.stop()
+	Profiler.stop("aggro_nearby_friends_of_enemy")
 
 	return 
 end
@@ -120,7 +120,7 @@ AiUtils.alert_nearby_friends_of_enemy = function (unit, broadphase, enemy_unit, 
 		broadphase_query_result[i] = nil
 	end
 
-	Profiler.stop()
+	Profiler.stop("alert_nearby_friends_of_enemy")
 
 	return 
 end
@@ -193,7 +193,7 @@ AiUtils.damage_target = function (target_unit, attacker_unit, action, damage_tri
 		if is_player_unit and push_speed then
 			local target_status_extension = ScriptUnit.extension(target_unit, "status_system")
 
-			if not target_status_extension.knocked_down then
+			if not target_status_extension.is_disabled(target_status_extension) then
 				local player_locomotion = ScriptUnit.extension(target_unit, "locomotion_system")
 
 				player_locomotion.add_external_velocity(player_locomotion, push_speed*damage_direction, action.max_player_push_speed)
@@ -260,7 +260,7 @@ AiUtils.broadphase_query = function (position, radius, result_table)
 
 	local num_hits = Broadphase.query(broadphase, position, radius, result_table)
 
-	Profiler.stop()
+	Profiler.stop("Ai broadphase query")
 
 	return num_hits
 end
@@ -402,7 +402,7 @@ AiUtils.is_of_interest_to_gutter_runner = function (gutter_runner_unit, enemy_un
 		return 
 	end
 
-	if status_extension.spawn_grace then
+	if status_extension.spawn_grace or status_extension.ready_for_assisted_respawn then
 		return 
 	end
 
@@ -411,37 +411,20 @@ end
 AiUtils.stagger = function (unit, blackboard, attacker_unit, stagger_direction, stagger_length, stagger_type, stagger_duration, stagger_animation_scale, t)
 	assert(0 < stagger_type, "Tried to use invalid stagger type %q", stagger_type)
 
+	local difficulty_modifier = Managers.state.difficulty:get_difficulty_settings().stagger_modifier
 	blackboard.pushing_unit = attacker_unit
 	blackboard.stagger_direction = Vector3Box(stagger_direction)
 	blackboard.stagger_length = stagger_length
-	blackboard.stagger_time = stagger_duration + t
+	blackboard.stagger_time = stagger_duration*difficulty_modifier + t
 	blackboard.stagger = (blackboard.stagger and blackboard.stagger + 1) or 1
 	blackboard.stagger_type = stagger_type
-	blackboard.stagger_scale = stagger_animation_scale
+	blackboard.stagger_animation_scale = stagger_animation_scale
 
 	if unit ~= attacker_unit and ScriptUnit.has_extension(unit, "ai_system") then
 		local ai_extension = ScriptUnit.extension(unit, "ai_system")
 
 		if ai_extension.attacked then
 			ai_extension.attacked(ai_extension, attacker_unit, t)
-		end
-	end
-
-	return 
-end
-AiUtils.stun = function (unit, stun_time, t, attacker_unit)
-	local blackboard = Unit.get_data(unit, "blackboard")
-
-	if blackboard then
-		blackboard.stunned = true
-		blackboard.stunned_time = t + stun_time
-
-		if unit ~= attacker_unit and ScriptUnit.has_extension(unit, "ai_system") then
-			local ai_extension = ScriptUnit.extension(unit, "ai_system")
-
-			if ai_extension.attacked then
-				ai_extension.attacked(ai_extension, attacker_unit, t)
-			end
 		end
 	end
 
@@ -624,7 +607,7 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 end
 AiUtils.debug_bot_transitions = function (gui, t, x1, y1)
 	local tiny_font_size = 16
-	local tiny_font = "arial_16"
+	local tiny_font = "gw_arial_16"
 	local tiny_font_mtrl = "materials/fonts/" .. tiny_font
 	local resx = RESOLUTION_LOOKUP.res_w
 	local resy = RESOLUTION_LOOKUP.res_h
@@ -677,6 +660,16 @@ AiUtils.debug_bot_transitions = function (gui, t, x1, y1)
 	y2 = y2 + 20
 
 	ScriptGUI.icrect(gui, resx, resy, borderx, bordery, x1 + debug_win_width, y2, layer - 1, Color(200, 20, 20, 20))
+
+	return 
+end
+AiUtils.allow_smart_object_layers = function (navigation_extension, status)
+	navigation_extension.allow_layer(navigation_extension, "ledges", status)
+	navigation_extension.allow_layer(navigation_extension, "ledges_with_fence", status)
+	navigation_extension.allow_layer(navigation_extension, "doors", status)
+	navigation_extension.allow_layer(navigation_extension, "planks", status)
+	navigation_extension.allow_layer(navigation_extension, "jumps", status)
+	navigation_extension.allow_layer(navigation_extension, "teleporters", status)
 
 	return 
 end

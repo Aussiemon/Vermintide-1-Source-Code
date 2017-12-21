@@ -1,5 +1,5 @@
 local font_size = 26
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local remove_list = {}
 Debug = Debug or {}
@@ -7,7 +7,7 @@ Debug.setup = function (world, world_name)
 	Debug.active = true
 	Debug.world = world
 	Debug.world_name = world_name
-	Debug.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	Debug.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 	Debug.debug_texts = {}
 	Debug.sticky_texts = {}
 	Debug.line_objects = {}
@@ -56,8 +56,15 @@ Debug.update = function (t, dt)
 	local gui = Debug.gui
 	local pos = res_y - 100
 	local text_color = Color(120, 220, 0)
+	local num_debug_texts = #Debug.debug_texts
+	local max = 100
 
-	for i = 1, #Debug.debug_texts, 1 do
+	if max < num_debug_texts then
+		table.dump(Debug.text_texts, "debug_texts", 3)
+		fassert(false, "Number of debug texts above %i during the same frame.", max)
+	end
+
+	for i = 1, num_debug_texts, 1 do
 		local data = Debug.debug_texts[i]
 		local text = data.text
 		local instance_text_color = data.color
@@ -161,7 +168,7 @@ Debug.colored_text = function (color, ...)
 
 	return 
 end
-local max_world_sticky = 64
+local max_world_sticky = 256
 local debug_colors = {
 	red = {
 		255,

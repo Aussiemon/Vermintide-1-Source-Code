@@ -75,6 +75,10 @@ LobbyHost.update = function (self, dt)
 		end
 	end
 
+	if Application.platform() == "ps4" then
+		lobby.update(lobby, dt)
+	end
+
 	if self.lobby_members then
 		self.lobby_members:update()
 	end
@@ -109,6 +113,9 @@ LobbyHost.lobby_data = function (self, key)
 end
 LobbyHost.lobby_host = function (self)
 	return self.lobby:lobby_host()
+end
+LobbyHost.user_name = function (self, peer_id)
+	return self.lobby:user_name(peer_id)
 end
 LobbyHost.id = function (self)
 	return (LobbyInternal.lobby_id and LobbyInternal.lobby_id(self.lobby)) or "no_id"

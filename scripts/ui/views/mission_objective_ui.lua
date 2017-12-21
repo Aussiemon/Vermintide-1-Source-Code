@@ -61,7 +61,7 @@ MissionObjectiveUI.add_mission_objective = function (self, mission_name, text)
 
 	return 
 end
-MissionObjectiveUI.complete_mission = function (self, mission_name)
+MissionObjectiveUI.complete_mission = function (self, mission_name, remove_immediately)
 	local index = nil
 
 	for idx, mission_data in ipairs(self.saved_mission_objectives) do
@@ -81,6 +81,12 @@ MissionObjectiveUI.complete_mission = function (self, mission_name)
 			self.completed_mission_objectives[mission_data.mission_name] = mission_data.text
 			self.current_mission_objective = nil
 		end
+	end
+
+	if remove_immediately then
+		self.area_text_box_animation = nil
+		self.mission_icon_left_animation = nil
+		self.mission_icon_right_animation = nil
 	end
 
 	return 

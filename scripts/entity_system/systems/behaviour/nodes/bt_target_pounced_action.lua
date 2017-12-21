@@ -1,15 +1,15 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTTargetPouncedAction = class(BTTargetPouncedAction, BTNode)
-BTTargetPouncedAction.name = "BTTargetPouncedAction"
 BTTargetPouncedAction.init = function (self, ...)
 	BTTargetPouncedAction.super.init(self, ...)
 
 	return 
 end
+BTTargetPouncedAction.name = "BTTargetPouncedAction"
 local POSITION_LOOKUP = POSITION_LOOKUP
 BTTargetPouncedAction.enter = function (self, unit, blackboard, t)
-	local ai_locomotion = blackboard.locomotion_extension
+	local locomotion_extension = blackboard.locomotion_extension
 	local action = self._tree_node.action_data
 	blackboard.action = action
 	blackboard.active_node = BTTargetPouncedAction
@@ -22,8 +22,8 @@ BTTargetPouncedAction.enter = function (self, unit, blackboard, t)
 		blackboard.already_pounced = true
 
 		Mover.set_position(Unit.mover(unit), target_position)
-		ai_locomotion.set_wanted_velocity(ai_locomotion, Vector3(0, 0, 0))
-		ai_locomotion.set_affected_by_gravity(ai_locomotion, true)
+		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3(0, 0, 0))
+		locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
 
 		return 
 	end
@@ -43,8 +43,8 @@ BTTargetPouncedAction.enter = function (self, unit, blackboard, t)
 	local target_position = POSITION_LOOKUP[target_unit]
 	local target_rotation = Unit.local_rotation(target_unit, 0)
 
-	ai_locomotion.set_wanted_velocity(ai_locomotion, Vector3(0, 0, 0))
-	ai_locomotion.teleport_to(ai_locomotion, target_position)
+	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
+	locomotion_extension.teleport_to(locomotion_extension, target_position)
 
 	local mover = Unit.mover(unit)
 
@@ -60,7 +60,6 @@ BTTargetPouncedAction.enter = function (self, unit, blackboard, t)
 
 	network_manager.network_transmit:send_rpc_clients("rpc_teleport_unit_to", unit_id, mover_position, Quaternion.identity())
 	LocomotionUtils.set_animation_driven_movement(unit, true, true, false)
-	ai_locomotion.set_affected_by_gravity(ai_locomotion, true)
 
 	local target_status_extension = ScriptUnit.extension(target_unit, "status_system")
 
@@ -111,7 +110,7 @@ BTTargetPouncedAction.leave = function (self, unit, blackboard, t, reason)
 			local target_status_extension = ScriptUnit.extension(target_unit, "status_system")
 
 			target_status_extension.set_pounced_down(target_status_extension, false, unit)
-			LocomotionUtils.set_animation_driven_movement(unit, true)
+			LocomotionUtils.set_animation_driven_movement(unit, false)
 		end
 
 		blackboard.locomotion_extension:set_wanted_rotation(nil)

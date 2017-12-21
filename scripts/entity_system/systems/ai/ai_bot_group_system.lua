@@ -139,22 +139,25 @@ AIBotGroupSystem.update = function (self, context, t)
 
 	Profiler.start("_update_urgent_targets")
 	self._update_urgent_targets(self, dt, t)
-	Profiler.stop()
+	Profiler.stop("_update_urgent_targets")
 	Profiler.start("_update_move_targets")
 	self._update_move_targets(self, dt, t)
-	Profiler.stop()
+	Profiler.stop("_update_move_targets")
 	Profiler.start("_update_priority_targets")
 	self._update_priority_targets(self, dt, t)
-	Profiler.stop()
+	Profiler.stop("_update_priority_targets")
 	Profiler.start("_update_pickups")
 	self._update_pickups(self, dt, t)
-	Profiler.stop()
+	Profiler.stop("_update_pickups")
 	Profiler.start("_update_first_person_debug")
 	self._update_first_person_debug(self)
+	Profiler.stop("_update_first_person_debug")
+	Profiler.start("_update_weapon_debug")
+	self._update_weapon_debug(self)
 	Profiler.stop()
 	Profiler.start("_update_ally_needs_aid_priority")
 	self._update_ally_needs_aid_priority(self)
-	Profiler.stop()
+	Profiler.stop("_update_ally_needs_aid_priority")
 
 	return 
 end
@@ -239,7 +242,7 @@ AIBotGroupSystem._update_move_targets = function (self, dt, t)
 		selected_unit = self._find_closest_move_target(self, TEMP_PLAYER_UNITS, self._last_move_target_unit, average_bot_pos)
 	end
 
-	if selected_unit and not script_data.bots_dont_follow then
+	if selected_unit and not script_data.bots_dont_follow and not Managers.state.game_mode:game_mode().bot_follow_disabled then
 		self._last_move_target_unit = selected_unit
 		local nav_world = Managers.state.entity:system("ai_system"):nav_world()
 		local unit_pos = POSITION_LOOKUP[selected_unit]
@@ -387,6 +390,10 @@ AIBotGroupSystem._find_origin = function (self, nav_world, selected_unit)
 		origin_pos = GwNavQueries.inside_position_from_outside_position(nav_world, unit_pos, 5, 5, 5, 0.5)
 	end
 
+	if origin_pos == nil then
+		origin_pos = unit_pos
+	end
+
 	return origin_pos
 end
 AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_unit)
@@ -499,7 +506,7 @@ AIBotGroupSystem._assign_destination_points = function (self, bot_ai_data, point
 		local pos = POSITION_LOOKUP[unit]
 
 		for i, point in ipairs(points) do
-			utility[i] = math.sqrt(math.max(0, 1, Vector3.distance(pos, point)))/1
+			utility[i] = math.sqrt(math.max(0.001, Vector3.distance(pos, point)))/1
 		end
 
 		units[#units + 1] = unit
@@ -892,7 +899,6 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 	local self_pos = POSITION_LOOKUP[unit]
 	local hp_pickups = self._available_health_pickups
 	local bot_ai_data = self._bot_ai_data
-	local num_pickups = Managers.state.entity:system("pickup_system"):get_pickups(self_pos, PICKUP_CHECK_RANGE, PICKUP_FETCH_RESULTS)
 	local valid_until = t + 5
 
 	for unit, data in pairs(bot_ai_data) do
@@ -910,6 +916,9 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 	local ammo_stickiness = 2.5
 	local allowed_distance_to_self = 5
 	local allowed_distance_to_follow_pos = 15
+	local game_mode_key = Managers.state.game_mode:game_mode_key()
+	local pickup_system = Managers.state.entity:system("pickup_system")
+	local num_pickups = pickup_system.get_pickups(pickup_system, self_pos, PICKUP_CHECK_RANGE, PICKUP_FETCH_RESULTS)
 
 	for i = 1, num_pickups, 1 do
 		local pickup_unit = PICKUP_FETCH_RESULTS[i]
@@ -931,15 +940,26 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 					hp_pickups[pickup_unit].valid_until = valid_until
 					hp_pickups[pickup_unit].template = template
 				end
-			elseif pickup_name == "all_ammo" then
+			elseif pickup_name == "all_ammo" or (pickup_name == "all_ammo_small" and game_mode_key == "survival") then
 				for unit, data in pairs(bot_ai_data) do
 					local bb = data.blackboard
 					local current_pickup = bb.ammo_pickup
 					local pickup_pos = POSITION_LOOKUP[pickup_unit]
 					local dist = Vector3.distance(POSITION_LOOKUP[unit], pickup_pos)
 					local follow_pos = data.follow_position
+					local allowed_to_take_ammo = nil
 
-					if (dist < allowed_distance_to_self or (follow_pos and Vector3.distance(follow_pos, pickup_pos) < allowed_distance_to_follow_pos)) and (not current_pickup or dist - ((current_pickup == pickup_unit and ammo_stickiness) or 0) < data.ammo_dist) then
+					if pickup_name == "all_ammo_small" then
+						local inventory_ext = bb.inventory_extension
+						local current_ammo, _ = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
+						allowed_to_take_ammo = current_ammo and current_ammo == 0
+					else
+						allowed_to_take_ammo = true
+					end
+
+					local ammo_condition = (dist < allowed_distance_to_self or (follow_pos and Vector3.distance(follow_pos, pickup_pos) < allowed_distance_to_follow_pos)) and (not current_pickup or dist - ((current_pickup == pickup_unit and ammo_stickiness) or 0) < data.ammo_dist)
+
+					if allowed_to_take_ammo and ammo_condition then
 						bb.ammo_pickup = pickup_unit
 						bb.ammo_pickup_valid_until = valid_until
 						bb.ammo_dist = dist
@@ -1270,23 +1290,61 @@ AIBotGroupSystem._update_first_person_debug = function (self)
 		return 
 	end
 
-	if Keyboard.pressed(Keyboard.button_index("numpad 1")) then
-		self.first_person_debug(self, 1)
-	elseif Keyboard.pressed(Keyboard.button_index("numpad 2")) then
-		self.first_person_debug(self, 2)
-	elseif Keyboard.pressed(Keyboard.button_index("numpad 3")) then
-		self.first_person_debug(self, 3)
-	elseif Keyboard.pressed(Keyboard.button_index("numpad enter")) then
-		self.first_person_debug(self, nil)
+	if Application.platform() == "win32" then
+		if Keyboard.pressed(Keyboard.button_index("numpad 1")) then
+			self.first_person_debug(self, 1)
+		elseif Keyboard.pressed(Keyboard.button_index("numpad 2")) then
+			self.first_person_debug(self, 2)
+		elseif Keyboard.pressed(Keyboard.button_index("numpad 3")) then
+			self.first_person_debug(self, 3)
+		elseif Keyboard.pressed(Keyboard.button_index("numpad enter")) then
+			self.first_person_debug(self, nil)
+		end
+	end
+
+	return 
+end
+AIBotGroupSystem._update_weapon_debug = function (self)
+	if not script_data.ai_bots_weapon_debug then
+		return 
+	end
+
+	local player_manager = Managers.player
+
+	Debug.text("BOT RANGED WEAPON")
+
+	for unit, data in pairs(self._bot_ai_data) do
+		local player_bot = player_manager.owner(player_manager, unit)
+		local bot_name = player_bot.profile_display_name(player_bot)
+		local blackboard = data.blackboard
+		local inventory_extension = blackboard.inventory_extension
+		local current_ammo, max_ammo = inventory_extension.current_ammo_status(inventory_extension, "slot_ranged")
+		local current_oc, threshold_oc, max_oc = inventory_extension.current_overcharge_status(inventory_extension, "slot_ranged")
+		local slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_ranged")
+		local item_template = inventory_extension.get_item_template(inventory_extension, slot_data)
+		local weapon_name = item_template.name
+		local ammo_substring = (current_ammo and string.format(" %d|%d", current_ammo, max_ammo)) or ""
+		local oc_substring = (current_oc and string.format(" %02d|%d|%d", current_oc, threshold_oc, max_oc)) or ""
+		local debug_text = string.format("%-16s:%s%s [%s]", bot_name, ammo_substring, oc_substring, weapon_name)
+
+		Debug.text(debug_text)
 	end
 
 	return 
 end
 AIBotGroupSystem._update_ally_needs_aid_priority = function (self)
 	local unit_alive = Unit.alive
+	local bot_ai_data = self._bot_ai_data
 
 	for target_unit, bot_unit in pairs(self._ally_needs_aid_priority) do
-		if not unit_alive(bot_unit) or Unit.get_data(bot_unit, "blackboard").target_ally_unit ~= target_unit or not ScriptUnit.extension(bot_unit, "health_system"):is_alive() then
+		local reset_priority_aid = true
+
+		if unit_alive(bot_unit) then
+			local blackboard = bot_ai_data[bot_unit].blackboard
+			reset_priority_aid = blackboard.target_ally_unit ~= target_unit or not blackboard.target_ally_needs_aid or not ScriptUnit.extension(bot_unit, "health_system"):is_alive()
+		end
+
+		if reset_priority_aid then
 			self._ally_needs_aid_priority[target_unit] = nil
 		end
 	end
@@ -1383,10 +1441,21 @@ AIBotGroupSystem.ranged_attack_ended = function (self, attacker_unit, victim_uni
 
 	return 
 end
+local ALLY_AID_PRIORITY_STICKINESS_DISTANCE = 3
 AIBotGroupSystem.register_ally_needs_aid_priority = function (self, bot_unit, target_unit)
-	local ally = self._ally_needs_aid_priority[target_unit]
+	local aider_unit = self._ally_needs_aid_priority[target_unit]
+	local set_new_aider = true
 
-	if not ally then
+	if aider_unit then
+		local bot_ai_data = self._bot_ai_data
+		local current_aider_bb = bot_ai_data[aider_unit].blackboard
+		local new_aider_bb = bot_ai_data[bot_unit].blackboard
+		local current_aider_dist = current_aider_bb.ally_distance
+		local new_aider_dist = new_aider_bb.ally_distance
+		set_new_aider = new_aider_dist + ALLY_AID_PRIORITY_STICKINESS_DISTANCE < current_aider_dist
+	end
+
+	if set_new_aider then
 		self._ally_needs_aid_priority[target_unit] = bot_unit
 	end
 

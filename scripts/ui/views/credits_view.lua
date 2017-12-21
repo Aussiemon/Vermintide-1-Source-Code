@@ -4,11 +4,7 @@ local credits = {
 	},
 	entries = {}
 }
-
-if Application.platform() ~= "xb1" then
-	credits = require("scripts/settings/credits")
-end
-
+credits = require("scripts/settings/credits")
 local credits_ui_element = {
 	passes = {
 		{
@@ -65,7 +61,7 @@ CreditsView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "credits_view", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "credits_view", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "credits_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "credits_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "credits_view", "gamepad")
@@ -163,7 +159,8 @@ CreditsView.update = function (self, dt)
 
 	for i = 1, self.num_credits, 1 do
 		local entry = credit_entries[i]
-		ui_content.text_field = (entry.localized and Localize(entry.text)) or entry.text
+		ui_content.text_field = entry.localized_str or (entry.localized and Localize(entry.text)) or entry.text
+		entry.localized_str = ui_content.text_field
 
 		if entry.type == "header" then
 			ui_style.text.text_color = colors.header
@@ -183,9 +180,13 @@ CreditsView.update = function (self, dt)
 			current_offset = current_offset - 30
 		end
 
-		offset[2] = current_offset
+		if current_offset < -84 then
+			break
+		elseif current_offset < 1080 then
+			offset[2] = current_offset
 
-		UIRenderer.draw_element(ui_renderer, self.ui_element, ui_style, nil, scenegraph_id, ui_content, offset)
+			UIRenderer.draw_element(ui_renderer, self.ui_element, ui_style, nil, scenegraph_id, ui_content, offset)
+		end
 	end
 
 	if 1200 < current_offset then

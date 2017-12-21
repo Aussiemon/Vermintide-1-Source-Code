@@ -32,6 +32,9 @@ SummaryScreenUI.init = function (self, end_of_level_ui_context)
 	self.ui_renderer = end_of_level_ui_context.ui_renderer
 	self.timers = {}
 	self.ui_animations = {}
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	local game_won = end_of_level_ui_context.game_won
 	local game_mode_key = Managers.state.game_mode:game_mode_key()
 	self.game_won = game_won
@@ -44,7 +47,7 @@ SummaryScreenUI.init = function (self, end_of_level_ui_context)
 	self.input_manager = input_manager
 	self.last_level_key = end_of_level_ui_context.last_level_key
 
-	input_manager.create_input_service(input_manager, "summary_screen_ui", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "summary_screen_ui", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "summary_screen_ui", "keyboard")
 	input_manager.map_device_to_service(input_manager, "summary_screen_ui", "mouse")
 	input_manager.map_device_to_service(input_manager, "summary_screen_ui", "gamepad")
@@ -131,7 +134,7 @@ SummaryScreenUI.draw = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("summary_screen_ui")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.summary_window_widget)
 	UIRenderer.draw_widget(ui_renderer, self.experience_window_widget)
 	UIRenderer.draw_widget(ui_renderer, self.summary_entries_mask_widget)
@@ -626,7 +629,7 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 				local text_width, text_height = self.get_text_size(self, total_value_text, value_text_style)
 				local value_text_scenegraph_id = value_text_style.scenegraph_id
 				local text_size = self.ui_scenegraph[value_text_scenegraph_id].size
-				text_size[1] = text_width
+				text_size[1] = (text_width < definitions.MAX_SUMMARY_TITLE_WIDTH and text_width) or definitions.MAX_SUMMARY_TITLE_WIDTH
 
 				if icon then
 					self.set_entry_widget_icon(self, widget, icon)

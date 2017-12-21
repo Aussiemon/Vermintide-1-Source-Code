@@ -190,7 +190,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-140,
+			-155,
 			1
 		},
 		size = {
@@ -204,7 +204,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-460,
+			-155,
 			1
 		},
 		size = {
@@ -218,7 +218,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-745,
+			-120,
 			1
 		},
 		size = {
@@ -288,7 +288,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "left",
 		position = {
 			25,
-			-800,
+			-121,
 			1
 		},
 		size = {
@@ -302,7 +302,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "left",
 		position = {
 			25,
-			-800,
+			-121,
 			1
 		},
 		size = {
@@ -316,7 +316,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-935,
+			-122,
 			1
 		},
 		size = {
@@ -623,7 +623,7 @@ local widget_definitions = {
 			text_title = {
 				font_size = 28,
 				scenegraph_id = "item_title_text",
-				word_wrap = true,
+				word_wrap = false,
 				pixel_perfect = true,
 				horizontal_alignment = "left",
 				vertical_alignment = "top",
@@ -1108,6 +1108,45 @@ local function create_attack_detailed_info_widget(number_of_entries, scenegraph_
 				255
 			}
 		}
+		local stats_bar_title_scenegraph_id = scenegraph_id .. "_stats_bar_title_" .. i
+		local bar_title = "bar_title_" .. i
+		scenegraph_definition[stats_bar_title_scenegraph_id] = {
+			vertical_alignment = "bottom",
+			horizontal_alignment = "left",
+			parent = stats_bar_frame_scenegraph_id,
+			size = {
+				397,
+				27
+			},
+			position = {
+				0,
+				24,
+				4
+			}
+		}
+		widget_definition.element.passes[#widget_definition.element.passes + 1] = {
+			pass_type = "text",
+			text_id = bar_title,
+			style_id = bar_title,
+			content_check_function = function (content)
+				return number_of_entries - content.number_of_bars < i
+			end
+		}
+		widget_definition.style[bar_title] = {
+			font_size = 14,
+			word_wrap = false,
+			horizontal_alignment = "left",
+			vertical_alignment = "bottom",
+			masked = true,
+			font_type = "hell_shark_masked",
+			scenegraph_id = stats_bar_title_scenegraph_id,
+			text_color = Colors.color_definitions.white,
+			offset = {
+				0,
+				0,
+				1
+			}
+		}
 		local bar_background = "bar_background_" .. i
 		local bar_background_active = "bar_background_active_" .. i
 		widget_definition.element.passes[#widget_definition.element.passes + 1] = {
@@ -1248,7 +1287,9 @@ local function create_attack_detailed_info_widget(number_of_entries, scenegraph_
 				return ui_content["bar_background_active_" .. i] and ui_content[bar_tooltip_hotspot].is_hover and ui_content.compare_window_hotspot.is_hover
 			end
 		}
-		widget_definition.content[bar_tooltip_text] = Localize(bar_tooltip_texts[i])
+		local display_text = Localize(bar_tooltip_texts[i])
+		widget_definition.content[bar_title] = display_text
+		widget_definition.content[bar_tooltip_text] = display_text
 	end
 
 	return UIWidget.init(widget_definition)

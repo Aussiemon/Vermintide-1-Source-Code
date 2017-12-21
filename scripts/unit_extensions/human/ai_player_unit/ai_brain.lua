@@ -71,7 +71,7 @@ AIBrain.exit_last_action = function (self)
 	local root = self._bt:root()
 	local t = 0
 
-	root.set_running_child(root, self._unit, blackboard, t, nil, "aborted")
+	root.set_running_child(root, self._unit, blackboard, t, nil, "aborted", true)
 
 	return 
 end

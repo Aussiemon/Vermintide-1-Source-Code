@@ -581,12 +581,6 @@ local input_actions = {
 				ignore_keybinding = true
 			},
 			{
-				input_action = "d_vertical",
-				priority = 4,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "refresh",
 				priority = 5,
 				description_text = "altar_craft_button_text"
@@ -605,12 +599,6 @@ local input_actions = {
 				ignore_keybinding = true
 			},
 			{
-				input_action = "d_vertical",
-				priority = 4,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 49,
 				description_text = "input_description_add"
@@ -621,12 +609,6 @@ local input_actions = {
 				input_action = "left_stick",
 				priority = 3,
 				description_text = "input_description_switch_settings",
-				ignore_keybinding = true
-			},
-			{
-				input_action = "d_vertical",
-				priority = 4,
-				description_text = "input_description_navigate",
 				ignore_keybinding = true
 			},
 			{
@@ -653,12 +635,6 @@ local input_actions = {
 				ignore_keybinding = true
 			},
 			{
-				input_action = "d_vertical",
-				priority = 4,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 48,
 				description_text = "input_description_add"
@@ -674,12 +650,6 @@ local input_actions = {
 				input_action = "left_stick",
 				priority = 3,
 				description_text = "input_description_switch_settings",
-				ignore_keybinding = true
-			},
-			{
-				input_action = "d_vertical",
-				priority = 4,
-				description_text = "input_description_navigate",
 				ignore_keybinding = true
 			},
 			{
@@ -701,12 +671,6 @@ local input_actions = {
 				ignore_keybinding = true
 			},
 			{
-				input_action = "d_vertical",
-				priority = 4,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 49,
 				description_text = "input_description_remove"
@@ -716,32 +680,13 @@ local input_actions = {
 	trait_proc = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 48,
 				description_text = "input_description_add"
 			}
 		},
-		disabled_item = {
-			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			}
-		},
+		disabled_item = {},
 		item_added = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "confirm",
 				priority = 47,
@@ -754,12 +699,6 @@ local input_actions = {
 			}
 		},
 		item_added_and_afford = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "confirm",
 				priority = 46,
@@ -778,12 +717,6 @@ local input_actions = {
 		},
 		item_added_and_selected_and_afford = {
 			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 47,
 				description_text = "input_description_remove"
@@ -795,12 +728,6 @@ local input_actions = {
 			}
 		},
 		item_added_and_selected = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "special_1",
 				priority = 48,
@@ -811,32 +738,13 @@ local input_actions = {
 	trait_reroll = {
 		default = {
 			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "confirm",
 				priority = 48,
 				description_text = "input_description_add"
 			}
 		},
-		disabled_item = {
-			{
-				input_action = "d_vertical",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			}
-		},
+		disabled_item = {},
 		item_added = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "confirm",
 				priority = 47,
@@ -849,12 +757,6 @@ local input_actions = {
 			}
 		},
 		item_added_and_afford = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "confirm",
 				priority = 46,
@@ -873,12 +775,6 @@ local input_actions = {
 		},
 		item_added_and_selected_and_afford = {
 			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 47,
 				description_text = "input_description_remove"
@@ -891,24 +787,12 @@ local input_actions = {
 		},
 		item_added_and_selected = {
 			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				input_action = "special_1",
 				priority = 48,
 				description_text = "input_description_remove"
 			}
 		},
 		select_trait_setup = {
-			{
-				input_action = "d_pad",
-				priority = 3,
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
 			{
 				input_action = "refresh",
 				priority = 47,

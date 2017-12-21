@@ -33,10 +33,6 @@ local items = {
 		unit_name = "units/weapons/enemy/wpn_skaven_set/wpn_skaven_sword_08",
 		attachment_node_linking = AttachmentNodeLinking.ai_sword
 	},
-	wpn_skaven_short_sword = {
-		unit_name = "units/weapons/enemy/wpn_skaven_short_sword/wpn_skaven_short_sword",
-		attachment_node_linking = AttachmentNodeLinking.ai_sword
-	},
 	wpn_skaven_sword_16 = {
 		unit_name = "units/weapons/enemy/wpn_skaven_set/wpn_skaven_sword_16",
 		attachment_node_linking = AttachmentNodeLinking.ai_sword
@@ -105,10 +101,6 @@ local items = {
 		unit_name = "units/weapons/enemy/wpn_skaven_set/wpn_skaven_spear_25",
 		attachment_node_linking = AttachmentNodeLinking.ai_spear
 	},
-	wpn_skaven_crooked_spear = {
-		unit_name = "units/weapons/enemy/wpn_skaven_crooked_spear/wpn_skaven_crooked_spear",
-		attachment_node_linking = AttachmentNodeLinking.ai_spear
-	},
 	wpn_skaven_spear_27 = {
 		unit_name = "units/weapons/enemy/wpn_skaven_set/wpn_skaven_spear_27",
 		attachment_node_linking = AttachmentNodeLinking.ai_spear
@@ -124,11 +116,6 @@ local items = {
 	wpn_skaven_spear_30 = {
 		unit_name = "units/weapons/enemy/wpn_skaven_set/wpn_skaven_spear_30",
 		attachment_node_linking = AttachmentNodeLinking.ai_spear
-	},
-	wpn_skaven_triangle_shield = {
-		drop_on_hit = true,
-		unit_name = "units/weapons/enemy/wpn_skaven_triangle_shield/wpn_skaven_triangle_shield",
-		attachment_node_linking = AttachmentNodeLinking.ai_shield
 	},
 	wpn_skaven_shield_38 = {
 		drop_on_hit = true,

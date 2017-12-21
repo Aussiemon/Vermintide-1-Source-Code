@@ -345,6 +345,64 @@ UIAnimation.init = function (...)
 	return ui_animation
 end
 
+local function debug_print_ui_animation(...)
+	Application.error("########### ANIMATION ERROR ###########")
+
+	local num_varargs = select("#", ...)
+
+	for i = 1, num_varargs, 1 do
+		local var = select(i, ...)
+
+		Application.error(string.format("Variable %d: %s", i, tostring(var)))
+	end
+
+	Application.error("########### ANIMATION ERROR END ###########")
+	print(debug.traceback())
+
+	return 
+end
+
+UIAnimation.init_debug = function (...)
+	local data_array = {}
+	local ui_animation = {
+		current_index = 1,
+		data_array = data_array
+	}
+	local num_varargs = select("#", ...)
+	local i = 0
+	local current_index = 0
+
+	while i < num_varargs do
+		i = i + 1
+		local animation_type = select(i, ...)
+
+		if not animation_type or type(animation_type) ~= "table" then
+			debug_print_ui_animation(...)
+
+			return nil
+		end
+
+		local num_args = animation_type.num_args
+		data_array[current_index + 1] = animation_type
+
+		for j = 1, num_args, 1 do
+			data_array[current_index + 1 + j] = select(i + j, ...)
+		end
+
+		current_index = current_index + 1 + num_args + animation_type.num_data
+		i = i + num_args
+	end
+
+	local num_args = data_array[1].num_args
+	local num_data = data_array[1].num_data
+	local pack_func = pack_index[num_data]
+	local unpack_func = unpack_index[num_args]
+
+	pack_func(data_array, num_args + 2, data_array[1].init(unpack_func(data_array, 2)))
+
+	return ui_animation
+end
+
 local function extract_continue_amount(pack_amount, array, index, continue, ...)
 	pack_index[pack_amount](array, index, ...)
 

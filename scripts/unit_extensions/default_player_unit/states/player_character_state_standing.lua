@@ -18,7 +18,7 @@ PlayerCharacterStateStanding.on_enter = function (self, unit, input, dt, context
 	local toggle_crouch = input_extension.toggle_crouch
 
 	CharacterStateHelper.crouch(unit, input_extension, status_extension, toggle_crouch, first_person_extension, t)
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
@@ -125,6 +125,7 @@ PlayerCharacterStateStanding.update = function (self, unit, input, dt, context, 
 		if not config.allow_movement then
 			local params = self.temp_params
 			params.swap_to_3p = config.swap_to_3p
+			params.show_weapons = config.show_weapons
 
 			csm.change_state(csm, "interacting", params)
 		end
@@ -138,6 +139,7 @@ PlayerCharacterStateStanding.update = function (self, unit, input, dt, context, 
 		if not config.allow_movement then
 			local params = self.temp_params
 			params.swap_to_3p = config.swap_to_3p
+			params.show_weapons = config.show_weapons
 
 			csm.change_state(csm, "interacting", params)
 		end
@@ -195,7 +197,7 @@ PlayerCharacterStateStanding.update = function (self, unit, input, dt, context, 
 	end
 
 	CharacterStateHelper.crouch(unit, input_extension, status_extension, toggle_crouch, first_person_extension, t)
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 	CharacterStateHelper.reload(input_extension, inventory_extension, status_extension)
 

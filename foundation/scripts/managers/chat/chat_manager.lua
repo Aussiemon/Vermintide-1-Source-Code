@@ -1,5 +1,15 @@
 require("scripts/ui/views/chat_gui")
 
+if Application.platform() ~= "win32" then
+	ChatGuiNull = class(ChatGuiNull)
+
+	for name, func in pairs(ChatGui) do
+		ChatGuiNull[name] = function ()
+			return 
+		end
+	end
+end
+
 ChatManager = class(ChatManager)
 ChatManager.init = function (self)
 	self.channels = {}
@@ -13,13 +23,19 @@ ChatManager.init = function (self)
 end
 ChatManager.create_chat_gui = function (self)
 	local top_world = Managers.world:world("top_ingame_view")
-	self._ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts")
+	self._ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 	local context = {
 		input_manager = Managers.input,
 		ui_top_renderer = self._ui_top_renderer,
 		chat_manager = self
 	}
-	self.chat_gui = ChatGui:new(context)
+
+	if Application.platform() ~= "win32" then
+		self.chat_gui = ChatGuiNull
+	else
+		self.chat_gui = ChatGui:new(context)
+	end
+
 	self.gui_enabled = true
 	local font_size = nil
 

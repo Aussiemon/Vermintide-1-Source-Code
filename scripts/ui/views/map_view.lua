@@ -144,12 +144,15 @@ MapView.init = function (self, ingame_ui_context)
 	self.popup_handler = self.ingame_ui.popup_handler
 	self.is_server = ingame_ui_context.is_server
 	self.lobby = ingame_ui_context.network_lobby
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	local player = Managers.player:local_player()
 	local player_stats_id = player.stats_id(player)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "map_menu", self.ingame_ui:get_ingame_menu_keymap())
+	input_manager.create_input_service(input_manager, "map_menu", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "map_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "map_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "map_menu", "gamepad")
@@ -176,7 +179,6 @@ MapView.init = function (self, ingame_ui_context)
 	self.create_ui_elements(self)
 
 	self.ui_animator = UIAnimator:new(definitions.scenegraph_definition, definitions.animations)
-	self.friends = FriendsView:new(ingame_ui_context, true)
 	self.peer_id = ingame_ui_context.peer_id
 	local input_service = input_manager.get_service(input_manager, "map_menu")
 	local gui_layer = definitions.scenegraph_definition.root.position[3]
@@ -215,6 +217,7 @@ MapView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	local selected_game_mode = game_mode_options[self.selected_game_mode_index]
 	local widgets = definitions.widgets
+	self.gamepad_button_selection_widget = UIWidget.init(widgets.gamepad_button_selection)
 	self.play_button_console_widget = UIWidget.init(widgets.play_button_console)
 	self.lobby_button_widget = UIWidget.init(widgets.lobby_button)
 	self.cancel_button_widget = UIWidget.init(widgets.cancel_button)
@@ -347,6 +350,11 @@ MapView.create_ui_elements = function (self)
 
 	return 
 end
+MapView.set_friends_view = function (self, friends_view)
+	self.friends = friends_view
+
+	return 
+end
 MapView.update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
@@ -372,8 +380,9 @@ MapView.update = function (self, dt, t)
 	local input_manager = self.input_manager
 	local input_service = ((transitioning or friends_menu_active) and fake_input_service) or input_manager.get_service(input_manager, "map_menu")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local is_sub_menu = true
 
-	friends.update(friends, dt)
+	friends.update(friends, dt, t, is_sub_menu)
 
 	if draw_intro_description then
 		local description_text_widgets = self.description_text_widgets
@@ -533,6 +542,8 @@ MapView.update = function (self, dt, t)
 				settings_button_widget.content.toggled = not settings_button_widget.content.toggled
 			elseif lobby_button_hotspot.on_release then
 				self.open_lobby_browser(self)
+			elseif input_service.get(input_service, "show_gamercard") then
+				self._show_selected_player_gamercard(self)
 			end
 
 			for stepper_name, stepper_data in pairs(self.steppers) do
@@ -574,6 +585,27 @@ MapView.update = function (self, dt, t)
 
 	return 
 end
+MapView._show_selected_player_gamercard = function (self)
+	local number_of_player = self.number_of_player or 0
+
+	for i = 1, number_of_player, 1 do
+		local widget = self.player_list_widgets[i]
+
+		if widget.content.button_hotspot.is_selected then
+			local peer_id = widget.content.peer_id
+
+			if peer_id then
+				local xuid = self.lobby.lobby:xuid(peer_id)
+
+				if xuid then
+					XboxLive.show_gamercard(Managers.account:user_id(), xuid)
+				end
+			end
+		end
+	end
+
+	return 
+end
 MapView._update_play_button_description = function (self)
 	local players_joined = self.network_server:are_all_peers_ingame()
 	local is_difficulty_unlocked = self.difficulty_unlocked
@@ -602,7 +634,7 @@ MapView.draw = function (self, input_service, gamepad_active, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	for _, widget in ipairs(self.background_widgets) do
 		UIRenderer.draw_widget(ui_renderer, widget)
@@ -647,6 +679,7 @@ MapView.draw = function (self, input_service, gamepad_active, dt)
 		end
 	else
 		UIRenderer.draw_widget(ui_renderer, self.background_overlay_console_widget)
+		UIRenderer.draw_widget(ui_renderer, self.gamepad_button_selection_widget)
 	end
 
 	local draw_intro_description = self.draw_intro_description
@@ -1727,8 +1760,8 @@ MapView.input_service = function (self)
 end
 MapView.destroy = function (self)
 	self.ui_animator = nil
+	self.friends = nil
 
-	self.friends:destroy()
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
@@ -2061,6 +2094,25 @@ MapView.select_gamepad_widget_by_index = function (self, index, optional_menu_na
 		self.active_gamepad_menu_list_name = optional_menu_name
 	end
 
+	local gamepad_selection_style = widget.style.gamepad_selection
+
+	if gamepad_selection_style then
+		local scenegraph_id = gamepad_selection_style.scenegraph_id
+		local offset = gamepad_selection_style.offset
+		local texture_size = gamepad_selection_style.texture_size
+		local widget_gamepad_selection_scenegraph = self.ui_scenegraph[scenegraph_id]
+		local scenegraph_world_position = widget_gamepad_selection_scenegraph.world_position
+		local gamepad_selection_scenegraph = self.ui_scenegraph.gamepad_selection_pivot
+		local gamepad_selection_position = gamepad_selection_scenegraph.local_position
+		local gamepad_selection_size = gamepad_selection_scenegraph.size
+		self.gamepad_button_selection_widget.scenegraph_id = scenegraph_id
+		local gamepad_widget_style = self.gamepad_button_selection_widget.style
+		gamepad_widget_style.texture_top_left.texture_size = texture_size
+		gamepad_widget_style.texture_top_right.texture_size = texture_size
+		gamepad_widget_style.texture_bottom_left.texture_size = texture_size
+		gamepad_widget_style.texture_bottom_right.texture_size = texture_size
+	end
+
 	self.update_gamepad_widget_description(self)
 
 	return 
@@ -2138,14 +2190,20 @@ MapView.handle_gamepad_navigation_input = function (self, dt)
 				return 
 			end
 
-			if input_service.get(input_service, "left_stick_press") then
-				self.play_sound(self, "Play_hud_select")
+			if Application.platform() ~= "xb1" then
+				if input_service.get(input_service, "left_stick_press") then
+					self.play_sound(self, "Play_hud_select")
 
-				self.settings_button_widget.content.toggled = not self.settings_button_widget.content.toggled
+					self.settings_button_widget.content.toggled = not self.settings_button_widget.content.toggled
 
-				self.on_gamepad_activated(self)
+					self.on_gamepad_activated(self)
 
-				return 
+					return 
+				end
+			elseif not self._warning_shown then
+				Application.warning("[MapView] Turned of switch settings for light optional cert")
+
+				self._warning_shown = true
 			end
 
 			local player_list_active = active_gamepad_menu_list_name == "player_list"

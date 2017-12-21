@@ -1,38 +1,38 @@
 Fonts = {
 	arial = {
-		"materials/fonts/arial",
+		"materials/fonts/gw_arial_16",
 		14,
-		"arial"
+		"gw_arial_16"
 	},
 	arial_14 = {
-		"materials/fonts/arial_14",
+		"materials/fonts/gw_arial_16",
 		14,
-		"arial_14"
+		"gw_arial_16"
 	},
 	arial_16 = {
-		"materials/fonts/arial_16",
+		"materials/fonts/gw_arial_16",
 		16,
-		"arial_16"
+		"gw_arial_16"
 	},
 	arial_18 = {
-		"materials/fonts/arial_18",
+		"materials/fonts/gw_arial_16",
 		18,
-		"arial_18"
+		"gw_arial_16"
 	},
 	arial_14_masked = {
-		"materials/fonts/arial_14",
+		"materials/fonts/gw_arial_16",
 		14,
-		"arial_14_masked"
+		"gw_arial_16_masked"
 	},
 	arial_16_masked = {
-		"materials/fonts/arial_16",
+		"materials/fonts/gw_arial_16",
 		16,
-		"arial_16_masked"
+		"gw_arial_16_masked"
 	},
 	arial_18_masked = {
-		"materials/fonts/arial_18",
+		"materials/fonts/gw_arial_16",
 		18,
-		"arial_18_masked"
+		"gw_arial_16_masked"
 	},
 	gw_body_20 = {
 		"materials/fonts/gw_body_32",
@@ -162,16 +162,6 @@ DynamicFonts = {
 	hell_shark_arial_masked = {
 		[16.0] = "gw_arial_16_masked",
 		[32.0] = "gw_arial_32_masked"
-	},
-	fatshark_test = {
-		[64.0] = "gw_body_64",
-		[20.0] = "gw_body_20",
-		[32.0] = "gw_body_32"
-	},
-	fatshark_test_masked = {
-		[64.0] = "gw_body_64_masked",
-		[20.0] = "gw_head_20_masked",
-		[32.0] = "gw_body_32_masked"
 	}
 }
 local font_vertical_base = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"

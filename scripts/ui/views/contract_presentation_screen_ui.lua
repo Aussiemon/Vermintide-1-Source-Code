@@ -19,7 +19,7 @@ ContractPresentationScreenUI.init = function (self, ingame_ui_context)
 	self.quest_manager = quest_manager
 	local input_manager = self.input_manager
 
-	input_manager.create_input_service(input_manager, "contract_presentation_screen_ui", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "contract_presentation_screen_ui", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "contract_presentation_screen_ui", "keyboard")
 	input_manager.map_device_to_service(input_manager, "contract_presentation_screen_ui", "mouse")
 	input_manager.map_device_to_service(input_manager, "contract_presentation_screen_ui", "gamepad")
@@ -179,10 +179,10 @@ ContractPresentationScreenUI._initialize_active_contracts = function (self)
 	local contract_entries_by_index = {}
 	local widget_index = 0
 
-	if active_contract_ids and 0 < #active_contract_ids then
+	if 0 < #active_contract_ids then
 		local widgets = self._widgets
 
-		for _, contract_id in pairs(active_contract_ids) do
+		for _, contract_id in ipairs(active_contract_ids) do
 			widget_index = widget_index + 1
 			local widget = widgets[widget_index]
 
@@ -200,7 +200,9 @@ ContractPresentationScreenUI._initialize_active_contracts = function (self)
 			end
 		end
 	else
-		return true
+		local missing_contracts = true
+
+		return missing_contracts
 	end
 
 	self.num_active_contract_widget = widget_index

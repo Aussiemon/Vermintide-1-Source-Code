@@ -66,19 +66,20 @@ weapon_template.actions = {
 			end
 		},
 		charged_beam = {
+			damage_window_start = 0.1,
+			kind = "handgun",
+			attack_template_damage_type = "sniper_AP",
+			attack_template = "wizard_staff_beam_sniper",
+			max_penetrations = 1,
+			fire_time = 0,
+			reset_aim_on_attack = true,
+			spread_template_override = "handgun",
+			hit_effect = "fireball_impact",
 			damage_window_end = 0,
 			overcharge_type = "beam_staff_sniper",
 			charge_value = "light_attack",
-			fire_time = 0,
-			attack_template = "wizard_staff_beam_sniper",
-			attack_template_damage_type = "carbine_AP",
-			spread_template_override = "handgun",
-			hit_effect = "fireball_impact",
-			damage_window_start = 0.1,
 			fire_sound_event = "weapon_staff_fire_beam_end_shot",
 			anim_event = "attack_shoot_beam_spark",
-			kind = "handgun",
-			max_penetrations = 1,
 			total_time = 0.66,
 			allowed_chain_actions = {
 				{
@@ -126,12 +127,15 @@ weapon_template.actions = {
 			charge_sound_husk_name = "player_combat_weapon_staff_fire_beam_husk",
 			overcharge_interval = 0.45,
 			charge_sound_husk_stop_event = "stop_player_combat_weapon_staff_fire_beam_husk",
+			aim_assist_ramp_multiplier = 0.4,
 			damage_interval = 0.45,
 			particle_effect_trail = "fx/wpnfx_staff_beam_trail",
 			minimum_hold_time = 0.5,
+			aim_assist_ramp_decay_delay = 0.3,
 			overcharge_type = "beam_staff_alternate",
 			anim_end_event = "attack_shoot_beam_end",
 			fire_time = 0.3,
+			aim_assist_max_ramp_multiplier = 0.8,
 			particle_effect_target = "fx/wpnfx_staff_beam_target",
 			hold_input = "action_two_hold",
 			anim_event = "attack_shoot_beam_start",
@@ -145,7 +149,7 @@ weapon_template.actions = {
 				{
 					start_time = 0,
 					external_multiplier = 0.25,
-					buff_name = "planted_fast_decrease_movement"
+					buff_name = "planted_charging_decrease_movement"
 				}
 			},
 			allowed_chain_actions = {
@@ -228,6 +232,19 @@ weapon_template.overcharge_data = {
 	time_until_overcharge_decreases = 0.5,
 	overcharge_value_decrease_rate = 1
 }
+weapon_template.aim_assist_settings = {
+	max_range = 50,
+	no_aim_input_multiplier = 0,
+	always_auto_aim = true,
+	base_multiplier = 0,
+	target_node = "j_spine1",
+	effective_max_range = 30,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
+}
 weapon_template.right_hand_unit = "units/weapons/player/wpn_brw_skullstaff/wpn_brw_skullstaff"
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.staff
 weapon_template.left_hand_unit = "units/weapons/player/wpn_fireball/wpn_fireball"
@@ -239,8 +256,8 @@ weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.wwise_dep_right_hand = {
 	"wwise/staff"
 }
-weapon_template.dodge_distance = 0.6
-weapon_template.dodge_speed = 0.6
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
 weapon_template.compare_statistics = {
 	attacks = {
 		light_attack = {
@@ -260,9 +277,11 @@ weapon_template.compare_statistics = {
 	},
 	perks = {
 		light_attack = {
+			"armor_penetration",
 			"burn"
 		},
 		heavy_attack = {
+			"head_shot",
 			"armor_penetration",
 			"burn"
 		}
@@ -275,13 +294,13 @@ Weapons.staff_blast_beam_template_1_co.compare_statistics.attacks.light_attack.d
 Weapons.staff_blast_beam_template_1_co.compare_statistics.attacks.heavy_attack.damage = 0.1375
 Weapons.staff_blast_beam_template_1_t2 = table.clone(weapon_template)
 Weapons.staff_blast_beam_template_1_t2.actions.action_one.default.attack_template = "flame_blast_t2"
-Weapons.staff_blast_beam_template_1_t2.actions.action_one.charged_beam.attack_template_damage_type = "carbine_AP_t2"
+Weapons.staff_blast_beam_template_1_t2.actions.action_one.charged_beam.attack_template_damage_type = "sniper_AP_t2"
 Weapons.staff_blast_beam_template_1_t2.actions.action_two.default.attack_template = "wizard_staff_beam_t2"
 Weapons.staff_blast_beam_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.375
 Weapons.staff_blast_beam_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.1875
 Weapons.staff_blast_beam_template_1_t3 = table.clone(weapon_template)
 Weapons.staff_blast_beam_template_1_t3.actions.action_one.default.attack_template = "flame_blast_t3"
-Weapons.staff_blast_beam_template_1_t3.actions.action_one.charged_beam.attack_template_damage_type = "carbine_AP_t3"
+Weapons.staff_blast_beam_template_1_t3.actions.action_one.charged_beam.attack_template_damage_type = "sniper_AP_t3"
 Weapons.staff_blast_beam_template_1_t3.actions.action_two.default.attack_template = "wizard_staff_beam_t3"
 Weapons.staff_blast_beam_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.5
 Weapons.staff_blast_beam_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.25

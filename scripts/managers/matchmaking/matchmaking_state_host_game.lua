@@ -1,3 +1,5 @@
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
 MatchmakingStateHostGame = class(MatchmakingStateHostGame)
 MatchmakingStateHostGame.NAME = "MatchmakingStateHostGame"
 MatchmakingStateHostGame.init = function (self, params)
@@ -49,20 +51,19 @@ MatchmakingStateHostGame.on_enter = function (self, state_context)
 
 	local peer_id = Network.peer_id()
 
-	self.matchmaking_ui:large_window_ready_enable(true)
+	self.matchmaking_ui:large_window_stop_ready_pulse()
+	self.matchmaking_ui:large_window_ready_enable(false)
 
 	if MatchmakingSettings.auto_ready then
 		self.ready = true
 
-		self.matchmaking_ui:large_window_stop_ready_pulse()
 		self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
-		self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready", "matchmaking_ready")
+		self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready")
 	else
 		self.ready = false
 
-		self.matchmaking_ui:large_window_start_ready_pulse()
 		self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
-		self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready", "matchmaking_ready")
+		self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
 	end
 
 	return 
@@ -126,54 +127,6 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 
 	if self.controller_cooldown and 0 < self.controller_cooldown then
 		self.controller_cooldown = self.controller_cooldown - dt
-	elseif input_service.get(input_service, "matchmaking_ready", true) then
-		local ready_changed = false
-
-		if Managers.input:is_device_active("gamepad") then
-			local total_time = 1
-			local cancel_timer = self.cancel_timer
-			cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-			local progress = math.min(cancel_timer/total_time, 1)
-
-			if progress == 1 then
-				self.ready = not self.ready
-				self.cancel_timer = nil
-				ready_changed = true
-
-				self.matchmaking_ui:set_ready_progress(0)
-
-				self.controller_cooldown = GamepadSettings.menu_cooldown
-			else
-				self.cancel_timer = cancel_timer
-
-				self.matchmaking_ui:set_ready_progress(progress)
-			end
-		else
-			self.ready = not self.ready
-			ready_changed = true
-
-			self.matchmaking_ui:set_ready_progress(0)
-
-			self.controller_cooldown = GamepadSettings.menu_cooldown
-		end
-
-		if ready_changed then
-			local peer_id = Network.peer_id()
-
-			self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
-
-			if self.ready then
-				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready", "matchmaking_ready")
-				self.matchmaking_ui:large_window_stop_ready_pulse()
-			else
-				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready", "matchmaking_ready")
-				self.matchmaking_ui:large_window_start_ready_pulse()
-			end
-		end
-	elseif self.cancel_timer then
-		self.cancel_timer = nil
-
-		self.matchmaking_ui:set_ready_progress(0)
 	end
 
 	if self.game_created then
@@ -322,6 +275,7 @@ MatchmakingStateHostGame.host_game = function (self, next_level_key, difficulty,
 
 	level_transition_handler.set_next_level(level_transition_handler, next_level_key)
 	self.lobby:set_lobby_data(lobby_data)
+	print("[MATCHMAKING] - Hosting game on level:", current_level_key, next_level_key)
 
 	return start_directly
 end

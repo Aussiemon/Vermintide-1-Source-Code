@@ -23,7 +23,7 @@ BTPackMasterAttackAction.enter = function (self, unit, blackboard, t)
 
 	network_manager.network_transmit:send_rpc_all("rpc_enemy_has_target", unit_id, true)
 
-	blackboard.target_unit_status_extension = (ScriptUnit.has_extension(blackboard.target_unit, "status_system") and ScriptUnit.extension(blackboard.target_unit, "status_system")) or nil
+	blackboard.target_unit_status_extension = ScriptUnit.has_extension(blackboard.target_unit, "status_system") or nil
 
 	blackboard.navigation_extension:set_enabled(false)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
@@ -82,13 +82,13 @@ BTPackMasterAttackAction.run = function (self, unit, blackboard, t, dt)
 end
 BTPackMasterAttackAction.attack = function (self, unit, t, dt, blackboard)
 	local action = blackboard.action
-	local locomotion = blackboard.locomotion_extension
+	local locomotion_extension = blackboard.locomotion_extension
 
 	if blackboard.move_state ~= "attacking" then
 		blackboard.move_state = "attacking"
 
-		locomotion.use_lerp_rotation(locomotion, true)
-		LocomotionUtils.set_animation_driven_movement(unit, true, true, true)
+		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, true)
 		Managers.state.network:anim_event(unit, action.attack_anim)
 
 		blackboard.attack_time_ends = t + blackboard.action.attack_anim_duration
@@ -96,7 +96,7 @@ BTPackMasterAttackAction.attack = function (self, unit, t, dt, blackboard)
 
 	local rotation = LocomotionUtils.rotation_towards_unit(unit, blackboard.target_unit)
 
-	locomotion.set_wanted_rotation(locomotion, rotation)
+	locomotion_extension.set_wanted_rotation(locomotion_extension, rotation)
 
 	if blackboard.attack_time_ends < t then
 		blackboard.attack_aborted = true
@@ -126,7 +126,7 @@ BTPackMasterAttackAction.attack_success = function (self, unit, blackboard)
 			blackboard.attack_success = PerceptionUtils.pack_master_has_line_of_sight_for_attack(blackboard.physics_world, unit, target_unit)
 		end
 
-		local first_person_extension = ScriptUnit.has_extension(blackboard.target_unit, "first_person_system") and ScriptUnit.extension(blackboard.target_unit, "first_person_system")
+		local first_person_extension = ScriptUnit.has_extension(blackboard.target_unit, "first_person_system")
 
 		if blackboard.attack_success and first_person_extension then
 			first_person_extension.animation_event(first_person_extension, "shake_get_hit")

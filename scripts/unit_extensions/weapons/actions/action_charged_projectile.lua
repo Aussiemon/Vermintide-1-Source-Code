@@ -43,6 +43,14 @@ ActionChargedProjectile.client_owner_start_action = function (self, new_action, 
 		self.spread_extension:override_spread_template(spread_template_override)
 	end
 
+	local loaded_projectile_settings = new_action.loaded_projectile_settings
+
+	if loaded_projectile_settings then
+		local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
+
+		inventory_extension.set_loaded_projectile_override(inventory_extension, loaded_projectile_settings)
+	end
+
 	return 
 end
 ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world, can_damage)
@@ -62,14 +70,32 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 			end
 		end
 
+		if self.ammo_extension then
+			local ammo_usage = self.current_action.ammo_usage
+			local _, procced = self.buff_extension:apply_buffs_to_value(0, StatBuffIndex.NOT_CONSUME_GRENADE)
+
+			if not procced then
+				self.ammo_extension:use_ammo(ammo_usage)
+			else
+				local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
+
+				inventory_extension.wield_previous_weapon(inventory_extension)
+			end
+		end
+
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "handgun_fire"
+			})
+		end
+
 		local _, procced = self.buff_extension:apply_buffs_to_value(0, StatBuffIndex.EXTRA_SHOT)
-		local add_spread = true
+		local add_spread = not self.extra_buff_shot
 
 		if procced and not self.extra_buff_shot then
 			self.state = "waiting_to_shoot"
 			self.time_to_shoot = t + 0.1
 			self.extra_buff_shot = true
-			add_spread = false
 		else
 			self.state = "shot"
 		end
@@ -159,18 +185,10 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 	return 
 end
 ActionChargedProjectile.finish = function (self, reason)
-	if self.ammo_extension and reason == "action_complete" then
-		local ammo_usage = self.current_action.ammo_usage
-		local _, procced = self.buff_extension:apply_buffs_to_value(0, StatBuffIndex.NOT_CONSUME_GRENADE)
+	local owner_unit = self.owner_unit
+	local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
-		if not procced then
-			self.ammo_extension:use_ammo(ammo_usage)
-		else
-			local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
-
-			inventory_extension.wield(inventory_extension, "slot_melee")
-		end
-	end
+	inventory_extension.set_loaded_projectile_override(inventory_extension, nil)
 
 	if self.spread_extension then
 		self.spread_extension:reset_spread_template()

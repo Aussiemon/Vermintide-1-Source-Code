@@ -15,19 +15,19 @@ PerformanceManager.init = function (self, gui, is_server, level_key)
 	self._num_ai_string = "SPAWNED: %3i   ACTIVE: %3i   EVENT SPAWNED: %3i   EVENT SPAWNED ACTIVE: %3i"
 	self._settings = {
 		critical = {
-			font = "materials/fonts/arial_36",
+			font = "materials/fonts/gw_arial_32",
 			distance_from_top = 60,
 			size = 36,
-			material = "arial_36",
+			material = "gw_arial_32",
 			color = ColorBox(255, 255, 0, 0),
 			color_to = ColorBox(255, 255, 255, 0),
 			position = Vector3Box()
 		},
 		normal = {
-			font = "materials/fonts/arial_26",
+			font = "materials/fonts/gw_arial_16",
 			distance_from_top = 30,
 			size = 26,
-			material = "arial_26",
+			material = "gw_arial_16",
 			color = ColorBox(255, 0, 255, 0),
 			position = Vector3Box()
 		}
@@ -157,6 +157,9 @@ PerformanceManager.event_ai_unit_despawned = function (self, breed_name, active,
 	end
 
 	return 
+end
+PerformanceManager.num_active_enemies = function (self)
+	return self._num_ai_active
 end
 PerformanceManager.destroy = function (self)
 	local event_manager = Managers.state.event

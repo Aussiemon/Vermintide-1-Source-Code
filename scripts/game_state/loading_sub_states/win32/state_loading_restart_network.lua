@@ -80,7 +80,9 @@ StateLoadingRestartNetwork._init_network = function (self)
 		self.parent:register_rpcs()
 	end
 
-	if loading_context.join_lobby_data then
+	if Managers.invite:has_invitation() then
+		self._has_invitation = true
+	elseif loading_context.join_lobby_data then
 		self.parent:setup_join_lobby()
 	elseif auto_join_setting or lobby_to_join or host_to_join then
 		self.parent:setup_lobby_finder(callback(self, "cb_lobby_joined"), lobby_to_join, host_to_join)
@@ -105,9 +107,19 @@ StateLoadingRestartNetwork._init_network = function (self)
 	return 
 end
 StateLoadingRestartNetwork.update = function (self, dt, t)
-	if self._server_created and self._lobby_joined then
+	if self._has_invitation then
+		local lobby_data = Managers.invite:get_invited_lobby_data()
+
+		if lobby_data then
+			self.parent.parent.loading_context.join_lobby_data = lobby_data
+
+			self.parent:setup_join_lobby()
+
+			self._has_invitation = false
+		end
+	elseif self._server_created and self._lobby_joined then
 		return StateLoadingRunning
-	elseif Managers.account:all_lobbies_freed() and not self._creating_lobby then
+	elseif Managers.account:all_lobbies_freed() and not self._creating_lobby and not Managers.account:user_detached() then
 		self.parent:setup_lobby_host(callback(self, "cb_server_created"))
 
 		self._creating_lobby = true

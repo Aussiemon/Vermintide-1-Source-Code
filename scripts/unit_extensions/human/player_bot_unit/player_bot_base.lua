@@ -19,7 +19,7 @@ local WANTS_TO_HEAL_THRESHOLD = 0.25
 local SELF_UNIT = nil
 
 function dprint(...)
-	if SELF_UNIT == script_data.debug_unit then
+	if SELF_UNIT == script_data.debug_unit and script_data.ai_bots_debug then
 		print(...)
 	end
 
@@ -161,44 +161,52 @@ end
 PlayerBotBase.update = function (self, unit, input, dt, context, t)
 	Profiler.start("PlayerBotBase")
 
-	local is_alive = self._health_extension:is_alive()
+	local health_extension = self._health_extension
+	local status_extension = self._status_extension
+	local is_alive = health_extension.is_alive(health_extension)
+	local is_ready_for_assisted_respawn = status_extension.is_ready_for_assisted_respawn(status_extension)
 
-	if is_alive then
+	if is_alive and not is_ready_for_assisted_respawn then
 		SELF_UNIT = unit
 
 		Profiler.start("update blackboard")
 		self._update_blackboard(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("update blackboard")
 		Profiler.start("update target enemy")
 		self._update_target_enemy(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("update target enemy")
 		Profiler.start("update target ally")
 		self._update_target_ally(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("update target ally")
 		Profiler.start("_update_rat_ogre_cover")
 		self._update_rat_ogre_cover(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("_update_rat_ogre_cover")
 		Profiler.start("update pickups")
 		self._update_pickups(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("update pickups")
 		Profiler.start("update interactables")
 		self._update_interactables(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("update interactables")
 		Profiler.start("update brain")
 		self._brain:update(unit, t, dt)
-		Profiler.stop()
-		Profiler.start("update movement target")
-		self._update_movement_target(self, dt, t)
-		Profiler.stop()
+		Profiler.stop("update brain")
+
+		local is_disabled = status_extension.is_disabled(status_extension)
+
+		if not is_disabled then
+			Profiler.start("update movement target")
+			self._update_movement_target(self, dt, t)
+			Profiler.stop("update movement target")
+		end
 	end
 
 	if script_data.ai_bots_debug then
 		Profiler.start("update debug draw")
 		self._debug_draw_update(self, dt)
-		Profiler.stop()
+		Profiler.stop("update debug draw")
 	end
 
-	Profiler.stop()
+	Profiler.stop("PlayerBotBase")
 
 	return 
 end
@@ -246,10 +254,10 @@ PlayerBotBase._update_target_enemy = function (self, dt, t)
 
 	Profiler.start("update_slot_target")
 	self._update_slot_target(self, dt, t, pos)
-	Profiler.stop()
+	Profiler.stop("update_slot_target")
 	Profiler.start("update_proximity_target")
 	self._update_proximity_target(self, dt, t, pos)
-	Profiler.stop()
+	Profiler.stop("update_proximity_target")
 
 	local bb = self._blackboard
 	local old_target = bb.target_unit
@@ -289,7 +297,7 @@ PlayerBotBase._update_target_enemy = function (self, dt, t)
 		bb.target_unit = nil
 	end
 
-	Profiler.stop()
+	Profiler.stop("update target enemy")
 
 	return 
 end
@@ -558,13 +566,13 @@ PlayerBotBase._update_target_ally = function (self, dt, t)
 
 	local is_priority_aid_type = blackboard.target_ally_need_type == "knocked_down" or blackboard.target_ally_need_type == "ledge" or blackboard.target_ally_need_type == "hook"
 
-	if blackboard.target_ally_needs_aid and is_priority_aid_type and self._within_aid_range(self, blackboard) then
+	if blackboard.target_ally_needs_aid and is_priority_aid_type then
 		local ai_bot_group_system = Managers.state.entity:system("ai_bot_group_system")
 
 		ai_bot_group_system.register_ally_needs_aid_priority(ai_bot_group_system, unit, blackboard.target_ally_unit)
 	end
 
-	Profiler.stop()
+	Profiler.stop("update target ally")
 
 	return 
 end
@@ -584,57 +592,58 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 
 		if AiUtils.unit_alive(player_unit) and player_unit ~= unit then
 			local status_ext = ScriptUnit.extension(player_unit, "status_system")
-			local in_need_type = nil
 
-			if status_ext.is_knocked_down(status_ext) then
-				in_need_type = "knocked_down"
-			elseif status_ext.get_is_ledge_hanging(status_ext) and not status_ext.is_pulled_up(status_ext) then
-				in_need_type = "ledge"
-			elseif status_ext.is_hanging_from_hook(status_ext) then
-				in_need_type = "hook"
-			elseif status_ext.is_pounced_down(status_ext) then
-				in_need_type = "pounced_down"
-			elseif can_heal_other then
-				local health_percent = ScriptUnit.extension(player_unit, "health_system"):current_health_percent()
+			if not status_ext.is_ready_for_assisted_respawn(status_ext) then
+				local in_need_type = nil
 
-				if health_percent < WANTS_TO_HEAL_THRESHOLD or status_ext.is_wounded(status_ext) then
-					in_need_type = "in_need_of_heal"
-				else
-					in_need_type = nil
-				end
-			end
+				if status_ext.is_knocked_down(status_ext) then
+					in_need_type = "knocked_down"
+				elseif status_ext.get_is_ledge_hanging(status_ext) and not status_ext.is_pulled_up(status_ext) then
+					in_need_type = "ledge"
+				elseif status_ext.is_hanging_from_hook(status_ext) then
+					in_need_type = "hook"
+				elseif can_heal_other then
+					local health_percent = ScriptUnit.extension(player_unit, "health_system"):current_health_percent()
 
-			if in_need_type or not player.bot_player then
-				local target_pos = POSITION_LOOKUP[player_unit]
-				local real_dist = Vector3.distance(self_pos, target_pos)
-				local allowed_follow_path, allowed_aid_path = self._ally_path_allowed(self, player_unit, t)
-
-				if allowed_follow_path then
-					if not allowed_aid_path then
+					if health_percent < WANTS_TO_HEAL_THRESHOLD or status_ext.is_wounded(status_ext) then
+						in_need_type = "in_need_of_heal"
+					else
 						in_need_type = nil
-					elseif in_need_type then
-						local rat_ogres = Managers.state.conflict:spawned_units_by_breed("skaven_rat_ogre")
+					end
+				end
 
-						for _, rat_ogre_unit in pairs(rat_ogres) do
-							local dist_sq = Vector3.distance_squared(target_pos, POSITION_LOOKUP[rat_ogre_unit])
-							local range = (blackboard.target_ally_unit == player_unit and blackboard.target_ally_needs_aid and 16) or 25
+				if in_need_type or not player.bot_player then
+					local target_pos = POSITION_LOOKUP[player_unit]
+					local allowed_follow_path, allowed_aid_path = self._ally_path_allowed(self, player_unit, t)
 
-							if dist_sq < range then
-								in_need_type = nil
+					if allowed_follow_path then
+						if not allowed_aid_path then
+							in_need_type = nil
+						elseif in_need_type then
+							local rat_ogres = Managers.state.conflict:spawned_units_by_breed("skaven_rat_ogre")
 
-								break
+							for _, rat_ogre_unit in pairs(rat_ogres) do
+								local dist_sq = Vector3.distance_squared(target_pos, POSITION_LOOKUP[rat_ogre_unit])
+								local range = (blackboard.target_ally_unit == player_unit and blackboard.target_ally_needs_aid and 16) or 25
+
+								if dist_sq < range then
+									in_need_type = nil
+
+									break
+								end
 							end
 						end
-					end
 
-					if in_need_type or not player.bot_player then
-						local dist = real_dist - ((in_need_type == "in_need_of_heal" and 10) or (in_need_type and 30) or 0)
+						if in_need_type or not player.bot_player then
+							local real_dist = Vector3.distance(self_pos, target_pos)
+							local dist = real_dist - ((in_need_type == "in_need_of_heal" and 10) or (in_need_type and 30) or 0)
 
-						if dist < closest_dist then
-							closest_dist = dist
-							closest_real_dist = real_dist
-							closest_ally = player_unit
-							closest_in_need_type = in_need_type
+							if dist < closest_dist then
+								closest_dist = dist
+								closest_real_dist = real_dist
+								closest_ally = player_unit
+								closest_in_need_type = in_need_type
+							end
 						end
 					end
 				end
@@ -978,6 +987,13 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 		cover_position = cover_bb.cover_position:unbox()
 	end
 
+	local obstruction_bb = blackboard.ranged_obstruction_by_static
+	local obstruction_unit = obstruction_bb and obstruction_bb.unit
+
+	if cover_bb.active_threats[obstruction_unit] then
+		blackboard.ranged_obstruction_by_static = nil
+	end
+
 	local target_ally_unit = blackboard.target_ally_unit
 	local transport_unit_override = nil
 
@@ -1212,10 +1228,7 @@ PlayerBotBase.cb_enemy_path_result = function (self, enemy_unit, success, destin
 	path_status.failed = fail
 
 	path_status.last_path_destination:store(destination)
-
-	if script_data.debug_unit == self._unit then
-		print("path to enemy result " .. ((success and "success") or "failed"))
-	end
+	dprint("path to enemy result " .. ((success and "success") or "failed"))
 
 	for unit, path in pairs(paths) do
 		if not alive(unit) then
@@ -1285,7 +1298,9 @@ PlayerBotBase._ally_path_allowed = function (self, ally_unit, t)
 		local no_longer_ignored = path_status.ignore_ally_from + ignore_for < t
 
 		if no_longer_ignored then
-			local has_moved = ALLY_PATH_FAILED_REPATH_THRESHOLD < Vector3.distance_squared(POSITION_LOOKUP[ally_unit], path_status.last_path_destination:unbox())
+			local ally_position = POSITION_LOOKUP[ally_unit]
+			local last_path_destination = path_status.last_path_destination:unbox()
+			local has_moved = ALLY_PATH_FAILED_REPATH_THRESHOLD < Vector3.distance_squared(ally_position, last_path_destination)
 
 			return true, has_moved
 		else

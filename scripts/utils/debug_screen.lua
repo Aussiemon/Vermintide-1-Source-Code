@@ -1,5 +1,5 @@
 local font_size = 26
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local fade_speed = 10
 local console_width = 800
@@ -83,7 +83,7 @@ DebugScreen.setup = function (world, settings, callbacks)
 
 	local DebugScreen = DebugScreen
 	DebugScreen.world = world
-	DebugScreen.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "material", "materials/menu/debug_screen", "immediate")
+	DebugScreen.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "material", "materials/menu/debug_screen", "immediate")
 	DebugScreen.active = false
 	local script_data = script_data
 	DebugScreen.console_settings = {}
@@ -238,7 +238,7 @@ DebugScreen.setup = function (world, settings, callbacks)
 	DebugScreen.search_string = ""
 	DebugScreen.filtered_console_settings = DebugScreen.console_settings
 
-	Profiler.stop()
+	Profiler.stop("DebugScreen.setup")
 
 	return 
 end
@@ -250,7 +250,7 @@ DebugScreen.destroy = function ()
 end
 local accelerate_factor = 1
 DebugScreen.update = function (dt, t, input_service, input_manager)
-	if not script_data.debug_enabled then
+	if not script_data.debug_enabled or not input_service then
 		return 
 	end
 

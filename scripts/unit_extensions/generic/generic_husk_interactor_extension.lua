@@ -39,6 +39,13 @@ GenericHuskInteractorExtension.game_object_unit_destroyed = function (self)
 	return 
 end
 GenericHuskInteractorExtension.destroy = function (self)
+	local interaction_context = self.interaction_context
+	local interactable_unit = interaction_context.interactable_unit
+
+	if Unit.alive(interactable_unit) then
+		Managers.state.unit_spawner:remove_destroy_listener(interactable_unit, "interactable_unit_for_husk")
+	end
+
 	return 
 end
 GenericHuskInteractorExtension.update = function (self, unit, input, dt, context, t)
@@ -113,11 +120,7 @@ GenericHuskInteractorExtension._stop_interaction = function (self, interactable_
 
 	self.state = "waiting_to_interact"
 	local flow_event = "lua_interaction_stopped_" .. interaction_type .. "_" .. InteractionResult[interaction_result]
-	local position_of_interactor = Unit.local_position(unit, 0)
-	local position_of_interactable_object = Unit.local_position(interactable_unit, 0)
-	local direction_to_interacble_object = Vector3.normalize(position_of_interactable_object - position_of_interactor)
 
-	Unit.set_flow_variable(interactable_unit, "lua_direction_to_interacble_object", direction_to_interacble_object)
 	Unit.flow_event(interactable_unit, flow_event)
 
 	return 
@@ -172,7 +175,7 @@ GenericHuskInteractorExtension.set_interaction_context = function (self, state, 
 	self.interaction_context.result = InteractionResult.ONGOING
 	local interactable_extension = ScriptUnit.extension(interactable_unit, "interactable_system")
 
-	interactable_extension.set_is_being_interacted_with(interactable_extension, true)
+	interactable_extension.set_is_being_interacted_with(interactable_extension, self.unit)
 
 	return 
 end

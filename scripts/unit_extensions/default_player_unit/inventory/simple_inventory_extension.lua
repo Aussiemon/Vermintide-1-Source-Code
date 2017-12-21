@@ -4,6 +4,11 @@ require("scripts/unit_extensions/default_player_unit/inventory/gear_utils")
 require("scripts/managers/backend/backend_utils")
 
 SimpleInventoryExtension = class(SimpleInventoryExtension)
+local consumable_slots = {
+	"slot_potion",
+	"slot_grenade",
+	"slot_healthkit"
+}
 local TraitUsingSlotTypes = {
 	melee = true,
 	ranged = true
@@ -36,6 +41,9 @@ SimpleInventoryExtension.init = function (self, extension_init_context, unit, ex
 		}
 	}
 	self.recently_acquired_list = {}
+	self._loaded_projectile_settings = {}
+	self._selected_consumable_slot = nil
+	self._previously_wielded_weapon_slot = "slot_melee"
 
 	return 
 end
@@ -86,6 +94,35 @@ SimpleInventoryExtension.extensions_ready = function (self, world, unit)
 	end
 
 	self._equipment.wielded_slot = profile.default_wielded_slot
+
+	return 
+end
+SimpleInventoryExtension.game_object_initialized = function (self, unit, unit_go_id)
+	local network_manager = Managers.state.network
+	local is_server = self.is_server
+	local equipment = self._equipment
+	local slots = equipment.slots
+
+	for slot_name, slot_data in pairs(slots) do
+		local item_data = slot_data.item_data
+		local slot_id = NetworkLookup.equipment_slots[slot_name]
+		local item_id = NetworkLookup.item_names[item_data.name]
+
+		if is_server then
+			network_manager.network_transmit:send_rpc_clients("rpc_add_equipment", unit_go_id, slot_id, item_id)
+		else
+			network_manager.network_transmit:send_rpc_server("rpc_add_equipment", unit_go_id, slot_id, item_id)
+		end
+	end
+
+	local wielded_slot = equipment.wielded_slot
+	local slot_id = NetworkLookup.equipment_slots[wielded_slot]
+
+	if is_server then
+		network_manager.network_transmit:send_rpc_clients("rpc_wield_equipment", unit_go_id, slot_id)
+	else
+		network_manager.network_transmit:send_rpc_server("rpc_wield_equipment", unit_go_id, slot_id)
+	end
 
 	return 
 end
@@ -181,6 +218,8 @@ SimpleInventoryExtension.update = function (self, unit, input, dt, context, t)
 		end
 	end
 
+	self.update_selected_consumable_slot(self)
+	self.update_loaded_projectile_settings(self)
 	self.update_resync_loadout(self)
 
 	return 
@@ -228,13 +267,8 @@ SimpleInventoryExtension.can_wield = function (self)
 
 	return can_wield
 end
-SimpleInventoryExtension.wield_previous = function (self)
-	local equipment = self._equipment
-	local slot_name = (equipment.previously_wielded_slot ~= "slot_packmaster_claw" and equipment.previously_wielded_slot) or "slot_melee"
-
-	if equipment.slots[slot_name] == nil then
-		slot_name = "slot_melee"
-	end
+SimpleInventoryExtension.wield_previous_weapon = function (self)
+	local slot_name = self._previously_wielded_weapon_slot
 
 	self.wield(self, slot_name)
 
@@ -258,7 +292,6 @@ SimpleInventoryExtension.wield = function (self, slot_name)
 		return 
 	end
 
-	equipment.previously_wielded_slot = equipment.wielded_slot
 	local item_data = slot_data.item_data
 	local item_template = BackendUtils.get_item_template(item_data)
 	local wielded_weapon = GearUtils.wield_slot(equipment, slot_data, self._first_person_unit, self._unit)
@@ -304,6 +337,10 @@ SimpleInventoryExtension.wield = function (self, slot_name)
 	end
 
 	self._spawn_attached_units(self, item_template.first_person_attached_units)
+
+	if slot_name == "slot_melee" or slot_name == "slot_ranged" then
+		self._previously_wielded_weapon_slot = slot_name
+	end
 
 	return 
 end
@@ -777,6 +814,13 @@ SimpleInventoryExtension.get_slot_data = function (self, slot_id)
 
 	return slots[slot_id]
 end
+SimpleInventoryExtension.get_item_name = function (self, slot_name)
+	local slot_data = self.get_slot_data(self, slot_name)
+	local item_data = slot_data and slot_data.item_data
+	local item_name = item_data and item_data.name
+
+	return item_name
+end
 SimpleInventoryExtension.resync_loadout = function (self, equipment_to_spawn)
 	if not equipment_to_spawn then
 		return 
@@ -805,15 +849,7 @@ SimpleInventoryExtension.create_equipment_in_slot = function (self, slot_id, bac
 		slot_id = slot_id,
 		item_data = item_data
 	}
-
-	self.update_gameobject(self, slot_id, item_name)
-
 	self.resync_loadout_needed = true
-
-	return 
-end
-SimpleInventoryExtension.update_gameobject = function (self, slot_id, item_name)
-	GearUtils.update_gameobject(self._unit, slot_id, item_name)
 
 	return 
 end
@@ -975,13 +1011,97 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 				self.destroy_slot(self, slot_name)
 
 				if slot_name == current_wielded_slot then
-					self.wield(self, "slot_melee")
+					self.wield_previous_weapon(self)
 				end
 			end
 		end
 	end
 
 	return 
+end
+SimpleInventoryExtension.set_loaded_projectile_override = function (self, settings)
+	self._loaded_projectile_settings_override = settings
+
+	return 
+end
+SimpleInventoryExtension.update_loaded_projectile_settings = function (self)
+	local loaded_projectile_settings = nil
+	local weapon_template = self.get_wielded_slot_item_template(self)
+	local settings_override = self._loaded_projectile_settings_override
+
+	if settings_override then
+		if settings_override ~= "none" then
+			loaded_projectile_settings = settings_override
+		end
+	elseif weapon_template then
+		loaded_projectile_settings = weapon_template.default_loaded_projectile_settings
+	end
+
+	self._loaded_projectile_settings = loaded_projectile_settings
+
+	return 
+end
+SimpleInventoryExtension.get_loaded_projectile_settings = function (self)
+	return self._loaded_projectile_settings
+end
+SimpleInventoryExtension.update_selected_consumable_slot = function (self)
+	local slots = self._equipment.slots
+
+	if not slots[self._selected_consumable_slot] then
+		self._selected_consumable_slot = nil
+	end
+
+	if not self._selected_consumable_slot then
+		for i = 1, #consumable_slots, 1 do
+			local slot_name = consumable_slots[i]
+			local slot_data = slots[slot_name]
+
+			if slot_data then
+				self._selected_consumable_slot = slot_name
+
+				break
+			end
+		end
+	end
+
+	if self._selected_consumable_slot then
+		local input_extension = ScriptUnit.extension(self._unit, "input_system")
+
+		if input_extension.get(input_extension, "action_select_consumable_left") then
+			if self._selected_consumable_slot == "slot_grenade" and slots.slot_potion then
+				self._selected_consumable_slot = "slot_potion"
+			elseif self._selected_consumable_slot == "slot_healthkit" and slots.slot_grenade then
+				self._selected_consumable_slot = "slot_grenade"
+			elseif self._selected_consumable_slot == "slot_healthkit" and slots.slot_potion then
+				self._selected_consumable_slot = "slot_potion"
+			end
+		elseif input_extension.get(input_extension, "action_select_consumable_right") then
+			if self._selected_consumable_slot == "slot_grenade" and slots.slot_healthkit then
+				self._selected_consumable_slot = "slot_healthkit"
+			elseif self._selected_consumable_slot == "slot_potion" and slots.slot_grenade then
+				self._selected_consumable_slot = "slot_grenade"
+			elseif self._selected_consumable_slot == "slot_potion" and slots.slot_healthkit then
+				self._selected_consumable_slot = "slot_healthkit"
+			end
+		end
+	end
+
+	return 
+end
+SimpleInventoryExtension.get_selected_consumable_slot_template = function (self)
+	local slot_name = self._selected_consumable_slot
+	local slot_data = self._equipment.slots[slot_name]
+	local item_template = nil
+
+	if slot_data then
+		local item_data = slot_data.item_data
+		item_template = BackendUtils.get_item_template(item_data)
+	end
+
+	return item_template
+end
+SimpleInventoryExtension.get_selected_consumable_slot_name = function (self)
+	return self._selected_consumable_slot
 end
 SimpleInventoryExtension.resyncing_loadout = function (self)
 	return self.resync_id

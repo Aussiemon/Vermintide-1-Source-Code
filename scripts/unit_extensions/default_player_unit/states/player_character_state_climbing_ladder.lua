@@ -192,7 +192,7 @@ PlayerCharacterStateClimbingLadder.update = function (self, unit, input, dt, con
 
 	local max_radians = math.degrees_to_radians(movement_settings_table.ladder.look_horizontal_max_degrees)
 
-	CharacterStateHelper.look_limited_rotation_freedom(input_extension, player.viewport_name, self.first_person_extension, self.ladder_unit, unit, max_radians, max_radians, status_extension)
+	CharacterStateHelper.look_limited_rotation_freedom(input_extension, player.viewport_name, self.first_person_extension, self.ladder_unit, unit, max_radians, max_radians, status_extension, self.inventory_extension)
 	self.on_ladder_animation(self)
 
 	self.accumilated_distance = self.accumilated_distance + math.abs(current_velocity_z)*dt

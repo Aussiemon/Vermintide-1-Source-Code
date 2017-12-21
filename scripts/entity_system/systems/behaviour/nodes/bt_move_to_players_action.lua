@@ -1,13 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTMoveToPlayersAction = class(BTMoveToPlayersAction, BTNode)
-BTMoveToPlayersAction.name = "BTMoveToPlayersAction"
+local EVALUATE_TIME = 0.25
 BTMoveToPlayersAction.init = function (self, ...)
 	BTMoveToPlayersAction.super.init(self, ...)
 
 	return 
 end
-local EVALUATE_TIME = 0.25
+BTMoveToPlayersAction.name = "BTMoveToPlayersAction"
 BTMoveToPlayersAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	blackboard.action = action
@@ -19,8 +19,9 @@ BTMoveToPlayersAction.enter = function (self, unit, blackboard, t)
 	end
 
 	local ai_navigation_extension = blackboard.navigation_extension
+	local walk_speed = blackboard.breed.walk_speed
 
-	ai_navigation_extension.set_max_speed(ai_navigation_extension, blackboard.breed.walk_speed)
+	ai_navigation_extension.set_max_speed(ai_navigation_extension, walk_speed)
 
 	if blackboard.move_to_players_position then
 		local move_to_players_position = blackboard.move_to_players_position:unbox()
@@ -69,13 +70,11 @@ BTMoveToPlayersAction.leave = function (self, unit, blackboard, t, reason)
 	return 
 end
 BTMoveToPlayersAction.run = function (self, unit, blackboard, t, dt)
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 	local ai_navigation = blackboard.navigation_extension
 	local data = blackboard.move_to_players
-	local TODO_HAS_FAILED_PATH = false
 	local target_pos = POSITION_LOOKUP[blackboard.target_unit]
 
-	if not blackboard.move_to_players_position or TODO_HAS_FAILED_PATH or 9 < Vector3.distance_squared(blackboard.move_to_players_position:unbox(), target_pos) then
+	if not blackboard.move_to_players_position or 9 < Vector3.distance_squared(blackboard.move_to_players_position:unbox(), target_pos) then
 		self._update_move_to_players_position(self, blackboard, ai_navigation, target_pos, data)
 
 		return "running"
@@ -92,8 +91,7 @@ BTMoveToPlayersAction.run = function (self, unit, blackboard, t, dt)
 	return ret_value
 end
 BTMoveToPlayersAction._evalute_targets = function (self, unit, blackboard, data, t)
-	local action = blackboard.action
-	local should_evaluate_next_player = t < data.eval_timer
+	local should_evaluate_next_player = data.eval_timer < t
 
 	if should_evaluate_next_player then
 		data.eval_timer = t + EVALUATE_TIME
@@ -118,6 +116,7 @@ BTMoveToPlayersAction._evalute_targets = function (self, unit, blackboard, data,
 		data.index = next_index
 	end
 
+	local action = blackboard.action
 	local target_found = self[action.find_target_function_name](self, unit, blackboard, action, next_target_unit, t)
 
 	return (target_found and "done") or "running"
@@ -243,16 +242,20 @@ BTMoveToPlayersAction._has_line_of_sight = function (self, unit, target_unit, wo
 	return not hit
 end
 BTMoveToPlayersAction.start_idle_animation = function (self, unit, blackboard)
-	Managers.state.network:anim_event(unit, "to_passive")
-	Managers.state.network:anim_event(unit, "idle")
+	local network_manager = Managers.state.network
+
+	network_manager.anim_event(network_manager, unit, "to_passive")
+	network_manager.anim_event(network_manager, unit, "idle")
 
 	blackboard.move_state = "idle"
 
 	return 
 end
 BTMoveToPlayersAction.start_move_animation = function (self, unit, blackboard)
-	Managers.state.network:anim_event(unit, "to_combat")
-	Managers.state.network:anim_event(unit, "move_fwd")
+	local network_manager = Managers.state.network
+
+	network_manager.anim_event(network_manager, unit, "to_combat")
+	network_manager.anim_event(network_manager, unit, "move_fwd")
 
 	blackboard.move_state = "moving"
 

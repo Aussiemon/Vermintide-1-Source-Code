@@ -1,1082 +1,740 @@
-local keyboard_debug_keymap = {
+require("scripts/utils/input_helper")
+
+DebugKeymap = {}
+DebugInputFilters = {}
+local valid_debug_build = Application.build() == "dev" or Application.build() == "debug"
+local use_synergy = script_data.synergy ~= nil and valid_debug_build
+local keyboard_device = (use_synergy and "synergy_keyboard") or "keyboard"
+local keyboard_keymaps = {
 	f1 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f1",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f1",
+		"pressed"
 	},
 	f2 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f2",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f2",
+		"pressed"
 	},
 	f3 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f3",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f3",
+		"pressed"
 	},
 	f4 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f4",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f4",
+		"pressed"
 	},
 	f5 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f5",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f5",
+		"pressed"
 	},
 	f6 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f6",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f6",
+		"pressed"
 	},
 	f7 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f7",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f7",
+		"pressed"
 	},
 	f8 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f8",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f8",
+		"pressed"
 	},
 	f9 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f9",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f9",
+		"pressed"
 	},
 	f10 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f10",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f10",
+		"pressed"
 	},
 	f11 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f11",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f11",
+		"pressed"
 	},
 	f12 = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f12",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"f12",
+		"pressed"
 	},
 	["page up"] = {
-		input_mappings = {
-			{
-				"keyboard",
-				"page up",
-				"pressed"
-			}
-		}
+		keyboard_device,
+		"page up",
+		"pressed"
 	},
 	["page down"] = {
+		keyboard_device,
+		"page down",
+		"pressed"
+	},
+	home = {
+		keyboard_device,
+		"home",
+		"pressed"
+	},
+	end = {
+		keyboard_device,
+		"end",
+		"pressed"
+	},
+	["left ctrl"] = {
+		keyboard_device,
+		"left ctrl",
+		"held"
+	},
+	["left shift"] = {
+		keyboard_device,
+		"left shift",
+		"held"
+	},
+	["right ctrl"] = {
+		keyboard_device,
+		"left ctrl",
+		"held"
+	},
+	["left alt"] = {
+		keyboard_device,
+		"left alt",
+		"held"
+	},
+	right_key = {
+		keyboard_device,
+		"right",
+		"pressed"
+	},
+	left_key = {
+		keyboard_device,
+		"left",
+		"pressed"
+	},
+	up_key = {
+		keyboard_device,
+		"up",
+		"held"
+	},
+	down_key = {
+		keyboard_device,
+		"down",
+		"held"
+	},
+	enter_key = {
+		keyboard_device,
+		"enter",
+		"pressed"
+	},
+	backspace = {
+		keyboard_device,
+		"backspace",
+		"pressed"
+	},
+	numpad_plus = {
+		keyboard_device,
+		"numpad +",
+		"pressed"
+	},
+	numpad_minus = {
+		keyboard_device,
+		"num -",
+		"pressed"
+	},
+	a = {
+		keyboard_device,
+		"a",
+		"pressed"
+	},
+	b = {
+		keyboard_device,
+		"b",
+		"pressed"
+	},
+	c = {
+		keyboard_device,
+		"c",
+		"pressed"
+	},
+	d = {
+		keyboard_device,
+		"d",
+		"pressed"
+	},
+	e = {
+		keyboard_device,
+		"e",
+		"pressed"
+	},
+	f = {
+		keyboard_device,
+		"f",
+		"pressed"
+	},
+	g = {
+		keyboard_device,
+		"g",
+		"pressed"
+	},
+	h = {
+		keyboard_device,
+		"h",
+		"pressed"
+	},
+	h_held = {
+		keyboard_device,
+		"h",
+		"held"
+	},
+	i = {
+		keyboard_device,
+		"i",
+		"pressed"
+	},
+	j = {
+		keyboard_device,
+		"j",
+		"pressed"
+	},
+	k = {
+		keyboard_device,
+		"k",
+		"pressed"
+	},
+	l = {
+		keyboard_device,
+		"l",
+		"pressed"
+	},
+	m = {
+		keyboard_device,
+		"m",
+		"pressed"
+	},
+	n = {
+		keyboard_device,
+		"n",
+		"pressed"
+	},
+	o = {
+		keyboard_device,
+		"o",
+		"pressed"
+	},
+	p = {
+		keyboard_device,
+		"p",
+		"pressed"
+	},
+	q = {
+		keyboard_device,
+		"q",
+		"pressed"
+	},
+	r = {
+		keyboard_device,
+		"r",
+		"pressed"
+	},
+	s = {
+		keyboard_device,
+		"s",
+		"pressed"
+	},
+	t = {
+		keyboard_device,
+		"t",
+		"pressed"
+	},
+	u = {
+		keyboard_device,
+		"u",
+		"pressed"
+	},
+	v = {
+		keyboard_device,
+		"v",
+		"pressed"
+	},
+	w = {
+		keyboard_device,
+		"w",
+		"pressed"
+	},
+	x = {
+		keyboard_device,
+		"x",
+		"pressed"
+	},
+	y = {
+		keyboard_device,
+		"y",
+		"pressed"
+	},
+	z = {
+		keyboard_device,
+		"z",
+		"pressed"
+	},
+	esc = {
+		keyboard_device,
+		"esc",
+		"pressed"
+	},
+	activate_chat_input = {
+		keyboard_device,
+		"y",
+		"pressed"
+	},
+	console_open_key = {
+		keyboard_device,
+		"end",
+		"pressed"
+	},
+	console_favorite_key = {
+		keyboard_device,
+		"f",
+		"pressed"
+	},
+	console_search_key = {
+		keyboard_device,
+		"backspace",
+		"pressed"
+	},
+	cursor = {
+		"mouse",
+		"cursor",
+		"axis"
+	},
+	look = {
+		"mouse",
+		"mouse",
+		"axis"
+	},
+	mouse_left_held = {
+		"mouse",
+		"left",
+		"held"
+	},
+	mouse_middle_held = {
+		"mouse",
+		"middle",
+		"held"
+	},
+	mouse_right_held = {
+		"mouse",
+		"right",
+		"held"
+	}
+}
+DebugKeymap.win32 = InputUtils.keymaps_key_approved("win32") and keyboard_keymaps
+DebugInputFilters.win32 = InputUtils.keymaps_key_approved("win32") and {
+	console_mod_key = {
+		filter_type = "or",
 		input_mappings = {
-			{
-				"keyboard",
-				"page down",
-				"pressed"
-			}
+			["left ctrl"] = "left ctrl",
+			["right ctrl"] = "right ctrl"
+		}
+	}
+}
+DebugKeymap.xb1 = InputUtils.keymaps_key_approved("xb1") and {
+	left_thumb = {
+		"gamepad",
+		"left_thumb",
+		"held"
+	},
+	right_thumb = {
+		"gamepad",
+		"right_thumb",
+		"held"
+	},
+	right_trigger = {
+		"gamepad",
+		"right_trigger",
+		"held"
+	},
+	right_trigger_soft = {
+		"gamepad",
+		"right_trigger",
+		"soft_button"
+	},
+	left_trigger = {
+		"gamepad",
+		"left_trigger",
+		"held"
+	},
+	left_trigger_soft = {
+		"gamepad",
+		"left_trigger",
+		"soft_button"
+	},
+	d_left = {
+		"gamepad",
+		"d_left",
+		"pressed"
+	},
+	d_right = {
+		"gamepad",
+		"d_right",
+		"pressed"
+	},
+	d_up = {
+		"gamepad",
+		"d_up",
+		"pressed"
+	},
+	x = {
+		"gamepad",
+		"x",
+		"pressed"
+	},
+	y = {
+		"gamepad",
+		"y",
+		"pressed"
+	},
+	b = {
+		"gamepad",
+		"b",
+		"pressed"
+	},
+	exclusive_right_key = {
+		"gamepad",
+		"d_right",
+		"pressed"
+	},
+	left_key = {
+		"gamepad",
+		"d_left",
+		"pressed"
+	},
+	up_key = {
+		"gamepad",
+		"d_up",
+		"held"
+	},
+	down_key = {
+		"gamepad",
+		"d_down",
+		"held"
+	},
+	right_shoulder_held = {
+		"gamepad",
+		"right_shoulder",
+		"held"
+	},
+	look_raw = {
+		"gamepad",
+		"right",
+		"axis"
+	},
+	["left ctrl"] = {
+		"gamepad",
+		"left_trigger",
+		"held"
+	},
+	["left shift"] = {
+		"gamepad",
+		"right_trigger",
+		"held"
+	}
+}
+
+if use_synergy then
+	table.merge(DebugKeymap.xb1, keyboard_keymaps)
+end
+
+DebugInputFilters.xb1 = InputUtils.keymaps_key_approved("xb1") and {
+	n_switch = {
+		filter_type = "and",
+		input_mappings = {
+			right_trigger = "right_trigger",
+			d_left = "d_left",
+			left_thumb = "left_thumb"
+		}
+	},
+	n = {
+		filter_type = "and",
+		input_mappings = {
+			right_trigger = "right_trigger",
+			d_up = "d_up",
+			left_thumb = "left_thumb"
+		}
+	},
+	o = {
+		filter_type = "and",
+		input_mappings = {
+			left_trigger = "left_trigger",
+			d_left = "d_left",
+			left_thumb = "left_thumb"
+		}
+	},
+	p = {
+		filter_type = "and",
+		input_mappings = {
+			d_up = "d_up",
+			left_trigger = "left_trigger",
+			left_thumb = "left_thumb"
+		}
+	},
+	i = {
+		filter_type = "and",
+		input_mappings = {
+			d_down = "d_down",
+			left_thumb = "left_thumb"
+		}
+	},
+	c = {
+		filter_type = "and",
+		input_mappings = {
+			d_up = "d_up",
+			left_thumb = "left_thumb"
 		}
 	},
 	home = {
+		filter_type = "and",
 		input_mappings = {
-			{
-				"keyboard",
-				"home",
-				"pressed"
-			}
-		}
-	},
-	end = {
-		input_mappings = {
-			{
-				"keyboard",
-				"end",
-				"pressed"
-			}
-		}
-	},
-	["left ctrl"] = {
-		input_mappings = {
-			{
-				"keyboard",
-				"left ctrl",
-				"held"
-			}
-		}
-	},
-	["left shift"] = {
-		input_mappings = {
-			{
-				"keyboard",
-				"left shift",
-				"held"
-			}
-		}
-	},
-	["right ctrl"] = {
-		input_mappings = {
-			{
-				"keyboard",
-				"left ctrl",
-				"held"
-			}
-		}
-	},
-	["left alt"] = {
-		input_mappings = {
-			{
-				"keyboard",
-				"left alt",
-				"held"
-			}
-		}
-	},
-	right_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"right",
-				"pressed"
-			}
-		}
-	},
-	left_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"left",
-				"pressed"
-			}
-		}
-	},
-	up_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"up",
-				"held"
-			}
-		}
-	},
-	down_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"down",
-				"held"
-			}
-		}
-	},
-	enter_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"enter",
-				"pressed"
-			}
-		}
-	},
-	backspace = {
-		input_mappings = {
-			{
-				"keyboard",
-				"backspace",
-				"pressed"
-			}
-		}
-	},
-	numpad_plus = {
-		input_mappings = {
-			{
-				"keyboard",
-				"numpad +",
-				"pressed"
-			}
-		}
-	},
-	numpad_minus = {
-		input_mappings = {
-			{
-				"keyboard",
-				"num -",
-				"pressed"
-			}
-		}
-	},
-	a = {
-		input_mappings = {
-			{
-				"keyboard",
-				"a",
-				"pressed"
-			}
-		}
-	},
-	b = {
-		input_mappings = {
-			{
-				"keyboard",
-				"b",
-				"pressed"
-			}
-		}
-	},
-	c = {
-		input_mappings = {
-			{
-				"keyboard",
-				"c",
-				"pressed"
-			}
-		}
-	},
-	d = {
-		input_mappings = {
-			{
-				"keyboard",
-				"d",
-				"pressed"
-			}
-		}
-	},
-	e = {
-		input_mappings = {
-			{
-				"keyboard",
-				"e",
-				"pressed"
-			}
-		}
-	},
-	f = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f",
-				"pressed"
-			}
-		}
-	},
-	g = {
-		input_mappings = {
-			{
-				"keyboard",
-				"g",
-				"pressed"
-			}
-		}
-	},
-	h = {
-		input_mappings = {
-			{
-				"keyboard",
-				"h",
-				"pressed"
-			}
-		}
-	},
-	h_held = {
-		input_mappings = {
-			{
-				"keyboard",
-				"h",
-				"held"
-			}
-		}
-	},
-	i = {
-		input_mappings = {
-			{
-				"keyboard",
-				"i",
-				"pressed"
-			}
-		}
-	},
-	j = {
-		input_mappings = {
-			{
-				"keyboard",
-				"j",
-				"pressed"
-			}
-		}
-	},
-	k = {
-		input_mappings = {
-			{
-				"keyboard",
-				"k",
-				"pressed"
-			}
-		}
-	},
-	l = {
-		input_mappings = {
-			{
-				"keyboard",
-				"l",
-				"pressed"
-			}
-		}
-	},
-	m = {
-		input_mappings = {
-			{
-				"keyboard",
-				"m",
-				"pressed"
-			}
-		}
-	},
-	n = {
-		input_mappings = {
-			{
-				"keyboard",
-				"n",
-				"pressed"
-			}
-		}
-	},
-	o = {
-		input_mappings = {
-			{
-				"keyboard",
-				"o",
-				"pressed"
-			}
-		}
-	},
-	p = {
-		input_mappings = {
-			{
-				"keyboard",
-				"p",
-				"pressed"
-			}
-		}
-	},
-	q = {
-		input_mappings = {
-			{
-				"keyboard",
-				"q",
-				"pressed"
-			}
-		}
-	},
-	r = {
-		input_mappings = {
-			{
-				"keyboard",
-				"r",
-				"pressed"
-			}
-		}
-	},
-	s = {
-		input_mappings = {
-			{
-				"keyboard",
-				"s",
-				"pressed"
-			}
-		}
-	},
-	t = {
-		input_mappings = {
-			{
-				"keyboard",
-				"t",
-				"pressed"
-			}
-		}
-	},
-	u = {
-		input_mappings = {
-			{
-				"keyboard",
-				"u",
-				"pressed"
-			}
+			x = "x",
+			right_thumb = "right_thumb"
 		}
 	},
 	v = {
+		filter_type = "and",
 		input_mappings = {
-			{
-				"keyboard",
-				"v",
-				"pressed"
-			}
+			y = "y",
+			right_thumb = "right_thumb"
 		}
 	},
-	w = {
+	show_behaviour = {
+		filter_type = "and",
 		input_mappings = {
-			{
-				"keyboard",
-				"w",
-				"pressed"
-			}
+			b = "b",
+			right_thumb = "right_thumb"
 		}
 	},
-	x = {
+	right_key = {
+		filter_type = "and",
 		input_mappings = {
-			{
-				"keyboard",
-				"x",
-				"pressed"
-			}
+			d_right = "d_right",
+			left_thumb = "left_thumb"
 		}
 	},
-	y = {
+	time_scale = {
+		filter_type = "and",
 		input_mappings = {
-			{
-				"keyboard",
-				"y",
-				"pressed"
-			}
+			right_thumb = "right_thumb",
+			left_thumb = "left_thumb"
 		}
 	},
-	z = {
+	time_scale_axis = {
+		filter_type = "sub",
 		input_mappings = {
-			{
-				"keyboard",
-				"z",
-				"pressed"
-			}
-		}
-	},
-	esc = {
-		input_mappings = {
-			{
-				"keyboard",
-				"esc",
-				"pressed"
-			}
-		}
-	},
-	activate_chat_input = {
-		input_mappings = {
-			{
-				"keyboard",
-				"y",
-				"pressed"
-			}
-		}
-	},
-	console_open_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"end",
-				"pressed"
-			}
-		}
-	},
-	console_mod_key = {
-		combination_type = "or",
-		input_mappings = {
-			{
-				"keyboard",
-				"left ctrl",
-				"held"
-			},
-			{
-				"keyboard",
-				"right ctrl",
-				"held"
-			}
-		}
-	},
-	console_favorite_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"f",
-				"pressed"
-			}
-		}
-	},
-	console_search_key = {
-		input_mappings = {
-			{
-				"keyboard",
-				"backspace",
-				"pressed"
-			}
+			right_trigger_soft = "right_trigger_soft",
+			left_trigger_soft = "left_trigger_soft"
 		}
 	}
 }
-local synergy_keyboard_debug_keymap = nil
+DebugKeymap.ps4 = InputUtils.keymaps_key_approved("ps4") and {
+	l3 = {
+		"gamepad",
+		"l3",
+		"held"
+	},
+	r3 = {
+		"gamepad",
+		"r3",
+		"held"
+	},
+	l2 = {
+		"gamepad",
+		"l2",
+		"held"
+	},
+	r2 = {
+		"gamepad",
+		"r2",
+		"held"
+	},
+	l2_soft = {
+		"gamepad",
+		"l2",
+		"soft_button"
+	},
+	r2_soft = {
+		"gamepad",
+		"r2",
+		"soft_button"
+	},
+	left = {
+		"gamepad",
+		"left",
+		"pressed"
+	},
+	right = {
+		"gamepad",
+		"right",
+		"pressed"
+	},
+	up = {
+		"gamepad",
+		"up",
+		"pressed"
+	},
+	down = {
+		"gamepad",
+		"down",
+		"pressed"
+	},
+	circle = {
+		"gamepad",
+		"circle",
+		"pressed"
+	},
+	b = {
+		"gamepad",
+		"b",
+		"pressed"
+	},
+	mouse_middle_held = {
+		"gamepad",
+		"l2",
+		"held"
+	},
+	exclusive_right_key = {
+		"gamepad",
+		"right",
+		"pressed"
+	},
+	left_key = {
+		"gamepad",
+		"left",
+		"pressed"
+	},
+	up_key = {
+		"gamepad",
+		"up",
+		"held"
+	},
+	down_key = {
+		"gamepad",
+		"down",
+		"held"
+	},
+	right_shoulder_held = {
+		"gamepad",
+		"right_shoulder",
+		"held"
+	},
+	look_raw = {
+		"gamepad",
+		"right",
+		"axis"
+	}
+}
 
-if Application.build() == "dev" or Application.build() == "debug" then
-	synergy_keyboard_debug_keymap = {}
-
-	for k, v in pairs(keyboard_debug_keymap) do
-		local input_mappings = v.input_mappings
-		local mapping = input_mappings[1]
-		synergy_keyboard_debug_keymap[k] = {
-			input_mappings = {
-				{
-					"synergy_keyboard",
-					mapping[2],
-					mapping[3]
-				}
-			}
-		}
-	end
+if use_synergy then
+	table.merge(DebugKeymap.ps4, keyboard_keymaps)
 end
 
-local mouse_debug_keymap = {
-	cursor = {
+DebugInputFilters.ps4 = InputUtils.keymaps_key_approved("ps4") and {
+	n_switch = {
+		filter_type = "and",
 		input_mappings = {
-			{
-				"mouse",
-				"cursor",
-				"axis"
-			}
+			l3 = "l3",
+			r2 = "r2",
+			left = "left"
+		}
+	},
+	n = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			r2 = "r2",
+			up = "up"
+		}
+	},
+	o = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			left = "left",
+			l2 = "l2"
+		}
+	},
+	p = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			up = "up",
+			l2 = "l2"
+		}
+	},
+	i = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			down = "down"
+		}
+	},
+	c = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			up = "up"
+		}
+	},
+	v = {
+		filter_type = "or",
+		input_mappings = {
+			r3 = "r3"
+		}
+	},
+	b = {
+		filter_type = "and",
+		input_mappings = {
+			left = "left",
+			l2 = "l2"
+		}
+	},
+	h = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			circle = "circle",
+			r3 = "r3"
+		}
+	},
+	right_key = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			right = "right"
+		}
+	},
+	time_scale = {
+		filter_type = "and",
+		input_mappings = {
+			l3 = "l3",
+			r3 = "r3"
+		}
+	},
+	time_scale_axis = {
+		filter_type = "sub",
+		input_mappings = {
+			l2_soft = "l2_soft",
+			r2_soft = "r2_soft"
 		}
 	},
 	look = {
-		input_mappings = {
-			{
-				"mouse",
-				"mouse",
-				"axis"
-			}
-		}
-	},
-	mouse_left_held = {
-		input_mappings = {
-			{
-				"mouse",
-				"left",
-				"held"
-			}
-		}
-	},
-	mouse_middle_held = {
-		input_mappings = {
-			{
-				"mouse",
-				"middle",
-				"held"
-			}
-		}
-	},
-	mouse_right_held = {
-		input_mappings = {
-			{
-				"mouse",
-				"right",
-				"held"
-			}
-		}
+		filter_type = "scale_vector3",
+		multiplier = 10,
+		input_mapping = "look_raw"
 	}
 }
-local gamepad_xbox_debug_keymap = {
-	n_switch = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"right_trigger",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_left",
-				"pressed"
-			}
-		}
-	},
-	n = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"right_trigger",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_up",
-				"pressed"
-			}
-		}
-	},
-	o = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"left_trigger",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_left",
-				"pressed"
-			}
-		}
-	},
-	p = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"left_trigger",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_up",
-				"pressed"
-			}
-		}
-	},
-	i = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_down",
-				"pressed"
-			}
-		}
-	},
-	c = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_up",
-				"pressed"
-			}
-		}
-	},
-	exclusive_right_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_right",
-				"pressed"
-			}
-		}
-	},
-	right_key = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_right",
-				"pressed"
-			}
-		}
-	},
-	left_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_left",
-				"pressed"
-			}
-		}
-	},
-	up_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_up",
-				"held"
-			}
-		}
-	},
-	down_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_down",
-				"held"
-			}
-		}
-	}
-}
-local synergy_gamepad_xbox_debug_keymap = {
-	["left ctrl"] = {
-		input_mappings = {
-			{
-				"gamepad",
-				"left_trigger",
-				"held"
-			}
-		}
-	},
-	["left shift"] = {
-		input_mappings = {
-			{
-				"gamepad",
-				"right_trigger",
-				"held"
-			}
-		}
-	},
-	exclusive_right_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_right",
-				"pressed"
-			}
-		}
-	},
-	right_key = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"left_thumb",
-				"held"
-			},
-			{
-				"gamepad",
-				"d_right",
-				"pressed"
-			}
-		}
-	},
-	left_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_left",
-				"pressed"
-			}
-		}
-	},
-	up_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_up",
-				"held"
-			}
-		}
-	},
-	down_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"d_down",
-				"held"
-			}
-		}
-	}
-}
-local gamepad_ps4_debug_keymap = {
-	n_switch = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"held"
-			},
-			{
-				"gamepad",
-				"r2",
-				"held"
-			},
-			{
-				"gamepad",
-				"left",
-				"pressed"
-			}
-		}
-	},
-	n = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"held"
-			},
-			{
-				"gamepad",
-				"r2",
-				"held"
-			},
-			{
-				"gamepad",
-				"up",
-				"pressed"
-			}
-		}
-	},
-	o = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"held"
-			},
-			{
-				"gamepad",
-				"l2",
-				"held"
-			},
-			{
-				"gamepad",
-				"left",
-				"pressed"
-			}
-		}
-	},
-	p = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"held"
-			},
-			{
-				"gamepad",
-				"l2",
-				"held"
-			},
-			{
-				"gamepad",
-				"up",
-				"pressed"
-			}
-		}
-	},
-	i = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"held"
-			},
-			{
-				"gamepad",
-				"down",
-				"pressed"
-			}
-		}
-	},
-	c = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"held"
-			},
-			{
-				"gamepad",
-				"up",
-				"pressed"
-			}
-		}
-	},
-	exclusive_right_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"right",
-				"pressed"
-			}
-		}
-	},
-	right_key = {
-		combination_type = "and",
-		input_mappings = {
-			{
-				"gamepad",
-				"l3",
-				"held"
-			},
-			{
-				"gamepad",
-				"right",
-				"pressed"
-			}
-		}
-	},
-	left_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"left",
-				"pressed"
-			}
-		}
-	},
-	up_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"up",
-				"held"
-			}
-		}
-	},
-	down_key = {
-		input_mappings = {
-			{
-				"gamepad",
-				"down",
-				"held"
-			}
-		}
-	}
-}
-
-local function merge_keymap(dest_keymap, source_keymap, xbox_merge)
-	local platform = Application.platform()
-
-	for key, mapdata in pairs(source_keymap) do
-		if (platform == "xb1" or platform == "ps4") and xbox_merge then
-			dest_keymap[key] = mapdata
-		elseif dest_keymap[key] then
-			assert(dest_keymap[key].combination_type == nil or dest_keymap[key].combination_type == "or", "wrongly configured key %s", key)
-
-			dest_keymap[key].combination_type = "or"
-			local dest_input_mappings = dest_keymap[key].input_mappings
-
-			for i = 1, #mapdata.input_mappings, 1 do
-				dest_input_mappings[#dest_input_mappings + 1] = mapdata.input_mappings[i]
-			end
-		else
-			dest_keymap[key] = mapdata
-		end
-	end
-
-	return 
-end
-
-DebugKeymap = {}
-local DebugKeymap = DebugKeymap
-
-if Application.platform() == "win32" then
-	merge_keymap(DebugKeymap, keyboard_debug_keymap)
-
-	if Application.build() == "dev" or Application.build() == "debug" then
-		merge_keymap(DebugKeymap, synergy_keyboard_debug_keymap)
-	end
-
-	merge_keymap(DebugKeymap, mouse_debug_keymap)
-elseif Application.platform() == "ps4" then
-	if script_data.synergy ~= nil then
-		merge_keymap(DebugKeymap, keyboard_debug_keymap)
-
-		if Application.build() == "dev" or Application.build() == "debug" then
-			merge_keymap(DebugKeymap, synergy_keyboard_debug_keymap)
-		end
-	else
-		merge_keymap(DebugKeymap, keyboard_debug_keymap)
-		merge_keymap(DebugKeymap, gamepad_ps4_debug_keymap, true)
-	end
-elseif Application.platform() == "xb1" then
-	if script_data.synergy ~= nil then
-		merge_keymap(DebugKeymap, keyboard_debug_keymap)
-
-		if Application.build() == "dev" or Application.build() == "debug" then
-			merge_keymap(DebugKeymap, synergy_keyboard_debug_keymap)
-			merge_keymap(DebugKeymap, synergy_gamepad_xbox_debug_keymap, true)
-		end
-	else
-		merge_keymap(DebugKeymap, keyboard_debug_keymap)
-		merge_keymap(DebugKeymap, gamepad_xbox_debug_keymap, true)
-	end
-end
 
 return 

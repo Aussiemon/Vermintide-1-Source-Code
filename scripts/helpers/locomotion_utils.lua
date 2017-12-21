@@ -64,6 +64,11 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 
 	if blackboard.remembered_threat_pos then
 		goal_has_moved = 1 < Vector3.distance(Vector3Box.unbox(blackboard.remembered_threat_pos), threat_position)
+
+		if not goal_has_moved and blackboard.next_move_check < t then
+			blackboard.next_move_check = t + 2
+			goal_has_moved = true
+		end
 	else
 		blackboard.remembered_threat_pos = Vector3Box(threat_position)
 		goal_has_moved = true
@@ -733,8 +738,10 @@ LocomotionUtils.closest_mesh_positions_outward = function (nav_world, outside_po
 
 	return 
 end
-LocomotionUtils.pos_on_mesh = function (nav_world, pos)
-	local success, altitude, p1, p2, p3 = GwNavQueries.triangle_from_position(nav_world, pos, 30, 30)
+LocomotionUtils.pos_on_mesh = function (nav_world, pos, above, below)
+	local above = above or 30
+	local below = below or 30
+	local success, altitude, p1, p2, p3 = GwNavQueries.triangle_from_position(nav_world, pos, above, below)
 
 	if success then
 		local projected_pos = Vector3(pos.x, pos.y, altitude)
@@ -743,6 +750,75 @@ LocomotionUtils.pos_on_mesh = function (nav_world, pos)
 	end
 
 	return 
+end
+LocomotionUtils.ray_can_go_on_mesh = function (nav_world, position_start, position_end, traverse_logic, above, below)
+	local projected_start_pos = LocomotionUtils.pos_on_mesh(nav_world, position_start, above, below)
+	local projected_end_pos = projected_start_pos and LocomotionUtils.pos_on_mesh(nav_world, position_end, above, below)
+	local raycango = nil
+
+	if traverse_logic then
+		raycango = projected_end_pos and GwNavQueries.raycango(nav_world, projected_start_pos, projected_end_pos, traverse_logic)
+	else
+		raycango = projected_end_pos and GwNavQueries.raycango(nav_world, projected_start_pos, projected_end_pos)
+	end
+
+	return raycango, projected_start_pos, projected_end_pos
+end
+local FLAT_GROUND_UP_DOT_THRESHOLD = 0.9
+LocomotionUtils.is_on_flat_ground_raycast = function (physics_world, unit_position)
+	local ray_source = unit_position + Vector3.up()*0.1
+	local hit_ground, _, _, ground_normal = PhysicsWorld.immediate_raycast(physics_world, ray_source, Vector3.down(), 0.15, "closest", "collision_filter", "filter_ai_mover")
+	local is_standing_on_flat_ground = nil
+
+	if hit_ground then
+		local up_dot = Vector3.dot(ground_normal, Vector3.up())
+		is_standing_on_flat_ground = FLAT_GROUND_UP_DOT_THRESHOLD < up_dot
+	end
+
+	return is_standing_on_flat_ground
+end
+local EPSILON_SQ = 0.0001
+local NAV_CHECK_ABOVE = 0.25
+local NAV_CHECK_BELOW = 0.25
+local NAV_CHECK_DISTANCE = 0.3
+local WALL_CHECK_RAYCAST_LENGTH = 1.3
+local WALL_CHECK_RAYCAST_LOW_HEIGHT = 0.4
+LocomotionUtils.navmesh_movement_check = function (unit_position, unit_velocity, nav_world, physics_world, traverse_logic)
+	local is_moving = EPSILON_SQ < Vector3.length_squared(unit_velocity)
+	local direction = (is_moving and Vector3.normalize(unit_velocity)) or Vector3.zero()
+	local target_position = unit_position + direction*NAV_CHECK_DISTANCE
+	local raycango, projected_unit_pos, projected_target_pos = LocomotionUtils.ray_can_go_on_mesh(nav_world, unit_position, target_position, traverse_logic, NAV_CHECK_ABOVE, NAV_CHECK_BELOW)
+	local result = "navmesh_ok"
+
+	if not raycango and is_moving then
+		local allowed_to_do_wall_check = LocomotionUtils.is_on_flat_ground_raycast(physics_world, unit_position)
+		local hit_wall, ray_source, hit_position = nil
+
+		if allowed_to_do_wall_check then
+			ray_source = unit_position + Vector3.up()*WALL_CHECK_RAYCAST_LOW_HEIGHT
+			hit_wall, hit_position = PhysicsWorld.immediate_raycast(physics_world, ray_source, direction, WALL_CHECK_RAYCAST_LENGTH, "closest", "collision_filter", "filter_ai_mover")
+		end
+
+		if script_data.debug_ai_movement then
+			QuickDrawerStay:sphere(projected_unit_pos or unit_position, 0.125, (projected_unit_pos and Colors.get("blue")) or Colors.get("pink"))
+			QuickDrawerStay:line(projected_unit_pos or unit_position, projected_target_pos or target_position, Colors.get("purple"))
+			QuickDrawerStay:sphere(projected_target_pos or target_position, 0.125, (projected_target_pos and Colors.get("light_blue")) or Colors.get("purple"))
+
+			if allowed_to_do_wall_check then
+				QuickDrawerStay:sphere(ray_source, 0.25, Colors.get("green"))
+				QuickDrawerStay:line(ray_source, ray_source + direction*WALL_CHECK_RAYCAST_LENGTH, Colors.get("yellow"))
+				QuickDrawerStay:sphere(hit_position or ray_source + direction*WALL_CHECK_RAYCAST_LENGTH, 0.25, (hit_wall and Colors.get("red")) or Colors.get("green"))
+			end
+		end
+
+		if hit_wall then
+			result = "navmesh_hit_wall"
+		else
+			result = "navmesh_use_mover"
+		end
+	end
+
+	return result
 end
 local INDEX_POSITION = 1
 local INDEX_DISTANCE = 2

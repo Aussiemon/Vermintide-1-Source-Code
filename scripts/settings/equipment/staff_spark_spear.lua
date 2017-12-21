@@ -7,6 +7,9 @@ weapon_template.actions = {
 			fire_time = 0.1,
 			max_penetrations = 1,
 			fire_sound_event_parameter = "drakegun_charge_fire",
+			aim_assist_ramp_multiplier = 0.2,
+			aim_assist_max_ramp_multiplier = 0.6,
+			aim_assist_ramp_decay_delay = 0.1,
 			hit_effect = "staff_spark",
 			anim_time_scale = 1.5,
 			overcharge_type = "spark",
@@ -70,6 +73,9 @@ weapon_template.actions = {
 			kind = "charged_projectile",
 			fire_sound_event_parameter = "drakegun_charge_fire",
 			attack_template = "wizard_staff_spark",
+			aim_assist_ramp_multiplier = 0.2,
+			aim_assist_max_ramp_multiplier = 0.6,
+			aim_assist_ramp_decay_delay = 0.1,
 			hit_effect = "staff_spark",
 			overcharge_type = "spark",
 			fire_sound_event = "weapon_staff_spark_spear",
@@ -128,28 +134,28 @@ weapon_template.actions = {
 		},
 		shoot_charged = {
 			damage_window_start = 0.1,
-			max_speed = 6000,
 			kind = "true_flight_bow",
 			ammo_usage = 1,
+			charge_value = "light_attack",
 			max_penetrations = 2,
 			fire_sound_event_parameter = "drakegun_charge_fire",
 			sphere_sweep_dot_threshold = 0.5,
 			spread_template_override = "spear",
-			fire_sound_event = "weapon_staff_spark_spear_charged",
 			alert_sound_range_hit = 20,
 			fire_sound_on_husk = true,
 			hit_effect = "staff_spear",
 			sphere_sweep_radius = 2,
 			anim_time_scale = 1.5,
-			charge_value = "light_attack",
+			true_flight_template = "sniper",
 			damage_window_end = 0,
 			overcharge_type = "spear",
 			alert_sound_range_fire = 12,
 			fire_time = 0.15,
-			true_flight_template = "sniper",
-			min_speed = 5000,
+			fire_sound_event = "weapon_staff_spark_spear_charged",
 			sphere_sweep_length = 50,
+			speed = 6000,
 			reload_when_out_of_ammo = true,
+			reset_aim_on_attack = true,
 			sphere_sweep_max_nr_of_results = 100,
 			anim_event = "attack_shoot_spear_charged",
 			reload_time = 2.5,
@@ -165,57 +171,70 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.3,
 					action = "action_one",
 					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.6,
+					start_time = 0.3,
+					action = "action_one",
+					release_required = "action_two_hold",
+					input = "action_one_hold"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.3,
 					action = "action_two",
 					input = "action_two_hold",
 					end_time = math.huge
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.3,
 					action = "action_wield",
 					input = "action_wield"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.2,
+					start_time = 0.3,
 					action = "weapon_reload",
-					input = "weapon_reload"
+					input = "weapon_reload_hold"
 				}
 			},
+			enter_function = function (attacker_unit, input_extension)
+				input_extension.reset_release_input(input_extension)
+				input_extension.clear_input_buffer(input_extension)
+
+				return 
+			end,
 			projectile_info = Projectiles.spear
 		},
 		shoot_charged_2 = {
 			damage_window_start = 0.1,
-			max_speed = 6000,
 			kind = "true_flight_bow",
 			ammo_usage = 1,
+			charge_value = "light_attack",
 			max_penetrations = 2,
 			fire_sound_event_parameter = "drakegun_charge_fire",
 			sphere_sweep_dot_threshold = 0.5,
 			spread_template_override = "spear",
-			fire_sound_event = "weapon_staff_spark_spear_charged",
 			alert_sound_range_hit = 20,
 			fire_sound_on_husk = true,
 			hit_effect = "staff_spear",
 			sphere_sweep_radius = 2,
 			anim_time_scale = 1.5,
-			charge_value = "light_attack",
+			true_flight_template = "sniper",
 			damage_window_end = 0,
 			overcharge_type = "spear_2",
 			alert_sound_range_fire = 12,
 			fire_time = 0.15,
-			true_flight_template = "sniper",
-			min_speed = 5000,
+			fire_sound_event = "weapon_staff_spark_spear_charged",
 			sphere_sweep_length = 50,
+			speed = 8000,
 			reload_when_out_of_ammo = true,
+			reset_aim_on_attack = true,
 			sphere_sweep_max_nr_of_results = 100,
 			anim_event = "attack_shoot_spear_charged",
 			reload_time = 2.5,
@@ -231,57 +250,63 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.3,
 					action = "action_one",
 					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.6,
+					start_time = 0.3,
 					action = "action_two",
 					input = "action_two_hold",
 					end_time = math.huge
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.3,
 					action = "action_wield",
 					input = "action_wield"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.2,
+					start_time = 0.3,
 					action = "weapon_reload",
-					input = "weapon_reload"
+					input = "weapon_reload_hold"
 				}
 			},
+			enter_function = function (attacker_unit, input_extension)
+				input_extension.reset_release_input(input_extension)
+				input_extension.clear_input_buffer(input_extension)
+
+				return 
+			end,
 			projectile_info = Projectiles.spear_2
 		},
 		shoot_charged_3 = {
 			damage_window_start = 0.1,
-			max_speed = 6000,
 			kind = "true_flight_bow",
 			ammo_usage = 1,
+			charge_value = "light_attack",
 			max_penetrations = 2,
 			fire_sound_event_parameter = "drakegun_charge_fire",
 			sphere_sweep_dot_threshold = 0.5,
 			spread_template_override = "spear",
-			fire_sound_event = "weapon_staff_spark_spear_charged",
 			alert_sound_range_hit = 20,
 			fire_sound_on_husk = true,
 			hit_effect = "staff_spear",
 			sphere_sweep_radius = 2,
 			anim_time_scale = 1.5,
-			charge_value = "light_attack",
+			true_flight_template = "sniper",
 			damage_window_end = 0,
 			overcharge_type = "spear_3",
 			alert_sound_range_fire = 12,
 			fire_time = 0.15,
-			true_flight_template = "sniper",
-			min_speed = 5000,
+			fire_sound_event = "weapon_staff_spark_spear_charged",
 			sphere_sweep_length = 50,
+			speed = 9000,
 			reload_when_out_of_ammo = true,
+			reset_aim_on_attack = true,
 			sphere_sweep_max_nr_of_results = 100,
 			anim_event = "attack_shoot_spear_charged",
 			reload_time = 2.5,
@@ -297,52 +322,62 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.3,
 					action = "action_one",
 					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.6,
+					start_time = 0.3,
 					action = "action_two",
 					input = "action_two_hold",
 					end_time = math.huge
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.3,
 					action = "action_wield",
 					input = "action_wield"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.2,
+					start_time = 0.3,
 					action = "weapon_reload",
-					input = "weapon_reload"
+					input = "weapon_reload_hold"
 				}
 			},
+			enter_function = function (attacker_unit, input_extension)
+				input_extension.reset_release_input(input_extension)
+				input_extension.clear_input_buffer(input_extension)
+
+				return 
+			end,
 			projectile_info = Projectiles.spear_3
 		}
 	},
 	action_two = {
 		default = {
 			charge_sound_stop_event = "player_combat_weapon_staff_charge_down",
-			charge_ready_sound_event = "weapon_staff_charge_ready",
+			charge_ready_sound_event = "hud_gameplay_stance_deactivate",
 			sphere_sweep_length = 100,
 			max_targets = 1,
 			sphere_sweep_dot_threshold = 0.7,
+			aim_assist_ramp_multiplier = 0.4,
+			spread_template_override = "spear",
+			overcharge_interval = 0.3,
+			aim_assist_ramp_decay_delay = 0.3,
 			sphere_sweep_max_nr_of_results = 100,
 			charge_sound_husk_name = "player_combat_weapon_staff_charge_husk",
-			overcharge_interval = 0.3,
-			charge_sound_husk_stop_event = "stop_player_combat_weapon_staff_charge_husk",
-			kind = "true_flight_bow_aim",
 			sphere_sweep_radius = 1.5,
 			minimum_hold_time = 0.2,
+			charge_sound_husk_stop_event = "stop_player_combat_weapon_staff_charge_husk",
 			overcharge_type = "drakegun_charging",
+			kind = "true_flight_bow_aim",
 			anim_end_event = "attack_finished",
 			charge_sound_switch = "projectile_charge_sound",
-			charge_time = 2,
+			charge_time = 2.5,
+			aim_assist_max_ramp_multiplier = 0.8,
 			hold_input = "action_two_hold",
 			anim_event = "attack_charge_spear",
 			charge_sound_name = "player_combat_weapon_staff_charge",
@@ -363,19 +398,19 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "shoot_charged_3",
-					start_time = 1,
+					start_time = 1.5,
 					action = "action_one",
 					input = "action_one"
 				},
 				{
 					sub_action = "shoot_charged_2",
-					start_time = 0.65,
+					start_time = 0.8,
 					action = "action_one",
 					input = "action_one"
 				},
 				{
 					sub_action = "shoot_charged",
-					start_time = 0.3,
+					start_time = 0.5,
 					action = "action_one",
 					input = "action_one"
 				},
@@ -384,6 +419,12 @@ weapon_template.actions = {
 					start_time = 0,
 					action = "action_wield",
 					input = "action_wield"
+				},
+				{
+					sub_action = "default",
+					start_time = 0,
+					action = "weapon_reload",
+					input = "weapon_reload"
 				}
 			}
 		}
@@ -444,14 +485,7 @@ weapon_template.overcharge_data = {
 	hit_overcharge_threshold_sound = "ui_special_attack_ready",
 	time_until_overcharge_decreases = 0.5,
 	max_value = 40,
-	overcharge_value_decrease_rate = 1,
-	buff_data = {
-		{
-			start_time = 0,
-			buff_name = "overcharged",
-			end_time = math.huge
-		}
-	}
+	overcharge_value_decrease_rate = 1
 }
 weapon_template.attack_meta_data = {
 	aim_at_node = "j_spine",
@@ -463,6 +497,20 @@ weapon_template.attack_meta_data = {
 	charge_when_obstructed = true,
 	ignore_enemies_for_obstruction = true,
 	charge_against_armoured_enemy = true
+}
+weapon_template.aim_assist_settings = {
+	max_range = 22,
+	no_aim_input_multiplier = 0,
+	aim_at_node = "j_neck",
+	can_charge_shot = true,
+	base_multiplier = 0.15,
+	aim_at_node_charged = "j_spine",
+	effective_max_range = 10,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
 }
 weapon_template.default_spread_template = "sparks"
 weapon_template.right_hand_unit = "units/weapons/player/wpn_brw_skullstaff/wpn_brw_skullstaff"
@@ -476,8 +524,8 @@ weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.wwise_dep_right_hand = {
 	"wwise/staff"
 }
-weapon_template.dodge_distance = 0.6
-weapon_template.dodge_speed = 0.6
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
 weapon_template.compare_statistics = {
 	attacks = {
 		light_attack = {

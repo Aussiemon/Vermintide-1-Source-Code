@@ -13,7 +13,7 @@ CutsceneSystem.init = function (self, context, name)
 	self.event_on_deactivate = nil
 	self.event_on_skip = nil
 	self.cutscene_started = false
-	self.showing_loading_icon = false
+	self._should_hide_loading_icon = false
 	self.ui_event_queue = pdArray.new()
 
 	return 
@@ -24,10 +24,10 @@ CutsceneSystem.destroy = function (self)
 	self.active_camera = nil
 	self.ui_event_queue = nil
 
-	if self.showing_loading_icon then
+	if self._should_hide_loading_icon then
 		Managers.transition:hide_loading_icon()
 
-		self.showing_loading_icon = false
+		self._should_hide_loading_icon = nil
 	end
 
 	return 
@@ -65,14 +65,12 @@ CutsceneSystem.update = function (self)
 	return 
 end
 CutsceneSystem.handle_loading_icon = function (self)
-	if self.active_camera and not self.showing_loading_icon then
+	if self.active_camera then
 		Managers.transition:show_loading_icon()
-
-		self.showing_loading_icon = true
-	elseif not self.active_camera and self.showing_loading_icon then
+	elseif not self.active_camera and self._should_hide_loading_icon then
 		Managers.transition:hide_loading_icon()
 
-		self.showing_loading_icon = false
+		self._should_hide_loading_icon = nil
 	end
 
 	return 
@@ -110,6 +108,11 @@ CutsceneSystem.flow_cb_activate_cutscene_camera = function (self, camera_unit, t
 
 	self.active_camera = camera
 	self.ingame_hud_enabled = ingame_hud_enabled
+	self._should_hide_loading_icon = true
+
+	if Application.platform() == "ps4" then
+		Managers.account:set_realtime_multiplay_state("cinematic", true)
+	end
 
 	pdArray.push_back2(self.ui_event_queue, "set_letterbox_enabled", letterbox_enabled)
 
@@ -121,10 +124,14 @@ CutsceneSystem.flow_cb_deactivate_cutscene_cameras = function (self)
 	self.active_camera = nil
 	self.ingame_hud_enabled = true
 
-	if self.showing_loading_icon then
+	if self._should_hide_loading_icon then
 		Managers.transition:hide_loading_icon()
 
-		self.showing_loading_icon = false
+		self._should_hide_loading_icon = nil
+	end
+
+	if Application.platform() == "ps4" then
+		Managers.account:set_realtime_multiplay_state("cinematic", false)
 	end
 
 	pdArray.push_back2(self.ui_event_queue, "set_letterbox_enabled", false)

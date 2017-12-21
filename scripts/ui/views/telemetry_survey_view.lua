@@ -26,7 +26,7 @@ TelemetrySurveyView.init = function (self, ingame_ui_context)
 	self.wwise_world = Managers.world:wwise_world(world)
 	local input_manager = self.input_manager
 
-	input_manager.create_input_service(input_manager, "telemetry_survey", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "telemetry_survey", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "telemetry_survey", "keyboard")
 	input_manager.map_device_to_service(input_manager, "telemetry_survey", "mouse")
 	input_manager.map_device_to_service(input_manager, "telemetry_survey", "gamepad")

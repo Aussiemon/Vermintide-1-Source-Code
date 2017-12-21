@@ -10,9 +10,6 @@ end
 BTConditions.spawn = function (blackboard)
 	return blackboard.spawn
 end
-BTConditions.stunned = function (blackboard)
-	return blackboard.stunned
-end
 BTConditions.blocked = function (blackboard)
 	return blackboard.blocked
 end
@@ -45,8 +42,8 @@ end
 BTConditions.target_changed = function (blackboard)
 	return blackboard.target_changed
 end
-BTConditions.target_reachable = function (blackboard)
-	return not blackboard.target_outside_navmesh or (blackboard.target_dist and blackboard.target_dist <= blackboard.breed.reach_distance)
+BTConditions.ratogre_target_reachable = function (blackboard)
+	return blackboard.jump_slam_data or not blackboard.target_outside_navmesh or (blackboard.target_dist and blackboard.target_dist <= blackboard.breed.reach_distance)
 end
 BTConditions.path_found = function (blackboard)
 	return not blackboard.no_path_found
@@ -60,6 +57,13 @@ BTConditions.at_smartobject = function (blackboard)
 	local is_smart_objecting = blackboard.is_smart_objecting
 
 	return (smartobject_is_next and is_in_smartobject_range) or is_smart_objecting
+end
+BTConditions.gutter_runner_at_smartobject = function (blackboard)
+	if blackboard.jump_data then
+		return false
+	end
+
+	return BTConditions.at_smartobject(blackboard)
 end
 BTConditions.ratogre_at_smartobject = function (blackboard)
 	if blackboard.keep_target then
@@ -121,13 +125,18 @@ BTConditions.can_teleport = function (blackboard)
 		return false
 	end
 
-	local self_unit = blackboard.unit
-	local conflict_director = Managers.state.conflict
-	local self_segment = conflict_director.get_player_unit_segment(conflict_director, self_unit) or 1
-	local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
+	local level_settings = LevelHelper:current_level_settings()
+	local disable_bot_main_path_teleport_check = level_settings.disable_bot_main_path_teleport_check
 
-	if not target_segment or target_segment < self_segment then
-		return false
+	if not disable_bot_main_path_teleport_check then
+		local self_unit = blackboard.unit
+		local conflict_director = Managers.state.conflict
+		local self_segment = conflict_director.get_player_unit_segment(conflict_director, self_unit) or 1
+		local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
+
+		if not target_segment or target_segment < self_segment then
+			return false
+		end
 	end
 
 	return true
@@ -139,26 +148,34 @@ BTConditions.cant_reach_ally = function (blackboard)
 		return false
 	end
 
-	local self_unit = blackboard.unit
-	local conflict_director = Managers.state.conflict
-	local self_segment = conflict_director.get_player_unit_segment(conflict_director, self_unit)
-	local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
+	local level_settings = LevelHelper:current_level_settings()
+	local disable_bot_main_path_teleport_check = level_settings.disable_bot_main_path_teleport_check
+	local is_forwards = nil
 
-	if not self_segment or not target_segment then
-		return false
+	if not disable_bot_main_path_teleport_check then
+		local self_unit = blackboard.unit
+		local conflict_director = Managers.state.conflict
+		local self_segment = conflict_director.get_player_unit_segment(conflict_director, self_unit)
+		local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
+
+		if not self_segment or not target_segment then
+			return false
+		end
+
+		local is_backwards = target_segment < self_segment
+
+		if is_backwards then
+			return false
+		end
+
+		is_forwards = self_segment < target_segment
 	end
 
-	local nav_ext = blackboard.navigation_extension
-	local fails, last_success = nav_ext.successive_failed_paths(nav_ext)
 	local t = Managers.time:time("game")
-	local is_backwards = target_segment < self_segment
-	local is_forwards = self_segment < target_segment
+	local navigation_extension = blackboard.navigation_extension
+	local fails, last_success = navigation_extension.successive_failed_paths(navigation_extension)
 
-	if is_backwards then
-		return false
-	end
-
-	return blackboard.moving_toward_follow_position and ((is_forwards and 1) or 5) < fails and 5 < t - last_success and not blackboard.has_teleported
+	return blackboard.moving_toward_follow_position and (((disable_bot_main_path_teleport_check or is_forwards) and 1) or 5) < fails and 5 < t - last_success and not blackboard.has_teleported
 end
 BTConditions.bot_at_breakable = function (blackboard)
 	if blackboard.breakable_object then
@@ -222,8 +239,9 @@ BTConditions.has_target_and_ammo_greater_than = function (blackboard, args)
 	local inventory_ext = blackboard.inventory_extension
 	local current, max = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
 	local ammo_ok = not current or args.ammo_percentage < current/max
-	local current_oc, max_oc = inventory_ext.current_overcharge_status(inventory_ext, "slot_ranged")
-	local overcharge_ok = not current_oc or current_oc/max_oc < args.overcharge_limit
+	local overcharge_limit_type = args.overcharge_limit_type
+	local current_oc, threshold_oc, max_oc = inventory_ext.current_overcharge_status(inventory_ext, "slot_ranged")
+	local overcharge_ok = not current_oc or (overcharge_limit_type == "threshold" and current_oc/threshold_oc < args.overcharge_limit) or (overcharge_limit_type == "maximum" and current_oc/max_oc < args.overcharge_limit)
 	local obstruction = blackboard.ranged_obstruction_by_static
 	local t = Managers.time:time("game")
 	local obstructed = obstruction and obstruction.unit == blackboard.target_unit and obstruction.timer + 3 < t
@@ -300,6 +318,14 @@ local function is_there_threat_to_aid(self_unit, proximite_enemies, force_aid)
 	return false
 end
 
+local function can_interact_with_ally(self_unit, target_ally_unit)
+	local interactable_extension = ScriptUnit.extension(target_ally_unit, "interactable_system")
+	local interactor_unit = interactable_extension.is_being_interacted_with(interactable_extension)
+	local can_interact_with_ally = interactor_unit == nil or interactor_unit == self_unit
+
+	return can_interact_with_ally
+end
+
 BTConditions.can_revive = function (blackboard)
 	if blackboard.target_ally_need_type == "knocked_down" then
 		local ally_distance = blackboard.ally_distance
@@ -309,15 +335,17 @@ BTConditions.can_revive = function (blackboard)
 		end
 
 		local self_unit = blackboard.unit
-		local health = ScriptUnit.extension(blackboard.target_ally_unit, "health_system"):current_health_percent()
+		local target_ally_unit = blackboard.target_ally_unit
+		local health = ScriptUnit.extension(target_ally_unit, "health_system"):current_health_percent()
 
 		if 0.2 < health and is_there_threat_to_aid(self_unit, blackboard.proximite_enemies, blackboard.force_aid) then
 			return false
 		end
 
 		local destination_reached = blackboard.navigation_extension:destination_reached()
+		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
 
-		if destination_reached or ally_distance < 1 then
+		if can_interact_with_ally and (destination_reached or ally_distance < 1) then
 			return true
 		end
 	end
@@ -340,9 +368,12 @@ BTConditions.can_heal_player = function (blackboard)
 			return false
 		end
 
+		local self_unit = blackboard.unit
+		local target_ally_unit = blackboard.target_ally_unit
 		local destination_reached = blackboard.navigation_extension:destination_reached()
+		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
 
-		if destination_reached then
+		if can_interact_with_ally and destination_reached then
 			return true
 		end
 	end
@@ -363,9 +394,11 @@ BTConditions.can_rescue_hanging_from_hook = function (blackboard)
 			return false
 		end
 
+		local target_ally_unit = blackboard.target_ally_unit
 		local destination_reached = blackboard.navigation_extension:destination_reached()
+		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
 
-		if destination_reached then
+		if can_interact_with_ally and (destination_reached or blackboard.current_interaction_unit == target_ally_unit) then
 			return true
 		end
 	end
@@ -386,9 +419,11 @@ BTConditions.can_rescue_ledge_hanging = function (blackboard)
 			return false
 		end
 
+		local target_ally_unit = blackboard.target_ally_unit
 		local destination_reached = blackboard.navigation_extension:destination_reached()
+		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
 
-		if destination_reached then
+		if can_interact_with_ally and destination_reached then
 			return true
 		end
 	end
@@ -444,7 +479,7 @@ BTConditions.is_falling = function (blackboard)
 	return blackboard.is_falling or blackboard.fall_state ~= nil
 end
 BTConditions.is_gutter_runner_falling = function (blackboard)
-	return not blackboard.pouncing_target and (blackboard.is_falling or blackboard.fall_state ~= nil)
+	return not blackboard.high_ground_opportunity and not blackboard.pouncing_target and (blackboard.is_falling or blackboard.fall_state ~= nil)
 end
 BTConditions.pack_master_needs_hook = function (blackboard)
 	return blackboard.needs_hook
@@ -476,14 +511,11 @@ end
 BTConditions.loot_rat_flee = function (blackboard)
 	return BTConditions.confirmed_player_sighting(blackboard) or blackboard.is_fleeing
 end
-BTConditions.loot_rat_look_for_players = function (blackboard)
-	return blackboard.look_for_players or blackboard.looking_for_players
-end
 BTConditions.can_trigger_move_to = function (blackboard)
 	local t = Managers.time:time("game")
 	local trigger_time = blackboard.trigger_time or 0
 
-	return trigger_time < t
+	return trigger_time < t and unit_alive(blackboard.target_unit)
 end
 BTConditions.globadier_skulked_for_too_long = function (blackboard)
 	local adv_data = blackboard.advance_towards_players

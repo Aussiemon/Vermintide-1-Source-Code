@@ -2,7 +2,6 @@ require("scripts/ui/views/subtitle_gui")
 require("scripts/ui/views/damage_indicator_gui")
 require("scripts/ui/views/tutorial_ui")
 require("scripts/ui/views/interaction_ui")
-require("scripts/ui/views/unit_frames_ui")
 require("scripts/ui/views/area_indicator_ui")
 require("scripts/ui/views/mission_objective_ui")
 require("scripts/ui/views/crosshair_ui")
@@ -20,14 +19,19 @@ require("scripts/ui/hud_ui/game_timer_ui")
 require("scripts/ui/hud_ui/endurance_badge_ui")
 require("scripts/ui/hud_ui/difficulty_unlock_ui")
 require("scripts/ui/hud_ui/difficulty_notification_ui")
+require("scripts/ui/hud_ui/gamepad_consumable_ui")
+require("scripts/ui/hud_ui/unit_frames_handler")
 require("scripts/ui/hud_ui/boon_ui")
 require("scripts/ui/hud_ui/contract_log_ui")
+require("scripts/ui/hud_ui/overcharge_bar_ui")
 require("scripts/ui/gift_popup/gift_popup_ui")
 
 local definitions = local_require("scripts/ui/views/ingame_hud_definitions")
 IngameHud = class(IngameHud)
 IngameHud.init = function (self, ingame_ui_context)
 	self.is_in_inn = ingame_ui_context.is_in_inn
+	local cutscene_system = Managers.state.entity:system("cutscene_system")
+	self.cutscene_system = cutscene_system
 	self.gdc_build = Development.parameter("gdc")
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -42,20 +46,28 @@ IngameHud.init = function (self, ingame_ui_context)
 	self.damage_indicator_gui = DamageIndicatorGui:new(ingame_ui_context)
 	self.interaction_ui = InteractionUI:new(ingame_ui_context)
 	self.tutorial_ui = TutorialUI:new(ingame_ui_context)
-	self.unit_frames = UnitFramesUI:new(ingame_ui_context)
 	self.area_indicator = AreaIndicatorUI:new(ingame_ui_context)
 	self.mission_objective = MissionObjectiveUI:new(ingame_ui_context)
 	self.crosshair = CrosshairUI:new(ingame_ui_context)
 	self.fatigue_ui = FatigueUI:new(ingame_ui_context)
-	self.player_inventory_ui = PlayerInventoryUI:new(ingame_ui_context)
 	self.bonus_dice_ui = BonusDiceUI:new(ingame_ui_context)
 	self.ingame_player_list_ui = IngamePlayerListUI:new(ingame_ui_context)
 	self.wait_for_rescue_ui = WaitForRescueUI:new(ingame_ui_context)
 	self.positive_reinforcement_ui = PositiveReinforcementUI:new(ingame_ui_context)
 	self.input_helper_ui = InputHelperUI:new(ingame_ui_context)
 	self.observer_ui = ObserverUI:new(ingame_ui_context)
-	self.ingame_news_ticker_ui = IngameNewsTickerUI:new(ingame_ui_context)
+	self.overcharge_bar_ui = OverchargeBarUI:new(ingame_ui_context)
+
+	if Application.platform() == "win32" then
+		self.player_inventory_ui = PlayerInventoryUI:new(ingame_ui_context)
+	end
+
+	if not script_data.disable_news_ticker then
+		self.ingame_news_ticker_ui = IngameNewsTickerUI:new(ingame_ui_context)
+	end
+
 	self.gift_popup_ui = GiftPopupUI:new(ingame_ui_context)
+	self.unit_frames_handler = UnitFramesHandler:new(ingame_ui_context)
 	local game_mode_key = Managers.state.game_mode:game_mode_key()
 	self.boon_ui = BoonUI:new(ingame_ui_context)
 	local backend_settings = GameSettingsDevelopment.backend_settings
@@ -79,6 +91,10 @@ IngameHud.init = function (self, ingame_ui_context)
 	return 
 end
 IngameHud.destroy = function (self)
+	if self.unit_frames_handler then
+		self.unit_frames_handler:destroy()
+	end
+
 	if self.game_timer_ui then
 		self.game_timer_ui:destroy()
 	end
@@ -107,12 +123,16 @@ IngameHud.destroy = function (self)
 	self.damage_indicator_gui:destroy()
 	self.tutorial_ui:destroy()
 	self.interaction_ui:destroy()
-	self.unit_frames:destroy()
 	self.area_indicator:destroy()
 	self.mission_objective:destroy()
 	self.crosshair:destroy()
 	self.fatigue_ui:destroy()
-	self.player_inventory_ui:destroy()
+
+	if self.player_inventory_ui then
+		self.player_inventory_ui:destroy()
+	end
+
+	self.overcharge_bar_ui:destroy()
 	self.bonus_dice_ui:destroy()
 	self.ingame_player_list_ui:destroy()
 	self.wait_for_rescue_ui:destroy()
@@ -136,8 +156,13 @@ IngameHud.create_ui_elements = function (self)
 	return 
 end
 IngameHud.set_visible = function (self, visible)
-	self.unit_frames:set_visible(visible)
-	self.player_inventory_ui:set_visible(visible)
+	if self.player_inventory_ui then
+		self.player_inventory_ui:set_visible(visible)
+	end
+
+	if self.unit_frames_handler then
+		self.unit_frames_handler:set_visible(visible)
+	end
 
 	if self.game_timer_ui then
 		self.game_timer_ui:set_visible(visible)
@@ -171,6 +196,16 @@ IngameHud.set_visible = function (self, visible)
 		self.tutorial_ui:set_visible(visible)
 	end
 
+	local observer_ui = self.observer_ui
+
+	if observer_ui then
+		local observer_ui_visibility = self.is_own_player_dead(self) and not self.ingame_player_list_ui.active and not self.input_helper_ui.active and visible
+
+		if observer_ui and observer_ui.is_visible(observer_ui) ~= observer_ui_visibility then
+			observer_ui.set_visible(observer_ui, observer_ui_visibility)
+		end
+	end
+
 	return 
 end
 IngameHud.is_own_player_dead = function (self)
@@ -201,7 +236,7 @@ IngameHud._update_survival_ui = function (self, dt, t)
 			if mission_data then
 				Profiler.start("game timer")
 				game_timer_ui.update(game_timer_ui, dt, mission_data)
-				Profiler.stop()
+				Profiler.stop("game timer")
 				Profiler.start("endurance badges")
 
 				local endurance_badge_ui = self.endurance_badge_ui
@@ -210,7 +245,7 @@ IngameHud._update_survival_ui = function (self, dt, t)
 					endurance_badge_ui.update(endurance_badge_ui, dt)
 				end
 
-				Profiler.stop()
+				Profiler.stop("endurance badges")
 				Profiler.start("Difficulty unlock")
 
 				local difficulty_unlock_ui = self.difficulty_unlock_ui
@@ -219,7 +254,7 @@ IngameHud._update_survival_ui = function (self, dt, t)
 					difficulty_unlock_ui.update(difficulty_unlock_ui, dt, mission_data)
 				end
 
-				Profiler.stop()
+				Profiler.stop("Difficulty unlock")
 				Profiler.start("Difficulty notification")
 
 				local difficulty_notification_ui = self.difficulty_notification_ui
@@ -228,28 +263,48 @@ IngameHud._update_survival_ui = function (self, dt, t)
 					difficulty_notification_ui.update(difficulty_notification_ui, dt, mission_data)
 				end
 
-				Profiler.stop()
+				Profiler.stop("Difficulty notification")
 			end
 		end
 	end
 
 	return 
 end
-IngameHud.update = function (self, dt, t, active_cutscene)
+IngameHud.is_cutscene_active = function (self)
+	local cutscene_system = self.cutscene_system
+
+	return cutscene_system.active_camera and not cutscene_system.ingame_hud_enabled
+end
+IngameHud.update = function (self, dt, t, menu_active)
 	Profiler.start("IngameHud")
 
+	local active_cutscene = self.is_cutscene_active(self)
 	local ui_scenegraph = self.ui_scenegraph
 	local peer_id = self.peer_id
 	local my_player = self.player_manager:player_from_peer_id(peer_id)
+
+	Profiler.start("Access Player Extensions")
+
+	local my_inventory_extension = nil
+	local player_unit = my_player.player_unit
+
+	if player_unit then
+		my_inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
+	end
+
+	Profiler.stop("Access Player Extensions")
+
 	local is_own_player_dead = self.is_own_player_dead(self)
 	local gift_popup_ui = self.gift_popup_ui
 
-	if not self.input_helper_ui.active then
+	if not self.input_helper_ui.active and not menu_active then
 		gift_popup_ui.update(gift_popup_ui, dt, t)
 	end
 
 	local gift_popup_active = gift_popup_ui.active(gift_popup_ui)
-	local input_service = self.input_manager:get_service("ingame_menu")
+	local input_manager = self.input_manager
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager.get_service(input_manager, "ingame_menu")
 	local ui_renderer = self.ui_renderer
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
@@ -257,18 +312,19 @@ IngameHud.update = function (self, dt, t, active_cutscene)
 	if my_player then
 		Profiler.start("subtitle_gui")
 		self.subtitle_gui:update(dt)
-		Profiler.stop()
+		Profiler.stop("subtitle_gui")
 
 		if not active_cutscene then
 			Profiler.start("damage_indicator_gui")
 			self.damage_indicator_gui:update(dt)
-			Profiler.stop()
+			Profiler.stop("damage_indicator_gui")
 		end
 	end
 
 	UIRenderer.end_pass(ui_renderer)
 
-	local show_hud = not is_own_player_dead and not active_cutscene and not gift_popup_active
+	local gamepad_player_list_active = self.ingame_player_list_ui.active and gamepad_active
+	local show_hud = not is_own_player_dead and not active_cutscene and not gift_popup_active and not gamepad_player_list_active
 
 	if show_hud ~= self.show_hud then
 		self.set_visible(self, show_hud)
@@ -276,95 +332,112 @@ IngameHud.update = function (self, dt, t, active_cutscene)
 
 	self.show_hud = show_hud
 
-	if not active_cutscene and not gift_popup_active then
+	if show_hud then
 		self._update_survival_ui(self, dt, t)
-		Profiler.start("Player List")
-
-		local ingame_player_list_ui = self.ingame_player_list_ui
-
-		ingame_player_list_ui.update(ingame_player_list_ui, dt)
-		Profiler.stop()
 		Profiler.start("Wait For Rescue")
 		self.wait_for_rescue_ui:update(dt, t)
-		Profiler.stop()
-		Profiler.start("Input Helper")
+		Profiler.stop("Wait For Rescue")
+		Profiler.start("Unit Frames")
 
-		local input_helper_ui = self.input_helper_ui
+		if self.unit_frames_handler then
+			self.unit_frames_handler:update(dt, t, my_player)
+		end
 
-		input_helper_ui.update(input_helper_ui, dt, t)
-		Profiler.stop()
-		Profiler.start("Observer")
-		self.observer_ui:update(dt, t, is_own_player_dead, self.is_in_inn)
-		Profiler.stop()
+		Profiler.stop("Unit Frames")
 
-		if not is_own_player_dead then
-			Profiler.start("Unit Frames")
-			self.unit_frames:update(dt, t, my_player)
-			Profiler.stop()
+		if self.player_inventory_ui then
 			Profiler.start("Player Inventory")
 			self.player_inventory_ui:update(dt, t, my_player)
-			Profiler.stop()
-			Profiler.start("Interaction")
-			self.interaction_ui:update(dt, t, my_player)
-			Profiler.stop()
-			Profiler.start("Crosshair")
-			self.crosshair:update(dt)
-			Profiler.stop()
-			Profiler.start("Fatigue")
-			self.fatigue_ui:update(dt)
-			Profiler.stop()
-			Profiler.start("Bonus Dice")
-			self.bonus_dice_ui:update(dt)
-			Profiler.stop()
-			Profiler.start("Positive Reinforcement Messages")
-			self.positive_reinforcement_ui:update(dt, t)
-			Profiler.stop()
-
-			if self.boon_ui then
-				Profiler.start("Boon UI")
-				self.boon_ui:update(dt, t)
-				Profiler.stop()
-			end
-
-			if self.contract_log_ui then
-				Profiler.start("Contract Log")
-				self.contract_log_ui:update(dt, t)
-				Profiler.stop()
-			end
+			Profiler.stop("Player Inventory")
 		end
-	else
-		self.observer_ui:update(dt, t, false, false)
-	end
 
-	if not is_own_player_dead and not gift_popup_active then
+		Profiler.start("Overcharge Bar")
+		self.overcharge_bar_ui:update(dt, t, my_player)
+		Profiler.stop("Overcharge Bar")
+		Profiler.start("Interaction")
+		self.interaction_ui:update(dt, t, my_player)
+		Profiler.stop("Interaction")
+		Profiler.start("Crosshair")
+		self.crosshair:update(dt)
+		Profiler.stop("Crosshair")
+		Profiler.start("Fatigue")
+		self.fatigue_ui:update(dt)
+		Profiler.stop("Fatigue")
+		Profiler.start("Bonus Dice")
+		self.bonus_dice_ui:update(dt)
+		Profiler.stop("Bonus Dice")
+		Profiler.start("Positive Reinforcement Messages")
+		self.positive_reinforcement_ui:update(dt, t)
+		Profiler.stop("Positive Reinforcement Messages")
+		Profiler.start("Boon UI")
+
+		if self.boon_ui then
+			self.boon_ui:update(dt, t)
+		end
+
+		Profiler.stop("Boon UI")
+		Profiler.start("Contract Log")
+
+		if self.contract_log_ui then
+			self.contract_log_ui:update(dt, t)
+		end
+
+		Profiler.stop("Contract Log")
 		Profiler.start("mission_objective")
 		self.mission_objective:update(dt)
-		Profiler.stop()
+		Profiler.stop("mission_objective")
 	end
 
+	local observer_ui_visibility = is_own_player_dead and not self.ingame_player_list_ui.active and not self.input_helper_ui.active and not menu_active and not self.is_in_inn
+	local observer_ui = self.observer_ui
+
+	if observer_ui and observer_ui.is_visible(observer_ui) ~= observer_ui_visibility then
+		observer_ui.set_visible(observer_ui, observer_ui_visibility)
+	end
+
+	if not show_hud and observer_ui_visibility then
+		Profiler.start("Observer")
+
+		local observer_ui = self.observer_ui
+
+		if observer_ui then
+			self.observer_ui:update(dt, t)
+		end
+
+		Profiler.stop("Observer")
+	end
+
+	Profiler.start("Player List")
+
+	local ingame_player_list_ui = self.ingame_player_list_ui
+
+	ingame_player_list_ui.update(ingame_player_list_ui, dt)
+	Profiler.stop("Player List")
 	Profiler.start("area_indicator")
 	self.area_indicator:update(dt)
-	Profiler.stop()
+	Profiler.stop("area_indicator")
 	Profiler.start("News Ticker")
-	self.ingame_news_ticker_ui:update(dt, t)
-	Profiler.stop()
+
+	if not script_data.disable_news_ticker then
+		self.ingame_news_ticker_ui:update(dt, t)
+	end
+
+	Profiler.stop("News Ticker")
 	Profiler.start("gdc")
 
 	if self.gdc_build then
 		self.gdc_start_ui:update(dt)
 	end
 
-	Profiler.stop()
-	Profiler.stop()
+	Profiler.stop("gdc")
+	Profiler.stop("IngameHud")
 
 	return 
 end
-IngameHud.post_update = function (self, dt, t, active_cutscene)
-	Profiler.start("Tutorial")
-	self.tutorial_ui:update(dt, t)
-	Profiler.stop()
+IngameHud.post_update = function (self, dt, t, menu_active)
+	local is_own_player_dead = self.is_own_player_dead(self)
 
-	if not self.input_helper_ui.active then
+	if not self.input_helper_ui.active and not menu_active then
 		self.gift_popup_ui:post_update(dt, t)
 	end
 

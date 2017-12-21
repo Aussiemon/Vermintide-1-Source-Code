@@ -69,13 +69,13 @@ AINavigationSystem.update = function (self, context, t)
 
 	Profiler.start("PlayerBotNavigation")
 	self.update_extension(self, "PlayerBotNavigation", dt, context, t)
-	Profiler.stop()
+	Profiler.stop("PlayerBotNavigation")
 
 	if self.LOLUPDATE then
 		Debug.text("LOLUPDATE")
 		Profiler.start("AINavigationExtension")
 		self.update_extension(self, "AINavigationExtension", dt, context, t)
-		Profiler.stop()
+		Profiler.stop("AINavigationExtension")
 	else
 		Profiler.start("AINavigationExtension")
 		self.update_enabled(self)
@@ -118,7 +118,7 @@ AINavigationSystem.update_enabled = function (self)
 		self.enabled_units[unit] = (enabled and extension) or nil
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_enabled")
 
 	return 
 end
@@ -240,7 +240,7 @@ AINavigationSystem.update_destination = function (self, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_destination")
 
 	return 
 end
@@ -409,7 +409,7 @@ AINavigationSystem.update_desired_velocity = function (self, t, dt)
 		extension._is_following_path = 0 < desired_speed
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_desired_velocity")
 
 	return 
 end
@@ -455,7 +455,7 @@ AINavigationSystem.update_next_smart_object = function (self, t, dt)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_next_smart_object")
 
 	return 
 end
@@ -470,7 +470,7 @@ AINavigationSystem.update_dispersion = function (self, t, dt)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_dispersion")
 
 	return 
 end
@@ -543,7 +543,7 @@ AINavigationSystem.update_debug_draw = function (self, t)
 		Debug.text("  wait_timer = %.1f", math.max(-1, navigation_extension._wait_timer - t))
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_debug_draw")
 
 	return 
 end
@@ -558,7 +558,7 @@ AINavigationSystem.update_position = function (self, t, dt)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_position")
 
 	return 
 end

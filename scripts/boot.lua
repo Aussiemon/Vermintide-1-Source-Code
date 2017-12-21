@@ -5,6 +5,7 @@ dofile("foundation/scripts/boot/boot")
 GlobalResources = GlobalResources or {
 	"resource_packages/common_level_resources",
 	"resource_packages/menu_assets_common",
+	"resource_packages/loading_screens/loading_bg_inn_level",
 	"resource_packages/ingame_sounds_one",
 	"resource_packages/ingame_sounds_two",
 	"resource_packages/ingame_sounds_three",
@@ -41,6 +42,17 @@ end
 Boot.foundation_update = Boot.foundation_update or Boot.update
 Boot.foundation_shutdown = Boot.foundation_shutdown or Boot.shutdown
 Boot.flow_return_table = Script.new_map(32)
+
+function force_render(dt)
+	if Managers.transition then
+		Managers.transition:force_render(dt)
+	end
+
+	render()
+
+	return 
+end
+
 Boot.update = function (self, dt)
 	if PlayerUnitLocomotionExtension then
 		PlayerUnitLocomotionExtension.set_new_frame()
@@ -111,6 +123,8 @@ function project_setup()
 end
 
 Bulldozer.setup = function (self)
+	self._init_localizer(self)
+
 	script_data.settings = Application.settings()
 	script_data.build_identifier = Application.build_identifier()
 
@@ -205,12 +219,6 @@ Bulldozer.setup = function (self)
 	Application.set_time_step_policy("no_smoothing")
 	self._load_user_settings(self)
 
-	local platform = Application.platform()
-
-	if platform == "ps4" then
-		Application.set_time_step_policy("throttle", 30)
-	end
-
 	if Development.parameter("network_log_spew") then
 		Network.log(Network.SPEW)
 	elseif Development.parameter("network_log_messages") then
@@ -294,14 +302,13 @@ Bulldozer._require_scripts = function (self)
 	Managers.package:load("resource_packages/foundation_scripts", "boot")
 	Managers.package:load("resource_packages/game_scripts", "boot")
 	Managers.package:load("backend/local_backend/local_backend", "boot")
-	Managers.package:load("backend/tutorial_backend/tutorial_backend", "boot")
 	Managers.package:load("resource_packages/level_scripts", "boot")
 	foundation_require("managers", "localization/localization_manager", "event/event_manager")
 	game_require("utils", "assert", "patches", "script_unit", "colors", "table", "random_table", "global_utils", "function_call_stats")
 	game_require("settings", "game_settings_development", "controller_settings", "default_user_settings", "synergy_settings")
 	game_require("game_state", "state_context")
 	game_require("entity_system", "entity_system")
-	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager")
+	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "play_go/play_go_manager", "controller_features/controller_features_manager")
 	game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 	game_require("network", "unit_spawner", "unit_storage", "network_unit")
 	game_require("utils", "table")
@@ -390,17 +397,22 @@ Bulldozer._init_mouse = function (self)
 	return 
 end
 Bulldozer._init_managers = function (self)
-	self._init_localizer(self)
+	self._setup_macros(self)
 	parse_item_master_list()
 
 	Managers.save = SaveManager:new(script_data.settings.disable_cloud_save)
 
 	self._init_backend(self)
 
+	if Application.platform() ~= "win32" then
+		Managers.splitscreen = SplitscreenTester:new()
+	end
+
 	Managers.perfhud = PerfhudManager:new()
 	Managers.debug_updator = Updator:new()
 	Managers.music = MusicManager:new()
 	Managers.transition = TransitionManager:new()
+	Managers.play_go = PlayGoManager:new()
 
 	if GameSettingsDevelopment.use_telemetry then
 		Managers.telemetry = TelemetryManager:new()
@@ -414,20 +426,12 @@ Bulldozer._init_managers = function (self)
 	Managers.invite = InviteManager:new()
 	Managers.news_ticker = NewsTickerManager:new()
 	Managers.light_fx = LightFXManager:new()
-	local platform = Application.platform()
-
-	if platform ~= "ps4" then
-		Managers.unlock = UnlockManager:new()
-	end
+	Managers.unlock = UnlockManager:new()
 
 	return 
 end
 Bulldozer._init_backend = function (self)
-	local platform = Application.platform()
-
-	if platform ~= "ps4" then
-		Managers.backend = BackendManager:new()
-	end
+	Managers.backend = BackendManager:new()
 
 	return 
 end
@@ -455,23 +459,17 @@ Bulldozer._load_user_settings = function (self)
 	return 
 end
 Bulldozer._init_localizer = function (self)
-	local language_id = Application.user_setting("language_id") or "en"
-
-	if not Application.user_setting("language_id") and rawget(_G, "Steam") then
-		language_id = Steam:language()
-
-		if language_id == "plhungarian" then
-			language_id = "pl"
-		elseif language_id == "ja" then
-			language_id = "jp"
-		end
-	end
+	local has_steam = rawget(_G, "Steam")
+	local language_id = Application.user_setting("language_id") or (has_steam and Steam:language()) or "en"
 
 	Application.set_resource_property_preference_order(language_id)
-	Managers.package:load("resource_packages/strings", "boot")
 	Managers.package:load("resource_packages/post_localization_boot", "boot")
+	Managers.package:load("resource_packages/strings", "boot")
 
-	Managers.localizer = LocalizationManager:new("localization/game", language_id)
+	return 
+end
+Bulldozer._setup_macros = function (self)
+	Managers.localizer = LocalizationManager:new("localization/game")
 
 	local function tweak_parser(tweak_name)
 		return LocalizerTweakData[tweak_name] or "<missing LocalizerTweakData \"" .. tweak_name .. "\">"
@@ -496,20 +494,18 @@ Bulldozer._init_localizer = function (self)
 
 		local key_locale_name = nil
 
-		for _, input_mapping in ipairs(key.input_mappings) do
-			for j = 1, input_mapping.n, 3 do
-				local device_type = input_mapping[j]
-				local button_index = input_mapping[j + 1]
+		for j = 1, key.n, 3 do
+			local device_type = key[j]
+			local button_index = key[j + 1]
 
-				if Managers.input:is_device_active("keyboard") or Managers.input:is_device_active("mouse") then
-					if device_type == "keyboard" then
-						key_locale_name = Keyboard.button_locale_name(button_index) or Keyboard.button_name(button_index)
-					elseif device_type == "mouse" then
-						key_locale_name = Mouse.button_name(button_index)
-					end
-				elseif Managers.input:is_device_active("gamepad") and device_type == "gamepad" then
-					key_locale_name = Pad1.button_name(button_index)
+			if Managers.input:is_device_active("keyboard") or Managers.input:is_device_active("mouse") then
+				if device_type == "keyboard" then
+					key_locale_name = Keyboard.button_locale_name(button_index) or Keyboard.button_name(button_index)
+				elseif device_type == "mouse" then
+					key_locale_name = Mouse.button_name(button_index)
 				end
+			elseif Managers.input:is_device_active("gamepad") and device_type == "gamepad" then
+				key_locale_name = Pad1.button_name(button_index)
 			end
 		end
 
@@ -557,12 +553,12 @@ Bulldozer.entrypoint = function (self)
 
 	Managers.package:load("resource_packages/levels/debug_levels", "boot")
 	Managers.package:load("resource_packages/levels/benchmark_levels", "boot")
-	Managers.package:load("resource_packages/levels/honduras_levels", "boot")
+	Managers.package:load("resource_packages/levels/dwarf_levels", "boot")
 
 	script_data.use_optimized_breed_units = false
 	local breed_package = (script_data.use_optimized_breed_units and "resource_packages/ingame_breeds_optimized") or "resource_packages/ingame_breeds"
 
-	print("use baked enemy meshes:", script_data.use_optimized_breed_units, " package: ", breed_package)
+	print("[Boot] use baked enemy meshes:", script_data.use_optimized_breed_units, " package: ", breed_package)
 
 	if GameSettingsDevelopment.start_state == "game" then
 		local ingame_package = (LEVEL_EDITOR_TEST and "resource_packages/ingame_light") or "resource_packages/ingame"

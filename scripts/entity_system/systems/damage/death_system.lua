@@ -110,7 +110,7 @@ DeathSystem.update = function (self, context, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("active_reactions")
 	Profiler.start("waiting_units")
 
 	for unit, extension in pairs(waiting_units) do
@@ -138,7 +138,7 @@ DeathSystem.update = function (self, context, t)
 
 			local death_reaction_data, death_is_done = death_reaction.start(unit, dt, context, t, killing_blow, self.is_server, extension.cached_wall_nail_data)
 
-			Profiler.stop()
+			Profiler.stop(profiler_names[extension.network_type][extension.death_reaction_template][1])
 
 			if death_is_done == IS_DONE then
 				Unit.flow_event(unit, "lua_dead")
@@ -155,7 +155,7 @@ DeathSystem.update = function (self, context, t)
 					if breed.run_on_death then
 						Profiler.start("run_on_death")
 						breed.run_on_death(unit, blackboard)
-						Profiler.stop()
+						Profiler.stop("run_on_death")
 					end
 				end
 			end
@@ -166,7 +166,7 @@ DeathSystem.update = function (self, context, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("waiting_units")
 
 	return 
 end

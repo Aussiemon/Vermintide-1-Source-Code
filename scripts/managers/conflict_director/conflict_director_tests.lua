@@ -113,7 +113,7 @@ ConflictDirectorTests.test_main_path_optimization = function (self, t, dt)
 		closest_pos_at_main_path(main_path_data.collapsed_path, main_path_data.collapsed_travel_dists, main_path_data.breaks_lookup, pos, ti)
 	end
 
-	Profiler.stop()
+	Profiler.stop("main_path_a")
 
 	local closest_pos_at_main_path_opt = EngineOptimized.closest_pos_at_main_path
 	local pr2 = EngineOptimized.point_on_mainpath
@@ -124,7 +124,7 @@ ConflictDirectorTests.test_main_path_optimization = function (self, t, dt)
 		closest_pos_at_main_path_opt(pos)
 	end
 
-	Profiler.stop()
+	Profiler.stop("main_path_b")
 
 	local p = PLAYER_POSITIONS[1]
 	local p1 = Vector3(100, 20, 130)

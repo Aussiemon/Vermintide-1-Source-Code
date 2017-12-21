@@ -187,6 +187,12 @@ weapon_template.attack_meta_data = {
 	charge_when_outside_max_range = false,
 	obstruction_fuzzyness_range = 1
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.05,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "drakegun"
 weapon_template.right_hand_unit = ""
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.drakegun

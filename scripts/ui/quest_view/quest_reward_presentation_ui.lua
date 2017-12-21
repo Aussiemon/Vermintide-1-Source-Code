@@ -23,7 +23,7 @@ QuestRewardPresentationUI.init = function (self, ingame_ui_context)
 	local input_manager = self.input_manager
 	local input_service_name = "quest_view"
 
-	input_manager.create_input_service(input_manager, input_service_name, IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, input_service_name, "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, input_service_name, "keyboard")
 	input_manager.map_device_to_service(input_manager, input_service_name, "mouse")
 	input_manager.map_device_to_service(input_manager, input_service_name, "gamepad")

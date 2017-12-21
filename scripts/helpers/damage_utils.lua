@@ -81,15 +81,34 @@ local upgraded_staggers = {
 	[5] = 2,
 	[7] = 2
 }
-DamageUtils.calculate_stagger = function (damage_table, duration_table, target_unit, attacker_unit)
+DamageUtils.calculate_stagger = function (damage_table, duration_table, target_unit, attacker_unit, attack_template)
 	local breed = Unit.get_data(target_unit, "breed")
-	local player_armor = 1
 	local target_unit_armor = breed.armor_category
 	local stagger = 0
 	local duration = 0.5
 
 	if damage_table then
 		stagger = damage_table[target_unit_armor]
+	end
+
+	if breed.boss_staggers and stagger < 6 then
+		stagger = 0
+	end
+
+	local blackboard = Unit.get_data(target_unit, "blackboard")
+	local action = blackboard.action
+	local ignore_staggers = action and action.ignore_staggers
+
+	if ignore_staggers then
+		local owner_buff_extension = ScriptUnit.has_extension(attacker_unit, "buff_system")
+
+		if owner_buff_extension and owner_buff_extension.has_buff_type(owner_buff_extension, "push_increase") then
+			ignore_staggers = false
+		end
+	end
+
+	if ignore_staggers and ignore_staggers[stagger] and (not ignore_staggers.allow_push or not attack_template or not attack_template.is_push) then
+		return 0, 0
 	end
 
 	if duration_table then
@@ -100,7 +119,7 @@ DamageUtils.calculate_stagger = function (damage_table, duration_table, target_u
 		duration = 0
 	end
 
-	duration = (duration + math.random()) - 0.5
+	duration = math.max((duration + math.random()) - 0.5, 0)
 
 	if DamageUtils.is_player_unit(attacker_unit) then
 		local player = Managers.player:owner(attacker_unit)
@@ -120,15 +139,6 @@ DamageUtils.calculate_stagger = function (damage_table, duration_table, target_u
 	end
 
 	return stagger, duration
-end
-DamageUtils.calculate_stun = function (damage_table, target_unit)
-	local breed = target_unit and Unit.get_data(target_unit, "breed")
-	local player_armor = 1
-	local target_unit_armor = (breed and breed.armor_category) or player_armor
-	local stun = nil
-	stun = damage_table[target_unit_armor]
-
-	return stun
 end
 DamageUtils.is_player_unit = function (unit)
 	return Managers.player:owner(unit) ~= nil
@@ -223,21 +233,14 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 		local attack_template_id, attack_template_damage_type_id = nil
 
 		if attack_template_name then
-			local attack_template = AttackTemplates[attack_template_name]
-			attack_template_id = attack_template.lookup_id
-			attack_template_damage_type_id = -1
-
-			if attack_template_damage_type_name then
-				local attack_damage_value = AttackDamageValues[attack_template_damage_type_name]
-				attack_template_damage_type_id = attack_damage_value.lookup_id
-			end
+			attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+			attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 		end
 
 		local attack_template_glance_id = nil
 
 		if attack_template_glance_name then
-			local attack_template_glance = AttackTemplates[attack_template_glance_name]
-			attack_template_glance_id = attack_template_glance.lookup_id
+			attack_template_glance_id = NetworkLookup.attack_templates[attack_template_glance_name]
 		end
 
 		local falloff_damage = explosion_template.falloff_damage
@@ -395,7 +398,11 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 							end
 
 							if push_speed and DamageUtils.is_player_unit(hit_unit) then
-								ScriptUnit.extension(hit_unit, "locomotion_system"):add_external_velocity(hit_direction_normalized*push_speed)
+								local status_extension = ScriptUnit.extension(hit_unit, "status_system")
+
+								if not status_extension.is_disabled(status_extension) then
+									ScriptUnit.extension(hit_unit, "locomotion_system"):add_external_velocity(hit_direction_normalized*push_speed)
+								end
 							end
 						end
 					end
@@ -635,7 +642,16 @@ DamageUtils.add_damage_network = function (attacked_unit, attacker_unit, origina
 		return 
 	end
 
-	if Managers.player.is_server or LEVEL_EDITOR_TEST then
+	local player_manager = Managers.player
+	local attacker_player = player_manager.owner(player_manager, attacker_unit)
+	local is_character, _ = DamageUtils.is_character(attacked_unit)
+	local unit_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, attacked_unit)
+
+	if attacker_player and attacker_player.bot_player and not is_character and not is_level_unit then
+		return 
+	end
+
+	if player_manager.is_server or LEVEL_EDITOR_TEST then
 		table.clear(victim_units)
 
 		local networkified_value = DamageUtils.networkify_damage(original_damage_amount)
@@ -643,13 +659,12 @@ DamageUtils.add_damage_network = function (attacked_unit, attacker_unit, origina
 	end
 
 	local damage_amount = DamageUtils.networkify_damage(original_damage_amount)
-	local unit_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, attacked_unit)
 	local attacker_unit_id, attacker_is_level_unit = network_manager.game_object_or_level_id(network_manager, attacker_unit)
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 	local damage_type_id = NetworkLookup.damage_types[damage_type]
 	local damage_source_id = NetworkLookup.damage_sources[damage_source or "n/a"]
 
-	if Managers.player.is_server or LEVEL_EDITOR_TEST then
+	if player_manager.is_server or LEVEL_EDITOR_TEST then
 		local num_victim_units = #victim_units
 
 		for i = 1, num_victim_units, 1 do
@@ -663,14 +678,16 @@ DamageUtils.add_damage_network = function (attacked_unit, attacker_unit, origina
 
 			if ScriptUnit.has_extension(attacker_unit, "hud_system") then
 				local health_extension = ScriptUnit.extension(victim_unit, "health_system")
+				local damage_source = NetworkLookup.damage_sources[damage_source_id]
+				local should_indicate_hit = health_extension.is_alive(health_extension) and attacker_unit ~= victim_unit and damage_source ~= "wounded_degen"
 
-				if health_extension.is_alive(health_extension) and attacker_unit ~= victim_unit then
+				if should_indicate_hit then
 					local hud_extension = ScriptUnit.extension(attacker_unit, "hud_system")
 					hud_extension.hit_enemy = true
 				end
 			end
 
-			local owner = Managers.player:owner(victim_unit)
+			local owner = player_manager.owner(player_manager, victim_unit)
 			local breed = Unit.get_data(attacker_unit, "breed")
 
 			if breed and owner then
@@ -854,6 +871,8 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 
 	if procced then
 		DamageUtils.buff_attack_hit(inventory_extension, unit, hit_unit, "killing_blow_proc")
+
+		return "killing_blow"
 	end
 
 	if attack_type == "heavy_attack" then
@@ -867,6 +886,8 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 			for i = 1, calls, 1 do
 				DamageUtils.buff_attack_hit(inventory_extension, unit, hit_unit, "heroic_killing_blow_proc")
 			end
+
+			return "killing_blow"
 		end
 	end
 
@@ -983,14 +1004,21 @@ DamageUtils.buff_attack_hit = function (inventory_extension, unit, hit_unit, att
 	local damage_source_id = NetworkLookup.damage_sources[item_name]
 	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 	local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
-	local attack_template = AttackTemplates[attack_template]
-	local attack_template_id = attack_template.lookup_id
+	local attack_template_id = NetworkLookup.attack_templates[attack_template]
+	local attack_damage_values_id = NetworkLookup.attack_damage_values["n/a"]
 	local hit_zone_id = NetworkLookup.hit_zones.full
 	local attack_direction = Vector3.normalize(POSITION_LOOKUP[hit_unit] - POSITION_LOOKUP[unit])
 	local hit_ragdoll_actor_id = NetworkLookup.hit_ragdoll_actors["n/a"]
 	local backstab_multiplier = 1
+	local is_server = network_manager.is_server
 
-	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, 0, hit_ragdoll_actor_id, backstab_multiplier)
+	if is_server or LEVEL_EDITOR_TEST then
+		local weapon_system = Managers.state.entity:system("weapon_system")
+
+		weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[item_name], unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_values_id, hit_ragdoll_actor_id, backstab_multiplier)
+	else
+		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_values_id, hit_ragdoll_actor_id, backstab_multiplier)
+	end
 
 	return 
 end
@@ -1020,13 +1048,14 @@ DamageUtils.heal_network = function (healed_unit, healer_unit, heal_amount, heal
 	assert(Managers.player.is_server or LEVEL_EDITOR_TEST)
 	table.clear(healed_units)
 
-	heal_amount = DamageUtils.apply_buffs_to_heal(healed_unit, healer_unit, heal_amount, heal_type, healed_units)
+	local shared_medpack = false
+	heal_amount, shared_medpack = DamageUtils.apply_buffs_to_heal(healed_unit, healer_unit, heal_amount, heal_type, healed_units)
 	heal_amount = DamageUtils.networkify_damage(heal_amount)
 	local num_healed_units = #healed_units
 
 	for i = 1, num_healed_units, 1 do
 		local unit = healed_units[i]
-		heal_type = (unit == healed_unit and heal_type) or "buff"
+		heal_type = (shared_medpack and "buff_shared_medpack") or (unit == healed_unit and heal_type) or "buff"
 		local damage_extension = ScriptUnit.extension(unit, "damage_system")
 
 		damage_extension.heal(damage_extension, unit, heal_amount)
@@ -1048,7 +1077,7 @@ DamageUtils.heal_network = function (healed_unit, healer_unit, heal_amount, heal
 		end
 	end
 
-	if healed_unit == healer_unit and (heal_type == "bandage" or heal_type == "healing_draught") and ScriptUnit.has_extension(healer_unit, "buff_system") then
+	if healed_unit == healer_unit and (heal_type == "bandage" or heal_type == "healing_draught" or heal_type == "buff_shared_medpack") and ScriptUnit.has_extension(healer_unit, "buff_system") then
 		local buff_extension = ScriptUnit.extension(healer_unit, "buff_system")
 
 		if buff_extension.has_buff_type(buff_extension, "medpack_spread_area") then
@@ -1075,6 +1104,7 @@ DamageUtils.heal_network = function (healed_unit, healer_unit, heal_amount, heal
 	return 
 end
 DamageUtils.apply_buffs_to_heal = function (healed_unit, healer_unit, heal_amount, heal_type, healed_units)
+	local shared_medpack = false
 	healed_units[#healed_units + 1] = healed_unit
 
 	if ScriptUnit.has_extension(healed_unit, "buff_system") then
@@ -1099,10 +1129,14 @@ DamageUtils.apply_buffs_to_heal = function (healed_unit, healer_unit, heal_amoun
 			end
 
 			heal_amount = heal_amount/num_players_with_shared_health_pool
+
+			if heal_type == "bandage" or heal_type == "healing_draught" then
+				shared_medpack = true
+			end
 		end
 	end
 
-	return heal_amount
+	return heal_amount, shared_medpack
 end
 DamageUtils.debug_deal_damage = function (victim_unit, attack_template_name, hit_zone_name)
 	local network_manager = Managers.state.network
@@ -1118,9 +1152,8 @@ DamageUtils.debug_deal_damage = function (victim_unit, attack_template_name, hit
 	local attacker_unit_id = hit_unit_id
 	hit_zone_name = hit_zone_name or "torso"
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-	local attack_template = AttackTemplates[attack_template_name]
-	local attack_template_id = attack_template.lookup_id
-	local attack_template_damage_type_id = 0
+	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+	local attack_template_damage_type_id = NetworkLookup.attack_damage_values["n/a"]
 	local backstab_multiplier = 1
 
 	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources.debug, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
@@ -1134,9 +1167,8 @@ DamageUtils.deal_damage = function (source, victim_unit, attacker_unit, attack_d
 	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, attacker_unit)
 	hit_zone_name = hit_zone_name or "torso"
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-	local attack_template = AttackTemplates[attack_template_name]
-	local attack_template_id = attack_template.lookup_id
-	local attack_template_damage_type_id = 0
+	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+	local attack_template_damage_type_id = NetworkLookup.attack_damage_values["n/a"]
 	local backstab_multiplier = 1
 
 	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
@@ -1415,16 +1447,8 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 					local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
 					local hit_zone_name = "full"
 					local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-					local attack_template = AttackTemplates[current_action.attack_template]
-					local attack_template_id = attack_template.lookup_id
-					local attack_template_damage_type_name = current_action.attack_template_damage_type
-					local attack_template_damage_type_id = 0
-
-					if attack_template_damage_type_name then
-						local attack_template_damage_type = AttackDamageValues[attack_template_damage_type_name]
-						attack_template_damage_type_id = attack_template_damage_type.lookup_id
-					end
-
+					local attack_template_id = NetworkLookup.attack_templates[current_action.attack_template]
+					local attack_template_damage_type_id = NetworkLookup.attack_damage_values[current_action.attack_template_damage_type or "n/a"]
 					local backstab_multiplier = 1
 
 					if is_server or LEVEL_EDITOR_TEST then
@@ -1547,15 +1571,11 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 				else
 					hit_units[hit_unit] = true
 					local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-					local attack_template = AttackTemplates[current_action.attack_template]
-					local attack_template_id = attack_template.lookup_id
-					local attack_template_damage_type_name = current_action.attack_template_damage_type
-					local attack_template_damage_type_id = 0
-
-					if attack_template_damage_type_name then
-						local attack_template_damage_type = AttackDamageValues[attack_template_damage_type_name]
-						attack_template_damage_type_id = attack_template_damage_type.lookup_id
-					end
+					local attack_template_name = current_action.attack_template
+					local attack_template = AttackTemplates[attack_template_name]
+					local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
+					local attack_damage_values_name = current_action.attack_template_damage_type
+					local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_damage_values_name or "n/a"]
 
 					if owner_is_player and breed and check_buffs then
 						local buffs_checked = DamageUtils.buff_on_attack(owner_unit, hit_unit, "instant_projectile")
@@ -1567,7 +1587,7 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 					local predicted_damage = 0
 
 					if attack_template.attack_type then
-						local attack_damage_value = AttackDamageValues[attack_template_damage_type_name]
+						local attack_damage_value = AttackDamageValues[attack_damage_values_name]
 						local attack = Attacks[attack_template.attack_type]
 						local hit_ragdoll_actor = nil
 						predicted_damage = attack.get_damage_amount(damage_source, attack_template, owner_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier)
@@ -1584,10 +1604,14 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 							EffectHelper.remote_play_skinned_surface_material_effects(hit_effect, world, hit_position, hit_rotation, hit_normal, enemy_type, damage_sound, no_damage, hit_zone_name, is_server)
 						end
 					elseif hit_unit_player and current_action.player_push_velocity then
-						local max_impact_push_speed = current_action.max_impact_push_speed
-						local locomotion = ScriptUnit.extension(hit_unit, "locomotion_system")
+						local status_extension = ScriptUnit.extension(hit_unit, "status_system")
 
-						locomotion.add_external_velocity(locomotion, current_action.player_push_velocity:unbox(), max_impact_push_speed)
+						if not status_extension.is_disabled(status_extension) then
+							local max_impact_push_speed = current_action.max_impact_push_speed
+							local locomotion = ScriptUnit.extension(hit_unit, "locomotion_system")
+
+							locomotion.add_external_velocity(locomotion, current_action.player_push_velocity:unbox(), max_impact_push_speed)
+						end
 					end
 
 					local deal_damage = true
@@ -1750,12 +1774,6 @@ DamageUtils.server_apply_hit = function (t, attack_template, attacker_unit, hit_
 		local stagger_func = Staggers[attack_template.stagger_type]
 
 		stagger_func(attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, t)
-	end
-
-	if attack_template.stun_type then
-		local stun_func = Stuns[attack_template.stun_type]
-
-		stun_func(attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, t)
 	end
 
 	if attack_template.dot_type then

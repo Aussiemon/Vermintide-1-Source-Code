@@ -369,6 +369,21 @@ ProfileWorldView.on_enter = function (self, viewport_widget, input_service, char
 	end
 
 	self.button_widgets.cancel_button.content.button_hotspot.disabled = cancel_input_disabled
+	local saved_profile_index = SaveData.wanted_profile_index or 3
+	local starting_selection_unit = self.units[saved_profile_index]
+
+	self.hover_unit(self, starting_selection_unit)
+	self.select_unit(self, starting_selection_unit, true)
+
+	for index, unit in ipairs(self.sorted_units) do
+		if starting_selection_unit == unit then
+			self.controller_index = index
+
+			break
+		end
+	end
+
+	self.update_input_description(self)
 
 	return 
 end
@@ -474,7 +489,7 @@ ProfileWorldView.handle_controller_input = function (self, input_service, dt)
 		local hover_unit = self.sorted_units[self.controller_index]
 
 		self.hover_unit(self, hover_unit)
-		self.select_unit_gamepad(self, hover_unit, 0.5)
+		self.select_unit_gamepad(self, hover_unit, 0.5, true)
 	end
 
 	if self.state == "selecting_profile" and self.selected_unit == self.sorted_units[self.controller_index] and input_service.get(input_service, "confirm") and not self.blocked_accept then
@@ -484,6 +499,8 @@ ProfileWorldView.handle_controller_input = function (self, input_service, dt)
 
 		if player == nil or player.profile_index ~= profile_index then
 			self.state = "waiting_for_profile_switch"
+			local wwise_world = Managers.world:wwise_world(self.world)
+			slot7, slot8 = WwiseWorld.trigger_event(wwise_world, "Play_hud_character_select")
 		end
 	end
 
@@ -703,9 +720,10 @@ ProfileWorldView.hover_unit = function (self, unit)
 
 	return 
 end
-ProfileWorldView.select_unit_gamepad = function (self, unit, delay)
+ProfileWorldView.select_unit_gamepad = function (self, unit, delay, ignore_sound)
 	self._unit_to_select = unit
 	self._gamepad_select_delay = delay
+	self._ignore_sound = ignore_sound
 
 	return 
 end
@@ -713,12 +731,12 @@ ProfileWorldView.update_select_unit_gamepad = function (self, dt)
 	self._gamepad_select_delay = self._gamepad_select_delay - dt
 
 	if self._gamepad_select_delay <= 0 and self._unit_to_select then
-		self.select_unit(self, self._unit_to_select)
+		self.select_unit(self, self._unit_to_select, self._ignore_sound)
 	end
 
 	return 
 end
-ProfileWorldView.select_unit = function (self, unit)
+ProfileWorldView.select_unit = function (self, unit, ignore_sound)
 	local level = self.level
 
 	if self.selected_unit and unit ~= self.selected_unit then
@@ -748,8 +766,11 @@ ProfileWorldView.select_unit = function (self, unit)
 
 	self.function_command_queue:queue_function_command(Level.trigger_event, level, flow_events[profile_name].selected)
 
-	local wwise_world = Managers.world:wwise_world(self.world)
-	local wwise_playing_id, wwise_source_id = WwiseWorld.trigger_event(wwise_world, "Play_hud_character_select")
+	if not ignore_sound then
+		local wwise_world = Managers.world:wwise_world(self.world)
+		slot7, slot8 = WwiseWorld.trigger_event(wwise_world, "Play_hud_character_select")
+	end
+
 	self.selected_unit = unit
 	self.unit_states[profile_index].wanted_state = "selected"
 

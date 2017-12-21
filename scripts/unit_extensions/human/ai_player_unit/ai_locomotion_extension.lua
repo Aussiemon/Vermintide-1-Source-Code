@@ -327,7 +327,7 @@ AILocomotionExtension.set_movement_type = function (self, movement_type, overrid
 				local damage_direction = Vector3(0, 0, -1)
 
 				AiUtils.kill_unit(unit, nil, nil, damage_type, damage_direction)
-				Profiler.stop()
+				Profiler.stop(movement_type)
 
 				return 
 			end
@@ -344,7 +344,7 @@ AILocomotionExtension.set_movement_type = function (self, movement_type, overrid
 		self._is_falling = num_hit_actors == 0
 	end
 
-	Profiler.stop()
+	Profiler.stop(movement_type)
 
 	return 
 end
@@ -358,9 +358,6 @@ AILocomotionExtension.set_disabled = function (self)
 	self._disabled = true
 
 	return 
-end
-AILocomotionExtension.get_velocity = function (self)
-	return self._velocity:unbox()
 end
 AILocomotionExtension.current_velocity = function (self)
 	return self._velocity:unbox()

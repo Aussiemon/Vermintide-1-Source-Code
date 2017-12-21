@@ -1,8 +1,6 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
-local GUTTER_RUNNER_OVERLAP_RADIUS = 1.3
 BTCrazyJumpAction = class(BTCrazyJumpAction, BTNode)
-BTCrazyJumpAction.name = "BTCrazyJumpAction"
 local position_lookup = POSITION_LOOKUP
 local PLAYER_AND_BOT_UNITS = PLAYER_AND_BOT_UNITS
 BTCrazyJumpAction.init = function (self, ...)
@@ -10,6 +8,7 @@ BTCrazyJumpAction.init = function (self, ...)
 
 	return 
 end
+BTCrazyJumpAction.name = "BTCrazyJumpAction"
 
 local function debug3d(unit, text, color_name)
 	if script_data.debug_ai_movement then
@@ -41,23 +40,25 @@ BTCrazyJumpAction.enter = function (self, unit, blackboard, t)
 	data.target_unit = blackboard.target_unit
 	data.overlap_context = ai_extension.get_overlap_context(ai_extension)
 	data.anim_jump_rot_var = Unit.animation_find_variable(unit, "jump_rotation")
-	local locomotion = blackboard.locomotion_extension
 
 	LocomotionUtils.set_animation_driven_movement(unit, false)
-	locomotion.set_gravity(locomotion, blackboard.breed.jump_gravity)
-	locomotion.set_check_falling(locomotion, false)
+
+	local locomotion_extension = blackboard.locomotion_extension
+
+	locomotion_extension.set_gravity(locomotion_extension, blackboard.breed.jump_gravity)
+	locomotion_extension.set_check_falling(locomotion_extension, false)
 
 	return 
 end
 BTCrazyJumpAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.skulk_pos = nil
 	blackboard.comitted_to_target = false
-	local locomotion = blackboard.locomotion_extension
+	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion.set_mover_displacement(locomotion)
+	locomotion_extension.set_mover_displacement(locomotion_extension)
 
 	if reason == "aborted" then
-		aiprint(" ----> WAS ABORTED BY OTHER ACTION ")
+		aiprint(" ----> CRAZY JUMP WAS ABORTED BY OTHER ACTION ")
 
 		if blackboard.jump_data.updating_jump_rot then
 			self.update_anim_variable_done(self, unit, blackboard.jump_data)
@@ -71,13 +72,18 @@ BTCrazyJumpAction.leave = function (self, unit, blackboard, t, reason)
 
 		blackboard.high_ground_opportunity = nil
 
-		locomotion.set_movement_type(locomotion, "snap_to_navmesh")
+		locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
 	end
 
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+	if reason == "failed" then
+		blackboard.jump_data = nil
+		blackboard.high_ground_opportunity = nil
+	end
+
+	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, true)
-	locomotion.set_check_falling(locomotion, true)
+	locomotion_extension.set_check_falling(locomotion_extension, true)
 
 	return 
 end
@@ -160,7 +166,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 					local network_manager = Managers.state.network
 
 					network_manager.anim_event(network_manager, unit, "jump_fail")
-					LocomotionUtils.set_animation_driven_movement(unit, true)
+					LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 					aiprint("fail already snapped!")
 					debug3d(unit, "JumpAction ai_air->pounce_down_fail pounced_down already", "red")
 
@@ -237,7 +243,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 				QuickDrawerStay:sphere(pos, 0.04, Color(200, 90, 0))
 			end
 
-			local velocity = blackboard.locomotion_extension:get_velocity()
+			local velocity = blackboard.locomotion_extension:current_velocity()
 			local normalized_velocity = Vector3.normalize(velocity)
 			local dot = Vector3.dot(normalized_velocity, Vector3.normalize(to_target))
 
@@ -303,14 +309,14 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 
 			if data.land_time then
 				if data.land_time < t then
-					locomotion.set_wanted_velocity(locomotion, Vector3.zero())
-
 					data.land_time = nil
 
 					return "failed"
 				end
 			else
-				LocomotionUtils.set_animation_driven_movement(unit, true, true)
+				LocomotionUtils.set_animation_driven_movement(unit, false)
+				locomotion.set_wanted_velocity(locomotion, Vector3.zero())
+				locomotion.set_movement_type(locomotion, "snap_to_navmesh")
 
 				local network_manager = Managers.state.network
 
@@ -334,7 +340,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 			network_manager.anim_event(network_manager, unit, "to_upright")
 			network_manager.anim_event(network_manager, unit, "jump_down")
 
-			local wanted_velocity = locomotion.get_velocity(locomotion)
+			local wanted_velocity = locomotion.current_velocity(locomotion)
 
 			locomotion.set_wanted_velocity(locomotion, wanted_velocity)
 
@@ -410,16 +416,18 @@ end
 BTCrazyJumpAction.setup_jump = function (self, unit, blackboard, data)
 	local jump_target_pos = data.jump_target_pos:unbox()
 	local jump_velocity = data.jump_velocity_boxed:unbox()
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, false)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+	local breed = blackboard.breed
+	local override_mover_move_distance = breed.override_mover_move_distance
+	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion.set_affected_by_gravity(locomotion, true)
-	locomotion.set_movement_type(locomotion, "constrained_by_mover")
-	locomotion.set_wanted_velocity(locomotion, jump_velocity)
+	locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
+	locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
+	locomotion_extension.set_wanted_velocity(locomotion_extension, jump_velocity)
 
 	data.overlap_context.spine_node = Unit.node(unit, "j_neck")
 	data.overlap_context.enemy_spine_node = data.enemy_spine_node
@@ -485,7 +493,7 @@ BTCrazyJumpAction.debug = function (self, unit, blackboard, data, t)
 		local target_pos = position_lookup[blackboard.jump_data.target_unit]
 
 		if target_pos then
-			local velocity = blackboard.locomotion_extension:get_velocity()
+			local velocity = blackboard.locomotion_extension:current_velocity()
 			local normalized_velocity = Vector3.normalize(velocity)
 			local closest_point_on_velocity = Geometry.closest_point_on_line(target_pos, pos, pos + normalized_velocity*20)
 			local to_side_vec = Vector3.flat(closest_point_on_velocity - target_pos)

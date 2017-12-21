@@ -26,6 +26,7 @@ ActionShotgun.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.state = "waiting_to_shoot"
 	self.time_to_shoot = t + new_action.fire_time
+	self.active_reload_time = new_action.active_reload_time and t + new_action.active_reload_time
 	local spread_template_override = new_action.spread_template_override
 
 	if spread_template_override then
@@ -54,17 +55,18 @@ ActionShotgun.client_owner_post_update = function (self, dt, t, world, can_damag
 		local num_shots = current_action.shot_count or 1
 		local ammo_usage = current_action.ammo_usage
 
+		if not Managers.player:owner(self.owner_unit).bot_player then
+			Managers.state.controller_features:add_effect("rumble", {
+				rumble_effect = "handgun_fire"
+			})
+		end
+
 		if current_action.special_ammo_thing and not self.extra_buff_shot then
 			ammo_usage = self.ammo_extension.current_ammo
 			num_shots = ammo_usage
 		end
 
 		local physics_world = World.get_data(world, "physics_world")
-		local pitch, yaw = spread_extension.get_current_pitch_and_yaw(spread_extension)
-		local angle = math.degrees_to_radians(math.max(pitch, yaw))
-
-		PhysicsWorld.prepare_actors_for_raycast(physics_world, current_position, Quaternion.forward(current_rotation), angle, 9, current_action.range*current_action.range)
-
 		local check_buffs = true
 
 		for i = 1, num_shots, 1 do
@@ -76,7 +78,7 @@ ActionShotgun.client_owner_post_update = function (self, dt, t, world, can_damag
 
 			local direction = Quaternion.forward(rotation)
 			local collision_filter = "filter_player_ray_projectile"
-			local result = PhysicsWorld.immediate_raycast(physics_world, current_position, direction, current_action.range or nil, "all", "collision_filter", collision_filter)
+			local result = PhysicsWorld.immediate_raycast_actors(physics_world, current_position, direction, current_action.range, "static_collision_filter", "filter_player_ray_projectile_static_only", "dynamic_collision_filter", "filter_player_ray_projectile_ai_only", "dynamic_collision_filter", "filter_player_ray_projectile_hitbox_only")
 
 			if result then
 				local data = DamageUtils.process_projectile_hit(world, self.item_name, owner_unit, is_server, result, current_action, direction, check_buffs)
@@ -87,18 +89,7 @@ ActionShotgun.client_owner_post_update = function (self, dt, t, world, can_damag
 			end
 		end
 
-		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
-		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
-		local add_spread = true
-
-		if procced and not self.extra_buff_shot then
-			self.state = "waiting_to_shoot"
-			self.time_to_shoot = t + 0.2
-			self.extra_buff_shot = true
-			add_spread = false
-		else
-			self.state = "shot"
-		end
+		local add_spread = not self.extra_buff_shot
 
 		if spread_extension and add_spread then
 			spread_extension.set_shooting(spread_extension)
@@ -116,12 +107,39 @@ ActionShotgun.client_owner_post_update = function (self, dt, t, world, can_damag
 			self.ammo_extension:use_ammo(ammo_usage)
 		end
 
+		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
+
+		if procced and not self.extra_buff_shot then
+			self.state = "waiting_to_shoot"
+			self.time_to_shoot = t + 0.2
+			self.extra_buff_shot = true
+		else
+			self.state = "shot"
+		end
+
 		local fire_sound_event = self.current_action.fire_sound_event
 
 		if fire_sound_event then
 			local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 
 			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event)
+		end
+	end
+
+	if self.state == "shot" and self.active_reload_time then
+		local input_extension = ScriptUnit.extension(owner_unit, "input_system")
+
+		if self.active_reload_time < t then
+			local ammo_extension = self.ammo_extension
+
+			if (input_extension.get(input_extension, "weapon_reload") or input_extension.get_buffer(input_extension, "weapon_reload")) and ammo_extension.can_reload(ammo_extension) then
+				local weapon_extension = ScriptUnit.extension(self.weapon_unit, "weapon_system")
+
+				weapon_extension.stop_action(weapon_extension, "reload")
+			end
+		elseif input_extension.get(input_extension, "weapon_reload") then
+			input_extension.add_buffer(input_extension, "weapon_reload", 0)
 		end
 	end
 
@@ -135,7 +153,7 @@ ActionShotgun.finish = function (self, reason)
 		self.spread_extension:reset_spread_template()
 	end
 
-	if ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension.ammo_count(ammo_extension) == 0 and ammo_extension.can_reload(ammo_extension) then
+	if ammo_extension and current_action.reload_when_out_of_ammo and (ammo_extension.ammo_count(ammo_extension) == 0 or reason == "reload") and ammo_extension.can_reload(ammo_extension) then
 		local play_reload_animation = true
 
 		ammo_extension.start_reload(ammo_extension, play_reload_animation)

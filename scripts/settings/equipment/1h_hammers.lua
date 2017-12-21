@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -57,8 +60,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -111,8 +117,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -165,8 +174,11 @@ weapon_template.actions = {
 			}
 		},
 		default_last = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_down",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -227,11 +239,15 @@ weapon_template.actions = {
 			use_target = true,
 			width_mod = 25,
 			max_targets = 1,
+			aim_assist_ramp_multiplier = 0.4,
 			hit_effect = "melee_hit_hammers_1h",
+			aim_assist_max_ramp_multiplier = 0.6,
+			aim_assist_ramp_decay_delay = 0.1,
 			damage_window_end = 0.3,
 			impact_sound_event = "blunt_hit",
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
+			reset_aim_on_attack = true,
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_heavy_down",
@@ -296,7 +312,6 @@ weapon_template.actions = {
 			no_damage_impact_sound_event = "blunt_hit_armour",
 			use_target = false,
 			width_mod = 25,
-			max_targets = 4,
 			hit_effect = "melee_hit_hammers_1h",
 			damage_window_end = 0.52,
 			impact_sound_event = "blunt_hit",
@@ -344,6 +359,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				}
 			},
+			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
 				attack_template = "light_blunt_tank"
@@ -351,7 +367,7 @@ weapon_template.actions = {
 			targets = {
 				{
 					attack_template_damage_type = "one_h_tank_L_1",
-					attack_template = "blunt_tank"
+					attack_template = "blunt_tank_hs"
 				},
 				{
 					attack_template_damage_type = "one_h_tank_L",
@@ -368,7 +384,6 @@ weapon_template.actions = {
 			no_damage_impact_sound_event = "blunt_hit_armour",
 			use_target = false,
 			width_mod = 25,
-			max_targets = 4,
 			hit_effect = "melee_hit_hammers_1h",
 			damage_window_end = 0.47,
 			impact_sound_event = "blunt_hit",
@@ -416,6 +431,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				}
 			},
+			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
 				attack_template = "light_blunt_tank"
@@ -423,7 +439,7 @@ weapon_template.actions = {
 			targets = {
 				{
 					attack_template_damage_type = "one_h_tank_L_1",
-					attack_template = "blunt_tank"
+					attack_template = "blunt_tank_hs"
 				},
 				{
 					attack_template_damage_type = "one_h_tank_L",
@@ -440,7 +456,6 @@ weapon_template.actions = {
 			range_mod = 1.2,
 			use_target = false,
 			width_mod = 25,
-			max_targets = 4,
 			hit_effect = "melee_hit_hammers_1h",
 			damage_window_end = 0.52,
 			impact_sound_event = "blunt_hit",
@@ -493,6 +508,7 @@ weapon_template.actions = {
 					input = "action_wield"
 				}
 			},
+			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
 				attack_template = "blunt_tank_uppercut"
@@ -518,12 +534,15 @@ weapon_template.actions = {
 			use_target = true,
 			width_mod = 25,
 			max_targets = 1,
+			aim_assist_max_ramp_multiplier = 0.4,
 			hit_effect = "melee_hit_hammers_1h",
+			aim_assist_ramp_decay_delay = 0.1,
 			damage_window_end = 0.42,
 			impact_sound_event = "blunt_hit",
 			charge_value = "light_attack",
 			anim_end_event = "attack_finished",
 			dedicated_target_range = 2,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_down_left",
 			hit_stop_anim = "attack_hit",
 			total_time = 1.5,
@@ -644,7 +663,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.6,
+					external_multiplier = 0.8,
 					buff_name = "planted_decrease_movement"
 				}
 			},
@@ -681,6 +700,9 @@ weapon_template.display_unit = "units/weapons/weapon_display/display_1h_weapon"
 weapon_template.wield_anim = "to_1h_hammer"
 weapon_template.buff_type = BuffTypes.MELEE
 weapon_template.max_fatigue_points = 6
+weapon_template.dodge_distance = 1.2
+weapon_template.dodge_speed = 1.2
+weapon_template.dodge_count = 3
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,
@@ -689,6 +711,18 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = true,
 		arc = 0
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	vertical_only = true,
+	base_multiplier = 0,
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
 	}
 }
 weapon_template.compare_statistics = {
@@ -707,7 +741,9 @@ weapon_template.compare_statistics = {
 		}
 	},
 	perks = {
-		light_attack = {},
+		light_attack = {
+			"head_shot"
+		},
 		heavy_attack = {
 			"armor_penetration"
 		}
@@ -749,30 +785,33 @@ Weapons.one_handed_hammer_template_2_co.compare_statistics.attacks.light_attack.
 Weapons.one_handed_hammer_template_2_co.compare_statistics.attacks.heavy_attack.damage = 0.6875
 Weapons.one_handed_hammer_template_2_t2 = table.clone(Weapons.one_handed_hammer_template_1_t2)
 Weapons.one_handed_hammer_template_2_t3 = table.clone(Weapons.one_handed_hammer_template_1_t3)
-Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_left.range_mod = 1
+Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_left.range_mod = 1.1
 Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_left.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_right.range_mod = 1
+Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_right.range_mod = 1.1
 Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_right.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_last.range_mod = 1
+Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_last.range_mod = 1.1
 Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_last.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_down.range_mod = 1
+Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_down.range_mod = 1.15
 Weapons.one_handed_hammer_template_2.actions.action_one.light_attack_down.anim_time_scale = 1.5
-Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_left.range_mod = 1
+Weapons.one_handed_hammer_template_2.dodge_distance = 1
+Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_left.range_mod = 1.1
 Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_left.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_right.range_mod = 1
+Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_right.range_mod = 1.1
 Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_right.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_last.range_mod = 1
+Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_last.range_mod = 1.1
 Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_last.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_down.range_mod = 1
+Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_down.range_mod = 1.15
 Weapons.one_handed_hammer_template_2_t2.actions.action_one.light_attack_down.anim_time_scale = 1.5
-Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_left.range_mod = 1
+Weapons.one_handed_hammer_template_2_t2.dodge_distance = 1
+Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_left.range_mod = 1.1
 Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_left.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_right.range_mod = 1
+Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_right.range_mod = 1.1
 Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_right.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_last.range_mod = 1
+Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_last.range_mod = 1.1
 Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_last.anim_time_scale = 1.2
-Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_down.range_mod = 1
+Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_down.range_mod = 1.15
 Weapons.one_handed_hammer_template_2_t3.actions.action_one.light_attack_down.anim_time_scale = 1.5
+Weapons.one_handed_hammer_template_2_t3.dodge_distance = 1
 Weapons.one_handed_hammer_template_1_t3_un = table.clone(Weapons.one_handed_hammer_template_1_t3)
 Weapons.one_handed_hammer_template_1_t3_un.actions.action_inspect.default.anim_event = "inspect_start_2"
 Weapons.one_handed_hammer_template_1_t3_un.actions.action_inspect.default.anim_end_event = "inspect_end_2"

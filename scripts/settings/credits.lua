@@ -8,8 +8,8 @@ local Credits = {
 			type = "header"
 		},
 		{
-			text = "credits_ceo",
-			localized = true,
+			text = "CEO",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -17,8 +17,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_cto",
-			localized = true,
+			text = "CTO",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -26,8 +26,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_game_director",
-			localized = true,
+			text = "Game Director",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -35,8 +35,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_producer",
-			localized = true,
+			text = "Executive Producer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -44,8 +44,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_associate_producers",
-			localized = true,
+			text = "Senior Producer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -53,7 +53,30 @@ local Credits = {
 			type = "person"
 		},
 		{
+			text = "Producer",
+			localized = false,
+			type = "title"
+		},
+		{
 			text = "Liam O'Neill",
+			type = "person"
+		},
+		{
+			text = "Head of Production",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Erika Kling",
+			type = "person"
+		},
+		{
+			text = "Assistant Producer",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Kasper Batalje",
 			type = "person"
 		},
 		{
@@ -61,8 +84,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_design_manager",
-			localized = true,
+			text = "Design Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -70,8 +93,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_game_design",
-			localized = true,
+			text = "Game Design",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -83,8 +106,16 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_game_writer",
-			localized = true,
+			text = "Markus Olsén",
+			type = "person"
+		},
+		{
+			text = "Kasper Holmberg",
+			type = "person"
+		},
+		{
+			text = "Game Writer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -92,8 +123,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_story_and_dialogue",
-			localized = true,
+			text = "Story and Dialogue",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -105,8 +136,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_level_designer",
-			localized = true,
+			text = "Lead Level Designer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -114,8 +145,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_level_design",
-			localized = true,
+			text = "Level Design",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -135,8 +166,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_programmer",
-			localized = true,
+			text = "Lead Programmer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -144,8 +175,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_programming_manager",
-			localized = true,
+			text = "Programming Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -153,8 +184,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_technical_director",
-			localized = true,
+			text = "Technical Director",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -162,8 +193,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_cio",
-			localized = true,
+			text = "CIO",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -171,8 +202,21 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_programming",
-			localized = true,
+			text = "Principal Platform Programmers",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Patrik Wennersten",
+			type = "person"
+		},
+		{
+			text = "Staffan Tejre",
+			type = "person"
+		},
+		{
+			text = "Programming",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -184,7 +228,19 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "Staffan Tejre",
+			text = "Dmytro Vovk",
+			type = "person"
+		},
+		{
+			text = "Elias Stolt",
+			type = "person"
+		},
+		{
+			text = "Sebastian Granstrand",
+			type = "person"
+		},
+		{
+			text = "Christoffer Wiss",
 			type = "person"
 		},
 		{
@@ -204,15 +260,16 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "Elias Stolt",
+			text = "Philip Sköld",
 			type = "person"
 		},
 		{
-			text = "Patrik Wennersten",
-			type = "person"
+			text = "Additional Programming",
+			localized = false,
+			type = "title"
 		},
 		{
-			text = "Christoffer Wiss",
+			text = "Olle Grahn",
 			type = "person"
 		},
 		{
@@ -232,15 +289,7 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "Sebastian Granstrand",
-			type = "person"
-		},
-		{
 			text = "Axel Lewenhaupt",
-			type = "person"
-		},
-		{
-			text = "Philip Sköld",
 			type = "person"
 		},
 		{
@@ -248,8 +297,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_environment_art_manager",
-			localized = true,
+			text = "Environment Art Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -257,8 +306,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_environment_artist",
-			localized = true,
+			text = "Lead Environment Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -266,8 +315,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_environment_art",
-			localized = true,
+			text = "Environment Art",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -283,8 +332,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_character_art_and_outsourcing_manager",
-			localized = true,
+			text = "Character Art & Outsourcing Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -292,8 +341,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_corpses_critter_statues_artist",
-			localized = true,
+			text = "Corpses Critter Statues Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -301,8 +350,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_concept_art",
-			localized = true,
+			text = "Concept Art",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -326,8 +375,12 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_animator_ta",
-			localized = true,
+			text = "Patrik Rosander",
+			type = "person"
+		},
+		{
+			text = "Lead Animator & TA",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -335,8 +388,12 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_animation",
-			localized = true,
+			text = "Erik Lindqvist",
+			type = "person"
+		},
+		{
+			text = "Animation",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -356,8 +413,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_visual_effects_artist",
-			localized = true,
+			text = "VFX",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -365,8 +422,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_level_artist",
-			localized = true,
+			text = "Level Art",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -378,8 +435,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_sound_designer",
-			localized = true,
+			text = "Lead Sound Designer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -387,8 +444,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_sound_design",
-			localized = true,
+			text = "Sound Design",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -400,8 +457,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_technical_vo_designer",
-			localized = true,
+			text = "Technical VO Designer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -409,8 +466,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_audio_engineer",
-			localized = true,
+			text = "Audio Engineer",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -418,8 +475,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_music",
-			localized = true,
+			text = "Music",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -427,8 +484,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_featured_solo_performers",
-			localized = true,
+			text = "Solo Performers",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -475,8 +532,17 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_head_of_administration",
-			localized = true,
+			text = "Community Manager",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Leo Wakelin",
+			type = "person"
+		},
+		{
+			text = "Head Of Administration",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -484,8 +550,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_it_support",
-			localized = true,
+			text = "IT Technician",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -493,12 +559,34 @@ local Credits = {
 			type = "person"
 		},
 		{
+			text = "Additional IT Technician",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Frank Hammar",
+			type = "person"
+		},
+		{
 			text = " ",
 			type = "person"
 		},
 		{
-			text = "credits_qa",
-			localized = true,
+			text = "QA Lead",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Otto Elggren",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = "Quality Assurance",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -518,7 +606,11 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "Otto Elggren",
+			text = "Eric Sernfalk",
+			type = "person"
+		},
+		{
+			text = "Philip Johansson",
 			type = "person"
 		},
 		{
@@ -526,8 +618,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_voice_actors",
-			localized = true,
+			text = "Voice Actors",
+			localized = false,
 			type = "header"
 		},
 		{
@@ -637,17 +729,13 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "Helena Hernander",
-			type = "person"
-		},
-		{
 			text = "Pixeldiet",
 			localized = false,
 			type = "header"
 		},
 		{
-			text = "credits_programming",
-			localized = true,
+			text = "Programming",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -660,6 +748,220 @@ local Credits = {
 		},
 		{
 			text = "Simon Lundmark",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = "Nordic Games GmbH",
+			localized = false,
+			type = "header"
+		},
+		{
+			text = "Production Team:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Reinhard Pollice",
+			type = "person"
+		},
+		{
+			text = "Roger Joswig",
+			type = "person"
+		},
+		{
+			text = "Gennaro Giani",
+			type = "person"
+		},
+		{
+			text = "Martin Kreuch",
+			type = "person"
+		},
+		{
+			text = "Localization Manager:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Gennaro Giani",
+			type = "person"
+		},
+		{
+			text = "PR & Marketing Director:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Philipp Brock",
+			type = "person"
+		},
+		{
+			text = "PR & Marketing",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Stephanie Harman",
+			type = "person"
+		},
+		{
+			text = "Social Media Manager:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Manuel Karl",
+			type = "person"
+		},
+		{
+			text = "Lead Graphic Artist:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Ernst Satzinger",
+			type = "person"
+		},
+		{
+			text = "Graphic Asset Assistant:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Tobias Grimus",
+			type = "person"
+		},
+		{
+			text = "Peter Hambsch",
+			type = "person"
+		},
+		{
+			text = "Age Rating Coordinator:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Thomas Reisinger",
+			type = "person"
+		},
+		{
+			text = "Web Developer:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Nina Trabe",
+			type = "person"
+		},
+		{
+			text = "Sales Director:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Georg Klotzberg",
+			type = "person"
+		},
+		{
+			text = "Sales:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Reinhold Schor",
+			type = "person"
+		},
+		{
+			text = "Nik Blower",
+			type = "person"
+		},
+		{
+			text = "Ian Warley",
+			type = "person"
+		},
+		{
+			text = "Digital Distribution:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Thomas Reisinger",
+			type = "person"
+		},
+		{
+			text = "Tim Grainer",
+			type = "person"
+		},
+		{
+			text = "Manufacturing:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Anton Seicarescu",
+			type = "person"
+		},
+		{
+			text = "Accounting & Office Management:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Marion Mayer",
+			type = "person"
+		},
+		{
+			text = "Anton Seicarescu",
+			type = "person"
+		},
+		{
+			text = "Business & Product Development Director:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Reinhard Pollice",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = "Nordic Games GmbH Management:",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Klemens Kreuzer",
+			type = "person"
+		},
+		{
+			text = "Lars Wingefors",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = "Nordic Games NA Inc.",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Adrienne Lauer",
+			type = "person"
+		},
+		{
+			text = "Eric Wuestmann",
+			type = "person"
+		},
+		{
+			text = "Klemens Kreuzer",
 			type = "person"
 		},
 		{
@@ -705,8 +1007,8 @@ local Credits = {
 			type = "header"
 		},
 		{
-			text = "credits_general_manager",
-			localized = true,
+			text = "General Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -714,8 +1016,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_business_development_director",
-			localized = true,
+			text = "Business Development Director",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -723,8 +1025,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_director_of_account_management",
-			localized = true,
+			text = "Director of Account Management",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -732,8 +1034,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_account_managers",
-			localized = true,
+			text = "Account Managers",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -745,8 +1047,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_head_of_quality_assurance",
-			localized = true,
+			text = "Head of Quality Assurance",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -754,21 +1056,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_qa_project_managers",
-			localized = true,
-			type = "title"
-		},
-		{
-			text = "Marcin Gorniak",
-			type = "person"
-		},
-		{
-			text = "Maciej Mazurek",
-			type = "person"
-		},
-		{
-			text = "credits_qa_lab_managers",
-			localized = true,
+			text = "QA Project Managers",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -776,12 +1065,21 @@ local Credits = {
 			type = "person"
 		},
 		{
+			text = "QA Lab Managers",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Lukasz Miroslawski",
+			type = "person"
+		},
+		{
 			text = "Pawel Strzelczyk",
 			type = "person"
 		},
 		{
-			text = "credits_qa_team_leader",
-			localized = true,
+			text = "QA Team Leader",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -789,79 +1087,123 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_qa_assistant_team_leaders",
-			localized = true,
+			text = "QA Compliance Engineers",
+			localized = false,
 			type = "title"
 		},
 		{
-			text = "Dawid Januszkiewicz",
+			text = "Ewa Angielska",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "Pawel Szczesny",
+			text = "Anna Bartosik",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "credits_qa_testers",
-			localized = true,
-			type = "title"
-		},
-		{
-			text = "Artur Borkowski",
+			text = "Rafal Dabrowski",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "Lukasz Dzikowski",
+			text = "Pawel Jaskolski",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "Piotr Januszka",
-			type = "person"
-		},
-		{
-			text = "Monika Kasznia",
-			type = "person"
-		},
-		{
-			text = "Arkadiusz Ladowski",
-			type = "person"
-		},
-		{
-			text = "Marta Szymanska",
-			type = "person"
-		},
-		{
-			text = "Jacek Zbikowski",
+			text = "Maksym Sapetto",
+			localized = false,
 			type = "person"
 		},
 		{
 			text = "Kamil Zielinski",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "credits_localization_testers",
-			localized = true,
+			text = "QA Testers",
+			localized = false,
 			type = "title"
 		},
 		{
-			text = "Prochor Aniszczuk",
+			text = "Sebastian Jaskolka",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "Richard Borzymowski",
+			text = "Marcin Kilinski",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "Sofiane Boukoffa",
+			text = "Dominika Kowalska",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "Emilio Rull",
+			text = "Lukasz Mazur",
+			localized = false,
 			type = "person"
 		},
 		{
-			text = "credits_it_manager",
-			localized = true,
+			text = "Marek Malagocki",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Piotr Milewski",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Jacek Zbikowski",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Localization Testers",
+			localized = false,
+			type = "title"
+		},
+		{
+			text = "Henryk Borzymowski",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Ismael Garcia-Marlowe",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Laetitia Magniez",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Angela Pellegrino",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Polina Rutkowska",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Maksym Sapetto",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "Pablo Venzke Avila",
+			localized = false,
+			type = "person"
+		},
+		{
+			text = "IT Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -873,13 +1215,13 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_omuk_london",
-			localized = true,
+			text = "OMUK London",
+			localized = false,
 			type = "header"
 		},
 		{
-			text = "credits_director",
-			localized = true,
+			text = "Director",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -887,8 +1229,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_casting",
-			localized = true,
+			text = "Casting",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -896,8 +1238,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_production_managers",
-			localized = true,
+			text = "IT Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -909,8 +1251,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_production_assistant",
-			localized = true,
+			text = "Production Assistant",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -918,8 +1260,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_recording_engineers",
-			localized = true,
+			text = "Recording Engineers",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -931,8 +1273,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_dialogue_editors",
-			localized = true,
+			text = "Dialogue Editors",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1053,8 +1395,8 @@ local Credits = {
 			type = "header"
 		},
 		{
-			text = "credits_executive_producers",
-			localized = true,
+			text = "Executive Producers",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1070,8 +1412,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_director",
-			localized = true,
+			text = "Director",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1079,8 +1421,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_creative_director",
-			localized = true,
+			text = "Creative Director",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1088,8 +1430,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_vfx_supervisor",
-			localized = true,
+			text = "VFX Supervisor",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1097,8 +1439,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_character_artist",
-			localized = true,
+			text = "Lead Character Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1106,8 +1448,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_animator",
-			localized = true,
+			text = "Lead Animator",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1115,8 +1457,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_light_and_fx_td",
-			localized = true,
+			text = "Light and FX TD",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1124,8 +1466,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_lead_compositor_and_fx",
-			localized = true,
+			text = "Lead Compositor",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1133,8 +1475,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_mattepaint_and_compositor",
-			localized = true,
+			text = "Mattepaint and Compositor",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1142,8 +1484,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_production_manager",
-			localized = true,
+			text = "Production Manager",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1151,8 +1493,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_rigging_td",
-			localized = true,
+			text = "Rigging TD",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1160,8 +1502,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_production_assistant",
-			localized = true,
+			text = "Production Assistant",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1169,8 +1511,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_animator",
-			localized = true,
+			text = "Animator",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1178,8 +1520,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_junior_3d_artist",
-			localized = true,
+			text = "Junior 3D Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1187,8 +1529,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_junior_3d_artist",
-			localized = true,
+			text = "Junior 3D Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1196,8 +1538,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_junior_animator",
-			localized = true,
+			text = "Junior Animator",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1205,8 +1547,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_concept_artist",
-			localized = true,
+			text = "Concept Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1214,8 +1556,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_character_artist",
-			localized = true,
+			text = "Character Artist",
+			localized = false,
 			type = "title"
 		},
 		{
@@ -1227,8 +1569,8 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "credits_playtesters",
-			localized = true,
+			text = "Playtesters",
+			localized = false,
 			type = "header"
 		},
 		{
@@ -1596,6 +1938,34 @@ local Credits = {
 		},
 		{
 			text = "Games Workshop",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = " ",
+			type = "person"
+		},
+		{
+			text = "...and John Blanche, for unsurpassed inspiration.",
 			type = "person"
 		}
 	}

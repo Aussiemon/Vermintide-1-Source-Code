@@ -67,20 +67,20 @@ end
 LimitedItemTrackSpawner.remove = function (self, id)
 	local items = self.items
 
-	assert(items[id], "Tried removing non-existing item")
-
-	items[id] = nil
-	self.num_items = self.num_items - 1
-	self.pool_exhausted = false
+	if items[id] then
+		items[id] = nil
+		self.num_items = self.num_items - 1
+		self.pool_exhausted = false
+	end
 
 	return 
 end
 LimitedItemTrackSpawner.transform = function (self, id)
 	local items = self.items
 
-	assert(items[id], "Tried transforming non-existing item")
-
-	items[id] = true
+	if items[id] then
+		items[id] = true
+	end
 
 	return 
 end

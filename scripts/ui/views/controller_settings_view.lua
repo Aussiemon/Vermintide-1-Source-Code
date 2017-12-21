@@ -76,13 +76,13 @@ local widget_definition = {
 	style = {
 		text = {
 			font_size = 14,
-			font_type = "arial",
+			font_type = "hell_shark",
 			horizontal_alignment = "center",
 			text_color = Colors.color_definitions.white
 		},
 		hover_text = {
 			font_size = 14,
-			font_type = "arial",
+			font_type = "hell_shark",
 			horizontal_alignment = "center",
 			text_color = Colors.color_definitions.green
 		}

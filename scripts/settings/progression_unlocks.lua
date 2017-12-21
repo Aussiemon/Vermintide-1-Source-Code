@@ -98,7 +98,7 @@ ProgressionUnlocks = {
 	get_quests_unlocked = function (level_key)
 		local level_settings = LevelSettings[level_key]
 
-		if level_settings.dlc_name then
+		if level_settings.dlc_name or not table.contains(MainGameLevels, level_key) then
 			return 
 		end
 

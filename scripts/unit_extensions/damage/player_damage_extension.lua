@@ -28,6 +28,19 @@ local my_temp_table = {}
 PlayerDamageExtension.add_damage = function (self, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source_name, hit_ragdoll_actor, damaging_unit)
 	PlayerDamageExtension.super.add_damage(self, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source_name, hit_ragdoll_actor, damaging_unit)
 
+	if Managers.state.controller_features then
+		local player_manager = Managers.player
+		local unit = self.unit
+		local owner = player_manager.owner(player_manager, unit)
+
+		if owner.local_player and 0 < damage_amount then
+			Managers.state.controller_features:add_effect("hit_rumble", {
+				damage_amount = damage_amount,
+				unit = unit
+			})
+		end
+	end
+
 	if GameSettingsDevelopment.use_telemetry then
 		self._add_player_damage_telemetry(self, damage_type, damage_source_name or "n/a")
 	end

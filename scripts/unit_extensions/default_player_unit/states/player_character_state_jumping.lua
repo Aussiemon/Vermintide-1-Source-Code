@@ -67,7 +67,7 @@ PlayerCharacterStateJumping.on_enter = function (self, unit, input, dt, context,
 	local inventory_extension = self.inventory_extension
 	local first_person_extension = self.first_person_extension
 
-	CharacterStateHelper.look(input_extension, player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 
 	local position = POSITION_LOOKUP[unit]
@@ -156,7 +156,7 @@ PlayerCharacterStateJumping.update = function (self, unit, input, dt, context, t
 	move_speed = move_speed*movement_settings_table.player_air_speed_scale
 
 	CharacterStateHelper.move_in_air(self.first_person_extension, input_extension, self.locomotion_extension, move_speed, unit)
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 	CharacterStateHelper.reload(input_extension, inventory_extension, status_extension)
 

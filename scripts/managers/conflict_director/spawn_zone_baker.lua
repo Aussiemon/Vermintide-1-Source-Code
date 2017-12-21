@@ -1,6 +1,7 @@
 SpawnZoneBaker = class(SpawnZoneBaker)
 local InterestPointUnits = InterestPointUnits
 local PackSpawningSettings = PackSpawningSettings
+local DOOR_SEARCH_RADIUS = 1.5
 SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 	self.world = world
 	self.nav_world = nav_world
@@ -42,6 +43,8 @@ SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 				self.num_main_zones = altered_amount_num_main_zones
 			end
 
+			local door_system = Managers.state.entity:system("door_system")
+			local door_broadphase_query_result = {}
 			local total_main_path_length = 0
 
 			for i = 1, #main_paths, 1 do
@@ -50,7 +53,21 @@ SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 
 				for j = 1, #nodes, 1 do
 					local p = nodes[j]
-					nodes[j] = Vector3Box(p[1], p[2], p[3])
+					local node_position = Vector3(p[1], p[2], p[3])
+					local num_doors = door_system.get_doors(door_system, node_position, DOOR_SEARCH_RADIUS, door_broadphase_query_result)
+
+					if 0 < num_doors then
+						local door_unit = door_broadphase_query_result[1]
+						local result_position = MainPathUtils.resolve_node_in_door(nav_world, node_position, door_unit)
+
+						if result_position then
+							node_position = result_position
+						else
+							print("MainPathUtils.resolve_node_in_door: Error - was unable to resolve node in door at position", node_position)
+						end
+					end
+
+					nodes[j] = Vector3Box(node_position)
 				end
 
 				total_main_path_length = total_main_path_length + path.path_length
@@ -62,6 +79,11 @@ SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 			self.total_main_path_length = total_main_path_length
 
 			self.level_analyzer:store_main_paths(main_paths)
+
+			if mainpath_was_changed then
+				Managers.state.spawn.respawn_handler:recalc_respawner_dist_due_to_crossroads()
+			end
+
 			self.create_cover_points(self, spawn_data.cover_points, self.level_analyzer.cover_points_broadphase)
 
 			self.spawn_zones_available = true

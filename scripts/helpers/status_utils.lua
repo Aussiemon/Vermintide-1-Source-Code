@@ -114,8 +114,6 @@ StatusUtils = {
 	set_grabbed_by_pack_master_network = function (status_name, grabbed_unit, is_grabbed, grabber_unit)
 		assert(Managers.player.is_server or LEVEL_EDITOR_TEST)
 
-		local player = Managers.player:owner(grabbed_unit)
-
 		if not Managers.state.network:game() then
 			return 
 		end

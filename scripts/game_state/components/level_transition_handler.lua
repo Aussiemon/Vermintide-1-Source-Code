@@ -102,9 +102,13 @@ LevelTransitionHandler.load_level = function (self, level_key)
 	return 
 end
 LevelTransitionHandler.release_level_resources = function (self, level_key)
-	if not LEVEL_EDITOR_TEST and self.loaded_levels[level_key] then
-		local package_name = LevelSettings[level_key].package_name
+	if level_key == nil then
+		return 
+	end
 
+	local package_name = LevelSettings[level_key].package_name
+
+	if not LEVEL_EDITOR_TEST and (self.loaded_levels[level_key] or Managers.package:is_loading(package_name)) then
 		Managers.package:unload(package_name, "LevelTransitionHandler")
 
 		self.loaded_levels[level_key] = false
@@ -209,7 +213,7 @@ LevelTransitionHandler.update = function (self)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("LevelTransitionHandler:update()")
 
 	return 
 end

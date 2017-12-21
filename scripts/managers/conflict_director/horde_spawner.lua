@@ -34,6 +34,7 @@ HordeSpawner.init = function (self, world, cover_points_broadphase)
 	self.spawner_system = Managers.state.entity:system("spawner_system")
 	self.num_paced_hordes = 0
 	self.world = world
+	self.physics_world = World.physics_world(world)
 	CurrentHordeSettings.ambush.max_size = self.max_composition_size(self, CurrentHordeSettings.ambush.composition_type)
 	CurrentHordeSettings.vector.max_size = self.max_composition_size(self, CurrentHordeSettings.vector.composition_type)
 
@@ -77,7 +78,7 @@ HordeSpawner.horde = function (self, horde_type, composition_lookup)
 		self.execute_ambush_horde(self)
 	end
 
-	Profiler.stop()
+	Profiler.stop("horde_spawner")
 
 	return 
 end
@@ -102,7 +103,7 @@ HordeSpawner.execute_fallback = function (self, horde_type, fallback, reason)
 
 	return 
 end
-HordeSpawner.execute_event_horde = function (self, t, terror_event_id, composition_type, limit_spawners, silent, group_template)
+HordeSpawner.execute_event_horde = function (self, t, terror_event_id, composition_type, limit_spawners, silent, group_template, strictly)
 	local composition = CurrentHordeSettings.compositions[composition_type]
 	local horde = {
 		horde_type = "event",
@@ -112,7 +113,8 @@ HordeSpawner.execute_event_horde = function (self, t, terror_event_id, compositi
 		start_time = t + (composition.start_time or 4),
 		end_time = t + (composition.start_time or 4) + 20,
 		silent = silent,
-		group_template = group_template
+		group_template = group_template,
+		strictly = strictly
 	}
 	local hordes = self.hordes
 	local id = #hordes + 1
@@ -325,6 +327,7 @@ HordeSpawner.execute_ambush_horde = function (self, fallback, override_epicenter
 
 	while last_spawner_count ~= spawner_count and spawner_count < num_to_spawn do
 		last_spawner_count = spawner_count
+		local spawn_time = t - 0.05
 
 		for i = 1, num_sectors, 1 do
 			local horde_sector = horde_sectors[i]
@@ -354,13 +357,14 @@ HordeSpawner.execute_ambush_horde = function (self, fallback, override_epicenter
 				if breed_name then
 					horde.hidden_spawns[#horde.hidden_spawns + 1] = {
 						num_to_spawn = 1,
-						next_spawn_time = 0,
+						next_spawn_time = spawn_time,
 						cover_point_unit = cover_point_unit,
 						spawn_list = {
 							breed_name
 						}
 					}
 					spawner_count = spawner_count + 1
+					spawn_time = spawn_time + 0.1
 				end
 			end
 		end
@@ -423,6 +427,83 @@ HordeSpawner.execute_ambush_horde = function (self, fallback, override_epicenter
 	self.num_paced_hordes = self.num_paced_hordes + 1
 
 	return 
+end
+HordeSpawner.replace_hidden_spawners = function (self, hidden_spawners, spawner_in_sight, offending_player_pos)
+	if spawner_in_sight.dont_move then
+		return 
+	end
+
+	local epicenter_pos = Unit.local_position(spawner_in_sight.cover_point_unit, 0)
+	local hidden_min_dist = 10
+	local hidden_max_dist = 20
+	local main_target_pos = offending_player_pos
+	local found_cover_points = found_cover_points
+
+	table.clear_array(found_cover_points, #found_cover_points)
+	self.hidden_cover_points(self, self.broadphase, epicenter_pos, {
+		epicenter_pos
+	}, found_cover_points, hidden_min_dist, hidden_max_dist, main_target_pos)
+
+	local num_found = #found_cover_points
+
+	print("replace_hidden_spawners -> first try found:", num_found, "cover points")
+
+	if num_found <= 0 then
+		hidden_min_dist = 0
+		hidden_max_dist = 30
+		local distance_ahead = 20
+		epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance_ahead)
+
+		if not epicenter_pos then
+			print("replace_hidden_spawners -> no alternate epicenter_pos found. failed! pos:", main_target_pos)
+
+			spawner_in_sight.dont_move = true
+
+			return 
+		end
+
+		table.clear_array(found_cover_points, #found_cover_points)
+		self.hidden_cover_points(self, self.broadphase, epicenter_pos, {
+			epicenter_pos
+		}, found_cover_points, hidden_min_dist, hidden_max_dist, main_target_pos)
+
+		num_found = #found_cover_points
+
+		print("replace_hidden_spawners -> second try try found:", num_found, "cover points")
+	end
+
+	if num_found <= 0 then
+		print("replace_hidden_spawners -> no alternate cover found. failed!")
+
+		spawner_in_sight.dont_move = true
+
+		return 
+	end
+
+	print("replace_hidden_spawners -> replacing hidden spawners!")
+
+	local count = 1
+
+	for i = 1, #hidden_spawners, 1 do
+		local spawner = hidden_spawners[i]
+
+		if 0 < spawner.num_to_spawn then
+			local index = (count - 1)%num_found + 1
+			spawner.cover_point_unit = found_cover_points[index]
+			count = count + 1
+
+			if script_data.debug_terror then
+				local p = Unit.local_position(spawner.cover_point_unit, 0)
+
+				QuickDrawerStay:sphere(p, 2, Color(0, 255, 9))
+				QuickDrawerStay:line(p, p + Vector3(0, 0, 10), Color(0, 255, 9))
+			end
+
+			print("->moving spawner")
+		end
+	end
+
+	return true
 end
 HordeSpawner.find_vector_horde_spawners = function (self, epicenter_pos, main_target_pos)
 	local settings = CurrentHordeSettings.vector
@@ -588,6 +669,7 @@ HordeSpawner.execute_vector_horde = function (self, fallback)
 		spawn_counter = spawn_counter + 1
 	end
 
+	local spawn_time = t - 0.05
 	local hidden_spawns = horde.hidden_spawns
 
 	for i = 1, n_hidden_spawners, 1 do
@@ -595,13 +677,14 @@ HordeSpawner.execute_vector_horde = function (self, fallback)
 		local breed_name = self.pop_random_any_breed(self)
 		hidden_spawns[#hidden_spawns + 1] = {
 			num_to_spawn = 1,
-			next_spawn_time = 0,
+			next_spawn_time = spawn_time,
 			cover_point_unit = spawner,
 			spawn_list = {
 				breed_name
 			}
 		}
 		spawn_counter = spawn_counter + 1
+		spawn_time = spawn_time + 0.1
 	end
 
 	while spawn_counter < num_to_spawn do
@@ -688,7 +771,7 @@ end
 HordeSpawner.update_event_horde = function (self, horde, t)
 	if not horde.started then
 		if horde.start_time < t then
-			local success, amount = self.spawner_system:spawn_horde_from_terror_event_id(horde.terror_event_id, horde.composition_type, horde.limit_spawners, horde.group_template)
+			local success, amount = self.spawner_system:spawn_horde_from_terror_event_id(horde.terror_event_id, horde.composition_type, horde.limit_spawners, horde.group_template, horde.strictly)
 
 			if success then
 				horde.started = true
@@ -708,6 +791,36 @@ HordeSpawner.update_event_horde = function (self, horde, t)
 	end
 
 	return false
+end
+HordeSpawner.spawner_in_view_of_players = function (self, spawner)
+	local spawner_pos = Unit.local_position(spawner.cover_point_unit, 0) + Vector3(0, 0, 1)
+
+	for i = 1, #player_and_bot_positions, 1 do
+		local player_pos = player_and_bot_positions[i] + Vector3(0, 0, 1)
+		local to_player = player_pos - spawner_pos
+		local distance = Vector3.length(to_player)
+
+		if distance < 3 then
+			QuickDrawerStay:sphere(spawner_pos, 3)
+
+			return player_pos
+		end
+
+		if distance < 20 then
+			local direction = Vector3.normalize(to_player)
+			local hit, hit_pos, _, _, actor = PhysicsWorld.immediate_raycast(self.physics_world, spawner_pos, direction, distance, "collision_filter", "filter_ai_line_of_sight_check")
+
+			if script_data.debug_terror then
+				QuickDrawerStay:line(spawner_pos, player_pos, (hit and Color(255, 255, 255)) or Color(255, 0, 0))
+			end
+
+			if not hit then
+				return player_pos
+			end
+		end
+	end
+
+	return 
 end
 HordeSpawner.update_horde = function (self, horde, t)
 	if not horde.started then
@@ -754,13 +867,19 @@ HordeSpawner.update_horde = function (self, horde, t)
 			local hidden_spawn = hidden_spawns[j]
 
 			if 0 < hidden_spawn.num_to_spawn and hidden_spawn.next_spawn_time < t then
+				local seen_from_this_pos = self.spawner_in_view_of_players(self, hidden_spawn)
+
+				if seen_from_this_pos and self.replace_hidden_spawners(self, hidden_spawns, hidden_spawn, seen_from_this_pos) then
+					break
+				end
+
 				local breed_name = pop_array(hidden_spawn.spawn_list)
 
 				self.spawn_unit(self, hidden_spawn, breed_name, horde.main_target_pos:unbox(), horde)
 
 				horde.spawned = horde.spawned + 1
 				hidden_spawn.num_to_spawn = hidden_spawn.num_to_spawn - 1
-				hidden_spawn.next_spawn_time = t + 1
+				hidden_spawn.next_spawn_time = hidden_spawn.next_spawn_time + 1
 			end
 		end
 	end

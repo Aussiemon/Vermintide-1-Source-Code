@@ -167,12 +167,26 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			-60,
+			-90,
 			2
 		},
 		size = {
 			300,
 			170
+		}
+	},
+	friend_info_title_text = {
+		vertical_alignment = "top",
+		parent = "level_image",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			60,
+			2
+		},
+		size = {
+			400,
+			40
 		}
 	},
 	disable_image = {
@@ -268,8 +282,22 @@ local scenegraph_definition = {
 			35
 		},
 		position = {
-			-10,
+			-7,
 			-70,
+			1
+		}
+	},
+	eye_glow = {
+		vertical_alignment = "top",
+		parent = "background",
+		horizontal_alignment = "center",
+		size = {
+			59,
+			59
+		},
+		position = {
+			0,
+			-41,
 			1
 		}
 	}
@@ -327,7 +355,16 @@ local widget_definitions = {
 			}
 		}
 	},
-	background_statue_left = UIWidgets.create_simple_texture("friends_list_bg_statue", "background_statue_left"),
+	background_statue_left = UIWidgets.create_simple_uv_texture("friends_list_bg_statue", {
+		{
+			1,
+			0
+		},
+		{
+			0,
+			1
+		}
+	}, "background_statue_left"),
 	title = {
 		scenegraph_id = "title",
 		element = UIElements.StaticText,
@@ -415,7 +452,9 @@ local friend_list_definition = {
 						style_id = "hover_texture",
 						texture_id = "hover_texture",
 						content_check_function = function (content)
-							return content.button_hotspot.is_hover or content.controller_button_hotspot.is_hover
+							local button_hotspot = content.button_hotspot
+
+							return (button_hotspot.gamepad_active and content.selected) or button_hotspot.is_hover or content.controller_button_hotspot.is_hover
 						end
 					}
 				}
@@ -472,11 +511,6 @@ local friend_info_widget_definitions = {
 		element = {
 			passes = {
 				{
-					style_id = "name",
-					pass_type = "text",
-					text_id = "name"
-				},
-				{
 					style_id = "status",
 					pass_type = "text",
 					text_id = "status"
@@ -504,8 +538,8 @@ local friend_info_widget_definitions = {
 				horizontal_alignment = "center",
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					110,
-					-15,
+					0,
+					-12,
 					2
 				}
 			},
@@ -517,7 +551,7 @@ local friend_info_widget_definitions = {
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
 					-110,
-					-15,
+					-12,
 					2
 				}
 			}
@@ -634,7 +668,7 @@ local friend_info_widget_definitions = {
 				font_size = 18,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					0,
+					-45,
 					-35,
 					2
 				}
@@ -647,7 +681,7 @@ local friend_info_widget_definitions = {
 				font_size = 18,
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					0,
+					45,
 					-35,
 					2
 				}
@@ -660,7 +694,7 @@ local friend_info_widget_definitions = {
 				font_size = 18,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					0,
+					-45,
 					-60,
 					2
 				}
@@ -673,7 +707,7 @@ local friend_info_widget_definitions = {
 				font_size = 18,
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					0,
+					45,
 					-60,
 					2
 				}
@@ -686,7 +720,7 @@ local friend_info_widget_definitions = {
 				font_size = 18,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					0,
+					-45,
 					-85,
 					2
 				}
@@ -700,25 +734,308 @@ local friend_info_widget_definitions = {
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					-2,
+					45,
 					-85,
 					2
 				}
 			},
 			info_title = {
-				vertical_alignment = "top",
-				scenegraph_id = "level_image",
+				vertical_alignment = "center",
+				scenegraph_id = "friend_info_title_text",
 				horizontal_alignment = "center",
 				font_type = "hell_shark",
 				font_size = 18,
+				word_wrap = true,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					0,
-					35,
+					0,
 					2
 				}
 			}
 		}
+	}
+}
+LEVEL_TRANSLATIONS = {
+	merchant = {
+		"Supply and Demand",
+		"Poda\u017c i popyt",
+		"Oferta y demanda",
+		"\u0421\u043f\u0440\u043e\u0441 \u0438 \u043f\u0440\u0435\u0434\u043b\u043e\u0436\u0435\u043d\u0438\u0435",
+		"Oferta e Procura",
+		"L'offre et la demande",
+		"Angebot und Nachfrage",
+		"Domanda e offerta"
+	},
+	dlc_survival_magnus = {
+		"Town Meeting",
+		"Spotkanie",
+		"Reunión de la ciudad",
+		"\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0433\u043e\u0440\u043e\u0434\u0435",
+		"Reunião do burgo",
+		"Réunion municipale",
+		"Bürgerversammlung",
+		"Consiglio cittadino"
+	},
+	sewers_short = {
+		"Smuggler's Run",
+		"Ucieczka przemytnika",
+		"La carrera del contrabandista",
+		"\u041a\u043e\u043d\u0442\u0440\u0430\u0431\u0430\u043d\u0434\u0430",
+		"Fuga do contrabandista",
+		"La course du contrebandier",
+		"Hineingeschmuggelt",
+		"Contrabbando"
+	},
+	inn_level = {
+		"Wartet im Gasthaus Roter Mond",
+		"Esperando en la Posada Luna Roja",
+		"En attente à la Lune rouge",
+		"In attesa alla Locanda della Luna Rossa",
+		"Czekam w karczmie Pod Czerwonym Ksi\u0119\u017cycem",
+		"Aguardando na Estalagem Lua Vermelha",
+		"\u0424\u043e\u0440\u043c\u0430\u0442 \u0441\u0442\u0440\u043e\u043a\u0438 \u0441 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u043d\u044b\u043c\u0438 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u044f\u043c\u0438 \u043f\u0440\u0438\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u044f",
+		"Waiting at the Red Moon Inn",
+		"Red Moon Inn",
+		"Karczma Pod Czerwonym Ksi\u0119\u017cycem",
+		"Posada Luna Roja",
+		"«\u041a\u0440\u0430\u0441\u043d\u0430\u044f \u043b\u0443\u043d\u0430»",
+		"Estalagem Lua Vermelha",
+		"Auberge de la Lune rouge",
+		"Zum Roten Mond",
+		"Locanda della Luna Rossa"
+	},
+	forest_ambush = {
+		"Engines of War",
+		"Machiny wojny",
+		"Máquinas de guerra",
+		"\u041c\u0430\u0448\u0438\u043d\u044b \u0432\u043e\u0439\u043d\u044b",
+		"Mecanismos da Guerra",
+		"Machines de guerre",
+		"Kriegsmaschinen",
+		"Macchine da guerra"
+	},
+	city_wall = {
+		"Man the Ramparts",
+		"\u017bo\u0142nierze na sza\u0144cach",
+		"Defended las murallas",
+		"\u041a \u043a\u0440\u0435\u043f\u043e\u0441\u0442\u043d\u043e\u043c\u0443 \u0432\u0430\u043b\u0443",
+		"Defenda as muralhas",
+		"Aux remparts",
+		"Bemannt die Schutzwälle",
+		"Ai bastioni"
+	},
+	wizard = {
+		"The Wizard's Tower",
+		"Wie\u017ca czarodzieja",
+		"La torre del Hechicero",
+		"\u0411\u0430\u0448\u043d\u044f \u041c\u0430\u0433\u0430",
+		"A Torre dos Magos",
+		"Tour de sorcier",
+		"Der Magierturm",
+		"La Torre del Mago"
+	},
+	dlc_castle_dungeon = {
+		"The Dungeons",
+		"Lochy",
+		"Las mazmorras",
+		"\u041f\u043e\u0434\u0437\u0435\u043c\u0435\u043b\u044c\u044f",
+		"As masmorras",
+		"Les Donjons",
+		"Das Verlies",
+		"I Dungeon"
+	},
+	dlc_portals = {
+		"Summoner's Peak",
+		"Szczyt Przywo\u0142ywacza",
+		"Pico del Invocador",
+		"\u041f\u0438\u043a \u041f\u0440\u0438\u0437\u044b\u0432\u0430\u0442\u0435\u043b\u044f",
+		"Pico do Invocador",
+		"Pic de l'invocateur",
+		"Gipfel des Beschwörers",
+		"Picco dell'Evocatore"
+	},
+	dlc_castle = {
+		"Castle Drachenfels",
+		"Zamek Drachenfels",
+		"Castillo Drachenfels",
+		"\u0417\u0430\u043c\u043e\u043a \u0414\u0440\u0430\u0445\u0435\u043d\u0444\u0435\u043b\u044c\u0441",
+		"Castelo Drachenfels",
+		"Château Drachenfels",
+		"Burg Drachenfels",
+		"Castel Drachenfels"
+	},
+	courtyard_level = {
+		"Well Watch",
+		"W obronie studni",
+		"Protección de pozos",
+		"\u0421\u0442\u0440\u0430\u0436\u0430 \u043a\u043e\u043b\u043e\u0434\u0446\u0435\u0432",
+		"Vigia dos poços",
+		"Surveillance de puits",
+		"Brunnenwache",
+		"Guardia ai pozzi"
+	},
+	bridge = {
+		"Black Powder",
+		"Czarny proch",
+		"Pólvora",
+		"\u0427\u0435\u0440\u043d\u044b\u0439 \u043f\u043e\u0440\u043e\u0445",
+		"Pólvora",
+		"La poudre noire",
+		"Schwarzpulver",
+		"Polvere nera"
+	},
+	cemetery = {
+		"Garden of Morr",
+		"Ogród Morra",
+		"Jardín de Morr",
+		"\u0421\u0430\u0434 \u041c\u043e\u0440\u0440\u0430",
+		"Jardins de Morr",
+		"Jardin de Morr",
+		"Morrs Garten",
+		"Giardino di Morr"
+	},
+	tunnels = {
+		"The Enemy Below",
+		"Wróg spod ziemi",
+		"Enemigo enterrado",
+		"\u0412\u0440\u0430\u0433 \u0438\u0437 \u0433\u043b\u0443\u0431\u0438\u043d",
+		"O Inimigo Profundo",
+		"L'ennemi souterrain",
+		"Den Feind zu Füßen",
+		"Il nemico sottoterra"
+	},
+	magnus = {
+		"The Horn of Magnus",
+		"Róg Magnusa",
+		"El Cuerno de Magnus",
+		"\u0420\u043e\u0433 \u041c\u0430\u0433\u043d\u0430",
+		"A Trompa de Magnus",
+		"La corne de Magnus",
+		"Das Horn des Magnus",
+		"Il Corno di Magnus"
+	},
+	end_boss = {
+		"The White Rat",
+		"Bia\u0142y szczur",
+		"La rata blanca",
+		"\u0411\u0435\u043b\u0430\u044f \u041a\u0440\u044b\u0441\u0430",
+		"O Rato Branco",
+		"Le rat blanc",
+		"Die Weiße Ratte",
+		"Il ratto bianco"
+	},
+	dlc_survival_ruins = {
+		"The Fall",
+		"Upadek",
+		"La caída",
+		"\u041f\u0430\u0434\u0435\u043d\u0438\u0435",
+		"A queda",
+		"La Chute",
+		"Der Fall",
+		"La Caduta"
+	},
+	farm = {
+		"Wheat and Chaff",
+		"Ziarna i plewy",
+		"Trigo y pienso",
+		"\u0417\u0435\u0440\u043d\u0430 \u0438 \u043f\u043b\u0435\u0432\u0435\u043b\u0430",
+		"Joio e trigo",
+		"Blé et paille",
+		"Spreu und Weizen",
+		"Grano e pula"
+	},
+	docks_short_level = {
+		"Waterfront",
+		"Na nabrze\u017cu",
+		"Ribera",
+		"\u041d\u0430\u0431\u0435\u0440\u0435\u0436\u043d\u0430\u044f",
+		"Orla",
+		"Quais",
+		"Das Ufer",
+		"Riva"
+	}
+}
+DIFFICULTY_TRANSLATIONS = {
+	easy = {
+		"Easy",
+		"Facile",
+		"\u0141atwy",
+		"Einfach",
+		"Fácil",
+		"Facile",
+		"\u041f\u0440\u043e\u0441\u0442\u043e\u0439",
+		"Fácil"
+	},
+	normal = {
+		"Normal",
+		"Normale",
+		"Normalny",
+		"Normal",
+		"Normal",
+		"Normale",
+		"\u0421\u0440\u0435\u0434\u043d\u0438\u0439",
+		"Normal"
+	},
+	hard = {
+		"Hard",
+		"Difficile",
+		"Trudny",
+		"Schwer",
+		"Difícil",
+		"Difficile",
+		"\u0421\u043b\u043e\u0436\u043d\u044b\u0439",
+		"Difícil"
+	},
+	harder = {
+		"Nightmare",
+		"Cauchemardesque",
+		"Koszmar",
+		"Albtraum",
+		"Pesadilla",
+		"Incubo",
+		"\u041a\u043e\u0448\u043c\u0430\u0440",
+		"Pesadelo"
+	},
+	hardest = {
+		"Cataclysm",
+		"Cataclysmique",
+		"Kataklizm",
+		"Kataklysmus",
+		"Cataclismo",
+		"Cataclisma",
+		"\u041a\u0430\u0442\u0430\u043a\u043b\u0438\u0437\u043c",
+		"Cataclismo"
+	},
+	survival_hard = {
+		"Veteran",
+		"Vétéran",
+		"Weteran",
+		"Veteran",
+		"Veterano",
+		"Veterano",
+		"\u0412\u0435\u0442\u0435\u0440\u0430\u043d",
+		"Veterano"
+	},
+	survival_harder = {
+		"Champion",
+		"Champion",
+		"Czempion",
+		"Champion",
+		"Campeón",
+		"Campione",
+		"\u0412\u043e\u0438\u0442\u0435\u043b\u044c",
+		"Campeão"
+	},
+	survival_hardest = {
+		"Héros",
+		"Heroic",
+		"Heroiczny",
+		"Heldenhaft",
+		"Héroe",
+		"Eroica",
+		"\u0413\u0435\u0440\u043e\u0439",
+		"Heroico"
 	}
 }
 

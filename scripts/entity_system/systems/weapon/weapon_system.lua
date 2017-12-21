@@ -70,9 +70,9 @@ WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker
 
 	local damage_source = NetworkLookup.damage_sources[damage_source_id]
 	local hit_zone_name = NetworkLookup.hit_zones[hit_zone_id]
-	local attack_template_name = AttackTemplatesLookup[attack_template_id]
+	local attack_template_name = NetworkLookup.attack_templates[attack_template_id]
 	local attack_template = AttackTemplates[attack_template_name]
-	local attack_damage_value_type = nil
+	local attack_damage_values = nil
 	local blackboard = Unit.get_data(hit_unit, "blackboard")
 	local uses_slot_system = ScriptUnit.has_extension(hit_unit, "ai_slot_system")
 	local target_override_extension = (ScriptUnit.has_extension(attacker_unit, "target_override_system") and ScriptUnit.extension(attacker_unit, "target_override_system")) or nil
@@ -95,14 +95,15 @@ WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker
 		end
 	end
 
-	if attack_template_damage_type_id and 1 <= attack_template_damage_type_id then
-		local attack_damage_type_name = AttackDamageValuesLookup[attack_template_damage_type_id]
-		attack_damage_value_type = AttackDamageValues[attack_damage_type_name]
+	local attack_damage_value_name = NetworkLookup.attack_damage_values[attack_template_damage_type_id]
+
+	if attack_damage_value_name ~= "n/a" then
+		attack_damage_values = AttackDamageValues[attack_damage_value_name]
 	end
 
 	local t = self.t
 
-	DamageUtils.server_apply_hit(t, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, hit_ragdoll_actor, damage_source, attack_damage_value_type, backstab_multiplier)
+	DamageUtils.server_apply_hit(t, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, hit_ragdoll_actor, damage_source, attack_damage_values, backstab_multiplier)
 
 	return 
 end
@@ -114,45 +115,12 @@ WeaponSystem.rpc_attack_hit_multiple = function (self, sender, damage_source_id,
 	end
 
 	local hit_zone_name = NetworkLookup.hit_zones[hit_zone_id]
-	local attack_template_name = AttackTemplatesLookup[attack_template_id]
+	local attack_template_name = NetworkLookup.attack_templates[attack_template_id]
 	local attack_template = AttackTemplates[attack_template_name]
 	local attack_func = Attacks[attack_template.attack_type]
 	local damage_source = NetworkLookup.damage_sources[damage_source_id]
 
 	attack_func(damage_source, attack_template, attacker_unit, hit_units, hit_zone_name)
-
-	return 
-end
-local affected_units = {}
-WeaponSystem.aoe_push = function (self, attacker_unit_id, attack_template_id, position, radius)
-	local attacker_unit = self.unit_storage:unit(attacker_unit_id)
-
-	if not Unit.alive(attacker_unit) then
-		return 
-	end
-
-	local num_affected_units = AiUtils.broadphase_query(position, radius, affected_units)
-	local network_manager = Managers.state.network
-	local z_offset = 1
-
-	if not Development.parameter("use_ragdoll_scroll_push") then
-		z_offset = 0
-		local attack_template = AttackTemplates.basic_sweep_push
-		attack_template_id = attack_template.lookup_id
-	end
-
-	local hit_zone_name = "full"
-
-	for i = 1, num_affected_units, 1 do
-		local hit_unit = affected_units[i]
-		local hit_unit_pos = Unit.local_position(hit_unit, 0)
-		hit_unit_pos.z = hit_unit_pos.z + z_offset
-		local attack_direction = Vector3.normalize(hit_unit_pos - position)
-		local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
-		local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-
-		self.rpc_attack_hit(self, nil, NetworkLookup.damage_sources.flow, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction)
-	end
 
 	return 
 end
@@ -240,10 +208,7 @@ WeaponSystem.update_synced_beam_particle_effects = function (self)
 			local aim_direction = GameSession.game_object_field(game, unit_id, "aim_direction")
 			local aim_position = GameSession.game_object_field(game, unit_id, "aim_position")
 			local range = data.range
-
-			PhysicsWorld.prepare_actors_for_raycast(physics_world, aim_position, aim_direction, 0.001, 0.5, range*range)
-
-			local result = PhysicsWorld.immediate_raycast(physics_world, aim_position, aim_direction, range, "all", "collision_filter", "filter_player_ray_projectile")
+			local result = PhysicsWorld.immediate_raycast_actors(physics_world, aim_position, aim_direction, range, "static_collision_filter", "filter_player_ray_projectile_static_only", "dynamic_collision_filter", "filter_player_ray_projectile_ai_only", "dynamic_collision_filter", "filter_player_ray_projectile_hitbox_only")
 			local beam_end_position = aim_position + aim_direction*range
 			local hit_position, hit_unit = nil
 
@@ -486,13 +451,7 @@ WeaponSystem.rpc_weapon_blood = function (self, sender, attacker_unit_id, attack
 		return 
 	end
 
-	local attack_damage_type_name = nil
-
-	if attack_template_damage_type_id and 1 <= attack_template_damage_type_id then
-		attack_damage_type_name = AttackDamageValuesLookup[attack_template_damage_type_id]
-	end
-
-	Managers.state.blood:add_weapon_blood(attacker_unit, attack_damage_type_name)
+	Managers.state.blood:add_weapon_blood(attacker_unit, NetworkLookup.attack_damage_values[attack_template_damage_type_id])
 
 	if self.is_server then
 		self.network_transmit:send_rpc_clients_except("rpc_weapon_blood", sender, attacker_unit_id, attack_template_damage_type_id)

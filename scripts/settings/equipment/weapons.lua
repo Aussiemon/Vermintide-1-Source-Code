@@ -1,9 +1,9 @@
 require("scripts/settings/attachment_node_linking")
-require("scripts/settings/action_templates")
 require("scripts/unit_extensions/generic/interactions")
 require("scripts/utils/action_assert_funcs")
 dofile("scripts/settings/explosion_templates")
 dofile("scripts/settings/equipment/projectiles")
+require("scripts/settings/action_templates")
 dofile("scripts/settings/equipment/1h_swords")
 dofile("scripts/settings/equipment/1h_swords_wood_elf")
 dofile("scripts/settings/equipment/1h_swords_wizard")
@@ -14,6 +14,7 @@ dofile("scripts/settings/equipment/fencing_swords")
 dofile("scripts/settings/equipment/dual_wield_swords")
 dofile("scripts/settings/equipment/dual_wield_sword_dagger")
 dofile("scripts/settings/equipment/dual_wield_daggers")
+dofile("scripts/settings/equipment/1h_falchions")
 dofile("scripts/settings/equipment/1h_axes")
 dofile("scripts/settings/equipment/1h_hammers")
 dofile("scripts/settings/equipment/1h_hammers_wizard")
@@ -21,6 +22,7 @@ dofile("scripts/settings/equipment/2h_swords")
 dofile("scripts/settings/equipment/2h_axes")
 dofile("scripts/settings/equipment/2h_axes_wood_elf")
 dofile("scripts/settings/equipment/2h_hammers")
+dofile("scripts/settings/equipment/2h_picks")
 dofile("scripts/settings/equipment/shortbows")
 dofile("scripts/settings/equipment/shortbows_bodkin")
 dofile("scripts/settings/equipment/shortbows_trueflight")
@@ -134,48 +136,6 @@ Attacks = {
 			return 
 		end
 	},
-	aoe_push = {
-		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value)
-			return 0
-		end,
-		do_damage = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, damage_amount)
-			local blackboard = Unit.get_data(hit_unit, "blackboard")
-			local breed = blackboard.breed
-
-			if breed.allow_aoe_push then
-				local mass = attack_template.mass
-				local speed = attack_template.speed
-				local orig_velocity = attack_direction*speed
-				local orig_position = Unit.local_position(hit_unit, 0)
-				local orig_rotation = Unit.local_rotation(hit_unit, 0)
-				local ai_navigation = ScriptUnit.extension(hit_unit, "ai_navigation_system")
-
-				assert(ai_navigation)
-				ai_navigation.move_to(ai_navigation, orig_position)
-
-				local int_velocity = AiAnimUtils.velocity_network_scale(orig_velocity, true)
-				local int_position = AiAnimUtils.position_network_scale(orig_position, true)
-				local int_rotation = AiAnimUtils.rotation_network_scale(orig_rotation, true)
-				local truncated_velocity = AiAnimUtils.velocity_network_scale(int_velocity, false)
-				local truncated_position = AiAnimUtils.position_network_scale(int_position, false)
-				local truncated_rotation = AiAnimUtils.rotation_network_scale(int_rotation, false)
-				local animation_system = Managers.state.entity:system("animation_system")
-
-				animation_system.set_ragdoll_start_parameters(animation_system, hit_unit, truncated_position, truncated_rotation, truncated_velocity, mass)
-
-				local network_manager = Managers.state.network
-				local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
-
-				network_manager.network_transmit:send_rpc_clients("rpc_set_ragdoll_start_parameters", hit_unit_id, int_position, int_rotation, int_velocity, mass)
-
-				blackboard.ragdoll = true
-
-				network_manager.anim_event(network_manager, hit_unit, "push_init")
-			end
-
-			return 
-		end
-	},
 	grenade = {
 		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value)
 			local damage_amount = attack_template.damage_amount
@@ -215,7 +175,7 @@ Staggers = {
 		local attacker_pos = POSITION_LOOKUP[attacker_unit] or Unit.world_position(attacker_unit, 0)
 		local stagger_type_table = attack_template.stagger_impact or nil
 		local stagger_duration_table = attack_template.stagger_duration or nil
-		local stagger_type, stagger_duration = DamageUtils.calculate_stagger(stagger_type_table, stagger_duration_table, hit_unit, attacker_unit)
+		local stagger_type, stagger_duration = DamageUtils.calculate_stagger(stagger_type_table, stagger_duration_table, hit_unit, attacker_unit, attack_template)
 		local angle = attack_template.stagger_angle or 0
 
 		if angle == "stab" or angle == "smiter" then
@@ -225,26 +185,11 @@ Staggers = {
 			attack_direction.z = -1
 		end
 
-		local blackboard = Unit.get_data(hit_unit, "blackboard")
-		local action = blackboard.action
-		local ignore_staggers = action and action.ignore_staggers
-
-		if 0 < stagger_type and (not ignore_staggers or not ignore_staggers[stagger_type] or (ignore_staggers.allow_push and attack_template.is_push)) then
+		if 0 < stagger_type then
 			local stagger_length = DamageUtils.modify_push_distance_with_buff(attacker_unit, attack_template.stagger_length)
+			local blackboard = Unit.get_data(hit_unit, "blackboard")
 
 			AiUtils.stagger(hit_unit, blackboard, attacker_unit, attack_direction, stagger_length, stagger_type, stagger_duration, attack_template.stagger_animation_scale, t)
-		end
-
-		return 
-	end
-}
-Stuns = {
-	ai_stun = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, t)
-		local stun_type = attack_template.stun_time
-		local stun = DamageUtils.calculate_stun(stun_type, hit_unit)
-
-		if 0 < stun then
-			AiUtils.stun(hit_unit, stun, t, attacker_unit)
 		end
 
 		return 
@@ -263,8 +208,8 @@ Dots = {
 		local armor = DamageUtils.get_breed_armor(hit_unit)
 		local do_dot = true
 
-		if armor == 2 and damage_amount == 0 then
-			do_dot = false
+		if armor == 2 then
+			do_dot = damage_amount ~= 0
 		end
 
 		if ScriptUnit.has_extension(hit_unit, "buff_system") and do_dot then
@@ -300,6 +245,12 @@ AttackDamageValues = {
 		0,
 		0
 	},
+	dropoff = {
+		1,
+		0,
+		2,
+		1
+	},
 	knockdown_bleed = {
 		10,
 		10,
@@ -307,37 +258,55 @@ AttackDamageValues = {
 		10
 	},
 	one_h_smiter_L = {
-		3,
+		4,
 		2,
 		16,
 		2
 	},
 	one_h_smiter_L_t2 = {
-		4,
+		5,
 		2.5,
 		18,
 		2
 	},
 	one_h_smiter_L_t3 = {
-		5,
+		6,
 		3.5,
 		20,
 		2
 	},
-	one_h_smiter_H = {
+	one_h_smiter_L_ap = {
+		4,
+		3,
+		20,
+		2
+	},
+	one_h_smiter_L_ap_t2 = {
 		5,
+		4,
+		25,
+		2
+	},
+	one_h_smiter_L_ap_t3 = {
+		6,
+		5,
+		30,
+		2
+	},
+	one_h_smiter_H = {
+		6,
 		2.5,
 		20,
 		2
 	},
 	one_h_smiter_H_t2 = {
-		6,
+		8,
 		3.5,
 		24,
 		2
 	},
 	one_h_smiter_H_t3 = {
-		7,
+		10,
 		4.5,
 		30,
 		2
@@ -357,6 +326,24 @@ AttackDamageValues = {
 	two_h_smiter_L_t3 = {
 		7,
 		4.5,
+		30,
+		2
+	},
+	two_h_smiter_L_1 = {
+		5,
+		5,
+		20,
+		2
+	},
+	two_h_smiter_L_1_t2 = {
+		7.5,
+		6,
+		25,
+		2
+	},
+	two_h_smiter_L_1_t3 = {
+		10,
+		7,
 		30,
 		2
 	},
@@ -380,24 +367,39 @@ AttackDamageValues = {
 	},
 	two_h_smiter_H_1 = {
 		12,
-		9,
-		25,
-		2,
-		8
+		10,
+		15,
+		2
 	},
 	two_h_smiter_H_1_t2 = {
 		15,
-		11,
-		30,
-		2,
-		10
+		12,
+		20,
+		2
 	},
 	two_h_smiter_H_1_t3 = {
 		20,
+		16,
+		25,
+		2
+	},
+	two_h_smiter_H_2 = {
+		10,
+		8,
+		20,
+		2
+	},
+	two_h_smiter_H_2_t2 = {
+		20,
 		14,
-		35,
-		2,
-		12
+		30,
+		2
+	},
+	two_h_smiter_H_2_t3 = {
+		30,
+		20,
+		40,
+		2
 	},
 	one_h_linesman_L = {
 		1,
@@ -454,20 +456,20 @@ AttackDamageValues = {
 		2
 	},
 	one_h_linesman_H_1 = {
-		3,
-		1,
+		4,
+		2,
 		8,
 		2
 	},
 	one_h_linesman_H_1_t2 = {
-		3.5,
-		1.25,
+		5,
+		3,
 		10,
 		2
 	},
 	one_h_linesman_H_1_t3 = {
+		6,
 		4,
-		1.5,
 		12,
 		2
 	},
@@ -508,20 +510,38 @@ AttackDamageValues = {
 		2
 	},
 	two_h_linesman_L_2 = {
-		5,
+		4,
 		2,
 		8,
 		2
 	},
 	two_h_linesman_L_2_t2 = {
-		6,
-		4,
+		5,
+		3,
 		10,
 		2
 	},
 	two_h_linesman_L_2_t3 = {
-		10,
 		6,
+		4,
+		12,
+		2
+	},
+	two_h_linesman_L_3 = {
+		2,
+		1,
+		8,
+		2
+	},
+	two_h_linesman_L_3_t2 = {
+		3,
+		2,
+		10,
+		2
+	},
+	two_h_linesman_L_3_t3 = {
+		4,
+		3,
 		12,
 		2
 	},
@@ -561,6 +581,42 @@ AttackDamageValues = {
 		16,
 		2
 	},
+	two_h_linesman_H_ap = {
+		3,
+		1.5,
+		12,
+		2
+	},
+	two_h_linesman_H_ap_t2 = {
+		3.5,
+		2,
+		14,
+		2
+	},
+	two_h_linesman_H_ap_t3 = {
+		4,
+		2.5,
+		16,
+		2
+	},
+	two_h_linesman_H_ap_1 = {
+		4,
+		2,
+		12,
+		2
+	},
+	two_h_linesman_H_ap_1_t2 = {
+		5,
+		3,
+		14,
+		2
+	},
+	two_h_linesman_H_ap_1_t3 = {
+		6,
+		4,
+		16,
+		2
+	},
 	one_h_ninja_L = {
 		2,
 		0,
@@ -595,6 +651,24 @@ AttackDamageValues = {
 		3.5,
 		1,
 		12,
+		1
+	},
+	one_h_ninja_L_2 = {
+		3,
+		0,
+		15,
+		1
+	},
+	one_h_ninja_L_2_t2 = {
+		3.5,
+		0,
+		20,
+		1
+	},
+	one_h_ninja_L_2_t3 = {
+		4,
+		0,
+		25,
 		1
 	},
 	one_h_ninja_H = {
@@ -780,164 +854,164 @@ AttackDamageValues = {
 	sniper = {
 		6,
 		2,
-		20,
-		2
+		16,
+		3
 	},
 	sniper_t2 = {
 		7,
 		3,
-		25,
-		2
+		20,
+		3.5
 	},
 	sniper_t3 = {
 		8,
 		4,
-		30,
-		2
+		24,
+		4
 	},
 	sniper_AP = {
-		6,
 		4,
+		6,
 		20,
-		2
+		3.5
 	},
 	sniper_AP_t2 = {
+		6,
 		7,
-		5,
 		25,
-		2
+		4
 	},
 	sniper_AP_t3 = {
+		10,
 		8,
-		6,
 		30,
-		2
+		5
 	},
 	sniper_shot_AP = {
 		12,
 		8,
-		30,
-		2
+		25,
+		6
 	},
 	sniper_shot_AP_t2 = {
 		16,
 		10,
-		35,
-		2
+		30,
+		8
 	},
 	sniper_shot_AP_t3 = {
 		20,
 		12,
-		40,
-		2
+		35,
+		10
 	},
 	carbine = {
 		4,
-		0,
+		1.5,
 		8,
 		2
 	},
 	carbine_t2 = {
 		5,
-		0,
+		2,
 		10,
-		2
+		2.5
 	},
 	carbine_t3 = {
 		6,
-		0,
+		2.5,
 		12,
-		2
+		3
 	},
 	carbine_AP = {
 		4,
-		1,
+		1.5,
 		8,
 		2
 	},
 	carbine_AP_t2 = {
 		5,
-		1.5,
+		2,
 		10,
-		2
+		2.5
 	},
 	carbine_AP_t3 = {
 		6,
-		2,
+		2.5,
 		12,
-		2
+		3
 	},
 	carbine_bolt_AP = {
 		5,
 		2,
 		15,
-		2
+		2.5
 	},
 	carbine_bolt_AP_t2 = {
 		6,
 		2.5,
 		20,
-		2
+		3
 	},
 	carbine_bolt_AP_t3 = {
 		7,
 		3,
 		25,
-		2
+		3.5
 	},
 	machinegun = {
-		2.5,
+		4,
 		0,
 		8,
-		1
+		2
 	},
 	machinegun_t2 = {
-		3,
+		5,
 		0,
 		10,
-		1
+		2.5
 	},
 	machinegun_t3 = {
-		3.5,
+		6,
 		0,
 		12,
-		1
+		3
 	},
 	machinegun_AP = {
-		2.5,
-		0.75,
+		2,
+		0.5,
 		8,
-		1
+		2
 	},
 	machinegun_AP_t2 = {
-		3,
+		2.5,
 		1,
 		10,
-		1
+		2.5
 	},
 	machinegun_AP_t3 = {
 		3.5,
 		1.5,
 		12,
-		1
+		3
 	},
 	spark_AP = {
 		2,
 		0.5,
 		4,
-		1
+		2
 	},
 	spark_AP_t2 = {
 		2.5,
 		1,
 		5,
-		1
+		2.5
 	},
 	spark_AP_t3 = {
-		3,
+		3.5,
 		1.5,
 		6,
-		1
+		3
 	},
 	shotgun = {
 		3,
@@ -958,20 +1032,20 @@ AttackDamageValues = {
 		2
 	},
 	boomer = {
-		3,
-		0,
+		1,
+		0.5,
 		20,
-		2
+		1
 	},
 	boomer_t2 = {
-		3,
-		0,
+		1.5,
+		1,
 		25,
-		2
+		1.5
 	},
 	boomer_t3 = {
-		3,
-		0,
+		2,
+		1.5,
 		30,
 		2
 	},
@@ -979,13 +1053,13 @@ AttackDamageValues = {
 		1,
 		0,
 		4,
-		2
+		1
 	},
 	arrow_poison_machinegun_t2 = {
 		1.5,
 		0,
 		5,
-		2
+		1.5
 	},
 	arrow_poison_machinegun_t3 = {
 		2,
@@ -1003,13 +1077,13 @@ AttackDamageValues = {
 		2.5,
 		0.5,
 		5,
-		2
+		2.5
 	},
 	arrow_poison_carbine_t3 = {
 		3,
 		1,
 		6,
-		2
+		3
 	},
 	arrow_poison_sniper = {
 		3,
@@ -1033,73 +1107,73 @@ AttackDamageValues = {
 		1,
 		1,
 		4,
-		2
+		0.25
 	},
 	poison_t2 = {
 		1.5,
 		1.5,
 		5,
-		2
+		0.25
 	},
 	poison_t3 = {
 		2,
 		2,
 		6,
-		2
+		0.25
 	},
 	poison_aoe = {
 		1,
 		0.25,
 		2,
-		2
+		0.25
 	},
 	poison_aoe_t2 = {
 		1,
 		0.5,
 		3,
-		2
+		0.25
 	},
 	poison_aoe_t3 = {
 		1,
 		1,
 		4,
-		2
+		0.25
 	},
 	burning_dot = {
 		1,
 		0.5,
-		8,
+		4,
 		0.25
 	},
 	burning_dot_t2 = {
 		1,
 		0.75,
-		10,
+		6,
 		0.25
 	},
 	burning_dot_t3 = {
 		1,
 		1,
-		12,
+		8,
 		0.25
 	},
 	beam_burning_dot = {
 		0.5,
 		0.25,
-		4,
-		0.25
+		2,
+		0.1
 	},
 	beam_burning_dot_t2 = {
 		0.5,
 		0.25,
-		4,
-		0.25
+		3,
+		0.1
 	},
 	beam_burning_dot_t3 = {
 		0.5,
 		0.25,
 		4,
-		0.25
+		0.1
 	},
 	ratlinggun_easy = {
 		3,
@@ -1222,24 +1296,25 @@ AttackTemplates = {
 			9,
 			9
 		},
-		stagger_duration = {
-			1,
-			0,
-			0,
-			0
-		},
 		stagger_impact = {
 			2,
 			2,
 			0,
 			0
+		},
+		stagger_duration = {
+			1,
+			0,
+			0,
+			0
 		}
 	},
 	light_slashing_linesman = {
+		stagger_type = "ai_stagger",
 		sound_type = "light",
 		damage_type = "light_slashing_linesman",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
 		stagger_length = 1,
 		stagger_impact = {
 			1,
@@ -1248,7 +1323,7 @@ AttackTemplates = {
 			0
 		},
 		stagger_duration = {
-			2,
+			1,
 			0,
 			0,
 			0
@@ -1263,6 +1338,26 @@ AttackTemplates = {
 		stagger_length = 1,
 		stagger_impact = {
 			1,
+			0,
+			0,
+			0
+		},
+		stagger_duration = {
+			2,
+			0,
+			0,
+			0
+		}
+	},
+	slashing_linesman_hs_2 = {
+		stagger_type = "ai_stagger",
+		sound_type = "light",
+		damage_type = "slashing_linesman",
+		headshot_multiplier = 3,
+		attack_type = "damage_headshot",
+		stagger_length = 0.5,
+		stagger_impact = {
+			2,
 			0,
 			0,
 			0
@@ -1351,6 +1446,26 @@ AttackTemplates = {
 			0
 		}
 	},
+	heavy_slashing_linesman_hs = {
+		stagger_type = "ai_stagger",
+		sound_type = "heavy",
+		damage_type = "heavy_slashing_linesman",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		stagger_length = 0.65,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.5,
+			1.25,
+			0,
+			0
+		}
+	},
 	slashing_linesman_no_hs = {
 		stagger_type = "ai_stagger",
 		sound_type = "heavy",
@@ -1391,12 +1506,13 @@ AttackTemplates = {
 		}
 	},
 	slashing_smiter = {
-		stagger_angle = "smiter",
-		sound_type = "medium",
-		damage_type = "slashing_smiter",
 		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		stagger_length = 1,
+		sound_type = "medium",
+		headshot_multiplier = 1.5,
+		attack_type = "damage_headshot",
+		damage_type = "slashing_smiter",
+		stagger_angle = "smiter",
+		stagger_length = 0.75,
 		stagger_impact = {
 			1,
 			1,
@@ -1410,12 +1526,54 @@ AttackTemplates = {
 			0
 		}
 	},
-	heavy_slashing_smiter = {
-		stagger_angle = "smiter",
-		sound_type = "heavy",
-		damage_type = "heavy_slashing_smiter",
+	oneh_axe_slashing_smiter_ap = {
 		stagger_type = "ai_stagger",
-		attack_type = "damage",
+		sound_type = "medium",
+		damage_type = "slashing_linesman",
+		headshot_multiplier = 1.7,
+		attack_type = "damage_headshot",
+		stagger_length = 0.75,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2,
+			1.5,
+			0,
+			0
+		}
+	},
+	slashing_smiter_hs = {
+		stagger_type = "ai_stagger",
+		sound_type = "medium",
+		headshot_multiplier = 2.25,
+		attack_type = "damage_headshot",
+		damage_type = "slashing_linesman",
+		stagger_angle = "smiter",
+		stagger_length = 1,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2,
+			1,
+			0,
+			0
+		}
+	},
+	heavy_slashing_smiter = {
+		stagger_type = "ai_stagger",
+		sound_type = "heavy",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		damage_type = "heavy_slashing_smiter",
+		stagger_angle = "smiter",
 		stagger_length = 1,
 		stagger_impact = {
 			2,
@@ -1476,15 +1634,15 @@ AttackTemplates = {
 		headshot_multiplier = 2,
 		attack_type = "damage_headshot",
 		stagger_length = 1,
-		stagger_duration = {
-			1,
-			1,
-			0,
-			0
-		},
 		stagger_impact = {
 			1,
 			0,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			1,
 			0,
 			0
 		}
@@ -1505,14 +1663,14 @@ AttackTemplates = {
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
 		stagger_length = 0.7,
-		stagger_duration = {
-			1,
+		stagger_impact = {
+			2,
 			0,
 			0,
 			0
 		},
-		stagger_impact = {
-			2,
+		stagger_duration = {
+			1,
 			0,
 			0,
 			0
@@ -1547,6 +1705,27 @@ AttackTemplates = {
 		stagger_length = 1.25,
 		stagger_impact = {
 			2,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.5,
+			1,
+			0,
+			0
+		}
+	},
+	heavy_slashing_upper = {
+		stagger_type = "ai_stagger",
+		sound_type = "heavy",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		damage_type = "heavy_slashing_tank",
+		stagger_angle = "stab",
+		stagger_length = 1,
+		stagger_impact = {
+			3,
 			2,
 			0,
 			0
@@ -1604,8 +1783,22 @@ AttackTemplates = {
 	},
 	heavy_blunt_linesman = {
 		sound_type = "heavy",
+		damage_type = "heavy_blunt_linesman",
+		stagger_type = "ai_stagger",
 		attack_type = "damage",
-		damage_type = "heavy_blunt_linesman"
+		stagger_length = 0.8,
+		stagger_impact = {
+			3,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			0.75,
+			0,
+			0
+		}
 	},
 	light_blunt_smiter = {
 		stagger_angle = "down",
@@ -1613,10 +1806,10 @@ AttackTemplates = {
 		damage_type = "light_blunt_smiter",
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
-		stagger_length = 0.8,
+		stagger_length = 0.5,
 		stagger_impact = {
-			1,
-			1,
+			2,
+			2,
 			0,
 			0
 		},
@@ -1633,10 +1826,10 @@ AttackTemplates = {
 		damage_type = "blunt_smiter",
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
-		stagger_length = 0.8,
+		stagger_length = 0.5,
 		stagger_impact = {
 			2,
-			1,
+			2,
 			0,
 			0
 		},
@@ -1648,21 +1841,21 @@ AttackTemplates = {
 		}
 	},
 	heavy_blunt_smiter = {
-		stagger_angle = "down",
 		sound_type = "heavy",
 		damage_type = "heavy_blunt_smiter",
 		stagger_type = "ai_stagger",
+		stagger_angle = "down",
 		attack_type = "damage",
 		stagger_length = 1,
-		stagger_duration = {
-			0.75,
-			0.5,
-			0,
-			0
-		},
 		stagger_impact = {
 			2,
 			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			0.75,
+			0.5,
 			0,
 			0
 		}
@@ -1696,7 +1889,7 @@ AttackTemplates = {
 		stagger_length = 0.65,
 		stagger_impact = {
 			2,
-			1,
+			2,
 			0,
 			0
 		},
@@ -1731,11 +1924,51 @@ AttackTemplates = {
 			0
 		}
 	},
+	light_blunt_tank_hs = {
+		stagger_type = "ai_stagger",
+		sound_type = "light",
+		damage_type = "light_blunt_tank",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		stagger_length = 0.65,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2,
+			0.75,
+			0,
+			0
+		}
+	},
 	blunt_tank = {
 		sound_type = "medium",
 		damage_type = "blunt_tank",
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
+		stagger_length = 0.75,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.5,
+			1,
+			0,
+			0
+		}
+	},
+	blunt_tank_hs = {
+		stagger_type = "ai_stagger",
+		sound_type = "medium",
+		damage_type = "blunt_tank",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
 		stagger_length = 0.75,
 		stagger_impact = {
 			2,
@@ -1813,8 +2046,22 @@ AttackTemplates = {
 	},
 	heavy_stab_linesman = {
 		sound_type = "heavy",
+		damage_type = "heavy_stab_linesman",
+		stagger_type = "ai_stagger",
 		attack_type = "damage",
-		damage_type = "heavy_stab_linesman"
+		stagger_length = 0.65,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.5,
+			1.25,
+			0,
+			0
+		}
 	},
 	light_stab_smiter = {
 		sound_type = "light",
@@ -1822,29 +2069,65 @@ AttackTemplates = {
 		damage_type = "light_stab_smiter"
 	},
 	stab_smiter = {
-		stagger_angle = "smiter",
 		sound_type = "medium",
 		damage_type = "stab_smiter",
 		stagger_type = "ai_stagger",
+		stagger_angle = "smiter",
 		attack_type = "damage",
 		stagger_length = 0.75,
-		stagger_duration = {
-			1,
-			0.5,
-			0,
-			0
-		},
 		stagger_impact = {
 			5,
 			5,
 			0,
 			0
+		},
+		stagger_duration = {
+			1,
+			0.5,
+			0,
+			0
 		}
 	},
 	heavy_stab_smiter = {
+		stagger_type = "ai_stagger",
 		sound_type = "heavy",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		damage_type = "heavy_stab_smiter",
+		stagger_angle = "smiter",
+		stagger_length = 1,
+		stagger_impact = {
+			2,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			2,
+			0,
+			0
+		}
+	},
+	heavy_stab_smiter_2 = {
+		stagger_angle = "smiter",
+		sound_type = "heavy",
+		damage_type = "heavy_blunt_smiter",
+		stagger_type = "ai_stagger",
 		attack_type = "damage",
-		damage_type = "heavy_stab_smiter"
+		stagger_length = 1,
+		stagger_impact = {
+			2,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			2,
+			0,
+			0
+		}
 	},
 	light_stab_fencer = {
 		stagger_type = "ai_stagger",
@@ -2066,9 +2349,9 @@ AttackTemplates = {
 		is_push = true,
 		sound_type = "stun_light",
 		stagger_type = "ai_stagger",
-		stagger_length = 0.5,
+		stagger_length = 0.75,
 		stagger_impact = {
-			2,
+			7,
 			1,
 			0,
 			0
@@ -2084,7 +2367,7 @@ AttackTemplates = {
 		is_push = true,
 		sound_type = "stun_light",
 		stagger_type = "ai_stagger",
-		stagger_length = 1,
+		stagger_length = 0.75,
 		stagger_impact = {
 			7,
 			1,
@@ -2116,6 +2399,24 @@ AttackTemplates = {
 			0
 		}
 	},
+	upgraded_sweep_push = {
+		is_push = true,
+		sound_type = "stun_heavy",
+		stagger_type = "ai_stagger",
+		stagger_length = 0.65,
+		stagger_impact = {
+			2,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			2,
+			1.25,
+			0,
+			0
+		}
+	},
 	super_heavy_sweep_push = {
 		is_push = true,
 		sound_type = "stun_heavy",
@@ -2138,31 +2439,6 @@ AttackTemplates = {
 		stagger_type = "ai_stagger",
 		sound_type = "stun_light",
 		stagger_length = 1
-	},
-	hammer_slam_short = {
-		attack_type = "damage",
-		sound_type = "light",
-		damage_type = "slashing_smiter",
-		damage = {
-			2,
-			0,
-			1
-		}
-	},
-	hammer_slam_medium = {
-		attack_type = "damage",
-		sound_type = "light",
-		damage_type = "slashing_smiter",
-		damage = {
-			3,
-			1,
-			1
-		}
-	},
-	hammer_slam_long = {
-		stagger_type = "ai_stagger",
-		sound_type = "light",
-		stagger_length = 10
 	},
 	attack_charge_push = {
 		stagger_type = "ai_stagger",
@@ -2198,7 +2474,7 @@ AttackTemplates = {
 		stagger_impact = {
 			4,
 			2,
-			0,
+			3,
 			0
 		},
 		stagger_duration = {
@@ -2209,31 +2485,12 @@ AttackTemplates = {
 		}
 	},
 	shot_carbine = {
-		stagger_angle = "stab",
+		stagger_type = "ai_stagger",
 		sound_type = "heavy",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
 		damage_type = "shot_carbine",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		stagger_length = 1,
-		stagger_impact = {
-			3,
-			0,
-			0,
-			0
-		},
-		stagger_duration = {
-			2.25,
-			0,
-			0,
-			0
-		}
-	},
-	shot_repeating_handgun = {
 		stagger_angle = "stab",
-		sound_type = "heavy",
-		damage_type = "shot_repeating_handgun",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
 		stagger_length = 1,
 		stagger_impact = {
 			3,
@@ -2357,21 +2614,20 @@ AttackTemplates = {
 		}
 	},
 	shot_machinegun = {
-		stagger_type = "ai_stagger",
-		sound_type = "light",
-		headshot_multiplier = 2,
-		attack_type = "damage_headshot",
-		damage_type = "shot_machinegun",
 		stagger_angle = "stab",
+		sound_type = "light",
+		damage_type = "shot_machinegun",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
 		stagger_length = 0.5,
-		stagger_duration = {
-			0.5,
+		stagger_impact = {
+			4,
 			0,
 			0,
 			0
 		},
-		stagger_impact = {
-			4,
+		stagger_duration = {
+			0.5,
 			0,
 			0,
 			0
@@ -2390,15 +2646,15 @@ AttackTemplates = {
 		stagger_length = 1,
 		damage_near = {
 			2.5,
-			0,
+			0.25,
 			1.5,
-			2
+			0.5
 		},
 		damage_far = {
 			1.5,
 			0,
 			1,
-			2
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 10,
@@ -2425,15 +2681,15 @@ AttackTemplates = {
 		stagger_length = 1,
 		damage_near = {
 			3,
-			0,
+			0.5,
 			2,
-			2
+			0.5
 		},
 		damage_far = {
 			2,
 			0,
 			1.5,
-			2
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 10,
@@ -2459,16 +2715,16 @@ AttackTemplates = {
 		attack_type = "damage_dropoff",
 		stagger_length = 1,
 		damage_near = {
-			4,
-			0,
+			6,
+			0.75,
 			2.5,
-			2
+			0.5
 		},
 		damage_far = {
 			2,
 			0,
 			2,
-			2
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 10,
@@ -2495,15 +2751,15 @@ AttackTemplates = {
 		stagger_length = 1,
 		damage_near = {
 			3,
-			0,
+			0.2,
 			2,
-			2
+			0.5
 		},
 		damage_far = {
 			2,
 			0,
 			1,
-			2
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 20,
@@ -2529,16 +2785,16 @@ AttackTemplates = {
 		attack_type = "damage_dropoff",
 		stagger_length = 1,
 		damage_near = {
-			4,
-			0,
+			5,
+			0.4,
 			2.5,
-			2
+			0.5
 		},
 		damage_far = {
 			2,
 			0,
 			1.5,
-			2
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 20,
@@ -2564,16 +2820,16 @@ AttackTemplates = {
 		attack_type = "damage_dropoff",
 		stagger_length = 1,
 		damage_near = {
-			5,
-			0,
+			6,
+			0.6,
 			2.3,
-			2
+			0.5
 		},
 		damage_far = {
 			2,
 			0,
 			2,
-			2
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 20,
@@ -2603,7 +2859,28 @@ AttackTemplates = {
 		stagger_impact = {
 			4,
 			4,
+			2,
+			0
+		},
+		stagger_duration = {
+			1,
+			0.5,
 			0,
+			0
+		}
+	},
+	arrow_sniper_1 = {
+		stagger_type = "ai_stagger",
+		sound_type = "heavy",
+		headshot_multiplier = 4,
+		attack_type = "damage_headshot",
+		damage_type = "arrow_sniper",
+		stagger_angle = "stab",
+		stagger_length = 1,
+		stagger_impact = {
+			4,
+			4,
+			2,
 			0
 		},
 		stagger_duration = {
@@ -2635,13 +2912,12 @@ AttackTemplates = {
 		}
 	},
 	arrow_machinegun = {
-		stagger_type = "ai_stagger",
-		sound_type = "light",
-		headshot_multiplier = 2,
-		attack_type = "damage_headshot",
-		damage_type = "arrow_machinegun",
 		stagger_angle = "stab",
-		stagger_length = 1,
+		sound_type = "light",
+		damage_type = "arrow_machinegun",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		stagger_length = 0.5,
 		stagger_impact = {
 			4,
 			0,
@@ -2656,48 +2932,6 @@ AttackTemplates = {
 		}
 	},
 	arrow_poison_machinegun = {
-		dot_template_name = "arrow_poison_dot",
-		sound_type = "light",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		dot_type = "poison_dot",
-		damage_type = "arrow_poison",
-		stagger_length = 1,
-		stagger_impact = {
-			4,
-			0,
-			0,
-			0
-		},
-		stagger_duration = {
-			1,
-			0,
-			0,
-			0
-		}
-	},
-	arrow_poison_machinegun_t2 = {
-		dot_template_name = "arrow_poison_dot",
-		sound_type = "light",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		dot_type = "poison_dot",
-		damage_type = "arrow_poison",
-		stagger_length = 1,
-		stagger_impact = {
-			4,
-			0,
-			0,
-			0
-		},
-		stagger_duration = {
-			1,
-			0,
-			0,
-			0
-		}
-	},
-	arrow_poison_machinegun_t3 = {
 		dot_template_name = "arrow_poison_dot",
 		sound_type = "light",
 		stagger_type = "ai_stagger",
@@ -2740,57 +2974,11 @@ AttackTemplates = {
 			0
 		}
 	},
-	arrow_poison_carbine_t2 = {
-		dot_template_name = "arrow_poison_dot_t2",
-		sound_type = "medium",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		dot_type = "poison_dot",
-		dot_on_wound = true,
-		damage_type = "arrow_poison",
-		stagger_length = 1,
-		stagger_impact = {
-			4,
-			0,
-			0,
-			0
-		},
-		stagger_duration = {
-			1,
-			0,
-			0,
-			0
-		}
-	},
-	arrow_poison_carbine_t3 = {
-		dot_template_name = "arrow_poison_dot_t3",
-		sound_type = "medium",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		dot_type = "poison_dot",
-		dot_on_wound = true,
-		damage_type = "arrow_poison",
-		stagger_length = 1,
-		stagger_impact = {
-			4,
-			0,
-			0,
-			0
-		},
-		stagger_duration = {
-			1,
-			0,
-			0,
-			0
-		}
-	},
 	arrow_poison_sniper = {
-		dot_template_name = "arrow_poison_dot",
 		sound_type = "heavy",
+		damage_type = "arrow_poison",
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
-		dot_type = "poison_dot",
-		damage_type = "arrow_poison",
 		stagger_length = 1,
 		stagger_impact = {
 			4,
@@ -2800,48 +2988,6 @@ AttackTemplates = {
 		},
 		stagger_duration = {
 			1.5,
-			0.75,
-			0,
-			0
-		}
-	},
-	arrow_poison_sniper_t2 = {
-		dot_template_name = "arrow_poison_dot",
-		sound_type = "heavy",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		dot_type = "poison_dot",
-		damage_type = "arrow_poison",
-		stagger_length = 1,
-		stagger_impact = {
-			4,
-			1,
-			0,
-			0
-		},
-		stagger_duration = {
-			2,
-			0.75,
-			0,
-			0
-		}
-	},
-	arrow_poison_sniper_t3 = {
-		dot_template_name = "arrow_poison_dot",
-		sound_type = "heavy",
-		stagger_type = "ai_stagger",
-		attack_type = "damage",
-		dot_type = "poison_dot",
-		damage_type = "arrow_poison",
-		stagger_length = 1,
-		stagger_impact = {
-			4,
-			1,
-			0,
-			0
-		},
-		stagger_duration = {
-			2.5,
 			0.75,
 			0,
 			0
@@ -2914,7 +3060,7 @@ AttackTemplates = {
 		stagger_type = "ai_stagger",
 		sound_type = "heavy",
 		damage_type = "bolt_sniper",
-		headshot_multiplier = 3,
+		headshot_multiplier = 2.5,
 		attack_type = "damage_headshot",
 		stagger_length = 1,
 		stagger_impact = {
@@ -3067,7 +3213,7 @@ AttackTemplates = {
 			2,
 			2,
 			0,
-			0
+			1
 		},
 		stagger_duration = {
 			2,
@@ -3139,10 +3285,10 @@ AttackTemplates = {
 		damage_type = "fire_grenade_glance",
 		stagger_length = 1,
 		damage = {
-			4,
 			2,
+			1,
 			16,
-			1
+			2
 		},
 		stagger_impact = {
 			6,
@@ -3166,10 +3312,10 @@ AttackTemplates = {
 		damage_type = "fire_grenade_glance",
 		stagger_length = 1,
 		damage = {
-			5,
-			2.5,
+			3,
+			2,
 			20,
-			1
+			2.5
 		},
 		stagger_impact = {
 			6,
@@ -3193,10 +3339,10 @@ AttackTemplates = {
 		damage_type = "fire_grenade_glance",
 		stagger_length = 1,
 		damage = {
-			8,
+			4,
 			3,
 			24,
-			1
+			4
 		},
 		stagger_impact = {
 			6,
@@ -3224,7 +3370,7 @@ AttackTemplates = {
 		damage = {
 			1,
 			0.5,
-			3,
+			1.5,
 			1
 		},
 		stagger_impact = {
@@ -3253,7 +3399,7 @@ AttackTemplates = {
 		damage = {
 			1.25,
 			0.5,
-			4,
+			2.5,
 			1
 		},
 		stagger_impact = {
@@ -3282,7 +3428,7 @@ AttackTemplates = {
 		damage = {
 			1.5,
 			0.5,
-			5,
+			3.5,
 			1
 		},
 		stagger_impact = {
@@ -3305,15 +3451,15 @@ AttackTemplates = {
 		headshot_multiplier = 2,
 		attack_type = "damage_headshot",
 		stagger_length = 1,
-		stagger_duration = {
-			1,
-			0.5,
-			0,
-			0
-		},
 		stagger_impact = {
 			4,
 			4,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			0.5,
 			0,
 			0
 		}
@@ -3331,7 +3477,7 @@ AttackTemplates = {
 			3,
 			0.5,
 			12,
-			1
+			2
 		},
 		damage_far = {
 			0,
@@ -3340,8 +3486,8 @@ AttackTemplates = {
 			0
 		},
 		range_dropoff_settings = {
-			dropoff_start = 5,
-			dropoff_end = 15
+			dropoff_start = 2,
+			dropoff_end = 10
 		},
 		stagger_impact = {
 			2,
@@ -3369,7 +3515,7 @@ AttackTemplates = {
 			3.5,
 			0.75,
 			14,
-			1
+			2.5
 		},
 		damage_far = {
 			0,
@@ -3378,8 +3524,8 @@ AttackTemplates = {
 			0
 		},
 		range_dropoff_settings = {
-			dropoff_start = 5,
-			dropoff_end = 15
+			dropoff_start = 2,
+			dropoff_end = 10
 		},
 		stagger_impact = {
 			2,
@@ -3407,7 +3553,7 @@ AttackTemplates = {
 			4,
 			1,
 			16,
-			1
+			3
 		},
 		damage_far = {
 			0,
@@ -3416,8 +3562,8 @@ AttackTemplates = {
 			0
 		},
 		range_dropoff_settings = {
-			dropoff_start = 5,
-			dropoff_end = 15
+			dropoff_start = 2,
+			dropoff_end = 10
 		},
 		stagger_impact = {
 			3,
@@ -3455,12 +3601,11 @@ AttackTemplates = {
 		}
 	},
 	wizard_staff_spark = {
-		stagger_type = "ai_stagger",
-		sound_type = "light",
-		headshot_multiplier = 2,
-		attack_type = "damage_headshot",
-		damage_type = "burn_machinegun",
 		stagger_angle = "stab",
+		sound_type = "medium",
+		damage_type = "burn_machinegun",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
 		stagger_length = 1,
 		stagger_impact = {
 			4,
@@ -3478,7 +3623,7 @@ AttackTemplates = {
 	wizard_staff_spear = {
 		stagger_type = "ai_stagger",
 		sound_type = "heavy",
-		headshot_multiplier = 2,
+		headshot_multiplier = 3,
 		attack_type = "damage_headshot",
 		damage_type = "burn_sniper",
 		stagger_angle = "stab",
@@ -3502,10 +3647,12 @@ AttackTemplates = {
 		damage_type = "burn"
 	},
 	drakegun_shot = {
+		dot_template_name = "burning_1W_dot",
 		sound_type = "light",
-		damage_type = "drakegun_shot",
 		stagger_type = "ai_stagger",
 		attack_type = "damage",
+		dot_type = "burning_dot",
+		damage_type = "burn_shotgun",
 		stagger_length = 1,
 		stagger_impact = {
 			3,
@@ -3521,6 +3668,8 @@ AttackTemplates = {
 		}
 	},
 	drakegun_shot_glance = {
+		dot_type = "burning_dot",
+		dot_template_name = "burning_1W_dot",
 		stagger_type = "ai_stagger",
 		stagger_length = 1,
 		stagger_impact = {
@@ -3693,13 +3842,13 @@ AttackTemplates = {
 			5,
 			1.5,
 			12,
-			2
+			2.5
 		},
 		damage_far = {
 			3,
 			0.75,
 			4,
-			1
+			1.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 5,
@@ -3730,13 +3879,13 @@ AttackTemplates = {
 			6,
 			2,
 			12,
-			2
+			2.5
 		},
 		damage_far = {
 			4,
 			1,
 			4,
-			1
+			1.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 5,
@@ -3756,25 +3905,26 @@ AttackTemplates = {
 		}
 	},
 	drake_pistol_charged = {
-		damage_type = "burn_shotgun",
+		headshot_multiplier = -1,
 		sound_type = "medium",
 		stagger_type = "ai_stagger",
 		attack_type = "damage_dropoff",
 		dot_type = "burning_dot",
 		dot_template_name = "burning_1W_dot",
+		damage_type = "burn_shotgun",
 		stagger_angle = "stab",
 		stagger_length = 1,
 		damage_near = {
 			3,
 			0.5,
-			16,
+			8,
 			2
 		},
 		damage_far = {
-			1,
+			0,
 			0,
 			4,
-			1
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 3,
@@ -3782,8 +3932,8 @@ AttackTemplates = {
 		},
 		stagger_impact = {
 			3,
-			0,
-			0,
+			2,
+			3,
 			0
 		},
 		stagger_duration = {
@@ -3794,25 +3944,26 @@ AttackTemplates = {
 		}
 	},
 	drake_pistol_charged_t2 = {
-		damage_type = "burn_shotgun",
+		headshot_multiplier = -1,
 		sound_type = "medium",
 		stagger_type = "ai_stagger",
 		attack_type = "damage_dropoff",
 		dot_type = "burning_dot",
 		dot_template_name = "burning_1W_dot_t2",
+		damage_type = "burn_shotgun",
 		stagger_angle = "stab",
 		stagger_length = 1,
 		damage_near = {
 			4,
 			1,
-			16,
-			2
+			10,
+			2.5
 		},
 		damage_far = {
-			1,
-			1,
+			0,
+			0,
 			4,
-			1
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 3,
@@ -3820,8 +3971,8 @@ AttackTemplates = {
 		},
 		stagger_impact = {
 			3,
-			0,
-			0,
+			2,
+			3,
 			0
 		},
 		stagger_duration = {
@@ -3832,25 +3983,26 @@ AttackTemplates = {
 		}
 	},
 	drake_pistol_charged_t3 = {
-		damage_type = "burn_shotgun",
+		headshot_multiplier = -1,
 		sound_type = "medium",
 		stagger_type = "ai_stagger",
 		attack_type = "damage_dropoff",
 		dot_type = "burning_dot",
 		dot_template_name = "burning_1W_dot_t3",
+		damage_type = "burn_shotgun",
 		stagger_angle = "stab",
 		stagger_length = 1,
 		damage_near = {
 			5,
 			1.5,
-			16,
-			2
+			12,
+			3
 		},
 		damage_far = {
-			1,
-			1,
+			0,
+			0,
 			4,
-			1
+			0.5
 		},
 		range_dropoff_settings = {
 			dropoff_start = 3,
@@ -3858,8 +4010,8 @@ AttackTemplates = {
 		},
 		stagger_impact = {
 			3,
-			0,
-			0,
+			2,
+			3,
 			0
 		},
 		stagger_duration = {
@@ -3877,7 +4029,7 @@ AttackTemplates = {
 			1,
 			1,
 			4,
-			1
+			0.5
 		}
 	},
 	poison_globe_ai_initial_damage = {
@@ -3890,12 +4042,6 @@ AttackTemplates = {
 			10,
 			30
 		}
-	},
-	scroll_aoe_push = {
-		speed = 120,
-		attack_type = "aoe_push",
-		sound_type = "light",
-		mass = 5
 	},
 	grenade = {
 		stagger_type = "ai_stagger",
@@ -3985,8 +4131,9 @@ ProjectileItemTypes = {}
 for item_template_name, item_template in pairs(Weapons) do
 	item_template.name = item_template_name
 	item_template.crosshair_style = item_template.crosshair_style or "dot"
+	local actions = item_template.actions
 
-	for action_name, sub_actions in pairs(item_template.actions) do
+	for action_name, sub_actions in pairs(actions) do
 		for sub_action_name, sub_action_data in pairs(sub_actions) do
 			local lookup_data = {
 				item_template_name = item_template_name,
@@ -3994,26 +4141,32 @@ for item_template_name, item_template in pairs(Weapons) do
 				sub_action_name = sub_action_name
 			}
 			sub_action_data.lookup_data = lookup_data
+			local allowed_chain_actions = sub_action_data.allowed_chain_actions
+
+			if allowed_chain_actions and actions.action_use_consumable then
+				local add_action = true
+
+				for i = 1, #allowed_chain_actions, 1 do
+					local chain_action_data = allowed_chain_actions[i]
+
+					if chain_action_data.input == "action_use_consumable" then
+						add_action = false
+
+						break
+					end
+				end
+
+				if add_action then
+					allowed_chain_actions[#allowed_chain_actions + 1] = {
+						start_time = 0.3,
+						first_possible_sub_action = true,
+						action = "action_use_consumable",
+						input = "action_use_consumable"
+					}
+				end
+			end
 		end
 	end
-end
-
-local attack_template_index = 0
-AttackTemplatesLookup = AttackTemplatesLookup or {}
-
-for attack_template_name, attack_template in pairs(AttackTemplates) do
-	attack_template_index = attack_template_index + 1
-	attack_template.lookup_id = attack_template_index
-	AttackTemplatesLookup[attack_template_index] = attack_template_name
-end
-
-local attack_damage_value_index = 0
-AttackDamageValuesLookup = AttackDamageValuesLookup or {}
-
-for attack_damage_values_name, attack_damage_values in pairs(AttackDamageValues) do
-	attack_damage_value_index = attack_damage_value_index + 1
-	attack_damage_values.lookup_id = attack_damage_value_index
-	AttackDamageValuesLookup[attack_damage_value_index] = attack_damage_values_name
 end
 
 for item_template_name, item_template in pairs(Weapons) do

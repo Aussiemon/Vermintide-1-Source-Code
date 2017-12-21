@@ -1,12 +1,12 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTRatlingGunnerApproachAction = class(BTRatlingGunnerApproachAction, BTNode)
-BTRatlingGunnerApproachAction.name = "BTRatlingGunnerApproachAction"
 BTRatlingGunnerApproachAction.init = function (self, ...)
 	BTRatlingGunnerApproachAction.super.init(self, ...)
 
 	return 
 end
+BTRatlingGunnerApproachAction.name = "BTRatlingGunnerApproachAction"
 BTRatlingGunnerApproachAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	local attack_pattern_data = blackboard.attack_pattern_data or {}
@@ -68,7 +68,7 @@ BTRatlingGunnerApproachAction.run = function (self, unit, blackboard, t, dt)
 		local position = self.calculate_move_position(self, unit, blackboard)
 
 		if position then
-			self.move_to(self, position, unit, blackboard)
+			self.move_to(self, position, blackboard)
 
 			return "running"
 		else
@@ -109,7 +109,7 @@ BTRatlingGunnerApproachAction.is_within_check_distance = function (self, unit, b
 
 	return is_within_check_distance
 end
-BTRatlingGunnerApproachAction.move_to = function (self, position, unit, blackboard)
+BTRatlingGunnerApproachAction.move_to = function (self, position, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.move_to(navigation_extension, position)

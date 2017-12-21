@@ -59,7 +59,7 @@ ActiveReloadAmmoUserExtension.update = function (self, unit, input, dt, context,
 
 				if ammo_data.destroy_when_out_of_ammo then
 					inventory_system.destroy_slot(inventory_system, slot_name)
-					inventory_system.wield(inventory_system, "slot_melee")
+					inventory_system.wield_previous_weapon(inventory_system)
 				end
 			end
 		end

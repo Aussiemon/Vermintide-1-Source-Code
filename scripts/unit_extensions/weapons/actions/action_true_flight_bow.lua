@@ -28,10 +28,7 @@ ActionTrueFlightBow.client_owner_start_action = function (self, new_action, t, c
 	assert(self.true_flight_template_id)
 
 	if chain_action_data then
-		self.charge_value = chain_action_data.charge_value
 		self.target = chain_action_data.target
-	else
-		self.charge_value = 0
 	end
 
 	self.state = "waiting_to_shoot"
@@ -51,25 +48,22 @@ ActionTrueFlightBow.client_owner_post_update = function (self, dt, t, world, can
 	if self.state == "shooting" then
 		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
-		local add_spread = true
+		local add_spread = not self.extra_buff_shot
+
+		self.fire(self, current_action, add_spread)
 
 		if procced and not self.extra_buff_shot then
 			self.state = "waiting_to_shoot"
 			self.time_to_shoot = t + 0.1
 			self.extra_buff_shot = true
-			add_spread = false
 		else
 			self.state = "shot"
 		end
 
-		self.fire(self, current_action, add_spread)
+		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 
-		if self.overcharge_extension and not self.extra_buff_shot then
-			if current_action.scale_overcharge then
-				self.overcharge_extension:add_charge(current_action.overcharge_type, self.charge_level)
-			else
-				self.overcharge_extension:add_charge(current_action.overcharge_type)
-			end
+		if self.current_action.reset_aim_on_attack then
+			first_person_extension.reset_aim_assist_multiplier(first_person_extension)
 		end
 
 		local fire_sound_event = self.current_action.fire_sound_event
@@ -97,8 +91,7 @@ end
 ActionTrueFlightBow.fire = function (self, current_action, add_spread)
 	local owner_unit = self.owner_unit
 	local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
-	local charge_value = self.charge_value
-	local speed = math.lerp(current_action.min_speed, current_action.max_speed or current_action.min_speed, charge_value)
+	local speed = current_action.speed
 	local rotation = first_person_extension.current_rotation(first_person_extension)
 	local spread_extension = self.spread_extension
 
@@ -127,6 +120,14 @@ ActionTrueFlightBow.fire = function (self, current_action, add_spread)
 			local play_reload_animation = false
 
 			self.ammo_extension:start_reload(play_reload_animation)
+		end
+	end
+
+	if self.overcharge_extension and not self.extra_buff_shot then
+		if current_action.scale_overcharge then
+			self.overcharge_extension:add_charge(current_action.overcharge_type, self.charge_level)
+		else
+			self.overcharge_extension:add_charge(current_action.overcharge_type)
 		end
 	end
 

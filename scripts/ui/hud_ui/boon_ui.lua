@@ -1,7 +1,7 @@
 local definitions = local_require("scripts/ui/hud_ui/boon_ui_definitions")
 local scenegraph_definition = definitions.scenegraph_definition
 BoonUI = class(BoonUI)
-local MAX_NUMBER_OF_BOONS = 10
+local MAX_NUMBER_OF_BOONS = definitions.MAX_NUMBER_OF_BOONS
 local DEBUG_BOONS_UI = false
 BoonUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -42,26 +42,28 @@ BoonUI._create_ui_elements = function (self)
 	return 
 end
 BoonUI._align_widgets = function (self)
+	local gamepad_active = self.input_manager:is_device_active("gamepad")
 	local boon_width = 38
-	local boon_spacing = 10
+	local boon_spacing = 15
 	local time_height = 14
 	local horizontal_spacing = boon_width + boon_spacing
 	local vertical_spacing = boon_width + boon_spacing + time_height
 	local current_index = 0
+	local start_x_offset = (gamepad_active and -250) or 0
 	local widget_total_width = 0
 
 	for _, data in ipairs(self._active_boons) do
 		local widget = data.widget
 		local widget_offset = widget.offset
-		widget_offset[1] = widget_total_width
-		widget_offset[2] = math.floor(current_index/10)*vertical_spacing
+		widget_offset[1] = start_x_offset + widget_total_width
+		widget_offset[2] = math.floor(current_index/MAX_NUMBER_OF_BOONS)*vertical_spacing
 		widget_total_width = widget_total_width - horizontal_spacing
 
 		self._set_widget_dirty(self, widget)
 
 		current_index = current_index + 1
 
-		if current_index%10 == 0 then
+		if current_index%MAX_NUMBER_OF_BOONS == 0 then
 			widget_total_width = 0
 		end
 	end
@@ -246,15 +248,28 @@ BoonUI.set_visible = function (self, visible)
 end
 BoonUI.update = function (self, dt, t)
 	local dirty = false
+	local gamepad_active = self.input_manager:is_device_active("gamepad")
+
+	if gamepad_active then
+		if not self.gamepad_active_last_frame then
+			self.gamepad_active_last_frame = true
+
+			self.on_gamepad_activated(self)
+
+			dirty = true
+		end
+	elseif self.gamepad_active_last_frame then
+		self.gamepad_active_last_frame = false
+
+		self.on_gamepad_deactivated(self)
+
+		dirty = true
+	end
 
 	if DEBUG_BOONS_UI then
 		if Keyboard.button(Keyboard.button_index("1")) ~= 0 then
-			self._add_boon(self)
-
 			dirty = true
 		elseif Keyboard.button(Keyboard.button_index("2")) ~= 0 then
-			self._remove_boon(self)
-
 			dirty = true
 		end
 	end
@@ -418,6 +433,16 @@ BoonUI.set_dirty = function (self)
 end
 BoonUI._set_widget_dirty = function (self, widget)
 	widget.element.dirty = true
+
+	return 
+end
+BoonUI.on_gamepad_activated = function (self)
+	self._align_widgets(self)
+
+	return 
+end
+BoonUI.on_gamepad_deactivated = function (self)
+	self._align_widgets(self)
 
 	return 
 end

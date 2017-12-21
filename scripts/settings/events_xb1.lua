@@ -228,6 +228,68 @@ return {
 			}
 		},
 		{
+			name = "Blessed",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "BountyHunter",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "ButtonPress",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -356,7 +418,193 @@ return {
 			}
 		},
 		{
+			name = "CurrentDifficulty",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "Difficulty"
+					}
+				}
+			}
+		},
+		{
+			name = "CurrentGroup",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "GroupAmount"
+					}
+				}
+			}
+		},
+		{
+			name = "CurrentLeveltest",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "LevelName"
+					}
+				}
+			}
+		},
+		{
+			name = "CurrentMap",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "LevelName"
+					}
+				}
+			}
+		},
+		{
+			name = "CurrentNumPlayers",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "NumPlayers"
+					}
+				}
+			}
+		},
+		{
 			name = "DefendersOfUbersreik",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "Defient",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",
@@ -652,6 +900,37 @@ return {
 		},
 		{
 			name = "ExtraMile",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "FindersKeepers",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",
@@ -991,6 +1270,37 @@ return {
 			}
 		},
 		{
+			name = "HeroDecapitations",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "HeroesOfTheEndTimes",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -1016,6 +1326,253 @@ return {
 				fields = {
 					{
 						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroGrimoiresCollected",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroLevelReached",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroMissionCompleted",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroOgresKilled",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroSkavenKilled",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroTimePlayed",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGGP",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					},
+					{
+						type = "Float",
+						name = "CompletionPercent"
+					}
+				}
+			},
+			part_c = {
+				version = "0",
+				abbreviation = "",
+				fields = {}
+			}
+		},
+		{
+			name = "HeroTomesCollected",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "HeroWavesCompleted",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
 						name = "Amount"
 					}
 				}
@@ -1110,6 +1667,68 @@ return {
 					{
 						type = "Int32",
 						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "LastStandTimeMagnus",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "TimeMagnus"
+					}
+				}
+			}
+		},
+		{
+			name = "LastStandTimeTheFall",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "UInt32",
+						name = "TheFallTime"
 					}
 				}
 			}
@@ -1358,6 +1977,37 @@ return {
 				version = "0",
 				abbreviation = "",
 				fields = {}
+			}
+		},
+		{
+			name = "Mercenary",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
 			}
 		},
 		{
@@ -1624,6 +2274,37 @@ return {
 				version = "0",
 				abbreviation = "",
 				fields = {}
+			}
+		},
+		{
+			name = "OneDownEndlessToGo",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
 			}
 		},
 		{
@@ -2440,7 +3121,69 @@ return {
 			}
 		},
 		{
+			name = "Stalwart",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "StateTrooper",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "Tenacious",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",
@@ -2626,6 +3369,37 @@ return {
 			}
 		},
 		{
+			name = "Unbreakable",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "Untersreik",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -2692,6 +3466,37 @@ return {
 		},
 		{
 			name = "WindsOfUlgu",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "Wutelgi",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",

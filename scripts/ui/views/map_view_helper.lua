@@ -35,13 +35,24 @@ MapViewHelper.get_level_visibility = function (self, level_key, level_settings)
 	return 
 end
 MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_settings)
+	local statistics_db = self.statistics_db
+	local player_stats_id = self.player_stats_id
 	local current_act_key = self.current_act_key
 	local next_act_key = self.next_act_key
 	local dlc_name = level_settings.dlc_name
+	local is_dlc_level = dlc_name ~= nil
+	local is_dlc_unlocked = is_dlc_level and Managers.unlock:is_dlc_unlocked(dlc_name)
+	local required_act_completed = level_settings.required_act_completed
 
-	if dlc_name then
-		local is_dlc_unlocked = Managers.unlock:is_dlc_unlocked(dlc_name)
+	if required_act_completed and not LevelUnlockUtils.act_completed(statistics_db, player_stats_id, required_act_completed) and (not is_dlc_level or is_dlc_unlocked) then
+		local required_act_completed = level_settings.required_act_completed
+		local required_display_name = GameActsDisplayNames[required_act_completed]
+		local tooltip_text = string.format(Localize("map_level_preview_tooltip"), Localize(required_display_name))
 
+		return "locked", tooltip_text
+	end
+
+	if is_dlc_level then
 		if is_dlc_unlocked then
 			return "visible"
 		else
@@ -54,8 +65,6 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 	if current_act_key then
 		local act_levels = GameActs[current_act_key]
 		local next_act_levels = GameActs[next_act_key]
-		local statistics_db = self.statistics_db
-		local player_stats_id = self.player_stats_id
 
 		if LevelUnlockUtils.level_unlocked(statistics_db, player_stats_id, level_key) or table.find(NoneActLevels, level_key) then
 			return "visible"
@@ -162,11 +171,7 @@ MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 	local difficulties, starting_difficulty = self.difficulty_manager:get_level_difficulties(level_key)
 	local difficulty_settings = DifficultySettings
 	local highest_completed_difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, player_stats_id, level_key)
-	local highest_completed_difficulty = 0 < highest_completed_difficulty_index and difficulties[highest_completed_difficulty_index]
-	local highest_completed_difficulty_rank = highest_completed_difficulty and difficulty_settings[highest_completed_difficulty].rank
-	local starting_difficulty_rank = difficulty_settings[starting_difficulty].rank
 	local num_difficulties = #difficulties
-	local highest_unlock_rank = (highest_completed_difficulty_rank and starting_difficulty_rank < highest_completed_difficulty_rank + 1 and math.min(highest_completed_difficulty_rank + 1, 5)) or starting_difficulty_rank
 
 	for i = 1, num_difficulties, 1 do
 		local difficulty_key = difficulties[i]
@@ -175,8 +180,8 @@ MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 		local layout = difficulty_data[rank]
 		layout.key = difficulty_key
 		layout.rank = rank
-		layout.unlocked = rank <= highest_unlock_rank
-		layout.completed = (highest_completed_difficulty_rank and rank <= highest_completed_difficulty_rank) or false
+		layout.unlocked = i <= LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
+		layout.completed = (0 < highest_completed_difficulty_index and i <= highest_completed_difficulty_index) or false
 		layout.available = true
 		layout.setting_text = Localize(settings.display_name)
 
@@ -192,6 +197,7 @@ MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 			local previous_display_name = previous_settings.display_name
 			local current_display_name = settings.display_name
 			layout.tooltip = string.format(Localize("dlc1_2_difficulty_dynamic_tooltip"), Localize(previous_display_name), Localize(current_display_name))
+			layout.console_tooltip = string.format(Localize("console_difficulty_dynamic_tooltip"), Localize(previous_display_name))
 		end
 	end
 

@@ -263,16 +263,16 @@ UISceneGraph.update_scenegraph = function (scenegraph, parent_scenegraph, sceneg
 			if scenegraph.is_static then
 				Profiler.start("UISceneGraph.update_scenegraph_children_static")
 				EngineOptimized.scenegraph_cached_update_children(scenegraph_object.scene_graph_ref, current_world_position, children, scenegraph_object.num_children, size_x, size_y)
+				Profiler.stop("UISceneGraph.update_scenegraph_children_static")
 			else
 				Profiler.start("UISceneGraph.update_scenegraph_children_dynamic")
 				EngineOptimized.scenegraph_update_children(current_world_position, children, scenegraph_object.num_children, size_x, size_y)
+				Profiler.stop("UISceneGraph.update_scenegraph_children_dynamic")
 			end
-
-			Profiler.stop()
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("UISceneGraph.update_scenegraph")
 
 	return 
 end
@@ -349,7 +349,7 @@ local default_size = {
 local draw_color = Colors.get_color_table_with_alpha("maroon", 64)
 local draw_text_color = Colors.get_color_table_with_alpha("white", 255)
 local font_size = 10
-local font_name = "arial_11"
+local font_name = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font_name
 
 local function debug_render_scenegraph(ui_renderer, scenegraph, n_scenegraph)

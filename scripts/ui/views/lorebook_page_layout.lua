@@ -265,6 +265,12 @@ JournalPageLayout = {
 								images = AllImages
 							},
 							{
+								category_name = "dlc1_3_gi_weapons_es_sword_2h_title",
+								page_text = "dlc1_3_gi_weapons_es_sword_2h",
+								page_title = "dlc1_3_gi_weapons_es_sword_2h_title",
+								images = AllImages
+							},
+							{
 								category_name = "dlc1_3_gi_weapons_es_mace_title",
 								page_text = "dlc1_3_gi_weapons_es_mace",
 								page_title = "dlc1_3_gi_weapons_es_mace_title",

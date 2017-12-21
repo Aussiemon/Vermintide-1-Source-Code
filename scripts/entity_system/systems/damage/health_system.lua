@@ -84,11 +84,17 @@ HealthSystem.update = function (self, context, t)
 		for i = 1, num_damages/DamageDataIndex.STRIDE, 1 do
 			local damage_index = (i - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
 			local damage_amount = damage_datas[damage_index]
+			local damage_type_index = (i - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE
+			local damage_type = damage_datas[damage_type_index]
 
 			if damage_amount < 0 then
 				extension.add_heal(extension, -damage_amount)
 			else
-				extension.add_damage(extension, damage_amount)
+				local status_extension = ScriptUnit.has_extension(unit, "status_system") and ScriptUnit.extension(unit, "status_system")
+
+				if not status_extension or not status_extension.is_knocked_down(status_extension) or not damage_type or damage_type ~= "overcharge" then
+					extension.add_damage(extension, damage_amount)
+				end
 			end
 		end
 	end

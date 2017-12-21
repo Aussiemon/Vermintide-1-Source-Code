@@ -17,6 +17,9 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 	local ui_world = end_of_level_ui_context.world_manager:world(ui_world_name)
 	self.ui_world = ui_world
 	self.wwise_world = Managers.world:wwise_world(ui_world)
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	local input_manager = end_of_level_ui_context.input_manager
 	self.input_manager = input_manager
 	self.ingame_ui = end_of_level_ui_context.ingame_ui
@@ -27,7 +30,12 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 		input_manager.block_device_except_service(input_manager, "ingame_menu", "gamepad")
 	end
 
-	self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
+	if Application.platform() == "win32" then
+		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images", "material", "materials/fonts/gw_fonts")
+	else
+		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/fonts/gw_fonts")
+	end
+
 	end_of_level_ui_context.game_won = game_won
 	end_of_level_ui_context.ui_renderer = self.ui_renderer
 	local rewards = end_of_level_ui_context.rewards
@@ -375,7 +383,7 @@ EndOfLevelUI.update = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local input_service = self.input_manager:get_service("ingame_menu")
 
-	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local curtain_widgets = self.curtain_widgets
 

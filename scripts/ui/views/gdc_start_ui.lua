@@ -398,7 +398,10 @@ GDCStartUI.set_input_text = function (self, optinal_text)
 
 	if not optinal_text then
 		local interact_action = "jump"
-		button_texture_data, button_text = self.button_texture_data_by_input_action(self, interact_action)
+		local input_manager = self.input_manager
+		local input_service = input_manager.get_service(input_manager, "Player")
+		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+		local button_texture_data, button_text = UISettings.get_gamepad_input_texture_data(input_service, interact_action, gamepad_active)
 
 		assert(button_texture_data, "Could not find button texture(s) for action: jump")
 
@@ -475,68 +478,6 @@ GDCStartUI.get_text_width = function (self, text_style, text)
 	local width, height, min = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
 
 	return width, scaled_font_size
-end
-GDCStartUI.button_texture_data_by_input_action = function (self, input_action)
-	local platform = Application.platform()
-	local active_devices, active_platform = nil
-
-	if platform == "ps4" or platform == "xb1" then
-		active_devices = {
-			"gamepad"
-		}
-		active_platform = platform
-	elseif platform == "win32" then
-		if Managers.input:get_device("gamepad").active() then
-			active_devices = {
-				"gamepad"
-			}
-			active_platform = "xb1"
-		else
-			active_devices = {
-				"keyboard",
-				"mouse"
-			}
-			active_platform = platform
-		end
-	end
-
-	local input_service = self.input_manager:get_service("Player")
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
-	local button_texture_data, button_text = nil
-
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-
-			for k = 1, #active_devices, 1 do
-				local active_device = active_devices[k]
-
-				print(device_type, active_device)
-
-				if device_type == active_device then
-					if active_device == "keyboard" then
-						button_texture_data = ButtonTextureByName(nil, active_platform)
-						button_text = Keyboard.button_name(key_index)
-					elseif active_device == "mouse" then
-						button_texture_data = ButtonTextureByName(nil, active_platform)
-						button_text = Mouse.button_name(key_index)
-					else
-						local button_name = Pad1.button_name(key_index)
-						button_texture_data = ButtonTextureByName(button_name, active_platform)
-					end
-
-					return button_texture_data, button_text
-				end
-			end
-		end
-	end
-
-	return 
 end
 
 return 

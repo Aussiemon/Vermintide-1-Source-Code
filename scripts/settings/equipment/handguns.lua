@@ -3,14 +3,14 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			attack_template_damage_type = "sniper_shot_AP",
-			kind = "handgun",
 			damage_window_start = 0.1,
 			total_time_secondary = 2,
-			max_penetrations = 1,
+			attack_template_damage_type = "sniper_shot_AP",
+			kind = "handgun",
 			anim_event_no_ammo_left = "attack_shoot_last",
-			charge_value = "light_attack",
+			max_penetrations = 2,
 			attack_template = "shot_sniper",
+			charge_value = "light_attack",
 			reload_when_out_of_ammo = true,
 			alert_sound_range_fire = 10,
 			alert_sound_range_hit = 2,
@@ -20,40 +20,48 @@ weapon_template.actions = {
 			ammo_usage = 1,
 			fire_time = 0,
 			anim_event_secondary = "reload",
+			active_reload_time = 0.35,
 			anim_event = "attack_shoot",
+			scale_total_time_on_mastercrafted = true,
 			total_time = 0.66,
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.1,
+					start_time = 0.66,
+					action = "action_wield",
+					input = "action_wield"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.66,
 					action = "action_one",
 					input = "action_one"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.3,
+					start_time = 0.66,
 					action = "action_one",
 					input = "action_one_hold"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.3,
+					start_time = 0.66,
 					action = "action_two",
 					input = "action_two"
-				},
-				{
-					sub_action = "default",
-					start_time = 0.3,
-					action = "action_wield",
-					input = "action_wield"
 				}
-			}
+			},
+			enter_function = function (attacker_unit, input_extension)
+				input_extension.clear_input_buffer(input_extension)
+
+				return 
+			end
 		},
 		zoomed_shot = {
-			attack_template_damage_type = "sniper_shot_AP",
-			kind = "handgun",
 			damage_window_start = 0.1,
-			max_penetrations = 1,
+			anim_end_event = "to_unzoom",
+			attack_template_damage_type = "sniper_shot_AP",
+			max_penetrations = 2,
+			kind = "handgun",
 			anim_event_no_ammo_left = "attack_shoot_last",
 			charge_value = "light_attack",
 			attack_template = "shot_sniper",
@@ -62,19 +70,36 @@ weapon_template.actions = {
 			alert_sound_range_hit = 2,
 			hit_effect = "bullet_impact",
 			anim_event_last_ammo = "attack_shoot_last",
+			minimum_hold_time = 0.66,
 			damage_window_end = 0,
 			ammo_usage = 1,
-			anim_end_event = "to_unzoom",
 			fire_time = 0,
+			active_reload_time = 0.35,
+			hold_input = "action_two_hold",
 			anim_event = "attack_shoot",
-			total_time = 0.66,
+			scale_total_time_on_mastercrafted = true,
+			total_time = 0.8,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
 			end,
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.4,
+					start_time = 0.7,
+					action = "action_one",
+					release_required = "action_two_hold",
+					input = "action_one"
+				},
+				{
+					sub_action = "default",
+					start_time = 0.7,
+					action = "action_two",
+					input = "action_two_hold",
+					end_time = math.huge
+				},
+				{
+					sub_action = "default",
+					start_time = 0.6,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -89,16 +114,16 @@ weapon_template.actions = {
 	},
 	action_two = {
 		default = {
-			allow_hold_toggle = true,
-			anim_event = "to_zoom",
 			anim_end_event = "to_unzoom",
-			cooldown = 0.3,
+			anim_event = "to_zoom",
 			kind = "aim",
-			minimum_hold_time = 0.3,
-			can_abort_reload = false,
-			hold_input = "action_two_hold",
+			cooldown = 0.3,
 			ammo_requirement = 1,
+			minimum_hold_time = 0.3,
 			keep_buffer = true,
+			hold_input = "action_two_hold",
+			can_abort_reload = false,
+			allow_hold_toggle = true,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
 			end,
@@ -129,6 +154,13 @@ weapon_template.actions = {
 			end,
 			unzoom_condition_function = function (end_reason)
 				return end_reason ~= "new_interupting_action"
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -217,9 +249,9 @@ Weapons.handgun_template_1_t2.compare_statistics.attacks.light_attack.damage = 0
 Weapons.handgun_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.96875
 Weapons.handgun_template_1_t3 = table.clone(weapon_template)
 Weapons.handgun_template_1_t3.actions.action_one.default.attack_template_damage_type = "sniper_shot_AP_t3"
-Weapons.handgun_template_1_t3.actions.action_one.default.max_penetrations = 3
+Weapons.handgun_template_1_t3.actions.action_one.default.max_penetrations = 2
 Weapons.handgun_template_1_t3.actions.action_one.zoomed_shot.attack_template_damage_type = "sniper_shot_AP_t3"
-Weapons.handgun_template_1_t3.actions.action_one.zoomed_shot.max_penetrations = 3
+Weapons.handgun_template_1_t3.actions.action_one.zoomed_shot.max_penetrations = 2
 Weapons.handgun_template_1_t3.compare_statistics.attacks.light_attack.damage = 1
 Weapons.handgun_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 1
 

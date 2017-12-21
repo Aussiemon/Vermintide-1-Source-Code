@@ -1,31 +1,35 @@
 local breed_data = {
-	special = true,
 	has_inventory = true,
-	base_unit = "units/beings/enemies/skaven_pack_master/chr_skaven_pack_master",
+	perception = "perception_pack_master",
 	run_speed = 5,
 	awards_positive_reinforcement_message = true,
 	death_reaction = "ai_default",
-	smart_object_template = "special",
-	target_selection = "pick_pack_master_target",
-	bone_lod_level = 1,
-	animation_sync_rpc = "rpc_sync_anim_state_5",
 	walk_speed = 2.25,
+	exchange_order = 2,
+	animation_sync_rpc = "rpc_sync_anim_state_5",
 	detection_radius = 12,
-	perception = "perception_pack_master",
+	special = true,
+	target_selection = "pick_pack_master_target",
 	headshot_coop_stamina_fatigue_type = "headshot_special",
 	hit_reaction = "ai_default",
+	bone_lod_level = 1,
 	wield_inventory_on_spawn = true,
 	default_inventory_template = "pack_master",
-	hit_effect_template = "HitEffectsSkavenClanRat",
+	smart_targeting_outer_width = 0.6,
+	hit_effect_template = "HitEffectsSkavenPackMaster",
+	smart_targeting_height_multiplier = 3,
 	radius = 1,
 	unit_template = "ai_unit_pack_master",
+	smart_object_template = "special",
 	proximity_system_check = true,
 	poison_resistance = 100,
 	armor_category = 3,
 	player_locomotion_constrain_radius = 0.7,
 	weapon_reach = 5,
+	smart_targeting_width = 0.2,
 	is_bot_aid_threat = true,
 	behavior = "pack_master",
+	base_unit = "units/beings/enemies/skaven_pack_master/chr_skaven_pack_master",
 	size_variation_range = {
 		1,
 		1
@@ -49,7 +53,6 @@ local breed_data = {
 		neck = {
 			prio = 1,
 			actors = {
-				"c_neck1",
 				"c_neck"
 			},
 			push_actors = {
@@ -139,6 +142,12 @@ local breed_data = {
 			actors = {
 				"c_afro"
 			}
+		},
+		aux = {
+			prio = 6,
+			actors = {
+				"c_backpack"
+			}
 		}
 	},
 	max_health = {
@@ -224,7 +233,7 @@ local action_data = {
 		ignore_staggers = {
 			true,
 			true,
-			false,
+			true,
 			true,
 			true,
 			false
@@ -243,18 +252,19 @@ local action_data = {
 		ignore_staggers = {
 			true,
 			true,
-			false,
+			true,
 			true,
 			true,
 			false
 		}
 	},
 	hoist = {
+		cooldown = 4,
 		hoist_anim_length = 3.5,
 		ignore_staggers = {
 			true,
 			true,
-			false,
+			true,
 			true,
 			true,
 			false

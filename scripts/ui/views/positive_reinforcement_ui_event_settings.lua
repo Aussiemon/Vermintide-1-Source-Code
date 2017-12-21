@@ -206,5 +206,16 @@ return {
 		icon_function = function ()
 			return "icon_lore_page"
 		end
+	},
+	interaction_warning = {
+		text_function = function (amount, localized_text)
+			return localized_text
+		end,
+		sound_function = function ()
+			return nil
+		end,
+		icon_function = function ()
+			return nil
+		end
 	}
 }

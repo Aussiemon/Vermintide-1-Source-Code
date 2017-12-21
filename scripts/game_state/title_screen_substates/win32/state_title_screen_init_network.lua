@@ -6,6 +6,7 @@ StateTitleScreenInitNetwork.on_enter = function (self, params)
 	print("[Gamestate] Enter Substate StateTitleScreenInitNetwork")
 
 	self._params = params
+	self._title_start_ui = params.ui
 	local loading_context = self.parent.parent.loading_context
 	local loading_view = loading_context.loading_view
 
@@ -20,6 +21,10 @@ StateTitleScreenInitNetwork.on_enter = function (self, params)
 	return 
 end
 StateTitleScreenInitNetwork.update = function (self, dt, t)
+	if self._title_start_ui then
+		self._title_start_ui:update(dt, t)
+	end
+
 	if not Managers.backend:is_disconnected() then
 		Managers.backend:update(dt)
 	end
@@ -68,7 +73,11 @@ StateTitleScreenInitNetwork._backend_signin = function (self)
 end
 StateTitleScreenInitNetwork._next_state = function (self)
 	if Managers.backend:profiles_loaded() and not Managers.backend:is_waiting_for_user_input() then
-		return StateTitleScreenLoadSave
+		if GameSettingsDevelopment.skip_start_screen then
+			return StateTitleScreenLoadSave
+		else
+			return StateTitleScreenMainMenu
+		end
 	end
 
 	return 

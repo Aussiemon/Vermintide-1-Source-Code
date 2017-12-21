@@ -226,7 +226,7 @@ weapon_template.actions = {
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			use_target = false,
-			max_targets = 3,
+			max_targets = 2,
 			hit_effect = "melee_hit_dagger",
 			damage_window_end = 0.4,
 			impact_sound_event = "slashing_hit",
@@ -306,7 +306,7 @@ weapon_template.actions = {
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			use_target = false,
-			max_targets = 3,
+			max_targets = 2,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.4,
 			impact_sound_event = "slashing_hit",
@@ -339,7 +339,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.75,
+					start_time = 0.7,
 					action = "action_one",
 					release_required = "action_one_hold",
 					end_time = 0.75,
@@ -379,7 +379,7 @@ weapon_template.actions = {
 			}
 		},
 		light_attack_left = {
-			damage_window_start = 0.35,
+			damage_window_start = 0.3,
 			range_mod = 1.15,
 			anim_end_event = "attack_finished",
 			kind = "sweep",
@@ -387,7 +387,7 @@ weapon_template.actions = {
 			anim_time_scale = 1.1,
 			weapon_action_hand = "left",
 			use_target = false,
-			max_targets = 3,
+			max_targets = 4,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.42,
 			impact_sound_event = "stab_hit",
@@ -453,13 +453,13 @@ weapon_template.actions = {
 			}
 		},
 		light_attack_right = {
-			damage_window_start = 0.35,
+			damage_window_start = 0.3,
 			range_mod = 1.15,
 			anim_end_event = "attack_finished",
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			anim_time_scale = 1.25,
-			max_targets = 3,
+			max_targets = 4,
 			use_target = false,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.44,
@@ -534,7 +534,7 @@ weapon_template.actions = {
 			anim_time_scale = 1.1,
 			weapon_action_hand = "right",
 			use_target = false,
-			max_targets = 3,
+			max_targets = 4,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.42,
 			impact_sound_event = "stab_hit",
@@ -608,7 +608,7 @@ weapon_template.actions = {
 			anim_time_scale = 1,
 			weapon_action_hand = "left",
 			use_target = false,
-			max_targets = 3,
+			max_targets = 4,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.43,
 			impact_sound_event = "stab_hit",
@@ -733,12 +733,16 @@ weapon_template.actions = {
 		push_stab = {
 			damage_window_start = 0.26,
 			anim_end_event = "attack_finished",
-			max_targets = 3,
+			max_targets = 1,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			attack_direction = "up",
+			aim_assist_ramp_multiplier = 0.2,
 			use_target = false,
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_decay_delay = 0.1,
 			hit_effect = "melee_hit_sword_1h",
+			reset_aim_on_attack = true,
 			damage_window_end = 0.35,
 			impact_sound_event = "stab_hit",
 			charge_value = "light_attack",
@@ -788,7 +792,7 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "one_h_ninja_L",
+				attack_template_damage_type = "one_h_smiter_L",
 				attack_template = "light_stab_fencer"
 			},
 			targets = {}
@@ -849,9 +853,9 @@ weapon_template.left_hand_unit = "units/weapons/player/wpn_empire_short_sword/wp
 weapon_template.left_hand_attachment_node_linking = AttachmentNodeLinking.one_handed_melee_weapon.left
 weapon_template.display_unit = "units/weapons/weapon_display/display_1h_weapon"
 weapon_template.buff_type = BuffTypes.MELEE
-weapon_template.max_fatigue_points = 4
-weapon_template.dodge_distance = 1.15
-weapon_template.dodge_speed = 1.15
+weapon_template.max_fatigue_points = 6
+weapon_template.dodge_distance = 1.25
+weapon_template.dodge_speed = 1.25
 weapon_template.dodge_count = 100
 weapon_template.wield_anim = "to_dual_swords"
 weapon_template.attack_meta_data = {
@@ -862,6 +866,18 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = true,
 		arc = 0
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0,
+	target_node = "j_neck",
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 0.5,
+		skaven_slave = 0.5
 	}
 }
 weapon_template.compare_statistics = {
@@ -910,7 +926,7 @@ Weapons.dual_wield_swords_template_1_t2.actions.action_one.light_attack_up_right
 Weapons.dual_wield_swords_template_1_t2.actions.action_one.light_attack_up_right.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t2"
 Weapons.dual_wield_swords_template_1_t2.actions.action_one.light_attack_up_left.default_target.attack_template_damage_type = "one_h_linesman_L_t2"
 Weapons.dual_wield_swords_template_1_t2.actions.action_one.light_attack_up_left.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t2"
-Weapons.dual_wield_swords_template_1_t2.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_ninja_L_1_t2"
+Weapons.dual_wield_swords_template_1_t2.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_smiter_L_t2"
 Weapons.dual_wield_swords_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.375
 Weapons.dual_wield_swords_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.5625
 Weapons.dual_wield_swords_template_1_t3 = table.clone(weapon_template)
@@ -926,7 +942,7 @@ Weapons.dual_wield_swords_template_1_t3.actions.action_one.light_attack_up_right
 Weapons.dual_wield_swords_template_1_t3.actions.action_one.light_attack_up_right.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t3"
 Weapons.dual_wield_swords_template_1_t3.actions.action_one.light_attack_up_left.default_target.attack_template_damage_type = "one_h_linesman_L_t3"
 Weapons.dual_wield_swords_template_1_t3.actions.action_one.light_attack_up_left.targets[1].attack_template_damage_type = "one_h_linesman_L_1_t3"
-Weapons.dual_wield_swords_template_1_t3.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_ninja_L_1_t3"
+Weapons.dual_wield_swords_template_1_t3.actions.action_one.push_stab.default_target.attack_template_damage_type = "one_h_smiter_L_t3"
 Weapons.dual_wield_swords_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.4583333333333333
 Weapons.dual_wield_swords_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.65
 Weapons.dual_wield_swords_template_1_t3_un = table.clone(Weapons.dual_wield_swords_template_1_t3)

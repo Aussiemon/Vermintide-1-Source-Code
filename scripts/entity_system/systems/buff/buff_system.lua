@@ -191,6 +191,10 @@ BuffSystem.add_volume_buff_multiplier = function (self, unit, buff_template_name
 	return 
 end
 BuffSystem.add_volume_buff = function (self, unit, buff_template_name, multiplier)
+	if not Unit.alive(unit) then
+		return 
+	end
+
 	local buff_extension = ScriptUnit.extension(unit, "buff_system")
 	local params = {
 		external_optional_multiplier = multiplier
@@ -224,6 +228,10 @@ BuffSystem.remove_volume_buff_multiplier = function (self, unit, buff_template_n
 	return 
 end
 BuffSystem.remove_volume_buff = function (self, unit, buff_template_name)
+	if not Unit.alive(unit) then
+		return 
+	end
+
 	local buff_extension = ScriptUnit.extension(unit, "buff_system")
 	local id = self.volume_buffs[unit][buff_template_name]
 

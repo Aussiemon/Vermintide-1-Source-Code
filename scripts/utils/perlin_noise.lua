@@ -4,7 +4,7 @@ PerlinNoise.init = function (self, world)
 	self._permutations = {}
 	self._gradients = {}
 	self.world = world
-	self.world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "material", "materials/fonts/arial")
+	self.world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "material", "materials/fonts/gw_fonts")
 	self._line_object = World.create_line_object(world, false)
 
 	self.setup(self)
@@ -267,8 +267,8 @@ PerlinNoise.simulate_points = function (self)
 	local world_gui = self.world_gui
 	local m = Matrix4x4.identity()
 	local font_size = 0.1
-	local font_material = "materials/fonts/arial"
-	local font = "arial"
+	local font = "gw_arial_16"
+	local font_material = "materials/fonts/" .. font
 	local lowest = 0
 	local highest = 0
 

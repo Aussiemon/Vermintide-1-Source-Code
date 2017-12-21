@@ -131,13 +131,15 @@ local platform_functions = {
 
 			assert(template.ID_XB1, "[AchievementManager] There is no Achievement ID specified for achievement: " .. template.name)
 			print("[AchievementManager] Unlocking Achievement: ", template.ID_XB1)
-			Events.write(template.ID_XB1, {
+			Managers.xbox_events:write(template.ID_XB1, {
 				Managers.account:xbox_user_id(),
 				Managers.account:player_session_id(),
 				1
-			})
+			}, nil, nil, nil, true)
 
 			local token = Application.time_since_launch() + 5
+
+			Managers.account:set_achievement_unlocked(template.name)
 
 			return token
 		end,
@@ -158,7 +160,14 @@ AchievementManager.init = function (self, world, statistics_db)
 	self.world = world
 	self.statistics_db = statistics_db
 	self.in_progress = {}
-	self.completed_achievements = {}
+	self.hero_stat_table = {}
+
+	if Application.platform() == "xb1" then
+		self.completed_achievements = Managers.account:get_unlocked_achievement_list()
+	else
+		self.completed_achievements = {}
+	end
+
 	self.next_achievement_to_process_index = 1
 	self.initialized_achievements = false
 	local platform = Application.platform()
@@ -174,11 +183,11 @@ AchievementManager.init = function (self, world, statistics_db)
 		self.platform = "ps4"
 	elseif platform == "xb1" then
 		if not rawget(_G, "XB1Achievements") then
-			local setup_data = require("scripts/settings/events_xb1")
-
-			Events.setup(setup_data)
-			rawset(_G, "XB1Achievements", Achievements(Managers.account:user_id()))
-			Achievements.refresh(XB1Achievements)
+			if Managers.account:user_detached() then
+				self._xbox_achievements_initialized = false
+			else
+				self._initialize_xbox_achivements(self)
+			end
 		end
 
 		self.platform = "xb1"
@@ -200,6 +209,17 @@ AchievementManager.init = function (self, world, statistics_db)
 end
 AchievementManager.event_enable_achievements = function (self, enable)
 	self._enabled = enable
+
+	return 
+end
+AchievementManager._initialize_xbox_achivements = function (self)
+	local setup_data = require("scripts/settings/events_xb1")
+
+	Events.setup(setup_data)
+	rawset(_G, "XB1Achievements", Achievements(Managers.account:user_id()))
+	Achievements.refresh(XB1Achievements)
+
+	self._xbox_achievements_initialized = true
 
 	return 
 end
@@ -227,6 +247,14 @@ AchievementManager.update = function (self, dt, t)
 	end
 
 	if not self._enabled then
+		return 
+	end
+
+	if self.platform == "xb1" and not self._xbox_achievements_initialized then
+		if not Managers.account:user_detached() then
+			self._initialize_xbox_achivements(self)
+		end
+
 		return 
 	end
 
@@ -308,7 +336,7 @@ AchievementManager.update = function (self, dt, t)
 
 				local result = template.evaluate(statistics_db, stats_id)
 
-				Profiler.stop()
+				Profiler.stop(name)
 
 				if result then
 					local token, error_msg = platform_functions.unlock(platform_id, template)
@@ -360,18 +388,21 @@ AchievementManager.reset = function (self)
 
 	platform_functions.reset()
 
-	self.completed_achievements = {}
+	if Application.platform() ~= "xb1" then
+		self.completed_achievements = {}
+	end
+
 	self.in_progress = {}
 
 	return 
 end
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 AchievementManager.debug_draw = function (self)
 	if script_data.achievement_debug then
 		if self.gui == nil then
-			self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/arial", "immediate")
+			self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 		end
 
 		local achievements = AchievementTemplates
@@ -412,6 +443,66 @@ AchievementManager.debug_draw = function (self)
 	self.statistics_db:debug_draw()
 
 	return 
+end
+
+if Application.platform() == "xb1" then
+	AchievementManager.initialize_hero_stats = function (self)
+		table.clear(self.hero_stat_table)
+
+		local stats_id = Managers.player:local_player():stats_id()
+
+		for _, hero_stat in pairs(HeroStats) do
+			if hero_stat.persistent then
+				self.hero_stat_table[hero_stat.stat_name] = hero_stat.evaluate(self.statistics_db, stats_id)
+			end
+		end
+
+		Application.warning("[AchievementManager] Hero stats initialized!")
+
+		return 
+	end
+	AchievementManager.write_hero_stats = function (self)
+		local xbox_user_id = Managers.account:xbox_user_id()
+		local player_session_id = Managers.account:player_session_id()
+		local player = Managers.player:local_player()
+
+		if not player then
+			Application.warning("[AchievementManager] Hero stats update --> FAILED! due to missing player")
+
+			return 
+		end
+
+		local stats_id = player.stats_id(player)
+
+		if not stats_id then
+			Application.warning("[AchievementManager] Hero stats update --> FAILED! due to missing stats_id")
+
+			return 
+		end
+
+		local final_value = nil
+
+		for _, hero_stat in pairs(HeroStats) do
+			local value = hero_stat.evaluate(self.statistics_db, stats_id)
+
+			if hero_stat.persistent then
+				final_value = value - self.hero_stat_table[hero_stat.stat_name]
+			else
+				final_value = value
+			end
+
+			print("Writing:", tostring(hero_stat.stat_name), tostring(final_value))
+			Managers.xbox_events:write(hero_stat.stat_name, {
+				xbox_user_id,
+				player_session_id,
+				final_value
+			})
+		end
+
+		Application.warning("[AchievementManager] Hero stats update --> SUCCESS!")
+
+		return 
+	end
 end
 
 return 

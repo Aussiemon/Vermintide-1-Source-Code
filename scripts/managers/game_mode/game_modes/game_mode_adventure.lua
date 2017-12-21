@@ -2,7 +2,8 @@ require("scripts/managers/game_mode/game_modes/game_mode_base")
 
 script_data.disable_gamemode_end = script_data.disable_gamemode_end or Development.parameter("disable_gamemode_end")
 GameModeAdventure = class(GameModeAdventure, GameModeBase)
-COMPLETE_LEVEL_VAR = false
+local COMPLETE_LEVEL_VAR = false
+local FAIL_LEVEL_VAR = false
 GameModeAdventure.init = function (self, settings, world, ...)
 	GameModeAdventure.super.init(self, settings, world, ...)
 
@@ -19,7 +20,7 @@ GameModeAdventure.evaluate_end_conditions = function (self, round_started, dt, t
 	local spawn_manager = Managers.state.spawn
 	local humans_dead = spawn_manager.all_humans_dead(spawn_manager)
 	local players_disabled = spawn_manager.all_players_disabled(spawn_manager)
-	local lost = not self._lose_condition_disabled and (humans_dead or players_disabled or self._level_failed)
+	local lost = not self._lose_condition_disabled and (humans_dead or players_disabled or self._level_failed or self._is_time_up(self))
 
 	if self.about_to_lose then
 		if lost then
@@ -40,6 +41,12 @@ GameModeAdventure.evaluate_end_conditions = function (self, round_started, dt, t
 		return true, "won"
 	end
 
+	if FAIL_LEVEL_VAR then
+		FAIL_LEVEL_VAR = false
+
+		return true, "lost"
+	end
+
 	if lost then
 		self.about_to_lose = true
 		self.lost_condition_timer = t + GameModeSettings.adventure.lose_condition_time
@@ -57,9 +64,13 @@ GameModeAdventure.evaluate_end_conditions = function (self, round_started, dt, t
 
 	return 
 end
-
-function COMPLETE_LEVEL()
+GameModeAdventure.COMPLETE_LEVEL = function (self)
 	COMPLETE_LEVEL_VAR = true
+
+	return 
+end
+GameModeAdventure.FAIL_LEVEL = function (self)
+	FAIL_LEVEL_VAR = true
 
 	return 
 end

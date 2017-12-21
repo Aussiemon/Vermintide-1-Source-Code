@@ -273,29 +273,29 @@ local button_mapping = {
 		a = {
 			texture = "xbone_button_icon_a",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		b = {
 			texture = "xbone_button_icon_b",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		x = {
 			texture = "xbone_button_icon_x",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		y = {
 			texture = "xbone_button_icon_y",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		d_up = {
@@ -436,29 +436,29 @@ local button_mapping = {
 		cross = {
 			texture = "ps4_button_icon_cross",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		circle = {
 			texture = "ps4_button_icon_circle",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		square = {
 			texture = "ps4_button_icon_square",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		triangle = {
 			texture = "ps4_button_icon_triangle",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		up = {
@@ -606,29 +606,29 @@ local button_mapping = {
 		a = {
 			texture = "ps4_button_icon_cross",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		b = {
 			texture = "ps4_button_icon_circle",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		x = {
 			texture = "ps4_button_icon_square",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		y = {
 			texture = "ps4_button_icon_triangle",
 			size = {
-				26,
-				26
+				34,
+				34
 			}
 		},
 		d_up = {
@@ -779,35 +779,36 @@ function ButtonTextureByName(button_name, platform)
 	return 
 end
 
-UISettings.get_gamepad_input_texture_data = function (input_service, input_action)
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
+UISettings.get_gamepad_input_texture_data = function (input_service, input_action, gamepad_active)
 	local platform = Application.platform()
 
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-
-			if device_type == "gamepad" then
-				local button_name = Pad1.button_name(key_index)
-				local button_texture_data = nil
-
-				if platform == "xb1" or platform == "win32" then
-					button_texture_data = ButtonTextureByName(button_name, "xb1")
-				else
-					button_texture_data = ButtonTextureByName(button_name, "ps4")
-				end
-
-				return button_texture_data, button_name
-			end
-		end
+	if platform == "win32" and gamepad_active then
+		platform = "xb1"
 	end
 
-	return 
+	local button_texture_data = nil
+	local button_name = ""
+	local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
+
+	if #keymap_binding < 3 then
+		return button_texture_data, button_name
+	end
+
+	local device_type = keymap_binding[1]
+	local key_index = keymap_binding[2]
+	local key_action_type = keymap_binding[3]
+
+	if device_type == "keyboard" then
+		button_name = Keyboard.button_locale_name(key_index)
+	elseif device_type == "mouse" then
+		button_name = Mouse.button_name(key_index)
+	elseif device_type == "gamepad" then
+		button_name = Pad1.button_name(key_index)
+	end
+
+	button_texture_data = ButtonTextureByName(button_name, platform)
+
+	return button_texture_data, button_name, keymap_binding
 end
 
 return 

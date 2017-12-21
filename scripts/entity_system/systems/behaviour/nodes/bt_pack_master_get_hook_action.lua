@@ -19,7 +19,7 @@ BTPackMasterGetHookAction.enter = function (self, unit, blackboard, t)
 		blackboard.navigation_extension:move_to(POSITION_LOOKUP[unit])
 	end
 
-	Unit.animation_event(unit, "run_away")
+	Managers.state.network:anim_event(unit, "run_away")
 
 	return 
 end
@@ -35,7 +35,7 @@ BTPackMasterGetHookAction.leave = function (self, unit, blackboard, t, reason)
 		blackboard.best_cover_score = nil
 	end
 
-	Unit.animation_event(unit, "move_fwd")
+	Managers.state.network:anim_event(unit, "move_fwd")
 
 	return 
 end

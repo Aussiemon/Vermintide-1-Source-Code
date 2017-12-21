@@ -107,12 +107,13 @@ BTAlertedAction.decide_deadline = function (self, unit, blackboard, t)
 	return 
 end
 BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
+	local network_manager = Managers.state.network
+
 	if script_data.enable_alert_icon then
 		local category_name = "detect"
 
 		Managers.state.debug_text:clear_unit_text(unit, category_name)
 
-		local network_manager = Managers.state.network
 		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 
 		network_manager.network_transmit:send_rpc_clients("rpc_enemy_is_alerted", unit_id, false)
@@ -139,7 +140,7 @@ BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 				blackboard.anim_locked = 0
 				blackboard.spawn_to_running = true
 
-				Managers.state.network:anim_event(unit, "move_fwd")
+				network_manager.anim_event(network_manager, unit, "move_fwd")
 			end
 		end
 	end
@@ -208,7 +209,7 @@ BTAlertedAction.run = function (self, unit, blackboard, t, dt)
 		local locomotion_extension = blackboard.locomotion_extension
 
 		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
-		LocomotionUtils.set_animation_driven_movement(unit, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 
 		local animation_name = AiAnimUtils.get_start_move_animation(unit, blackboard, action)
 

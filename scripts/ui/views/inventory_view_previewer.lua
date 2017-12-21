@@ -47,11 +47,11 @@ InventoryViewPreviewer.on_enter = function (self, viewport_widget)
 	self.camera_xy_angle_target = DEFAULT_ANGLE
 	self.camera_height_current = camera_position_current.z
 	self.camera_height_target = camera_position_current.z
-	self.camera_lookat_height_current = 0
-	self.camera_lookat_height_target = 0
-	self.camera_distance_default = Vector3.length(camera_position_current)
-	self.camera_distance_current = Vector3.length(camera_position_current)
-	self.camera_distance_target = Vector3.length(camera_position_current)
+	self.camera_lookat_height_current = 0.9
+	self.camera_lookat_height_target = 0.9
+	self.camera_distance_default = 2.6
+	self.camera_distance_current = 2.6
+	self.camera_distance_target = 2.6
 	self.camera_distance_modifier = 1
 	self.camera_zoom_lerp_t = 1
 
@@ -194,29 +194,9 @@ InventoryViewPreviewer.handle_controller_input = function (self, input_service, 
 		return 
 	end
 
-	local camera_move = input_service.get(input_service, "gamepad_left_axis")
-
-	if 0.01 < Vector3.length(camera_move) then
-		self.camera_xy_angle_target = self.camera_xy_angle_target + -camera_move.x*dt*5
-		local new_camera_look_height = self.camera_lookat_height_target + -camera_move.y*dt*5
-		self.camera_lookat_height_target = math.min(math.max(new_camera_look_height, 0.3), self.unit_max_look_height)
-	end
-
-	local left_trigger = input_service.get(input_service, "trigger_left_soft")
-	local right_trigger = input_service.get(input_service, "trigger_right_soft")
-	local zoom_value = nil
-
-	if 0.01 < left_trigger then
-		zoom_value = -(left_trigger*0.2)
-	elseif 0.01 < right_trigger then
-		zoom_value = right_trigger*0.2
-	end
-
-	if zoom_value then
-		local new_camera_distance_target = self.camera_distance_target - zoom_value
-		new_camera_distance_target = math.max(new_camera_distance_target, 1.5)
-		self.camera_distance_target = math.min(new_camera_distance_target, self.camera_distance_default)
-	end
+	local move_left = input_service.get(input_service, "trigger_left_soft")
+	local move_right = input_service.get(input_service, "trigger_right_soft")
+	self.camera_xy_angle_target = self.camera_xy_angle_target + (move_left - move_right)*dt*5
 
 	return 
 end

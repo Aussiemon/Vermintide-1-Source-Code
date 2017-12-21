@@ -6,9 +6,8 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "bow",
-			min_speed = 5000,
 			ammo_usage = 1,
+			kind = "bow",
 			max_penetrations = 1,
 			anim_event = "attack_shoot_fast",
 			apply_recoil = true,
@@ -16,6 +15,7 @@ weapon_template.actions = {
 			charge_value = "arrow_hit",
 			weapon_action_hand = "left",
 			fire_sound_event = "player_combat_weapon_bow_fire_light",
+			speed = 5000,
 			total_time = 0.83,
 			buff_data = {
 				{
@@ -60,17 +60,16 @@ weapon_template.actions = {
 		},
 		shoot_charged = {
 			attack_template_damage_type = "sniper",
-			max_speed = 8000,
-			anim_end_event = "to_unzoom",
 			kind = "bow",
-			min_speed = 5000,
-			max_penetrations = 2,
 			attack_template = "arrow_sniper",
+			max_penetrations = 2,
 			charge_value = "zoomed_arrow_hit",
 			weapon_action_hand = "left",
 			anim_event_last_ammo = "attack_shoot_last",
 			ammo_usage = 1,
+			anim_end_event = "to_unzoom",
 			fire_sound_event = "player_combat_weapon_bow_fire_heavy",
+			speed = 8000,
 			hold_input = "action_two_hold",
 			anim_event = "attack_shoot",
 			allow_hold_toggle = true,
@@ -161,6 +160,13 @@ weapon_template.actions = {
 			end,
 			unzoom_condition_function = function (end_reason)
 				return end_reason ~= "new_interupting_action"
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -198,6 +204,12 @@ weapon_template.attack_meta_data = {
 	ignore_enemies_for_obstruction = false,
 	charge_against_armoured_enemy = true
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "longbow"
 weapon_template.left_hand_unit = "units/weapons/player/wpn_we_bow_01_t1/wpn_we_bow_01_t1"
 weapon_template.display_unit = "units/weapons/weapon_display/display_bow"
@@ -206,6 +218,10 @@ weapon_template.wield_anim = "to_longbow"
 weapon_template.wield_anim_no_ammo = "to_bow_noammo"
 weapon_template.crosshair_style = "default"
 weapon_template.no_ammo_reload_event = "reload"
+weapon_template.default_projectile_action = weapon_template.actions.action_one.default
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 6
 weapon_template.wwise_dep_left_hand = {
 	"wwise/bow"
 }

@@ -3,12 +3,9 @@ SimpleHuskInventoryExtension.init = function (self, extension_init_context, unit
 	self._world = extension_init_context.world
 	self._unit = unit
 	self._equipment = {
-		slots = extension_init_data.slots
+		slots = {}
 	}
 	self._attached_units = {}
-	self.wielded_slot = extension_init_data.wielded_slot
-
-	self.wield(self, extension_init_data.wielded_slot)
 
 	return 
 end
@@ -116,21 +113,10 @@ end
 SimpleHuskInventoryExtension.update = function (self)
 	return 
 end
-SimpleHuskInventoryExtension.wield_previous = function (self)
-	local equipment = self._equipment
-	local slot_name = (equipment.previously_wielded_slot ~= "slot_packmaster_claw" and equipment.previously_wielded_slot) or "slot_melee"
-
-	self.wield(self, slot_name)
-
-	return 
-end
 SimpleHuskInventoryExtension.wield = function (self, slot_name)
 	local equipment = self._equipment
 
 	self._despawn_attached_units(self)
-
-	equipment.previously_wielded_slot = equipment.wielded_slot or "slot_melee"
-
 	GearUtils.wield(self._world, equipment, slot_name, nil, self._unit)
 
 	self.wielded_slot = slot_name
@@ -294,6 +280,9 @@ SimpleHuskInventoryExtension.get_slot_data = function (self, slot_id)
 	local slots = equipment.slots
 
 	return slots[slot_id]
+end
+SimpleHuskInventoryExtension.set_loaded_projectile_override = function (self)
+	return 
 end
 
 return 

@@ -27,7 +27,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 	local child_running = self.current_running_child(self, blackboard)
 	local children = self._children
 	local node_falling = children[1]
-	local condition_result = not blackboard.pouncing_target and (blackboard.is_falling or blackboard.fall_state ~= nil)
+	local condition_result = not blackboard.high_ground_opportunity and not blackboard.pouncing_target and (blackboard.is_falling or blackboard.fall_state ~= nil)
 
 	if condition_result then
 		self.set_running_child(self, unit, blackboard, t, node_falling, "aborted")
@@ -35,7 +35,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_falling.run(node_falling, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("falling")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -61,7 +61,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -83,7 +83,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -97,10 +97,15 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 	end
 
 	local node_smartobject = children[4]
-	local smartobject_is_next = blackboard.next_smart_object_data.next_smart_object_id ~= nil
-	local is_in_smartobject_range = blackboard.is_in_smartobject_range
-	local is_smart_objecting = blackboard.is_smart_objecting
-	local condition_result = (smartobject_is_next and is_in_smartobject_range) or is_smart_objecting
+	local condition_result = nil
+
+	if blackboard.jump_data then
+		condition_result = false
+	end
+
+	if condition_result == nil then
+		condition_result = BTConditions.at_smartobject(blackboard)
+	end
 
 	if condition_result then
 		self.set_running_child(self, unit, blackboard, t, node_smartobject, "aborted")
@@ -108,7 +113,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -130,7 +135,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_ninja_vanish.run(node_ninja_vanish, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("ninja_vanish")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -152,7 +157,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_quick_jump.run(node_quick_jump, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("quick_jump")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -174,7 +179,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_approach_target.run(node_approach_target, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("approach_target")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -196,7 +201,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_abide.run(node_abide, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("abide")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -216,7 +221,7 @@ BTSelector_gutter_runner.run = function (self, unit, blackboard, t, dt)
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

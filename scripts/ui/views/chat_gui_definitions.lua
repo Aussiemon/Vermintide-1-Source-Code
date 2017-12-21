@@ -251,7 +251,7 @@ local scenegraph_definition = {
 		},
 		size = {
 			CHAT_WIDTH - 74,
-			176
+			CHAT_HEIGHT - 26 - 24
 		}
 	},
 	chat_input_root = {
@@ -275,7 +275,7 @@ local scenegraph_definition = {
 		},
 		size = {
 			CHAT_WIDTH - 74,
-			24
+			CHAT_HEIGHT - 26 - 176
 		}
 	},
 	chat_mask = {
@@ -396,7 +396,7 @@ local chat_input_widget = {
 			color = Colors.get_table("black"),
 			size = {
 				CHAT_WIDTH - 61,
-				24
+				CHAT_HEIGHT - 26 - 176
 			}
 		},
 		text = {

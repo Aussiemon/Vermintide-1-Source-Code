@@ -125,6 +125,11 @@ HitEffectsRatOgre = {
 			"death_left",
 			"death_right",
 			"death_backward"
+		},
+		push = {
+			distal_force = 50,
+			vertical_force = 50,
+			lateral_force = 0
 		}
 	},
 	burn_death = {

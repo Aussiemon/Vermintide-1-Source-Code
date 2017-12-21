@@ -12,21 +12,29 @@ PlayerCharacterStateInteracting.on_enter = function (self, unit, input, dt, cont
 	self.locomotion_extension:set_wanted_velocity(Vector3.zero())
 
 	self.swap_to_3p = params.swap_to_3p
+	local show_weapons = false
+
+	if params.show_weapons then
+		show_weapons = true
+	end
+
 	local status_extension = self.status_extension
 
 	if not self.locomotion_extension:is_colliding_down() then
 		status_extension.set_falling_height(status_extension)
 	end
 
+	local first_person_extension = self.first_person_extension
+
 	if self.swap_to_3p then
 		CharacterStateHelper.change_camera_state(self.player, "follow_third_person")
-		self.first_person_extension:set_first_person_mode(false)
-
-		local include_local_player = true
-
-		CharacterStateHelper.show_inventory_3p(unit, false, include_local_player, self.is_server, self.inventory_extension)
+		first_person_extension.set_first_person_mode(first_person_extension, false)
 	else
-		local include_local_player = false
+		CharacterStateHelper.play_animation_event_first_person(first_person_extension, "idle")
+	end
+
+	if not show_weapons then
+		local include_local_player = true
 
 		CharacterStateHelper.show_inventory_3p(unit, false, include_local_player, self.is_server, self.inventory_extension)
 	end
@@ -103,8 +111,7 @@ PlayerCharacterStateInteracting.update = function (self, unit, input, dt, contex
 	end
 
 	self.locomotion_extension:set_disable_rotation_update()
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
-	Debug.text("PlayerCharacterStateInteracting: [camera node=%s]", tostring(camera_manager.current_camera_node(camera_manager, "player_1")))
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 
 	return 
 end

@@ -945,9 +945,9 @@ Colors.color_definitions = Colors.color_definitions or {
 	},
 	loading_screen_stone = {
 		ALPHA,
-		21,
-		18,
-		13
+		23,
+		22,
+		20
 	}
 }
 

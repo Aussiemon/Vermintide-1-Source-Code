@@ -5,7 +5,7 @@ local INFO_SLATE_SIZE = {
 	500
 }
 local INFO_SLATE_ENTRY_SIZE = {
-	550,
+	450,
 	66
 }
 local INFO_SLATE_ENTRY_SPACING = 30
@@ -99,115 +99,6 @@ local scenegraph_definition = {
 			40
 		}
 	},
-	tooltip_hold_text = {
-		vertical_alignment = "center",
-		parent = "tooltip_icon",
-		horizontal_alignment = "left",
-		size = {
-			150,
-			62
-		},
-		position = {
-			-150,
-			0,
-			2
-		}
-	},
-	tooltip_text = {
-		vertical_alignment = "center",
-		parent = "tooltip_icon",
-		horizontal_alignment = "right",
-		size = {
-			600,
-			200
-		},
-		position = {
-			603,
-			0,
-			2
-		}
-	},
-	tooltip_icon = {
-		vertical_alignment = "center",
-		parent = "tooltip",
-		horizontal_alignment = "left",
-		size = {
-			62,
-			62
-		},
-		position = {
-			0,
-			0,
-			1
-		}
-	},
-	tooltip_mission_root = {
-		parent = "root",
-		position = {
-			0,
-			0,
-			0
-		},
-		size = {
-			3,
-			3
-		}
-	},
-	tooltip_mission = {
-		vertical_alignment = "bottom",
-		parent = "tooltip_mission_root",
-		position = {
-			0,
-			0,
-			1
-		},
-		size = {
-			1,
-			1
-		}
-	},
-	tooltip_mission_text = {
-		vertical_alignment = "center",
-		parent = "tooltip_mission_icon",
-		horizontal_alignment = "right",
-		size = {
-			400,
-			62
-		},
-		position = {
-			403,
-			0,
-			2
-		}
-	},
-	tooltip_mission_icon = {
-		vertical_alignment = "center",
-		parent = "tooltip_mission",
-		horizontal_alignment = "center",
-		size = {
-			FLOATING_ICON_SIZE[1],
-			FLOATING_ICON_SIZE[2]
-		},
-		position = {
-			0,
-			0,
-			3
-		}
-	},
-	tooltip_mission_arrow = {
-		vertical_alignment = "center",
-		parent = "tooltip_mission_icon",
-		horizontal_alignment = "center",
-		size = {
-			38,
-			18
-		},
-		position = {
-			0,
-			0,
-			2
-		}
-	},
 	info_slate_root = {
 		vertical_alignment = "center",
 		parent = "root",
@@ -259,7 +150,7 @@ for i = 1, 3, 1 do
 			INFO_SLATE_ENTRY_SIZE[2]
 		},
 		position = {
-			-INFO_SLATE_ENTRY_SIZE[1],
+			0,
 			-y,
 			1
 		}
@@ -279,121 +170,6 @@ for i = 1, 3, 1 do
 end
 
 local widget_definitions = {
-	tooltip = {
-		scenegraph_id = "tooltip",
-		element = {
-			passes = {
-				{
-					style_id = "hold_text",
-					pass_type = "text",
-					text_id = "hold_text",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.hold
-					end
-				},
-				{
-					texture_id = "icon_textures",
-					style_id = "icon_styles",
-					pass_type = "multi_texture"
-				},
-				{
-					style_id = "button_text",
-					pass_type = "text",
-					text_id = "button_text",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.text ~= ""
-					end
-				},
-				{
-					style_id = "text",
-					pass_type = "text",
-					text_id = "text",
-					retained_mode = RETAINED_MODE_ENABLED,
-					content_check_function = function (content)
-						return content.text
-					end
-				}
-			}
-		},
-		content = {
-			text = "tooltip_text",
-			hold_text = "input_hold",
-			button_text = "",
-			icon_textures = {
-				"pc_button_icon_left"
-			}
-		},
-		style = {
-			hold_text = {
-				scenegraph_id = "tooltip_hold_text",
-				localize = true,
-				font_size = 24,
-				pixel_perfect = true,
-				horizontal_alignment = "right",
-				vertical_alignment = "center",
-				dynamic_font = true,
-				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("white", 255),
-				offset = {
-					0,
-					0,
-					1
-				}
-			},
-			text = {
-				font_size = 24,
-				scenegraph_id = "tooltip_text",
-				pixel_perfect = true,
-				horizontal_alignment = "left",
-				vertical_alignment = "center",
-				dynamic_font = true,
-				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("white", 255),
-				offset = {
-					0,
-					0,
-					1
-				}
-			},
-			button_text = {
-				font_size = 24,
-				scenegraph_id = "tooltip_icon",
-				horizontal_alignment = "center",
-				pixel_perfect = true,
-				vertical_alignment = "center",
-				dynamic_font = true,
-				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("white", 255),
-				offset = {
-					0,
-					0,
-					2
-				}
-			},
-			icon_styles = {
-				scenegraph_id = "tooltip_icon",
-				texture_sizes = {
-					{
-						20,
-						36
-					}
-				},
-				offset = {
-					0,
-					0,
-					1
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				}
-			}
-		}
-	},
 	tooltip_mission = {
 		scenegraph_id = "tooltip",
 		element = {
@@ -493,13 +269,133 @@ local widget_definitions = {
 		}
 	}
 }
+local floating_icons_scene_graph = {
+	root = {
+		is_root = true,
+		size = {
+			1920,
+			1080
+		},
+		position = {
+			0,
+			0,
+			UILayer.tutorial
+		}
+	},
+	screen_fit = {
+		scale = "fit",
+		position = {
+			0,
+			0,
+			UILayer.tutorial
+		},
+		size = {
+			1920,
+			1080
+		}
+	},
+	tooltip_root = {
+		vertical_alignment = "center",
+		parent = "root",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			0
+		},
+		size = {
+			3,
+			3
+		}
+	},
+	tooltip = {
+		vertical_alignment = "bottom",
+		parent = "tooltip_root",
+		position = {
+			0,
+			-120,
+			1
+		},
+		size = {
+			200,
+			40
+		}
+	},
+	tooltip_mission_root = {
+		parent = "root",
+		position = {
+			0,
+			0,
+			0
+		},
+		size = {
+			3,
+			3
+		}
+	},
+	tooltip_mission = {
+		vertical_alignment = "bottom",
+		parent = "tooltip_mission_root",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			1,
+			1
+		}
+	},
+	tooltip_mission_text = {
+		vertical_alignment = "center",
+		parent = "tooltip_mission_icon",
+		horizontal_alignment = "right",
+		size = {
+			400,
+			62
+		},
+		position = {
+			403,
+			0,
+			2
+		}
+	},
+	tooltip_mission_icon = {
+		vertical_alignment = "center",
+		parent = "tooltip_mission",
+		horizontal_alignment = "center",
+		size = {
+			FLOATING_ICON_SIZE[1],
+			FLOATING_ICON_SIZE[2]
+		},
+		position = {
+			0,
+			0,
+			3
+		}
+	},
+	tooltip_mission_arrow = {
+		vertical_alignment = "center",
+		parent = "tooltip_mission_icon",
+		horizontal_alignment = "center",
+		size = {
+			38,
+			18
+		},
+		position = {
+			0,
+			0,
+			2
+		}
+	}
+}
 
 local function create_health_bar_definitions(num_health_bars)
 	local definitions = {}
 
 	for i = 1, num_health_bars, 1 do
 		local scenegraph_id = "health_bar_" .. i
-		scenegraph_definition[scenegraph_id] = {
+		floating_icons_scene_graph[scenegraph_id] = {
 			parent = "screen_fit",
 			position = {
 				0,
@@ -857,6 +753,7 @@ local function create_info_slate_widgets(num_of_entries)
 				},
 				background_texture = {
 					masked = true,
+					background_component = true,
 					uv_start_pixels = 0,
 					offset_scale = 1,
 					scale_axis = 1,
@@ -885,6 +782,7 @@ local function create_info_slate_widgets(num_of_entries)
 					}
 				},
 				top_frame_texture = {
+					background_component = true,
 					masked = true,
 					offset = {
 						-3,
@@ -900,6 +798,7 @@ local function create_info_slate_widgets(num_of_entries)
 					scenegraph_id = top_frame_scenegraph_id
 				},
 				bottom_frame_texture = {
+					background_component = true,
 					masked = true,
 					offset = {
 						-3,
@@ -969,7 +868,7 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 		local scenegraph_text = "objective_tooltip_text" .. i
 		local scenegraph_icon = "objective_tooltip_icon" .. i
 		local scenegraph_arrow = "objective_tooltip_arrow" .. i
-		scenegraph_definition[scenegraph_root] = {
+		floating_icons_scene_graph[scenegraph_root] = {
 			parent = "root",
 			position = {
 				0,
@@ -981,7 +880,7 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 				3
 			}
 		}
-		scenegraph_definition[scenegraph_id] = {
+		floating_icons_scene_graph[scenegraph_id] = {
 			vertical_alignment = "bottom",
 			parent = scenegraph_root,
 			position = {
@@ -994,7 +893,7 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 				1
 			}
 		}
-		scenegraph_definition[scenegraph_text] = {
+		floating_icons_scene_graph[scenegraph_text] = {
 			vertical_alignment = "center",
 			horizontal_alignment = "right",
 			parent = scenegraph_icon,
@@ -1008,7 +907,7 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 				2
 			}
 		}
-		scenegraph_definition[scenegraph_icon] = {
+		floating_icons_scene_graph[scenegraph_icon] = {
 			vertical_alignment = "center",
 			horizontal_alignment = "center",
 			parent = scenegraph_id,
@@ -1022,7 +921,7 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 				3
 			}
 		}
-		scenegraph_definition[scenegraph_arrow] = {
+		floating_icons_scene_graph[scenegraph_arrow] = {
 			vertical_alignment = "center",
 			horizontal_alignment = "center",
 			parent = scenegraph_icon,
@@ -1133,6 +1032,7 @@ local objective_tooltips = create_objective_tooltip_definitions(NUMBER_OF_OBJECT
 
 return {
 	scenegraph = scenegraph_definition,
+	floating_icons_scene_graph = floating_icons_scene_graph,
 	widgets = widget_definitions,
 	INFO_SLATE_SIZE = INFO_SLATE_SIZE,
 	INFO_SLATE_ENTRY_SIZE = INFO_SLATE_ENTRY_SIZE,

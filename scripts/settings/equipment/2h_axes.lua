@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -13,7 +16,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.4,
+					external_multiplier = 0.7,
 					buff_name = "planted_charging_decrease_movement"
 				}
 			},
@@ -57,8 +60,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_right",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -67,7 +73,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.4,
+					external_multiplier = 0.6,
 					buff_name = "planted_charging_decrease_movement"
 				}
 			},
@@ -111,8 +117,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.1,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_swing_charge_left",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -121,7 +130,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.4,
+					external_multiplier = 0.6,
 					buff_name = "planted_charging_decrease_movement"
 				}
 			},
@@ -166,13 +175,14 @@ weapon_template.actions = {
 		},
 		heavy_attack_right = {
 			damage_window_start = 0.3,
-			range_mod = 1.2,
-			anim_time_scale = 1,
+			range_mod = 1.4,
+			anim_time_scale = 1.1,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
-			max_targets = 4,
 			use_target = false,
+			width_mod = 30,
+			max_targets = 4,
 			hit_effect = "melee_hit_axes_2h",
 			damage_window_end = 0.5,
 			impact_sound_event = "slashing_hit",
@@ -222,31 +232,32 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "two_h_linesman_L",
+				attack_template_damage_type = "two_h_linesman_H",
 				attack_template = "heavy_slashing_linesman"
 			},
 			targets = {
 				{
-					attack_template_damage_type = "two_h_linesman_H_1",
+					attack_template_damage_type = "two_h_linesman_H_ap_1",
 					attack_template = "heavy_slashing_linesman"
 				},
 				{
-					attack_template_damage_type = "two_h_linesman_H",
+					attack_template_damage_type = "two_h_linesman_H_ap",
 					attack_template = "heavy_slashing_linesman"
 				},
 				{
-					attack_template_damage_type = "two_h_linesman_H",
+					attack_template_damage_type = "two_h_linesman_H_ap",
 					attack_template = "heavy_slashing_linesman"
 				}
 			}
 		},
 		heavy_attack_left = {
 			damage_window_start = 0.3,
-			anim_time_scale = 1,
-			range_mod = 1.2,
+			range_mod = 1.4,
+			anim_time_scale = 1.1,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
+			width_mod = 30,
 			use_target = false,
 			max_targets = 4,
 			hit_effect = "melee_hit_axes_2h",
@@ -301,20 +312,20 @@ weapon_template.actions = {
 				return input_extension.reset_release_input(input_extension)
 			end,
 			default_target = {
-				attack_template_damage_type = "two_h_linesman_L",
+				attack_template_damage_type = "two_h_linesman_H",
 				attack_template = "heavy_slashing_linesman"
 			},
 			targets = {
 				{
-					attack_template_damage_type = "two_h_linesman_H_1",
+					attack_template_damage_type = "two_h_linesman_H_ap_1",
 					attack_template = "heavy_slashing_linesman"
 				},
 				{
-					attack_template_damage_type = "two_h_linesman_H",
+					attack_template_damage_type = "two_h_linesman_H_ap",
 					attack_template = "heavy_slashing_linesman"
 				},
 				{
-					attack_template_damage_type = "two_h_linesman_H",
+					attack_template_damage_type = "two_h_linesman_H_ap",
 					attack_template = "heavy_slashing_linesman"
 				}
 			}
@@ -386,7 +397,7 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "two_h_smiter_L",
+				attack_template_damage_type = "two_h_smiter_L_1",
 				attack_template = "slashing_smiter"
 			},
 			targets = {}
@@ -458,7 +469,7 @@ weapon_template.actions = {
 				}
 			},
 			default_target = {
-				attack_template_damage_type = "two_h_smiter_L",
+				attack_template_damage_type = "two_h_smiter_L_1",
 				attack_template = "slashing_smiter"
 			},
 			targets = {}
@@ -486,14 +497,14 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.4,
+					start_time = 0.3,
 					action = "action_one",
 					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.4,
 					action = "action_two",
 					send_buffer = true,
 					input = "action_two_hold"
@@ -531,7 +542,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.6,
+					external_multiplier = 0.5,
 					buff_name = "planted_decrease_movement"
 				}
 			},
@@ -567,7 +578,7 @@ weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.one_h
 weapon_template.display_unit = "units/weapons/weapon_display/display_2h_weapon"
 weapon_template.wield_anim = "to_2h_hammer"
 weapon_template.buff_type = BuffTypes.MELEE
-weapon_template.max_fatigue_points = 4
+weapon_template.max_fatigue_points = 5
 weapon_template.dodge_distance = 0.85
 weapon_template.dodge_speed = 0.85
 weapon_template.dodge_count = 1
@@ -579,6 +590,17 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = false,
 		arc = 1
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0,
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 0.5,
+		skaven_slave = 0.5
 	}
 }
 weapon_template.wwise_dep_right_hand = {
@@ -614,29 +636,29 @@ Weapons.two_handed_axes_template_1_co = table.clone(weapon_template)
 Weapons.two_handed_axes_template_1_co.compare_statistics.attacks.light_attack.damage = 0.6875
 Weapons.two_handed_axes_template_1_co.compare_statistics.attacks.heavy_attack.damage = 0.6015625
 Weapons.two_handed_axes_template_1_t2 = table.clone(weapon_template)
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.default_target.attack_template_damage_type = "two_h_linesman_L_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.targets[1].attack_template_damage_type = "two_h_linesman_H_1_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.targets[2].attack_template_damage_type = "two_h_linesman_H_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.targets[3].attack_template_damage_type = "two_h_linesman_H_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.default_target.attack_template_damage_type = "two_h_linesman_L_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.targets[1].attack_template_damage_type = "two_h_linesman_H_1_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.targets[2].attack_template_damage_type = "two_h_linesman_H_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.targets[3].attack_template_damage_type = "two_h_linesman_H_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "two_h_smiter_L_t2"
-Weapons.two_handed_axes_template_1_t2.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "two_h_smiter_L_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.default_target.attack_template_damage_type = "two_h_linesman_H_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.targets[1].attack_template_damage_type = "two_h_linesman_H_ap_1_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.targets[2].attack_template_damage_type = "two_h_linesman_H_ap_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_left.targets[3].attack_template_damage_type = "two_h_linesman_H_ap_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.default_target.attack_template_damage_type = "two_h_linesman_H_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.targets[1].attack_template_damage_type = "two_h_linesman_H_ap_1_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.targets[2].attack_template_damage_type = "two_h_linesman_H_ap_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.heavy_attack_right.targets[3].attack_template_damage_type = "two_h_linesman_H_ap_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "two_h_smiter_L_1_t2"
+Weapons.two_handed_axes_template_1_t2.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "two_h_smiter_L_1_t2"
 Weapons.two_handed_axes_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.two_handed_axes_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.6328125
 Weapons.two_handed_axes_template_1_t3 = table.clone(weapon_template)
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.default_target.attack_template_damage_type = "two_h_linesman_L_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.targets[1].attack_template_damage_type = "two_h_linesman_H_1_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.targets[2].attack_template_damage_type = "two_h_linesman_H_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.targets[3].attack_template_damage_type = "two_h_linesman_H_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.default_target.attack_template_damage_type = "two_h_linesman_L_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.targets[1].attack_template_damage_type = "two_h_linesman_H_1_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.targets[2].attack_template_damage_type = "two_h_linesman_H_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.targets[3].attack_template_damage_type = "two_h_linesman_H_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "two_h_smiter_L_t3"
-Weapons.two_handed_axes_template_1_t3.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "two_h_smiter_L_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.default_target.attack_template_damage_type = "two_h_linesman_H_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.targets[1].attack_template_damage_type = "two_h_linesman_H_ap_1_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.targets[2].attack_template_damage_type = "two_h_linesman_H_ap_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_left.targets[3].attack_template_damage_type = "two_h_linesman_H_ap_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.default_target.attack_template_damage_type = "two_h_linesman_H_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.targets[1].attack_template_damage_type = "two_h_linesman_H_ap_1_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.targets[2].attack_template_damage_type = "two_h_linesman_H_ap_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.heavy_attack_right.targets[3].attack_template_damage_type = "two_h_linesman_H_ap_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.light_attack_left.default_target.attack_template_damage_type = "two_h_smiter_L_1_t3"
+Weapons.two_handed_axes_template_1_t3.actions.action_one.light_attack_right.default_target.attack_template_damage_type = "two_h_smiter_L_1_t3"
 Weapons.two_handed_axes_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.875
 Weapons.two_handed_axes_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.796875
 Weapons.two_handed_axes_template_1_t3_un = table.clone(Weapons.two_handed_axes_template_1_t3)

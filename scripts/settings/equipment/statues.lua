@@ -107,5 +107,13 @@ Weapons.drachenfels_statue.actions.action_one.default.projectile_info.pickup_nam
 Weapons.drachenfels_statue.pickup_data.pickup_name = "drachenfels_statue"
 Weapons.drachenfels_statue.left_hand_unit = "units/weapons/player/pup_drachenfels_statue/wpn_drachenfels_statue"
 Weapons.drachenfels_statue.wield_anim = "to_statue"
+Weapons.cannon_ball = Weapons.cannon_ball or table.clone(weapon_template)
+Weapons.cannon_ball.left_hand_unit = "units/weapons/player/wpn_cannon_ball_01/wpn_cannon_ball_01"
+Weapons.cannon_ball.actions.action_one.default.speed = 8
+Weapons.cannon_ball.actions.action_one.default.projectile_info = {
+	projectile_unit_template_name = "pickup_projectile_unit",
+	pickup_name = "cannon_ball",
+	projectile_unit_name = "units/weapons/player/pup_cannon_ball_01/pup_cannon_ball_01"
+}
 
 return 

@@ -51,7 +51,7 @@ WorldManager.create_world = function (self, name, shading_environment, shading_c
 	self._wwise_worlds[world] = Wwise.wwise_world(world)
 
 	self._sort_update_queue(self)
-	Profiler.stop()
+	Profiler.stop("create_world")
 
 	return world
 end

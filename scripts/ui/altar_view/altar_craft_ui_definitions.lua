@@ -111,6 +111,20 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	craft_button_fill = {
+		vertical_alignment = "center",
+		parent = "craft_button",
+		horizontal_alignment = "left",
+		size = {
+			307,
+			69
+		},
+		position = {
+			16,
+			-10,
+			-1
+		}
+	},
 	description_text_1 = {
 		vertical_alignment = "center",
 		parent = "frame",
@@ -809,7 +823,7 @@ local widgets_definitions = {
 	wheel_glow_weapon_type_widget = UIWidgets.create_simple_texture("craft_wheel_glow_normal", "wheel_glow_weapon_type"),
 	wheel_glow_token_widget = UIWidgets.create_simple_texture("craft_wheel_glow_large", "wheel_glow_token"),
 	craft_wheel_mask_widget = UIWidgets.create_simple_texture("mask_rect", "wheel_mask"),
-	craft_button_widget = UIWidgets.create_altar_button("altar_craft_button_text", "craft_button", "craft_button_text", "craft_button_token"),
+	craft_button_widget = UIWidgets.create_altar_button("altar_craft_button_text", "craft_button", "craft_button_text", "craft_button_token", "craft_button_fill"),
 	description_text_1 = UIWidgets.create_simple_text("altar_craft_description_1", "description_text_1", 24, Colors.get_color_table_with_alpha("white", 255)),
 	title_text = UIWidgets.create_simple_text("altar_title_craft", "title_text", 32, Colors.get_color_table_with_alpha("cheeseburger", 255), nil, "hell_shark_header"),
 	background_candle_left_widget = UIWidgets.create_simple_texture("candle_glow_02", "background_candle_left"),

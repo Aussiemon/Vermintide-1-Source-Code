@@ -234,61 +234,25 @@ ActionTemplates.instant_equip_grimoire = {
 }
 ActionTemplates.instant_grenade_throw = {
 	default = {
-		weapon_action_hand = "right",
-		hold_input = "action_instant_grenade_throw_hold",
-		kind = "dummy",
+		slot_to_wield = "slot_grenade",
+		weapon_action_hand = "either",
+		kind = "instant_wield",
 		total_time = 0,
-		allowed_chain_actions = {
-			{
-				sub_action = "grenade_charge",
-				start_time = 0,
-				action = "action_instant_grenade_throw",
-				auto_chain = true
-			}
-		},
-		condition_func = function ()
-			return true
-		end
-	},
-	grenade_charge = {
-		charge_sound_stop_event = "stop_player_combat_weapon_grenade_ignite_loop",
-		explode_time = 3.5,
-		ammo_usage = 1,
-		anim_end_event = "attack_finished",
-		kind = "charge",
-		charge_sound_name = "player_combat_weapon_grenade_ignite_loop",
-		charge_time = 1,
-		minimum_hold_time = 1.1,
-		block_pickup = true,
-		anim_event = "grenade_charge",
-		anim_end_event_condition_func = function (unit, end_reason)
-			return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
+		condition_func = function (action_user, input_extension)
+			local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
+			local equipment = inventory_extension._equipment
+			local grenade_equipped = equipment.slots.slot_grenade
+			local health_extension = ScriptUnit.extension(action_user, "health_system")
+			local status_extension = ScriptUnit.extension(action_user, "status_system")
+			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_disabled(status_extension)
+
+			return grenade_equipped and is_alive
 		end,
-		total_time = math.huge,
-		allowed_chain_actions = {
-			{
-				sub_action = "throw",
-				start_time = 1,
-				action = "action_one",
-				input = "action_instant_grenade_throw_released"
-			},
-			{
-				sub_action = "cancel",
-				start_time = 0.55,
-				action = "action_one",
-				input = "action_two"
-			},
-			{
-				start_time = 0,
-				input = "action_instant_grenade_throw_hold"
-			},
-			{
-				sub_action = "throw",
-				start_time = 1.1,
-				action = "action_one",
-				auto_chain = true
-			}
-		}
+		action_on_wield = {
+			action = "action_instant_throw_grenade",
+			sub_action = "instant_throw"
+		},
+		allowed_chain_actions = {}
 	}
 }
 ActionTemplates.action_inspect = {
@@ -318,6 +282,221 @@ ActionTemplates.action_inspect = {
 		end,
 		total_time = math.huge,
 		allowed_chain_actions = {}
+	}
+}
+ActionTemplates.action_use_consumable = {
+	default = {
+		slot_to_wield = "slot_healthkit",
+		weapon_action_hand = "either",
+		kind = "instant_wield",
+		total_time = 1,
+		condition_func = function (action_user, input_extension)
+			local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
+
+			if inventory_extension.get_selected_consumable_slot_name(inventory_extension) ~= "slot_healthkit" then
+				return false
+			end
+
+			local equipment = inventory_extension._equipment
+			local slot_healthkit_data = equipment.slots.slot_healthkit
+			local has_health_kit = false
+
+			if slot_healthkit_data and slot_healthkit_data.item_data.name == "healthkit_first_aid_kit_01" then
+				has_health_kit = true
+			end
+
+			local health_extension = ScriptUnit.extension(action_user, "health_system")
+			local status_extension = ScriptUnit.extension(action_user, "status_system")
+			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_disabled(status_extension)
+			local has_max_health = health_extension.current_health_percent(health_extension) == 1
+			local can_use_heal_item = is_alive and not has_max_health
+
+			return has_health_kit and can_use_heal_item
+		end,
+		action_on_wield = {
+			action = "action_instant_heal_self",
+			sub_action = "default"
+		},
+		allowed_chain_actions = {}
+	},
+	healing_draught = {
+		slot_to_wield = "slot_healthkit",
+		weapon_action_hand = "either",
+		kind = "instant_wield",
+		total_time = 0,
+		condition_func = function (action_user, input_extension)
+			local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
+
+			if inventory_extension.get_selected_consumable_slot_name(inventory_extension) ~= "slot_healthkit" then
+				return false
+			end
+
+			local equipment = inventory_extension._equipment
+			local slot_healthkit_data = equipment.slots.slot_healthkit
+			local has_healing_draught = false
+
+			if slot_healthkit_data and slot_healthkit_data.item_data.name == "potion_healing_draught_01" then
+				has_healing_draught = true
+			end
+
+			local health_extension = ScriptUnit.extension(action_user, "health_system")
+			local status_extension = ScriptUnit.extension(action_user, "status_system")
+			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_disabled(status_extension)
+			local has_max_health = health_extension.current_health_percent(health_extension) == 1
+			local can_use_heal_item = is_alive and not has_max_health
+
+			return has_healing_draught and can_use_heal_item
+		end,
+		action_on_wield = {
+			action = "action_instant_drink_healing_draught",
+			sub_action = "instant_drink"
+		},
+		allowed_chain_actions = {}
+	},
+	potion = {
+		slot_to_wield = "slot_potion",
+		weapon_action_hand = "either",
+		kind = "instant_wield",
+		total_time = 0,
+		condition_func = function (action_user, input_extension)
+			local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
+
+			if inventory_extension.get_selected_consumable_slot_name(inventory_extension) ~= "slot_potion" then
+				return false
+			end
+
+			local equipment = inventory_extension._equipment
+			local potion_equipped = equipment.slots.slot_potion
+
+			if potion_equipped and potion_equipped.item_data.name == "wpn_grimoire_01" then
+				return false
+			end
+
+			local health_extension = ScriptUnit.extension(action_user, "health_system")
+			local status_extension = ScriptUnit.extension(action_user, "status_system")
+			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_disabled(status_extension)
+
+			return potion_equipped and is_alive
+		end,
+		action_on_wield = {
+			action = "action_instant_drink_potion",
+			sub_action = "instant_drink"
+		},
+		allowed_chain_actions = {}
+	},
+	grenade = {
+		slot_to_wield = "slot_grenade",
+		weapon_action_hand = "either",
+		kind = "instant_wield",
+		total_time = 0,
+		condition_func = function (action_user, input_extension)
+			local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
+
+			if inventory_extension.get_selected_consumable_slot_name(inventory_extension) ~= "slot_grenade" then
+				return false
+			end
+
+			local equipment = inventory_extension._equipment
+			local grenade_equipped = equipment.slots.slot_grenade
+			local health_extension = ScriptUnit.extension(action_user, "health_system")
+			local status_extension = ScriptUnit.extension(action_user, "status_system")
+			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_disabled(status_extension)
+
+			return grenade_equipped and is_alive
+		end,
+		action_on_wield = {
+			action = "action_instant_throw_grenade",
+			sub_action = "instant_throw"
+		},
+		allowed_chain_actions = {}
+	},
+	grimoire = {
+		slot_to_wield = "slot_potion",
+		weapon_action_hand = "either",
+		kind = "instant_wield",
+		total_time = 0,
+		condition_func = function (action_user, input_extension)
+			local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
+
+			if inventory_extension.get_selected_consumable_slot_name(inventory_extension) ~= "slot_potion" then
+				return false
+			end
+
+			local has_grimoire = false
+			local equipment = inventory_extension.equipment(inventory_extension)
+			local slot_potion_data = equipment.slots.slot_potion
+
+			if slot_potion_data and slot_potion_data.item_data.name == "wpn_grimoire_01" then
+				has_grimoire = true
+			end
+
+			local health_extension = ScriptUnit.extension(action_user, "health_system")
+			local status_extension = ScriptUnit.extension(action_user, "status_system")
+			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_disabled(status_extension)
+
+			return has_grimoire and is_alive
+		end,
+		action_on_wield = {
+			action = "action_instant_throw_grimoire",
+			sub_action = "instant_throw"
+		},
+		allowed_chain_actions = {}
+	}
+}
+
+for sub_action_name, data in pairs(ActionTemplates.action_use_consumable) do
+	data.chain_condition_func = data.condition_func
+end
+
+ActionTemplates.give_item_on_defend = {
+	interaction_priority = 5,
+	ammo_usage = 1,
+	anim_end_event = "attack_finished",
+	kind = "interaction",
+	interaction_type = "give_item",
+	weapon_action_hand = "left",
+	uninterruptible = true,
+	do_not_validate_with_hold = true,
+	hold_input = "action_two_hold",
+	anim_event = "parry_pose",
+	total_time = 0,
+	anim_end_event_condition_func = function (unit, end_reason)
+		return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
+	end,
+	allowed_chain_actions = {},
+	condition_func = function (attacker_unit)
+		local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
+
+		return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "give_item") and not Application.user_setting("disable_give_on_defend")
+	end
+}
+ActionTemplates.instant_give_item = {
+	default = {
+		kind = "dummy",
+		weapon_action_hand = "left",
+		total_time = 0,
+		allowed_chain_actions = {}
+	},
+	instant_give = {
+		interaction_priority = 4,
+		ammo_usage = 1,
+		anim_end_event = "attack_finished",
+		kind = "interaction",
+		interaction_type = "give_item",
+		weapon_action_hand = "left",
+		uninterruptible = true,
+		hold_input = "interact",
+		anim_event = "parry_pose",
+		total_time = 0,
+		anim_end_event_condition_func = function (unit, end_reason)
+			return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
+		end,
+		allowed_chain_actions = {},
+		condition_func = function (attacker_unit)
+			local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
+
+			return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "give_item")
+		end
 	}
 }
 ActionTemplates.wield_left = table.clone(ActionTemplates.wield)

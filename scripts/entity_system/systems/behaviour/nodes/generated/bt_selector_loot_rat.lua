@@ -35,7 +35,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -57,7 +57,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_falling.run(node_falling, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("falling")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -79,7 +79,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -104,7 +104,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -126,7 +126,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_dodge.run(node_dodge, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("dodge")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -139,29 +139,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_look_players = children[6]
-	local condition_result = blackboard.look_for_players
-
-	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_look_players, "aborted")
-		Profiler_start("look_players")
-
-		local result, evaluate = node_look_players.run(node_look_players, unit, blackboard, t, dt)
-
-		Profiler_stop()
-
-		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
-		end
-
-		if result ~= "failed" then
-			return result, evaluate
-		end
-	elseif node_look_players == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
-	end
-
-	local node_flee = children[7]
+	local node_flee = children[6]
 	local condition_result = BTConditions.confirmed_player_sighting(blackboard) or blackboard.is_fleeing
 
 	if condition_result then
@@ -170,7 +148,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_flee.run(node_flee, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("flee")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -183,7 +161,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_alerted = children[8]
+	local node_alerted = children[7]
 	local condition_result = unit_alive(blackboard.target_unit)
 
 	if condition_result then
@@ -192,7 +170,7 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_alerted.run(node_alerted, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("alerted")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -205,14 +183,14 @@ BTSelector_loot_rat.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_idle = children[9]
+	local node_idle = children[8]
 
 	self.set_running_child(self, unit, blackboard, t, node_idle, "aborted")
 	Profiler_start("idle")
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

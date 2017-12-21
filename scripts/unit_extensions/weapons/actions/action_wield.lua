@@ -14,6 +14,13 @@ end
 ActionWield.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.action_time_started = t
+
+	if self.current_action.reset_aim_on_attack then
+		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
+
+		first_person_extension.reset_aim_assist_multiplier(first_person_extension)
+	end
+
 	self.new_slot = CharacterStateHelper.wield_input(self.input_extension, self.inventory_extension, "action_wield", true)
 
 	assert(self.new_slot, "went into wield action without input")

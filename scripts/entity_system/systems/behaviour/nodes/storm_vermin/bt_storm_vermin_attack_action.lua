@@ -33,6 +33,8 @@ BTStormVerminAttackAction.enter = function (self, unit, blackboard, t)
 
 	self._init_attack(self, unit, blackboard, t)
 
+	blackboard.spawn_to_running = nil
+
 	return 
 end
 BTStormVerminAttackAction._init_attack = function (self, unit, blackboard, t)
@@ -74,14 +76,14 @@ BTStormVerminAttackAction.run = function (self, unit, blackboard, t, dt)
 	return "running"
 end
 BTStormVerminAttackAction.attack = function (self, unit, t, dt, blackboard)
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
-
 	if t < blackboard.attack_rotation_update_timer and blackboard and blackboard.target_unit_status_extension and not blackboard.target_unit_status_extension:get_is_dodging() then
 		local rotation = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.special_attacking_target)
 		blackboard.attack_rotation = QuaternionBox(rotation)
 	end
 
-	locomotion.set_wanted_rotation(locomotion, blackboard.attack_rotation:unbox())
+	local locomotion_extension = blackboard.locomotion_extension
+
+	locomotion_extension.set_wanted_rotation(locomotion_extension, blackboard.attack_rotation:unbox())
 
 	return 
 end

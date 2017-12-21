@@ -19,6 +19,9 @@ AltarItemsUI.init = function (self, parent, position, animation_definitions, ing
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.item_list = {}
 	self.widget_definitions = definitions.widget_definitions
 	self.scenegraph_definition = definitions.scenegraph_definition
@@ -56,6 +59,8 @@ AltarItemsUI.init = function (self, parent, position, animation_definitions, ing
 	return 
 end
 AltarItemsUI.on_enter = function (self)
+	self.use_gamepad = Managers.input:is_device_active("gamepad")
+
 	self.inventory_item_list:set_rarity(nil)
 
 	return 
@@ -66,7 +71,16 @@ AltarItemsUI.set_gamepad_press_input_enabled = function (self, enabled)
 	return 
 end
 AltarItemsUI.set_gamepad_focus = function (self, enabled)
+	if self.use_gamepad and not enabled then
+		self.inventory_item_list:on_focus_lost()
+	end
+
 	self.use_gamepad = enabled
+
+	return 
+end
+AltarItemsUI.on_focus_lost = function (self)
+	self.inventory_item_list:on_focus_lost()
 
 	return 
 end
@@ -281,6 +295,11 @@ AltarItemsUI.update = function (self, dt)
 	self.update_button_bar_animation(self, inventory_selection_bar_widget, "character_selection", dt)
 
 	local handle_gamepad = gamepad_active and self.use_gamepad
+
+	if self.parent.ui_pages.craft.active and self.parent.ui_pages.craft.active_item_id then
+		handle_gamepad = false
+	end
+
 	local inventory_item_list = self.inventory_item_list
 
 	inventory_item_list.update(inventory_item_list, dt, handle_gamepad, self.use_gamepad_press_input)
@@ -353,20 +372,23 @@ AltarItemsUI.set_drag_enabled = function (self, enabled)
 end
 AltarItemsUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
+	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
 	local input_service = self.parent:page_input_service()
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	for _, widget in ipairs(self.background_widgets) do
 		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
-	UIRenderer.draw_widget(ui_renderer, self.inventory_selection_bar_widget)
 	UIRenderer.end_pass(ui_renderer)
-	self.inventory_item_list:draw(dt)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.draw_widget(ui_top_renderer, self.inventory_selection_bar_widget)
+	UIRenderer.end_pass(ui_top_renderer)
+	self.inventory_item_list:draw(dt, self.use_gamepad)
 
 	return 
 end

@@ -42,7 +42,7 @@ UIAnimator.start_animation = function (self, animation_sequence_name, widget, sc
 		if animation.start_relative_to then
 			local relative_animation_index = animation.start_relative_to
 
-			assert(animation.start_relative_to < i, "elias l2code pls")
+			assert(animation.start_relative_to < i)
 
 			local relative_animation_end = times[(relative_animation_index - 1)*2 + 2]
 			local duration = animation.duration/((animation.scale_duration_by_speed and speed) or 1)

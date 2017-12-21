@@ -374,7 +374,7 @@ LevelAnalysis.update_main_path_generation = function (self)
 		local result = GwNavAStar.processing_finished(a_star)
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_main_path_generation")
 
 	return 
 end
@@ -408,6 +408,11 @@ LevelAnalysis.boss_gizmo_spawned = function (self, unit)
 				map_section_index
 			}
 		end
+	end
+
+	if script_data.debug_ai_recycler then
+		QuickDrawerStay:sphere(Unit.local_position(unit, 0), 2, Color(map_section_index*64, map_section_index%4*64, map_section_index%8*32))
+		QuickDrawerStay:sphere(Unit.local_position(unit, 0), 0.25, Color(200, 200, 200))
 	end
 
 	return 
@@ -600,6 +605,10 @@ LevelAnalysis.hand_placed_terror_creation = function (self, main_paths, event_se
 		return 
 	end
 
+	if script_data.debug_ai_recycler then
+		self.saved_terror_spawners = table.clone(self.terror_spawners)
+	end
+
 	local terror_spawners = self.terror_spawners
 	local last_num_sections, last_checkbox_name = nil
 
@@ -713,6 +722,47 @@ LevelAnalysis.automatic_terror_creation = function (self, main_paths, total_main
 		end
 
 		spawn_distance = wanted_distance
+	end
+
+	return 
+end
+LevelAnalysis.debug_spawn_boss_from_closest_spawner_to_player = function (self, draw_only)
+	local player_pos = PLAYER_POSITIONS[1]
+	local best_dist = math.huge
+	local best_pos = nil
+	local spawners = self.saved_terror_spawners
+
+	if not spawners then
+		print("debug_spawn_boss_from_closest_spawner_to_player - no spawners found")
+
+		return 
+	end
+
+	print("debug_spawn_boss_from_closest_spawner_to_player")
+
+	local boss_spawners = spawners.event_boss.spawners
+
+	for i = 1, #boss_spawners, 1 do
+		local data = boss_spawners[i]
+		local spawner_pos = Unit.local_position(data[1], 0)
+		local dist = Vector3.distance(player_pos, spawner_pos)
+
+		if dist < best_dist then
+			best_dist = dist
+			best_pos = spawner_pos
+		end
+
+		QuickDrawer:sphere(spawner_pos, 1.5, Color(100, 200, 10))
+	end
+
+	if best_pos then
+		print("debug_spawn_boss_from_closest_spawner_to_player - found spawner!")
+		QuickDrawerStay:sphere(best_pos, 1.6, Color(50, 200, 10))
+
+		if not draw_only then
+			print("\t spawning ogre")
+			Managers.state.conflict:spawn_unit(Breeds.skaven_rat_ogre, best_pos, Quaternion(Vector3.up(), 0), "debug_spawn")
+		end
 	end
 
 	return 
@@ -841,6 +891,8 @@ LevelAnalysis.remove_terror_spawners_due_to_crossroads = function (self, removed
 	local num_removed_dist_pairs = #removed_path_distances
 
 	for checkbox_name, data in pairs(terror_spawners) do
+		table.clear(to_remove)
+
 		local spawners = data.spawners
 
 		for i = 1, #spawners, 1 do
@@ -1013,7 +1065,7 @@ LevelAnalysis.debug = function (self, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("LevelAnalysis:debug")
 
 	return 
 end
@@ -1028,7 +1080,7 @@ LevelAnalysis.update = function (self, t)
 		self.update_main_path_generation(self)
 	end
 
-	Profiler.stop()
+	Profiler.stop("level_analysis")
 
 	return 
 end

@@ -7,11 +7,14 @@ EndScreenUI.init = function (self, ingame_ui_context)
 	self.world_manager = ingame_ui_context.world_manager
 	self.camera_manager = ingame_ui_context.camera_manager
 	self.voting_manager = Managers.state.voting
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.timers = {}
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "end_screen_ui", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "end_screen_ui", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "end_screen_ui", "keyboard")
 	input_manager.map_device_to_service(input_manager, "end_screen_ui", "mouse")
 	input_manager.map_device_to_service(input_manager, "end_screen_ui", "gamepad")
@@ -331,7 +334,7 @@ EndScreenUI.draw = function (self, dt)
 	local input_service = self.input_manager:get_service("end_screen_ui")
 	local draw_flags = self.draw_flags
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if draw_flags.draw_background then
 		UIRenderer.draw_widget(ui_renderer, self.background_rect_widget)

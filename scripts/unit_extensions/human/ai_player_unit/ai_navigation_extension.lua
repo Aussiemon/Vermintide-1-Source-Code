@@ -53,11 +53,12 @@ AINavigationExtension.release_bot = function (self)
 	return 
 end
 AINavigationExtension.init_position = function (self)
+	local unit = self._unit
 	local nav_world = self._nav_world
-	local breed = Unit.get_data(self._unit, "breed")
+	local breed = Unit.get_data(unit, "breed")
 	local height = 1.6
 	local speed = breed.run_speed
-	local pos = Unit.local_position(self._unit, 0)
+	local pos = Unit.local_position(unit, 0)
 	local enable_crowd_dispersion = not script_data.disable_crowd_dispersion and not breed.disable_crowd_dispersion
 	self._nav_bot = GwNavBot.create(nav_world, height, NAVIGATION_NAVMESH_RADIUS, speed, pos, enable_crowd_dispersion)
 	self._max_speed = speed
@@ -87,6 +88,13 @@ AINavigationExtension.init_position = function (self)
 	table.merge(allowed_layers, NAV_TAG_VOLUME_LAYER_COST_AI)
 	AiUtils.initialize_cost_table(self._navtag_layer_cost_table, allowed_layers)
 	GwNavBot.set_navtag_layer_cost_table(self._nav_bot, self._navtag_layer_cost_table)
+
+	local locomotion_extension = self._blackboard.locomotion_extension
+	local engine_extension_id = locomotion_extension._engine_extension_id
+
+	if engine_extension_id then
+		EngineOptimizedExtensions.ai_locomotion_set_traverse_logic(engine_extension_id, self._traverse_logic)
+	end
 
 	return 
 end

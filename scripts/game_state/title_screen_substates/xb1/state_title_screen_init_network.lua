@@ -6,7 +6,6 @@ require("scripts/network/network_event_delegate")
 require("scripts/network/network_server")
 require("scripts/network/network_client")
 require("scripts/network/network_transmit")
-require("scripts/ui/views/information_view")
 
 StateTitleScreenInitNetwork = class(StateTitleScreenInitNetwork)
 StateTitleScreenInitNetwork.NAME = "StateTitleScreenInitNetwork"
@@ -18,13 +17,7 @@ StateTitleScreenInitNetwork.on_enter = function (self, params)
 	self._world = self._params.world
 	self._viewport = self._params.viewport
 
-	self._setup_view(self)
 	self._init_network(self)
-
-	return 
-end
-StateTitleScreenInitNetwork._setup_view = function (self)
-	self._information_view = InformationView:new(self._world)
 
 	return 
 end
@@ -51,13 +44,9 @@ StateTitleScreenInitNetwork._init_network = function (self)
 
 	self._network_state = "_create_session"
 
-	self._information_view:set_information_text("Creating Session")
-
 	return 
 end
 StateTitleScreenInitNetwork.update = function (self, dt, t)
-	self._information_view:update(dt, t)
-
 	if self[self._network_state] then
 		self[self._network_state](self, dt, t)
 	end
@@ -93,7 +82,7 @@ StateTitleScreenInitNetwork._create_session = function (self)
 
 		assert(unique_server_name, "No unique_server_name in %%appdata%%\\Roaming\\Fatshark\\Bulldozer\\user_settings.config")
 
-		self._lobby_finder = LobbyFinder:new(self._network_options)
+		self._lobby_finder = LobbyFinder:new(self._network_options, nil, true)
 		self._network_state = "_update_lobby_join"
 	else
 		assert(not loading_context.profile_synchronizer)
@@ -101,12 +90,6 @@ StateTitleScreenInitNetwork._create_session = function (self)
 
 		self._lobby_host = LobbyHost:new(self._network_options)
 		self._network_state = "_creating_session_host"
-	end
-
-	if loading_context.previous_session_error then
-		local previous_session_error = loading_context.previous_session_error
-		loading_context.previous_session_error = nil
-		self._popup_id = Managers.popup:queue_popup(Localize(previous_session_error), Localize("popup_error_topic"), "continue", Localize("menu_ok"))
 	end
 
 	return 
@@ -118,11 +101,7 @@ StateTitleScreenInitNetwork._creating_session_host = function (self, dt, t)
 
 	if state == LobbyState.JOINED then
 		self._network_state = "_join_session"
-
-		self._information_view:set_information_text("Joining Session")
 	elseif state == LobbyState.FAILED then
-		self._information_view:set_information_text("Creating session host failed")
-
 		self._network_state = "_error"
 	end
 
@@ -148,8 +127,6 @@ StateTitleScreenInitNetwork._join_session = function (self, dt, t)
 
 	self._wanted_game_state = StateIngame
 	self._network_state = "_update_host_lobby"
-
-	self._information_view:set_information_text("Session Joined - Loading Assets")
 
 	return 
 end
@@ -420,10 +397,6 @@ StateTitleScreenInitNetwork.on_exit = function (self, application_shutdown)
 
 		self._network_event_delegate = nil
 	end
-
-	self._information_view:destroy()
-
-	self._information_view = nil
 
 	return 
 end

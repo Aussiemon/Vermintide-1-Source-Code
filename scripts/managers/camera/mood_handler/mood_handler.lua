@@ -141,14 +141,20 @@ MoodHandler.handle_particles = function (self, current_mood, next_mood)
 	end
 
 	if next_mood ~= "default" then
-		local on_enter_particles = MoodSettings[next_mood].particle_effects_on_enter
+		local next_mood_settings = MoodSettings[next_mood]
+		local no_particles_on_enter_from = next_mood_settings.no_particles_on_enter_from
+		local play_particles = not no_particles_on_enter_from or not table.find(no_particles_on_enter_from, current_mood)
 
-		if on_enter_particles then
-			local playing_particles = self.playing_particles
-			local world = self.world
+		if play_particles then
+			local on_enter_particles = next_mood_settings.particle_effects_on_enter
 
-			for _, particle_name in pairs(on_enter_particles) do
-				playing_particles[#playing_particles + 1] = World.create_particles(world, particle_name, Vector3.zero())
+			if on_enter_particles then
+				local playing_particles = self.playing_particles
+				local world = self.world
+
+				for _, particle_name in pairs(on_enter_particles) do
+					playing_particles[#playing_particles + 1] = World.create_particles(world, particle_name, Vector3.zero())
+				end
 			end
 		end
 	end
@@ -159,7 +165,7 @@ MoodHandler.update = function (self, dt)
 	Profiler.start("MoodHandler: Update")
 	self.update_mood_blends(self, dt)
 	self.update_environment_variables(self)
-	Profiler.stop()
+	Profiler.stop("MoodHandler: Update")
 
 	return 
 end
@@ -286,7 +292,7 @@ MoodHandler.apply_environment_variables = function (self, shading_environment)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("MoodHandler: Apply Environment Variables")
 
 	return 
 end

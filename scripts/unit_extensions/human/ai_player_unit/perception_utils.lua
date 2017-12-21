@@ -39,6 +39,22 @@ PerceptionUtils.pick_closest_target = function (unit, blackboard, breed)
 
 	return closest_enemy, closest_dist
 end
+PerceptionUtils.pick_closest_target_infinte_range = function (unit, blackboard, breed)
+	local pos = POSITION_LOOKUP[unit]
+	local closest_enemy = nil
+	local closest_dist = math.huge
+
+	for k, enemy_pos in ipairs(PLAYER_AND_BOT_POSITIONS) do
+		local dist = Vector3.distance(pos, enemy_pos)
+
+		if dist < closest_dist then
+			closest_dist = dist
+			closest_enemy = PLAYER_AND_BOT_UNITS[k]
+		end
+	end
+
+	return closest_enemy, closest_dist
+end
 PerceptionUtils.healthy_players = function (unit, blackboard, breed)
 	local special_targets = blackboard.group_blackboard.special_targets
 	local vector3_distance = Vector3.distance
@@ -424,7 +440,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 
 	if not target_current then
 		if target_unit ~= target_current and detection_radius_sq < distance_sq then
-			Profiler.stop()
+			Profiler.stop("line of sight checks")
 
 			return 
 		end
@@ -443,7 +459,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 				local result, pos = PhysicsWorld.immediate_raycast(physics_world, raycast_pos, direction, distance, "closest", "types", "statics", "collision_filter", "filter_ai_line_of_sight_check")
 
 				if result then
-					Profiler.stop()
+					Profiler.stop("line of sight checks")
 
 					return 
 				end
@@ -451,7 +467,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("line of sight checks")
 
 	local dogpile_count = 0
 	local disabled_slots_count = 0
@@ -617,6 +633,7 @@ PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard,
 			if not target_slot_extension.valid_target then
 			else
 				local target_unit_position = POSITION_LOOKUP[target_unit]
+				local is_bot = Managers.player:owner(target_unit).bot_player
 				local distance_sq = Vector3.distance_squared(ai_unit_position, target_unit_position)
 				local view_cone_dot = 0.5
 
@@ -627,7 +644,7 @@ PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard,
 					local ai_unit_to_target_dir = Vector3.normalize(target_unit_position - ai_unit_position)
 					local dot = Vector3.dot(ai_unit_to_target_dir, ai_unit_direction)
 
-					if view_cone_dot < dot or distance_sq < breed.panic_close_detection_radius_sq then
+					if (view_cone_dot < dot and not is_bot) or distance_sq < breed.panic_close_detection_radius_sq then
 						local physics_world = World.get_data(Unit.world(target_unit), "physics_world")
 						local see_you = PerceptionUtils.raycast_spine_to_spine(ai_unit, target_unit, physics_world)
 
@@ -930,7 +947,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 end
 PerceptionUtils.debug_rat_ogre_perception = function (gui, t, x1, y1, blackboard)
 	local tiny_font_size = 16
-	local tiny_font = "arial_16"
+	local tiny_font = "gw_arial_16"
 	local tiny_font_mtrl = "materials/fonts/" .. tiny_font
 	local resx = RESOLUTION_LOOKUP.res_w
 	local resy = RESOLUTION_LOOKUP.res_h
@@ -1436,7 +1453,7 @@ PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_ta
 				event_data.attack_tag = "rat_ogre_change_target"
 
 				dialogue_input.trigger_networked_dialogue_event(dialogue_input, "enemy_attack", event_data)
-				Profiler.stop()
+				Profiler.stop("dialogue trigger")
 			end
 		end
 	end

@@ -16,7 +16,7 @@ local DEFAULT_AIM_DATA = {
 local THIS_UNIT = nil
 
 local function dprint(...)
-	if script_data.debug_ai_shoot_action and script_data.debug_unit == THIS_UNIT then
+	if script_data.ai_bots_weapon_debug and script_data.debug_unit == THIS_UNIT then
 		print(...)
 	end
 
@@ -156,7 +156,7 @@ BTBotShootAction._wanted_aim_rotation = function (self, self_unit, target_unit, 
 
 		angle, target_position = prediction_function(projectile_speed/100, -gravity_setting, current_position, target_pos, target_current_velocity)
 
-		Profiler.stop()
+		Profiler.stop("trajectory prediction")
 
 		if not angle then
 			if self_unit == script_data.debug_unit then

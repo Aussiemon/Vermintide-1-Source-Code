@@ -5,15 +5,13 @@ local Vector3 = stingray.Vector3
 local LineObject = stingray.LineObject
 local Color = stingray.Color
 local LevelEditor = stingray.LevelEditor or LevelEditor
-WwiseVisualization.soundscape_units = WwiseVisualization.soundscape_units or {}
+local soundscape_units = {}
 
 local function verify_unit_script_data(unit)
 	local result = true
 	local event_name = Unit.get_data(unit, "Wwise", "event_name")
 
 	if event_name == nil or event_name == "" then
-		print_error("WwiseVisualizaton. Unit does not have required script data: " .. event_name)
-
 		result = false
 	elseif Wwise.has_event(event_name) == false then
 		print_error("WwiseVisualizaton. Wwise banks do not contain event: " .. event_name)
@@ -33,7 +31,7 @@ WwiseVisualization.add_soundscape_unit = function (unit)
 		return 
 	end
 
-	WwiseVisualization.soundscape_units[#WwiseVisualization.soundscape_units + 1] = unit
+	soundscape_units[#soundscape_units + 1] = unit
 
 	return 
 end
@@ -73,17 +71,19 @@ local function render_soundscape_unit(lines, lines_noz, unit)
 	local trigger_range_color = Color(0, 240, 170)
 	local source_shape_color = Color(0, 160, 225)
 
-	if shape == "point" then
-		LineObject.add_sphere(lines_noz, trigger_range_color, position, range)
-	elseif shape == "sphere" then
-		LineObject.add_sphere(lines_noz, source_shape_color, position, scale)
-		LineObject.add_sphere(lines_noz, trigger_range_color, position, scale + range)
-	elseif shape == "box" then
-		Matrix4x4.set_x(pose, Vector3.normalize(Matrix4x4.x(pose)))
-		Matrix4x4.set_y(pose, Vector3.normalize(Matrix4x4.y(pose)))
-		Matrix4x4.set_z(pose, Vector3.normalize(Matrix4x4.z(pose)))
-		LineObject.add_box(lines_noz, source_shape_color, pose, scale)
-		LineObject.add_box(lines_noz, trigger_range_color, pose, scale + Vector3(1, 1, 1)*range)
+	if Wwise.position_type(event_name) == Wwise.WWISE_3D_SOUND then
+		if shape == "point" then
+			LineObject.add_sphere(lines_noz, trigger_range_color, position, range)
+		elseif shape == "sphere" then
+			LineObject.add_sphere(lines_noz, source_shape_color, position, scale)
+			LineObject.add_sphere(lines_noz, trigger_range_color, position, scale + range)
+		elseif shape == "box" then
+			Matrix4x4.set_x(pose, Vector3.normalize(Matrix4x4.x(pose)))
+			Matrix4x4.set_y(pose, Vector3.normalize(Matrix4x4.y(pose)))
+			Matrix4x4.set_z(pose, Vector3.normalize(Matrix4x4.z(pose)))
+			LineObject.add_box(lines_noz, source_shape_color, pose, scale)
+			LineObject.add_box(lines_noz, trigger_range_color, pose, scale + Vector3(1, 1, 1)*range)
+		end
 	end
 
 	return 
@@ -106,7 +106,6 @@ WwiseVisualization.render = function (lines, lines_noz)
 
 	for _, selection_table in pairs(current_selection) do
 		local selection_unit = selection_table._unit
-		local soundscape_units = WwiseVisualization.soundscape_units
 		local i = Array.index_of(soundscape_units, selection_unit)
 
 		if i then

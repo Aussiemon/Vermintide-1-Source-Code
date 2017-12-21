@@ -77,7 +77,7 @@ end
 BTPrepareJumpSlamAction.start_jump_animation = function (blackboard, unit, velocity)
 	blackboard.navigation_extension:set_enabled(false)
 	Managers.state.network:anim_event(unit, "attack_jump")
-	LocomotionUtils.set_animation_driven_movement(unit, true, true)
+	LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 
 	return 
 end

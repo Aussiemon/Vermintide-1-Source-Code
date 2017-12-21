@@ -151,8 +151,10 @@ DamageSystem.rpc_add_damage = function (self, sender, victim_unit_go_id, attacke
 
 		if ScriptUnit.has_extension(attacker_unit, "hud_system") then
 			local health_extension = ScriptUnit.extension(victim_unit, "health_system")
+			local damage_source = NetworkLookup.damage_sources[damage_source_id]
+			local should_indicate_hit = health_extension.is_alive(health_extension) and attacker_unit ~= victim_unit and damage_source ~= "wounded_degen"
 
-			if health_extension.is_alive(health_extension) and attacker_unit ~= victim_unit then
+			if should_indicate_hit then
 				local hud_extension = ScriptUnit.extension(attacker_unit, "hud_system")
 				hud_extension.hit_enemy = true
 			end
@@ -289,7 +291,7 @@ DamageSystem.suicide = function (self, unit)
 		return 
 	end
 
-	if self.already_dead then
+	if not Unit.alive(unit) then
 		print("trying suicide but already dead")
 
 		return 
@@ -316,6 +318,10 @@ DamageSystem.rpc_suicide = function (self, sender, go_id)
 	return 
 end
 DamageSystem.rpc_level_object_damage = function (self, sender, level_object_id, damage_amount, attack_direction, damage_source_id)
+	if self.is_server then
+		Managers.state.network.network_transmit:send_rpc_clients_except("rpc_level_object_damage", sender, level_object_id, damage_amount, attack_direction, damage_source_id)
+	end
+
 	local level = LevelHelper:current_level(self.world)
 	local hit_unit = Level.unit_by_index(level, level_object_id)
 
@@ -329,6 +335,10 @@ DamageSystem.rpc_level_object_damage = function (self, sender, level_object_id, 
 	return 
 end
 DamageSystem.rpc_level_object_heal = function (self, sender, level_object_id, heal_amount)
+	if self.is_server then
+		Managers.state.network.network_transmit:send_rpc_clients_except("rpc_level_object_heal", sender, level_object_id, heal_amount)
+	end
+
 	local level = LevelHelper:current_level(self.world)
 	local hit_unit = Level.unit_by_index(level, level_object_id)
 
@@ -364,6 +374,10 @@ DamageSystem.rpc_create_explosion = function (self, sender, attacker_unit_id, at
 	return 
 end
 DamageSystem.create_explosion = function (self, attacker_unit, position, rotation, explosion_template_name, scale, damage_source)
+	if not NetworkUtils.network_safe_position(position) then
+		return false
+	end
+
 	local explosion_template = ExplosionTemplates[explosion_template_name]
 	local is_husk = false
 

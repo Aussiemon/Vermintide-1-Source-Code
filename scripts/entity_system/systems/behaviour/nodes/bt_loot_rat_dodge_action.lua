@@ -20,6 +20,7 @@ BTLootRatDodgeAction.enter = function (self, unit, blackboard, t)
 		blackboard.is_dodging = true
 		blackboard.pass_check_position = Vector3Box(pass_check_position)
 		blackboard.dodge_end_time = t + action.dodge_time
+		blackboard.move_state = nil
 
 		LocomotionUtils.set_animation_driven_movement(unit, false)
 
@@ -102,7 +103,7 @@ BTLootRatDodgeAction.leave = function (self, unit, blackboard, t)
 end
 BTLootRatDodgeAction.dodge = function (self, unit, blackboard, dodge_vector, threat_vector)
 	local unit_position = position_lookup[unit]
-	local velocity = blackboard.locomotion_extension:get_velocity()
+	local velocity = blackboard.locomotion_extension:current_velocity()
 	local normalized_velocity = Vector3.normalize(velocity)
 	local normalized_dodge_vector = Vector3.normalize(dodge_vector)
 	local left_right = Vector3.cross(-threat_vector, Vector3.up())

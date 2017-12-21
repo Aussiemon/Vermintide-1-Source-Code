@@ -25,6 +25,7 @@ CameraStateIdle.update = function (self, unit, input, dt, context, t)
 	local position = camera_extension.get_idle_position(camera_extension)
 	local rotation = camera_extension.get_idle_rotation(camera_extension)
 
+	assert(Vector3.is_valid(position), "Camera position invalid.")
 	Unit.set_local_position(unit, 0, position)
 	Unit.set_local_rotation(unit, 0, rotation)
 

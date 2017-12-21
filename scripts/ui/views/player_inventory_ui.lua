@@ -4,14 +4,20 @@ require("scripts/settings/inventory_settings")
 
 PlayerInventoryUI = class(PlayerInventoryUI)
 local SLOTS_LIST = InventorySettings.weapon_slots
+local GAMEPAD_SLOTS_LIST = {}
+
+for i, slot in ipairs(SLOTS_LIST) do
+	local slot_name = slot.name
+
+	if slot_name == "slot_melee" or slot_name == "slot_ranged" then
+		GAMEPAD_SLOTS_LIST[i] = slot
+	end
+end
+
 local consumable_slots = {
 	slot_healthkit = 1,
 	slot_grenade = 3,
 	slot_potion = 2
-}
-local charge_bar_end_position = {
-	190,
-	80
 }
 local temp_slot_texture_mapping = {
 	slot_healthkit = "consumables_medpack",
@@ -38,6 +44,7 @@ inventory_entry_stance_bar_fill_lookup_table = {}
 inventory_entry_stance_bar_lit_lookup_table = {}
 inventory_entry_stance_bar_glow_lookup_table = {}
 PlayerInventoryUI.init = function (self, ingame_ui_context)
+	self.platform = Application.platform()
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
 	self.slot_equip_animations = {}
@@ -49,6 +56,11 @@ PlayerInventoryUI.init = function (self, ingame_ui_context)
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.peer_id = ingame_ui_context.peer_id
 	self.player_manager = ingame_ui_context.player_manager
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
+	local gamepad_active = self.input_manager:is_device_active("gamepad")
+	self._visible = not gamepad_active
 
 	return 
 end
@@ -75,7 +87,6 @@ PlayerInventoryUI.create_ui_elements = function (self)
 	end
 
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
-	self.charge_bar = UIWidget.init(definitions.widget_definitions.charge_bar)
 	self.inventory_widgets = {}
 
 	for i, widget in ipairs(inventory_widget_definitions) do
@@ -90,12 +101,21 @@ PlayerInventoryUI.create_ui_elements = function (self)
 	return 
 end
 PlayerInventoryUI.set_visible = function (self, visible)
+	if visible then
+		local gamepad_active = self.input_manager:is_device_active("gamepad")
+
+		if gamepad_active then
+			visible = false
+		end
+	end
+
 	for i, slot in ipairs(SLOTS_LIST) do
-		local slot_name = slot.name
 		local widget = self.inventory_slots_widgets[i]
 
 		UIRenderer.set_element_visible(self.ui_renderer, widget.element, visible)
 	end
+
+	self._visible = visible
 
 	return 
 end
@@ -117,10 +137,11 @@ local function get_ammunition_count(left_hand_wielded_unit, right_hand_wielded_u
 		return 
 	end
 
+	local single_clip = ammo_extension.using_single_clip(ammo_extension)
 	local ammo_count = ammo_extension.ammo_count(ammo_extension)
 	local remaining_ammo = ammo_extension.remaining_ammo(ammo_extension)
 
-	return ammo_count, remaining_ammo
+	return ammo_count, not single_clip and remaining_ammo
 end
 
 PlayerInventoryUI.overcharge_amount = function (self, left_hand_wielded_unit, right_hand_wielded_unit)
@@ -144,8 +165,22 @@ PlayerInventoryUI.overcharge_amount = function (self, left_hand_wielded_unit, ri
 end
 PlayerInventoryUI.update = function (self, dt, t, my_player)
 	local ui_scenegraph = self.ui_scenegraph
-	local input_service = self.input_manager:get_service("ingame_menu")
+	local input_manager = self.input_manager
+	local input_service = input_manager.get_service(input_manager, "ingame_menu")
+	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local ui_renderer = self.ui_renderer
+
+	if gamepad_active then
+		if not self.gamepad_active_last_frame then
+			self.gamepad_active_last_frame = true
+
+			self.on_gamepad_activated(self)
+		end
+	elseif self.gamepad_active_last_frame then
+		self.gamepad_active_last_frame = false
+
+		self.on_gamepad_deactivated(self)
+	end
 
 	Profiler.start("animations")
 
@@ -165,10 +200,15 @@ PlayerInventoryUI.update = function (self, dt, t, my_player)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("animations")
+
+	if not self._visible then
+		return 
+	end
+
 	self.update_slot_animations(self, dt)
 	self.update_inventory_slots_positions(self, dt)
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if RESOLUTION_LOOKUP.modified then
 		for i, slot in ipairs(SLOTS_LIST) do
@@ -178,12 +218,31 @@ PlayerInventoryUI.update = function (self, dt, t, my_player)
 	end
 
 	if my_player then
+		local profile_index = my_player.profile_index
+
+		if profile_index ~= self.profile_index then
+			self.selected_index = nil
+			self.profile_index = profile_index
+		end
+
 		Profiler.start("update_inventory_slots")
 		self.update_inventory_slots(self, dt, ui_scenegraph, ui_renderer, my_player)
-		Profiler.stop()
+		Profiler.stop("update_inventory_slots")
 	end
 
 	UIRenderer.end_pass(ui_renderer)
+
+	return 
+end
+PlayerInventoryUI.on_gamepad_activated = function (self)
+	local gamepad_layout = Application.user_setting("gamepad_layout")
+
+	self.set_visible(self, false)
+
+	return 
+end
+PlayerInventoryUI.on_gamepad_deactivated = function (self)
+	self.set_visible(self, true)
 
 	return 
 end
@@ -204,14 +263,14 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 		hud_extension = ScriptUnit.extension(player_unit, "hud_system")
 	end
 
-	Profiler.stop()
+	Profiler.stop("Player data retrieve")
 
 	if inventory_extension then
 		Profiler.start("Inventory Widgets Update")
 
 		local inventory_widgets = self.inventory_widgets
 		local equipment = inventory_extension.equipment(inventory_extension)
-		local stuff = SLOTS_LIST
+		local slots = SLOTS_LIST
 		local wielded = equipment.wielded
 		local picked_up_ammo = hud_extension.get_picked_up_ammo(hud_extension)
 
@@ -219,7 +278,7 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 			hud_extension.set_picked_up_ammo(hud_extension, false)
 		end
 
-		for i, slot in ipairs(SLOTS_LIST) do
+		for i, slot in ipairs(slots) do
 			local slot_name = slot.name
 			local slot_data = equipment.slots[slot_name]
 			local widget = self.inventory_slots_widgets[i]
@@ -246,7 +305,7 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 					widget_content.icon = "weapon_icon_empty"
 				end
 
-				Profiler.stop()
+				Profiler.stop("reset slot data")
 			else
 				local item_data = slot_data.item_data
 				local is_wielded = wielded == slot_data.item_data
@@ -275,11 +334,6 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 					if first_update then
 						local bar_textures = definitions.bar_textures
 						local overcharge_fraction, threshold_fraction = self.overcharge_amount(self, slot_data.left_unit_1p, slot_data.right_unit_1p)
-						self.draw_attention_bar = nil
-
-						if threshold_fraction then
-							self.setup_charge_bar(self, overcharge_fraction, threshold_fraction)
-						end
 
 						if not overcharge_fraction then
 							widget_content.stance_bar.texture_id = bar_textures.stance_bar.bar
@@ -290,7 +344,7 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 						end
 					end
 
-					Profiler.stop()
+					Profiler.stop("selected slot change")
 				end
 
 				Profiler.start("set slot icon")
@@ -299,7 +353,7 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 					widget_content.has_data = true
 				end
 
-				Profiler.stop()
+				Profiler.stop("set slot icon")
 				Profiler.start("ammo and charge bar")
 
 				local item_template = BackendUtils.get_item_template(item_data)
@@ -310,7 +364,7 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 
 					if ammo_data and not ammo_data.destroy_when_out_of_ammo then
 						local ammo_text_1 = tostring(ammo_count)
-						local ammo_text_2 = tostring(remaining_ammo)
+						local ammo_text_2 = (remaining_ammo and tostring(remaining_ammo)) or ""
 
 						if ammo_text_1 ~= widget_content.ammo_text_1 or ammo_text_2 ~= widget_content.ammo_text_2 then
 							widget.element.dirty = true
@@ -345,14 +399,6 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 						bar_progress = math.min(overcharge_fraction, 1)
 					else
 						bar_progress = 0
-					end
-
-					if is_wielded and overcharge_fraction and 0 < overcharge_fraction then
-						self.set_charge_bar_fraction(self, overcharge_fraction, threshold_fraction, anim_blend_overcharge)
-
-						self.draw_attention_bar = true
-					elseif self.draw_attention_bar then
-						self.draw_attention_bar = nil
 					end
 
 					bar_progress = math.lerp(widget_content.stance_bar.bar_value, math.min(bar_progress, 1), 0.3)
@@ -391,17 +437,13 @@ PlayerInventoryUI.update_inventory_slots = function (self, dt, ui_scenegraph, ui
 					self.ui_scenegraph[inventory_entry_root_lookup_table[i]].local_position[1] = default_root_offset
 				end
 
-				Profiler.stop()
+				Profiler.stop("ammo and charge bar")
 			end
 
 			UIRenderer.draw_widget(ui_renderer, widget)
 		end
 
-		if self.draw_attention_bar then
-			UIRenderer.draw_widget(ui_renderer, self.charge_bar)
-		end
-
-		Profiler.stop()
+		Profiler.stop("Inventory Widgets Update")
 	end
 
 	return 
@@ -441,7 +483,7 @@ PlayerInventoryUI.update_inventory_slots_positions = function (self, dt)
 		height_offset = height_offset + widget_height + slot_spacing
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_inventory_slots_positions")
 
 	return 
 end
@@ -540,7 +582,7 @@ PlayerInventoryUI.update_slot_animations = function (self, dt)
 		animations[scenegraph_id] = self.animate_slot_widget(self, animation_data, dt)
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_slot_animations")
 
 	return 
 end
@@ -599,15 +641,6 @@ PlayerInventoryUI.animate_slot_widget = function (self, animation_data, dt)
 	local background_default_size = scenegraph_definition[scenegraph_background_id].size
 	widget_background_scenegraph.size[1] = background_default_size[1]*new_scale_fraction
 	widget_background_scenegraph.size[2] = background_default_size[2]*new_scale_fraction
-	local background_default_position = scenegraph_definition[scenegraph_id].position
-	local target_x_offest = smoothstep*5
-
-	if selected then
-		widget_scenegraph.position[1] = math.max(widget_scenegraph.position[1] - target_x_offest, -5)
-	else
-		widget_scenegraph.position[1] = math.min(widget_scenegraph.position[1] + target_x_offest, 0)
-	end
-
 	local new_lit_alpha = 0
 
 	if selected then
@@ -673,56 +706,6 @@ PlayerInventoryUI.animate_slot_widget = function (self, animation_data, dt)
 
 		return nil
 	end
-
-	return 
-end
-PlayerInventoryUI.setup_charge_bar = function (self, overcharge_fraction, threshold_fraction)
-	local widget = self.charge_bar
-	local widget_style = widget.style
-	local marker_fraction = threshold_fraction*0.82
-	local r = 265
-	local x = r*math.sin(marker_fraction)
-	local y = r*-math.cos(marker_fraction)
-	widget_style.black_divider_left.offset[1] = -x
-	widget_style.black_divider_left.offset[2] = y
-	widget_style.black_divider_right.offset[1] = x
-	widget_style.black_divider_right.offset[2] = y
-	local one_side_max_angle = 45
-	local current_angle = threshold_fraction*one_side_max_angle
-	local radians = math.degrees_to_radians(current_angle)
-	widget_style.black_divider_right.angle = -radians
-	widget_style.black_divider_left.angle = radians
-
-	return 
-end
-PlayerInventoryUI.set_charge_bar_fraction = function (self, overcharge_fraction, threshold_fraction, anim_blend_overcharge)
-	local widget = self.charge_bar
-	local widget_style = widget.style
-	overcharge_fraction = math.lerp(widget_style.fill.gradient_threshold, math.min(overcharge_fraction, 1), 0.3)
-	widget_style.fill.gradient_threshold = overcharge_fraction
-	widget_style.sidefade.gradient_threshold = 1
-	local marker_fraction = overcharge_fraction*0.82
-	local r = 265
-	local x = r*math.sin(marker_fraction)
-	local y = r*-math.cos(marker_fraction)
-	widget_style.white_divider_left.offset[1] = -x
-	widget_style.white_divider_left.offset[2] = y
-	widget_style.white_divider_right.offset[1] = x
-	widget_style.white_divider_right.offset[2] = y
-	local white_divider_alpha = math.min(overcharge_fraction/(threshold_fraction*1.5), 1)*255
-	widget_style.white_divider_left.color[1] = white_divider_alpha
-	widget_style.white_divider_right.color[1] = white_divider_alpha
-	widget_style.fill.color[3] = white_divider_alpha - 255
-	local sidefade_alpha = math.max(0, math.min((overcharge_fraction - threshold_fraction)/0.1, 1))*255
-	widget_style.sidefade.color[1] = sidefade_alpha
-	local one_side_max_angle = 45
-	local current_angle = overcharge_fraction*one_side_max_angle
-	local radians = math.degrees_to_radians(current_angle)
-	widget_style.white_divider_right.angle = -radians
-	widget_style.white_divider_left.angle = radians
-	self.ui_scenegraph.charge_bar_white_divider_start_left.local_position[1] = -2
-	self.ui_scenegraph.charge_bar_white_divider_start_right.local_position[1] = 2
-	widget_style.flames_texture.offset[2] = anim_blend_overcharge*130 + -130
 
 	return 
 end

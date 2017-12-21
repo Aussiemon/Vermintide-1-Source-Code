@@ -185,9 +185,6 @@ AILocomotionExtensionC.set_movement_type = function (self, movement_type, overri
 
 	return 
 end
-AILocomotionExtensionC.get_velocity = function (self)
-	return EngineOptimizedExtensions.ai_locomotion_get_velocity(self._engine_extension_id)
-end
 AILocomotionExtensionC.current_velocity = function (self)
 	return EngineOptimizedExtensions.ai_locomotion_get_velocity(self._engine_extension_id)
 end

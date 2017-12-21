@@ -51,6 +51,9 @@ end
 GenericHealthExtension.current_health = function (self)
 	return self.health - self.damage
 end
+GenericHealthExtension.current_damage = function (self)
+	return self.damage
+end
 GenericHealthExtension.get_max_health = function (self)
 	if self.is_invincible then
 		return 0

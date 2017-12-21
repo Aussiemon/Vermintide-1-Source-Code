@@ -494,7 +494,7 @@ end
 local function lobby_difficulty_rank(lobby_data)
 	local difficulty = lobby_data.difficulty
 	local difficulty_setting = difficulty and DifficultySettings[difficulty]
-	local difficulty_rank = difficulty and difficulty_setting.rank
+	local difficulty_rank = (difficulty and difficulty_setting.rank) or 0
 
 	return difficulty_rank
 end
@@ -555,15 +555,15 @@ function difficulty_is_locked(lobby_data)
 		return false
 	end
 
-	local unlocked_level_difficulty = LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
+	local unlocked_level_difficulty_index = LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
 
-	if not unlocked_level_difficulty then
+	if not unlocked_level_difficulty_index then
 		return true
 	end
 
 	local difficulty_manager = Managers.state.difficulty
 	local level_difficulties = difficulty_manager.get_level_difficulties(difficulty_manager, level_key)
-	local unlocked_difficulty_key = level_difficulties[unlocked_level_difficulty]
+	local unlocked_difficulty_key = level_difficulties[unlocked_level_difficulty_index]
 	local unlocked_difficulty_settings = DifficultySettings[unlocked_difficulty_key]
 	local difficulty_setting = DifficultySettings[difficulty]
 
@@ -1059,7 +1059,9 @@ LobbyItemsList.handle_gamepad_input = function (self, dt, num_elements)
 	if controller_cooldown and 0 < controller_cooldown then
 		self.controller_cooldown = controller_cooldown - dt
 		local speed_multiplier = self.speed_multiplier or 1
-		self.speed_multiplier = math.max(speed_multiplier - 0.05, 0.3)
+		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
+		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
+		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
 
 		return 
 	else

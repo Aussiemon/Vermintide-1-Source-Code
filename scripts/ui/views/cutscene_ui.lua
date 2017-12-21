@@ -10,7 +10,7 @@ CutsceneUI.init = function (self, ingame_ui_context, cutscene_system)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "cutscene", CutsceneKeymaps)
+	input_manager.create_input_service(input_manager, "cutscene", "CutsceneKeymaps", "CutsceneFilters")
 	input_manager.map_device_to_service(input_manager, "cutscene", "keyboard")
 	input_manager.map_device_to_service(input_manager, "cutscene", "mouse")
 	input_manager.map_device_to_service(input_manager, "cutscene", "gamepad")

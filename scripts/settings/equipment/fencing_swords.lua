@@ -3,8 +3,11 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.2,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_stab_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -78,8 +81,11 @@ weapon_template.actions = {
 			}
 		},
 		default_right = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 2,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_stab_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -153,8 +159,11 @@ weapon_template.actions = {
 			}
 		},
 		default_left = {
-			kind = "dummy",
+			aim_assist_ramp_decay_delay = 0.2,
 			anim_end_event = "attack_finished",
+			kind = "dummy",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_stab_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
@@ -238,11 +247,15 @@ weapon_template.actions = {
 			max_targets = 1,
 			attack_direction = "up",
 			hit_effect = "melee_hit_sword_1h",
+			aim_assist_ramp_multiplier = 0.4,
 			damage_window_end = 0.15,
 			impact_sound_event = "stab_hit",
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_decay_delay = 0.1,
 			dedicated_target_range = 3,
+			reset_aim_on_attack = true,
 			uninterruptible = true,
 			anim_event = "attack_swing_stab",
 			total_time = 2.25,
@@ -326,11 +339,15 @@ weapon_template.actions = {
 			no_damage_impact_sound_event = "stab_hit_armour",
 			use_target = false,
 			max_targets = 2,
+			aim_assist_ramp_multiplier = 0.4,
 			hit_effect = "melee_hit_sword_1h",
+			aim_assist_max_ramp_multiplier = 0.8,
 			damage_window_end = 0.15,
 			impact_sound_event = "stab_hit",
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
+			aim_assist_ramp_decay_delay = 0.1,
+			reset_aim_on_attack = true,
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_stab",
@@ -415,12 +432,15 @@ weapon_template.actions = {
 			use_target = false,
 			max_targets = 2,
 			width_mod = 30,
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.3,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_right",
 			total_time = 1.5,
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -487,12 +507,15 @@ weapon_template.actions = {
 			use_target = false,
 			max_targets = 2,
 			width_mod = 30,
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.3,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_left",
 			total_time = 1.5,
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -559,12 +582,15 @@ weapon_template.actions = {
 			use_target = false,
 			max_targets = 2,
 			width_mod = 30,
+			aim_assist_max_ramp_multiplier = 0.4,
+			aim_assist_ramp_decay_delay = 0,
 			hit_effect = "melee_hit_sword_1h",
 			damage_window_end = 0.42,
 			impact_sound_event = "slashing_hit",
 			charge_value = "light_attack",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			dedicated_target_range = 2.5,
+			aim_assist_ramp_multiplier = 0.4,
 			anim_event = "attack_swing_right_diagonal",
 			total_time = 1.5,
 			anim_end_event_condition_func = function (unit, end_reason)
@@ -666,7 +692,7 @@ weapon_template.actions = {
 					input = "action_two_hold"
 				},
 				{
-					sub_action = "default",
+					sub_action = "block_shot",
 					start_time = 0.4,
 					action = "action_three",
 					input = "action_three"
@@ -698,7 +724,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.75,
+					external_multiplier = 0.9,
 					buff_name = "planted_decrease_movement"
 				}
 			},
@@ -725,8 +751,8 @@ weapon_template.actions = {
 					end_time = math.huge
 				},
 				{
-					sub_action = "default",
-					start_time = 0.4,
+					sub_action = "block_shot",
+					start_time = 0.3,
 					action = "action_three",
 					input = "action_three"
 				}
@@ -735,7 +761,7 @@ weapon_template.actions = {
 	},
 	action_three = {
 		default = {
-			attack_template_damage_type = "carbine",
+			attack_template_damage_type = "carbine_AP",
 			kind = "handgun",
 			cooldown = 0.25,
 			total_time_secondary = 2,
@@ -743,11 +769,14 @@ weapon_template.actions = {
 			charge_value = "light_attack",
 			weapon_action_hand = "left",
 			attack_template = "shot_carbine",
+			aim_assist_max_ramp_multiplier = 1,
+			aim_assist_ramp_decay_delay = 0,
 			hit_effect = "bullet_impact",
 			anim_time_scale = 2,
 			ammo_usage = 1,
 			fire_time = 0.22,
 			anim_event_secondary = "reload",
+			aim_assist_ramp_multiplier = 1,
 			anim_event = "attack_shoot",
 			reload_time = 0.5,
 			total_time = 0.8,
@@ -821,11 +850,14 @@ weapon_template.actions = {
 		}
 	}
 }
+weapon_template.actions.action_three.block_shot = table.create_copy(weapon_template.actions.action_three.block_shot, weapon_template.actions.action_three.default)
+weapon_template.actions.action_three.block_shot.block = true
 weapon_template.ammo_data = {
+	ammo_hand = "left",
 	ammo_immediately_available = true,
-	reload_time = 1.25,
 	max_ammo = 16,
-	ammo_hand = "left"
+	reload_time = 1.25,
+	single_clip = true
 }
 weapon_template.default_spread_template = "brace_of_pistols"
 weapon_template.attack_meta_data = {
@@ -836,6 +868,18 @@ weapon_template.attack_meta_data = {
 	hold_attack = {
 		penetrating = true,
 		arc = 0
+	}
+}
+weapon_template.aim_assist_settings = {
+	max_range = 5,
+	no_aim_input_multiplier = 0,
+	base_multiplier = 0,
+	target_node = "j_neck",
+	effective_max_range = 4,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
 	}
 }
 weapon_template.compare_statistics = {

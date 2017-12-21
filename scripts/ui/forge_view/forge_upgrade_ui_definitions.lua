@@ -111,6 +111,20 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	upgrade_button_fill = {
+		vertical_alignment = "center",
+		parent = "upgrade_button",
+		horizontal_alignment = "left",
+		size = {
+			307,
+			69
+		},
+		position = {
+			16,
+			-10,
+			-1
+		}
+	},
 	upgrade_button_eye_glow = {
 		vertical_alignment = "center",
 		parent = "upgrade_button",
@@ -237,6 +251,76 @@ local scenegraph_definition = {
 			5
 		}
 	},
+	progress_bar_bg = {
+		vertical_alignment = "bottom",
+		parent = "frame",
+		horizontal_alignment = "center",
+		size = {
+			303,
+			59
+		},
+		position = {
+			0,
+			95,
+			2
+		}
+	},
+	progress_bar_abort_text = {
+		vertical_alignment = "center",
+		parent = "progress_bar_bg",
+		horizontal_alignment = "center",
+		size = {
+			321,
+			42
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	progress_bar = {
+		vertical_alignment = "center",
+		parent = "progress_bar_bg",
+		horizontal_alignment = "left",
+		size = {
+			0,
+			42
+		},
+		position = {
+			36,
+			0,
+			1
+		}
+	},
+	progress_bar_fg = {
+		vertical_alignment = "center",
+		parent = "progress_bar_bg",
+		horizontal_alignment = "center",
+		size = {
+			303,
+			59
+		},
+		position = {
+			0,
+			0,
+			2
+		}
+	},
+	progress_bar_glow = {
+		vertical_alignment = "center",
+		parent = "progress_bar_bg",
+		horizontal_alignment = "center",
+		size = {
+			303,
+			59
+		},
+		position = {
+			0,
+			0,
+			3
+		}
+	},
 	description_text_1 = {
 		vertical_alignment = "center",
 		parent = "frame",
@@ -283,8 +367,7 @@ local scenegraph_definition = {
 local widgets_definitions = {
 	frame_widget = UIWidgets.create_simple_texture("character_selection_bg", "frame"),
 	frame_background_widget = UIWidgets.create_simple_texture("forge_upgrade_bg", "frame_background"),
-	upgrade_button_widget = UIWidgets.create_forge_upgrade_button("upgrade_button", "upgrade_button_text", "upgrade_button_token"),
-	button_eye_glow_widget = UIWidgets.create_simple_texture("forge_button_03_glow_effect", "upgrade_button_eye_glow"),
+	upgrade_button_widget = UIWidgets.create_forge_upgrade_button("upgrade_button", "upgrade_button_text", "upgrade_button_token", "upgrade_button_eye_glow", "upgrade_button_fill"),
 	item_button_widget = UIWidgets.create_attach_icon_button("item_slot_01", "item_button", "item_button_icon", scenegraph_definition.item_button_icon.size),
 	text_frame_title = UIWidgets.create_simple_text("", "text_frame_title", 28, Colors.get_color_table_with_alpha("cheeseburger", 255), {
 		font_size = 28,

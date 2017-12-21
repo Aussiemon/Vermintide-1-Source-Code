@@ -36,6 +36,10 @@ function profiler_scopes_trace()
 	overloaded = true
 	local real_start = Profiler.start
 	Profiler.start = function (scope)
+		if scope == nil then
+			Application.error("Profiler with nil scope")
+		end
+
 		last_started = scope
 
 		if dump_light then
@@ -66,6 +70,11 @@ function profiler_scopes_trace()
 		real_stop()
 
 		depth = depth - 1
+
+		if scope == nil then
+			Application.error("Profiler with nil scope")
+		end
+
 		local started_scope = started_scopes[#started_scopes]
 
 		if scope and scope ~= started_scope and has_started then

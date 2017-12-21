@@ -38,7 +38,7 @@ local scenegraph_definition = {
 		position = {
 			-46,
 			-56.5,
-			5
+			3
 		}
 	},
 	map_overlay = {
@@ -214,12 +214,19 @@ local area_element_definition_drachenfels = {
 			click_check_content_id = "button_hotspot",
 			pass_type = "on_click",
 			content_check_function = function (content)
-				return not content.is_preview
+				return not content.button_hotspot.is_preview
 			end,
 			click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 				ui_content.button_hotspot.is_selected = true
 
 				return 
+			end
+		},
+		{
+			pass_type = "hotspot",
+			content_id = "preview_hotspot",
+			content_check_function = function (content)
+				return content and content.is_preview
 			end
 		},
 		{
@@ -264,7 +271,7 @@ local area_element_definition_ubersreik = {
 			click_check_content_id = "button_hotspot",
 			pass_type = "on_click",
 			content_check_function = function (content)
-				return not content.is_preview
+				return not content.button_hotspot.is_preview
 			end,
 			click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 				ui_content.button_hotspot.is_selected = true
@@ -273,20 +280,21 @@ local area_element_definition_ubersreik = {
 			end
 		},
 		{
-			pass_type = "texture",
-			style_id = "background",
-			texture_id = "background",
+			pass_type = "hotspot",
+			content_id = "preview_hotspot",
 			content_check_function = function (content)
-				return not content.button_hotspot.is_preview
+				return content and content.is_preview
 			end
 		},
 		{
 			pass_type = "texture",
+			style_id = "background",
+			texture_id = "background"
+		},
+		{
+			pass_type = "texture",
 			style_id = "hover",
-			texture_id = "hover",
-			content_check_function = function (content)
-				return not content.button_hotspot.is_preview
-			end
+			texture_id = "hover"
 		},
 		{
 			style_id = "banner",
@@ -582,7 +590,7 @@ local function create_level_widget(index)
 			position = {
 				-2,
 				16,
-				4
+				2
 			},
 			size = {
 				1,
@@ -602,7 +610,7 @@ local function create_level_widget(index)
 			position = {
 				0,
 				0,
-				4
+				2
 			},
 			parent = text_background_root_scenegraph_id
 		}
@@ -692,14 +700,14 @@ local function create_level_widget(index)
 			offset = {
 				23,
 				38,
-				10
+				4
 			}
 		},
 		preview_texture = {
 			offset = {
 				-1,
 				1,
-				12
+				5
 			},
 			color = {
 				150,
@@ -716,7 +724,7 @@ local function create_level_widget(index)
 			offset = {
 				-1,
 				1,
-				12
+				6
 			},
 			color = {
 				255,
@@ -733,7 +741,7 @@ local function create_level_widget(index)
 			offset = {
 				0,
 				0,
-				12
+				5
 			},
 			color = {
 				255,
@@ -750,7 +758,7 @@ local function create_level_widget(index)
 			offset = {
 				5,
 				50,
-				13
+				6
 			},
 			color = {
 				255,
@@ -1385,7 +1393,7 @@ local function create_area_widget(widget_name)
 		return create_ubersreik_widget(widget_name)
 	elseif widget_name == "drachenfels" then
 		return create_drachenfels_widget(widget_name)
-	else
+	elseif widget_name == "dwarfs" then
 		return create_dwarfs_widget(widget_name)
 	end
 

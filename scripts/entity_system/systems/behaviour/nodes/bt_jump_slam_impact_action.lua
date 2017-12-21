@@ -17,7 +17,6 @@ BTJumpSlamImpactAction.enter = function (self, unit, blackboard, t)
 	blackboard.active_node = BTJumpSlamImpactAction
 	blackboard.attack_finished = nil
 	blackboard.attacking_target = blackboard.target_unit
-	local data = blackboard.jump_slam_data
 
 	return 
 end
@@ -27,7 +26,7 @@ BTJumpSlamImpactAction.leave = function (self, unit, blackboard, t, reason)
 
 	blackboard.navigation_extension:set_enabled(true)
 
-	blackboard.attack_jump_data = nil
+	blackboard.jump_slam_data = nil
 
 	if reason == "aborted" then
 	end

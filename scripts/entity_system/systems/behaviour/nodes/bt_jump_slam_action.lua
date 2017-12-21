@@ -31,17 +31,17 @@ BTJumpSlamAction.leave = function (self, unit, blackboard, t, reason)
 
 	blackboard.navigation_extension:set_enabled(true)
 
-	if reason == "aborted" then
-		LocomotionUtils.set_animation_driven_movement(unit, false, true)
-
-		blackboard.attack_jump_data = nil
-		blackboard.keep_target = nil
-	end
-
 	local data = blackboard.jump_slam_data
 
 	if data.constrained then
 		LocomotionUtils.constrain_on_clients(unit, false, Vector3.zero(), Vector3.zero())
+	end
+
+	if reason == "aborted" then
+		LocomotionUtils.set_animation_driven_movement(unit, false, true)
+
+		blackboard.keep_target = nil
+		blackboard.jump_slam_data = nil
 	end
 
 	return 
@@ -68,12 +68,13 @@ BTJumpSlamAction.run = function (self, unit, blackboard, t, dt)
 	return "running"
 end
 BTJumpSlamAction.progress_to_landing = function (blackboard, unit, data)
-	LocomotionUtils.set_animation_driven_movement(unit, true, true)
+	LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 	Managers.state.network:anim_event(unit, "attack_jump_land")
 
 	local locomotion = blackboard.locomotion_extension
 
 	locomotion.set_movement_type(locomotion, "snap_to_navmesh")
+	locomotion.set_wanted_velocity(locomotion, Vector3.zero())
 	locomotion.set_gravity(locomotion, nil)
 
 	return 
@@ -84,7 +85,6 @@ BTJumpSlamAction.progress_to_in_flight = function (blackboard, unit, velocity)
 	local locomotion = blackboard.locomotion_extension
 
 	locomotion.set_movement_type(locomotion, "script_driven")
-	locomotion.set_affected_by_gravity(locomotion, true)
 	locomotion.set_gravity(locomotion, blackboard.breed.jump_slam_gravity)
 	locomotion.set_wanted_velocity(locomotion, velocity)
 

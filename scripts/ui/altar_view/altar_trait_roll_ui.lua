@@ -12,6 +12,9 @@ AltarTraitRollUI.init = function (self, parent, position, animation_definitions,
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.traits_list = {}
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
@@ -50,16 +53,19 @@ AltarTraitRollUI._handle_gamepad_input = function (self, dt)
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad then
 		if self.active_item_id then
-			if input_service.get(input_service, "special_1") and self.can_remove_item(self) then
+			if (input_service.get(input_service, "back", true) or input_service.get(input_service, "special_1")) and self.can_remove_item(self) then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_item_remove_request = true
-			elseif input_service.get(input_service, "refresh") then
+			elseif input_service.get(input_service, "refresh_press") and not self.charging and self.can_afford_reroll_cost(self) then
+				self.start_charge_progress(self)
+			elseif self.charging and not input_service.get(input_service, "refresh_hold") then
+				self.abort_charge_progress(self)
+
 				self.controller_cooldown = GamepadSettings.menu_cooldown
-				self.gamepad_reroll_request = true
 			end
 		end
 
-		if self.handling_reroll_answer then
+		if self.handling_reroll_answer and not self.charging then
 			local trait_window_selection_index = self.trait_window_selection_index
 
 			if trait_window_selection_index then
@@ -140,7 +146,8 @@ AltarTraitRollUI.create_ui_elements = function (self)
 	local reroll_button_widget = widgets_by_name.reroll_button_widget
 	reroll_button_widget.content.text_field = Localize("reroll")
 	reroll_button_widget.default_text_on_disable = false
-	local rotating_disk_glow_widget = widgets_by_name.rotating_disk_glow_widget
+	reroll_button_widget.content.enable_charge = true
+	local rotating_disk_glow_widget = self.widgets_by_name.rotating_disk_glow_widget
 	rotating_disk_glow_widget.style.texture_id.color[1] = 0
 	local preview_window_1_button_content = widgets_by_name.preview_window_1_button.content
 	local preview_window_2_button_content = widgets_by_name.preview_window_2_button.content
@@ -210,6 +217,18 @@ AltarTraitRollUI.update = function (self, dt)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 
 	if gamepad_active then
+		if not self.gamepad_active_last_frame then
+			self.gamepad_active_last_frame = true
+
+			self.on_gamepad_activated(self)
+		end
+	elseif self.gamepad_active_last_frame then
+		self.gamepad_active_last_frame = false
+
+		self.on_gamepad_deactivated(self)
+	end
+
+	if gamepad_active then
 		if self.handling_reroll_answer and not self.fade_out_preview_window_new_traits_anim_id and not self.fade_in_preview_window_new_traits_anim_id then
 			local trait_window_selection_index = self.trait_window_selection_index
 
@@ -250,6 +269,8 @@ AltarTraitRollUI.update = function (self, dt)
 
 		if UIAnimation.completed(animation) then
 			self.animations[name] = nil
+
+			self.on_charge_animations_complete(self, name)
 		end
 	end
 
@@ -478,7 +499,7 @@ AltarTraitRollUI.draw = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.parent:page_input_service()
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	local widgets = self.widgets
 	local num_widgets = #widgets
@@ -486,7 +507,7 @@ AltarTraitRollUI.draw = function (self, dt)
 	for i = 1, num_widgets, 1 do
 		local widget = widgets[i]
 
-		UIRenderer.draw_widget(ui_renderer, widget)
+		UIRenderer.draw_widget(ui_top_renderer, widget)
 	end
 
 	local trait_preview_widgets = self.trait_preview_widgets
@@ -499,12 +520,12 @@ AltarTraitRollUI.draw = function (self, dt)
 			if current_traits_data[i] or new_traits_data[i] then
 				local widget = trait_preview_widgets[i]
 
-				UIRenderer.draw_widget(ui_renderer, widget)
+				UIRenderer.draw_widget(ui_top_renderer, widget)
 			end
 		end
 	end
 
-	UIRenderer.end_pass(ui_renderer)
+	UIRenderer.end_pass(ui_top_renderer)
 
 	return 
 end
@@ -525,6 +546,15 @@ AltarTraitRollUI._set_description_text = function (self, text)
 	return 
 end
 AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_equipped)
+	local gamepad_active = self.input_manager:is_device_active("gamepad")
+	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
+
+	if self.charging or reroll_button_widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
 	if self.active_item_id and self.active_item_id ~= backend_item_id then
 		self.popup_confirmed = nil
 	end
@@ -619,14 +649,34 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 
 	self._update_trait_alignment(self, number_of_traits_on_item, false)
 	self._set_selected_trait(self, 1)
-	self._set_description_text(self, "altar_trait_roll_description_2")
+
+	local platform = Application.platform()
+	local description_text = "altar_trait_roll_description_2"
+
+	if (platform == "win32" and gamepad_active) or platform == "xb1" then
+		description_text = description_text .. "_xb1"
+	elseif (platform == "win32" and gamepad_active and UISettings.use_ps4_input_icons) or platform == "ps4" then
+		description_text = description_text .. "_ps4"
+	end
+
+	self._set_description_text(self, description_text)
 
 	local item_button_bg_glow_widget = widgets_by_name.item_button_bg_glow_widget
 	item_button_bg_glow_widget.style.texture_id.color[1] = 0
 
 	self._clear_new_trait_slots(self, true)
 	self.set_traits_info(self, self.current_traits_data, 1, num_traits)
-	self._set_description_text(self, "altar_trait_roll_description_2")
+
+	local platform = Application.platform()
+	local description_text = "altar_trait_roll_description_2"
+
+	if (platform == "win32" and gamepad_active) or platform == "xb1" then
+		description_text = description_text .. "_xb1"
+	elseif (platform == "win32" and gamepad_active and UISettings.use_ps4_input_icons) or platform == "ps4" then
+		description_text = description_text .. "_ps4"
+	end
+
+	self._set_description_text(self, description_text)
 	self._update_trait_cost_display(self)
 
 	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
@@ -911,6 +961,14 @@ AltarTraitRollUI.can_remove_item = function (self)
 	return self.active_item_id and not self.handling_reroll_answer and not self.rerolling
 end
 AltarTraitRollUI.remove_item = function (self)
+	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
+
+	if self.charging or reroll_button_widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
 	self.popup_confirmed = nil
 	self.number_of_traits_on_item = nil
 	local widgets_by_name = self.widgets_by_name
@@ -947,6 +1005,10 @@ AltarTraitRollUI.reroll = function (self, new_item_key)
 	self._set_selected_trait(self, nil)
 
 	self.new_item_key = new_item_key
+	local preview_window_1_button = self.widgets_by_name.preview_window_1_button
+	preview_window_1_button.content.disable_input_icon = true
+	local preview_window_2_button = self.widgets_by_name.preview_window_2_button
+	preview_window_2_button.content.disable_input_icon = true
 
 	if self.rerolling then
 		self.fade_out_preview_window_new_traits_anim_id = self._animate_preview_window(self, "fade_out_preview_window_2_traits")
@@ -1326,6 +1388,8 @@ AltarTraitRollUI._on_preview_window_1_button_hovered = function (self)
 
 	self.window_1_corner_glow_anim_id = self.ui_animator:start_animation("fade_in_window_1_corner_glow", self.widgets_by_name, self.scenegraph_definition, params)
 	self.trait_window_selection_index = 1
+	local preview_window_1_button = self.widgets_by_name.preview_window_1_button
+	preview_window_1_button.content.disable_input_icon = false
 
 	return 
 end
@@ -1340,6 +1404,8 @@ AltarTraitRollUI._on_preview_window_2_button_hovered = function (self)
 
 	self.window_2_corner_glow_anim_id = self.ui_animator:start_animation("fade_in_window_2_corner_glow", self.widgets_by_name, self.scenegraph_definition, params)
 	self.trait_window_selection_index = 2
+	local preview_window_2_button = self.widgets_by_name.preview_window_2_button
+	preview_window_2_button.content.disable_input_icon = false
 
 	return 
 end
@@ -1356,6 +1422,9 @@ AltarTraitRollUI._on_preview_window_1_button_hover_exit = function (self)
 		self.trait_window_selection_index = nil
 	end
 
+	local preview_window_1_button = self.widgets_by_name.preview_window_1_button
+	preview_window_1_button.content.disable_input_icon = true
+
 	return 
 end
 AltarTraitRollUI._on_preview_window_2_button_hover_exit = function (self)
@@ -1370,6 +1439,9 @@ AltarTraitRollUI._on_preview_window_2_button_hover_exit = function (self)
 	if self.trait_window_selection_index == 2 then
 		self.trait_window_selection_index = nil
 	end
+
+	local preview_window_2_button = self.widgets_by_name.preview_window_2_button
+	preview_window_2_button.content.disable_input_icon = true
 
 	return 
 end
@@ -1487,6 +1559,149 @@ AltarTraitRollUI.get_word_wrap_size = function (self, localized_text, text_style
 	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
 
 	return text_width, text_height*#lines
+end
+AltarTraitRollUI.start_charge_progress = function (self)
+	self.charging = true
+	local animation_name = "gamepad_charge_progress"
+	local animation_time = 1.5
+	local from = 0
+	local to = 307
+	local widget = self.widgets_by_name.reroll_button_widget
+	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.reroll_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
+	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
+
+	self.cancel_abort_animation(self)
+
+	widget.content.charging = true
+	widget.style.progress_fill.color[1] = 255
+
+	self._play_sound(self, "Play_hud_reroll_traits_charge")
+
+	return 
+end
+AltarTraitRollUI.abort_charge_progress = function (self, force_shutdown)
+	local animation_name = "gamepad_charge_progress"
+	self.animations[animation_name] = nil
+	self.animations[animation_name .. "_uv"] = nil
+	self.charging = nil
+	self.ui_scenegraph.reroll_button_fill.size[1] = 0
+
+	self._play_sound(self, "Stop_hud_reroll_traits_charge")
+
+	if force_shutdown then
+		self.cancel_abort_animation(self)
+	else
+		self.start_abort_animation(self)
+	end
+
+	return 
+end
+AltarTraitRollUI.on_charge_complete = function (self)
+	self.charging = nil
+	self.gamepad_reroll_request = true
+	local widget = self.widgets_by_name.reroll_button_widget
+	widget.content.charging = false
+	local animation_name = "progress_bar_complete"
+	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, widget.style.progress_fill_glow.color, 1, 0, 255, 0.2, math.easeCubic, UIAnimation.function_by_time, self.ui_scenegraph.reroll_button_fill.size, 1, 0, 0, 0.01, math.easeCubic, UIAnimation.function_by_time, widget.style.progress_fill_glow.color, 1, 255, 0, 0.2, math.easeOutCubic)
+	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, 0, 255, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, 0, 255, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.text.text_color, 1, 0, 255, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "5"] = UIAnimation.init(UIAnimation.wait, 0.2, UIAnimation.function_by_time, widget.style.text_disabled.text_color, 1, 0, 255, 0.3, math.easeInCubic)
+	widget.style.text.text_color[1] = 0
+	widget.style.token_text.text_color[1] = 0
+	widget.style.texture_token_type.color[1] = 0
+	widget.style.text_disabled.text_color[1] = 0
+
+	self._play_sound(self, "Stop_hud_reroll_traits_charge")
+
+	return 
+end
+AltarTraitRollUI.start_abort_animation = function (self)
+	local animation_name = "gamepad_charge_progress_abort"
+	local from = 0
+	local to = 255
+	local widget = self.widgets_by_name.reroll_button_widget
+	widget.content.show_cancel_text = true
+	widget.content.charging = false
+	widget.style.progress_fill.color[1] = 0
+	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, widget.style.text_charge_cancelled.text_color, 1, from, to, 0.2, math.easeInCubic, UIAnimation.wait, 0.3, UIAnimation.function_by_time, widget.style.text_charge_cancelled.text_color, 1, to, from, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
+	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
+
+	return 
+end
+AltarTraitRollUI.cancel_abort_animation = function (self)
+	local animations = self.animations
+	animations.gamepad_charge_progress_abort = nil
+	animations.progress_bar_complete = nil
+
+	for i = 2, 4, 1 do
+		animations["gamepad_charge_progress_abort" .. i] = nil
+	end
+
+	for i = 2, 5, 1 do
+		animations["progress_bar_complete" .. i] = nil
+	end
+
+	local widget = self.widgets_by_name.reroll_button_widget
+	widget.content.charging = false
+	widget.content.show_cancel_text = false
+	widget.style.progress_fill.color[1] = 0
+	widget.style.text_charge_cancelled.text_color[1] = 0
+	widget.style.texture_token_type.color[1] = 255
+	widget.style.token_text.text_color[1] = 255
+	widget.style.text.text_color[1] = 255
+	widget.style.text_disabled.text_color[1] = 255
+
+	return 
+end
+AltarTraitRollUI.on_charge_animations_complete = function (self, animation_name)
+	if animation_name == "gamepad_charge_progress" then
+		self.on_charge_complete(self)
+	end
+
+	if animation_name == "gamepad_charge_progress_abort" then
+		local widget = self.widgets_by_name.reroll_button_widget
+		widget.content.show_cancel_text = false
+	end
+
+	return 
+end
+AltarTraitRollUI.on_gamepad_activated = function (self)
+	local widgets_by_name = self.widgets_by_name
+	local input_manager = self.input_manager
+	local input_service = self.parent:page_input_service()
+	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
+	local button_texture = button_texture_data.texture
+	local button_size = button_texture_data.size
+	local widget = widgets_by_name.reroll_button_widget
+	widget.content.progress_input_icon = button_texture
+	local select_button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "confirm", true)
+	local select_button_texture = select_button_texture_data.texture
+	local preview_window_1_button = widgets_by_name.preview_window_1_button
+	local preview_window_2_button = widgets_by_name.preview_window_2_button
+	preview_window_1_button.content.enable_input_icon = true
+	preview_window_2_button.content.enable_input_icon = true
+	preview_window_1_button.content.progress_input_icon = select_button_texture
+	preview_window_2_button.content.progress_input_icon = select_button_texture
+
+	return 
+end
+AltarTraitRollUI.on_gamepad_deactivated = function (self)
+	return 
+end
+AltarTraitRollUI.set_active = function (self, active)
+	self.active = active
+	local widget = self.widgets_by_name.reroll_button_widget
+
+	if self.charging or widget.content.show_cancel_text then
+		local force_cancel = true
+
+		self.abort_charge_progress(self, force_cancel)
+	end
+
+	return 
 end
 
 return 

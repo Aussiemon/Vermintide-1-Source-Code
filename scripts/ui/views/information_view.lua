@@ -67,7 +67,7 @@ local widget_definitions = {
 InformationView = class(InformationView)
 InformationView.init = function (self, world)
 	self._world = world
-	self.ui_renderer = UIRenderer.create(self._world, "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts")
+	self.ui_renderer = UIRenderer.create(self._world, "material", "materials/fonts/gw_fonts")
 
 	UISetupFontHeights(self.ui_renderer.gui)
 	self._create_ui_elements(self)

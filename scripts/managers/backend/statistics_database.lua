@@ -44,6 +44,7 @@ StatisticsDefinitions = {
 		best_projectile_multikill = {
 			value = 0
 		},
+		damage_dealt_per_breed = {},
 		dynamic_objects_destroyed = {
 			value = 0,
 			database_name = "dynamic_objects_destroyed"
@@ -204,29 +205,105 @@ StatisticsDefinitions = {
 		survival_dlc_survival_magnus_survival_hardest_kills = {
 			value = 0,
 			database_name = "survival_dlc_survival_magnus_survival_hardest_kills"
-		}
-	},
-	weapon = {
-		kills_total = {
-			value = 0,
-			database_name = "kills_total"
-		}
-	},
-	unit_test = {
-		kills_total = {
-			value = 0,
-			database_name = "kills_total"
 		},
-		lorebook_unlocks = {
-			database_name = "lorebook_unlocks",
-			database_type = "hexarray",
-			value = {}
-		},
-		profiles = {
-			witch_hunter = {
-				kills_total = {
-					value = 0
-				}
+		tutorial_revive_ally = {
+			value = 0
+		}
+	}
+}
+local platform = Application.platform()
+
+if platform == "ps4" then
+	StatisticsDefinitions.player.matchmaking_country_code = {
+		value = "N/A",
+		database_name = "matchmaking_country_code"
+	}
+	StatisticsDefinitions.player.matchmaking_primary_region = {
+		value = "N/A",
+		database_name = "matchmaking_primary_region"
+	}
+	StatisticsDefinitions.player.matchmaking_secondary_region = {
+		value = "N/A",
+		database_name = "matchmaking_secondary_region"
+	}
+	StatisticsDefinitions.player.matchmaking_num_searches = {
+		value = 0,
+		database_name = "matchmaking_num_searches"
+	}
+	StatisticsDefinitions.player.matchmaking_aborted_sub_15s = {
+		value = 0,
+		database_name = "matchmaking_aborted_sub_15s"
+	}
+	StatisticsDefinitions.player.matchmaking_aborted_above_15s = {
+		value = 0,
+		database_name = "matchmaking_aborted_above_15s"
+	}
+	StatisticsDefinitions.player.matchmaking_aborted_above_15s_total_time = {
+		value = 0,
+		database_name = "matchmaking_aborted_above_15s_total_time"
+	}
+	StatisticsDefinitions.player.matchmaking_game_joined = {
+		value = 0,
+		database_name = "matchmaking_game_joined"
+	}
+	StatisticsDefinitions.player.matchmaking_game_joined_primary_region = {
+		value = 0,
+		database_name = "matchmaking_game_joined_primary_region"
+	}
+	StatisticsDefinitions.player.matchmaking_game_joined_secondary_region = {
+		value = 0,
+		database_name = "matchmaking_game_joined_secondary_region"
+	}
+	StatisticsDefinitions.player.matchmaking_game_joined_total_search_time = {
+		value = 0,
+		database_name = "matchmaking_game_joined_total_search_time"
+	}
+	StatisticsDefinitions.player.matchmaking_game_started = {
+		value = 0,
+		database_name = "matchmaking_game_started"
+	}
+	StatisticsDefinitions.player.matchmaking_game_started_total_time = {
+		value = 0,
+		database_name = "matchmaking_game_started_total_time"
+	}
+	StatisticsDefinitions.player.matchmaking_game_started_player_amount = {
+		value = 0,
+		database_name = "matchmaking_game_started_player_amount"
+	}
+	StatisticsDefinitions.player.matchmaking_game_started_full_team = {
+		value = 0,
+		database_name = "matchmaking_game_started_full_team"
+	}
+	StatisticsDefinitions.player.matchmaking_first_client_joined = {
+		value = 0,
+		database_name = "matchmaking_first_client_joined"
+	}
+	StatisticsDefinitions.player.matchmaking_first_client_joined_total_time = {
+		value = 0,
+		database_name = "matchmaking_first_client_joined_total_time"
+	}
+end
+
+StatisticsDefinitions.weapon = {
+	kills_total = {
+		value = 0,
+		database_name = "kills_total"
+	}
+}
+StatisticsDefinitions.unit_test = {
+	kills_total = {
+		value = 0,
+		database_name = "kills_total"
+	},
+	lorebook_unlocks = {
+		database_name = "lorebook_unlocks",
+		database_type = "hexarray",
+		value = {}
+	},
+	profiles = {
+		witch_hunter = {
+			kills_total = {
+				value = 0
 			}
 		}
 	}
@@ -239,6 +316,11 @@ for breed_name, breed in pairs(Breeds) do
 		name = breed_name
 	}
 	StatisticsDefinitions.player.kill_assists_per_breed[breed_name] = {
+		value = 0,
+		sync_on_hot_join = true,
+		name = breed_name
+	}
+	StatisticsDefinitions.player.damage_dealt_per_breed[breed_name] = {
 		value = 0,
 		sync_on_hot_join = true,
 		name = breed_name
@@ -366,6 +448,11 @@ StatisticsDatabase.init = function (self)
 
 	for breed_name, breed in pairs(Breeds) do
 		StatisticsDefinitions.player.kills_per_breed[breed_name] = {
+			value = 0,
+			sync_on_hot_join = true,
+			name = breed_name
+		}
+		StatisticsDefinitions.player.damage_dealt_per_breed[breed_name] = {
 			value = 0,
 			sync_on_hot_join = true,
 			name = breed_name
@@ -693,6 +780,10 @@ StatisticsDatabase.set_stat = function (self, id, ...)
 
 	local new_value = select(arg_n, ...)
 	stat.value = new_value
+
+	table.dump(stat, nil, 2)
+	print("ID", id, "Value", new_value)
+
 	stat.persistent_value = new_value
 
 	return 

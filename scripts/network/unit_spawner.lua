@@ -175,6 +175,12 @@ UnitSpawner.mark_for_deletion = function (self, unit, recycle_type)
 
 	return 
 end
+UnitSpawner.is_marked_for_deletion = function (self, unit)
+	local deletion_queue = self.deletion_queue
+	local is_marked = deletion_queue.contains(deletion_queue, unit)
+
+	return is_marked
+end
 UnitSpawner.commit_and_remove_pending_units = function (self)
 	local n_commited = 0
 	local n_removed = 0
@@ -329,6 +335,7 @@ UnitSpawner.spawn_network_unit = function (self, unit_name, unit_template_name, 
 
 	Profiler.stop("make unit networked")
 	self.unit_storage:add_unit_info(unit, go_id, go_type, self.own_peer_id)
+	self.entity_manager:sync_unit_extensions(unit, go_id)
 
 	return unit, go_id
 end

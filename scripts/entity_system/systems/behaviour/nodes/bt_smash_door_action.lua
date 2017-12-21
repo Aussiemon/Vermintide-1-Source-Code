@@ -38,21 +38,23 @@ BTSmashDoorAction.enter = function (self, unit, blackboard, t)
 		exit_lookat_direction = Vector3Box(Vector3.normalize(Vector3.flat(smart_object.exit_pos:unbox() - smart_object.entrance_pos:unbox())))
 	}
 	blackboard.smash_door.state_machine = StateMachine:new(self, BTSmashDoorAction.StateInit, params)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_affected_by_gravity(locomotion_extension, false)
 	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
 	locomotion_extension.set_rotation_speed(locomotion_extension, 10)
 
+	blackboard.spawn_to_running = nil
+
 	return 
 end
 BTSmashDoorAction.leave = function (self, unit, blackboard, t)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
 	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
 
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, true)
 
@@ -81,10 +83,6 @@ BTSmashDoorAction.run = function (self, unit, blackboard, t, dt)
 	end
 
 	if blackboard.attack_aborted then
-		return "failed"
-	end
-
-	if blackboard.stunned then
 		return "failed"
 	end
 
@@ -117,11 +115,14 @@ BTSmashDoorAction.StateInit.update = function (self, dt, t)
 	local unit = self.unit
 	local blackboard = self.blackboard
 	local unit_position = POSITION_LOOKUP[unit]
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
 	if Vector3.distance(self.entrance_pos:unbox(), unit_position) < 1 then
-		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3(0, 0, 0))
+		local locomotion_extension = blackboard.locomotion_extension
+
+		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
+
+		local navigation_extension = blackboard.navigation_extension
+
 		navigation_extension.set_enabled(navigation_extension, false)
 
 		if navigation_extension.use_smart_object(navigation_extension, true) then
@@ -152,7 +153,6 @@ end
 BTSmashDoorAction.StateMovingToSmartObjectEntrance.update = function (self, dt, t)
 	local unit = self.unit
 	local blackboard = self.blackboard
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 	local unit_position = POSITION_LOOKUP[unit]
 	local entrance_pos = self.entrance_pos:unbox()
 	local vector_to_target = entrance_pos - unit_position
@@ -161,6 +161,7 @@ BTSmashDoorAction.StateMovingToSmartObjectEntrance.update = function (self, dt, 
 	if (blackboard.action.door_attack_distance or 0.1) < distance_to_target then
 		local look_direction_wanted = self.exit_lookat_direction:unbox()
 		local direction_to_target = Vector3.normalize(vector_to_target)
+		local locomotion_extension = blackboard.locomotion_extension
 
 		locomotion_extension.set_wanted_velocity(locomotion_extension, direction_to_target*blackboard.breed.walk_speed)
 		locomotion_extension.set_wanted_rotation(locomotion_extension, Quaternion.look(look_direction_wanted))
@@ -190,12 +191,11 @@ BTSmashDoorAction.StateOpening.on_enter = function (self, params)
 	self.unit = unit
 	self.action = action
 	self.target_unit = target_unit
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
 
 	local rotation = LocomotionUtils.rotation_towards_unit(unit, target_unit)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
 	locomotion_extension.set_wanted_rotation(locomotion_extension, rotation)
 
@@ -226,11 +226,12 @@ BTSmashDoorAction.StateOpening.update = function (self, dt, t)
 end
 BTSmashDoorAction.StateAttacking.on_enter = function (self, params)
 	local target_unit = params.blackboard.smash_door.target_unit
-	self.blackboard = params.blackboard
+	local blackboard = params.blackboard
+	self.blackboard = blackboard
 	self.unit = params.unit
 	self.action = params.action
 	self.target_unit = target_unit
-	local locomotion_extension = ScriptUnit.extension(params.unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
 
@@ -270,7 +271,7 @@ BTSmashDoorAction.StateAttacking.attack = function (self)
 	local blackboard = self.blackboard
 	local action = self.action
 	local rotation = LocomotionUtils.rotation_towards_unit(unit, target_unit)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
 	locomotion_extension.set_wanted_rotation(locomotion_extension, rotation)
 	Managers.state.network:anim_event(unit, action.attack_anim)
@@ -292,7 +293,7 @@ end
 BTSmashDoorAction.StateMovingToSmartObjectExit.update = function (self, dt, t)
 	local unit = self.unit
 	local blackboard = self.blackboard
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 	local unit_position = POSITION_LOOKUP[unit]
 	local exit_pos = self.exit_pos:unbox()
 	local vector_to_target = exit_pos - unit_position

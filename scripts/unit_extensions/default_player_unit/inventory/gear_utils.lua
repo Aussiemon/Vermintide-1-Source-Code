@@ -679,43 +679,5 @@ GearUtils.create_grenade_extension_init_data = function (owner_unit, item_name, 
 
 	return extension_init_data
 end
-GearUtils.update_gameobject = function (unit, slot_id, item_name)
-	local equipped_slots = {}
-	local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-	local equipment = inventory_extension.equipment(inventory_extension)
-	local inventory_slots = equipment.slots
-	local attachment_extension = ScriptUnit.extension(unit, "attachment_system")
-	local attachments = attachment_extension.attachments(attachment_extension)
-	local attachemnt_slots = attachments.slots
-	local slots = table.clone(inventory_slots)
-
-	table.merge(slots, attachemnt_slots)
-
-	local network_slot_id = NetworkLookup.equipment_slots[slot_id]
-	local network_weapon_id = NetworkLookup.item_names[item_name]
-	equipped_slots[network_slot_id] = network_weapon_id
-
-	for slot_name, slot_data in pairs(slots) do
-		if slot_name ~= slot_id then
-			local item_data = slot_data.item_data
-			local network_slot_id = NetworkLookup.equipment_slots[slot_name]
-			local network_weapon_id = NetworkLookup.item_names[item_data.name]
-			equipped_slots[network_slot_id] = network_weapon_id
-		end
-	end
-
-	for i = 1, 11, 1 do
-		if equipped_slots[i] == nil then
-			equipped_slots[i] = NetworkLookup.item_names["n/a"]
-		end
-	end
-
-	local game = Managers.state.network:game()
-	local go_id = Managers.state.unit_storage:go_id(unit)
-
-	GameSession.set_game_object_field(game, go_id, "inventory_slots", equipped_slots)
-
-	return 
-end
 
 return 

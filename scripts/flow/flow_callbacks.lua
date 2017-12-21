@@ -1099,50 +1099,9 @@ end
 function flow_callback_set_allowed_nav_tag_volume_layer(params)
 	local layer_name = params.layer
 	local allowed = params.allowed
-	local entity_manager = Managers.state.entity
-	local nav_world = GLOBAL_AI_NAVWORLD
-	local layer_id = LAYER_ID_MAPPING[layer_name]
-	NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] = (allowed and 1) or 0
-	NAV_TAG_VOLUME_LAYER_COST_BOTS[layer_name] = (allowed and 1) or 0
-	local ai_extensions = entity_manager.get_entities(entity_manager, "AINavigationExtension")
+	local ai_system = Managers.state.entity:system("ai_system")
 
-	for _, extension in pairs(ai_extensions) do
-		extension.allow_layer(extension, layer_name, allowed)
-
-		local blackboard = extension._blackboard
-
-		if blackboard.cover_navtag_layer_cost_table then
-			if allowed then
-				GwNavTagLayerCostTable.allow_layer(blackboard.cover_navtag_layer_cost_table, layer_id)
-			else
-				GwNavTagLayerCostTable.forbid_layer(blackboard.cover_navtag_layer_cost_table, layer_id)
-			end
-		end
-
-		if not allowed then
-			local unit = extension._unit
-
-			if Unit.alive(unit) then
-				local unit_position = POSITION_LOOKUP[unit]
-
-				if NavTagVolumeUtils.inside_nav_tag_layer(nav_world, unit_position, 0.5, 0.5, layer_name) then
-					AiUtils.kill_unit(unit, nil, nil, "inside_forbidden_tag_volume", Vector3(0, 0, 0))
-				else
-					local destination_position = extension.destination(extension)
-
-					if NavTagVolumeUtils.inside_nav_tag_layer(nav_world, destination_position, 0.5, 0.5, layer_name) then
-						extension.reset_destination(extension)
-					end
-				end
-			end
-		end
-	end
-
-	local bot_nav_transition_manager = Managers.state.bot_nav_transition
-
-	bot_nav_transition_manager.allow_layer(bot_nav_transition_manager, layer_name, allowed)
-	Managers.state.entity:system("ai_slot_system"):set_allowed_layer(layer_name, allowed)
-	Managers.state.entity:system("ai_group_system"):set_allowed_layer(layer_name, allowed)
+	ai_system.set_allowed_layer(ai_system, layer_name, allowed)
 
 	return 
 end
@@ -1371,6 +1330,52 @@ function flow_callback_spawn_tutorial_bot(params)
 	return 
 end
 
+function flow_callback_set_bot_ready_for_assisted_respawn(params)
+	local unit = params.unit
+	local respawn_unit = params.respawn_unit
+
+	Managers.state.entity:system("play_go_tutorial_system"):set_bot_ready_for_assisted_respawn(unit, respawn_unit)
+
+	return 
+end
+
+function flow_callback_enable_tutorial_player_ammo_refill(params)
+	Managers.state.entity:system("play_go_tutorial_system"):enable_player_ammo_refill()
+
+	return 
+end
+
+function flow_callback_remove_player_ammo(params)
+	Managers.state.entity:system("play_go_tutorial_system"):remove_player_ammo()
+
+	return 
+end
+
+function flow_callback_give_player_potion_from_bot(params)
+	local player_unit = params.player_unit
+	local bot_unit = params.bot_unit
+
+	Managers.state.entity:system("play_go_tutorial_system"):give_player_potion_from_bot(player_unit, bot_unit)
+
+	return 
+end
+
+function flow_callback_teleport_unit(params)
+	local unit = params.unit
+	local position = params.position
+	local rotation = params.rotation
+
+	Managers.state.entity:system("play_go_tutorial_system"):teleport_unit(unit, position, rotation)
+
+	return 
+end
+
+function flow_callback_unspawn_all_ais(params)
+	Managers.state.conflict:destroy_all_units()
+
+	return 
+end
+
 function flow_query_slots_status(params)
 	local player_unit = params.player_unit
 	local equipment = nil
@@ -1423,7 +1428,7 @@ function flow_callback_get_health_player_bot_ai(params)
 		local health_extension = ScriptUnit.extension(unit, "health_system")
 		local status_extension = ScriptUnit.extension(unit, "status_system")
 
-		if status_extension.is_knocked_down(status_extension) then
+		if status_extension.is_knocked_down(status_extension) or status_extension.is_ready_for_assisted_respawn(status_extension) then
 			current_health = 0
 		else
 			current_health = health_extension.current_health(health_extension)
@@ -1477,6 +1482,24 @@ function flow_callback_kill_player_bot_ai(params)
 	return 
 end
 
+function heal_overcharge_unit(unit, damage)
+	local damage_extension = ScriptUnit.extension(unit, "damage_system")
+
+	damage_extension.heal(damage_extension, unit, heal_amount, "wounded_degen")
+
+	return 
+end
+
+function damage_overcharge_unit(unit, damage)
+	local damage_extension = ScriptUnit.extension(unit, "damage_system")
+	local hit_zone_name = "full"
+	local attack_direction = Vector3(0, 0, 0)
+
+	damage_extension.add_damage(damage_extension, unit, damage, hit_zone_name, "destructible_level_object_hit", attack_direction, "wounded_degen")
+
+	return 
+end
+
 function flow_callback_overcharge_heal_unit(params)
 	if not Managers.player.is_server then
 		return 
@@ -1493,11 +1516,13 @@ function flow_callback_overcharge_heal_unit(params)
 		health_extension.add_heal(health_extension, health_added)
 
 		local unit_health = health_extension.current_health(health_extension)
+		local unit_damage = health_extension.current_damage(health_extension)
 		local level_index, is_level_unit = Managers.state.network:game_object_or_level_id(unit)
 
 		Managers.state.network.network_transmit:send_rpc_clients("rpc_level_object_heal", level_index, health_added)
 
 		flow_return_table.current_health = unit_health
+		flow_return_table.current_damage = unit_damage
 
 		return flow_return_table
 	end
@@ -1507,15 +1532,32 @@ end
 
 function flow_callback_overcharge_init_unit(params)
 	local unit = params.unit
-	local damage = params.damage
+	local init_damage = params.init_damage
 
 	if Unit.alive(unit) then
 		fassert(ScriptUnit.has_extension(unit, "health_system"), "Tried to damage overcharge unit %s from flow but the unit has no health extension", unit)
 
 		local health_extension = ScriptUnit.extension(unit, "health_system")
 
-		health_extension.add_damage(health_extension, damage)
+		health_extension.add_damage(health_extension, init_damage)
+
+		if not health_extension.is_alive(health_extension) then
+			print("flow_callback_overcharge_init_unit hack ", init_damage)
+			damage_overcharge_unit(unit, init_damage)
+		end
 	end
+
+	return 
+end
+
+function flow_callback_overcharge_sync_damage(params)
+	local unit = params.unit
+	local damage = params.damage
+	local hit_zone_name = "full"
+	local damage_extension = ScriptUnit.extension(unit, "damage_system")
+	local attack_direction = Vector3(0, 0, 0)
+
+	damage_extension.add_damage(damage_extension, unit, damage, hit_zone_name, "destructible_level_object_hit", attack_direction, NetworkLookup.damage_sources.wounded_degen)
 
 	return 
 end
@@ -1535,7 +1577,11 @@ function flow_callback_overcharge_damage_unit(params)
 
 		health_extension.add_damage(health_extension, damage)
 
-		local unit_health = health_extension.current_health(health_extension)
+		if not health_extension.is_alive(health_extension) then
+			print("flow_callback_overcharge_damage_unit hack", damage)
+			damage_overcharge_unit(unit, damage)
+		end
+
 		local level_index, is_level_unit = Managers.state.network:game_object_or_level_id(unit)
 		local hit_normal = Vector3(0, 0, 0)
 		local damage_source_id = NetworkLookup.damage_sources.wounded_degen
@@ -1826,7 +1872,7 @@ function flow_callback_get_completed_dwarf_levels_difficulty(params)
 		local stats_id = server_player.stats_id(server_player)
 
 		for _, level_key in ipairs(levels) do
-			local difficulty_index = LevelUnlockUtils.completed_level_difficulty(statistics_db, stats_id, level_key)
+			local difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_key)
 
 			if not result or difficulty_index < result then
 				result = difficulty_index
@@ -2436,6 +2482,19 @@ function flow_callback_barrel_explode(params)
 	health_extension.set_max_health(health_extension, 1)
 	damage_extension.add_damage(damage_extension, unit, 1, "full", "grenade", Vector3(1, 0, 0))
 
+	return 
+end
+
+function flow_callback_set_game_mode_variable(params)
+	local variable = params.variable
+	local value = params.value
+	local game_mode = Managers.state.game_mode:game_mode()
+	game_mode[variable] = value
+
+	return 
+end
+
+function flow_callback_print_callstack(params)
 	return 
 end
 

@@ -8,6 +8,7 @@ StateTitleScreenLoadSave.on_enter = function (self, params)
 	self._params = params
 	self._world = self._params.world
 	self._viewport = self._params.viewport
+	self._title_start_ui = params.ui
 	self._save_data_loaded = false
 
 	self._load_save_data(self)
@@ -60,6 +61,10 @@ StateTitleScreenLoadSave._setup_init_network_view = function (self)
 	return 
 end
 StateTitleScreenLoadSave.update = function (self, dt, t)
+	if self._title_start_ui then
+		self._title_start_ui:update(dt, t)
+	end
+
 	if not self._save_data_loaded then
 		return 
 	end

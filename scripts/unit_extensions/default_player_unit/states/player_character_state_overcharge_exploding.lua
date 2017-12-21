@@ -136,6 +136,10 @@ PLayerCharacterStateOverchargeExploding.update = function (self, unit, input, dt
 			DamageUtils.add_damage_network(unit, unit, 10, "torso", "overcharge", Vector3(0, 0, 1), "overcharge")
 		end
 
+		Managers.state.controller_features:add_effect("rumble", {
+			rumble_effect = "overcharge_rumble_crit"
+		})
+
 		local player_locomotion = ScriptUnit.extension(unit, "locomotion_system")
 		local push_direction = Vector3.normalize(Vector3((math.random() - 0.5)*2, (math.random() - 0.5)*2, 0))
 
@@ -199,7 +203,7 @@ PLayerCharacterStateOverchargeExploding.update = function (self, unit, input, dt
 	end
 
 	CharacterStateHelper.move_on_ground(first_person_extension, input_extension, self.locomotion_extension, move_input_direction, move_speed, unit)
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 
 	local move_anim_3p, move_anim_1p = CharacterStateHelper.get_move_animation(self.locomotion_extension, input_extension, status_extension)
 

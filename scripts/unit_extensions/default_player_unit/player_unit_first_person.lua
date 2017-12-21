@@ -44,6 +44,9 @@ PlayerUnitFirstPerson.init = function (self, extension_init_context, unit, exten
 		name = "PlayerUnitFirstPerson"
 	})
 	self._disable_head_bob = false
+	self.aim_assist_multiplier = 1
+	self.aim_assist_ramp_multiplier = 0
+	self.aim_assist_ramp_multiplier_timer = 0
 
 	return 
 end
@@ -54,6 +57,8 @@ PlayerUnitFirstPerson.extensions_ready = function (self)
 	self.locomotion_extension = ScriptUnit.extension(self.unit, "locomotion_system")
 	self.inventory_extension = ScriptUnit.extension(self.unit, "inventory_system")
 	self.attachment_extension = ScriptUnit.extension(self.unit, "attachment_system")
+	self.smart_targeting_extension = ScriptUnit.extension(self.unit, "smart_targeting_system")
+	self.input_extension = ScriptUnit.extension(self.unit, "input_system")
 
 	if script_data.debug_third_person then
 		self.set_first_person_mode(self, false)
@@ -70,6 +75,10 @@ PlayerUnitFirstPerson.destroy = function (self)
 	return 
 end
 PlayerUnitFirstPerson.update = function (self, unit, input, dt, context, t)
+	if Managers.input:is_device_active("gamepad") then
+		self.update_aim_assist_multiplier(self, dt)
+	end
+
 	self.update_player_height(self, t)
 	self.update_rotation(self, t, dt)
 	self.update_position(self)
@@ -102,6 +111,59 @@ PlayerUnitFirstPerson.update = function (self, unit, input, dt, context, t)
 
 		self.set_first_person_mode(self, not self.first_person_mode)
 	end
+
+	return 
+end
+PlayerUnitFirstPerson.update_aim_assist_multiplier = function (self, dt)
+	if Application.user_setting("gamepad_auto_aim_enabled") then
+		local inventory_extension = self.inventory_extension
+		local weapon_template = inventory_extension.get_wielded_slot_item_template(inventory_extension)
+		local aim_assist_settings = weapon_template and weapon_template.aim_assist_settings
+		local aim_assist_multiplier = (aim_assist_settings and aim_assist_settings.base_multiplier) or 0
+		local no_aim_input_multiplier = (aim_assist_settings and aim_assist_settings.no_aim_input_multiplier) or aim_assist_multiplier*0.5
+		local input_extension = self.input_extension
+		local look_raw = input_extension.get(input_extension, "look_raw_controller")
+		local move = input_extension.get(input_extension, "move_controller")
+		local has_input = true
+
+		if (not aim_assist_settings or not aim_assist_settings.always_auto_aim) and Vector3.length(look_raw) < 0.01 then
+			aim_assist_multiplier = no_aim_input_multiplier
+
+			if Vector3.length(move) < 0.01 then
+				has_input = false
+			end
+		end
+
+		local aim_assist_ramp_multiplier_timer = math.max(self.aim_assist_ramp_multiplier_timer - dt, 0)
+		local aim_assist_ramp_multiplier = nil
+
+		if 0 < aim_assist_ramp_multiplier_timer then
+			aim_assist_ramp_multiplier = self.aim_assist_ramp_multiplier
+		else
+			aim_assist_ramp_multiplier = math.max(self.aim_assist_ramp_multiplier - dt, 0)
+		end
+
+		self.aim_assist_multiplier = (has_input and math.min(aim_assist_multiplier + aim_assist_ramp_multiplier, 1)) or 0
+		self.aim_assist_ramp_multiplier = aim_assist_ramp_multiplier
+		self.aim_assist_ramp_multiplier_timer = aim_assist_ramp_multiplier_timer
+	else
+		self.aim_assist_multiplier = 0
+		self.aim_assist_ramp_multiplier = 0
+		self.aim_assist_ramp_multiplier_timer = 0
+	end
+
+	return 
+end
+PlayerUnitFirstPerson.increase_aim_assist_multiplier = function (self, value, max_value, delay)
+	local delay = delay or 2
+	self.aim_assist_ramp_multiplier = math.min(self.aim_assist_ramp_multiplier + value, max_value)
+	self.aim_assist_ramp_multiplier_timer = delay
+
+	return 
+end
+PlayerUnitFirstPerson.reset_aim_assist_multiplier = function (self)
+	self.aim_assist_ramp_multiplier = 0
+	self.aim_assist_ramp_multiplier_timer = 0
 
 	return 
 end
@@ -146,63 +208,14 @@ PlayerUnitFirstPerson.force_look_rotation = function (self, rot, total_lerp_time
 
 	return 
 end
-PlayerUnitFirstPerson.set_aim_assist_unit = function (self, unit, node, total_lerp_time)
-	if AiUtils.unit_alive(unit) then
-		self._aim_assist_unit = unit
-		self._aim_assist_node_index = (Unit.has_node(unit, node) and Unit.node(unit, node)) or 0
-		self._aim_assist_lerp_timer = self._aim_assist_lerp_timer or 0
-		self._aim_assist_lerp_time = total_lerp_time or 0.3
-	else
-		self._aim_assist_unit = nil
-		self._aim_assist_lerp_timer = nil
-		self._aim_assist_node_index = nil
-		self._aim_assist_lerp_time = nil
-		self.look_delta = nil
-	end
-
-	return 
-end
 PlayerUnitFirstPerson.update_rotation = function (self, t, dt)
 	local first_person_unit = self.first_person_unit
-
-	if self._aim_assist_unit then
-		local input_manager = Managers.input
-		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-		local input_service = input_manager.get_service(input_manager, "Player")
-		local look = input_service.get(input_service, "look_raw_controller")
-
-		if not AiUtils.unit_alive(self._aim_assist_unit) or not gamepad_active or 0.5625 < Vector3.length_squared(look) then
-			self._aim_assist_unit = nil
-			self._aim_assist_lerp_timer = nil
-			self._aim_assist_node_index = nil
-			self._aim_assist_lerp_time = nil
-		end
-	end
+	local aim_assist_data = self.smart_targeting_extension:get_targeting_data()
 
 	if Bulldozer.rift then
 		local new_rotation = Oculus.get_orientation(Bulldozer.rift_info.hmd_device)
 
 		Unit.set_local_rotation(first_person_unit, 0, new_rotation)
-	elseif self._aim_assist_unit ~= nil then
-		local total_lerp_time = self._aim_assist_lerp_time
-		self._aim_assist_lerp_timer = self._aim_assist_lerp_timer + dt
-		local p = math.clamp(self._aim_assist_lerp_timer/total_lerp_time, 0, 1) - 1
-		p = p - 1
-		local aim_assist_unit_pos = Unit.world_position(self._aim_assist_unit, self._aim_assist_node_index)
-		local current_position = self.current_position(self)
-		local aim_assist_rotation = Quaternion.look(aim_assist_unit_pos - current_position, Vector3.up())
-		local look_rotation = Quaternion.lerp(self.look_rotation:unbox(), aim_assist_rotation, p)
-		local yaw = Quaternion.yaw(look_rotation)
-		local pitch = math.clamp(Quaternion.pitch(look_rotation), -self.MAX_MIN_PITCH, self.MAX_MIN_PITCH)
-		local roll = Quaternion.roll(look_rotation)
-		local yaw_rotation = Quaternion(Vector3.up(), yaw)
-		local pitch_rotation = Quaternion(Vector3.right(), pitch)
-		local roll_rotation = Quaternion(Vector3.forward(), roll)
-		local yaw_pitch_rotation = Quaternion.multiply(yaw_rotation, pitch_rotation)
-		look_rotation = Quaternion.multiply(yaw_pitch_rotation, roll_rotation)
-
-		self.look_rotation:store(look_rotation)
-		Unit.set_local_rotation(first_person_unit, 0, look_rotation)
 	elseif self.forced_look_rotation ~= nil then
 		local total_lerp_time = self.forced_total_lerp_time or 0.3
 		self.forced_lerp_timer = self.forced_lerp_timer + dt
@@ -230,14 +243,15 @@ PlayerUnitFirstPerson.update_rotation = function (self, t, dt)
 			self.forced_lerp_time = nil
 		end
 	elseif self.look_delta ~= nil then
+		local aim_assist_unit = aim_assist_data.unit
 		local rotation = self.look_rotation:unbox()
 		local look_delta = self.look_delta
 		self.look_delta = nil
-		local yaw = Quaternion.yaw(rotation) - look_delta.x
-		local pitch = math.clamp(Quaternion.pitch(rotation) + look_delta.y, -self.MAX_MIN_PITCH, self.MAX_MIN_PITCH)
-		local yaw_rotation = Quaternion(Vector3.up(), yaw)
-		local pitch_rotation = Quaternion(Vector3.right(), pitch)
-		local look_rotation = Quaternion.multiply(yaw_rotation, pitch_rotation)
+		local look_rotation = self.calculate_look_rotation(self, rotation, look_delta)
+
+		if aim_assist_unit and Managers.input:is_device_active("gamepad") then
+			look_rotation = self.calculate_aim_assisted_rotation(self, look_rotation, aim_assist_data, look_delta, dt)
+		end
 
 		self.look_rotation:store(look_rotation)
 
@@ -247,6 +261,33 @@ PlayerUnitFirstPerson.update_rotation = function (self, t, dt)
 	end
 
 	return 
+end
+PlayerUnitFirstPerson.calculate_look_rotation = function (self, current_rotation, look_delta)
+	local yaw = Quaternion.yaw(current_rotation) - look_delta.x
+	local pitch = math.clamp(Quaternion.pitch(current_rotation) + look_delta.y, -self.MAX_MIN_PITCH, self.MAX_MIN_PITCH)
+	local yaw_rotation = Quaternion(Vector3.up(), yaw)
+	local pitch_rotation = Quaternion(Vector3.right(), pitch)
+	local look_rotation = Quaternion.multiply(yaw_rotation, pitch_rotation)
+
+	return look_rotation
+end
+PlayerUnitFirstPerson.calculate_aim_assisted_rotation = function (self, look_rotation, aim_assist_data, look_delta, dt)
+	local aim_assist_unit = aim_assist_data.unit
+	local aim_assist_position = aim_assist_data.target_position
+	local current_pos = self.current_position(self)
+	local direction = aim_assist_position - current_pos
+	local target_rotation = Quaternion.look(direction, Vector3.up())
+	local aim_score = aim_assist_data.aim_score
+	local aim_assist_multiplier = self.aim_assist_multiplier
+	local horizontal_lerp = (aim_assist_data.vertical_only and look_rotation) or Quaternion.lerp(look_rotation, target_rotation, dt*33*aim_score*aim_assist_multiplier)
+	local vertical_lerp = Quaternion.lerp(look_rotation, target_rotation, aim_assist_multiplier*0.5*dt*33*aim_score*aim_assist_multiplier)
+	local yaw = Quaternion.yaw(horizontal_lerp)
+	local pitch = Quaternion.pitch(vertical_lerp)
+	local yaw_rotation = Quaternion(Vector3.up(), yaw)
+	local pitch_rotation = Quaternion(Vector3.right(), pitch)
+	local wanted_rotation = Quaternion.multiply(yaw_rotation, pitch_rotation)
+
+	return wanted_rotation
 end
 PlayerUnitFirstPerson.update_position = function (self)
 	local position_root = Unit.local_position(self.unit, 0)
@@ -311,15 +352,17 @@ PlayerUnitFirstPerson.is_within_default_view = function (self, position)
 
 	return false
 end
-PlayerUnitFirstPerson.apply_recoil = function (self)
+PlayerUnitFirstPerson.apply_recoil = function (self, factor)
 	local player = Managers.player:owner(self.unit)
 	local viewport_name = player.viewport_name
 	local viewport = ScriptWorld.viewport(self.world, viewport_name)
 	local camera = ScriptViewport.camera(viewport)
 	local camera_rotation = ScriptCamera.rotation(camera)
+	local current_rotation = self.look_rotation:unbox()
+	local recoil_rotation = Quaternion.lerp(current_rotation, camera_rotation, factor or 1)
 
-	Unit.set_local_rotation(self.first_person_unit, 0, camera_rotation)
-	self.look_rotation:store(camera_rotation)
+	Unit.set_local_rotation(self.first_person_unit, 0, recoil_rotation)
+	self.look_rotation:store(recoil_rotation)
 
 	return 
 end
@@ -513,6 +556,13 @@ PlayerUnitFirstPerson.play_sound_event = function (self, event, position)
 end
 PlayerUnitFirstPerson.play_camera_effect_sequence = function (self, event, t)
 	Managers.state.camera:camera_effect_sequence_event(event, t)
+
+	return 
+end
+PlayerUnitFirstPerson.set_aim_assist = function (self, assist_type)
+	if assist_type == "" then
+		self.aim_assist_type = assist_type
+	end
 
 	return 
 end

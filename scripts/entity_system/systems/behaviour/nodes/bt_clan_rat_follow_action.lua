@@ -9,7 +9,6 @@ local CHASE_MIN_REQUIRED_MOVEMENT_DISTANCE = 2
 local CHASE_MAX_TARGET_DISTANCE = 10
 local CHASE_MAX_SPEED_INCREASE = 2
 local CHASE_DEACCELERATION_DISTANCE = 1
-local MATCH_TARGET_SPEED_INTERPOLATION_FACTOR = 0.2
 local RUN_SPEED_INTERPOLATION_FACTOR = 0.15
 local POSITION_LOOKUP = POSITION_LOOKUP
 local Vector3_length = Vector3.length
@@ -81,7 +80,7 @@ BTClanRatFollowAction.leave = function (self, unit, blackboard, t)
 	blackboard.move_state = nil
 
 	if Managers.state.network:in_game_session() then
-		self.set_start_move_animation_lock(self, unit, false)
+		self.set_start_move_animation_lock(self, unit, blackboard, false)
 	end
 
 	blackboard.start_anim_locked = nil
@@ -113,7 +112,7 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 	Profiler.start("BTClanRatFollowAction")
 
 	if not Unit_alive(blackboard.target_unit) then
-		Profiler.stop()
+		Profiler.stop("BTClanRatFollowAction")
 
 		return "done"
 	end
@@ -124,7 +123,7 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 		blackboard.move_state = "moving"
 		blackboard.start_anim_locked = nil
 
-		self.set_start_move_animation_lock(self, unit, false)
+		self.set_start_move_animation_lock(self, unit, blackboard, false)
 	end
 
 	if blackboard.walking then
@@ -151,7 +150,7 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 			blackboard.move_state = "moving"
 			blackboard.anim_lock_fallback_time = nil
 
-			self.set_start_move_animation_lock(self, unit, false)
+			self.set_start_move_animation_lock(self, unit, blackboard, false)
 
 			blackboard.start_anim_locked = nil
 			blackboard.start_anim_done = true
@@ -177,7 +176,7 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 	end
 
 	Profiler.stop("reach-dest")
-	Profiler.stop()
+	Profiler.stop("BTClanRatFollowAction")
 
 	return "running", should_evaluate
 end
@@ -307,7 +306,7 @@ BTClanRatFollowAction._calculate_run_speed = function (self, unit, target_unit, 
 	return new_speed
 end
 BTClanRatFollowAction.start_move_animation = function (self, unit, blackboard)
-	self.set_start_move_animation_lock(self, unit, true)
+	self.set_start_move_animation_lock(self, unit, blackboard, true)
 
 	local animation_name = AiAnimUtils.get_start_move_animation(unit, blackboard, blackboard.action)
 
@@ -320,9 +319,9 @@ BTClanRatFollowAction.start_move_animation = function (self, unit, blackboard)
 end
 BTClanRatFollowAction.start_move_rotation = function (self, unit, blackboard, t, dt)
 	if blackboard.move_animation_name == "move_start_fwd" then
-		self.set_start_move_animation_lock(self, unit, false)
+		self.set_start_move_animation_lock(self, unit, blackboard, false)
 
-		local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+		local locomotion_extension = blackboard.locomotion_extension
 		local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 
 		locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
@@ -335,12 +334,12 @@ BTClanRatFollowAction.start_move_rotation = function (self, unit, blackboard, t,
 
 	return 
 end
-BTClanRatFollowAction.set_start_move_animation_lock = function (self, unit, should_lock_ani)
-	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
+BTClanRatFollowAction.set_start_move_animation_lock = function (self, unit, blackboard, should_lock_ani)
+	local locomotion_extension = blackboard.locomotion_extension
 
 	if should_lock_ani then
 		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
-		LocomotionUtils.set_animation_driven_movement(unit, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 	else
 		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
 		LocomotionUtils.set_animation_driven_movement(unit, false)

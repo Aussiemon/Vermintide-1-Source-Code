@@ -74,14 +74,6 @@ ProjectileTemplates.impact_templates = {
 					blackboard.explosion_impact = true
 				end
 
-				return true
-			end
-		},
-		client = {
-			execute = function (world, damage_source, unit, recent_impacts, num_impacts, owner_unit)
-				Unit.set_unit_visibility(unit, false)
-				Unit.flow_event(unit, "lua_projectile_impact")
-
 				if AiUtils.unit_alive(owner_unit) then
 					local players_inside = 0
 					local area_damage_position = POSITION_LOOKUP[unit]
@@ -104,8 +96,16 @@ ProjectileTemplates.impact_templates = {
 					local event_data = FrameTable.alloc_table()
 					event_data.num_units = players_inside
 
-					dialogue_input.trigger_networked_dialogue_event(dialogue_input, "pwg_projectile_hit", event_data)
+					dialogue_input.trigger_dialogue_event(dialogue_input, "pwg_projectile_hit", event_data)
 				end
+
+				return true
+			end
+		},
+		client = {
+			execute = function (world, damage_source, unit, recent_impacts, num_impacts, owner_unit)
+				Unit.set_unit_visibility(unit, false)
+				Unit.flow_event(unit, "lua_projectile_impact")
 
 				return true
 			end

@@ -37,6 +37,44 @@ SpreadTemplates = {
 			}
 		}
 	},
+	repeating_pistol = {
+		continuous = {
+			still = {
+				max_yaw = 1,
+				max_pitch = 1
+			},
+			moving = {
+				max_yaw = 1.2,
+				max_pitch = 1.2
+			},
+			crouch_still = {
+				max_yaw = 0.8,
+				max_pitch = 0.8
+			},
+			crouch_moving = {
+				max_yaw = 2,
+				max_pitch = 2
+			},
+			zoomed_still = {
+				max_yaw = 0,
+				max_pitch = 0
+			},
+			zoomed_moving = {
+				max_yaw = 0.4,
+				max_pitch = 0.4
+			}
+		},
+		immediate = {
+			being_hit = {
+				immediate_pitch = 1.4,
+				immediate_yaw = 1.4
+			},
+			shooting = {
+				immediate_pitch = 0.35,
+				immediate_yaw = 0.35
+			}
+		}
+	},
 	sparks = {
 		continuous = {
 			still = {
@@ -230,20 +268,20 @@ SpreadTemplates = {
 	repeating_handgun = {
 		continuous = {
 			still = {
-				max_yaw = 0.75,
-				max_pitch = 0.75
+				max_yaw = 0.6,
+				max_pitch = 0.6
 			},
 			moving = {
-				max_yaw = 2.5,
-				max_pitch = 2.5
+				max_yaw = 1.5,
+				max_pitch = 1.5
 			},
 			crouch_still = {
 				max_yaw = 0.5,
 				max_pitch = 0.5
 			},
 			crouch_moving = {
-				max_yaw = 2,
-				max_pitch = 2
+				max_yaw = 0.75,
+				max_pitch = 0.75
 			},
 			zoomed_still = {
 				max_yaw = 0.1,
@@ -298,8 +336,8 @@ SpreadTemplates = {
 				immediate_yaw = 1.4
 			},
 			shooting = {
-				immediate_pitch = 6,
-				immediate_yaw = 6
+				immediate_pitch = 0.5,
+				immediate_yaw = 0.5
 			}
 		}
 	},
@@ -382,20 +420,20 @@ SpreadTemplates = {
 	repeating_handgun_special = {
 		continuous = {
 			still = {
-				max_yaw = 4,
-				max_pitch = 2.5
+				max_yaw = 6,
+				max_pitch = 4
 			},
 			moving = {
-				max_yaw = 4,
-				max_pitch = 3
+				max_yaw = 6,
+				max_pitch = 4
 			},
 			crouch_still = {
-				max_yaw = 4,
-				max_pitch = 2.5
+				max_yaw = 6,
+				max_pitch = 4
 			},
 			crouch_moving = {
 				max_yaw = 6,
-				max_pitch = 2
+				max_pitch = 4
 			},
 			zoomed_still = {
 				max_yaw = 0,
@@ -496,12 +534,12 @@ SpreadTemplates = {
 	brace_of_pistols = {
 		continuous = {
 			still = {
-				max_yaw = 1.5,
-				max_pitch = 1.5
+				max_yaw = 1,
+				max_pitch = 1
 			},
 			moving = {
-				max_yaw = 2,
-				max_pitch = 2
+				max_yaw = 1,
+				max_pitch = 1
 			},
 			crouch_still = {
 				max_yaw = 1,
@@ -572,20 +610,20 @@ SpreadTemplates = {
 	brace_of_drake_pistols = {
 		continuous = {
 			still = {
-				max_yaw = 3,
-				max_pitch = 3
+				max_yaw = 2,
+				max_pitch = 2
 			},
 			moving = {
-				max_yaw = 4,
-				max_pitch = 4
-			},
-			crouch_still = {
 				max_yaw = 3,
 				max_pitch = 3
 			},
+			crouch_still = {
+				max_yaw = 2,
+				max_pitch = 2
+			},
 			crouch_moving = {
-				max_yaw = 3.5,
-				max_pitch = 3.5
+				max_yaw = 2.5,
+				max_pitch = 2.5
 			},
 			zoomed_still = {
 				max_yaw = 0,
@@ -726,7 +764,7 @@ SpreadTemplates = {
 }
 SpreadTemplates.fireball = SpreadTemplates.fireball or table.clone(SpreadTemplates.default)
 SpreadTemplates.beam_staff_basic = SpreadTemplates.beam_staff_basic or table.clone(SpreadTemplates.default)
-SpreadTemplates.repeating_pistol = SpreadTemplates.repeating_pistol or table.clone(SpreadTemplates.default)
+SpreadTemplates.repeating_pistol = SpreadTemplates.repeating_handgun or table.clone(SpreadTemplates.default)
 SpreadTemplates.repeating_handgun = SpreadTemplates.repeating_handgun or table.clone(SpreadTemplates.default)
 SpreadTemplates.repeating_handgun_special = SpreadTemplates.repeating_handgun_special or table.clone(SpreadTemplates.default)
 SpreadTemplates.sparks = SpreadTemplates.sparks or table.clone(SpreadTemplates.default)
@@ -735,7 +773,7 @@ SpreadTemplates.longbow = SpreadTemplates.longbow or table.clone(SpreadTemplates
 SpreadTemplates.handgun = table.create_copy(SpreadTemplates.handgun, SpreadTemplates.handgun) or table.clone(SpreadTemplates.default)
 SpreadTemplates.crossbow = SpreadTemplates.crossbow or table.clone(SpreadTemplates.default)
 SpreadTemplates.brace_of_pistols = SpreadTemplates.brace_of_pistols or table.clone(SpreadTemplates.default)
-SpreadTemplates.pistol_special = SpreadTemplates.pistol_special or table.clone(SpreadTemplates.default)
+SpreadTemplates.pistol_special = SpreadTemplates.brace_of_pistols or table.clone(SpreadTemplates.default)
 SpreadTemplates.brace_of_drake_pistols = SpreadTemplates.brace_of_drake_pistols or table.clone(SpreadTemplates.default)
 SpreadTemplates.drakegun = SpreadTemplates.drakegun or table.clone(SpreadTemplates.default)
 SpreadTemplates.bow = table.create_copy(SpreadTemplates.bow, SpreadTemplates.bow) or table.clone(SpreadTemplates.default)

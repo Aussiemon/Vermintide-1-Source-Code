@@ -35,7 +35,7 @@ BTSelector_critter_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -57,7 +57,7 @@ BTSelector_critter_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_under_door.run(node_under_door, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("under_door")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -79,7 +79,7 @@ BTSelector_critter_rat.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_flee_sequence.run(node_flee_sequence, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("flee_sequence")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -99,7 +99,7 @@ BTSelector_critter_rat.run = function (self, unit, blackboard, t, dt)
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

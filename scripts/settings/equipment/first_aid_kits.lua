@@ -73,6 +73,13 @@ weapon_template.actions = {
 				return end_reason ~= "new_interupting_action"
 			end,
 			total_time = math.huge,
+			buff_data = {
+				{
+					start_time = 0,
+					external_multiplier = 0.75,
+					buff_name = "planted_decrease_movement"
+				}
+			},
 			allowed_chain_actions = {
 				{
 					sub_action = "push",
@@ -163,6 +170,8 @@ weapon_template.actions = {
 	action_inspect = ActionTemplates.action_inspect_left,
 	action_wield = ActionTemplates.wield_left,
 	action_instant_grenade_throw = ActionTemplates.instant_equip_grenade,
+	action_instant_heal_self = ActionTemplates.instant_equip_and_heal_self,
+	action_instant_heal_other = ActionTemplates.instant_equip_and_heal_other,
 	action_instant_drink_potion = ActionTemplates.instant_equip_and_drink_potion,
 	action_instant_equip_tome = ActionTemplates.instant_equip_tome,
 	action_instant_equip_grimoire = ActionTemplates.instant_equip_grimoire,
@@ -189,6 +198,10 @@ weapon_template.can_heal_other = true
 weapon_template.can_heal_self = true
 weapon_template.bot_heal_threshold = 0.2
 weapon_template.fast_heal = false
+weapon_template.max_fatigue_points = 1
+weapon_template.dodge_distance = 1.2
+weapon_template.dodge_speed = 1.2
+weapon_template.dodge_count = 3
 Weapons = Weapons or {}
 Weapons.first_aid_kit = Weapons.first_aid_kit or table.clone(weapon_template)
 Weapons.first_aid_kit.left_hand_unit = "units/weapons/player/wpn_first_aid_kit/wpn_first_aid_kit"

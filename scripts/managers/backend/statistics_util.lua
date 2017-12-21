@@ -1,267 +1,281 @@
-StatisticsUtil = {
-	register_kill = function (victim_unit, damage_data, statistics_db, is_server)
-		local attacker_unit = damage_data[DamageDataIndex.ATTACKER]
-		local damaging_unit = damage_data[DamageDataIndex.DAMAGING_UNIT]
-		attacker_unit = AiUtils.get_actual_attacker_unit(attacker_unit)
-		local player_manager = Managers.player
-		local attacker_player = player_manager.owner(player_manager, attacker_unit)
+local Unit_alive = Unit.alive
+local Unit_get_data = Unit.get_data
+StatisticsUtil = {}
+local StatisticsUtil = StatisticsUtil
+StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db, is_server)
+	local attacker_unit = damage_data[DamageDataIndex.ATTACKER]
+	local damaging_unit = damage_data[DamageDataIndex.DAMAGING_UNIT]
+	attacker_unit = AiUtils.get_actual_attacker_unit(attacker_unit)
+	local player_manager = Managers.player
+	local attacker_player = player_manager.owner(player_manager, attacker_unit)
 
-		if damaging_unit and damaging_unit ~= "n/a" and ScriptUnit.has_extension(damaging_unit, "projectile_system") then
-			local projectile_ext = ScriptUnit.extension(damaging_unit, "projectile_system")
+	if damaging_unit and damaging_unit ~= "n/a" and ScriptUnit.has_extension(damaging_unit, "projectile_system") then
+		local projectile_ext = ScriptUnit.extension(damaging_unit, "projectile_system")
 
-			if projectile_ext.add_kill then
-				projectile_ext.add_kill(projectile_ext)
+		if projectile_ext.add_kill then
+			projectile_ext.add_kill(projectile_ext)
+		end
+	end
+
+	if attacker_player then
+		local stats_id = attacker_player.stats_id(attacker_player)
+
+		statistics_db.increment_stat(statistics_db, stats_id, "kills_total")
+
+		local breed = Unit_get_data(victim_unit, "breed")
+
+		if breed ~= nil then
+			local breed_name = breed.name
+			local print_message = breed.awards_positive_reinforcement_message
+
+			if print_message then
+				local predicate = "killed_special"
+				local local_human = not attacker_player.remote and not attacker_player.bot_player
+
+				Managers.state.event:trigger("add_coop_feedback_kill", attacker_player.stats_id(attacker_player) .. breed_name, local_human, predicate, attacker_player.name(attacker_player), breed_name)
+			end
+
+			statistics_db.increment_stat(statistics_db, stats_id, "kills_per_breed", breed_name)
+
+			local hit_zone = damage_data[DamageDataIndex.HIT_ZONE]
+
+			if hit_zone == "head" then
+				statistics_db.increment_stat(statistics_db, stats_id, "headshots")
+			end
+
+			local inventory_extension = ScriptUnit.extension(attacker_unit, "inventory_system")
+			local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+
+			if slot_name == "slot_melee" then
+				statistics_db.increment_stat(statistics_db, stats_id, "kills_melee")
+			elseif slot_name == "slot_ranged" then
+				statistics_db.increment_stat(statistics_db, stats_id, "kills_ranged")
 			end
 		end
+	elseif statistics_db.is_registered(statistics_db, attacker_unit) then
+		statistics_db.increment_stat(statistics_db, attacker_unit, "kills_total")
+	end
 
-		if attacker_player then
-			local stats_id = attacker_player.stats_id(attacker_player)
+	local human_and_bot_players = player_manager.human_and_bot_players(player_manager)
 
-			statistics_db.increment_stat(statistics_db, stats_id, "kills_total")
-
-			local breed = Unit.get_data(victim_unit, "breed")
+	for _, player in pairs(human_and_bot_players) do
+		if player ~= attacker_player then
+			local stats_id = player.stats_id(player)
+			local breed = Unit_get_data(victim_unit, "breed")
 
 			if breed ~= nil then
 				local breed_name = breed.name
-				local print_message = breed.awards_positive_reinforcement_message
 
-				if print_message then
-					local predicate = "killed_special"
-					local local_human = not attacker_player.remote and not attacker_player.bot_player
-
-					Managers.state.event:trigger("add_coop_feedback_kill", attacker_player.stats_id(attacker_player) .. breed_name, local_human, predicate, attacker_player.name(attacker_player), breed_name)
-				end
-
-				statistics_db.increment_stat(statistics_db, stats_id, "kills_per_breed", breed_name)
-
-				local hit_zone = damage_data[DamageDataIndex.HIT_ZONE]
-
-				if hit_zone == "head" then
-					statistics_db.increment_stat(statistics_db, stats_id, "headshots")
-				end
-
-				local inventory_extension = ScriptUnit.extension(attacker_unit, "inventory_system")
-				local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-
-				if slot_name == "slot_melee" then
-					statistics_db.increment_stat(statistics_db, stats_id, "kills_melee")
-				elseif slot_name == "slot_ranged" then
-					statistics_db.increment_stat(statistics_db, stats_id, "kills_ranged")
-				end
+				statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_per_breed", breed_name)
 			end
-		elseif statistics_db.is_registered(statistics_db, attacker_unit) then
-			statistics_db.increment_stat(statistics_db, attacker_unit, "kills_total")
+		end
+	end
+
+	return 
+end
+StatisticsUtil.check_save = function (savior_unit, enemy_unit)
+	local blackboard = Unit_get_data(enemy_unit, "blackboard")
+	local saved_unit = blackboard.target_unit
+	local savior_player = savior_unit and Managers.player:owner(savior_unit)
+	local saved_player = saved_unit and Managers.player:owner(saved_unit)
+
+	if savior_player and saved_player and savior_player ~= saved_player then
+		local saved_unit_dir = nil
+		local network_manager = Managers.state.network
+		local game = network_manager.game(network_manager)
+		local game_object_id = game and network_manager.unit_game_object_id(network_manager, saved_unit)
+
+		if game_object_id then
+			saved_unit_dir = Vector3.normalize(Vector3.flat(GameSession.game_object_field(game, game_object_id, "aim_direction")))
+		else
+			saved_unit_dir = Quaternion.forward(Unit.local_rotation(saved_unit, 0))
 		end
 
-		local human_and_bot_players = player_manager.human_and_bot_players(player_manager)
+		local enemy_unit_dir = Quaternion.forward(Unit.local_rotation(enemy_unit, 0))
+		local saved_unit_pos = POSITION_LOOKUP[saved_unit]
+		local enemy_unit_pos = POSITION_LOOKUP[enemy_unit]
+		local attack_dir = saved_unit_pos - enemy_unit_pos
+		local is_behind = Vector3.distance(saved_unit_pos, enemy_unit_pos) < 3 and 0 < Vector3.dot(attack_dir, saved_unit_dir) and 0 < Vector3.dot(attack_dir, enemy_unit_dir)
+		local status_ext = ScriptUnit.extension(saved_unit, "status_system")
+		local grabber_unit = status_ext.get_pouncer_unit(status_ext) or status_ext.get_pack_master_grabber(status_ext)
+		local is_disabled = status_ext.is_disabled(status_ext)
+		local predicate = nil
 
-		for _, player in pairs(human_and_bot_players) do
-			if player ~= attacker_player then
+		if enemy_unit == grabber_unit then
+			predicate = "save"
+		elseif is_behind or is_disabled then
+			predicate = "aid"
+
+			if not savior_player.remote then
+				BuffUtils.trigger_assist_buffs(savior_player, saved_player)
+			end
+		end
+
+		if predicate then
+			local local_human = not savior_player.remote and not savior_player.bot_player
+
+			Managers.state.event:trigger("add_coop_feedback", savior_player.stats_id(savior_player) .. saved_player.stats_id(saved_player), local_human, predicate, savior_player, saved_player)
+			Managers.state.network.network_transmit:send_rpc_clients("rpc_coop_feedback", savior_player.network_id(savior_player), savior_player.local_player_id(savior_player), NetworkLookup.coop_feedback[predicate], saved_player.network_id(saved_player), saved_player.local_player_id(saved_player))
+		end
+	end
+
+	return 
+end
+StatisticsUtil.register_pull_up = function (puller_up_unit, pulled_up_unit, statistics_db)
+	local player_manager = Managers.player
+	local player1 = player_manager.owner(player_manager, puller_up_unit)
+	local player2 = player_manager.owner(player_manager, pulled_up_unit)
+
+	if player1 and player2 then
+		local predicate = "assisted_respawn"
+		local local_human = not player1.remote and not player1.bot_player
+
+		Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
+	end
+
+	return 
+end
+StatisticsUtil.register_assisted_respawn = function (reviver_unit, revivee_unit, statistics_db)
+	local player_manager = Managers.player
+	local player1 = player_manager.owner(player_manager, reviver_unit)
+	local player2 = player_manager.owner(player_manager, revivee_unit)
+
+	if player1 and player2 then
+		local predicate = "assisted_respawn"
+		local local_human = not player1.remote and not player1.bot_player
+
+		Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
+	end
+
+	return 
+end
+StatisticsUtil.register_revive = function (reviver_unit, revivee_unit, statistics_db)
+	local player_manager = Managers.player
+	local player1 = player_manager.owner(player_manager, reviver_unit)
+
+	if player1 then
+		local stats_id = player1.stats_id(player1)
+
+		statistics_db.increment_stat(statistics_db, stats_id, "revives")
+	end
+
+	local player2 = player_manager.owner(player_manager, revivee_unit)
+
+	if player2 then
+		local stats_id = player2.stats_id(player2)
+
+		statistics_db.increment_stat(statistics_db, stats_id, "times_revived")
+	end
+
+	if player1 and player2 then
+		local predicate = "revive"
+		local local_human = not player1.remote and not player1.bot_player
+
+		Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
+	end
+
+	return 
+end
+StatisticsUtil.register_heal = function (healer_unit, healed_unit, statistics_db)
+	local player_manager = Managers.player
+	local player1 = player_manager.owner(player_manager, healer_unit)
+	local player2 = player_manager.owner(player_manager, healed_unit)
+
+	if player1 and player2 and player1 ~= player2 then
+		local predicate = "heal"
+		local local_human = not player1.remote and not player1.bot_player
+
+		Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
+
+		local stats_id = player1.stats_id(player1)
+
+		statistics_db.increment_stat(statistics_db, stats_id, "times_friend_healed")
+	end
+
+	return 
+end
+StatisticsUtil.register_damage = function (victim_unit, damage_data, statistics_db)
+	local damage_amount = damage_data[DamageDataIndex.DAMAGE_AMOUNT]
+	local player_manager = Managers.player
+	local player = player_manager.owner(player_manager, victim_unit)
+
+	if player then
+		local stats_id = player.stats_id(player)
+
+		statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_taken", damage_amount)
+	end
+
+	local attacker_unit = damage_data[DamageDataIndex.ATTACKER]
+	attacker_unit = AiUtils.get_actual_attacker_unit(attacker_unit)
+	player = player_manager.owner(player_manager, attacker_unit)
+
+	if player then
+		local breed = Unit_alive(victim_unit) and Unit_get_data(victim_unit, "breed")
+
+		if breed then
+			local breed_name = breed.name
+			local health_extension = ScriptUnit.extension(victim_unit, "health_system")
+			local current_health = health_extension.current_health(health_extension)
+
+			if 0 < current_health then
 				local stats_id = player.stats_id(player)
-				local breed = Unit.get_data(victim_unit, "breed")
+				damage_amount = math.clamp(damage_amount, 0, current_health)
 
-				if breed ~= nil then
-					local breed_name = breed.name
-
-					statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_per_breed", breed_name)
-				end
+				statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_dealt", damage_amount)
+				statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_dealt_per_breed", breed_name, damage_amount)
 			end
 		end
+	end
 
-		return 
-	end,
-	check_save = function (savior_unit, enemy_unit)
-		local blackboard = Unit.get_data(enemy_unit, "blackboard")
-		local saved_unit = blackboard.target_unit
-		local savior_player = savior_unit and Managers.player:owner(savior_unit)
-		local saved_player = saved_unit and Managers.player:owner(saved_unit)
+	return 
+end
+StatisticsUtil.won_games = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local completed = 0
 
-		if savior_player and saved_player and savior_player ~= saved_player then
-			local saved_unit_dir = nil
-			local network_manager = Managers.state.network
-			local game = network_manager.game(network_manager)
-			local game_object_id = game and network_manager.unit_game_object_id(network_manager, saved_unit)
+	for _, level_name in ipairs(UnlockableLevels) do
+		completed = completed + statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_name)
+	end
 
-			if game_object_id then
-				saved_unit_dir = Vector3.normalize(Vector3.flat(GameSession.game_object_field(game, game_object_id, "aim_direction")))
-			else
-				saved_unit_dir = Quaternion.forward(Unit.local_rotation(saved_unit, 0))
-			end
+	return completed
+end
+StatisticsUtil.register_collected_grimoires = function (collected_grimoires, statistics_db)
+	local level_settings = LevelHelper:current_level_settings()
+	local level_id = level_settings.level_id
 
-			local enemy_unit_dir = Quaternion.forward(Unit.local_rotation(enemy_unit, 0))
-			local saved_unit_pos = POSITION_LOOKUP[saved_unit]
-			local enemy_unit_pos = POSITION_LOOKUP[enemy_unit]
-			local attack_dir = saved_unit_pos - enemy_unit_pos
-			local is_behind = Vector3.distance(saved_unit_pos, enemy_unit_pos) < 3 and 0 < Vector3.dot(attack_dir, saved_unit_dir) and 0 < Vector3.dot(attack_dir, enemy_unit_dir)
-			local status_ext = ScriptUnit.extension(saved_unit, "status_system")
-			local grabber_unit = status_ext.get_pouncer_unit(status_ext) or status_ext.get_pack_master_grabber(status_ext)
-			local is_disabled = status_ext.is_disabled(status_ext)
-			local predicate = nil
-
-			if enemy_unit == grabber_unit then
-				predicate = "save"
-			elseif is_behind or is_disabled then
-				predicate = "aid"
-
-				if not savior_player.remote then
-					BuffUtils.trigger_assist_buffs(savior_player, saved_player)
-				end
-			end
-
-			if predicate then
-				local local_human = not savior_player.remote and not savior_player.bot_player
-
-				Managers.state.event:trigger("add_coop_feedback", savior_player.stats_id(savior_player) .. saved_player.stats_id(saved_player), local_human, predicate, savior_player, saved_player)
-				Managers.state.network.network_transmit:send_rpc_clients("rpc_coop_feedback", savior_player.network_id(savior_player), savior_player.local_player_id(savior_player), NetworkLookup.coop_feedback[predicate], saved_player.network_id(saved_player), saved_player.local_player_id(saved_player))
-			end
-		end
-
-		return 
-	end,
-	register_pull_up = function (puller_up_unit, pulled_up_unit, statistics_db)
-		local player_manager = Managers.player
-		local player1 = player_manager.owner(player_manager, puller_up_unit)
-		local player2 = player_manager.owner(player_manager, pulled_up_unit)
-
-		if player1 and player2 then
-			local predicate = "assisted_respawn"
-			local local_human = not player1.remote and not player1.bot_player
-
-			Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
-		end
-
-		return 
-	end,
-	register_assisted_respawn = function (reviver_unit, revivee_unit, statistics_db)
-		local player_manager = Managers.player
-		local player1 = player_manager.owner(player_manager, reviver_unit)
-		local player2 = player_manager.owner(player_manager, revivee_unit)
-
-		if player1 and player2 then
-			local predicate = "assisted_respawn"
-			local local_human = not player1.remote and not player1.bot_player
-
-			Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
-		end
-
-		return 
-	end,
-	register_revive = function (reviver_unit, revivee_unit, statistics_db)
-		local player_manager = Managers.player
-		local player1 = player_manager.owner(player_manager, reviver_unit)
-
-		if player1 then
-			local stats_id = player1.stats_id(player1)
-
-			statistics_db.increment_stat(statistics_db, stats_id, "revives")
-		end
-
-		local player2 = player_manager.owner(player_manager, revivee_unit)
-
-		if player2 then
-			local stats_id = player2.stats_id(player2)
-
-			statistics_db.increment_stat(statistics_db, stats_id, "times_revived")
-		end
-
-		if player1 and player2 then
-			local predicate = "revive"
-			local local_human = not player1.remote and not player1.bot_player
-
-			Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
-		end
-
-		return 
-	end,
-	register_heal = function (healer_unit, healed_unit, statistics_db)
-		local player_manager = Managers.player
-		local player1 = player_manager.owner(player_manager, healer_unit)
-		local player2 = player_manager.owner(player_manager, healed_unit)
-
-		if player1 and player2 and player1 ~= player2 then
-			local predicate = "heal"
-			local local_human = not player1.remote and not player1.bot_player
-
-			Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)
-
-			local stats_id = player1.stats_id(player1)
-
-			statistics_db.increment_stat(statistics_db, stats_id, "times_friend_healed")
-		end
-
-		return 
-	end,
-	register_damage = function (victim_unit, damage_data, statistics_db)
-		local damage_amout = damage_data[DamageDataIndex.DAMAGE_AMOUNT]
-		local player_manager = Managers.player
-		local player = player_manager.owner(player_manager, victim_unit)
-
-		if player then
-			local stats_id = player.stats_id(player)
-
-			statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_taken", damage_amout)
-		end
-
-		local attacker_unit = damage_data[DamageDataIndex.ATTACKER]
-		attacker_unit = AiUtils.get_actual_attacker_unit(attacker_unit)
-		player = player_manager.owner(player_manager, attacker_unit)
-
-		if player then
-			local stats_id = player.stats_id(player)
-
-			statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_dealt", damage_amout)
-		end
-
-		return 
-	end,
-	won_games = function (statistics_db)
-		local local_player = Managers.player:local_player()
-		local stats_id = local_player.stats_id(local_player)
-		local completed = 0
-
-		for _, level_name in ipairs(UnlockableLevels) do
-			completed = completed + statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_name)
-		end
-
-		return completed
-	end,
-	register_collected_grimoires = function (collected_grimoires, statistics_db)
-		local level_settings = LevelHelper:current_level_settings()
-		local level_id = level_settings.level_id
-
-		if not table.find(UnlockableLevels, level_id) then
-			return 
-		end
-
-		local local_player = Managers.player:local_player()
-		local stats_id = local_player.stats_id(local_player)
-		local current_collected_grimoires = statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", level_id)
-
-		if current_collected_grimoires < collected_grimoires then
-			statistics_db.set_stat(statistics_db, stats_id, "collected_grimoires", level_id, collected_grimoires)
-		end
-
-		return 
-	end,
-	register_collected_tomes = function (collected_tomes, statistics_db)
-		local level_settings = LevelHelper:current_level_settings()
-		local level_id = level_settings.level_id
-
-		if not table.find(UnlockableLevels, level_id) then
-			return 
-		end
-
-		local local_player = Managers.player:local_player()
-		local stats_id = local_player.stats_id(local_player)
-		local current_collected_tomes = statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", level_id)
-
-		if current_collected_tomes < collected_tomes then
-			statistics_db.set_stat(statistics_db, stats_id, "collected_tomes", level_id, collected_tomes)
-		end
-
+	if not table.find(UnlockableLevels, level_id) then
 		return 
 	end
-}
+
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local current_collected_grimoires = statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", level_id)
+
+	if current_collected_grimoires < collected_grimoires then
+		statistics_db.set_stat(statistics_db, stats_id, "collected_grimoires", level_id, collected_grimoires)
+	end
+
+	return 
+end
+StatisticsUtil.register_collected_tomes = function (collected_tomes, statistics_db)
+	local level_settings = LevelHelper:current_level_settings()
+	local level_id = level_settings.level_id
+
+	if not table.find(UnlockableLevels, level_id) then
+		return 
+	end
+
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local current_collected_tomes = statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", level_id)
+
+	if current_collected_tomes < collected_tomes then
+		statistics_db.set_stat(statistics_db, stats_id, "collected_tomes", level_id, collected_tomes)
+	end
+
+	return 
+end
 StatisticsUtil.register_complete_level = function (statistics_db)
 	local level_settings = LevelHelper:current_level_settings()
 	local level_id = level_settings.level_id
@@ -297,6 +311,26 @@ StatisticsUtil.register_complete_level = function (statistics_db)
 	StatisticsUtil._register_completed_level_difficulty(statistics_db, level_id, difficulty_name)
 
 	return 
+end
+StatisticsUtil.get_game_progress = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local max_value = #MainGameLevels*5
+	local current_value = 0
+	local level_difficulty_name, level_completed_difficulty = nil
+
+	for _, level_id in pairs(MainGameLevels) do
+		level_difficulty_name = LevelDifficultyDBNames[level_id]
+		level_completed_difficulty = statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels_difficulty", level_difficulty_name)
+
+		print("Completed Level Difficulty", level_difficulty_name, level_completed_difficulty, level_id)
+
+		current_value = current_value + level_completed_difficulty
+	end
+
+	local game_progress = current_value/max_value*100
+
+	return game_progress
 end
 StatisticsUtil._register_completed_level_difficulty = function (statistics_db, level_id, difficulty_name)
 	local local_player = Managers.player:local_player()
@@ -477,6 +511,152 @@ StatisticsUtil._register_endurance_badges = function (statistics_db)
 
 		statistics_db.modify_stat_by_amount(statistics_db, stats_id, "endurance_badges", num_collected_badges)
 	end
+
+	return 
+end
+StatisticsUtil.register_matchmaking_country_code = function (statistics_db)
+	local account_manager = Managers.account
+	local country_code = account_manager.region(account_manager) or "N/A"
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.set_stat(statistics_db, stats_id, "matchmaking_country_code", country_code)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_primary_region = function (statistics_db)
+	local account_manager = Managers.account
+	local user_region = account_manager.region(account_manager) or "N/A"
+	local search_region_level = "primary"
+	local search_region = MatchmakingRegionLookup[search_region_level][user_region] or "N/A"
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.set_stat(statistics_db, stats_id, "matchmaking_primary_region", search_region)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_secondary_region = function (statistics_db)
+	local account_manager = Managers.account
+	local user_region = account_manager.region(account_manager) or "N/A"
+	local search_region_level = "secondary"
+	local search_region = MatchmakingRegionLookup[search_region_level][user_region] or "N/A"
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.set_stat(statistics_db, stats_id, "matchmaking_secondary_region", search_region)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_search = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_num_searches")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_aborted_sub_15s = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_aborted_sub_15s")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_aborted_above_15s = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_aborted_above_15s")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_aborted_above_15s_total_time = function (statistics_db, time_taken)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.modify_stat_by_amount(statistics_db, stats_id, "matchmaking_aborted_above_15s_total_time", time_taken)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_joined = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_game_joined")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_joined_primary_region = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_game_joined_primary_region")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_joined_secondary_region = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_game_joined_secondary_region")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_joined_total_search_time = function (statistics_db, time_taken)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.modify_stat_by_amount(statistics_db, stats_id, "matchmaking_game_joined_total_search_time", time_taken)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_started = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_game_started")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_started_total_time = function (statistics_db, time_taken)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.modify_stat_by_amount(statistics_db, stats_id, "matchmaking_game_started_total_time", time_taken)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_started_player_amount = function (statistics_db, nr_players)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.modify_stat_by_amount(statistics_db, stats_id, "matchmaking_game_started_player_amount", nr_players)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_game_started_full_team = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_game_started_full_team")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_first_client_joined = function (statistics_db)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.increment_stat(statistics_db, stats_id, "matchmaking_first_client_joined")
+
+	return 
+end
+StatisticsUtil.register_matchmaking_first_client_joined_total_time = function (statistics_db, time_taken)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.modify_stat_by_amount(statistics_db, stats_id, "matchmaking_first_client_joined_total_time", time_taken)
 
 	return 
 end

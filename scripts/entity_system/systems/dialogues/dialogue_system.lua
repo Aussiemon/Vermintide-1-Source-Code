@@ -57,7 +57,10 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 		self.tagquery_loader:load_file(dialogue_filename)
 	end
 
-	for _, file_name in ipairs(DialogueSettings.auto_load_files) do
+	local level_specific_load_files = DialogueSettings.level_specific_load_files[level_name]
+	local auto_load_files = level_specific_load_files or DialogueSettings.auto_load_files
+
+	for _, file_name in ipairs(auto_load_files) do
 		if Application.can_get("lua", file_name) then
 			self.tagquery_loader:load_file(file_name)
 		end
@@ -68,7 +71,7 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 	local world = entity_system_creation_context.world
 	self.world = world
 	self.wwise_world = Managers.world:wwise_world(world)
-	self.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	self.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 	self.input_event_queue = {}
 	self.input_event_queue_n = 0
 	self.faction_memories = {
@@ -482,7 +485,7 @@ DialogueSystem.update_currently_playing_dialogues = function (self, dt)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_currently_playing_dialogues")
 
 	return 
 end
@@ -555,7 +558,7 @@ DialogueSystem.physics_async_update = function (self, context, t)
 	local query = tagquery_database.iterate_queries(tagquery_database, LOCAL_GAMETIME)
 	local playing_units = self.playing_units
 
-	Profiler.stop()
+	Profiler.stop("Iterate Query")
 
 	if enabled and (DialogueSettings.dialogue_level_start_delay < self.global_context.level_time or DialogueSystem:LocalPlayerHasMovedFromStartPos()) then
 		if query then
@@ -739,7 +742,7 @@ DialogueSystem.physics_async_update = function (self, context, t)
 				end
 			end
 
-			Profiler.stop()
+			Profiler.stop("Handle Query")
 		end
 
 		update_story_lines(t)
@@ -836,10 +839,10 @@ DialogueSystem.update_new_events = function (self, t)
 
 	self.input_event_queue_n = 0
 
-	Profiler.stop()
+	Profiler.stop("update_new_events")
 	Profiler.start("Debug")
 	self.update_debug(self, t)
-	Profiler.stop()
+	Profiler.stop("Debug")
 
 	return 
 end
@@ -847,7 +850,7 @@ DialogueSystem.hot_join_sync = function (self, sender)
 	return 
 end
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 local debug_vo_by_file, debug_vo_by_file_gui = nil
 local debug_tick_time = 0
@@ -1127,11 +1130,13 @@ DialogueSystem.TriggerBackstab = function (self, player_unit, enemy_unit, should
 
 				if Vector3.dot(to_target_vec, unit_fwd_dir) < 0.4 then
 					backstab_event = "Play_clan_rat_attack_player_back_vce"
+
+					dialogue_input.trigger_dialogue_event(dialogue_input, "backstab", event_data)
 				else
 					backstab_event = "Play_clan_rat_attack_player_vce"
 				end
 			else
-				backstab_event = "Play_clan_rat_attack_vce"
+				backstab_event = "Play_clan_rat_attack_player_vce"
 			end
 
 			local player_data = Managers.player:owner(player_unit)
@@ -1162,15 +1167,15 @@ end
 DialogueSystem.TriggerBackstabHit = function (self, player_unit, enemy_unit)
 	local player_manager = Managers.player
 	local owner = player_manager.unit_owner(player_manager, player_unit)
+	local game = Managers.state.network:game()
 
-	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) and not owner.bot_player then
+	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) and game and not owner.bot_player then
 		local drawer = Managers.state.debug:drawer({
 			mode = "retained",
 			name = "Dialoge_debug"
 		})
 		local to_target_vec = Vector3.normalize(POSITION_LOOKUP[enemy_unit] - POSITION_LOOKUP[player_unit])
 		local unit_id = Managers.state.network.unit_storage:go_id(player_unit)
-		local game = Managers.state.network:game()
 		local player_rot = GameSession.game_object_field(game, unit_id, "aim_direction")
 		local unit_fwd_dir = Quaternion.forward(Quaternion.look(player_rot))
 

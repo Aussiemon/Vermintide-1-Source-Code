@@ -1,329 +1,342 @@
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
 require("scripts/ui/ui_animations")
 
-local scenegraph = {
-	root = {
-		is_root = true,
-		size = {
-			1920,
-			1080
-		},
-		position = {
-			0,
-			0,
-			0
-		}
-	},
-	input_root = {
-		parent = "root",
-		position = {
-			960,
-			225,
-			0
-		},
-		size = {
-			1,
-			1
-		}
-	},
-	background = {
-		parent = "root",
-		horizontal_alignment = "left",
-		size = {
-			1920,
-			1080
-		},
-		position = {
-			0,
-			0,
-			99
-		}
-	},
-	splash_video = {
-		parent = "background",
-		size = {
-			1920,
-			1080
-		},
-		position = {
-			0,
-			0,
-			700
-		}
-	},
-	input = {
-		vertical_alignment = "bottom",
-		parent = "input_root",
-		position = {
-			0,
-			0,
-			1
-		},
-		size = {
-			200,
-			40
-		}
-	},
-	input_text = {
-		vertical_alignment = "center",
-		parent = "input",
-		size = {
-			600,
-			62
-		},
-		position = {
-			0,
-			0,
-			2
-		}
-	},
-	input_prefix_text = {
-		vertical_alignment = "center",
-		parent = "input_icon",
-		horizontal_alignment = "left",
-		size = {
-			300,
-			62
-		},
-		position = {
-			-300,
-			0,
-			2
-		}
-	},
-	input_icon = {
-		vertical_alignment = "center",
-		parent = "input",
-		horizontal_alignment = "left",
-		size = {
-			62,
-			62
-		},
-		position = {
-			0,
-			0,
-			1
-		}
-	}
-}
-local attract_mode_video = {
-	video_name = "video/trailer",
-	sound_start = "Play_intro",
-	scenegraph_id = "splash_video",
-	loop = false,
-	material_name = "trailer",
-	sound_stop = "Stop_intro"
-}
-local widget_definitions = {
-	input = {
-		scenegraph_id = "input",
-		element = {
-			passes = {
-				{
-					texture_id = "icon_textures",
-					style_id = "icon_styles",
-					pass_type = "multi_texture"
-				},
-				{
-					style_id = "button_text",
-					pass_type = "text",
-					text_id = "button_text",
-					content_check_function = function (content)
-						return content.text ~= ""
-					end
-				},
-				{
-					style_id = "text",
-					pass_type = "text",
-					text_id = "text",
-					content_check_function = function (content)
-						return content.text
-					end
-				},
-				{
-					style_id = "prefix_text",
-					pass_type = "text",
-					text_id = "prefix_text",
-					content_check_function = function (content)
-						return content.text
-					end
-				}
-			}
-		},
-		content = {
-			text = "input_text",
-			prefix_text = "",
-			button_text = "",
-			icon_textures = {
-				"button_win32_left"
-			}
-		},
-		style = {
-			prefix_text = {
-				scenegraph_id = "input_prefix_text",
-				font_size = 36,
-				word_wrap = true,
-				pixel_perfect = true,
-				horizontal_alignment = "right",
-				vertical_alignment = "center",
-				dynamic_font = true,
-				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("white", 255),
-				offset = {
-					0,
-					3,
-					1
-				}
-			},
-			text = {
-				scenegraph_id = "input_text",
-				font_size = 36,
-				word_wrap = true,
-				pixel_perfect = true,
-				horizontal_alignment = "left",
-				vertical_alignment = "center",
-				dynamic_font = true,
-				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("white", 255),
-				offset = {
-					0,
-					3,
-					1
-				}
-			},
-			button_text = {
-				font_size = 24,
-				scenegraph_id = "input_icon",
-				horizontal_alignment = "center",
-				pixel_perfect = true,
-				vertical_alignment = "center",
-				dynamic_font = true,
-				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("white", 255),
-				offset = {
-					0,
-					2,
-					2
-				}
-			},
-			icon_styles = {
-				scenegraph_id = "input_icon",
-				texture_sizes = {
-					{
-						20,
-						36
-					}
-				},
-				offset = {
-					0,
-					0,
-					1
-				},
-				color = {
-					255,
-					255,
-					255,
-					255
-				}
-			}
-		}
-	}
+local definitions = local_require("scripts/ui/views/title_main_ui_definitions")
+local scenegraph_definition = definitions.scenegraph_definition
+local background_widget_definitions = definitions.background_widget_definitions
+local single_widget_definitions = definitions.single_widget_definitions
+local widget_definitions = definitions.widget_definitions
+local attract_mode_video = definitions.attract_mode_video
+local animations = definitions.animations
+local menu_button_definitions = definitions.menu_button_definitions
+local menu_button_font_size = definitions.menu_button_font_size
+local menu_item_index_lookup = definitions.menu_item_index_lookup
+local DO_RELOAD = false
+local legal_texts = {
+	"fatshark_legal_1",
+	"gw_legal_1",
+	"gw_legal_2",
+	"gw_legal_3",
+	"gw_legal_4"
 }
 TitleMainUI = class(TitleMainUI)
 TitleMainUI.init = function (self, world)
 	self._world = world
-	self.ui_renderer = UIRenderer.create(self._world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_title_screen", "material", attract_mode_video.video_name)
+	local platform = Application.platform()
+	self.platform = platform
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
+	self._ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_title_screen", "material", "materials/ui/ui_1080p_start_screen", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_ingame_common", "material", attract_mode_video.video_name)
 
-	UISetupFontHeights(self.ui_renderer.gui)
+	UISetupFontHeights(self._ui_renderer.gui)
 
 	self.input_manager = Managers.input
 
-	self.input_manager:create_input_service("title_screen", TitleScreenKeyMaps)
-	self.input_manager:map_device_to_service("title_screen", "keyboard")
-	self.input_manager:map_device_to_service("title_screen", "gamepad")
+	self.input_manager:create_input_service("main_menu", "TitleScreenKeyMaps")
+	self.input_manager:map_device_to_service("main_menu", "keyboard")
+	self.input_manager:map_device_to_service("main_menu", "gamepad")
 
-	self.ui_animations = {}
+	self._attract_mode_active = false
 
 	self._create_ui_elements(self)
+	self._init_animations(self)
+
+	return 
+end
+TitleMainUI._play_sound = function (self, event)
+	return Managers.music:trigger_event(event)
+end
+TitleMainUI.get_ui_renderer = function (self)
+	return self._ui_renderer
+end
+TitleMainUI._init_animations = function (self)
+	self._menu_item_animations = {}
+	self._ui_animations = {}
+	self._ui_animator = UIAnimator:new(self._ui_scenegraph, animations)
+	self._circle_pulse_out_anim_id = self._ui_animator:start_animation("circle_glow_pulse_out", self._widgets, scenegraph_definition)
+
+	self._start_fog_animations(self)
 
 	return 
 end
 TitleMainUI._create_ui_elements = function (self)
-	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph)
-	self.input_widget = UIWidget.init(widget_definitions.input)
+	self._current_menu_index = nil
+	self._ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self.attract_video = UIWidget.init(UIWidgets.create_splash_video(attract_mode_video))
+	self._widgets = {}
 
-	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self.set_input_text(self)
+	for widget_name, widget_definition in pairs(widget_definitions) do
+		self._widgets[widget_name] = UIWidget.init(widget_definition)
+	end
 
-	local input_widget_style = self.input_widget.style
-	self.ui_animations.button_text_pulse = UIAnimation.init(UIAnimation.pulse_animation, input_widget_style.button_text.text_color, 1, 100, 255, 2)
-	self.ui_animations.button_texture_pulse = UIAnimation.init(UIAnimation.pulse_animation, input_widget_style.icon_styles.color, 1, 100, 255, 2)
-	self.ui_animations.text_pulse = UIAnimation.init(UIAnimation.pulse_animation, input_widget_style.text.text_color, 1, 100, 255, 2)
-	self.ui_animations.prefix_text_pulse = UIAnimation.init(UIAnimation.pulse_animation, input_widget_style.prefix_text.text_color, 1, 100, 255, 2)
+	self._widgets.frame_line_glow.style.texture_id.color[1] = 0
+	self._widgets.frame_top.offset[2] = -5
+	self._widgets.frame_bottom.offset[2] = 5
+	self._background_widgets = {}
+
+	for widget_name, widget_definition in pairs(background_widget_definitions) do
+		self._background_widgets[widget_name] = UIWidget.init(widget_definition)
+	end
+
+	local lock_widgets = {
+		lock_center = UIWidget.init(single_widget_definitions.lock_center),
+		lock_outer_top = UIWidget.init(single_widget_definitions.lock_outer_top),
+		lock_middle_top = UIWidget.init(single_widget_definitions.lock_middle_top),
+		lock_outer_bottom = UIWidget.init(single_widget_definitions.lock_outer_bottom),
+		lock_middle_bottom = UIWidget.init(single_widget_definitions.lock_middle_bottom)
+	}
+	self._lock_widgets = lock_widgets
+	self._information_text = UIWidget.init(single_widget_definitions.information_text)
+	self._information_text.style.text.localize = false
+	self._legal_text = UIWidget.init(single_widget_definitions.legal_text)
+	local legal_text_widget = self._legal_text
+	local legal_text_style = legal_text_widget.style.text
+	legal_text_style.localize = false
+	legal_text_style.vertical_alignment = "bottom"
+	local legal_display_text = ""
+
+	for _, text in ipairs(legal_texts) do
+		legal_display_text = legal_display_text .. "\n" .. Localize(text)
+	end
+
+	legal_text_widget.content.text = legal_display_text
+	self._menu_selection_left = UIWidget.init(single_widget_definitions.start_screen_selection_left)
+	self._menu_selection_right = UIWidget.init(single_widget_definitions.start_screen_selection_right)
+	self._user_gamertag_widget = UIWidget.init(single_widget_definitions.user_gamertag)
+	self._playgo_status_widget = UIWidget.init(single_widget_definitions.playgo_status)
+	self._change_profile_input_icon_widget = UIWidget.init(single_widget_definitions.change_profile_input_icon)
+	self._change_profile_input_text_widget = UIWidget.init(single_widget_definitions.change_profile_input_text)
+	self._input_icon_widget = self._widgets.input_icon
+
+	if self.platform ~= "ps4" then
+		self._input_icon_widget.content.texture_id = "xbone_button_icon_a_large"
+	end
+
+	self._menu_widgets = {}
+
+	for _, definition in ipairs(menu_button_definitions) do
+		local menu_item_widget = UIWidget.init(definition)
+		self._menu_widgets[#self._menu_widgets + 1] = menu_item_widget
+		local widget_style = menu_item_widget.style
+		widget_style.text.horizontal_alignment = "center"
+		widget_style.text_hover.horizontal_alignment = "center"
+	end
+
+	UIRenderer.clear_scenegraph_queue(self._ui_renderer)
 
 	return 
 end
-TitleMainUI.update = function (self, dt)
-	for name, ui_animation in pairs(self.ui_animations) do
+TitleMainUI.update = function (self, dt, t, render_background_only)
+	if DO_RELOAD then
+		self._attract_mode_active = false
+
+		self._create_ui_elements(self)
+		self._init_animations(self)
+
+		DO_RELOAD = false
+	end
+
+	for name, ui_animation in pairs(self._ui_animations) do
 		UIAnimation.update(ui_animation, dt)
 
 		if UIAnimation.completed(ui_animation) then
-			self.ui_animations[name] = nil
+			self._ui_animations[name] = nil
 		end
 	end
 
-	local input_service = self.input_manager:get_service("title_screen")
+	local ui_animator = self._ui_animator
 
-	if input_service.get(input_service, "start") then
-		self._start_pressed = true
-	else
-		self._start_pressed = false
+	ui_animator.update(ui_animator, dt)
+
+	if self._circle_pulse_out_anim_id and ui_animator.is_animation_completed(ui_animator, self._circle_pulse_out_anim_id) then
+		ui_animator.stop_animation(ui_animator, self._circle_pulse_out_anim_id)
+
+		self._circle_pulse_out_anim_id = nil
+		self._circle_pulse_in_anim_id = ui_animator.start_animation(ui_animator, "circle_glow_pulse_in", self._widgets, scenegraph_definition)
 	end
 
-	if input_service.has(input_service, "delete_save") and input_service.get(input_service, "delete_save") then
-		StateTitleScreenLoadSave.DELETE_SAVE = true
+	if self._circle_pulse_in_anim_id and ui_animator.is_animation_completed(ui_animator, self._circle_pulse_in_anim_id) then
+		ui_animator.stop_animation(ui_animator, self._circle_pulse_in_anim_id)
+
+		self._circle_pulse_in_anim_id = nil
+		self._circle_pulse_out_anim_id = self._ui_animator:start_animation("circle_glow_pulse_out", self._widgets, scenegraph_definition)
 	end
 
-	self.draw(self, dt)
+	if self._frame_anim_id and ui_animator.is_animation_completed(ui_animator, self._frame_anim_id) then
+		self._ui_animator:stop_animation(self._frame_anim_id)
+
+		self._frame_anim_id = nil
+
+		if not self._show_menu and not self._circle_pulse_out_anim_id then
+			self._circle_pulse_out_anim_id = self._ui_animator:start_animation("circle_glow_pulse_in", self._widgets, scenegraph_definition)
+		end
+	end
+
+	if self._input_fade_out_anim_id and ui_animator.is_animation_completed(ui_animator, self._input_fade_out_anim_id) then
+		self._ui_animator:stop_animation(self._input_fade_out_anim_id)
+
+		self._input_fade_out_anim_id = nil
+	end
+
+	self._update_fog_loop_animations(self)
+
+	if not self._frame_anim_id and not self._show_menu and self._start_pressed then
+		self._animate_lock(self, dt)
+	end
+
+	if not render_background_only and not self._frame_anim_id and self._show_menu then
+		self._handle_menu_input(self, dt, t)
+	end
+
+	for index, animation in pairs(self._menu_item_animations) do
+		self[animation.func](self, animation, index, dt)
+	end
+
+	self._draw(self, dt, render_background_only)
 
 	return 
 end
-TitleMainUI.draw = function (self, dt)
-	local ui_renderer = self.ui_renderer
-	local ui_scenegraph = self.ui_scenegraph
-	local input_service = self.input_manager:get_service("title_screen")
+TitleMainUI._handle_menu_input = function (self, dt, t)
+	local current_index = self._current_menu_index or 1
+	local input_service = self.input_manager:get_service("main_menu")
+	local navigation_allowed = self._frame_anim_id == nil
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
-	UIRenderer.draw_widget(ui_renderer, self.input_widget)
+	if navigation_allowed then
+		if input_service.get(input_service, "down") then
+			current_index = current_index%#self._menu_widgets + 1
 
-	if self._destroy_video_player then
-		UIRenderer.destroy_video_player(self.ui_renderer)
+			self._play_sound(self, "hud_menu_select")
+		elseif input_service.get(input_service, "up") then
+			current_index = (current_index - 1 < 1 and #self._menu_widgets) or current_index - 1
 
-		self._destroy_video_player = nil
-	elseif self._attract_mode_enabled then
-		if not self.attract_video.content.video_completed then
-			if not ui_renderer.video_player then
-				UIRenderer.create_video_player(self.ui_renderer, self._world, attract_mode_video.video_name, attract_mode_video.loop)
-			else
-				if not self._sound_started then
-					if attract_mode_video.sound_start then
-						Managers.music:trigger_event(attract_mode_video.sound_start)
+			self._play_sound(self, "hud_menu_select")
+		end
+	end
+
+	if current_index ~= self._current_menu_index then
+		if self._current_menu_index then
+			self._add_menu_item_animation(self, self._current_menu_index, "anim_deselect_button")
+		end
+
+		self._add_menu_item_animation(self, current_index, "anim_select_button")
+	end
+
+	self._current_menu_index = current_index
+
+	return 
+end
+TitleMainUI.current_menu_index = function (self)
+	if self._show_menu then
+		local index = self._current_menu_index
+
+		if index then
+			local menu_item = self._menu_widgets[index]
+			local disabled = menu_item.content.disabled
+
+			return not disabled and index
+		end
+	end
+
+	return 
+end
+TitleMainUI.active_menu_selection = function (self)
+	if self._show_menu then
+		return self._current_menu_index ~= nil
+	end
+
+	return 
+end
+TitleMainUI._draw = function (self, dt, render_background_only)
+	local ui_renderer = self._ui_renderer
+	local ui_scenegraph = self._ui_scenegraph
+	local input_service = self.input_manager:get_service("main_menu")
+
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
+
+	if render_background_only then
+		for _, widget in pairs(self._background_widgets) do
+			UIRenderer.draw_widget(ui_renderer, widget)
+		end
+	else
+		if self._destroy_video_player then
+			UIRenderer.destroy_video_player(ui_renderer)
+
+			self._destroy_video_player = nil
+		elseif self._attract_mode_enabled then
+			if not self.attract_video.content.video_completed then
+				if not ui_renderer.video_player then
+					UIRenderer.create_video_player(ui_renderer, self._world, attract_mode_video.video_name, attract_mode_video.loop)
+				else
+					if not self._sound_started then
+						if attract_mode_video.sound_start then
+							Managers.music:trigger_event(attract_mode_video.sound_start)
+						end
+
+						self._sound_started = true
 					end
 
-					self._sound_started = true
+					UIRenderer.draw_widget(ui_renderer, self.attract_video)
 				end
+			elseif ui_renderer.video_player then
+				UIRenderer.destroy_video_player(ui_renderer)
 
-				UIRenderer.draw_widget(ui_renderer, self.attract_video)
-			end
-		elseif ui_renderer.video_player then
-			UIRenderer.destroy_video_player(self.ui_renderer)
+				self._sound_started = false
 
-			self._sound_started = false
-
-			if attract_mode_video.sound_stop then
-				Managers.music:trigger_event(attract_mode_video.sound_stop)
+				if attract_mode_video.sound_stop then
+					Managers.music:trigger_event(attract_mode_video.sound_stop)
+				end
 			end
 		end
+
+		if self._attract_mode_active then
+			if ui_renderer.video_player then
+				UIRenderer.destroy_video_player(ui_renderer)
+			end
+		else
+			if not self._frame_anim_id and self._show_menu then
+				for _, widget in ipairs(self._menu_widgets) do
+					UIRenderer.draw_widget(ui_renderer, widget)
+				end
+
+				if self._current_menu_index then
+					UIRenderer.draw_widget(ui_renderer, self._menu_selection_left)
+					UIRenderer.draw_widget(ui_renderer, self._menu_selection_right)
+				end
+
+				if self._draw_gamertag then
+					UIRenderer.draw_widget(ui_renderer, self._user_gamertag_widget)
+
+					if not self._switch_profile_blocked then
+						UIRenderer.draw_widget(ui_renderer, self._change_profile_input_icon_widget)
+						UIRenderer.draw_widget(ui_renderer, self._change_profile_input_text_widget)
+					end
+				end
+			end
+
+			UIRenderer.draw_widget(ui_renderer, self._legal_text)
+
+			if self._start_pressed and self._draw_information_text then
+				UIRenderer.draw_widget(ui_renderer, self._information_text)
+			end
+
+			for _, widget in pairs(self._lock_widgets) do
+				UIRenderer.draw_widget(ui_renderer, widget)
+			end
+
+			for _, widget in pairs(self._widgets) do
+				UIRenderer.draw_widget(ui_renderer, widget)
+			end
+
+			for _, widget in pairs(self._background_widgets) do
+				UIRenderer.draw_widget(ui_renderer, widget)
+			end
+		end
+	end
+
+	if self._draw_playgo and not self._attract_mode_active then
+		UIRenderer.draw_widget(ui_renderer, self._playgo_status_widget)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
@@ -332,171 +345,7 @@ TitleMainUI.draw = function (self, dt)
 end
 TitleMainUI.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "TitleMainUI")
-	UIRenderer.destroy(self.ui_renderer, self._world)
-
-	return 
-end
-TitleMainUI.set_input_text = function (self, optinal_text)
-	local ui_renderer = self.ui_renderer
-	local ui_scenegraph = self.ui_scenegraph
-	local widget = self.input_widget
-	local widget_content = widget.content
-	local widget_style = widget.style
-	local text = ""
-	local prefix_text = ""
-	local button_text = ""
-	local button_texture_data = nil
-
-	if not optinal_text then
-		local interact_action = "start"
-		button_texture_data, button_text = self.button_texture_data_by_input_action(self, interact_action)
-
-		assert(button_texture_data, "Could not find button texture(s) for action: start")
-
-		text = Localize("to_start_game")
-		prefix_text = Localize("interaction_prefix_press")
-	else
-		text = optinal_text
-		prefix_text = ""
-	end
-
-	local texture_size_x = 0
-	local texture_size_y = 0
-
-	if button_texture_data then
-		if button_texture_data.texture then
-			widget_content.button_text = ""
-			widget_content.icon_textures = {
-				button_texture_data.texture
-			}
-			widget_style.icon_styles.texture_sizes = {
-				button_texture_data.size
-			}
-			texture_size_x = button_texture_data.size[1]
-			texture_size_y = button_texture_data.size[2]
-		else
-			local textures = {}
-			local sizes = {}
-			local tile_sizes = {}
-			local button_text_style = widget_style.button_text
-			local font, scaled_font_size = UIFontByResolution(button_text_style)
-			local text_width, text_height, min = UIRenderer.text_size(ui_renderer, button_text, font[1], scaled_font_size)
-
-			for i = 1, #button_texture_data, 1 do
-				textures[i] = button_texture_data[i].texture
-				sizes[i] = button_texture_data[i].size
-
-				if button_texture_data[i].tileable then
-					tile_sizes[i] = {
-						text_width,
-						sizes[i][2]
-					}
-					texture_size_x = texture_size_x + text_width
-
-					if texture_size_y < sizes[i][2] then
-						if not sizes[i][2] then
-						end
-					end
-				else
-					texture_size_x = texture_size_x + sizes[i][1]
-
-					if texture_size_y < sizes[i][2] and not sizes[i][2] then
-					end
-				end
-			end
-
-			widget_content.icon_textures = textures
-			widget_content.button_text = button_text
-			widget_style.icon_styles.texture_sizes = sizes
-			widget_style.icon_styles.tile_sizes = tile_sizes
-		end
-
-		ui_scenegraph.input_text.local_position[1] = texture_size_x
-		ui_scenegraph.input_icon.size[1] = texture_size_x
-		ui_scenegraph.input_icon.size[2] = texture_size_y
-	else
-		widget_content.icon_textures = {}
-		widget_content.button_text = ""
-		widget_content.prefix_text = ""
-		ui_scenegraph.input_text.local_position[1] = 0
-	end
-
-	local text_style = widget_style.text
-	local text_width, scaled_font_size = self.get_text_width(self, text_style, text)
-	local prefix_text_width = self.get_text_width(self, widget_style.prefix_text, prefix_text)
-	widget_content.text = text
-	widget_content.prefix_text = prefix_text
-	ui_scenegraph.input_text.position[2] = (scaled_font_size == text_style.font_size and 3) or 0
-	ui_scenegraph.input_prefix_text.position[2] = ui_scenegraph.input_text.position[2]
-	ui_scenegraph.input.position[1] = -((text_width + texture_size_x)*0.5) + prefix_text_width
-
-	return 
-end
-TitleMainUI.get_text_width = function (self, text_style, text)
-	local font, scaled_font_size = UIFontByResolution(text_style)
-	local width, height, min = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
-
-	return width, scaled_font_size
-end
-TitleMainUI.button_texture_data_by_input_action = function (self, input_action)
-	local platform = Application.platform()
-	local active_devices, active_platform = nil
-	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-
-	if platform == "ps4" or platform == "xb1" then
-		active_devices = {
-			"gamepad"
-		}
-		active_platform = platform
-	elseif platform == "win32" then
-		if gamepad_active then
-			active_devices = {
-				"gamepad"
-			}
-			active_platform = "xb1"
-		else
-			active_devices = {
-				"keyboard",
-				"mouse"
-			}
-			active_platform = platform
-		end
-	end
-
-	local input_service = input_manager.get_service(input_manager, "title_screen")
-	local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-	local input_mappings = keymap_bindings.input_mappings
-	local button_texture_data, button_text = nil
-
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-
-			for k = 1, #active_devices, 1 do
-				local active_device = active_devices[k]
-
-				if device_type == active_device then
-					if active_device == "keyboard" then
-						button_texture_data = ButtonTextureByName(nil, active_platform)
-						button_text = Keyboard.button_name(key_index)
-					elseif active_device == "mouse" then
-						button_texture_data = ButtonTextureByName(nil, active_platform)
-						button_text = Mouse.button_name(key_index)
-					else
-						local button_name = Pad1.button_name(key_index)
-						button_texture_data = ButtonTextureByName(button_name, active_platform)
-					end
-
-					return button_texture_data, button_text
-				end
-			end
-		end
-	end
+	UIRenderer.destroy(self._ui_renderer, self._world)
 
 	return 
 end
@@ -520,6 +369,295 @@ TitleMainUI.video_completed = function (self)
 end
 TitleMainUI.attract_mode = function (self)
 	return self._attract_mode_enabled
+end
+TitleMainUI._start_fog_animations = function (self)
+	local fog_animations = {}
+	local ui_animator = self._ui_animator
+	fog_animations[#fog_animations + 1] = {
+		name = "fog_move_back",
+		id = ui_animator.start_animation(ui_animator, "fog_move_back", self._background_widgets, scenegraph_definition)
+	}
+	fog_animations[#fog_animations + 1] = {
+		name = "fog_move_front",
+		id = ui_animator.start_animation(ui_animator, "fog_move_front", self._background_widgets, scenegraph_definition)
+	}
+	self._fog_animations = fog_animations
+
+	return 
+end
+TitleMainUI._update_fog_loop_animations = function (self)
+	local fog_animations = self._fog_animations
+
+	if fog_animations then
+		local ui_animator = self._ui_animator
+		local widgets = self._background_widgets
+
+		for index, anim_data in ipairs(fog_animations) do
+			local anim_id = anim_data.id
+			local anim_name = anim_data.name
+
+			if ui_animator.is_animation_completed(ui_animator, anim_id) then
+				anim_data.id = self._ui_animator:start_animation(anim_name, widgets, scenegraph_definition)
+			end
+		end
+	end
+
+	return 
+end
+TitleMainUI.show_menu = function (self, show)
+	if show and self._lock_angle then
+		self._show_menu_when_ready = true
+
+		return 
+	end
+
+	self._show_menu = show
+	self._show_menu_when_ready = nil
+
+	if self._frame_anim_id then
+		self._ui_animator:stop_animation(self._frame_anim_id)
+	end
+
+	if self._input_fade_out_anim_id then
+		self._ui_animator:stop_animation(self._input_fade_out_anim_id)
+
+		self._input_fade_out_anim_id = nil
+	end
+
+	if not show then
+		local current_menu_index = self._current_menu_index
+
+		if current_menu_index then
+			self.anim_deselect_button(self, nil, current_menu_index, nil, 0)
+
+			self._current_menu_index = nil
+			self._menu_item_animations[current_menu_index] = nil
+		end
+
+		self._frame_anim_id = self._ui_animator:start_animation("frame_close", self._widgets, scenegraph_definition)
+
+		self._play_sound(self, "Play_hud_main_menu_close")
+	else
+		self._frame_anim_id = self._ui_animator:start_animation("frame_open", self._widgets, scenegraph_definition)
+
+		self._play_sound(self, "Play_hud_main_menu_open")
+
+		self._draw_information_text = nil
+	end
+
+	self._lock_angle = nil
+
+	return 
+end
+TitleMainUI.set_start_pressed = function (self, pressed)
+	if self._start_pressed ~= pressed then
+		if pressed then
+			if self._circle_pulse_out_anim_id then
+				self._ui_animator:stop_animation(self._circle_pulse_out_anim_id)
+
+				self._circle_pulse_out_anim_id = nil
+			end
+
+			if self._circle_pulse_in_anim_id then
+				self._ui_animator:stop_animation(self._circle_pulse_in_anim_id)
+
+				self._circle_pulse_in_anim_id = nil
+			end
+
+			self._input_fade_out_anim_id = self._ui_animator:start_animation("input_icon_fade_out", self._widgets, scenegraph_definition)
+			self._ui_animations.legal_text_fade = UIAnimation.init(UIAnimation.function_by_time, self._legal_text.style.text.text_color, 1, 255, 0, 0.2, math.easeCubic)
+			self._ui_animations.information_text_fade = UIAnimation.init(UIAnimation.function_by_time, self._information_text.style.text.text_color, 1, 0, 255, 0.5, math.easeCubic)
+		else
+			self._ui_animations.legal_text_fade = UIAnimation.init(UIAnimation.function_by_time, self._legal_text.style.text.text_color, 1, 0, 255, 0.5, math.easeCubic)
+			self._ui_animations.information_text_fade = UIAnimation.init(UIAnimation.function_by_time, self._information_text.style.text.text_color, 1, 255, 0, 0.2, math.easeCubic)
+			self._draw_information_text = nil
+
+			if not self._frame_anim_id then
+				if self._input_fade_out_anim_id then
+					self._ui_animator:stop_animation(self._input_fade_out_anim_id)
+
+					self._input_fade_out_anim_id = nil
+				end
+
+				self._widgets.input_icon.style.texture_id.color[1] = 255
+				self._widgets.frame_line_glow.style.texture_id.color[1] = 0
+				self._circle_pulse_out_anim_id = self._ui_animator:start_animation("circle_glow_pulse_out", self._widgets, scenegraph_definition)
+			end
+		end
+	end
+
+	self._start_pressed = pressed
+
+	return 
+end
+local MENU_ITEM_FADE_IN = 0.2
+local MENU_ITEM_FADE_OUT = 0.2
+TitleMainUI.anim_select_button = function (self, animation_data, index, dt)
+	if animation_data.progress == 1 then
+		return 
+	end
+
+	animation_data.timer = animation_data.timer or animation_data.progress*MENU_ITEM_FADE_IN
+	animation_data.timer = animation_data.timer + dt
+	animation_data.progress = math.clamp(animation_data.timer/MENU_ITEM_FADE_IN, 0, 1)
+	local menu_item = self._menu_widgets[index]
+	local item_disabled = menu_item.content.disabled
+	local color = (item_disabled and Colors.color_definitions.gray) or Colors.color_definitions.cheeseburger
+	local select_color = (item_disabled and Colors.color_definitions.gray) or Colors.color_definitions.white
+	menu_item.style.text.text_color[2] = math.lerp(color[2], select_color[2], math.smoothstep(animation_data.progress, 0, 1))
+	menu_item.style.text.text_color[3] = math.lerp(color[3], select_color[3], math.smoothstep(animation_data.progress, 0, 1))
+	menu_item.style.text.text_color[4] = math.lerp(color[4], select_color[4], math.smoothstep(animation_data.progress, 0, 1))
+	menu_item.style.text.font_size = math.lerp(menu_item.style.text.font_size, menu_button_font_size + 10, math.easeInCubic(animation_data.progress))
+	local menu_item_scenegraph_id = menu_item.scenegraph_id
+	local ui_scenegraph = self._ui_scenegraph
+	ui_scenegraph.selection_anchor.local_position[2] = ui_scenegraph[menu_item_scenegraph_id].local_position[2]
+	local widget_style = menu_item.style
+	local text = menu_item.content.text_field
+	local text_width, text_height = self._get_word_wrap_size(self, Localize(text), widget_style.text, 1000)
+	ui_scenegraph.selection_anchor.size[1] = text_width or 0
+	self._menu_selection_left.offset[1] = math.lerp(-50, 0, math.smoothstep(animation_data.progress, 0, 1))
+	self._menu_selection_right.offset[1] = math.lerp(50, 0, math.smoothstep(animation_data.progress, 0, 1))
+
+	return 
+end
+TitleMainUI.anim_deselect_button = function (self, animation_data, index, dt, optional_progress)
+	if animation_data and animation_data.progress == 0 then
+		return 
+	end
+
+	local progress = 0
+
+	if not optional_progress then
+		animation_data.timer = animation_data.timer or animation_data.progress*MENU_ITEM_FADE_OUT
+		animation_data.timer = animation_data.timer - dt
+		animation_data.progress = math.clamp(animation_data.timer/MENU_ITEM_FADE_OUT, 0, 1)
+		progress = animation_data.progress
+	else
+		progress = optional_progress
+	end
+
+	local menu_item = self._menu_widgets[index]
+	local item_disabled = menu_item.content.disabled
+	local color = (item_disabled and Colors.color_definitions.gray) or Colors.color_definitions.cheeseburger
+	local select_color = (item_disabled and Colors.color_definitions.gray) or Colors.color_definitions.white
+	menu_item.style.text.text_color[2] = math.lerp(color[2], select_color[2], math.smoothstep(progress, 0, 1))
+	menu_item.style.text.text_color[3] = math.lerp(color[3], select_color[3], math.smoothstep(progress, 0, 1))
+	menu_item.style.text.text_color[4] = math.lerp(color[4], select_color[4], math.smoothstep(progress, 0, 1))
+
+	if optional_progress then
+		menu_item.style.text.font_size = menu_button_font_size*(progress - 1)
+	else
+		menu_item.style.text.font_size = math.lerp(menu_item.style.text.font_size, menu_button_font_size, math.easeInCubic(progress))
+	end
+
+	return 
+end
+TitleMainUI._get_text_size = function (self, localized_text, text_style)
+	local font, scaled_font_size = UIFontByResolution(text_style)
+	local text_width, text_height, min = UIRenderer.text_size(self._ui_renderer, localized_text, font[1], scaled_font_size)
+
+	return text_width, text_height
+end
+TitleMainUI._get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
+	local font, scaled_font_size = UIFontByResolution(text_style)
+	local lines = UIRenderer.word_wrap(self._ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
+	local text_width, text_height = self._get_text_size(self, localized_text, text_style)
+
+	return text_width, text_height*#lines
+end
+TitleMainUI._add_menu_item_animation = function (self, index, func)
+	self._menu_item_animations[index] = {
+		progress = (self._menu_item_animations[index] and self._menu_item_animations[index].progress) or 0,
+		func = func
+	}
+
+	return 
+end
+TitleMainUI.set_information_text = function (self, optinal_text)
+	self._draw_information_text = true
+	local widget = self._information_text
+	local widget_content = widget.content
+	local widget_style = widget.style
+
+	if not optinal_text then
+		widget_content.text = Localize("state_info")
+	else
+		widget_content.text = optinal_text
+	end
+
+	return 
+end
+TitleMainUI.set_user_name = function (self, username)
+	self._draw_gamertag = true
+	self._user_gamertag_widget.content.text = username
+
+	if Application.platform() == "ps4" then
+		self._switch_profile_blocked = true
+	end
+
+	return 
+end
+TitleMainUI.clear_user_name = function (self)
+	self._draw_gamertag = nil
+	self._switch_profile_blocked = nil
+
+	return 
+end
+TitleMainUI.set_playgo_status = function (self, status_text)
+	self._draw_playgo = true
+	self._playgo_status_widget.content.text = status_text
+
+	return 
+end
+TitleMainUI.clear_playgo_status = function (self)
+	self._draw_playgo = nil
+
+	return 
+end
+TitleMainUI.set_menu_item_enable_state_by_index = function (self, item_lookup_name, enabled, reason)
+	local index = menu_item_index_lookup[item_lookup_name]
+	local menu_item = self._menu_widgets[index]
+	menu_item.content.disabled = not enabled
+	local color = (enabled and Colors.color_definitions.cheeseburger) or Colors.color_definitions.gray
+	local text_color = menu_item.style.text.text_color
+	text_color[2] = color[2]
+	text_color[3] = color[3]
+	text_color[4] = color[4]
+
+	return 
+end
+TitleMainUI._animate_lock = function (self, dt)
+	local widget = self._lock_widgets
+	local moduluse_value = 6.2831852999999995
+	local lock_outer_top = widget.lock_outer_top
+	local lock_middle_top = widget.lock_middle_top
+	local lock_outer_bottom = widget.lock_outer_bottom
+	local lock_middle_bottom = widget.lock_middle_bottom
+	local speed = 3
+	local angle = self._lock_angle or 0
+	angle = angle + dt*speed
+
+	if self._show_menu_when_ready then
+		if moduluse_value < angle then
+			angle = 0
+		end
+	else
+		angle = angle%moduluse_value
+	end
+
+	lock_outer_top.style.texture_id.angle = angle
+	lock_outer_bottom.style.texture_id.angle = angle
+	lock_middle_top.style.texture_id.angle = -angle
+	lock_middle_bottom.style.texture_id.angle = -angle
+	self._lock_angle = angle
+
+	if self._show_menu_when_ready and angle == 0 then
+		self._lock_angle = nil
+
+		self.show_menu(self, true)
+	end
+
+	return 
 end
 
 return 

@@ -24,7 +24,7 @@ local subtitle_widget_definition = {
 	scenegraph_id = "subtitle_background",
 	element = UIElements.StaticText,
 	content = {
-		text_field = "Ola"
+		text_field = ""
 	},
 	style = {
 		text = {
@@ -33,7 +33,9 @@ local subtitle_widget_definition = {
 			word_wrap = true,
 			font_size = 20,
 			font_type = "hell_shark",
-			text_color = Colors.get_table("white")
+			draw_text_rect = true,
+			text_color = Colors.get_table("white"),
+			rect_color = Colors.get_color_table_with_alpha("black", 50)
 		}
 	}
 }

@@ -57,7 +57,7 @@ if Application.platform() == "ps4" or Application.platform() == "xb1" then
 	end
 
 	if P ~= "win32" and P ~= "osx" then
-		print("PATCHING SHIT")
+		print("PATCHING FUNCTIONS")
 
 		local NilMeta = {
 			__index = function (...)

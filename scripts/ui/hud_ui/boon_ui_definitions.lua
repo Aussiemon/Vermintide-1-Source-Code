@@ -182,12 +182,14 @@ local function create_boon_widget(index)
 end
 
 local widget_definitions = {}
+local MAX_NUMBER_OF_BOONS = MaxDisplayableBoons
 
-for i = 1, 10, 1 do
+for i = 1, MAX_NUMBER_OF_BOONS, 1 do
 	widget_definitions[i] = create_boon_widget(i)
 end
 
 return {
+	MAX_NUMBER_OF_BOONS = MAX_NUMBER_OF_BOONS,
 	scenegraph_definition = scenegraph_definition,
 	widget_definitions = widget_definitions
 }

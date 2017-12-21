@@ -228,6 +228,48 @@ local scenegraph_definition = {
 			198
 		}
 	},
+	voting_widget_1_gamepad_selection = {
+		vertical_alignment = "center",
+		parent = "voting_widget_1",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			395,
+			260
+		}
+	},
+	voting_widget_2_gamepad_selection = {
+		vertical_alignment = "center",
+		parent = "voting_widget_2",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			395,
+			260
+		}
+	},
+	voting_widget_3_gamepad_selection = {
+		vertical_alignment = "center",
+		parent = "voting_widget_3",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			395,
+			260
+		}
+	},
 	level_vote_timer_prefix = {
 		vertical_alignment = "top",
 		parent = "level_vote_texts",
@@ -431,7 +473,7 @@ local compact_topic_offset = {
 	0
 }
 
-local function create_voting_widget(scenegraph_id)
+local function create_voting_widget(scenegraph_id, gamepad_selection_scenegraph_id)
 	return {
 		element = {
 			passes = {
@@ -461,7 +503,7 @@ local function create_voting_widget(scenegraph_id)
 					style_id = "gamepad_texture_selected_id",
 					pass_type = "texture",
 					content_check_function = function (content)
-						return not content.button_hotspot.is_selected and content.selected
+						return not content.button_hotspot.is_selected and not content.button_hotspot.gamepad_active and content.selected
 					end
 				},
 				{
@@ -503,6 +545,13 @@ local function create_voting_widget(scenegraph_id)
 			button_hotspot = {}
 		},
 		style = {
+			gamepad_selection = {
+				texture_size = {
+					90,
+					90
+				},
+				scenegraph_id = gamepad_selection_scenegraph_id
+			},
 			background_texture_id = {
 				offset = {
 					0,
@@ -538,20 +587,20 @@ local function create_voting_widget(scenegraph_id)
 			vote_marker = {
 				texture_sizes = {
 					{
-						22,
-						22
+						37,
+						31
 					},
 					{
-						22,
-						22
+						37,
+						31
 					},
 					{
-						22,
-						22
+						37,
+						31
 					},
 					{
-						22,
-						22
+						37,
+						31
 					}
 				},
 				spacing = {
@@ -560,15 +609,15 @@ local function create_voting_widget(scenegraph_id)
 					0
 				},
 				offset = {
-					20,
-					143,
+					25,
+					136,
 					3
 				},
 				color = {
 					255,
+					0,
 					255,
-					255,
-					255
+					0
 				}
 			},
 			gamepad_texture_selected_id = {
@@ -587,10 +636,15 @@ local function create_voting_widget(scenegraph_id)
 	}
 end
 
+local leave_party_text = (Application.platform() == "xb1" and "leave_party_xb1") or "leave_party"
 local widgets = {
-	voting_widget_1 = create_voting_widget("voting_widget_1"),
-	voting_widget_2 = create_voting_widget("voting_widget_2"),
-	voting_widget_3 = create_voting_widget("voting_widget_3"),
+	gamepad_slot_selection = UIWidgets.create_gamepad_selection("voting_widget_1_gamepad_selection", nil, nil, {
+		70,
+		70
+	}),
+	voting_widget_1 = create_voting_widget("voting_widget_1", "voting_widget_1_gamepad_selection"),
+	voting_widget_2 = create_voting_widget("voting_widget_2", "voting_widget_2_gamepad_selection"),
+	voting_widget_3 = create_voting_widget("voting_widget_3", "voting_widget_3_gamepad_selection"),
 	topic_mask = UIWidgets.create_simple_texture("mask_rect", "topic_mask"),
 	background_tint = {
 		scenegraph_id = "screen",
@@ -1138,7 +1192,7 @@ local widgets = {
 			}
 		}
 	},
-	continue_button = UIWidgets.create_menu_button_medium("leave_party", "scoreboard_window_button")
+	continue_button = UIWidgets.create_menu_button_medium(leave_party_text, "scoreboard_window_button")
 }
 
 local function create_compact_topic_widgets(number_of_elements)
@@ -1336,8 +1390,8 @@ local function create_compact_topic_widgets(number_of_elements)
 					scenegraph_id = scenegraph_internal_id
 				},
 				title_text = {
-					font_size = 32,
-					word_wrap = true,
+					font_size = 28,
+					word_wrap = false,
 					pixel_perfect = true,
 					horizontal_alignment = "center",
 					vertical_alignment = "top",
@@ -1345,15 +1399,19 @@ local function create_compact_topic_widgets(number_of_elements)
 					font_type = "hell_shark_header_masked",
 					text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 					offset = {
-						0,
+						12,
 						-30,
 						5
+					},
+					size = {
+						280,
+						214
 					},
 					scenegraph_id = scenegraph_internal_id
 				},
 				player_name = {
 					font_size = 18,
-					word_wrap = true,
+					word_wrap = false,
 					pixel_perfect = true,
 					horizontal_alignment = "center",
 					vertical_alignment = "bottom",

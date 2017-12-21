@@ -16,11 +16,16 @@ local HOPPER_PARAMS_LUT = {
 	default_stage_hopper = {
 		"difficulty",
 		"stage"
+	},
+	new_stage_hopper = {
+		"difficulty",
+		"level"
 	}
 }
 local HOPPER_PARAM_TYPE_LUT = {
+	stage = "number",
 	difficulty = "number",
-	stage = "number"
+	level = "collection"
 }
 local SMARTMATCH_STATUS_LUT = {
 	[SmartMatchStatus.UNKNOWN] = "UNKNOWN",
@@ -39,8 +44,9 @@ SmartMatch.init = function (self, hopper_name, is_host, ticket_params, timeout)
 	self._hopper_name = hopper_name or LobbyInternal.HOPPER_NAME
 	self._is_host = is_host or false
 	self._ticket_params = ticket_params or {}
-	self._timout = timeout or 60
+	self._timout = timeout or 90
 	self._ticket_id = nil
+	self._user_id = Managers.account:user_id()
 
 	if table.is_empty(self._ticket_params) then
 		dprintf("No params sent to SmartMatch")
@@ -60,7 +66,7 @@ SmartMatch._create_smartmatch_session = function (self)
 	local min_num_members = 0
 	local max_num_members = 0
 	local guest_user_ids = nil
-	self._session_id = Network.create_multiplayer_session_host(Managers.account:user_id(), session_name, session_template_name, keywords, min_num_members, max_num_members, guest_user_ids)
+	self._session_id = Network.create_multiplayer_session_host(self._user_id, session_name, session_template_name, keywords, min_num_members, max_num_members, guest_user_ids)
 	self._session_name = session_name
 
 	return 
@@ -187,6 +193,18 @@ SmartMatch._convert_to_json = function (self, hopper_name, params)
 			str = str .. string.format("%q:%i,", var, val)
 		elseif var_type == "string" then
 			str = str .. string.format("%q:%q,", var, val)
+		elseif var_type == "collection" then
+			str = str .. string.format("%q:[", var)
+
+			for idx, value in ipairs(val) do
+				if idx == 1 then
+					str = str .. string.format("%q", tostring(value))
+				else
+					str = str .. string.format(",%q", tostring(value))
+				end
+			end
+
+			str = str .. "],"
 		end
 	end
 
@@ -194,6 +212,8 @@ SmartMatch._convert_to_json = function (self, hopper_name, params)
 		return 
 	else
 		str = string.sub(str, 1, -2)
+
+		print("Hopper name:", hopper_name, "JSON_DATA:", string.format("{%s}", str))
 
 		return string.format("{%s}", str)
 	end
@@ -219,7 +239,7 @@ SmartMatch.destroy = function (self)
 	local session_data = {
 		destroy_session = true,
 		state = "_cleanup_ticket",
-		user_id = Managers.account:user_id(),
+		user_id = self._user_id,
 		session_id = self._session_id,
 		hopper_name = self._hopper_name,
 		session_name = self._session_name

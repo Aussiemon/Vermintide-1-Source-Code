@@ -335,6 +335,20 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	roll_button_fill = {
+		vertical_alignment = "center",
+		parent = "roll_button",
+		horizontal_alignment = "left",
+		size = {
+			307,
+			69
+		},
+		position = {
+			16,
+			-10,
+			-1
+		}
+	},
 	item_button = {
 		vertical_alignment = "center",
 		parent = "frame",
@@ -675,7 +689,7 @@ local widgets_definitions = {
 	candle_glow_left_top_widget = UIWidgets.create_simple_texture("candle_glow_01", "candle_glow_top_left"),
 	candle_glow_left_widget = UIWidgets.create_simple_texture("candle_glow_01", "candle_glow_left"),
 	candle_glow_right_widget = UIWidgets.create_simple_texture("candle_glow_01", "candle_glow_right"),
-	roll_button_widget = UIWidgets.create_altar_button("altar_screen_reroll_proc_tooltip", "roll_button", "roll_button_text", "roll_button_token"),
+	roll_button_widget = UIWidgets.create_altar_button("altar_screen_reroll_proc_tooltip", "roll_button", "roll_button_text", "roll_button_token", "roll_button_fill"),
 	item_button_widget = UIWidgets.create_attach_icon_button("item_slot_01", "item_button", "item_button_icon", scenegraph_definition.item_button_icon.size),
 	text_frame_title = UIWidgets.create_simple_text("", "text_frame_title", 28, Colors.get_color_table_with_alpha("cheeseburger", 255), {
 		font_size = 28,

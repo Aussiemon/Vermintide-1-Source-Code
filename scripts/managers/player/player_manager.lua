@@ -114,6 +114,7 @@ end
 PlayerManager.relinquish_unit_ownership = function (self, unit)
 	if script_data.network_debug_connections then
 		printf("PlayerManager:relinquish_unit_ownership")
+		print(Script.callstack())
 	end
 
 	fassert(self._unit_owners[unit], "[PlayerManager:relinquish_unit_ownership] Unit %s ownership cannot be relinquished, not owned.", unit)

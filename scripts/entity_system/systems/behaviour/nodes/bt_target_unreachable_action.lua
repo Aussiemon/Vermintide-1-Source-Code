@@ -23,7 +23,6 @@ BTTargetUnreachableAction.leave = function (self, unit, blackboard, t)
 	return 
 end
 BTTargetUnreachableAction.run = function (self, unit, blackboard, t, dt)
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 	local whereabouts_extension = ScriptUnit.extension(blackboard.target_unit, "whereabouts_system")
 	local pos = POSITION_LOOKUP[unit]
 	local enemy_pos = POSITION_LOOKUP[blackboard.target_unit]
@@ -56,6 +55,8 @@ BTTargetUnreachableAction.run = function (self, unit, blackboard, t, dt)
 	if closest_pos then
 		blackboard.navigation_extension:move_to(closest_pos)
 	end
+
+	local locomotion = blackboard.locomotion_extension
 
 	self.move_closer(self, unit, t, dt, blackboard, locomotion)
 

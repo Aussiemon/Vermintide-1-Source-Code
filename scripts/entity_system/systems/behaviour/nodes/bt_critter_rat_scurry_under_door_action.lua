@@ -17,7 +17,6 @@ BTCritterRatScurryUnderDoorAction.enter = function (self, unit, blackboard, t)
 	blackboard.scurry_under_lookat_direction = Vector3Box(Vector3.normalize(Vector3.flat(exit_pos - entrance_pos)))
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_affected_by_gravity(locomotion_extension, false)
 	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
 
 	if blackboard.move_state ~= "moving" then
@@ -38,11 +37,12 @@ BTCritterRatScurryUnderDoorAction.leave = function (self, unit, blackboard, t)
 	blackboard.is_scurrying_under_door = nil
 	blackboard.anim_cb_scurry_under_finished = nil
 	blackboard.is_smart_objecting = nil
+
+	LocomotionUtils.set_animation_driven_movement(unit, false)
+
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
 	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
-	locomotion_extension.set_animation_driven(locomotion_extension, false)
 
 	local navigation_extension = blackboard.navigation_extension
 
@@ -104,7 +104,7 @@ BTCritterRatScurryUnderDoorAction._moving_to_door_update = function (self, unit,
 	if entrance_distance < 1 then
 		local locomotion_extension = blackboard.locomotion_extension
 
-		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3(0, 0, 0))
+		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
 		locomotion_extension.set_movement_type(locomotion_extension, "script_driven")
 
 		local navigation_extension = blackboard.navigation_extension
@@ -149,7 +149,7 @@ BTCritterRatScurryUnderDoorAction._move_towards_smartobject_entrance_update = fu
 		locomotion_extension.set_wanted_velocity(locomotion_extension, direction_to_target*speed)
 		locomotion_extension.set_wanted_rotation(locomotion_extension, wanted_rotation)
 	else
-		locomotion_extension.set_animation_driven(locomotion_extension, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 		locomotion_extension.teleport_to(locomotion_extension, entrance_pos, wanted_rotation)
 		Managers.state.network:anim_event(unit, "dig_door")
 

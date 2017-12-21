@@ -9,7 +9,7 @@ UnlockKeyView.init = function (self, ingame_ui_context)
 	self.wwise_world = ingame_ui_context.dialogue_system.wwise_world
 	local input_manager = self.input_manager
 
-	input_manager.create_input_service(input_manager, "unlock_key_menu", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "unlock_key_menu", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "unlock_key_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "unlock_key_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "unlock_key_menu", "gamepad")

@@ -30,7 +30,8 @@ local unit_templates = {
 			"StatisticsExtension",
 			"ContextAwarePingExtension",
 			"PlayerUnitFadeExtension",
-			"PlayerUnitDarknessExtension"
+			"PlayerUnitDarknessExtension",
+			"PlayerUnitSmartTargetingExtension"
 		},
 		self_owned_extensions_server = {
 			"PlayerInputExtension",
@@ -65,7 +66,8 @@ local unit_templates = {
 			"StatisticsExtension",
 			"ContextAwarePingExtension",
 			"PlayerUnitFadeExtension",
-			"PlayerUnitDarknessExtension"
+			"PlayerUnitDarknessExtension",
+			"PlayerUnitSmartTargetingExtension"
 		},
 		husk_extensions = {
 			"SimpleHuskInventoryExtension",

@@ -33,10 +33,11 @@ WeaponSpreadExtension.destroy = function (self)
 	return 
 end
 local ignored_damage_types = {
-	heal = true,
 	globadier_gas_dot = true,
+	buff_shared_medpack = true,
 	wounded_dot = true,
-	buff = true
+	buff = true,
+	heal = true
 }
 WeaponSpreadExtension.update = function (self, unit, input, dt, context, t)
 	local current_pitch = self.current_pitch

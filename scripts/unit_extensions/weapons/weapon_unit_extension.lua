@@ -13,8 +13,6 @@ require("scripts/unit_extensions/weapons/actions/action_staff")
 require("scripts/unit_extensions/weapons/actions/action_bow")
 require("scripts/unit_extensions/weapons/actions/action_true_flight_bow")
 require("scripts/unit_extensions/weapons/actions/action_true_flight_bow_aim")
-require("scripts/unit_extensions/weapons/actions/action_hammer_slam")
-require("scripts/unit_extensions/weapons/actions/action_hammer_leap")
 require("scripts/unit_extensions/weapons/actions/action_handgun_lock")
 require("scripts/unit_extensions/weapons/actions/action_handgun_lock_targeting")
 require("scripts/unit_extensions/weapons/actions/action_bullet_spray")
@@ -24,7 +22,6 @@ require("scripts/unit_extensions/weapons/actions/action_shotgun")
 require("scripts/unit_extensions/weapons/actions/action_crossbow")
 require("scripts/unit_extensions/weapons/actions/action_cancel")
 require("scripts/unit_extensions/weapons/actions/action_potion")
-require("scripts/unit_extensions/weapons/actions/action_scroll_push")
 require("scripts/unit_extensions/weapons/actions/action_shield_slam")
 require("scripts/unit_extensions/weapons/actions/action_charged_projectile")
 require("scripts/unit_extensions/weapons/actions/action_beam")
@@ -67,7 +64,6 @@ local action_classes = {
 	handgun_lock = ActionHandgunLock,
 	bullet_spray_targeting = ActionBulletSprayTargeting,
 	bullet_spray = ActionBulletSpray,
-	scroll_push = ActionScrollPush,
 	aim = ActionAim,
 	shotgun = ActionShotgun,
 	shield_slam = ActionShieldSlam,
@@ -189,6 +185,7 @@ WeaponUnitExtension.get_action = function (self, action_name, sub_action_name, a
 end
 local interupting_action_data = {}
 WeaponUnitExtension.start_action = function (self, action_name, sub_action_name, actions, t)
+	local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
 	local current_action_settings = self.current_action_settings
 	local new_action = action_name
 	local new_sub_action = sub_action_name
@@ -251,7 +248,6 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 		local locomotion_extension = ScriptUnit.extension(owner_unit, "locomotion_system")
 
 		if locomotion_extension.is_stood_still(locomotion_extension) then
-			local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 			local look_rotation = first_person_extension.current_rotation(first_person_extension)
 
 			locomotion_extension.set_stood_still_target_rotation(locomotion_extension, look_rotation)
@@ -273,6 +269,15 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 		local action_kind = current_action_settings.kind
 		local action = self.actions[action_kind]
 		local time_to_complete = current_action_settings.total_time
+
+		if current_action_settings.scale_total_time_on_mastercrafted then
+			local buff_extension = ScriptUnit.extension(self.owner_unit, "buff_system")
+
+			if buff_extension then
+				time_to_complete = buff_extension.apply_buffs_to_value(buff_extension, time_to_complete, StatBuffIndex.RELOAD_SPEED)
+			end
+		end
+
 		local event = current_action_settings.anim_event
 
 		for _, data in pairs(self.action_buff_data) do
@@ -288,6 +293,15 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 		end
 
 		action.client_owner_start_action(action, current_action_settings, t, chain_action_data)
+
+		local aim_assist_ramp_multiplier = current_action_settings.aim_assist_ramp_multiplier
+
+		if aim_assist_ramp_multiplier then
+			local aim_assist_max_ramp_multiplier = current_action_settings.aim_assist_max_ramp_multiplier
+			local aim_assist_ramp_decay_delay = current_action_settings.aim_assist_ramp_decay_delay
+
+			first_person_extension.increase_aim_assist_multiplier(first_person_extension, aim_assist_ramp_multiplier, aim_assist_max_ramp_multiplier, aim_assist_ramp_decay_delay)
+		end
 
 		if self.ammo_extension then
 			if self.ammo_extension:total_remaining_ammo() == 0 then
@@ -325,6 +339,10 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 				end
 			end
 
+			if Application.platform() ~= "win32" and event == "attack_shoot" then
+				anim_time_scale = anim_time_scale*1.2
+			end
+
 			local first_person_variable_id = Unit.animation_find_variable(first_person_unit, "attack_speed")
 
 			Unit.animation_set_variable(first_person_unit, first_person_variable_id, anim_time_scale)
@@ -338,7 +356,7 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 			if current_action_settings.apply_recoil then
 				local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 
-				first_person_extension.apply_recoil(first_person_extension)
+				first_person_extension.apply_recoil(first_person_extension, current_action_settings.recoil_factor)
 			end
 		end
 	end
@@ -440,12 +458,12 @@ WeaponUnitExtension.update = function (self, unit, input, dt, context, t)
 			if buff_data then
 				Profiler.start("buff")
 				ActionUtils.update_action_buff_data(self.action_buff_data, buff_data, owner_unit, t)
-				Profiler.stop()
+				Profiler.stop("buff")
 			end
 
 			Profiler.start(action_kind)
 			action.client_owner_post_update(action, dt, t, self.world, can_damage, current_time_in_action)
-			Profiler.stop()
+			Profiler.stop(action_kind)
 
 			if current_action_settings.cooldown then
 				self.cooldown_timer = t + current_action_settings.cooldown
@@ -491,6 +509,12 @@ WeaponUnitExtension.can_stop_hold_action = function (self, t)
 
 	if not minimum_hold_time then
 		return true
+	end
+
+	local buff_extension = ScriptUnit.extension(self.owner_unit, "buff_system")
+
+	if buff_extension then
+		minimum_hold_time = buff_extension.apply_buffs_to_value(buff_extension, minimum_hold_time, StatBuffIndex.RELOAD_SPEED)
 	end
 
 	return minimum_hold_time < current_time_in_action

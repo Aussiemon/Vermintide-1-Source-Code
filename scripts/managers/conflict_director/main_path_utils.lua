@@ -61,7 +61,7 @@ MainPathUtils.closest_pos_at_main_path_lua = function (main_paths, p)
 		best_point = nil
 	end
 
-	Profiler.stop()
+	Profiler.stop("closest_pos_at_main_path")
 
 	return best_point, best_travel_dist, total_path_dist, move_percent, best_main_path, best_sub_index
 end
@@ -194,11 +194,46 @@ MainPathUtils.closest_pos_at_collapsed_main_path = function (collapsed_path, col
 
 	return best_point, best_travel_dist, move_percent, best_index
 end
+MainPathUtils.resolve_node_in_door = function (nav_world, node_position, door_unit)
+	local nav_graph_system = Managers.state.entity:system("nav_graph_system")
+	local smart_object_id = nav_graph_system.get_smart_object_id(nav_graph_system, door_unit)
+	local smart_object_unit_data = nav_graph_system.get_smart_objects(nav_graph_system, smart_object_id)
+
+	for _, smart_object_data in pairs(smart_object_unit_data) do
+		local entrance_position = Vector3Aux.unbox(smart_object_data.pos1)
+		local exit_position = Vector3Aux.unbox(smart_object_data.pos2)
+		local entrance_distance_sq = Vector3.distance_squared(node_position, entrance_position)
+		local exit_distance_sq = Vector3.distance_squared(node_position, exit_position)
+
+		if entrance_distance_sq < exit_distance_sq then
+			node_position = entrance_position
+		else
+			node_position = exit_position
+		end
+
+		local success, z = GwNavQueries.triangle_from_position(nav_world, node_position, 1.5, 1.5)
+
+		if success then
+			node_position.z = z
+
+			break
+		end
+
+		node_position = nil
+
+		break
+	end
+
+	return node_position
+end
+local DOOR_SEARCH_RADIUS = 1.5
 MainPathUtils.node_list_from_main_paths = function (nav_world, main_paths, max_node_distance, obstacles)
 	local forward_list = {}
 	local reversed_list = {}
 	local forward_break_list = {}
 	local reversed_break_list = {}
+	local door_system = Managers.state.entity:system("door_system")
+	local door_broadphase_query_result = {}
 
 	for i = 1, #main_paths, 1 do
 		local path_nodes = main_paths[i].nodes
@@ -226,10 +261,22 @@ MainPathUtils.node_list_from_main_paths = function (nav_world, main_paths, max_n
 
 						for k = 1, num_insert_nodes, 1 do
 							local wanted_node_position = node.unbox(node) + segment_direction*k*max_node_distance
-							local success, z = GwNavQueries.triangle_from_position(nav_world, wanted_node_position, 1.5, 1.5)
+							local num_doors = door_system.get_doors(door_system, wanted_node_position, DOOR_SEARCH_RADIUS, door_broadphase_query_result)
 
-							if success then
-								wanted_node_position.z = z
+							if 0 < num_doors then
+								local door_unit = door_broadphase_query_result[1]
+								wanted_node_position = MainPathUtils.resolve_node_in_door(nav_world, wanted_node_position, door_unit)
+							else
+								local success, z = GwNavQueries.triangle_from_position(nav_world, wanted_node_position, 1.5, 1.5)
+
+								if success then
+									wanted_node_position.z = z
+								else
+									wanted_node_position = nil
+								end
+							end
+
+							if wanted_node_position then
 								local new_node = Vector3Box(wanted_node_position)
 								forward_list[#forward_list + 1] = new_node
 							end

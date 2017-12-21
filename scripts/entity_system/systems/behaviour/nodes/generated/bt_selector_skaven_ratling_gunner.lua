@@ -35,7 +35,7 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("spawn")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -57,7 +57,7 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_falling.run(node_falling, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("falling")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -83,7 +83,7 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("stagger")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -96,29 +96,7 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_stunned = children[4]
-	local condition_result = blackboard.stunned
-
-	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_stunned, "aborted")
-		Profiler_start("stunned")
-
-		local result, evaluate = node_stunned.run(node_stunned, unit, blackboard, t, dt)
-
-		Profiler_stop()
-
-		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
-		end
-
-		if result ~= "failed" then
-			return result, evaluate
-		end
-	elseif node_stunned == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
-	end
-
-	local node_smartobject = children[5]
+	local node_smartobject = children[4]
 	local smartobject_is_next = blackboard.next_smart_object_data.next_smart_object_id ~= nil
 	local is_in_smartobject_range = blackboard.is_in_smartobject_range
 	local is_smart_objecting = blackboard.is_smart_objecting
@@ -130,7 +108,7 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 
 		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
 
-		Profiler_stop()
+		Profiler_stop("smartobject")
 
 		if result ~= "running" then
 			self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -143,14 +121,14 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 		self.set_running_child(self, unit, blackboard, t, nil, "failed")
 	end
 
-	local node_attack_pattern = children[6]
+	local node_attack_pattern = children[5]
 
 	self.set_running_child(self, unit, blackboard, t, node_attack_pattern, "aborted")
 	Profiler_start("attack_pattern")
 
 	local result, evaluate = node_attack_pattern.run(node_attack_pattern, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("attack_pattern")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)
@@ -160,14 +138,14 @@ BTSelector_skaven_ratling_gunner.run = function (self, unit, blackboard, t, dt)
 		return result, evaluate
 	end
 
-	local node_idle = children[7]
+	local node_idle = children[6]
 
 	self.set_running_child(self, unit, blackboard, t, node_idle, "aborted")
 	Profiler_start("idle")
 
 	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
 
-	Profiler_stop()
+	Profiler_stop("idle")
 
 	if result ~= "running" then
 		self.set_running_child(self, unit, blackboard, t, nil, result)

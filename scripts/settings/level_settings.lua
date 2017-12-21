@@ -16,8 +16,7 @@ COLD_CAMERA_BACKLIGHT = {
 	color = Vector3Box(0.9, 0.7, 0.6)
 }
 
-require("scripts/settings/level_settings_honduras")
-require("scripts/settings/level_settings_dlc_dwarf")
+dofile("scripts/settings/level_settings_dlc_dwarf")
 
 local DEFAULT_TIP_LIST = {
 	"tip_1",
@@ -197,8 +196,9 @@ LevelSettings.whitebox_basic = {
 	level_name = "levels/debug/whitebox_basic/world",
 	loading_bg_image = "loading_screen_cemetery",
 	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_cemetery",
-	level_image = "level_image_any",
+	conflict_settings = "disabled",
 	source_aux_bus_name = "environment_reverb_outside_source",
+	level_image = "level_image_any",
 	level_particle_effects = {},
 	level_screen_effects = {},
 	locations = {},
@@ -246,10 +246,17 @@ LevelSettings.whitebox_ai = {
 	level_screen_effects = {},
 	pickup_settings = {
 		{
-			ammo = 2,
-			grenades = 4,
-			healing = 6,
-			potions = 8
+			primary = {
+				ammo = 2,
+				grenades = 4,
+				healing = 6,
+				potions = 8
+			},
+			secondary = {
+				healing = {
+					first_aid_kit = 6
+				}
+			}
 		}
 	},
 	loading_screen_wwise_events = {
@@ -343,11 +350,12 @@ LevelSettings.tutorial = {
 	display_name = "level_tutorial",
 	mini_patrol = false,
 	level_image = "level_image_any",
-	loading_bg_image = "loading_screen_cemetery",
-	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_cemetery",
+	loading_bg_image = "loading_screen_tutorial_level",
+	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_tutorial",
 	conflict_settings = "tutorial",
 	ambient_sound_event = "silent_default_world_sound",
-	default_surface_material = "stone",
+	game_mode = "tutorial",
+	default_surface_material = "forest_grass",
 	knocked_down_setting = "knocked_down",
 	package_name = "resource_packages/levels/play_go_tutorial",
 	source_aux_bus_name = "environment_reverb_outside_source",
@@ -681,7 +689,7 @@ LevelSettings.tunnels = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 6,
+		sorting = 10,
 		icon = "level_location_long_icon_06",
 		wwise_events = {
 			"nik_map_brief_skaven_tunnels_01",
@@ -829,7 +837,7 @@ LevelSettings.farm = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 11,
+		sorting = 9,
 		icon = "level_location_short_icon_06",
 		wwise_events = {
 			"nik_map_brief_farm_01",
@@ -952,7 +960,7 @@ LevelSettings.city_wall = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 10,
+		sorting = 7,
 		icon = "level_location_short_icon_05",
 		wwise_events = {
 			"nik_map_brief_city_wall_01",
@@ -1051,7 +1059,7 @@ LevelSettings.cemetery = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 5,
+		sorting = 8,
 		icon = "level_location_long_icon_05",
 		wwise_events = {
 			"nik_map_brief_cemetary_01",
@@ -1157,7 +1165,7 @@ LevelSettings.courtyard_level = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 12,
+		sorting = 11,
 		icon = "level_location_short_icon_03",
 		wwise_events = {
 			"nik_map_brief_courtyard_01",
@@ -1257,7 +1265,7 @@ LevelSettings.sewers_short = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 8,
+		sorting = 3,
 		icon = "level_location_short_icon_01",
 		wwise_events = {
 			"nik_map_brief_sewers_01",
@@ -1362,7 +1370,7 @@ LevelSettings.wizard = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 3,
+		sorting = 4,
 		icon = "level_location_long_icon_03",
 		wwise_events = {
 			"nik_map_brief_wizard_tower_01",
@@ -1386,13 +1394,14 @@ LevelSettings.magnus = {
 	map_sorting = 1,
 	player_aux_bus_name = "environment_reverb_outside",
 	package_name = "resource_packages/levels/magnus",
+	act = "prologue",
 	level_image = "level_image_magnus",
 	loading_bg_image = "loading_screen_magnus",
 	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_magnus",
-	loading_screen_gamemode_prefix = "level_gamemode_prefix_2",
 	ambient_sound_event = "silent_default_world_sound",
-	loading_screen_gamemode_name = "level_gamemode_defend",
+	loading_screen_gamemode_prefix = "level_gamemode_prefix_2",
 	boss_spawning_method = "hand_placed",
+	loading_screen_gamemode_name = "level_gamemode_defend",
 	default_surface_material = "stone",
 	knocked_down_setting = "knocked_down",
 	level_name = "levels/magnus/world",
@@ -1555,7 +1564,7 @@ LevelSettings.end_boss = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 7,
+		sorting = 13,
 		icon = "level_location_long_icon_07",
 		wwise_events = {
 			"nik_map_brief_end_boss_01",
@@ -1656,7 +1665,7 @@ LevelSettings.forest_ambush = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 4,
+		sorting = 6,
 		icon = "level_location_long_icon_04",
 		wwise_events = {
 			"nik_map_brief_forest_ambush_01",
@@ -1688,6 +1697,7 @@ LevelSettings.docks_short_level = {
 	level_name = "levels/docks_short_level/world",
 	loading_screen_gamemode_prefix = "level_gamemode_prefix_1",
 	loading_screen_gamemode_name = "level_gamemode_sabotage",
+	disable_bot_main_path_teleport_check = true,
 	default_surface_material = "stone_wet",
 	conflict_settings = "event_level_with_roaming",
 	package_name = "resource_packages/levels/docks_short_level",
@@ -1745,7 +1755,7 @@ LevelSettings.docks_short_level = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 13,
+		sorting = 12,
 		icon = "level_location_short_icon_04",
 		wwise_events = {
 			"nik_map_brief_docks_01",
@@ -1774,6 +1784,7 @@ LevelSettings.dlc_castle = {
 	loading_bg_image = "loading_screen_dlc_castle",
 	level_image = "level_image_dlc_castle",
 	dlc_name = "drachenfels",
+	required_act_completed = "prologue",
 	boss_spawning_method = "hand_placed",
 	game_mode = "adventure",
 	knocked_down_setting = "knocked_down",
@@ -1840,7 +1851,7 @@ LevelSettings.dlc_castle = {
 	},
 	map_settings = {
 		area = "drachenfels",
-		sorting = 20,
+		sorting = 16,
 		icon = "level_location_dlc_icon_castle",
 		wwise_events = {
 			"nik_map_brief_castle_a_01",
@@ -1870,6 +1881,7 @@ LevelSettings.dlc_castle_dungeon = {
 	game_mode = "adventure",
 	dlc_name = "drachenfels",
 	ambient_sound_event = "ambience_dlc_castle_inside_hall_corridor",
+	required_act_completed = "prologue",
 	boss_spawning_method = "hand_placed",
 	knocked_down_setting = "knocked_down",
 	package_name = "resource_packages/levels/dlc_castle_dungeon",
@@ -1943,7 +1955,7 @@ LevelSettings.dlc_castle_dungeon = {
 	},
 	map_settings = {
 		area = "drachenfels",
-		sorting = 21,
+		sorting = 17,
 		icon = "level_location_dlc_icon_dungeon",
 		wwise_events = {
 			"nik_map_brief_dungeon_01",
@@ -1973,6 +1985,7 @@ LevelSettings.dlc_portals = {
 	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_dlc_portals",
 	level_name = "levels/dlc_portals/world",
 	dlc_name = "drachenfels",
+	required_act_completed = "prologue",
 	game_mode = "adventure",
 	conflict_settings = "dlc_portals",
 	package_name = "resource_packages/levels/dlc_portals",
@@ -2035,7 +2048,7 @@ LevelSettings.dlc_portals = {
 	},
 	map_settings = {
 		area = "drachenfels",
-		sorting = 22,
+		sorting = 18,
 		icon = "level_location_dlc_icon_portals",
 		wwise_events = {
 			"nik_map_brief_portals_01",
@@ -2331,7 +2344,7 @@ LevelSettings.dlc_survival_ruins = {
 	},
 	map_settings = {
 		area = "world",
-		sorting = 2,
+		sorting = 15,
 		icon = "level_location_dlc_icon_01",
 		wwise_events = {
 			"nik_map_brief_dlc_survival_ruins_01",
@@ -2384,7 +2397,7 @@ LevelSettings.dlc_survival_magnus = {
 	},
 	map_settings = {
 		area = "world",
-		sorting = 1,
+		sorting = 14,
 		icon = "level_location_dlc_icon_02",
 		wwise_events = {
 			"nik_map_brief_dlc_survival_general_01",
@@ -2474,7 +2487,7 @@ LevelSettings.bridge = {
 	},
 	map_settings = {
 		area = "ubersreik",
-		sorting = 9,
+		sorting = 5,
 		icon = "level_location_short_icon_02",
 		wwise_events = {
 			"nik_map_brief_bridge_01",

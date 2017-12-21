@@ -148,9 +148,9 @@ HitEffectsSkavenClanRat = {
 			"ragdoll"
 		},
 		push = {
-			distal_force = 20,
+			distal_force = 40,
 			vertical_force = 0,
-			lateral_force = 40
+			lateral_force = 80
 		}
 	},
 	slashing_linesman_death_right_arm = {
@@ -160,7 +160,11 @@ HitEffectsSkavenClanRat = {
 			hit_zone = "right_arm"
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_arm_right",
+			"death_arm_right_2",
+			"death_arm_right_3",
+			"death_arm_right_4"
 		}
 	},
 	slashing_linesman_death_left_arm = {
@@ -170,7 +174,11 @@ HitEffectsSkavenClanRat = {
 			hit_zone = "left_arm"
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_arm_left",
+			"death_arm_left_2",
+			"death_arm_left_3",
+			"death_arm_left_4"
 		}
 	},
 	slashing_linesman_death_head = {
@@ -184,7 +192,13 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
 		}
 	},
 	heavy_slashing_linesman_death = {
@@ -343,7 +357,10 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_stab_chest",
+			"death_stab_chest_2",
+			"death_stab_chest_3"
 		},
 		push = {
 			distal_force = 5,
@@ -454,7 +471,10 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_arm_right"
+			"death_arm_right",
+			"death_arm_right_2",
+			"death_arm_right_3",
+			"death_arm_right_4"
 		},
 		push = {
 			distal_force = 0,
@@ -470,7 +490,10 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_arm_left"
+			"death_arm_left",
+			"death_arm_left_2",
+			"death_arm_left_3",
+			"death_arm_left_4"
 		},
 		push = {
 			distal_force = 0,
@@ -544,7 +567,10 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_arm_right"
+			"death_arm_right",
+			"death_arm_right_2",
+			"death_arm_right_3",
+			"death_arm_right_4"
 		}
 	},
 	heavy_slashing_smiter_death_left_arm = {
@@ -554,7 +580,10 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_arm_left"
+			"death_arm_left",
+			"death_arm_left_2",
+			"death_arm_left_3",
+			"death_arm_left_4"
 		}
 	},
 	heavy_slashing_smiter_death_torso = {
@@ -650,7 +679,12 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_decapitate"
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
 		}
 	},
 	heavy_blunt_smiter_death = {
@@ -758,8 +792,7 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"ragdoll",
-			"death_crawl"
+			"ragdoll"
 		},
 		push = {
 			distal_force = 30,
@@ -825,7 +858,11 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_burn"
+			"death_burn",
+			"death_burn_2",
+			"death_burn_3",
+			"death_burn_4",
+			"death_burn_5"
 		},
 		push = {
 			distal_force = 30,
@@ -1069,7 +1106,12 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_decapitate"
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
 		}
 	},
 	light_slashing_tank_death = {
@@ -1439,7 +1481,11 @@ HitEffectsSkavenClanRat = {
 			hit_zone = "right_arm"
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_arm_right",
+			"death_arm_right_2",
+			"death_arm_right_3",
+			"death_arm_right_4"
 		}
 	},
 	burning_linesman_death_left_arm = {
@@ -1449,7 +1495,11 @@ HitEffectsSkavenClanRat = {
 			hit_zone = "left_arm"
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_arm_left",
+			"death_arm_left_2",
+			"death_arm_left_3",
+			"death_arm_left_4"
 		}
 	},
 	burning_linesman_death_head = {
@@ -1462,7 +1512,13 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
 		}
 	},
 	shot_default = {
@@ -1510,7 +1566,8 @@ HitEffectsSkavenClanRat = {
 		animations = {
 			"ragdoll",
 			"death_shot_body",
-			"death_shot_body_2"
+			"death_shot_body_2",
+			"death_shot_body_bwd"
 		},
 		push = {
 			distal_force = 40,
@@ -1546,7 +1603,7 @@ HitEffectsSkavenClanRat = {
 		animations = {
 			"ragdoll",
 			"death_shot_head_front",
-			"death_decapitate",
+			"death_shot_head_bwd",
 			"death_decapitate_2",
 			"death_decapitate_3",
 			"death_decapitate_4",
@@ -1778,7 +1835,8 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_shot_head_front"
+			"death_shot_head_front",
+			"death_shot_head_bwd"
 		},
 		push = {
 			distal_force = 20,
@@ -1872,7 +1930,8 @@ HitEffectsSkavenClanRat = {
 		animations = {
 			"ragdoll",
 			"death_shot_body",
-			"death_shot_body_2"
+			"death_shot_body_2",
+			"death_shot_body_bwd"
 		},
 		push = {
 			distal_force = 50,
@@ -1893,7 +1952,8 @@ HitEffectsSkavenClanRat = {
 		animations = {
 			"ragdoll",
 			"death_shot_body",
-			"death_shot_body_2"
+			"death_shot_body_2",
+			"death_shot_body_bwd"
 		},
 		push = {
 			distal_force = 50,
@@ -1911,7 +1971,8 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_shot_head_front"
+			"death_shot_head_front",
+			"death_shot_head_bwd"
 		},
 		push = {
 			distal_force = 20,
@@ -1947,7 +2008,6 @@ HitEffectsSkavenClanRat = {
 		}
 	},
 	burn = {
-		flow_event = "burn",
 		extra_conditions = {
 			damage_type = "burn"
 		}
@@ -1961,7 +2021,6 @@ HitEffectsSkavenClanRat = {
 		}
 	},
 	burn_shotgun = {
-		flow_event = "burn",
 		extra_conditions = {
 			damage = true,
 			damage_type = "burn_shotgun"
@@ -2060,13 +2119,11 @@ HitEffectsSkavenClanRat = {
 		},
 		animations = {
 			"ragdoll",
-			"death_shot_head_front",
-			"death_decapitate",
-			"death_decapitate_2",
-			"death_decapitate_3",
-			"death_decapitate_4",
-			"death_decapitate_5",
-			"death_decapitate_6"
+			"death_burn",
+			"death_burn_2",
+			"death_burn_3",
+			"death_burn_4",
+			"death_burn_5"
 		},
 		push = {
 			distal_force = 80,
@@ -2117,7 +2174,13 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"death_shot_head_front"
+			"ragdoll",
+			"death_shot_head_front",
+			"death_burn",
+			"death_burn_2",
+			"death_burn_3",
+			"death_burn_4",
+			"death_burn_5"
 		},
 		flow_event = {
 			"burn",
@@ -2155,7 +2218,13 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"death_shot_head_front"
+			"death_shot_head_front",
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
 		},
 		flow_event = {
 			"burn",
@@ -2168,7 +2237,7 @@ HitEffectsSkavenClanRat = {
 		}
 	},
 	arrow_poison_dot = {
-		hit_effect_name = "fx/wpnfx_poison_arrow_impact",
+		flow_event = "poisoned",
 		extra_conditions = {
 			damage = true,
 			damage_type = {
@@ -2180,12 +2249,15 @@ HitEffectsSkavenClanRat = {
 	},
 	arrow_poison_dot_death = {
 		inherits = "arrow_poison_dot",
-		hit_effect_name = "fx/wpnfx_poison_arrow_impact",
+		flow_event = "poisoned",
 		extra_conditions = {
 			death = true
 		},
 		animations = {
-			"death_gas"
+			"death_gas",
+			"death_gas_2",
+			"death_gas_3",
+			"death_gas_4"
 		}
 	},
 	push = {
@@ -2333,7 +2405,6 @@ HitEffectsSkavenClanRat = {
 	},
 	drakegun = {
 		inherits = "default",
-		flow_event = "burn",
 		extra_conditions = {
 			damage_type = {
 				"drakegun"
@@ -2375,7 +2446,6 @@ HitEffectsSkavenClanRat = {
 		}
 	},
 	drakegun_shot_death = {
-		explosion_push = true,
 		flow_event = "burn",
 		extra_conditions = {
 			death = true,
@@ -2423,7 +2493,13 @@ HitEffectsSkavenClanRat = {
 			}
 		},
 		animations = {
-			"ragdoll"
+			"ragdoll",
+			"death_decapitate",
+			"death_decapitate_2",
+			"death_decapitate_3",
+			"death_decapitate_4",
+			"death_decapitate_5",
+			"death_decapitate_6"
 		},
 		flow_event = {
 			"burn",
@@ -2454,6 +2530,11 @@ HitEffectsSkavenClanRat = {
 		},
 		flow_event = {
 			"dismember_gib"
+		},
+		push = {
+			distal_force = 100,
+			vertical_force = 140,
+			lateral_force = 0
 		}
 	},
 	wound_default = {
@@ -2491,7 +2572,6 @@ HitEffectsSkavenClanRat = {
 	},
 	default_burning = {
 		inherits = "default",
-		flow_event = "burn",
 		extra_conditions = {
 			damage_type = {
 				"burning_tank",

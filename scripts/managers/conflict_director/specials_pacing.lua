@@ -301,11 +301,11 @@ SpecialsPacing.update = function (self, t, alive_specials, threat_population, pl
 	end
 
 	if 0 < #specials_spawn_queue then
-		local spawn_pos = self.get_special_spawn_pos(self)
+		local slot = specials_spawn_queue[#specials_spawn_queue]
+		local breed = Breeds[slot.breed]
+		local spawn_pos = self.get_special_spawn_pos(self, breed.spawning_rule)
 
 		if spawn_pos then
-			local slot = specials_spawn_queue[#specials_spawn_queue]
-			local breed = Breeds[slot.breed]
 			local new_special = Managers.state.conflict:spawn_unit(breed, spawn_pos, Quaternion(Vector3.up(), 0), "specials_pacing")
 			slot.unit = new_special
 			slot.state = "alive"
@@ -323,7 +323,23 @@ SpecialsPacing.update = function (self, t, alive_specials, threat_population, pl
 
 	return 
 end
-SpecialsPacing.get_special_spawn_pos = function (self)
+SpecialsPacing.debug_spawn = function (self)
+	local breeds = CurrentConflictSettings.specials.breeds
+	local breed_name = breeds[math.random(#breeds)]
+	local breed = Breeds[breed_name]
+	local spawn_pos = self.get_special_spawn_pos(self, breed.spawning_rule)
+
+	if spawn_pos then
+		QuickDrawerStay:sphere(spawn_pos, 4, Color(125, 255, 47))
+		print("debug spawning special: ", breed_name)
+		Managers.state.conflict:spawn_unit(breed, spawn_pos, Quaternion(Vector3.up(), 0), "specials_pacing")
+	else
+		print("debug spawning special could not find spawn position")
+	end
+
+	return 
+end
+SpecialsPacing.get_special_spawn_pos = function (self, spawning_rule)
 	local conflict_director = Managers.state.conflict
 	local main_path_info = conflict_director.main_path_info
 	local main_path_player_info = conflict_director.main_path_player_info
@@ -338,6 +354,9 @@ SpecialsPacing.get_special_spawn_pos = function (self)
 	if not ahead_unit or not behind_unit then
 		epicenter = POSITION_LOOKUP[loneliest_player_unit]
 		debug_string = "specialspawn: loneliest -->"
+	elseif spawning_rule == "always_ahead" then
+		epicenter = self.get_relative_main_path_pos(self, main_paths, main_path_player_info[ahead_unit], 20)
+		debug_string = "specialspawn: rule: only_ahead -->"
 	elseif 10 < loneliness_value then
 		if ahead_unit == loneliest_player_unit then
 			epicenter = self.get_relative_main_path_pos(self, main_paths, main_path_player_info[ahead_unit], 20)

@@ -1,12 +1,12 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTInterestPointUseAction = class(BTInterestPointUseAction, BTNode)
-BTInterestPointUseAction.name = "BTInterestPointUseAction"
 BTInterestPointUseAction.init = function (self, ...)
 	BTInterestPointUseAction.super.init(self, ...)
 
 	return 
 end
+BTInterestPointUseAction.name = "BTInterestPointUseAction"
 BTInterestPointUseAction.enter = function (self, unit, blackboard, t)
 	local interest_point_system_api = blackboard.system_api.ai_interest_point_system
 	local request = interest_point_system_api.get_claim(blackboard.ip_request_id)

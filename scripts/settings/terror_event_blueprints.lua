@@ -205,6 +205,14 @@ WeightedRandomTerrorEvents = {
 		"dungeon_random_stormvermin_addition_c",
 		1
 	},
+	dwarf_interior_brewery_random = {
+		"dwarf_interior_brewery_a",
+		1,
+		"dwarf_interior_brewery_b",
+		1,
+		"dwarf_interior_brewery_c",
+		1
+	},
 	survival_wave_initial = {
 		"survival_wave_abd",
 		1
@@ -625,16 +633,8 @@ WeightedRandomTerrorEvents = {
 		"survival_magnus_cataclysm_13_f",
 		1
 	},
-	dwarf_interior_brewery_random = {
-		"dwarf_interior_brewery_a",
-		1,
-		"dwarf_interior_brewery_b",
-		1,
-		"dwarf_interior_brewery_c",
-		1
-	},
-	survival_wave_boss_13 = {
-		"survival_13_a",
+	chamber_inn = {
+		"chamber_inn_setup_a",
 		1
 	}
 }
@@ -25879,7 +25879,7 @@ TerrorEventBlueprints = {
 	dungeon_escape_tunnels = {
 		{
 			"set_master_event_running",
-			name = "dungeon"
+			name = "dungeon_escape"
 		},
 		{
 			"play_stinger",
@@ -25917,7 +25917,7 @@ TerrorEventBlueprints = {
 	dungeon_artifact_defend = {
 		{
 			"set_master_event_running",
-			name = "dungeon"
+			name = "dungeon_artifact"
 		},
 		{
 			"control_pacing",
@@ -25951,7 +25951,7 @@ TerrorEventBlueprints = {
 	dungeon_artifact_stormvermin = {
 		{
 			"set_master_event_running",
-			name = "dungeon"
+			name = "dungeon_stormvermin"
 		},
 		{
 			"play_stinger",
@@ -26018,10 +26018,6 @@ TerrorEventBlueprints = {
 			name = "brewery_event"
 		},
 		{
-			"control_pacing",
-			enable = false
-		},
-		{
 			"play_stinger",
 			stinger_name = "enemy_horde_stinger"
 		},
@@ -26070,10 +26066,6 @@ TerrorEventBlueprints = {
 			name = "brewery_event"
 		},
 		{
-			"control_pacing",
-			enable = false
-		},
-		{
 			"play_stinger",
 			stinger_name = "enemy_horde_stinger"
 		},
@@ -26103,10 +26095,6 @@ TerrorEventBlueprints = {
 		{
 			"set_master_event_running",
 			name = "brewery_event"
-		},
-		{
-			"control_pacing",
-			enable = false
 		},
 		{
 			"play_stinger",
@@ -26265,10 +26253,6 @@ TerrorEventBlueprints = {
 			name = "brewery_event"
 		},
 		{
-			"control_pacing",
-			enable = false
-		},
-		{
 			"play_stinger",
 			stinger_name = "enemy_horde_stinger"
 		},
@@ -26356,9 +26340,6 @@ TerrorEventBlueprints = {
 		{
 			"control_pacing",
 			enable = true
-		},
-		{
-			"disable_bots_in_carry_event"
 		}
 	},
 	dwarf_interior_brewery_loop = {
@@ -26842,9 +26823,9 @@ TerrorEventBlueprints = {
 		},
 		{
 			"continue_when",
-			duration = 15,
+			duration = 80,
 			condition = function (t)
-				return count_event_breed("skaven_clan_rat") < 1 and count_event_breed("skaven_slave") < 1 and count_event_breed("skaven_storm_vermin_commander") < 1
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_slave") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
 			end
 		},
 		{
@@ -27709,6 +27690,1077 @@ TerrorEventBlueprints = {
 			"event_horde",
 			spawner_id = "beacon_barrier",
 			composition_type = "event_small"
+		}
+	},
+	catacombs_puzzle_event_a = {
+		{
+			"set_master_event_running",
+			name = "catacombs_puzzle_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "enemy_door",
+			composition_type = "event_small"
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_puzzle_event_a_done"
+		}
+	},
+	catacombs_puzzle_event_b = {
+		{
+			"set_master_event_running",
+			name = "catacombs_puzzle_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "enemy_door",
+			composition_type = "event_generic_long_level_stormvermin"
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_puzzle_event_a_done"
+		}
+	},
+	catacombs_puzzle_event_c = {
+		{
+			"set_master_event_running",
+			name = "catacombs_puzzle_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "enemy_door",
+			composition_type = "event_generic_long_level_stormvermin"
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_puzzle_event_a_done"
+		}
+	},
+	catacombs_end_event_start = {
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"control_specials",
+			enable = false
+		},
+		{
+			"disable_kick"
+		}
+	},
+	catacombs_end_event_left_sorcerer = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_left_sorcerer"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "sorcerer",
+			breed_name = "skaven_ratling_gunner"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_ratling_gunner") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_left_sorcerer_done"
+		}
+	},
+	catacombs_end_event_left_group = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_left_sorcerer"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "left_sorcerer_group",
+			composition_type = "event_catacombs_sorcerer_group"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_left_group_done"
+		}
+	},
+	catacombs_end_event_left_group_02 = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_left_sorcerer"
+		},
+		{
+			"event_horde",
+			limit_spawners = 1,
+			spawner_id = "sorcerer_groups",
+			composition_type = "event_catacombs_sorcerer_group"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_left_group_02_done"
+		}
+	},
+	catacombs_end_event_left_counter = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_left_sorcerer"
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 1 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_left_counter_done"
+		}
+	},
+	catacombs_end_event_front_sorcerer = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_front_sorcerer"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "sorcerer",
+			breed_name = "skaven_gutter_runner"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_gutter_runner") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_front_sorcerer_done"
+		}
+	},
+	catacombs_end_event_front_group = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_front_sorcerer"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "front_sorcerer_group",
+			composition_type = "event_catacombs_sorcerer_group"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_front_group_done"
+		}
+	},
+	catacombs_end_event_front_group_02 = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_front_sorcerer"
+		},
+		{
+			"event_horde",
+			limit_spawners = 1,
+			spawner_id = "sorcerer_groups",
+			composition_type = "event_catacombs_sorcerer_group"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_front_group_02_done"
+		}
+	},
+	catacombs_end_event_front_counter = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_front_sorcerer"
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 1 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_front_counter_done"
+		}
+	},
+	catacombs_end_event_right_sorcerer = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_right_sorcerer"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "sorcerer",
+			breed_name = "skaven_poison_wind_globadier"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_poison_wind_globadier") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_right_sorcerer_done"
+		}
+	},
+	catacombs_end_event_right_group = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_right_sorcerer"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "right_sorcerer_group",
+			composition_type = "event_catacombs_sorcerer_group"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_right_group_done"
+		}
+	},
+	catacombs_end_event_right_group_02 = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_right_sorcerer"
+		},
+		{
+			"event_horde",
+			limit_spawners = 1,
+			spawner_id = "sorcerer_groups",
+			composition_type = "event_catacombs_sorcerer_group"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_right_group_02_done"
+		}
+	},
+	catacombs_end_event_right_counter = {
+		{
+			"set_master_event_running",
+			name = "catacombs_end_event_right_sorcerer"
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 1 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "catacombs_end_event_right_counter_done"
+		}
+	},
+	elven_ruins_end_event = {
+		{
+			"set_master_event_running",
+			name = "ruins_end_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"event_horde",
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_small"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = {
+				5,
+				6
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_magnus_horn_small"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_magnus_horn_small"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_magnus_horn_small"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_magnus_horn_small"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_magnus_horn_small"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_toptier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 3,
+			spawner_id = "elven_ruins_bottomtier",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		}
+	},
+	chamber_pacing_off = {
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"control_specials",
+			enable = false
+		}
+	},
+	chamber_pacing_on = {
+		{
+			"control_pacing",
+			enable = true
+		},
+		{
+			"control_specials",
+			enable = true
+		}
+	},
+	chamber_inn_setup_a = {
+		{
+			"set_master_event_running",
+			name = "chamber_inn"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "inn_floor_roger",
+			breed_name = "skaven_rat_ogre"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_floor_spawn_a",
+			composition_type = "event_chamber_slaves_small"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			duration = 30,
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 5 and count_event_breed("skaven_rat_ogre") == 0
+			end
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_chimney_spawn_a",
+			composition_type = "event_chamber_slaves_large"
+		},
+		{
+			"flow_event",
+			flow_event_name = "inn_chimney_event"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			duration = 30,
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_door_window_spawn_a",
+			composition_type = "event_chamber_mixed_a"
+		},
+		{
+			"delay",
+			duration = 2
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_door_window_spawn_b",
+			composition_type = "event_chamber_mixed_c"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "inn_manual_spawn_window_b",
+			breed_name = "skaven_ratling_gunner"
+		},
+		{
+			"continue_when",
+			duration = 30,
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 5 and count_event_breed("skaven_gutter_runner") < 1 and count_event_breed("skaven_ratling_gunner") < 1
+			end
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_roof_spawn_b",
+			composition_type = "event_chamber_mixed_c"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"flow_event",
+			flow_event_name = "inn_roof_destroy_c"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_roof_spawn_c",
+			composition_type = "event_chamber_slaves_small"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "inn_manual_spawn_roof_c",
+			breed_name = "skaven_poison_wind_globadier"
+		},
+		{
+			"flow_event",
+			flow_event_name = "inn_roof_destroy_a"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_roof_spawn_a",
+			composition_type = "event_chamber_clanrats"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			duration = 30,
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_room_spawn_b",
+			composition_type = "event_chamber_slaves_small"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_room_spawn_a",
+			composition_type = "event_chamber_slaves_small"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "inn_manual_spawn_room_a",
+			breed_name = "skaven_gutter_runner"
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_room_spawn_c",
+			composition_type = "event_chamber_clanrats"
+		},
+		{
+			"delay",
+			duration = 3
+		},
+		{
+			"continue_when",
+			duration = 30,
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_door_window_spawn_a",
+			composition_type = "event_chamber_mixed_c"
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_chimney_spawn_a",
+			composition_type = "event_chamber_slaves_small"
+		},
+		{
+			"continue_when",
+			duration = 30,
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_roof_spawn_b",
+			composition_type = "event_chamber_clanrats"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"event_horde",
+			spawner_id = "inn_door_window_spawn_b",
+			composition_type = "event_chamber_mixed_b"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_slave") == 0 and count_event_breed("skaven_clan_rat") == 0 and count_event_breed("skaven_gutter_runner") == 0 and count_event_breed("skaven_ratling_gunner") == 0 and count_event_breed("skaven_poison_wind_globadier") == 0 and count_event_breed("skaven_storm_vermin_commander") == 0
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "chamber_inn_event_done"
+		}
+	},
+	chamber_end_a = {
+		{
+			"set_master_event_running",
+			name = "chamber_end"
+		},
+		{
+			"event_horde",
+			spawner_id = "chamber_end_a_spawn",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 4
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "chamber_end_a_done"
+		}
+	},
+	chamber_end_b = {
+		{
+			"set_master_event_running",
+			name = "chamber_end"
+		},
+		{
+			"event_horde",
+			spawner_id = "chamber_end_b_spawn",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 4
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "chamber_end_b_done"
+		}
+	},
+	chamber_end_c = {
+		{
+			"set_master_event_running",
+			name = "chamber_end"
+		},
+		{
+			"event_horde",
+			spawner_id = "chamber_end_c_spawn",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			condition = function (t)
+				return count_event_breed("skaven_slave") < 4
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "chamber_end_c_done"
 		}
 	}
 }

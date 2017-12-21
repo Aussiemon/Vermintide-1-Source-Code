@@ -32,6 +32,7 @@ end
 GenericCameraExtension.set_idle_position = function (self, position)
 	local viewport_name = self.viewport_name
 
+	assert(Vector3.is_valid(position), "Trying to set invalid camera position")
 	self.idle_position:store(position)
 
 	return 

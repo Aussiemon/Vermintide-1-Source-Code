@@ -6,7 +6,7 @@ PlayerCharacterStateDodging.init = function (self, character_state_init_context)
 	self.movement_speed = 0
 	self.last_input_direction = Vector3Box(0, 0, 0)
 	self.dodge_direction = Vector3Box(0, 0, 0)
-	self.starting_position = Vector3Box(0, 0, 0)
+	self.last_position = Vector3Box(0, 0, 0)
 
 	return 
 end
@@ -41,17 +41,24 @@ PlayerCharacterStateDodging.on_enter = function (self, unit, input, dt, context,
 	self.dodge_direction:store(params.dodge_direction)
 
 	params.dodge_direction = nil
-
-	self.start_dodge(self, unit, t)
-
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 
 	self.status_extension:set_dodge_jump_override_t(t, movement_settings_table.dodging.dodge_jump_override_timer)
 
 	local inventory_extension = self.inventory_extension
+	local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+	local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
 
+	if slot_data then
+		local item_data = slot_data.item_data
+		local item_template = BackendUtils.get_item_template(item_data)
+		movement_settings_table.dodging.speed_modifier = item_template.dodge_speed or 1
+		movement_settings_table.dodging.distance_modifier = item_template.dodge_distance or 1
+	end
+
+	self.start_dodge(self, unit, t)
 	self.last_input_direction:store(Vector3(0, 0, 0))
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, inventory_extension, self.damage_extension)
 	self.on_enter_animation(self, unit)
 	self.locomotion_extension:enable_rotation_towards_velocity(false)
@@ -134,12 +141,6 @@ PlayerCharacterStateDodging.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	if self.distance_left < 0 then
-		local params = self.temp_params
-
-		csm.change_state(csm, "walking", params)
-	end
-
 	if input_extension.get(input_extension, "jump") and status_extension.can_override_dodge_with_jump(status_extension, t) then
 		local params = self.temp_params
 		params.post_dodge_jump = true
@@ -163,7 +164,7 @@ PlayerCharacterStateDodging.update = function (self, unit, input, dt, context, t
 		csm.change_state(csm, "walking", params)
 	end
 
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, first_person_extension, status_extension, self.inventory_extension)
 	CharacterStateHelper.update_weapon_actions(t, unit, input_extension, self.inventory_extension, self.damage_extension)
 	CharacterStateHelper.reload(input_extension, self.inventory_extension, status_extension)
 
@@ -184,14 +185,10 @@ PlayerCharacterStateDodging.update_dodge = function (self, unit, dt, t)
 	local diminishing_return_factor = self.status_extension:get_dodge_cooldown()
 	local speed_modifier = movement_settings_table.dodging.speed_modifier
 	local distance_modifier = movement_settings_table.dodging.distance_modifier
-	self.distance_left = movement_settings_table.dodging.distance*distance_modifier*diminishing_return_factor - Vector3.distance(Unit.world_position(unit, 0), self.starting_position:unbox())
-	local test = self.distance_supposed_to_move - last_distance_left - self.distance_left
+	local distance_moved = Vector3.distance(Unit.world_position(unit, 0), self.last_position:unbox())
+	local move_procent = distance_moved/self.distance_supposed_to_move
 
-	if movement_settings_table.dodging.stop_threshold < test then
-		return false
-	end
-
-	if last_distance_left <= self.distance_left then
+	if move_procent < movement_settings_table.dodging.stop_threshold then
 		return false
 	end
 
@@ -199,7 +196,7 @@ PlayerCharacterStateDodging.update_dodge = function (self, unit, dt, t)
 		return false
 	end
 
-	local time_in_dodge = self.time_in_dodge
+	local time_in_dodge = self.time_in_dodge*diminishing_return_factor
 	local speed_at_times = movement_settings_table.dodging.speed_at_times
 	local breaked = false
 	local start_point = self.current_speed_setting_index + 1
@@ -213,6 +210,7 @@ PlayerCharacterStateDodging.update_dodge = function (self, unit, dt, t)
 		end
 	end
 
+	local dodge_finished = false
 	local current_speed_setting_index = self.current_speed_setting_index
 	local next_speed_setting_index = current_speed_setting_index + 1
 
@@ -231,7 +229,9 @@ PlayerCharacterStateDodging.update_dodge = function (self, unit, dt, t)
 
 	self.locomotion_extension:set_wanted_velocity(move_direction*self.speed)
 
-	self.distance_supposed_to_move = self.speed*dt
+	local move_delta = self.speed*dt
+	self.distance_supposed_to_move = move_delta
+	self.distance_left = self.distance_left - move_delta
 
 	return true
 end
@@ -255,9 +255,9 @@ PlayerCharacterStateDodging.start_dodge = function (self, unit, t)
 	self.speed = movement_settings_table.dodging.speed_at_times[self.current_speed_setting_index].speed
 	self.distance_supposed_to_move = 0
 	self.time_in_dodge = 0
-	self.distance_left = movement_settings_table.dodging.distance*movement_settings_table.dodging.distance_modifier + 0.1
+	self.distance_left = movement_settings_table.dodging.distance*movement_settings_table.dodging.distance_modifier*self.status_extension:get_dodge_cooldown()
 
-	self.starting_position:store(Unit.world_position(unit, 0))
+	self.last_position:store(Unit.world_position(unit, 0))
 	self.calculate_dodge_total_time(self, unit)
 
 	return 

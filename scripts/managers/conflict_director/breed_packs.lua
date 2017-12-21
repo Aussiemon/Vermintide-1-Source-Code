@@ -50,6 +50,14 @@ BreedPacks = {
 	},
 	{
 		pack_type = "basic",
+		spawn_weight = 3.5,
+		members = {
+			Breeds.skaven_clan_rat,
+			Breeds.skaven_storm_vermin_commander
+		}
+	},
+	{
+		pack_type = "basic",
 		spawn_weight = 10,
 		members = {
 			Breeds.skaven_clan_rat,
@@ -59,7 +67,7 @@ BreedPacks = {
 	},
 	{
 		pack_type = "basic",
-		spawn_weight = 1,
+		spawn_weight = 3.5,
 		members = {
 			Breeds.skaven_clan_rat,
 			Breeds.skaven_clan_rat,
@@ -78,7 +86,7 @@ BreedPacks = {
 	},
 	{
 		pack_type = "basic",
-		spawn_weight = 2,
+		spawn_weight = 3.5,
 		members = {
 			Breeds.skaven_clan_rat,
 			Breeds.skaven_clan_rat,
@@ -99,7 +107,7 @@ BreedPacks = {
 	},
 	{
 		pack_type = "basic",
-		spawn_weight = 2,
+		spawn_weight = 3,
 		members = {
 			Breeds.skaven_clan_rat,
 			Breeds.skaven_clan_rat,
@@ -122,7 +130,7 @@ BreedPacks = {
 	},
 	{
 		pack_type = "basic",
-		spawn_weight = 2,
+		spawn_weight = 2.5,
 		members = {
 			Breeds.skaven_clan_rat,
 			Breeds.skaven_clan_rat,

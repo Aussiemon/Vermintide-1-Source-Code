@@ -80,6 +80,20 @@ IngameViewDefinitions = {
 				876
 			}
 		},
+		button_gamepad_selection = {
+			vertical_alignment = "bottom",
+			parent = "button_1",
+			horizontal_alignment = "center",
+			position = {
+				0,
+				62,
+				10
+			},
+			size = {
+				369,
+				127
+			}
+		},
 		button_1 = {
 			vertical_alignment = "top",
 			parent = "background_top",
@@ -169,7 +183,11 @@ IngameViewDefinitions = {
 				1
 			}
 		}, "background_bottom"),
-		background_widget = create_simple_texture("main_menu_bg", "main_menu")
+		background_widget = create_simple_texture("main_menu_bg", "main_menu"),
+		gamepad_button_selection = UIWidgets.create_gamepad_selection("button_gamepad_selection", nil, nil, {
+			70,
+			70
+		})
 	}
 }
 

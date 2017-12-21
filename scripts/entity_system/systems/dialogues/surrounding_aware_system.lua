@@ -131,16 +131,16 @@ end
 SurroundingAwareSystem.update = function (self, context, t)
 	Profiler.start("SeenRecently")
 	self.update_seen_recently(self, context, t)
-	Profiler.stop()
+	Profiler.stop("SeenRecently")
 	Profiler.start("Lookat")
 	self.update_lookat(self, context, t)
-	Profiler.stop()
+	Profiler.stop("Lookat")
 	Profiler.start("Events")
 	self.update_events(self, context, t)
-	Profiler.stop()
+	Profiler.stop("Events")
 	Profiler.start("Debug")
 	self.update_debug(self, context, t)
-	Profiler.stop()
+	Profiler.stop("Debug")
 
 	return 
 end
@@ -157,12 +157,8 @@ local function check_raycast_center(physics_world, unit, target, collision_filte
 		for i, hit_data in ipairs(hits) do
 			local hit_unit = Actor.unit(hit_data[4])
 
-			if hit_unit ~= unit then
-				if hit_unit == target then
-					return true
-				else
-					return false
-				end
+			if hit_unit ~= unit and hit_unit ~= target then
+				return false
 			end
 		end
 	end

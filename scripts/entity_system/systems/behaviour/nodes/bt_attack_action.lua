@@ -40,9 +40,13 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 		blackboard.attack_range_flat = box_range.flat
 	end
 
-	blackboard.attack_token = (target_unit_status_extension and target_unit_status_extension.want_an_attack(target_unit_status_extension)) or nil
+	if target_unit_status_extension then
+		blackboard.attack_token = (target_unit_status_extension and target_unit_status_extension.want_an_attack(target_unit_status_extension)) or nil
+	else
+		blackboard.attack_token = true
+	end
 
-	if blackboard.attack_token then
+	if blackboard.attack_token and target_unit_status_extension then
 		target_unit_status_extension.add_attack_intensity(target_unit_status_extension, math.random()*0.5 + 0.75)
 
 		local breed = blackboard.breed
@@ -66,6 +70,7 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 
 	blackboard.attack_setup_delayed = true
 	blackboard.attacking_target = blackboard.target_unit
+	blackboard.spawn_to_running = nil
 
 	return 
 end
@@ -102,7 +107,7 @@ BTAttackAction._select_attack = function (self, action, unit, target_unit, black
 	return 
 end
 BTAttackAction.leave = function (self, unit, blackboard, t)
-	if blackboard.move_state ~= "idle" then
+	if blackboard.move_state ~= "idle" and AiUtils.unit_alive(unit) then
 		local network_manager = Managers.state.network
 
 		network_manager.anim_event(network_manager, unit, "idle")
@@ -136,6 +141,7 @@ BTAttackAction.leave = function (self, unit, blackboard, t)
 	end
 
 	blackboard.action = nil
+	blackboard.backstab_attack_trigger = nil
 
 	return 
 end
@@ -198,6 +204,7 @@ BTAttackAction.attack_success = function (self, unit, blackboard)
 		local breed = blackboard.breed
 
 		if breed.use_backstab_vo and blackboard.backstab_attack_trigger then
+			print("uses backstab vo")
 			DialogueSystem:TriggerBackstabHit(blackboard.target_unit, unit)
 
 			blackboard.backstab_attack_trigger = false

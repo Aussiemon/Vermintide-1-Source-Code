@@ -3,7 +3,7 @@ require("scripts/ui/views/popup_handler")
 PopupManager = class(PopupManager)
 PopupManager.init = function (self)
 	local top_world = Managers.world:world("top_ingame_view")
-	self._ui_top_renderer = UIRenderer.create(top_world, "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
+	self._ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
 	local popup_context = {
 		ui_renderer = self._ui_top_renderer,
 		world = top_world
@@ -58,11 +58,16 @@ PopupManager.queue_popup = function (self, text, topic, ...)
 
 	return self._handler:queue_popup(text, topic, ...)
 end
-PopupManager.activate_timer = function (self, popup_id, time, default_result, timer_alignment, blink)
-	return self._handler:activate_timer(popup_id, time, default_result, timer_alignment, blink)
+PopupManager.activate_timer = function (self, popup_id, time, default_result, timer_alignment, blink, optional_timer_format_func, optional_font_size)
+	return self._handler:activate_timer(popup_id, time, default_result, timer_alignment, blink, optional_timer_format_func, optional_font_size)
 end
 PopupManager.has_popup = function (self)
 	return self._handler:has_popup()
+end
+PopupManager.has_popup_with_id = function (self, popup_id)
+	self._handler:has_popup_with_id(popup_id)
+
+	return 
 end
 PopupManager.cancel_popup = function (self, popup_id)
 	return self._handler:cancel_popup(popup_id)
@@ -94,6 +99,9 @@ PopupManager.remove_input_manager = function (self, application_shutdown)
 	self._handler:remove_input_manager(application_shutdown)
 
 	return 
+end
+PopupManager.fit_text_width_to_popup = function (self, text)
+	return self._handler:fit_text_width_to_popup(text)
 end
 
 return 

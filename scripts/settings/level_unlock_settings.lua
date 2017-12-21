@@ -57,6 +57,45 @@ DLCProgressionOrder = {
 		"dlc_portals"
 	}
 }
+UnlockableLevelsByGameMode = {
+	adventure = {
+		"magnus",
+		"merchant",
+		"wizard",
+		"forest_ambush",
+		"cemetery",
+		"tunnels",
+		"end_boss",
+		"sewers_short",
+		"bridge",
+		"city_wall",
+		"farm",
+		"courtyard_level",
+		"docks_short_level",
+		"dlc_portals",
+		"dlc_castle",
+		"dlc_castle_dungeon"
+	},
+	survival = {
+		"dlc_survival_ruins",
+		"dlc_survival_magnus"
+	}
+}
+MainGameLevels = {
+	"magnus",
+	"merchant",
+	"wizard",
+	"forest_ambush",
+	"cemetery",
+	"tunnels",
+	"end_boss",
+	"sewers_short",
+	"bridge",
+	"city_wall",
+	"farm",
+	"courtyard_level",
+	"docks_short_level"
+}
 NoneActLevels = {
 	"dlc_portals",
 	"dlc_castle",
@@ -79,8 +118,9 @@ if Development.parameter("beta_level_progression") then
 end
 
 LevelGameModeTypes = {
+	survival = true,
 	adventure = true,
-	survival = true
+	tutorial = true
 }
 GameActsDisplayNames = {
 	act_1 = "act_1_display_name",
@@ -192,11 +232,34 @@ LevelUnlockUtils = {
 	end
 }
 LevelUnlockUtils.unlocked_level_difficulty_index = function (statistics_db, player_stats_id, level_key)
-	local completed_difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, player_stats_id, level_key)
-	local difficulties, starting_difficulty = Managers.state.difficulty:get_level_difficulties(level_key)
-	local automatic_difficulty_unlock_index = table.find(difficulties, starting_difficulty)
+	local level_settings = LevelSettings[level_key]
+	local game_mode = level_settings.game_mode
 
-	return math.max(math.min(completed_difficulty_index + 1, #difficulties), automatic_difficulty_unlock_index)
+	if game_mode == "adventure" and Application.platform() ~= "win32" then
+		local difficulties, starting_difficulty = Managers.state.difficulty:get_level_difficulties(level_key)
+		local automatic_difficulty_unlock_index = table.find(difficulties, starting_difficulty)
+		local highest_available_difficulty_index = #difficulties
+		local highest_completed_difficulty_index = highest_available_difficulty_index
+
+		for _, level in ipairs(MainGameLevels) do
+			local completed_difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, player_stats_id, level)
+
+			if completed_difficulty_index < highest_completed_difficulty_index then
+				highest_completed_difficulty_index = completed_difficulty_index
+			end
+		end
+
+		return math.max(math.min(highest_completed_difficulty_index + 1, highest_available_difficulty_index), automatic_difficulty_unlock_index)
+	else
+		local difficulties, starting_difficulty = Managers.state.difficulty:get_level_difficulties(level_key)
+		local automatic_difficulty_unlock_index = table.find(difficulties, starting_difficulty)
+		local highest_available_difficulty_index = #difficulties
+		local completed_difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, player_stats_id, level_key)
+
+		return math.max(math.min(completed_difficulty_index + 1, highest_available_difficulty_index), automatic_difficulty_unlock_index)
+	end
+
+	return 
 end
 LevelUnlockUtils.completed_level_difficulty_index = function (statistics_db, player_stats_id, level_key)
 	local level_difficulty_name = LevelDifficultyDBNames[level_key]
@@ -230,6 +293,17 @@ LevelUnlockUtils.completed_adventure_difficulty = function (statistics_db, playe
 
 	return lowest_completed
 end
+
+local function sort_levels_by_order(a, b)
+	local level_settings = LevelSettings
+	local a_settings = level_settings[a].map_settings
+	local b_settings = level_settings[b].map_settings
+	local a_order = a_settings.sorting or 99
+	local b_order = b_settings.sorting or 99
+
+	return a_order < b_order
+end
+
 LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats_id, current_level_key)
 	local level_settings = LevelSettings[current_level_key]
 	local dlc_name = level_settings.dlc_name
@@ -240,6 +314,8 @@ LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats
 	if dlc_name then
 		unlock_levels = DLCProgressionOrder[dlc_name]
 		num_unlock_levels = #unlock_levels
+
+		table.sort(unlock_levels, sort_levels_by_order)
 	else
 		for i = 1, #LevelUnlockOrder, 1 do
 			local group_levels = LevelUnlockOrder[i]
@@ -248,6 +324,8 @@ LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats
 				unlock_levels[#unlock_levels + 1] = group_levels[k]
 			end
 		end
+
+		table.sort(unlock_levels, sort_levels_by_order)
 
 		num_unlock_levels = #unlock_levels
 
@@ -292,11 +370,6 @@ LevelUnlockUtils.level_unlocked = function (statistics_db, player_stats_id, leve
 	if not act_key then
 		local settings = LevelSettings[level_key]
 		local level_game_mode = settings.game_mode
-		local dlc_name = settings.dlc_name
-
-		if dlc_name then
-			return Managers.unlock:is_dlc_unlocked(dlc_name)
-		end
 
 		if level_game_mode == "survival" then
 			local required_act_unlocked = SurvivalSettings.required_act_unlocked
@@ -304,6 +377,25 @@ LevelUnlockUtils.level_unlocked = function (statistics_db, player_stats_id, leve
 			if LevelUnlockUtils.act_unlocked(statistics_db, player_stats_id, required_act_unlocked) then
 				return true
 			end
+		end
+
+		local dlc_name = settings.dlc_name
+		local required_act_completed = settings.required_act_completed
+
+		if required_act_completed then
+			if LevelUnlockUtils.act_completed(statistics_db, player_stats_id, required_act_completed) then
+				if dlc_name then
+					return Managers.unlock:is_dlc_unlocked(dlc_name)
+				else
+					return true
+				end
+			else
+				return false
+			end
+		elseif dlc_name then
+			return Managers.unlock:is_dlc_unlocked(dlc_name)
+		else
+			return true
 		end
 
 		return false

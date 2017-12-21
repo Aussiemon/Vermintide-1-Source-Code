@@ -255,7 +255,7 @@ end
 BuffExtension.update = function (self, unit, input, dt, context, t)
 	Profiler.start("BuffExtension:update :: buffs")
 	self._update_buffs(self, dt, t)
-	Profiler.stop()
+	Profiler.stop("BuffExtension:update :: buffs")
 
 	return 
 end

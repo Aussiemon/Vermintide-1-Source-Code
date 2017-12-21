@@ -45,7 +45,7 @@ NewsTickerManager.refresh_loading_screen_message = function (self)
 	if not rawget(_G, "Curl") then
 		self.cb_loading_screen_loaded(self, {
 			done = true,
-			data = "This executable is built without Curl\nNews ticker will be unavailable."
+			data = "This executable is built without Curl. News ticker will be unavailable."
 		})
 
 		return 
@@ -80,7 +80,7 @@ NewsTickerManager.refresh_ingame_message = function (self)
 	if not rawget(_G, "Curl") then
 		self.cb_ingame_loaded(self, {
 			done = true,
-			data = "This executable is built without Curl\nNews ticker will be unavailable."
+			data = "This executable is built without Curl. News ticker will be unavailable."
 		})
 
 		return 

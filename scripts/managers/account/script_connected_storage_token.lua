@@ -12,7 +12,7 @@ ScriptConnectedStorageToken.info = function (self)
 		print("GET STORAGE ID ERROR", self._status)
 
 		info = {
-			error = parse_error(self._status)
+			error = self._parse_error(self, self._status)
 		}
 	end
 
@@ -28,7 +28,7 @@ ScriptConnectedStorageQueryToken.info = function (self)
 		print("QUERY ERROR")
 
 		info = {
-			error = parse_error(self._status)
+			error = self._parse_error(self, self._status)
 		}
 	end
 
@@ -42,7 +42,7 @@ ScriptConnectedStorageDeleteToken.info = function (self)
 		print("DELETE ERROR")
 
 		info = {
-			error = parse_error(self._status)
+			error = self._parse_error(self, self._status)
 		}
 	end
 

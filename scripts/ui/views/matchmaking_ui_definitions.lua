@@ -268,41 +268,13 @@ local scenegraph_definition = {
 		parent = "window_timer",
 		horizontal_alignment = "center",
 		size = {
-			800,
+			850,
 			50
 		},
 		position = {
 			0,
 			-40,
 			1
-		}
-	},
-	window_ready_area = {
-		vertical_alignment = "bottom",
-		parent = "large_window",
-		horizontal_alignment = "left",
-		size = {
-			631,
-			58
-		},
-		position = {
-			9,
-			24,
-			3
-		}
-	},
-	window_cancel_area = {
-		vertical_alignment = "bottom",
-		parent = "large_window",
-		horizontal_alignment = "right",
-		size = {
-			631,
-			58
-		},
-		position = {
-			-9,
-			24,
-			3
 		}
 	},
 	window_action_area_mask = {
@@ -347,6 +319,48 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	window_ready_area = {
+		vertical_alignment = "bottom",
+		parent = "large_window",
+		horizontal_alignment = "left",
+		size = {
+			631,
+			58
+		},
+		position = {
+			-9,
+			24,
+			3
+		}
+	},
+	window_ready_bg = {
+		vertical_alignment = "center",
+		parent = "window_ready_area",
+		horizontal_alignment = "left",
+		size = {
+			631,
+			58
+		},
+		position = {
+			0,
+			0,
+			0
+		}
+	},
+	window_ready_glow = {
+		vertical_alignment = "center",
+		parent = "window_ready_area",
+		horizontal_alignment = "center",
+		size = {
+			631,
+			58
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
 	window_ready_input_text = {
 		vertical_alignment = "center",
 		parent = "window_ready_area",
@@ -361,7 +375,7 @@ local scenegraph_definition = {
 			1
 		}
 	},
-	window_ready_input_text_2 = {
+	window_ready_error_text = {
 		vertical_alignment = "center",
 		parent = "window_ready_area",
 		horizontal_alignment = "center",
@@ -375,18 +389,46 @@ local scenegraph_definition = {
 			1
 		}
 	},
-	window_ready_input_icon = {
+	window_ready_suffix = {
 		vertical_alignment = "center",
-		parent = "window_ready_area",
+		parent = "window_ready_input_text",
 		horizontal_alignment = "center",
 		size = {
-			28,
-			28
+			631,
+			50
 		},
 		position = {
 			0,
-			-6,
+			0,
 			1
+		}
+	},
+	window_ready_prefix = {
+		vertical_alignment = "center",
+		parent = "window_ready_input_text",
+		horizontal_alignment = "center",
+		size = {
+			631,
+			50
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	window_ready_input_icon = {
+		vertical_alignment = "center",
+		parent = "window_ready_input_text",
+		horizontal_alignment = "center",
+		size = {
+			36,
+			26
+		},
+		position = {
+			0,
+			1,
+			2
 		}
 	},
 	window_ready_input_icon_bar = {
@@ -394,13 +436,13 @@ local scenegraph_definition = {
 		parent = "window_ready_input_icon",
 		horizontal_alignment = "center",
 		size = {
-			32,
-			32
+			36,
+			26
 		},
 		position = {
 			0,
 			0,
-			0
+			1
 		}
 	},
 	window_action_input_text = {
@@ -417,32 +459,46 @@ local scenegraph_definition = {
 			0
 		}
 	},
-	window_action_input_text_2 = {
+	window_action_suffix = {
 		vertical_alignment = "center",
-		parent = "window_action_area",
-		horizontal_alignment = "right",
+		parent = "window_action_input_text",
+		horizontal_alignment = "center",
 		size = {
 			770,
 			50
 		},
 		position = {
 			0,
-			-5,
+			0,
+			0
+		}
+	},
+	window_action_prefix = {
+		vertical_alignment = "center",
+		parent = "window_action_input_text",
+		horizontal_alignment = "center",
+		size = {
+			770,
+			50
+		},
+		position = {
+			0,
+			0,
 			0
 		}
 	},
 	window_action_input_icon = {
 		vertical_alignment = "center",
-		parent = "window_action_area",
+		parent = "window_action_input_text",
 		horizontal_alignment = "center",
 		size = {
-			34,
-			34
+			36,
+			26
 		},
 		position = {
 			0,
-			-3,
-			0
+			1,
+			2
 		}
 	},
 	window_action_input_icon_bar = {
@@ -450,8 +506,36 @@ local scenegraph_definition = {
 		parent = "window_action_input_icon",
 		horizontal_alignment = "center",
 		size = {
-			38,
-			38
+			36,
+			26
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
+	window_cancel_area = {
+		vertical_alignment = "bottom",
+		parent = "large_window",
+		horizontal_alignment = "right",
+		size = {
+			631,
+			58
+		},
+		position = {
+			-9,
+			24,
+			3
+		}
+	},
+	window_cancel_bg = {
+		vertical_alignment = "center",
+		parent = "window_cancel_area",
+		horizontal_alignment = "right",
+		size = {
+			631,
+			58
 		},
 		position = {
 			0,
@@ -473,32 +557,46 @@ local scenegraph_definition = {
 			0
 		}
 	},
-	window_cancel_input_text_2 = {
+	window_cancel_suffix = {
 		vertical_alignment = "center",
-		parent = "window_cancel_area",
-		horizontal_alignment = "right",
+		parent = "window_cancel_input_text",
+		horizontal_alignment = "center",
 		size = {
-			631,
+			300,
 			50
 		},
 		position = {
 			0,
-			-7,
+			0,
+			0
+		}
+	},
+	window_cancel_prefix = {
+		vertical_alignment = "center",
+		parent = "window_cancel_input_text",
+		horizontal_alignment = "center",
+		size = {
+			300,
+			50
+		},
+		position = {
+			0,
+			0,
 			0
 		}
 	},
 	window_cancel_input_icon = {
 		vertical_alignment = "center",
-		parent = "window_cancel_area",
+		parent = "window_cancel_input_text",
 		horizontal_alignment = "center",
 		size = {
-			28,
-			28
+			36,
+			26
 		},
 		position = {
 			0,
-			-6,
-			0
+			1,
+			2
 		}
 	},
 	window_cancel_input_icon_bar = {
@@ -506,13 +604,13 @@ local scenegraph_definition = {
 		parent = "window_cancel_input_icon",
 		horizontal_alignment = "center",
 		size = {
-			32,
-			32
+			36,
+			26
 		},
 		position = {
 			0,
 			0,
-			0
+			1
 		}
 	},
 	player_portrait_1 = {
@@ -586,15 +684,15 @@ local scenegraph_definition = {
 		}
 	},
 	status_box_title = {
-		vertical_alignment = "top",
+		vertical_alignment = "center",
 		parent = "status_box",
 		position = {
 			65,
-			-18,
+			3,
 			2
 		},
 		size = {
-			150,
+			160,
 			40
 		}
 	},
@@ -1001,7 +1099,16 @@ local widgets = {
 				1
 			}
 		}, "window_frame_right"),
-		ready_button_bg = UIWidgets.create_texture_with_style("matchmaking_button_bg", "window_ready_area", {
+		ready_button_bg = UIWidgets.create_uv_texture_with_style("matchmaking_button_bg", {
+			{
+				1,
+				0
+			},
+			{
+				0,
+				1
+			}
+		}, "window_ready_bg", {
 			offset = {
 				0,
 				0,
@@ -1014,7 +1121,16 @@ local widgets = {
 				0
 			}
 		}),
-		ready_button_fg = UIWidgets.create_texture_with_style("matchmaking_button_fg", "window_ready_area", {
+		ready_button_fg = UIWidgets.create_uv_texture_with_style("matchmaking_button_fg", {
+			{
+				1,
+				0
+			},
+			{
+				0,
+				1
+			}
+		}, "window_ready_area", {
 			offset = {
 				0,
 				0,
@@ -1027,7 +1143,7 @@ local widgets = {
 				255
 			}
 		}),
-		cancel_button_bg = UIWidgets.create_uv_texture_with_style("matchmaking_button_bg", {
+		ready_button_glow = UIWidgets.create_uv_texture_with_style("matchmaking_button_glow", {
 			{
 				1,
 				0
@@ -1036,7 +1152,29 @@ local widgets = {
 				0,
 				1
 			}
-		}, "window_cancel_area", {
+		}, "window_ready_glow", {
+			offset = {
+				0,
+				0,
+				-2
+			},
+			color = {
+				50,
+				0,
+				255,
+				0
+			}
+		}),
+		cancel_button_bg = UIWidgets.create_uv_texture_with_style("matchmaking_button_bg", {
+			{
+				0,
+				0
+			},
+			{
+				1,
+				1
+			}
+		}, "window_cancel_bg", {
 			offset = {
 				0,
 				0,
@@ -1123,9 +1261,37 @@ local widgets = {
 		window_level_image_frame = UIWidgets.create_simple_texture("matchmaking_level_image_frame", "window_level_image_frame"),
 		search_zone_icon = UIWidgets.create_simple_texture("matchmaking_globe_icon", "search_zone_icon"),
 		window_action_area_mask = UIWidgets.create_simple_texture("mask_rect", "window_action_area_mask"),
-		ready_text_surfix = UIWidgets.create_simple_text("", "window_ready_input_text_2", nil, nil, {
+		ready_text_suffix = UIWidgets.create_simple_text("", "window_ready_suffix", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 26,
+			font_size = 22,
+			localize = true,
+			horizontal_alignment = "center",
+			word_wrap = false,
+			font_type = "hell_shark",
+			text_color = Colors.get_color_table_with_alpha("white", 255),
+			offset = {
+				0,
+				0,
+				2
+			}
+		}),
+		ready_text_prefix = UIWidgets.create_simple_text("", "window_ready_prefix", nil, nil, {
+			vertical_alignment = "center",
+			font_size = 22,
+			localize = false,
+			horizontal_alignment = "center",
+			word_wrap = false,
+			font_type = "hell_shark",
+			text_color = Colors.get_color_table_with_alpha("white", 255),
+			offset = {
+				0,
+				0,
+				2
+			}
+		}),
+		ready_error_text = UIWidgets.create_simple_text("", "window_ready_error_text", nil, nil, {
+			vertical_alignment = "center",
+			font_size = 22,
 			localize = false,
 			horizontal_alignment = "center",
 			word_wrap = false,
@@ -1139,7 +1305,7 @@ local widgets = {
 		}),
 		ready_text = UIWidgets.create_simple_text("", "window_ready_input_text", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 26,
+			font_size = 22,
 			localize = false,
 			horizontal_alignment = "center",
 			word_wrap = false,
@@ -1208,9 +1374,23 @@ local widgets = {
 				}
 			}
 		},
-		action_text_surfix = UIWidgets.create_simple_text("", "window_action_input_text_2", nil, nil, {
+		action_text_suffix = UIWidgets.create_simple_text("", "window_action_suffix", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 30,
+			font_size = 26,
+			localize = true,
+			horizontal_alignment = "center",
+			word_wrap = false,
+			font_type = "hell_shark_masked",
+			text_color = Colors.get_color_table_with_alpha("white", 255),
+			offset = {
+				0,
+				0,
+				2
+			}
+		}),
+		action_text_prefix = UIWidgets.create_simple_text("", "window_action_prefix", nil, nil, {
+			vertical_alignment = "center",
+			font_size = 26,
 			localize = false,
 			horizontal_alignment = "center",
 			word_wrap = false,
@@ -1224,7 +1404,7 @@ local widgets = {
 		}),
 		action_text = UIWidgets.create_simple_text("", "window_action_input_text", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 30,
+			font_size = 26,
 			localize = false,
 			horizontal_alignment = "center",
 			word_wrap = false,
@@ -1295,10 +1475,24 @@ local widgets = {
 				}
 			}
 		},
-		cancel_text_surfix = UIWidgets.create_simple_text("matchmaking_surfix_cancel", "window_cancel_input_text_2", nil, nil, {
+		cancel_text_suffix = UIWidgets.create_simple_text("matchmaking_surfix_cancel", "window_cancel_suffix", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 26,
+			font_size = 22,
 			localize = true,
+			horizontal_alignment = "center",
+			word_wrap = false,
+			font_type = "hell_shark",
+			text_color = Colors.get_color_table_with_alpha("white", 255),
+			offset = {
+				0,
+				0,
+				2
+			}
+		}),
+		cancel_text_prefix = UIWidgets.create_simple_text("", "window_cancel_prefix", nil, nil, {
+			vertical_alignment = "center",
+			font_size = 22,
+			localize = false,
 			horizontal_alignment = "center",
 			word_wrap = false,
 			font_type = "hell_shark",
@@ -1311,7 +1505,7 @@ local widgets = {
 		}),
 		cancel_text = UIWidgets.create_simple_text("", "window_cancel_input_text", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 26,
+			font_size = 22,
 			localize = false,
 			horizontal_alignment = "center",
 			word_wrap = false,
@@ -1380,7 +1574,7 @@ local widgets = {
 				}
 			}
 		},
-		title = UIWidgets.create_simple_text("status_matchmaking", "window_title", 28, Colors.get_color_table_with_alpha("white", 255)),
+		title = UIWidgets.create_simple_text("status_matchmaking", "window_title", 24, Colors.get_color_table_with_alpha("white", 255)),
 		search_zone_host_title = UIWidgets.create_simple_text("matchmaking_status_hosting", "window_search_zone_host_title", 28, Colors.get_color_table_with_alpha("white", 255)),
 		timer = UIWidgets.create_simple_text("00:00", "window_timer", nil, nil, {
 			vertical_alignment = "center",
@@ -1395,7 +1589,7 @@ local widgets = {
 				2
 			}
 		}),
-		status_text = UIWidgets.create_simple_text("status text should be here...", "window_status_text", 36, {
+		status_text = UIWidgets.create_simple_text(" ", "window_status_text", 32, {
 			255,
 			255,
 			255,
@@ -1403,7 +1597,7 @@ local widgets = {
 		}),
 		search_zone_title = UIWidgets.create_simple_text("zone", "window_search_zone_title", nil, nil, {
 			vertical_alignment = "center",
-			font_size = 28,
+			font_size = 24,
 			localize = true,
 			horizontal_alignment = "center",
 			word_wrap = false,
@@ -1429,7 +1623,7 @@ local widgets = {
 				2
 			}
 		}),
-		level_description = UIWidgets.create_simple_text("level text", "window_game_info_level", nil, nil, {
+		level_description = UIWidgets.create_simple_text("dlc1_2_difficulty_unavailable", "window_game_info_level", nil, nil, {
 			vertical_alignment = "center",
 			font_size = 24,
 			localize = true,
@@ -1457,7 +1651,7 @@ local widgets = {
 				2
 			}
 		}),
-		difficulty_description = UIWidgets.create_simple_text("difficulty text", "window_game_info_difficulty", nil, nil, {
+		difficulty_description = UIWidgets.create_simple_text("dlc1_2_difficulty_unavailable", "window_game_info_difficulty", nil, nil, {
 			vertical_alignment = "center",
 			font_size = 24,
 			localize = true,
@@ -1561,7 +1755,7 @@ local widgets = {
 				word_wrap = true,
 				pixel_perfect = true,
 				horizontal_alignment = "left",
-				vertical_alignment = "top",
+				vertical_alignment = "center",
 				dynamic_font = true,
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("white", 255)

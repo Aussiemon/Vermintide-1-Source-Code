@@ -91,11 +91,13 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 		csm.change_state(csm, "leave_ledge_hanging_pull_up", params)
 	end
 
-	if self.fall_down_time < t then
+	if self.fall_down_time < t or CharacterStateHelper.is_knocked_down(status_extension) then
 		local params = self.temp_params
 		params.ledge_unit = self.ledge_unit
 
 		csm.change_state(csm, "leave_ledge_hanging_falling", params)
+
+		return 
 	end
 
 	if self.position_lerp_timer then
@@ -118,7 +120,7 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 	end
 
 	self.locomotion_extension:set_disable_rotation_update()
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 	self.locomotion_extension:set_forced_velocity(Vector3:zero())
 
 	return 

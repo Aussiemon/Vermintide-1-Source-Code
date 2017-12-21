@@ -2041,13 +2041,13 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			log_contract_size[1]/2 - 104.5 - 30,
-			log_contract_size[2]/2 - 33.5 - 20,
+			log_contract_size[1]/2 - 83.60000000000001 - 10,
+			log_contract_size[2]/2 - 26.8 - 20,
 			1
 		},
 		size = {
-			209,
-			67
+			167.20000000000002,
+			53.6
 		}
 	}
 	local difficulty_texture_pass = {
@@ -2381,13 +2381,13 @@ local function create_quest_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			quest_size[1]/2 - 104.5,
-			quest_size[2]/2 - 33.5,
+			quest_size[1]/2 - 83.60000000000001 - 15,
+			quest_size[2]/2 - 26.8,
 			1
 		},
 		size = {
-			209,
-			67
+			167.20000000000002,
+			53.6
 		}
 	}
 

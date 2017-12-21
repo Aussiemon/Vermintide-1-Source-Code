@@ -81,7 +81,7 @@ ActionPotion.finish = function (self, reason)
 		else
 			local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
-			inventory_extension.wield(inventory_extension, "slot_melee")
+			inventory_extension.wield_previous_weapon(inventory_extension)
 		end
 	end
 

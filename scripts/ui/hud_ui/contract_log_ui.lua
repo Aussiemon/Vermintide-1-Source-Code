@@ -145,11 +145,21 @@ ContractLogUI._sync_contract_progression = function (self)
 		local contract_id = entry_data.contract_id
 
 		if self.quest_manager:has_contract_session_changes(contract_id) then
-			if self._update_contract_goal(self, entry_data) then
+			local changed, task_completed = self._update_contract_goal(self, entry_data)
+
+			if changed then
+				local widget = entry_data.widget
+
+				self._set_widget_dirty(self, widget)
+			end
+
+			if task_completed then
 				any_task_completed = true
 			end
 
-			dirty = true
+			if changed or task_completed then
+				dirty = true
+			end
 		end
 	end
 
@@ -170,10 +180,9 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 	local task = entry_data.contract_goal
 	local contract_progress = entry_data.contract_goal_start_progress
 	local current_session_progress = entry_data.contract_goal_session_progress
-	local texts_to_be_coloured = {}
 	local task_text = ""
-	local one_lined_task_text = ""
 	local add_unspecified_task_entry = nil
+	widget_style.task_text.text_color = text_color
 
 	if task then
 		local task_start_progress = contract_progress
@@ -189,19 +198,17 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 			text_color = progress_color
 		end
 
+		local make_dirty = task_progress ~= widget_content.task_progress
+		widget_content.task_progress = task_progress
+		widget_style.task_text.text_color = text_color
 		local text = Localize(QuestSettings.task_type_to_name_lookup[task.type]) .. ": " .. tostring(task_progress) .. "/" .. tostring(required)
 		task_text = task_text .. text
-		one_lined_task_text = task_text
 		local task_current_session_progress = current_session_progress
 		local new_value = task_current_session_progress ~= task_session_progress
 		local progress_increased = task_progress ~= task_start_progress
 
 		if new_value then
 			current_session_progress = task_session_progress
-		end
-
-		if progress_increased then
-			texts_to_be_coloured[#texts_to_be_coloured + 1] = text
 		end
 
 		if add_unspecified_task_entry then
@@ -217,57 +224,18 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 		widget_content.task_text = task_text
 		widget_content.text_width = text_width
 
-		self._set_widget_dirty(self, widget)
-
 		if not widget_content.tasks_complete and tasks_complete then
 			widget_content.tasks_complete = tasks_complete
 
-			return tasks_complete
+			return make_dirty, tasks_complete
 		else
 			widget_content.tasks_complete = tasks_complete
 		end
-	end
 
-	widget_style.task_text.text_color = text_color
+		return make_dirty
+	end
 
 	return 
-end
-ContractLogUI._get_text_color = function (self, status)
-	if status == "complete" then
-		return complete_color
-	elseif status == "in_progress" then
-		return progress_color
-	end
-
-	return default_color
-end
-local temp_text_color_templates = {
-	in_progress = {
-		start_index = 1,
-		end_index = 2,
-		color = Colors.get_color_table_with_alpha("sky_blue", 220)
-	},
-	complete = {
-		start_index = 1,
-		end_index = 2,
-		color = Colors.get_color_table_with_alpha("pale_green", 220)
-	}
-}
-ContractLogUI.get_color_text_index_list = function (self, text, texts_to_be_coloured, tasks_complete)
-	local color_override = {}
-	texts_to_be_coloured = 35
-	text = 106
-
-	for index, text_line in ipairs(texts_to_be_coloured) do
-		local start_index, end_index = string.find(text, text_line)
-		local table_name = (tasks_complete and "complete") or "in_progress"
-		local color_data = table.clone(temp_text_color_templates[table_name])
-		color_data.start_index = start_index
-		color_data.end_index = end_index
-		color_override[#color_override + 1] = color_data
-	end
-
-	return color_override
 end
 ContractLogUI._add_contract = function (self, contract_id)
 	local num_added_contracts = self.num_added_contracts or 0
@@ -325,6 +293,7 @@ ContractLogUI._add_contract = function (self, contract_id)
 	widget_content.text_width = text_width
 	widget_content.title_text_width = title_text_width
 	widget_content.tasks_complete = false
+	widget_content.task_progress = 0
 	entry_data.widget = widget
 	entry_data.contract_goal = task
 	entry_data.contract_goal_start_progress = contract_progress

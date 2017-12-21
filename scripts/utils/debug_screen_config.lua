@@ -133,6 +133,17 @@ local settings = {
 		category = "Allround useful stuff!"
 	},
 	{
+		description = "Requires restart. Gives you all items of a certain rarity",
+		setting_name = "all_items_of_rarity",
+		category = "Allround useful stuff!",
+		item_source = {
+			common = true,
+			plentiful = true,
+			rare = true,
+			exotic = true
+		}
+	},
+	{
 		description = "",
 		setting_name = "Default development settings",
 		category = "Presets",
@@ -331,12 +342,6 @@ Features that make player mechanics nicer to work with.
 		description = "Shows area of active AreaDamageExtensions",
 		is_boolean = true,
 		setting_name = "debug_area_damage",
-		category = "Player mechanics"
-	},
-	{
-		description = "Shows yourself in third person",
-		is_boolean = true,
-		setting_name = "camera_third_person",
 		category = "Player mechanics"
 	},
 	{
@@ -620,12 +625,6 @@ Features that make player mechanics nicer to work with.
 		end
 	},
 	{
-		description = "Push scroll will use ragdolls when enabled.",
-		is_boolean = true,
-		setting_name = "use_ragdoll_scroll_push",
-		category = "Weapons"
-	},
-	{
 		description = "Will show debug lines for projectiles when true",
 		is_boolean = true,
 		setting_name = "debug_projectiles",
@@ -830,6 +829,12 @@ Features that make player mechanics nicer to work with.
 		category = "AI"
 	},
 	{
+		description = "Shows the active respawns as yellow spheres with distance from start. removed respawns due to crossroads are bluish spheres",
+		is_boolean = true,
+		setting_name = "debug_player_respawns",
+		category = "AI"
+	},
+	{
 		description = "Horde debugging, shows how it picks spawn points",
 		is_boolean = true,
 		setting_name = "debug_hordes",
@@ -866,6 +871,40 @@ Features that make player mechanics nicer to work with.
 		category = "AI"
 	},
 	{
+		description = "Draws a sphere and text at each respawner unit in the level",
+		category = "AI",
+		setting_name = "debug_spawn_ogre_from_closest_boss_spawner",
+		func = function ()
+			if script_data.debug_ai_recycler then
+				local only_draw = false
+
+				Managers.state.conflict.level_analysis:debug_spawn_boss_from_closest_spawner_to_player(only_draw)
+			end
+
+			return 
+		end
+	},
+	{
+		description = "Debug spawn ogre from closest boss spawner. NOTE: debug_ai_recycler must be true at level load.",
+		category = "AI",
+		setting_name = "debug_draw_respaners",
+		func = function ()
+			Managers.state.spawn.respawn_handler:debug_draw_respaners()
+
+			return 
+		end
+	},
+	{
+		description = "Debug spawns one special through the specials spawning system.",
+		category = "AI",
+		setting_name = "debug_spawn_special",
+		func = function ()
+			Managers.state.conflict.specials_pacing:debug_spawn()
+
+			return 
+		end
+	},
+	{
 		description = "Enable navigation group debugging.",
 		is_boolean = true,
 		setting_name = "debug_navigation_group_manager",
@@ -887,6 +926,12 @@ Features that make player mechanics nicer to work with.
 		description = "Visual debugging when enemy AI pathfinding fails.",
 		is_boolean = true,
 		setting_name = "ai_debug_failed_pathing",
+		category = "AI"
+	},
+	{
+		description = "Displays engine debug for EngineOptimizedExtensions",
+		is_boolean = true,
+		setting_name = "show_engine_locomotion_debug",
 		category = "AI"
 	},
 	{
@@ -971,6 +1016,12 @@ Features that make player mechanics nicer to work with.
 		description = "show gutter runner debug",
 		is_boolean = true,
 		setting_name = "ai_gutter_runner_behavior",
+		category = "AI"
+	},
+	{
+		description = "show loot rat debug",
+		is_boolean = true,
+		setting_name = "ai_loot_rat_behavior",
 		category = "AI"
 	},
 	{
@@ -1069,12 +1120,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "navigation_visual_debug_enabled",
 		callback = "enable_navigation_visual_debug",
 		is_boolean = true
-	},
-	{
-		description = "Force rats to use mover when staggering.",
-		is_boolean = true,
-		setting_name = "ai_force_stagger_mover",
-		category = "AI"
 	},
 	{
 		description = "Find it annoying that the game ends every time you die? Well enable this setting then!",
@@ -4297,6 +4342,17 @@ Features that make player mechanics nicer to work with.
 				}
 			},
 			{
+				description = "Crappy cable 192/192",
+				commands = {
+					{
+						"network",
+						"limit",
+						"192",
+						"192"
+					}
+				}
+			},
+			{
 				description = "Crappy cable, 128/512",
 				commands = {
 					{
@@ -5094,6 +5150,12 @@ Features that make player mechanics nicer to work with.
 		category = "Bots"
 	},
 	{
+		description = "Enable debug printing related to bot weapons.",
+		is_boolean = true,
+		setting_name = "ai_bots_weapon_debug",
+		category = "Bots"
+	},
+	{
 		description = "Bots will not follow player.",
 		is_boolean = true,
 		setting_name = "bots_dont_follow",
@@ -5323,6 +5385,19 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty hardest",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(5)
+
+			return 
+		end
+	},
+	{
+		description = "Adds 1000 Experience to your account.",
+		category = "Progression",
+		setting_name = "1000 Experience",
+		func = function ()
+			local experience = ScriptBackendProfileAttribute.get("experience")
+			local end_experience = experience + 1000
+
+			ScriptBackendProfileAttribute.set("experience", end_experience)
 
 			return 
 		end

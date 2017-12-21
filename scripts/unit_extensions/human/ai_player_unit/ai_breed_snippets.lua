@@ -7,6 +7,7 @@ AiBreedSnippets.on_rat_ogre_spawn = function (unit, blackboard)
 	blackboard.shove_opportunity = blackboard.breed.num_forced_slams_at_target_switch <= blackboard.slams
 	blackboard.aggro_list = {}
 	blackboard.fling_skaven_timer = 0
+	blackboard.next_move_check = 0
 	local conflict_director = Managers.state.conflict
 	local breed = blackboard.breed
 
@@ -67,6 +68,18 @@ AiBreedSnippets.on_loot_rat_alerted = function (unit, blackboard, alerting_unit,
 				threat_vector = Vector3Box(threat_vector)
 			end
 		end
+
+		if not blackboard.confirmed_player_sighting then
+			blackboard.confirmed_player_sighting = true
+			blackboard.target_unit = enemy_unit
+			blackboard.is_alerted = true
+			blackboard.is_fleeing = true
+			blackboard.is_passive = false
+		end
+
+		local ai_simple = ScriptUnit.extension(unit, "ai_system")
+
+		ai_simple.set_perception(ai_simple, breed.perception, breed.target_selection_alerted)
 
 		blackboard.dodge_vector = dodge_vector
 		blackboard.threat_vector = threat_vector

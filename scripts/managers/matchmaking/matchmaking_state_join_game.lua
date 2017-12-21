@@ -12,11 +12,14 @@ MatchmakingStateJoinGame.init = function (self, params)
 	self.profile_synchronizer = params.profile_synchronizer
 	self.handshaker_client = params.handshaker_client
 	self.matchmaking_ui = params.matchmaking_ui
+	self.statistics_db = params.statistics_db
 	self.matchmaking_manager.selected_profile_index = nil
 	self.matchmaking_loading_context = {}
 	self.hero_popup_at_t = nil
 	self.selected_hero_at_t = nil
 	self.show_popup = false
+	local level_key = self.level_transition_handler:get_current_level_keys()
+	self.is_in_inn = level_key and level_key == "inn_level"
 
 	return 
 end
@@ -244,17 +247,17 @@ MatchmakingStateJoinGame.rpc_matchmaking_request_profile_reply = function (self,
 		if current_hero_name == selected_hero_name then
 			local level_started, level_key = self._level_started(self)
 
-			if level_started then
+			if self.is_in_inn and level_started then
 				mm_printf("Level already started, starting the countdown manually.")
 
 				self.waiting_for_local_countdown = true
 
 				self.network_transmit:queue_local_rpc("rpc_start_game_countdown", "game_starts_prepare")
 			else
-				self.next_transition_state = "start_lobby"
+				self.set_state_to_start_lobby(self)
 			end
 		else
-			self.next_transition_state = "start_lobby"
+			self.set_state_to_start_lobby(self)
 		end
 	else
 		reason = "profile_declined"
@@ -299,8 +302,7 @@ MatchmakingStateJoinGame.rpc_matchmaking_join_game = function (self, sender, cli
 		return 
 	end
 
-	self.matchmaking_manager.debug.text = "starting_game"
-	self.next_transition_state = "start_lobby"
+	self.set_state_to_start_lobby(self)
 
 	return 
 end
@@ -312,8 +314,36 @@ MatchmakingStateJoinGame.countdown_completed = function (self)
 		mm_printf("Countdown completed, joining game")
 
 		local level_started, level_key = self._level_started(self)
-		self.matchmaking_manager.debug.text = "starting_game"
-		self.next_transition_state = "start_lobby"
+
+		self.set_state_to_start_lobby(self)
+	end
+
+	return 
+end
+MatchmakingStateJoinGame.set_state_to_start_lobby = function (self)
+	self.matchmaking_manager.debug.text = "starting_game"
+	self.next_transition_state = "start_lobby"
+
+	if Application.platform() == "ps4" then
+		local statistics_db = self.statistics_db
+		local state_context = self.state_context
+		local game_search_data = state_context.game_search_data
+		local search_region_level = game_search_data.search_region_level
+		local started_matchmaking_t = game_search_data.started_matchmaking_t
+		local time_manager = Managers.time
+		local t = time_manager.time(time_manager, "game") or started_matchmaking_t
+		local time_taken = t - started_matchmaking_t
+
+		if search_region_level == "primary" then
+			StatisticsUtil.register_matchmaking_game_joined_primary_region(statistics_db)
+		elseif search_region_level == "secondary" then
+			StatisticsUtil.register_matchmaking_game_joined_secondary_region(statistics_db)
+		else
+			print("Matchmaking Error: Joined without having a search_region_level!")
+		end
+
+		StatisticsUtil.register_matchmaking_game_joined(statistics_db)
+		StatisticsUtil.register_matchmaking_game_joined_total_search_time(statistics_db, time_taken)
 	end
 
 	return 

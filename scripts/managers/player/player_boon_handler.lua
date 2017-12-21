@@ -66,6 +66,7 @@ PlayerBoonHandler._update_boons = function (self, boons)
 	local name_ids = {}
 	local remaining_durations = {}
 	local network_manager = self.network_manager
+	local game = network_manager.game(network_manager)
 
 	for i = 1, NUM_GO_BOONS, 1 do
 		local boon_data = boons[i]
@@ -88,7 +89,9 @@ PlayerBoonHandler._update_boons = function (self, boons)
 		local player = self.player
 		local player_game_object_id = player.game_object_id
 
-		network_manager.network_transmit:send_rpc_server("rpc_set_boon_handler_game_object_fields", player_game_object_id, name_ids, remaining_durations)
+		if game then
+			network_manager.network_transmit:send_rpc_server("rpc_set_boon_handler_game_object_fields", player_game_object_id, name_ids, remaining_durations)
+		end
 	end
 
 	return 

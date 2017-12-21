@@ -1,6 +1,7 @@
 require("scripts/settings/game_mode_settings")
 require("scripts/managers/game_mode/game_modes/game_mode_adventure")
 require("scripts/managers/game_mode/game_modes/game_mode_survival")
+require("scripts/managers/game_mode/game_modes/game_mode_tutorial")
 require("scripts/managers/game_mode/game_modes/game_mode_inn")
 
 local RPCS = {
@@ -181,10 +182,12 @@ GameModeManager.update_flow_object_set_enable = function (self, dt)
 
 	return 
 end
+local Unit_get_data = Unit.get_data
+local Unit_flow_event = Unit.flow_event
 GameModeManager._set_flow_object_set_unit_enabled = function (self, level, index)
 	local unit = Level.unit_by_index(level, index)
-	local refs = Unit.get_data(unit, "flow_object_set_references")
-	local enabled = Unit.get_data(unit, "flow_object_set_enabled")
+	local refs = Unit_get_data(unit, "flow_object_set_references")
+	local enabled = Unit_get_data(unit, "flow_object_set_enabled")
 
 	if enabled == nil then
 		enabled = true
@@ -204,31 +207,42 @@ GameModeManager._set_flow_object_set_unit_enabled = function (self, level, index
 		Unit.set_data(unit, "flow_object_set_enabled", new_state)
 		Unit.set_unit_visibility(unit, new_state)
 
-		local actor_list = nil
+		local ignore_physics = Unit_get_data(unit, "physics_ignores_object_set")
 
-		if new_state then
-			actor_list = Unit.get_data(unit, "flow_object_set_actor_list")
-		else
-			actor_list = {}
-		end
-
-		for i = 0, Unit.num_actors(unit) - 1, 1 do
-			if new_state and actor_list[i] then
-				Unit.create_actor(unit, i)
-			elseif not new_state and Unit.actor(unit, i) then
-				Unit.destroy_actor(unit, i)
-
-				actor_list[i] = true
+		if ignore_physics then
+			if new_state then
+				Unit_flow_event(unit, "hide_helper_mesh")
+				Unit_flow_event(unit, "unit_object_set_enabled")
+			else
+				Unit_flow_event(unit, "unit_object_set_disabled")
 			end
-		end
-
-		if new_state then
-			Unit.set_data(unit, "flow_object_set_actor_list", nil)
-			Unit.flow_event(unit, "hide_helper_mesh")
-			Unit.flow_event(unit, "unit_object_set_enabled")
 		else
-			Unit.set_data(unit, "flow_object_set_actor_list", actor_list)
-			Unit.flow_event(unit, "unit_object_set_disabled")
+			local actor_list = nil
+
+			if new_state then
+				actor_list = Unit_get_data(unit, "flow_object_set_actor_list")
+			else
+				actor_list = {}
+			end
+
+			for i = 0, Unit.num_actors(unit) - 1, 1 do
+				if new_state and actor_list[i] then
+					Unit.create_actor(unit, i)
+				elseif not new_state and Unit.actor(unit, i) then
+					Unit.destroy_actor(unit, i)
+
+					actor_list[i] = true
+				end
+			end
+
+			if new_state then
+				Unit.set_data(unit, "flow_object_set_actor_list", nil)
+				Unit_flow_event(unit, "hide_helper_mesh")
+				Unit_flow_event(unit, "unit_object_set_enabled")
+			else
+				Unit.set_data(unit, "flow_object_set_actor_list", actor_list)
+				Unit_flow_event(unit, "unit_object_set_disabled")
+			end
 		end
 	end
 
@@ -275,7 +289,7 @@ GameModeManager._init_game_mode = function (self, game_mode_key)
 
 	local settings = GameModeSettings[game_mode_key]
 	local class = rawget(_G, settings.class_name)
-	self._game_mode = class.new(class, settings, self._world, self.network_server)
+	self._game_mode = class.new(class, settings, self._world, self.network_server, self.level_transition_handler)
 
 	return 
 end
@@ -317,6 +331,9 @@ GameModeManager.complete_level = function (self)
 	end
 
 	return 
+end
+GameModeManager.wanted_transition = function (self)
+	return self._game_mode:wanted_transition()
 end
 GameModeManager.fail_level = function (self)
 	self._game_mode:fail_level()
@@ -408,6 +425,8 @@ GameModeManager.server_update = function (self, dt, t)
 				self.level_transition_handler:level_completed()
 			elseif reason == "won" then
 			elseif reason == "lost" then
+			elseif reason == "reload" then
+				self.retry_level(self)
 			else
 				fassert(false, "Invalid end reason %q.", tostring(reason))
 			end

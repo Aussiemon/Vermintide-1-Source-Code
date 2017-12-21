@@ -21,7 +21,6 @@ dofile("scripts/settings/breeds/breed_skaven_pack_master")
 dofile("scripts/settings/breeds/breed_skaven_poison_wind_globadier")
 dofile("scripts/settings/breeds/breed_skaven_ratling_gunner")
 dofile("scripts/settings/breeds/breed_skaven_rat_ogre")
-dofile("scripts/settings/breeds/breed_skaven_stormfiend")
 dofile("scripts/settings/breeds/breed_critters")
 
 for breed_name, breed_data in pairs(Breeds) do

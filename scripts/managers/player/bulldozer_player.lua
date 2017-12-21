@@ -90,7 +90,6 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 		PlayerCharacterStateLeaveLedgeHangingFalling,
 		PlayerCharacterStateCatapulted,
 		PlayerCharacterStateStunned,
-		PlayerCharacterStateHammerLeap,
 		PlayerCharacterStateUsingTransport,
 		PlayerCharacterStateGrabbedByPackMaster,
 		PlayerCharacterStateWaitingForAssistedRespawn,
@@ -307,6 +306,9 @@ end
 BulldozerPlayer.profile_id = function (self)
 	return self._unique_id
 end
+BulldozerPlayer.ui_id = function (self)
+	return self._unique_id
+end
 BulldozerPlayer.stats_id = function (self)
 	return self._unique_id
 end
@@ -338,7 +340,7 @@ BulldozerPlayer.name = function (self)
 
 			return name
 		end
-	elseif Application.platform() == "xb1" then
+	elseif Application.platform() == "xb1" or Application.platform() == "ps4" then
 		if self._cached_name then
 			return self._cached_name
 		end

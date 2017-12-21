@@ -76,6 +76,9 @@ local widget_definitions = {
 InputHelperUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.platform = Application.platform()
 	self.ui_animations = {}
 
@@ -161,7 +164,7 @@ InputHelperUI.draw = function (self, dt, t)
 	local input_service = input_manager.get_service(input_manager, "ingame_menu")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.background_overlay_widget)
 
 	if gamepad_active then

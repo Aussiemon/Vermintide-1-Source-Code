@@ -30,6 +30,7 @@ local BLACKBOARDS = BLACKBOARDS
 local distance_squared = Vector3.distance_squared
 local GameSettingsDevelopment = GameSettingsDevelopment
 local RecycleSettings = RecycleSettings
+local FORM_GROUPS_IN_ONE_FRAME = true
 local script_data = script_data
 script_data.debug_terror = script_data.debug_terror or Development.parameter("debug_terror")
 script_data.ai_roaming_spawning_disabled = script_data.ai_roaming_spawning_disabled or Development.parameter("ai_roaming_spawning_disabled")
@@ -352,7 +353,44 @@ ConflictDirector.sort_player_info_by_travel_distance = function (self, main_path
 
 	return 
 end
-ConflictDirector.update_main_path_player_info = function (self)
+ConflictDirector.main_path_player_far_away_check = function (self, data, travel_dist, path_pos, pos, t)
+	local far_away = 100 < math.abs(travel_dist - data.travel_dist)
+
+	if far_away then
+		local astar = data.astar
+
+		if astar then
+			local done = GwNavAStar.processing_finished(astar)
+
+			if done then
+				local path_found = GwNavAStar.path_found(astar)
+
+				if path_found then
+					far_away = false
+				end
+
+				GwNavAStar.destroy(astar)
+
+				data.astar = nil
+				data.astar_timer = 0
+				data.astar_timer = t + 3
+			end
+		elseif data.astar_timer < t then
+			print("main_path_player_far_away_check started")
+
+			local astar = GwNavAStar.create(self.nav_world)
+			local traverse_logic = Managers.state.bot_nav_transition:traverse_logic()
+
+			GwNavAStar.start_with_propagation_box(astar, self.nav_world, pos, path_pos, 30, traverse_logic)
+
+			data.astar = astar
+			data.astar_timer = t + 3
+		end
+	end
+
+	return far_away
+end
+ConflictDirector.update_main_path_player_info = function (self, t)
 	local main_path_info = self.main_path_info
 
 	if not main_path_info.main_paths then
@@ -364,8 +402,9 @@ ConflictDirector.update_main_path_player_info = function (self)
 	local main_path_player_info = self.main_path_player_info
 	local index = main_path_info.main_path_player_info_index
 	index = index + 1
+	local num_units = #player_and_bot_units
 
-	if #player_and_bot_units < index then
+	if num_units < index then
 		index = 1
 	end
 
@@ -375,42 +414,44 @@ ConflictDirector.update_main_path_player_info = function (self)
 	if unit then
 		local pos = player_and_bot_positions[index]
 		local data = main_path_player_info[unit]
+		local main_paths = main_path_info.main_paths
+		local path_pos, travel_dist, move_percent, sub_index, path_index = MainPathUtils.closest_pos_at_main_path(nil, pos)
 
 		if not data then
 			data = {
+				astar_timer = 0,
 				path_pos = Vector3Box(),
 				unit = unit,
-				total_path_dist = MainPathUtils.total_path_dist()
+				total_path_dist = MainPathUtils.total_path_dist(),
+				travel_dist = travel_dist
 			}
 			main_path_player_info[unit] = data
 		end
 
-		local main_paths = main_path_info.main_paths
-		local path_pos = nil
-		path_pos, data.travel_dist, data.move_percent, data.sub_index, data.path_index = MainPathUtils.closest_pos_at_main_path(nil, pos)
+		local far_away = self.main_path_player_far_away_check(self, data, travel_dist, path_pos, pos, t)
 
-		data.path_pos:store(path_pos)
+		if not far_away then
+			data.path_index = path_index
+			data.sub_index = sub_index
+			data.move_percent = move_percent
+			data.travel_dist = travel_dist
 
-		if data.path_index then
-			main_path_info.current_path_index = math.max(data.path_index, main_path_info.current_path_index)
-		end
+			data.path_pos:store(path_pos)
 
-		local move_percent = data.move_percent
+			if path_index then
+				main_path_info.current_path_index = math.max(path_index, main_path_info.current_path_index)
+			end
 
-		if main_path_info.ahead_percent <= move_percent then
-			main_path_info.ahead_percent = move_percent
-			main_path_info.ahead_unit = unit
-			main_path_info.ahead_travel_dist = data.travel_dist
-		elseif main_path_info.ahead_unit == unit then
-			main_path_info.ahead_percent = 0
-			main_path_info.ahead_travel_dist = 0
-		end
+			if main_path_info.ahead_percent <= move_percent or main_path_info.ahead_unit == unit then
+				main_path_info.ahead_percent = move_percent
+				main_path_info.ahead_unit = unit
+				main_path_info.ahead_travel_dist = data.travel_dist
+			end
 
-		if move_percent <= main_path_info.behind_percent then
-			main_path_info.behind_percent = move_percent
-			main_path_info.behind_unit = unit
-		elseif main_path_info.behind_unit == unit then
-			main_path_info.behind_percent = 1
+			if move_percent <= main_path_info.behind_percent or main_path_info.behind_unit == unit then
+				main_path_info.behind_percent = move_percent
+				main_path_info.behind_unit = unit
+			end
 		end
 	end
 
@@ -553,8 +594,12 @@ ConflictDirector.has_horde = function (self, t)
 
 	return 
 end
-ConflictDirector.mini_patrol = function (self, t, terror_event_id, composition_type, limit_spawners, silent, group_template)
-	self.horde_spawner:execute_event_horde(t, terror_event_id, composition_type, limit_spawners, silent, group_template)
+ConflictDirector.mini_patrol = function (self, t, terror_event_id, composition_type, group_template)
+	local strictly_not_close_to_players = true
+	local limit_spawners = 1
+	local silent = true
+
+	self.horde_spawner:execute_event_horde(t, terror_event_id, composition_type, limit_spawners, silent, group_template, strictly_not_close_to_players)
 
 	return 
 end
@@ -1185,14 +1230,13 @@ ConflictDirector.update_mini_patrol = function (self, t, dt)
 
 			print("spawning mini patrol")
 
-			local silent = true
 			local group_template = {
 				size = 0,
 				template = "mini_patrol",
 				id = Managers.state.entity:system("ai_group_system"):generate_group_id()
 			}
 
-			self.mini_patrol(self, t, nil, composition, nil, silent, group_template)
+			self.mini_patrol(self, t, nil, composition, group_template)
 
 			self._mini_patrol_state = "spawning"
 		else
@@ -1214,13 +1258,19 @@ end
 ConflictDirector.update = function (self, dt, t)
 	self._time = t
 
+	if script_data.debug_enabled and World.get_data(self._world, "paused") then
+		self.update_server_debug(self, t, dt)
+
+		return 
+	end
+
 	if #player_positions == 0 then
 		return 
 	end
 
 	if self.level_analysis then
 		self.level_analysis:update(t, dt)
-		self.update_main_path_player_info(self)
+		self.update_main_path_player_info(self, t)
 	end
 
 	if self.disabled then
@@ -1350,7 +1400,7 @@ ConflictDirector.update = function (self, dt, t)
 
 		TerrorEventMixer.update(t, dt, ai_system.ai_debugger and ai_system.ai_debugger.screen_gui)
 		Profiler.stop("TerrorEventMixer")
-	elseif self.navigation_group_manager.form_groups_running then
+	elseif not FORM_GROUPS_IN_ONE_FRAME and self.navigation_group_manager.form_groups_running then
 		Profiler.start("form_groups_update")
 
 		local done = self.navigation_group_manager:form_groups_update()
@@ -1380,7 +1430,7 @@ ConflictDirector.update = function (self, dt, t)
 	end
 
 	if script_data.debug_enabled then
-		self.update_server_debug(self, dt, t)
+		self.update_server_debug(self, t, dt)
 	end
 
 	return 
@@ -1688,8 +1738,9 @@ ConflictDirector._remove_unit_from_spawned = function (self, unit, blackboard)
 	BLACKBOARDS[unit] = nil
 
 	if not index then
-		print("ERROR: REMOVE UNIT FROM SPAWNED:(traceback)")
+		printf("ERROR: REMOVE UNIT FROM SPAWNED:(traceback) %q", tostring(unit))
 		print(Unit.get_data(unit, "traceback"))
+		print(Script.callstack())
 
 		return 
 	end
@@ -2231,7 +2282,13 @@ ConflictDirector.generate_spawns = function (self)
 
 	assert(triangle, "The path marker at the end of the level is outside the navmesh")
 	self.navigation_group_manager:setup(self._world, self.nav_world)
-	self.navigation_group_manager:form_groups_start(nil, finish_point)
+
+	if FORM_GROUPS_IN_ONE_FRAME then
+		print("Forming navigation groups in one frame")
+		self.navigation_group_manager:form_groups(nil, finish_point)
+	else
+		self.navigation_group_manager:form_groups_start(nil, finish_point)
+	end
 
 	if CurrentConflictSettings.roaming.disabled then
 		print("roaming spawning is disabled")
@@ -2314,6 +2371,10 @@ ConflictDirector.ai_ready = function (self)
 
 	self._spawn_pos_list, self._pack_sizes, self._pack_rotations = self.generate_spawns(self)
 
+	if FORM_GROUPS_IN_ONE_FRAME then
+		self.ai_nav_groups_ready(self)
+	end
+
 	return 
 end
 ConflictDirector.ai_nav_groups_ready = function (self)
@@ -2377,7 +2438,7 @@ ConflictDirector.level_flow_event = function (self, event_name)
 
 	return 
 end
-ConflictDirector.update_server_debug = function (self, dt, t)
+ConflictDirector.update_server_debug = function (self, t, dt)
 	Profiler.start("Conflict Server Debug")
 	ConflictDirectorTests.update(self, t, dt)
 
@@ -2413,6 +2474,10 @@ ConflictDirector.update_server_debug = function (self, dt, t)
 	end
 
 	if DebugKeyHandler.key_pressed("t", "test terror", "ai", "left shift") then
+		self.specials_pacing:get_spawn_pos_from_zone(30)
+
+		return 
+
 		local debug_breed = Breeds[self._debug_breed]
 
 		if debug_breed == Breeds.skaven_clan_rat or debug_breed == Breeds.skaven_slave or debug_breed == Breeds.skaven_storm_vermin then
@@ -2573,15 +2638,42 @@ ConflictDirector.update_server_debug = function (self, dt, t)
 	end
 
 	if DebugKeyHandler.key_pressed("o", "draw spawn zones", "ai", "left shift") then
-		local draw_all_zones = true
+		local d = self.draw_all_zones
+		d = (d == nil and "all") or (d == "all" and "last") or (d == "last" and "last_naive") or (d == "last_naive" and nil)
 
-		if draw_all_zones then
+		if d == "all" then
 			self.spawn_zone_baker:draw_zones(self.nav_world)
+		elseif d == "last_naive" then
+		elseif d == "last" then
 		else
+			self.spawn_zone_baker:draw_zones(self.nav_world)
+		end
+
+		self.draw_all_zones = d
+	end
+
+	local draw_all_zones = self.draw_all_zones
+
+	if draw_all_zones ~= "nil" then
+		if draw_all_zones == "all" then
+			Debug.text("Draw Zone-segment (all)")
+		elseif draw_all_zones == "last" then
+			local main_paths = self.level_analysis:get_main_paths()
+			local dist = self.main_path_info.ahead_travel_dist or 0
+			local index = self.spawn_zone_baker:find_zone_index(dist)
+
+			if index then
+				Debug.text("Draw Zone-segment: %d (last) travel_dist: %.1f", index, dist)
+				self.spawn_zone_baker:draw_zones(self.nav_world, index)
+			else
+				Debug.text("Draw Zone-segment not precalculated (last)")
+			end
+		elseif draw_all_zones == "last_naive" then
 			local main_paths = self.level_analysis:get_main_paths()
 			local index = MainPathUtils.zone_segment_on_mainpath(main_paths, PLAYER_POSITIONS[1])
 
 			self.spawn_zone_baker:draw_zones(self.nav_world, index)
+			Debug.text("Draw Zone-segment: %d (last_naive)", index)
 		end
 	end
 
@@ -2703,7 +2795,7 @@ ConflictDirector.update_server_debug = function (self, dt, t)
 		local ahead_unit = main_path_info.ahead_unit
 		local dist_to_intervention = 0
 
-		for slot23, slot24 in pairs(self.main_path_player_info) do
+		for slot24, slot25 in pairs(self.main_path_player_info) do
 		end
 
 		if ahead_unit then

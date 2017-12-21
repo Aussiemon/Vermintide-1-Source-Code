@@ -18,6 +18,13 @@ NetworkUtils = {
 		damage = math.clamp(damage, damage_min, damage_max)
 
 		return damage
+	end,
+	network_clamp_position = function (pos)
+		local pos_constant = NetworkConstants.position
+		local pos_min = pos_constant.min
+		local pos_max = pos_constant.max
+
+		return Vector3.clamp(pos, pos_min, pos_max)
 	end
 }
 

@@ -9,6 +9,7 @@ NetworkConstants.position = Network.type_info("position")
 NetworkConstants.rotation = Network.type_info("rotation")
 NetworkConstants.enemy_rotation = Network.type_info("enemy_rotation")
 NetworkConstants.max_attachments = 4
+NetworkConstants.clock_time = Network.type_info("clock_time")
 NetworkConstants.time_multiplier = Network.type_info("time_multiplier")
 NetworkConstants.ping = Network.type_info("ping")
 NetworkConstants.animation_variable_float = Network.type_info("animation_variable_float")
@@ -17,7 +18,13 @@ NetworkConstants.game_object_id_max = Network.type_info("game_object_id").max
 NetworkConstants.invalid_game_object_id = NetworkConstants.game_object_id_max
 NetworkConstants.attack_template = Network.type_info("attack_template")
 
-assert(#AttackTemplatesLookup <= NetworkConstants.attack_template.max, "Too many attack templates, global config max value needs to be upped")
+assert(#NetworkLookup.attack_templates <= NetworkConstants.attack_template.max, "Too many attack templates, global config max value needs to be upped")
+
+NetworkConstants.attack_damage_value = Network.type_info("attack_damage_value")
+local num_attack_damage_values = #NetworkLookup.attack_damage_values
+local max_attack_damage_values = NetworkConstants.attack_damage_value.max
+
+fassert(num_attack_damage_values <= max_attack_damage_values, "Too many attack damage values (%i), global config max value (%i) needs to be upped to %i", num_attack_damage_values, max_attack_damage_values, max_attack_damage_values*2)
 
 NetworkConstants.statistics_path_max_size = Network.type_info("statistics_path").max_size
 NetworkConstants.anim_event = Network.type_info("anim_event")

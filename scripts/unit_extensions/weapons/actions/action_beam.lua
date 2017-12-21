@@ -7,6 +7,7 @@ ActionBeam.init = function (self, world, item_name, is_server, owner_unit, damag
 	self.world = world
 	self.item_name = item_name
 	self.wwise_world = Managers.world:wwise_world(world)
+	self._rumble_effect_id = false
 	self.owner_player = Managers.player:owner(owner_unit)
 	self.inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
@@ -87,6 +88,15 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 	local owner_unit = self.owner_unit
 	local current_action = self.current_action
 	local is_server = self.is_server
+	local input_extension = ScriptUnit.extension(self.owner_unit, "input_system")
+	local buff_extension = ScriptUnit.extension(self.owner_unit, "buff_system")
+	local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
+
+	if buff_extension.has_buff_type(buff_extension, "increased_zoom") and status_extension.is_zooming(status_extension) and input_extension.get(input_extension, "action_three") then
+		status_extension.switch_variable_zoom(status_extension, current_action.buffed_zoom_thresholds)
+	elseif current_action.zoom_thresholds and status_extension.is_zooming(status_extension) and input_extension.get(input_extension, "action_three") then
+		status_extension.switch_variable_zoom(status_extension, current_action.zoom_thresholds)
+	end
 
 	if self.state == "waiting_to_shoot" and self.time_to_shoot <= t then
 		self.state = "shooting"
@@ -106,6 +116,12 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 	end
 
 	if self.state == "shooting" then
+		if not Managers.player:owner(self.owner_unit).bot_player and not self._rumble_effect_id then
+			self._rumble_effect_id = Managers.state.controller_features:add_effect("persistent_rumble", {
+				rumble_effect = "reload_start"
+			})
+		end
+
 		local world = self.world
 		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 		local current_position = first_person_extension.current_position(first_person_extension)
@@ -114,10 +130,7 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 		local physics_world = World.get_data(world, "physics_world")
 		local range = current_action.range or 30
 		local collision_filter = "filter_player_ray_projectile"
-
-		PhysicsWorld.prepare_actors_for_raycast(physics_world, current_position, direction, 0.1, 9, range*range)
-
-		local result = PhysicsWorld.immediate_raycast(physics_world, current_position, direction, range, "all", "collision_filter", collision_filter)
+		local result = PhysicsWorld.immediate_raycast_actors(physics_world, current_position, direction, range, "static_collision_filter", "filter_player_ray_projectile_static_only", "dynamic_collision_filter", "filter_player_ray_projectile_ai_only", "dynamic_collision_filter", "filter_player_ray_projectile_hitbox_only")
 		local beam_end_position = current_position + direction*range
 		local hit_unit, hit_position = nil
 
@@ -162,19 +175,25 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 
 			if hit_unit then
 				if hit_unit ~= self.current_target then
-					self.ramping_interval = 1
+					self.ramping_interval = 1.5
 				end
 
 				if current_action.damage_interval*self.ramping_interval <= self.damage_timer and ScriptUnit.has_extension(hit_unit, "damage_system") then
 					Managers.state.entity:system("ai_system"):alert_enemies_within_range(owner_unit, POSITION_LOOKUP[owner_unit], 5)
 
 					self.damage_timer = 0
-					self.ramping_interval = math.clamp(self.ramping_interval*0.9, 0.65, 1)
+					self.ramping_interval = math.clamp(self.ramping_interval*0.8, 0.45, 1.5)
 				end
 
 				if self.damage_timer == 0 and ScriptUnit.has_extension(hit_unit, "damage_system") then
 					first_person_extension.play_hud_sound_event(first_person_extension, "staff_beam_hit_enemy", nil, false)
 					DamageUtils.process_projectile_hit(world, self.item_name, owner_unit, is_server, result, current_action, direction, true)
+
+					if not Managers.player:owner(self.owner_unit).bot_player then
+						Managers.state.controller_features:add_effect("rumble", {
+							rumble_effect = "hit_character_light"
+						})
+					end
 
 					local health_extension = ScriptUnit.has_extension(hit_unit, "health_system")
 
@@ -230,6 +249,12 @@ ActionBeam.finish = function (self, reason)
 		ActionUtils.play_husk_sound_event(charge_sound_husk_stop_event, owner_unit)
 	end
 
+	if self._rumble_effect_id then
+		Managers.state.controller_features:stop_effect(self._rumble_effect_id)
+
+		self._rumble_effect_id = nil
+	end
+
 	World.destroy_particles(self.world, self.beam_effect)
 
 	self.beam_effect = nil
@@ -253,6 +278,12 @@ ActionBeam.destroy = function (self)
 		World.destroy_particles(self.world, self.beam_effect)
 
 		self.beam_effect = nil
+	end
+
+	if self._rumble_effect_id then
+		Managers.state.controller_features:stop_effect(self._rumble_effect_id)
+
+		self._rumble_effect_id = nil
 	end
 
 	local charging_sound_id = self.charging_sound_id

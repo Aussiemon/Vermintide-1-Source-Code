@@ -180,6 +180,16 @@ TerrorEventMixer.init_functions = {
 		Managers.state.voting:set_vote_kick_enabled(false)
 
 		return 
+	end,
+	set_freeze_condition = function (event, element, t)
+		event.max_active_enemies = element.max_active_enemies or math.huge
+
+		return 
+	end,
+	set_breed_event_horde_spawn_limit = function (event, element, t)
+		Managers.state.entity:system("spawner_system"):set_breed_event_horde_spawn_limit(element.breed_name, element.limit)
+
+		return 
 	end
 }
 TerrorEventMixer.run_functions = {
@@ -333,6 +343,12 @@ TerrorEventMixer.run_functions = {
 	end,
 	disable_kick = function (event, element, t)
 		return true
+	end,
+	set_freeze_condition = function (event, element, t)
+		return true
+	end,
+	set_breed_event_horde_spawn_limit = function (event, element, t)
+		return true
 	end
 }
 TerrorEventMixer.debug_functions = {
@@ -456,7 +472,8 @@ TerrorEventMixer.start_event = function (event_name, optional_pos)
 		ends_at = 0,
 		name = event_name,
 		elements = elements,
-		optional_pos = optional_pos
+		optional_pos = optional_pos,
+		max_active_enemies = math.huge
 	}
 	active_events[#active_events + 1] = new_event
 	local t = Managers.time:time("game")
@@ -543,31 +560,37 @@ TerrorEventMixer.run_event = function (event, t, dt)
 	local elements = event.elements
 	local index = event.index
 	local element = elements[index]
-	local func_name = element[1]
-	local continue = TerrorEventMixer.run_functions[func_name](event, element, t, dt)
+	local active_enemies = Managers.state.performance:num_active_enemies()
 
-	if continue then
-		if event.destroy then
-			return true
-		end
-
-		index = index + 1
-
-		if #elements < index then
-			return true
-		end
-
-		event.index = index
-		local element = elements[index]
+	if event.max_active_enemies < active_enemies then
+		element.ends_at = (element.ends_at or 0) + dt
+	else
 		local func_name = element[1]
+		local continue = TerrorEventMixer.run_functions[func_name](event, element, t, dt)
 
-		TerrorEventMixer.init_functions[func_name](event, element, t)
+		if continue then
+			if event.destroy then
+				return true
+			end
+
+			index = index + 1
+
+			if #elements < index then
+				return true
+			end
+
+			event.index = index
+			local element = elements[index]
+			local func_name = element[1]
+
+			TerrorEventMixer.init_functions[func_name](event, element, t)
+		end
 	end
 
 	return 
 end
 local tiny_font_size = 16
-local tiny_font = "arial_16"
+local tiny_font = "gw_arial_16"
 local tiny_font_mtrl = "materials/fonts/" .. tiny_font
 local resx, resy = Application.resolution()
 local debug_win_width = 330

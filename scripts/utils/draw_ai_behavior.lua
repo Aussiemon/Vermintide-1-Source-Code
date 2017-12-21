@@ -1,10 +1,10 @@
 require("scripts/utils/script_gui")
 
 local font_size = 26
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local tiny_font_size = 16
-local tiny_font = "arial_16"
+local tiny_font = "gw_arial_16"
 local tiny_font_mtrl = "materials/fonts/" .. tiny_font
 local layer = 100
 local res_x, res_y = Application.resolution()
@@ -14,14 +14,19 @@ local min_node_width = res_x/140
 local node_spacing = res_x*1e-05
 local text_spacing = res_x/2
 local thin_border = res_x/5
+
+local function rshoot_action_debug(blackboard)
+	local attack_pattern_data = blackboard.attack_pattern_data
+	local s = "State:" .. tostring(attack_pattern_data and attack_pattern_data.state)
+
+	return s
+end
+
 local show_blackboard_data = {
 	BTFallAction = {
 		"is_falling",
 		"fall_done",
 		"fall_state"
-	},
-	BTChaseAction = {
-		"move_state"
 	},
 	BTFollowAction = {
 		"move_state"
@@ -60,7 +65,8 @@ local show_blackboard_data = {
 	},
 	BTClimbAction = {
 		"is_in_smartobject_range",
-		"is_climbing"
+		"is_climbing",
+		"climb_state"
 	},
 	BTSkulkAroundAction = {
 		"skulk_jump_tries"
@@ -83,6 +89,9 @@ local show_blackboard_data = {
 	},
 	BTNinjaApproachAction = {
 		"skulk_pos_is_jump_off_point"
+	},
+	BTRatlingGunnerShootAction = {
+		rshoot_action_debug
 	}
 }
 local time_to_fade = 3
@@ -124,7 +133,7 @@ DrawAiBehaviour.tree_width = function (gui, node)
 
 	return 
 end
-DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, y, draw_utility)
+DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, y, draw_utility, extra_info)
 	local nodes = nodes
 
 	if row == 1 then
@@ -186,6 +195,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 
 	local tcolor = Color(240, 255, 255, 255)
 	local lcolor = Color(150, 100, 255, 100)
+	local ecolor = Color(240, 255, 55, 100)
 	local node_width = nodes[node._identifier].w
 	local total_width = nodes[node._identifier].total_w
 	local y1 = row*(node_height + node_height) + y
@@ -218,12 +228,27 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 
 					ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
 				end
+			elseif type(key) == "function" then
+				local s = key(blackboard)
+				extra_height = extra_height + res_y/11
+				local bb_text = s
+
+				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
 			else
 				extra_height = extra_height + res_y/11
 				local bb_text = key .. "=" .. tostring(blackboard[key])
 
 				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
 			end
+		end
+	elseif extra_info then
+		node_width = node_width*2
+		extra_height = extra_height + res_y/5
+
+		for k, string in ipairs(extra_info) do
+			extra_height = extra_height + res_y/12
+
+			ScriptGUI.itext(gui, res_x, res_y, string, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, ecolor)
 		end
 	end
 

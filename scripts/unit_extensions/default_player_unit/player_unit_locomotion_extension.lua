@@ -271,7 +271,9 @@ PlayerUnitLocomotionExtension.update_script_driven_movement = function (self, un
 		velocity_wanted.z = velocity_current.z
 	end
 
-	if self.velocity_forced then
+	local velocity_forced = self.velocity_forced
+
+	if velocity_forced then
 		local velocity_forced = self.velocity_forced
 		velocity_wanted = velocity_forced
 		self.velocity_forced = nil
@@ -378,13 +380,13 @@ PlayerUnitLocomotionExtension.update_script_driven_movement = function (self, un
 			dragged_velocity.z = fall_speed
 		end
 
-		Profiler.stop()
+		Profiler.stop("manual mover")
 	end
 
 	local delta = dragged_velocity*dt
 
 	Mover.move(mover, delta, dt)
-	Profiler.stop()
+	Profiler.stop("mover move")
 
 	local final_position = Mover.position(mover)
 	local final_velocity = (final_position - current_position)/dt

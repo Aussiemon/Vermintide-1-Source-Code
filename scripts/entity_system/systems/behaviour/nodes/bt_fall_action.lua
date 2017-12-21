@@ -1,19 +1,20 @@
-local function get_fall_animation(unit)
-	local velocity = ScriptUnit.extension(unit, "locomotion_system"):get_velocity()
-	velocity.z = 0
+require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
-	if Vector3.length(velocity) < 0.0001 then
+local function get_fall_animation(unit, blackboard)
+	local locomotion_extension = blackboard.locomotion_extension
+	local velocity = locomotion_extension.current_velocity(locomotion_extension)
+	local vel_x = velocity.x
+	local vel_y = velocity.y
+
+	if vel_x*vel_x + vel_y*vel_y < 1e-07 then
 		return "falling_fwd"
 	end
 
-	velocity = Vector3.normalize(velocity)
 	local unit_rotation = Unit.local_rotation(unit, 0)
 	local unit_direction = Quaternion.forward(unit_rotation)
-	unit_direction.z = 0
-	unit_direction = Vector3.normalize(unit_direction)
-	local dot = Vector3.dot(velocity, unit_direction)
+	local flat_dot = vel_x*unit_direction.x + vel_y*unit_direction.y
 
-	if 0 <= dot then
+	if 0 <= flat_dot then
 		return "falling_fwd"
 	end
 
@@ -21,28 +22,26 @@ local function get_fall_animation(unit)
 end
 
 BTFallAction = class(BTFallAction, BTNode)
-BTFallAction.name = "BTFallAction"
 BTFallAction.init = function (self, ...)
 	BTFallAction.super.init(self, ...)
 
 	return 
 end
-local fall_anims = {
-	fwd = "falling_fwd",
-	bwd = "falling_bwd"
-}
+BTFallAction.name = "BTFallAction"
 BTFallAction.enter = function (self, unit, blackboard, t)
-	local fall_animation = get_fall_animation(unit)
+	local fall_animation = get_fall_animation(unit, blackboard)
 
 	Managers.state.network:anim_event(unit, fall_animation)
-	LocomotionUtils.set_animation_driven_movement(unit, true, true)
+	LocomotionUtils.set_animation_driven_movement(unit, true, true, false)
 
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+	local breed = blackboard.breed
+	local override_mover_move_distance = breed.override_mover_move_distance
+	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion.set_affected_by_gravity(locomotion, true)
-	locomotion.set_movement_type(locomotion, "constrained_by_mover")
+	locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
+	locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
 
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, false)
 
@@ -55,15 +54,15 @@ BTFallAction.enter = function (self, unit, blackboard, t)
 
 	return 
 end
-BTFallAction.leave = function (self, unit, blackboard, t, dt, new_action)
+BTFallAction.leave = function (self, unit, blackboard, t, reason)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion.set_affected_by_gravity(locomotion, false)
-	locomotion.set_movement_type(locomotion, "snap_to_navmesh")
+	locomotion_extension.set_affected_by_gravity(locomotion_extension, false)
+	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
 
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+	local navigation_extension = blackboard.navigation_extension
 
 	navigation_extension.set_enabled(navigation_extension, true)
 
@@ -93,7 +92,6 @@ BTFallAction.run = function (self, unit, blackboard, t, dt)
 				pos = Vector3(pos.x, pos.y, altitude)
 
 				Unit.set_local_position(unit, 0, pos)
-				LocomotionUtils.set_animation_driven_movement(unit, true, true)
 				Managers.state.network:anim_event(unit, "jump_down_land")
 
 				blackboard.fall_state = "waiting_to_land"
@@ -109,7 +107,6 @@ BTFallAction.run = function (self, unit, blackboard, t, dt)
 
 				if nav_pos then
 					Unit.set_local_position(unit, 0, nav_pos)
-					LocomotionUtils.set_animation_driven_movement(unit, true, true)
 					Managers.state.network:anim_event(unit, "jump_down_land")
 
 					blackboard.fall_state = "waiting_to_land"

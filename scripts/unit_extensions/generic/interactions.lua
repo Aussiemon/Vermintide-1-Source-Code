@@ -157,16 +157,21 @@ end
 
 InteractionDefinitions.revive = {
 	config = {
+		block_other_interactions = true,
 		hud_verb = "revive",
-		duration = 2,
 		hold = true,
-		swap_to_3p = true
+		swap_to_3p = true,
+		duration = 2
 	},
 	server = {
 		start = function (world, interactor_unit, interactable_unit, data, config, t)
 			local duration = config.duration
 			local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
 			duration = buff_extension.apply_buffs_to_value(buff_extension, duration, StatBuffIndex.FASTER_REVIVE)
+			local revivee_status_extension = ScriptUnit.extension(interactable_unit, "status_system")
+
+			revivee_status_extension.set_knocked_down_bleed_buff(revivee_status_extension, true)
+
 			data.done_time = t + duration
 
 			return 
@@ -208,6 +213,14 @@ InteractionDefinitions.revive = {
 					local interactable_pos = POSITION_LOOKUP[interactable_unit]
 
 					_add_revive_telemetry(interactor_player, interactable_player, interactable_pos)
+				end
+			elseif Unit.alive(interactable_unit) then
+				local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
+
+				if health_extension.is_alive(health_extension) then
+					local revivee_status_extension = ScriptUnit.extension(interactable_unit, "status_system")
+
+					revivee_status_extension.set_knocked_down_bleed_buff(revivee_status_extension, false)
 				end
 			end
 
@@ -314,7 +327,10 @@ InteractionDefinitions.revive = {
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
 			local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
-			local can_revive = not status_extension.is_pounced_down(status_extension) and status_extension.is_knocked_down(status_extension) and health_extension.is_alive(health_extension)
+			local grabbed = status_extension.is_grabbed_by_pack_master(status_extension)
+			local ledge_hanging = status_extension.get_is_ledge_hanging(status_extension)
+			local hanging_from_hook = status_extension.is_hanging_from_hook(status_extension)
+			local can_revive = not status_extension.is_pounced_down(status_extension) and not grabbed and not ledge_hanging and not hanging_from_hook and status_extension.is_knocked_down(status_extension) and health_extension.is_alive(health_extension)
 
 			return can_revive
 		end
@@ -322,6 +338,7 @@ InteractionDefinitions.revive = {
 }
 InteractionDefinitions.pull_up = {
 	config = {
+		block_other_interactions = true,
 		hud_verb = "pull up",
 		hold = true,
 		swap_to_3p = true,
@@ -431,10 +448,11 @@ InteractionDefinitions.pull_up = {
 }
 InteractionDefinitions.release_from_hook = {
 	config = {
+		block_other_interactions = true,
 		hud_verb = "player_interaction",
-		duration = 2,
 		hold = true,
-		swap_to_3p = true
+		swap_to_3p = true,
+		duration = 2
 	},
 	server = {
 		start = function (world, interactor_unit, interactable_unit, data, config, t)
@@ -502,17 +520,19 @@ InteractionDefinitions.release_from_hook = {
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
 			local is_hanging = status_extension.is_hanging_from_hook(status_extension)
+			local alive = ScriptUnit.extension(interactable_unit, "health_system"):is_alive()
 
-			return is_hanging
+			return is_hanging and alive
 		end
 	}
 }
 InteractionDefinitions.assisted_respawn = {
 	config = {
+		block_other_interactions = true,
 		hud_verb = "assist respawn",
-		duration = 2,
 		hold = true,
-		swap_to_3p = true
+		swap_to_3p = true,
+		duration = 2
 	},
 	server = {
 		start = function (world, interactor_unit, interactable_unit, data, config, t)
@@ -590,6 +610,7 @@ InteractionDefinitions.assisted_respawn = {
 }
 InteractionDefinitions.smartobject = {
 	config = {
+		show_weapons = true,
 		duration = 0,
 		hold = true,
 		swap_to_3p = false
@@ -635,6 +656,7 @@ InteractionDefinitions.smartobject = {
 			data.duration = duration
 			local interactor_animation_name = Unit.get_data(interactable_unit, "interaction_data", "interactor_animation")
 			local interactor_animation_time_variable = Unit.get_data(interactable_unit, "interaction_data", "interactor_animation_time_variable")
+			local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
 
 			if interactor_animation_name then
 				local interactor_animation_time_variable = Unit.animation_find_variable(interactor_unit, interactor_animation_time_variable)
@@ -653,6 +675,9 @@ InteractionDefinitions.smartobject = {
 				Unit.animation_event(interactable_unit, interactable_animation_name)
 			end
 
+			CharacterStateHelper.stop_weapon_actions(inventory_extension, "interacting")
+			Unit.set_data(interactable_unit, "interaction_data", "being_used", true)
+
 			return 
 		end,
 		update = function (world, interactor_unit, interactable_unit, data, config, dt, t)
@@ -667,6 +692,8 @@ InteractionDefinitions.smartobject = {
 				Unit.set_data(interactable_unit, "interaction_data", "used", true)
 			end
 
+			Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 			return 
 		end,
 		get_progress = function (data, config, t)
@@ -678,8 +705,9 @@ InteractionDefinitions.smartobject = {
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local used = Unit.get_data(interactable_unit, "interaction_data", "used")
+			local being_used = Unit.get_data(interactable_unit, "interaction_data", "being_used")
 
-			return not used
+			return not used and not being_used
 		end,
 		hud_description = function (interactable_unit, config)
 			return Unit.get_data(interactable_unit, "interaction_data", "hud_description")
@@ -970,7 +998,8 @@ InteractionDefinitions.pickup_object = {
 								ignored_damage_types = {
 									heal = true,
 									kinetic = true,
-									wounded_dot = true
+									wounded_dot = true,
+									buff = true
 								}
 							},
 							health_system = {
@@ -1090,13 +1119,13 @@ InteractionDefinitions.pickup_object = {
 		can_interact = function (interactor_unit, interactable_unit, data, config, world)
 			local return_value = not Unit.get_data(interactable_unit, "interaction_data", "used")
 			local pickup_extension = ScriptUnit.extension(interactable_unit, "pickup_system")
+			local pickup_settings = pickup_extension.get_pickup_settings(pickup_extension)
+			local slot_name = pickup_settings.slot_name
+			local fail_reason = nil
 
 			if return_value and pickup_extension.can_interact then
 				return_value = pickup_extension.can_interact(pickup_extension)
 			end
-
-			local pickup_extension = ScriptUnit.extension(interactable_unit, "pickup_system")
-			local pickup_settings = pickup_extension.get_pickup_settings(pickup_extension)
 
 			if return_value and pickup_settings.can_interact_func then
 				return_value = pickup_settings.can_interact_func(interactor_unit, interactable_unit, data)
@@ -1113,7 +1142,7 @@ InteractionDefinitions.pickup_object = {
 				end
 			end
 
-			if return_value and pickup_settings.slot_name == "slot_level_event" then
+			if return_value and slot_name == "slot_level_event" then
 				local wielded_slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
 
 				if wielded_slot_name == "slot_level_event" then
@@ -1121,16 +1150,21 @@ InteractionDefinitions.pickup_object = {
 				end
 			end
 
-			if return_value and pickup_settings.slot_name == "slot_potion" then
-				local slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_potion")
+			slot_data = slot_name and inventory_extension.get_slot_data(inventory_extension, slot_name)
+			local item_template = slot_data and inventory_extension.get_item_template(inventory_extension, slot_data)
 
-				if slot_data then
-					local item_template = inventory_extension.get_item_template(inventory_extension, slot_data)
+			if return_value and slot_name and item_template and slot_name == "slot_potion" and item_template.is_grimoire then
+				fail_reason = "grimoire_equipped"
+				return_value = false
+			end
 
-					if item_template.is_grimoire then
-						return_value = false
-					end
-				end
+			local pickup_item_name = pickup_settings.item_name
+			local slot_item_name = inventory_extension.get_item_name(inventory_extension, slot_name)
+			local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
+
+			if return_value and pickup_item_name and slot_item_name and pickup_item_name == slot_item_name and (not buff_extension.has_buff_type(buff_extension, "not_consume_pickup") or not pickup_settings.dupable or pickup_extension.spawn_type == "dropped") then
+				fail_reason = "already_equipped"
+				return_value = false
 			end
 
 			if return_value and ScriptUnit.has_extension(interactable_unit, "death_system") then
@@ -1143,12 +1177,44 @@ InteractionDefinitions.pickup_object = {
 			end
 
 			if return_value and pickup_settings.type == "ammo" and inventory_extension.has_full_ammo(inventory_extension) then
+				fail_reason = "ammo_full"
 				return_value = false
 			end
 
-			return return_value
+			return return_value, fail_reason
 		end,
-		hud_description = function (interactable_unit, config)
+		hud_description = function (interactable_unit, config, fail_reason, interactor_unit)
+			if not Managers.state.unit_spawner:is_marked_for_deletion(interactable_unit) then
+				if fail_reason then
+					if fail_reason == "already_equipped" then
+						local pickup_extension = ScriptUnit.extension(interactable_unit, "pickup_system")
+						local pickup_settings = pickup_extension.get_pickup_settings(pickup_extension)
+
+						if not pickup_settings.item_description then
+							table.dump(pickup_settings)
+						end
+
+						return "already_equipped", pickup_settings.item_description
+					elseif fail_reason == "ammo_full" then
+						return "ammo_full"
+					elseif fail_reason == "grimoire_equipped" then
+						return "grimoire_equipped"
+					end
+				else
+					local pickup_extension = ScriptUnit.extension(interactable_unit, "pickup_system")
+					local pickup_settings = pickup_extension.get_pickup_settings(pickup_extension)
+					local pickup_item_name = pickup_settings.item_name
+					local slot_name = pickup_settings.slot_name
+					local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
+					local slot_item_name = inventory_extension.get_item_name(inventory_extension, slot_name)
+					local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
+
+					if pickup_item_name and slot_item_name and pickup_item_name == slot_item_name and buff_extension.has_buff_type(buff_extension, "not_consume_pickup") and pickup_settings.dupable and pickup_extension.spawn_type ~= "dropped" then
+						return "trinket_not_consume_pickup_tier1"
+					end
+				end
+			end
+
 			return Unit.get_data(interactable_unit, "interaction_data", "hud_description")
 		end
 	}
@@ -1157,7 +1223,8 @@ InteractionDefinitions.give_item = {
 	config = {
 		allow_movement = true,
 		duration = 0,
-		hold = false
+		hold = false,
+		block_other_interactions = true
 	},
 	server = {
 		start = function (world, interactor_unit, interactable_unit, data, config, t)
@@ -1273,6 +1340,8 @@ InteractionDefinitions.give_item = {
 				return false
 			end
 
+			local owner_player = Managers.player:unit_owner(interactor_unit)
+			local is_bot = owner_player and owner_player.bot_player
 			local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
 			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_knocked_down(status_extension)
@@ -1284,7 +1353,7 @@ InteractionDefinitions.give_item = {
 			end
 
 			local target_inventory_extension = ScriptUnit.extension(interactable_unit, "inventory_system")
-			local slot_name = interactor_inventory_extension.get_wielded_slot_name(interactor_inventory_extension)
+			local slot_name = (Managers.input:is_device_active("gamepad") and interactor_inventory_extension.get_selected_consumable_slot_name(interactor_inventory_extension)) or interactor_inventory_extension.get_wielded_slot_name(interactor_inventory_extension)
 			local slot_occupied = target_inventory_extension.get_slot_data(target_inventory_extension, slot_name)
 
 			return is_alive and item_template.can_give_other and not slot_occupied
@@ -1309,10 +1378,11 @@ InteractionDefinitions.give_item = {
 }
 InteractionDefinitions.heal = {
 	config = {
-		attack_template = "heal_bandage",
-		duration = 2,
+		block_other_interactions = true,
 		hold = true,
-		swap_to_3p = true
+		swap_to_3p = true,
+		duration = 2,
+		attack_template = "heal_bandage"
 	},
 	server = {
 		start = function (world, interactor_unit, interactable_unit, data, config, t)
@@ -1413,9 +1483,9 @@ InteractionDefinitions.heal = {
 
 			Unit.animation_event(interactor_unit, "interaction_end")
 
-			if result == InteractionResult.SUCCESS then
-				local owner_player = Managers.player:unit_owner(interactor_unit)
+			local owner_player = Managers.player:unit_owner(interactor_unit)
 
+			if result == InteractionResult.SUCCESS then
 				if not owner_player.remote then
 					local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
 					local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
@@ -1436,7 +1506,7 @@ InteractionDefinitions.heal = {
 							end
 						end
 					else
-						inventory_extension.wield(inventory_extension, "slot_melee")
+						inventory_extension.wield_previous_weapon(inventory_extension)
 					end
 				end
 
@@ -1467,6 +1537,8 @@ InteractionDefinitions.heal = {
 				return false
 			end
 
+			local owner_player = Managers.player:unit_owner(interactor_unit)
+			local is_bot = owner_player and owner_player.bot_player
 			local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
 			local is_alive = health_extension.is_alive(health_extension) and not status_extension.is_knocked_down(status_extension)
@@ -1529,6 +1601,8 @@ InteractionDefinitions.linker_transportation_unit.client.stop = function (world,
 		transportation_extension.interacted_with(transportation_extension, interactor_unit)
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
 end
 local player_units = {}
@@ -1573,6 +1647,7 @@ InteractionDefinitions.linker_transportation_unit.client.can_interact = function
 end
 InteractionDefinitions.door = InteractionDefinitions.door or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.door.config.swap_to_3p = false
+InteractionDefinitions.door.config.block_other_interactions = true
 InteractionDefinitions.door.config.allow_movement = true
 InteractionDefinitions.door.client.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 	data.start_time = nil
@@ -1583,12 +1658,53 @@ InteractionDefinitions.door.client.stop = function (world, interactor_unit, inte
 		door_extension.interacted_with(door_extension, interactor_unit)
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
+end
+InteractionDefinitions.door.client.hud_description = function (interactable_unit, config)
+	local door_extension = ScriptUnit.extension(interactable_unit, "door_system")
+
+	if door_extension.is_open(door_extension) then
+		return "close"
+	end
+
+	return "interact_open_door"
 end
 local pickup_params = {}
 InteractionDefinitions.chest = InteractionDefinitions.chest or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.chest.config.swap_to_3p = false
+InteractionDefinitions.chest.config.block_other_interactions = true
 InteractionDefinitions.chest.config.allow_movement = true
+InteractionDefinitions.chest.client.start = function (world, interactor_unit, interactable_unit, data, config, t)
+	data.start_time = t
+	local duration = Unit.get_data(interactable_unit, "interaction_data", "interaction_length")
+	data.duration = duration
+	local interactor_animation_name = Unit.get_data(interactable_unit, "interaction_data", "interactor_animation")
+	local interactor_animation_time_variable = Unit.get_data(interactable_unit, "interaction_data", "interactor_animation_time_variable")
+	local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
+
+	if interactor_animation_name then
+		local interactor_animation_time_variable = Unit.animation_find_variable(interactor_unit, interactor_animation_time_variable)
+
+		Unit.animation_set_variable(interactor_unit, interactor_animation_time_variable, duration)
+		Unit.animation_event(interactor_unit, interactor_animation_name)
+	end
+
+	local interactable_animation_name = Unit.get_data(interactable_unit, "interaction_data", "interactable_animation")
+	local interactable_animation_time_variable_name = Unit.get_data(interactable_unit, "interaction_data", "interactable_animation_time_variable")
+
+	if interactable_animation_name then
+		local interactable_animation_time_variable = Unit.animation_find_variable(interactable_unit, interactable_animation_time_variable_name)
+
+		Unit.animation_set_variable(interactable_unit, interactable_animation_time_variable, duration)
+		Unit.animation_event(interactable_unit, interactable_animation_name)
+	end
+
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", true)
+
+	return 
+end
 InteractionDefinitions.chest.server.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 	data.start_time = nil
 	local can_spawn_dice = Unit.get_data(interactable_unit, "can_spawn_dice")
@@ -1628,10 +1744,15 @@ InteractionDefinitions.chest.server.stop = function (world, interactor_unit, int
 		end
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
 end
 InteractionDefinitions.inventory_access = InteractionDefinitions.inventory_access or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.inventory_access.config.swap_to_3p = false
+InteractionDefinitions.inventory_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
+	return true
+end
 InteractionDefinitions.inventory_access.client.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 	data.start_time = nil
 
@@ -1643,16 +1764,23 @@ InteractionDefinitions.inventory_access.client.stop = function (world, interacto
 		data.ingame_ui:transition_with_fade("inventory_view_force")
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
 end
 InteractionDefinitions.prestige_access = InteractionDefinitions.prestige_access or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.prestige_access.config.swap_to_3p = false
+InteractionDefinitions.prestige_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
+	return true
+end
 InteractionDefinitions.prestige_access.client.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 	data.start_time = nil
 
 	if result == InteractionResult.SUCCESS and not data.is_husk then
 		data.ingame_ui:transition_with_fade("prestige")
 	end
+
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
 
 	return 
 end
@@ -1667,6 +1795,8 @@ InteractionDefinitions.forge_access.client.stop = function (world, interactor_un
 	if result == InteractionResult.SUCCESS and not data.is_husk then
 		data.ingame_ui:transition_with_fade("forge_view_force")
 	end
+
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
 
 	return 
 end
@@ -1687,6 +1817,8 @@ InteractionDefinitions.altar_access.client.stop = function (world, interactor_un
 		data.ingame_ui:transition_with_fade("altar_view_force")
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
 end
 InteractionDefinitions.altar_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
@@ -1706,6 +1838,8 @@ InteractionDefinitions.quest_access.client.stop = function (world, interactor_un
 		data.ingame_ui:transition_with_fade("quest_view_force")
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
 end
 InteractionDefinitions.quest_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
@@ -1715,8 +1849,17 @@ InteractionDefinitions.quest_access.client.can_interact = function (interactor_u
 	local stats_id = player.stats_id(player)
 	local can_use = LevelUnlockUtils.all_acts_completed(statistics_db, stats_id)
 	local backend_settings = GameSettingsDevelopment.backend_settings
+	local can_interact = can_use and backend_settings.quests_enabled
+	local fail_reason = not can_interact and "quest_access_locked"
 
-	return can_use and backend_settings.quests_enabled
+	return can_interact, fail_reason
+end
+InteractionDefinitions.quest_access.client.hud_description = function (interactable_unit, config, fail_reason, interactor_unit)
+	if fail_reason and fail_reason == "quest_access_locked" then
+		return "dlc1_3_1_interact_open_quests_blocked"
+	end
+
+	return Unit.get_data(interactable_unit, "interaction_data", "hud_description")
 end
 InteractionDefinitions.journal_access = InteractionDefinitions.journal_access or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.journal_access.config.swap_to_3p = false
@@ -1727,6 +1870,8 @@ InteractionDefinitions.journal_access.client.stop = function (world, interactor_
 		data.ingame_ui:transition_with_fade("lorebook_view_force")
 	end
 
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
+
 	return 
 end
 InteractionDefinitions.journal_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
@@ -1734,12 +1879,17 @@ InteractionDefinitions.journal_access.client.can_interact = function (interactor
 end
 InteractionDefinitions.map_access = InteractionDefinitions.map_access or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.map_access.config.swap_to_3p = false
+InteractionDefinitions.map_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
+	return true
+end
 InteractionDefinitions.map_access.client.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 	data.start_time = nil
 
 	if result == InteractionResult.SUCCESS and not data.is_husk then
 		data.ingame_ui:transition_with_fade("map_view_force")
 	end
+
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
 
 	return 
 end
@@ -1751,6 +1901,8 @@ InteractionDefinitions.unlock_key_access.client.stop = function (world, interact
 	if result == InteractionResult.SUCCESS and not data.is_husk then
 		data.ingame_ui:transition_with_fade("unlock_key_force")
 	end
+
+	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
 
 	return 
 end

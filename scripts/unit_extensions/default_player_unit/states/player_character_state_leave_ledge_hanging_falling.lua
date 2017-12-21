@@ -54,12 +54,6 @@ PlayerCharacterStateLeaveLedgeHangingFalling.update = function (self, unit, inpu
 		return 
 	end
 
-	if CharacterStateHelper.is_knocked_down(status_extension) then
-		csm.change_state(csm, "knocked_down")
-
-		return 
-	end
-
 	if CharacterStateHelper.is_pounced_down(status_extension) then
 		csm.change_state(csm, "pounced_down")
 
@@ -101,7 +95,7 @@ PlayerCharacterStateLeaveLedgeHangingFalling.update = function (self, unit, inpu
 
 	self.locomotion_extension:set_forced_velocity(Vector3(0, 0, -3))
 	self.locomotion_extension:set_disable_rotation_update()
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 
 	return 
 end

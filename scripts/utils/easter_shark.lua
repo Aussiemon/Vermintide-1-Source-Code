@@ -56,7 +56,7 @@ EasterShark.update = function (self, dt, t)
 	end
 
 	self.update_unit(self, dt)
-	Profiler.stop()
+	Profiler.stop("EasterShark")
 
 	return 
 end

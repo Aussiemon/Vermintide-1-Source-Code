@@ -730,10 +730,12 @@ EnemyRecycler.draw_debug = function (self, player_positions)
 		local main_path_player_info = self.conflict_director.main_path_player_info
 		local info = main_path_player_info[local_player_unit]
 
-		Debug.text("travel-dist: %.1fm, move_percent: %.1f%%, path-index: %d, sub-index: %d", info.travel_dist, info.move_percent*100, info.path_index, info.sub_index)
+		if info then
+			Debug.text("travel-dist: %.1fm, move_percent: %.1f%%, path-index: %d, sub-index: %d", info.travel_dist, info.move_percent*100, info.path_index, info.sub_index)
+		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("recycler - debug")
 
 	return 
 end
@@ -779,7 +781,7 @@ EnemyRecycler.far_off_despawn = function (self, t, dt, player_positions, spawned
 				local distance_squared = Vector3.distance_squared(ai_navigation.destination(ai_navigation), pos)
 
 				if 5 < distance_squared then
-					local velocity = ScriptUnit.extension(unit, "locomotion_system"):get_velocity()
+					local velocity = ScriptUnit.extension(unit, "locomotion_system"):current_velocity()
 
 					if Vector3.distance_squared(velocity, Vector3.zero()) == 0 then
 						ai_stuck = true
@@ -828,7 +830,7 @@ EnemyRecycler.far_off_despawn = function (self, t, dt, player_positions, spawned
 
 	self.far_off_index = index
 
-	Profiler.stop()
+	Profiler.stop("recycler  far off despawn")
 
 	return 
 end

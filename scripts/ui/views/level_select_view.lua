@@ -24,7 +24,7 @@ LevelSelectView.init = function (self, ingame_ui_context)
 	return 
 end
 local font_size = 26
-local font = "arial_26"
+local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local text_color = {
 	255,

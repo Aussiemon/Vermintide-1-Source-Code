@@ -177,7 +177,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			-278,
+			-277,
 			9
 		}
 	},
@@ -221,6 +221,20 @@ local scenegraph_definition = {
 			110,
 			-10,
 			1
+		}
+	},
+	merge_button_fill = {
+		vertical_alignment = "center",
+		parent = "merge_button",
+		horizontal_alignment = "left",
+		size = {
+			307,
+			69
+		},
+		position = {
+			16,
+			-10,
+			-1
 		}
 	},
 	item_button_1_icon = {
@@ -623,8 +637,7 @@ local widgets_definitions = {
 			1
 		}
 	}, "frame_door_right"),
-	button_eye_glow_widget = UIWidgets.create_simple_texture("forge_button_03_glow_effect", "merge_button_eye_glow"),
-	merge_button_widget = UIWidgets.create_forge_merge_button("merge_button", "merge_button_text", "merge_button_token"),
+	merge_button_widget = UIWidgets.create_forge_merge_button("merge_button", "merge_button_text", "merge_button_token", "merge_button_eye_glow", "merge_button_fill"),
 	item_button_1_widget = UIWidgets.create_attach_icon_button("item_slot_01", "item_button_1", "item_button_1_icon", scenegraph_definition.item_button_1_icon.size, "item_button_1_animation", "item_slot_glow"),
 	item_button_2_widget = UIWidgets.create_attach_icon_button("item_slot_01", "item_button_2", "item_button_2_icon", scenegraph_definition.item_button_2_icon.size, "item_button_2_animation", "item_slot_glow"),
 	item_button_3_widget = UIWidgets.create_attach_icon_button("item_slot_01", "item_button_3", "item_button_3_icon", scenegraph_definition.item_button_3_icon.size, "item_button_3_animation", "item_slot_glow"),

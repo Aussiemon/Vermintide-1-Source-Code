@@ -36,7 +36,7 @@ DebugKeyHandler = DebugKeyHandler or {
 }
 local DebugKeyHandler = DebugKeyHandler
 DebugKeyHandler.setup = function (world, input_manager)
-	DebugKeyHandler.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	DebugKeyHandler.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 	DebugKeyHandler.enabled = true
 	DebugKeyHandler.input_manager = input_manager
 	DebugKeyHandler.current_y = 0
@@ -60,6 +60,10 @@ DebugKeyHandler.key_pressed = function (key, description, category, key_modifier
 	Profiler.start("DebugKeyHandler.key_pressed")
 
 	local input_service = DebugKeyHandler.input_manager:get_service(input_service_name or "Debug")
+
+	if not input_service then
+		return 
+	end
 
 	if script_data.debug_key_handler_visible then
 		DebugKeyHandler.num_keys = DebugKeyHandler.num_keys + 1
@@ -96,7 +100,7 @@ DebugKeyHandler.key_pressed = function (key, description, category, key_modifier
 
 	local key_pressed = input_service.get(input_service, key)
 
-	Profiler.stop()
+	Profiler.stop("DebugKeyHandler.key_pressed")
 
 	return modifier_pressed and key_pressed
 end
@@ -114,7 +118,7 @@ DebugKeyHandler.frame_clear = function ()
 	return 
 end
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 DebugKeyHandler.render = function ()
 	if not script_data.debug_key_handler_visible then

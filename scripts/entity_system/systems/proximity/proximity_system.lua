@@ -256,7 +256,7 @@ ProximitySystem.physics_async_update = function (self, context, t)
 		Broadphase_move(special_units_broadphase, extension.special_broadphase_id, position)
 	end
 
-	Profiler.stop()
+	Profiler.stop("Moving units")
 
 	local enemy_check_raycasts = self.enemy_check_raycasts
 	local unit_forwards = self.unit_forwards
@@ -310,7 +310,7 @@ ProximitySystem.physics_async_update = function (self, context, t)
 			table.clear(nearby_units)
 		end
 
-		Profiler.stop()
+		Profiler.stop("Update Proximity Type Data")
 		Profiler.start("See and hear enemies")
 
 		local raycast_timer = extension.raycast_timer + dt
@@ -386,7 +386,7 @@ ProximitySystem.physics_async_update = function (self, context, t)
 		extension.raycast_timer = raycast_timer
 		unit_forwards[unit] = nil
 
-		Profiler.stop()
+		Profiler.stop("See and hear enemies")
 	end
 
 	self._update_nearby_enemies(self)

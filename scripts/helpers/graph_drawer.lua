@@ -3,7 +3,7 @@ GraphDrawer = class(GraphDrawer)
 GraphDrawer.init = function (self, world, input_manager)
 	self.world = world
 	self.input_manager = input_manager
-	self.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "material", "materials/menu/debug_screen", "immediate")
+	self.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "material", "materials/menu/debug_screen", "immediate")
 	self.graphs = {}
 	self.unblocked_services = {}
 	self.unblocked_services_n = 0
@@ -60,14 +60,14 @@ GraphDrawer.update = function (self, input_service, t)
 				graph.update(graph, input_service, t)
 			end
 
-			Profiler.stop()
+			Profiler.stop("update")
 			Profiler.start("draw")
 			graph.draw(graph, gui, input_service, t)
-			Profiler.stop()
+			Profiler.stop("draw")
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("GraphDrawer")
 
 	return 
 end
@@ -441,7 +441,7 @@ Graph.draw = function (self, gui, input_service, t)
 	local layer = 1
 	local line_width = 2
 	local font_size = 26
-	local font = "arial_26"
+	local font = "gw_arial_32"
 	local font_mtrl = "materials/fonts/" .. font
 	local color_bg = Colors.get_color_with_alpha("navy", (Window.show_cursor() and 100) or 50)
 	local color_point_line = Colors.get("aqua_marine")

@@ -16,6 +16,8 @@ AreaDamageTemplates.templates = {
 					return false
 				end
 
+				local damage_buffer = {}
+
 				if aoe_dot_player_take_damage then
 					for _, player in pairs(Managers.player:players()) do
 						local player_unit = player.player_unit
@@ -26,13 +28,28 @@ AreaDamageTemplates.templates = {
 							local is_inside_radius = distance < radius
 
 							if is_inside_radius then
-								DamageUtils.add_damage_network(player_unit, unit, damage, "torso", "damage_over_time", Vector3(1, 0, 0), damage_source)
+								local damage_data = {
+									area_damage_template = "area_dot_damage",
+									unit = player_unit,
+									damage = damage,
+									damage_source = damage_source
+								}
+								damage_buffer[#damage_buffer + 1] = damage_data
 							end
 						end
 					end
 				end
 
-				return true
+				return true, damage_buffer
+			end,
+			do_damage = function (data, extension_unit)
+				local unit = data.unit
+				local damage = data.damage
+				local damage_source = data.damage_source
+
+				DamageUtils.add_damage_network(unit, extension_unit, damage, "torso", "damage_over_time", Vector3(1, 0, 0), damage_source)
+
+				return 
 			end
 		},
 		client = {
@@ -108,6 +125,8 @@ AreaDamageTemplates.templates = {
 					return false
 				end
 
+				local damage_buffer = {}
+
 				if aoe_dot_player_take_damage then
 					for _, player in pairs(Managers.player:players()) do
 						local player_unit = player.player_unit
@@ -118,13 +137,28 @@ AreaDamageTemplates.templates = {
 							local is_inside_radius = distance < radius
 
 							if is_inside_radius then
-								DamageUtils.add_damage_network(player_unit, player_unit, damage, "torso", "damage_over_time", Vector3(1, 0, 0), damage_source)
+								local damage_data = {
+									area_damage_template = "area_dot_damage_courtyard_well_hack",
+									unit = player_unit,
+									damage = damage,
+									damage_source = damage_source
+								}
+								damage_buffer[#damage_buffer + 1] = damage_data
 							end
 						end
 					end
 				end
 
-				return true
+				return true, damage_buffer
+			end,
+			do_damage = function (data, extension_unit)
+				local unit = data.unit
+				local damage = data.damage
+				local damage_source = data.damage_source
+
+				DamageUtils.add_damage_network(unit, unit, damage, "torso", "damage_over_time", Vector3(1, 0, 0), damage_source)
+
+				return 
 			end
 		},
 		client = {
@@ -203,47 +237,43 @@ AreaDamageTemplates.templates = {
 				local area_damage_position = Unit.world_position(unit, 0)
 				local explosion_template = ExplosionTemplates[explosion_template_name]
 				local aoe_data = explosion_template.aoe
+				local friendly_fire_data = true
+
+				if explosion_template.friendly_fire ~= nil then
+					friendly_fire_data = explosion_template.friendly_fire
+				end
 
 				if aoe_data.attack_template then
 					if 0 < damage_timer and damage_timer < damage_interval then
 						return false
 					end
 
+					local damage_buffer = {}
 					local attack_template_name = aoe_data.attack_template
 					local attack_template_damage_type_name = aoe_data.attack_template_damage_type
-					local attack_template_id, attack_template_damage_type_id = nil
-					local attack_template = AttackTemplates[attack_template_name]
-					attack_template_id = attack_template.lookup_id
-					attack_template_damage_type_id = -1
-
-					if attack_template_damage_type_name then
-						local attack_damage_value = AttackDamageValues[attack_template_damage_type_name]
-						attack_template_damage_type_id = attack_damage_value.lookup_id
-					end
-
-					local weapon_system = Managers.state.entity:system("weapon_system")
-					local network_manager = Managers.state.network
-					local attacker_unit_id = network_manager.unit_game_object_id(network_manager, unit)
-					local damage_source_id = NetworkLookup.damage_sources[damage_source]
 					local hit_zone_name = "full"
-					local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 					local dot_damage = aoe_data.dot_damage
 					local num_ai_units = AiUtils.broadphase_query(area_damage_position, radius, ai_units)
 
 					for i = 1, num_ai_units, 1 do
 						local ai_unit = ai_units[i]
-						local ai_pos = POSITION_LOOKUP[ai_unit]
-						local hit_direction = ai_pos - area_damage_position
-						local hit_direction_normalized = Vector3.normalize(hit_direction)
-						local ai_unit_id = network_manager.unit_game_object_id(network_manager, ai_unit)
 						local backstab_multiplier = 1
-
-						weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, ai_unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+						local damage_data = {
+							hit_ragdoll_actor = "n/a",
+							area_damage_template = "explosion_template_aoe",
+							unit = ai_unit,
+							damage_source = damage_source,
+							attack_template_name = attack_template_name,
+							attack_template_damage_type_name = attack_template_damage_type_name or "n/a",
+							hit_zone_name = hit_zone_name,
+							backstab_multiplier = backstab_multiplier
+						}
+						damage_buffer[#damage_buffer + 1] = damage_data
 					end
 
 					local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 
-					if aoe_dot_player_take_damage and difficulty_settings.friendly_fire_ranged then
+					if aoe_dot_player_take_damage and difficulty_settings.friendly_fire_ranged and friendly_fire_data then
 						for _, player in pairs(Managers.player:players()) do
 							local player_unit = player.player_unit
 
@@ -251,20 +281,48 @@ AreaDamageTemplates.templates = {
 								local unit_position = POSITION_LOOKUP[player_unit]
 								local distance = Vector3.distance(unit_position, area_damage_position)
 								local is_inside_radius = distance < radius
-								local hit_direction = unit_position - area_damage_position
-								local hit_direction_normalized = Vector3.normalize(hit_direction)
-								local player_unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
 								local backstab_multiplier = 1
 
 								if is_inside_radius then
-									weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, player_unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+									local damage_data = {
+										hit_ragdoll_actor = "n/a",
+										area_damage_template = "explosion_template_aoe",
+										unit = player_unit,
+										damage_source = damage_source,
+										attack_template_name = attack_template_name,
+										attack_template_damage_type_name = attack_template_damage_type_name or "n/a",
+										hit_zone_name = hit_zone_name,
+										backstab_multiplier = backstab_multiplier
+									}
+									damage_buffer[#damage_buffer + 1] = damage_data
 								end
 							end
 						end
 					end
 
-					return true
+					return true, damage_buffer
 				end
+
+				return 
+			end,
+			do_damage = function (data, extension_unit)
+				local unit = data.unit
+				local unit_position = POSITION_LOOKUP[unit]
+				local damage_position = POSITION_LOOKUP[extension_unit]
+				local hit_direction = unit_position - damage_position
+				local hit_direction_normalized = Vector3.normalize(hit_direction)
+				local network_manager = Managers.state.network
+				local damage_source_id = NetworkLookup.damage_sources[data.damage_source]
+				local attacker_unit_id = network_manager.unit_game_object_id(network_manager, extension_unit)
+				local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+				local attack_template_id = NetworkLookup.attack_templates[data.attack_template_name]
+				local attack_template_damage_type_id = NetworkLookup.attack_damage_values[data.attack_template_damage_type_name]
+				local hit_zone_id = NetworkLookup.hit_zones[data.hit_zone_name]
+				local hit_ragdoll_actor_id = NetworkLookup.hit_ragdoll_actors[data.hit_ragdoll_actor]
+				local backstab_multiplier = data.backstab_multiplier
+				local weapon_system = Managers.state.entity:system("weapon_system")
+
+				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
 
 				return 
 			end
@@ -298,6 +356,7 @@ AreaDamageTemplates.templates = {
 				end
 
 				local area_damage_position = Unit.world_position(unit, 0)
+				local damage_buffer = {}
 				local ai_units_n = AiUtils.broadphase_query(area_damage_position, radius, ai_units)
 
 				for i = 1, ai_units_n, 1 do
@@ -314,15 +373,26 @@ AreaDamageTemplates.templates = {
 						local die_roll = math.random(1, 100)
 
 						if die_roll < chance_to_die then
-							local ai_unit_position = POSITION_LOOKUP[ai_unit]
-							local damage_direction = Vector3.normalize(ai_unit_position - area_damage_position)
-
-							DamageUtils.deal_damage("skaven_poison_wind_globadier", ai_unit, ai_unit, damage_direction, "poison_globe_ai_initial_damage", "full")
+							local damage_data = {
+								area_damage_template = "area_poison_ai_random_death",
+								unit = ai_unit
+							}
+							damage_buffer[#damage_buffer + 1] = damage_data
 						end
 					end
 				end
 
-				return true
+				return true, damage_buffer
+			end,
+			do_damage = function (data, extension_unit)
+				local unit = data.unit
+				local area_damage_position = Unit.world_position(extension_unit, 0)
+				local unit_position = POSITION_LOOKUP[unit]
+				local damage_direction = Vector3.normalize(unit_position - area_damage_position)
+
+				DamageUtils.deal_damage("skaven_poison_wind_globadier", unit, unit, damage_direction, "poison_globe_ai_initial_damage", "full")
+
+				return 
 			end
 		}
 	}

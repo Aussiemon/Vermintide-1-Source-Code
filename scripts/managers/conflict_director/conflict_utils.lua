@@ -194,6 +194,15 @@ end
 local found_cover_units = {}
 local hidden_cover_units = {}
 ConflictUtils.hidden_cover_points = function (center_position, avoid_pos_list, min_rad, max_rad, dot_threshold)
+	if script_data.debug_near_cover_points then
+		local free_flight_manager = Managers.free_flight
+		local in_free_flight = free_flight_manager.active(free_flight_manager, "global")
+
+		if in_free_flight then
+			center_position = free_flight_manager.camera_position_rotation(free_flight_manager)
+		end
+	end
+
 	local bp = Managers.state.conflict.level_analysis.cover_points_broadphase
 	min_rad = min_rad*min_rad
 	dot_threshold = dot_threshold or -0.9
@@ -384,6 +393,37 @@ ConflictUtils.filter_horde_spawners = function (player_positions, spawner_units,
 			if dist_squared < max_dist and min_dist < dist_squared then
 				list[#list + 1] = unit
 			end
+		end
+	end
+
+	if not next(list) then
+		return false
+	end
+
+	return list
+end
+ConflictUtils.filter_horde_spawners_strictly = function (player_positions, spawner_units, min_dist, max_dist)
+	local list = {}
+	max_dist = max_dist*max_dist
+	min_dist = min_dist*min_dist
+	local num_player_pos = #player_positions
+
+	for j = 1, #spawner_units, 1 do
+		local unit = spawner_units[j]
+		local spawner_pos = Unit.local_position(unit, 0)
+		local count = 0
+
+		for i = 1, num_player_pos, 1 do
+			local pos = player_positions[i]
+			local dist_squared = distance_squared(pos, spawner_pos)
+
+			if dist_squared < max_dist and min_dist < dist_squared then
+				count = count + 1
+			end
+		end
+
+		if count == num_player_pos then
+			list[#list + 1] = unit
 		end
 	end
 
@@ -838,7 +878,7 @@ ConflictUtils.debug_update = function ()
 			drawer.line(drawer, pointa, pointb, color)
 		end
 
-		Profiler.stop()
+		Profiler.stop("ConflictUtils.debug_update")
 	end
 
 	return 
@@ -1035,7 +1075,7 @@ ConflictUtils.make_roaming_spawns = function (self, nav_world, level_analysis)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("make_spawns")
 
 	return list
 end

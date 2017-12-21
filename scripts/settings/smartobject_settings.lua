@@ -156,11 +156,12 @@ SmartObjectSettings.templates.rat_ogre = {
 			animation_edge = "jump_up_1m"
 		},
 		{
-			horizontal_length = 2,
+			fence_vertical_length = 3,
+			animation_edge = "jump_up_2m",
 			animation_fence = "jump_up_fence_3m",
 			height_threshold = 2.5,
 			vertical_length = 2.5,
-			animation_edge = "jump_up_2m"
+			horizontal_length = 2
 		},
 		{
 			horizontal_length = 2,
@@ -170,10 +171,11 @@ SmartObjectSettings.templates.rat_ogre = {
 			animation_edge = "jump_up_3m"
 		},
 		{
-			horizontal_length = 2,
-			animation_fence = "jump_up_fence_3m",
-			vertical_length = 4,
+			fence_vertical_length = 3,
 			animation_edge = "jump_up_4m",
+			animation_fence = "jump_up_fence_3m",
+			vertical_length = 5,
+			horizontal_length = 2,
 			height_threshold = math.huge
 		}
 	},

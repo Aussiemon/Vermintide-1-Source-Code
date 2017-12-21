@@ -93,6 +93,61 @@ GenericVolumeTemplates.functions = {
 
 				return 
 			end
+		},
+		ai_inside = {
+			on_enter = function (unit, dt, t, data)
+				local event = data.params.event_on_triggered
+
+				if event then
+					Level.trigger_event(data.level, event)
+				end
+
+				return 
+			end
+		},
+		players_inside = {
+			on_enter = function (unit, dt, t, data)
+				local event = data.params.event_on_triggered
+				local should_trigger_enter_event = not data.params.player_entered
+
+				if event and should_trigger_enter_event then
+					Level.trigger_event(data.level, event)
+
+					data.params.player_entered = true
+				end
+
+				return 
+			end,
+			on_exit = function (unit, data)
+				local volume_system = Managers.state.entity:system("volume_system")
+
+				if not volume_system.volume_has_units_inside(volume_system, data.volume_name) then
+					local event = data.params.event_on_exit
+
+					if event then
+						Level.trigger_event(data.level, event)
+					end
+
+					data.params.player_entered = false
+				end
+
+				return 
+			end,
+			on_destroy = function (unit, data)
+				local volume_system = Managers.state.entity:system("volume_system")
+
+				if not volume_system.volume_has_units_inside(volume_system, data.volume_name) then
+					local event = data.params.event_on_exit
+
+					if event then
+						Level.trigger_event(data.level, event)
+					end
+
+					data.params.player_entered = false
+				end
+
+				return 
+			end
 		}
 	},
 	despawn_volume = {
@@ -113,6 +168,7 @@ GenericVolumeTemplates.functions.damage_volume.ai_insta_kill_no_cost = GenericVo
 GenericVolumeTemplates.functions.damage_volume.player_insta_kill_no_cost = GenericVolumeTemplates.functions.damage_volume.generic_insta_kill
 GenericVolumeTemplates.functions.damage_volume.ai_kill_dot = GenericVolumeTemplates.functions.damage_volume.generic_dot
 GenericVolumeTemplates.functions.damage_volume.ai_kill_dot_no_cost = GenericVolumeTemplates.functions.damage_volume.generic_dot
+GenericVolumeTemplates.functions.damage_volume.catacombs_corpse_pit = GenericVolumeTemplates.functions.damage_volume.generic_dot
 GenericVolumeTemplates.filters = {
 	unit_disabled = function (unit)
 		local status_extension = ScriptUnit.extension(unit, "status_system")

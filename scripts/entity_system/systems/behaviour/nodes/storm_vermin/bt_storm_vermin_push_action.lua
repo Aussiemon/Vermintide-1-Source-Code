@@ -1,6 +1,11 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTStormVerminPushAction = class(BTStormVerminPushAction, BTNode)
+BTStormVerminPushAction.init = function (self, ...)
+	BTStormVerminPushAction.super.init(self, ...)
+
+	return 
+end
 BTStormVerminPushAction.name = "BTStormVerminPushAction"
 BTStormVerminPushAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
@@ -8,7 +13,6 @@ BTStormVerminPushAction.enter = function (self, unit, blackboard, t)
 	blackboard.active_node = BTStormVerminPushAction
 	blackboard.attack_finished = false
 	blackboard.attack_aborted = false
-	local target_unit = blackboard.target_unit
 	local network_manager = Managers.state.network
 	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 
@@ -19,11 +23,14 @@ BTStormVerminPushAction.enter = function (self, unit, blackboard, t)
 	blackboard.navigation_extension:set_enabled(false)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
 
+	local target_unit = blackboard.target_unit
 	blackboard.attacking_target = target_unit
 	blackboard.move_state = "attacking"
 
 	network_manager.anim_event(network_manager, unit, "to_combat")
 	network_manager.anim_event(network_manager, unit, action.attack_anim)
+
+	blackboard.spawn_to_running = nil
 
 	return 
 end
@@ -57,7 +64,7 @@ BTStormVerminPushAction.run = function (self, unit, blackboard, t, dt)
 	return 
 end
 BTStormVerminPushAction.attack = function (self, unit, t, dt, blackboard)
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+	local locomotion = blackboard.locomotion_extension
 	local rotation = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 
 	locomotion.set_wanted_rotation(locomotion, rotation)

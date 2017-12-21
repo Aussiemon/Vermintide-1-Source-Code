@@ -1069,7 +1069,7 @@ local function update_target_slots_status(target_unit, target_units, unit_extens
 	end
 
 	update_anchor_weights(target_unit, unit_extension_data)
-	Profiler.stop()
+	Profiler.stop("update_target_slots_status")
 
 	return 
 end
@@ -1226,7 +1226,7 @@ local function update_target_slots_positions(target_unit, target_units, unit_ext
 	end
 
 	update_anchor_weights(target_unit, unit_extension_data)
-	Profiler.stop()
+	Profiler.stop("update_target_slots_positions")
 
 	return 
 end
@@ -1453,7 +1453,7 @@ AISlotSystem.update = function (self, context, t, dt)
 
 		NAVIGATION_RUNNING_IN_THREAD = false
 
-		Profiler.stop()
+		Profiler.stop("wait for navigation thread")
 	end
 
 	return 
@@ -1490,7 +1490,7 @@ AISlotSystem.physics_async_update = function (self, context, t)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_target_slots")
 
 	if self.next_total_slot_count_update < t then
 		Profiler.start("update_total_slots_count")
@@ -1498,7 +1498,7 @@ AISlotSystem.physics_async_update = function (self, context, t)
 
 		self.next_total_slot_count_update = t + TOTAL_SLOTS_COUNT_UPDATE_INTERVAL
 
-		Profiler.stop()
+		Profiler.stop("update_total_slots_count")
 	end
 
 	if self.next_disabled_slot_count_update < t then
@@ -1507,7 +1507,7 @@ AISlotSystem.physics_async_update = function (self, context, t)
 
 		self.next_disabled_slot_count_update = t + DISABLED_SLOTS_COUNT_UPDATE_INTERVAL
 
-		Profiler.stop()
+		Profiler.stop("update_disabled_slots_count")
 	end
 
 	if self.next_slot_sound_update < t then
@@ -1516,7 +1516,7 @@ AISlotSystem.physics_async_update = function (self, context, t)
 
 		self.next_slot_sound_update = t + SLOT_SOUND_UPDATE_INTERVAL
 
-		Profiler.stop()
+		Profiler.stop("update_slot_sound")
 	end
 
 	local update_slots_ai_units_prioritized = self.update_slots_ai_units_prioritized
@@ -1547,7 +1547,7 @@ AISlotSystem.physics_async_update = function (self, context, t)
 		self.update_ai_unit_slot(self, ai_unit, target_units, unit_extension_data, nav_world, t)
 	end
 
-	Profiler.stop()
+	Profiler.stop("ai")
 	Profiler.start("debug_slots")
 
 	if script_data.ai_debug_slots and self.is_server then
@@ -1555,7 +1555,7 @@ AISlotSystem.physics_async_update = function (self, context, t)
 		debug_print_slots_count(target_units, unit_extension_data)
 	end
 
-	Profiler.stop()
+	Profiler.stop("debug_slots")
 
 	return 
 end
@@ -1593,7 +1593,7 @@ AISlotSystem.update_ai_unit_slot = function (self, ai_unit, target_units, unit_e
 
 	Profiler.start("get_best_slot")
 	get_best_slot(target_unit, target_units, ai_unit, unit_extension_data, nav_world, t, skip_slots_behind_target)
-	Profiler.stop()
+	Profiler.stop("get_best_slot")
 
 	local slot = ai_unit_extension.slot
 
@@ -1609,16 +1609,16 @@ AISlotSystem.update_ai_unit_slot = function (self, ai_unit, target_units, unit_e
 			clear_ghost_position(slot)
 		end
 
-		Profiler.stop()
+		Profiler.stop("set_ghost_position")
 	else
 		Profiler.start("get_best_slot_to_wait_on")
 		get_best_slot_to_wait_on(target_unit, ai_unit, unit_extension_data, nav_world, skip_slots_behind_target)
-		Profiler.stop()
+		Profiler.stop("get_best_slot_to_wait_on")
 	end
 
 	Profiler.start("improve_slot_position")
 	self.improve_slot_position(self, ai_unit, t)
-	Profiler.stop()
+	Profiler.stop("improve_slot_position")
 
 	return 
 end

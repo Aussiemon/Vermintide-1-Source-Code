@@ -1,5 +1,7 @@
 GenericStatusExtension = class(GenericStatusExtension)
 local DamageDataIndex = DamageDataIndex
+local ATTACK_INTENSITY_RESET = 0.5
+local ATTACK_INTENSITY_DECAY = 0.3
 GenericStatusExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
 	self.profile_id = extension_init_data.profile_id
@@ -44,6 +46,9 @@ GenericStatusExtension.init = function (self, extension_init_context, unit, exte
 	self.interrupt_cooldown_timer = nil
 	self.attack_intensity = 0
 	self.attack_allowed = true
+	local difficulty_manager = Managers.state.difficulty
+	local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+	self.attack_intensity_threshold = difficulty_settings.attack_intensity_threshold or 3
 	self.inside_transport_unit = nil
 	self.using_transport = false
 	self.dodge_position = Vector3Box(0, 0, 0)
@@ -171,13 +176,13 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 	local current_player_health = self.health_extension:current_health_percent()
 
 	if 0 < self.attack_intensity then
-		if 5 < self.attack_intensity then
+		if self.attack_intensity_threshold < self.attack_intensity then
 			self.attack_allowed = false
-		elseif self.attack_intensity < 1 then
+		elseif self.attack_intensity < ATTACK_INTENSITY_RESET then
 			self.attack_allowed = true
 		end
 
-		self.attack_intensity = self.attack_intensity - dt*2
+		self.attack_intensity = self.attack_intensity - dt*ATTACK_INTENSITY_DECAY*self.attack_intensity_threshold
 	end
 
 	if self.move_speed_multiplier_timer < 1 then
@@ -466,6 +471,12 @@ GenericStatusExtension.blocked_attack = function (self, fatigue_type, attacking_
 			local time_blocking = t - self.raise_block_time
 			local timed_block = time_blocking <= 0.3
 
+			if Managers.state.controller_features and player.local_player then
+				Managers.state.controller_features:add_effect("rumble", {
+					rumble_effect = "block"
+				})
+			end
+
 			Unit.animation_event(first_person_unit, "parry_hit_reaction")
 
 			local buff_extension = self.buff_extension
@@ -486,13 +497,12 @@ GenericStatusExtension.blocked_attack = function (self, fatigue_type, attacking_
 				local damage_source_id = NetworkLookup.damage_sources[item_name]
 				local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 				local hit_unit_id = network_manager.unit_game_object_id(network_manager, attacking_unit)
-				local attack_template = AttackTemplates.damage_on_timed_block
-				local attack_template_id = attack_template.lookup_id
+				local attack_template_id = NetworkLookup.attack_templates.damage_on_timed_block
 				local hit_zone_id = NetworkLookup.hit_zones.full
 				local attack_direction = Vector3.normalize(POSITION_LOOKUP[attacking_unit] - POSITION_LOOKUP[unit])
 				local backstab_multiplier = 1
 
-				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, 0, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, NetworkLookup.attack_damage_values["n/a"], NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
 			end
 
 			_, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.INCREASE_DAMAGE_TO_ENEMY_BLOCK)
@@ -697,6 +707,10 @@ end
 GenericStatusExtension.add_attack_intensity = function (self, attack_intensity)
 	self.attack_intensity = self.attack_intensity + attack_intensity
 
+	if self.attack_intensity_threshold < self.attack_intensity then
+		self.attack_allowed = false
+	end
+
 	return 
 end
 GenericStatusExtension.is_pushed = function (self)
@@ -852,7 +866,7 @@ GenericStatusExtension.set_knocked_down = function (self, knocked_down)
 		health_extension.set_current_damage(health_extension, player_health/2)
 		health_extension.set_max_health(health_extension, player_health, true)
 
-		if is_server then
+		if is_server and self.knocked_down_bleed_id then
 			buff_extension.remove_buff(buff_extension, self.knocked_down_bleed_id)
 
 			self.knocked_down_bleed_id = nil
@@ -917,7 +931,7 @@ GenericStatusExtension.set_ready_for_assisted_respawn = function (self, ready, f
 
 	if ready then
 		method_name = "always"
-		color_name = "knocked_down"
+		color_name = "interactable"
 	else
 		if player and player.local_player then
 			method_name = "never"
@@ -1126,22 +1140,6 @@ GenericStatusExtension.switch_variable_zoom = function (self, zoom_table)
 
 	return 
 end
-GenericStatusExtension.set_hammer_leaping = function (self, hammer_leaping, velocity)
-	self.hammer_leaping = hammer_leaping
-
-	if hammer_leaping then
-		local unit = self.unit
-
-		if not NetworkUnit.is_husk_unit(unit) then
-			local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
-
-			locomotion_extension.set_forced_velocity(locomotion_extension, velocity)
-			locomotion_extension.set_wanted_velocity(locomotion_extension, velocity)
-		end
-	end
-
-	return 
-end
 GenericStatusExtension.set_catapulted = function (self, catapulted, velocity)
 	if catapulted then
 		if not self.is_disabled(self) then
@@ -1288,10 +1286,6 @@ GenericStatusExtension.set_pack_master = function (self, grabbed_status, is_grab
 	self.pack_master_grabber = (is_grabbed and grabber_unit) or nil
 	local previous_status = self.pack_master_status
 	self.pack_master_status = grabbed_status
-
-	print("NEW PACKMASTER STATUS", previous_status, "-->", grabbed_status, (previous_status ~= grabbed_status and "  NEW STATE!") or "")
-	print("\tSET PACK MASTER:", previous_status, "-->", grabbed_status, " is_grabbed:", is_grabbed, " pm:", grabber_unit)
-
 	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
 	if grabbed_status == "pack_master_pulling" then
@@ -1301,6 +1295,7 @@ GenericStatusExtension.set_pack_master = function (self, grabbed_status, is_grab
 			return 
 		end
 
+		self.release_unhook_time = nil
 		local foe_rotation = Unit.local_rotation(grabber_unit, 0)
 		local foe_forward = Quaternion.forward(foe_rotation)
 		local back_to_grabber_rotation = Quaternion.look(foe_forward, Vector3.up())
@@ -1310,9 +1305,6 @@ GenericStatusExtension.set_pack_master = function (self, grabbed_status, is_grab
 		if not NetworkUnit.is_husk_unit(unit) then
 			locomotion.set_wanted_velocity(locomotion, Vector3.zero())
 		end
-
-		Unit.animation_event(unit, "packmaster_hooked")
-		locomotion.set_disabled(locomotion, true, LocomotionUtils.update_local_animation_driven_movement_plus_mover)
 
 		local target_player = self.player
 		local unit_name = SPProfiles[self.profile_id].unit_name
@@ -1402,6 +1394,19 @@ end
 GenericStatusExtension.is_knocked_down = function (self)
 	return self.knocked_down
 end
+GenericStatusExtension.set_knocked_down_bleed_buff = function (self, stop_bleed)
+	local buff_extension = self.buff_extension or ScriptUnit.extension(self.unit, "buff_system")
+
+	if self.knocked_down_bleed_id and stop_bleed then
+		buff_extension.remove_buff(buff_extension, self.knocked_down_bleed_id)
+
+		self.knocked_down_bleed_id = nil
+	elseif self.knocked_down and not stop_bleed then
+		self.knocked_down_bleed_id = buff_extension.add_buff(buff_extension, "knockdown_bleed")
+	end
+
+	return self.knocked_down_bleed_id
+end
 GenericStatusExtension.is_ready_for_assisted_respawn = function (self)
 	return self.ready_for_assisted_respawn
 end
@@ -1449,14 +1454,11 @@ end
 GenericStatusExtension.is_blocking = function (self)
 	return self.blocking
 end
-GenericStatusExtension.is_hammer_leaping = function (self)
-	return self.hammer_leaping
-end
 GenericStatusExtension.is_wounded = function (self)
 	return self.wounded
 end
 GenericStatusExtension.heal_can_remove_wounded = function (self, heal_type)
-	return heal_type == "healing_draught" or heal_type == "bandage" or heal_type == "bandage_trinket"
+	return heal_type == "healing_draught" or heal_type == "bandage" or heal_type == "bandage_trinket" or heal_type == "buff_shared_medpack"
 end
 GenericStatusExtension.is_revived = function (self)
 	return self.revived

@@ -110,8 +110,16 @@ AchievementTemplates = {
 		ID_XB1 = "Gauntlet",
 		ID_PS4 = "009",
 		evaluate = function (statistics_db, stats_id)
-			for i = 1, #LevelSettingsCampaign.level_list, 1 do
-				local level_id = LevelSettingsCampaign.level_list[i]
+			local level_list = nil
+
+			if Application.platform() == "win32" then
+				level_list = LevelSettingsCampaign.level_list
+			else
+				level_list = LevelSettingsCampaign.console_level_list
+			end
+
+			for i = 1, #level_list, 1 do
+				local level_id = level_list[i]
 
 				if 3 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) then
 					return true
@@ -125,8 +133,16 @@ AchievementTemplates = {
 		ID_XB1 = "TrialByFire",
 		ID_PS4 = "010",
 		evaluate = function (statistics_db, stats_id)
-			for i = 1, #LevelSettingsCampaign.level_list, 1 do
-				local level_id = LevelSettingsCampaign.level_list[i]
+			local level_list = nil
+
+			if Application.platform() == "win32" then
+				level_list = LevelSettingsCampaign.level_list
+			else
+				level_list = LevelSettingsCampaign.console_level_list
+			end
+
+			for i = 1, #level_list, 1 do
+				local level_id = level_list[i]
 
 				if 4 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) then
 					return true
@@ -140,8 +156,16 @@ AchievementTemplates = {
 		ID_XB1 = "EndTimesExcursion",
 		ID_PS4 = "011",
 		evaluate = function (statistics_db, stats_id)
-			for i = 1, #LevelSettingsCampaign.level_list, 1 do
-				local level_id = LevelSettingsCampaign.level_list[i]
+			local level_list = nil
+
+			if Application.platform() == "win32" then
+				level_list = LevelSettingsCampaign.level_list
+			else
+				level_list = LevelSettingsCampaign.console_level_list
+			end
+
+			for i = 1, #level_list, 1 do
+				local level_id = level_list[i]
 
 				if 5 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) then
 					return true
@@ -162,7 +186,15 @@ AchievementTemplates = {
 		ID_XB1 = "Dissident",
 		ID_PS4 = "013",
 		evaluate = function (statistics_db, stats_id)
-			for _, level_id in pairs(LevelSettingsCampaign.level_list) do
+			local level_list = nil
+
+			if Application.platform() == "win32" then
+				level_list = LevelSettingsCampaign.level_list
+			else
+				level_list = LevelSettingsCampaign.console_level_list
+			end
+
+			for _, level_id in pairs(level_list) do
 				if 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", level_id) then
 					return true
 				end
@@ -182,13 +214,17 @@ AchievementTemplates = {
 		ID_XB1 = "Rakogridrengi",
 		ID_PS4 = "015",
 		evaluate = function (statistics_db, stats_id)
-			local players = Managers.player:human_and_bot_players()
+			local has_damaged_ogre = 0 < statistics_db.get_stat(statistics_db, stats_id, "damage_dealt_per_breed", "skaven_rat_ogre")
 
-			for _, player in pairs(players) do
-				local stats_id = player.stats_id(player)
+			if has_damaged_ogre then
+				local players = Managers.player:human_and_bot_players()
 
-				if 0 < statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre") then
-					return true
+				for _, player in pairs(players) do
+					local stats_id = player.stats_id(player)
+
+					if 0 < statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre") then
+						return true
+					end
 				end
 			end
 
@@ -358,6 +394,14 @@ AchievementTemplates = {
 		ID_XB1 = "Scholar",
 		ID_PS4 = "030",
 		evaluate = function (statistics_db, stats_id)
+			local level_list = nil
+
+			if Application.platform() == "win32" then
+				level_list = LevelSettingsCampaign.level_list
+			else
+				level_list = LevelSettingsCampaign.console_level_list
+			end
+
 			for _, level_id in pairs(LevelSettingsCampaign.level_list) do
 				if 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", level_id) then
 					return true
@@ -371,10 +415,19 @@ AchievementTemplates = {
 		ID_XB1 = "BalthasarGelt",
 		ID_PS4 = "031",
 		evaluate = function (statistics_db, stats_id)
-			for _, level_id in pairs(LevelSettingsCampaign.levels_with_tomes) do
+			local levels_with_tomes = nil
+
+			if Application.platform() == "win32" then
+				levels_with_tomes = LevelSettingsCampaign.levels_with_tomes
+			else
+				levels_with_tomes = LevelSettingsCampaign.console_levels_with_tomes
+			end
+
+			for _, level_id in pairs(levels_with_tomes) do
+				local max_amount = LevelSettingsCampaign.tome_amount_exceptions[level_id] or 3
 				local amount = statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", level_id)
 
-				if amount < 3 then
+				if amount < max_amount then
 					return false
 				end
 			end
@@ -402,8 +455,6 @@ AchievementTemplates = {
 		end
 	},
 	complete_a_mission_as_the_bright_wizard = {
-		ID_XB1 = "Firebrand",
-		ID_PS4 = "033",
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
@@ -415,8 +466,6 @@ AchievementTemplates = {
 		end
 	},
 	complete_a_mission_as_the_way_watcher = {
-		ID_XB1 = "Accursed",
-		ID_PS4 = "034",
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
@@ -428,8 +477,6 @@ AchievementTemplates = {
 		end
 	},
 	complete_a_mission_as_the_empire_soldier = {
-		ID_XB1 = "StateTrooper",
-		ID_PS4 = "035",
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
@@ -441,8 +488,6 @@ AchievementTemplates = {
 		end
 	},
 	complete_a_mission_as_the_witch_hunter = {
-		ID_XB1 = "SilverHammer",
-		ID_PS4 = "036",
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
@@ -454,8 +499,6 @@ AchievementTemplates = {
 		end
 	},
 	complete_a_mission_as_the_dwarf_ranger = {
-		ID_XB1 = "Holdseeker",
-		ID_PS4 = "037",
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
@@ -467,134 +510,111 @@ AchievementTemplates = {
 		end
 	},
 	roll_seven_successes = {
-		ID_XB1 = "TheGamester",
-		ID_PS4 = "038",
 		evaluate = function (statistics_db, stats_id)
 			return 8 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "dice_roll_successes")
 		end
 	},
 	collect_both_grimoires_on_magnus = {
-		ID_XB1 = "ClanFester",
-		ID_PS4 = "039",
 		evaluate = function (statistics_db, stats_id)
 			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "magnus")
 		end
 	},
 	collect_both_grimoires_on_merchant = {
-		ID_XB1 = "BlackHunger",
-		ID_PS4 = "040",
 		evaluate = function (statistics_db, stats_id)
 			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "merchant")
 		end
 	},
 	collect_both_grimoires_on_wizard = {
-		ID_XB1 = "LoreOfWarp",
-		ID_PS4 = "041",
 		evaluate = function (statistics_db, stats_id)
 			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "wizard")
 		end
 	},
 	collect_both_grimoires_on_forest_ambush = {
-		ID_XB1 = "Doomwheel",
-		ID_PS4 = "042",
 		evaluate = function (statistics_db, stats_id)
 			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "forest_ambush")
 		end
 	},
 	collect_both_grimoires_on_cemetery = {
-		ID_XB1 = "Nurglitch",
-		ID_PS4 = "043",
 		evaluate = function (statistics_db, stats_id)
 			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "cemetery")
 		end
 	},
 	collect_both_grimoires_on_tunnels = {
-		ID_XB1 = "Untersreik",
-		ID_PS4 = "044",
 		evaluate = function (statistics_db, stats_id)
 			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "tunnels")
 		end
 	},
 	collect_all_tomes_on_magnus = {
 		ID_XB1 = "ThePious",
-		ID_PS4 = "045",
 		evaluate = function (statistics_db, stats_id)
 			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "magnus")
 		end
 	},
 	collect_all_tomes_on_merchant = {
 		ID_XB1 = "Marktplatz",
-		ID_PS4 = "046",
 		evaluate = function (statistics_db, stats_id)
 			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "merchant")
 		end
 	},
 	collect_all_tomes_on_wizard = {
 		ID_XB1 = "WindsOfUlgu",
-		ID_PS4 = "047",
 		evaluate = function (statistics_db, stats_id)
 			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "wizard")
 		end
 	},
 	collect_all_tomes_on_forest_ambush = {
 		ID_XB1 = "Reikwald",
-		ID_PS4 = "048",
 		evaluate = function (statistics_db, stats_id)
 			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "forest_ambush")
 		end
 	},
 	collect_all_tomes_on_cemetery = {
 		ID_XB1 = "BlackGuard",
-		ID_PS4 = "049",
 		evaluate = function (statistics_db, stats_id)
 			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "cemetery")
 		end
 	},
 	collect_all_tomes_on_tunnels = {
 		ID_XB1 = "Mandred",
-		ID_PS4 = "050",
 		evaluate = function (statistics_db, stats_id)
 			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "tunnels")
 		end
 	},
 	win_item_as_wood_elf = {
-		ID_XB1 = "WinWE",
-		ID_PS4 = "051",
 		evaluate = function (statistics_db, stats_id)
 			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_wood_elf") == 1
 		end
 	},
 	win_item_as_witch_hunter = {
-		ID_XB1 = "WinWH",
-		ID_PS4 = "052",
 		evaluate = function (statistics_db, stats_id)
 			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_witch_hunter") == 1
 		end
 	},
 	win_item_as_bright_wizard = {
-		ID_XB1 = "WinBW",
-		ID_PS4 = "053",
 		evaluate = function (statistics_db, stats_id)
 			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_bright_wizard") == 1
 		end
 	},
 	win_item_as_dwarf_ranger = {
-		ID_XB1 = "WinDR",
-		ID_PS4 = "054",
 		evaluate = function (statistics_db, stats_id)
 			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_dwarf_ranger") == 1
 		end
 	},
 	win_item_as_empire_soldier = {
-		ID_XB1 = "WinES",
-		ID_PS4 = "055",
 		evaluate = function (statistics_db, stats_id)
 			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_empire_soldier") == 1
 		end
 	},
+	last_stand_town_meeting_bronze = {
+		ID_XB1 = "Defient",
+		ID_PS4 = "033",
+		evaluate = function (statistics_db, stats_id)
+			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+		end
+	},
 	last_stand_town_meeting_silver = {
 		ID_XB1 = "Stalwart",
-		ID_PS4 = "059",
+		ID_PS4 = "034",
 		evaluate = function (statistics_db, stats_id)
 			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
 			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
@@ -604,7 +624,7 @@ AchievementTemplates = {
 	},
 	last_stand_town_meeting_gold = {
 		ID_XB1 = "Unbreakable",
-		ID_PS4 = "060",
+		ID_PS4 = "035",
 		evaluate = function (statistics_db, stats_id)
 			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
 			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
@@ -614,15 +634,11 @@ AchievementTemplates = {
 		end
 	},
 	last_stand_the_fall_bronze = {
-		ID_XB1 = "LockAndKey",
-		ID_PS4 = "061",
 		evaluate = function (statistics_db, stats_id)
 			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
 		end
 	},
 	last_stand_the_fall_silver = {
-		ID_XB1 = "Breakwater",
-		ID_PS4 = "062",
 		evaluate = function (statistics_db, stats_id)
 			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
 			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
@@ -631,8 +647,6 @@ AchievementTemplates = {
 		end
 	},
 	last_stand_the_fall_gold = {
-		ID_XB1 = "Floodgate",
-		ID_PS4 = "063",
 		evaluate = function (statistics_db, stats_id)
 			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
 			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
@@ -643,7 +657,7 @@ AchievementTemplates = {
 	},
 	last_stand_wave_complete = {
 		ID_XB1 = "OneDownEndlessToGo",
-		ID_PS4 = "064",
+		ID_PS4 = "036",
 		evaluate = function (statistics_db, stats_id)
 			local complete = 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
 			complete = complete or 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
@@ -657,37 +671,120 @@ AchievementTemplates = {
 	},
 	last_stand_single_endurance_badge = {
 		ID_XB1 = "FindersKeepers",
-		ID_PS4 = "065",
+		ID_PS4 = "037",
 		evaluate = function (statistics_db, stats_id)
 			return 1 <= statistics_db.get_stat(statistics_db, stats_id, "endurance_badges")
 		end
 	},
 	last_stand_multiple_endurance_badges = {
 		ID_XB1 = "Tenacious",
-		ID_PS4 = "066",
+		ID_PS4 = "038",
 		evaluate = function (statistics_db, stats_id)
 			return 200 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "endurance_badges")
 		end
 	},
 	complete_drachenfels_portals = {
-		ID_XB1 = "ThinkingWithPortals",
-		ID_PS4 = "067",
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_portals")
 		end
 	},
 	complete_drachenfels_castle = {
-		ID_XB1 = "WhatWeDoInTheShadows",
-		ID_PS4 = "068",
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle")
 		end
 	},
 	complete_drachenfels_castle_dungeon = {
-		ID_XB1 = "CullensSecret",
-		ID_PS4 = "069",
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle_dungeon")
+		end
+	},
+	complete_dwarf_exterior = {
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
+		end
+	},
+	complete_dwarf_interior = {
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
+		end
+	},
+	complete_dwarf_beacons = {
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
+		end
+	}
+}
+
+local function completed_levels(statistics_db, stats_id)
+	local levels_completed = 0
+
+	for _, level_id in ipairs(MainGameLevels) do
+		levels_completed = levels_completed + statistics_db.get_stat(statistics_db, stats_id, "completed_levels", level_id)
+	end
+
+	for _, level_id in ipairs(NoneActLevels) do
+		levels_completed = levels_completed + statistics_db.get_stat(statistics_db, stats_id, "completed_levels", level_id)
+	end
+
+	return levels_completed
+end
+
+local function collected_tomes(statistics_db, stats_id)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local tome_mission_data = mission_system.get_level_end_mission_data(mission_system, "tome_bonus_mission")
+
+	if not tome_mission_data then
+		return 0
+	end
+
+	return tome_mission_data.current_amount
+end
+
+local function collected_grimoires(statistics_db, stats_id)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local grimoire_mission_data = mission_system.get_level_end_mission_data(mission_system, "grimoire_hidden_mission")
+
+	if not grimoire_mission_data then
+		return 0
+	end
+
+	return grimoire_mission_data.current_amount
+end
+
+HeroStats = {
+	mission_completed = {
+		persistent = true,
+		stat_name = "HeroMissionCompleted",
+		evaluate = function (statistics_db, stats_id)
+			return completed_levels(statistics_db, stats_id)
+		end
+	},
+	skaven_killed = {
+		persistent = false,
+		stat_name = "HeroSkavenKilled",
+		evaluate = function (statistics_db, stats_id)
+			return statistics_db.get_stat(statistics_db, stats_id, "kills_total")
+		end
+	},
+	rat_ogres_killed = {
+		persistent = false,
+		stat_name = "HeroOgresKilled",
+		evaluate = function (statistics_db, stats_id)
+			return statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
+		end
+	},
+	tomes_collected = {
+		persistent = false,
+		stat_name = "HeroTomesCollected",
+		evaluate = function (statistics_db, stats_id)
+			return collected_tomes(statistics_db, stats_id)
+		end
+	},
+	grimoires_collected = {
+		persistent = false,
+		stat_name = "HeroGrimoiresCollected",
+		evaluate = function (statistics_db, stats_id)
+			return collected_grimoires(statistics_db, stats_id)
 		end
 	}
 }

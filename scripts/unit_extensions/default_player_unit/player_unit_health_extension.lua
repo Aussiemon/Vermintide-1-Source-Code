@@ -117,6 +117,11 @@ PlayerUnitHealthExtension.set_max_health = function (self, health, update_unmodf
 
 	self.health = health
 
+	if health == 0 then
+		print(Script.callstack())
+		fassert(false, "[GenericHealthExtension] - Trying to set health to zero")
+	end
+
 	return 
 end
 PlayerUnitHealthExtension.add_damage = function (self, damage)

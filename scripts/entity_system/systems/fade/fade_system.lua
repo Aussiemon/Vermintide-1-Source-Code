@@ -94,7 +94,7 @@ FadeSystem.update = function (self, context, t)
 		extension.cached_value = value
 	end
 
-	Profiler.stop()
+	Profiler.stop("fade_unit_list")
 	self.update_ai_units(self, camera_position, camera_position_flat, camera_position_height)
 
 	return 
@@ -140,7 +140,7 @@ FadeSystem.update_ai_units = function (self, camera_position, camera_position_fl
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_ai_units")
 
 	return 
 end
@@ -157,14 +157,17 @@ FadeSystem.calculate_and_set_jitter_alpha = function (self, camera_position_flat
 	local fade_unit_position_height = fade_unit_position.z
 	local fade_unit_position_flat = vector3_flat(fade_unit_position)
 	local to_vec = fade_unit_position_flat - camera_position_flat
-	local to_vec_length = vector3_length(to_vec)
-	local height_difference = math.abs(camera_height - fade_unit_position_height)
-	local value = nil
+	local value = 0
 
-	if height_difference < MAX_HEIGHT_DIFFERENCE then
-		value = math.min((to_vec_length - MIN_FADE_DISTANCE)/CHANGE_DISTANCE, 1) - 1
-	else
-		value = 0
+	if self._verify_length(self, to_vec, unit) then
+		local to_vec_length = vector3_length(to_vec)
+		local height_difference = math.abs(camera_height - fade_unit_position_height)
+
+		if height_difference < MAX_HEIGHT_DIFFERENCE then
+			value = math.clamp((to_vec_length - MIN_FADE_DISTANCE)/CHANGE_DISTANCE, 0, 1) - 1
+		else
+			value = 0
+		end
 	end
 
 	if value ~= cached_value then
@@ -172,6 +175,16 @@ FadeSystem.calculate_and_set_jitter_alpha = function (self, camera_position_flat
 	end
 
 	return value
+end
+SAFE_DISTANCE = SAFE_DISTANCE or MIN_FADE_DISTANCE*2
+FadeSystem._verify_length = function (self, vec, unit)
+	if SAFE_DISTANCE < math.abs(vec[1]) or SAFE_DISTANCE < math.abs(vec[2]) then
+		return false
+	else
+		return true
+	end
+
+	return 
 end
 
 return 

@@ -110,6 +110,9 @@ InputAux.combination_functions = {
 	add = function (lhs, rhs)
 		return lhs + rhs
 	end,
+	sub = function (lhs, rhs)
+		return lhs - rhs
+	end,
 	mul = function (lhs, rhs)
 		return lhs*rhs
 	end,

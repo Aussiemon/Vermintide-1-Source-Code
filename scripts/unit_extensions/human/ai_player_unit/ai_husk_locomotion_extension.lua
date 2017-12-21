@@ -1,5 +1,6 @@
 require("scripts/helpers/mover_helper")
 
+local ALLOWED_MOVER_MOVE_DISTANCE = 0.5
 AiHuskLocomotionExtension = class(AiHuskLocomotionExtension)
 AiHuskLocomotionExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self._unit = unit
@@ -16,10 +17,16 @@ AiHuskLocomotionExtension.init = function (self, extension_init_context, unit, e
 		DamageUtils.create_hit_zone_lookup(unit, self._breed)
 	end
 
+	local ai_system = Managers.state.entity:system("ai_system")
+	local client_traverse_logic = ai_system.client_traverse_logic(ai_system)
+	self._nav_world = ai_system.nav_world(ai_system)
+	self._world = extension_init_context.world
+	self._traverse_logic = client_traverse_logic
 	self._move_speed_anim_var = Unit.animation_find_variable(unit, "move_speed")
 	self._animation_translation_scale = Vector3Box(1, 1, 1)
 	self._animation_rotation_scale = 1
 	self.is_affected_by_gravity = false
+	self.hit_wall = false
 	local level_settings = LevelHelper:current_level_settings()
 	local flow_event = level_settings.on_spawn_flow_event
 
@@ -53,13 +60,15 @@ AiHuskLocomotionExtension.init = function (self, extension_init_context, unit, e
 	end
 
 	MoverHelper.set_active_mover(unit, self._mover_state, "mover")
-	self.set_mover_disable_reason(self, "network_driven", true)
+	self.set_mover_disable_reason(self, "not_constrained_by_mover", true)
 
 	self._system_data.all_update_units[unit] = self
 	self._system_data.pure_network_update_units[unit] = self
-	self._engine_extension_id = EngineOptimizedExtensions.ai_husk_locomotion_register_extension(unit, self._go_id, has_teleported)
+	self._engine_extension_id = EngineOptimizedExtensions.ai_husk_locomotion_register_extension(unit, self._go_id, has_teleported, client_traverse_logic)
 
 	EngineOptimizedExtensions.ai_husk_locomotion_set_is_network_driven(self._engine_extension_id, true)
+
+	self.is_network_driven = true
 
 	return 
 end
@@ -113,9 +122,11 @@ AiHuskLocomotionExtension.set_animation_driven = function (self, is_animation_dr
 	self.is_animation_driven = is_animation_driven
 	self.has_network_driven_rotation = has_script_driven_rotation
 	self.is_affected_by_gravity = is_affected_by_gravity
+	self.hit_wall = false
 	local network_driven = not is_animation_driven or not is_affected_by_gravity
+	self.is_network_driven = network_driven
 
-	self.set_mover_disable_reason(self, "network_driven", network_driven)
+	self.set_mover_disable_reason(self, "not_constrained_by_mover", true)
 
 	local system_data = self._system_data
 
@@ -123,8 +134,8 @@ AiHuskLocomotionExtension.set_animation_driven = function (self, is_animation_dr
 		system_data.other_update_units[self._unit] = nil
 		system_data.pure_network_update_units[self._unit] = self
 	else
-		system_data.pure_network_update_units[self._unit] = nil
 		system_data.other_update_units[self._unit] = self
+		system_data.pure_network_update_units[self._unit] = nil
 	end
 
 	EngineOptimizedExtensions.ai_husk_locomotion_set_has_network_driven_rotation(self._engine_extension_id, has_script_driven_rotation)
@@ -159,17 +170,21 @@ AiHuskLocomotionExtension.teleport_to = function (self, position, rotation, velo
 		return 
 	end
 
+	self.hit_wall = false
 	local unit = self._unit
 	local mover = Unit.mover(unit)
 
 	if mover and not dontseparate then
+		local breed = self._breed
+		local mover_move_distance = breed.override_mover_move_distance or ALLOWED_MOVER_MOVE_DISTANCE
+
 		Mover.set_position(mover, position)
-		LocomotionUtils.separate_mover_fallbacks(mover, 1)
+		LocomotionUtils.separate_mover_fallbacks(mover, mover_move_distance)
 
 		position = Mover.position(mover)
 	end
 
-	velocity = velocity or Vector3(0, 0, 0)
+	velocity = velocity or Vector3.zero()
 
 	Unit.set_local_position(unit, 0, position)
 	Unit.set_local_rotation(unit, 0, rotation)
@@ -188,8 +203,11 @@ AiHuskLocomotionExtension.set_collision_disabled = function (self, reason, state
 
 	return 
 end
-AiHuskLocomotionExtension.get_velocity = function (self)
+AiHuskLocomotionExtension.current_velocity = function (self)
 	return self._velocity:unbox()
+end
+AiHuskLocomotionExtension.traverse_logic = function (self)
+	return self._traverse_logic
 end
 AiHuskLocomotionExtension.hot_join_sync = function (self, sender)
 	assert(false, "ai is never husk on server")

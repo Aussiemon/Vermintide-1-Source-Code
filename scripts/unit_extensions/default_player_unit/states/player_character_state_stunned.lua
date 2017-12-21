@@ -39,15 +39,14 @@ PlayerCharacterStateStunned.update = function (self, unit, input, dt, context, t
 	local csm = self.csm
 	local unit = self.unit
 	local input_extension = self.input_extension
+	local inventory_extension = self.inventory_extension
 	local status_extension = self.status_extension
 
 	if CharacterStateHelper.do_common_state_transitions(status_extension, csm) then
 		return 
 	end
 
-	if input_extension.get(input_extension, "action_one") then
-		input_extension.add_stun_buffer(input_extension, "action_one")
-	end
+	self.queue_input(self, input, input_extension, inventory_extension)
 
 	if self.end_time < t then
 		csm.change_state(csm, "standing")
@@ -55,7 +54,20 @@ PlayerCharacterStateStunned.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension)
+	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
+
+	return 
+end
+PlayerCharacterStateStunned.queue_input = function (self, input, input_extension, inventory_extension)
+	local wield_input = CharacterStateHelper.wield_input(input_extension, inventory_extension, "action_wield")
+
+	if wield_input then
+		input_extension.add_buffer(input_extension, wield_input)
+	end
+
+	if input_extension.get(input_extension, "action_one") then
+		input_extension.add_stun_buffer(input_extension, "action_one")
+	end
 
 	return 
 end

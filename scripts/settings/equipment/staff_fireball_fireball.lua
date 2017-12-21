@@ -3,18 +3,21 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			kind = "charged_projectile",
-			overcharge_type = "fireball_basic",
-			alert_sound_range_fire = 12,
-			fire_time = 0.27,
-			fire_sound_event_parameter = "drakegun_charge_fire",
-			charge_value = "light_attack",
-			speed = 7000,
-			hit_effect = "fireball_impact",
-			fire_sound_event = "player_combat_weapon_staff_fireball_fire",
 			alert_sound_range_hit = 2,
-			anim_event = "attack_shoot_fireball",
+			fire_time = 0.27,
+			alert_sound_range_fire = 12,
+			kind = "charged_projectile",
+			fire_sound_event_parameter = "drakegun_charge_fire",
+			aim_assist_max_ramp_multiplier = 0.8,
+			aim_assist_ramp_decay_delay = 0.3,
+			hit_effect = "fireball_impact",
+			overcharge_type = "fireball_basic",
+			charge_value = "light_attack",
+			fire_sound_event = "player_combat_weapon_staff_fireball_fire",
 			fire_sound_on_husk = true,
+			speed = 7000,
+			aim_assist_ramp_multiplier = 0.4,
+			anim_event = "attack_shoot_fireball",
 			total_time = 1,
 			allowed_chain_actions = {
 				{
@@ -217,6 +220,12 @@ weapon_template.overcharge_data = {
 		}
 	}
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.03,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
 weapon_template.default_spread_template = "fireball"
 weapon_template.right_hand_unit = "units/weapons/player/wpn_brw_skullstaff/wpn_brw_skullstaff"
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.staff
@@ -229,8 +238,21 @@ weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.wwise_dep_right_hand = {
 	"wwise/staff"
 }
-weapon_template.dodge_distance = 0.6
-weapon_template.dodge_speed = 0.6
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.aim_assist_settings = {
+	max_range = 50,
+	no_aim_input_multiplier = 0,
+	always_auto_aim = true,
+	base_multiplier = 0,
+	target_node = "j_spine1",
+	effective_max_range = 30,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
+}
 weapon_template.compare_statistics = {
 	attacks = {
 		light_attack = {
@@ -250,6 +272,7 @@ weapon_template.compare_statistics = {
 	},
 	perks = {
 		light_attack = {
+			"head_shot",
 			"armor_penetration"
 		},
 		heavy_attack = {

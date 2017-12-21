@@ -572,6 +572,7 @@ CameraManager.force_update_nodes = function (self, dt, viewport_name)
 	return 
 end
 local SWEEP_EPSILON = 0.01
+local MAX_ITERATIONS = 20
 CameraManager._smooth_camera_collision = function (self, camera_position, safe_position, smooth_radius, near_radius)
 	local physics_world = World.get_data(self._world, "physics_world")
 	local cast_from = safe_position
@@ -609,6 +610,8 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 		return cast_from
 	end
 
+	local iterations = 0
+
 	while true do
 		if cast_distance < SWEEP_EPSILON then
 			assert(Vector3.is_valid(cast_from), "Trying to set invalid camera position")
@@ -616,8 +619,7 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 			return cast_from
 		end
 
-		self._hits = PhysicsWorld.linear_sphere_sweep(physics_world, cast_from, cast_to, cast_radius, 1, "types", "statics", "collision_filter", "filter_camera_sweep")
-		local hits = self._hits
+		local hits = PhysicsWorld.linear_sphere_sweep(physics_world, cast_from, cast_to, cast_radius, 1, "types", "statics", "collision_filter", "filter_camera_sweep")
 		local hit = nil
 
 		if hits and 0 < #hits then
@@ -639,7 +641,7 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 			local x = Vector3.dot(dir, hit.position - cast_from)
 			local y = Vector3.length(hit.position - cast_from - x*dir)
 
-			if y == 0 then
+			if y < SWEEP_EPSILON then
 				local pos = hit.position
 
 				assert(Vector3.is_valid(pos), "Trying to set invalid camera position")
@@ -665,13 +667,21 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 			else
 				cast_radius = math.max(y, near_radius)
 			end
-		elseif script_data.camera_debug then
-			drawer.sphere(drawer, cast_to, 0.2, Color(0, 0, 255))
+		else
+			if script_data.camera_debug then
+				drawer.sphere(drawer, cast_to, 0.2, Color(0, 0, 255))
+			end
+
+			assert(Vector3.is_valid(cast_to), "Trying to set invalid camera position")
+
+			return cast_to
 		end
 
-		assert(Vector3.is_valid(cast_to), "Trying to set invalid camera position")
+		iterations = iterations + 1
 
-		return cast_to
+		if MAX_ITERATIONS < iterations then
+			return cast_to
+		end
 	end
 
 	return 
@@ -726,13 +736,13 @@ CameraManager.camera_effect_sequence_event = function (self, event, start_time)
 
 	return 
 end
-CameraManager.camera_effect_shake_event = function (self, event, start_time, scale)
+CameraManager.camera_effect_shake_event = function (self, event_name, start_time, scale)
 	if Application.user_setting("disable_camera_shake") then
 		return 
 	end
 
 	local data = {}
-	local event = CameraEffectSettings.shake[event]
+	local event = CameraEffectSettings.shake[event_name]
 	local duration = event.duration
 	local fade_in = event.fade_in
 	local fade_out = event.fade_out
@@ -745,6 +755,16 @@ CameraManager.camera_effect_shake_event = function (self, event, start_time, sca
 	data.seed = event.seed or Math.random(1, 100)
 	data.scale = scale or 1
 	self._shake_event_settings[data] = true
+	local use_rumble = not event.no_rumble
+
+	if use_rumble and Managers.state.controller_features then
+		Managers.state.controller_features:add_effect("camera_shake", {
+			shake_settings = data,
+			scale = scale,
+			duration = duration,
+			event_name = event_name
+		})
+	end
 
 	return data
 end

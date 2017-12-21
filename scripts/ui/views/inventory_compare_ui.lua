@@ -44,12 +44,16 @@ local fake_input_service = {
 InventoryCompareUI.init = function (self, parent, window_position, animation_definitions, ingame_ui_context, input_service_name)
 	self.parent = parent
 	self.ui_renderer = ingame_ui_context.ui_renderer
+	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.input_manager = ingame_ui_context.input_manager
 	self.world_manager = ingame_ui_context.world_manager
 	self.input_service_name = input_service_name
 	self.widgets_definitions = definitions.widgets
 	self.scenegraph_definition = definitions.scenegraph_definition
 	self.scenegraph_definition.page_root.position = window_position
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.ui_animator = UIAnimator:new(self.scenegraph_definition, animation_definitions)
 	self.animation_definitions = animation_definitions
 
@@ -210,7 +214,7 @@ InventoryCompareUI.set_scroll_amount = function (self, value)
 		local ui_scenegraph = self.ui_scenegraph
 		local start_position = 22
 		local size = self.total_widgets_height or 0
-		ui_scenegraph.compare_window.local_position[2] = start_position + size*value
+		ui_scenegraph.compare_window.local_position[2] = math.ceil(start_position + size*value)
 		local widget_scroll_bar_info = self.scrollbar_widget.content.scroll_bar_info
 		widget_scroll_bar_info.value = value
 		self.scroll_field_widget.content.internal_scroll_value = value
@@ -227,7 +231,7 @@ InventoryCompareUI.draw = function (self, dt)
 	local input_service = (self.input_blocked and fake_input_service) or input_manager.get_service(input_manager, input_service_name)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.window_title_text_widget)
 
 	for _, widget in ipairs(self.background_widgets) do
@@ -308,7 +312,12 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		local info_widget_style = info_widget.style
 		local item_name = item.name
 		local rarity_color = self.get_rarity_color(self, item.rarity)
-		info_widget_content.text_title = Localize(item.display_name)
+		local item_name = Localize(item.display_name)
+
+		if info_widget_style.text_title and 25 < UTF8Utils.string_length(item_name) and not UIRenderer.crop_text_width(self.ui_renderer, item_name, 400, info_widget_style.text_title) then
+		end
+
+		info_widget_content.text_title = item_name
 		info_widget_content.sub_text_title = Localize(item.item_type)
 		info_widget_style.text_title.text_color = rarity_color
 		info_widget_style.icon_frame_texture.color = rarity_color
@@ -370,19 +379,19 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 
 		self.trait_widgets_height = self.set_traits_info(self, item, traits)
 		local total_description_height = self.set_item_description(self, item.description)
+		self.total_description_height = total_description_height
 		total_widgets_height = total_widgets_height + total_description_height + self.trait_widgets_height
 		self.draw_attack_info = draw_attack_info
 		self.draw_stamina = draw_stamina
 		self.draw_ammo = draw_ammo
 	end
 
+	show_traits = 0 < self.number_of_traits_on_item
+	local height, spacing_height = self.handle_widget_positions(self, draw_attack_info, show_traits, self.draw_stamina, self.draw_ammo)
+	total_widgets_height = total_widgets_height + spacing_height
 	self.total_widgets_height = total_widgets_height
 
 	self.set_scrollbar_length(self, total_widgets_height, 0, draw_attack_info)
-
-	local show_traits = 0 < self.number_of_traits_on_item
-
-	self.handle_widget_positions(self, draw_attack_info, show_traits, self.draw_stamina, self.draw_ammo)
 
 	return 
 end
@@ -395,6 +404,12 @@ InventoryCompareUI.handle_widget_positions = function (self, show_attack_info, s
 	local light_attack_position_default = scenegraph_definition.light_attack_frame.position
 	local heavy_attack_position_default = scenegraph_definition.heavy_attack_frame.position
 	local description_position_default = scenegraph_definition.item_description_field.position
+	local stamina_size_default = scenegraph_definition.stamina_field.size
+	local ammo_size_default = scenegraph_definition.ammo_field.size
+	local traits_size_default = scenegraph_definition.item_traits_root.size
+	local light_attack_size_default = scenegraph_definition.light_attack_frame.size
+	local heavy_attack_size_default = scenegraph_definition.heavy_attack_frame.size
+	local description_size_default = scenegraph_definition.item_description_field.size
 	local stamina_position = ui_scenegraph.stamina_field.local_position
 	local ammo_position = ui_scenegraph.ammo_field.local_position
 	local traits_position = ui_scenegraph.item_traits_root.local_position
@@ -402,50 +417,67 @@ InventoryCompareUI.handle_widget_positions = function (self, show_attack_info, s
 	local heavy_attack_position = ui_scenegraph.heavy_attack_frame.local_position
 	local description_position = ui_scenegraph.item_description_field.local_position
 	local trait_widgets_height = self.trait_widgets_height
+	local total_description_height = self.total_description_height
+	local total_height = 0
+	local total_spacing = 0
+	local large_spacing = 45
+	local small_spacing = 15
 
-	if show_attack_info then
-		light_attack_position[2] = light_attack_position_default[2]
-		heavy_attack_position[2] = heavy_attack_position_default[2]
-
-		if show_traits then
-			traits_position[2] = traits_position_default[2]
-
-			if show_stamina and show_ammo then
-				stamina_position[2] = stamina_position_default[2] - trait_widgets_height
-				description_position[2] = stamina_position[2] - 40
-				ammo_position[2] = ammo_position_default[2] - trait_widgets_height - 40
-				description_position[2] = ammo_position[2] - 40
-			elseif show_stamina then
-				stamina_position[2] = stamina_position_default[2] - trait_widgets_height
-				description_position[2] = stamina_position[2] - 40
-			elseif show_ammo then
-				ammo_position[2] = ammo_position_default[2] - trait_widgets_height
-				description_position[2] = ammo_position[2] - 40
-			else
-				description_position[2] = stamina_position_default[2] - trait_widgets_height
-			end
-		elseif show_stamina and show_ammo then
-			stamina_position[2] = traits_position_default[2]
-			description_position[2] = stamina_position[2] - 40
-			ammo_position[2] = traits_position_default[2] - 40
-			description_position[2] = ammo_position[2] - 40
-		elseif show_stamina then
-			stamina_position[2] = traits_position_default[2]
-			description_position[2] = stamina_position[2] - 40
-		elseif show_ammo then
-			ammo_position[2] = traits_position_default[2]
-			description_position[2] = ammo_position[2] - 40
-		else
-			description_position[2] = traits_position_default[2] - 5
-		end
-	elseif show_traits then
-		traits_position[2] = light_attack_position_default[2] + 35
-		description_position[2] = light_attack_position_default[2] - trait_widgets_height - 20
-	else
-		description_position[2] = light_attack_position_default[2]
+	if show_traits then
+		traits_position[2] = traits_position_default[2]
+		total_height = total_height + trait_widgets_height
 	end
 
-	return 
+	if show_attack_info then
+		if show_traits then
+			light_attack_position[2] = light_attack_position_default[2] - total_height - large_spacing
+			total_height = total_height + light_attack_size_default[2] + large_spacing
+			total_spacing = total_spacing + large_spacing
+		else
+			light_attack_position[2] = light_attack_position_default[2] - total_height
+			total_height = total_height + light_attack_size_default[2]
+		end
+
+		heavy_attack_position[2] = heavy_attack_position_default[2] - total_height - large_spacing
+		total_height = total_height + heavy_attack_size_default[2] + large_spacing
+		total_spacing = total_spacing + large_spacing
+
+		if show_stamina and show_ammo then
+			stamina_position[2] = stamina_position_default[2] - total_height - large_spacing
+			total_height = total_height + stamina_size_default[2] + large_spacing
+			total_spacing = total_spacing + large_spacing
+			ammo_position[2] = ammo_position_default[2] - total_height - small_spacing
+			total_height = total_height + ammo_size_default[2] + small_spacing
+			total_spacing = total_spacing + small_spacing
+		elseif show_stamina then
+			stamina_position[2] = stamina_position_default[2] - total_height - large_spacing
+			total_height = total_height + stamina_size_default[2] + large_spacing
+			total_spacing = total_spacing + large_spacing
+		elseif show_ammo then
+			ammo_position[2] = ammo_position_default[2] - total_height - large_spacing
+			total_height = total_height + ammo_size_default[2] + large_spacing
+			total_spacing = total_spacing + large_spacing
+		end
+
+		if show_stamina or show_ammo then
+			description_position[2] = description_position_default[2] - total_height - small_spacing
+			total_height = total_height + total_description_height + small_spacing
+			total_spacing = total_spacing + small_spacing
+		else
+			description_position[2] = description_position_default[2] - total_height - large_spacing
+			total_height = total_height + total_description_height + large_spacing
+			total_spacing = total_spacing + large_spacing
+		end
+	elseif show_traits then
+		description_position[2] = description_position_default[2] - total_height - large_spacing
+		total_height = total_height + total_description_height + large_spacing
+		total_spacing = total_spacing + large_spacing
+	else
+		description_position[2] = light_attack_position_default[2] - total_height
+		total_height = total_height + total_description_height
+	end
+
+	return total_height, math.max(total_spacing - 150, 0)
 end
 InventoryCompareUI.calculate_attack_frame_height = function (self, widget, scenegraph_id, using_perks, attack_statistics)
 	local ui_scenegraph = self.ui_scenegraph
@@ -754,7 +786,7 @@ InventoryCompareUI.set_traits_info = function (self, item, traits)
 	ui_scenegraph.item_traits_background_center.size[2] = (total_traits_height + trait_start_spacing + trait_end_spacing) - background_default_height
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	return (0 < self.number_of_traits_on_item and total_traits_height + trait_start_spacing + trait_end_spacing) or 0
+	return math.ceil((0 < self.number_of_traits_on_item and total_traits_height + trait_start_spacing + trait_end_spacing) or 0)
 end
 InventoryCompareUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)

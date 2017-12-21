@@ -106,7 +106,7 @@ CrosshairUI.update_crosshair_style = function (self, equipment)
 
 	self.crosshair_style = crosshair_style
 
-	Profiler.stop()
+	Profiler.stop("update_crosshair_style")
 
 	return 
 end
@@ -142,7 +142,7 @@ CrosshairUI.update_hit_markers = function (self, dt)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("update_hit_markers")
 
 	return 
 end
@@ -174,7 +174,7 @@ CrosshairUI.update_spread = function (self, dt, equipment)
 	self.crosshair_left.style.offset[1] = -yaw_offset
 	self.crosshair_right.style.offset[1] = yaw_offset
 
-	Profiler.stop()
+	Profiler.stop("update_spread")
 
 	return 
 end
@@ -204,7 +204,7 @@ CrosshairUI.draw = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, hit_marker)
 	end
 
-	Profiler.stop()
+	Profiler.stop("draw widgets")
 	UIRenderer.end_pass(ui_renderer)
 
 	return 

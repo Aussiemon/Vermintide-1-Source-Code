@@ -10,6 +10,7 @@ GameModeSettings.adventure = table.clone(GameModeSettings.base)
 GameModeSettings.adventure.key = "adventure"
 GameModeSettings.adventure.class_name = "GameModeAdventure"
 GameModeSettings.adventure.display_name = "dlc1_2_map_game_mode_adventure"
+GameModeSettings.adventure.description_text = "game_mode_description_adventure"
 GameModeSettings.adventure.object_sets = {
 	gm_sp = true
 }
@@ -20,6 +21,7 @@ GameModeSettings.survival = table.clone(GameModeSettings.base)
 GameModeSettings.survival.key = "survival"
 GameModeSettings.survival.class_name = "GameModeSurvival"
 GameModeSettings.survival.display_name = "dlc1_2_map_game_mode_survival"
+GameModeSettings.survival.description_text = "game_mode_description_survival"
 GameModeSettings.survival.object_sets = {
 	gm_sp = true
 }
@@ -28,6 +30,16 @@ GameModeSettings.survival.lose_experience = 50
 GameModeSettings.survival.map_screen_texture = "map_last_stand"
 GameModeSettings.survival.playable = true
 GameModeSettings.survival.difficulties = SurvivalDifficulties
+GameModeSettings.survival.required_act_unlocked = "act_1"
+GameModeSettings.tutorial = table.clone(GameModeSettings.base)
+GameModeSettings.tutorial.key = "tutorial"
+GameModeSettings.tutorial.private_only = true
+GameModeSettings.tutorial.display_name = "tutorial_no_localization"
+GameModeSettings.tutorial.class_name = "GameModeTutorial"
+GameModeSettings.tutorial.object_sets = {
+	gm_sp = true
+}
+GameModeSettings.tutorial.lose_condition_time = 4
 GameModeSettings.inn = table.clone(GameModeSettings.base)
 GameModeSettings.inn.key = "inn"
 GameModeSettings.inn.disable_difficulty_spawning_items = true

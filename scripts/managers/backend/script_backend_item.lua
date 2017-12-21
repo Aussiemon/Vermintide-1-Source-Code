@@ -300,6 +300,9 @@ Items.data_server_queue = function (self)
 end
 backend_items = backend_items or Items.new(Items)
 ScriptBackendItem = ScriptBackendItem or {}
+ScriptBackendItem.type = function ()
+	return "backend"
+end
 ScriptBackendItem.update = function ()
 	Profiler.start("ScriptBackendItem update")
 	backend_items:update()
@@ -368,7 +371,7 @@ ScriptBackendItem.get_key = function (backend_id)
 end
 ScriptBackendItem.get_item_from_id = function (backend_id)
 	if backend_id == 0 then
-		ScriptApplication.send_to_crashify("[ScriptBackendItem.get_item_from_id] tried to get item from backend_id 0")
+		ScriptApplication.send_to_crashify("ScriptBackendItem", "Tried to get item from backend_id 0")
 	end
 
 	local items = backend_items:get_all_backend_items()

@@ -20,6 +20,16 @@ ScriptUnit.optimize = function (unit)
 			end
 		end
 
+		local force_ssm = Unit.get_data(unit, "force_ssm")
+
+		if force_ssm then
+			local num_meshes = Unit.num_meshes(unit)
+
+			for i = 0, num_meshes - 1, 1 do
+				Unit.set_mesh_ssm_visibility(unit, i, true)
+			end
+		end
+
 		local disable_physics = Unit.get_data(unit, "disable_physics")
 
 		if disable_physics then

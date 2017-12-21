@@ -22,22 +22,10 @@ function make_script_backend_profile_attribute_local()
 	return 
 end
 
-function make_script_backend_profile_attribute_tutorial()
-	ScriptBackendProfileAttribute = ScriptBackendProfileAttributeTutorial
-
-	return 
-end
-
 BackendManagerLocalEnabled = BackendManagerLocalEnabled or false
 
 if BackendManagerLocalEnabled then
 	make_script_backend_profile_attribute_local()
-end
-
-BackendManagerTutorialEnabled = BackendManagerTutorialEnabled or false
-
-if BackendManagerTutorialEnabled then
-	make_script_backend_profile_attribute_tutorial()
 end
 
 return 

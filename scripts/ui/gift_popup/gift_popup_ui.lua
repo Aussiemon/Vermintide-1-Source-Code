@@ -37,7 +37,7 @@ GiftPopupUI.init = function (self, ingame_ui_context)
 	local input_manager = Managers.input
 	local input_service_name = "gift_popup"
 
-	input_manager.create_input_service(input_manager, input_service_name, IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, input_service_name, "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, input_service_name, "keyboard")
 	input_manager.map_device_to_service(input_manager, input_service_name, "mouse")
 	input_manager.map_device_to_service(input_manager, input_service_name, "gamepad")
@@ -51,7 +51,9 @@ GiftPopupUI.init = function (self, ingame_ui_context)
 	self.player_manager = ingame_ui_context.player_manager
 	self.ingame_ui_context = ingame_ui_context
 	self.poll_cooldown = GIFT_POLL_COOLDOWN
+	local event_manager = Managers.state.event
 
+	event_manager.register(event_manager, self, "level_start_local_player_spawned", "event_initialize_poll")
 	rawset(_G, "gift_popup_ui", self)
 
 	return 
@@ -309,7 +311,15 @@ GiftPopupUI.destroy = function (self)
 		self.menu_input_description = nil
 	end
 
+	local event_manager = Managers.state.event
+
+	event_manager.unregister(event_manager, "level_start_local_player_spawned", self)
 	rawset(_G, "gift_popup_ui", nil)
+
+	return 
+end
+GiftPopupUI.event_initialize_poll = function (self)
+	self._poll_initialized = true
 
 	return 
 end
@@ -358,11 +368,15 @@ GiftPopupUI.post_update = function (self, dt)
 		end
 	end
 
-	if self.is_in_inn then
+	if self._poll_initialized and self.is_in_inn then
 		if not self.presentation_started then
-			local handled = self._poll_new_rewards(self, dt)
+			if self._verify_poll(self) then
+				local handled = self._poll_new_rewards(self, dt)
 
-			if not handled then
+				if not handled then
+					return 
+				end
+			else
 				return 
 			end
 		end
@@ -423,6 +437,22 @@ GiftPopupUI.post_update = function (self, dt)
 
 	if gamepad_active then
 		self._handle_gamepad_input(self, dt)
+	end
+
+	return 
+end
+GiftPopupUI._verify_poll = function (self)
+	local popup_manager = Managers.popup
+
+	if popup_manager and popup_manager.has_popup(popup_manager) then
+		return 
+	end
+
+	local translation_manager = Managers.transition
+	local fade_out_completed = translation_manager.fade_out_completed(translation_manager)
+
+	if fade_out_completed then
+		return true
 	end
 
 	return 

@@ -1,29 +1,34 @@
 local breed_data = {
 	walk_speed = 2.5,
-	run_speed = 5,
+	scale_death_push = 2,
 	awards_positive_reinforcement_message = true,
-	smart_object_template = "special",
+	armor_category = 1,
 	poison_resistance = 100,
 	is_bot_aid_threat = true,
-	bone_lod_level = 1,
-	no_stagger_duration = true,
+	run_speed = 5,
+	exchange_order = 2,
 	animation_sync_rpc = "rpc_sync_anim_state_3",
+	no_stagger_duration = true,
 	target_selection = "pick_closest_target",
 	detection_radius = 9999999,
-	armor_category = 1,
+	bone_lod_level = 1,
 	headshot_coop_stamina_fatigue_type = "headshot_special",
 	max_globe_throw_speed = 16383,
 	hit_reaction = "ai_default",
 	special = true,
+	smart_targeting_outer_width = 0.7,
 	hit_effect_template = "HitEffectsPoisonWind",
+	smart_targeting_height_multiplier = 2.2,
 	debug_flag = "ai_globadier_behavior",
 	radius = 1,
 	unit_template = "ai_unit_poison_wind_globadier",
+	smart_object_template = "special",
 	proximity_system_check = true,
 	death_reaction = "poison_globadier",
 	perception = "perception_all_seeing",
 	player_locomotion_constrain_radius = 0.7,
 	death_sound_event = "Play_globadier_death_vce",
+	smart_targeting_width = 0.3,
 	perception_continuous = "perception_continuous_keep_target",
 	behavior = "skaven_poison_wind_globadier",
 	base_unit = "units/beings/enemies/skaven_wind_globadier/chr_skaven_wind_globadier",
@@ -56,8 +61,7 @@ local breed_data = {
 		neck = {
 			prio = 1,
 			actors = {
-				"c_neck",
-				"c_neck1"
+				"c_neck"
 			},
 			push_actors = {
 				"j_head",
@@ -141,6 +145,16 @@ local breed_data = {
 				"j_hips"
 			}
 		},
+		aux = {
+			prio = 5,
+			actors = {
+				"c_compressor_valve",
+				"c_compressor",
+				"c_backpack_can",
+				"c_backpack_bag",
+				"c_ballsling_ball"
+			}
+		},
 		afro = {
 			prio = 5,
 			actors = {
@@ -218,7 +232,7 @@ local action_data = {
 	throw_poison_globe = {
 		aoe_dot_damage_interval = 1,
 		duration = 8,
-		barrage_count = 3,
+		barrage_count = 2,
 		nav_tag_volume_layer = "bot_poison_wind",
 		create_nav_tag_volume = true,
 		damage_type = "poison",
@@ -282,7 +296,7 @@ local action_data = {
 		radius = GLOBE_RADIUS,
 		initial_radius = GLOBE_RADIUS*0.6,
 		time_between_throws = {
-			10,
+			12,
 			2
 		}
 	},

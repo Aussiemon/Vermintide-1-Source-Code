@@ -1,5 +1,13 @@
 MatchmakingStateSearchPlayers = class(MatchmakingStateSearchPlayers)
 MatchmakingStateSearchPlayers.NAME = "MatchmakingStateSearchPlayers"
+local fake_input_service = {
+	get = function ()
+		return 
+	end,
+	has = function ()
+		return 
+	end
+}
 local telemetry_data = {}
 MatchmakingStateSearchPlayers.init = function (self, params)
 	self.lobby = params.lobby
@@ -14,6 +22,12 @@ MatchmakingStateSearchPlayers.init = function (self, params)
 	return 
 end
 MatchmakingStateSearchPlayers.destroy = function (self)
+	if self._popup_id then
+		Managers.popup:cancel_popup(self._popup_id)
+
+		self._popup_id = nil
+	end
+
 	return 
 end
 MatchmakingStateSearchPlayers.on_enter = function (self, state_context)
@@ -37,15 +51,81 @@ MatchmakingStateSearchPlayers.on_exit = function (self)
 
 	return 
 end
+MatchmakingStateSearchPlayers._signal_start_game = function (self, all_peers_ingame, all_peers_ready)
+	if all_peers_ingame and all_peers_ready then
+		if self._gamepad_path then
+			self.ready = true
+			local peer_id = Network.peer_id()
+
+			self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
+
+			self.controller_cooldown = GamepadSettings.menu_cooldown
+		end
+
+		self.full_group_timer = 1
+
+		self.matchmaking_ui:set_action_area_visible(false)
+		self.matchmaking_ui:set_start_progress(0)
+		self.matchmaking_ui:animate_large_window(true)
+	end
+
+	return 
+end
 MatchmakingStateSearchPlayers.update = function (self, dt, t)
+	local gamepad_active_last_frame = self._gamepad_active_last_frame
+	local gamepad_active = Managers.input:is_device_active("gamepad")
 	local status_message = self.status_message
 	local peer_id = Network.peer_id()
 	local current_number_of_members = self.current_number_lobby_members(self)
 	local ready_peers = self.matchmaking_manager.ready_peers
 	local all_peers_ingame = self.network_server:are_all_peers_ingame()
-	local all_peers_ready = self.matchmaking_manager:all_peers_ready()
+	local all_peers_ready = self.matchmaking_manager:all_peers_ready(self._gamepad_path)
 	local full_group = current_number_of_members == MatchmakingSettings.MAX_NUMBER_OF_PLAYERS
 	local private_game = self.state_context.game_search_data.private_game
+
+	if gamepad_active ~= gamepad_active_last_frame then
+		self._gamepad_path = true
+
+		if not gamepad_active then
+			self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
+			self.matchmaking_ui:set_ready_progress(1)
+			self.matchmaking_ui:set_cancel_progress(1)
+			self.matchmaking_ui:set_action_area_visible(false, true)
+		else
+			self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_start")
+			self.matchmaking_ui:set_ready_progress(0)
+			self.matchmaking_ui:set_cancel_progress(0)
+			self.matchmaking_ui:set_action_area_visible(false, true)
+		end
+
+		self.ready = false
+		local peer_id = Network.peer_id()
+
+		self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
+	end
+
+	if not gamepad_active then
+		self._gamepad_path = false
+	end
+
+	if self._popup_id then
+		local result = Managers.popup:query_result(self._popup_id)
+
+		if result then
+			Managers.popup:cancel_popup(self._popup_id)
+
+			self._popup_id = nil
+		end
+
+		if result == "yes" then
+			self._signal_start_game(self, all_peers_ingame, all_peers_ready)
+		elseif result == "no" then
+			self.ready = false
+			local peer_id = Network.peer_id()
+
+			self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
+		end
+	end
 
 	if full_group or private_game then
 		if not all_peers_ingame then
@@ -79,7 +159,10 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 		self.matchmaking_manager:set_status_message(status_message)
 	end
 
-	local input_service = Managers.input:get_service("ingame_menu")
+	local player_manager = Managers.player
+	local player = player_manager.player(player_manager, peer_id, 1)
+	local can_use_input = player and Unit.alive(player.player_unit)
+	local input_service = (can_use_input and Managers.input:get_service("ingame_menu")) or fake_input_service
 
 	if self.full_group_timer then
 		local full_group_timer_ended = (all_peers_ready and all_peers_ingame and self.update_full_group_timer(self, dt)) or false
@@ -97,109 +180,137 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 			end
 
 			return MatchmakingStateStartGame, self.state_context
+		elseif not all_peers_ready then
+			self.full_group_timer = nil
+
+			self.matchmaking_ui:set_action_area_visible(false)
+			self.matchmaking_ui:set_start_progress(0)
+			self.matchmaking_ui:animate_large_window(false)
 		end
 	elseif all_peers_ready and all_peers_ingame then
 		if self.full_group_timer == nil then
 			if not self.can_start then
 				self.can_start = true
 
-				self.matchmaking_ui:set_action_area_visible(true)
-				self.matchmaking_ui:large_window_set_action_button_text("matchmaking_surfix_start", "matchmaking_start")
+				if self._gamepad_path then
+					self.matchmaking_ui:set_action_area_visible(false)
+				else
+					self.matchmaking_ui:set_action_area_visible(true)
+					self.matchmaking_ui:large_window_set_action_button_text("matchmaking_surfix_start")
+				end
 			end
 
 			if self.controller_cooldown and 0 < self.controller_cooldown then
 				self.controller_cooldown = self.controller_cooldown - dt
-			elseif input_service.get(input_service, "matchmaking_start", true) then
-				if Managers.input:is_device_active("gamepad") then
+			elseif self._gamepad_path then
+				self.matchmaking_ui:set_ready_area_enabled(true)
+				self.matchmaking_ui:large_window_start_ready_pulse()
+
+				if input_service.get(input_service, "matchmaking_ready") then
 					local total_time = 1
 					local cancel_timer = self.start_cancel_timer
 					cancel_timer = (cancel_timer and cancel_timer + dt) or dt
 					local progress = math.min(cancel_timer/total_time, 1)
 
 					if progress == 1 then
-						self.full_group_timer = 1
+						if current_number_of_members < MatchmakingSettings.MAX_NUMBER_OF_PLAYERS then
+							local text_key = (Application.platform() == "xb1" and "popup_matchmaking_start_without_full_party_xb1") or "popup_matchmaking_start_without_full_party"
+							self._popup_id = Managers.popup:queue_popup(Localize(text_key), Localize("popup_notice_topic"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 
-						self.matchmaking_ui:set_action_area_visible(false)
+							self.matchmaking_ui:set_ready_progress(0)
+						else
+							self.start_cancel_timer = nil
 
-						self.start_cancel_timer = nil
-
-						self.matchmaking_ui:set_start_progress(0)
-
-						self.controller_cooldown = GamepadSettings.menu_cooldown
+							self._signal_start_game(self, all_peers_ingame, all_peers_ready)
+						end
 					else
 						self.start_cancel_timer = cancel_timer
 
-						self.matchmaking_ui:set_start_progress(progress)
+						if self._gamepad_path then
+							self.matchmaking_ui:set_ready_progress(progress)
+						else
+							self.matchmaking_ui:set_start_progress(progress)
+						end
 					end
 				else
-					self.full_group_timer = 1
+					self.start_cancel_timer = nil
 
-					self.matchmaking_ui:set_action_area_visible(false)
-					self.matchmaking_ui:set_start_progress(0)
-
-					self.controller_cooldown = GamepadSettings.menu_cooldown
+					self.matchmaking_ui:set_ready_progress(0)
 				end
 			else
-				self.start_cancel_timer = nil
+				self.matchmaking_ui:large_window_stop_ready_pulse()
 
-				self.matchmaking_ui:set_start_progress(0)
+				if input_service.get(input_service, "matchmaking_start") then
+					self._signal_start_game(self, all_peers_ingame, all_peers_ready)
+				else
+					self.start_cancel_timer = nil
+
+					self.matchmaking_ui:set_start_progress(0)
+				end
 			end
 		end
 	elseif self.can_start then
 		self.can_start = false
 
 		self.matchmaking_ui:set_action_area_visible(false)
-	end
+	elseif (not all_peers_ready or not all_peers_ingame) and self._gamepad_path then
+		self.matchmaking_ui:set_ready_area_enabled(false, "matchmaking_all_clients_need_to_ready")
+		self.matchmaking_ui:large_window_stop_ready_pulse()
+		self.matchmaking_ui:animate_large_window(false)
 
-	if self.controller_cooldown and 0 < self.controller_cooldown then
-		self.controller_cooldown = self.controller_cooldown - dt
-	elseif input_service.get(input_service, "matchmaking_ready", true) then
-		local ready = nil
-		local ready_changed = false
-
-		if Managers.input:is_device_active("gamepad") then
-			local total_time = 1
-			local cancel_timer = self.cancel_timer
-			cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-			local progress = math.min(cancel_timer/total_time, 1)
-
-			if progress == 1 then
-				ready = not self.matchmaking_manager.ready_peers[peer_id]
-				self.cancel_timer = nil
-				ready_changed = true
-
-				self.matchmaking_ui:set_ready_progress(0)
-
-				self.controller_cooldown = GamepadSettings.menu_cooldown
-			else
-				self.cancel_timer = cancel_timer
-
-				self.matchmaking_ui:set_ready_progress(progress)
-			end
-		else
-			ready = not self.matchmaking_manager.ready_peers[peer_id]
-			ready_changed = true
-
-			self.matchmaking_ui:set_ready_progress(0)
-
-			self.controller_cooldown = GamepadSettings.menu_cooldown
-		end
-
-		if ready_changed then
-			self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, ready)
-
-			if ready then
-				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready", "matchmaking_ready")
-				self.matchmaking_ui:large_window_stop_ready_pulse()
-			else
-				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready", "matchmaking_ready")
-				self.matchmaking_ui:large_window_start_ready_pulse()
-			end
-		end
-	elseif self.cancel_timer then
-		self.cancel_timer = nil
+		self.full_group_timer = nil
+		self.start_cancel_timer = nil
 
 		self.matchmaking_ui:set_ready_progress(0)
+	elseif not all_peers_ready and all_peers_ingame and not self._gamepad_path then
+		self.matchmaking_ui:set_ready_area_enabled(true)
+	end
+
+	if not self._gamepad_path then
+		if self.controller_cooldown and 0 < self.controller_cooldown then
+			self.controller_cooldown = self.controller_cooldown - dt
+		elseif input_service.get(input_service, "matchmaking_ready") then
+			local ready_changed = false
+
+			if gamepad_active then
+				local total_time = 1
+				local cancel_timer = self.cancel_timer
+				cancel_timer = (cancel_timer and cancel_timer + dt) or dt
+				local progress = math.min(cancel_timer/total_time, 1)
+
+				if progress == 1 then
+					self.ready = not self.matchmaking_manager.ready_peers[peer_id]
+					ready_changed = true
+
+					self.matchmaking_ui:set_ready_progress(0)
+
+					self.controller_cooldown = GamepadSettings.menu_cooldown
+				else
+					self.cancel_timer = cancel_timer
+
+					self.matchmaking_ui:set_ready_progress(progress)
+				end
+			else
+				self.ready = not self.matchmaking_manager.ready_peers[peer_id]
+				ready_changed = true
+			end
+
+			if ready_changed then
+				self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
+
+				if self.ready then
+					self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready")
+					self.matchmaking_ui:large_window_stop_ready_pulse()
+				else
+					self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
+					self.matchmaking_ui:large_window_start_ready_pulse()
+				end
+			end
+		elseif self.cancel_timer then
+			self.cancel_timer = nil
+
+			self.matchmaking_ui:set_ready_progress(0)
+		end
 	end
 
 	local can_flash_window = _G.Window ~= nil and Window.flash_window ~= nil
@@ -209,6 +320,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 	end
 
 	self.number_of_players = current_number_of_members
+	self._gamepad_active_last_frame = gamepad_active
 
 	return nil
 end

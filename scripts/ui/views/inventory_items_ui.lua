@@ -12,10 +12,10 @@ for index, slot in ipairs(InventorySettings.slots_by_inventory_button_index) do
 end
 
 local slot_type_title_names = {
-	ranged = "inventory_screen_ranged_weapon_tooltip",
-	melee = "inventory_screen_melee_weapon_tooltip",
-	hat = "inventory_screen_hat_tooltip",
-	trinket = "inventory_screen_trinket_1_tooltip"
+	ranged = "inventory_screen_ranged_weapon_title",
+	melee = "inventory_screen_melee_weapon_title",
+	hat = "inventory_screen_hat_title",
+	trinket = "inventory_screen_trinket_title"
 }
 InventoryItemsUI = class(InventoryItemsUI)
 InventoryItemsUI.init = function (self, parent, window_position, page_spacing, animation_definitions, ingame_ui_context)
@@ -33,6 +33,9 @@ InventoryItemsUI.init = function (self, parent, window_position, page_spacing, a
 	self.inventory_list_animations = {}
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 
 	self.create_ui_elements(self)
 
@@ -54,6 +57,10 @@ InventoryItemsUI.init = function (self, parent, window_position, page_spacing, a
 	return 
 end
 InventoryItemsUI.set_gamepad_focus = function (self, enabled)
+	if self.use_gamepad and not enabled then
+		self.inventory_item_list:on_focus_lost()
+	end
+
 	self.use_gamepad = enabled
 
 	return 
@@ -64,6 +71,8 @@ InventoryItemsUI.on_enter = function (self)
 	return 
 end
 InventoryItemsUI.on_exit = function (self)
+	self.inventory_item_list:on_focus_lost()
+
 	return 
 end
 InventoryItemsUI.destroy = function (self)
@@ -187,7 +196,7 @@ InventoryItemsUI.on_inventory_type_selected = function (self, slot_type, force_u
 	end
 
 	local title_text = Localize(slot_type_title_names[slot_type])
-	self.item_type_display_text.content.text_field = string.upper(title_text)
+	self.item_type_display_text.content.text_field = title_text
 
 	return 
 end
@@ -259,12 +268,13 @@ InventoryItemsUI.update = function (self, dt)
 end
 InventoryItemsUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
+	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
 	local input_service = input_manager.get_service(input_manager, "inventory_menu")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if gamepad_active and self.use_gamepad then
 		UIRenderer.draw_widget(ui_renderer, self.controller_window_highlight)
@@ -274,14 +284,19 @@ InventoryItemsUI.draw = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
-	if not gamepad_active then
-		UIRenderer.draw_widget(ui_renderer, self.inventory_selection_bar_widget)
-	else
+	if gamepad_active then
 		UIRenderer.draw_widget(ui_renderer, self.item_type_display_text)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-	self.inventory_item_list:draw(dt)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+
+	if not gamepad_active then
+		UIRenderer.draw_widget(ui_top_renderer, self.inventory_selection_bar_widget)
+	end
+
+	UIRenderer.end_pass(ui_top_renderer)
+	self.inventory_item_list:draw(dt, self.use_gamepad)
 
 	return 
 end

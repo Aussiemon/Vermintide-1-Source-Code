@@ -25,15 +25,25 @@ Vector3.flat_angle = function (v1, v2)
 	return (a2 - a1 + math.pi)%(math.pi*2) - math.pi
 end
 Vector3.clamp = function (v, min, max)
-	return Vector3(math.clamp(v.x, min, max), math.clamp(v.y, min, max), math.clamp(v.z, min, max))
+	local x, y, z = Vector3.to_elements(v)
+	local clamp = math.clamp
+
+	return Vector3(clamp(x, min, max), clamp(y, min, max), clamp(z, min, max))
 end
 Vector3.clamp_3d = function (v, min, max)
-	return Vector3(math.clamp(v.x, min[1], max[1]), math.clamp(v.y, min[2], max[2]), math.clamp(v.z, min[3], max[3]))
+	local x, y, z = Vector3.to_elements(v)
+
+	return Vector3(math.clamp(x, min[1], max[1]), math.clamp(y, min[2], max[2]), math.clamp(z, min[3], max[3]))
 end
 Vector3.invalid_vector = function ()
 	return Vector3(math.huge, math.huge, math.huge)
 end
-Vector3.copy = function (vector)
+Vector3.copy = function (v)
+	local x, y, z = Vector3.to_elements(v)
+
+	return Vector3(x, y, z)
+end
+Vector3.deprecated_copy = function (vector)
 	return Vector3(vector[1], vector[2], vector[3])
 end
 Vector3Aux = Vector3Aux or {}

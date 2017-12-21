@@ -68,7 +68,14 @@ weapon_template.actions = {
 					action = "action_wield",
 					input = "action_wield"
 				}
-			}
+			},
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
+			end
 		}
 	},
 	action_inspect = ActionTemplates.action_inspect,
@@ -134,9 +141,7 @@ weapon_template.actions.action_one.default_three.allowed_chain_actions = {
 		input = "action_wield"
 	}
 }
-weapon_template.default_spread_template = "brace_of_pistols"
-weapon_template.dodge_distance = 1
-weapon_template.dodge_speed = 1
+weapon_template.default_spread_template = "repeating pistol"
 weapon_template.right_hand_unit = ""
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.one_handed_melee_weapon.right
 weapon_template.left_hand_unit = ""
@@ -146,6 +151,9 @@ weapon_template.wield_anim = "to_dual_pistol"
 weapon_template.crosshair_style = "default"
 weapon_template.gui_texture = "hud_weapon_icon_repeating_handgun"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.dodge_distance = 1.3
+weapon_template.dodge_speed = 1.3
+weapon_template.dodge_count = 1
 weapon_template.wwise_dep_right_hand = {
 	"wwise/handgun_rifle"
 }

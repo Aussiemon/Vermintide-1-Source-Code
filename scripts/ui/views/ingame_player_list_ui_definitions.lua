@@ -142,9 +142,36 @@ local scenegraph_definition = {
 			40,
 			10
 		}
+	},
+	private_text_gamepad = {
+		vertical_alignment = "top",
+		parent = "game_level",
+		horizontal_alignment = "center",
+		size = {
+			600,
+			34
+		},
+		position = {
+			0,
+			40,
+			10
+		}
+	}
+}
+local private_text_style = {
+	vertical_alignment = "center",
+	font_type = "hell_shark",
+	font_size = 22,
+	horizontal_alignment = "center",
+	text_color = Colors.get_table("cheeseburger"),
+	offset = {
+		0,
+		0,
+		2
 	}
 }
 local widget_definitions = {
+	private_text_gamepad = UIWidgets.create_simple_text("n/a", "private_text_gamepad", 22, nil, private_text_style),
 	input_description_text = UIWidgets.create_simple_text("player_list_show_mouse_description", "player_list_input_description", 24, Colors.get_table("white")),
 	background = {
 		scenegraph_id = "screen",
@@ -220,7 +247,7 @@ local widget_definitions = {
 				font_size = 36,
 				horizontal_alignment = "center",
 				offset = {
-					0,
+					95,
 					0,
 					0
 				},
@@ -233,7 +260,7 @@ local widget_definitions = {
 				font_size = 36,
 				horizontal_alignment = "left",
 				offset = {
-					1200,
+					1170,
 					0,
 					0
 				},
@@ -539,11 +566,11 @@ local hero_textures = {
 		}
 	}
 }
-local Y_OFFSET = 35
+local Y_OFFSET = 25
 
 local function player_widget_definition(index)
 	local i = index - 1
-	local y_offset = -(PLAYER_LIST_SIZE[2]*i + Y_OFFSET*i)
+	local y_offset = -(PLAYER_LIST_SIZE[2]*(i - 1) + Y_OFFSET*i)
 	local text_y_offset = 9
 	local start_x = 400
 	local definition = {
@@ -1047,7 +1074,7 @@ local function player_widget_definition(index)
 				font_size = 28,
 				horizontal_alignment = "center",
 				offset = {
-					0,
+					95,
 					text_y_offset + y_offset,
 					0
 				},
@@ -1057,7 +1084,7 @@ local function player_widget_definition(index)
 			},
 			hero_texture = {
 				offset = {
-					1200,
+					1170,
 					y_offset + 14,
 					0
 				},
@@ -1077,7 +1104,7 @@ local function player_widget_definition(index)
 				font_size = 28,
 				font_type = "hell_shark",
 				offset = {
-					1239,
+					1209,
 					text_y_offset + y_offset,
 					0
 				},
@@ -1091,14 +1118,9 @@ local function player_widget_definition(index)
 	return definition
 end
 
+local platform = Application.platform()
 local generic_input_actions = {
 	own_player = {
-		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
 		{
 			input_action = "back",
 			priority = 5,
@@ -1107,17 +1129,6 @@ local generic_input_actions = {
 	},
 	server_default = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "mute_chat",
-			priority = 2,
-			description_text = "input_description_mute_chat"
-		},
-		{
 			input_action = "mute_voice",
 			priority = 3,
 			description_text = "input_description_mute_voice"
@@ -1125,7 +1136,7 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 4,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1135,17 +1146,6 @@ local generic_input_actions = {
 	},
 	server_chat_muted = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "mute_chat",
-			priority = 2,
-			description_text = "input_description_unmute_chat"
-		},
-		{
 			input_action = "mute_voice",
 			priority = 3,
 			description_text = "input_description_mute_voice"
@@ -1153,7 +1153,7 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 4,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1163,17 +1163,6 @@ local generic_input_actions = {
 	},
 	server_voice_muted = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "mute_chat",
-			priority = 2,
-			description_text = "input_description_mute_chat"
-		},
-		{
 			input_action = "mute_voice",
 			priority = 3,
 			description_text = "input_description_unmute_voice"
@@ -1181,7 +1170,7 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 4,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1191,17 +1180,6 @@ local generic_input_actions = {
 	},
 	server_voice_and_chat_muted = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "mute_chat",
-			priority = 2,
-			description_text = "input_description_unmute_chat"
-		},
-		{
 			input_action = "mute_voice",
 			priority = 3,
 			description_text = "input_description_unmute_voice"
@@ -1209,7 +1187,7 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 4,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1219,20 +1197,9 @@ local generic_input_actions = {
 	},
 	default = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "kick_player",
 			priority = 2,
 			description_text = "input_description_vote_kick_player"
-		},
-		{
-			input_action = "mute_chat",
-			priority = 3,
-			description_text = "input_description_mute_chat"
 		},
 		{
 			input_action = "mute_voice",
@@ -1242,7 +1209,24 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 5,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
+		},
+		{
+			input_action = "back",
+			priority = 6,
+			description_text = "input_description_close"
+		}
+	},
+	kick_unavailable = {
+		{
+			input_action = "mute_voice",
+			priority = 4,
+			description_text = "input_description_mute_voice"
+		},
+		{
+			input_action = "show_profile",
+			priority = 5,
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1252,20 +1236,9 @@ local generic_input_actions = {
 	},
 	chat_muted = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "kick_player",
 			priority = 2,
 			description_text = "input_description_vote_kick_player"
-		},
-		{
-			input_action = "mute_chat",
-			priority = 3,
-			description_text = "input_description_unmute_chat"
 		},
 		{
 			input_action = "mute_voice",
@@ -1275,7 +1248,7 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 5,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1285,20 +1258,9 @@ local generic_input_actions = {
 	},
 	voice_muted = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "kick_player",
 			priority = 2,
 			description_text = "input_description_vote_kick_player"
-		},
-		{
-			input_action = "mute_chat",
-			priority = 3,
-			description_text = "input_description_mute_chat"
 		},
 		{
 			input_action = "mute_voice",
@@ -1308,7 +1270,24 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 5,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
+		},
+		{
+			input_action = "back",
+			priority = 6,
+			description_text = "input_description_close"
+		}
+	},
+	voice_and_kick_unavailable = {
+		{
+			input_action = "mute_voice",
+			priority = 4,
+			description_text = "input_description_unmute_voice"
+		},
+		{
+			input_action = "show_profile",
+			priority = 5,
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1318,20 +1297,9 @@ local generic_input_actions = {
 	},
 	voice_and_chat_muted = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "kick_player",
 			priority = 2,
 			description_text = "input_description_vote_kick_player"
-		},
-		{
-			input_action = "mute_chat",
-			priority = 3,
-			description_text = "input_description_unmute_chat"
 		},
 		{
 			input_action = "mute_voice",
@@ -1341,7 +1309,7 @@ local generic_input_actions = {
 		{
 			input_action = "show_profile",
 			priority = 5,
-			description_text = "input_description_show_profile"
+			description_text = (platform == "xb1" and "input_description_show_profile_xb1") or "input_description_show_profile"
 		},
 		{
 			input_action = "back",
@@ -1351,7 +1319,63 @@ local generic_input_actions = {
 	}
 }
 
+if Application.platform() == "win32" then
+	generic_input_actions.server_default[#generic_input_actions.server_default + 1] = {
+		input_action = "mute_chat",
+		priority = 2,
+		description_text = "input_description_mute_chat"
+	}
+	generic_input_actions.server_chat_muted[#generic_input_actions.server_chat_muted + 1] = {
+		input_action = "mute_chat",
+		priority = 2,
+		description_text = "input_description_unmute_chat"
+	}
+	generic_input_actions.server_voice_muted[#generic_input_actions.server_voice_muted + 1] = {
+		input_action = "mute_chat",
+		priority = 2,
+		description_text = "input_description_mute_chat"
+	}
+	generic_input_actions.server_voice_and_chat_muted[#generic_input_actions.server_voice_and_chat_muted + 1] = {
+		input_action = "mute_chat",
+		priority = 2,
+		description_text = "input_description_unmute_chat"
+	}
+	generic_input_actions.default[#generic_input_actions.default + 1] = {
+		input_action = "mute_chat",
+		priority = 3,
+		description_text = "input_description_mute_chat"
+	}
+	generic_input_actions.chat_muted[#generic_input_actions.chat_muted + 1] = {
+		input_action = "mute_chat",
+		priority = 3,
+		description_text = "input_description_unmute_chat"
+	}
+	generic_input_actions.voice_muted[#generic_input_actions.voice_muted + 1] = {
+		input_action = "mute_chat",
+		priority = 3,
+		description_text = "input_description_mute_chat"
+	}
+	generic_input_actions.voice_and_chat_muted[#generic_input_actions.voice_and_chat_muted + 1] = {
+		input_action = "mute_chat",
+		priority = 3,
+		description_text = "input_description_unmute_chat"
+	}
+end
+
+local private_input_description = {
+	name = "stick",
+	gamepad_support = true,
+	actions = {
+		{
+			input_action = "toggle_private",
+			priority = 1,
+			description_text = "input_description_change_privacy"
+		}
+	}
+}
+
 return {
+	private_input_description = private_input_description,
 	scenegraph_definition = scenegraph_definition,
 	widget_definitions = widget_definitions,
 	player_widget_definition = player_widget_definition,

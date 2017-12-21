@@ -543,7 +543,7 @@ local dead_space_filler_widget = {
 		}
 	}
 }
-local gamma_adjuster = {
+local gamma_adjuster_definition = {
 	scenegraph_id = "gamma_slider",
 	element = {
 		passes = {
@@ -896,19 +896,28 @@ local function get_slider_value(min, max, value)
 end
 
 TitleLoadingUI = class(TitleLoadingUI)
-TitleLoadingUI.init = function (self, world, force_done)
+TitleLoadingUI.init = function (self, world, params, force_done)
 	if Application.platform() == "win32" then
 		Application.set_time_step_policy("no_smoothing", "clear_history", "throttle", 60)
 	end
 
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self._world = world
 	self._done = false
 	self._force_done = force_done
 	self._gamma_done = false
 	self._needs_cursor_pop = false
 	self._current_inputs = {}
+	self._gamma = params.gamma
+	self._trailer = params.trailer
 
-	Managers.input:create_input_service("title_loading_ui", TitleLoadingKeyMaps)
+	if not self._trailer then
+		self._done = true
+	end
+
+	Managers.input:create_input_service("title_loading_ui", "TitleLoadingKeyMaps", "TitleLoadingFilters")
 	Managers.input:map_device_to_service("title_loading_ui", "keyboard")
 	Managers.input:map_device_to_service("title_loading_ui", "mouse")
 	Managers.input:map_device_to_service("title_loading_ui", "gamepad")
@@ -917,7 +926,7 @@ TitleLoadingUI.init = function (self, world, force_done)
 	return 
 end
 TitleLoadingUI._setup_gui = function (self)
-	self._ui_renderer = UIRenderer.create(self._world, "material", "materials/ui/ui_1080p_splash_screen", "material", "materials/ui/ui_1080p_title_screen", "material", "video/trailer", "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts")
+	self._ui_renderer = UIRenderer.create(self._world, "material", "materials/ui/ui_1080p_splash_screen", "material", "materials/ui/ui_1080p_title_screen", "material", "video/trailer", "material", "materials/fonts/gw_fonts")
 
 	self._create_elements(self)
 
@@ -930,11 +939,11 @@ TitleLoadingUI._create_elements = function (self)
 	self._dead_space_filler_widget = UIWidget.init(dead_space_filler_widget)
 	self._done_button = UIWidget.init(done_button)
 
-	if not SaveData.gamma_corrected and not self._force_done then
+	if self._gamma then
 		ShowCursorStack.push()
 
 		self._needs_cursor_pop = true
-		local gamma_adjuster = UIWidget.init(gamma_adjuster)
+		local gamma_adjuster = UIWidget.init(gamma_adjuster_definition)
 		self._gamma_adjuster = gamma_adjuster
 
 		self.setup_gamma_menu(self)
@@ -1013,6 +1022,12 @@ TitleLoadingUI._update_gamma_adjuster = function (self, dt)
 			SaveData.gamma_corrected = true
 
 			Managers.save:auto_save(SaveFileName, SaveData)
+		elseif Application.platform() == "ps4" then
+			Application.set_user_setting("render_settings", "gamma", gamma)
+
+			SaveData.gamma_corrected = true
+
+			Managers.save:auto_save(SaveFileName, SaveData)
 		end
 
 		self._gamma_done = true
@@ -1031,6 +1046,17 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 	else
 		local gamma_adjuster = self._gamma_adjuster
 		local gamma_adjuster_content = gamma_adjuster.content
+		local input_cooldown = gamma_adjuster_content.input_cooldown
+		local input_cooldown_multiplier = gamma_adjuster_content.input_cooldown_multiplier
+		local on_cooldown_last_frame = false
+
+		if input_cooldown then
+			on_cooldown_last_frame = true
+			local new_cooldown = math.max(input_cooldown - dt, 0)
+			input_cooldown = (0 < new_cooldown and new_cooldown) or nil
+			gamma_adjuster_content.input_cooldown = input_cooldown
+		end
+
 		local internal_value = gamma_adjuster_content.internal_value
 		local num_decimals = gamma_adjuster_content.num_decimals
 		local min = gamma_adjuster_content.min
@@ -1038,87 +1064,74 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 		local diff = max - min
 		local total_step = diff*10^num_decimals
 		local step = total_step/1
+		local move = input_service.get(input_service, "analog_input")
+		local analog_speed = 0.01
+		local current_time = Managers.time:time("main")
+		local input_been_made = false
 
 		if input_service.get(input_service, "move_left_hold") then
-			gamma_adjuster_content.changed = true
-			gamma_adjuster_content.internal_value = math.clamp(internal_value - step, 0, 1)
+			if not input_cooldown then
+				gamma_adjuster_content.internal_value = math.clamp(internal_value - step, 0, 1)
+				gamma_adjuster_content.last_update = current_time
+				input_been_made = true
+			end
 		elseif input_service.get(input_service, "move_right_hold") then
+			if not input_cooldown then
+				gamma_adjuster_content.internal_value = math.clamp(internal_value + step, 0, 1)
+				gamma_adjuster_content.last_update = current_time
+				input_been_made = true
+			end
+		elseif 0 < math.abs(move.x) then
 			gamma_adjuster_content.changed = true
-			gamma_adjuster_content.internal_value = math.clamp(internal_value + step, 0, 1)
+			gamma_adjuster_content.internal_value = math.clamp(internal_value + math.sign(move.x)*math.pow(move.x, 2)*total_step*dt*analog_speed, 0, 1)
+		end
+
+		if input_been_made then
+			gamma_adjuster_content.changed = true
+
+			if on_cooldown_last_frame then
+				input_cooldown_multiplier = math.max(input_cooldown_multiplier - 0.1, 0.1)
+				gamma_adjuster_content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+				gamma_adjuster_content.input_cooldown_multiplier = input_cooldown_multiplier
+			else
+				input_cooldown_multiplier = 1
+				gamma_adjuster_content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+				gamma_adjuster_content.input_cooldown_multiplier = input_cooldown_multiplier
+			end
+
+			return true
 		end
 	end
 
 	return 
 end
-TitleLoadingUI._get_input_texture_data = function (self, input)
+TitleLoadingUI._get_input_texture_data = function (self, input_action)
 	local input_service = Managers.input:get_service("title_loading_ui")
-	local keymap_bindings = input_service.get_keymapping(input_service, input)
-	local input_mappings = keymap_bindings.input_mappings
-	local platform = Application.platform()
 
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
+	if Managers.input:is_device_active("keyboard") or Managers.input:is_device_active("mouse") then
+		local platform = Application.platform()
+		local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
+		local device_type = keymap_binding[1]
+		local key_index = keymap_binding[2]
+		local key_action_type = keymap_binding[3]
 
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-
-			if Managers.input:is_device_active("keyboard") or Managers.input:is_device_active("mouse") then
-				return nil, Keyboard.button_locale_name(key_index)
-			elseif Managers.input:is_device_active("gamepad") and device_type == "gamepad" then
-				local button_name = Pad1.button_name(key_index)
-				local button_texture_data = nil
-
-				if platform == "xb1" or platform == "win32" then
-					button_texture_data = ButtonTextureByName(button_name, "xb1")
-				else
-					button_texture_data = ButtonTextureByName(button_name, "ps4")
-				end
-
-				return button_texture_data, button_name
-			end
-		end
+		return nil, Keyboard.button_locale_name(key_index)
+	elseif Managers.input:is_device_active("gamepad") then
+		return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 	end
 
 	return 
 end
-TitleLoadingUI._get_input_gamepad_texture_data = function (self, input)
+TitleLoadingUI._get_input_gamepad_texture_data = function (self, input_action)
 	local input_service = Managers.input:get_service("title_loading_ui")
-	local keymap_bindings = input_service.get_keymapping(input_service, input)
-	local input_mappings = keymap_bindings.input_mappings
-	local platform = Application.platform()
 
-	for i = 1, #input_mappings, 1 do
-		local input_mapping = input_mappings[i]
-
-		for j = 1, input_mapping.n, 3 do
-			local device_type = input_mapping[j]
-			local key_index = input_mapping[j + 1]
-			local key_action_type = input_mapping[j + 2]
-
-			if device_type == "gamepad" then
-				local button_name = Pad1.button_name(key_index)
-				local button_texture_data = nil
-
-				if platform == "xb1" or platform == "win32" then
-					button_texture_data = ButtonTextureByName(button_name, "xb1")
-				else
-					button_texture_data = ButtonTextureByName(button_name, "ps4")
-				end
-
-				return button_texture_data, button_name
-			end
-		end
-	end
-
-	return 
+	return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 end
 TitleLoadingUI._update_input_text = function (self, dt)
 	local widget_content = self._skip_widget.content
 	local widget_style = self._skip_widget.style
 	local ui_scenegraph = self._ui_scenegraph
-	local texture_data, input_text = self._get_input_texture_data(self, "cancel_video")
+	local texture_data, input_text = self._get_input_texture_data(self, "cancel_video_1")
 
 	if not texture_data then
 		if widget_content.input_text ~= input_text then
@@ -1191,6 +1204,12 @@ TitleLoadingUI._update_any_held = function (self)
 		self._current_inputs[input] = Mouse
 	end
 
+	local input = Pad1.any_pressed()
+
+	if input then
+		self._current_inputs[input] = Pad1
+	end
+
 	return held
 end
 TitleLoadingUI._update_input = function (self, dt)
@@ -1258,7 +1277,7 @@ TitleLoadingUI._render = function (self, dt)
 	local input_service = input_manager.get_service(input_manager, "title_loading_ui")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(self._ui_renderer, self._ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(self._ui_renderer, self._ui_scenegraph, input_service, dt, nil, self.render_settings)
 
 	if not self._gamma_done then
 		UIRenderer.draw_widget(self._ui_renderer, self._gamma_adjuster)
@@ -1280,6 +1299,10 @@ TitleLoadingUI._render = function (self, dt)
 	return 
 end
 TitleLoadingUI._render_video = function (self, dt)
+	if not self._trailer then
+		return 
+	end
+
 	if self._done then
 		return 
 	end
@@ -1331,8 +1354,6 @@ TitleLoadingUI.destroy = function (self)
 			Application.set_time_step_policy("throttle", max_fps, "smoothing", 11, 2, 0.1)
 		end
 	end
-
-	Managers.transition:hide_loading_icon()
 
 	if self._needs_cursor_pop then
 		ShowCursorStack.pop()

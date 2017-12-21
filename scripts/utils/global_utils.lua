@@ -27,22 +27,18 @@ function CLEAR_POSITION_LOOKUP()
 	return 
 end
 
+local world_position = Unit.world_position
+
 function UPDATE_POSITION_LOOKUP()
 	Profiler.start("UPDATE_POSITION_LOOKUP")
-
-	local world_position = Unit.world_position
-
-	for unit, _ in pairs(position_lookup) do
-		position_lookup[unit] = world_position(unit, 0)
-	end
+	EngineOptimized.update_position_lookup(position_lookup)
+	Profiler.stop("UPDATE_POSITION_LOOKUP")
 
 	if script_data.debug_enabled and not script_data.disable_debug_position_lookup then
 		for unit, _ in pairs(position_lookup) do
 			position_lookup_backup[unit] = world_position(unit, 0)
 		end
 	end
-
-	Profiler.stop()
 
 	return 
 end
@@ -65,7 +61,7 @@ function UPDATE_RESOLUTION_LOOKUP()
 
 	resolution_lookup.modified = resolution_modified
 
-	Profiler.stop()
+	Profiler.stop("UPDATE_RESOLUTION_LOOKUP")
 
 	return 
 end
@@ -103,7 +99,7 @@ function VALIDATE_POSITION_LOOKUP()
 	end
 
 	table.clear(position_lookup_backup)
-	Profiler.stop()
+	Profiler.stop("VALIDATE_POSITION_LOOKUP")
 
 	return 
 end
@@ -120,54 +116,57 @@ local function is_valid(unit)
 end
 
 function UPDATE_PLAYER_LISTS()
-	local player_units = PLAYER_UNITS
-	local player_positions = PLAYER_POSITIONS
-	local players = Managers.player:human_players()
-	local i = 1
+	local human_units = PLAYER_UNITS
+	local human_unit_positions = PLAYER_POSITIONS
+	local human_and_bot_units = PLAYER_AND_BOT_UNITS
+	local human_and_bot_unit_positions = PLAYER_AND_BOT_POSITIONS
+	local valid_humans_and_bots = VALID_PLAYERS_AND_BOTS
 
-	for k, player in pairs(players) do
+	table.clear(valid_humans_and_bots)
+
+	local players = Managers.player:human_and_bot_players()
+	local num_human_units = 0
+	local num_human_and_bot_units = 0
+
+	for _, player in pairs(players) do
 		local unit = player.player_unit
 
 		if is_valid(unit) then
 			local pos = position_lookup[unit]
-			player_units[i] = unit
-			player_positions[i] = pos
-			i = i + 1
+			num_human_and_bot_units = num_human_and_bot_units + 1
+			human_and_bot_units[num_human_and_bot_units] = unit
+			human_and_bot_unit_positions[num_human_and_bot_units] = pos
+			valid_humans_and_bots[unit] = true
+
+			if player.is_player_controlled(player) then
+				num_human_units = num_human_units + 1
+				human_units[num_human_units] = unit
+				human_unit_positions[num_human_units] = pos
+			end
 		end
 	end
 
-	while player_units[i] do
-		player_units[i] = nil
-		player_positions[i] = nil
+	local i = num_human_units + 1
+
+	while human_units[i] do
+		human_units[i] = nil
+		human_unit_positions[i] = nil
 		i = i + 1
 	end
 
-	local player_and_bot_units = PLAYER_AND_BOT_UNITS
-	local player_and_bot_positions = PLAYER_AND_BOT_POSITIONS
-	local ai_target_units = AI_TARGET_UNITS
-	local players_and_bots = Managers.player:human_and_bot_players()
-	local valid_players_and_bots = VALID_PLAYERS_AND_BOTS
+	local k = num_human_and_bot_units + 1
 
-	table.clear(valid_players_and_bots)
-
-	local j = 1
-	i = 1
-
-	for k, player in pairs(players_and_bots) do
-		local unit = player.player_unit
-
-		if is_valid(unit) then
-			local pos = position_lookup[unit]
-			player_and_bot_units[i] = unit
-			player_and_bot_positions[i] = pos
-			valid_players_and_bots[unit] = true
-			i = i + 1
-		end
+	while human_and_bot_units[k] do
+		human_and_bot_units[k] = nil
+		human_and_bot_unit_positions[k] = nil
+		k = k + 1
 	end
 
+	local ai_target_units = AI_TARGET_UNITS
 	local aggro_system = Managers.state.entity:system("aggro_system")
 	local aggroable_units = aggro_system.aggroable_units
 	local ai_unit_alive = AiUtils.unit_alive
+	local j = 1
 
 	for unit, _ in pairs(aggroable_units) do
 		if ai_unit_alive(unit) and not ignore_ai_target(unit) then
@@ -179,12 +178,6 @@ function UPDATE_PLAYER_LISTS()
 	while ai_target_units[j] do
 		ai_target_units[j] = nil
 		j = j + 1
-	end
-
-	while player_and_bot_units[i] do
-		player_and_bot_units[i] = nil
-		player_and_bot_positions[i] = nil
-		i = i + 1
 	end
 
 	return 

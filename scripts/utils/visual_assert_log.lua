@@ -8,7 +8,7 @@ VisualAssertLog.setup = function (world)
 	VAL.console_end_key = Keyboard.button_index("insert")
 
 	if world then
-		VAL.gui = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+		VAL.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
 	end
 
 	VAL.asserts = VisualAssertLog.asserts or {}
@@ -31,7 +31,7 @@ VisualAssertLog.cleanup = function ()
 	return 
 end
 local font_size = 16
-local font = "arial_16"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 VisualAssertLog.update = function ()
 	if 0 < VisualAssertLog.n_asserts then

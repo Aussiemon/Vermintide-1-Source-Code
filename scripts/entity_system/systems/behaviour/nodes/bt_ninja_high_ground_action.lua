@@ -1,15 +1,14 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTNinjaHighGroundAction = class(BTNinjaHighGroundAction, BTClimbAction)
-BTNinjaHighGroundAction.name = "BTNinjaHighGroundAction"
 local position_lookup = POSITION_LOOKUP
 local alive = POSITION_LOOKUP
-local script_data = script_data
 BTNinjaHighGroundAction.init = function (self, ...)
 	BTNinjaHighGroundAction.super.init(self, ...)
 
 	return 
 end
+BTNinjaHighGroundAction.name = "BTNinjaHighGroundAction"
 BTNinjaHighGroundAction.enter = function (self, unit, blackboard, t)
 	blackboard.high_ground_opportunity = nil
 
@@ -40,6 +39,19 @@ BTNinjaHighGroundAction.leave = function (self, unit, blackboard, t, reason)
 		end
 
 		if blackboard.fence_jumping then
+			local navigation_extension = blackboard.navigation_extension
+			local locomotion_extension = blackboard.locomotion_extension
+
+			navigation_extension.set_enabled(navigation_extension, true)
+
+			local exit_pos = blackboard.climb_exit_pos:unbox()
+
+			navigation_extension.set_navbot_position(navigation_extension, exit_pos)
+			print("In smart object range:", blackboard.is_in_smart_object_range, blackboard.is_smart_objecting)
+			locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
+			locomotion_extension.set_movement_type(locomotion_extension, "script_driven")
+			locomotion_extension.teleport_to(locomotion_extension, blackboard.ledge_position:unbox(), Unit.local_rotation(unit, 0))
+
 			blackboard.climb_spline_ground = nil
 			blackboard.climb_spline_ledge = nil
 			blackboard.climb_entrance_pos = nil
@@ -59,19 +71,19 @@ BTNinjaHighGroundAction.leave = function (self, unit, blackboard, t, reason)
 			LocomotionUtils.set_animation_translation_scale(unit, Vector3(1, 1, 1))
 			LocomotionUtils.constrain_on_clients(unit, false, Vector3.zero(), Vector3.zero())
 
-			local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
-
-			navigation_extension.set_enabled(navigation_extension, true)
-
 			local hit_reaction_extension = ScriptUnit.extension(unit, "hit_reaction_system")
 			hit_reaction_extension.force_ragdoll_on_death = nil
 
 			if navigation_extension.is_using_smart_object(navigation_extension) then
-				slot7 = navigation_extension.use_smart_object(navigation_extension, false)
+				slot9 = navigation_extension.use_smart_object(navigation_extension, false)
 			end
 		end
 	else
 		BTClimbAction.leave(self, unit, blackboard, t)
+	end
+
+	if reason == "aborted" then
+		blackboard.jump_data = nil
 	end
 
 	blackboard.fence_jumping = false
@@ -108,16 +120,20 @@ BTNinjaHighGroundAction.try_jump = function (self, unit, blackboard, t, pos1, fo
 	local p1 = pos1 + Vector3(0, 0, 1)
 	local enemy_spine_node = Unit.node(target_unit, "j_neck")
 	local p2 = Unit.world_position(target_unit, enemy_spine_node) - Vector3(0, 0, 1)
-	local in_los = true
+	local ninja_rotation = Unit.local_rotation(unit, 0)
+	local ninja_forward = Quaternion.forward(ninja_rotation)
+	local to_target = p2 - POSITION_LOOKUP[unit]
+	local dot = Vector3.dot(ninja_forward, to_target)
+	local target_ahead = 0.3 < dot
 
-	if in_los then
+	if target_ahead then
 		local segment_list = {}
 		local wedge = Vector3(0, 0, 0.05)
 		local in_los, velocity, time_of_flight = BTPrepareForCrazyJumpAction.test_trajectory(blackboard, p1 + Vector3(0, 0, 0, 5), p2 + wedge, segment_list, true)
 
 		if in_los then
 			blackboard.jump_data = {
-				delay_jump_start = true,
+				delay_jump_start = false,
 				segment_list = segment_list,
 				enemy_spine_node = enemy_spine_node,
 				jump_target_pos = Vector3Box(p2),

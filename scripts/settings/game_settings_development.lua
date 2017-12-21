@@ -1,8 +1,23 @@
-if Application.platform() ~= "xb1" then
+if Application.platform() == "win32" then
 	require("scripts/helpers/debug_helper")
 end
 
 require("scripts/settings/backend_settings")
+
+CONSOLE_DISABLED_INTERACTIONS = CONSOLE_DISABLED_INTERACTIONS or {}
+
+if Application.platform() ~= "win32" then
+	CONSOLE_DISABLED_INTERACTIONS = {
+		altar_access = true,
+		quest_access = true
+	}
+end
+
+if Application.platform() == "xb1" then
+	Application.warning("Unlocking all levels for Lite Optional Cert")
+
+	script_data.unlock_all_levels = true
+end
 
 GameSettingsDevelopment = GameSettingsDevelopment or {}
 local argv = {
@@ -19,6 +34,9 @@ if Application.platform() == "win32" then
 end
 
 GameSettingsDevelopment.disable_shadow_lights_system = true
+GameSettingsDevelopment.use_baked_enemy_meshes = false
+GameSettingsDevelopment.help_screen_enabled = false
+GameSettingsDevelopment.lobby_browser_enabled = true
 local network_timeout = 60
 
 if Development.parameter("network_timeout_really_long") then
@@ -47,6 +65,8 @@ end
 
 GameSettingsDevelopment.backend_settings = BackendSettings.beta2
 GameSettingsDevelopment.disable_intro_trailer = false
+GameSettingsDevelopment.use_new_pickup_spawning = true
+GameSettingsDevelopment.fade_environments = true
 GameSettingsDevelopment.app_ids = {
 	beta = 252650,
 	beta2 = 393760,
@@ -60,6 +80,10 @@ if Development.parameter("gdc") then
 	if not Development.parameter("force_debug_enabled") or Development.parameter("force_debug_disabled") then
 		script_data.debug_enabled = false
 	end
+end
+
+if Application.platform() == "xb1" and Application.build() == "public_dev" then
+	script_data.debug_enabled = false
 end
 
 if Development.parameter("force_debug_disabled") then
@@ -97,19 +121,24 @@ if settings.steam or Development.parameter("force_steam") then
 		Application.quit_with_message("Warhammer: End Times - Vermintide. You need to have the Steam Client running to play the game.")
 	end
 elseif Application.platform() == "ps4" then
-	if Application.build() == "dev" or Application.build() == "debug" then
+	if Application.build() == "dev" or Application.build() == "debug" or Application.build() == "public_dev" then
 		GameSettingsDevelopment.backend_settings = BackendSettings.ps4
 		GameSettingsDevelopment.network_mode = (LEVEL_EDITOR_TEST and "lan") or "lan"
 	end
 
 	GameSettingsDevelopment.show_fps = true
 elseif Application.platform() == "xb1" then
-	if Application.build() == "dev" or Application.build() == "debug" then
+	if Application.build() == "dev" or Application.build() == "debug" or Application.build() == "public_dev" then
 		GameSettingsDevelopment.backend_settings = BackendSettings.xb1
 		GameSettingsDevelopment.network_mode = (LEVEL_EDITOR_TEST and "lan") or "lan"
 	end
 
-	GameSettingsDevelopment.show_fps = true
+	if Application.build() == "public_dev" then
+		GameSettingsDevelopment.show_version_info = false
+		GameSettingsDevelopment.show_fps = false
+	else
+		GameSettingsDevelopment.show_fps = true
+	end
 elseif Application.build() == "dev" or Application.build() == "debug" then
 	GameSettingsDevelopment.network_mode = (LEVEL_EDITOR_TEST and "lan") or (Development.parameter("force_steam") and "steam") or "lan"
 	GameSettingsDevelopment.show_fps = Development.parameter("show_fps") == nil or Development.parameter("show_fps")
@@ -121,7 +150,7 @@ else
 end
 
 GameSettingsDevelopment.disable_crafting = Development.parameter("disable-crafting")
-GameSettingsDevelopment.disable_free_flight = Development.parameter("disable-free-flight")
+GameSettingsDevelopment.disable_free_flight = Development.parameter("disable-free-flight") or Application.build() == "release"
 
 if Development.parameter("quests_enabled") ~= nil then
 	GameSettingsDevelopment.backend_settings.quests_enabled = Development.parameter("quests_enabled")
@@ -261,7 +290,6 @@ GameSettingsDevelopment.ignored_rpc_logs = {
 	"rpc_ai_weapon_shoot_start",
 	"rpc_ai_weapon_shoot_end",
 	"rpc_interest_point_chatter_update",
-	"rpc_set_animation_driven_movement",
 	"rpc_set_animation_rotation_scale",
 	"rpc_set_animation_translation_scale",
 	"rpc_set_script_driven",

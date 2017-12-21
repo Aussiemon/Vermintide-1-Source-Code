@@ -7,6 +7,7 @@ GenericAmmoUserExtension.init = function (self, extension_init_context, unit, ex
 	local ammo_percent = extension_init_data.ammo_percent or 1
 	local ammo_data = extension_init_data.ammo_data
 	self.reload_time = ammo_data.reload_time
+	self.single_clip = ammo_data.single_clip
 	self.max_ammo = ammo_data.max_ammo
 	self.start_ammo = math.floor(ammo_percent*self.max_ammo)
 	self.ammo_per_clip = ammo_data.ammo_per_clip or self.max_ammo
@@ -105,7 +106,7 @@ GenericAmmoUserExtension.update = function (self, unit, input, dt, context, t)
 					local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
 
 					inventory_extension.destroy_slot(inventory_extension, self.slot_name)
-					inventory_extension.wield(inventory_extension, "slot_melee")
+					inventory_extension.wield_previous_weapon(inventory_extension)
 				elseif GameSettingsDevelopment.use_telemetry then
 					local player_manager = Managers.player
 					local player = player_manager.unit_owner(player_manager, self.owner_unit)
@@ -146,9 +147,21 @@ GenericAmmoUserExtension.update = function (self, unit, input, dt, context, t)
 			if self.play_reload_animation then
 				Unit.set_flow_variable(self.unit, "wwise_reload_speed", unmodded_reload_time/reload_time)
 				self.start_reload_animation(self, reload_time)
+
+				if not Managers.player:owner(self.owner_unit).bot_player then
+					Managers.state.controller_features:add_effect("rumble", {
+						rumble_effect = "reload_start"
+					})
+				end
 			end
 		else
 			self.next_reload_time = nil
+
+			if not Managers.player:owner(self.owner_unit).bot_player then
+				Managers.state.controller_features:add_effect("rumble", {
+					rumble_effect = "reload_over"
+				})
+			end
 		end
 	end
 
@@ -295,6 +308,9 @@ GenericAmmoUserExtension.is_reloading = function (self)
 end
 GenericAmmoUserExtension.full_ammo = function (self)
 	return self.remaining_ammo(self) + self.ammo_count(self) == self.max_ammo
+end
+GenericAmmoUserExtension.using_single_clip = function (self)
+	return self.single_clip
 end
 
 return 

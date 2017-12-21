@@ -1,7 +1,8 @@
 AiAnimUtils = AiAnimUtils or {}
+local POSITION_LOOKUP = POSITION_LOOKUP
 AiAnimUtils.get_animation_rotation_scale = function (unit, blackboard, action)
-	local unit_pos = Unit.local_position(unit, 0)
-	local target_pos = Unit.local_position(blackboard.target_unit, 0)
+	local unit_pos = POSITION_LOOKUP[unit]
+	local target_pos = POSITION_LOOKUP[blackboard.target_unit]
 	local forward_dir = Quaternion.forward(Unit.local_rotation(unit, 0), 0)
 	local target_dir = Vector3.normalize(target_pos - unit_pos)
 	local unit_rot_radians = math.atan2(forward_dir.y, forward_dir.x)
@@ -22,8 +23,8 @@ AiAnimUtils.get_animation_rotation_scale = function (unit, blackboard, action)
 end
 AiAnimUtils.get_start_move_animation = function (unit, blackboard, action)
 	local animation_name = nil
-	local current_pos = Unit.local_position(unit, 0)
-	local target_pos = Unit.local_position(blackboard.target_unit, 0)
+	local current_pos = POSITION_LOOKUP[unit]
+	local target_pos = POSITION_LOOKUP[blackboard.target_unit]
 	local target_vector_flat = Vector3.normalize(Vector3.flat(target_pos - current_pos))
 	local rotation = Unit.local_rotation(unit, 0)
 	local forward_vector_flat = Vector3.normalize(Vector3.flat(Quaternion.forward(rotation)))

@@ -33,20 +33,22 @@ StateInGameRunning.on_enter = function (self, params)
 	local input_manager = params.input_manager
 	self.input_manager = input_manager
 	self.is_in_inn = params.is_in_inn
+	self.is_in_tutorial = params.is_in_tutorial
 	self.end_conditions_met = false
 	local loaded_player_controls = PlayerData.controls and PlayerData.controls.Player
+	local platform = Application.platform()
 	local player_control_keymap = table.clone(PlayerControllerKeymaps)
 	local player_control_filters = table.clone(PlayerControllerFilters)
 
 	if loaded_player_controls and loaded_player_controls.keymap then
-		table.merge_recursive(player_control_keymap, loaded_player_controls.keymap)
+		table.merge_recursive(player_control_keymap[platform], loaded_player_controls.keymap)
 	end
 
 	if loaded_player_controls and loaded_player_controls.filters then
-		table.merge_recursive(player_control_filters, loaded_player_controls.filters)
+		table.merge_recursive(player_control_filters[platform], loaded_player_controls.filters)
 	end
 
-	input_manager.create_input_service(input_manager, "Player", player_control_keymap, player_control_filters)
+	input_manager.create_input_service(input_manager, "Player", "PlayerControllerKeymaps", "PlayerControllerFilters")
 	input_manager.map_device_to_service(input_manager, "Player", "keyboard")
 	input_manager.map_device_to_service(input_manager, "Player", "mouse")
 	input_manager.map_device_to_service(input_manager, "Player", "gamepad")
@@ -91,6 +93,10 @@ StateInGameRunning.on_enter = function (self, params)
 	event_manager.register(event_manager, self, "checkpoint_vote_cancelled", "on_checkpoint_vote_cancelled")
 	event_manager.register(event_manager, self, "conflict_director_setup_done", "event_conflict_director_setup_done")
 
+	if Application.platform() == "xb1" then
+		event_manager.register(event_manager, self, "trigger_xbox_round_end", "event_trigger_xbox_round_end")
+	end
+
 	if self.is_server then
 		Managers.state.event:trigger("game_started")
 		Managers.smoketest:report("enter_ingame")
@@ -126,6 +132,7 @@ StateInGameRunning.on_enter = function (self, params)
 		network_lobby = self._lobby_host or self._lobby_client,
 		network_event_delegate = params.network_event_delegate,
 		peer_id = peer_id,
+		player = player,
 		local_player_id = local_player_id,
 		dialogue_system = entity_manager.system(entity_manager, "dialogue_system"),
 		dice_keeper = params.dice_keeper,
@@ -181,6 +188,10 @@ StateInGameRunning.on_enter = function (self, params)
 	Managers.state.camera:apply_level_particle_effects(LevelSettings[level_key].level_particle_effects, viewport_name)
 	Managers.state.camera:apply_level_screen_effects(LevelSettings[level_key].level_screen_effects, viewport_name)
 
+	if Application.platform() == "ps4" then
+		Managers.account:set_realtime_multiplay_state("pre_game", true)
+	end
+
 	if Managers.chat:chat_is_focused() then
 		Managers.chat.chat_gui:block_input()
 	end
@@ -194,7 +205,7 @@ StateInGameRunning.create_ingame_ui = function (self, ingame_ui_context)
 
 	self.ingame_ui = IngameUI:new(ingame_ui_context)
 
-	Managers.state.entity:system("tutorial_system"):set_tutorial_ui(self.ingame_ui.ingame_hud.tutorial_ui)
+	Managers.state.entity:system("tutorial_system"):set_ingame_ui(self.ingame_ui)
 
 	Managers.state.entity:system("mission_system").tutorial_ui = self.ingame_ui.ingame_hud.tutorial_ui
 	Managers.state.entity:system("mission_system").mission_objective_ui = self.ingame_ui.ingame_hud.mission_objective
@@ -231,6 +242,7 @@ StateInGameRunning.setup_end_of_level_UI = function (self)
 
 		if Application.platform() == "ps4" then
 			Managers.account:set_presence("dice_game")
+			Managers.account:set_realtime_multiplay_state("end_screen", true)
 		end
 
 		if Managers.chat:chat_is_focused() then
@@ -265,9 +277,48 @@ StateInGameRunning.wanted_transition = function (self)
 		return 
 	end
 
-	if self.network_server and not self.network_server:are_all_peers_ingame() then
+	if self.network_client and not self.network_client:is_ingame() then
 		return 
-	elseif self.network_client and not self.network_client:is_ingame() then
+	end
+
+	local invite_transition = nil
+	local invite_data = Managers.invite:get_invited_lobby_data()
+
+	if invite_data then
+		local platform = Application.platform()
+		local lobby_id = invite_data.id or invite_data.name
+		local current_lobby_id = nil
+
+		if platform == "xb1" then
+			current_lobby_id = (self._lobby_host and self._lobby_host.lobby._data.session_name) or self._lobby_client.lobby._data.session_name
+		else
+			current_lobby_id = (self._lobby_host and self._lobby_host:id()) or self._lobby_client:id()
+		end
+
+		local current_level = self.level_transition_handler.level_key
+
+		if Managers.matchmaking:is_game_matchmaking() and self.network_server and current_level == "inn_level" then
+			mm_printf("Found an invite, but was matchmaking.")
+
+			self.popup_id = Managers.popup:queue_popup(Localize("popup_join_while_matchmaking"), Localize("popup_error_topic"), "ok", Localize("button_ok"))
+		elseif lobby_id == current_lobby_id then
+			mm_printf("Found an invite, but was already in lobby.")
+
+			self.popup_id = Managers.popup:queue_popup(Localize("popup_already_in_same_lobby"), Localize("popup_error_topic"), "ok", Localize("button_ok"))
+		elseif not Managers.play_go:installed() then
+			mm_printf("Found an invite, but game was not fully installed.")
+
+			self.popup_id = Managers.popup:queue_popup(Localize("popup_invite_not_installed"), Localize("popup_invite_not_installed_header"), "not_installed", Localize("menu_ok"))
+		elseif self.network_server and not self.network_server:are_all_peers_ingame() then
+			mm_printf("Found an invite, but someone is trying to join the game.")
+
+			self.popup_id = Managers.popup:queue_popup(Localize("popup_join_blocked_by_joining_player"), Localize("popup_invite_not_installed_header"), "not_installed", Localize("menu_ok"))
+		else
+			invite_transition = "join_lobby"
+		end
+	end
+
+	if self.network_server and not self.network_server:are_all_peers_ingame() then
 		return 
 	end
 
@@ -275,36 +326,11 @@ StateInGameRunning.wanted_transition = function (self)
 
 	if wanted_transition then
 		mm_printf("Doing transition %s from UI", wanted_transition)
-	else
-		data = Managers.invite:get_invited_lobby_data()
+	elseif invite_transition then
+		mm_printf("Found an invite, joining that lobby.")
 
-		if data then
-			local platform = Application.platform()
-			local lobby_id = data.id or data.name
-			local current_lobby_id = nil
-
-			if platform == "xb1" then
-				current_lobby_id = (self._lobby_host and self._lobby_host.lobby._data.session_name) or self._lobby_client.lobby._data.session_name
-			else
-				current_lobby_id = (self._lobby_host and self._lobby_host:id()) or self._lobby_client:id()
-			end
-
-			local current_level = self.level_transition_handler.level_key
-
-			if Managers.matchmaking:is_game_matchmaking() and self.network_server and current_level == "inn_level" then
-				mm_printf("Found an invite, but was matchmaking.")
-
-				self.popup_id = Managers.popup:queue_popup(Localize("popup_join_while_matchmaking"), Localize("popup_error_topic"), "ok", Localize("button_ok"))
-			elseif lobby_id == current_lobby_id then
-				mm_printf("Found an invite, but was already in lobby.")
-
-				self.popup_id = Managers.popup:queue_popup(Localize("popup_already_in_same_lobby"), Localize("popup_error_topic"), "ok", Localize("button_ok"))
-			else
-				mm_printf("Found an invite, joining that lobby.")
-
-				wanted_transition = "join_lobby"
-			end
-		end
+		wanted_transition = invite_transition
+		data = invite_data
 	end
 
 	if not wanted_transition then
@@ -317,6 +343,16 @@ StateInGameRunning.wanted_transition = function (self)
 
 	if not wanted_transition and self.afk_kick then
 		wanted_transition = "afk_kick"
+	end
+
+	wanted_transition = wanted_transition or Managers.state.game_mode:wanted_transition()
+
+	if wanted_transition and Application.platform() == "xb1" and not self.is_in_inn and not self.is_in_tutorial then
+		if Development.parameter("auto-host-level") ~= nil then
+		elseif not self._xbox_event_end_triggered then
+			Application.warning("MultiplyerRoundStart was triggered without end conditions met")
+			self._xbone_end_of_round_events(self, self.statistics_db)
+		end
 	end
 
 	return wanted_transition, data
@@ -430,6 +466,18 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 
 	self.game_lost = game_lost
 
+	if self.is_in_inn or self.is_in_tutorial then
+		return 
+	end
+
+	if Application.platform() == "xb1" then
+		if not self._xbox_event_end_triggered then
+			self._xbone_end_of_round_events(self, self.statistics_db)
+		end
+
+		Managers.state.achievement:write_hero_stats()
+	end
+
 	return 
 end
 StateInGameRunning.on_checkpoint_vote_cancelled = function (self)
@@ -469,6 +517,25 @@ StateInGameRunning._debug_update_rooms = function (self, dt, t)
 
 	return 
 end
+
+if Application.platform() ~= "win32" and (Application.build() == "dev" or Application.build() == "debug") then
+	function RELOAD_CONTROLS()
+		Managers.input:create_input_service("Player", "PlayerControllerKeymaps", "PlayerControllerFilters")
+		Managers.input:map_device_to_service("Player", "keyboard")
+		Managers.input:map_device_to_service("Player", "mouse")
+		Managers.input:map_device_to_service("Player", "gamepad")
+
+		local input_source = Managers.input:get_service("Player")
+		local player = Managers.player:local_player()
+		player.input_source = input_source
+		local unit = player.player_unit
+		local input_extension = ScriptUnit.extension(unit, "input_system")
+		input_extension.input_service = input_source
+
+		return 
+	end
+end
+
 StateInGameRunning.update = function (self, dt, t)
 	Profiler.start("StateInGameRunning:update()")
 
@@ -515,6 +582,10 @@ StateInGameRunning.update = function (self, dt, t)
 		local result = Managers.popup:query_result(self.popup_id)
 
 		if result then
+			if result == "not_installed" then
+				Managers.invite:clear_invites()
+			end
+
 			self.popup_id = nil
 		end
 	end
@@ -530,8 +601,8 @@ StateInGameRunning.update = function (self, dt, t)
 	local main_t = Managers.time:time("main")
 
 	self.update_player_afk_check(self, dt, main_t)
-	Profiler.stop()
-	Profiler.stop()
+	Profiler.stop("AFK Kick")
+	Profiler.stop("StateInGameRunning:update()")
 
 	return 
 end
@@ -550,7 +621,22 @@ StateInGameRunning.check_for_new_quests_or_contracts = function (self, dt)
 
 	return 
 end
+StateInGameRunning.disable_ui = function (self)
+	self._disable_ui = true
+
+	return 
+end
 StateInGameRunning.update_ui = function (self)
+	if self._disable_ui then
+		return 
+	end
+
+	if not self._ui_update_initialized then
+		self._ui_update_initialized = true
+
+		return 
+	end
+
 	local time_manager = Managers.time
 	local dt = time_manager.mean_dt(time_manager)
 	local t = time_manager.time(time_manager, "game")
@@ -639,9 +725,22 @@ StateInGameRunning.post_update = function (self, dt, t)
 				ScriptWorld.activate_viewport(world, viewport)
 			end
 
+			if Application.platform() == "ps4" then
+				Managers.account:set_realtime_multiplay_state("end_screen", false)
+			end
+
 			Managers.state.network.network_transmit:send_rpc_server("rpc_is_ready_for_transition")
 		end
 	end
+
+	return 
+end
+StateInGameRunning.trigger_xbox_multiplayer_round_end_events = function (self)
+	if self.is_in_inn or self.is_in_tutorial or Development.parameter("auto-host-level") ~= nil or self._xbox_event_end_triggered then
+		return 
+	end
+
+	self._xbone_end_of_round_events(self, self.statistics_db)
 
 	return 
 end
@@ -656,6 +755,10 @@ StateInGameRunning.on_exit = function (self)
 		self.end_of_level_ui:destroy()
 
 		self.end_of_level_ui = nil
+
+		if Application.platform() == "ps4" then
+			Managers.account:set_realtime_multiplay_state("end_screen", false)
+		end
 	end
 
 	self.ingame_ui:destroy()
@@ -698,8 +801,110 @@ StateInGameRunning.event_game_started = function (self)
 
 	self.end_conditions_met = false
 
+	if self.is_in_inn or self.is_in_tutorial then
+		return 
+	end
+
+	if Application.platform() == "xb1" then
+		self._xbone_round_start_events(self)
+	end
+
 	return 
 end
+
+if Application.platform() == "xb1" then
+	StateInGameRunning.event_trigger_xbox_round_end = function (self)
+		self._xbone_end_of_round_events(self, self.statistics_db)
+
+		return 
+	end
+	StateInGameRunning._xbone_round_start_events = function (self)
+		if self.is_in_inn or self.is_in_tutorial or Development.parameter("auto-host-level") ~= nil then
+			return 
+		end
+
+		if not self._xbox_event_init_triggered then
+			self._xbox_event_init_triggered = true
+			local session_id = Managers.state.network:lobby().lobby:session_id()
+			local multiplayer_round_start_table = {
+				Managers.account:xbox_user_id(),
+				Managers.account:round_id(),
+				0,
+				Managers.account:player_session_id(),
+				MultiplayerSession.multiplayer_correlation_id(session_id),
+				0,
+				0,
+				0
+			}
+
+			Managers.transition:set_multiplayer_values("start", {
+				xuid = Managers.account:xbox_user_id(),
+				round_id = Managers.account:round_id(),
+				player_session_id = Managers.account:player_session_id(),
+				correlation_id = MultiplayerSession.multiplayer_correlation_id(session_id)
+			}, string.format("[StateInGameRunning] Writing MultiplayerRoundStart. CorrelationID: %s. RoundID: %s", tostring(MultiplayerSession.multiplayer_correlation_id(session_id)), tostring(Managers.account:round_id())))
+
+			local debug_string = string.format("[StateInGameRunning] Writing MultiplayerRoundStart. CorrelationID: %s. RoundID: %s", tostring(MultiplayerSession.multiplayer_correlation_id(session_id)), tostring(Managers.account:round_id()))
+			local debug_print_func = Application.warning
+
+			Managers.xbox_events:write("MultiplayerRoundStart", multiplayer_round_start_table, debug_string, debug_print_func, true)
+		end
+
+		return 
+	end
+	StateInGameRunning._xbone_end_of_round_events = function (self, statistics_db)
+		if self.is_in_inn or self.is_in_tutorial or Development.parameter("auto-host-level") ~= nil then
+			return 
+		end
+
+		if not self._xbox_event_end_triggered then
+			self._xbox_event_end_triggered = true
+			local session_id = Managers.state.network:lobby().lobby:session_id()
+			local multiplayer_round_end_table = {
+				Managers.account:xbox_user_id(),
+				Managers.account:round_id(),
+				0,
+				Managers.account:player_session_id(),
+				MultiplayerSession.multiplayer_correlation_id(session_id),
+				0,
+				0,
+				0,
+				math.floor(Managers.time:time("game")),
+				0
+			}
+
+			Managers.transition:set_multiplayer_values("end", {
+				xuid = Managers.account:xbox_user_id(),
+				round_id = Managers.account:round_id(),
+				player_session_id = Managers.account:player_session_id(),
+				correlation_id = MultiplayerSession.multiplayer_correlation_id(session_id),
+				time = Managers.time:time("game")
+			}, string.format("[StateInGameRunning] Writing MultiplayerRoundEnd. CorrelationID: %s. RoundID: %s", tostring(MultiplayerSession.multiplayer_correlation_id(session_id)), tostring(Managers.account:round_id())))
+
+			local debug_string = string.format("[StateInGameRunning] Writing MultiplayerRoundEnd. CorrelationID: %s. RoundID: %s", tostring(MultiplayerSession.multiplayer_correlation_id(session_id)), tostring(Managers.account:round_id()))
+			local debug_print_func = Application.warning
+
+			Managers.xbox_events:write("MultiplayerRoundEnd", multiplayer_round_end_table, debug_string, debug_print_func, true)
+			Managers.transition:dump_multiplayer_data()
+		end
+
+		if not self._gameprogress_event_triggered then
+			self._gameprogress_event_triggered = true
+			local game_progress_table = {
+				Managers.account:xbox_user_id(),
+				Managers.account:player_session_id(),
+				StatisticsUtil.get_game_progress(statistics_db)
+			}
+			local debug_string = "[StateInGameRunning] Writing GameProgress"
+			local debug_print_func = Application.warning
+
+			Managers.xbox_events:write("GameProgress", game_progress_table, debug_string, debug_print_func, true)
+		end
+
+		return 
+	end
+end
+
 StateInGameRunning.event_conflict_director_setup_done = function (self)
 	self._conflict_directory_is_ready = true
 
@@ -722,7 +927,8 @@ StateInGameRunning.game_actually_starts = function (self)
 		local first_hero_selection_made = SaveData.first_hero_selection_made
 		local show_profile_on_startup = loading_context.show_profile_on_startup
 		local backend_waiting_for_input = Managers.backend:is_waiting_for_user_input()
-		local show_hero_selection = not backend_waiting_for_input and show_profile_on_startup and (platform == "ps4" or platform == "xb1" or not first_hero_selection_made)
+		local level_key = Managers.state.game_mode:level_key()
+		local show_hero_selection = not backend_waiting_for_input and show_profile_on_startup and (platform == "ps4" or platform == "xb1" or not first_hero_selection_made) and level_key == "inn_level"
 
 		if show_hero_selection and not LEVEL_EDITOR_TEST then
 			self.ingame_ui:transition_with_fade("initial_profile_view_force")
@@ -875,6 +1081,8 @@ end
 local afk_warn_timer = 120
 local afk_force_kick_timer = 180
 StateInGameRunning.update_player_afk_check = function (self, dt, t)
+	return 
+
 	local cutscene_system = Managers.state.entity:system("cutscene_system")
 	local active_cutscene = cutscene_system.active_camera
 	local afk_kick_disabled = self.afk_kick or active_cutscene or self.is_server or self.is_in_inn or self.end_conditions_met or Development.parameter("debug_disable_afk_kick")

@@ -15,7 +15,7 @@ Utility.GetUtilityValueFromSpline = function (spline, norm_value)
 		end
 	end
 
-	return 
+	return spline[#spline]
 end
 Utility.get_action_utility = function (breed_action, action_name, blackboard, from_draw_ai_behavior)
 	if not from_draw_ai_behavior then

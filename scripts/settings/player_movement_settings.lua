@@ -164,7 +164,7 @@ PlayerUnitMovementSettings.dodging = {
 	},
 	dodge_cd = 0.15,
 	dodge_jump_override_timer = 0.35,
-	stop_threshold = 0.01,
+	stop_threshold = 0.1,
 	speed_modifier = 1,
 	distance_modifier = 1
 }
@@ -206,7 +206,7 @@ PlayerUnitMovementSettings.fall.heights = PlayerUnitMovementSettings.fall.height
 PlayerUnitMovementSettings.fall.heights.FALL_DAMAGE_MULTIPLIER = 14
 PlayerUnitMovementSettings.fall.heights.MIN_FALL_DAMAGE_HEIGHT = 5
 PlayerUnitMovementSettings.fall.heights.MIN_FALL_DAMAGE = 0
-PlayerUnitMovementSettings.fall.heights.MAX_FALL_DAMAGE = 100
+PlayerUnitMovementSettings.fall.heights.MAX_FALL_DAMAGE = 150
 PlayerUnitMovementSettings.fall.heights.HARD_LANDING_FALL_HEIGHT = 7
 PlayerUnitMovementSettings.landing = PlayerUnitMovementSettings.landing or {}
 PlayerUnitMovementSettings.landing.anim_forced_upper_body_block = 0.3

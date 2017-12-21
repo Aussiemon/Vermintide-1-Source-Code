@@ -1,12 +1,12 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTTriggerMoveToAction = class(BTTriggerMoveToAction, BTNode)
-BTTriggerMoveToAction.name = "BTTriggerMoveToAction"
 BTTriggerMoveToAction.init = function (self, ...)
 	BTTriggerMoveToAction.super.init(self, ...)
 
 	return 
 end
+BTTriggerMoveToAction.name = "BTTriggerMoveToAction"
 BTTriggerMoveToAction.enter = function (self, unit, blackboard, t)
 	blackboard.trigger_index = blackboard.trigger_index or 0
 

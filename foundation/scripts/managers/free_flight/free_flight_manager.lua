@@ -13,7 +13,8 @@ FreeFlightManager.init = function (self)
 	self._max_players = 4
 	self._input_service_wrapper = {
 		get = function (self, id)
-			local filter = FreeFlightFilters[id]
+			local platform = Application.platform()
+			local filter = FreeFlightFilters[platform][id]
 
 			if filter then
 				if filter.filter_type == "virtual_axis" then
@@ -22,7 +23,7 @@ FreeFlightManager.init = function (self)
 					return false
 				end
 			else
-				local func = FreeFlightKeymaps[id].input_mappings[1][3]
+				local func = FreeFlightKeymaps[platform][id].input_mappings[1][3]
 
 				if func == "pressed" or func == "held" then
 					return false
@@ -42,7 +43,7 @@ end
 FreeFlightManager.register_input_manager = function (self, input_manager)
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "FreeFlight", FreeFlightKeymaps, FreeFlightFilters)
+	input_manager.create_input_service(input_manager, "FreeFlight", "FreeFlightKeymaps", "FreeFlightFilters")
 	input_manager.map_device_to_service(input_manager, "FreeFlight", "keyboard")
 	input_manager.map_device_to_service(input_manager, "FreeFlight", "mouse")
 	input_manager.map_device_to_service(input_manager, "FreeFlight", "gamepad")
@@ -586,7 +587,7 @@ FreeFlightManager._update_free_flight = function (self, dt, player, data)
 	local cam = data.frustum_freeze_camera or ScriptViewport.camera(viewport)
 	local input = self.input_manager:get_service("FreeFlight")
 	local translation_change_speed = data.current_translation_max_speed*0.5
-	local speed_change = Vector3.y(input.get(input, "speed_change"))
+	local speed_change = Vector3.y(input.get(input, "speed_change") or Vector3(0, 0, 0))
 	data.current_translation_max_speed = math.max(data.current_translation_max_speed + speed_change*translation_change_speed, 0.01)
 	local cm = Camera.local_pose(cam)
 	local trans = Matrix4x4.translation(cm)

@@ -36,7 +36,7 @@ BTMeleeShoveAction.enter = function (self, unit, blackboard, t)
 	if target_running or blackboard.fling_skaven then
 		attack_anim = (right and action.attack_anim_right_running) or action.attack_anim_left_running
 
-		LocomotionUtils.set_animation_driven_movement(unit, true, true, true)
+		LocomotionUtils.set_animation_driven_movement(unit, true, false, true)
 
 		anim_driven = true
 	else

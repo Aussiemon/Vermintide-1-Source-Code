@@ -1,5 +1,33 @@
 local go_type_table = nil
 local temp_table = {}
+
+local function enemy_unit_common_extractor(unit, game_session, game_object_id)
+	local breed_name_id = GameSession.game_object_field(game_session, game_object_id, "breed_name")
+	local breed_name = NetworkLookup.breeds[breed_name_id]
+	local breed = Breeds[breed_name]
+
+	Unit.set_data(unit, "breed", breed)
+
+	local level_settings = LevelSettings[Managers.state.game_mode:level_key()]
+
+	if level_settings.climate_type then
+		Unit.set_flow_variable(unit, "climate_type", level_settings.climate_type)
+		Unit.flow_event(unit, "climate_type_set")
+	end
+
+	local size_variation_range = breed.size_variation_range
+
+	if size_variation_range then
+		local size_variation_normalized = GameSession.game_object_field(game_session, game_object_id, "size_variation_normalized")
+		local size_variation = math.lerp(size_variation_range[1], size_variation_range[2], size_variation_normalized)
+		local root_node = Unit.node(unit, "root_point")
+
+		Unit.set_local_scale(unit, root_node, Vector3(size_variation, size_variation, size_variation))
+	end
+
+	return breed, breed_name
+end
+
 go_type_table = {
 	initializers = {
 		player_unit = function (unit, unit_name, unit_template, gameobject_functor_context)
@@ -14,34 +42,6 @@ go_type_table = {
 			assert(profile, "No such profile with index %s", tostring(profile_id))
 
 			local husk_unit = profile.base_units.third_person_husk
-			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-			local equipment = inventory_extension.equipment(inventory_extension)
-			local inventory_slots = equipment.slots
-			local wielded_slot = NetworkLookup.equipment_slots[equipment.wielded_slot]
-			local equipped_slots = {}
-
-			for slot_name, slot_data in pairs(inventory_slots) do
-				local slot_id = NetworkLookup.equipment_slots[slot_name]
-				local item_data = slot_data.item_data
-				local item_id = NetworkLookup.item_names[item_data.name]
-				equipped_slots[slot_id] = item_id
-			end
-
-			local attachment_extension = ScriptUnit.extension(unit, "attachment_system")
-			local attachments = attachment_extension.attachments(attachment_extension)
-
-			for slot_name, slot_data in pairs(attachments.slots) do
-				local slot_id = NetworkLookup.equipment_slots[slot_name]
-				local item_id = NetworkLookup.item_names[slot_data.name]
-				equipped_slots[slot_id] = item_id
-			end
-
-			for i = 1, 11, 1 do
-				if equipped_slots[i] == nil then
-					equipped_slots[i] = NetworkLookup.item_names["n/a"]
-				end
-			end
-
 			local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 			local aim_position = first_person_extension.current_position(first_person_extension)
 			local rotation = Unit.local_rotation(unit, 0)
@@ -66,8 +66,6 @@ go_type_table = {
 				aim_position = aim_position,
 				velocity = Vector3(0, 0, 0),
 				average_velocity = Vector3(0, 0, 0),
-				inventory_slots = equipped_slots,
-				wielded_slot = wielded_slot,
 				profile_id = profile_id
 			}
 
@@ -105,43 +103,13 @@ go_type_table = {
 			assert(profile, "No such profile with index %s", tostring(profile_id))
 
 			local husk_unit = profile.base_units.third_person_husk
-			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-			local equipment = inventory_extension.equipment(inventory_extension)
-			local inventory_slots = equipment.slots
-			local wielded_slot = NetworkLookup.equipment_slots[equipment.wielded_slot]
-			local num_slots_used = 0
-			local equipped_slots = {}
-
-			for slot_name, slot_data in pairs(inventory_slots) do
-				local slot_id = NetworkLookup.equipment_slots[slot_name]
-				local item_data = slot_data.item_data
-				local item_id = NetworkLookup.item_names[item_data.name]
-				equipped_slots[slot_id] = item_id
-				num_slots_used = num_slots_used + 1
-			end
-
-			local attachment_extension = ScriptUnit.extension(unit, "attachment_system")
-			local attachments = attachment_extension.attachments(attachment_extension)
-
-			for slot_name, slot_data in pairs(attachments.slots) do
-				local slot_id = NetworkLookup.equipment_slots[slot_name]
-				local item_id = NetworkLookup.item_names[slot_data.name]
-				equipped_slots[slot_id] = item_id
-			end
-
-			for i = 1, 11, 1 do
-				if equipped_slots[i] == nil then
-					equipped_slots[i] = NetworkLookup.item_names["n/a"]
-				end
-			end
-
 			local max_health = ScriptUnit.extension(unit, "health_system"):initial_max_health()
 			local max_wounds = ScriptUnit.extension(unit, "status_system"):max_wounds_network_safe()
 			local rotation = Unit.local_rotation(unit, 0)
 			local data_table = {
 				prestige_level = 0,
-				level = 0,
 				moving_platform = 0,
+				level = 0,
 				go_type = NetworkLookup.go_types.player_bot_unit,
 				husk_unit = NetworkLookup.husks[husk_unit],
 				health = max_health,
@@ -154,8 +122,6 @@ go_type_table = {
 				owner_peer_id = player.network_id(player),
 				local_player_id = player.local_player_id(player),
 				aim_direction = Vector3(1, 0, 0),
-				inventory_slots = equipped_slots,
-				wielded_slot = wielded_slot,
 				profile_id = profile_id
 			}
 
@@ -457,9 +423,11 @@ go_type_table = {
 			local damage = health_extension.damage
 			local death_extension = ScriptUnit.extension(unit, "death_system")
 			local explode_time = 0
+			local fuse_time = 0
 
 			if death_extension.has_death_started(death_extension) then
 				explode_time = death_extension.death_reaction_data.explode_time
+				fuse_time = death_extension.death_reaction_data.fuse_time
 			end
 
 			local item_name = death_extension.item_name
@@ -478,6 +446,7 @@ go_type_table = {
 				spawn_type = NetworkLookup.pickup_spawn_types[spawn_type],
 				damage = damage,
 				explode_time = explode_time,
+				fuse_time = fuse_time,
 				item_name = NetworkLookup.item_names[item_name]
 			}
 
@@ -500,9 +469,11 @@ go_type_table = {
 			local damage = health_extension.damage
 			local death_extension = ScriptUnit.extension(unit, "death_system")
 			local explode_time = 0
+			local fuse_time = 0
 
 			if death_extension.has_death_started(death_extension) then
 				explode_time = death_extension.death_reaction_data.explode_time
+				fuse_time = death_extension.death_reaction_data.fuse_time
 			end
 
 			local item_name = death_extension.item_name
@@ -526,6 +497,7 @@ go_type_table = {
 				limited_item_id = id,
 				damage = damage,
 				explode_time = explode_time,
+				fuse_time = fuse_time,
 				item_name = NetworkLookup.item_names[item_name]
 			}
 
@@ -780,37 +752,6 @@ go_type_table = {
 		player_unit = function (game_session, go_id, owner_id, unit, gameobject_functor_context)
 			local player_health = GameSession.game_object_field(game_session, go_id, "health")
 			local player_wounds = GameSession.game_object_field(game_session, go_id, "wounds")
-			local wielded_slot_id = GameSession.game_object_field(game_session, go_id, "wielded_slot")
-			local wielded_slot = NetworkLookup.equipment_slots[wielded_slot_id]
-			local inventory_slots = GameSession.game_object_field(game_session, go_id, "inventory_slots")
-			local slots = {}
-
-			for i = 1, #inventory_slots, 1 do
-				local slot_name = NetworkLookup.equipment_slots[i]
-				local slot = InventorySettings.slots_by_name[slot_name]
-				local slot_category = slot.category
-
-				if slot_category == "weapon" or slot_category == "enemy_weapon" or slot_category == "level_event" then
-					local item_id = inventory_slots[i]
-					local item_name = NetworkLookup.item_names[item_id]
-
-					if item_name ~= "n/a" then
-						slots[slot_name] = {
-							item_data = ItemMasterList[item_name],
-							id = slot_name
-						}
-					end
-				elseif slot_category == "attachment" then
-					local item_id = inventory_slots[i]
-					local item_name = NetworkLookup.item_names[item_id]
-
-					if item_name ~= "n/a" then
-						local item_data = ItemMasterList[item_name]
-						slots[slot_name] = item_data
-					end
-				end
-			end
-
 			local profile_id = GameSession.game_object_field(game_session, go_id, "profile_id")
 			local profile = SPProfiles[profile_id]
 
@@ -849,12 +790,8 @@ go_type_table = {
 					profile_id = profile_id,
 					player = player
 				},
-				inventory_system = {
-					slots = slots,
-					wielded_slot = wielded_slot
-				},
+				inventory_system = {},
 				attachment_system = {
-					slots = slots,
 					profile = profile
 				},
 				dialogue_context_system = {
@@ -891,94 +828,14 @@ go_type_table = {
 
 			return unit_template_name, extension_init_data
 		end,
-		ai_unit = function (game_session, go_id, owner_id, unit, gameobject_functor_context)
-			local breed_name_id = GameSession.game_object_field(game_session, go_id, "breed_name")
-			local breed_name = NetworkLookup.breeds[breed_name_id]
-			local breed = Breeds[breed_name]
-
-			Unit.set_data(unit, "breed", breed)
-
-			local size_variation_range = breed.size_variation_range
-
-			if size_variation_range then
-				local size_variation_normalized = GameSession.game_object_field(game_session, go_id, "size_variation_normalized")
-				local size_variation = math.lerp(size_variation_range[1], size_variation_range[2], size_variation_normalized)
-				local root_node = Unit.node(unit, "root_point")
-
-				Unit.set_local_scale(unit, root_node, Vector3(size_variation, size_variation, size_variation))
-			end
-
-			local health = GameSession.game_object_field(game_session, go_id, "health")
-			local extension_init_data = {
-				ai_system = {
-					go_id = go_id,
-					game = game_session
-				},
-				locomotion_system = {
-					go_id = go_id,
-					breed = breed,
-					game = game_session
-				},
-				health_system = {
-					health = health
-				},
-				death_system = {
-					is_husk = true,
-					death_reaction_template = breed.death_reaction
-				},
-				hit_reaction_system = {
-					is_husk = true,
-					hit_reaction_template = breed.hit_reaction,
-					hit_effect_template = breed.hit_effect_template
-				},
-				dialogue_system = {
-					faction = "enemy",
-					breed_name = breed_name
-				}
-			}
-			local unit_template_name = breed.unit_template
-
-			return unit_template_name, extension_init_data
-		end,
 		player_bot_unit = function (game_session, go_id, owner, unit, gameobject_functor_context)
 			local player_health = GameSession.game_object_field(game_session, go_id, "health")
 			local player_wounds = GameSession.game_object_field(game_session, go_id, "wounds")
-			local wielded_slot_id = GameSession.game_object_field(game_session, go_id, "wielded_slot")
-			local wielded_slot = NetworkLookup.equipment_slots[wielded_slot_id]
-			local inventory_slots = GameSession.game_object_field(game_session, go_id, "inventory_slots")
 			local profile_id = GameSession.game_object_field(game_session, go_id, "profile_id")
 			local profile = SPProfiles[profile_id]
 
 			assert(profile, "No such profile with index %s", tostring(profile_id))
 			Unit.set_data(unit, "sound_character", SPProfiles[profile_id].sound_character)
-
-			local slots = {}
-
-			for i = 1, #inventory_slots, 1 do
-				local slot_name = NetworkLookup.equipment_slots[i]
-				local slot = InventorySettings.slots_by_name[slot_name]
-				local slot_category = slot.category
-
-				if slot_category == "weapon" or slot_category == "enemy_weapon" or slot_category == "level_event" then
-					local item_id = inventory_slots[i]
-					local item_name = NetworkLookup.item_names[item_id]
-
-					if item_name ~= "n/a" then
-						slots[slot_name] = {
-							item_data = ItemMasterList[item_name],
-							id = slot_name
-						}
-					end
-				elseif slot_category == "attachment" then
-					local item_id = inventory_slots[i]
-					local item_name = NetworkLookup.item_names[item_id]
-
-					if item_name ~= "n/a" then
-						local item_data = ItemMasterList[item_name]
-						slots[slot_name] = item_data
-					end
-				end
-			end
 
 			local player_id = GameSession.game_object_field(game_session, go_id, "local_player_id")
 			local peer_id = GameSession.game_object_field(game_session, go_id, "owner_peer_id")
@@ -998,10 +855,7 @@ go_type_table = {
 					death_reaction_template = "player",
 					is_husk = true
 				},
-				inventory_system = {
-					slots = slots,
-					wielded_slot = wielded_slot
-				},
+				inventory_system = {},
 				hit_reaction_system = {
 					is_husk = true,
 					hit_reaction_template = "player"
@@ -1026,7 +880,7 @@ go_type_table = {
 					wwise_voice_switch_value = profile.character_vo
 				},
 				attachment_system = {
-					slots = slots
+					profile = profile
 				},
 				buff_system = {
 					is_husk = true
@@ -1043,32 +897,51 @@ go_type_table = {
 
 			return unit_template_name, extension_init_data
 		end,
-		ai_unit_with_inventory = function (game_session, go_id, owner_id, unit, gameobject_functor_context)
-			local breed_name_id = GameSession.game_object_field(game_session, go_id, "breed_name")
-			local breed_name = NetworkLookup.breeds[breed_name_id]
-			local breed = Breeds[breed_name]
-
-			Unit.set_data(unit, "breed", breed)
-
-			local size_variation_range = breed.size_variation_range
-
-			if size_variation_range then
-				local size_variation_normalized = GameSession.game_object_field(game_session, go_id, "size_variation_normalized")
-				local size_variation = math.lerp(size_variation_range[1], size_variation_range[2], size_variation_normalized)
-				local root_node = Unit.node(unit, "root_point")
-
-				Unit.set_local_scale(unit, root_node, Vector3(size_variation, size_variation, size_variation))
-			end
-
-			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, go_id, "inventory_configuration")]
-			local health = GameSession.game_object_field(game_session, go_id, "health")
+		ai_unit = function (game_session, game_object_id, owner_id, unit, gameobject_functor_context)
+			local breed, breed_name = enemy_unit_common_extractor(unit, game_session, game_object_id)
+			local health = GameSession.game_object_field(game_session, game_object_id, "health")
 			local extension_init_data = {
 				ai_system = {
-					go_id = go_id,
+					go_id = game_object_id,
 					game = game_session
 				},
 				locomotion_system = {
-					go_id = go_id,
+					go_id = game_object_id,
+					breed = breed,
+					game = game_session
+				},
+				health_system = {
+					health = health
+				},
+				death_system = {
+					is_husk = true,
+					death_reaction_template = breed.death_reaction
+				},
+				hit_reaction_system = {
+					is_husk = true,
+					hit_reaction_template = breed.hit_reaction,
+					hit_effect_template = breed.hit_effect_template
+				},
+				dialogue_system = {
+					faction = "enemy",
+					breed_name = breed_name
+				}
+			}
+			local unit_template_name = breed.unit_template
+
+			return unit_template_name, extension_init_data
+		end,
+		ai_unit_with_inventory = function (game_session, game_object_id, owner_id, unit, gameobject_functor_context)
+			local breed, breed_name = enemy_unit_common_extractor(unit, game_session, game_object_id)
+			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, game_object_id, "inventory_configuration")]
+			local health = GameSession.game_object_field(game_session, game_object_id, "health")
+			local extension_init_data = {
+				ai_system = {
+					go_id = game_object_id,
+					game = game_session
+				},
+				locomotion_system = {
+					go_id = game_object_id,
 					breed = breed,
 					game = game_session
 				},
@@ -1096,32 +969,17 @@ go_type_table = {
 
 			return unit_template_name, extension_init_data
 		end,
-		ai_unit_pack_master = function (game_session, go_id, owner_id, unit, gameobject_functor_context)
-			local breed_name_id = GameSession.game_object_field(game_session, go_id, "breed_name")
-			local breed_name = NetworkLookup.breeds[breed_name_id]
-			local breed = Breeds[breed_name]
-
-			Unit.set_data(unit, "breed", breed)
-
-			local size_variation_range = breed.size_variation_range
-
-			if size_variation_range then
-				local size_variation_normalized = GameSession.game_object_field(game_session, go_id, "size_variation_normalized")
-				local size_variation = math.lerp(size_variation_range[1], size_variation_range[2], size_variation_normalized)
-				local root_node = Unit.node(unit, "root_point")
-
-				Unit.set_local_scale(unit, root_node, Vector3(size_variation, size_variation, size_variation))
-			end
-
-			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, go_id, "inventory_configuration")]
-			local health = GameSession.game_object_field(game_session, go_id, "health")
+		ai_unit_pack_master = function (game_session, game_object_id, owner_id, unit, gameobject_functor_context)
+			local breed, breed_name = enemy_unit_common_extractor(unit, game_session, game_object_id)
+			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, game_object_id, "inventory_configuration")]
+			local health = GameSession.game_object_field(game_session, game_object_id, "health")
 			local extension_init_data = {
 				ai_system = {
-					go_id = go_id,
+					go_id = game_object_id,
 					game = game_session
 				},
 				locomotion_system = {
-					go_id = go_id,
+					go_id = game_object_id,
 					breed = breed,
 					game = game_session
 				},
@@ -1149,32 +1007,17 @@ go_type_table = {
 
 			return unit_template_name, extension_init_data
 		end,
-		ai_unit_ratling_gunner = function (game_session, go_id, owner_id, unit, gameobject_functor_context)
-			local breed_name_id = GameSession.game_object_field(game_session, go_id, "breed_name")
-			local breed_name = NetworkLookup.breeds[breed_name_id]
-			local breed = Breeds[breed_name]
-
-			Unit.set_data(unit, "breed", breed)
-
-			local size_variation_range = breed.size_variation_range
-
-			if size_variation_range then
-				local size_variation_normalized = GameSession.game_object_field(game_session, go_id, "size_variation_normalized")
-				local size_variation = math.lerp(size_variation_range[1], size_variation_range[2], size_variation_normalized)
-				local root_node = Unit.node(unit, "root_point")
-
-				Unit.set_local_scale(unit, root_node, Vector3(size_variation, size_variation, size_variation))
-			end
-
-			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, go_id, "inventory_configuration")]
-			local health = GameSession.game_object_field(game_session, go_id, "health")
+		ai_unit_ratling_gunner = function (game_session, game_object_id, owner_id, unit, gameobject_functor_context)
+			local breed, breed_name = enemy_unit_common_extractor(unit, game_session, game_object_id)
+			local inventory_configuration_name = NetworkLookup.ai_inventory[GameSession.game_object_field(game_session, game_object_id, "inventory_configuration")]
+			local health = GameSession.game_object_field(game_session, game_object_id, "health")
 			local extension_init_data = {
 				ai_system = {
-					go_id = go_id,
+					go_id = game_object_id,
 					game = game_session
 				},
 				locomotion_system = {
-					go_id = go_id,
+					go_id = game_object_id,
 					breed = breed,
 					game = game_session
 				},
@@ -1206,23 +1049,23 @@ go_type_table = {
 
 			return unit_template_name, extension_init_data
 		end,
-		flame_wave_projectile_unit = function (game_session, go_id, owner_id, unit, gameobject_functor_context)
-			local owner_unit_id = GameSession.game_object_field(game_session, go_id, "owner_unit")
+		flame_wave_projectile_unit = function (game_session, game_object_id, owner_id, unit, gameobject_functor_context)
+			local owner_unit_id = GameSession.game_object_field(game_session, game_object_id, "owner_unit")
 			local owner_unit = (owner_unit_id ~= 0 and Managers.state.unit_storage:unit(owner_unit_id)) or nil
-			local item_name_id = GameSession.game_object_field(game_session, go_id, "item_name")
-			local item_template_name_id = GameSession.game_object_field(game_session, go_id, "item_template_name")
-			local action_name_id = GameSession.game_object_field(game_session, go_id, "action_name")
-			local sub_action_name_id = GameSession.game_object_field(game_session, go_id, "sub_action_name")
+			local item_name_id = GameSession.game_object_field(game_session, game_object_id, "item_name")
+			local item_template_name_id = GameSession.game_object_field(game_session, game_object_id, "item_template_name")
+			local action_name_id = GameSession.game_object_field(game_session, game_object_id, "action_name")
+			local sub_action_name_id = GameSession.game_object_field(game_session, game_object_id, "sub_action_name")
 			local item_name = NetworkLookup.item_names[item_name_id]
 			local item_template_name = NetworkLookup.item_template_names[item_template_name_id]
 			local action_name = NetworkLookup.actions[action_name_id]
 			local sub_action_name = NetworkLookup.sub_actions[sub_action_name_id]
-			local scale = GameSession.game_object_field(game_session, go_id, "scale")/100
-			local position = GameSession.game_object_field(game_session, go_id, "position")
-			local flat_angle = GameSession.game_object_field(game_session, go_id, "flat_angle")
-			local lateral_speed = GameSession.game_object_field(game_session, go_id, "lateral_speed")
-			local initial_forward_speed = GameSession.game_object_field(game_session, go_id, "initial_forward_speed")
-			local distance_travelled = GameSession.game_object_field(game_session, go_id, "distance_travelled")
+			local scale = GameSession.game_object_field(game_session, game_object_id, "scale")/100
+			local position = GameSession.game_object_field(game_session, game_object_id, "position")
+			local flat_angle = GameSession.game_object_field(game_session, game_object_id, "flat_angle")
+			local lateral_speed = GameSession.game_object_field(game_session, game_object_id, "lateral_speed")
+			local initial_forward_speed = GameSession.game_object_field(game_session, game_object_id, "initial_forward_speed")
+			local distance_travelled = GameSession.game_object_field(game_session, game_object_id, "distance_travelled")
 			local time_initialized = Managers.time:time("game")
 			local extension_init_data = {
 				projectile_locomotion_system = {

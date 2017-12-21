@@ -1,4 +1,6 @@
-require("scripts/managers/input/input_manager2")
+SPLITSCREEN_ENABLED = false
+
+require("scripts/managers/input/input_manager")
 
 SplitscreenTester = class(SplitscreenTester)
 
@@ -92,7 +94,7 @@ SplitscreenTester._setup_background = function (self)
 	return 
 end
 SplitscreenTester._setup_input = function (self)
-	self.input_manager = InputManager2:new()
+	self.input_manager = InputManager:new()
 
 	self.input_manager:initialize_device("keyboard", 1)
 	self.input_manager:initialize_device("mouse", 1)
@@ -101,7 +103,7 @@ SplitscreenTester._setup_input = function (self)
 	if Application.platform() ~= "xb1" and Application.platform() ~= "ps4" then
 	end
 
-	self.input_manager:create_input_service("splitscreen_tester", SplitScreenTesterKeymaps)
+	self.input_manager:create_input_service("splitscreen_tester", "SplitScreenTesterKeymaps")
 	self.input_manager:map_device_to_service("splitscreen_tester", "keyboard")
 	self.input_manager:map_device_to_service("splitscreen_tester", "gamepad")
 
@@ -270,7 +272,7 @@ camera_world_to_screen = camera_world_to_screen or Camera.world_to_screen
 Camera.world_to_screen = function (...)
 	local pos = camera_world_to_screen(...)
 
-	if Managers.splitscreen:active() then
+	if Managers.splitscreen and Managers.splitscreen:active() then
 		pos[1] = pos[1]*SPLITSCREEN_WIDTH
 	end
 

@@ -5,20 +5,23 @@ require("scripts/network/lobby_aux")
 local LobbyBrowseDefinitions = require("scripts/ui/views/lobby_browse_view_definitions")
 LobbyBrowseView = class(LobbyBrowseView)
 local input_delay_before_start_new_search = 0
-local MapLobbyDistanceFilter = {
+local platform = Application.platform()
+
+if platform ~= "ps4" or not {
 	LobbyDistanceFilter.CLOSE,
 	LobbyDistanceFilter.MEDIUM,
-	LobbyDistanceFilter.FAR,
 	LobbyDistanceFilter.WORLD
-}
+} then
+	local MapLobbyDistanceFilter = {
+		LobbyDistanceFilter.CLOSE,
+		LobbyDistanceFilter.MEDIUM,
+		LobbyDistanceFilter.FAR,
+		LobbyDistanceFilter.WORLD
+	}
+end
+
 local generic_input_actions = {
 	default = {
-		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
 		{
 			input_action = "d_horizontal",
 			priority = 2,
@@ -32,7 +35,7 @@ local generic_input_actions = {
 			ignore_keybinding = true
 		},
 		{
-			input_action = "refresh",
+			input_action = "confirm",
 			priority = 49,
 			description_text = "lb_join"
 		},
@@ -42,7 +45,7 @@ local generic_input_actions = {
 			description_text = "lb_reset_filters"
 		},
 		{
-			input_action = "confirm",
+			input_action = "refresh",
 			priority = 51,
 			description_text = "lb_search"
 		},
@@ -54,12 +57,6 @@ local generic_input_actions = {
 	},
 	no_join = {
 		{
-			input_action = "d_vertical",
-			priority = 1,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "d_horizontal",
 			priority = 2,
 			description_text = "input_description_switch_settings",
@@ -77,7 +74,7 @@ local generic_input_actions = {
 			description_text = "lb_reset_filters"
 		},
 		{
-			input_action = "confirm",
+			input_action = "refresh",
 			priority = 51,
 			description_text = "lb_search"
 		},
@@ -97,7 +94,11 @@ local fake_input_service = {
 	end
 }
 LobbyBrowseView.init = function (self, ingame_ui_context)
-	LobbyBrowseDefinitions.game_mode_data = LobbyBrowseDefinitions.setup_game_mode_data()
+	local player_manager = Managers.player
+	local player = player_manager.local_player(player_manager)
+	local statistics_db = player_manager.statistics_db(player_manager)
+	local player_stats_id = player.stats_id(player)
+	LobbyBrowseDefinitions.game_mode_data = LobbyBrowseDefinitions.setup_game_mode_data(statistics_db, player_stats_id)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(LobbyBrowseDefinitions.scenegraph_definition)
 	self.difficulty_manager = Managers.state.difficulty
@@ -105,7 +106,7 @@ LobbyBrowseView.init = function (self, ingame_ui_context)
 	self.input_manager = input_manager
 	self.ingame_ui = ingame_ui_context.ingame_ui
 
-	input_manager.create_input_service(input_manager, "lobby_browser", self.ingame_ui:get_ingame_menu_keymap())
+	input_manager.create_input_service(input_manager, "lobby_browser", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "lobby_browser", "keyboard")
 	input_manager.map_device_to_service(input_manager, "lobby_browser", "mouse")
 	input_manager.map_device_to_service(input_manager, "lobby_browser", "gamepad")
@@ -300,7 +301,19 @@ LobbyBrowseView.populate_lobby_list = function (self, auto_update)
 	local lobby_finder = Managers.matchmaking.lobby_finder
 	local lobbies = lobby_finder.latest_filter_lobbies(lobby_finder) or emtpy_lobby_list
 	local ignore_scroll_reset = true
-	local keep_searching = #lobbies == 0
+	local show_lobbies_index = self.selected_show_lobbies_index
+	local show_all_lobbies = (show_lobbies_index == 2 and true) or false
+	local lobbies_to_present = {}
+	local lobby_count = 0
+
+	for lobby_id, lobby_data in pairs(lobbies) do
+		if show_all_lobbies or self.valid_lobby(self, lobby_data) then
+			lobbies_to_present[lobby_id] = lobby_data
+			lobby_count = lobby_count + 1
+		end
+	end
+
+	local keep_searching = lobby_count == 0
 
 	if auto_update and keep_searching and self.lobby_list_update_timer then
 		self.lobby_list:animate_loading_text()
@@ -308,7 +321,7 @@ LobbyBrowseView.populate_lobby_list = function (self, auto_update)
 
 	self.lobby_list_update_timer = (keep_searching and MatchmakingSettings.TIME_BETWEEN_EACH_SEARCH) or nil
 
-	self.lobby_list:populate_lobby_list(lobbies, ignore_scroll_reset)
+	self.lobby_list:populate_lobby_list(lobbies_to_present, ignore_scroll_reset)
 
 	if selected_lobby_data then
 		self.lobby_list:set_selected_lobby(selected_lobby_data)
@@ -337,14 +350,14 @@ LobbyBrowseView.valid_lobby = function (self, lobby_data)
 		return false
 	end
 
-	local unlocked_level_difficulty = LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
+	local unlocked_level_difficulty_index = LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
 
-	if not unlocked_level_difficulty then
+	if not unlocked_level_difficulty_index then
 		return false
 	end
 
 	local level_difficulties = self.difficulty_manager:get_level_difficulties(level_key)
-	local unlocked_difficulty_key = level_difficulties[unlocked_level_difficulty]
+	local unlocked_difficulty_key = level_difficulties[unlocked_level_difficulty_index]
 	local unlocked_difficulty_settings = DifficultySettings[unlocked_difficulty_key]
 	local difficulty_setting = DifficultySettings[difficulty]
 
@@ -534,7 +547,7 @@ LobbyBrowseView.update = function (self, dt)
 		self.exit(self, return_to_game)
 	end
 
-	if (gamepad_active and input_service.get(input_service, "confirm")) or search_button_hotspot.on_release then
+	if (gamepad_active and input_service.get(input_service, "refresh")) or search_button_hotspot.on_release then
 		self.play_sound(self, "Play_hud_select")
 
 		search_button_hotspot.on_release = nil
@@ -664,9 +677,25 @@ LobbyBrowseView._create_filter_requirements = function (self)
 	local game_mode = game_mode_data[game_mode_index].game_mode_key
 	local requirements = {
 		free_slots = free_slots,
-		distance_filter = distance_filter,
+		distance_filter = platform ~= "ps4" and distance_filter,
 		filters = {}
 	}
+
+	if platform == "ps4" then
+		local user_region = Managers.account:region()
+
+		if distance_filter == LobbyDistanceFilter.CLOSE then
+			requirements.filters.primary_region = {
+				value = MatchmakingRegionLookup.primary[user_region],
+				comparison = LobbyComparison.EQUAL
+			}
+		elseif distance_filter == LobbyDistanceFilter.MEDIUM then
+			requirements.filters.secondary_region = {
+				value = MatchmakingRegionLookup.secondary[user_region],
+				comparison = LobbyComparison.EQUAL
+			}
+		end
+	end
 
 	if game_mode then
 		requirements.filters.game_mode = {
@@ -768,7 +797,7 @@ LobbyBrowseView.on_level_stepper_input = function (self, index_change, specific_
 	local levels_table = self._get_levels(self)
 	local current_index = self.selected_level_index or 1
 	local new_index = self._on_stepper_input(self, stepper, levels_table, current_index, index_change, specific_index)
-	local level_display_name = "any_level"
+	local level_display_name = "lobby_browser_mission"
 	local level = levels_table[new_index]
 
 	if level ~= "any" then
@@ -787,7 +816,7 @@ LobbyBrowseView.on_difficulty_stepper_input = function (self, index_change, spec
 	local difficulties_table = self._get_difficulties(self)
 	local current_index = self.selected_difficulty_index or 1
 	local new_index = self._on_stepper_input(self, stepper, difficulties_table, current_index, index_change, specific_index)
-	local difficulty_display_name = "any_level"
+	local difficulty_display_name = "lobby_browser_difficulty"
 	local difficulty = difficulties_table[new_index]
 
 	if difficulty ~= "any" then

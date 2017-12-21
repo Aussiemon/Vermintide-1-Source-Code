@@ -16,6 +16,9 @@ RewardPopupHandler.init = function (self, input_manager, ui_renderer, wait_time_
 	self.ui_world = ui_world
 	local world = world_manager.world(world_manager, "level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.ui_renderer = ui_renderer
 	self.ui_animations = {}
 
@@ -123,7 +126,7 @@ RewardPopupHandler.update = function (self, dt)
 	end
 
 	self.update_animation(self, dt)
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.popup_widget)
 
 	if self.display_reward_texts then

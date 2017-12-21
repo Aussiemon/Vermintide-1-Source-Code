@@ -15,10 +15,14 @@ weapon_template.actions = {
 			reload_when_out_of_ammo = true,
 			apply_recoil = true,
 			hit_effect = "bullet_impact",
+			aim_assist_max_ramp_multiplier = 0.6,
+			aim_assist_auto_hit_chance = 0.5,
+			aim_assist_ramp_decay_delay = 0.1,
 			damage_window_end = 0,
 			ammo_usage = 1,
 			fire_time = 0,
 			anim_event_secondary = "reload",
+			aim_assist_ramp_multiplier = 0.2,
 			anim_event = "attack_shoot",
 			reload_time = 1.25,
 			total_time = 0.66,
@@ -44,7 +48,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.2,
+					start_time = 0,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -129,6 +133,13 @@ weapon_template.actions = {
 			},
 			zoom_condition_function = function ()
 				return false
+			end,
+			condition_func = function (unit, input_extension, ammo_extension)
+				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+					return false
+				end
+
+				return true
 			end
 		}
 	},
@@ -160,6 +171,23 @@ weapon_template.wield_anim = "to_repeater_pistol"
 weapon_template.crosshair_style = "default"
 weapon_template.reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.dodge_distance = 1
+weapon_template.dodge_speed = 1
+weapon_template.dodge_count = 1
+weapon_template.aim_assist_settings = {
+	max_range = 22,
+	no_aim_input_multiplier = 0,
+	aim_at_node = "j_neck",
+	can_charge_shot = true,
+	base_multiplier = 0.15,
+	aim_at_node_charged = "j_spine",
+	effective_max_range = 10,
+	breed_scalars = {
+		skaven_storm_vermin = 1,
+		skaven_clan_rat = 1,
+		skaven_slave = 1
+	}
+}
 weapon_template.wwise_dep_right_hand = {
 	"wwise/repeating_handgun_pistol"
 }
@@ -181,8 +209,12 @@ weapon_template.compare_statistics = {
 		}
 	},
 	perks = {
-		light_attack = {},
-		heavy_attack = {}
+		light_attack = {
+			"armor_penetration"
+		},
+		heavy_attack = {
+			"armor_penetration"
+		}
 	}
 }
 Weapons = Weapons or {}

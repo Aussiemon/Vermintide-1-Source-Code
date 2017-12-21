@@ -1,10 +1,10 @@
 local font_size = 26
-local font = "arial_26"
+local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 PlayerHud = class(PlayerHud)
 PlayerHud.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
-	self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/arial", "material", "materials/fonts/gw_fonts", "immediate")
+	self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 	self.raycast_state = "waiting_to_raycast"
 	self.raycast_target = nil
 	local physics_world = World.get_data(extension_init_context.world, "physics_world")

@@ -85,7 +85,7 @@ MatchmakingHandshakerHost.rpc_matchmaking_handshake_start = function (self, send
 	self.client_pong_times[sender] = nil
 	local name = (LobbyInternal.user_name and LobbyInternal.user_name(sender)) or "-"
 
-	mm_printf("Got a handshake request from %s with user name '%s'", sender, name)
+	mm_printf_force("Got a handshake request from %s with user name '%s'", sender, name)
 	RPC.rpc_matchmaking_handshake_reply(sender, client_cookie, self.cookie)
 
 	return 
@@ -154,13 +154,13 @@ MatchmakingHandshakerHost.send_rpc_to_self = function (self, rpc_name, ...)
 end
 MatchmakingHandshakerHost.validate_cookies = function (self, sender, client_cookie, host_cookie)
 	if self.cookie ~= host_cookie then
-		mm_printf("Invalid host cookie %s from %s", host_cookie, sender)
+		mm_printf_force("Invalid host cookie %s from %s", host_cookie, sender)
 
 		return false
 	end
 
 	if self.clients[sender] ~= client_cookie then
-		mm_printf("Invalid client cookie %s from %s", client_cookie, sender)
+		mm_printf_force("Invalid client cookie %s from %s", client_cookie, sender)
 
 		return false
 	end
@@ -198,7 +198,7 @@ MatchmakingHandshakerClient.unregister_rpcs = function (self)
 	return 
 end
 MatchmakingHandshakerClient.reset = function (self)
-	mm_printf("Resetting client handshaker")
+	mm_printf_force("Resetting client handshaker", self.cookie, self.host_cookie)
 
 	self.cookie = nil
 	self.host_cookie = nil
@@ -212,19 +212,19 @@ MatchmakingHandshakerClient.start_handshake = function (self, peer_id)
 	self.host_cookie = nil
 	self.host_peer_id = peer_id
 
-	mm_printf("Starting handshake with host %s using client cookie %s", peer_id, self.cookie)
+	mm_printf_force("Starting handshake with host %s using client cookie %s", peer_id, self.cookie)
 	RPC.rpc_matchmaking_handshake_start(peer_id, self.cookie)
 
 	return 
 end
 MatchmakingHandshakerClient.rpc_matchmaking_handshake_reply = function (self, sender, client_cookie, host_cookie)
 	if client_cookie ~= self.cookie then
-		mm_printf("Invalid client cookie %s in reply from %s", client_cookie, sender)
+		mm_printf_force("Invalid client cookie %s in reply from %s", client_cookie, sender)
 
 		return 
 	end
 
-	mm_printf("Handshake successful")
+	mm_printf_force("Handshake successful", sender, client_cookie, host_cookie)
 
 	self.host_cookie = host_cookie
 	self.host_peer_id = sender
@@ -261,13 +261,13 @@ MatchmakingHandshakerClient.send_rpc_to_host = function (self, rpc_name, ...)
 end
 MatchmakingHandshakerClient.validate_cookies = function (self, client_cookie, host_cookie)
 	if self.cookie ~= client_cookie then
-		mm_printf("Invalid client cookie %s", client_cookie)
+		mm_printf_force("Invalid client cookie %s", client_cookie)
 
 		return false
 	end
 
 	if self.host_cookie ~= host_cookie then
-		mm_printf("Invalid host cookie %s", host_cookie)
+		mm_printf_force("Invalid host cookie %s", host_cookie)
 
 		return false
 	end

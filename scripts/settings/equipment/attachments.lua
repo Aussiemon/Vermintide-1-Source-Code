@@ -135,6 +135,7 @@ Attachments.dr_helmets_no_ear = table.clone(dr_helmets_no_ear)
 local bw_gates = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
+	on_equip_flow_event = "lua_show_breastplate",
 	attachment_node_linking = AttachmentNodeLinking.bw_gate,
 	slots = {
 		"slot_hat"
@@ -145,6 +146,7 @@ Attachments.bw_gates = table.clone(bw_gates)
 local bw_gates_facemask = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
+	on_equip_flow_event = "lua_show_breastplate",
 	attachment_node_linking = AttachmentNodeLinking.bw_gate_facemask,
 	slots = {
 		"slot_hat"

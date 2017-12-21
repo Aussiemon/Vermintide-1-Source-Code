@@ -131,8 +131,8 @@ local scenegraph_definition = {
 		parent = "buttons_root",
 		horizontal_alignment = "center",
 		position = {
-			-230,
-			0,
+			-200,
+			18,
 			1
 		},
 		size = {
@@ -146,7 +146,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			0,
+			-15,
 			1
 		},
 		size = {
@@ -159,8 +159,8 @@ local scenegraph_definition = {
 		parent = "buttons_root",
 		horizontal_alignment = "center",
 		position = {
-			230,
-			0,
+			200,
+			18,
 			1
 		},
 		size = {
@@ -338,12 +338,12 @@ local function create_gamepad_button(input_action, scenegraph_id)
 			},
 			icon = {
 				size = {
-					26,
-					26
+					34,
+					34
 				},
 				offset = {
 					0,
-					19,
+					15,
 					1
 				},
 				scenegraph_id = scenegraph_id
@@ -358,6 +358,9 @@ PopupHandler.init = function (self, context, from_manager)
 	fassert(from_manager, "Not created by the popoup manager")
 
 	self.ui_renderer = context.ui_renderer
+	self.render_settings = {
+		snap_pixel_positions = true
+	}
 	self.wwise_world = Managers.world:wwise_world(context.world)
 	self.debug_num_updates = 0
 	self.popup_results = {}
@@ -380,7 +383,7 @@ end
 PopupHandler.set_input_manager = function (self, input_manager)
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "popup", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "popup", "IngameMenuKeymaps", "IngameMenuFilters")
 	input_manager.map_device_to_service(input_manager, "popup", "keyboard")
 	input_manager.map_device_to_service(input_manager, "popup", "mouse")
 	input_manager.map_device_to_service(input_manager, "popup", "gamepad")
@@ -440,8 +443,11 @@ PopupHandler.create_ui_elements = function (self)
 
 	return 
 end
-PopupHandler.acquire_input = function (self)
+PopupHandler.acquire_input = function (self, ignore_cursor_stack)
 	local input_manager = self.input_manager
+
+	self.release_input(self, true)
+
 	self.unblocked_services_n = input_manager.get_unblocked_services(input_manager, nil, nil, self.unblocked_services)
 
 	input_manager.device_block_services(input_manager, "keyboard", 1, self.unblocked_services, self.unblocked_services_n, "popup")
@@ -450,11 +456,14 @@ PopupHandler.acquire_input = function (self)
 	input_manager.device_unblock_service(input_manager, "keyboard", 1, "popup")
 	input_manager.device_unblock_service(input_manager, "gamepad", 1, "popup")
 	input_manager.device_unblock_service(input_manager, "mouse", 1, "popup")
-	ShowCursorStack.push()
+
+	if not ignore_cursor_stack then
+		ShowCursorStack.push()
+	end
 
 	return 
 end
-PopupHandler.release_input = function (self)
+PopupHandler.release_input = function (self, ignore_cursor_stack)
 	local input_manager = self.input_manager
 
 	input_manager.device_block_service(input_manager, "keyboard", 1, "popup")
@@ -463,7 +472,13 @@ PopupHandler.release_input = function (self)
 	input_manager.device_unblock_services(input_manager, "keyboard", 1, self.unblocked_services, self.unblocked_services_n)
 	input_manager.device_unblock_services(input_manager, "gamepad", 1, self.unblocked_services, self.unblocked_services_n)
 	input_manager.device_unblock_services(input_manager, "mouse", 1, self.unblocked_services, self.unblocked_services_n)
-	ShowCursorStack.pop()
+	table.clear(self.unblocked_services)
+
+	self.unblocked_services_n = 0
+
+	if not ignore_cursor_stack then
+		ShowCursorStack.pop()
+	end
 
 	return 
 end
@@ -480,12 +495,18 @@ PopupHandler.update = function (self, dt, from_manager)
 		local input_service = input_manager.get_service(input_manager, "popup")
 		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 		local frame_widget = self.frame_widget
+		frame_widget.style.text.font_size = current_popup.text_font_size
 		frame_widget.content.text_field = current_popup.text
 		frame_widget.content.topic_field = current_popup.topic
 		local result = nil
 
 		if current_popup.timer then
 			local timer = string.format("%d", math.floor(current_popup.timer))
+
+			if current_popup.timer_format_func then
+				timer = current_popup.timer_format_func(timer)
+			end
+
 			local timer_field, timer_style = nil
 
 			if current_popup.timer_alignment == "center" then
@@ -494,6 +515,11 @@ PopupHandler.update = function (self, dt, from_manager)
 			else
 				frame_widget.content.timer_field = timer
 				timer_style = frame_widget.style.timer
+			end
+
+			if current_popup.timer_font_size then
+				frame_widget.style.timer.font_size = current_popup.timer_font_size
+				frame_widget.style.center_timer.font_size = current_popup.timer_font_size
 			end
 
 			if current_popup.timer_blink then
@@ -509,9 +535,11 @@ PopupHandler.update = function (self, dt, from_manager)
 		else
 			frame_widget.content.timer_field = ""
 			frame_widget.content.center_timer_field = ""
+			frame_widget.style.timer.font_size = 36
+			frame_widget.style.center_timer.font_size = 44
 		end
 
-		UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt)
+		UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, input_service, dt, nil, self.render_settings)
 		UIRenderer.draw_widget(ui_renderer, self.frame_widget)
 
 		local n_args = current_popup.n_args
@@ -539,7 +567,7 @@ PopupHandler.update = function (self, dt, from_manager)
 				text_style.text_color = (button_enabled and self.gamepad_button_colors.enabled) or self.gamepad_button_colors.disabled
 				local font, scaled_font_size = UIFontByResolution(text_style)
 				local text_width, text_height, min = UIRenderer.text_size(ui_renderer, button_text, font[1], scaled_font_size)
-				button_style.icon.offset[1] = text_width*0.5 - 84
+				button_style.icon.offset[1] = text_width*0.5 - 80
 
 				UIRenderer.draw_widget(ui_renderer, gamepad_button)
 
@@ -588,38 +616,14 @@ end
 PopupHandler.get_gamepad_input_texture_data = function (self, input_service, input_action, ignore_keybinding)
 	local platform = Application.platform()
 
-	if ignore_keybinding then
-		if platform == "win32" then
-			platform = "xb1"
-		end
+	if platform == "win32" then
+		platform = "xb1"
+	end
 
+	if ignore_keybinding then
 		return ButtonTextureByName(input_action, platform)
 	else
-		local keymap_bindings = input_service.get_keymapping(input_service, input_action)
-		local input_mappings = keymap_bindings.input_mappings
-
-		for i = 1, #input_mappings, 1 do
-			local input_mapping = input_mappings[i]
-
-			for j = 1, input_mapping.n, 3 do
-				local device_type = input_mapping[j]
-				local key_index = input_mapping[j + 1]
-				local key_action_type = input_mapping[j + 2]
-
-				if device_type == "gamepad" then
-					local button_name = Pad1.button_name(key_index)
-					local button_texture_data = nil
-
-					if platform == "xb1" or platform == "win32" then
-						button_texture_data = ButtonTextureByName(button_name, "xb1")
-					else
-						button_texture_data = ButtonTextureByName(button_name, "ps4")
-					end
-
-					return button_texture_data, button_name
-				end
-			end
-		end
+		return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 	end
 
 	return 
@@ -663,6 +667,11 @@ PopupHandler.queue_popup = function (self, text, topic, ...)
 	self.popup_ids = self.popup_ids + 1
 	local popup_id = tostring(self.popup_ids)
 	new_popup.popup_id = popup_id
+	local frame_widget = self.frame_widget
+	local text_style = frame_widget.style.text
+	local scaled_text_field_size = UIScaleVectorToResolution(scenegraph_definition.popup_text.size)
+	local number_of_text_rows = self.get_number_of_rows(self, text, text_style, scaled_text_field_size[1])
+	new_popup.text_font_size = (7 <= number_of_text_rows and 20) or 28
 	new_popup.text = text
 	new_popup.topic = topic
 	local n_args = select("#", ...)
@@ -682,15 +691,17 @@ PopupHandler.queue_popup = function (self, text, topic, ...)
 
 	pack_index[n_args](new_popup.args, 1, ...)
 
-	if n_popups == 1 and self.input_manager then
-		self.acquire_input(self)
+	local ignore_cursor_stack = 1 < n_popups
+
+	if self.input_manager then
+		self.acquire_input(self, ignore_cursor_stack)
 	end
 
 	popups[n_popups] = new_popup
 
 	return popup_id
 end
-PopupHandler.activate_timer = function (self, popup_id, time, default_result, alignment, blink)
+PopupHandler.activate_timer = function (self, popup_id, time, default_result, alignment, blink, optional_timer_format_func, optional_font_size)
 	local n_popups = self.n_popups
 	local popups = self.popups
 	local popup = nil
@@ -726,11 +737,22 @@ PopupHandler.activate_timer = function (self, popup_id, time, default_result, al
 	popup.default_result = default_result
 	popup.timer_alignment = alignment or "right"
 	popup.timer_blink = (blink == nil and true) or blink
+	popup.timer_format_func = optional_timer_format_func
+	popup.timer_font_size = optional_font_size
 
 	return 
 end
 PopupHandler.has_popup = function (self)
 	return 0 < self.n_popups
+end
+PopupHandler.has_popup_with_id = function (self, popup_id)
+	for _, popup in pairs(self.popups) do
+		if popup.popup_id == popup_id then
+			return true
+		end
+	end
+
+	return false
 end
 PopupHandler.cancel_popup = function (self, popup_id)
 	local n_popups = self.n_popups
@@ -781,6 +803,15 @@ PopupHandler.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
 
 	return 
+end
+PopupHandler.fit_text_width_to_popup = function (self, text)
+	return UIRenderer.crop_text_width(self.ui_renderer, text, 500, self.frame_widget.style.text)
+end
+PopupHandler.get_number_of_rows = function (self, localized_text, text_style, text_area_width)
+	local font, scaled_font_size = UIFontByResolution(text_style)
+	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
+
+	return #lines
 end
 
 return 

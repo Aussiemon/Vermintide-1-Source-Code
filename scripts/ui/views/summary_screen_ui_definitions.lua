@@ -655,7 +655,7 @@ local widget_definitions = {
 				scenegraph_id = "summary_line_break"
 			},
 			title_text = {
-				word_wrap = true,
+				word_wrap = false,
 				scenegraph_id = "summary_window_title_text",
 				localize = true,
 				horizontal_alignment = "center",
@@ -1551,6 +1551,8 @@ local function create_bonus_entries(num_of_dices)
 	return dices
 end
 
+local MAX_SUMMARY_TITLE_WIDTH = 382
+
 local function create_summary_entry(num_of_entries)
 	local summary_widgets = {}
 
@@ -1584,7 +1586,7 @@ local function create_summary_entry(num_of_entries)
 					1
 				},
 				size = {
-					382,
+					MAX_SUMMARY_TITLE_WIDTH,
 					40
 				}
 			}
@@ -1647,6 +1649,7 @@ local function create_summary_entry(num_of_entries)
 			style = {
 				title_text = {
 					vertical_alignment = "center",
+					word_wrap = true,
 					font_size = 24,
 					font_type = "hell_shark_masked",
 					text_color = Colors.get_color_table_with_alpha("white", 0),
@@ -1692,5 +1695,6 @@ return {
 	widgets = widget_definitions,
 	summary_widgets = summary_widgets,
 	bonus_widgets = bonus_widgets,
-	hero_icons = hero_icons
+	hero_icons = hero_icons,
+	MAX_SUMMARY_TITLE_WIDTH = MAX_SUMMARY_TITLE_WIDTH
 }

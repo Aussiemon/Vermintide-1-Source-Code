@@ -153,6 +153,10 @@ local function play_sound(event_id, wwise_world, unit, node, is_husk, wwise_para
 end
 
 local function send_flow_event(event, unit)
+	if event == "dismember_torso" and not Unit.has_animation_state_machine(unit) then
+		return 
+	end
+
 	Unit.flow_event(unit, event)
 
 	return 
@@ -245,17 +249,21 @@ GenericHitReactionExtension.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	local best_damage_amount = -100
+	local best_damage_amount = -1000
 	local best_damage_index = nil
 	local stride = DamageDataIndex.STRIDE
 
 	for i = 1, num_damages, stride do
 		local damage_amount = damages[(i + DamageDataIndex.DAMAGE_AMOUNT) - 1]
 
-		if best_damage_amount < damage_amount then
+		if best_damage_amount < damage_amount and 0 <= damage_amount then
 			best_damage_amount = damage_amount
 			best_damage_index = i
 		end
+	end
+
+	if best_damage_amount < 0 then
+		return 
 	end
 
 	pack_index[DamageDataIndex.STRIDE](biggest_hit, 1, unpack_index[DamageDataIndex.STRIDE](damages, 1))
@@ -268,7 +276,7 @@ GenericHitReactionExtension.update = function (self, unit, input, dt, context, t
 		local hit_reaction = HitReactions.get_reaction(self.hit_reaction_template, self.is_husk)
 
 		hit_reaction(unit, dt, context, t, biggest_hit)
-		Profiler.stop()
+		Profiler.stop(self.hit_reaction_template)
 	end
 
 	if not self.hit_effect_template then
@@ -320,7 +328,7 @@ GenericHitReactionExtension.update = function (self, unit, input, dt, context, t
 		self._execute_effect(self, unit, hit_effects[i], biggest_hit, parameters)
 	end
 
-	Profiler.stop()
+	Profiler.stop("executing effects")
 
 	return 
 end
@@ -609,6 +617,11 @@ GenericHitReactionExtension._do_push = function (self, unit, dt)
 	local lateral_vector = lateral_direction*lateral_force
 	local vertical_vector = Vector3(0, 0, vertical_force)
 	local push_force = (distal_vector + lateral_vector + vertical_vector)/(num_actors*0.75)
+	local breed = Unit.get_data(unit, "breed")
+
+	if breed.scale_death_push then
+		push_force = push_force*breed.scale_death_push
+	end
 
 	for i = 1, num_actors, 1 do
 		actor = Unit.actor(unit, push_actors[i])

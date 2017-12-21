@@ -11,9 +11,10 @@ end
 
 SaveData = SaveData or {
 	profiles_version = 45,
-	version = 5,
 	player_data_version = 7,
-	video_version = 1
+	save_loaded = false,
+	video_version = 1,
+	version = 6
 }
 
 function populate_save_data(save_data)
@@ -42,6 +43,10 @@ function populate_save_data(save_data)
 			save_data.video_version = SaveData.video_version
 		end
 
+		if not save_data.backend_profile_hash then
+			save_data.backend_profile_hash = SaveData.backend_profile_hash
+		end
+
 		SaveData = save_data
 	else
 		print("Wrong version for save file, saved: ", save_data.version, " current: ", SaveData.version)
@@ -50,6 +55,8 @@ function populate_save_data(save_data)
 	local id = (rawget(_G, "Steam") and Steam.user_id()) or "local_save"
 
 	populate_player_data_from_save(SaveData, id, version_match)
+
+	SaveData.save_loaded = true
 
 	return 
 end

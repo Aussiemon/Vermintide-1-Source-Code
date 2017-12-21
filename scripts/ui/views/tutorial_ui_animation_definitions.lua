@@ -23,7 +23,7 @@ local info_slate_enter = {
 
 			for name, style_data in pairs(widget.style) do
 				if style_data.color then
-					style_data.color[1] = style_data.default_alpha
+					style_data.color[1] = (not style_data.background_component or 0) and style_data.default_alpha
 				end
 			end
 
@@ -34,10 +34,13 @@ local info_slate_enter = {
 		update = function (ui_scenegraph, scenegraph_definition, widget, local_progress, params)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 2, 0, 1, -1)
 			local smooth_value = math.smoothstep(local_progress, 0, 1)
-			local start_position = ui_scenegraph[params.start_id].position
-			local end_position = ui_scenegraph[params.end_id].position
-			local ui_local_position = ui_scenegraph[widget.scenegraph_id].position
-			ui_local_position[1] = math.lerp(start_position[1], end_position[1], smooth_value)
+
+			for name, style_data in pairs(widget.style) do
+				if style_data.color and style_data.background_component then
+					style_data.color[1] = style_data.default_alpha*smooth_value
+				end
+			end
+
 			widget.element.dirty = true
 
 			return 

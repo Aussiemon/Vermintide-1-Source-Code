@@ -86,7 +86,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.75,
+					start_time = 0.7,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one"
@@ -148,16 +148,16 @@ weapon_template.actions = {
 			},
 			allowed_chain_actions = {
 				{
-					sub_action = "shoot_charged",
-					start_time = 0.2,
-					action = "action_one",
-					input = "action_one"
-				},
-				{
 					sub_action = "default",
 					start_time = 0.2,
 					action = "action_wield",
 					input = "action_wield"
+				},
+				{
+					sub_action = "shoot_charged",
+					start_time = 0.2,
+					action = "action_one",
+					input = "action_one"
 				},
 				{
 					sub_action = "default",
@@ -225,6 +225,14 @@ weapon_template.overcharge_data = {
 	overcharge_warning_med_sound_event = "drakegun_overcharge_warning_med",
 	hit_overcharge_threshold_sound = "ui_special_attack_ready"
 }
+local action = weapon_template.actions.action_one.default
+weapon_template.default_loaded_projectile_settings = {
+	drop_multiplier = 0.04,
+	speed = action.speed,
+	gravity = ProjectileGravitySettings[action.projectile_info.gravity_settings]
+}
+local charge_action = weapon_template.actions.action_two.default
+charge_action.loaded_projectile_settings = "none"
 weapon_template.default_spread_template = "brace_of_drake_pistols"
 weapon_template.right_hand_unit = ""
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.drake_pistol.right
@@ -234,6 +242,9 @@ weapon_template.display_unit = "units/weapons/weapon_display/display_pistols"
 weapon_template.wield_anim = "to_drakefire_pistols"
 weapon_template.crosshair_style = "default"
 weapon_template.buff_type = BuffTypes.RANGED
+weapon_template.dodge_distance = 0.85
+weapon_template.dodge_speed = 0.85
+weapon_template.dodge_count = 1
 weapon_template.wwise_dep_right_hand = {
 	"wwise/drakegun"
 }

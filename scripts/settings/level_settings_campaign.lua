@@ -15,15 +15,21 @@ LevelSettingsCampaign = {
 	},
 	act_1 = {
 		"merchant",
-		"wizard"
+		"wizard",
+		"sewers_short",
+		"bridge"
 	},
 	act_2 = {
 		"forest_ambush",
-		"cemetery"
+		"cemetery",
+		"city_wall",
+		"farm"
 	},
 	act_3 = {
 		"tunnels",
-		"end_boss"
+		"end_boss",
+		"courtyard_level",
+		"docks_short_level"
 	},
 	side_missions = {
 		"sewers_short",
@@ -52,6 +58,24 @@ LevelSettingsCampaign = {
 		"courtyard_level",
 		"docks_short_level"
 	},
+	console_level_list = {
+		"magnus",
+		"merchant",
+		"wizard",
+		"sewers_short",
+		"bridge",
+		"forest_ambush",
+		"cemetery",
+		"city_wall",
+		"farm",
+		"tunnels",
+		"end_boss",
+		"courtyard_level",
+		"docks_short_level",
+		"dlc_portals",
+		"dlc_castle",
+		"dlc_castle_dungeon"
+	},
 	levels_with_tomes = {
 		"magnus",
 		"merchant",
@@ -59,6 +83,19 @@ LevelSettingsCampaign = {
 		"forest_ambush",
 		"cemetery",
 		"tunnels"
+	},
+	console_levels_with_tomes = {
+		"magnus",
+		"merchant",
+		"wizard",
+		"forest_ambush",
+		"cemetery",
+		"tunnels",
+		"dlc_castle",
+		"dlc_castle_dungeon"
+	},
+	tome_amount_exceptions = {
+		dlc_castle_dungeon = 1
 	}
 }
 
