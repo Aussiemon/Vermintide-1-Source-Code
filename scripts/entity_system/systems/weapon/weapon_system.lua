@@ -70,7 +70,7 @@ WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker
 	local attack_template_name = NetworkLookup.attack_templates[attack_template_id]
 	local attack_template = AttackTemplates[attack_template_name]
 
-	if hit_player and attacker_player then
+	if hit_player and attacker_player and Managers.state.game_mode:level_key() == "inn_level" then
 		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 		local hit_unit_friendly_fire_melee = DamageUtils.allow_friendly_fire_melee(difficulty_settings, hit_player)
 		local attacker_unit_friendly_fire_melee = DamageUtils.allow_friendly_fire_melee(difficulty_settings, attacker_player)

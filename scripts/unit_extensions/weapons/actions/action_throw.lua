@@ -84,12 +84,6 @@ ActionThrow._throw = function (self)
 	local spawn_type = "thrown"
 
 	ActionUtils.spawn_pickup_projectile(self.world, self.weapon_unit, projectile_info.projectile_unit_name, projectile_info.projectile_unit_template_name, current_action, owner_unit, position, proj_rotation, velocity, angular_velocity_transformed, self.item_name, spawn_type)
-	Unit.set_unit_visibility(self.weapon_unit, false)
-	Unit.flow_event(self.weapon_unit, "lua_unwield")
-
-	local include_local_player = false
-
-	CharacterStateHelper.show_inventory_3p(owner_unit, false, include_local_player, self.is_server, self.owner_inventory_extension)
 
 	if projectile_info.pickup_name then
 		local dialogue_input = ScriptUnit.extension_input(self.owner_unit, "dialogue_system")

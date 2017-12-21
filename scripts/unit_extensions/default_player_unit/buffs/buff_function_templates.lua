@@ -321,23 +321,27 @@ BuffFunctionTemplates.functions = {
 		return 
 	end,
 	remove_brawl_defeated_buff = function (unit, buff, params)
-		CharacterStateHelper.play_animation_event(unit, "revive_complete")
-		StatusUtils.set_knocked_down_network(unit, false)
-
-		local difficulty_manager = Managers.state.difficulty
-		local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
-		local player_health = difficulty_settings.max_hp
-		local health_extension = ScriptUnit.extension(unit, "health_system")
-
-		health_extension.reset(health_extension)
-		health_extension.set_max_health(health_extension, player_health, true)
-
 		local network_manager = Managers.state.network
-		local go_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, unit)
-		local state_id = NetworkLookup.health_statuses[health_extension.state]
+		local go_id = network_manager.unit_game_object_id(network_manager, unit)
 
-		network_manager.network_transmit:send_rpc_clients("rpc_sync_damage_taken", go_id, is_level_unit, 0, state_id)
-		StatusUtils.set_wounded_network(unit, false, "healed", params.t)
+		if go_id then
+			CharacterStateHelper.play_animation_event(unit, "revive_complete")
+			StatusUtils.set_knocked_down_network(unit, false)
+
+			local difficulty_manager = Managers.state.difficulty
+			local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+			local player_health = difficulty_settings.max_hp
+			local health_extension = ScriptUnit.extension(unit, "health_system")
+
+			health_extension.reset(health_extension)
+			health_extension.set_max_health(health_extension, player_health, true)
+
+			local state_id = NetworkLookup.health_statuses[health_extension.state]
+			local is_level_unit = false
+
+			network_manager.network_transmit:send_rpc_clients("rpc_sync_damage_taken", go_id, is_level_unit, 0, state_id)
+			StatusUtils.set_wounded_network(unit, false, "healed", params.t)
+		end
 
 		return 
 	end,
