@@ -2,10 +2,14 @@ local Unit_alive = Unit.alive
 local Unit_get_data = Unit.get_data
 StatisticsUtil = {}
 local StatisticsUtil = StatisticsUtil
+StatisticsUtil.register_player_death = function (victim_unit, statistics_db)
+	statistics_db.increment_stat(statistics_db, "session", "deaths")
+
+	return 
+end
 StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db, is_server)
-	local attacker_unit = damage_data[DamageDataIndex.ATTACKER]
+	local attacker_unit = AiUtils.get_actual_attacker_unit(damage_data[DamageDataIndex.ATTACKER])
 	local damaging_unit = damage_data[DamageDataIndex.DAMAGING_UNIT]
-	attacker_unit = AiUtils.get_actual_attacker_unit(attacker_unit)
 	local player_manager = Managers.player
 	local attacker_player = player_manager.owner(player_manager, attacker_unit)
 
@@ -16,6 +20,8 @@ StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db
 			projectile_ext.add_kill(projectile_ext)
 		end
 	end
+
+	local grenade_kill = false
 
 	if attacker_player then
 		local stats_id = attacker_player.stats_id(attacker_player)
@@ -43,13 +49,21 @@ StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db
 				statistics_db.increment_stat(statistics_db, stats_id, "headshots")
 			end
 
-			local inventory_extension = ScriptUnit.extension(attacker_unit, "inventory_system")
-			local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+			local damage_source = damage_data[DamageDataIndex.DAMAGE_SOURCE_NAME]
+			local master_list_item = rawget(ItemMasterList, damage_source)
 
-			if slot_name == "slot_melee" then
-				statistics_db.increment_stat(statistics_db, stats_id, "kills_melee")
-			elseif slot_name == "slot_ranged" then
-				statistics_db.increment_stat(statistics_db, stats_id, "kills_ranged")
+			if master_list_item then
+				local slot_type = master_list_item.slot_type
+
+				if slot_type == "melee" then
+					statistics_db.increment_stat(statistics_db, stats_id, "kills_melee")
+				elseif slot_type == "ranged" then
+					statistics_db.increment_stat(statistics_db, stats_id, "kills_ranged")
+				elseif slot_type == "grenade" then
+					statistics_db.increment_stat(statistics_db, stats_id, "kills_grenade")
+
+					grenade_kill = true
+				end
 			end
 		end
 	elseif statistics_db.is_registered(statistics_db, attacker_unit) then
@@ -67,6 +81,10 @@ StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db
 				local breed_name = breed.name
 
 				statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_per_breed", breed_name)
+
+				if grenade_kill then
+					statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_grenade")
+				end
 			end
 		end
 	end
@@ -100,11 +118,17 @@ StatisticsUtil.check_save = function (savior_unit, enemy_unit)
 		local grabber_unit = status_ext.get_pouncer_unit(status_ext) or status_ext.get_pack_master_grabber(status_ext)
 		local is_disabled = status_ext.is_disabled(status_ext)
 		local predicate = nil
+		local statistics_db = Managers.player:statistics_db()
+		local savior_player_stats_id = savior_player.stats_id(savior_player)
 
 		if enemy_unit == grabber_unit then
 			predicate = "save"
+
+			statistics_db.increment_stat(statistics_db, savior_player_stats_id, "saves")
 		elseif is_behind or is_disabled then
 			predicate = "aid"
+
+			statistics_db.increment_stat(statistics_db, savior_player_stats_id, "aidings")
 
 			if not savior_player.remote then
 				BuffUtils.trigger_assist_buffs(savior_player, saved_player)
@@ -114,7 +138,7 @@ StatisticsUtil.check_save = function (savior_unit, enemy_unit)
 		if predicate then
 			local local_human = not savior_player.remote and not savior_player.bot_player
 
-			Managers.state.event:trigger("add_coop_feedback", savior_player.stats_id(savior_player) .. saved_player.stats_id(saved_player), local_human, predicate, savior_player, saved_player)
+			Managers.state.event:trigger("add_coop_feedback", savior_player_stats_id .. saved_player.stats_id(saved_player), local_human, predicate, savior_player, saved_player)
 			Managers.state.network.network_transmit:send_rpc_clients("rpc_coop_feedback", savior_player.network_id(savior_player), savior_player.local_player_id(savior_player), NetworkLookup.coop_feedback[predicate], saved_player.network_id(saved_player), saved_player.local_player_id(saved_player))
 		end
 	end
@@ -203,6 +227,13 @@ StatisticsUtil.register_damage = function (victim_unit, damage_data, statistics_
 		local stats_id = player.stats_id(player)
 
 		statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_taken", damage_amount)
+
+		local damage_source = damage_data[DamageDataIndex.DAMAGE_SOURCE_NAME]
+
+		if Breeds[damage_source] then
+			statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_taken_per_breed", damage_source, damage_amount)
+			statistics_db.modify_stat_by_amount(statistics_db, "session", "damage_taken_per_breed", damage_source, damage_amount)
+		end
 	end
 
 	local attacker_unit = damage_data[DamageDataIndex.ATTACKER]
@@ -223,6 +254,39 @@ StatisticsUtil.register_damage = function (victim_unit, damage_data, statistics_
 
 				statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_dealt", damage_amount)
 				statistics_db.modify_stat_by_amount(statistics_db, stats_id, "damage_dealt_per_breed", breed_name, damage_amount)
+			end
+		end
+	end
+
+	return 
+end
+StatisticsUtil.register_instakill = function (victim_unit, damage_datas, index)
+	local breed = Unit.get_data(victim_unit, "breed")
+
+	if breed and breed.name == "skaven_storm_vermin" then
+		local attacker_unit_index = (index - 1)*DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER
+		local attacker_unit = damage_datas[attacker_unit_index]
+
+		if Unit.alive(attacker_unit) then
+			local player_manager = Managers.player
+			local owner = player_manager.owner(player_manager, attacker_unit)
+			local local_player = player_manager.local_player(player_manager)
+
+			if owner == local_player then
+				local damage_source_name_index = (index - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_SOURCE_NAME
+				local damage_source_name = damage_datas[damage_source_name_index]
+				local item = rawget(ItemMasterList, damage_source_name)
+
+				if item then
+					local item_type = item.item_type
+
+					if item_type == "dr_2h_picks" then
+						local statistics_db = player_manager.statistics_db(player_manager)
+						local stats_id = local_player.stats_id(local_player)
+
+						statistics_db.increment_stat(statistics_db, stats_id, "stormvermin_pick_instakills")
+					end
+				end
 			end
 		end
 	end
@@ -415,6 +479,101 @@ StatisticsUtil._modify_survival_stat = function (statistics_db, level_id, diffic
 
 	return 
 end
+StatisticsUtil.register_online_leaderboards_data = function (statistics_db, score)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+	local mission_data = active_missions.survival_wave
+
+	if not mission_data then
+		return 
+	end
+
+	local player_manager = Managers.player
+	local local_player = player_manager.local_player(player_manager)
+	local profile_index = local_player.profile_index
+	local stats_id = local_player.stats_id(local_player)
+	local level_key = Managers.state.game_mode:level_key()
+	local waves = mission_data.wave_completed
+	local wave_times = mission_data.wave_times
+	local wave_completed_time = mission_data.wave_completed_time - mission_data.start_time
+	local leaderboard_name = level_key .. "_" .. SPProfiles[profile_index].display_name
+	local overall_leaderboard_name = level_key .. "_overall"
+	local skaven_slave = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_slave")
+	local skaven_clan_rat = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_clan_rat")
+	local skaven_storm_vermin = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_storm_vermin")
+	local skaven_storm_vermin_commander = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_storm_vermin_commander")
+	local skaven_gutter_runner = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_gutter_runner")
+	local skaven_pack_master = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_pack_master")
+	local skaven_poison_wind_globadier = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_poison_wind_globadier")
+	local skaven_ratling_gunner = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_ratling_gunner")
+	local skaven_rat_ogre = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
+	local skaven_storm_vermins = skaven_storm_vermin + skaven_storm_vermin_commander
+	local skaven_specials = skaven_pack_master + skaven_poison_wind_globadier + skaven_gutter_runner + skaven_ratling_gunner
+	local total_score = score
+
+	if Managers.state.network.is_server then
+		print("###################################")
+		print("##### REGISTERING LEADERBOARD #####")
+		print("###################################")
+
+		local BASE_SCORE = 1000
+		local MAX_TIME_IN_SEC = 1000
+		total_score = 0
+		local total_time = mission_data.start_time
+
+		print("Start time: " .. mission_data.start_time)
+
+		for wave = 1, waves, 1 do
+			local time_in_sec = wave_times[wave] - total_time
+			total_time = total_time + time_in_sec
+			local time_score = math.max(BASE_SCORE*math.max(MAX_TIME_IN_SEC - time_in_sec, 0)/MAX_TIME_IN_SEC, 1)
+			local wave_score = math.floor(wave*BASE_SCORE + time_score)
+			total_score = total_score + wave_score
+
+			print("Wave: " .. wave .. " time: " .. time_in_sec .. " Score: " .. wave_score)
+		end
+
+		print("-----------------------------------")
+		print("Total score: " .. total_score .. " Waves: " .. waves)
+		print("Calculated Total time: " .. total_time)
+		print("Mission Total time: " .. wave_completed_time)
+		print("")
+		print("###################################")
+		Managers.state.network.network_transmit:send_rpc_clients("rpc_register_online_leaderboards", total_score)
+	end
+
+	local score_data = {
+		waves,
+		skaven_slave,
+		skaven_clan_rat,
+		skaven_storm_vermins,
+		skaven_specials,
+		skaven_rat_ogre,
+		math.floor(wave_completed_time + 0.5)
+	}
+	local platform = Application.platform()
+
+	if platform == "win32" then
+		Managers.leaderboards:register_score(leaderboard_name, total_score, score_data)
+	elseif platform == "xb1" then
+		local xdp_leaderboard_stat_name = LeaderboardSettings.xdp_leaderboard_stats[leaderboard_name]
+
+		if xdp_leaderboard_stat_name then
+			Managers.account:set_leaderboard(xdp_leaderboard_stat_name, total_score, score_data)
+		else
+			Application.error(string.format("[StatisticsUtil] No leaderboard specified for %s", leaderboard_name))
+		end
+	elseif platform == "ps4" then
+	end
+
+	local old_score = statistics_db.get_stat(statistics_db, stats_id, leaderboard_name)
+
+	if old_score < total_score then
+		statistics_db.set_stat(statistics_db, stats_id, leaderboard_name, total_score)
+	end
+
+	return 
+end
 StatisticsUtil.register_complete_survival_level = function (statistics_db)
 	local mission_system = Managers.state.entity:system("mission_system")
 	local active_missions, completed_missions = mission_system.get_missions(mission_system)
@@ -535,6 +694,25 @@ StatisticsUtil.register_matchmaking_country_code = function (statistics_db)
 	local stats_id = local_player.stats_id(local_player)
 
 	statistics_db.set_stat(statistics_db, stats_id, "matchmaking_country_code", country_code)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_unix_timestamp = function (statistics_db)
+	local timestamp = os.time()
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.set_stat(statistics_db, stats_id, "matchmaking_unix_timestamp", timestamp)
+
+	return 
+end
+StatisticsUtil.register_matchmaking_region_fetch_status = function (statistics_db)
+	local account_manager = Managers.account
+	local region_fetch_status = account_manager.region_fetch_status(account_manager)
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+
+	statistics_db.set_stat(statistics_db, stats_id, "matchmaking_region_fetch_status", region_fetch_status)
 
 	return 
 end

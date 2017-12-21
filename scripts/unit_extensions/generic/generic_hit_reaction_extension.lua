@@ -127,6 +127,13 @@ local function play_effect(hit_effect_name, unit, world, actors, hit_direction_f
 		World.create_particles(world, hit_effect_name, Unit.world_position(unit, node), hit_rotation)
 	end
 
+	local breed = Unit.get_data(unit, "breed")
+	local show_blood = not breed.no_blood_splatter_on_damage
+
+	if not show_blood then
+		return 
+	end
+
 	Managers.state.blood:spawn_blood_ball(Unit.world_position(unit, node), hit_direction_flat, damage_type, unit)
 
 	return 

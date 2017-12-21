@@ -589,10 +589,24 @@ function status_is_locked(lobby_data)
 	return is_broken or is_full or is_private
 end
 
+local function make_utf8_valid(str)
+	while not Utf8.valid(str) do
+		local length = string.len(str)
+
+		if length == 1 then
+			str = ""
+		else
+			str = string.sub(str, 1, length - 1)
+		end
+	end
+
+	return str
+end
+
 local function create_lobby_list_entry_content(lobby_data)
 	local my_peer_id = Network:peer_id()
 	local host = lobby_data.host or lobby_data.Host
-	local title_text = lobby_data.server_name or lobby_data.unique_server_name or lobby_data.host or lobby_data.Host
+	local title_text = make_utf8_valid(lobby_data.server_name or lobby_data.unique_server_name or lobby_data.host or lobby_data.Host)
 
 	if host == my_peer_id or not title_text then
 		return 
@@ -1310,6 +1324,8 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 
 	if selected_lobby then
 		self.set_selected_lobby(self, selected_lobby)
+	else
+		self.on_lobby_selected(self, 1, false)
 	end
 
 	return 

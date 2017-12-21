@@ -81,6 +81,16 @@ UnlockableLevelsByGameMode = {
 		"dlc_survival_magnus"
 	}
 }
+UnlockableLevelsByDLC = {
+	dwarfs = {
+		adventure = {
+			"dlc_dwarf_interior",
+			"dlc_dwarf_exterior",
+			"dlc_dwarf_beacons"
+		},
+		survival = {}
+	}
+}
 MainGameLevels = {
 	"magnus",
 	"merchant",
@@ -153,6 +163,14 @@ LengthTypeByLevel = {
 }
 
 dofile("scripts/settings/level_unlock_settings_dlc_dwarf")
+
+for _, dlc in pairs(DLCSettings) do
+	local unlock_settings = dlc.level_unlock_settings
+
+	if unlock_settings then
+		dofile(unlock_settings)
+	end
+end
 
 LevelUnlockOrderCombined = {}
 
@@ -455,6 +473,10 @@ LevelUnlockUtils.act_completed = function (statistics_db, player_stats_id, act_k
 	return true
 end
 LevelUnlockUtils.all_acts_completed = function (statistics_db, player_stats_id)
+	if Development.parameter("unlock_all_levels") then
+		return true
+	end
+
 	for _, key in ipairs(GameActsOrder) do
 		if not LevelUnlockUtils.act_completed(statistics_db, player_stats_id, key) then
 			return false
@@ -468,8 +490,9 @@ LevelUnlockUtils.debug_set_completed_game_difficulty = function (difficulty)
 	local player = Managers.player:local_player()
 	local stats_id = player.stats_id(player)
 
-	for _, level_key in pairs(LevelDifficultyDBNames) do
-		slot9 = statistics_db.set_stat(statistics_db, stats_id, "completed_levels_difficulty", level_key, difficulty)
+	for level_key, level_difficulty_key in pairs(LevelDifficultyDBNames) do
+		statistics_db.set_stat(statistics_db, stats_id, "completed_levels_difficulty", level_difficulty_key, difficulty)
+		statistics_db.increment_stat(statistics_db, stats_id, "completed_levels", level_key)
 	end
 
 	local backend_stats = {}

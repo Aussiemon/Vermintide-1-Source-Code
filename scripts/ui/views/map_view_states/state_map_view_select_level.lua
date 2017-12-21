@@ -28,6 +28,7 @@ StateMapViewSelectLevel.on_enter = function (self, params)
 	self.level_filter = params.level_filter
 	self.wwise_world = ingame_ui_context.dialogue_system.wwise_world
 	self.platform = Application.platform()
+	self.open = true
 	self._filter_unplayable_path = "filter_unplayable"
 
 	if self.game_info.game_mode == "adventure" then
@@ -36,6 +37,16 @@ StateMapViewSelectLevel.on_enter = function (self, params)
 	else
 		self._filter_enabled = false
 		self.input_actions = generic_input_actions
+
+		if GameSettingsDevelopment.use_leaderboards or Development.parameter("use_leaderboards") then
+			self._leaderboards_ui = LeaderboardsUI:new(ingame_ui_context, "map_menu")
+			self.input_actions = table.clone(generic_input_actions)
+			self.input_actions.default.default[#self.input_actions.default.default + 1] = {
+				input_action = "refresh",
+				priority = 5,
+				description_text = "input_descriptions_leaderboards"
+			}
+		end
 	end
 
 	local input_service = self.input_manager:get_service("map_menu")
@@ -267,6 +278,51 @@ StateMapViewSelectLevel.on_exit = function (self, params)
 
 	return 
 end
+StateMapViewSelectLevel.animate_window = function (self, open, level_key)
+	if not self._draw_score then
+		return 
+	end
+
+	if not self.close_window_animation and not self.open_window_animation then
+		local ui_scenegraph = self.ui_scenegraph
+		local target = ui_scenegraph.overlay.local_position
+		local target_index = 2
+
+		if open then
+			local from = 1200
+			local to = 0
+			local time = UISettings.scoreboard.open_duration
+			self.opening_leaderboards = false
+			self.open_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+
+			self._play_sound(self, "Play_hud_button_close")
+			self._leaderboards_ui:close()
+		else
+			if not level_key then
+				return 
+			end
+
+			self._map_view:enable_timeline(false)
+
+			self.open = false
+			local from = 0
+			local to = 1200
+			local time = UISettings.scoreboard.close_duration
+			self.opening_leaderboards = true
+			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+
+			self._play_sound(self, "Play_hud_button_open")
+			self._leaderboards_ui:open(level_key)
+		end
+	end
+
+	return 
+end
+StateMapViewSelectLevel.animate_element_by_time = function (self, target, destination_index, from, to, time)
+	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.ease_out_quad)
+
+	return new_animation
+end
 StateMapViewSelectLevel._update_transition_timer = function (self, dt)
 	if not self._transition_timer then
 		return 
@@ -284,7 +340,21 @@ StateMapViewSelectLevel._update_transition_timer = function (self, dt)
 
 	return 
 end
+StateMapViewSelectLevel.on_open_complete = function (self)
+	self.open = true
+
+	self._map_view:enable_timeline(true)
+
+	return 
+end
+StateMapViewSelectLevel.on_close_complete = function (self)
+	self.open = false
+
+	return 
+end
 StateMapViewSelectLevel.update = function (self, dt, t)
+	script_data.mapview = self
+
 	if DO_RELOAD then
 		DO_RELOAD = false
 
@@ -296,6 +366,50 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 	end
 
 	self._update_elements_position(self, dt)
+
+	local open_animation = self.open_window_animation
+
+	if open_animation then
+		UIAnimation.update(open_animation, dt)
+
+		if UIAnimation.completed(open_animation) then
+			self.open_window_animation = nil
+
+			self.on_open_complete(self)
+		end
+	else
+		local close_animation = self.close_window_animation
+
+		if close_animation then
+			UIAnimation.update(close_animation, dt)
+
+			if UIAnimation.completed(close_animation) then
+				self.close_window_animation = nil
+
+				if not self.opening_leaderboards then
+					self.on_close_complete(self)
+				end
+			end
+		end
+	end
+
+	if self._leaderboards_ui then
+		local input_service = self.input_manager:get_service("map_menu")
+
+		if self.open and input_service.get(input_service, "refresh") then
+			local level_data = self._active_level_list[self._selected_read_index]
+			local level_key = level_data and level_data.level_key
+
+			self.animate_window(self, not self.open, level_key)
+		elseif not self.open and (input_service.get(input_service, "back") or input_service.get(input_service, "refresh")) then
+			local level_data = self._active_level_list[self._selected_read_index]
+			local level_key = level_data and level_data.level_key
+
+			self.animate_window(self, not self.open, level_key)
+		end
+
+		self._leaderboards_ui:update(dt)
+	end
 
 	if self._filter_enabled then
 		local level_filter = self.level_filter
@@ -329,6 +443,10 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 
 			self._update_input_description(self)
 		end
+	end
+
+	if self._leaderboards_ui and self._leaderboards_ui:enabled() then
+		self._leaderboards_ui:draw(dt)
 	end
 
 	self.draw(self, dt)
@@ -519,7 +637,7 @@ StateMapViewSelectLevel._update_filter_animation = function (self, dt)
 	return 
 end
 StateMapViewSelectLevel._handle_input = function (self, dt)
-	if self._new_state then
+	if self._new_state or (self._leaderboards_ui and self._leaderboards_ui:enabled()) then
 		return 
 	end
 
@@ -674,7 +792,11 @@ StateMapViewSelectLevel.draw = function (self, dt)
 	UIRenderer.end_pass(ui_renderer)
 
 	if not self._transition_timer then
-		self.menu_input_description:draw(ui_renderer, dt)
+		local leaderboards_enabled = self._leaderboards_ui and self._leaderboards_ui:enabled()
+
+		if not leaderboards_enabled then
+			self.menu_input_description:draw(ui_renderer, dt)
+		end
 	end
 
 	return 
@@ -819,8 +941,16 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 		self._set_level_score(self, level_key, difficulty_data)
 
 		self._draw_score = true
+
+		if self.game_info.game_mode == "survival" then
+			self.menu_input_description:enable_button(3, true)
+		end
 	else
 		self._draw_score = false
+
+		if self.game_info.game_mode == "survival" then
+			self.menu_input_description:enable_button(3, false)
+		end
 	end
 
 	return 

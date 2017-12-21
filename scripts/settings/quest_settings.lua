@@ -1,12 +1,12 @@
 QuestSettings = {
-	quest_icon_unknown_fallback = "level_location_long_icon_01_quest_screen",
-	PREPARE_MENU_FOR_SYNC_DURATION = 8,
-	NUMBER_OF_SEAL_VARIATIONS_BG = 4,
-	LOG_CONTRACTS_HEIGHT_SPACING = 3,
 	MAX_NUMBER_OF_POPUP_QUEST_LINKS_PER_ROW = 10,
+	PREPARE_MENU_FOR_SYNC_DURATION = 8,
+	quest_icon_unknown_fallback = "level_location_long_icon_01_quest_screen",
 	MAX_NUMBER_OF_BOARD_CONTRACTS = 2,
+	NUMBER_OF_SEAL_VARIATIONS_BG = 4,
 	EXPIRE_CHECK_MARGIN = 5,
 	MAX_NUMBER_OF_LOG_QUESTS = 1,
+	LOG_CONTRACTS_HEIGHT_SPACING = 3,
 	MAX_NUMBER_OF_BOARD_PAGES = 3,
 	EXPIRE_CHECK_COOLDOWN = 45,
 	MAX_NUMBER_OF_LOG_CONTRACTS = 3,
@@ -38,44 +38,6 @@ QuestSettings = {
 		success = "success",
 		requirements_already_met = "requirements_already_met",
 		not_active = "not_active"
-	},
-	level_icon_lookup = {
-		bridge = "quest_screen_level_image_bridge",
-		wizard = "quest_screen_level_image_wizard",
-		docks_short_level = "quest_screen_level_image_docks",
-		end_boss = "quest_screen_level_image_end_boss",
-		dlc_portals = "quest_screen_level_image_dlc_portals",
-		tunnels = "quest_screen_level_image_tunnels",
-		cemetery = "quest_screen_level_image_cemetery",
-		farm = "quest_screen_level_image_farm",
-		courtyard_level = "quest_screen_level_image_courtyard",
-		dlc_castle = "quest_screen_level_image_dlc_castle",
-		any = "quest_screen_level_image_any",
-		dlc_castle_dungeon = "quest_screen_level_image_dlc_castle_dungeon",
-		magnus = "quest_screen_level_image_magnus",
-		city_wall = "quest_screen_level_image_city_wall",
-		forest_ambush = "quest_screen_level_image_forest_ambush",
-		sewers_short = "quest_screen_level_image_sewers",
-		merchant = "quest_screen_level_image_merchant"
-	},
-	level_name_lookup = {
-		farm = "level_short_4",
-		wizard = "level_long_3",
-		docks_short_level = "level_short_6",
-		end_boss = "level_long_7",
-		dlc_portals = "dlc1_4_level_portals",
-		tunnels = "level_long_6",
-		cemetery = "level_long_5",
-		bridge = "level_short_2",
-		courtyard_level = "level_short_5",
-		dlc_castle = "dlc1_4_level_castle",
-		any = "any_level",
-		dlc_castle_dungeon = "dlc1_4_level_castle_dungeon",
-		magnus = "level_long_1",
-		city_wall = "level_short_3",
-		forest_ambush = "level_long_4",
-		sewers_short = "level_short_1",
-		merchant = "level_long_2"
 	},
 	task_type_titles = {
 		tome = {
@@ -111,9 +73,10 @@ QuestSettings = {
 			"dlc1_3_1_task_requirement_key_01"
 		},
 		unknown = {
-			"dlc1_3_1_task_requirement_unknown"
+			"qnc_task_requirement_unknown"
 		}
 	},
+	detailed_task_type_requirement_text = {},
 	task_type_to_icon_lookup = {
 		unknown = "quest_icon_map",
 		tome = "quest_icon_tome",
@@ -171,13 +134,6 @@ QuestSettings = {
 			95
 		}
 	},
-	contract_bg_texture_names = {
-		"quest_screen_bg_contract_01",
-		"quest_screen_bg_contract_02",
-		"quest_screen_bg_contract_03",
-		"quest_screen_bg_contract_04",
-		"quest_screen_bg_contract_05"
-	},
 	quest_bg_texture_names = {
 		"quest_screen_bg_board_quest_01",
 		"quest_screen_bg_board_quest_02",
@@ -189,12 +145,50 @@ QuestSettings = {
 		"quest_screen_bg_contract_05"
 	}
 }
+local new_contracts = {
+	avoid_specials_damage_team = true,
+	open_chests = false,
+	avoid_deaths_team = true,
+	damage_taken_individual = true,
+	grenade_kills = false,
+	last_stand_waves_defeated = false
+}
+local req_texts = QuestSettings.task_type_requirement_text
+local detailed_req_texts = QuestSettings.detailed_task_type_requirement_text
+local task_titles = QuestSettings.task_type_titles
+local task_names = QuestSettings.task_type_to_name_lookup
+local icons = QuestSettings.task_type_to_icon_lookup
+
+for contract_name, has_detailed in pairs(new_contracts) do
+	req_texts[contract_name] = {
+		"qnc_task_requirement_" .. contract_name
+	}
+
+	if has_detailed then
+		detailed_req_texts[contract_name] = {
+			"qnc_task_requirement_detailed_" .. contract_name
+		}
+	end
+
+	task_titles[contract_name] = {
+		"qnc_task_type_title_" .. contract_name
+	}
+	task_names[contract_name] = "qnc_task_objective_" .. contract_name
+	icons[contract_name] = "quest_icon_" .. contract_name
+end
+
 QuestTextSettings = {
 	task_type_max_range = {
 		grim = 6,
+		open_chests = 2,
+		avoid_deaths_team = 6,
+		damage_taken_individual = 6,
+		last_stand_waves_defeated = 2,
+		avoid_specials_damage_team = 6,
 		tome = 6,
-		level = 10,
-		ogre = 8
+		ogre = 8,
+		grenade_kills = 6,
+		level = 10
 	},
 	quest_giver_max_range = {
 		borgun = 3,
@@ -238,11 +232,5 @@ local replace_list = {
 for _, key in ipairs(replace_list) do
 	setmetatable(QuestSettings[key], meta)
 end
-
-setmetatable(QuestTextSettings.task_type_max_range, {
-	__index = function (t, k)
-		return 1
-	end
-})
 
 return 

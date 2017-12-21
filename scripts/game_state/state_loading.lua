@@ -54,6 +54,7 @@ StateLoading.on_enter = function (self, param_block)
 	self._setup_init_network_view(self)
 	Managers.popup:set_input_manager(self._input_manager)
 	Managers.chat:set_input_manager(self._input_manager)
+	Managers.account:reset_popups()
 	self._setup_level_transition(self)
 	self._setup_state_machine(self)
 	self._unmute_all_world_sounds(self)
@@ -208,23 +209,17 @@ StateLoading._unmute_all_world_sounds = function (self)
 	return 
 end
 StateLoading._get_game_difficulty = function (self)
-	local game_difficulty = self.parent.loading_context.difficulty
+	local stored_lobby_data = nil
 
 	if self._lobby_host then
-		local stored_lobby_data = self._lobby_host:get_stored_lobby_data()
-
-		if stored_lobby_data and stored_lobby_data.difficulty then
-			game_difficulty = stored_lobby_data.difficulty
-		end
-	elseif self._lobby_client then
-		local stored_lobby_data = self._lobby_client:get_stored_lobby_data()
-
-		if stored_lobby_data and stored_lobby_data.difficulty then
-			game_difficulty = stored_lobby_data.difficulty
-		end
+		stored_lobby_data = self._lobby_host:get_stored_lobby_data()
 	end
 
-	return game_difficulty or "normal"
+	if self._lobby_client then
+		stored_lobby_data = self._lobby_client:get_stored_lobby_data()
+	end
+
+	return (stored_lobby_data and stored_lobby_data.difficulty) or self.parent.loading_context.difficulty or nil
 end
 StateLoading._create_loading_view = function (self, level_key, act_progression_index)
 	local game_difficulty = self._get_game_difficulty(self)
@@ -320,6 +315,9 @@ StateLoading.setup_menu_assets = function (self)
 		if not inn_package_loaded then
 			load_package_path = package_name_inn
 		end
+
+		package_manager.load(package_manager, package_name_ingame, reference_name, nil, true, true)
+		package_manager.load(package_manager, package_name_inn, reference_name, nil, true, true)
 	else
 		should_load_inn_package = self._level_key == "inn_level"
 
@@ -342,19 +340,30 @@ StateLoading.setup_menu_assets = function (self)
 		end
 
 		self._menu_setup_done = true
-	end
 
-	if load_package_path then
-		package_manager.load(package_manager, load_package_path, reference_name, nil, true, true)
+		if load_package_path then
+			package_manager.load(package_manager, load_package_path, reference_name, nil, true, true)
 
-		self._ui_loading_package_reference_name = reference_name
-		self._ui_loading_package_path = load_package_path
+			self._ui_loading_package_reference_name = reference_name
+			self._ui_loading_package_path = load_package_path
+		end
 	end
 
 	return 
 end
 StateLoading.menu_assets_setup_done = function (self)
 	return self._menu_setup_done
+end
+StateLoading.unload_first_time_view_packages = function (self)
+	local package_manager = Managers.package
+	local package_name = "resource_packages/title_screen_gamma"
+	local reference_name = "state_splash_screen"
+
+	if package_manager.has_loaded(package_manager, package_name, reference_name) then
+		package_manager.unload(package_manager, package_name, reference_name)
+	end
+
+	return 
 end
 StateLoading.cb_loading_screen_loaded = function (self, level_key, act_progression_index, skip_fade)
 	if self._first_time_view then
@@ -769,6 +778,8 @@ StateLoading._try_next_state = function (self)
 				self._first_time_view:destroy()
 
 				self._first_time_view = nil
+
+				self.unload_first_time_view_packages(self)
 			end
 
 			Managers.transition:show_loading_icon()
@@ -793,6 +804,7 @@ StateLoading._try_next_state = function (self)
 
 				self._first_time_view = nil
 
+				self.unload_first_time_view_packages(self)
 				Managers.chat:enable_gui(true)
 			end
 		elseif self._loading_view then
@@ -820,8 +832,6 @@ StateLoading._try_next_state = function (self)
 					printf("[StateLoading] started fadeing in, want to go to state:%s", self._wanted_state.NAME)
 				elseif Managers.transition:fade_in_completed() then
 					self._new_state = self._wanted_state
-
-					printf("[StateLoading] fade_in_completed, new state:%s", self._new_state.NAME)
 
 					if self._join_popup_id then
 						Managers.popup:cancel_popup(self._join_popup_id)
@@ -990,7 +1000,8 @@ StateLoading.on_exit = function (self, application_shutdown)
 		end
 
 		loading_context.show_profile_on_startup = self.parent.loading_context.show_profile_on_startup
-		loading_context.difficulty = self.parent.loading_context.difficulty
+		local difficulty = self._get_game_difficulty(self)
+		loading_context.difficulty = difficulty
 		self.parent.loading_context = loading_context
 	end
 
@@ -1008,6 +1019,8 @@ StateLoading.on_exit = function (self, application_shutdown)
 		self._first_time_view:destroy()
 
 		self._first_time_view = nil
+
+		self.unload_first_time_view_packages(self)
 	end
 
 	if self._loading_view then
@@ -1102,7 +1115,15 @@ StateLoading._packages_loaded = function (self)
 			end
 		end
 
-		if self._ui_loading_package_path and self._ui_loading_package_reference_name and not package_manager.has_loaded(package_manager, self._ui_loading_package_path, self._ui_loading_package_reference_name) then
+		if ALWAYS_LOAD_ALL_VIEWS then
+			if not package_manager.has_loaded(package_manager, "resource_packages/menu_assets", "menu_assets") then
+				return false
+			end
+
+			if not package_manager.has_loaded(package_manager, "resource_packages/menu_assets_inn", "menu_assets") then
+				return false
+			end
+		elseif self._ui_loading_package_path and self._ui_loading_package_reference_name and not package_manager.has_loaded(package_manager, self._ui_loading_package_path, self._ui_loading_package_reference_name) then
 			return false
 		end
 

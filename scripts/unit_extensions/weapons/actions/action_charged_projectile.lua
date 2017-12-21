@@ -103,8 +103,21 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 		local network_manager = self.network_manager
 		local owner_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
 		local first_person_unit = self.first_person_unit
+		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 		local position = Unit.world_position(first_person_unit, 0)
-		local rotation = Unit.local_rotation(first_person_unit, 0)
+		local rotation = Unit.world_rotation(first_person_unit, 0)
+		local gaze_settings = nil
+
+		if current_action.fire_at_gaze_setting then
+			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+			if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+				local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
+				rotation = eyetracking_extension.gaze_rotation(eyetracking_extension)
+				gaze_settings = true
+			end
+		end
+
 		local spread_extension = self.spread_extension
 
 		if spread_extension then
@@ -154,13 +167,12 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 		local charge_level = math.round(self.charge_level*100)
 		local scale = charge_level
 
-		ActionUtils.spawn_player_projectile(owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name)
+		ActionUtils.spawn_player_projectile(owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, gaze_settings)
 
 		local fire_sound_event = self.current_action.fire_sound_event
 
 		if fire_sound_event then
 			local play_on_husk = self.current_action.fire_sound_on_husk
-			local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 
 			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event, nil, play_on_husk)
 		end

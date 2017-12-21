@@ -325,6 +325,9 @@ UIAnimation.init = function (...)
 		i = i + 1
 		local animation_type = select(i, ...)
 		local num_args = animation_type.num_args
+
+		assert(i + num_args <= num_varargs)
+
 		data_array[current_index + 1] = animation_type
 
 		for j = 1, num_args, 1 do

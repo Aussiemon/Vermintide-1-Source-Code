@@ -4,21 +4,22 @@ weapon_template.actions = {
 	action_one = {
 		default = {
 			damage_window_start = 0.1,
-			ammo_usage = 1,
+			fire_at_gaze_setting = "tobii_fire_at_gaze_grudgeraker",
 			total_time_secondary = 2,
 			kind = "shotgun",
+			charge_value = "light_attack",
 			alert_sound_range_fire = 15,
-			alert_sound_range_hit = 4,
 			attack_template = "shot_grudgeraker_twinbarrel",
+			alert_sound_range_hit = 4,
 			reload_when_out_of_ammo = true,
 			shot_count = 8,
 			max_penetrations = 2,
-			apply_recoil = true,
 			hit_effect = "shotgun_bullet_impact",
 			anim_event_last_ammo = "attack_shoot_last",
+			apply_recoil = true,
 			damage_window_end = 0,
 			range = 100,
-			charge_value = "light_attack",
+			ammo_usage = 1,
 			fire_time = 0.1,
 			anim_event_secondary = "reload",
 			active_reload_time = 0.35,
@@ -40,13 +41,13 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.25,
+					start_time = 0.4,
 					action = "action_two",
 					input = "action_two"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.4,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -129,6 +130,7 @@ weapon_template.display_unit = "units/weapons/weapon_display/display_rifle"
 weapon_template.wield_anim = "to_grudge_raker"
 weapon_template.wield_anim_no_ammo = "to_grudge_raker_noammo"
 weapon_template.crosshair_style = "default"
+weapon_template.fire_at_gaze_setting = "tobii_fire_at_gaze_grudgeraker"
 weapon_template.reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.dodge_distance = 1

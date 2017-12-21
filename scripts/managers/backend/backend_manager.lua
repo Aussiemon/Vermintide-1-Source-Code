@@ -42,6 +42,8 @@ if rawget(_G, "Backend") then
 	ERROR_CODES[BACKEND_LUA_ERRORS.ERR_DICE_TIMEOUT3] = "backend_err_dice_timeout_3"
 	BACKEND_LUA_ERRORS.ERR_DISCONNECTED = #ERROR_CODES + 1
 	ERROR_CODES[BACKEND_LUA_ERRORS.ERR_DISCONNECTED] = "backend_err_disconnected"
+	BACKEND_LUA_ERRORS.ERR_SIGNIN_TIMEOUT = #ERROR_CODES + 1
+	ERROR_CODES[BACKEND_LUA_ERRORS.ERR_SIGNIN_TIMEOUT] = "backend_err_signin_timeout"
 end
 
 BACKEND_LUA_ERRORS.ERR_LOADING_PLUGIN = 255
@@ -49,7 +51,7 @@ ERROR_CODES[BACKEND_LUA_ERRORS.ERR_LOADING_PLUGIN] = "backend_err_loading_plugin
 BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED = 256
 ERROR_CODES[BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED] = "backend_err_use_local_backend_not_allowed"
 BackendManager = class(BackendManager)
-BackendManager.TIMEOUT_SIGNIN = 10
+local TIMEOUT_SIGNIN = 20
 BackendManager.init = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 
@@ -137,7 +139,7 @@ BackendManager.signin = function (self, authentication_token)
 
 	print("[BackendManager] Backend Enabled")
 
-	self._backend = ScriptBackend:new(authentication_token)
+	self._backend = ScriptBackend:new(TIMEOUT_SIGNIN, authentication_token)
 
 	if not self._backend:authenticated() then
 		print("[BackendManager] BackendManager self._need_signin = true")
@@ -386,6 +388,8 @@ BackendManager._format_error_message_windows = function (self, reason, details_m
 
 		if reason == Backend.ERR_AUTH then
 			error_text = "backend_err_auth_steam"
+		elseif reason == BACKEND_LUA_ERRORS.ERR_SIGNIN_TIMEOUT then
+			error_text = "backend_err_signin_timeout"
 		else
 			error_text = "backend_err_connecting"
 		end

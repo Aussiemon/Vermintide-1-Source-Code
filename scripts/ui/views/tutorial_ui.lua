@@ -37,6 +37,9 @@ TutorialUI.init = function (self, ingame_ui_context)
 	self.world_manager = ingame_ui_context.world_manager
 	self.peer_id = ingame_ui_context.peer_id
 	self.platform = Application.platform()
+	self.render_settings = {
+		alpha_multiplier = 1
+	}
 	self.localized_texts = {
 		hold = Localize("interaction_prefix_hold"),
 		press = Localize("interaction_prefix_press"),
@@ -60,6 +63,7 @@ TutorialUI.init = function (self, ingame_ui_context)
 	}
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
+	self.cleanui = ingame_ui_context.cleanui
 
 	self.create_ui_elements(self)
 
@@ -78,6 +82,18 @@ TutorialUI.create_ui_elements = function (self)
 	for i = 1, definitions.NUMBER_OF_INFO_SLATE_ENTRIES, 1 do
 		self.info_slate_widgets[i] = UIWidget.init(definitions.info_slate_entries[i])
 	end
+
+	self.cleanui_data = {}
+	local position = {
+		0,
+		590
+	}
+	local size = {
+		definitions.INFO_SLATE_ENTRY_SIZE[1]*0.75,
+		definitions.INFO_SLATE_ENTRY_SIZE[2]*definitions.NUMBER_OF_INFO_SLATE_ENTRIES
+	}
+
+	UICleanUI.register_area(self.cleanui, "tutorial_ui", self.cleanui_data, position, size)
 
 	self.info_slate_widgets[INFO_SLATES.mission_goal].style.description_text.word_wrap = false
 	self.info_slate_widgets[INFO_SLATES.mission_goal].style.description_text.font_type = "hell_shark"
@@ -251,8 +267,14 @@ TutorialUI.update = function (self, dt, t)
 			self.tutorial_tooltip_ui:draw(dt, t)
 		end
 
-		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+		local render_settings = self.render_settings
+
+		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, render_settings)
 		Profiler.start("widgets")
+
+		local alpha = UICleanUI.get_alpha(self.cleanui, self.cleanui_data)
+		render_settings.alpha_multiplier = alpha
+
 		UIRenderer.draw_widget(ui_renderer, self.info_slate_mask)
 
 		if not script_data.disable_info_slate_ui then
@@ -262,6 +284,8 @@ TutorialUI.update = function (self, dt, t)
 				UIRenderer.draw_widget(ui_renderer, widget)
 			end
 		end
+
+		render_settings.alpha_multiplier = 1
 
 		UIRenderer.end_pass(ui_renderer)
 		Profiler.stop("widgets")

@@ -1729,8 +1729,20 @@ InteractionDefinitions.chest.client.start = function (world, interactor_unit, in
 
 	return 
 end
+InteractionDefinitions.chest.client.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
+	local success = result == InteractionResult.SUCCESS
+
+	if success then
+		Managers.player:statistics_db():increment_stat("session", "chests_opened")
+	end
+
+	InteractionDefinitions.smartobject.client.stop(world, interactor_unit, interactable_unit, data, config, t, result)
+
+	return 
+end
 InteractionDefinitions.chest.server.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
 	data.start_time = nil
+	local success = result == InteractionResult.SUCCESS
 	local can_spawn_dice = Unit.get_data(interactable_unit, "can_spawn_dice")
 
 	if not can_spawn_dice then
@@ -1744,7 +1756,7 @@ InteractionDefinitions.chest.server.stop = function (world, interactor_unit, int
 	local pickup_settings = AllPickups[pickup_name]
 	pickup_params.dice_keeper = dice_keeper
 
-	if result == InteractionResult.SUCCESS and pickup_settings.can_spawn_func(pickup_params) then
+	if success and pickup_settings.can_spawn_func(pickup_params) then
 		local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
 		local rand = math.random()
 		local chance = dice_keeper.chest_loot_dice_chance(dice_keeper)
@@ -1867,16 +1879,12 @@ InteractionDefinitions.quest_access.client.stop = function (world, interactor_un
 	return 
 end
 InteractionDefinitions.quest_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
-	local player_manager = Managers.player
-	local statistics_db = player_manager.statistics_db(player_manager)
-	local player = player_manager.local_player(player_manager)
-	local stats_id = player.stats_id(player)
-	local can_use = LevelUnlockUtils.all_acts_completed(statistics_db, stats_id)
-	local backend_settings = GameSettingsDevelopment.backend_settings
-	local can_interact = can_use and backend_settings.quests_enabled
-	local fail_reason = not can_interact and "quest_access_locked"
+	local experience = ScriptBackendProfileAttribute.get("experience")
+	local level = ExperienceSettings.get_level(experience)
+	local prestige = ScriptBackendProfileAttribute.get("prestige")
+	local can_use = ProgressionUnlocks.is_unlocked("quests", level, prestige)
 
-	return can_interact, fail_reason
+	return can_use, not can_use and "quest_access_locked"
 end
 InteractionDefinitions.quest_access.client.hud_description = function (interactable_unit, config, fail_reason, interactor_unit)
 	if fail_reason and fail_reason == "quest_access_locked" then
@@ -1899,7 +1907,7 @@ InteractionDefinitions.journal_access.client.stop = function (world, interactor_
 	return 
 end
 InteractionDefinitions.journal_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
-	return true
+	return GameSettingsDevelopment.lorebook_enabled
 end
 InteractionDefinitions.map_access = InteractionDefinitions.map_access or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.map_access.config.swap_to_3p = false

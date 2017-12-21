@@ -112,6 +112,11 @@ VolumeExtensionSettings = VolumeExtensionSettings or {
 				traversal_cost = "high"
 			}
 		},
+		generic_insta_kill_no_cost = {
+			[PLAYER] = {},
+			[BOT] = {},
+			[AI] = {}
+		},
 		player_insta_kill_no_cost = {
 			[PLAYER] = {},
 			[BOT] = {}

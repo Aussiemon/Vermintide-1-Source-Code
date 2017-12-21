@@ -321,7 +321,7 @@ AnimationCallbackTemplates.server.anim_cb_enter_shooting_hit_react = function (u
 end
 AnimationCallbackTemplates.server.anim_cb_stormvermin_push = function (unit, param)
 	local blackboard = Unit.get_data(unit, "blackboard")
-	local target_unit = blackboard.target_unit
+	local target_unit = blackboard.attacking_target
 	local active_node = blackboard.active_node
 
 	if not active_node or blackboard.attack_aborted or not AiUtils.unit_alive(target_unit) then

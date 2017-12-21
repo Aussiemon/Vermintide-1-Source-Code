@@ -371,7 +371,7 @@ BuffFunctionTemplates.functions = {
 				if Unit.alive(params.attacker_unit) then
 					local damage = DamageUtils.calculate_damage(AttackDamageValues[buff_template.attack_damage_template], unit, params.attacker_unit, "full", 1)
 
-					DamageUtils.add_damage_network(unit, params.attacker_unit, damage, "full", buff_template.damage_type, Vector3(1, 0, 0), "dot_debuff")
+					DamageUtils.add_damage_network(unit, params.attacker_unit, damage, "full", buff_template.damage_type, Vector3(1, 0, 0), buff.damage_source or "dot_debuff")
 				end
 			end
 		end

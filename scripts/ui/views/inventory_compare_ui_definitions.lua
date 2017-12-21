@@ -798,7 +798,10 @@ local widget_definitions = {
 				{
 					pass_type = "texture",
 					style_id = "ammo_divider",
-					texture_id = "ammo_divider"
+					texture_id = "ammo_divider",
+					content_check_function = function (content)
+						return content.ammo_text_1 ~= "" and content.ammo_text_2 ~= ""
+					end
 				}
 			}
 		},

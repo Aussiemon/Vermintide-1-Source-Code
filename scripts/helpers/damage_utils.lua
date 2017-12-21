@@ -14,6 +14,26 @@ DamageUtils.get_breed_armor = function (target_unit)
 end
 DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_unit, hit_zone_name, headshot_multiplier, backstab_multiplier)
 	local target_unit_armor = DamageUtils.get_breed_armor(target_unit)
+	local breed = target_unit and Unit.get_data(target_unit, "breed")
+	local blackboard = nil
+
+	if breed then
+		blackboard = Unit.get_data(target_unit, "blackboard")
+	end
+
+	local ranged_shield = breed and breed.ranged_shield
+
+	if ranged_shield then
+		local attacker_location = POSITION_LOOKUP[attacker_unit]
+		local self_location = POSITION_LOOKUP[target_unit]
+		local attacker_distance = Vector3.distance(attacker_location, self_location)
+		local ranged_shield_distance = ranged_shield.distance
+
+		if ranged_shield_distance < attacker_distance then
+			return 0
+		end
+	end
+
 	local has_damage_boost = false
 
 	if attacker_unit and Unit.alive(attacker_unit) and ScriptUnit.has_extension(attacker_unit, "buff_system") then
@@ -458,7 +478,8 @@ DamageUtils.create_aoe = function (world, attacker_unit, position, damage_source
 			damage_source = damage_source,
 			create_nav_tag_volume = aoe_data.create_nav_tag_volume,
 			nav_tag_volume_layer = aoe_data.nav_tag_volume_layer,
-			explosion_template_name = explosion_template.name
+			explosion_template_name = explosion_template.name,
+			owner_unit = attacker_unit
 		}
 	}
 	local aoe_unit_name = "units/weapons/projectile/poison_wind_globe/poison_wind_globe"
@@ -1296,7 +1317,7 @@ DamageUtils.check_ranged_block = function (attacking_unit, target_unit, attack_d
 			local fatigue_type_id = NetworkLookup.fatigue_types[fatigue_type]
 			local attacking_unit_id = unit_storage.go_id(unit_storage, attacking_unit)
 
-			network_manager.network_transmit:send_rpc_clients("rpc_player_blocked_attack", go_id, fatigue_type_id, attacking_unit_id)
+			network_manager.network_transmit:send_rpc_clients("rpc_player_blocked_attack", go_id, fatigue_type_id, attacking_unit_id or 0)
 		end
 
 		return true
@@ -1779,7 +1800,7 @@ DamageUtils.server_apply_hit = function (t, attack_template, attacker_unit, hit_
 	if attack_template.dot_type then
 		local dot_func = Dots[attack_template.dot_type]
 
-		dot_func(attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value_type)
+		dot_func(attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value_type, damage_source)
 	end
 
 	return 

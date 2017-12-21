@@ -90,10 +90,6 @@ ProfileView.on_exit = function (self)
 
 	ScriptWorld.activate_viewport(world, viewport)
 
-	if self.ingame_ui.initial_profile_view then
-		self.ingame_ui:show_input_helper()
-	end
-
 	local wwise_world = Managers.world:wwise_world(self.parent_world)
 	local wwise_playing_id, wwise_source_id = WwiseWorld.trigger_event(wwise_world, "hud_in_inventory_state_off")
 

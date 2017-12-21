@@ -49,11 +49,6 @@ local button_tooltips = {
 	quests_full = "dlc1_3_1_quest_log_full",
 	contracts_full = "dlc1_3_1_contract_log_full"
 }
-local contract_large_paper_by_type = {
-	dwarfs = "contract_large_dwarf",
-	drachenfels = "contract_large_drachenfels",
-	main = "contract_large_ubersreik"
-}
 local quest_title_by_type = {
 	dwarfs = "dlc1_5_area_dwarf",
 	drachenfels = "dlc1_4_area_drachenfels",
@@ -62,7 +57,8 @@ local quest_title_by_type = {
 local entries_per_board_list = {
 	3,
 	2,
-	4
+	4,
+	1
 }
 local input_description_data = {
 	gamepad_support = true,
@@ -272,6 +268,7 @@ QuestView.create_ui_elements = function (self)
 		item_hero_tooltip = UIWidget.init(widget_definitions.presentation_item_hero_tooltip),
 		item_border = UIWidget.init(widget_definitions.presentation_item_border),
 		item_border_icon = UIWidget.init(widget_definitions.presentation_item_border_icon),
+		item_border_icon_2 = UIWidget.init(widget_definitions.presentation_item_border_icon_2),
 		trait_button_1 = UIWidget.init(widget_definitions.presentation_trait_button_1),
 		trait_button_2 = UIWidget.init(widget_definitions.presentation_trait_button_2),
 		trait_button_3 = UIWidget.init(widget_definitions.presentation_trait_button_3),
@@ -316,6 +313,16 @@ QuestView.create_ui_elements = function (self)
 
 	self._align_board_entries(self)
 	self._align_log_entries(self)
+
+	self._event_sounds = {
+		board_start_event = "Play_hud_quest_event_mystery_loop",
+		board_stop_event = "Stop_hud_quest_event_mystery_loop",
+		hover_stop_event = "Play_hud_quest_event_mystery_volume_down",
+		hover_started = false,
+		hover_start_event = "Play_hud_quest_event_mystery_volume_up",
+		select_event = "Play_hud_quest_event_select",
+		board_started = false
+	}
 
 	return 
 end
@@ -497,6 +504,71 @@ QuestView.post_update = function (self, dt, t)
 		self.draw(self, dt, input_service)
 	end
 
+	self._update_event_contracts(self, dt, t)
+
+	return 
+end
+QuestView._update_event_contract_countdown = function (self, t, main_time_expire)
+	local ttl = math.max(main_time_expire - t, 0)
+	local h = math.floor(ttl/3600)
+	local rem = ttl%3600
+	local m = math.floor(rem/60)
+	local s = rem%60
+	local str = nil
+
+	if 0 < h then
+		str = string.format(Localize("qnc_event_contract_hours_left"), h)
+	elseif 0 < m then
+		str = string.format(Localize("qnc_event_contract_minutes_left"), m)
+	elseif 20 < s then
+		str = Localize("qnc_event_contract_less_than_1_min_left")
+	else
+		str = Localize("qnc_event_contract_expiring")
+	end
+
+	return str
+end
+QuestView._update_event_contracts = function (self)
+	local t = Managers.time:time("main")
+	local should_play = false
+
+	for _, list in pairs(self._board_widgets) do
+		for _, widget in pairs(list) do
+			local content = widget.content
+			local data = content.data
+			local is_event = data and self._is_event_contract(self, data)
+			should_play = should_play or is_event
+
+			if is_event and data.expire_in_log then
+				content.countdown = self._update_event_contract_countdown(self, t, data.main_time_expire)
+			end
+		end
+	end
+
+	for _, widget in pairs(self._log_widgets) do
+		local content = widget.content
+		local data = content.data
+		local is_event = data and self._is_event_contract(self, data)
+		should_play = should_play or is_event
+
+		if is_event and data.expire_in_log then
+			local countdown_str = self._update_event_contract_countdown(self, t, data.main_time_expire)
+			content.title_text = content.title_text_original .. " - " .. countdown_str
+		end
+	end
+
+	local sound_data = self._event_sounds
+
+	if not should_play and sound_data.board_started then
+		self.play_sound(self, sound_data.board_stop_event)
+
+		sound_data.board_started = false
+	elseif should_play and not sound_data.board_started then
+		self.play_sound(self, sound_data.board_start_event)
+
+		sound_data.board_started = true
+	end
+
 	return 
 end
 QuestView.update = function (self, dt, t)
@@ -519,7 +591,7 @@ QuestView._poll_popups = function (self)
 				local data = selected_contract_list_widget.content.data
 				local id = data.id
 
-				self._decline_contract(self, id)
+				self._decline_contract(self, id, self._is_event_contract(self, data))
 			end
 		end
 	end
@@ -561,7 +633,7 @@ QuestView._poll_popups = function (self)
 				local data = selected_contract_list_widget.content.data
 				local id = data.id
 
-				self._turn_in_contract(self, id)
+				self._turn_in_contract(self, id, self._is_event_contract(self, data))
 			end
 		end
 	end
@@ -610,6 +682,20 @@ QuestView.on_exit = function (self)
 	self._terminate_all_popups(self)
 	self._deselect_selection_widget(self)
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
+
+	local event_sound_data = self._event_sounds
+
+	if event_sound_data.board_started then
+		self.play_sound(self, event_sound_data.board_stop_event)
+
+		event_sound_data.board_started = false
+	end
+
+	if event_sound_data.hover_started then
+		self.play_sound(self, event_sound_data.hover_stop_event)
+
+		event_sound_data.hover_started = false
+	end
 
 	return 
 end
@@ -901,6 +987,7 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 	local quest_manager = self.quest_manager
 	local input_pressed = false
 	local any_hovered = false
+	local any_hovered_event = false
 	local button_on_hover_enter = self._button_on_hover_enter(self, self._accept_button_widget)
 	local on_pressed = self._is_button_pressed(self, self._accept_button_widget)
 
@@ -930,13 +1017,15 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 				local on_pressed = button_hotspot.on_pressed
 				local is_hover = button_hotspot.is_hover
 				local on_hover_enter = button_hotspot.on_hover_enter
+				local is_event_contract = self._is_event_contract(self, content.data)
 
 				if on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self.play_sound(self, (is_event_contract and self._event_sounds.hover_event) or "Play_hud_hover")
 				end
 
 				if is_hover then
 					any_hovered = true
+					any_hovered_event = any_hovered_event or is_event_contract
 				end
 
 				if on_pressed then
@@ -963,13 +1052,15 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 				local on_pressed = button_hotspot.on_pressed
 				local is_hover = button_hotspot.is_hover
 				local on_hover_enter = button_hotspot.on_hover_enter
+				local is_event_contract = self._is_event_contract(self, content.data)
 
 				if on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self.play_sound(self, (is_event_contract and self._event_sounds.hover_event) or "Play_hud_hover")
 				end
 
 				if is_hover then
 					any_hovered = true
+					any_hovered_event = any_hovered_event or is_event_contract
 				end
 
 				if on_pressed then
@@ -990,6 +1081,18 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 
 	if not any_hovered and self._hovered_widget then
 		self._select_entry_widget(self, self._selected_widget)
+	end
+
+	local event_sound_data = self._event_sounds
+
+	if any_hovered_event and not event_sound_data.hover_started then
+		self.play_sound(self, event_sound_data.hover_start_event)
+
+		event_sound_data.hover_started = true
+	elseif not any_hovered_event and event_sound_data.hover_started then
+		self.play_sound(self, event_sound_data.hover_stop_event)
+
+		event_sound_data.hover_started = false
 	end
 
 	return 
@@ -1018,9 +1121,9 @@ QuestView._on_accept_pressed = function (self)
 						local has_key = data_type == "main"
 
 						if has_key then
-							self._request_turn_in_contract(self, id)
+							self._request_turn_in_contract(self, id, self._is_event_contract(self, data))
 						else
-							self._turn_in_contract(self, id)
+							self._turn_in_contract(self, id, self._is_event_contract(self, data))
 						end
 					end
 				elseif is_quest then
@@ -1037,7 +1140,7 @@ QuestView._on_accept_pressed = function (self)
 				if is_quest then
 					self._accept_quest(self, id)
 				else
-					self._accept_contract(self, id)
+					self._accept_contract(self, id, self._is_event_contract(self, data))
 				end
 
 				return true
@@ -1191,18 +1294,15 @@ QuestView._assign_widget_data = function (self, widget, data)
 	content.completed = requirements_met
 
 	if not is_quest then
-		if not active then
-			content.background_texture = "board_contract_bg_default"
-		else
-			content.background_texture = "log_contract_bg_default"
-		end
-
 		local has_key = data_type == "main"
 		content.has_key = has_key
 
 		if has_key then
 			content.key_tooltip_text = Localize("dlc1_3_1_quest_key_title") .. "\n" .. Localize("dlc1_3_1_quest_key_description")
 		end
+
+		local has_key_2 = data.rewards.progress == 2
+		content.has_key_2 = has_key_2
 
 		if task then
 			local task_type = task.type
@@ -1213,9 +1313,10 @@ QuestView._assign_widget_data = function (self, widget, data)
 			local amount_required = (task_amount and task_amount.required) or ""
 			local amount_text = (task_amount and amount_acquired .. "/" .. amount_required) or ""
 			content.task_text = amount_text
-			local requirement_text = QuestSettings.task_type_requirement_text[task_type][1]
+			local requirement_text = Localize(QuestSettings.task_type_requirement_text[task_type][1])
 			content.title_text = requirement_text
-			content.task_tooltip_text = Localize(requirement_text) .. "\n" .. amount_text
+			content.title_text_original = requirement_text
+			content.task_tooltip_text = requirement_text .. "\n" .. amount_text
 		end
 
 		local level_key = requirements.level
@@ -1237,14 +1338,23 @@ QuestView._assign_widget_data = function (self, widget, data)
 			content.locked = not level_unlocked
 		end
 
+		local is_event_contract = self._is_event_contract(self, data)
 		local difficulty_key = requirements.difficulty
 
 		if difficulty_key then
 			local difficulty_settings = DifficultySettings[difficulty_key]
 			local display_name = difficulty_settings.display_name
 			local rank = difficulty_settings.rank
-			style.difficulty_texture.draw_count = rank
+			style.difficulty_texture.draw_count = (not is_event_contract or 0) and rank
 			content.level_tooltip_text = content.level_tooltip_text .. "\n" .. Localize(display_name)
+		end
+
+		if is_event_contract and active then
+			content.background_texture = "log_contract_bg_event"
+			content.edge_glow = "contract_glow_03_event"
+		elseif active then
+			content.background_texture = "log_contract_bg_default"
+			content.edge_glow = "contract_glow_03"
 		end
 	else
 		local quest_title_text = self.quest_manager:get_title_for_quest_id(id)
@@ -1311,6 +1421,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 		local token_name = QuestSettings.token_name_by_type_lookup[token_type]
 		content.has_tokens = token_icon ~= nil
 		content.token_reward_texture = token_icon
+		content.token_text = amount
 		content.tooltip_text = Localize(token_name) .. "\n x" .. amount
 	else
 		content.has_tokens = false
@@ -1329,6 +1440,7 @@ QuestView._present_data = function (self, data)
 	local requirements = data.requirements
 	local requirements_met = data.requirements_met
 	local task = requirements.task
+	local rewards = data.rewards
 	self.ui_scenegraph.presentation_title.local_position[2] = (is_quest and -50) or 0
 
 	if is_quest then
@@ -1353,13 +1465,23 @@ QuestView._present_data = function (self, data)
 		presentation_widgets.difficulty.content.visible = false
 		presentation_widgets.item_border_icon.content.texture_id = "quest_chest_icon"
 		presentation_widgets.item_border_icon.content.visible = true
+		presentation_widgets.item_border_icon_2.content.visible = false
 	else
-		self._set_presentation_background(self, "contract_paper_bg")
-
 		local difficulty_key = requirements.difficulty
 		local difficulty_settings = DifficultySettings[difficulty_key]
 		local difficulty_display_name = difficulty_settings.display_name
-		local difficulty_display_text = string.format(Localize("dlc1_3_1_quests_difficulty_text"), Localize(difficulty_display_name))
+		local difficulty_display_text = nil
+
+		if self._is_event_contract(self, data) then
+			self._set_presentation_background(self, "contract_paper_bg_event")
+
+			difficulty_display_text = Localize(difficulty_display_name)
+		else
+			self._set_presentation_background(self, "contract_paper_bg")
+
+			difficulty_display_text = string.format(Localize("dlc1_3_1_quests_difficulty_text"), Localize(difficulty_display_name))
+		end
+
 		presentation_widgets.difficulty.content.visible = true
 		presentation_widgets.difficulty.content.text = difficulty_display_text
 		local description_text = self.quest_manager:get_description_for_contract_id(id)
@@ -1376,15 +1498,28 @@ QuestView._present_data = function (self, data)
 			presentation_widgets.objective_icon.content.texture_id = icon_texture
 			local amount_acquired = (task_amount and task_amount.acquired) or ""
 			local amount_required = (task_amount and task_amount.required) or ""
-			local requirement_text = QuestSettings.task_type_requirement_text[task_type][1]
-			local count_text = (task_amount and amount_acquired .. "/" .. amount_required .. " " .. Localize(requirement_text)) or ""
-			presentation_widgets.objective_counter.content.text = count_text
-			slot22 = QuestSettings.task_type_titles[task_type]
+			local task_req_text = nil
+			local detailed = QuestSettings.detailed_task_type_requirement_text[task_type]
+			local localized_detailed = detailed and Localize(detailed[1])
+
+			if localized_detailed and localized_detailed ~= "" then
+				local requirement_text = detailed[1]
+				task_req_text = string.format(localized_detailed, amount_acquired, amount_required)
+			else
+				local requirement_text = QuestSettings.task_type_requirement_text[task_type][1]
+				task_req_text = (task_amount and amount_acquired .. "/" .. amount_required .. " " .. Localize(requirement_text)) or ""
+			end
+
+			presentation_widgets.objective_counter.content.text = task_req_text
 		end
 
 		presentation_widgets.title.content.text = "dlc1_3_1_contract_title"
 		presentation_widgets.item_border_icon.content.texture_id = "contract_key_icon"
 		presentation_widgets.item_border_icon.content.visible = data.type == "main"
+		presentation_widgets.item_border_icon_2.content.visible = rewards.progress == 2
+		local offset = presentation_widgets.item_border_icon_2.style.texture_id.offset
+		offset[1] = -10
+		offset[3] = -1
 		local level_key = requirements.level
 
 		if level_key then
@@ -1393,7 +1528,6 @@ QuestView._present_data = function (self, data)
 		end
 	end
 
-	local rewards = data.rewards
 	local boons = rewards.boons
 	local tokens = rewards.tokens
 	local items = rewards.items
@@ -1695,13 +1829,15 @@ QuestView._turn_in_quest = function (self, quest_id)
 	self._waiting_for_reward_presentation = true
 
 	self._deselect_selection_widget(self)
+	self.statistics_db:increment_stat(self.player_stats_id, "quests_completed")
 
 	return 
 end
-QuestView._accept_contract = function (self, contract_id)
+QuestView._accept_contract = function (self, contract_id, is_event_contract)
+	local sound = (is_event_contract and "Play_hud_quest_event_accept") or "Play_hud_quest_menu_accept_small_quest"
 	self._num_log_contracts = self._num_log_contracts + 1
 
-	self.play_sound(self, "Play_hud_quest_menu_accept_small_quest")
+	self.play_sound(self, sound)
 	self.quest_manager:accept_contract_by_id(contract_id)
 	self._deselect_selection_widget(self)
 
@@ -1716,28 +1852,31 @@ QuestView._request_decline_contract = function (self, contract_id, expired)
 
 	return 
 end
-QuestView._decline_contract = function (self, contract_id)
+QuestView._decline_contract = function (self, contract_id, is_event_contract)
+	local sound = (is_event_contract and "Play_hud_quest_event_decline") or "Play_hud_quest_menu_decline_quest"
 	self._num_log_contracts = self._num_log_contracts - 1
 
-	self.play_sound(self, "Play_hud_quest_menu_decline_quest")
+	self.play_sound(self, sound)
 	self.quest_manager:decline_contract_by_id(contract_id)
 	self._deselect_selection_widget(self)
 
 	return 
 end
-QuestView._request_turn_in_contract = function (self, contract_id)
+QuestView._request_turn_in_contract = function (self, contract_id, is_event_contract)
 	local has_no_quest = not self._num_log_quests or self._num_log_quests == 0
 
 	if has_no_quest then
 		self._turn_in_contract_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_key_contract_warning_text"), Localize("dlc1_3_1_key_contract_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 	else
-		self._turn_in_contract(self, contract_id)
+		self._turn_in_contract(self, contract_id, is_event_contract)
 	end
 
 	return 
 end
-QuestView._turn_in_contract = function (self, contract_id)
-	self.play_sound(self, "Play_hud_quest_menu_finish_quest_turn_in_stamp")
+QuestView._turn_in_contract = function (self, contract_id, is_event_contract)
+	local sound = (is_event_contract and "Play_hud_quest_event_finish") or "Play_hud_quest_menu_finish_quest_turn_in_stamp"
+
+	self.play_sound(self, sound)
 	self.quest_manager:complete_contract_by_id(contract_id)
 
 	self._waiting_for_reward_presentation = true
@@ -1759,6 +1898,12 @@ QuestView._get_number_of_rows = function (self, text_style, text)
 
 	return #texts
 end
+QuestView._is_event_contract = function (self, data)
+	local rew = data.rewards
+
+	return (rew and rew.progress) == 2
+end
+local NUM_KEY_CONTRACTS = 2
 QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 	local counter = 0
 	local quest_manager = self.quest_manager
@@ -1766,8 +1911,8 @@ QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 
 	for _, data in pairs(entries) do
 		local id = data.id
-		local expire_at = data.expire_at or 0
-		local expired = quest_manager.has_time_expired(quest_manager, expire_at)
+		local ttl = data.ttl or 0
+		local expired = quest_manager.has_time_expired(quest_manager, ttl)
 		local active = data.active
 		local requirements_met = data.requirements_met
 		local add_contract = not expired and not active and not requirements_met
@@ -1775,8 +1920,9 @@ QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 		if add_contract then
 			local new_entry = not stored_board_ids[id]
 			local contract_type = data.type
-			local list_index = (is_quest and 1) or contract_list_index_by_type[contract_type]
-			local widget_index = (list_index == 3 and data.index - 2) or data.index
+			local is_event_contract = self._is_event_contract(self, data)
+			local list_index = (is_quest and 1) or (is_event_contract and 4) or contract_list_index_by_type[contract_type]
+			local widget_index = (is_event_contract and 1) or (list_index == 3 and data.index - NUM_KEY_CONTRACTS) or data.index
 			local widget = self._get_inactive_board_widget(self, list_index, widget_index)
 
 			if widget then
@@ -1910,7 +2056,13 @@ QuestView._select_entry_widget = function (self, widget)
 			self._fade_in_presentation_widgets(self)
 		end
 
-		self.play_sound(self, "Play_hud_quest_menu_select_quest")
+		local is_event_contract = self._is_event_contract(self, content.data)
+
+		if is_event_contract then
+			self.play_sound(self, self._event_sounds.select_event)
+		else
+			self.play_sound(self, "Play_hud_quest_menu_select_quest")
+		end
 	end
 
 	self._hovered_widget = nil

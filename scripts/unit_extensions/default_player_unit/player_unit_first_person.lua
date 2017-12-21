@@ -1,6 +1,7 @@
 PlayerUnitFirstPerson = class(PlayerUnitFirstPerson)
 PlayerUnitFirstPerson.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
+	self.physics_world = World.get_data(self.world, "physics_world")
 	self.unit = unit
 	local profile = extension_init_data.profile
 	self.profile = profile
@@ -379,6 +380,13 @@ PlayerUnitFirstPerson.set_look_delta = function (self, look_delta)
 end
 PlayerUnitFirstPerson.play_animation_event = function (self, anim_event)
 	Unit.animation_event(self.first_person_unit, anim_event)
+
+	return 
+end
+PlayerUnitFirstPerson.set_aim_constraint_target = function (self, id, target)
+	local aim_constraint_index = Unit.animation_find_constraint_target(self.first_person_unit, id)
+
+	Unit.animation_set_constraint_target(self.first_person_unit, aim_constraint_index, target)
 
 	return 
 end

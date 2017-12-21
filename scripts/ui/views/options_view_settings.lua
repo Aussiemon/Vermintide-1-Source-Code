@@ -970,6 +970,64 @@ local gamepad_settings_definition = {
 		widget_type = "stepper"
 	}
 }
+local tobii_settings_definition = nil
+
+if rawget(_G, "Tobii") then
+	tobii_settings_definition = {}
+
+	local function add_stepper(name, tooltip_text)
+		tobii_settings_definition[#tobii_settings_definition + 1] = {
+			widget_type = "stepper",
+			callback = "cb_" .. name,
+			setup = "cb_" .. name .. "_setup",
+			saved_value = "cb_" .. name .. "_saved_value",
+			tooltip_text = tooltip_text
+		}
+
+		return 
+	end
+
+	local function add_slider(name, tooltip_text)
+		tobii_settings_definition[#tobii_settings_definition + 1] = {
+			widget_type = "slider",
+			callback = "cb_" .. name,
+			setup = "cb_" .. name .. "_setup",
+			saved_value = "cb_" .. name .. "_saved_value",
+			tooltip_text = tooltip_text
+		}
+
+		return 
+	end
+
+	add_stepper("tobii_eyetracking", "tooltip_tobii_eyetracking")
+	add_stepper("tobii_tag_at_gaze", "tooltip_tobii_tag_at_gaze")
+	add_stepper("tobii_interact_at_gaze", "tooltip_tobii_interact_at_gaze")
+	add_stepper("tobii_clean_ui", "tooltip_tobii_clean_ui")
+	add_slider("tobii_clean_ui_alpha", "tooltip_tobii_clean_ui_alpha")
+	add_stepper("tobii_fire_at_gaze_blunderbuss", "tooltip_tobii_fire_at_gaze_blunderbuss")
+	add_stepper("tobii_fire_at_gaze_grudgeraker", "tooltip_tobii_fire_at_gaze_grudgeraker")
+	add_stepper("tobii_fire_at_gaze_fireball", "tooltip_tobii_fire_at_gaze_fireball")
+	add_stepper("tobii_fire_at_gaze_geiser", "tooltip_tobii_fire_at_gaze_geiser")
+	add_stepper("tobii_fire_at_gaze_sparks", "tooltip_tobii_fire_at_gaze_sparks")
+	add_stepper("tobii_aim_at_gaze_hagbane", "tooltip_tobii_aim_at_gaze_hagbane")
+	add_stepper("tobii_aim_at_gaze_shortbow", "tooltip_tobii_aim_at_gaze_shortbow")
+	add_stepper("tobii_aim_at_gaze_longbow", "tooltip_tobii_aim_at_gaze_longbow")
+	add_stepper("tobii_aim_at_gaze_crossbow", "tooltip_tobii_aim_at_gaze_crossbow")
+	add_stepper("tobii_aim_at_gaze_handgun", "tooltip_tobii_aim_at_gaze_handgun")
+	add_stepper("tobii_fire_at_gaze_drake_pistols", "tooltip_tobii_fire_at_gaze_drake_pistols")
+	add_stepper("tobii_fire_at_gaze_brace_of_pistols", "tooltip_tobii_fire_at_gaze_brace_of_pistols")
+	add_stepper("tobii_fire_at_gaze_repeating_pistol", "tooltip_tobii_fire_at_gaze_repeating_pistol")
+	add_stepper("tobii_fire_at_gaze_repeating_handgun", "tooltip_tobii_fire_at_gaze_repeating_handgun")
+	add_stepper("tobii_extended_view", "tooltip_tobii_extended_view")
+	add_slider("tobii_extended_view_speed", "tooltip_tobii_extended_view_speed")
+	add_slider("tobii_extended_view_max_yaw", "tooltip_tobii_extended_view_max_yaw")
+	add_slider("tobii_extended_view_max_pitch_up", "tooltip_tobii_extended_view_max_pitch_up")
+	add_slider("tobii_extended_view_max_pitch_down", "tooltip_tobii_extended_view_max_pitch_down")
+	add_slider("tobii_extended_view_deadzone", "tooltip_tobii_extended_view_deadzone")
+	add_slider("tobii_extended_view_curve_slope", "tooltip_tobii_extended_view_curve_slope")
+	add_slider("tobii_extended_view_curve_shoulder", "tooltip_tobii_extended_view_curve_shoulder")
+end
+
 local needs_reload_settings = {
 	"screen_resolution",
 	"fullscreen",
@@ -1022,6 +1080,11 @@ local title_button_definitions = {
 	UIWidgets.create_menu_button("settings_view_gamepad", "settings_button_6")
 }
 
+if rawget(_G, "Tobii") then
+	title_button_definitions[#title_button_definitions + 1] = UIWidgets.create_menu_button("settings_view_eyex", "settings_button_" .. #title_button_definitions + 1)
+	SettingsMenuNavigation[#SettingsMenuNavigation + 1] = "tobii_eyetracking_settings"
+end
+
 return {
 	video_settings_definition = video_settings_definition,
 	audio_settings_definition = audio_settings_definition,
@@ -1029,6 +1092,7 @@ return {
 	display_settings_definition = display_settings_definition,
 	keybind_settings_definition = keybind_settings_definition,
 	gamepad_settings_definition = gamepad_settings_definition,
+	tobii_settings_definition = tobii_settings_definition,
 	needs_restart_settings = needs_restart_settings,
 	needs_reload_settings = needs_reload_settings,
 	ignore_keybind = ignore_keybind,

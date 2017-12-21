@@ -370,7 +370,7 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		if draw_stamina then
 			local max_fatigue_points = item_template.max_fatigue_points
 
-			self.set_stamina(self, (max_fatigue_points and max_fatigue_points/2) or 0)
+			self.set_stamina(self, max_fatigue_points or 0)
 		end
 
 		if draw_ammo then
@@ -662,25 +662,23 @@ InventoryCompareUI.set_attack_title = function (self, widget, scenegraph_id, row
 
 	return 
 end
-InventoryCompareUI.set_stamina = function (self, value)
+InventoryCompareUI.set_stamina = function (self, max_fatigue_points)
+	local max_shields = 6
+	local remaining_fatigue_points = max_fatigue_points
 	local widget = self.stamina_field_widget
 	local widget_content = widget.content
 	local widget_style = widget.style
-	local even_numbers = value%2 == 1
-	local end_index = nil
 
-	for i = 1, 5, 1 do
-		local used = i <= value
+	for i = 1, max_shields, 1 do
+		remaining_fatigue_points = remaining_fatigue_points - 2
 
-		if used then
-			end_index = i
+		if 0 <= remaining_fatigue_points then
+			widget_content.icon_textures[i] = "fatigue_icon_full"
+		elseif remaining_fatigue_points == -1 then
+			widget_content.icon_textures[i] = "fatigue_icon_broken"
+		else
+			widget_content.icon_textures[i] = "fatigue_icon_empty"
 		end
-
-		widget_content.icon_textures[i] = (used and "fatigue_icon_full") or "fatigue_icon_empty"
-	end
-
-	if not even_numbers then
-		widget_content.icon_textures[end_index + 1] = "fatigue_icon_broken"
 	end
 
 	return 
@@ -688,10 +686,14 @@ end
 InventoryCompareUI.set_ammo = function (self, item_template)
 	local widget = self.ammo_field_widget
 	local widget_content = widget.content
-	local loaded_ammo = item_template.ammo_data.ammo_per_clip or item_template.ammo_data.max_ammo
-	local total_ammo = item_template.ammo_data.max_ammo
-	widget_content.ammo_text_1 = loaded_ammo
-	widget_content.ammo_text_2 = total_ammo - loaded_ammo
+	local ammo_data = item_template.ammo_data
+	local single_clip = ammo_data.single_clip
+	local ammo_count = ammo_data.ammo_per_clip or ammo_data.max_ammo
+	local max_ammo = ammo_data.max_ammo
+	local ammo_text_1 = (not single_clip and tostring(ammo_count)) or ""
+	local ammo_text_2 = (not single_clip and tostring(max_ammo - ammo_count)) or tostring(ammo_count)
+	widget_content.ammo_text_1 = ammo_text_1
+	widget_content.ammo_text_2 = ammo_text_2
 
 	return 
 end

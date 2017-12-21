@@ -78,7 +78,7 @@ ActionCrossbow.client_owner_post_update = function (self, dt, t, world, can_dama
 				local projectile_info = current_action.projectile_info
 				local lookup_data = current_action.lookup_data
 
-				ActionUtils.spawn_player_projectile(owner_unit, position, fire_rotation, 0, angle, target_vector, speed, self.item_name, lookup_data.item_template_name, lookup_data.action_name, lookup_data.sub_action_name)
+				ActionUtils.spawn_player_projectile(owner_unit, position, fire_rotation, 0, angle, target_vector, speed, self.item_name, lookup_data.item_template_name, lookup_data.action_name, lookup_data.sub_action_name, nil)
 
 				local fire_sound_event = self.current_action.fire_sound_event
 
@@ -113,7 +113,7 @@ ActionCrossbow.client_owner_post_update = function (self, dt, t, world, can_dama
 			local projectile_info = current_action.projectile_info
 			local lookup_data = current_action.lookup_data
 
-			ActionUtils.spawn_player_projectile(owner_unit, position, rotation, 0, angle, target_vector, speed, self.item_name, lookup_data.item_template_name, lookup_data.action_name, lookup_data.sub_action_name)
+			ActionUtils.spawn_player_projectile(owner_unit, position, rotation, 0, angle, target_vector, speed, self.item_name, lookup_data.item_template_name, lookup_data.action_name, lookup_data.sub_action_name, nil)
 
 			local fire_sound_event = self.current_action.fire_sound_event
 

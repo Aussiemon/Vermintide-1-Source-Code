@@ -258,7 +258,7 @@ local generic_input_actions = {
 	}
 }
 
-if Application.platform() == "ps4" then
+if Application.platform() == "ps4" and GameSettingsDevelopment.lobby_browser_enabled then
 	generic_input_actions.default[#generic_input_actions.default + 1] = {
 		input_action = "refresh",
 		priority = 3,

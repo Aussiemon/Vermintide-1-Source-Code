@@ -7,14 +7,23 @@ require("scripts/settings/smartobject_settings")
 require("scripts/settings/nav_tag_volume_settings")
 require("foundation/scripts/util/table")
 require("scripts/unit_extensions/human/ai_player_unit/ai_breed_snippets")
+require("scripts/settings/dlc_settings")
 
 Breeds = Breeds or {}
 BreedActions = BreedActions or {}
 BreedHitZonesLookup = BreedHitZonesLookup or {}
 
+setmetatable(UtilityConsiderations, {
+	__index = function (t, k)
+		error(string.format("Trying to access UtilityConsiderations %s that doesn't exist", k))
+
+		return 
+	end
+})
 dofile("scripts/settings/breeds/breed_skaven_clan_rat")
 dofile("scripts/settings/breeds/breed_skaven_slave")
 dofile("scripts/settings/breeds/breed_skaven_storm_vermin")
+dofile("scripts/settings/breeds/breed_skaven_grey_seer")
 dofile("scripts/settings/breeds/breed_skaven_loot_rat")
 dofile("scripts/settings/breeds/breed_skaven_gutter_runner")
 dofile("scripts/settings/breeds/breed_skaven_pack_master")
@@ -22,6 +31,16 @@ dofile("scripts/settings/breeds/breed_skaven_poison_wind_globadier")
 dofile("scripts/settings/breeds/breed_skaven_ratling_gunner")
 dofile("scripts/settings/breeds/breed_skaven_rat_ogre")
 dofile("scripts/settings/breeds/breed_critters")
+
+for _, dlc in pairs(DLCSettings) do
+	local breeds = dlc.breeds
+
+	for _, breed in ipairs(breeds) do
+		dofile(breed)
+	end
+end
+
+setmetatable(UtilityConsiderations, nil)
 
 for breed_name, breed_data in pairs(Breeds) do
 	local lookup = BreedHitZonesLookup[breed_name]

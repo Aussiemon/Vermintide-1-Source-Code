@@ -248,7 +248,12 @@ CharacterStateHelper.do_common_state_transitions = function (status_extension, c
 	local is_catapulted, direction = CharacterStateHelper.is_catapulted(status_extension)
 
 	if is_catapulted then
-		csm.change_state(csm, "catapulted", direction)
+		local params = {
+			sound_event = "Play_hit_by_ratogre",
+			direction = direction
+		}
+
+		csm.change_state(csm, "catapulted", params)
 
 		return true
 	end
@@ -972,14 +977,12 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 
 				if input_id and input_extension.get(input_extension, input_id, true) and current_action_extension.can_stop_hold_action(current_action_extension, t) then
 					current_action_extension.stop_action(current_action_extension, "hold_input_released")
-					print("toggled hold", current_action_settings.lookup_data.action_name)
 				end
 			else
 				local input_id = current_action_settings.hold_input
 
 				if input_id and not input_extension.get(input_extension, input_id) and current_action_extension.can_stop_hold_action(current_action_extension, t) then
 					current_action_extension.stop_action(current_action_extension, "hold_input_released")
-					print("released hold", current_action_settings.lookup_data.action_name)
 				end
 			end
 		end
@@ -1082,8 +1085,8 @@ CharacterStateHelper.stop_weapon_actions = function (inventory_extension, reason
 	local equipment = inventory_extension.equipment(inventory_extension)
 	local right_hand_wielded_unit = equipment.right_hand_wielded_unit
 	local left_hand_wielded_unit = equipment.left_hand_wielded_unit
-	local right_weapon_extension = right_hand_wielded_unit and ScriptUnit.extension(right_hand_wielded_unit, "weapon_system")
-	local left_weapon_extension = left_hand_wielded_unit and ScriptUnit.extension(left_hand_wielded_unit, "weapon_system")
+	local right_weapon_extension = Unit.alive(right_hand_wielded_unit) and ScriptUnit.extension(right_hand_wielded_unit, "weapon_system")
+	local left_weapon_extension = Unit.alive(left_hand_wielded_unit) and ScriptUnit.extension(left_hand_wielded_unit, "weapon_system")
 
 	if right_weapon_extension and right_weapon_extension.current_action_settings then
 		right_weapon_extension.stop_action(right_weapon_extension, reason)

@@ -14,6 +14,7 @@ require("scripts/entity_system/systems/mission/rewards")
 StateInGameRunning = class(StateInGameRunning)
 StateInGameRunning.NAME = "StateInGameRunning"
 local dicegame_resource_path = "resource_packages/levels/dicegame"
+local menu_assets_resource_path = (Application.platform() == "win32" and "resource_packages/menu_assets_postgame") or "resource_packages/menu_assets_postgame_console"
 StateInGameRunning.on_enter = function (self, params)
 	GarbageLeakDetector.register_object(self, "StateInGameRunning")
 
@@ -83,7 +84,7 @@ StateInGameRunning.on_enter = function (self, params)
 
 	self.network_event_delegate = params.network_event_delegate
 
-	self.network_event_delegate:register(self, "rpc_client_next_level_vote_started")
+	self.network_event_delegate:register(self, "rpc_client_next_level_vote_started", "rpc_register_online_leaderboards")
 
 	local event_manager = Managers.state.event
 
@@ -392,6 +393,11 @@ StateInGameRunning.rpc_client_next_level_vote_started = function (self)
 
 	return 
 end
+StateInGameRunning.rpc_register_online_leaderboards = function (self, sender, score)
+	StatisticsUtil.register_online_leaderboards_data_client(self.statistics_db, score)
+
+	return 
+end
 StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpoint_available)
 	LevelHelper:flow_event(self.world, "gm_event_end_conditions_met")
 
@@ -425,11 +431,17 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 			StatisticsUtil.register_complete_survival_level(self.statistics_db)
 			StatisticsUtil.register_unlocked_lorebook_pages(self.statistics_db)
 
+			if (GameSettingsDevelopment.use_leaderboards or Development.parameter("use_leaderboards")) and self.is_server then
+				StatisticsUtil.register_online_leaderboards_data(self.statistics_db)
+			end
+
 			local player = Managers.player:local_player()
 
 			Managers.player:set_stats_backend(player)
 			Managers.package:load(dicegame_resource_path, "state_ingame_running", nil, true)
 		end
+
+		Managers.package:load(menu_assets_resource_path, "menu_assets_postgame", nil, true)
 	elseif game_won then
 		print("Game won")
 
@@ -444,6 +456,15 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 
 		Managers.player:set_stats_backend(player)
 		Managers.package:load(dicegame_resource_path, "state_ingame_running", nil, true)
+		Managers.package:load(menu_assets_resource_path, "menu_assets_postgame", nil, true)
+
+		if Application.platform() == "ps4" then
+			local level_key = Managers.state.game_mode:level_key()
+			local level_display_name = LevelSettings[level_key].display_name
+			local difficulty_display_name = Managers.state.difficulty:get_difficulty_settings().display_name
+
+			Managers.account:activity_feed_post_mission_completed(level_display_name, difficulty_display_name)
+		end
 	elseif game_lost then
 		print("Game lost")
 
@@ -452,6 +473,8 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 		end
 
 		self.checkpoint_available = checkpoint_available
+
+		Managers.package:load(menu_assets_resource_path, "menu_assets_postgame", nil, true)
 	end
 
 	if game_won then
@@ -507,7 +530,9 @@ StateInGameRunning._debug_update_rooms = function (self, dt, t)
 					button = button .. tostring(i)
 				}
 			elseif tapped_player and DebugKeyHandler.key_pressed(tapped_player.button, "destroy room", category) then
-				room_manager.destroy_room(room_manager, i)
+				local move_out_other_players = true
+
+				room_manager.destroy_room(room_manager, i, move_out_other_players)
 
 				settings.tapped_players[i] = nil
 			end
@@ -574,8 +599,9 @@ StateInGameRunning.update = function (self, dt, t)
 	end
 
 	local ingame_ui = self.ingame_ui
+	local package_manager = Managers.package
 
-	if self.next_level_vote_started and not ingame_ui.survey_active and self.setup_end_of_level and (Managers.package:has_loaded(dicegame_resource_path) or self.game_lost) then
+	if self.next_level_vote_started and not ingame_ui.survey_active and self.setup_end_of_level and (package_manager.has_loaded(package_manager, dicegame_resource_path) or self.game_lost) and package_manager.has_loaded(package_manager, menu_assets_resource_path) then
 		self.setup_end_of_level_UI(self)
 	end
 
@@ -782,6 +808,10 @@ StateInGameRunning.on_exit = function (self)
 
 	if Managers.package:has_loaded(dicegame_resource_path) then
 		Managers.package:unload(dicegame_resource_path, "state_ingame_running")
+	end
+
+	if Managers.package:has_loaded(menu_assets_resource_path) then
+		Managers.package:unload(menu_assets_resource_path, "menu_assets_postgame")
 	end
 
 	self.player = nil

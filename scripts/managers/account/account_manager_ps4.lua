@@ -45,10 +45,14 @@ AccountManager.init = function (self)
 	}
 	self._fetch_friends_timer = FETCH_FRIEND_TIME
 	self._fetching_region = false
+	self._region_fetch_status = "Uninitialized"
 	self._next_region_fetch = 0
 	self._fetching_matchmaking_data = false
 	self._next_matchmaking_data_fetch = 0
 
+	return 
+end
+AccountManager.reset_popups = function (self)
 	return 
 end
 AccountManager.set_level_transition_handler = function (self, level_transition_handler)
@@ -290,6 +294,9 @@ end
 AccountManager.region = function (self)
 	return self._region
 end
+AccountManager.region_fetch_status = function (self)
+	return self._region_fetch_status
+end
 AccountManager._update_region_fetch = function (self, dt)
 	local t = Managers.time:time("main")
 
@@ -312,6 +319,7 @@ AccountManager._fetch_region = function (self, t)
 	self._web_api:send_request(np_id, api_group, path, method, content, response_callback)
 
 	self._fetching_region = true
+	self._region_fetch_status = "Fetching"
 	self._next_region_fetch = t + 3
 
 	return 
@@ -320,10 +328,14 @@ AccountManager.cb_fetch_region = function (self, data)
 	self._fetching_region = false
 
 	if data == nil then
+		self._region_fetch_status = "Failed"
+
 		print("FAILED FETCH REGION")
 
 		return 
 	end
+
+	self._region_fetch_status = "Successful"
 
 	print("REGION FETCHED", data.region)
 
@@ -715,6 +727,50 @@ AccountManager.send_session_invitation_multiple = function (self, to_online_ids)
 	params = params .. "}"
 
 	self._web_api:send_request_session_invitation(np_id, params, session_id)
+
+	return 
+end
+AccountManager.activity_feed_post_mission_completed = function (self, level_display_name, difficulty_display_name)
+	local np_id = self._np_id
+	local title_id = self._np_title_id
+	local api_group = "activityFeed"
+	local path = "/v1/users/me/feed"
+	local method = WebApi.POST
+	local languages = {
+		"en",
+		"ja",
+		"sv",
+		"fr",
+		"pl",
+		"it",
+		"es",
+		"de"
+	}
+	local captions = {}
+	local condensed = {}
+	captions.default = string.format(Localize("activity_feed_finished_level_en"), Localize(level_display_name), Localize(difficulty_display_name))
+	condensed.default = string.format(Localize("activity_feed_finished_level_condensed_en"), Localize(level_display_name))
+
+	for _, language in ipairs(languages) do
+		captions[language] = string.format(Localize("activity_feed_finished_level_" .. language), Localize(level_display_name), Localize(difficulty_display_name))
+		condensed[language] = string.format(Localize("activity_feed_finished_level_condensed_" .. language), Localize(level_display_name))
+	end
+
+	local content = {
+		subType = 1,
+		storyType = "IN_GAME_POST",
+		captions = captions,
+		condensedCaptions = condensed,
+		targets = {
+			{
+				type = "TITLE_ID",
+				meta = title_id
+			}
+		}
+	}
+	local content_json = cjson.encode(content)
+
+	self._web_api:send_request(np_id, api_group, path, method, content_json)
 
 	return 
 end

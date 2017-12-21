@@ -896,7 +896,7 @@ function flow_callback_trigger_dialogue_event(params)
 			event_table[params.argument3_name] = tonumber(params.argument3) or params.argument3
 		end
 
-		dialogue_input.trigger_dialogue_event(dialogue_input, params.concept, event_table)
+		dialogue_input.trigger_dialogue_event(dialogue_input, params.concept, event_table, params.identifier)
 	else
 		print(string.format("[flow_callback_trigger_dialogue_event] No extension found belonging to system \"dialogue_system\" for unit %s", tostring(unit)))
 	end
@@ -978,6 +978,17 @@ end
 
 function flow_callback_objective_entered_socket_zone(params)
 	print("[flow_callback_objective_entered_socket_zone]", params.socket_unit, params.objective_unit)
+
+	if Managers.state.entity:system("mission_system"):has_mission("dwarf_interior_destroy_tunnels") then
+		local fuse_time_left = Unit.get_data(params.objective_unit, "fuse_time_left")
+		local statistics_db = Managers.player:statistics_db()
+		local stats_id = Managers.player:local_player():stats_id()
+		local current_fuse_time_left_when_socketed = statistics_db.get_stat(statistics_db, stats_id, "fuse_time_when_socketed")
+
+		if fuse_time_left < current_fuse_time_left_when_socketed then
+			statistics_db.set_stat(statistics_db, stats_id, "fuse_time_when_socketed", fuse_time_left)
+		end
+	end
 
 	if Managers.player.is_server then
 		local socket_unit = params.socket_unit
@@ -2495,6 +2506,19 @@ function flow_callback_set_game_mode_variable(params)
 end
 
 function flow_callback_print_callstack(params)
+	return 
+end
+
+function flow_callback_increment_goal_mission_data_counter(params)
+	if not Managers.state.network.is_server then
+		return 
+	end
+
+	local mission_name = params.mission_name
+	local value = params.value
+
+	Managers.state.entity:system("mission_system"):flow_callback_increment_goal_mission_data_counter(mission_name, value)
+
 	return 
 end
 

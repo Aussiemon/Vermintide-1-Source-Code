@@ -16,6 +16,7 @@ local unit_templates = {
 			"GenericDeathExtension",
 			"PlayerUnitLocomotionExtension",
 			"PlayerUnitFirstPerson",
+			"PlayerEyeTrackingExtension",
 			"GenericUnitAimExtension",
 			"PlayerHud",
 			"PlayerUnitAttachmentExtension",
@@ -47,6 +48,7 @@ local unit_templates = {
 			"GenericDeathExtension",
 			"PlayerUnitLocomotionExtension",
 			"PlayerUnitFirstPerson",
+			"PlayerEyeTrackingExtension",
 			"GenericUnitAimExtension",
 			"PlayerHud",
 			"PlayerUnitAttachmentExtension",
@@ -249,6 +251,27 @@ local unit_templates = {
 		husk_extensions = {}
 	},
 	ai_unit_storm_vermin = {
+		base_template = "ai_unit_base",
+		go_type = "ai_unit_with_inventory",
+		self_owned_extensions = {
+			"AIMeleeLineOfSightExtension",
+			"AIInventoryExtension",
+			"AIEnemySlotExtension",
+			"PingTargetExtension"
+		},
+		husk_extensions = {
+			"AIInventoryExtension",
+			"PingTargetExtension"
+		},
+		remove_when_killed = {
+			self_owned_extensions = {
+				"AIMeleeLineOfSightExtension",
+				"AIEnemySlotExtension"
+			},
+			husk_extensions = {}
+		}
+	},
+	ai_unit_grey_seer = {
 		base_template = "ai_unit_base",
 		go_type = "ai_unit_with_inventory",
 		self_owned_extensions = {
@@ -815,6 +838,17 @@ local unit_templates = {
 		go_type = "base_level_unit"
 	}
 }
+
+for _, dlc in pairs(DLCSettings) do
+	local templates = dofile(dlc.unit_extension_templates)
+
+	for k, v in pairs(templates) do
+		fassert(not unit_templates[k], "Unit template %s from dlc %s already exists.", k, dlc.name)
+
+		unit_templates[k] = v
+	end
+end
+
 local extension_table_names = {
 	"self_owned_extensions",
 	"self_owned_extensions_server",

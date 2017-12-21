@@ -697,23 +697,182 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle_dungeon")
 		end
-	},
-	complete_dwarf_exterior = {
+	}
+}
+
+if Application.platform() == "win32" then
+	AchievementTemplates.complete_dwarf_exterior = {
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
 		end
-	},
-	complete_dwarf_interior = {
+	}
+	AchievementTemplates.complete_dwarf_interior = {
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
 		end
-	},
-	complete_dwarf_beacons = {
+	}
+	AchievementTemplates.complete_dwarf_beacons = {
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
 		end
 	}
-}
+end
+
+if Application.platform() ~= "win32" then
+	AchievementTemplates.rescue_bardin_goreksson_from_the_skaven = {
+		ID_XB1 = "Wutelgi",
+		ID_PS4 = "039",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_stat(statistics_db, stats_id, "tutorial_revive_ally")
+		end
+	}
+	AchievementTemplates.complete_dwarf_exterior = {
+		ID_XB1 = "ByValaya",
+		ID_PS4 = "043",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
+		end
+	}
+	AchievementTemplates.complete_dwarf_interior = {
+		ID_XB1 = "SmashAndGrab",
+		ID_PS4 = "044",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
+		end
+	}
+	AchievementTemplates.complete_dwarf_beacons = {
+		ID_XB1 = "BeaconOfHope",
+		ID_PS4 = "045",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
+		end
+	}
+	AchievementTemplates.khazid_kro_complete_the_brewery_event_in_less_than_x_seconds = {
+		ID_XB1 = "GatheringSteam",
+		ID_PS4 = "046",
+		evaluate = function (statistics_db, stats_id)
+			if not Managers.state.entity then
+				return 
+			end
+
+			local mission_system = Managers.state.entity:system("mission_system")
+			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+
+			if not completed_missions then
+				return 
+			end
+
+			local completed_dwarf_interior_stabilize_pressure = completed_missions.dwarf_interior_stabilize_pressure
+
+			if not completed_dwarf_interior_stabilize_pressure then
+				return 
+			end
+
+			return completed_dwarf_interior_stabilize_pressure.end_time < 240
+		end
+	}
+	AchievementTemplates.chain_offire_complete_the_final_event_without_stopping_the_ignition_sequence = {
+		ID_XB1 = "StepUpToThePlate",
+		ID_PS4 = "047",
+		evaluate = function (statistics_db, stats_id)
+			if not Managers.state.entity then
+				return 
+			end
+
+			local mission_system = Managers.state.entity:system("mission_system")
+			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+
+			if not completed_missions then
+				return 
+			end
+
+			local dwarf_beacons_activate_beacon = completed_missions.dwarf_beacons_activate_beacon
+
+			if not dwarf_beacons_activate_beacon then
+				return 
+			end
+
+			return dwarf_beacons_activate_beacon.generic_counter == 0
+		end
+	}
+	AchievementTemplates.the_cursed_rune_take_no_team_damage_during_the_quarry_event = {
+		ID_XB1 = "Ironbreaker",
+		ID_PS4 = "048",
+		evaluate = function (statistics_db, stats_id)
+			if not Managers.state.entity then
+				return 
+			end
+
+			local mission_system = Managers.state.entity:system("mission_system")
+			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+
+			if not completed_missions then
+				return 
+			end
+
+			local dwarf_exterior_survive = completed_missions.dwarf_exterior_survive
+
+			if not dwarf_exterior_survive then
+				return 
+			end
+
+			return dwarf_exterior_survive.generic_counter == 0
+		end
+	}
+	AchievementTemplates.khazid_kro_get_timed_explosives_in_place_with_less_than_one_second_left = {
+		ID_XB1 = "PerfectTiming",
+		ID_PS4 = "049",
+		evaluate = function (statistics_db, stats_id)
+			return statistics_db.get_stat(statistics_db, stats_id, "fuse_time_when_socketed") < 2
+		end
+	}
+	AchievementTemplates.kill_a_stormvermin_in_one_blow_using_bardins_pick = {
+		ID_XB1 = "PickHisBrain",
+		ID_PS4 = "050",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_stat(statistics_db, stats_id, "stormvermin_pick_instakills")
+		end
+	}
+	AchievementTemplates.complete_your_first_contract = {
+		ID_XB1 = "Mercenary",
+		ID_PS4 = "040",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_stat(statistics_db, stats_id, "contracts_completed")
+		end
+	}
+	AchievementTemplates.complete_your_first_quest = {
+		ID_XB1 = "BountyHunter",
+		ID_PS4 = "041",
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_stat(statistics_db, stats_id, "quests_completed")
+		end
+	}
+	AchievementTemplates.get_your_first_boon = {
+		ID_XB1 = "Blessed",
+		ID_PS4 = "042",
+		evaluate = function (statistics_db, stats_id)
+			local player_manager = Managers.player
+
+			if not player_manager then
+				return false
+			end
+
+			local local_player = player_manager.local_player(player_manager)
+
+			if not local_player then
+				return false
+			end
+
+			local boon_handler = local_player.boon_handler
+
+			if not boon_handler then
+				return false
+			end
+
+			return boon_handler.has_any_boon(boon_handler)
+		end
+	}
+end
 
 local function completed_levels(statistics_db, stats_id)
 	local levels_completed = 0

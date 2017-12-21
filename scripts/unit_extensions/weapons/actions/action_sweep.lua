@@ -432,19 +432,25 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 
 					local charge_value = current_action.charge_value
 					local buff_result = DamageUtils.buff_on_attack(owner_unit, hit_unit, charge_value)
+					local show_blood = not breed.no_blood_splatter_on_damage
 
-					self.weapon_system:rpc_weapon_blood(nil, attacker_unit_id, attack_template_damage_type_id)
+					if show_blood then
+						self.weapon_system:rpc_weapon_blood(nil, attacker_unit_id, attack_template_damage_type_id)
 
-					local blood_position = Vector3(result.position.x, result.position.y, result.position.z + self.down_offset)
+						local blood_position = Vector3(result.position.x, result.position.y, result.position.z + self.down_offset)
 
-					Managers.state.blood:add_enemy_blood(blood_position, result.normal, result.actor)
+						Managers.state.blood:add_enemy_blood(blood_position, result.normal, result.actor)
+					end
 
 					if buff_result ~= "killing_blow" then
 						if is_server or LEVEL_EDITOR_TEST then
 							self.weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
 						else
 							network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
-							network_manager.network_transmit:send_rpc_server("rpc_weapon_blood", attacker_unit_id, attack_template_damage_type_id)
+
+							if show_blood then
+								network_manager.network_transmit:send_rpc_server("rpc_weapon_blood", attacker_unit_id, attack_template_damage_type_id)
+							end
 						end
 					else
 						first_person_extension.play_hud_sound_event(first_person_extension, "Play_hud_matchmaking_countdown")
@@ -643,6 +649,10 @@ ActionSweep._play_character_impact = function (self, is_server, owner_unit, curr
 		hit_effect = current_action.armour_impact_particle_effect or "fx/hit_armored"
 	else
 		hit_effect = (predicted_damage > 0 or current_action.no_damage_impact_particle_effect) and (current_action.impact_particle_effect or "fx/impact_blood")
+	end
+
+	if breed.no_blood_splatter_on_damage and hit_effect == "fx/impact_blood" then
+		hit_effect = current_action.no_damage_impact_particle_effect
 	end
 
 	if hit_effect then

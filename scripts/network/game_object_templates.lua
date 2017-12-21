@@ -43,8 +43,8 @@ local game_object_templates = {
 	},
 	player_projectile_unit = {
 		game_object_created_func_name = "game_object_created_network_unit",
-		syncs_position = false,
-		syncs_rotation = false,
+		syncs_position = true,
+		syncs_rotation = true,
 		game_object_destroyed_func_name = "game_object_destroyed_network_unit",
 		is_level_unit = false
 	},

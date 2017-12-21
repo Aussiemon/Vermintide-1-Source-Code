@@ -13,12 +13,12 @@ ActionUtils.spawn_flame_wave_projectile = function (owner_unit, scale, item_temp
 
 	return 
 end
-ActionUtils.spawn_player_projectile = function (owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name)
+ActionUtils.spawn_player_projectile = function (owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, gaze_settings)
 	scale = scale or 100
 	local projectile_system = Managers.state.entity:system("projectile_system")
 	local ping = 0
 
-	projectile_system.spawn_player_projectile(projectile_system, owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, ping)
+	projectile_system.spawn_player_projectile(projectile_system, owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, ping, gaze_settings)
 
 	return 
 end

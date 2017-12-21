@@ -13,11 +13,11 @@ RoomManagerServer.setup_level_anchor_points = function (self, level)
 
 	return 
 end
-RoomManagerServer.create_room = function (self, peer_id, local_player_id)
+RoomManagerServer.create_room = function (self, peer_id, local_player_id, room_id)
 	local profile_index = Managers.state.spawn._profile_synchronizer:profile_by_peer(peer_id, local_player_id)
 	local profile = SPProfiles[profile_index]
 	local room_profile = profile.room_profile
-	local room_id = self._room_handler:create_room(room_profile)
+	room_id = self._room_handler:create_room(room_profile, room_id)
 	self._peer_rooms[peer_id] = {
 		room_id = room_id,
 		profile_index = profile_index
@@ -37,7 +37,7 @@ end
 RoomManagerServer.destroy_room = function (self, peer_id, move_other_players_from_room)
 	local room_id = self._peer_rooms[peer_id].room_id
 
-	if (move_other_players_from_room and move_other_players_from_room == true) or move_other_players_from_room == nil then
+	if move_other_players_from_room then
 		self.move_players_from_room(self, room_id)
 	end
 

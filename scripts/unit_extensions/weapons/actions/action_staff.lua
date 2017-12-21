@@ -66,7 +66,7 @@ ActionStaff.fire = function (self, reason)
 	local projectile_info = current_action.projectile_info
 	local lookup_data = current_action.lookup_data
 
-	ActionUtils.spawn_player_projectile(owner_unit, position, rotation, 0, angle, target_vector, speed, self.item_name, lookup_data.item_template_name, lookup_data.action_name, lookup_data.sub_action_name)
+	ActionUtils.spawn_player_projectile(owner_unit, position, rotation, 0, angle, target_vector, speed, self.item_name, lookup_data.item_template_name, lookup_data.action_name, lookup_data.sub_action_name, nil)
 
 	if self.ammo_extension then
 		local ammo_usage = current_action.ammo_usage

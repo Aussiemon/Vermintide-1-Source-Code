@@ -59,8 +59,14 @@ UIRenderer.script_draw_bitmap = function (gui, render_settings, material, gui_po
 		gui_position = snap_to_position(gui_position)
 	end
 
+	local alpha_multiplier = 1
+
+	if render_settings and render_settings.alpha_multiplier then
+		alpha_multiplier = render_settings.alpha_multiplier
+	end
+
 	local texture_settings, optional_point_sample_material = UIAtlasHelper.get_atlas_settings_by_texture_name(material)
-	color = color and Color(color[1], color[2], color[3], color[4])
+	color = (color and Color(color[1]*alpha_multiplier, color[2], color[3], color[4])) or Color(alpha_multiplier*255, 255, 255, 255)
 
 	if texture_settings then
 		local uv00_table = texture_settings.uv00
@@ -75,14 +81,6 @@ UIRenderer.script_draw_bitmap = function (gui, render_settings, material, gui_po
 			material_name = texture_settings.saturated_material_name
 		else
 			material_name = texture_settings.material_name
-		end
-
-		if material_name == nil then
-			for i = 1, 10, 1 do
-				print("heheheheheh")
-			end
-
-			slot16 = 1231239855
 		end
 
 		if retained_id then
@@ -105,7 +103,13 @@ UIRenderer.script_draw_bitmap_uv = function (gui, render_settings, material, uvs
 		gui_position = snap_to_position(gui_position)
 	end
 
-	color = color and Color(color[1], color[2], color[3], color[4])
+	local alpha_multiplier = 1
+
+	if render_settings and render_settings.alpha_multiplier then
+		alpha_multiplier = render_settings.alpha_multiplier
+	end
+
+	color = (color and Color(color[1]*alpha_multiplier, color[2], color[3], color[4])) or Color(alpha_multiplier*255, 255, 255, 255)
 
 	if texture_settings then
 		local new_uvs = get_relative_uvs(texture_settings.uv00, texture_settings.uv11, uvs)
@@ -150,7 +154,13 @@ UIRenderer.script_draw_bitmap_3d = function (gui, render_settings, material, tm,
 		gui_position = snap_to_position(gui_position)
 	end
 
-	color = color and Color(color[1], color[2], color[3], color[4])
+	local alpha_multiplier = 1
+
+	if render_settings and render_settings.alpha_multiplier then
+		alpha_multiplier = render_settings.alpha_multiplier
+	end
+
+	color = (color and Color(color[1]*alpha_multiplier, color[2], color[3], color[4])) or Color(alpha_multiplier*255, 255, 255, 255)
 
 	if texture_settings then
 		local material_name = nil
@@ -184,6 +194,7 @@ UIRenderer.create = function (world, ...)
 	UPDATE_RESOLUTION_LOOKUP()
 
 	return ProtectMetaTable(MakeTableStrict({
+		alpha_multiplier = 1,
 		dt = 0,
 		gui = gui,
 		gui_retained = gui_retained,
@@ -202,6 +213,11 @@ UIRenderer.create = function (world, ...)
 		debug_startpoint = StrictNil,
 		render_settings = StrictNil
 	}))
+end
+UIRenderer.set_alpha_multiplier = function (self, alpha)
+	self.alpha_multiplier = alpha
+
+	return 
 end
 UIRenderer.create_video_player = function (self, world, resource, set_loop)
 	assert(not self.video_player)
@@ -1013,22 +1029,30 @@ UIRenderer.draw_text = function (self, text, font_material, font_size, font_name
 	end
 
 	local use_var_args = 0 < #draw_text_var_args
+	local alpha_multiplier = 1
+	local render_settings = self.render_settings
+
+	if render_settings and render_settings.alpha_multiplier then
+		alpha_multiplier = render_settings.alpha_multiplier
+	end
+
 	local return_value = nil
+	color = (color and Color(alpha_multiplier*color[1], color[2], color[3], color[4])) or Color(alpha_multiplier*255, 255, 255, 255)
 
 	if use_var_args then
 		if retained_id == true then
-			return_value = Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color and Color(unpack(color)), unpack(draw_text_var_args))
+			return_value = Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color, unpack(draw_text_var_args))
 		elseif retained_id then
-			Gui.update_text(self.gui_retained, retained_id, text, font_material, font_size, font_name, ui_position, color and Color(unpack(color)), unpack(draw_text_var_args))
+			Gui.update_text(self.gui_retained, retained_id, text, font_material, font_size, font_name, ui_position, color, unpack(draw_text_var_args))
 		else
-			Gui.text(self.gui, text, font_material, font_size, font_name, ui_position, color and Color(unpack(color)), unpack(draw_text_var_args))
+			Gui.text(self.gui, text, font_material, font_size, font_name, ui_position, color, unpack(draw_text_var_args))
 		end
 	elseif retained_id == true then
-		return_value = Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color and Color(unpack(color)))
+		return_value = Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color)
 	elseif retained_id then
-		Gui.update_text(self.gui_retained, retained_id, text, font_material, font_size, font_name, ui_position, color and Color(unpack(color)))
+		Gui.update_text(self.gui_retained, retained_id, text, font_material, font_size, font_name, ui_position, color)
 	else
-		Gui.text(self.gui, text, font_material, font_size, font_name, ui_position, color and Color(unpack(color)))
+		Gui.text(self.gui, text, font_material, font_size, font_name, ui_position, color)
 	end
 
 	if use_var_args then
@@ -1047,8 +1071,15 @@ UIRenderer.draw_justified_text = function (self, text, font_material, font_size,
 		end
 	end
 
+	local alpha_multiplier = 1
+	local render_settings = self.render_settings
+
+	if render_settings and render_settings.alpha_multiplier then
+		alpha_multiplier = render_settings.alpha_multiplier
+	end
+
 	local ui_position = UIScaleVectorToResolution(position)
-	color = color and Color(unpack(color))
+	color = (color and Color(alpha_multiplier*color[1], color[2], color[3], color[4])) or Color(alpha_multiplier*255, 255, 255, 255)
 
 	if retained_id == true then
 		return Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), ...)

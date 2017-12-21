@@ -190,11 +190,11 @@ StateTitleScreenMainMenu.update = function (self, dt, t)
 		if active_menu_selection and not self._input_disabled and not has_popup and not user_detached and not self._popup_id then
 			if current_menu_index and input_service.get(input_service, "start") then
 				menu_functions[current_menu_index](self)
-			elseif active_controller.pressed(active_controller.button_index("b")) then
+			elseif input_service.get(input_service, "back") then
 				self.parent:show_menu(false)
 
 				self._new_state = StateTitleScreenMain
-			elseif active_controller.pressed(active_controller.button_index("x")) then
+			elseif input_service.get(input_service, "change_profile") then
 				local controller_id = tonumber(string.gsub(active_controller._name, "Pad", ""), 10)
 
 				XboxLive.show_account_picker(controller_id)

@@ -1,5 +1,8 @@
 local definitions = local_require("scripts/ui/hud_ui/boon_ui_definitions")
 local scenegraph_definition = definitions.scenegraph_definition
+local BOON_WIDTH = 44
+local BOON_HEIGHT = 84
+local BOON_SPACING = 15
 BoonUI = class(BoonUI)
 local MAX_NUMBER_OF_BOONS = definitions.MAX_NUMBER_OF_BOONS
 local DEBUG_BOONS_UI = false
@@ -9,10 +12,28 @@ BoonUI.init = function (self, ingame_ui_context)
 	self.input_manager = ingame_ui_context.input_manager
 	self.peer_id = ingame_ui_context.peer_id
 	self.player_manager = ingame_ui_context.player_manager
+	self.cleanui = ingame_ui_context.cleanui
 	self.ui_animations = {}
+	self.render_settings = {
+		alpha_multiplier = 1
+	}
 	self.is_in_inn = ingame_ui_context.is_in_inn
 
 	self._create_ui_elements(self)
+
+	local boon_pivot_definition = scenegraph_definition.pivot
+	local boon_pivot_position = boon_pivot_definition.position
+	local size = {
+		(BOON_WIDTH*MAX_NUMBER_OF_BOONS + BOON_SPACING*MAX_NUMBER_OF_BOONS)*2,
+		BOON_HEIGHT
+	}
+	local position = {
+		(boon_pivot_position[1] + 1920) - size[1] - BOON_WIDTH*1.5,
+		0
+	}
+	self.cleanui_data = {}
+
+	UICleanUI.register_area(self.cleanui, "boon_ui", self.cleanui_data, position, size)
 	rawset(_G, "boon_ui", self)
 
 	return 
@@ -44,7 +65,7 @@ end
 BoonUI._align_widgets = function (self)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 	local boon_width = 38
-	local boon_spacing = 15
+	local boon_spacing = BOON_SPACING
 	local time_height = 14
 	local horizontal_spacing = boon_width + boon_spacing
 	local vertical_spacing = boon_width + boon_spacing + time_height
@@ -274,7 +295,7 @@ BoonUI.update = function (self, dt, t)
 		end
 	end
 
-	if dirty or DEBUG_BOONS_UI then
+	if dirty or DEBUG_BOONS_UI or self.cleanui_data.is_dirty then
 		self.set_dirty(self)
 	end
 
@@ -330,14 +351,20 @@ BoonUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("ingame_menu")
+	local render_settings = self.render_settings
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, render_settings)
+
+	local alpha = UICleanUI.get_alpha(self.cleanui, self.cleanui_data)
+	render_settings.alpha_multiplier = alpha
 
 	for _, data in ipairs(self._active_boons) do
 		local widget = data.widget
 
 		UIRenderer.draw_widget(ui_renderer, widget)
 	end
+
+	render_settings.alpha_multiplier = 1
 
 	UIRenderer.end_pass(ui_renderer)
 

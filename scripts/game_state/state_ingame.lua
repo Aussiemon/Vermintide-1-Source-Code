@@ -47,6 +47,7 @@ require("foundation/scripts/util/datacounter")
 require("scripts/managers/blood/blood_manager")
 require("scripts/managers/quest/quest_manager")
 require("scripts/managers/performance/performance_manager")
+require("scripts/managers/leaderboards/leaderboard_manager")
 
 StateIngame = class(StateIngame)
 StateIngame.NAME = "StateIngame"
@@ -121,8 +122,12 @@ StateIngame.on_enter = function (self)
 			self.statistics_db:reset_session_stats()
 		end
 	else
-		self.statistics_db = StatisticsDatabase:new()
-		loading_context.statistics_db = self.statistics_db
+		local db = StatisticsDatabase:new()
+
+		db.register(db, "session", "session", nil)
+
+		loading_context.statistics_db = db
+		self.statistics_db = db
 	end
 
 	Managers.player:set_statistics_db(self.statistics_db)
@@ -510,7 +515,6 @@ StateIngame.on_enter = function (self)
 	return 
 end
 StateIngame.event_xbox_one_hack_start_game = function (self, level_key, difficulty)
-	print(level_key, difficulty)
 	Managers.state.difficulty:set_difficulty(difficulty)
 	self.level_transition_handler:set_next_level(level_key)
 	Managers.state.game_mode:complete_level()

@@ -33,6 +33,7 @@ GameModeManager.init = function (self, world, lobby_host, lobby_client, level_tr
 	event_manager.register(event_manager, self, "reload_application_settings", "event_reload_application_settings")
 	event_manager.register(event_manager, self, "gm_event_end_conditions_met", "gm_event_end_conditions_met")
 	event_manager.register(event_manager, self, "gm_event_round_started", "gm_event_round_started")
+	event_manager.register(event_manager, self, "gm_event_survival_wave_completed", "gm_event_survival_wave_completed")
 	event_manager.register(event_manager, self, "camera_teleported", "event_camera_teleported")
 
 	self.network_event_delegate = network_event_delegate
@@ -71,6 +72,17 @@ GameModeManager.settings = function (self)
 end
 GameModeManager.object_sets = function (self)
 	return self._game_mode:object_sets()
+end
+GameModeManager.gm_event_survival_wave_completed = function (self, difficulty)
+	print("gm_event_survival_wave_completed", difficulty)
+
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local db = Managers.player:statistics_db()
+
+	db.increment_stat(db, stats_id, "last_stand_waves_completed", difficulty)
+
+	return 
 end
 GameModeManager.gm_event_end_conditions_met = function (self, reason)
 	self._gm_event_end_conditions_met = true

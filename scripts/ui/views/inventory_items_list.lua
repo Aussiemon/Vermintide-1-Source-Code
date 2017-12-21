@@ -670,7 +670,7 @@ InventoryItemsList.remove_item = function (self, item_backend_id, ignore_scroll_
 				list_style.list_start_index = math.max(list_start_index - 1, 1)
 
 				if 1 < list_start_index then
-					selected_absolute_list_index = selected_absolute_list_index - 1
+					selected_absolute_list_index = math.max(selected_absolute_list_index - 1, 1)
 				end
 
 				move_scroll = true

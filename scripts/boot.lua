@@ -1,6 +1,7 @@
 MODE = {}
 
 dofile("foundation/scripts/boot/boot")
+require("scripts/settings/dlc_settings")
 
 GlobalResources = GlobalResources or {
 	"resource_packages/common_level_resources",
@@ -21,7 +22,6 @@ GlobalResources = GlobalResources or {
 	"resource_packages/ingame",
 	"resource_packages/pickups",
 	"resource_packages/levels/ui_profile_selection",
-	"resource_packages/helper_screens/helper_screen",
 	"resource_packages/end_screen_banners/end_screen_banners"
 }
 
@@ -208,6 +208,15 @@ Bulldozer.setup = function (self)
 	print("[Boot] Application build:", Application.build())
 	print("[Boot] Engine revision:", script_data.build_identifier)
 	print("[Boot] Content revision:", script_data.settings.content_revision)
+
+	for _, dlc in pairs(DLCSettings) do
+		local package_name = dlc.package_name
+
+		if package_name then
+			Managers.package:load(package_name, "boot")
+		end
+	end
+
 	self._require_scripts(self)
 
 	if Development.parameter("paste_revision_to_clipboard") then
@@ -308,7 +317,7 @@ Bulldozer._require_scripts = function (self)
 	game_require("settings", "game_settings_development", "controller_settings", "default_user_settings", "synergy_settings")
 	game_require("game_state", "state_context")
 	game_require("entity_system", "entity_system")
-	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "play_go/play_go_manager", "controller_features/controller_features_manager")
+	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "play_go/play_go_manager", "controller_features/controller_features_manager", "leaderboards/leaderboard_manager")
 	game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 	game_require("network", "unit_spawner", "unit_storage", "network_unit")
 	game_require("utils", "table")
@@ -427,6 +436,10 @@ Bulldozer._init_managers = function (self)
 	Managers.news_ticker = NewsTickerManager:new()
 	Managers.light_fx = LightFXManager:new()
 	Managers.unlock = UnlockManager:new()
+
+	if GameSettingsDevelopment.use_leaderboards or Development.parameter("use_leaderboards") then
+		Managers.leaderboards = LeaderboardManager:new()
+	end
 
 	return 
 end

@@ -400,7 +400,7 @@ StateMapViewStart._handle_input = function (self, dt, t)
 			local return_to_game = not self.parent.ingame_ui.menu_active
 
 			self.parent:exit(return_to_game)
-		elseif input_service.get(input_service, "refresh") then
+		elseif Application.platform() == "ps4" and GameSettingsDevelopment.lobby_browser_enabled and input_service.get(input_service, "refresh") then
 			self.parent:exit(nil, "lobby_browser_view")
 		elseif self._selection_index and self._selection_index == 1 then
 			if input_service.get(input_service, "confirm") then

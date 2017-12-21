@@ -3,14 +3,15 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			total_time_secondary = 1,
-			charge_value = "light_attack",
-			ammo_usage = 1,
-			anim_event = "attack_shoot",
-			kind = "shotgun",
 			damage_window_start = 0.1,
-			reload_when_out_of_ammo = true,
+			ammo_usage = 1,
+			fire_at_gaze_setting = "tobii_fire_at_gaze_blunderbuss",
+			charge_value = "light_attack",
+			kind = "shotgun",
+			total_time_secondary = 1,
+			alert_sound_range_hit = 5,
 			attack_template = "shot_blunderbuss",
+			reload_when_out_of_ammo = true,
 			shot_count = 12,
 			max_penetrations = 3,
 			apply_recoil = true,
@@ -22,7 +23,7 @@ weapon_template.actions = {
 			fire_time = 0.1,
 			anim_event_secondary = "reload",
 			active_reload_time = 0.35,
-			alert_sound_range_hit = 5,
+			anim_event = "attack_shoot",
 			total_time = 0.66,
 			allowed_chain_actions = {
 				{
@@ -39,13 +40,13 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.25,
+					start_time = 0.4,
 					action = "action_two",
 					input = "action_two"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.4,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -123,6 +124,7 @@ weapon_template.display_unit = "units/weapons/weapon_display/display_rifle"
 weapon_template.wield_anim = "to_blunderbuss"
 weapon_template.wield_anim_no_ammo = "to_blunderbuss_noammo"
 weapon_template.crosshair_style = "default"
+weapon_template.fire_at_gaze_setting = "tobii_fire_at_gaze_blunderbuss"
 weapon_template.reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.dodge_distance = 1

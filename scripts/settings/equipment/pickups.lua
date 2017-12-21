@@ -348,12 +348,12 @@ end
 
 Pickups.lorebook_pages = {
 	lorebook_page = {
-		only_once = false,
-		unit_name = "units/weapons/player/pup_lore_page/pup_lore_page_01",
+		mission_name = "lorebook_page_hidden_mission",
 		hide_on_pickup = true,
 		type = "lorebook_page",
 		spawn_weighting = 1,
-		mission_name = "lorebook_page_hidden_mission",
+		only_once = false,
+		unit_name = "units/weapons/player/pup_lore_page/pup_lore_page_01",
 		hud_description = "pickup_lorebook_page",
 		hide_func = function (statistics_db)
 			local level_key = Managers.state.game_mode:level_key()
@@ -374,6 +374,9 @@ Pickups.lorebook_pages = {
 			local unlocked_all_session = lorebook_pages_unlocked_sesssion(level_key)
 
 			return unlocked_all or unlocked_all_session
+		end,
+		can_spawn_func = function ()
+			return GameSettingsDevelopment.lorebook_enabled
 		end
 	}
 }

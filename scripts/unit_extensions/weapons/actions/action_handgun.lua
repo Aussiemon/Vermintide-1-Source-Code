@@ -89,6 +89,16 @@ ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damag
 		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 		local position = first_person_extension.current_position(first_person_extension)
 		local rotation = first_person_extension.current_rotation(first_person_extension)
+
+		if current_action.fire_at_gaze_setting then
+			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+			if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+				local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
+				rotation = eyetracking_extension.gaze_rotation(eyetracking_extension)
+			end
+		end
+
 		local spread_extension = self.spread_extension
 
 		if spread_extension then

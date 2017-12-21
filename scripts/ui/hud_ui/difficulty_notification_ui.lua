@@ -189,6 +189,9 @@ DifficultyNotificationUI.on_presentation_complete = function (self)
 
 	return 
 end
+DifficultyNotificationUI.is_presentation_active = function (self)
+	return self.draw_widgets
+end
 DifficultyNotificationUI.start_presentation_animation = function (self)
 	local params = {
 		wwise_world = self.wwise_world

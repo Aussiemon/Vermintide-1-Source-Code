@@ -227,12 +227,14 @@ MissionTemplates = {
 		init = function (mission_data, unit)
 			local mission_text = Localize(mission_data.text)
 			local data = {
+				generic_counter = 0,
 				manual_update = true,
 				info_slate_type = "mission_goal",
 				is_goal = true,
 				mission_text = mission_text,
 				mission_data = mission_data,
-				unit = unit
+				unit = unit,
+				start_time = Managers.state.network:network_time()
 			}
 
 			return data
@@ -246,14 +248,24 @@ MissionTemplates = {
 			return 
 		end,
 		evaluate_mission = function (data, dt)
+			data.end_time = Managers.state.network:network_time() - data.start_time
+
 			return true, 1
 		end,
 		create_sync_data = function (data)
-			local sync_data = {}
+			local sync_data = {
+				data.start_time,
+				data.generic_counter
+			}
 
 			return sync_data
 		end,
 		sync = function (data, sync_data)
+			local start_time = sync_data[1]
+			data.start_time = start_time
+			local generic_counter = sync_data[2]
+			data.generic_counter = generic_counter
+
 			return 
 		end
 	},
@@ -354,6 +366,7 @@ MissionTemplates = {
 				experience_per_percent = mission_data.experience_per_percent,
 				start_time = start_time,
 				wave_completed_time = start_time,
+				wave_times = {},
 				starting_wave = starting_wave
 			}
 
@@ -364,6 +377,9 @@ MissionTemplates = {
 				data.wave_state = data.states.completed
 				data.wave_completed = data.wave
 				data.wave_completed_time = network_time
+				data.wave_times[data.wave] = network_time
+
+				Managers.state.game_mode:trigger_event("survival_wave_completed", Managers.state.difficulty:get_difficulty())
 			elseif data.wave_state == data.states.completed and data.wave_prepare_text then
 				data.wave_state = data.states.prepare
 			elseif data.wave_state == data.states.prepare then

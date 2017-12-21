@@ -4,9 +4,11 @@ UnitFrameUI.init = function (self, ingame_ui_context, definitions, data, frame_i
 	self.definitions = definitions
 	self.features_list = definitions.features_list
 	self.inventory_consumable_icons = definitions.inventory_consumable_icons
+	self.cleanui = ingame_ui_context.cleanui
 	self.inventory_index_by_slot = definitions.inventory_index_by_slot
 	self.weapon_slot_widget_settings = definitions.weapon_slot_widget_settings
 	self.render_settings = {
+		alpha_multiplier = 1,
 		snap_pixel_positions = true
 	}
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -160,6 +162,17 @@ UnitFrameUI.update = function (self, dt, t)
 
 	Profiler.stop("connection")
 
+	local alpha = UICleanUI.get_alpha(self.cleanui, self)
+
+	if alpha ~= self.last_alpha then
+		dirty = true
+		self.last_alpha = alpha
+
+		for _, widget in pairs(self._widgets) do
+			self._set_widget_dirty(self, widget)
+		end
+	end
+
 	if dirty then
 		self.set_dirty(self)
 	end
@@ -187,12 +200,16 @@ UnitFrameUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("ingame_menu")
+	local render_settings = self.render_settings
+	render_settings.alpha_multiplier = self.last_alpha
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, render_settings)
 
 	for _, widget in pairs(self._widgets) do
 		UIRenderer.draw_widget(ui_renderer, widget)
 	end
+
+	render_settings.alpha_multiplier = 1
 
 	UIRenderer.end_pass(ui_renderer)
 

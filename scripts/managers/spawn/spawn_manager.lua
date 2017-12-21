@@ -283,17 +283,27 @@ SpawnManager._spawn_unit_at_pos_rot = function (self, spawn_data, pos, rot)
 
 	return unit
 end
+local Profiler_start = Profiler.start
+local Profiler_stop = Profiler.stop
 SpawnManager.update = function (self, dt, t)
+	Profiler_start("spawn handler")
 	self.hero_spawner_handler:update(dt, t)
+	Profiler_stop("spawn handler")
 
 	if self._is_server and Managers.state.network:game() then
 		local allow_respawns = Managers.state.difficulty:get_difficulty_settings().allow_respawns
 
+		Profiler_start("player status")
 		self._update_player_status(self, dt, t)
+		Profiler_stop("player status")
+		Profiler_start("respawn handler")
 
 		if allow_respawns then
 			self.respawn_handler:update(dt, t, self._player_statuses)
 		end
+
+		Profiler_stop("respawn handler")
+		Profiler_start("bot spawns")
 
 		local level_settings = LevelHelper:current_level_settings()
 
@@ -301,11 +311,17 @@ SpawnManager.update = function (self, dt, t)
 			self._update_bot_spawns(self, dt, t)
 		end
 
+		Profiler_stop("bot spawns")
+		Profiler_start("spawning")
 		self._update_spawning(self, dt, t)
+		Profiler_stop("spawning")
+		Profiler_start("respawns")
 
 		if allow_respawns then
 			self._update_respawns(self, dt, t)
 		end
+
+		Profiler_stop("respawns")
 	end
 
 	return 

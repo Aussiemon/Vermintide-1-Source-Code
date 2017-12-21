@@ -355,8 +355,13 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 
 			if current_action_settings.apply_recoil then
 				local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
+				local user_setting = Application.user_setting
+				local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and user_setting("tobii_eyetracking")
+				local tobii_extended_view_enabled = user_setting("tobii_extended_view")
 
-				first_person_extension.apply_recoil(first_person_extension, current_action_settings.recoil_factor)
+				if not HAS_TOBII or (HAS_TOBII and not tobii_extended_view_enabled) then
+					first_person_extension.apply_recoil(first_person_extension, current_action_settings.recoil_factor)
+				end
 			end
 		end
 	end

@@ -949,6 +949,10 @@ ForgeView.handle_index_changes = function (self)
 	local character_changed = items_page.character_changed
 
 	if character_changed then
+		if melt_active and melt_ui_page.melting then
+			melt_ui_page.abort_melt(melt_ui_page)
+		end
+
 		items_page.set_selected_hero(items_page, character_changed)
 
 		local item_filter = self.item_filter

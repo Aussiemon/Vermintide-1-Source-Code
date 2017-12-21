@@ -75,6 +75,7 @@ require("scripts/unit_extensions/generic/generic_unit_aim_extension")
 require("scripts/unit_extensions/generic/generic_hit_reaction_extension")
 require("scripts/unit_extensions/generic/no_target_zone_extension")
 require("scripts/unit_extensions/generic/ladder_extension")
+require("scripts/unit_extensions/default_player_unit/player_eyetracking_extension")
 require("scripts/unit_extensions/default_player_unit/player_input_extension")
 require("scripts/unit_extensions/default_player_unit/player_whereabouts_extension")
 require("scripts/unit_extensions/human/player_bot_unit/player_bot_base")
@@ -237,6 +238,9 @@ EntitySystem._init_systems = function (self, entity_system_creation_context)
 	self._add_system(self, "transportation_system", TransportationSystem, entity_system_creation_context)
 	self._add_system(self, "locomotion_system", LocomotionSystem, entity_system_creation_context, nil, no_pre_update, has_post_update)
 	self._add_system(self, "animation_system", AnimationSystem, entity_system_creation_context)
+	self._add_system(self, "eyetracking_system", ExtensionSystemBase, entity_system_creation_context, {
+		"PlayerEyeTrackingExtension"
+	})
 	self._add_system(self, "first_person_system", FirstPersonSystem, entity_system_creation_context)
 	self._add_system(self, "fade_system", FadeSystem, entity_system_creation_context)
 	self._add_system(self, "camera_state_machine_system", ExtensionSystemBase, entity_system_creation_context, {

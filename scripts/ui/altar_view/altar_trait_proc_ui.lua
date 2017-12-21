@@ -74,10 +74,10 @@ AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 				local new_trait_index = nil
 
 				if input_service.get(input_service, "move_right") then
-					new_trait_index = math.min(selected_trait_index + 1, number_of_traits_on_item)
+					new_trait_index = self._get_next_free_trait_index(self, selected_trait_index, "right", number_of_traits_on_item)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 				elseif input_service.get(input_service, "move_left") then
-					new_trait_index = math.max(selected_trait_index - 1, 1)
+					new_trait_index = self._get_next_free_trait_index(self, selected_trait_index, "left", number_of_traits_on_item)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 				end
 
@@ -89,6 +89,36 @@ AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 	end
 
 	return 
+end
+AltarTraitProcUI._get_next_free_trait_index = function (self, selected_trait_index, direction, number_of_traits_on_item)
+	local new_trait_index = selected_trait_index
+
+	if direction == "right" then
+		for i = selected_trait_index + 1, number_of_traits_on_item, 1 do
+			if not self._is_trait_index_locked(self, i) then
+				new_trait_index = i
+
+				break
+			end
+		end
+	elseif direction == "left" then
+		for i = selected_trait_index - 1, 1, -1 do
+			if not self._is_trait_index_locked(self, i) then
+				new_trait_index = i
+
+				break
+			end
+		end
+	end
+
+	return new_trait_index
+end
+AltarTraitProcUI._is_trait_index_locked = function (self, trait_index)
+	local widget_name = "trait_button_" .. trait_index
+	local widget = self.widgets_by_name[widget_name]
+	local button_hotspot = widget.content.button_hotspot
+
+	return button_hotspot.disabled
 end
 AltarTraitProcUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)

@@ -980,22 +980,14 @@ Missions.tutorial = {
 	mission_template_name = "tutorial",
 	hidden = true
 }
-Missions.chamber_inn = {
-	mission_template_name = "goal",
-	text = "mission_chamber_defend"
-}
-Missions.chamber_cellar = {
-	mission_template_name = "goal",
-	text = "mission_chamber_cellar"
-}
-Missions.chamber_sewer = {
-	mission_template_name = "goal",
-	text = "mission_chamber_sewer_hunt"
-}
-Missions.chamber_machine = {
-	mission_template_name = "goal",
-	text = "mission_chamber_stop_machine"
-}
+
+for _, dlc in pairs(DLCSettings) do
+	local missions = dlc.missions
+
+	for mission_name, mission in pairs(missions) do
+		Missions[mission_name] = mission
+	end
+end
 
 for name, data in pairs(Missions) do
 	assert(data.mission_template_name, "mission_template_name not specified")

@@ -133,12 +133,16 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 				local attack_template_id = NetworkLookup.attack_templates[current_action.push_attack_template]
 				local attack_template_damage_type_name = current_action.push_attack_template_damage_type
 				local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
+
+				self.weapon_system:rpc_weapon_blood(nil, attacker_unit_id, attack_template_damage_type_id)
+
 				local backstab_multiplier = 1
 
 				if self.is_server or LEVEL_EDITOR_TEST then
 					self.weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
 				else
 					network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+					network_manager.network_transmit:send_rpc_server("rpc_weapon_blood", attacker_unit_id, attack_template_damage_type_id)
 				end
 			end
 		end

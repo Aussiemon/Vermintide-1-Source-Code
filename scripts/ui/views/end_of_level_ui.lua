@@ -7,6 +7,11 @@ require("scripts/utils/debug_key_handler")
 require("scripts/settings/ui_settings")
 require("scripts/ui/views/scoreboard_ui")
 require("scripts/ui/views/contract_presentation_screen_ui")
+
+if GameSettingsDevelopment.use_leaderboards or Development.parameter("use_leaderboards") then
+	require("scripts/ui/views/leaderboards_ui")
+end
+
 require("scripts/game_state/components/dice_keeper")
 
 local definitions = local_require("scripts/ui/views/end_of_level_ui_definitions")
@@ -31,9 +36,9 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 	end
 
 	if Application.platform() == "win32" then
-		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images", "material", "materials/fonts/gw_fonts")
+		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_postgame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images", "material", "materials/fonts/gw_fonts")
 	else
-		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/fonts/gw_fonts")
+		self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_postgame", "material", "materials/ui/ui_1080p_popup", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/fonts/gw_fonts")
 	end
 
 	end_of_level_ui_context.game_won = game_won

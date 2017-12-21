@@ -166,6 +166,37 @@ return {
 			}
 		},
 		{
+			name = "BeaconOfHope",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "BlackGuard",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -320,6 +351,37 @@ return {
 					{
 						type = "Float",
 						name = "ButtonValue"
+					}
+				}
+			}
+		},
+		{
+			name = "ByValaya",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
 					}
 				}
 			}
@@ -1177,6 +1239,37 @@ return {
 			}
 		},
 		{
+			name = "GatheringSteam",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "Gauntlet",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -1641,6 +1734,37 @@ return {
 			}
 		},
 		{
+			name = "Ironbreaker",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "KarlFranz",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -1729,6 +1853,1186 @@ return {
 					{
 						type = "UInt32",
 						name = "TheFallTime"
+					}
+				}
+			}
+		},
+		{
+			name = "LBMagnusBrightScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBMagnusDwarfScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBMagnusEmpireScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBMagnusWitchScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBMagnusWoodScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBRuinsBrightScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBRuinsDwarfScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBRuinsEmpireScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBRuinsWitchScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LBRuinsWoodScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardMagnusBrightScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardMagnusDwarfScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardMagnusEmpireScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardMagnusWitchScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardMagnusWoodScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardRuinsBrightScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardRuinsDwarfScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardRuinsEmpireScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardRuinsWitchScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
+					}
+				}
+			}
+		},
+		{
+			name = "LeaderboardRuinsWoodScore",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "2",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Score"
+					},
+					{
+						type = "Int32",
+						name = "Slave"
+					},
+					{
+						type = "Int32",
+						name = "Clan"
+					},
+					{
+						type = "Int32",
+						name = "Storm"
+					},
+					{
+						type = "Int32",
+						name = "Special"
+					},
+					{
+						type = "Int32",
+						name = "Ogre"
+					},
+					{
+						type = "Int32",
+						name = "Waves"
+					},
+					{
+						type = "Int32",
+						name = "Time"
 					}
 				}
 			}
@@ -2408,7 +3712,69 @@ return {
 			}
 		},
 		{
+			name = "PerfectTiming",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "PestControl",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "PickHisBrain",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",
@@ -3121,6 +4487,37 @@ return {
 			}
 		},
 		{
+			name = "SmashAndGrab",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "Stalwart",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -3153,6 +4550,37 @@ return {
 		},
 		{
 			name = "StateTrooper",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "StepUpToThePlate",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",

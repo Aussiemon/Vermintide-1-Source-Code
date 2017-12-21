@@ -68,7 +68,6 @@ SummaryScreenUI.create_ui_elements = function (self)
 	self.reward_widget = UIWidget.init(definitions.widgets.reward_widget)
 	self.summary_entries_mask_widget = UIWidget.init(definitions.widgets.summary_entries_mask_widget)
 	self.summary_entries_top_mask_widget = UIWidget.init(definitions.widgets.summary_entries_top_mask_widget)
-	self.summary_entries_top_mask_widget.style.texture_id.color[1] = 0
 	local bonus_widgets = {}
 	local bonus_widgets_definitions = definitions.bonus_widgets
 
@@ -246,7 +245,6 @@ SummaryScreenUI.on_enter = function (self, ignore_input_blocking)
 	if self.game_won and self.game_mode_key ~= "survival" then
 		local level_key = self.last_level_key
 		self.level_up_rewards = self.dice_roller:level_up_rewards()
-		self.quests_unlocked_reward = ProgressionUnlocks.get_quests_unlocked(level_key)
 	else
 		local level_up_rewards, failed_game_rewards = self.rewards:get_upgrades_failed_game()
 		self.level_up_rewards = level_up_rewards
@@ -420,25 +418,6 @@ SummaryScreenUI.update_bar_progress = function (self)
 			end
 
 			if progress == 1 then
-				local quests_unlocked_reward = self.quests_unlocked_reward
-
-				if quests_unlocked_reward then
-					local icon_name = quests_unlocked_reward.icon
-					local description_text = quests_unlocked_reward.description
-					local reward_data = {
-						reward_type = "misc",
-						bar_name = name,
-						title_text = Localize("reward_popup_title"),
-						icon_name = icon_name,
-						description_text = Localize(description_text)
-					}
-
-					self.add_reward(self, reward_data)
-
-					reward_added = true
-					self.quests_unlocked_reward = nil
-				end
-
 				local failed_game_rewards = self.failed_game_rewards
 
 				if self._show_failed_game_popup and failed_game_rewards then

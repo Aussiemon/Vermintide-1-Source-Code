@@ -145,8 +145,9 @@ SoundSectorSystem.update = function (self, context, t, dt)
 		local has_enough_units = MIN_NUM_OF_UNITS <= num_of_units_in_sector
 		local wwise_source_id = sector_sound_source_ids[sector_index]
 		local is_playing_sound = wwise_source_id ~= nil
+		local horde_is_active = Managers.state.conflict:has_horde(t)
 
-		if has_enough_units then
+		if has_enough_units and horde_is_active then
 			units_center = units_center/num_of_units_in_sector
 			local sound_source_unit = sector_sound_source_units[sector_index]
 

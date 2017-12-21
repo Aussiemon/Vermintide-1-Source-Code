@@ -29,17 +29,25 @@ end
 if SelectedBetaLevelSettingsVariant == "VARIANT2" then
 	GameActs = {
 		prologue = {
-			"dlc_dwarf\\dlc_dwarf_beacons"
+			"magnus"
+		},
+		act_1 = {
+			"city_wall",
+			"forest_ambush"
 		}
 	}
 	LevelUnlockOrder = {
-		GameActs.prologue
+		GameActs.prologue,
+		GameActs.act_1
 	}
 	UnlockableLevels = {
-		"dlc_dwarf\\dlc_dwarf_beacons"
+		"magnus",
+		"forest_ambush",
+		"city_wall"
 	}
 	GameActsOrder = {
-		"prologue"
+		"prologue",
+		"act_1"
 	}
 end
 

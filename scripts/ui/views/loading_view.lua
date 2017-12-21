@@ -175,6 +175,7 @@ LoadingView.create_ui_elements = function (self)
 	self._subtitle_row_widgets = subtitle_row_widgets
 	self.bg_widget.content.bg_texture = self.default_loading_screen
 
+	self.setup_level_text(self)
 	self.setup_tip_text(self)
 
 	return 
@@ -412,6 +413,9 @@ LoadingView.setup_level_text = function (self, level_key)
 			self.level_name_widget.content.text = level_text
 			self.level_name_bg_widget.content.text = level_text
 		end
+	else
+		self.level_name_widget.content.text = ""
+		self.level_name_bg_widget.content.text = ""
 	end
 
 	return 

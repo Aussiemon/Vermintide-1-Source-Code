@@ -59,6 +59,23 @@ ActionGeiserTargeting.client_owner_start_action = function (self, new_action, t)
 			self.charging_sound_id = wwise_playing_id
 			self.wwise_source_id = wwise_source_id
 		end
+
+		local current_action = self.current_action
+
+		if current_action.fire_at_gaze_setting then
+			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+			if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+				local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
+				local first_person_rotation = Unit.world_rotation(self.first_person_unit, 0)
+				local new_direction = Quaternion.look(eyetracking_extension.get_smooth_gaze_forward(eyetracking_extension), Vector3.up())
+				local player_rotation_inverse = Quaternion.inverse(first_person_rotation)
+				local new_offset = Quaternion.multiply(player_rotation_inverse, new_direction)
+				self.fire_at_gaze_offset = QuaternionBox()
+
+				QuaternionBox.store(self.fire_at_gaze_offset, new_offset)
+			end
+		end
 	end
 
 	local charge_sound_husk_name = self.current_action.charge_sound_husk_name
@@ -90,6 +107,11 @@ ActionGeiserTargeting.client_owner_post_update = function (self, dt, t, world, c
 	local player_position = POSITION_LOOKUP[self.owner_unit]
 	local first_person_position = POSITION_LOOKUP[self.first_person_unit]
 	local first_person_rotation = Unit.world_rotation(self.first_person_unit, 0)
+
+	if self.fire_at_gaze_offset then
+		first_person_rotation = Quaternion.multiply(first_person_rotation, QuaternionBox.unbox(self.fire_at_gaze_offset))
+	end
+
 	local position = nil
 	local physics_world = World.get_data(world, "physics_world")
 	local max_steps = 10

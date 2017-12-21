@@ -214,5 +214,18 @@ PlayerBoonHandler.has_boon = function (self, boon_name)
 
 	return false
 end
+PlayerBoonHandler.has_any_boon = function (self)
+	local boons = self.active_boons
+
+	for i = 1, #boons, 1 do
+		local boon_data = boons[i]
+
+		if boon_data.name then
+			return true
+		end
+	end
+
+	return false
+end
 
 return 

@@ -24,80 +24,35 @@ DialogueSettings.level_specific_load_files = {
 		"dialogues/generated/dwarf_ranger_bridge",
 		"dialogues/generated/witch_hunter_bridge",
 		"dialogues/generated/wood_elf_bridge",
-		"dialogues/generated/dwarf_ranger_bridge",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_bridge"
 	},
 	cemetery = {
 		"dialogues/generated/bright_wizard_cemetery",
 		"dialogues/generated/dwarf_ranger_cemetery",
 		"dialogues/generated/witch_hunter_cemetery",
 		"dialogues/generated/wood_elf_cemetery",
-		"dialogues/generated/dwarf_ranger_cemetery",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_cemetery"
 	},
 	city_wall = {
 		"dialogues/generated/bright_wizard_city_wall",
 		"dialogues/generated/dwarf_ranger_city_wall",
 		"dialogues/generated/witch_hunter_city_wall",
 		"dialogues/generated/wood_elf_city_wall",
-		"dialogues/generated/dwarf_ranger_city_wall",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_city_wall"
 	},
 	courtyard = {
 		"dialogues/generated/bright_wizard_courtyard",
 		"dialogues/generated/dwarf_ranger_courtyard",
 		"dialogues/generated/witch_hunter_courtyard",
 		"dialogues/generated/wood_elf_courtyard",
-		"dialogues/generated/dwarf_ranger_courtyard",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_courtyard"
 	},
 	docks = {
 		"dialogues/generated/bright_wizard_docks",
 		"dialogues/generated/dwarf_ranger_docks",
 		"dialogues/generated/witch_hunter_docks",
 		"dialogues/generated/wood_elf_docks",
-		"dialogues/generated/dwarf_ranger_docks",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_docks"
 	},
 	end_boss = {
 		"dialogues/generated/bright_wizard_end_boss",
@@ -105,128 +60,67 @@ DialogueSettings.level_specific_load_files = {
 		"dialogues/generated/witch_hunter_end_boss",
 		"dialogues/generated/wood_elf_end_boss",
 		"dialogues/generated/dwarf_ranger_end_boss",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/grey_seer"
 	},
 	farm = {
 		"dialogues/generated/bright_wizard_farm",
 		"dialogues/generated/dwarf_ranger_farm",
 		"dialogues/generated/witch_hunter_farm",
 		"dialogues/generated/wood_elf_farm",
-		"dialogues/generated/dwarf_ranger_farm",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_farm"
 	},
 	forest_ambush = {
 		"dialogues/generated/bright_wizard_forest_ambush",
 		"dialogues/generated/dwarf_ranger_forest_ambush",
 		"dialogues/generated/witch_hunter_forest_ambush",
 		"dialogues/generated/wood_elf_forest_ambush",
-		"dialogues/generated/dwarf_ranger_forest_ambush",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_forest_ambush"
 	},
 	magnus = {
 		"dialogues/generated/bright_wizard_magnus_tower",
 		"dialogues/generated/dwarf_ranger_magnus_tower",
 		"dialogues/generated/witch_hunter_magnus_tower",
 		"dialogues/generated/wood_elf_magnus_tower",
-		"dialogues/generated/dwarf_ranger_magnus_tower",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_magnus_tower"
 	},
 	merchant = {
 		"dialogues/generated/bright_wizard_merchant",
 		"dialogues/generated/dwarf_ranger_merchant",
 		"dialogues/generated/witch_hunter_merchant",
 		"dialogues/generated/wood_elf_merchant",
-		"dialogues/generated/dwarf_ranger_merchant",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_merchant"
 	},
 	sewers = {
 		"dialogues/generated/bright_wizard_sewers",
 		"dialogues/generated/dwarf_ranger_sewers",
 		"dialogues/generated/witch_hunter_sewers",
 		"dialogues/generated/wood_elf_sewers",
-		"dialogues/generated/dwarf_ranger_sewers",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_sewers"
 	},
 	skaven_tunnels = {
 		"dialogues/generated/bright_wizard_skaven_tunnels",
 		"dialogues/generated/dwarf_ranger_skaven_tunnels",
 		"dialogues/generated/witch_hunter_skaven_tunnels",
 		"dialogues/generated/wood_elf_skaven_tunnels",
-		"dialogues/generated/dwarf_ranger_skaven_tunnels",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_skaven_tunnels"
 	},
 	wizard = {
 		"dialogues/generated/bright_wizard_wizard_tower",
 		"dialogues/generated/dwarf_ranger_wizard_tower",
 		"dialogues/generated/witch_hunter_wizard_tower",
 		"dialogues/generated/wood_elf_wizard_tower",
-		"dialogues/generated/dwarf_ranger_wizard_tower",
-		"dialogues/generated/witch_hunter",
-		"dialogues/generated/bright_wizard",
-		"dialogues/generated/dwarf_ranger",
-		"dialogues/generated/wood_elf",
-		"dialogues/generated/empire_soldier",
-		"dialogues/generated/player_conversations",
-		"dialogues/generated/npcs",
-		"dialogues/generated/special_occasions",
-		"dialogues/generated/enemies"
+		"dialogues/generated/dwarf_ranger_wizard_tower"
 	}
+}
+
+for dlc_name, dlc_settings in pairs(DLCSettings) do
+	for level_name, dialogues in pairs(dlc_settings.dialogue_settings) do
+		DialogueSettings.level_specific_load_files[level_name] = dialogues
+	end
+end
+
+DialogueSettings.blocked_auto_load_files = {
+	tutorial = true
 }
 DialogueSettings.max_view_distance = 50
 DialogueSettings.default_view_distance = 10

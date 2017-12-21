@@ -551,5 +551,77 @@ BTConditions.ratling_gunner_skulked_for_too_long = function (blackboard)
 
 	return false
 end
+BTConditions.grey_seer_first_teleport = function (blackboard)
+	return BTConditions.grey_seer_teleport(blackboard, 1)
+end
+BTConditions.grey_seer_second_teleport = function (blackboard)
+	return BTConditions.grey_seer_teleport(blackboard, 2)
+end
+BTConditions.grey_seer_third_teleport = function (blackboard)
+	return BTConditions.grey_seer_teleport(blackboard, 3)
+end
+BTConditions.grey_seer_teleport = function (blackboard, index)
+	assert(index, "[BTConditions.grey_seer_teleport] Missing teleport index for grey_seer_teleport condition")
+
+	local teleport_done = blackboard.teleports_done[index]
+
+	if teleport_done then
+		return false
+	end
+
+	local next_auto_teleport_at = blackboard.next_auto_teleport_at
+	local time = Managers.time:time("main")
+
+	if next_auto_teleport_at < time then
+		blackboard.teleport_triggered_by = "time"
+
+		return true
+	end
+
+	local self_unit = blackboard.unit
+	local position = POSITION_LOOKUP[self_unit]
+	local locomotion_system = Managers.state.entity:system("locomotion_system")
+	local broadphase = locomotion_system.player_broadphase
+	local teleport_index = "teleport_" .. index
+	local action_data = BreedActions.skaven_grey_seer[teleport_index]
+	local player_distance = action_data.player_distance
+
+	if player_distance then
+		local player_distance_sq = player_distance*player_distance
+
+		for i = 1, #PLAYER_AND_BOT_POSITIONS, 1 do
+			local player_position = PLAYER_AND_BOT_POSITIONS[i]
+			local distance_squared = Vector3.distance_squared(player_position, position)
+
+			if distance_squared < player_distance_sq then
+				blackboard.teleport_triggered_by = "distance"
+
+				return true
+			end
+		end
+	end
+
+	local damage_threshold = action_data.damage_threshold
+
+	if damage_threshold then
+		local health_extension = ScriptUnit.extension(self_unit, "health_system")
+		local current_damage = health_extension.current_damage(health_extension)
+
+		if damage_threshold < current_damage then
+			blackboard.teleport_triggered_by = "damage"
+
+			return true
+		end
+	end
+
+	return false
+end
+BTConditions.health_lost_percent = function (blackboard, args)
+	local min = args[1]
+	local max = args[2]
+	local lost_percent = ScriptUnit.extension(blackboard.unit, "health_system"):current_health_percent() - 1
+
+	return min <= lost_percent and lost_percent <= max
+end
 
 return 

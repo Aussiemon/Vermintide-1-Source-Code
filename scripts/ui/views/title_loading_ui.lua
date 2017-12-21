@@ -926,7 +926,7 @@ TitleLoadingUI.init = function (self, world, params, force_done)
 	return 
 end
 TitleLoadingUI._setup_gui = function (self)
-	self._ui_renderer = UIRenderer.create(self._world, "material", "materials/ui/ui_1080p_splash_screen", "material", "materials/ui/ui_1080p_title_screen", "material", "video/trailer", "material", "materials/fonts/gw_fonts")
+	self._ui_renderer = UIRenderer.create(self._world, "material", "materials/ui/ui_1080p_title_screen_gamma", "material", "video/trailer", "material", "materials/fonts/gw_fonts")
 
 	self._create_elements(self)
 

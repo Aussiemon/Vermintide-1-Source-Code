@@ -168,13 +168,13 @@ local scenegraph_definition = {
 	difficulty_stepper_unlock_icon = {
 		vertical_alignment = "bottom",
 		parent = "difficulty_stepper",
-		horizontal_alignment = "right",
+		horizontal_alignment = "center",
 		size = {
 			30,
 			38
 		},
 		position = {
-			-40,
+			0,
 			-45,
 			1
 		}

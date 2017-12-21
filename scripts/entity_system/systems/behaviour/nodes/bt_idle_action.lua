@@ -85,9 +85,18 @@ BTIdleAction.run = function (self, unit, blackboard, t, dt)
 	local target_unit = blackboard.target_unit
 
 	if Unit_alive(target_unit) then
-		local rot = LocomotionUtils.rotation_towards_unit_flat(unit, target_unit)
+		local action = blackboard.action
+		local rotate_towards_target = action and action.rotate_towards_target
 
-		blackboard.locomotion_extension:set_wanted_rotation(rot)
+		if rotate_towards_target == nil then
+			rotate_towards_target = true
+		end
+
+		if rotate_towards_target then
+			local rot = LocomotionUtils.rotation_towards_unit_flat(unit, target_unit)
+
+			blackboard.locomotion_extension:set_wanted_rotation(rot)
+		end
 	end
 
 	self._discovery_sound_when_close(self, unit, blackboard)

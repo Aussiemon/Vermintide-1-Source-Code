@@ -1,6 +1,7 @@
 local definitions = local_require("scripts/ui/views/player_inventory_ui_definitions")
 
 require("scripts/settings/inventory_settings")
+require("scripts/ui/ui_cleanui")
 
 PlayerInventoryUI = class(PlayerInventoryUI)
 local SLOTS_LIST = InventorySettings.weapon_slots
@@ -50,6 +51,7 @@ PlayerInventoryUI.init = function (self, ingame_ui_context)
 	self.slot_equip_animations = {}
 	self.slot_animations = {}
 	self.ui_animations = {}
+	self.cleanui = ingame_ui_context.cleanui
 
 	self.create_ui_elements(self)
 
@@ -57,6 +59,7 @@ PlayerInventoryUI.init = function (self, ingame_ui_context)
 	self.peer_id = ingame_ui_context.peer_id
 	self.player_manager = ingame_ui_context.player_manager
 	self.render_settings = {
+		alpha_multiplier = 1,
 		snap_pixel_positions = true
 	}
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
@@ -97,6 +100,18 @@ PlayerInventoryUI.create_ui_elements = function (self)
 		widget.scenegraph_id = inventory_slot_lookup_table[i]
 		self.inventory_widgets[i] = UIWidget.init(widget)
 	end
+
+	self.cleanui_data = {}
+	local position = {
+		1680,
+		400
+	}
+	local size = {
+		240,
+		360
+	}
+
+	UICleanUI.register_area(self.cleanui, "player_inventory_ui", self.cleanui_data, position, size, true)
 
 	return 
 end
@@ -208,9 +223,15 @@ PlayerInventoryUI.update = function (self, dt, t, my_player)
 
 	self.update_slot_animations(self, dt)
 	self.update_inventory_slots_positions(self, dt)
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
-	if RESOLUTION_LOOKUP.modified then
+	local render_settings = self.render_settings
+
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, render_settings)
+
+	if RESOLUTION_LOOKUP.modified or self.cleanui_data.is_dirty then
+		local alpha = UICleanUI.get_alpha(self.cleanui, self.cleanui_data)
+		render_settings.alpha_multiplier = alpha
+
 		for i, slot in ipairs(SLOTS_LIST) do
 			local widget = self.inventory_slots_widgets[i]
 			widget.element.dirty = true
@@ -229,6 +250,8 @@ PlayerInventoryUI.update = function (self, dt, t, my_player)
 		self.update_inventory_slots(self, dt, ui_scenegraph, ui_renderer, my_player)
 		Profiler.stop("update_inventory_slots")
 	end
+
+	render_settings.alpha_multiplier = 1
 
 	UIRenderer.end_pass(ui_renderer)
 

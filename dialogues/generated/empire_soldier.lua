@@ -1143,6 +1143,234 @@ return function ()
 		}
 	})
 	define_rule({
+		name = "pes_gameplay_hearing_a_gutter_runner_combat",
+		response = "pes_gameplay_hearing_a_gutter_runner_combat",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"heard_enemy"
+			},
+			{
+				"query_context",
+				"enemy_tag",
+				OP.EQ,
+				"skaven_gutter_runner"
+			},
+			{
+				"user_context",
+				"enemies_close",
+				OP.GT,
+				0
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"faction_memory",
+				"last_seen_gutter_runner",
+				OP.TIMEDIFF,
+				OP.GT,
+				10
+			},
+			{
+				"faction_memory",
+				"last_heard_gutter_runner",
+				OP.TIMEDIFF,
+				OP.GT,
+				30
+			}
+		},
+		on_done = {
+			{
+				"faction_memory",
+				"last_heard_gutter_runner",
+				OP.TIMESET
+			}
+		}
+	})
+	define_rule({
+		name = "pes_gameplay_hearing_a_globadier_combat",
+		response = "pes_gameplay_hearing_a_globadier_combat",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"heard_enemy"
+			},
+			{
+				"query_context",
+				"enemy_tag",
+				OP.EQ,
+				"skaven_poison_wind_globadier"
+			},
+			{
+				"user_context",
+				"enemies_close",
+				OP.GT,
+				0
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"faction_memory",
+				"last_seen_globadier",
+				OP.TIMEDIFF,
+				OP.GT,
+				10
+			},
+			{
+				"faction_memory",
+				"last_heard_globadier",
+				OP.TIMEDIFF,
+				OP.GT,
+				30
+			}
+		},
+		on_done = {
+			{
+				"faction_memory",
+				"last_heard_globadier",
+				OP.TIMESET
+			}
+		}
+	})
+	define_rule({
+		name = "pes_gameplay_hearing_a_skaven_rat_ogre_combat",
+		response = "pes_gameplay_hearing_a_skaven_rat_ogre_combat",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"heard_enemy"
+			},
+			{
+				"query_context",
+				"enemy_tag",
+				OP.EQ,
+				"skaven_rat_ogre"
+			},
+			{
+				"user_context",
+				"enemies_close",
+				OP.GT,
+				0
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"faction_memory",
+				"last_seen_rate_ogre",
+				OP.TIMEDIFF,
+				OP.GT,
+				10
+			},
+			{
+				"faction_memory",
+				"last_heard_skaven_rat_ogre",
+				OP.TIMEDIFF,
+				OP.GT,
+				30
+			}
+		},
+		on_done = {
+			{
+				"faction_memory",
+				"last_heard_skaven_rat_ogre",
+				OP.TIMESET
+			}
+		}
+	})
+	define_rule({
+		name = "pes_gameplay_hearing_a_skaven_ratling_gun_combat",
+		response = "pes_gameplay_hearing_a_skaven_ratling_gun_combat",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"heard_enemy"
+			},
+			{
+				"query_context",
+				"enemy_tag",
+				OP.EQ,
+				"skaven_ratling_gunner"
+			},
+			{
+				"user_context",
+				"enemies_close",
+				OP.GT,
+				0
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"empire_soldier"
+			},
+			{
+				"faction_memory",
+				"last_seen_skaven_ratling_gunner",
+				OP.TIMEDIFF,
+				OP.GT,
+				10
+			},
+			{
+				"faction_memory",
+				"last_heard_skaven_ratling_gunner",
+				OP.TIMEDIFF,
+				OP.GT,
+				30
+			}
+		},
+		on_done = {
+			{
+				"faction_memory",
+				"last_heard_skaven_ratling_gunner",
+				OP.TIMESET
+			}
+		}
+	})
+	define_rule({
 		name = "pes_gameplay_globadier_guck",
 		response = "pes_gameplay_globadier_guck",
 		criterias = {
@@ -5136,6 +5364,35 @@ return function ()
 		}
 	})
 	add_dialogues({
+		pes_gameplay_hearing_a_gutter_runner_combat = {
+			sound_events_n = 3,
+			randomize_indexes_n = 0,
+			face_animations_n = 3,
+			database = "empire_soldier",
+			category = "enemy_alerts",
+			dialogue_animations_n = 3,
+			sound_events = {
+				"pes_gameplay_hearing_a_gutter_runner_combat_01",
+				"pes_gameplay_hearing_a_gutter_runner_combat_02",
+				"pes_gameplay_hearing_a_gutter_runner_03"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_contempt",
+				"face_contempt",
+				"face_contempt"
+			},
+			localization_strings = {
+				"pes_gameplay_hearing_a_gutter_runner_combat_01",
+				"pes_gameplay_hearing_a_gutter_runner_combat_02",
+				"pes_gameplay_hearing_a_gutter_runner_03"
+			},
+			randomize_indexes = {}
+		},
 		pes_gameplay_healing_dwarf_ranger = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -5412,36 +5669,36 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_correct_path_stairs_up = {
+		pes_gameplay_hearing_a_skaven_ratling_gun_combat = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "empire_soldier",
-			category = "guidance",
+			category = "enemy_alerts",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_correct_path_stairs_up_01",
-				"pes_objective_correct_path_stairs_up_02",
-				"pes_objective_correct_path_stairs_up_03",
-				"pes_objective_correct_path_stairs_up_04"
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_01",
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_02",
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_03",
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_04"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				"pes_objective_correct_path_stairs_up_01",
-				"pes_objective_correct_path_stairs_up_02",
-				"pes_objective_correct_path_stairs_up_03",
-				"pes_objective_correct_path_stairs_up_04"
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_01",
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_02",
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_03",
+				"pes_gameplay_hearing_a_skaven_ratling_gun_combat_04"
 			},
 			randomize_indexes = {}
 		},
@@ -6184,6 +6441,47 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pes_gameplay_hearing_a_skaven_rat_ogre_combat = {
+			sound_events_n = 6,
+			randomize_indexes_n = 0,
+			face_animations_n = 6,
+			database = "empire_soldier",
+			category = "enemy_alerts",
+			dialogue_animations_n = 6,
+			sound_events = {
+				"pes_gameplay_hearing_a_skaven_rat_ogre_combat_01",
+				"pes_gameplay_hearing_a_skaven_rat_ogre_combat_02",
+				"pes_gameplay_hearing_a_skaven_rat_ogre_combat_03",
+				"pes_gameplay_first_time_seeing_a_skaven_rat_ogre_02",
+				"pes_gameplay_first_time_seeing_a_skaven_rat_ogre_01",
+				"pes_gameplay_hearing_a_skaven_rat_ogre_01"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_talk",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_contempt",
+				"face_fear",
+				"face_fear",
+				"face_fear",
+				"face_contempt",
+				"face_fear"
+			},
+			localization_strings = {
+				"pes_gameplay_hearing_a_skaven_rat_ogre_combat_01",
+				"pes_gameplay_hearing_a_skaven_rat_ogre_combat_02",
+				"pes_gameplay_hearing_a_skaven_rat_ogre_combat_03",
+				"pes_gameplay_first_time_seeing_a_skaven_rat_ogre_02",
+				"pes_gameplay_first_time_seeing_a_skaven_rat_ogre_01",
+				"pes_gameplay_hearing_a_skaven_rat_ogre_01"
+			},
+			randomize_indexes = {}
+		},
 		pes_gameplay_ambush_horde_spawned = {
 			sound_events_n = 6,
 			randomize_indexes_n = 0,
@@ -6293,6 +6591,39 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pes_gameplay_friendly_fire_witch_hunter = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_gameplay_friendly_fire_witch_hunter_01",
+				"pes_gameplay_friendly_fire_witch_hunter_02",
+				"pes_gameplay_friendly_fire_witch_hunter_03",
+				"pes_gameplay_friendly_fire_witch_hunter_04"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_angry",
+				"face_angry",
+				"face_angry",
+				"face_angry"
+			},
+			localization_strings = {
+				"pes_gameplay_friendly_fire_witch_hunter_01",
+				"pes_gameplay_friendly_fire_witch_hunter_02",
+				"pes_gameplay_friendly_fire_witch_hunter_03",
+				"pes_gameplay_friendly_fire_witch_hunter_04"
+			},
+			randomize_indexes = {}
+		},
 		pes_gameplay_witch_hunter_being_helped_up = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -6323,39 +6654,6 @@ return function ()
 				"pes_gameplay_witch_hunter_being_helped_up_02",
 				"pes_gameplay_witch_hunter_being_helped_up_03",
 				"pes_gameplay_witch_hunter_being_helped_up_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_friendly_fire_wood_elf = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_friendly_fire_wood_elf_01",
-				"pes_gameplay_friendly_fire_wood_elf_02",
-				"pes_gameplay_friendly_fire_wood_elf_03",
-				"pes_gameplay_friendly_fire_wood_elf_04"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry"
-			},
-			localization_strings = {
-				"pes_gameplay_friendly_fire_wood_elf_01",
-				"pes_gameplay_friendly_fire_wood_elf_02",
-				"pes_gameplay_friendly_fire_wood_elf_03",
-				"pes_gameplay_friendly_fire_wood_elf_04"
 			},
 			randomize_indexes = {}
 		},
@@ -6506,6 +6804,88 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pes_objective_picking_up_grimoire = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_objective_picking_up_grimoire_01",
+				"pes_objective_picking_up_grimoire_02",
+				"pes_objective_picking_up_grimoire_03",
+				"pes_objective_picking_up_grimoire_04"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_objective_picking_up_grimoire_01",
+				"pes_objective_picking_up_grimoire_02",
+				"pes_objective_picking_up_grimoire_03",
+				"pes_objective_picking_up_grimoire_04"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_healing_draught = {
+			sound_events_n = 8,
+			randomize_indexes_n = 0,
+			face_animations_n = 8,
+			database = "empire_soldier",
+			category = "seen_items",
+			dialogue_animations_n = 8,
+			sound_events = {
+				"pes_gameplay_healing_draught_01",
+				"pes_gameplay_healing_draught_02",
+				"pes_gameplay_healing_draught_03",
+				"pes_gameplay_healing_draught_04",
+				"pes_gameplay_healing_draught_05",
+				"pes_gameplay_healing_draught_06",
+				"pes_gameplay_healing_draught_07",
+				"pes_gameplay_healing_draught_08"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy"
+			},
+			localization_strings = {
+				"pes_gameplay_healing_draught_01",
+				"pes_gameplay_healing_draught_02",
+				"pes_gameplay_healing_draught_03",
+				"pes_gameplay_healing_draught_04",
+				"pes_gameplay_healing_draught_05",
+				"pes_gameplay_healing_draught_06",
+				"pes_gameplay_healing_draught_07",
+				"pes_gameplay_healing_draught_08"
+			},
+			randomize_indexes = {}
+		},
 		pes_gameplay_bright_wizard_being_helped_up = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -6580,76 +6960,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_picking_up_grimoire = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_objective_picking_up_grimoire_01",
-				"pes_objective_picking_up_grimoire_02",
-				"pes_objective_picking_up_grimoire_03",
-				"pes_objective_picking_up_grimoire_04"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pes_objective_picking_up_grimoire_01",
-				"pes_objective_picking_up_grimoire_02",
-				"pes_objective_picking_up_grimoire_03",
-				"pes_objective_picking_up_grimoire_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_spots_potion = {
-			sound_events_n = 5,
-			randomize_indexes_n = 0,
-			face_animations_n = 5,
-			database = "empire_soldier",
-			category = "seen_items",
-			dialogue_animations_n = 5,
-			sound_events = {
-				"pes_gameplay_spots_potion_01",
-				"pes_gameplay_spots_potion_02",
-				"pes_gameplay_spots_potion_03",
-				"pes_gameplay_spots_potion_04",
-				"pes_gameplay_spots_potion_05"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy"
-			},
-			localization_strings = {
-				"pes_gameplay_spots_potion_01",
-				"pes_gameplay_spots_potion_02",
-				"pes_gameplay_spots_potion_03",
-				"pes_gameplay_spots_potion_04",
-				"pes_gameplay_spots_potion_05"
-			},
-			randomize_indexes = {}
-		},
 		pes_objective_correct_path_stairs_down = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -6680,6 +6990,72 @@ return function ()
 				"pes_objective_correct_path_stairs_down_02",
 				"pes_objective_correct_path_stairs_down_03",
 				"pes_objective_correct_path_stairs_down_04"
+			},
+			randomize_indexes = {}
+		},
+		pes_objective_correct_path_stairs_up = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "guidance",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_objective_correct_path_stairs_up_01",
+				"pes_objective_correct_path_stairs_up_02",
+				"pes_objective_correct_path_stairs_up_03",
+				"pes_objective_correct_path_stairs_up_04"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_objective_correct_path_stairs_up_01",
+				"pes_objective_correct_path_stairs_up_02",
+				"pes_objective_correct_path_stairs_up_03",
+				"pes_objective_correct_path_stairs_up_04"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_friendly_fire_dwarf_ranger = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_gameplay_friendly_fire_dwarf_ranger_01",
+				"pes_gameplay_friendly_fire_dwarf_ranger_02",
+				"pes_gameplay_friendly_fire_dwarf_ranger_03",
+				"pes_gameplay_friendly_fire_dwarf_ranger_04"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_angry",
+				"face_angry",
+				"face_angry",
+				"face_angry"
+			},
+			localization_strings = {
+				"pes_gameplay_friendly_fire_dwarf_ranger_01",
+				"pes_gameplay_friendly_fire_dwarf_ranger_02",
+				"pes_gameplay_friendly_fire_dwarf_ranger_03",
+				"pes_gameplay_friendly_fire_dwarf_ranger_04"
 			},
 			randomize_indexes = {}
 		},
@@ -6720,24 +7096,24 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_heard_dwarf_ranger_in_trouble = {
+		pes_gameplay_killing_gutterrunner = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "empire_soldier",
-			category = "player_alerts",
+			category = "enemy_alerts",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_01",
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_02",
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_03",
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_04"
+				"pes_gameplay_killing_gutterrunner_01",
+				"pes_gameplay_killing_gutterrunner_02",
+				"pes_gameplay_killing_gutterrunner_03",
+				"pes_gameplay_killing_gutterrunner_04"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
 				"face_neutral",
@@ -6746,10 +7122,10 @@ return function ()
 				"face_neutral"
 			},
 			localization_strings = {
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_01",
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_02",
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_03",
-				"pes_gameplay_heard_dwarf_ranger_in_trouble_04"
+				"pes_gameplay_killing_gutterrunner_01",
+				"pes_gameplay_killing_gutterrunner_02",
+				"pes_gameplay_killing_gutterrunner_03",
+				"pes_gameplay_killing_gutterrunner_04"
 			},
 			randomize_indexes = {}
 		},
@@ -6988,19 +7364,29 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_armoured_enemy_bright_wizard = {
-			sound_events_n = 3,
+		pes_objective_goal_achieved_more_left = {
+			sound_events_n = 8,
 			randomize_indexes_n = 0,
-			face_animations_n = 3,
+			face_animations_n = 8,
 			database = "empire_soldier",
 			category = "player_feedback",
-			dialogue_animations_n = 3,
+			dialogue_animations_n = 8,
 			sound_events = {
-				"pes_gameplay_armoured_enemy_bright_wizard_01",
-				"pes_gameplay_armoured_enemy_bright_wizard_02",
-				"pes_gameplay_armoured_enemy_bright_wizard_03"
+				"pes_objective_goal_achieved_more_left_01",
+				"pes_objective_goal_achieved_more_left_02",
+				"pes_objective_goal_achieved_more_left_03",
+				"pes_objective_goal_achieved_more_left_04",
+				"pes_objective_goal_achieved_more_left_05",
+				"pes_objective_goal_achieved_more_left_06",
+				"pes_objective_goal_achieved_more_left_07",
+				"pes_objective_goal_achieved_more_left_08"
 			},
 			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk"
@@ -7008,12 +7394,22 @@ return function ()
 			face_animations = {
 				"face_neutral",
 				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
 				"face_neutral"
 			},
 			localization_strings = {
-				"pes_gameplay_armoured_enemy_bright_wizard_01",
-				"pes_gameplay_armoured_enemy_bright_wizard_02",
-				"pes_gameplay_armoured_enemy_bright_wizard_03"
+				"pes_objective_goal_achieved_more_left_01",
+				"pes_objective_goal_achieved_more_left_02",
+				"pes_objective_goal_achieved_more_left_03",
+				"pes_objective_goal_achieved_more_left_04",
+				"pes_objective_goal_achieved_more_left_05",
+				"pes_objective_goal_achieved_more_left_06",
+				"pes_objective_goal_achieved_more_left_07",
+				"pes_objective_goal_achieved_more_left_08"
 			},
 			randomize_indexes = {}
 		},
@@ -7124,55 +7520,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_goal_achieved_more_left = {
-			sound_events_n = 8,
-			randomize_indexes_n = 0,
-			face_animations_n = 8,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 8,
-			sound_events = {
-				"pes_objective_goal_achieved_more_left_01",
-				"pes_objective_goal_achieved_more_left_02",
-				"pes_objective_goal_achieved_more_left_03",
-				"pes_objective_goal_achieved_more_left_04",
-				"pes_objective_goal_achieved_more_left_05",
-				"pes_objective_goal_achieved_more_left_06",
-				"pes_objective_goal_achieved_more_left_07",
-				"pes_objective_goal_achieved_more_left_08"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pes_objective_goal_achieved_more_left_01",
-				"pes_objective_goal_achieved_more_left_02",
-				"pes_objective_goal_achieved_more_left_03",
-				"pes_objective_goal_achieved_more_left_04",
-				"pes_objective_goal_achieved_more_left_05",
-				"pes_objective_goal_achieved_more_left_06",
-				"pes_objective_goal_achieved_more_left_07",
-				"pes_objective_goal_achieved_more_left_08"
-			},
-			randomize_indexes = {}
-		},
 		pes_objective_nearing_objective_deadline = {
 			sound_events_n = 3,
 			randomize_indexes_n = 0,
@@ -7199,6 +7546,35 @@ return function ()
 				"pes_objective_nearing_objective_deadline_01",
 				"pes_objective_nearing_objective_deadline_02",
 				"pes_objective_nearing_objective_deadline_03"
+			},
+			randomize_indexes = {}
+		},
+		pes_objective_interacting_with_objective = {
+			sound_events_n = 3,
+			randomize_indexes_n = 0,
+			face_animations_n = 3,
+			database = "empire_soldier",
+			category = "player_feedback",
+			dialogue_animations_n = 3,
+			sound_events = {
+				"pes_objective_interacting_with_objective_01",
+				"pes_objective_interacting_with_objective_02",
+				"pes_objective_interacting_with_objective_03"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_objective_interacting_with_objective_01",
+				"pes_objective_interacting_with_objective_02",
+				"pes_objective_interacting_with_objective_03"
 			},
 			randomize_indexes = {}
 		},
@@ -7239,7 +7615,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_interacting_with_objective = {
+		pes_gameplay_armoured_enemy_wood_elf = {
 			sound_events_n = 3,
 			randomize_indexes_n = 0,
 			face_animations_n = 3,
@@ -7247,9 +7623,9 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 3,
 			sound_events = {
-				"pes_objective_interacting_with_objective_01",
-				"pes_objective_interacting_with_objective_02",
-				"pes_objective_interacting_with_objective_03"
+				"pes_gameplay_armoured_enemy_wood_elf_01",
+				"pes_gameplay_armoured_enemy_wood_elf_02",
+				"pes_gameplay_armoured_enemy_wood_elf_03"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -7262,9 +7638,9 @@ return function ()
 				"face_neutral"
 			},
 			localization_strings = {
-				"pes_objective_interacting_with_objective_01",
-				"pes_objective_interacting_with_objective_02",
-				"pes_objective_interacting_with_objective_03"
+				"pes_gameplay_armoured_enemy_wood_elf_01",
+				"pes_gameplay_armoured_enemy_wood_elf_02",
+				"pes_gameplay_armoured_enemy_wood_elf_03"
 			},
 			randomize_indexes = {}
 		},
@@ -7301,7 +7677,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_armoured_enemy_wood_elf = {
+		pes_gameplay_armoured_enemy_bright_wizard = {
 			sound_events_n = 3,
 			randomize_indexes_n = 0,
 			face_animations_n = 3,
@@ -7309,9 +7685,9 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 3,
 			sound_events = {
-				"pes_gameplay_armoured_enemy_wood_elf_01",
-				"pes_gameplay_armoured_enemy_wood_elf_02",
-				"pes_gameplay_armoured_enemy_wood_elf_03"
+				"pes_gameplay_armoured_enemy_bright_wizard_01",
+				"pes_gameplay_armoured_enemy_bright_wizard_02",
+				"pes_gameplay_armoured_enemy_bright_wizard_03"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -7324,9 +7700,9 @@ return function ()
 				"face_neutral"
 			},
 			localization_strings = {
-				"pes_gameplay_armoured_enemy_wood_elf_01",
-				"pes_gameplay_armoured_enemy_wood_elf_02",
-				"pes_gameplay_armoured_enemy_wood_elf_03"
+				"pes_gameplay_armoured_enemy_bright_wizard_01",
+				"pes_gameplay_armoured_enemy_bright_wizard_02",
+				"pes_gameplay_armoured_enemy_bright_wizard_03"
 			},
 			randomize_indexes = {}
 		},
@@ -7360,72 +7736,6 @@ return function ()
 				"pes_objective_correct_path_up_02",
 				"pes_objective_correct_path_up_03",
 				"pes_objective_correct_path_up_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_friendly_fire_witch_hunter = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_friendly_fire_witch_hunter_01",
-				"pes_gameplay_friendly_fire_witch_hunter_02",
-				"pes_gameplay_friendly_fire_witch_hunter_03",
-				"pes_gameplay_friendly_fire_witch_hunter_04"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry"
-			},
-			localization_strings = {
-				"pes_gameplay_friendly_fire_witch_hunter_01",
-				"pes_gameplay_friendly_fire_witch_hunter_02",
-				"pes_gameplay_friendly_fire_witch_hunter_03",
-				"pes_gameplay_friendly_fire_witch_hunter_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_bright_wizard_on_a_frenzy = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_bright_wizard_on_a_frenzy_01",
-				"pes_gameplay_bright_wizard_on_a_frenzy_02",
-				"pes_gameplay_bright_wizard_on_a_frenzy_03",
-				"pes_gameplay_bright_wizard_on_a_frenzy_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pes_gameplay_bright_wizard_on_a_frenzy_01",
-				"pes_gameplay_bright_wizard_on_a_frenzy_02",
-				"pes_gameplay_bright_wizard_on_a_frenzy_03",
-				"pes_gameplay_bright_wizard_on_a_frenzy_04"
 			},
 			randomize_indexes = {}
 		},
@@ -7470,6 +7780,39 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pes_gameplay_bright_wizard_on_a_frenzy = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_gameplay_bright_wizard_on_a_frenzy_01",
+				"pes_gameplay_bright_wizard_on_a_frenzy_02",
+				"pes_gameplay_bright_wizard_on_a_frenzy_03",
+				"pes_gameplay_bright_wizard_on_a_frenzy_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_gameplay_bright_wizard_on_a_frenzy_01",
+				"pes_gameplay_bright_wizard_on_a_frenzy_02",
+				"pes_gameplay_bright_wizard_on_a_frenzy_03",
+				"pes_gameplay_bright_wizard_on_a_frenzy_04"
+			},
+			randomize_indexes = {}
+		},
 		pes_gameplay_special_enemy_kill_melee = {
 			sound_events_n = 6,
 			randomize_indexes_n = 0,
@@ -7508,6 +7851,47 @@ return function ()
 				"pes_gameplay_special_enemy_kill_melee_04",
 				"pes_gameplay_special_enemy_kill_melee_05",
 				"pes_gameplay_special_enemy_kill_melee_06"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_player_pounced = {
+			sound_events_n = 6,
+			randomize_indexes_n = 0,
+			face_animations_n = 6,
+			database = "empire_soldier",
+			category = "player_alerts",
+			dialogue_animations_n = 6,
+			sound_events = {
+				"pes_gameplay_player_pounced_01",
+				"pes_gameplay_player_pounced_02",
+				"pes_gameplay_player_pounced_03",
+				"pes_gameplay_player_pounced_04",
+				"pes_gameplay_player_pounced_05",
+				"pes_gameplay_player_pounced_06"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_angry",
+				"face_angry",
+				"face_angry",
+				"face_fear",
+				"face_fear",
+				"face_fear"
+			},
+			localization_strings = {
+				"pes_gameplay_player_pounced_01",
+				"pes_gameplay_player_pounced_02",
+				"pes_gameplay_player_pounced_03",
+				"pes_gameplay_player_pounced_04",
+				"pes_gameplay_player_pounced_05",
+				"pes_gameplay_player_pounced_06"
 			},
 			randomize_indexes = {}
 		},
@@ -7577,7 +7961,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_friendly_fire_dwarf_ranger = {
+		pes_gameplay_friendly_fire_wood_elf = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -7585,10 +7969,10 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_gameplay_friendly_fire_dwarf_ranger_01",
-				"pes_gameplay_friendly_fire_dwarf_ranger_02",
-				"pes_gameplay_friendly_fire_dwarf_ranger_03",
-				"pes_gameplay_friendly_fire_dwarf_ranger_04"
+				"pes_gameplay_friendly_fire_wood_elf_01",
+				"pes_gameplay_friendly_fire_wood_elf_02",
+				"pes_gameplay_friendly_fire_wood_elf_03",
+				"pes_gameplay_friendly_fire_wood_elf_04"
 			},
 			dialogue_animations = {
 				"dialogue_shout",
@@ -7603,10 +7987,10 @@ return function ()
 				"face_angry"
 			},
 			localization_strings = {
-				"pes_gameplay_friendly_fire_dwarf_ranger_01",
-				"pes_gameplay_friendly_fire_dwarf_ranger_02",
-				"pes_gameplay_friendly_fire_dwarf_ranger_03",
-				"pes_gameplay_friendly_fire_dwarf_ranger_04"
+				"pes_gameplay_friendly_fire_wood_elf_01",
+				"pes_gameplay_friendly_fire_wood_elf_02",
+				"pes_gameplay_friendly_fire_wood_elf_03",
+				"pes_gameplay_friendly_fire_wood_elf_04"
 			},
 			randomize_indexes = {}
 		},
@@ -7922,39 +8306,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_wood_elf_low_on_health = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_wood_elf_low_on_health_01",
-				"pes_gameplay_wood_elf_low_on_health_02",
-				"pes_gameplay_wood_elf_low_on_health_03",
-				"pes_gameplay_wood_elf_low_on_health_04"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pes_gameplay_wood_elf_low_on_health_01",
-				"pes_gameplay_wood_elf_low_on_health_02",
-				"pes_gameplay_wood_elf_low_on_health_03",
-				"pes_gameplay_wood_elf_low_on_health_04"
-			},
-			randomize_indexes = {}
-		},
 		pes_gameplay_activating_magic_weapon_offensive = {
 			sound_events_n = 5,
 			randomize_indexes_n = 0,
@@ -7989,6 +8340,39 @@ return function ()
 				"pes_gameplay_activating_magic_weapon_offensive_03",
 				"pes_gameplay_activating_magic_weapon_offensive_04",
 				"pes_gameplay_activating_magic_weapon_offensive_05"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_heard_bright_wizard_in_trouble = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_alerts",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_gameplay_heard_bright_wizard_in_trouble_01",
+				"pes_gameplay_heard_bright_wizard_in_trouble_02",
+				"pes_gameplay_heard_bright_wizard_in_trouble_03",
+				"pes_gameplay_heard_bright_wizard_in_trouble_04"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_gameplay_heard_bright_wizard_in_trouble_01",
+				"pes_gameplay_heard_bright_wizard_in_trouble_02",
+				"pes_gameplay_heard_bright_wizard_in_trouble_03",
+				"pes_gameplay_heard_bright_wizard_in_trouble_04"
 			},
 			randomize_indexes = {}
 		},
@@ -8041,64 +8425,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_heard_bright_wizard_in_trouble = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_alerts",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_heard_bright_wizard_in_trouble_01",
-				"pes_gameplay_heard_bright_wizard_in_trouble_02",
-				"pes_gameplay_heard_bright_wizard_in_trouble_03",
-				"pes_gameplay_heard_bright_wizard_in_trouble_04"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pes_gameplay_heard_bright_wizard_in_trouble_01",
-				"pes_gameplay_heard_bright_wizard_in_trouble_02",
-				"pes_gameplay_heard_bright_wizard_in_trouble_03",
-				"pes_gameplay_heard_bright_wizard_in_trouble_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_casual_quotes_town = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "empire_soldier",
-			category = "casual_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pes_gameplay_casual_quotes_05",
-				[2.0] = "pes_gameplay_casual_quotes_08"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_sadness"
-			},
-			localization_strings = {
-				[1.0] = "pes_gameplay_casual_quotes_05",
-				[2.0] = "pes_gameplay_casual_quotes_08"
-			},
-			randomize_indexes = {}
-		},
 		pes_gameplay_self_heal = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -8132,40 +8458,28 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_taking_heavy_damage = {
-			sound_events_n = 5,
+		pes_gameplay_casual_quotes_town = {
+			sound_events_n = 2,
 			randomize_indexes_n = 0,
-			face_animations_n = 5,
+			face_animations_n = 2,
 			database = "empire_soldier",
-			category = "player_alerts",
-			dialogue_animations_n = 5,
+			category = "casual_talk",
+			dialogue_animations_n = 2,
 			sound_events = {
-				"pes_gameplay_taking_heavy_damage_02",
-				"pes_gameplay_taking_heavy_damage_05",
-				"pes_gameplay_taking_heavy_damage_08",
-				"pes_general_response_44",
-				"pes_gameplay_taking_heavy_damage_09"
+				[1.0] = "pes_gameplay_casual_quotes_05",
+				[2.0] = "pes_gameplay_casual_quotes_08"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
 			},
 			face_animations = {
-				"face_fear",
-				"face_fear",
-				"face_pain",
-				"face_pain",
-				"face_pain"
+				[1.0] = "face_neutral",
+				[2.0] = "face_sadness"
 			},
 			localization_strings = {
-				"pes_gameplay_taking_heavy_damage_02",
-				"pes_gameplay_taking_heavy_damage_05",
-				"pes_gameplay_taking_heavy_damage_08",
-				"pes_general_response_44",
-				"pes_gameplay_taking_heavy_damage_09"
+				[1.0] = "pes_gameplay_casual_quotes_05",
+				[2.0] = "pes_gameplay_casual_quotes_08"
 			},
 			randomize_indexes = {}
 		},
@@ -8195,6 +8509,88 @@ return function ()
 				"pes_gameplay_using_potion_03",
 				"pes_gameplay_using_potion_05",
 				"pes_gameplay_self_heal_05"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_hit_by_goo = {
+			sound_events_n = 7,
+			randomize_indexes_n = 0,
+			face_animations_n = 7,
+			database = "empire_soldier",
+			category = "player_alerts",
+			dialogue_animations_n = 7,
+			sound_events = {
+				"pes_gameplay_hit_by_goo_01",
+				"pes_gameplay_hit_by_goo_02",
+				"pes_gameplay_hit_by_goo_03",
+				"pes_gameplay_hit_by_goo_04",
+				"pes_gameplay_hit_by_goo_05",
+				"pes_gameplay_hit_by_goo_06",
+				"pes_gameplay_hit_by_goo_07"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_surprise",
+				"face_surprise",
+				"face_surprise",
+				"face_surprise",
+				"face_surprise",
+				"face_surprise",
+				"face_surprise"
+			},
+			localization_strings = {
+				"pes_gameplay_hit_by_goo_01",
+				"pes_gameplay_hit_by_goo_02",
+				"pes_gameplay_hit_by_goo_03",
+				"pes_gameplay_hit_by_goo_04",
+				"pes_gameplay_hit_by_goo_05",
+				"pes_gameplay_hit_by_goo_06",
+				"pes_gameplay_hit_by_goo_07"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_spots_potion = {
+			sound_events_n = 5,
+			randomize_indexes_n = 0,
+			face_animations_n = 5,
+			database = "empire_soldier",
+			category = "seen_items",
+			dialogue_animations_n = 5,
+			sound_events = {
+				"pes_gameplay_spots_potion_01",
+				"pes_gameplay_spots_potion_02",
+				"pes_gameplay_spots_potion_03",
+				"pes_gameplay_spots_potion_04",
+				"pes_gameplay_spots_potion_05"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy"
+			},
+			localization_strings = {
+				"pes_gameplay_spots_potion_01",
+				"pes_gameplay_spots_potion_02",
+				"pes_gameplay_spots_potion_03",
+				"pes_gameplay_spots_potion_04",
+				"pes_gameplay_spots_potion_05"
 			},
 			randomize_indexes = {}
 		},
@@ -8321,52 +8717,36 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_healing_draught = {
-			sound_events_n = 8,
+		pes_gameplay_wood_elf_low_on_health = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 8,
+			face_animations_n = 4,
 			database = "empire_soldier",
-			category = "seen_items",
-			dialogue_animations_n = 8,
+			category = "player_feedback",
+			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_gameplay_healing_draught_01",
-				"pes_gameplay_healing_draught_02",
-				"pes_gameplay_healing_draught_03",
-				"pes_gameplay_healing_draught_04",
-				"pes_gameplay_healing_draught_05",
-				"pes_gameplay_healing_draught_06",
-				"pes_gameplay_healing_draught_07",
-				"pes_gameplay_healing_draught_08"
+				"pes_gameplay_wood_elf_low_on_health_01",
+				"pes_gameplay_wood_elf_low_on_health_02",
+				"pes_gameplay_wood_elf_low_on_health_03",
+				"pes_gameplay_wood_elf_low_on_health_04"
 			},
 			dialogue_animations = {
 				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
+				"dialogue_talk",
+				"dialogue_talk",
 				"dialogue_shout"
 			},
 			face_animations = {
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				"pes_gameplay_healing_draught_01",
-				"pes_gameplay_healing_draught_02",
-				"pes_gameplay_healing_draught_03",
-				"pes_gameplay_healing_draught_04",
-				"pes_gameplay_healing_draught_05",
-				"pes_gameplay_healing_draught_06",
-				"pes_gameplay_healing_draught_07",
-				"pes_gameplay_healing_draught_08"
+				"pes_gameplay_wood_elf_low_on_health_01",
+				"pes_gameplay_wood_elf_low_on_health_02",
+				"pes_gameplay_wood_elf_low_on_health_03",
+				"pes_gameplay_wood_elf_low_on_health_04"
 			},
 			randomize_indexes = {}
 		},
@@ -8432,36 +8812,36 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_killing_gutterrunner = {
+		pes_gameplay_witch_hunter_low_on_health = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "empire_soldier",
-			category = "enemy_alerts",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_gameplay_killing_gutterrunner_01",
-				"pes_gameplay_killing_gutterrunner_02",
-				"pes_gameplay_killing_gutterrunner_03",
-				"pes_gameplay_killing_gutterrunner_04"
+				"pes_gameplay_witch_hunter_low_on_health_01",
+				"pes_gameplay_witch_hunter_low_on_health_02",
+				"pes_gameplay_witch_hunter_low_on_health_03",
+				"pes_gameplay_witch_hunter_low_on_health_04"
 			},
 			dialogue_animations = {
+				"dialogue_shout",
 				"dialogue_talk",
 				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
+				"dialogue_shout"
 			},
 			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				"pes_gameplay_killing_gutterrunner_01",
-				"pes_gameplay_killing_gutterrunner_02",
-				"pes_gameplay_killing_gutterrunner_03",
-				"pes_gameplay_killing_gutterrunner_04"
+				"pes_gameplay_witch_hunter_low_on_health_01",
+				"pes_gameplay_witch_hunter_low_on_health_02",
+				"pes_gameplay_witch_hunter_low_on_health_03",
+				"pes_gameplay_witch_hunter_low_on_health_04"
 			},
 			randomize_indexes = {}
 		},
@@ -8502,7 +8882,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_witch_hunter_low_on_health = {
+		pes_gameplay_dwarf_ranger_being_helped = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -8510,28 +8890,28 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_gameplay_witch_hunter_low_on_health_01",
-				"pes_gameplay_witch_hunter_low_on_health_02",
-				"pes_gameplay_witch_hunter_low_on_health_03",
-				"pes_gameplay_witch_hunter_low_on_health_04"
+				"pes_gameplay_dwarf_ranger_being_helped_up_01",
+				"pes_gameplay_dwarf_ranger_being_helped_up_02",
+				"pes_gameplay_dwarf_ranger_being_helped_up_03",
+				"pes_gameplay_dwarf_ranger_being_helped_up_04"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
 				"dialogue_talk",
 				"dialogue_talk",
-				"dialogue_shout"
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
 			},
 			localization_strings = {
-				"pes_gameplay_witch_hunter_low_on_health_01",
-				"pes_gameplay_witch_hunter_low_on_health_02",
-				"pes_gameplay_witch_hunter_low_on_health_03",
-				"pes_gameplay_witch_hunter_low_on_health_04"
+				"pes_gameplay_dwarf_ranger_being_helped_up_01",
+				"pes_gameplay_dwarf_ranger_being_helped_up_02",
+				"pes_gameplay_dwarf_ranger_being_helped_up_03",
+				"pes_gameplay_dwarf_ranger_being_helped_up_04"
 			},
 			randomize_indexes = {}
 		},
@@ -8565,39 +8945,6 @@ return function ()
 				"pes_gameplay_healing_wood_elf_02",
 				"pes_gameplay_healing_wood_elf_03",
 				"pes_gameplay_healing_wood_elf_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_dwarf_ranger_being_helped = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_dwarf_ranger_being_helped_up_01",
-				"pes_gameplay_dwarf_ranger_being_helped_up_02",
-				"pes_gameplay_dwarf_ranger_being_helped_up_03",
-				"pes_gameplay_dwarf_ranger_being_helped_up_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pes_gameplay_dwarf_ranger_being_helped_up_01",
-				"pes_gameplay_dwarf_ranger_being_helped_up_02",
-				"pes_gameplay_dwarf_ranger_being_helped_up_03",
-				"pes_gameplay_dwarf_ranger_being_helped_up_04"
 			},
 			randomize_indexes = {}
 		},
@@ -8639,6 +8986,39 @@ return function ()
 				"pes_gameplay_seeing_a_skaven_rat_ogre_02",
 				"pes_gameplay_seeing_a_skaven_rat_ogre_03",
 				"pes_gameplay_seeing_a_skaven_rat_ogre_05"
+			},
+			randomize_indexes = {}
+		},
+		pes_gameplay_wood_elf_being_helped_up = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_gameplay_wood_elf_being_helped_up_02",
+				"pes_gameplay_wood_elf_being_helped_up_03",
+				"pes_gameplay_wood_elf_being_helped_up_01",
+				"pes_gameplay_wood_elf_being_helped_up_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_gameplay_wood_elf_being_helped_up_02",
+				"pes_gameplay_wood_elf_being_helped_up_03",
+				"pes_gameplay_wood_elf_being_helped_up_01",
+				"pes_gameplay_wood_elf_being_helped_up_04"
 			},
 			randomize_indexes = {}
 		},
@@ -8728,122 +9108,77 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_player_pounced = {
-			sound_events_n = 6,
+		pes_gameplay_hearing_a_globadier_combat = {
+			sound_events_n = 5,
 			randomize_indexes_n = 0,
-			face_animations_n = 6,
+			face_animations_n = 5,
 			database = "empire_soldier",
-			category = "player_alerts",
-			dialogue_animations_n = 6,
+			category = "enemy_alerts",
+			dialogue_animations_n = 5,
 			sound_events = {
-				"pes_gameplay_player_pounced_01",
-				"pes_gameplay_player_pounced_02",
-				"pes_gameplay_player_pounced_03",
-				"pes_gameplay_player_pounced_04",
-				"pes_gameplay_player_pounced_05",
-				"pes_gameplay_player_pounced_06"
+				"pes_gameplay_hearing_a_globadier_combat_01",
+				"pes_gameplay_hearing_a_globadier_combat_02",
+				"pes_gameplay_hearing_a_globadier_combat_03",
+				"pes_gameplay_hearing_a_globadier_combat_04",
+				"pes_gameplay_hearing_a_globadier_combat_05"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_fear",
-				"face_fear",
-				"face_fear"
-			},
-			localization_strings = {
-				"pes_gameplay_player_pounced_01",
-				"pes_gameplay_player_pounced_02",
-				"pes_gameplay_player_pounced_03",
-				"pes_gameplay_player_pounced_04",
-				"pes_gameplay_player_pounced_05",
-				"pes_gameplay_player_pounced_06"
-			},
-			randomize_indexes = {}
-		},
-		pes_gameplay_wood_elf_being_helped_up = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "empire_soldier",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_gameplay_wood_elf_being_helped_up_02",
-				"pes_gameplay_wood_elf_being_helped_up_03",
-				"pes_gameplay_wood_elf_being_helped_up_01",
-				"pes_gameplay_wood_elf_being_helped_up_04"
-			},
-			dialogue_animations = {
+				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk"
 			},
 			face_animations = {
-				"face_neutral",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
+				"face_contempt",
+				"face_fear",
+				"face_contempt",
+				"face_contempt",
+				"face_contempt"
 			},
 			localization_strings = {
-				"pes_gameplay_wood_elf_being_helped_up_02",
-				"pes_gameplay_wood_elf_being_helped_up_03",
-				"pes_gameplay_wood_elf_being_helped_up_01",
-				"pes_gameplay_wood_elf_being_helped_up_04"
+				"pes_gameplay_hearing_a_globadier_combat_01",
+				"pes_gameplay_hearing_a_globadier_combat_02",
+				"pes_gameplay_hearing_a_globadier_combat_03",
+				"pes_gameplay_hearing_a_globadier_combat_04",
+				"pes_gameplay_hearing_a_globadier_combat_05"
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_hit_by_goo = {
-			sound_events_n = 7,
+		pes_gameplay_taking_heavy_damage = {
+			sound_events_n = 5,
 			randomize_indexes_n = 0,
-			face_animations_n = 7,
+			face_animations_n = 5,
 			database = "empire_soldier",
 			category = "player_alerts",
-			dialogue_animations_n = 7,
+			dialogue_animations_n = 5,
 			sound_events = {
-				"pes_gameplay_hit_by_goo_01",
-				"pes_gameplay_hit_by_goo_02",
-				"pes_gameplay_hit_by_goo_03",
-				"pes_gameplay_hit_by_goo_04",
-				"pes_gameplay_hit_by_goo_05",
-				"pes_gameplay_hit_by_goo_06",
-				"pes_gameplay_hit_by_goo_07"
+				"pes_gameplay_taking_heavy_damage_02",
+				"pes_gameplay_taking_heavy_damage_05",
+				"pes_gameplay_taking_heavy_damage_08",
+				"pes_general_response_44",
+				"pes_gameplay_taking_heavy_damage_09"
 			},
 			dialogue_animations = {
 				"dialogue_shout",
 				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				"face_surprise",
-				"face_surprise",
-				"face_surprise",
-				"face_surprise",
-				"face_surprise",
-				"face_surprise",
-				"face_surprise"
+				"face_fear",
+				"face_fear",
+				"face_pain",
+				"face_pain",
+				"face_pain"
 			},
 			localization_strings = {
-				"pes_gameplay_hit_by_goo_01",
-				"pes_gameplay_hit_by_goo_02",
-				"pes_gameplay_hit_by_goo_03",
-				"pes_gameplay_hit_by_goo_04",
-				"pes_gameplay_hit_by_goo_05",
-				"pes_gameplay_hit_by_goo_06",
-				"pes_gameplay_hit_by_goo_07"
+				"pes_gameplay_taking_heavy_damage_02",
+				"pes_gameplay_taking_heavy_damage_05",
+				"pes_gameplay_taking_heavy_damage_08",
+				"pes_general_response_44",
+				"pes_gameplay_taking_heavy_damage_09"
 			},
 			randomize_indexes = {}
 		},
@@ -8900,6 +9235,39 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pes_gameplay_dwarf_ranger_dead = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "empire_soldier",
+			category = "player_alerts",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_gameplay_dwarf_ranger_dead_01",
+				"pes_gameplay_dwarf_ranger_dead_02",
+				"pes_gameplay_dwarf_ranger_dead_03",
+				"pes_gameplay_dwarf_ranger_dead_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_neutral",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pes_gameplay_dwarf_ranger_dead_01",
+				"pes_gameplay_dwarf_ranger_dead_02",
+				"pes_gameplay_dwarf_ranger_dead_03",
+				"pes_gameplay_dwarf_ranger_dead_04"
+			},
+			randomize_indexes = {}
+		},
 		pes_gameplay_helped_by_wood_elf = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -8933,7 +9301,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_gameplay_dwarf_ranger_dead = {
+		pes_gameplay_heard_dwarf_ranger_in_trouble = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -8941,16 +9309,16 @@ return function ()
 			category = "player_alerts",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_gameplay_dwarf_ranger_dead_01",
-				"pes_gameplay_dwarf_ranger_dead_02",
-				"pes_gameplay_dwarf_ranger_dead_03",
-				"pes_gameplay_dwarf_ranger_dead_04"
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_01",
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_02",
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_03",
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_04"
 			},
 			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
 			},
 			face_animations = {
 				"face_neutral",
@@ -8959,10 +9327,10 @@ return function ()
 				"face_neutral"
 			},
 			localization_strings = {
-				"pes_gameplay_dwarf_ranger_dead_01",
-				"pes_gameplay_dwarf_ranger_dead_02",
-				"pes_gameplay_dwarf_ranger_dead_03",
-				"pes_gameplay_dwarf_ranger_dead_04"
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_01",
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_02",
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_03",
+				"pes_gameplay_heard_dwarf_ranger_in_trouble_04"
 			},
 			randomize_indexes = {}
 		},

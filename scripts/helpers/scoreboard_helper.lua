@@ -93,6 +93,32 @@ ScoreboardHelper.scoreboard_topic_stats = {
 		sort_function = function (a, b)
 			return b.score < a.score
 		end
+	},
+	{
+		display_text = "scoreboard_topic_damage_bosses",
+		stat_types = {
+			{
+				"damage_dealt_per_breed",
+				"skaven_rat_ogre"
+			}
+		},
+		sort_function = function (a, b)
+			return b.score < a.score
+		end
+	},
+	{
+		stat_type = "saves",
+		display_text = "scoreboard_topic_saved_companion",
+		sort_function = function (a, b)
+			return b.score < a.score
+		end
+	},
+	{
+		stat_type = "aidings",
+		display_text = "scoreboard_topic_aided_companion",
+		sort_function = function (a, b)
+			return b.score < a.score
+		end
 	}
 }
 

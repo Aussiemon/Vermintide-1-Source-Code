@@ -67,6 +67,10 @@ CameraManager.init = function (self, world)
 	self._environment_blenders = {}
 	self._shading_environment = {}
 	self._fov_multiplier = 1
+	self._extended_view_settings = {
+		pitch_offset = 0,
+		yaw_offset = 0
+	}
 
 	return 
 end
@@ -335,6 +339,24 @@ CameraManager.shading_callback = function (self, world, shading_env, viewport)
 		end
 
 		self.mood_handler:apply_environment_variables(shading_env)
+
+		local fog = self._fog_depth_override
+
+		if fog then
+			ShadingEnvironment.set_vector2(shading_env, "fog_depth_range", Vector2(fog[1], fog[2]))
+		end
+	end
+
+	return 
+end
+CameraManager.set_fog_depth_override = function (self, start_dist, full_dist)
+	if start_dist then
+		self._fog_depth_override = {
+			start_dist,
+			full_dist
+		}
+	else
+		self._fog_depth_override = nil
 	end
 
 	return 
@@ -781,6 +803,10 @@ CameraManager._update_camera = function (self, dt, t, viewport_name)
 	local current_node = self._current_node(self, camera_nodes)
 	local camera_data = self._update_transition(self, viewport_name, camera_nodes, dt)
 
+	if current_node._apply_extended_view then
+		self._apply_extended_view(self, self._extended_view_settings, camera_data, dt)
+	end
+
 	if self._sequence_event_settings.event then
 		camera_data = self._apply_sequence_event(self, table.clone(camera_data), t)
 	end
@@ -918,6 +944,7 @@ CameraManager._calculate_sequence_event_rotation = function (self, current_data,
 
 	return Quaternion.multiply(current_rot, total_offset)
 end
+local deg_to_rad = math.pi/180
 CameraManager._apply_shake_event = function (self, settings, current_data, t)
 	local shake_event_settings = self._shake_event_settings
 	local start_time = settings.start_time
@@ -935,7 +962,6 @@ CameraManager._apply_shake_event = function (self, settings, current_data, t)
 	local yaw_noise_value = self._calculate_perlin_value(self, t - settings.start_time + 10, settings)*settings.scale
 	local new_data = current_data
 	local current_rot = current_data.rotation
-	local deg_to_rad = math.pi/180
 	local yaw_offset = Quaternion(Vector3.up(), yaw_noise_value*deg_to_rad)
 	local pitch_offset = Quaternion(Vector3.right(), pitch_noise_value*deg_to_rad)
 	local total_offset = Quaternion.multiply(yaw_offset, pitch_offset)
@@ -946,6 +972,82 @@ CameraManager._apply_shake_event = function (self, settings, current_data, t)
 	end
 
 	return new_data
+end
+
+function TobiiCurve(normalizedValue, powerOf, falloffPoint, deadZone)
+	local sign = nil
+
+	if 0 <= normalizedValue then
+		sign = 1
+	else
+		normalizedValue = -normalizedValue
+		sign = -1
+	end
+
+	local x = (normalizedValue - deadZone)/(deadZone - 1)
+	x = math.min(math.max(x, 0), 1)
+	local a = falloffPoint/1
+	local b = a*x
+	local c = a/math.max(a - 1, 1e-06)
+	local d = math.min(math.floor(b), 1)
+
+	return sign*((d - 1)*math.pow(b, powerOf)/a + d*(math.pow(c*(x - 1), powerOf)/c - 1))
+end
+
+CameraManager._apply_extended_view = function (self, eview_settings, current_data, dt)
+	local user_setting = Application.user_setting
+	local HAS_TOBII = rawget(_G, "Tobii") and user_setting("tobii_eyetracking")
+
+	if not HAS_TOBII then
+		return 
+	end
+
+	local has_device = Tobii.device_status() == Tobii.DEVICE_TRACKING
+	local has_presence = Tobii.user_presence() == Tobii.USER_PRESENT
+	local is_enabled = user_setting("tobii_extended_view")
+
+	if not has_device or not is_enabled then
+		return 
+	end
+
+	local gaze_x, gaze_y = Tobii.get_gaze_point()
+	gaze_x = (gaze_x - 0.5)*2
+	gaze_y = (gaze_y - 0.5)*2
+	local gaze_x_dist = gaze_x - eview_settings.yaw_offset
+	local gaze_y_dist = gaze_y - eview_settings.pitch_offset
+	local distance_moved = math.sqrt(gaze_x_dist*gaze_x_dist + gaze_y_dist*gaze_y_dist)
+
+	if 0 < distance_moved then
+		local curve_deadzone = user_setting("tobii_extended_view_deadzone")
+		local curve_slope = user_setting("tobii_extended_view_curve_slope")
+		local curve_shoulder = user_setting("tobii_extended_view_curve_shoulder")
+		local result_length = TobiiCurve(distance_moved, curve_slope, curve_shoulder, curve_deadzone)
+		local new_gaze_x = result_length*gaze_x_dist/distance_moved
+		local new_gaze_y = result_length*gaze_y_dist/distance_moved
+		local speed = user_setting("tobii_extended_view_speed")
+		eview_settings.yaw_offset = eview_settings.yaw_offset + new_gaze_x*dt*speed
+		eview_settings.pitch_offset = eview_settings.pitch_offset + new_gaze_y*dt*speed
+	end
+
+	local maxYaw = user_setting("tobii_extended_view_max_yaw")
+	local maxPitch = nil
+
+	if 0 < eview_settings.pitch_offset then
+		maxPitch = user_setting("tobii_extended_view_max_pitch_up")
+	else
+		maxPitch = user_setting("tobii_extended_view_max_pitch_down")
+	end
+
+	local new_yaw = eview_settings.yaw_offset*maxYaw
+	local new_pitch = eview_settings.pitch_offset*maxPitch
+	local yaw_offset = Quaternion(Vector3.up(), new_yaw*deg_to_rad)
+	yaw_offset = Quaternion.multiply(Quaternion.inverse(current_data.rotation), yaw_offset)
+	yaw_offset = Quaternion.multiply(yaw_offset, current_data.rotation)
+	local pitch_offset = Quaternion(Vector3.right(), new_pitch*deg_to_rad)
+	local total_offset = Quaternion.multiply(yaw_offset, pitch_offset)
+	current_data.rotation = Quaternion.multiply(current_data.rotation, total_offset)
+
+	return 
 end
 CameraManager._calculate_perlin_value = function (self, x, settings)
 	local total = 0

@@ -434,6 +434,12 @@ OptionsView.cleanup_popups = function (self)
 		self.handle_apply_popup_results(self, "revert_changes")
 	end
 
+	if self.save_error_popup_id then
+		Managers.popup:cancel_popup(self.save_error_popup_id)
+
+		self.save_error_popup_id = nil
+	end
+
 	if self.title_popup_id then
 		Managers.popup:cancel_popup(self.title_popup_id)
 
@@ -524,6 +530,10 @@ OptionsView.create_ui_elements = function (self)
 	local settings_lists = {}
 
 	if Application.platform() == "win32" then
+		if rawget(_G, "Tobii") then
+			settings_lists.tobii_eyetracking_settings = self.build_settings_list(self, settings_definitions.tobii_settings_definition, "tobii_eyetracking_settings_list")
+		end
+
 		settings_lists.video_settings = self.build_settings_list(self, settings_definitions.video_settings_definition, "video_settings_list")
 		settings_lists.audio_settings = self.build_settings_list(self, settings_definitions.audio_settings_definition, "audio_settings_list")
 		settings_lists.gameplay_settings = self.build_settings_list(self, settings_definitions.gameplay_settings_definition, "gameplay_settings_list")
@@ -1098,8 +1108,18 @@ OptionsView.set_wwise_parameter = function (self, name, value)
 	return 
 end
 OptionsView.changes_been_made = function (self)
-	return 0 < table.size(self.changed_user_settings) or 0 < table.size(self.changed_render_settings) or self.changed_keymaps
+	local changed_user_settings = 0 < table.size(self.changed_user_settings)
+	local changed_render_settings = 0 < table.size(self.changed_render_settings)
+	local changed_keymaps = self.changed_keymaps
+
+	return changed_user_settings or changed_render_settings or changed_keymaps
 end
+local save_error_code_key_lookup = {
+	[0] = "save_error_no_error",
+	"save_error_no_settings_file",
+	"save_error_no_appdata_folder",
+	"save_error_cannot_open_file"
+}
 local needs_reload_settings = settings_definitions.needs_reload_settings
 OptionsView.apply_changes = function (self, user_settings, render_settings, pending_user_settings)
 	local needs_reload = false
@@ -1120,468 +1140,483 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		end
 	end
 
-	local char_texture_quality = user_settings.char_texture_quality
-
-	if char_texture_quality then
-		local char_texture_settings = TextureQuality.characters[char_texture_quality]
-
-		for id, setting in ipairs(char_texture_settings) do
-			Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
-		end
-	end
-
-	local env_texture_quality = user_settings.env_texture_quality
-
-	if env_texture_quality then
-		local char_texture_settings = TextureQuality.environment[env_texture_quality]
-
-		for id, setting in ipairs(char_texture_settings) do
-			Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
-		end
-	end
+	local save_error_code, error_path = nil
 
 	if Application.platform() == "win32" then
-		local max_fps = user_settings.max_fps
-
-		if max_fps then
-			if max_fps == 0 then
-				Application.set_time_step_policy("no_throttle")
-			else
-				Application.set_time_step_policy("throttle", max_fps)
-			end
-		end
-	end
-
-	local max_upload = user_settings.max_upload_speed
-	local network_manager = Managers.state.network
-
-	if max_upload and network_manager then
-		network_manager.set_max_upload_speed(network_manager, max_upload)
-	end
-
-	local max_stacking_frames = user_settings.max_stacking_frames
-
-	if max_stacking_frames then
-		Application.set_max_frame_stacking(max_stacking_frames)
-	end
-
-	local use_hud_screen_fit = user_settings.use_hud_screen_fit
-
-	if use_hud_screen_fit ~= nil then
-		UISettings.use_hud_screen_fit = use_hud_screen_fit
-	end
-
-	local use_subtitles = user_settings.use_subtitles
-
-	if use_subtitles ~= nil then
-		UISettings.use_subtitles = use_subtitles
-	end
-
-	local master_bus_volume = user_settings.master_bus_volume
-
-	if master_bus_volume then
-		self.set_wwise_parameter(self, "master_bus_volume", master_bus_volume)
-	end
-
-	local music_bus_volume = user_settings.music_bus_volume
-
-	if music_bus_volume then
-		Managers.music:set_music_volume(music_bus_volume)
-	end
-
-	local sfx_bus_volume = user_settings.sfx_bus_volume
-
-	if sfx_bus_volume then
-		self.set_wwise_parameter(self, "sfx_bus_volume", sfx_bus_volume)
-	end
-
-	local voice_bus_volume = user_settings.voice_bus_volume
-
-	if voice_bus_volume then
-		self.set_wwise_parameter(self, "voice_bus_volume", voice_bus_volume)
-	end
-
-	local voip_bus_volume = user_settings.voip_bus_volume
-
-	if voip_bus_volume then
-		self.voip:set_volume(voip_bus_volume)
-
-		if Application.platform() == "xb1" then
-			Managers.voice_chat:set_chat_volume(voip_bus_volume)
-		end
-	end
-
-	local voip_enabled = user_settings.voip_is_enabled
-
-	if voip_enabled ~= nil then
-		self.voip:set_enabled(voip_enabled)
-
-		if Application.platform() == "xb1" then
-			Managers.voice_chat:set_enabled(voip_enabled)
-		end
-	end
-
-	local voip_push_to_talk = user_settings.voip_push_to_talk
-
-	if voip_push_to_talk then
-		self.voip:set_push_to_talk(voip_push_to_talk)
-	end
-
-	local dynamic_range_sound = user_settings.dynamic_range_sound
-
-	if dynamic_range_sound then
-		local setting = 1
-
-		if dynamic_range_sound == "high" then
-			setting = 0
-		end
-
-		self.set_wwise_parameter(self, "dynamic_range_sound", setting)
-	end
-
-	local sound_panning_rule = user_settings.sound_panning_rule
-
-	if sound_panning_rule then
-		local value = (sound_panning_rule == "headphones" and "PANNING_RULE_HEADPHONES") or "PANNING_RULE_SPEAKERS"
-
-		Managers.music:set_panning_rule(value)
-	end
-
-	local sound_quality = user_settings.sound_quality
-
-	if sound_quality then
-		SoundQualitySettings.set_sound_quality(self.wwise_world, sound_quality)
-	end
-
-	local fov = render_settings.fov
-
-	if fov then
-		local base_fov = CameraSettings.first_person._node.vertical_fov
-		local fov_multiplier = fov/base_fov
-		local camera_manager = Managers.state.camera
-
-		if camera_manager then
-			camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
-		end
-	end
-
-	local enabled_crosshairs = user_settings.enabled_crosshairs
-
-	if enabled_crosshairs and self.ingame_ui and self.ingame_ui.ingame_hud and self.ingame_ui.ingame_hud.crosshair then
-		self.ingame_ui.ingame_hud.crosshair:set_enabled_crosshair_styles(enabled_crosshairs)
-	end
-
-	local player_input_service = self.input_manager:get_service("Player")
-	local mouse_look_sensitivity = user_settings.mouse_look_sensitivity
-
-	if mouse_look_sensitivity then
-		local platform_key = "win32"
-		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
-		local base_look_multiplier = base_filter.look.multiplier
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look
-		local function_data = look_filter.function_data
-		function_data.multiplier = base_look_multiplier*0.85^(-mouse_look_sensitivity)
-	end
-
-	local mouse_look_invert_y = user_settings.mouse_look_invert_y
-
-	if mouse_look_invert_y ~= nil then
-		local platform_key = "win32"
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look
-		local function_data = look_filter.function_data
-		function_data.filter_type = (mouse_look_invert_y and "scale_vector3") or "scale_vector3_invert_y"
-	end
-
-	local gamepad_look_sensitivity = user_settings.gamepad_look_sensitivity
-
-	if gamepad_look_sensitivity then
-		local platform_key = (self.platform == "win32" and "xb1") or self.platform
-		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
-		local base_look_multiplier = base_filter.look_controller.multiplier_x
-		local base_melee_look_multiplier = base_filter.look_controller_melee.multiplier_x
-		local base_ranged_look_multiplier = base_filter.look_controller_ranged.multiplier_x
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look_controller
-		local function_data = look_filter.function_data
-		function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_look_sensitivity)
-		function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
-		local melee_look_filter = input_filters.look_controller_melee
-		local function_data = melee_look_filter.function_data
-		function_data.multiplier_x = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity)
-		function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
-		local ranged_look_filter = input_filters.look_controller_ranged
-		local function_data = ranged_look_filter.function_data
-		function_data.multiplier_x = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity)
-		function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
-	end
-
-	local gamepad_look_sensitivity_y = user_settings.gamepad_look_sensitivity_y
-
-	if gamepad_look_sensitivity_y then
-		local platform_key = (self.platform == "win32" and "xb1") or self.platform
-		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
-		local base_look_multiplier = base_filter.look_controller.multiplier_y
-		local base_melee_look_multiplier = base_filter.look_controller.multiplier_y
-		local base_ranged_look_multiplier = base_filter.look_controller.multiplier_y
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look_controller
-		local function_data = look_filter.function_data
-		function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
-		local melee_look_filter = input_filters.look_controller_melee
-		local function_data = melee_look_filter.function_data
-		function_data.multiplier_y = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
-		local ranged_look_filter = input_filters.look_controller_ranged
-		local function_data = ranged_look_filter.function_data
-		function_data.multiplier_y = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
-	end
-
-	local gamepad_zoom_sensitivity = user_settings.gamepad_zoom_sensitivity
-
-	if gamepad_zoom_sensitivity then
-		local platform_key = (self.platform == "win32" and "xb1") or self.platform
-		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
-		local base_look_multiplier = base_filter.look_controller_zoom.multiplier_x
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look_controller_zoom
-		local function_data = look_filter.function_data
-		function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity)
-		function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x*0.85^(-gamepad_zoom_sensitivity)) or function_data.multiplier_x*0.25
-	end
-
-	local gamepad_zoom_sensitivity_y = user_settings.gamepad_zoom_sensitivity_y
-
-	if gamepad_zoom_sensitivity_y then
-		local platform_key = (self.platform == "win32" and "xb1") or self.platform
-		local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
-		local base_look_multiplier = base_filter.look_controller_zoom.multiplier_y
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look_controller_zoom
-		local function_data = look_filter.function_data
-		function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity_y)
-	end
-
-	local gamepad_look_invert_y = user_settings.gamepad_look_invert_y
-
-	if gamepad_look_invert_y ~= nil then
-		local platform_key = (self.platform == "win32" and "xb1") or self.platform
-		local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
-		local look_filter = input_filters.look_controller
-		local function_data = look_filter.function_data
-		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
-		local look_filter = input_filters.look_controller_melee
-		local function_data = look_filter.function_data
-		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
-		local look_filter = input_filters.look_controller_ranged
-		local function_data = look_filter.function_data
-		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
-		local look_filter = input_filters.look_controller_zoom
-		local function_data = look_filter.function_data
-		function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
-	end
-
-	local gamepad_use_ps4_style_input_icons = user_settings.gamepad_use_ps4_style_input_icons
-
-	if gamepad_use_ps4_style_input_icons ~= nil then
-		UISettings.use_ps4_input_icons = gamepad_use_ps4_style_input_icons
-	end
-
-	local changed_gamepad_layout = user_settings.gamepad_layout ~= nil
-	local changed_gamepad_left_handed = user_settings.gamepad_left_handed ~= nil
-
-	if changed_gamepad_layout or changed_gamepad_left_handed then
-		local default_value = DefaultUserSettings.get("user_settings", "gamepad_layout") or "default"
-		local gamepad_layout = assigned(user_settings.gamepad_layout, Application.user_setting("gamepad_layout")) or default_value
-
-		if gamepad_layout then
-			local using_left_handed_option = assigned(user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
-			local gamepad_keymaps_layout = nil
-
-			if using_left_handed_option then
-				gamepad_keymaps_layout = AlternatateGamepadKeymapsLayoutsLeftHanded
-			else
-				gamepad_keymaps_layout = AlternatateGamepadKeymapsLayouts
-			end
-
-			local gamepad_keymaps = gamepad_keymaps_layout[gamepad_layout]
-
-			self.apply_gamepad_changes(self, gamepad_keymaps, using_left_handed_option)
-		end
-	end
-
-	local animation_lod_distance_multiplier = user_settings.animation_lod_distance_multiplier
-
-	if animation_lod_distance_multiplier then
-		GameSettingsDevelopment.bone_lod_husks.lod_multiplier = animation_lod_distance_multiplier
-	end
-
-	local player_outlines = user_settings.player_outlines
-
-	if player_outlines then
-		local players = Managers.player:players()
-
-		for _, player in pairs(players) do
-			local player_unit = player.player_unit
-
-			if not player.local_player and Unit.alive(player_unit) then
-				local outline_extension = ScriptUnit.extension(player_unit, "outline_system")
-
-				outline_extension.update_override_method_player_setting()
-			end
-		end
-	end
-
-	local toggle_crouch = user_settings.toggle_crouch
-
-	if toggle_crouch ~= nil then
-		local units = (Managers.state.entity and Managers.state.entity:get_entities("PlayerInputExtension")) or {}
-
-		for unit, extension in pairs(units) do
-			local player = Managers.player:owner(unit)
-
-			if player.local_player and not player.bot_player then
-				local input_extension = ScriptUnit.extension(unit, "input_system")
-				input_extension.toggle_crouch = toggle_crouch
-			end
-		end
-	end
-
-	local double_tap_dodge = user_settings.double_tap_dodge
-
-	if double_tap_dodge ~= nil then
-		local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-		for unit, extension in pairs(units) do
-			local player = Managers.player:owner(unit)
-
-			if player.local_player and not player.bot_player then
-				local input_extension = ScriptUnit.extension(unit, "input_system")
-				input_extension.double_tap_dodge = double_tap_dodge
-			end
-		end
-	end
-
-	local dodge_on_jump_key = user_settings.dodge_on_jump_key
-
-	if dodge_on_jump_key ~= nil then
-		local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-		for unit, extension in pairs(units) do
-			local player = Managers.player:owner(unit)
-
-			if player.local_player and not player.bot_player then
-				local input_extension = ScriptUnit.extension(unit, "input_system")
-				input_extension.dodge_on_jump_key = dodge_on_jump_key
-			end
-		end
-	end
-
-	local dodge_on_forward_diagonal = user_settings.dodge_on_forward_diagonal
-
-	if dodge_on_forward_diagonal ~= nil then
-		local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-		for unit, extension in pairs(units) do
-			local player = Managers.player:owner(unit)
-
-			if player.local_player and not player.bot_player then
-				local input_extension = ScriptUnit.extension(unit, "input_system")
-				input_extension.dodge_on_forward_diagonal = dodge_on_forward_diagonal
-			end
-		end
-	end
-
-	local toggle_alternate_attack = user_settings.toggle_alternate_attack
-
-	if toggle_alternate_attack ~= nil then
-		local units = Managers.state.entity:get_entities("PlayerInputExtension")
-
-		for unit, extension in pairs(units) do
-			local player = Managers.player:owner(unit)
-
-			if player.local_player and not player.bot_player then
-				local input_extension = ScriptUnit.extension(unit, "input_system")
-				input_extension.toggle_alternate_attack = toggle_alternate_attack
-			end
-		end
-	end
-
-	local overcharge_opacity = user_settings.overcharge_opacity
-	local player_manager = Managers.player
-
-	if overcharge_opacity and player_manager then
-		local local_player = player_manager.local_player(player_manager)
-		local player_unit = local_player.player_unit
-		local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
-		local melee_slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_melee")
-		local ranged_slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_ranged")
-
-		local function set_opacity(slot_data)
-			if not slot_data then
-				return 
-			end
-
-			local left_hand_wielded_unit = slot_data.left_unit_1p
-			local right_hand_wielded_unit = slot_data.right_unit_1p
-			local overcharge_extension = nil
-
-			if right_hand_wielded_unit and ScriptUnit.has_extension(right_hand_wielded_unit, "overcharge_system") then
-				overcharge_extension = ScriptUnit.extension(right_hand_wielded_unit, "overcharge_system")
-			elseif left_hand_wielded_unit and ScriptUnit.has_extension(left_hand_wielded_unit, "overcharge_system") then
-				overcharge_extension = ScriptUnit.extension(left_hand_wielded_unit, "overcharge_system")
-			end
-
-			if overcharge_extension then
-				overcharge_extension.set_screen_particle_opacity_modifier(overcharge_extension, overcharge_opacity)
-			end
-
-			return 
-		end
-
-		set_opacity(melee_slot_data)
-		set_opacity(ranged_slot_data)
-	end
-
-	local chat_enabled = user_settings.chat_enabled
-	local chat_manager = Managers.chat
-
-	if chat_enabled ~= nil and chat_manager then
-		chat_manager.set_chat_enabled(chat_manager, chat_enabled)
-	end
-
-	local chat_font_size = user_settings.chat_font_size
-	local chat_manager = Managers.chat
-
-	if chat_font_size and chat_manager then
-		chat_manager.set_font_size(chat_manager, chat_font_size)
-	end
-
-	local language_id = user_settings.language_id
-
-	if language_id then
-		self.reload_language(self, language_id)
-	end
-
-	local ui_scale = user_settings.ui_scale
-
-	if ui_scale ~= nil then
-		UISettings.ui_scale = ui_scale
-		local force_update = true
-
-		UPDATE_RESOLUTION_LOOKUP(force_update)
-	end
-
-	if Application.platform() == "win32" then
-		Application.save_user_settings()
+		save_error_code, error_path = Application.save_user_settings()
+		save_error_code = save_error_code and ((0 < save_error_code and save_error_code) or nil)
 	else
 		Managers.save:auto_save(SaveFileName, SaveData, callback(self, "cb_save_done"))
 	end
 
-	if needs_reload then
-		Application.apply_user_settings()
-		Renderer.bake_static_shadows()
+	if not save_error_code then
+		local char_texture_quality = user_settings.char_texture_quality
+
+		if char_texture_quality then
+			local char_texture_settings = TextureQuality.characters[char_texture_quality]
+
+			for id, setting in ipairs(char_texture_settings) do
+				Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
+			end
+		end
+
+		local env_texture_quality = user_settings.env_texture_quality
+
+		if env_texture_quality then
+			local char_texture_settings = TextureQuality.environment[env_texture_quality]
+
+			for id, setting in ipairs(char_texture_settings) do
+				Application.set_user_setting("texture_settings", setting.texture_setting, setting.mip_level)
+			end
+		end
+
+		if Application.platform() == "win32" then
+			local max_fps = user_settings.max_fps
+
+			if max_fps then
+				if max_fps == 0 then
+					Application.set_time_step_policy("no_throttle")
+				else
+					Application.set_time_step_policy("throttle", max_fps)
+				end
+			end
+		end
+
+		local max_upload = user_settings.max_upload_speed
+		local network_manager = Managers.state.network
+
+		if max_upload and network_manager then
+			network_manager.set_max_upload_speed(network_manager, max_upload)
+		end
+
+		local max_stacking_frames = user_settings.max_stacking_frames
+
+		if max_stacking_frames then
+			Application.set_max_frame_stacking(max_stacking_frames)
+		end
+
+		local use_hud_screen_fit = user_settings.use_hud_screen_fit
+
+		if use_hud_screen_fit ~= nil then
+			UISettings.use_hud_screen_fit = use_hud_screen_fit
+		end
+
+		local use_subtitles = user_settings.use_subtitles
+
+		if use_subtitles ~= nil then
+			UISettings.use_subtitles = use_subtitles
+		end
+
+		local master_bus_volume = user_settings.master_bus_volume
+
+		if master_bus_volume then
+			self.set_wwise_parameter(self, "master_bus_volume", master_bus_volume)
+		end
+
+		local music_bus_volume = user_settings.music_bus_volume
+
+		if music_bus_volume then
+			Managers.music:set_music_volume(music_bus_volume)
+		end
+
+		local sfx_bus_volume = user_settings.sfx_bus_volume
+
+		if sfx_bus_volume then
+			self.set_wwise_parameter(self, "sfx_bus_volume", sfx_bus_volume)
+		end
+
+		local voice_bus_volume = user_settings.voice_bus_volume
+
+		if voice_bus_volume then
+			self.set_wwise_parameter(self, "voice_bus_volume", voice_bus_volume)
+		end
+
+		local voip_bus_volume = user_settings.voip_bus_volume
+
+		if voip_bus_volume then
+			self.voip:set_volume(voip_bus_volume)
+
+			if Application.platform() == "xb1" then
+				Managers.voice_chat:set_chat_volume(voip_bus_volume)
+			end
+		end
+
+		local voip_enabled = user_settings.voip_is_enabled
+
+		if voip_enabled ~= nil then
+			self.voip:set_enabled(voip_enabled)
+
+			if Application.platform() == "xb1" then
+				Managers.voice_chat:set_enabled(voip_enabled)
+			end
+		end
+
+		local voip_push_to_talk = user_settings.voip_push_to_talk
+
+		if voip_push_to_talk then
+			self.voip:set_push_to_talk(voip_push_to_talk)
+		end
+
+		local dynamic_range_sound = user_settings.dynamic_range_sound
+
+		if dynamic_range_sound then
+			local setting = 1
+
+			if dynamic_range_sound == "high" then
+				setting = 0
+			end
+
+			self.set_wwise_parameter(self, "dynamic_range_sound", setting)
+		end
+
+		local sound_panning_rule = user_settings.sound_panning_rule
+
+		if sound_panning_rule then
+			local value = (sound_panning_rule == "headphones" and "PANNING_RULE_HEADPHONES") or "PANNING_RULE_SPEAKERS"
+
+			Managers.music:set_panning_rule(value)
+		end
+
+		local sound_quality = user_settings.sound_quality
+
+		if sound_quality then
+			SoundQualitySettings.set_sound_quality(self.wwise_world, sound_quality)
+		end
+
+		local fov = render_settings.fov
+
+		if fov then
+			local base_fov = CameraSettings.first_person._node.vertical_fov
+			local fov_multiplier = fov/base_fov
+			local camera_manager = Managers.state.camera
+
+			if camera_manager then
+				camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
+			end
+		end
+
+		local enabled_crosshairs = user_settings.enabled_crosshairs
+
+		if enabled_crosshairs and self.ingame_ui and self.ingame_ui.ingame_hud and self.ingame_ui.ingame_hud.crosshair then
+			self.ingame_ui.ingame_hud.crosshair:set_enabled_crosshair_styles(enabled_crosshairs)
+		end
+
+		local player_input_service = self.input_manager:get_service("Player")
+		local mouse_look_sensitivity = user_settings.mouse_look_sensitivity
+
+		if mouse_look_sensitivity then
+			local platform_key = "win32"
+			local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+			local base_look_multiplier = base_filter.look.multiplier
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look
+			local function_data = look_filter.function_data
+			function_data.multiplier = base_look_multiplier*0.85^(-mouse_look_sensitivity)
+		end
+
+		local mouse_look_invert_y = user_settings.mouse_look_invert_y
+
+		if mouse_look_invert_y ~= nil then
+			local platform_key = "win32"
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look
+			local function_data = look_filter.function_data
+			function_data.filter_type = (mouse_look_invert_y and "scale_vector3") or "scale_vector3_invert_y"
+		end
+
+		local gamepad_look_sensitivity = user_settings.gamepad_look_sensitivity
+
+		if gamepad_look_sensitivity then
+			local platform_key = (self.platform == "win32" and "xb1") or self.platform
+			local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+			local base_look_multiplier = base_filter.look_controller.multiplier_x
+			local base_melee_look_multiplier = base_filter.look_controller_melee.multiplier_x
+			local base_ranged_look_multiplier = base_filter.look_controller_ranged.multiplier_x
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look_controller
+			local function_data = look_filter.function_data
+			function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_look_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+			local melee_look_filter = input_filters.look_controller_melee
+			local function_data = melee_look_filter.function_data
+			function_data.multiplier_x = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+			local ranged_look_filter = input_filters.look_controller_ranged
+			local function_data = ranged_look_filter.function_data
+			function_data.multiplier_x = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+		end
+
+		local gamepad_look_sensitivity_y = user_settings.gamepad_look_sensitivity_y
+
+		if gamepad_look_sensitivity_y then
+			local platform_key = (self.platform == "win32" and "xb1") or self.platform
+			local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+			local base_look_multiplier = base_filter.look_controller.multiplier_y
+			local base_melee_look_multiplier = base_filter.look_controller.multiplier_y
+			local base_ranged_look_multiplier = base_filter.look_controller.multiplier_y
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look_controller
+			local function_data = look_filter.function_data
+			function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+			local melee_look_filter = input_filters.look_controller_melee
+			local function_data = melee_look_filter.function_data
+			function_data.multiplier_y = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+			local ranged_look_filter = input_filters.look_controller_ranged
+			local function_data = ranged_look_filter.function_data
+			function_data.multiplier_y = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+		end
+
+		local gamepad_zoom_sensitivity = user_settings.gamepad_zoom_sensitivity
+
+		if gamepad_zoom_sensitivity then
+			local platform_key = (self.platform == "win32" and "xb1") or self.platform
+			local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+			local base_look_multiplier = base_filter.look_controller_zoom.multiplier_x
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look_controller_zoom
+			local function_data = look_filter.function_data
+			function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x*0.85^(-gamepad_zoom_sensitivity)) or function_data.multiplier_x*0.25
+		end
+
+		local gamepad_zoom_sensitivity_y = user_settings.gamepad_zoom_sensitivity_y
+
+		if gamepad_zoom_sensitivity_y then
+			local platform_key = (self.platform == "win32" and "xb1") or self.platform
+			local base_filter = InputUtils.get_platform_filters(PlayerControllerFilters, platform_key)
+			local base_look_multiplier = base_filter.look_controller_zoom.multiplier_y
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look_controller_zoom
+			local function_data = look_filter.function_data
+			function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity_y)
+		end
+
+		local gamepad_look_invert_y = user_settings.gamepad_look_invert_y
+
+		if gamepad_look_invert_y ~= nil then
+			local platform_key = (self.platform == "win32" and "xb1") or self.platform
+			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
+			local look_filter = input_filters.look_controller
+			local function_data = look_filter.function_data
+			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			local look_filter = input_filters.look_controller_melee
+			local function_data = look_filter.function_data
+			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			local look_filter = input_filters.look_controller_ranged
+			local function_data = look_filter.function_data
+			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+			local look_filter = input_filters.look_controller_zoom
+			local function_data = look_filter.function_data
+			function_data.filter_type = (gamepad_look_invert_y and "scale_vector3_xy_accelerated_x_inverted") or "scale_vector3_xy_accelerated_x"
+		end
+
+		local gamepad_use_ps4_style_input_icons = user_settings.gamepad_use_ps4_style_input_icons
+
+		if gamepad_use_ps4_style_input_icons ~= nil then
+			UISettings.use_ps4_input_icons = gamepad_use_ps4_style_input_icons
+		end
+
+		local changed_gamepad_layout = user_settings.gamepad_layout ~= nil
+		local changed_gamepad_left_handed = user_settings.gamepad_left_handed ~= nil
+
+		if changed_gamepad_layout or changed_gamepad_left_handed then
+			local default_value = DefaultUserSettings.get("user_settings", "gamepad_layout") or "default"
+			local gamepad_layout = assigned(user_settings.gamepad_layout, Application.user_setting("gamepad_layout")) or default_value
+
+			if gamepad_layout then
+				local using_left_handed_option = assigned(user_settings.gamepad_left_handed, Application.user_setting("gamepad_left_handed"))
+				local gamepad_keymaps_layout = nil
+
+				if using_left_handed_option then
+					gamepad_keymaps_layout = AlternatateGamepadKeymapsLayoutsLeftHanded
+				else
+					gamepad_keymaps_layout = AlternatateGamepadKeymapsLayouts
+				end
+
+				local gamepad_keymaps = gamepad_keymaps_layout[gamepad_layout]
+
+				self.apply_gamepad_changes(self, gamepad_keymaps, using_left_handed_option)
+			end
+		end
+
+		local animation_lod_distance_multiplier = user_settings.animation_lod_distance_multiplier
+
+		if animation_lod_distance_multiplier then
+			GameSettingsDevelopment.bone_lod_husks.lod_multiplier = animation_lod_distance_multiplier
+		end
+
+		local player_outlines = user_settings.player_outlines
+
+		if player_outlines then
+			local players = Managers.player:players()
+
+			for _, player in pairs(players) do
+				local player_unit = player.player_unit
+
+				if not player.local_player and Unit.alive(player_unit) then
+					local outline_extension = ScriptUnit.extension(player_unit, "outline_system")
+
+					outline_extension.update_override_method_player_setting()
+				end
+			end
+		end
+
+		local toggle_crouch = user_settings.toggle_crouch
+
+		if toggle_crouch ~= nil then
+			local units = (Managers.state.entity and Managers.state.entity:get_entities("PlayerInputExtension")) or {}
+
+			for unit, extension in pairs(units) do
+				local player = Managers.player:owner(unit)
+
+				if player.local_player and not player.bot_player then
+					local input_extension = ScriptUnit.extension(unit, "input_system")
+					input_extension.toggle_crouch = toggle_crouch
+				end
+			end
+		end
+
+		local double_tap_dodge = user_settings.double_tap_dodge
+
+		if double_tap_dodge ~= nil then
+			local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+			for unit, extension in pairs(units) do
+				local player = Managers.player:owner(unit)
+
+				if player.local_player and not player.bot_player then
+					local input_extension = ScriptUnit.extension(unit, "input_system")
+					input_extension.double_tap_dodge = double_tap_dodge
+				end
+			end
+		end
+
+		local dodge_on_jump_key = user_settings.dodge_on_jump_key
+
+		if dodge_on_jump_key ~= nil then
+			local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+			for unit, extension in pairs(units) do
+				local player = Managers.player:owner(unit)
+
+				if player.local_player and not player.bot_player then
+					local input_extension = ScriptUnit.extension(unit, "input_system")
+					input_extension.dodge_on_jump_key = dodge_on_jump_key
+				end
+			end
+		end
+
+		local dodge_on_forward_diagonal = user_settings.dodge_on_forward_diagonal
+
+		if dodge_on_forward_diagonal ~= nil then
+			local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+			for unit, extension in pairs(units) do
+				local player = Managers.player:owner(unit)
+
+				if player.local_player and not player.bot_player then
+					local input_extension = ScriptUnit.extension(unit, "input_system")
+					input_extension.dodge_on_forward_diagonal = dodge_on_forward_diagonal
+				end
+			end
+		end
+
+		local toggle_alternate_attack = user_settings.toggle_alternate_attack
+
+		if toggle_alternate_attack ~= nil then
+			local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+			for unit, extension in pairs(units) do
+				local player = Managers.player:owner(unit)
+
+				if player.local_player and not player.bot_player then
+					local input_extension = ScriptUnit.extension(unit, "input_system")
+					input_extension.toggle_alternate_attack = toggle_alternate_attack
+				end
+			end
+		end
+
+		local overcharge_opacity = user_settings.overcharge_opacity
+		local player_manager = Managers.player
+
+		if overcharge_opacity and player_manager then
+			local local_player = player_manager.local_player(player_manager)
+			local player_unit = local_player.player_unit
+			local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
+			local melee_slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_melee")
+			local ranged_slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_ranged")
+
+			local function set_opacity(slot_data)
+				if not slot_data then
+					return 
+				end
+
+				local left_hand_wielded_unit = slot_data.left_unit_1p
+				local right_hand_wielded_unit = slot_data.right_unit_1p
+				local overcharge_extension = nil
+
+				if right_hand_wielded_unit and ScriptUnit.has_extension(right_hand_wielded_unit, "overcharge_system") then
+					overcharge_extension = ScriptUnit.extension(right_hand_wielded_unit, "overcharge_system")
+				elseif left_hand_wielded_unit and ScriptUnit.has_extension(left_hand_wielded_unit, "overcharge_system") then
+					overcharge_extension = ScriptUnit.extension(left_hand_wielded_unit, "overcharge_system")
+				end
+
+				if overcharge_extension then
+					overcharge_extension.set_screen_particle_opacity_modifier(overcharge_extension, overcharge_opacity)
+				end
+
+				return 
+			end
+
+			set_opacity(melee_slot_data)
+			set_opacity(ranged_slot_data)
+		end
+
+		local chat_enabled = user_settings.chat_enabled
+		local chat_manager = Managers.chat
+
+		if chat_enabled ~= nil and chat_manager then
+			chat_manager.set_chat_enabled(chat_manager, chat_enabled)
+		end
+
+		local chat_font_size = user_settings.chat_font_size
+		local chat_manager = Managers.chat
+
+		if chat_font_size and chat_manager then
+			chat_manager.set_font_size(chat_manager, chat_font_size)
+		end
+
+		local language_id = user_settings.language_id
+
+		if language_id then
+			self.reload_language(self, language_id)
+		end
+
+		local ui_scale = user_settings.ui_scale
+
+		if ui_scale ~= nil then
+			UISettings.ui_scale = ui_scale
+			local force_update = true
+
+			UPDATE_RESOLUTION_LOOKUP(force_update)
+		end
+
+		if needs_reload then
+			Application.apply_user_settings()
+			Renderer.bake_static_shadows()
+		end
+	elseif not self.delayed_title_change then
+		local error_text = Localize(save_error_code_key_lookup[save_error_code])
+
+		if error_path and not string.format(error_text, error_path) then
+		end
+
+		self.save_error_popup_id = Managers.popup:queue_popup(error_text, Localize("popup_save_error"), "ok", Localize("popup_choice_ok"))
+		self.has_save_error = true
 	end
+
+	self.has_save_error = save_error_code ~= nil
 
 	ShowCursorStack.update_clip_cursor()
 
@@ -1683,9 +1718,10 @@ OptionsView.apply_gamepad_changes = function (self, keymaps, using_left_handed_o
 	return 
 end
 OptionsView.has_popup = function (self)
-	return self.exit_popup_id or self.title_popup_id or self.apply_popup_id
+	return self.exit_popup_id or self.title_popup_id or self.apply_popup_id or self.save_error_popup_id
 end
 OPTIONS_VIEW_PRINT_ORIGINAL_VALUES = false
+local HAS_TOBII = rawget(_G, "Tobii")
 OptionsView.update = function (self, dt)
 	if self.suspended then
 		return 
@@ -1787,6 +1823,16 @@ OptionsView.update = function (self, dt)
 			self.apply_popup_id = nil
 
 			self.handle_apply_popup_results(self, result)
+		end
+	end
+
+	if self.save_error_popup_id then
+		local result = Managers.popup:query_result(self.save_error_popup_id)
+
+		if result then
+			Managers.popup:cancel_popup(self.save_error_popup_id)
+
+			self.save_error_popup_id = nil
 		end
 	end
 
@@ -1906,7 +1952,9 @@ OptionsView.handle_apply_popup_results = function (self, result)
 			local text = Localize("changes_need_restart_popup_text")
 			self.apply_popup_id = Managers.popup:queue_popup(text, Localize("popup_needs_restart_topic"), "continue", Localize("popup_choice_continue"), "restart", Localize("popup_choice_restart_now"))
 		else
-			self.unsuspend(self)
+			if not self.has_save_error then
+				self.unsuspend(self)
+			end
 
 			if self.delayed_title_change then
 				self.select_settings_title(self, self.delayed_title_change)
@@ -1916,7 +1964,10 @@ OptionsView.handle_apply_popup_results = function (self, result)
 		end
 
 		self.set_original_settings(self)
-		self.reset_changed_settings(self)
+
+		if not self.has_save_error then
+			self.reset_changed_settings(self)
+		end
 	elseif result == "revert_changes" then
 		if self.changed_keymaps then
 			self.apply_keymap_changes(self, self.original_keymaps, true)
@@ -2272,7 +2323,7 @@ OptionsView.draw_widgets = function (self, dt, disable_all_input)
 	end
 
 	if gamepad_active then
-		local popup_active = self.save_data_error_popup_id or self.exit_popup_id or self.title_popup_id or self.apply_popup_id
+		local popup_active = self.save_data_error_popup_id or self.exit_popup_id or self.title_popup_id or self.apply_popup_id or self.save_error_popup_id
 
 		if not popup_active and not self.disable_all_input then
 			self.menu_input_description:draw(ui_renderer, dt)
@@ -3378,8 +3429,7 @@ end
 OptionsView.cb_adapter = function (self, content, selected_index)
 	local options_values = content.options_values
 	local value = options_values[content.current_selection]
-	local changed_user_settings = self.changed_user_settings
-	changed_user_settings.adapter_index = value
+	self.changed_user_settings.adapter_index = value
 
 	return 
 end
@@ -4720,7 +4770,7 @@ OptionsView.cb_mouse_look_sensitivity = function (self, content)
 	return 
 end
 OptionsView.cb_ui_scale_setup = function (self)
-	local min = 90
+	local min = 70
 	local max = 100
 	local ui_scale = Application.user_setting("ui_scale") or 100
 	local value = get_slider_value(min, max, ui_scale)
@@ -5317,8 +5367,10 @@ OptionsView.cb_matchmaking_region_setup = function (self)
 	local temp = {}
 
 	for region_type, regions in pairs(MatchmakingRegions) do
-		for region, _ in pairs(regions) do
-			temp[region] = true
+		if region_type == "primary" then
+			for region, _ in pairs(regions) do
+				temp[region] = true
+			end
 		end
 	end
 
@@ -5347,6 +5399,10 @@ OptionsView.cb_matchmaking_region_setup = function (self)
 
 			break
 		end
+	end
+
+	if saved_value ~= nil and saved_value ~= "auto" and not temp[saved_value] then
+		Application.set_user_setting("matchmaking_region", "auto")
 	end
 
 	return selected_option, options, "menu_settings_matchmaking_region", default_option
@@ -6766,6 +6822,117 @@ OptionsView.cb_player_outlines = function (self, content)
 
 	return 
 end
+
+local function AddStepperSetting(setting_name)
+	local value_set_name = "cb_" .. setting_name
+	local value_setup_name = value_set_name .. "_setup"
+	OptionsView[value_setup_name] = function (self)
+		local options = {
+			{
+				value = false,
+				text = Localize("menu_settings_off")
+			},
+			{
+				value = true,
+				text = Localize("menu_settings_on")
+			}
+		}
+		local use_tobii = Application.user_setting(setting_name)
+
+		if use_tobii == nil then
+			use_tobii = true
+		end
+
+		local selection = (use_tobii and 2) or 1
+		local default_selection = (DefaultUserSettings.get("user_settings", setting_name) and 2) or 1
+		GameSettingsDevelopment[setting_name] = use_tobii
+
+		return selection, options, "menu_settings_" .. setting_name, default_selection
+	end
+	OptionsView[value_set_name] = function (self, content)
+		local options_values = content.options_values
+		local current_selection = content.current_selection
+		self.changed_user_settings[setting_name] = options_values[current_selection]
+		GameSettingsDevelopment[setting_name] = options_values[current_selection]
+
+		return 
+	end
+	local value_saved_name = value_set_name .. "_saved_value"
+	OptionsView[value_saved_name] = function (self, widget)
+		local use_tobii = assigned(self.changed_user_settings[setting_name], Application.user_setting(setting_name))
+
+		if use_tobii == nil then
+			use_tobii = true
+		end
+
+		widget.content.current_selection = (use_tobii and 2) or 1
+
+		return 
+	end
+
+	return 
+end
+
+AddStepperSetting("tobii_eyetracking")
+AddStepperSetting("tobii_extended_view")
+AddStepperSetting("tobii_tag_at_gaze")
+AddStepperSetting("tobii_clean_ui")
+AddStepperSetting("tobii_interact_at_gaze")
+AddStepperSetting("tobii_fire_at_gaze_blunderbuss")
+AddStepperSetting("tobii_fire_at_gaze_grudgeraker")
+AddStepperSetting("tobii_fire_at_gaze_fireball")
+AddStepperSetting("tobii_fire_at_gaze_geiser")
+AddStepperSetting("tobii_fire_at_gaze_sparks")
+AddStepperSetting("tobii_aim_at_gaze_hagbane")
+AddStepperSetting("tobii_fire_at_gaze_hagbane")
+AddStepperSetting("tobii_aim_at_gaze_shortbow")
+AddStepperSetting("tobii_fire_at_gaze_shortbow")
+AddStepperSetting("tobii_aim_at_gaze_longbow")
+AddStepperSetting("tobii_fire_at_gaze_longbow")
+AddStepperSetting("tobii_aim_at_gaze_crossbow")
+AddStepperSetting("tobii_aim_at_gaze_handgun")
+AddStepperSetting("tobii_fire_at_gaze_drake_pistols")
+AddStepperSetting("tobii_fire_at_gaze_brace_of_pistols")
+AddStepperSetting("tobii_fire_at_gaze_repeating_pistol")
+AddStepperSetting("tobii_fire_at_gaze_repeating_handgun")
+
+local function AddSliderSetting(setting_name, setting_min, setting_max, num_decimals)
+	local value_set_name = "cb_" .. setting_name
+	local value_setup_name = value_set_name .. "_setup"
+	OptionsView[value_setup_name] = function (self)
+		local value = Application.user_setting(setting_name) or DefaultUserSettings[setting_name]
+		local default_value = DefaultUserSettings.get("user_settings", setting_name)
+		local new_value = get_slider_value(setting_min, setting_max, value)
+
+		return new_value, setting_min, setting_max, num_decimals, "menu_settings_" .. setting_name, default_value
+	end
+	OptionsView[value_set_name] = function (self, content)
+		self.changed_user_settings[setting_name] = content.value
+
+		return 
+	end
+	local value_saved_name = value_set_name .. "_saved_value"
+	OptionsView[value_saved_name] = function (self, widget)
+		local content = widget.content
+		local new_value = assigned(self.changed_user_settings[setting_name], Application.user_setting(setting_name))
+		new_value = math.clamp(new_value, setting_min, setting_max)
+		content.internal_value = get_slider_value(setting_min, setting_max, new_value)
+		content.value = new_value
+
+		return 
+	end
+
+	return 
+end
+
+AddSliderSetting("tobii_clean_ui_alpha", 0, 1, 2)
+AddSliderSetting("tobii_extended_view_speed", 0.1, 10, 1)
+AddSliderSetting("tobii_extended_view_max_yaw", 1, 25, 0)
+AddSliderSetting("tobii_extended_view_max_pitch_up", 1, 25, 0)
+AddSliderSetting("tobii_extended_view_max_pitch_down", 1, 25, 0)
+AddSliderSetting("tobii_extended_view_deadzone", 0, 0.2, 4)
+AddSliderSetting("tobii_extended_view_curve_slope", 1, 10, 1)
+AddSliderSetting("tobii_extended_view_curve_shoulder", 0.1, 0.99, 1)
 
 local function get_button_locale_name(controller_type, button_name)
 	local button_locale_name = nil

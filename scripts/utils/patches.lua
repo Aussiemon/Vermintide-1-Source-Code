@@ -94,29 +94,4 @@ if not rawget(_G, "G_IS_PROFILING") and Application.platform() == "win32" and Ap
 	end
 end
 
-__old_nav_raycast = __old_nav_raycast or GwNavQueries.raycast
-local UNREALISTIC_VALUE = 10000
-GwNavQueries.raycast = function (nav_world, from, to)
-	local success, collision_point = __old_nav_raycast(nav_world, from, to)
-	local abs = math.abs
-
-	if success then
-		return success, collision_point
-	else
-		local collision_x = abs(collision_point.x)
-		local collision_y = abs(collision_point.y)
-		local collision_z = abs(collision_point.z)
-
-		if UNREALISTIC_VALUE < collision_x or UNREALISTIC_VALUE < collision_y or UNREALISTIC_VALUE < collision_z then
-			Application.warning("GwNavQueries returned an unrealistic value, falling back to raycast origin")
-
-			return false, from
-		else
-			return false, collision_point
-		end
-	end
-
-	return 
-end
-
 return 

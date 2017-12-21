@@ -364,7 +364,7 @@ StateTitleScreenMainMenu._start_game = function (self, level_key)
 		loading_context.play_trailer = false
 	elseif not level_key then
 		loading_context.gamma_correct = not SaveData.gamma_corrected
-		loading_context.play_trailer = false
+		loading_context.play_trailer = true
 		loading_context.show_profile_on_startup = true
 	end
 

@@ -1,6 +1,25 @@
 require("scripts/managers/backend/statistics_util")
 
 StatisticsDefinitions = {
+	session = {
+		chests_opened = {
+			value = 0,
+			hot_join_sync_rpc = "rpc_set_unsigned_number_session_stat"
+		},
+		level_progress = {
+			value = 0,
+			hot_join_sync_rpc = "rpc_set_unsigned_number_session_stat"
+		},
+		level_progress_distance = {
+			value = 0,
+			hot_join_sync_rpc = "rpc_set_unsigned_number_session_stat"
+		},
+		deaths = {
+			value = 0,
+			hot_join_sync_rpc = "rpc_set_unsigned_number_session_stat"
+		},
+		damage_taken_per_breed = {}
+	},
 	player = {
 		kills_total = {
 			value = 0,
@@ -14,6 +33,14 @@ StatisticsDefinitions = {
 			value = 0,
 			sync_on_hot_join = true
 		},
+		kills_grenade = {
+			value = 0,
+			sync_on_hot_join = true
+		},
+		kill_assists_grenade = {
+			value = 0,
+			sync_on_hot_join = true
+		},
 		kills_per_breed = {},
 		kill_assists_per_breed = {},
 		headshots = {
@@ -21,6 +48,14 @@ StatisticsDefinitions = {
 			sync_on_hot_join = true
 		},
 		revives = {
+			value = 0,
+			sync_on_hot_join = true
+		},
+		aidings = {
+			value = 0,
+			sync_on_hot_join = true
+		},
+		saves = {
 			value = 0,
 			sync_on_hot_join = true
 		},
@@ -37,6 +72,7 @@ StatisticsDefinitions = {
 			value = 0,
 			sync_on_hot_join = true
 		},
+		damage_taken_per_breed = {},
 		damage_dealt = {
 			value = 0,
 			sync_on_hot_join = true
@@ -88,6 +124,13 @@ StatisticsDefinitions = {
 			database_name = "dice_roll_successes"
 		},
 		killed_patrols = {
+			value = 0
+		},
+		checkpoint_damage_taken = {
+			value = 0
+		},
+		checkpoint_progress = {},
+		completed_checkpoints = {
 			value = 0
 		},
 		completed_levels_difficulty = {},
@@ -206,25 +249,60 @@ StatisticsDefinitions = {
 			value = 0,
 			database_name = "survival_dlc_survival_magnus_survival_hardest_kills"
 		},
+		last_stand_waves_completed = {},
 		tutorial_revive_ally = {
+			value = 0
+		},
+		contracts_completed = {
+			value = 0,
+			database_name = "contracts_completed"
+		},
+		quests_completed = {
+			value = 0,
+			database_name = "quests_completed"
+		},
+		fuse_time_when_socketed = {
+			value = math.huge
+		},
+		stormvermin_pick_instakills = {
 			value = 0
 		}
 	}
 }
+local wave_stat = StatisticsDefinitions.player.last_stand_waves_completed
+
+for _, difficulty_name in ipairs(SurvivalDifficulties) do
+	wave_stat[difficulty_name] = {
+		value = 0
+	}
+end
+
 local platform = Application.platform()
 
 if platform == "ps4" then
+	StatisticsDefinitions.player.matchmaking_unix_timestamp = {
+		value = 0,
+		database_name = "matchmaking_unix_timestamp"
+	}
 	StatisticsDefinitions.player.matchmaking_country_code = {
 		value = "N/A",
-		database_name = "matchmaking_country_code"
+		database_name = "matchmaking_country_code",
+		database_type = "string"
 	}
 	StatisticsDefinitions.player.matchmaking_primary_region = {
 		value = "N/A",
-		database_name = "matchmaking_primary_region"
+		database_name = "matchmaking_primary_region",
+		database_type = "string"
 	}
 	StatisticsDefinitions.player.matchmaking_secondary_region = {
 		value = "N/A",
-		database_name = "matchmaking_secondary_region"
+		database_name = "matchmaking_secondary_region",
+		database_type = "string"
+	}
+	StatisticsDefinitions.player.matchmaking_region_fetch_status = {
+		value = "N/A",
+		database_name = "matchmaking_region_fetch_status",
+		database_type = "string"
 	}
 	StatisticsDefinitions.player.matchmaking_num_searches = {
 		value = 0,
@@ -320,10 +398,19 @@ for breed_name, breed in pairs(Breeds) do
 		sync_on_hot_join = true,
 		name = breed_name
 	}
+	StatisticsDefinitions.player.damage_taken_per_breed[breed_name] = {
+		value = 0,
+		sync_on_hot_join = true,
+		name = breed_name
+	}
 	StatisticsDefinitions.player.damage_dealt_per_breed[breed_name] = {
 		value = 0,
 		sync_on_hot_join = true,
 		name = breed_name
+	}
+	StatisticsDefinitions.session.damage_taken_per_breed[breed_name] = {
+		value = 0,
+		sync_on_hot_join = "rpc_set_unsigned_number_session_stat"
 	}
 end
 
@@ -355,6 +442,34 @@ for level_key, level in pairs(LevelSettings) do
 			sync_on_hot_join = true,
 			database_name = tome_name
 		}
+
+		if level.game_mode == "survival" then
+			local stat_name = level_key .. "_bright_wizard"
+			StatisticsDefinitions.player[stat_name] = {
+				value = 0,
+				database_name = stat_name
+			}
+			stat_name = level_key .. "_witch_hunter"
+			StatisticsDefinitions.player[stat_name] = {
+				value = 0,
+				database_name = stat_name
+			}
+			stat_name = level_key .. "_dwarf_ranger"
+			StatisticsDefinitions.player[stat_name] = {
+				value = 0,
+				database_name = stat_name
+			}
+			stat_name = level_key .. "_empire_soldier"
+			StatisticsDefinitions.player[stat_name] = {
+				value = 0,
+				database_name = stat_name
+			}
+			stat_name = level_key .. "_wood_elf"
+			StatisticsDefinitions.player[stat_name] = {
+				value = 0,
+				database_name = stat_name
+			}
+		end
 	end
 end
 
@@ -381,6 +496,8 @@ add_names(StatisticsDefinitions.unit_test)
 local function convert_from_backend(raw_value, database_type)
 	if database_type == nil then
 		return tonumber(raw_value)
+	elseif database_type == "string" then
+		return raw_value
 	elseif database_type == "hexarray" then
 		local value = {}
 		local value_n = 0
@@ -410,6 +527,8 @@ end
 local function convert_to_backend(value, database_type)
 	if database_type == nil then
 		return tostring(value)
+	elseif database_type == "string" then
+		return value
 	elseif database_type == "hexarray" then
 		local raw_value = ""
 		local value_n = #value
@@ -599,6 +718,7 @@ StatisticsDatabase.hot_join_sync = function (self, peer_id)
 			local stats = self.statistics[stat_id]
 
 			sync_stat(peer_id, player.network_id(player), player.local_player_id(player), {}, 1, stats)
+		elseif category == "session" then
 		end
 	end
 
@@ -782,10 +902,6 @@ StatisticsDatabase.set_stat = function (self, id, ...)
 
 	local new_value = select(arg_n, ...)
 	stat.value = new_value
-
-	table.dump(stat, nil, 2)
-	print("ID", id, "Value", new_value)
-
 	stat.persistent_value = new_value
 
 	return 

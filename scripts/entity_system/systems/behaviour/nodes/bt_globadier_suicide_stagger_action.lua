@@ -15,7 +15,7 @@ BTGlobadierSuicideStaggerAction.enter = function (self, unit, blackboard, t)
 
 	return 
 end
-BTGlobadierSuicideStaggerAction.leave = function (self, unit, blackboard, t, dt, new_action)
+BTGlobadierSuicideStaggerAction.leave = function (self, unit, blackboard, t, reason, destroy)
 	return 
 end
 BTGlobadierSuicideStaggerAction.run = function (self, unit, blackboard, t, dt)

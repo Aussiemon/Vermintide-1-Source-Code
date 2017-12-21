@@ -18,6 +18,7 @@ ActionAim.init = function (self, world, item_name, is_server, owner_unit, damage
 	return 
 end
 ActionAim.client_owner_start_action = function (self, new_action, t)
+	local owner_unit = self.owner_unit
 	self.current_action = new_action
 	self.zoom_condition_function = new_action.zoom_condition_function
 	self.played_aim_sound = false
@@ -29,10 +30,20 @@ ActionAim.client_owner_start_action = function (self, new_action, t)
 		self.spread_extension:override_spread_template(spread_template_override)
 	end
 
+	local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+	if new_action.aim_at_gaze_setting and Application.user_setting(new_action.aim_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+		local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
+		local gaze_rotation = eyetracking_extension.gaze_rotation(eyetracking_extension)
+		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
+
+		first_person_extension.force_look_rotation(first_person_extension, gaze_rotation, 0)
+	end
+
 	local loaded_projectile_settings = new_action.loaded_projectile_settings
 
 	if loaded_projectile_settings then
-		local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
+		local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
 		inventory_extension.set_loaded_projectile_override(inventory_extension, loaded_projectile_settings)
 	end

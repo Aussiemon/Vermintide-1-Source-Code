@@ -137,14 +137,14 @@ ProjectileSystem.destroy = function (self)
 
 	return 
 end
-ProjectileSystem.rpc_spawn_player_projectile = function (self, sender, owner_unit_id, position, rotation, scale, angle, target_vector, speed, item_name_id, item_template_name_id, action_name_id, sub_action_name_id)
+ProjectileSystem.rpc_spawn_player_projectile = function (self, sender, owner_unit_id, position, rotation, scale, angle, target_vector, speed, item_name_id, item_template_name_id, action_name_id, sub_action_name_id, gaze_settings)
 	local owner_unit = self.unit_storage:unit(owner_unit_id)
 	local item_name = NetworkLookup.item_names[item_name_id]
 	local item_template_name = NetworkLookup.item_template_names[item_template_name_id]
 	local action_name = NetworkLookup.actions[action_name_id]
 	local sub_action_name = NetworkLookup.sub_actions[sub_action_name_id]
 
-	self.spawn_player_projectile(self, owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, 0)
+	self.spawn_player_projectile(self, owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, 0, gaze_settings)
 
 	return 
 end
@@ -198,10 +198,14 @@ ProjectileSystem.spawn_flame_wave_projectile = function (self, owner_unit, scale
 
 	return 
 end
-ProjectileSystem.spawn_player_projectile = function (self, owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, fast_forward_time)
+ProjectileSystem.spawn_player_projectile = function (self, owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, fast_forward_time, gaze_settings)
 	local action = Weapons[item_template_name].actions[action_name][sub_action_name]
 	local projectile_info = action.projectile_info
 	local gravity_settings = projectile_info.gravity_settings
+
+	if gaze_settings and not projectile_info.gaze_override_gravity_settings then
+	end
+
 	local trajectory_template_name = projectile_info.trajectory_template_name
 	scale = scale/100
 	local min = projectile_info.radius_min

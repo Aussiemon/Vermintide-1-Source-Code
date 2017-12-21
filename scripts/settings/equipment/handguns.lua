@@ -121,6 +121,7 @@ weapon_template.actions = {
 			ammo_requirement = 1,
 			minimum_hold_time = 0.3,
 			keep_buffer = true,
+			aim_at_gaze_setting = "tobii_aim_at_gaze_handgun",
 			hold_input = "action_two_hold",
 			can_abort_reload = false,
 			allow_hold_toggle = true,

@@ -4,6 +4,7 @@ require("scripts/utils/function_command_queue")
 require("scripts/entity_system/systems/dialogues/tag_query")
 require("scripts/entity_system/systems/dialogues/tag_query_database")
 require("scripts/entity_system/systems/dialogues/tag_query_loader")
+require("scripts/entity_system/systems/dialogues/dialogue_state_handler")
 require("scripts/settings/dialogue_settings")
 
 script_data.dialogue_debug_local_player_context = script_data.dialogue_debug_local_player_context or Development.parameter("dialogue_debug_local_player_context")
@@ -47,6 +48,7 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 	self.is_server = entity_system_creation_context.is_server
 	self.tagquery_database = TagQueryDatabase:new()
 	self.dialogues = {}
+	self.markers = {}
 	self.tagquery_loader = TagQueryLoader:new(self.tagquery_database, self.dialogues)
 	local max_num_args = 2
 	self.function_command_queue = FunctionCommandQueue:new(max_num_args)
@@ -54,14 +56,29 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 	local dialogue_filename = "dialogues/generated/" .. level_name
 	local auto_load_files = DialogueSettings.auto_load_files
 	local level_specific_load_files = DialogueSettings.level_specific_load_files[level_name]
+	local blocked_auto_load = DialogueSettings.blocked_auto_load_files[level_name]
 
 	if Application.can_get("lua", dialogue_filename) then
 		self.tagquery_loader:load_file(dialogue_filename)
 	end
 
-	for _, file_name in ipairs(auto_load_files) do
-		if Application.can_get("lua", file_name) then
-			self.tagquery_loader:load_file(file_name)
+	self._markers = {}
+
+	if not blocked_auto_load then
+		for _, file_name in ipairs(auto_load_files) do
+			if Application.can_get("lua", file_name) then
+				self.tagquery_loader:load_file(file_name)
+			end
+
+			if Application.can_get("lua", file_name .. "_markers") then
+				local markers = dofile(file_name .. "_markers")
+
+				for name, marker in pairs(markers) do
+					fassert(not self._markers[name], "[DialogueSystem] There is already a marker called %s registered", name)
+
+					self._markers[name] = marker
+				end
+			end
 		end
 	end
 
@@ -69,6 +86,16 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 		for _, file_name in ipairs(level_specific_load_files) do
 			if Application.can_get("lua", file_name) then
 				self.tagquery_loader:load_file(file_name)
+			end
+
+			if Application.can_get("lua", file_name .. "_markers") then
+				local markers = dofile(file_name .. "_markers")
+
+				for name, marker in pairs(markers) do
+					fassert(not self._markers[name], "[DialogueSystem] There is already a marker called %s registered", name)
+
+					self._markers[name] = marker
+				end
 			end
 		end
 	end
@@ -79,6 +106,7 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 	self.world = world
 	self.wwise_world = Managers.world:wwise_world(world)
 	self.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
+	self.dialogue_state_handler = DialogueStateHandler:new(self.world, self.wwise_world)
 	self.input_event_queue = {}
 	self.input_event_queue_n = 0
 	self.faction_memories = {
@@ -120,7 +148,7 @@ DialogueSystem.on_add_extension = function (self, world, unit, extension_name, e
 	}
 	local dialogue_system = self
 	local input = MakeTableStrict({
-		trigger_dialogue_event = function (self, event_name, event_data)
+		trigger_dialogue_event = function (self, event_name, event_data, identifier)
 			if not dialogue_system.is_server then
 				return 
 			end
@@ -130,11 +158,12 @@ DialogueSystem.on_add_extension = function (self, world, unit, extension_name, e
 			input_event_queue[input_event_queue_n + 1] = unit
 			input_event_queue[input_event_queue_n + 2] = event_name
 			input_event_queue[input_event_queue_n + 3] = event_data
-			dialogue_system.input_event_queue_n = input_event_queue_n + 3
+			input_event_queue[input_event_queue_n + 4] = identifier or ""
+			dialogue_system.input_event_queue_n = input_event_queue_n + 4
 
 			return 
 		end,
-		trigger_networked_dialogue_event = function (self, event_name, event_data)
+		trigger_networked_dialogue_event = function (self, event_name, event_data, identifier)
 			if LEVEL_EDITOR_TEST then
 				return 
 			end
@@ -145,7 +174,8 @@ DialogueSystem.on_add_extension = function (self, world, unit, extension_name, e
 				input_event_queue[input_event_queue_n + 1] = unit
 				input_event_queue[input_event_queue_n + 2] = event_name
 				input_event_queue[input_event_queue_n + 3] = event_data
-				dialogue_system.input_event_queue_n = input_event_queue_n + 3
+				input_event_queue[input_event_queue_n + 4] = identifier or ""
+				dialogue_system.input_event_queue_n = input_event_queue_n + 4
 
 				return 
 			end
@@ -338,7 +368,7 @@ DialogueSystem.on_freeze_extension = function (self, unit, extension_name)
 
 	return 
 end
-DialogueSystem.rpc_trigger_dialogue_event = function (self, sender, go_id, event_id, event_data_array, event_data_array_types)
+DialogueSystem.rpc_trigger_dialogue_event = function (self, sender, go_id, event_id, event_data_array, event_data_array_types, identifier)
 	local unit = Managers.state.unit_storage:unit(go_id)
 
 	if not unit then
@@ -369,7 +399,8 @@ DialogueSystem.rpc_trigger_dialogue_event = function (self, sender, go_id, event
 	input_event_queue[input_event_queue_n + 1] = unit
 	input_event_queue[input_event_queue_n + 2] = event_name
 	input_event_queue[input_event_queue_n + 3] = event_data
-	self.input_event_queue_n = input_event_queue_n + 3
+	input_event_queue[input_event_queue_n + 4] = identifier or ""
+	self.input_event_queue_n = input_event_queue_n + 4
 
 	return 
 end
@@ -543,6 +574,108 @@ local function get_dialogue_event_index(dialogue)
 	return 
 end
 
+DialogueSystem._handle_wwise_markers = function (self, dt, t)
+	local marker_events = WwiseWorld.pull_marker_events(self.wwise_world) or {}
+
+	for _, marker_event in ipairs(marker_events) do
+		local marker_data = self._markers[marker_event.label]
+
+		if marker_data then
+			self._trigger_marker(self, marker_data)
+		end
+	end
+
+	return 
+end
+DialogueSystem._trigger_marker = function (self, marker_data)
+	local marker_name = marker_data.label
+	local sound_event = marker_data.sound_event
+	local source_name = marker_data.source_name
+	local parent = marker_data.parent
+	local localization = marker_data.localization
+	local source_player = nil
+	local players = Managers.player:players()
+
+	for id, player in pairs(players) do
+		local unit = player.player_unit
+
+		if Unit.alive(unit) and ScriptUnit.has_extension(unit, "dialogue_system") then
+			local extension = ScriptUnit.extension(unit, "dialogue_system")
+			local player_profile = extension.context and extension.context.player_profile
+
+			if player_profile == source_name then
+				source_player = player.player_unit
+
+				break
+			end
+		end
+	end
+
+	if not source_player then
+		Application.error(string.format("[DialogueSystem] No source_name called %s could be found", source_name))
+	elseif self.playing_units[source_player] then
+		Application.error(string.format("[DialogueSystem] Marker couldn't play since %s was already talking", source_name))
+	else
+		local wwise_world = self.wwise_world
+		local extension = self.unit_extension_data[source_player]
+		local network_manager = Managers.state.network
+
+		if not extension then
+			Application.error(string.format("[DialogueSystem] Could not find any extension_data for profile %s", source_name))
+		else
+			local wwise_source_id = WwiseUtils.make_unit_auto_source(self.world, extension.play_unit, extension.voice_node)
+
+			if wwise_source_id ~= extension.wwise_source_id and extension.wwise_voice_switch_group then
+				extension.wwise_source_id = wwise_source_id
+
+				WwiseWorld.set_switch(wwise_world, extension.wwise_voice_switch_group, extension.wwise_voice_switch_value, wwise_source_id)
+				WwiseWorld.set_source_parameter(wwise_world, wwise_source_id, "vo_center_percent", extension.vo_center_percent)
+			end
+
+			local go_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, source_player)
+			local source_id = wwise_world.trigger_event(wwise_world, sound_event, wwise_source_id)
+
+			if source_id ~= 0 then
+				local marker_id = NetworkLookup.markers[sound_event]
+
+				network_manager.network_transmit:send_rpc_clients("rpc_play_marker_event", go_id, marker_id)
+
+				if script_data.dialogue_debug_all_contexts then
+					print(string.format("[DialogueSystem] Playing marker %s", sound_event))
+				end
+			end
+		end
+	end
+
+	return 
+end
+DialogueSystem.rpc_play_marker_event = function (self, sender, go_id, marker_id)
+	local marker_unit = Managers.state.network:game_object_or_level_unit(go_id, false)
+
+	if not marker_unit then
+		return 
+	end
+
+	if self.playing_units[marker_unit] then
+		Application.error(string.format("[DialogueSystem] Marker couldn't play since %s was already talking", source_name))
+	end
+
+	local marker_sound_event = NetworkLookup.markers[marker_id]
+	local extension = self.unit_extension_data[marker_unit]
+	local wwise_world = self.wwise_world
+	local wwise_source_id = WwiseUtils.make_unit_auto_source(self.world, extension.play_unit, extension.voice_node)
+
+	if wwise_source_id ~= extension.wwise_source_id and extension.wwise_voice_switch_group then
+		extension.wwise_source_id = wwise_source_id
+
+		WwiseWorld.set_switch(wwise_world, extension.wwise_voice_switch_group, extension.wwise_voice_switch_value, wwise_source_id)
+		WwiseWorld.set_source_parameter(wwise_world, wwise_source_id, "vo_center_percent", extension.vo_center_percent)
+	end
+
+	wwise_world.trigger_event(wwise_world, marker_sound_event, wwise_source_id)
+
+	return 
+end
 DialogueSystem.physics_async_update = function (self, context, t)
 	local dt = context.dt
 
@@ -552,6 +685,9 @@ DialogueSystem.physics_async_update = function (self, context, t)
 	if not self.is_server then
 		return 
 	end
+
+	self.dialogue_state_handler:update(t)
+	self._handle_wwise_markers(self, dt, t)
 
 	local player_manager = Managers.player
 	self.global_context.level_time = t
@@ -671,6 +807,12 @@ DialogueSystem.physics_async_update = function (self, context, t)
 
 					if source_id ~= 0 then
 						dialogue.currently_playing_id = source_id
+						local query_context = query.query_context
+
+						if query_context.identifier and query_context.identifier ~= "" then
+							self.dialogue_state_handler:add_playing_dialogue(query_context.identifier, source_id, t)
+						end
+
 						local dialogue_id = NetworkLookup.dialogues[result]
 
 						network_manager.network_transmit:send_rpc_clients("rpc_play_dialogue_event", go_id, is_level_unit, dialogue_id, dialogue_index)
@@ -688,6 +830,12 @@ DialogueSystem.physics_async_update = function (self, context, t)
 
 						if source_id ~= 0 then
 							dialogue.currently_playing_id = source_id
+							local query_context = query.query_context
+
+							if query_context.identifier and query_context.identifier ~= "" then
+								self.dialogue_state_handler:add_playing_dialogue(query_context.identifier, source_id, t)
+							end
+
 							local dialogue_id = NetworkLookup.dialogues[result]
 
 							network_manager.network_transmit:send_rpc_clients("rpc_play_dialogue_event", go_id, is_level_unit, dialogue_id, dialogue_index)
@@ -795,7 +943,7 @@ DialogueSystem.update_new_events = function (self, t)
 	local input_event_queue = self.input_event_queue
 	local input_event_queue_n = self.input_event_queue_n
 
-	for i = 1, input_event_queue_n, 3 do
+	for i = 1, input_event_queue_n, 4 do
 		local unit = input_event_queue[i]
 
 		if not Unit.alive(unit) then
@@ -813,6 +961,7 @@ DialogueSystem.update_new_events = function (self, t)
 				else
 					local event_name = input_event_queue[i + 1]
 					local event_data = input_event_queue[i + 2]
+					local identifier = input_event_queue[i + 3]
 					local query = tagquery_database.create_query(tagquery_database)
 					local temp_table = FrameTable.alloc_table()
 					local n_temp_table = 0
@@ -833,7 +982,7 @@ DialogueSystem.update_new_events = function (self, t)
 						source_name = extension_data.context.player_profile
 					end
 
-					query.add(query, "concept", event_name, "source", unit, "source_name", source_name, unpack(temp_table))
+					query.add(query, "concept", event_name, "source", unit, "source_name", source_name, "identifier", identifier, unpack(temp_table))
 					query.finalize(query)
 
 					input_event_queue[i] = nil

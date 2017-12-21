@@ -97,5 +97,42 @@ AiBreedSnippets.on_loot_rat_stagger_action_done = function (unit)
 
 	return 
 end
+AiBreedSnippets.on_grey_seer_spawn = function (unit, blackboard)
+	local level_key = Managers.state.game_mode:level_key()
+	local level_settings = LevelSettings[level_key]
+	local level_name = level_settings.level_name
+	local teleport_portals = {}
+	local unit_indices = LevelResource.unit_indices(level_name, "units/hub_elements/ai_teleport_portal")
+
+	for _, id in ipairs(unit_indices) do
+		local position = LevelResource.unit_position(level_name, id)
+		local rotation = LevelResource.unit_rotation(level_name, id)
+		local boxed_position = Vector3Box(position)
+		local boxed_rotation = QuaternionBox(rotation)
+		local unit_data = LevelResource.unit_data(level_name, id)
+		local portal_id = tonumber(DynamicData.get(unit_data, "id"))
+
+		assert(portal_id, "portal id not integer?")
+
+		teleport_portals[portal_id] = {
+			position = boxed_position,
+			rotation = boxed_rotation
+		}
+	end
+
+	blackboard.teleports_done = {
+		false,
+		false,
+		false
+	}
+	blackboard.teleport_portals = teleport_portals
+	local action_data = BreedActions.skaven_grey_seer.teleport_1
+
+	if action_data then
+		blackboard.next_auto_teleport_at = Managers.time:time("main") + action_data.time_until_auto_teleport
+	end
+
+	return 
+end
 
 return 

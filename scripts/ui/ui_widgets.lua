@@ -6762,6 +6762,7 @@ UIWidgets.create_splash_texture = function (input)
 		scenegraph_id = input.scenegraph_id
 	}
 end
+local is_ps4 = Application.platform() == "ps4"
 UIWidgets.create_loader_icon = function (scenegraph_id)
 	return {
 		element = {
@@ -6769,17 +6770,50 @@ UIWidgets.create_loader_icon = function (scenegraph_id)
 				{
 					pass_type = "texture",
 					style_id = "loader_icon",
-					texture_id = "loader_icon"
+					texture_id = "loader_icon",
+					content_check_function = function (content)
+						if is_ps4 and content.countdown_timer_ps4 ~= nil then
+							return false
+						end
+
+						return true
+					end
 				},
 				{
 					pass_type = "rotated_texture",
 					style_id = "loader_part_1",
-					texture_id = "loader_part_1"
+					texture_id = "loader_part_1",
+					content_check_function = function (content)
+						if is_ps4 and content.countdown_timer_ps4 ~= nil then
+							return false
+						end
+
+						return true
+					end
 				},
 				{
 					pass_type = "rotated_texture",
 					style_id = "loader_part_2",
-					texture_id = "loader_part_2"
+					texture_id = "loader_part_2",
+					content_check_function = function (content)
+						if is_ps4 and content.countdown_timer_ps4 ~= nil then
+							return false
+						end
+
+						return true
+					end
+				},
+				{
+					style_id = "countdown_timer_ps4",
+					pass_type = "text",
+					text_id = "countdown_timer_ps4",
+					content_check_function = function (content)
+						if is_ps4 and content.countdown_timer_ps4 ~= nil then
+							return true
+						end
+
+						return false
+					end
 				}
 			}
 		},
@@ -6830,6 +6864,22 @@ UIWidgets.create_loader_icon = function (scenegraph_id)
 				pivot = {
 					26,
 					26
+				}
+			},
+			countdown_timer_ps4 = {
+				font_size = 40,
+				localize = false,
+				word_wrap = true,
+				pixel_perfect = true,
+				horizontal_alignment = "center",
+				vertical_alignment = "center",
+				dynamic_font = true,
+				font_type = "hell_shark",
+				text_color = Colors.get_color_table_with_alpha("white", 255),
+				offset = {
+					10,
+					15,
+					2
 				}
 			}
 		},

@@ -75,6 +75,7 @@ ConsoleMapView.init = function (self, ingame_ui_context)
 	self.render_settings = {
 		snap_pixel_positions = true
 	}
+	self.timeline_enabled = true
 	self.platform = Application.platform()
 	local player = Managers.player:local_player()
 	local player_stats_id = player.stats_id(player)
@@ -258,6 +259,11 @@ ConsoleMapView.set_time_line_index = function (self, index)
 
 	return 
 end
+ConsoleMapView.enable_timeline = function (self, enable)
+	self.timeline_enabled = enable
+
+	return 
+end
 ConsoleMapView.draw = function (self, dt)
 	local draw_time_line_index = self.draw_time_line_index
 	local ui_renderer = self.ui_renderer
@@ -273,7 +279,7 @@ ConsoleMapView.draw = function (self, dt)
 		end
 	end
 
-	if draw_time_line_index then
+	if draw_time_line_index and self.timeline_enabled then
 		UIRenderer.draw_widget(ui_renderer, self._time_line_bg_widget)
 		UIRenderer.draw_widget(ui_renderer, self._time_line_marker_widget)
 

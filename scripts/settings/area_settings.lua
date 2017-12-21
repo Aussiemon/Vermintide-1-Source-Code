@@ -59,4 +59,14 @@ AreaSettings.dwarfs = {
 	}
 }
 
+for _, dlc in pairs(DLCSettings) do
+	local area_settings = dlc.area_settings
+
+	if area_settings then
+		for key, value in pairs(area_settings) do
+			AreaSettings[key] = value
+		end
+	end
+end
+
 return 

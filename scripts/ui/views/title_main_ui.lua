@@ -34,11 +34,12 @@ TitleMainUI.init = function (self, world)
 
 	self.input_manager = Managers.input
 
-	self.input_manager:create_input_service("main_menu", "TitleScreenKeyMaps")
+	self.input_manager:create_input_service("main_menu", "TitleScreenKeyMaps", "TitleScreenFilters")
 	self.input_manager:map_device_to_service("main_menu", "keyboard")
 	self.input_manager:map_device_to_service("main_menu", "gamepad")
 
 	self._attract_mode_active = false
+	self._controller_cooldown = 0
 
 	self._create_ui_elements(self)
 	self._init_animations(self)
@@ -204,14 +205,20 @@ TitleMainUI._handle_menu_input = function (self, dt, t)
 	local navigation_allowed = self._frame_anim_id == nil
 
 	if navigation_allowed then
-		if input_service.get(input_service, "down") then
+		if 0 < self._controller_cooldown then
+			self._controller_cooldown = self._controller_cooldown - dt
+		elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
 			current_index = current_index%#self._menu_widgets + 1
 
 			self._play_sound(self, "hud_menu_select")
-		elseif input_service.get(input_service, "up") then
+
+			self._controller_cooldown = GamepadSettings.menu_cooldown
+		elseif input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
 			current_index = (current_index - 1 < 1 and #self._menu_widgets) or current_index - 1
 
 			self._play_sound(self, "hud_menu_select")
+
+			self._controller_cooldown = GamepadSettings.menu_cooldown
 		end
 	end
 

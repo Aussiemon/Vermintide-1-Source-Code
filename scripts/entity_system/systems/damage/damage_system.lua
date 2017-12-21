@@ -67,6 +67,7 @@ DamageSystem.on_remove_extension = function (self, unit, extension_name)
 
 	return 
 end
+local debug_found_units = {}
 DamageSystem.update = function (self, context, t)
 	local pdArray_set_empty = pdArray.set_empty
 	self.active_damage_buffer_index = self.active_damage_buffer_index - 3
@@ -85,6 +86,32 @@ DamageSystem.update = function (self, context, t)
 
 	for unit, extension in pairs(self.inherited_extension_unit_data) do
 		extension.update(extension, unit, dummy_input, dt, context, t)
+	end
+
+	if self.is_server and DebugKeyHandler.key_pressed("q", "Deal damage to enemies", "DamageSystem", "left ctrl") then
+		local local_player = Managers.player:local_player()
+		local player_unit = local_player.player_unit
+		local ai_system = Managers.state.entity:system("ai_system")
+		local num_units = Broadphase.query(ai_system.broadphase, POSITION_LOOKUP[player_unit], 10, debug_found_units)
+
+		table.dump(debug_found_units, "debug_found_units", 5)
+
+		local damage_system = Managers.state.entity:system("damage_system")
+		local network_manager = Managers.state.network
+		local player_unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
+		local player_unit_pos = Unit.world_position(player_unit, 0)
+		local hit_zone_id = NetworkLookup.hit_zones.full
+		local damage_type_id = NetworkLookup.damage_types.undefined
+		local damage_source_id = NetworkLookup.damage_sources.debug
+
+		for i = 1, num_units, 1 do
+			local unit = debug_found_units[i]
+			local unit_pos = Unit.world_position(unit, 0)
+			local damage_direction = Vector3.normalize(unit_pos - player_unit_pos)
+			local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+
+			damage_system.rpc_add_damage_network(damage_system, nil, unit_id, player_unit_id, false, 255, hit_zone_id, damage_type_id, damage_direction, damage_source_id)
+		end
 	end
 
 	return 
@@ -219,6 +246,10 @@ DamageSystem.rpc_request_heal = function (self, sender, unit_go_id, heal_amount,
 
 	local heal_type = NetworkLookup.heal_types[heal_type_id]
 	local unit = self.unit_storage:unit(unit_go_id)
+
+	if not Unit.alive(unit) then
+		return 
+	end
 
 	if heal_type == "shield_by_assist" then
 		DamageUtils.assist_shield_network(unit, unit, heal_amount)

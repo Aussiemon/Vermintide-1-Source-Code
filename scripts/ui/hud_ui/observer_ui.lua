@@ -260,7 +260,6 @@ ObserverUI.update_follow_player_health_bar = function (self, peer_id)
 
 	if active_percentage < 1 then
 		max_health_divider_content.active = true
-		local max_health_divider_style = hp_bar_widget.style.hp_bar_max_health_divider
 		local default_bar_length = definitions.scenegraph_definition.hp_bar_grimoire_debuff_fill.size[1]
 		local bar_value = bar_content.hp_bar_grimoire_debuff.bar_value
 		local bar_offset = bar_value*default_bar_length
@@ -268,11 +267,12 @@ ObserverUI.update_follow_player_health_bar = function (self, peer_id)
 		grimoire_icon_content.active = true
 		local current_offset = grimoire_icon_style.offset[1]
 		local new_offset = -bar_offset/2
-		max_health_divider_style.offset[1] = bar_offset
 
 		if current_offset ~= new_offset then
 			grimoire_icon_style.offset[1] = new_offset
 			modified_bar = true
+			local max_health_divider_style = hp_bar_widget.style.hp_bar_max_health_divider
+			max_health_divider_style.offset[1] = -bar_offset
 		end
 	end
 

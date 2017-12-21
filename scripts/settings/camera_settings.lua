@@ -237,6 +237,7 @@ CameraSettings.first_person = {
 		name = "root_node",
 		pitch_min = -40,
 		near_range = 0.1,
+		apply_extended_view = true,
 		pitch_max = 0,
 		should_apply_fov_multiplier = true,
 		class = "RootCamera",

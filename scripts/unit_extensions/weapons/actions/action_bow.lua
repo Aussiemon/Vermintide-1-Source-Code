@@ -92,6 +92,17 @@ ActionBow.fire = function (self, current_action, add_spread)
 	local rotation = first_person_extension.current_rotation(first_person_extension)
 	local position = first_person_extension.current_position(first_person_extension)
 	local auto_hit_chance = current_action.aim_assist_auto_hit_chance or 0
+
+	if current_action.fire_at_gaze_setting then
+		local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+		if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+			local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
+			local forward = eyetracking_extension.get_smooth_gaze_forward(eyetracking_extension)
+			rotation = Quaternion.look(forward, Vector3.up())
+		end
+	end
+
 	local spread_extension = self.spread_extension
 
 	if spread_extension then

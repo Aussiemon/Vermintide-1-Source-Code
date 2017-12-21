@@ -655,6 +655,12 @@ LorebookView.on_back_pressed = function (self, play_sound)
 	local depth = #index_array
 	local previous_category_index = nil
 
+	if self.element_select_anim_id then
+		self.ui_animator:stop_animation(self.element_select_anim_id)
+
+		self.element_select_anim_id = nil
+	end
+
 	if 1 < depth then
 		previous_category_index = index_array[depth]
 		index_array[depth] = nil

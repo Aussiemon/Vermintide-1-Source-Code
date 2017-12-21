@@ -144,6 +144,12 @@ local settings = {
 		}
 	},
 	{
+		description = "Enable leaderboards. Requires restart",
+		is_boolean = true,
+		setting_name = "use_leaderboards",
+		category = "Allround useful stuff!"
+	},
+	{
 		description = "",
 		setting_name = "Default development settings",
 		category = "Presets",
@@ -820,6 +826,12 @@ Features that make player mechanics nicer to work with.
 		description = "Automagically destroys AI that are at a far enough distance from all the players.",
 		is_boolean = true,
 		setting_name = "ai_far_off_despawn_disabled",
+		category = "AI"
+	},
+	{
+		description = "Shows how many units are dead and not despawned.",
+		is_boolean = true,
+		setting_name = "debug_death_watch_list",
 		category = "AI"
 	},
 	{

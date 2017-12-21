@@ -280,11 +280,9 @@ MapView.create_ui_elements = function (self)
 		banner_search_zone = UIWidget.init(widgets.banner_search_zone),
 		banner_hero_list = UIWidget.init(widgets.banner_hero_list),
 		banner_host_setting = UIWidget.init(widgets.banner_host_setting),
-		banner_ready_setting = UIWidget.init(widgets.banner_ready_setting),
 		hero_search_filter = self.hero_search_filter_widget,
 		stepper_host_setting = self.steppers.host.widget,
-		stepper_search_zone = self.steppers.zone.widget,
-		stepper_ready_setting = self.steppers.ready.widget
+		stepper_search_zone = self.steppers.zone.widget
 	}
 	self.gamepad_settings_widgets = {
 		normal = {
@@ -308,10 +306,6 @@ MapView.create_ui_elements = function (self)
 			},
 			{
 				widget = self.advanced_settings_widgets.stepper_host_setting,
-				data = MapWidgetsGamepadController.stepper
-			},
-			{
-				widget = self.advanced_settings_widgets.stepper_ready_setting,
 				data = MapWidgetsGamepadController.stepper
 			}
 		}
@@ -1002,7 +996,7 @@ MapView.on_difficulty_index_changed = function (self, index_change)
 
 	return 
 end
-MapView.set_difficulty_locked_info = function (self, index, specific_level_index, stop_draw_lock_icon)
+MapView.set_difficulty_locked_info = function (self, index, specific_level_index, stop_draw_lock_icon, widget, stepper_text)
 	local difficulty_data = (specific_level_index and self.get_difficulty_data(self, specific_level_index)) or self.get_difficulty_data(self, self.selected_level_index)
 	local is_unlocked = difficulty_data[index].unlocked
 	local icon_visible = not is_unlocked
@@ -1013,6 +1007,8 @@ MapView.set_difficulty_locked_info = function (self, index, specific_level_index
 
 	self.difficulty_unlock_icon_widget.content.visible = icon_visible
 	self.difficulty_unlocked = is_unlocked
+
+	self._adjust_difficulty_lock_icons_position(self, widget, stepper_text)
 
 	return not is_unlocked
 end
@@ -1028,7 +1024,7 @@ MapView.set_difficulty_stepper_index = function (self, index, level_index, stop_
 		widget.content.setting_text = data.setting_text
 		self.selected_difficulty_stepper_index = index
 
-		self.set_difficulty_locked_info(self, index, level_index, stop_draw_lock_icon)
+		self.set_difficulty_locked_info(self, index, level_index, stop_draw_lock_icon, widget, data.setting_text)
 	else
 		widget.content.difficulty_level = 0
 		local settings_text = Localize("dlc1_2_difficulty_unavailable")
@@ -1038,7 +1034,18 @@ MapView.set_difficulty_stepper_index = function (self, index, level_index, stop_
 		local draw_lock_icon = not stop_draw_lock_icon
 		self.difficulty_unlock_icon_widget.content.visible = draw_lock_icon
 		self.difficulty_unlocked = false
+
+		self._adjust_difficulty_lock_icons_position(self, widget, settings_text)
 	end
+
+	return 
+end
+MapView._adjust_difficulty_lock_icons_position = function (self, widget, text)
+	local widget_style = widget.style
+	local text_style = widget_style.setting_text
+	local font, scaled_font_size = UIFontByResolution(text_style)
+	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
+	self.difficulty_unlock_icon_widget.style.unlock_texture.offset[1] = text_width*0.5 + 15
 
 	return 
 end
@@ -1120,7 +1127,7 @@ MapView.handle_difficulty_hover = function (self, stepper)
 			local data = difficulty_data[i]
 			widget_content.setting_text_hover = data.setting_text
 
-			self.set_difficulty_locked_info(self, i)
+			self.set_difficulty_locked_info(self, i, nil, nil, stepper_widget, data.setting_text)
 
 			widget_content.internal_difficulty_level = i
 
@@ -1139,9 +1146,10 @@ MapView.handle_difficulty_hover = function (self, stepper)
 			local difficulty_data = self.get_difficulty_data(self, self.selected_level_index)
 
 			if difficulty_data then
-				widget_content.setting_text_hover = difficulty_data[selected_difficulty_stepper_index].setting_text
+				local stepper_text = difficulty_data[selected_difficulty_stepper_index].setting_text
+				widget_content.setting_text_hover = stepper_text
 
-				self.set_difficulty_locked_info(self, selected_difficulty_stepper_index)
+				self.set_difficulty_locked_info(self, selected_difficulty_stepper_index, nil, nil, stepper_widget, stepper_text)
 			end
 
 			widget_content.internal_difficulty_level = selected_difficulty_stepper_index
@@ -1270,7 +1278,7 @@ MapView.on_play_pressed = function (self, t)
 
 	local selected_zone_option = search_zone_options[self.selected_zone_index]
 	local selected_host_option = host_game_options[self.selected_host_index]
-	local selected_ready_option = ready_options[self.selected_ready_index]
+	local selected_ready_option = false
 	local hero_search_filter = self.hero_search_filter
 	local random_level = next_level_key == "any"
 	local matchmaking_manager = Managers.matchmaking
@@ -1793,10 +1801,6 @@ MapView.setup_steppers = function (self)
 		host = {
 			widget = UIWidget.init(definitions.widgets.stepper_host_setting),
 			callback = callback(self, "on_host_index_changed")
-		},
-		ready = {
-			widget = UIWidget.init(definitions.widgets.stepper_ready_setting),
-			callback = callback(self, "on_ready_index_changed")
 		}
 	}
 
@@ -1920,16 +1924,6 @@ MapView.apply_saved_settings = function (self)
 		self.on_host_index_changed(self, nil, host_option_index or 1)
 	else
 		self.on_host_index_changed(self, nil, 1)
-	end
-
-	local ready_option = map_save_data.ready_option
-
-	if ready_option ~= nil then
-		local ready_option_index = (ready_option and 2) or 1
-
-		self.on_ready_index_changed(self, nil, ready_option_index)
-	else
-		self.on_ready_index_changed(self, nil, 1)
 	end
 
 	local hero_search_filter = map_save_data.hero_search_filter

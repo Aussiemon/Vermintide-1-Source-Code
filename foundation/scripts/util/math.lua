@@ -136,9 +136,10 @@ math.circular_to_square_coordinates = function (v)
 	local uu = u*u
 	local vv = v*v
 	local sqrt = math.sqrt
+	local max = math.max
 	local sqrt_2 = sqrt(2)
-	local x = (sqrt((u*2*sqrt_2 + 2 + uu) - vv) - sqrt((u*2*sqrt_2 - 2 + uu) - vv))*0.5
-	local y = (sqrt((v*2*sqrt_2 + 2) - uu + vv) - sqrt(v*2*sqrt_2 - 2 - uu + vv))*0.5
+	local x = (sqrt(max((u*2*sqrt_2 + 2 + uu) - vv, 0)) - sqrt(max((u*2*sqrt_2 - 2 + uu) - vv, 0)))*0.5
+	local y = (sqrt(max((v*2*sqrt_2 + 2) - uu + vv, 0)) - sqrt(max(v*2*sqrt_2 - 2 - uu + vv, 0)))*0.5
 
 	return Vector3(x, y, 0)
 end

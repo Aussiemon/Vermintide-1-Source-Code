@@ -106,7 +106,10 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 			self.matchmaking_manager.debug.text = "Requesting to join"
 
 			mm_printf("Handshake done, requesting to join game...")
-			self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_join_lobby", lobby_id)
+
+			local friend_join = not not self.state_context.friend_join
+
+			self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_join_lobby", lobby_id, friend_join)
 
 			self.join_timeout = t + MatchmakingSettings.REQUEST_JOIN_LOBBY_REPLY_TIME
 			self.state = "asking_to_join"
@@ -177,9 +180,9 @@ MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, rea
 	self.handshaker_client:reset()
 
 	self.state_context.join_lobby_data = nil
-	local join_by_lobby_browser = self.state_context.join_by_lobby_browser
+	local non_matchmaking_join = self.state_context.non_matchmaking_join
 
-	if join_by_lobby_browser then
+	if non_matchmaking_join then
 		self.matchmaking_manager:cancel_join_lobby(reason)
 
 		return MatchmakingStateIdle, self.state_context

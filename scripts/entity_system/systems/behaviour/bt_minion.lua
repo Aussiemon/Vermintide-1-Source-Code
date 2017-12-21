@@ -1,323 +1,333 @@
 local USE_PRECOMPILED_ROOT_TABLES = true
-BreedBehaviors = {
-	ogre = {
+BreedBehaviors = {}
+
+for breed, actions in pairs(BreedActions) do
+	setmetatable(actions, {
+		__index = function (t, k)
+			error(string.format("Trying to access BreedActions.%s.%s that doesn't exist", breed, k))
+
+			return 
+		end
+	})
+end
+
+BreedBehaviors.ogre = {
+	"BTSelector",
+	{
+		"BTSpawningAction",
+		condition = "spawn",
+		name = "spawn"
+	},
+	{
 		"BTSelector",
 		{
-			"BTSpawningAction",
-			condition = "spawn",
-			name = "spawn"
+			"BTTeleportAction",
+			condition = "at_teleport_smartobject",
+			name = "teleport"
 		},
 		{
-			"BTSelector",
-			{
-				"BTTeleportAction",
-				condition = "at_teleport_smartobject",
-				name = "teleport"
-			},
-			{
-				"BTClimbAction",
-				name = "climb",
-				condition = "at_climb_smartobject",
-				action_data = BreedActions.skaven_rat_ogre.climb
-			},
-			{
-				"BTJumpAcrossAction",
-				condition = "at_jump_smartobject",
-				name = "jump_across"
-			},
-			{
-				"BTSmashDoorAction",
-				name = "smash_door",
-				condition = "at_door_smartobject",
-				action_data = BreedActions.skaven_rat_ogre.smash_door
-			},
-			condition = "ratogre_at_smartobject",
-			name = "smartobject"
+			"BTClimbAction",
+			name = "climb",
+			condition = "at_climb_smartobject",
+			action_data = BreedActions.skaven_rat_ogre.climb
 		},
 		{
-			"BTStaggerAction",
-			name = "stagger",
-			condition = "stagger",
-			action_data = BreedActions.skaven_rat_ogre.stagger
+			"BTJumpAcrossAction",
+			condition = "at_jump_smartobject",
+			name = "jump_across"
 		},
 		{
-			"BTSelector",
+			"BTSmashDoorAction",
+			name = "smash_door",
+			condition = "at_door_smartobject",
+			action_data = BreedActions.skaven_rat_ogre.smash_door
+		},
+		condition = "ratogre_at_smartobject",
+		name = "smartobject"
+	},
+	{
+		"BTStaggerAction",
+		name = "stagger",
+		condition = "stagger",
+		action_data = BreedActions.skaven_rat_ogre.stagger
+	},
+	{
+		"BTSelector",
+		{
+			"BTMeleeShoveAction",
+			name = "fling_skaven",
+			condition = "fling_skaven",
+			action_data = BreedActions.skaven_rat_ogre.fling_skaven
+		},
+		{
+			"BTTargetRageAction",
+			name = "target_rage",
+			condition = "target_changed",
+			action_data = BreedActions.skaven_rat_ogre.target_rage
+		},
+		{
+			"BTUtilityNode",
+			{
+				"BTFollowAction",
+				name = "follow",
+				action_data = BreedActions.skaven_rat_ogre.follow
+			},
+			{
+				"BTMeleeSlamAction",
+				name = "melee_slam",
+				action_data = BreedActions.skaven_rat_ogre.melee_slam
+			},
+			{
+				"BTMeleeSlamAction",
+				name = "anti_ladder_melee_slam",
+				action_data = BreedActions.skaven_rat_ogre.anti_ladder_melee_slam
+			},
 			{
 				"BTMeleeShoveAction",
-				name = "fling_skaven",
-				condition = "fling_skaven",
-				action_data = BreedActions.skaven_rat_ogre.fling_skaven
+				name = "melee_shove",
+				action_data = BreedActions.skaven_rat_ogre.melee_shove
 			},
 			{
-				"BTTargetRageAction",
-				name = "target_rage",
-				condition = "target_changed",
-				action_data = BreedActions.skaven_rat_ogre.target_rage
-			},
-			{
-				"BTUtilityNode",
+				"BTSequence",
 				{
-					"BTFollowAction",
-					name = "follow",
-					action_data = BreedActions.skaven_rat_ogre.follow
+					"BTPrepareJumpSlamAction",
+					name = "prepare_jump_slam"
 				},
 				{
-					"BTMeleeSlamAction",
-					name = "melee_slam",
-					action_data = BreedActions.skaven_rat_ogre.melee_slam
+					"BTJumpSlamAction",
+					name = "attack_jump"
 				},
 				{
-					"BTMeleeSlamAction",
-					name = "anti_ladder_melee_slam",
-					action_data = BreedActions.skaven_rat_ogre.anti_ladder_melee_slam
+					"BTJumpSlamImpactAction",
+					name = "jump_slam_impact",
+					action_data = BreedActions.skaven_rat_ogre.jump_slam_impact
 				},
-				{
-					"BTMeleeShoveAction",
-					name = "melee_shove",
-					action_data = BreedActions.skaven_rat_ogre.melee_shove
-				},
-				{
-					"BTSequence",
-					{
-						"BTPrepareJumpSlamAction",
-						name = "prepare_jump_slam"
-					},
-					{
-						"BTJumpSlamAction",
-						name = "attack_jump"
-					},
-					{
-						"BTJumpSlamImpactAction",
-						name = "jump_slam_impact",
-						action_data = BreedActions.skaven_rat_ogre.jump_slam_impact
-					},
-					name = "jump_slam",
-					action_data = BreedActions.skaven_rat_ogre.jump_slam
-				},
-				condition = "ratogre_target_reachable",
-				name = "in_combat"
+				name = "jump_slam",
+				action_data = BreedActions.skaven_rat_ogre.jump_slam
 			},
-			{
-				"BTTargetUnreachableAction",
-				name = "target_unreachable",
-				action_data = BreedActions.skaven_rat_ogre.target_unreachable
-			},
-			condition = "can_see_player",
-			name = "has_target"
-		},
-		{
-			"BTIdleAction",
-			name = "idle"
-		},
-		name = "rat_ogre"
-	},
-	pack_rat = {
-		"BTSelector",
-		{
-			"BTSpawningAction",
-			condition = "spawn",
-			name = "spawn"
-		},
-		{
-			"BTFallAction",
-			condition = "is_falling",
-			name = "falling"
-		},
-		{
-			"BTStaggerAction",
-			name = "stagger",
-			condition = "stagger",
-			action_data = BreedActions.skaven_clan_rat.stagger
-		},
-		{
-			"BTBlockedAction",
-			name = "blocked",
-			condition = "blocked",
-			action_data = BreedActions.skaven_clan_rat.blocked
-		},
-		{
-			"BTSelector",
-			{
-				"BTTeleportAction",
-				condition = "at_teleport_smartobject",
-				name = "teleport"
-			},
-			{
-				"BTClimbAction",
-				condition = "at_climb_smartobject",
-				name = "climb"
-			},
-			{
-				"BTJumpAcrossAction",
-				condition = "at_jump_smartobject",
-				name = "jump_across"
-			},
-			{
-				"BTSmashDoorAction",
-				name = "smash_door",
-				condition = "at_door_smartobject",
-				action_data = BreedActions.skaven_clan_rat.smash_door
-			},
-			condition = "at_smartobject",
-			name = "smartobject"
-		},
-		{
-			"BTHesitateAction",
-			condition = "is_alerted",
-			name = "hesitate"
-		},
-		{
-			"BTUtilityNode",
-			{
-				"BTClanRatFollowAction",
-				name = "follow",
-				action_data = BreedActions.skaven_clan_rat.follow
-			},
-			{
-				"BTAttackAction",
-				name = "running_attack",
-				action_data = BreedActions.skaven_clan_rat.running_attack
-			},
-			{
-				"BTAttackAction",
-				name = "normal_attack",
-				action_data = BreedActions.skaven_clan_rat.normal_attack
-			},
-			{
-				"BTCombatShoutAction",
-				name = "combat_shout",
-				action_data = BreedActions.skaven_clan_rat.combat_shout
-			},
-			name = "in_combat",
-			condition = "confirmed_player_sighting",
-			action_data = BreedActions.skaven_clan_rat.utility_action
-		},
-		{
-			"BTAlertedAction",
-			name = "alerted",
-			condition = "player_spotted",
-			action_data = BreedActions.skaven_clan_rat.alerted
-		},
-		{
-			"BTMoveToGoalAction",
-			name = "move_to_goal",
-			condition = "has_goal_destination",
-			action_data = BreedActions.skaven_clan_rat.follow
-		},
-		{
-			"BTSequence",
-			{
-				"BTInterestPointChooseAction",
-				name = "interest_point_choose",
-				action_data = BreedActions.skaven_clan_rat.interest_point_choose
-			},
-			{
-				"BTInterestPointApproachAction",
-				name = "interest_point_approach"
-			},
-			{
-				"BTInterestPointUseAction",
-				name = "interest_point_use",
-				action_data = BreedActions.skaven_clan_rat.interest_point_choose
-			},
-			condition = "should_use_interest_point",
-			name = "interest_point"
-		},
-		{
-			"BTIdleAction",
-			name = "idle"
-		},
-		name = "pack"
-	},
-	horde_rat = {
-		"BTSelector",
-		{
-			"BTSpawningAction",
-			condition = "spawn",
-			name = "spawn"
-		},
-		{
-			"BTFallAction",
-			condition = "is_falling",
-			name = "falling"
-		},
-		{
-			"BTStaggerAction",
-			name = "stagger",
-			condition = "stagger",
-			action_data = BreedActions.skaven_clan_rat.stagger
-		},
-		{
-			"BTBlockedAction",
-			name = "blocked",
-			condition = "blocked",
-			action_data = BreedActions.skaven_clan_rat.blocked
-		},
-		{
-			"BTSelector",
-			{
-				"BTTeleportAction",
-				condition = "at_teleport_smartobject",
-				name = "teleport"
-			},
-			{
-				"BTClimbAction",
-				condition = "at_climb_smartobject",
-				name = "climb"
-			},
-			{
-				"BTJumpAcrossAction",
-				condition = "at_jump_smartobject",
-				name = "jump_across"
-			},
-			{
-				"BTSmashDoorAction",
-				name = "smash_door",
-				condition = "at_door_smartobject",
-				action_data = BreedActions.skaven_clan_rat.smash_door
-			},
-			condition = "at_smartobject",
-			name = "smartobject"
-		},
-		{
-			"BTUtilityNode",
-			{
-				"BTClanRatFollowAction",
-				name = "follow",
-				action_data = BreedActions.skaven_clan_rat.follow
-			},
-			{
-				"BTAttackAction",
-				name = "running_attack",
-				condition = "ask_target_before_attacking",
-				action_data = BreedActions.skaven_clan_rat.running_attack
-			},
-			{
-				"BTAttackAction",
-				name = "normal_attack",
-				condition = "ask_target_before_attacking",
-				action_data = BreedActions.skaven_clan_rat.normal_attack
-			},
-			{
-				"BTCombatShoutAction",
-				name = "combat_shout",
-				action_data = BreedActions.skaven_clan_rat.combat_shout
-			},
-			condition = "can_see_player",
+			condition = "ratogre_target_reachable",
 			name = "in_combat"
 		},
 		{
-			"BTMoveToGoalAction",
-			name = "move_to_goal",
-			condition = "has_goal_destination",
+			"BTTargetUnreachableAction",
+			name = "target_unreachable",
+			action_data = BreedActions.skaven_rat_ogre.target_unreachable
+		},
+		condition = "can_see_player",
+		name = "has_target"
+	},
+	{
+		"BTIdleAction",
+		name = "idle"
+	},
+	name = "rat_ogre"
+}
+BreedBehaviors.pack_rat = {
+	"BTSelector",
+	{
+		"BTSpawningAction",
+		condition = "spawn",
+		name = "spawn"
+	},
+	{
+		"BTFallAction",
+		condition = "is_falling",
+		name = "falling"
+	},
+	{
+		"BTStaggerAction",
+		name = "stagger",
+		condition = "stagger",
+		action_data = BreedActions.skaven_clan_rat.stagger
+	},
+	{
+		"BTBlockedAction",
+		name = "blocked",
+		condition = "blocked",
+		action_data = BreedActions.skaven_clan_rat.blocked
+	},
+	{
+		"BTSelector",
+		{
+			"BTTeleportAction",
+			condition = "at_teleport_smartobject",
+			name = "teleport"
+		},
+		{
+			"BTClimbAction",
+			condition = "at_climb_smartobject",
+			name = "climb"
+		},
+		{
+			"BTJumpAcrossAction",
+			condition = "at_jump_smartobject",
+			name = "jump_across"
+		},
+		{
+			"BTSmashDoorAction",
+			name = "smash_door",
+			condition = "at_door_smartobject",
+			action_data = BreedActions.skaven_clan_rat.smash_door
+		},
+		condition = "at_smartobject",
+		name = "smartobject"
+	},
+	{
+		"BTHesitateAction",
+		condition = "is_alerted",
+		name = "hesitate"
+	},
+	{
+		"BTUtilityNode",
+		{
+			"BTClanRatFollowAction",
+			name = "follow",
 			action_data = BreedActions.skaven_clan_rat.follow
 		},
 		{
-			"BTIdleAction",
-			name = "idle"
+			"BTAttackAction",
+			name = "running_attack",
+			action_data = BreedActions.skaven_clan_rat.running_attack
 		},
-		name = "horde"
-	}
+		{
+			"BTAttackAction",
+			name = "normal_attack",
+			action_data = BreedActions.skaven_clan_rat.normal_attack
+		},
+		{
+			"BTCombatShoutAction",
+			name = "combat_shout",
+			action_data = BreedActions.skaven_clan_rat.combat_shout
+		},
+		name = "in_combat",
+		condition = "confirmed_player_sighting",
+		action_data = BreedActions.skaven_clan_rat.utility_action
+	},
+	{
+		"BTAlertedAction",
+		name = "alerted",
+		condition = "player_spotted",
+		action_data = BreedActions.skaven_clan_rat.alerted
+	},
+	{
+		"BTMoveToGoalAction",
+		name = "move_to_goal",
+		condition = "has_goal_destination",
+		action_data = BreedActions.skaven_clan_rat.follow
+	},
+	{
+		"BTSequence",
+		{
+			"BTInterestPointChooseAction",
+			name = "interest_point_choose",
+			action_data = BreedActions.skaven_clan_rat.interest_point_choose
+		},
+		{
+			"BTInterestPointApproachAction",
+			name = "interest_point_approach"
+		},
+		{
+			"BTInterestPointUseAction",
+			name = "interest_point_use",
+			action_data = BreedActions.skaven_clan_rat.interest_point_choose
+		},
+		condition = "should_use_interest_point",
+		name = "interest_point"
+	},
+	{
+		"BTIdleAction",
+		name = "idle"
+	},
+	name = "pack"
+}
+BreedBehaviors.horde_rat = {
+	"BTSelector",
+	{
+		"BTSpawningAction",
+		condition = "spawn",
+		name = "spawn"
+	},
+	{
+		"BTFallAction",
+		condition = "is_falling",
+		name = "falling"
+	},
+	{
+		"BTStaggerAction",
+		name = "stagger",
+		condition = "stagger",
+		action_data = BreedActions.skaven_clan_rat.stagger
+	},
+	{
+		"BTBlockedAction",
+		name = "blocked",
+		condition = "blocked",
+		action_data = BreedActions.skaven_clan_rat.blocked
+	},
+	{
+		"BTSelector",
+		{
+			"BTTeleportAction",
+			condition = "at_teleport_smartobject",
+			name = "teleport"
+		},
+		{
+			"BTClimbAction",
+			condition = "at_climb_smartobject",
+			name = "climb"
+		},
+		{
+			"BTJumpAcrossAction",
+			condition = "at_jump_smartobject",
+			name = "jump_across"
+		},
+		{
+			"BTSmashDoorAction",
+			name = "smash_door",
+			condition = "at_door_smartobject",
+			action_data = BreedActions.skaven_clan_rat.smash_door
+		},
+		condition = "at_smartobject",
+		name = "smartobject"
+	},
+	{
+		"BTUtilityNode",
+		{
+			"BTClanRatFollowAction",
+			name = "follow",
+			action_data = BreedActions.skaven_clan_rat.follow
+		},
+		{
+			"BTAttackAction",
+			name = "running_attack",
+			condition = "ask_target_before_attacking",
+			action_data = BreedActions.skaven_clan_rat.running_attack
+		},
+		{
+			"BTAttackAction",
+			name = "normal_attack",
+			condition = "ask_target_before_attacking",
+			action_data = BreedActions.skaven_clan_rat.normal_attack
+		},
+		{
+			"BTCombatShoutAction",
+			name = "combat_shout",
+			action_data = BreedActions.skaven_clan_rat.combat_shout
+		},
+		condition = "can_see_player",
+		name = "in_combat"
+	},
+	{
+		"BTMoveToGoalAction",
+		name = "move_to_goal",
+		condition = "has_goal_destination",
+		action_data = BreedActions.skaven_clan_rat.follow
+	},
+	{
+		"BTIdleAction",
+		name = "idle"
+	},
+	name = "horde"
 }
 local STORM_VERMIN_COMBAT_DESTRUCTIBLE_STATIC = {
 	"BTSelector",
@@ -544,6 +554,49 @@ BreedBehaviors.storm_vermin_commander = {
 	{
 		"BTIdleAction",
 		name = "idle"
+	},
+	name = "horde"
+}
+BreedBehaviors.grey_seer = {
+	"BTSelector",
+	{
+		"BTSpawningAction",
+		condition = "spawn",
+		name = "spawn"
+	},
+	{
+		"BTStaggerAction",
+		name = "stagger",
+		condition = "stagger",
+		action_data = BreedActions.skaven_grey_seer.stagger
+	},
+	{
+		"BTSelector",
+		{
+			"BTTeleportToPortalAction",
+			name = "teleport_1",
+			condition = "grey_seer_first_teleport",
+			action_data = BreedActions.skaven_grey_seer.teleport_1
+		},
+		{
+			"BTTeleportToPortalAction",
+			name = "teleport_2",
+			condition = "grey_seer_second_teleport",
+			action_data = BreedActions.skaven_grey_seer.teleport_2
+		},
+		{
+			"BTTeleportToPortalAction",
+			name = "teleport_3",
+			condition = "grey_seer_third_teleport",
+			action_data = BreedActions.skaven_grey_seer.teleport_3
+		},
+		condition = "can_see_player",
+		name = "teleport"
+	},
+	{
+		"BTIdleAction",
+		name = "idle",
+		action_data = BreedActions.skaven_grey_seer.idle
 	},
 	name = "horde"
 }
@@ -1028,9 +1081,8 @@ BreedBehaviors.critter_rat = {
 	},
 	{
 		"BTCritterRatScurryUnderDoorAction",
-		name = "under_door",
 		condition = "at_smart_object_and_door",
-		action_data = BreedActions.critter_rat.scurry_under_door
+		name = "under_door"
 	},
 	{
 		"BTSequence",
@@ -1053,6 +1105,18 @@ BreedBehaviors.critter_rat = {
 	},
 	name = "critter_rat"
 }
+
+for _, dlc in pairs(DLCSettings) do
+	local behaviour_trees = dlc.behaviour_trees
+
+	for _, tree in ipairs(behaviour_trees) do
+		dofile(tree)
+	end
+end
+
+for breed, actions in pairs(BreedActions) do
+	setmetatable(actions, nil)
+end
 
 if USE_PRECOMPILED_ROOT_TABLES then
 	for bt_name, bt_node in pairs(BreedBehaviors) do

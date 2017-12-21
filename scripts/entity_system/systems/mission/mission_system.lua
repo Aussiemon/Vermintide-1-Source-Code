@@ -10,7 +10,8 @@ local RPCS = {
 	"rpc_request_mission_with_unit",
 	"rpc_update_mission",
 	"rpc_request_mission_update",
-	"rpc_request_unique_mission_update"
+	"rpc_request_unique_mission_update",
+	"rpc_sync_mission_data"
 }
 local ACHIEVEMENT_MISSION_STATS = {
 	tutorial_revive_ally = true
@@ -327,6 +328,34 @@ MissionSystem.flow_callback_start_mission = function (self, mission_name, unit)
 
 	return 
 end
+MissionSystem.flow_callback_increment_goal_mission_data_counter = function (self, mission_name, value)
+	if not self.is_server then
+		return 
+	end
+
+	self.increment_goal_mission_counter(self, mission_name, value, true)
+
+	return 
+end
+MissionSystem.increment_goal_mission_counter = function (self, mission_name, value, sync)
+	local data = self.active_missions[mission_name]
+
+	if data and data.is_goal then
+		data.generic_counter = math.max(data.generic_counter + value, 0)
+
+		if self.is_server and sync then
+			local mission_data = data.mission_data
+			local mission_template_name = mission_data.mission_template_name
+			local template = MissionTemplates[mission_template_name]
+			local sync_data = template.create_sync_data(data)
+			local mission_name_id = NetworkLookup.mission_names[mission_name]
+
+			self.network_transmit:send_rpc_clients("rpc_sync_mission_data", mission_name_id, sync_data)
+		end
+	end
+
+	return 
+end
 MissionSystem.flow_callback_update_mission = function (self, mission_name)
 	if not self.is_server then
 		return 
@@ -440,8 +469,24 @@ MissionSystem.rpc_update_mission = function (self, peer_id, mission_name_id, syn
 
 	return 
 end
+MissionSystem.rpc_sync_mission_data = function (self, peer_id, mission_name_id, sync_data)
+	local mission_name = NetworkLookup.mission_names[mission_name_id]
+	local data = self.active_missions[mission_name]
+
+	fassert(data, "[MissionSystem]:rpc_sync_mission_data() Trying to update non-active mission %q", mission_name)
+
+	local mission_template_name = data.mission_data.mission_template_name
+	local template = MissionTemplates[mission_template_name]
+
+	template.sync(data, sync_data)
+
+	return 
+end
 MissionSystem.get_missions = function (self)
 	return self.active_missions, self.completed_missions
+end
+MissionSystem.has_mission = function (self, mission_name)
+	return self.active_missions[mission_name]
 end
 MissionSystem.get_level_end_mission_data = function (self, mission_template_name)
 	return self.level_end_missions[mission_template_name]

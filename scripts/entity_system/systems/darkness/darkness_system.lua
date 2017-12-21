@@ -18,6 +18,17 @@ DarknessSystem.init = function (self, entity_system_creation_context, system_nam
 	self._num_volumes = volumes and #volumes
 	self._in_darkness = false
 	self._screen_fx_name = "fx/screenspace_darkness_flash"
+	self._global_darkness = false
+
+	return 
+end
+DarknessSystem.set_global_darkness = function (self, set)
+	self._global_darkness = set
+
+	return 
+end
+DarknessSystem.set_local_players_light_intensity = function (self, intensity)
+	self._local_players_light_intensity = intensity
 
 	return 
 end
@@ -62,9 +73,11 @@ end
 DarknessSystem.update = function (self, context, t)
 	local dt = context.dt
 
-	self._update_light_sources(self, dt, t)
-	self._update_player_unit_darkness(self, dt, t)
-	self._update_darkness_fx(self, dt, t)
+	if self._darkness_volumes or self._global_darkness then
+		self._update_light_sources(self, dt, t)
+		self._update_player_unit_darkness(self, dt, t)
+		self._update_darkness_fx(self, dt, t)
+	end
 
 	return 
 end
@@ -201,6 +214,10 @@ DarknessSystem._update_darkness_fx = function (self, dt, t)
 	return 
 end
 DarknessSystem.is_in_darkness_volume = function (self, position)
+	if self._global_darkness then
+		return true
+	end
+
 	local volumes = self._darkness_volumes
 
 	if volumes then
@@ -226,6 +243,19 @@ DarknessSystem.calculate_light_value = function (self, position)
 		local dist_sq = math.max(Vector3.distance_squared(position, pos), 1)
 		local intensity = data.intensity
 		light_value = light_value + intensity*dist_sq/1
+	end
+
+	if self._local_players_light_intensity then
+		local player_manager = Managers.player
+		local player = player_manager.local_player(player_manager, 1)
+		local player_unit = player and player.player_unit
+
+		if Unit.alive(player_unit) then
+			local pos = POSITION_LOOKUP[player_unit]
+			local dist_sq = math.max(Vector3.distance_squared(position, pos), 1)
+			local intensity = data.intensity
+			light_value = light_value + intensity*dist_sq/1
+		end
 	end
 
 	return light_value

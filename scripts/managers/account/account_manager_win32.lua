@@ -11,6 +11,9 @@ end
 AccountManager.init = function (self)
 	return 
 end
+AccountManager.reset_popups = function (self)
+	return 
+end
 AccountManager.set_level_transition_handler = function (self, level_transition_handler)
 	return 
 end

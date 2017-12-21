@@ -48,6 +48,9 @@ go_type_table = {
 			local experience = ExperienceSettings.get_experience()
 			local level = ExperienceSettings.get_level(experience)
 			local max_health = ScriptUnit.extension(unit, "health_system"):initial_max_health()
+
+			fassert(max_health and 0 < max_health, "Trying to create player unit with invalid max health: %s", tostring(max_health))
+
 			local max_wounds = ScriptUnit.extension(unit, "status_system"):max_wounds_network_safe()
 			local data_table = {
 				moving_platform = 0,
@@ -243,6 +246,8 @@ go_type_table = {
 			local data_table = {
 				go_type = NetworkLookup.go_types.player_projectile_unit,
 				husk_unit = NetworkLookup.husks[unit_name],
+				position = Unit.local_position(unit, 0),
+				rotation = Unit.local_rotation(unit, 0),
 				angle = angle,
 				initial_position = initial_position,
 				target_vector = target_vector,
@@ -532,6 +537,8 @@ go_type_table = {
 			local data_table = {
 				go_type = NetworkLookup.go_types.true_flight_projectile_unit,
 				husk_unit = NetworkLookup.husks[unit_name],
+				position = Unit.local_position(unit, 0),
+				rotation = Unit.local_rotation(unit, 0),
 				true_flight_template_id = TrueFlightTemplates[true_flight_template].lookup_id,
 				target_unit_id = target_unit_id,
 				angle = angle,

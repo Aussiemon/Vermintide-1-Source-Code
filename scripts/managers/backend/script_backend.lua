@@ -73,11 +73,11 @@ local LOG_LEVELS = {
 	verbose = 2,
 	normal = 1
 }
-ScriptBackend.init = function (self)
+ScriptBackend.init = function (self, signin_timeout)
 	local title_id = GameSettingsDevelopment.backend_settings.title_id
 	local environment = GameSettingsDevelopment.backend_settings.environment
 
-	print(string.format("[Backend] Creating backend with title id: %d, environment: %q", title_id, BACKEND_ENVIRONMENTS[environment]))
+	print(string.format("[Backend] Creating backend with title id: %d, environment: %q", title_id, tostring(BACKEND_ENVIRONMENTS[environment])))
 	Backend.create(title_id, environment)
 
 	self._backend = true
@@ -91,6 +91,7 @@ ScriptBackend.init = function (self)
 	self._commit_current_id = nil
 	self._commit_queue_id = nil
 	self._last_id = 0
+	self._signin_timeout = os.time() + signin_timeout
 
 	return 
 end
@@ -190,6 +191,14 @@ ScriptBackend.update_signin = function (self)
 		Backend.load_entities()
 
 		self._entities_requested = true
+	end
+
+	if not result and self._signin_timeout < os.time() then
+		result = {
+			reason = BACKEND_LUA_ERRORS.ERR_SIGNIN_TIMEOUT
+		}
+
+		print_error("Signin timed out")
 	end
 
 	return result

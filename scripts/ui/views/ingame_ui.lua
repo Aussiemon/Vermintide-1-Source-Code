@@ -61,8 +61,8 @@ IngameUI.init = function (self, ingame_ui_context)
 	self.top_world = top_world
 
 	if Development.parameter("gdc") then
-		self.ui_renderer = UIRenderer.create(world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
-		self.ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/helper_screens/helper_screens", "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+		self.ui_renderer = UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+		self.ui_top_renderer = UIRenderer.create(top_world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/gdc_material", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 	elseif ALWAYS_LOAD_ALL_VIEWS then
 		self.ui_renderer = view_settings.development.ui_renderer_function(world)
 		self.ui_top_renderer = view_settings.development.ui_renderer_function(top_world)
@@ -74,19 +74,15 @@ IngameUI.init = function (self, ingame_ui_context)
 		self.ui_top_renderer = view_settings.ingame.ui_renderer_function(top_world)
 	end
 
-	if GameSettingsDevelopment.beta then
-		self.blocked_transitions = {}
-
-		if Development.parameter("gdc") then
-			self.blocked_transitions = {
-				inventory_view_force = true,
-				forge_view = true,
-				forge_view_force = true,
-				inventory_view = true,
-				lorebook_view = true,
-				lorebook_view_force = true
-			}
-		end
+	if Development.parameter("gdc") then
+		self.blocked_transitions = {
+			inventory_view_force = true,
+			forge_view = true,
+			forge_view_force = true,
+			inventory_view = true,
+			lorebook_view = true,
+			lorebook_view_force = true
+		}
 	elseif ALWAYS_LOAD_ALL_VIEWS then
 		self.blocked_transitions = view_settings.development.blocked_transitions
 	elseif self.is_in_inn then
@@ -152,6 +148,7 @@ IngameUI.init = function (self, ingame_ui_context)
 
 	self.telemetry_time_view_enter = 0
 	self.ingame_ui_context = ingame_ui_context
+	self.player_manager = Managers.player
 
 	return 
 end
@@ -239,17 +236,21 @@ IngameUI.is_quests_unlocked = function (self)
 		return true
 	end
 
-	local player_manager = Managers.player
-	local statistics_db = player_manager.statistics_db(player_manager)
-	local player = player_manager.local_player(player_manager)
-	local stats_id = player.stats_id(player)
-	local can_use = LevelUnlockUtils.all_acts_completed(statistics_db, stats_id)
-	local backend_settings = GameSettingsDevelopment.backend_settings
+	local experience = ScriptBackendProfileAttribute.get("experience")
+	local level = ExperienceSettings.get_level(experience)
+	local prestige = ScriptBackendProfileAttribute.get("prestige")
+	local can_use = ProgressionUnlocks.is_unlocked("quests", level, prestige)
 
-	return can_use and backend_settings.quests_enabled
+	return can_use
 end
 IngameUI.is_lorebook_enabled = function (self)
-	return true
+	if Application.platform() ~= "win32" then
+		return GameSettingsDevelopment.lorebook_enabled
+	else
+		return true
+	end
+
+	return 
 end
 IngameUI.register_rpcs = function (self, network_event_delegate)
 	self.network_event_delegate = network_event_delegate
@@ -271,12 +272,15 @@ IngameUI.destroy = function (self)
 	Managers.chat:set_wwise_world(nil)
 	Managers.chat:set_input_manager(nil)
 
-	if self.menu_active or self.current_view then
+	local current_view = self.current_view
+	local menu_active = self.menu_active
+
+	if menu_active or current_view then
 		ShowCursorStack.pop()
 	end
 
-	if self.current_view then
-		self.views[self.current_view]:on_exit()
+	if current_view then
+		self.views[current_view]:on_exit()
 
 		self.current_view = nil
 	end
@@ -339,11 +343,7 @@ IngameUI.destroy = function (self)
 
 	return 
 end
-IngameUI.handle_menu_hotkeys = function (self, dt, input_service, hotkeys_enabled, menu_active)
-	if not hotkeys_enabled then
-		return 
-	end
-
+IngameUI.handle_menu_hotkeys = function (self, dt, input_service, menu_active)
 	local views = self.views
 	local current_view = self.current_view
 	local hotkey_mapping = self.hotkey_mapping
@@ -425,7 +425,6 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 	local input_service = self.input_manager:get_service("ingame_menu")
 	local end_screen_active = self.end_screen_active(self)
 	local ingame_hud = self.ingame_hud
-	local input_helper_ui = ingame_hud.input_helper_ui
 	local transition_manager = Managers.transition
 	local countdown_ui = self.countdown_ui
 	local end_screen = self.end_screen
@@ -482,34 +481,41 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 
 			local gdc_build = Development.parameter("gdc")
 
-			if not self.pending_transition(self) and not end_screen_active and not self.menu_active and not self.leave_game and not self.return_to_title_screen and not gdc_build and not self.popup_join_lobby_handler.visible and not input_helper_ui.active and input_service.get(input_service, "toggle_menu", true) then
+			if not self.pending_transition(self) and not end_screen_active and not self.menu_active and not self.leave_game and not self.return_to_title_screen and not gdc_build and not self.popup_join_lobby_handler.visible and input_service.get(input_service, "toggle_menu", true) then
 				self.handle_transition(self, "ingame_menu")
 
 				MOOD_BLACKBOARD.menu = true
 			end
 		end
 
-		if not self.pending_transition(self) then
+		if is_in_inn then
 			Profiler.start("hotkeys")
 
-			local local_player = Managers.player:local_player()
-			local player_unit = local_player and local_player.player_unit
+			if not self.pending_transition(self) then
+				local local_player = self.player_manager:local_player()
+				local player_unit = local_player and local_player.player_unit
+				local player_alive = player_unit and Unit.alive(player_unit)
 
-			if player_unit and Unit.alive(player_unit) then
-				local enable_hotkeys = is_in_inn and not end_screen_active and not disable_ingame_ui and not in_score_screen and not input_helper_ui.active
-
-				self.handle_menu_hotkeys(self, dt, input_service, enable_hotkeys, self.menu_active)
+				if player_alive then
+					self.handle_menu_hotkeys(self, dt, input_service, self.menu_active)
+				end
 			end
 
 			Profiler.stop("hotkeys")
 		end
 
-		Profiler.start("Countdown UI")
-		countdown_ui.update(countdown_ui, dt)
-		Profiler.stop("Countdown UI")
-		Profiler.start("matchmaking")
-		self.matchmaking_ui:update(dt, t)
-		Profiler.stop("matchmaking")
+		if is_in_inn then
+			Profiler.start("Countdown UI")
+			countdown_ui.update(countdown_ui, dt)
+			Profiler.stop("Countdown UI")
+		end
+
+		if is_in_inn then
+			Profiler.start("matchmaking")
+			self.matchmaking_ui:update(dt, t)
+			Profiler.stop("matchmaking")
+		end
+
 		Profiler.start("popup_handler")
 		self.popup_join_lobby_handler:update(dt)
 		Profiler.stop("popup_handler")
@@ -1038,15 +1044,6 @@ IngameUI.update_map_enable_state = function (self)
 end
 IngameUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
-end
-IngameUI.show_input_helper = function (self)
-	local input_helper_ui = self.ingame_hud.input_helper_ui
-
-	if input_helper_ui.show_at_startup then
-		input_helper_ui.display_first_time(input_helper_ui)
-	end
 
 	return 
 end

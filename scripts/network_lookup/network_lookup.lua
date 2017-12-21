@@ -23,73 +23,99 @@ setmetatable(DialogueLookup, nil)
 table.clear(DialogueLookup)
 
 DialogueLookup_n = 0
+MarkerLookup = MarkerLookup or {}
 
-dofile("dialogues/generated/lookup_witch_hunter")
-dofile("dialogues/generated/lookup_bright_wizard")
-dofile("dialogues/generated/lookup_dwarf_ranger")
-dofile("dialogues/generated/lookup_wood_elf")
-dofile("dialogues/generated/lookup_empire_soldier")
-dofile("dialogues/generated/lookup_player_conversations")
-dofile("dialogues/generated/lookup_npcs")
-dofile("dialogues/generated/lookup_special_occasions")
-dofile("dialogues/generated/lookup_enemies")
-dofile("dialogues/generated/lookup_dlc_01")
-dofile("dialogues/generated/lookup_tutorial")
-dofile("dialogues/generated/lookup_drachenfels")
-dofile("dialogues/generated/lookup_dlc_enemies_01")
-dofile("dialogues/generated/lookup_dwarf_dlc")
-dofile("dialogues/generated/lookup_bright_wizard_bridge")
-dofile("dialogues/generated/lookup_dwarf_ranger_bridge")
-dofile("dialogues/generated/lookup_witch_hunter_bridge")
-dofile("dialogues/generated/lookup_wood_elf_bridge")
-dofile("dialogues/generated/lookup_bright_wizard_cemetery")
-dofile("dialogues/generated/lookup_dwarf_ranger_cemetery")
-dofile("dialogues/generated/lookup_witch_hunter_cemetery")
-dofile("dialogues/generated/lookup_wood_elf_cemetery")
-dofile("dialogues/generated/lookup_bright_wizard_city_wall")
-dofile("dialogues/generated/lookup_dwarf_ranger_city_wall")
-dofile("dialogues/generated/lookup_witch_hunter_city_wall")
-dofile("dialogues/generated/lookup_wood_elf_city_wall")
-dofile("dialogues/generated/lookup_bright_wizard_courtyard")
-dofile("dialogues/generated/lookup_dwarf_ranger_courtyard")
-dofile("dialogues/generated/lookup_witch_hunter_courtyard")
-dofile("dialogues/generated/lookup_wood_elf_courtyard")
-dofile("dialogues/generated/lookup_bright_wizard_docks")
-dofile("dialogues/generated/lookup_dwarf_ranger_docks")
-dofile("dialogues/generated/lookup_witch_hunter_docks")
-dofile("dialogues/generated/lookup_wood_elf_docks")
-dofile("dialogues/generated/lookup_bright_wizard_end_boss")
-dofile("dialogues/generated/lookup_dwarf_ranger_end_boss")
-dofile("dialogues/generated/lookup_witch_hunter_end_boss")
-dofile("dialogues/generated/lookup_wood_elf_end_boss")
-dofile("dialogues/generated/lookup_bright_wizard_farm")
-dofile("dialogues/generated/lookup_dwarf_ranger_farm")
-dofile("dialogues/generated/lookup_witch_hunter_farm")
-dofile("dialogues/generated/lookup_wood_elf_farm")
-dofile("dialogues/generated/lookup_bright_wizard_forest_ambush")
-dofile("dialogues/generated/lookup_dwarf_ranger_forest_ambush")
-dofile("dialogues/generated/lookup_witch_hunter_forest_ambush")
-dofile("dialogues/generated/lookup_wood_elf_forest_ambush")
-dofile("dialogues/generated/lookup_bright_wizard_magnus_tower")
-dofile("dialogues/generated/lookup_dwarf_ranger_magnus_tower")
-dofile("dialogues/generated/lookup_witch_hunter_magnus_tower")
-dofile("dialogues/generated/lookup_wood_elf_magnus_tower")
-dofile("dialogues/generated/lookup_bright_wizard_merchant")
-dofile("dialogues/generated/lookup_dwarf_ranger_merchant")
-dofile("dialogues/generated/lookup_witch_hunter_merchant")
-dofile("dialogues/generated/lookup_wood_elf_merchant")
-dofile("dialogues/generated/lookup_bright_wizard_sewers")
-dofile("dialogues/generated/lookup_dwarf_ranger_sewers")
-dofile("dialogues/generated/lookup_witch_hunter_sewers")
-dofile("dialogues/generated/lookup_wood_elf_sewers")
-dofile("dialogues/generated/lookup_bright_wizard_skaven_tunnels")
-dofile("dialogues/generated/lookup_dwarf_ranger_skaven_tunnels")
-dofile("dialogues/generated/lookup_witch_hunter_skaven_tunnels")
-dofile("dialogues/generated/lookup_wood_elf_skaven_tunnels")
-dofile("dialogues/generated/lookup_bright_wizard_wizard_tower")
-dofile("dialogues/generated/lookup_dwarf_ranger_wizard_tower")
-dofile("dialogues/generated/lookup_witch_hunter_wizard_tower")
-dofile("dialogues/generated/lookup_wood_elf_wizard_tower")
+setmetatable(MarkerLookup, nil)
+table.clear(MarkerLookup)
+
+MarkerLookup_n = 0
+local dialogue_lookup_tables = {
+	"dialogues/generated/lookup_witch_hunter",
+	"dialogues/generated/lookup_bright_wizard",
+	"dialogues/generated/lookup_dwarf_ranger",
+	"dialogues/generated/lookup_wood_elf",
+	"dialogues/generated/lookup_empire_soldier",
+	"dialogues/generated/lookup_player_conversations",
+	"dialogues/generated/lookup_npcs",
+	"dialogues/generated/lookup_special_occasions",
+	"dialogues/generated/lookup_enemies",
+	"dialogues/generated/lookup_dlc_01",
+	"dialogues/generated/lookup_tutorial",
+	"dialogues/generated/lookup_drachenfels",
+	"dialogues/generated/lookup_dlc_enemies_01",
+	"dialogues/generated/lookup_dwarf_dlc",
+	"dialogues/generated/lookup_bright_wizard_bridge",
+	"dialogues/generated/lookup_dwarf_ranger_bridge",
+	"dialogues/generated/lookup_witch_hunter_bridge",
+	"dialogues/generated/lookup_wood_elf_bridge",
+	"dialogues/generated/lookup_bright_wizard_cemetery",
+	"dialogues/generated/lookup_dwarf_ranger_cemetery",
+	"dialogues/generated/lookup_witch_hunter_cemetery",
+	"dialogues/generated/lookup_wood_elf_cemetery",
+	"dialogues/generated/lookup_bright_wizard_city_wall",
+	"dialogues/generated/lookup_dwarf_ranger_city_wall",
+	"dialogues/generated/lookup_witch_hunter_city_wall",
+	"dialogues/generated/lookup_wood_elf_city_wall",
+	"dialogues/generated/lookup_bright_wizard_courtyard",
+	"dialogues/generated/lookup_dwarf_ranger_courtyard",
+	"dialogues/generated/lookup_witch_hunter_courtyard",
+	"dialogues/generated/lookup_wood_elf_courtyard",
+	"dialogues/generated/lookup_bright_wizard_docks",
+	"dialogues/generated/lookup_dwarf_ranger_docks",
+	"dialogues/generated/lookup_witch_hunter_docks",
+	"dialogues/generated/lookup_wood_elf_docks",
+	"dialogues/generated/lookup_bright_wizard_end_boss",
+	"dialogues/generated/lookup_dwarf_ranger_end_boss",
+	"dialogues/generated/lookup_witch_hunter_end_boss",
+	"dialogues/generated/lookup_wood_elf_end_boss",
+	"dialogues/generated/lookup_bright_wizard_farm",
+	"dialogues/generated/lookup_dwarf_ranger_farm",
+	"dialogues/generated/lookup_witch_hunter_farm",
+	"dialogues/generated/lookup_wood_elf_farm",
+	"dialogues/generated/lookup_bright_wizard_forest_ambush",
+	"dialogues/generated/lookup_dwarf_ranger_forest_ambush",
+	"dialogues/generated/lookup_witch_hunter_forest_ambush",
+	"dialogues/generated/lookup_wood_elf_forest_ambush",
+	"dialogues/generated/lookup_bright_wizard_magnus_tower",
+	"dialogues/generated/lookup_dwarf_ranger_magnus_tower",
+	"dialogues/generated/lookup_witch_hunter_magnus_tower",
+	"dialogues/generated/lookup_wood_elf_magnus_tower",
+	"dialogues/generated/lookup_bright_wizard_merchant",
+	"dialogues/generated/lookup_dwarf_ranger_merchant",
+	"dialogues/generated/lookup_witch_hunter_merchant",
+	"dialogues/generated/lookup_wood_elf_merchant",
+	"dialogues/generated/lookup_bright_wizard_sewers",
+	"dialogues/generated/lookup_dwarf_ranger_sewers",
+	"dialogues/generated/lookup_witch_hunter_sewers",
+	"dialogues/generated/lookup_wood_elf_sewers",
+	"dialogues/generated/lookup_bright_wizard_skaven_tunnels",
+	"dialogues/generated/lookup_dwarf_ranger_skaven_tunnels",
+	"dialogues/generated/lookup_witch_hunter_skaven_tunnels",
+	"dialogues/generated/lookup_wood_elf_skaven_tunnels",
+	"dialogues/generated/lookup_bright_wizard_wizard_tower",
+	"dialogues/generated/lookup_dwarf_ranger_wizard_tower",
+	"dialogues/generated/lookup_witch_hunter_wizard_tower",
+	"dialogues/generated/lookup_wood_elf_wizard_tower",
+	"dialogues/generated/lookup_grey_seer"
+}
+local num_dialogues = #dialogue_lookup_tables
+
+for dlc_name, dlc_settings in pairs(DLCSettings) do
+	for _, dialogue_lookup in ipairs(dlc_settings.dialogue_lookup) do
+		num_dialogues = num_dialogues + 1
+		dialogue_lookup_tables[num_dialogues] = dialogue_lookup
+	end
+end
+
+table.dump(dialogue_lookup_tables)
+
+for _, dialogue_lookup_table in ipairs(dialogue_lookup_tables) do
+	dofile(dialogue_lookup_table)
+
+	if Application.can_get("lua", dialogue_lookup_table .. "_markers") then
+		dofile(dialogue_lookup_table .. "_markers")
+	end
+end
 
 NetworkLookup = {
 	matchmaking_messages = {
@@ -103,6 +129,17 @@ NetworkLookup = {
 		"rpc_matchmaking_request_status_message"
 	}
 }
+
+function create_lookup(lookup, hashtable)
+	local i = #lookup
+
+	for key, _ in pairs(hashtable) do
+		i = i + 1
+		lookup[i] = key
+	end
+
+	return lookup
+end
 
 for _, message_name in ipairs(NetworkLookup.matchmaking_messages) do
 	RPC[message_name] = function (recipient, ...)
@@ -159,25 +196,11 @@ for index, slot_settings in ipairs(InventorySettings.slots) do
 	NetworkLookup.equipment_slots[#NetworkLookup.equipment_slots + 1] = slot_settings.name
 end
 
-NetworkLookup.breeds = {
-	"skaven_clan_rat",
-	"skaven_slave",
-	"skaven_loot_rat",
-	"skaven_storm_vermin",
-	"skaven_storm_vermin_commander",
-	"skaven_poison_wind_globadier",
-	"skaven_gutter_runner",
-	"skaven_pack_master",
-	"skaven_ratling_gunner",
-	"skaven_rat_ogre",
-	"critter_pig",
-	"critter_rat",
-	"debug_ai_profile",
-	"skaven_ai_profile"
-}
+local breeds = {}
 local temp = {}
 
 for breed_name, breed in pairs(Breeds) do
+	breeds[#breeds + 1] = breed_name
 	local translation = breed.hitbox_ragdoll_translation
 
 	if translation then
@@ -187,6 +210,7 @@ for breed_name, breed in pairs(Breeds) do
 	end
 end
 
+NetworkLookup.breeds = breeds
 local hit_ragdoll_actors = {
 	"n/a"
 }
@@ -232,6 +256,8 @@ NetworkLookup.husks = {
 	"units/beings/enemies/skaven_pack_master/chr_skaven_pack_master",
 	"units/beings/enemies/skaven_ratlinggunner/chr_skaven_ratlinggunner",
 	"units/beings/enemies/skaven_stormvermin/chr_skaven_stormvermin",
+	"units/beings/enemies/skaven_grey_seer/chr_skaven_grey_seer",
+	"units/beings/enemies/skaven_stormvermin_champion/chr_skaven_stormvermin_champion",
 	"units/beings/enemies/skaven_wind_globadier/chr_skaven_wind_globadier",
 	"units/beings/enemies/skaven_gutter_runner/chr_skaven_gutter_runner",
 	"units/beings/enemies/skaven_rat_ogre/chr_skaven_rat_ogre",
@@ -396,12 +422,7 @@ NetworkLookup.heal_types = {
 	"heal_on_killing_blow",
 	"shield_by_assist"
 }
-NetworkLookup.difficulties = {}
-
-for difficulty, _ in pairs(DifficultySettings) do
-	NetworkLookup.difficulties[#NetworkLookup.difficulties + 1] = difficulty
-end
-
+NetworkLookup.difficulties = create_lookup({}, DifficultySettings)
 NetworkLookup.linked_particle_policies = {
 	"destroy",
 	"stop",
@@ -555,6 +576,8 @@ NetworkLookup.anims = {
 	"attack_slam_back",
 	"attack_slam_left",
 	"attack_slam_right",
+	"attack_charge_special",
+	"attack_charge_shatter",
 	"attack_shove_left",
 	"attack_shove_left_run",
 	"attack_shove_right",
@@ -635,7 +658,16 @@ NetworkLookup.anims = {
 	"attack_reach_up_2",
 	"attack_reach_up_3",
 	"attack_reach_up_4",
+	"attack_run_2",
+	"attack_spin_charge",
+	"attack_spin_charge_loop",
+	"attack_spin",
+	"charge_attack_step",
+	"charge_attack_loop",
+	"charge_attack_lunge",
 	"combat_idle",
+	"combo_break",
+	"combo_attack",
 	"death",
 	"idle",
 	"idle_looking_around",
@@ -686,26 +718,6 @@ NetworkLookup.anims = {
 	"run_away",
 	"attack_shoot_align",
 	"attack_shoot_start",
-	"screenshot_inn_00",
-	"screenshot_inn_01",
-	"screenshot_inn_02",
-	"screenshot_inn_03",
-	"screenshot_inn_04",
-	"screenshot_magnus_01",
-	"screenshot_sewers_01",
-	"screenshot_farm_01",
-	"screenshot_wizard_01",
-	"screenshot_tunnels_01",
-	"screenshot_bridge_01",
-	"screenshot_1",
-	"screenshot_2",
-	"screenshot_3",
-	"screenshot_4",
-	"screenshot_5",
-	"screenshot_6",
-	"screenshot_7",
-	"screenshot_8",
-	"screenshot_9",
 	"sprint",
 	"suicide_run_start",
 	"surprised_fwd",
@@ -824,9 +836,6 @@ NetworkLookup.anims = {
 	"hanging_loop",
 	"hanging_exit"
 }
-NetworkLookup.bt_action_names = {
-	"n/a"
-}
 NetworkLookup.lobby_data = {
 	"level_key",
 	"selected_level_key",
@@ -922,13 +931,9 @@ for _, direction in pairs(PlayerUnitMovementSettings.catapulted.directions) do
 	end
 end
 
-local actions_table = NetworkLookup.bt_action_names
-local new_action_index = #actions_table + 1
-
-for action_name, _ in pairs(actions_temp) do
-	actions_table[new_action_index] = action_name
-	new_action_index = new_action_index + 1
-end
+NetworkLookup.bt_action_names = create_lookup({
+	"n/a"
+}, actions_temp)
 
 for _, variation_table in pairs(BTHesitationVariations) do
 	for _, variation_name in pairs(variation_table) do
@@ -936,13 +941,7 @@ for _, variation_table in pairs(BTHesitationVariations) do
 	end
 end
 
-local anims_table = NetworkLookup.anims
-local new_index = #anims_table + 1
-
-for anim, _ in pairs(anims_temp) do
-	anims_table[new_index] = anim
-	new_index = new_index + 1
-end
+NetworkLookup.anims = create_lookup(NetworkLookup.anims, anims_temp)
 
 table.clear(anims_temp)
 table.clear(actions_temp)
@@ -1097,20 +1096,10 @@ NetworkLookup.projectile_templates = {
 	"spawn_pickup",
 	"skull_staff"
 }
-NetworkLookup.explosion_templates = {
+NetworkLookup.explosion_templates = create_lookup({
 	"n/a"
-}
-
-for name, template in pairs(ExplosionTemplates) do
-	NetworkLookup.explosion_templates[#NetworkLookup.explosion_templates + 1] = name
-end
-
-NetworkLookup.area_damage_templates = {}
-
-for name, template in pairs(AreaDamageTemplates.templates) do
-	NetworkLookup.area_damage_templates[#NetworkLookup.area_damage_templates + 1] = name
-end
-
+}, ExplosionTemplates)
+NetworkLookup.area_damage_templates = create_lookup({}, AreaDamageTemplates.templates)
 NetworkLookup.game_end_reasons = {
 	"won",
 	"lost",
@@ -1123,32 +1112,12 @@ NetworkLookup.set_wounded_reasons = {
 	"revived",
 	"reached_min_health"
 }
-NetworkLookup.level_keys = {
+NetworkLookup.level_keys = create_lookup({
 	"next_level"
-}
-
-for name, _ in pairs(LevelSettings) do
-	NetworkLookup.level_keys[#NetworkLookup.level_keys + 1] = name
-end
-
-NetworkLookup.game_mode_keys = {}
-
-for name, _ in pairs(GameModeSettings) do
-	NetworkLookup.game_mode_keys[#NetworkLookup.game_mode_keys + 1] = name
-end
-
-NetworkLookup.fatigue_types = {}
-
-for fatigue_type, _ in pairs(PlayerUnitStatusSettings.fatigue_point_costs) do
-	NetworkLookup.fatigue_types[#NetworkLookup.fatigue_types + 1] = fatigue_type
-end
-
-NetworkLookup.pickup_names = {}
-
-for pickup_name, _ in pairs(AllPickups) do
-	NetworkLookup.pickup_names[#NetworkLookup.pickup_names + 1] = pickup_name
-end
-
+}, LevelSettings)
+NetworkLookup.game_mode_keys = create_lookup({}, GameModeSettings)
+NetworkLookup.fatigue_types = create_lookup({}, PlayerUnitStatusSettings.fatigue_point_costs)
+NetworkLookup.pickup_names = create_lookup({}, AllPickups)
 NetworkLookup.pickup_spawn_types = {
 	"spawner",
 	"guaranteed",
@@ -1194,13 +1163,7 @@ NetworkLookup.effects = {
 	"fx/chr_gutter_foff",
 	"spawn_cylinder"
 }
-local lwp_particle_effects = {}
-
-for name, _ in pairs(LightWeightProjectileParticleEffects) do
-	lwp_particle_effects[#lwp_particle_effects + 1] = name
-end
-
-NetworkLookup.light_weight_projectile_particle_effects = lwp_particle_effects
+NetworkLookup.light_weight_projectile_particle_effects = create_lookup({}, LightWeightProjectileParticleEffects)
 NetworkLookup.grenades = {
 	"impact_grenade",
 	"dot_grenade"
@@ -1215,12 +1178,7 @@ NetworkLookup.localized_strings = {
 	"defenders_zone",
 	"neutral_zone"
 }
-NetworkLookup.surface_material_effects = {}
-
-for name, _ in pairs(MaterialEffectMappings) do
-	NetworkLookup.surface_material_effects[#NetworkLookup.surface_material_effects + 1] = name
-end
-
+NetworkLookup.surface_material_effects = create_lookup({}, MaterialEffectMappings)
 NetworkLookup.local_player_id = {
 	"local_player_1",
 	"local_player_2",
@@ -1232,14 +1190,7 @@ NetworkLookup.local_player_id = {
 	"player_bot_4",
 	"enemy_main"
 }
-NetworkLookup.interactions = {}
-local i = 1
-
-for name, _ in pairs(InteractionDefinitions) do
-	NetworkLookup.interactions[i] = name
-	i = i + 1
-end
-
+NetworkLookup.interactions = create_lookup({}, InteractionDefinitions)
 NetworkLookup.interaction_states = {
 	"starting_interaction",
 	"doing_interaction",
@@ -1338,11 +1289,7 @@ for _, weapon_table in pairs(Weapons) do
 	end
 end
 
-for sound_event_name, _ in pairs(weapon_sound_events) do
-	NetworkLookup.sound_events[#NetworkLookup.sound_events + 1] = sound_event_name
-end
-
-NetworkLookup.melee_impact_sound_types = {}
+NetworkLookup.sound_events = create_lookup(NetworkLookup.sound_events, weapon_sound_events)
 local attack_template_sound_types = {}
 
 for _, attack_template in pairs(AttackTemplates) do
@@ -1353,10 +1300,9 @@ for _, attack_template in pairs(AttackTemplates) do
 	end
 end
 
-for sound_type, _ in pairs(attack_template_sound_types) do
-	NetworkLookup.melee_impact_sound_types[#NetworkLookup.melee_impact_sound_types + 1] = sound_type
-end
-
+NetworkLookup.melee_impact_sound_types = create_lookup({
+	"n/a"
+}, attack_template_sound_types)
 NetworkLookup.sound_event_param_names = {
 	"drakegun_charge_fire",
 	"enemy_vo"
@@ -1509,17 +1455,13 @@ for level, settings in pairs(LevelSettings) do
 	end
 end
 
-NetworkLookup.tutorials = {
-	"elite_enemies",
-	"skaven_loot_rat",
-	"skaven_storm_vermin",
-	"skaven_storm_vermin_commander",
-	"skaven_poison_wind_globadier",
-	"skaven_gutter_runner",
-	"skaven_pack_master",
-	"skaven_ratling_gunner",
-	"skaven_rat_ogre"
+local tutorials = {
+	"elite_enemies"
 }
+
+table.append(tutorials, breeds)
+
+NetworkLookup.tutorials = tutorials
 NetworkLookup.pacing = {
 	"pacing_build_up",
 	"pacing_sustain_peak",
@@ -1536,9 +1478,6 @@ NetworkLookup.game_ping_reply = {
 NetworkLookup.sync_names = {
 	"ferry_lady",
 	"ferry_lady2"
-}
-NetworkLookup.boons = {
-	"n/a"
 }
 NetworkLookup.matchmaking_regions = {
 	"south_east_asia",
@@ -1557,29 +1496,15 @@ NetworkLookup.matchmaking_regions = {
 	"europe",
 	"africa"
 }
-NetworkLookup.attack_templates = {
+NetworkLookup.attack_templates = create_lookup({
 	"n/a"
-}
-local i = #NetworkLookup.attack_templates
-
-for template_name, template in pairs(AttackTemplates) do
-	i = i + 1
-	NetworkLookup.attack_templates[i] = template_name
-end
-
-NetworkLookup.attack_damage_values = {
+}, AttackTemplates)
+NetworkLookup.attack_damage_values = create_lookup({
 	"n/a"
-}
-i = #NetworkLookup.attack_damage_values
-
-for value_name, values in pairs(AttackDamageValues) do
-	i = i + 1
-	NetworkLookup.attack_damage_values[i] = value_name
-end
-
-for name, data in pairs(BoonTemplates) do
-	NetworkLookup.boons[#NetworkLookup.boons + 1] = name
-end
+}, AttackDamageValues)
+NetworkLookup.boons = create_lookup({
+	"n/a"
+}, BoonTemplates)
 
 local function statistics_path_names(path_names, stat)
 	if not stat.value then
@@ -1593,36 +1518,17 @@ local function statistics_path_names(path_names, stat)
 	return 
 end
 
-NetworkLookup.statistics_path_names = {}
 local path_names = {}
 
 for category, stat_definitions in pairs(StatisticsDefinitions) do
 	statistics_path_names(path_names, stat_definitions)
 end
 
-for path_name, _ in pairs(path_names) do
-	NetworkLookup.statistics_path_names[#NetworkLookup.statistics_path_names + 1] = path_name
-end
-
-NetworkLookup.mission_names = {}
-
-for name, data in pairs(Missions) do
-	NetworkLookup.mission_names[#NetworkLookup.mission_names + 1] = name
-end
-
-NetworkLookup.inventory_packages = dofile("scripts/network_lookup/inventory_package_list")
-NetworkLookup.projectile_gravity_settings = {}
-
-for name, settings in pairs(ProjectileGravitySettings) do
-	NetworkLookup.projectile_gravity_settings[#NetworkLookup.projectile_gravity_settings + 1] = name
-end
-
-NetworkLookup.voting_types = {}
-
-for voting_type_name, data in pairs(VoteTemplates) do
-	NetworkLookup.voting_types[#NetworkLookup.voting_types + 1] = voting_type_name
-end
-
+NetworkLookup.statistics_path_names = create_lookup({}, path_names)
+NetworkLookup.mission_names = create_lookup({}, Missions)
+NetworkLookup.projectile_gravity_settings = create_lookup({}, ProjectileGravitySettings)
+NetworkLookup.voting_types = create_lookup({}, VoteTemplates)
+NetworkLookup.session_stats = create_lookup({}, StatisticsDefinitions.session)
 local lookup_table = {}
 local flow_events = {}
 
@@ -1636,14 +1542,8 @@ for _, blueprint in pairs(TerrorEventBlueprints) do
 	end
 end
 
-local i = 0
-
-for name, _ in pairs(flow_events) do
-	i = i + 1
-	lookup_table[i] = name
-end
-
-NetworkLookup.terror_flow_events = lookup_table
+NetworkLookup.terror_flow_events = create_lookup({}, flow_events)
+NetworkLookup.inventory_packages = dofile("scripts/network_lookup/inventory_package_list")
 
 local function init(self, name)
 	for index, str in ipairs(self) do
@@ -1668,6 +1568,8 @@ end
 
 local DialogueLookup = DialogueLookup
 NetworkLookup.dialogues = DialogueLookup
+local MarkerLookup = MarkerLookup
+NetworkLookup.markers = MarkerLookup
 
 for key, lookup_table in pairs(NetworkLookup) do
 	init(lookup_table, key)

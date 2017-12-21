@@ -407,7 +407,9 @@ LobbyBrowseView._handle_input = function (self, dt)
 
 		if lobby_data then
 			self.play_sound(self, "Play_hud_select")
-			Managers.matchmaking:request_join_lobby(lobby_data)
+			Managers.matchmaking:request_join_lobby(lobby_data, {
+				join_by_lobby_browser = true
+			})
 
 			self.join_lobby_data_id = lobby_data.id
 		end
@@ -446,7 +448,7 @@ LobbyBrowseView._handle_gamepad_input = function (self, dt)
 	local gamepad_selected_page = self.gamepad_selected_page
 
 	if gamepad_selected_page == "filters" then
-		if input_service.get(input_service, "confirm") then
+		if input_service.get(input_service, "confirm", true) then
 			self.search(self)
 			self.deselect_gamepad_widget_by_index(self, self.selected_gamepad_widget_index)
 
@@ -459,12 +461,14 @@ LobbyBrowseView._handle_gamepad_input = function (self, dt)
 
 		self.handle_gamepad_navigation_input(self, dt)
 		self._handle_stepper_input(self, dt)
-	elseif input_service.get(input_service, "confirm") then
+	elseif input_service.get(input_service, "confirm", true) then
 		local lobby_data = self.lobby_list:selected_lobby()
 
 		if lobby_data then
 			self.play_sound(self, "Play_hud_select")
-			Managers.matchmaking:request_join_lobby(lobby_data)
+			Managers.matchmaking:request_join_lobby(lobby_data, {
+				join_by_lobby_browser = true
+			})
 
 			self.join_lobby_data_id = lobby_data.id
 		end

@@ -155,6 +155,25 @@ InputService.get_keymapping = function (self, keymap_name, optional_platform)
 
 	return keymaps[keymap_name]
 end
+InputService.get_filter_keymapping = function (self, keymap_name, optional_platform)
+	local filters = self.get_active_filters(self, optional_platform)
+	local filter = filters[keymap_name]
+	local mappings = filter.function_data.input_mappings or filter.function_data.input_mapping
+
+	if type(mappings) == "table" then
+		for _, input in pairs(mappings) do
+			local key = self.get_keymapping(self, input, optional_platform)
+
+			if key and 0 < #key then
+				return key
+			end
+		end
+	else
+		return self.get_keymapping(self, mappings, optional_platform)
+	end
+
+	return 
+end
 InputService.add_keymap = function (self, keymap_name)
 	local keymaps = self.get_active_keymaps(self)
 	local keymapping = not keymaps[keymap_name]

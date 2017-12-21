@@ -24,6 +24,8 @@ local argv = {
 	Application.argv()
 }
 IS_DEMO = false
+GameSettingsDevelopment.use_leaderboards = false
+GameSettingsDevelopment.lorebook_enabled = true
 GameSettingsDevelopment.trunk_path = GameSettingsDevelopment.trunk_path or false
 GameSettingsDevelopment.quicklaunch_params = GameSettingsDevelopment.quicklaunch_params or {}
 GameSettingsDevelopment.quicklaunch_params.level_key = (LEVEL_EDITOR_TEST and "editor_level") or "castle_01"

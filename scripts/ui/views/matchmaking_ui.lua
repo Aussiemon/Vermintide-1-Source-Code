@@ -446,6 +446,12 @@ MatchmakingUI.get_input_texture_data = function (self, input_action)
 
 	return nil, ""
 end
+MatchmakingUI.large_window_set_countdown_timer = function (self, time)
+	local loader_icon = self.large_window_widgets.loader_icon
+	loader_icon.content.countdown_timer_ps4 = (time and string.format("%02i", math.floor(time))) or nil
+
+	return 
+end
 MatchmakingUI.large_window_set_time = function (self, time)
 	local widgets = self.large_window_widgets
 	local time_text = string.format(" %02d:%02d", math.floor(time/60), time%60)
@@ -629,8 +635,8 @@ MatchmakingUI.large_window_set_level = function (self, level_key, optional_name,
 	local display_name, display_image = nil
 end
 MatchmakingUI.large_window_set_difficulty = function (self, difficulty)
-	local difficulty_setting = DifficultySettings[difficulty]
-	local difficulty_display_name = difficulty_setting.display_name
+	local difficulty_setting = difficulty and DifficultySettings[difficulty]
+	local difficulty_display_name = (difficulty_setting and difficulty_setting.display_name) or "dlc1_2_difficulty_unavailable"
 	local widgets = self.large_window_widgets
 	widgets.difficulty_description.content.text = difficulty_display_name
 

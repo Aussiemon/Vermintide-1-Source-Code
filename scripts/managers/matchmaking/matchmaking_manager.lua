@@ -940,7 +940,7 @@ MatchmakingManager.profiles_data = function (self)
 
 	return profiles_data
 end
-MatchmakingManager.rpc_matchmaking_request_join_lobby = function (self, sender, client_cookie, host_cookie, lobby_id)
+MatchmakingManager.rpc_matchmaking_request_join_lobby = function (self, sender, client_cookie, host_cookie, lobby_id, friend_join)
 	local id = self.lobby:id()
 	id = tostring(id)
 	lobby_id = tostring(lobby_id)
@@ -955,7 +955,7 @@ MatchmakingManager.rpc_matchmaking_request_join_lobby = function (self, sender, 
 		reply = "lobby_id_mismatch"
 	elseif is_game_mode_ended then
 		reply = "game_mode_ended"
-	elseif not is_searching_for_players then
+	elseif not friend_join and not is_searching_for_players then
 		reply = "not_searching_for_players"
 	elseif not valid_cookies then
 		reply = "obsolete_request"
@@ -1498,7 +1498,7 @@ MatchmakingManager.add_default_filter_requirements = function (self)
 
 	return 
 end
-MatchmakingManager.request_join_lobby = function (self, lobby)
+MatchmakingManager.request_join_lobby = function (self, lobby, state_context_params)
 	if self._state.NAME ~= "MatchmakingStateIdle" then
 		mm_printf("trying to join lobby from lobby browswer in wrong state %s", self._state.NAME)
 
@@ -1508,9 +1508,12 @@ MatchmakingManager.request_join_lobby = function (self, lobby)
 	mm_printf("Joining lobby %s from lobby browswer.", tostring(lobby))
 
 	local state_context = {
-		join_by_lobby_browser = true,
+		non_matchmaking_join = true,
 		join_lobby_data = lobby
 	}
+
+	table.merge(state_context, state_context_params or {})
+
 	local t = Managers.time:time("main")
 	self.started_matchmaking_t = t
 	local matchmaking_ui = self.matchmaking_ui
@@ -1527,9 +1530,11 @@ MatchmakingManager.request_join_lobby = function (self, lobby)
 	return 
 end
 MatchmakingManager.cancel_join_lobby = function (self, reason)
-	self.state_context.join_by_lobby_browser = nil
+	self.state_context.non_matchmaking_join = nil
 
-	if self.lobby_browser_view_ui then
+	if self.state_context.join_by_lobby_browser and self.lobby_browser_view_ui then
+		self.state_context.join_by_lobby_browser = nil
+
 		self.lobby_browser_view_ui:cancel_join_lobby(reason)
 	end
 

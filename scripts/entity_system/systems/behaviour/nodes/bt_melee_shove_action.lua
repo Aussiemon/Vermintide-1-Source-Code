@@ -152,7 +152,7 @@ BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_act
 						local shove_speed = action.shove_speed
 						local blocked = false
 
-						if DamageUtils.check_block(unit, blackboard.target_unit, action.fatigue_type) and action.shove_blocked_speed_mul then
+						if DamageUtils.check_block(unit, hit_unit, action.fatigue_type) and action.shove_blocked_speed_mul then
 							shove_speed = shove_speed*action.shove_blocked_speed_mul
 							blocked = true
 						end

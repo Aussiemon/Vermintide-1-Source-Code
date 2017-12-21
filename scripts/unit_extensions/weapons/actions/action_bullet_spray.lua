@@ -145,6 +145,17 @@ ActionBulletSpray._select_targets = function (self, world, show_outline)
 	local player_rotation = Unit.world_rotation(owner_unit_1p, 0)
 	local player_direction = Vector3.normalize(Quaternion.forward(player_rotation))
 	local ignore_hitting_allies = not Managers.state.difficulty:get_difficulty_settings().friendly_fire_ranged
+	local current_action = self.current_action
+	local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+	if current_action.fire_at_gaze_setting and HAS_TOBII and ScriptUnit.has_extension(self.owner_unit, "eyetracking_system") then
+		local eyetracking_extension = ScriptUnit.extension(self.owner_unit, "eyetracking_system")
+
+		if Application.user_setting(current_action.fire_at_gaze_setting) then
+			player_direction = eyetracking_extension.gaze_forward(eyetracking_extension)
+		end
+	end
+
 	local start_point = player_position + player_direction*POSITION_TWEAK + player_direction*SPRAY_RADIUS
 	local end_point = player_position + player_direction*POSITION_TWEAK + player_direction*(SPRAY_RANGE - SPRAY_RADIUS)
 

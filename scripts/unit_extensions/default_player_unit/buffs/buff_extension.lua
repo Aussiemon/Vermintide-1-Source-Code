@@ -136,6 +136,8 @@ BuffExtension.add_buff = function (self, template_name, params)
 
 				if not params.external_optional_proc_chance then
 				end
+
+				buff.damage_source = params.damage_source
 			end
 
 			if proc_chance then

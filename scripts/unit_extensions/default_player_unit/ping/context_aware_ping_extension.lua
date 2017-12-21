@@ -36,8 +36,17 @@ ContextAwarePingExtension.update = function (self, unit, input, dt, context, t)
 		else
 			local first_person_extension = self.first_person_extension
 			local camera_position = first_person_extension.current_position(first_person_extension)
-			local camera_rotation = first_person_extension.current_rotation(first_person_extension)
-			local camera_forward = Quaternion.forward(camera_rotation)
+			local camera_forward = nil
+			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+			if HAS_TOBII and Application.user_setting("tobii_tag_at_gaze") then
+				local eyetracking_extension = ScriptUnit.extension(self._unit, "eyetracking_system")
+				camera_forward = eyetracking_extension.gaze_forward(eyetracking_extension)
+			else
+				local camera_rotation = first_person_extension.current_rotation(first_person_extension)
+				camera_forward = Quaternion.forward(camera_rotation)
+			end
+
 			local hits, hits_n = self._physics_world:immediate_raycast(camera_position, camera_forward, PING_RANGE, "all", "collision_filter", "filter_ray_ping")
 
 			for i = 1, hits_n, 1 do

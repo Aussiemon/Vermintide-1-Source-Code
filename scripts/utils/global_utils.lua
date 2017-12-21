@@ -14,7 +14,7 @@ local function ignore_ai_target(unit)
 end
 
 RESOLUTION_LOOKUP = RESOLUTION_LOOKUP or {}
-POSITION_LOOKUP = POSITION_LOOKUP or {}
+POSITION_LOOKUP = POSITION_LOOKUP or Script.new_map(256)
 BLACKBOARDS = BLACKBOARDS or {}
 local position_lookup = POSITION_LOOKUP
 local position_lookup_backup = {}

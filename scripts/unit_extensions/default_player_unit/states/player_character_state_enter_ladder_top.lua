@@ -109,7 +109,12 @@ PlayerCharacterStateEnterLadderTop.update = function (self, unit, input, dt, con
 	local is_catapulted, direction = CharacterStateHelper.is_catapulted(status_extension)
 
 	if is_catapulted then
-		csm.change_state(csm, "catapulted", direction)
+		local params = {
+			sound_event = "Play_hit_by_ratogre",
+			direction = direction
+		}
+
+		csm.change_state(csm, "catapulted", params)
 
 		return 
 	end

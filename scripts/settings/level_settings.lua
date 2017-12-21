@@ -18,6 +18,14 @@ COLD_CAMERA_BACKLIGHT = {
 
 dofile("scripts/settings/level_settings_dlc_dwarf")
 
+for _, dlc in pairs(DLCSettings) do
+	local level_settings = dlc.level_settings
+
+	if level_settings then
+		dofile(level_settings)
+	end
+end
+
 local DEFAULT_TIP_LIST = {
 	"tip_1",
 	"tip_2",
@@ -361,7 +369,7 @@ LevelSettings.tutorial = {
 	package_name = "resource_packages/levels/play_go_tutorial",
 	source_aux_bus_name = "environment_reverb_outside_source",
 	pickup_settings = {
-		easy = {
+		{
 			ammo = 0,
 			grenades = 0,
 			healing = 0,
@@ -595,12 +603,6 @@ LevelSettings.merchant = {
 			115,
 			-180
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.tunnels = {
@@ -700,12 +702,6 @@ LevelSettings.tunnels = {
 			-298,
 			150
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.whitebox_combat = {
@@ -848,12 +844,6 @@ LevelSettings.farm = {
 			540,
 			-150
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = true
 	}
 }
 LevelSettings.merchant_pretty_corner = {
@@ -971,12 +961,6 @@ LevelSettings.city_wall = {
 			-200,
 			295
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = false
 	}
 }
 LevelSettings.cemetery = {
@@ -1070,12 +1054,6 @@ LevelSettings.cemetery = {
 			-490,
 			55
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.arena = {
@@ -1176,12 +1154,6 @@ LevelSettings.courtyard_level = {
 			-145,
 			-200
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = true
 	}
 }
 LevelSettings.sewers_short = {
@@ -1276,12 +1248,6 @@ LevelSettings.sewers_short = {
 			170,
 			243
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = true
 	}
 }
 LevelSettings.wizard = {
@@ -1381,12 +1347,6 @@ LevelSettings.wizard = {
 			310,
 			-100
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.magnus = {
@@ -1486,12 +1446,6 @@ LevelSettings.magnus = {
 			-25,
 			205
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.end_boss = {
@@ -1575,12 +1529,6 @@ LevelSettings.end_boss = {
 			380,
 			150
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.forest_ambush = {
@@ -1676,12 +1624,6 @@ LevelSettings.forest_ambush = {
 			555,
 			25
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.docks_short_level = {
@@ -1766,12 +1708,6 @@ LevelSettings.docks_short_level = {
 			-250,
 			-45
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = true
 	}
 }
 LevelSettings.dlc_castle = {
@@ -1862,12 +1798,6 @@ LevelSettings.dlc_castle = {
 			-212,
 			107
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.dlc_castle_dungeon = {
@@ -1966,12 +1896,6 @@ LevelSettings.dlc_castle_dungeon = {
 			38,
 			-65
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = true,
-		grimoire = true,
-		ogre = true
 	}
 }
 LevelSettings.dlc_portals = {
@@ -2059,12 +1983,6 @@ LevelSettings.dlc_portals = {
 			470,
 			120
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = true
 	}
 }
 LevelSettings.umbratest = {
@@ -2498,12 +2416,6 @@ LevelSettings.bridge = {
 			70,
 			0
 		}
-	},
-	quest_settings = {
-		level = true,
-		tome = false,
-		grimoire = false,
-		ogre = true
 	}
 }
 

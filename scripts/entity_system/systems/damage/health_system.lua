@@ -94,6 +94,10 @@ HealthSystem.update = function (self, context, t)
 
 				if not status_extension or not status_extension.is_knocked_down(status_extension) or not damage_type or damage_type ~= "overcharge" then
 					extension.add_damage(extension, damage_amount)
+
+					if extension.instakill then
+						StatisticsUtil.register_instakill(unit, damage_datas, i)
+					end
 				end
 			end
 		end

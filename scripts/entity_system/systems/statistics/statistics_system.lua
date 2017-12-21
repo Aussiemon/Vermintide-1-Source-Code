@@ -8,10 +8,18 @@ StatisticsSystem.init = function (self, context, name)
 	StatisticsSystem.super.init(self, context, name, extensions)
 
 	self.unit_extension_data = {}
+	local network_event_delegate = context.network_event_delegate
+	self.network_event_delegate = network_event_delegate
+
+	if not self.is_server then
+		network_event_delegate.register(network_event_delegate, self, "rpc_set_unsigned_number_session_stat")
+	end
 
 	return 
 end
 StatisticsSystem.destroy = function (self)
+	self.network_event_delegate:unregister(self)
+
 	return 
 end
 local dummy_input = {}
@@ -65,6 +73,57 @@ StatisticsSystem.update = function (self, context, t)
 			end
 		end
 	end
+
+	if self.is_server and Managers.state.network:game() then
+		local stored_progress = statistics_db.get_stat(statistics_db, "session", "level_progress")
+		local actual_progress = math.min(math.floor(Managers.state.conflict.main_path_info.ahead_percent*110), 100)
+
+		if stored_progress < actual_progress then
+			local stat_name = "level_progress"
+
+			statistics_db.set_stat(statistics_db, "session", stat_name, actual_progress)
+
+			local stat_id = NetworkLookup.session_stats[stat_name]
+
+			self.network_transmit:send_rpc_clients("rpc_set_unsigned_number_session_stat", stat_id, actual_progress)
+		end
+
+		local stat_name = "level_progress_distance"
+		local stored_distance = statistics_db.get_stat(statistics_db, "session", stat_name)
+		local actual_distance = math.floor(Managers.state.conflict.main_path_info.ahead_travel_dist)
+
+		if stored_distance < actual_distance then
+			statistics_db.set_stat(statistics_db, "session", stat_name, actual_distance)
+
+			local stat_id = NetworkLookup.session_stats[stat_name]
+
+			self.network_transmit:send_rpc_clients("rpc_set_unsigned_number_session_stat", stat_id, actual_distance)
+		end
+	end
+
+	return 
+end
+StatisticsSystem.hot_join_sync = function (self, sender)
+	local db = self.extension_init_context.statistics_db
+
+	for stat_name, data in pairs(StatisticsDefinitions.session) do
+		local sync_rpc = data.hot_join_sync_rpc
+
+		if sync_rpc then
+			local stat_id = NetworkLookup.session_stats[stat_name]
+			local value = db.get_stat(db, "session", stat_name)
+
+			self.network_transmit:send_rpc(sync_rpc, sender, stat_id, value)
+		end
+	end
+
+	return 
+end
+StatisticsSystem.rpc_set_unsigned_number_session_stat = function (self, sender, stat_id, value)
+	local stat = NetworkLookup.session_stats[stat_id]
+	local statistics_db = self.extension_init_context.statistics_db
+
+	statistics_db.set_stat(statistics_db, "session", stat, value)
 
 	return 
 end

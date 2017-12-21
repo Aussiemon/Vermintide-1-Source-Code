@@ -1,10 +1,12 @@
 require("scripts/managers/account/presence/script_presence_xb1")
 require("scripts/managers/account/leaderboards/script_leaderboards_xb1")
+require("scripts/managers/leaderboards/leaderboard_settings")
 require("scripts/managers/account/script_connected_storage_token")
 require("scripts/managers/account/script_user_profile_token")
 require("scripts/managers/account/smartmatch_cleaner")
 require("scripts/network/xbox_user_privileges")
 require("scripts/managers/account/qos/script_qos_token")
+require("scripts/managers/account/privacy/script_privacy_token")
 
 AccountManager = class(AccountManager)
 AccountManager.VERSION = "xb1"
@@ -33,6 +35,29 @@ AccountManager.init = function (self)
 	self._query_bandwidth_timer = AccountManager.QUERY_BANDWIDTH_TIMER
 	self._bandwidth_query_fails = 0
 	self._unlocked_achievements = {}
+	self._block_list = {}
+	self._block_list_updated = false
+
+	return 
+end
+AccountManager.block_list = function (self)
+	return self._block_list
+end
+AccountManager.update_block_list = function (self)
+	if Privacy.get_avoid_list(self._user_id) then
+		self._block_list_updated = false
+		local script_privacy_token = ScriptPrivacyToken:new()
+
+		Managers.token:register_token(script_privacy_token, callback(self, "cb_block_list_updated"))
+	else
+		Application.error("[AccountManager] Couldn't get block list")
+	end
+
+	return 
+end
+AccountManager.cb_block_list_updated = function (self, block_list)
+	self._block_list_updated = true
+	self._block_list = block_list
 
 	return 
 end
@@ -78,16 +103,30 @@ AccountManager.set_presence = function (self, presence)
 
 	return 
 end
-AccountManager.set_leaderboard = function (self, level_id, time_in_seconds)
+AccountManager.set_leaderboard = function (self, leaderboard_stat_name, score, score_data)
 	if self._user_id then
-		self._leaderboards:set_leaderboard(self._user_info.xbox_user_id, self._player_session_id, level_id, time_in_seconds)
+		self._leaderboards:set_leaderboard(self._user_info.xbox_user_id, self._player_session_id, leaderboard_stat_name, score, score_data)
+	else
+		callback({
+			error = "No user ID"
+		})
 	end
 
 	return 
 end
-AccountManager.get_leaderboard = function (self, level_id, leaderboard_type, in_callback, max_items, skip_to_rank)
+AccountManager.test_write = function (self)
+	self._leaderboards:test_write()
+
+	return 
+end
+AccountManager.test_get = function (self)
+	self._leaderboards:test_get()
+
+	return 
+end
+AccountManager.get_leaderboard = function (self, leaderboard_name, leaderboard_type, in_callback, max_items, skip_to_rank, template)
 	if self._user_id then
-		self._leaderboards:get_leaderboard(self._user_id, level_id, leaderboard_type, in_callback, max_items, skip_to_rank)
+		self._leaderboards:get_leaderboard(self._user_id, leaderboard_name, leaderboard_type, in_callback, max_items, skip_to_rank, template)
 	end
 
 	return 
@@ -161,19 +200,29 @@ AccountManager.update = function (self, dt)
 			self._verify_privileges(self)
 			self._verify_user_in_cache(self)
 			self._update_bandwidth_query(self, dt)
+			self._verify_user_detached_popup(self)
 			Profiler.start("Presence")
 			self._presence:update(dt)
 			Profiler.stop("Presence")
 		end
 	end
 
-	self._process_popup_handle(self, "_popup_id")
+	self._process_popup_handle(self, "_user_detached_popup_id")
 	self._process_popup_handle(self, "_privilege_popup_id")
 	self._process_popup_handle(self, "_xbox_live_connection_lost_popup_id")
 	self._process_popup_handle(self, "_not_connected_to_xbox_live_popup_id")
 	self._update_sessions(self, dt)
 
 	self._user_cache_changed = XboxLive.user_cache_changed()
+
+	return 
+end
+AccountManager.reset_popups = function (self)
+	self._user_detached_popup_id = nil
+	self._privilege_popup_id = nil
+	self._xbox_live_connection_lost_popup_id = nil
+	self._not_connected_to_xbox_live_popup_id = nil
+	self._fatal_error = nil
 
 	return 
 end
@@ -275,7 +324,7 @@ AccountManager._update_lobbies_to_free = function (self)
 	return 
 end
 AccountManager._verify_user_profile = function (self)
-	if self._popup_id then
+	if self._user_detached_popup_id then
 		return 
 	end
 
@@ -295,16 +344,11 @@ AccountManager._verify_user_profile = function (self)
 		local cropped_profile = (wanted_profile and Managers.popup:fit_text_width_to_popup(wanted_profile)) or "?"
 		local wrong_profile_str = string.format(Localize("controller_pairing"), cropped_profile)
 
-		if Managers.matchmaking then
+		if Managers.matchmaking and Managers.matchmaking.is_server then
 			Managers.matchmaking:cancel_matchmaking()
 		end
 
 		self._verify_user_in_cache(self)
-
-		if Managers.voice_chat then
-			Managers.voice_chat:remove_current_user()
-		end
-
 		self._create_popup(self, wrong_profile_str, "controller_pairing_header", "verify_profile", "menu_retry", "restart", "menu_return_to_title_screen", "show_profile_picker", "menu_select_profile", true)
 	end
 
@@ -320,6 +364,12 @@ AccountManager._verify_privileges = function (self)
 	return 
 end
 AccountManager._verify_user_in_cache = function (self)
+	if self._user_detached_popup_id then
+		self._user_detached = true
+
+		return 
+	end
+
 	local users = {
 		XboxLive.users()
 	}
@@ -333,6 +383,20 @@ AccountManager._verify_user_in_cache = function (self)
 	end
 
 	self._user_detached = true
+
+	return 
+end
+AccountManager._verify_user_detached_popup = function (self)
+	if self._user_detached_popup_id or not Managers.account:user_detached() then
+		return 
+	end
+
+	local wanted_profile_id = self._user_info.xbox_user_id
+	local wanted_profile = self._gamertags[wanted_profile_id]
+	local cropped_profile = (wanted_profile and Managers.popup:fit_text_width_to_popup(wanted_profile)) or "?"
+	local wrong_profile_str = string.format(Localize("controller_pairing"), cropped_profile)
+
+	self._create_popup(self, wrong_profile_str, "controller_pairing_header", "verify_profile", "menu_retry", "restart", "menu_return_to_title_screen", "show_profile_picker", "menu_select_profile", true)
 
 	return 
 end
@@ -386,15 +450,15 @@ AccountManager._create_popup = function (self, error, header, right_action, righ
 	local extra_button = extra_button and Localize(extra_button)
 	local localized_error = (disable_localize_error and error) or Localize(error)
 
-	assert(self._popup_id == nil, "Tried to show popup even though we already had one.")
+	assert(self._user_detached_popup_id == nil, "Tried to show popup even though we already had one.")
 	print(error, header, right_action, right_button, left_action, left_button, extra_action, extra_button, disable_localize_error)
 
 	if extra_action and extra_button then
-		self._popup_id = Managers.popup:queue_popup(localized_error, Localize(header), right_action, right_button, left_action, left_button, extra_action, extra_button)
+		self._user_detached_popup_id = Managers.popup:queue_popup(localized_error, Localize(header), right_action, right_button, left_action, left_button, extra_action, extra_button)
 	elseif left_action and left_button then
-		self._popup_id = Managers.popup:queue_popup(localized_error, Localize(header), right_action, right_button, left_action, left_button)
+		self._user_detached_popup_id = Managers.popup:queue_popup(localized_error, Localize(header), right_action, right_button, left_action, left_button)
 	else
-		self._popup_id = Managers.popup:queue_popup(localized_error, Localize(header), right_action, right_button)
+		self._user_detached_popup_id = Managers.popup:queue_popup(localized_error, Localize(header), right_action, right_button)
 	end
 
 	return 
@@ -440,11 +504,6 @@ AccountManager._handle_popup_result = function (self, result)
 		self._controller_id = self._active_controller.controller_id()
 
 		Managers.input:set_exclusive_gamepad(self._active_controller)
-
-		if Managers.voice_chat then
-			Managers.voice_chat:join_channel()
-		end
-
 		self._verify_user_in_cache(self)
 	else
 		fassert(false, "[AccountManager] The popup result doesn't exist (%s)", result)
@@ -464,12 +523,12 @@ AccountManager.teardown_xboxlive = function (self)
 	return 
 end
 AccountManager.update_popup_status = function (self)
-	if not self._popup_id then
+	if not self._user_detached_popup_id then
 		return 
 	end
 
-	if not Managers.popup:has_popup_with_id(self._popup_id) then
-		self._popup_id = nil
+	if not Managers.popup:has_popup_with_id(self._user_detached_popup_id) then
+		self._user_detached_popup_id = nil
 	end
 
 	return 
@@ -495,14 +554,9 @@ AccountManager.verify_profile = function (self)
 		self._controller_id = self._active_controller.controller_id()
 
 		Managers.input:set_exclusive_gamepad(self._active_controller)
-
-		if Managers.voice_chat then
-			Managers.voice_chat:join_channel()
-		end
-
 		self._verify_user_in_cache(self)
 
-		if Managers.matchmaking then
+		if Managers.matchmaking and Managers.matchmaking.is_server then
 			Managers.matchmaking:cancel_countdown()
 		end
 	else
@@ -520,10 +574,6 @@ AccountManager.cb_profile_signed_out = function (self)
 		self._controller_id = self._active_controller.controller_id()
 
 		Managers.input:set_exclusive_gamepad(self._active_controller)
-
-		if Managers.voice_chat then
-			Managers.voice_chat:join_channel()
-		end
 	else
 		print(string.format("Wrong profile: Had user_id %s - wanted user_id %s", user_info.xbox_user_id, self._user_info.xbox_user_id))
 	end
@@ -689,7 +739,7 @@ AccountManager.reset = function (self)
 	self._should_teardown_xboxlive = nil
 	self._backend_user_id = nil
 	self._user_detached = nil
-	self._popup_id = nil
+	self._user_detached_popup_id = nil
 	self._xbox_live_connection_lost_popup_id = nil
 	self._not_connected_to_xbox_live_popup_id = nil
 	self._privilege_popup_id = nil

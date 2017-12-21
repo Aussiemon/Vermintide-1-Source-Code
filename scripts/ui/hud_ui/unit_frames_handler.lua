@@ -43,6 +43,8 @@ UnitFramesHandler.init = function (self, ingame_ui_context)
 	self.player_manager = ingame_ui_context.player_manager
 	self.lobby = ingame_ui_context.network_lobby
 	self.my_player = ingame_ui_context.player
+	self.cleanui = ingame_ui_context.cleanui
+	self.ui_renderer = ingame_ui_context.ui_renderer
 	local network_manager = Managers.state.network
 	local network_transmit = network_manager.network_transmit
 	local server_peer_id = network_transmit.server_peer_id
@@ -73,7 +75,8 @@ local function get_portrait_name_by_profile_index(profile_index)
 end
 
 UnitFramesHandler._create_player_unit_frame = function (self)
-	local unit_frame = self._create_unit_frame_by_type(self, "player")
+	local frame_type = "player"
+	local unit_frame = self._create_unit_frame_by_type(self, frame_type)
 	local player = self.my_player
 	local player_ui_id = player.ui_id(player)
 	local player_data = {
@@ -86,6 +89,17 @@ UnitFramesHandler._create_player_unit_frame = function (self)
 	unit_frame.player_data = player_data
 	unit_frame.sync = true
 	self._unit_frames[1] = unit_frame
+	local position = {
+		1580,
+		0
+	}
+	local size = {
+		340,
+		200
+	}
+
+	UICleanUI.register_area(self.cleanui, "unit_frame_" .. frame_type, self._unit_frames[1].widget, position, size)
+
 	self.unit_frame_index_by_ui_id[player_ui_id] = 1
 
 	return 
@@ -109,21 +123,41 @@ UnitFramesHandler._create_unit_frame_by_type = function (self, frame_type, frame
 	local unit_frame = {}
 	local state_data = {}
 	local player_data = {}
+	local clean_ui_position = {
+		0,
+		0
+	}
+	local clean_ui_size = {
+		0,
+		0
+	}
 	local definitions = nil
 
 	if frame_type == "team" then
 		definitions = local_require("scripts/ui/hud_ui/team_member_unit_frame_ui_definitions")
+		clean_ui_size[1] = 1020
+		clean_ui_size[2] = 200
 	elseif frame_type == "player" then
 		local gamepad_active = self.input_manager:is_device_active("gamepad")
 
 		if self.platform ~= "win32" or gamepad_active then
 			definitions = local_require("scripts/ui/hud_ui/player_console_unit_frame_ui_definitions")
 			unit_frame.gamepad_version = true
+			clean_ui_size[1] = 600
+			clean_ui_size[2] = 200
+			clean_ui_position[1] = 1320
+			clean_ui_position[2] = 0
 		else
 			definitions = local_require("scripts/ui/hud_ui/player_unit_frame_ui_definitions")
+			clean_ui_size[1] = 340
+			clean_ui_size[2] = 200
+			clean_ui_position[1] = 1580
+			clean_ui_position[2] = 0
 		end
 	else
 		definitions = local_require("scripts/ui/hud_ui/team_member_unit_frame_ui_definitions")
+		clean_ui_size[1] = 1020
+		clean_ui_size[2] = 200
 	end
 
 	unit_frame.data = state_data
@@ -131,12 +165,26 @@ UnitFramesHandler._create_unit_frame_by_type = function (self, frame_type, frame
 	unit_frame.definitions = definitions
 	unit_frame.features_list = definitions.features_list
 	unit_frame.widget = UnitFrameUI:new(ingame_ui_context, definitions, state_data, frame_index)
+	local clean_ui_name = (frame_index and "unit_frame_" .. frame_type .. "_" .. tostring(frame_index)) or "unit_frame_" .. frame_type
+
+	UICleanUI.register_area(self.cleanui, clean_ui_name, unit_frame.widget, clean_ui_position, clean_ui_size)
 
 	return unit_frame
 end
 UnitFramesHandler._get_unused_unit_frame = function (self)
 	for index, unit_frame in ipairs(self._unit_frames) do
-		if not unit_frame.player_data.player then
+		local player_data = unit_frame.player_data
+
+		if not player_data.peer_id and not player_data.connecting_peer_id then
+			return unit_frame, index
+		end
+	end
+
+	return 
+end
+UnitFramesHandler._get_unit_frame_by_connecting_peer_id = function (self, peer_id)
+	for index, unit_frame in ipairs(self._unit_frames) do
+		if unit_frame.player_data.connecting_peer_id == peer_id then
 			return unit_frame, index
 		end
 	end
@@ -155,14 +203,18 @@ UnitFramesHandler._reset_unit_frame = function (self, unit_frame)
 	return 
 end
 local temp_active_ui_ids = {}
+local temp_active_peer_ids = {}
+local temp_connecting_peer_ids = {}
 UnitFramesHandler._handle_unit_frame_assigning = function (self)
 	local player_manager = self.player_manager
 	local players = self.player_manager:human_and_bot_players()
 	local unit_frames = self._unit_frames
 	local unit_frame_index_by_ui_id = self.unit_frame_index_by_ui_id
+	local unit_frames_used_by_players = 0
 	local my_player = self.my_player
 
 	table.clear(temp_active_ui_ids)
+	table.clear(temp_active_peer_ids)
 
 	local frames_changed = false
 
@@ -170,41 +222,49 @@ UnitFramesHandler._handle_unit_frame_assigning = function (self)
 		local player_ui_id = player.ui_id(player)
 		local player_peer_id = player.network_id(player)
 		temp_active_ui_ids[player_ui_id] = true
+		temp_active_peer_ids[player_peer_id] = true
 		local own_player = player == my_player
 
-		if not own_player and not unit_frame_index_by_ui_id[player_ui_id] then
-			local avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+		if not own_player then
+			if not unit_frame_index_by_ui_id[player_ui_id] then
+				local avaiable_unit_frame, unit_frame_index = self._get_unit_frame_by_connecting_peer_id(self, player_peer_id)
 
-			if avaiable_unit_frame then
-				unit_frame_index_by_ui_id[player_ui_id] = unit_frame_index
+				if not avaiable_unit_frame then
+					avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+				end
 
-				table.clear(avaiable_unit_frame.data)
+				if avaiable_unit_frame then
+					unit_frame_index_by_ui_id[player_ui_id] = unit_frame_index
 
-				local player_data = {
-					player_ui_id = player_ui_id,
-					player = player,
-					own_player = own_player,
-					peer_id = player_peer_id,
-					local_player_id = player.local_player_id(player)
-				}
-				avaiable_unit_frame.player_data = player_data
-				avaiable_unit_frame.sync = true
-				frames_changed = true
+					table.clear(avaiable_unit_frame.data)
+
+					local player_data = {
+						player_ui_id = player_ui_id,
+						player = player,
+						own_player = own_player,
+						peer_id = player_peer_id,
+						local_player_id = player.local_player_id(player)
+					}
+					avaiable_unit_frame.player_data = player_data
+					avaiable_unit_frame.sync = true
+					frames_changed = true
+
+					if player.is_player_controlled(player) then
+						unit_frames_used_by_players = unit_frames_used_by_players + 1
+					end
+				end
+			elseif player.is_player_controlled(player) then
+				unit_frames_used_by_players = unit_frames_used_by_players + 1
 			end
 		end
 	end
 
-	for index, unit_frame in ipairs(unit_frames) do
-		local player_data = unit_frame.player_data
-		local player_ui_id = player_data.player_ui_id
+	if self._handle_connecting_peers(self, temp_active_peer_ids, unit_frames_used_by_players) then
+		frames_changed = true
+	end
 
-		if player_ui_id and not temp_active_ui_ids[player_ui_id] then
-			unit_frame_index_by_ui_id[player_ui_id] = nil
-
-			self._reset_unit_frame(self, unit_frame)
-
-			frames_changed = true
-		end
+	if self._cleanup_unused_unit_frames(self, temp_active_ui_ids, temp_connecting_peer_ids) then
+		frames_changed = true
 	end
 
 	if frames_changed then
@@ -212,6 +272,70 @@ UnitFramesHandler._handle_unit_frame_assigning = function (self)
 	end
 
 	return 
+end
+UnitFramesHandler._handle_connecting_peers = function (self, active_peer_ids, num_unit_frames_used)
+	local added_connection = false
+
+	table.clear(temp_connecting_peer_ids)
+
+	if num_unit_frames_used < 3 then
+		local members = self.lobby:members()
+
+		if members then
+			local lobby_members = members.get_members(members)
+
+			for idx, peer_id in ipairs(lobby_members) do
+				if not active_peer_ids[peer_id] then
+					local unit_frame = self._get_unit_frame_by_connecting_peer_id(self, peer_id)
+
+					if not unit_frame then
+						local avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+
+						if avaiable_unit_frame then
+							self._reset_unit_frame(self, avaiable_unit_frame)
+
+							avaiable_unit_frame.player_data = {
+								connecting_peer_id = peer_id
+							}
+							added_connection = true
+						end
+					end
+
+					temp_connecting_peer_ids[peer_id] = true
+					num_unit_frames_used = num_unit_frames_used + 1
+
+					if num_unit_frames_used == 3 then
+						break
+					end
+				end
+			end
+		end
+	end
+
+	return added_connection
+end
+UnitFramesHandler._cleanup_unused_unit_frames = function (self, active_ui_ids, connecting_peer_ids)
+	local frames_cleared = false
+
+	for index, unit_frame in ipairs(self._unit_frames) do
+		local player_data = unit_frame.player_data
+		local player_ui_id = player_data.player_ui_id
+		local player_peer_id = player_data.peer_id
+		local connecting_peer_id = player_data.connecting_peer_id
+		local clear_unit_frame = (connecting_peer_id and not connecting_peer_ids[connecting_peer_id]) or (player_ui_id and not active_ui_ids[player_ui_id])
+
+		if clear_unit_frame then
+			self._reset_unit_frame(self, unit_frame)
+
+			frames_cleared = true
+
+			if player_ui_id then
+				self.unit_frame_index_by_ui_id[player_ui_id] = nil
+			end
+		end
+	end
+
+	return frames_cleared
 end
 UnitFramesHandler._align_team_member_frames = function (self)
 	local position_y = 100
@@ -222,9 +346,10 @@ UnitFramesHandler._align_team_member_frames = function (self)
 		if 1 < index then
 			local widget = unit_frame.widget
 			local player_data = unit_frame.player_data
-			local player_ui_id = player_data.player_ui_id
+			local peer_id = player_data.peer_id
+			local connecting_peer_id = player_data.connecting_peer_id
 
-			if player_ui_id then
+			if peer_id or connecting_peer_id then
 				local position_x = start_offset_x + count*340
 
 				widget.set_position(widget, position_x, position_y)
@@ -287,6 +412,21 @@ end
 
 UnitFramesHandler._set_player_extensions = function (self, player_data, player_unit)
 	local extensions = {}
+	local mt = {
+		__newindex = function (t, k, v)
+			assert(type(v) == "table")
+
+			mt[k] = v
+
+			return 
+		end,
+		__index = function (t, k)
+			return mt[k]
+		end
+	}
+
+	setmetatable(extensions, mt)
+
 	local health_extension = ScriptUnit.extension(player_unit, "health_system")
 	extensions.health = health_extension
 
@@ -331,6 +471,11 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	local features_list = unit_frame.features_list or empty_features_list
 	local player_data = unit_frame.player_data
 	local player = player_data.player
+
+	if not player then
+		return 
+	end
+
 	local peer_id = player_data.peer_id
 	local local_player_id = player_data.local_player_id
 	local data = unit_frame.data
@@ -620,7 +765,6 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 						local is_wielded = wielded == item_data
 
 						if stored_slot_data.is_wielded ~= is_wielded or stored_slot_data.item_name ~= item_name then
-							print("set_equipped_weapon_info", slot_name, is_wielded, item_name, hud_icon)
 							widget.set_equipped_weapon_info(widget, slot_name, is_wielded, item_name, hud_icon)
 
 							if stored_slot_data.item_name ~= item_name then
@@ -709,7 +853,7 @@ UnitFramesHandler.set_visible = function (self, visible)
 	for index, unit_frame in ipairs(self._unit_frames) do
 		local player_data = unit_frame.player_data
 
-		if player_data.player_ui_id then
+		if player_data.peer_id then
 			unit_frame.widget:set_visible(visible)
 		end
 	end
@@ -806,8 +950,13 @@ UnitFramesHandler._draw = function (self, dt)
 		return 
 	end
 
+	local ui_renderer = self.ui_renderer
+	local cleanui = self.cleanui
+
 	for index, unit_frame in ipairs(self._unit_frames) do
-		unit_frame.widget:draw(dt)
+		local widget = unit_frame.widget
+
+		widget.draw(widget, dt)
 	end
 
 	return 

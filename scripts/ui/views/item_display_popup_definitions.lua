@@ -138,28 +138,28 @@ local scenegraph_definition = {
 	hero_icon = {
 		vertical_alignment = "top",
 		parent = "reward_viewport",
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		size = {
 			46,
 			46
 		},
 		position = {
-			5,
-			-5,
+			0,
+			-65,
 			-300
 		}
 	},
 	hero_icon_tooltip = {
 		vertical_alignment = "top",
 		parent = "reward_viewport",
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		size = {
 			46,
 			46
 		},
 		position = {
-			5,
-			-5,
+			0,
+			-65,
 			5
 		}
 	},
@@ -324,7 +324,7 @@ local widgets = {
 			button_hotspot = {}
 		}
 	},
-	reward_title_text = UIWidgets.create_simple_text("dice_game_reward_title", "reward_title_text", 56, Colors.get_color_table_with_alpha("cheeseburger", 255), nil, "hell_shark_header"),
+	reward_title_text = UIWidgets.create_simple_text("dice_game_reward_title", "reward_title_text", 42, Colors.get_color_table_with_alpha("cheeseburger", 255), nil, "hell_shark_header"),
 	reward_name_text = UIWidgets.create_simple_text("", "reward_name_text", 36, Colors.get_color_table_with_alpha("white", 255), nil, "hell_shark_header"),
 	reward_type_text = UIWidgets.create_simple_text("", "reward_type_text", 28, Colors.get_color_table_with_alpha("cheeseburger", 255)),
 	trait_button_1 = UIWidgets.create_small_trait_button("trait_button_1", "trait_button_1"),

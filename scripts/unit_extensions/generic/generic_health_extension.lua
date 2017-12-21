@@ -22,6 +22,7 @@ GenericHealthExtension.init = function (self, extension_init_context, unit, exte
 	self.unmodified_max_health_changed = false
 	self.damage = extension_init_data.damage or 0
 	self.state = "alive"
+	self.instakill = false
 
 	return 
 end
@@ -80,6 +81,7 @@ GenericHealthExtension.add_heal = function (self, heal_amount)
 end
 GenericHealthExtension.add_damage = function (self, damage)
 	if not self.is_invincible then
+		self.instakill = self.health <= damage and self.damage == 0
 		self.damage = self.damage + damage
 	end
 

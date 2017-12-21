@@ -22,6 +22,8 @@ AreaDamageExtension.init = function (self, extension_init_context, unit, extensi
 	self.create_nav_tag_volume = extension_init_data.create_nav_tag_volume or Unit.get_data(unit, "create_nav_tag_volume")
 	self.nav_tag_volume_layer = extension_init_data.nav_tag_volume_layer or Unit.get_data(unit, "nav_tag_volume_layer")
 	self.explosion_template_name = extension_init_data.explosion_template_name
+	self.owner_unit = extension_init_data.owner_unit
+	self.owner_player = Managers.player:owner(extension_init_data.owner_unit)
 	self.effect_size = self.radius*1.5
 	self.damage_timer = 0
 	self.life_timer = 0
@@ -305,7 +307,7 @@ AreaDamageExtension._update_damage_buffer = function (self)
 		if Unit.alive(unit) then
 			local area_damage = AreaDamageTemplates.get_template(damage_data.area_damage_template)
 
-			area_damage.server.do_damage(damage_data, self.unit)
+			area_damage.server.do_damage(damage_data, self.owner_unit or self.unit)
 		end
 	end
 

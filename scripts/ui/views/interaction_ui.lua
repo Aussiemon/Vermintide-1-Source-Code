@@ -588,6 +588,28 @@ InteractionUI.update = function (self, dt, t, my_player)
 	if self.draw_interaction_bar or self.interaction_animations.interaction_bar_bg_fade then
 		UIRenderer.draw_widget(ui_renderer, self.interaction_bar_widget)
 	elseif self.draw_interaction_tooltip then
+		local HAS_TOBII = rawget(_G, "Tobii") and Application.user_setting("tobii_eyetracking") and Application.user_setting("tobii_interact_at_gaze")
+		local interact_at_gaze_enabled = HAS_TOBII and Tobii.user_presence() == Tobii.USER_PRESENT and Tobii.device_status() == Tobii.DEVICE_TRACKING
+
+		if interact_at_gaze_enabled then
+			local interactable_unit = interactor_extension.interactable_unit(interactor_extension)
+
+			if Unit.alive(interactable_unit) then
+				local mesh = Unit.mesh(interactable_unit, 0)
+				local orientation_mat, _ = Mesh.box(mesh)
+				local interactable_world_pos = Matrix4x4.translation(orientation_mat)
+				local eyetracking_extension = ScriptUnit.extension(player_unit, "eyetracking_system")
+				local pos_in_screen = eyetracking_extension.world_position_in_screen(eyetracking_extension, interactable_world_pos)
+				local x_scale = RESOLUTION_LOOKUP.res_w/1920
+				local y_scale = RESOLUTION_LOOKUP.res_h/1080
+				local new_position = Vector3(pos_in_screen[1]*x_scale - 960, pos_in_screen[2]*y_scale - 540, 0)
+
+				UISceneGraph.set_local_position(ui_scenegraph, "tooltip_root", new_position)
+			end
+		else
+			UISceneGraph.set_local_position(ui_scenegraph, "tooltip_root", Vector3(0, -40, 0))
+		end
+
 		UIRenderer.draw_widget(ui_renderer, self.interaction_widget)
 	end
 

@@ -132,7 +132,33 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 
 	local input_service = input_manager.get_service(input_manager, "scoreboard_ui")
 	local gui_layer = definitions.scenegraph.root.position[3]
-	self.menu_input_description = MenuInputDescriptionUI:new(end_of_level_ui_context, self.ui_renderer, input_service, 5, gui_layer, generic_input_actions.default)
+	self._generic_input_actions = table.clone(generic_input_actions)
+
+	if (GameSettingsDevelopment.use_leaderboards or Development.parameter("use_leaderboards")) and Managers.state.game_mode:game_mode_key() == "survival" then
+		self._leaderboards_ui = LeaderboardsUI:new(end_of_level_ui_context, "scoreboard_ui")
+		self._generic_input_actions.default[#self._generic_input_actions.default + 1] = {
+			input_action = "refresh",
+			priority = 5,
+			description_text = "input_descriptions_leaderboards"
+		}
+		self._generic_input_actions.already_voted[#self._generic_input_actions.already_voted + 1] = {
+			input_action = "refresh",
+			priority = 5,
+			description_text = "input_descriptions_leaderboards"
+		}
+		self._generic_input_actions.player_list[#self._generic_input_actions.player_list + 1] = {
+			input_action = "refresh",
+			priority = 5,
+			description_text = "input_descriptions_leaderboards"
+		}
+		self._generic_input_actions.player_list_profile[#self._generic_input_actions.player_list_profile + 1] = {
+			input_action = "refresh",
+			priority = 5,
+			description_text = "input_descriptions_leaderboards"
+		}
+	end
+
+	self.menu_input_description = MenuInputDescriptionUI:new(end_of_level_ui_context, self.ui_renderer, input_service, 5, gui_layer, self._generic_input_actions.default)
 
 	return 
 end
@@ -307,6 +333,11 @@ ScoreboardUI.on_open_complete = function (self)
 
 	return 
 end
+ScoreboardUI.on_close_complete = function (self)
+	self.open = false
+
+	return 
+end
 ScoreboardUI.on_exit = function (self)
 	self.open = nil
 	local ui_scenegraph = self.ui_scenegraph
@@ -318,6 +349,36 @@ ScoreboardUI.on_exit = function (self)
 	self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
 
 	self.play_sound(self, "Play_hud_button_close")
+
+	return 
+end
+ScoreboardUI.animate_window = function (self, open)
+	if not self.close_window_animation and not self.open_window_animation then
+		local ui_scenegraph = self.ui_scenegraph
+		local target = ui_scenegraph.root.local_position
+		local target_index = 2
+
+		if open then
+			local from = 1200
+			local to = 0
+			local time = UISettings.scoreboard.open_duration
+			self.opening_leaderboards = false
+			self.open_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+
+			self.play_sound(self, "Play_hud_button_close")
+			self._leaderboards_ui:close()
+		else
+			self.open = false
+			local from = 0
+			local to = 1200
+			local time = UISettings.scoreboard.close_duration
+			self.opening_leaderboards = true
+			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+
+			self.play_sound(self, "Play_hud_button_open")
+			self._leaderboards_ui:open(Managers.state.game_mode:level_key())
+		end
+	end
 
 	return 
 end
@@ -370,7 +431,9 @@ ScoreboardUI.update = function (self, dt)
 			if UIAnimation.completed(close_animation) then
 				self.close_window_animation = nil
 
-				self.on_close_complete(self)
+				if not self.opening_leaderboards then
+					self.on_close_complete(self)
+				end
 			end
 		end
 	end
@@ -405,11 +468,26 @@ ScoreboardUI.update = function (self, dt)
 		self.handle_interaction(self, dt)
 	end
 
+	if self._leaderboards_ui then
+		local input_service = self.input_manager:get_service("scoreboard_ui")
+
+		if input_service.get(input_service, "refresh") or input_service.get(input_service, "back") then
+			self.animate_window(self, not self.open)
+		end
+
+		self._leaderboards_ui:update(dt)
+	end
+
 	self.update_arrow_widget_mouse_input(self, self.topic_arrow_widget_left, "left")
 	self.update_arrow_widget_mouse_input(self, self.topic_arrow_widget_right, "right")
 	self.update_topic_widgets_mouse_input(self)
 	self.update_topic_scroll_animation(self, dt)
 	self.update_player_widgets_animations(self, dt)
+
+	if self._leaderboards_ui and self._leaderboards_ui:enabled() then
+		self._leaderboards_ui:draw(dt)
+	end
+
 	self.draw(self, dt)
 
 	return 
@@ -485,7 +563,9 @@ ScoreboardUI.draw = function (self, dt)
 
 	UIRenderer.end_pass(ui_renderer)
 
-	if gamepad_active and not self.popup_id then
+	local leaderboards_enabled = self._leaderboards_ui and self._leaderboards_ui:enabled()
+
+	if gamepad_active and not self.popup_id and not leaderboards_enabled then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
 
@@ -534,7 +614,7 @@ ScoreboardUI.update_input_description = function (self)
 
 	if not self.gamepad_active_generic_actions_name or self.gamepad_active_generic_actions_name ~= actions_name_to_use then
 		self.gamepad_active_generic_actions_name = actions_name_to_use
-		local generic_actions = generic_input_actions[actions_name_to_use]
+		local generic_actions = self._generic_input_actions[actions_name_to_use]
 
 		self.menu_input_description:change_generic_actions(generic_actions)
 	end

@@ -1395,6 +1395,8 @@ local function create_area_widget(widget_name)
 		return create_drachenfels_widget(widget_name)
 	elseif widget_name == "dwarfs" then
 		return create_dwarfs_widget(widget_name)
+	else
+		return create_dwarfs_widget(widget_name)
 	end
 
 	return 

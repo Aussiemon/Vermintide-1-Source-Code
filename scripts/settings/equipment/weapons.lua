@@ -19,6 +19,7 @@ dofile("scripts/settings/equipment/1h_axes")
 dofile("scripts/settings/equipment/1h_hammers")
 dofile("scripts/settings/equipment/1h_hammers_wizard")
 dofile("scripts/settings/equipment/2h_swords")
+dofile("scripts/settings/equipment/2h_swords_executioner")
 dofile("scripts/settings/equipment/2h_axes")
 dofile("scripts/settings/equipment/2h_axes_wood_elf")
 dofile("scripts/settings/equipment/2h_hammers")
@@ -171,9 +172,30 @@ Staggers = {
 			return 
 		end
 
+		local ai_extension = ScriptUnit.extension(hit_unit, "ai_system")
+		local blackboard = ai_extension.blackboard(ai_extension)
+		local breed_data = Unit.get_data(hit_unit, "breed")
 		local hit_unit_pos = POSITION_LOOKUP[hit_unit] or Unit.world_position(hit_unit, 0)
 		local attacker_pos = POSITION_LOOKUP[attacker_unit] or Unit.world_position(attacker_unit, 0)
-		local stagger_type_table = attack_template.stagger_impact or nil
+		local breed = blackboard and blackboard.breed
+		local ranged_shield = breed and breed.ranged_shield
+
+		if ranged_shield then
+			local attacker_distance = Vector3.distance(attacker_pos, hit_unit_pos)
+			local ranged_shield_distance = ranged_shield.distance
+
+			if ranged_shield_distance < attacker_distance then
+				local hit_flow_event = ranged_shield.hit_flow_event
+
+				if hit_flow_event then
+					Unit.flow_event(hit_unit, hit_flow_event)
+				end
+
+				return 
+			end
+		end
+
+		stagger_type_table = attack_template.stagger_impact or nil
 		local stagger_duration_table = attack_template.stagger_duration or nil
 		local stagger_type, stagger_duration = DamageUtils.calculate_stagger(stagger_type_table, stagger_duration_table, hit_unit, attacker_unit, attack_template)
 		local angle = attack_template.stagger_angle or 0
@@ -185,7 +207,7 @@ Staggers = {
 			attack_direction.z = -1
 		end
 
-		if 0 < stagger_type then
+		if 0 < stagger_type and not breed_data.stagger_immune then
 			local stagger_length = DamageUtils.modify_push_distance_with_buff(attacker_unit, attack_template.stagger_length)
 			local blackboard = Unit.get_data(hit_unit, "blackboard")
 
@@ -197,7 +219,7 @@ Staggers = {
 }
 local buff_params = {}
 Dots = {
-	poison_dot = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value)
+	poison_dot = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, damage_source)
 		local damage = attack_damage_value or attack_template.damage
 		local damage_amount = nil
 
@@ -215,16 +237,18 @@ Dots = {
 		if ScriptUnit.has_extension(hit_unit, "buff_system") and do_dot then
 			local buff_extension = ScriptUnit.extension(hit_unit, "buff_system")
 			buff_params.attacker_unit = attacker_unit
+			buff_params.damage_source = damage_source
 
 			buff_extension.add_buff(buff_extension, attack_template.dot_template_name, buff_params)
 		end
 
 		return 
 	end,
-	burning_dot = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value)
+	burning_dot = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, damage_source)
 		if ScriptUnit.has_extension(hit_unit, "buff_system") then
 			local buff_extension = ScriptUnit.extension(hit_unit, "buff_system")
 			buff_params.attacker_unit = attacker_unit
+			buff_params.damage_source = damage_source
 
 			buff_extension.add_buff(buff_extension, attack_template.dot_template_name, buff_params)
 		end
@@ -814,6 +838,24 @@ AttackDamageValues = {
 		3,
 		0,
 		12,
+		2
+	},
+	two_h_tank_L_weak = {
+		0.8,
+		0,
+		2,
+		2
+	},
+	two_h_tank_L_weak_t2 = {
+		1,
+		0,
+		4,
+		2
+	},
+	two_h_tank_L_weak_t3 = {
+		1.2,
+		0,
+		6,
 		2
 	},
 	two_h_tank_H = {
@@ -1675,6 +1717,26 @@ AttackTemplates = {
 		sound_type = "heavy",
 		damage_type = "slashing_tank",
 		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		stagger_length = 0.8,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			1.5,
+			0.4,
+			0,
+			0
+		}
+	},
+	slashing_tank_executioner = {
+		stagger_type = "ai_stagger",
+		sound_type = "heavy",
+		damage_type = "slashing_tank",
+		headshot_multiplier = 5,
 		attack_type = "damage_headshot",
 		stagger_length = 0.8,
 		stagger_impact = {

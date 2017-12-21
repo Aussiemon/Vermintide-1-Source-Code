@@ -988,9 +988,10 @@ GenericStatusExtension.set_respawned = function (self, respawned)
 end
 GenericStatusExtension.set_dead = function (self, dead)
 	local player = self.player
+	local unit = self.unit
 
-	if dead and ScriptUnit.has_extension(self.unit, "outline_system") then
-		local outline_extension = ScriptUnit.extension(self.unit, "outline_system")
+	if dead and ScriptUnit.has_extension(unit, "outline_system") then
+		local outline_extension = ScriptUnit.extension(unit, "outline_system")
 
 		if player and player.local_player then
 			outline_extension.set_method("never")
@@ -1003,6 +1004,11 @@ GenericStatusExtension.set_dead = function (self, dead)
 		local inventory_extension = self.inventory_extension
 
 		CharacterStateHelper.stop_weapon_actions(inventory_extension, "dead")
+	end
+
+	if dead then
+		SurroundingAwareSystem.add_event(unit, "player_death", DialogueSettings.death_discover_distance, "target", unit, "target_name", ScriptUnit.extension(unit, "dialogue_system").context.player_profile)
+		StatisticsUtil.register_player_death(unit, Managers.player:statistics_db())
 	end
 
 	self.dead = dead

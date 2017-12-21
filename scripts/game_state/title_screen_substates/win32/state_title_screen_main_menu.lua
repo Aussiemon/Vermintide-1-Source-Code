@@ -94,7 +94,7 @@ end
 StateTitleScreenMainMenu._setup_input = function (self)
 	local input_manager = Managers.input
 
-	input_manager.create_input_service(input_manager, "main_menu", "TitleScreenKeyMaps")
+	input_manager.create_input_service(input_manager, "main_menu", "TitleScreenKeyMaps", "TitleScreenFilters")
 	input_manager.map_device_to_service(input_manager, "main_menu", "gamepad")
 
 	self.input_manager = input_manager

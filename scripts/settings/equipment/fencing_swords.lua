@@ -921,6 +921,7 @@ Weapons.fencing_sword_template_1_t2.actions.action_one.light_attack_right.target
 Weapons.fencing_sword_template_1_t2.actions.action_one.light_attack_left_last.default_target.attack_template_damage_type = "one_h_linesman_L_t2"
 Weapons.fencing_sword_template_1_t2.actions.action_one.light_attack_left_last.targets[1].attack_template_damage_type = "one_h_linesman_L_t2"
 Weapons.fencing_sword_template_1_t2.actions.action_three.default.attack_template_damage_type = "carbine_AP_t2"
+Weapons.fencing_sword_template_1_t2.actions.action_three.block_shot.attack_template_damage_type = "carbine_AP_t2"
 Weapons.fencing_sword_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.25
 Weapons.fencing_sword_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.5
 Weapons.fencing_sword_template_1_t3 = table.create_copy(Weapons.fencing_sword_template_1_t3, weapon_template)
@@ -933,6 +934,7 @@ Weapons.fencing_sword_template_1_t3.actions.action_one.light_attack_right.target
 Weapons.fencing_sword_template_1_t3.actions.action_one.light_attack_left_last.default_target.attack_template_damage_type = "one_h_linesman_L_t3"
 Weapons.fencing_sword_template_1_t3.actions.action_one.light_attack_left_last.targets[1].attack_template_damage_type = "one_h_linesman_L_t3"
 Weapons.fencing_sword_template_1_t3.actions.action_three.default.attack_template_damage_type = "carbine_AP_t3"
+Weapons.fencing_sword_template_1_t3.actions.action_three.block_shot.attack_template_damage_type = "carbine_AP_t3"
 Weapons.fencing_sword_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.3333333333333333
 Weapons.fencing_sword_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.625
 Weapons.fencing_sword_template_1_t3_un = table.create_copy(Weapons.fencing_sword_template_1_t3_un, Weapons.fencing_sword_template_1_t3)

@@ -9,9 +9,9 @@ StateSplashScreen = class(StateSplashScreen)
 StateSplashScreen.NAME = "StateSplashScreen"
 StateSplashScreen.packages_to_load = {
 	"resource_packages/title_screen",
+	"resource_packages/title_screen_gamma",
 	"resource_packages/menu",
 	"resource_packages/platform_specific/platform_specific",
-	"resource_packages/menu_assets",
 	"resource_packages/loading_screens/loading_bg_default"
 }
 
@@ -303,6 +303,10 @@ StateSplashScreen.packages_loaded = function (self)
 		end
 
 		if not self._console_delayed_scripts_setup_and_required then
+			for i = 1, 10, 1 do
+				print("?????????????")
+			end
+
 			self._require_and_setup_delayed_scripts(self)
 
 			self._console_delayed_scripts_setup_and_required = true
@@ -349,6 +353,7 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		game_require("settings", "default_user_settings", "synergy_settings", "controller_settings")
 		game_require("game_state", "state_context")
 		game_require("entity_system", "entity_system")
+		table.dump(DLCSettings, "DLCSettings", 5)
 		game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "backend/backend_manager", "splitscreen/splitscreen_tester", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "input/input_manager", "debug/debug", "invite/invite_manager", "controller_features/controller_features_manager")
 		game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 		game_require("network", "unit_spawner", "unit_storage", "network_unit")
@@ -424,13 +429,10 @@ StateSplashScreen._init_localizer = function (self)
 		local device = Managers.input:get_most_recent_device()
 		local device_type = InputAux.get_device_type(device)
 		local button_index = nil
+		local mapping = key
 
-		for _, mapping in ipairs(key.input_mappings) do
-			if mapping[1] == device_type then
-				button_index = mapping[2]
-
-				break
-			end
+		if mapping[1] == device_type then
+			button_index = mapping[2]
 		end
 
 		local key_locale_name = nil
@@ -445,15 +447,10 @@ StateSplashScreen._init_localizer = function (self)
 				key_locale_name = string.format("%s %s", "mouse", key_locale_name)
 			end
 		else
-			local button_index = nil
 			local default_device_type = "keyboard"
 
-			for _, mapping in ipairs(key.input_mappings) do
-				if mapping[1] == default_device_type then
-					button_index = mapping[2]
-
-					break
-				end
+			if mapping[1] == default_device_type then
+				button_index = mapping[2]
 			end
 
 			if button_index then

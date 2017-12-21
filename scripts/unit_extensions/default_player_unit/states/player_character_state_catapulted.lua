@@ -8,15 +8,25 @@ PlayerCharacterStateCatapulted.init = function (self, character_state_init_conte
 
 	return 
 end
-PlayerCharacterStateCatapulted.on_enter = function (self, unit, input, dt, context, t, previous_state, direction)
+PlayerCharacterStateCatapulted.on_enter = function (self, unit, input, dt, context, t, previous_state, params)
 	CharacterStateHelper.stop_weapon_actions(self.inventory_extension, "stunned")
 
+	local direction = params.direction
 	self._direction = direction
 	local anim = DIRECTIONS[direction].start_animation
 
 	CharacterStateHelper.play_animation_event(unit, anim)
 	CharacterStateHelper.play_animation_event_first_person(self.first_person_extension, anim)
-	self.first_person_extension:hide_weapons("catapulted")
+
+	local first_person_extension = self.first_person_extension
+
+	first_person_extension.hide_weapons(first_person_extension, "catapulted")
+
+	local sound_event = params.sound_event
+
+	if sound_event then
+		first_person_extension.play_hud_sound_event(first_person_extension, sound_event)
+	end
 
 	return 
 end

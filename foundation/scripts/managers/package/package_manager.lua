@@ -289,7 +289,7 @@ PackageManager.has_loaded = function (self, package, reference_name)
 	return 
 end
 PackageManager.update = function (self)
-	Profiler.start("Update()")
+	Profiler.start("PackageManager:update()")
 
 	for package_name, package in pairs(self._asynch_packages) do
 		local resource_handle = package.handle
@@ -302,7 +302,7 @@ PackageManager.update = function (self)
 		end
 	end
 
-	Profiler.stop("Update()")
+	Profiler.stop("PackageManager:update()")
 
 	return 
 end

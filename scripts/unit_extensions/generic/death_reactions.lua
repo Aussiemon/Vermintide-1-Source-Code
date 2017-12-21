@@ -99,7 +99,7 @@ local function ai_default_unit_start(unit, dt, context, t, killing_blow, is_serv
 	}
 
 	if not breed.force_despawn then
-		data.push_to_death_watch_timer = t + 3 + math.random()*2
+		Managers.state.unit_spawner:push_unit_to_death_watch_list(unit, t, data)
 	end
 
 	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
@@ -677,8 +677,6 @@ DeathReactions.templates = {
 		},
 		husk = {
 			start = function (unit, dt, context, t, killing_blow, is_server)
-				SurroundingAwareSystem.add_event(unit, "player_death", DialogueSettings.death_discover_distance, "target", unit, "target_name", ScriptUnit.extension(unit, "dialogue_system").context.player_profile)
-
 				return nil, DeathReactions.IS_DONE
 			end
 		}
@@ -732,6 +730,7 @@ DeathReactions.templates = {
 				local fuse_time_percent = fuse_time_left/fuse_time
 
 				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
+				Unit.set_data(unit, "fuse_time_left", fuse_time_left)
 
 				if not data.exploded and not data.enemies_ignore_fuse then
 					if data.starting_pos then
@@ -833,6 +832,7 @@ DeathReactions.templates = {
 				local fuse_time_percent = fuse_time_left/fuse_time
 
 				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
+				Unit.set_data(unit, "fuse_time_left", fuse_time_left)
 
 				local network_time = Managers.state.network:network_time()
 				local explode_time = data.explode_time

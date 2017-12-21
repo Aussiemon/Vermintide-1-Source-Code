@@ -353,6 +353,20 @@ local scenegraph_definition = {
 			84
 		}
 	},
+	settings_button_8 = {
+		vertical_alignment = "top",
+		parent = "left_frame",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			-700,
+			1
+		},
+		size = {
+			318,
+			84
+		}
+	},
 	settings_button_gamepad_selection = {
 		vertical_alignment = "top",
 		parent = "left_frame",
@@ -452,7 +466,6 @@ local background_widget_definitions = {
 		},
 		content = {
 			internal_scroll_value = 0,
-			texture_id = "settings_window_02",
 			edge_fade_top_id = {
 				texture_id = "mask_rect_edge_fade",
 				uvs = {

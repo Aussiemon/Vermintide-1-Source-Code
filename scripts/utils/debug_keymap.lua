@@ -388,6 +388,11 @@ DebugKeymap.xb1 = InputUtils.keymaps_key_approved("xb1") and {
 		"d_up",
 		"pressed"
 	},
+	d_down = {
+		"gamepad",
+		"d_down",
+		"pressed"
+	},
 	x = {
 		"gamepad",
 		"x",
@@ -432,16 +437,6 @@ DebugKeymap.xb1 = InputUtils.keymaps_key_approved("xb1") and {
 		"gamepad",
 		"right",
 		"axis"
-	},
-	["left ctrl"] = {
-		"gamepad",
-		"left_trigger",
-		"held"
-	},
-	["left shift"] = {
-		"gamepad",
-		"right_trigger",
-		"held"
 	}
 }
 

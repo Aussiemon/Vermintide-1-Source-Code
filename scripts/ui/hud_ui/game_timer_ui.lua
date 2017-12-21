@@ -4,8 +4,24 @@ GameTimerUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
+	self.cleanui = ingame_ui_context.cleanui
+	self.render_settings = {
+		alpha_multiplier = 1
+	}
 
 	self.create_ui_elements(self)
+
+	local position = {
+		810,
+		1005
+	}
+	local size = {
+		300,
+		150
+	}
+	self.cleanui_data = {}
+
+	UICleanUI.register_area(self.cleanui, "game_timer_ui", self.cleanui_data, position, size)
 	rawset(_G, "game_timer_ui", self)
 
 	return 
@@ -35,7 +51,7 @@ GameTimerUI.update = function (self, dt, survival_mission_data)
 	local resolution_modified = RESOLUTION_LOOKUP.modified
 	local is_dirty = false
 
-	if resolution_modified then
+	if resolution_modified or self.cleanui_data.is_dirty then
 		is_dirty = true
 		self.timer_background.element.dirty = true
 	end
@@ -53,10 +69,18 @@ GameTimerUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("ingame_menu")
+	local render_settings = self.render_settings
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, render_settings)
+
+	local alpha = UICleanUI.get_alpha(self.cleanui, self.cleanui_data)
+	render_settings.alpha_multiplier = alpha
+
 	UIRenderer.draw_widget(ui_renderer, self.timer_text_box)
 	UIRenderer.draw_widget(ui_renderer, self.timer_background)
+
+	render_settings.alpha_multiplier = 1
+
 	UIRenderer.end_pass(ui_renderer)
 
 	return 

@@ -219,8 +219,16 @@ LobbyInternal.unserialize_psn_data = function (data_string)
 	local lobby_data_network_lookups = LobbyInternal.lobby_data_network_lookups
 
 	for key, value in pairs(t) do
-		if lobby_data_network_lookups[key] then
-			t[key] = NetworkLookup[lobby_data_network_lookups[key]][value]
+		local network_lookup = lobby_data_network_lookups[key]
+
+		if network_lookup then
+			if not not rawget(NetworkLookup[network_lookup], value) then
+				t[key] = NetworkLookup[network_lookup][value]
+			else
+				t.valid = false
+
+				break
+			end
 		end
 	end
 

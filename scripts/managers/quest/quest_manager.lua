@@ -13,9 +13,6 @@ QuestManager.init = function (self, statistics_db, level_key)
 		local statistics_db = statistics_db
 		local difficulty_manager = Managers.state.difficulty
 		local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
-
-		Managers.state.event:register(self, "difficulty_synced", "difficulty_set")
-
 		self.evaluation_params = {
 			statistics_db = statistics_db,
 			level_key = level_key,
@@ -35,6 +32,7 @@ QuestManager.init = function (self, statistics_db, level_key)
 		self.all_contracts = quest_interface.get_contracts(quest_interface)
 		self.active_contracts = quest_interface.get_active_contracts(quest_interface)
 		self.available_contracts = quest_interface.get_available_contracts(quest_interface)
+		self.mutators = quest_interface.get_mutators(quest_interface)
 		self.status = quest_interface.get_status(quest_interface)
 	end
 
@@ -61,25 +59,16 @@ QuestManager.evaluate_level_end = function (self, statistics_db, level_key)
 
 	return 
 end
-QuestManager.difficulty_set = function (self)
-	local params = self.evaluation_params
-
-	if params then
-		local difficulty_manager = Managers.state.difficulty
-		local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
-		params.difficulty_rank = difficulty_rank
-	end
-
-	return 
-end
 QuestManager.update = function (self, statistics_db, dt, t)
 	local quest_interface = self.quest_interface
+	self.evaluation_params.difficulty_rank = Managers.state.difficulty:get_difficulty_rank()
 	self.all_quests = quest_interface.get_quests(quest_interface)
 	self.active_quest = quest_interface.get_active_quest(quest_interface)
 	self.available_quests = quest_interface.get_available_quests(quest_interface)
 	self.all_contracts = quest_interface.get_contracts(quest_interface)
 	self.active_contracts = quest_interface.get_active_contracts(quest_interface)
 	self.available_contracts = quest_interface.get_available_contracts(quest_interface)
+	self.mutators = quest_interface.get_mutators(quest_interface)
 	local session_progress = self.session_progress
 	local active_contracts = self.active_contracts
 	local params = self.evaluation_params
@@ -102,7 +91,8 @@ QuestManager.update = function (self, statistics_db, dt, t)
 
 			local progress = session_progress[contract_id]
 			local amount = progress.amount
-			local session_amount = self._calculate_contract_session_progress(self, contract, params)
+			local session_amount, negative_progress = self._calculate_contract_session_progress(self, contract, params, false)
+			progress.negative_progress = negative_progress
 
 			if amount ~= session_amount then
 				local task = contract.requirements.task
@@ -110,7 +100,14 @@ QuestManager.update = function (self, statistics_db, dt, t)
 				local acquired = amount.acquired
 				local required = amount.required
 				local missing_progress = required - acquired
-				progress.amount = math.min(session_amount, missing_progress)
+				local negative_score = amount.negative_score
+
+				if negative_score then
+					progress.amount = session_amount
+				else
+					progress.amount = math.min(session_amount, missing_progress)
+				end
+
 				progress.changed = true
 			end
 		end
@@ -130,7 +127,7 @@ QuestManager.has_contract_session_changes = function (self, contract_id)
 		local changed = progress.changed
 		progress.changed = false
 
-		return changed
+		return changed or progress.negative_progress
 	end
 
 	return 
@@ -140,29 +137,32 @@ QuestManager.get_session_progress_by_contract_id = function (self, contract_id)
 	local progress = session_progress[contract_id]
 
 	if progress then
-		return progress.amount
+		return progress.amount, progress.negative_progress
 	end
 
 	return 
 end
-QuestManager._progress_valid = function (self, contract, params)
+QuestManager._progress_valid = function (self, contract, params, ignore_level_and_difficulty)
 	local requirements = contract.requirements
-	local level_key = params.level_key
-	local required_level = requirements.level
 
-	if required_level and required_level ~= level_key then
-		return false
-	end
+	if not ignore_level_and_difficulty then
+		local level_key = params.level_key
+		local required_level = requirements.level
 
-	local difficulty_rank = params.difficulty_rank
-	local required_difficulty = requirements.difficulty
-
-	if required_difficulty then
-		local required_rank = DifficultySettings[required_difficulty].rank
-		local correct_difficulty = required_rank <= difficulty_rank
-
-		if not correct_difficulty then
+		if required_level and required_level ~= level_key then
 			return false
+		end
+
+		local difficulty_rank = params.difficulty_rank
+		local required_difficulty = requirements.difficulty
+
+		if required_difficulty then
+			local required_rank = DifficultySettings[required_difficulty].rank
+			local correct_difficulty = required_rank <= difficulty_rank
+
+			if not correct_difficulty then
+				return false
+			end
 		end
 	end
 
@@ -180,7 +180,15 @@ QuestManager._progress_valid = function (self, contract, params)
 
 	return true
 end
-QuestManager._calculate_contract_session_progress = function (self, contract, params)
+local SPECIALS = {}
+
+for breed_name, breed in pairs(Breeds) do
+	if breed.special then
+		SPECIALS[#SPECIALS + 1] = breed_name
+	end
+end
+
+QuestManager._calculate_contract_session_progress = function (self, contract, params, finished_level)
 	local requirements = contract.requirements
 	local task = requirements.task
 
@@ -191,72 +199,145 @@ QuestManager._calculate_contract_session_progress = function (self, contract, pa
 		local mission_system = Managers.state.entity:system("mission_system")
 
 		if task_type == "level" then
-			return 0
-		end
-
-		if task_type == "ogre" then
+			return (finished_level and 1) or 0
+		elseif task_type == "ogre" then
 			local local_player = Managers.player:local_player()
 			local stats_id = local_player.stats_id(local_player)
 			local player_killed = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
 			local player_assists = statistics_db.get_stat(statistics_db, stats_id, "kill_assists_per_breed", "skaven_rat_ogre")
 
 			return player_killed + player_assists
-		end
-
-		if task_type == "tome" then
+		elseif task_type == "tome" then
 			local mission_data = mission_system.get_level_end_mission_data(mission_system, "tome_bonus_mission")
 			local num_collected = (mission_data and mission_data.get_current_amount(mission_data)) or 0
 
 			return num_collected
-		end
-
-		if task_type == "grimoire" then
+		elseif task_type == "grimoire" then
 			local mission_data = mission_system.get_level_end_mission_data(mission_system, "grimoire_hidden_mission")
 			local num_collected = (mission_data and mission_data.get_current_amount(mission_data)) or 0
 
 			return num_collected
+		elseif task_type == "grenade_kills" then
+			local local_player = Managers.player:local_player()
+			local stats_id = local_player.stats_id(local_player)
+			local player_killed = statistics_db.get_stat(statistics_db, stats_id, "kills_grenade")
+			local player_assists = statistics_db.get_stat(statistics_db, stats_id, "kill_assists_grenade")
+			local grenade_kills = player_killed + player_assists
+
+			return grenade_kills
+		elseif task_type == "open_chests" then
+			return statistics_db.get_stat(statistics_db, "session", "chests_opened")
+		elseif task_type == "damage_taken_individual" then
+			local local_player = Managers.player:local_player()
+			local stats_id = local_player.stats_id(local_player)
+			local local_player_unit = local_player.player_unit
+
+			local function get_stat(...)
+				return statistics_db:get_stat(stats_id, ...)
+			end
+
+			local function set_stat(stat, v)
+				statistics_db:set_stat(stats_id, stat, v)
+
+				return 
+			end
+
+			local function inc_stat(stat)
+				statistics_db:increment_stat(stats_id, stat)
+
+				return 
+			end
+
+			local damage_taken = 0
+
+			for breed_name, _ in pairs(Breeds) do
+				damage_taken = damage_taken + get_stat("damage_taken_per_breed", breed_name)
+			end
+
+			local last_checkpoint_damage_taken = get_stat("checkpoint_damage_taken")
+			local progress = statistics_db.get_stat(statistics_db, "session", "level_progress_distance")
+			local last_checkpoint_progress = get_stat("checkpoint_progress")
+			local distance = 91.44
+			local allowed_damage = 30
+			local player_dead = not AiUtils.unit_alive(local_player_unit)
+			local negative_progress = false
+
+			if player_dead and not last_checkpoint_progress then
+			elseif player_dead or not last_checkpoint_progress or last_checkpoint_damage_taken + allowed_damage < damage_taken then
+				if last_checkpoint_progress and last_checkpoint_damage_taken + allowed_damage < damage_taken and 5 < progress - last_checkpoint_progress then
+					negative_progress = true
+				end
+
+				set_stat("checkpoint_damage_taken", damage_taken)
+				set_stat("checkpoint_progress", progress)
+			elseif distance < progress - last_checkpoint_progress then
+				set_stat("checkpoint_damage_taken", damage_taken)
+				set_stat("checkpoint_progress", last_checkpoint_progress + distance)
+				inc_stat("completed_checkpoints")
+			end
+
+			return get_stat("completed_checkpoints"), negative_progress
+		elseif task_type == "avoid_deaths_team" then
+			local allowed_deaths = 0
+			local starting_points = 4
+			local deaths = statistics_db.get_stat(statistics_db, "session", "deaths")
+
+			return starting_points - math.max(0, deaths - allowed_deaths)
+		elseif task_type == "avoid_specials_damage_team" then
+			local allowed_damage = 150
+			local damage = 0
+			local progress_percent = statistics_db.get_stat(statistics_db, "session", "level_progress")
+
+			for _, breed_name in ipairs(SPECIALS) do
+				damage = damage + statistics_db.get_stat(statistics_db, "session", "damage_taken_per_breed", breed_name)
+			end
+
+			local estimated_damage = (damage*100)/math.max(progress_percent, 1)
+			local damage_multiplier = estimated_damage/allowed_damage
+			local penalty = nil
+
+			if damage_multiplier <= 1 then
+				return math.floor(damage_multiplier*30 - 100)
+			else
+				return math.floor(damage_multiplier/70)
+			end
+		elseif task_type == "last_stand_waves_defeated" then
+			local local_player = Managers.player:local_player()
+			local stats_id = local_player.stats_id(local_player)
+			local diffs = SurvivalDifficulties
+			local num_diffs = #diffs
+			local difficulty = requirements.difficulty
+			local found = false
+			local waves = 0
+
+			for i = 1, num_diffs, 1 do
+				local diff_name = diffs[i]
+
+				if found or diff_name == difficulty then
+					found = true
+					waves = waves + statistics_db.get_stat(statistics_db, stats_id, "last_stand_waves_completed", diff_name)
+				end
+			end
+
+			return waves
 		end
+
+		fassert(false, "trying to calculate session progress on a contract with an unsuported task: %s", task_type)
 	end
 
 	return 0
 end
 QuestManager._commit_contract_progress = function (self, contract_id, contract, params)
-	local quest_interface = self.quest_interface
-	local requirements = contract.requirements
-	local task = requirements.task
+	if not self._progress_valid(self, contract, params) then
+		return 
+	end
 
-	if task then
-		local task_type = task.type
+	local task_amount = self._calculate_contract_session_progress(self, contract, params, true)
+
+	if 0 < task_amount then
 		local level_key = params.level_key
-		local statistics_db = params.statistics_db
-		local stats_id = Managers.player:local_player(1):stats_id()
-		local mission_system = Managers.state.entity:system("mission_system")
 
-		if not self._progress_valid(self, contract, params) then
-			return 
-		end
-
-		local task_amount = 0
-
-		if task_type == "ogre" then
-			local local_player = Managers.player:local_player()
-			local stats_id = local_player.stats_id(local_player)
-			local player_killed = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
-			local player_assists = statistics_db.get_stat(statistics_db, stats_id, "kill_assists_per_breed", "skaven_rat_ogre")
-			task_amount = player_killed + player_assists
-		elseif task_type == "tome" then
-			local mission_data = mission_system.get_level_end_mission_data(mission_system, "tome_bonus_mission")
-			task_amount = (mission_data and mission_data.get_current_amount(mission_data)) or 0
-		elseif task_type == "grimoire" then
-			local mission_data = mission_system.get_level_end_mission_data(mission_system, "grimoire_hidden_mission")
-			task_amount = (mission_data and mission_data.get_current_amount(mission_data)) or 0
-		elseif task_type == "level" then
-			task_amount = 1
-		end
-
-		if 0 < task_amount then
-			quest_interface.add_contract_progress(quest_interface, contract_id, level_key, task_amount)
-		end
+		self.quest_interface:add_contract_progress(contract_id, level_key, task_amount)
 	end
 
 	return 
@@ -340,22 +421,17 @@ QuestManager.get_active_contracts = function (self)
 
 	return active_contracts
 end
-QuestManager.is_contract_able_to_progress = function (self, contract_id)
+QuestManager.should_contract_progress_be_shown = function (self, contract_id, ignore_level_and_difficulty)
 	local params = self.evaluation_params
 	local contract = self.get_contract_by_id(self, contract_id)
-	local progress_valid = self._progress_valid(self, contract, params)
+
+	if not contract then
+		return false
+	end
+
+	local progress_valid = self._progress_valid(self, contract, params, ignore_level_and_difficulty)
 
 	return progress_valid
-end
-QuestManager.is_task_available_for_contract = function (self, contract_id)
-	local params = self.evaluation_params
-	local contract = self.get_contract_by_id(self, contract_id)
-	local task = contract.requirements.task
-	local task_type = task.type
-	local level_key = params.level_key
-	local available_tasks = LevelSettings[level_key].quest_settings
-
-	return available_tasks[task_type]
 end
 QuestManager.are_contracts_dirty = function (self)
 	local quest_interface = self.quest_interface
@@ -384,6 +460,13 @@ QuestManager.get_description_for_contract_id = function (self, contract_id)
 
 	local start_seed = self.get_random_seed_from_id(self, contract_id)
 	local max_range = QuestTextSettings.task_type_max_range[task_type]
+
+	if not max_range then
+		printf("QuestManager:get_description_for_contract_id() ERROR! Missing max_range for task type %q in QuestSettings, defaulting to 1", task_type)
+
+		max_range = 1
+	end
+
 	local seed, value = Math.next_random(start_seed, max_range)
 	local index = (value < 10 and "0" .. tostring(value)) or tostring(value)
 	local localization_key = "dlc1_3_1_task_description_" .. task_type .. "_" .. index
@@ -404,6 +487,17 @@ QuestManager.has_quest_progressed = function (self, contract_id)
 	end
 
 	return false
+end
+QuestManager.get_mutators = function (self, level_key, difficulty)
+	local level_data = self.mutators[level_key]
+
+	if not level_data then
+		return 
+	end
+
+	local mutators = level_data[difficulty]
+
+	return mutators
 end
 QuestManager.get_quests = function (self)
 	return self.all_quests

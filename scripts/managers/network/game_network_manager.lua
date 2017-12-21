@@ -107,7 +107,8 @@ local RPC_EVENTS = {
 	"rpc_enemy_is_alerted",
 	"rpc_coop_feedback",
 	"rpc_ladder_shake",
-	"rpc_set_boon_handler_game_object_fields"
+	"rpc_set_boon_handler_game_object_fields",
+	"rpc_gm_event_survival_wave_completed"
 }
 GameNetworkManager.register_event_delegate = function (self, event_delegate)
 	self._event_delegate = event_delegate
@@ -354,11 +355,16 @@ GameNetworkManager.spawn_peer_player = function (self, peer_id, local_player_id,
 		local room_manager = self.room_manager
 
 		if room_manager then
+			local room_id = nil
+
 			if room_manager.has_room(room_manager, peer_id) then
-				room_manager.destroy_room(room_manager, peer_id, false)
+				room_id = room_manager.get_spawn_point_by_peer(room_manager, peer_id)
+				local move_out_other_players = false
+
+				room_manager.destroy_room(room_manager, peer_id, move_out_other_players)
 			end
 
-			room_manager.create_room(room_manager, peer_id, local_player_id)
+			room_manager.create_room(room_manager, peer_id, local_player_id, room_id)
 		end
 
 		if not player_manager.player_exists(player_manager, peer_id, local_player_id) then
@@ -600,7 +606,9 @@ GameNetworkManager.remove_peer = function (self, peer_id)
 	self.player_manager:remove_all_players_from_peer(peer_id)
 
 	if self.room_manager and self.room_manager:has_room(peer_id) then
-		self.room_manager:destroy_room(peer_id)
+		local move_out_other_players = true
+
+		self.room_manager:destroy_room(peer_id, move_out_other_players)
 	end
 
 	return 
@@ -678,6 +686,20 @@ GameNetworkManager.gm_event_round_started = function (self)
 end
 GameNetworkManager.rpc_gm_event_round_started = function (self, sender)
 	Managers.state.game_mode:trigger_event("round_started")
+
+	return 
+end
+GameNetworkManager.gm_event_survival_wave_completed = function (self, difficulty)
+	local difficulty_id = NetworkLookup.difficulties[difficulty]
+
+	self.network_transmit:send_rpc_clients("rpc_gm_event_survival_wave_completed", difficulty_id)
+
+	return 
+end
+GameNetworkManager.rpc_gm_event_survival_wave_completed = function (self, sender, difficulty_id)
+	local difficulty = NetworkLookup.difficulties[difficulty_id]
+
+	Managers.state.game_mode:trigger_event("survival_wave_completed", difficulty)
 
 	return 
 end
@@ -795,6 +817,14 @@ GameNetworkManager.rpc_coop_feedback = function (self, sender, player1_peer_id, 
 
 	if local_human and predicate == "aid" then
 		BuffUtils.trigger_assist_buffs(player1, player2)
+	end
+
+	local statistics_db = Managers.player:statistics_db()
+
+	if predicate == "aid" then
+		statistics_db.increment_stat(statistics_db, player1.stats_id(player1), "aidings")
+	elseif predicate == "save" then
+		statistics_db.increment_stat(statistics_db, player1.stats_id(player1), "saves")
 	end
 
 	Managers.state.event:trigger("add_coop_feedback", player1.stats_id(player1) .. player2.stats_id(player2), local_human, predicate, player1, player2)

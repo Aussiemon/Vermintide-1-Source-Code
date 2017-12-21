@@ -790,6 +790,7 @@ UISettings.get_gamepad_input_texture_data = function (input_service, input_actio
 	local button_texture_data = nil
 	local button_name = ""
 	local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
+	keymap_binding = keymap_binding or input_service.get_filter_keymapping(input_service, input_action, platform)
 
 	if #keymap_binding < 3 then
 		return button_texture_data, button_name

@@ -172,7 +172,7 @@ DifficultyUnlockUI._update_start_timer = function (self, dt)
 
 	return 
 end
-DifficultyUnlockUI.update = function (self, dt, mission_data)
+DifficultyUnlockUI.update = function (self, dt, mission_data, active_presentation)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
@@ -185,7 +185,7 @@ DifficultyUnlockUI.update = function (self, dt, mission_data)
 
 	self._update_start_timer(self, dt)
 
-	if not self.is_visible or not self.draw_widgets then
+	if not self.is_visible or not self.draw_widgets or active_presentation then
 		return 
 	end
 

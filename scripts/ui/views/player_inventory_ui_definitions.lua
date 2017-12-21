@@ -15,12 +15,12 @@ local scenegraph_definition = {
 		}
 	},
 	inventory_entry_base = {
-		vertical_alignment = "bottom",
+		vertical_alignment = "center",
 		parent = "root",
 		horizontal_alignment = "right",
 		position = {
 			-10,
-			420,
+			-100,
 			1
 		},
 		size = {

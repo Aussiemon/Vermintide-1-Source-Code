@@ -65,9 +65,13 @@ BTStormVerminPushAction.run = function (self, unit, blackboard, t, dt)
 end
 BTStormVerminPushAction.attack = function (self, unit, t, dt, blackboard)
 	local locomotion = blackboard.locomotion_extension
-	local rotation = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
+	local attacking_target = blackboard.attacking_target
 
-	locomotion.set_wanted_rotation(locomotion, rotation)
+	if AiUtils.unit_alive(attacking_target) then
+		local rotation = LocomotionUtils.rotation_towards_unit_flat(unit, attacking_target)
+
+		locomotion.set_wanted_rotation(locomotion, rotation)
+	end
 
 	return 
 end

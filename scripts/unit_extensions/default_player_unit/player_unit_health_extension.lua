@@ -75,7 +75,7 @@ PlayerUnitHealthExtension.update = function (self, dt, context, t)
 
 	if self.is_server then
 		if state == "alive" then
-			if not self.is_alive(self) then
+			if self._should_die(self) then
 				if not status_extension.has_wounds_remaining(status_extension) then
 					self.die(self)
 
@@ -87,18 +87,16 @@ PlayerUnitHealthExtension.update = function (self, dt, context, t)
 				end
 			end
 		elseif state == "knocked_down" then
-			if self.is_alive(self) then
-				if status_extension.is_revived(status_extension) then
-					self.state = "alive"
-
-					StatusUtils.set_knocked_down_network(unit, false)
-					StatusUtils.set_wounded_network(unit, true, "revived", t)
-					StatusUtils.set_revived_network(unit, false)
-
-					return 
-				end
-			else
+			if self._should_die(self) then
 				self.die(self, "knockdown_death")
+
+				return 
+			elseif status_extension.is_revived(status_extension) then
+				self.state = "alive"
+
+				StatusUtils.set_knocked_down_network(unit, false)
+				StatusUtils.set_wounded_network(unit, true, "revived", t)
+				StatusUtils.set_revived_network(unit, false)
 
 				return 
 			end
@@ -130,6 +128,12 @@ PlayerUnitHealthExtension.add_damage = function (self, damage)
 	end
 
 	return 
+end
+PlayerUnitHealthExtension._should_die = function (self)
+	return self.health <= self.damage
+end
+PlayerUnitHealthExtension.is_alive = function (self)
+	return not self.status_extension:is_dead()
 end
 PlayerUnitHealthExtension.die = function (self, damage_type)
 	damage_type = damage_type or "undefined"

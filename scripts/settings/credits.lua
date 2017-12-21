@@ -1913,6 +1913,10 @@ local Credits = {
 			type = "person"
 		},
 		{
+			text = "Nicole De Bernardi for assisting with Italian localization",
+			type = "person"
+		},
+		{
 			text = "Rockelstad Slott, Making Christmas happen at Fatshark",
 			type = "person"
 		},

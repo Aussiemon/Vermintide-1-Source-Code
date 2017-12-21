@@ -204,6 +204,40 @@ end
 MenuInputDescriptionUI.destroy = function (self)
 	return 
 end
+MenuInputDescriptionUI.enable_button = function (self, index, enable)
+	local widget = self.console_input_description_widgets[index]
+
+	if widget then
+		local styles = widget.style
+
+		if styles and type(styles) == "table" then
+			for _, style_data in pairs(styles) do
+				if style_data.color then
+					style_data.old_alpha = style_data.old_alpha or style_data.color[1]
+					style_data.color[1] = (enable and style_data.old_alpha) or 128
+				elseif style_data.text_color then
+					style_data.old_alpha = style_data.old_alpha or style_data.text_color[1]
+					style_data.text_color[1] = (enable and style_data.old_alpha) or 128
+				else
+					style_data.color = (enable and {
+						255,
+						255,
+						255,
+						255
+					}) or {
+						128,
+						255,
+						255,
+						255
+					}
+					style_data.old_alpha = 255
+				end
+			end
+		end
+	end
+
+	return 
+end
 MenuInputDescriptionUI.change_generic_actions = function (self, new_generic_actions)
 	self.generic_actions = new_generic_actions
 

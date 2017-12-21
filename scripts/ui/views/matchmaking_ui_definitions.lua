@@ -1589,7 +1589,7 @@ local widgets = {
 				2
 			}
 		}),
-		status_text = UIWidgets.create_simple_text(" ", "window_status_text", 32, {
+		status_text = UIWidgets.create_simple_text("matchmaking_status_searching_for_game", "window_status_text", 32, {
 			255,
 			255,
 			255,

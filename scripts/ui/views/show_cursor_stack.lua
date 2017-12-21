@@ -14,6 +14,8 @@ ShowCursorStack.render_cursor = function (allow_cursor_rendering)
 	return 
 end
 ShowCursorStack.push = function ()
+	printf("ShowCursorStack.push() depth: %d \n  %s", ShowCursorStack.stack_depth, string.match(Script.callstack(), "%[2%].-\n.-\n"))
+
 	if ShowCursorStack.stack_depth == 0 and ShowCursorStack.allow_cursor_rendering then
 		local is_fullscreen = Application.is_fullscreen and Application.is_fullscreen()
 
@@ -26,6 +28,8 @@ ShowCursorStack.push = function ()
 	return 
 end
 ShowCursorStack.pop = function ()
+	printf("ShowCursorStack.pop() depth: %d \n  %s", ShowCursorStack.stack_depth, string.match(Script.callstack(), "%[2%].-\n.-\n"))
+
 	ShowCursorStack.stack_depth = ShowCursorStack.stack_depth - 1
 
 	assert(0 <= ShowCursorStack.stack_depth, "Trying to pop a cursor stack that doesn't exist.")

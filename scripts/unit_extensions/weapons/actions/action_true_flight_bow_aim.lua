@@ -73,6 +73,9 @@ ActionTrueFlightBowAim.client_owner_post_update = function (self, dt, t, world, 
 	local current_action = self.current_action
 	local owner_unit = self.owner_unit
 	local time_to_shoot = self.time_to_shoot
+	local owner_unit = self.owner_unit
+	local owner_player = Managers.player:owner(owner_unit)
+	local is_bot = owner_player and owner_player.bot_player
 	local overcharge_extension = self.overcharge_extension
 
 	if current_action.overcharge_interval then
@@ -159,13 +162,13 @@ ActionTrueFlightBowAim.client_owner_post_update = function (self, dt, t, world, 
 			self.aim_timer = 0
 
 			if Unit.alive(self.aimed_target) and current_target ~= hit_unit then
-				if ScriptUnit.has_extension(hit_unit, "outline_system") then
+				if ScriptUnit.has_extension(hit_unit, "outline_system") and not is_bot then
 					local outline_extension = ScriptUnit.extension(hit_unit, "outline_system")
 
 					outline_extension.set_method("always")
 				end
 
-				if Unit.alive(current_target) and ScriptUnit.has_extension(current_target, "outline_system") then
+				if Unit.alive(current_target) and not is_bot and ScriptUnit.has_extension(current_target, "outline_system") then
 					local outline_extension = ScriptUnit.extension(current_target, "outline_system")
 
 					outline_extension.set_method("never")
@@ -177,9 +180,6 @@ ActionTrueFlightBowAim.client_owner_post_update = function (self, dt, t, world, 
 	end
 
 	self.charge_value = math.min(math.max(t - time_to_shoot, 0)/self.charge_time, 1)
-	local owner_unit = self.owner_unit
-	local owner_player = Managers.player:owner(owner_unit)
-	local is_bot = owner_player and owner_player.bot_player
 
 	if not is_bot then
 		local charge_sound_parameter_name = current_action.charge_sound_parameter_name

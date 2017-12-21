@@ -4,8 +4,6 @@
 --   Code may be incomplete or incorrect.
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/ui/views/menu_input_description_ui")
 
 PopupJoinLobbyHandler = class(PopupJoinLobbyHandler)
@@ -498,15 +496,24 @@ local scenegraph_definition = {
 	}
 }
 local generic_input_actions = {
-	{
-		input_action = "confirm",
-		priority = 2,
-		description_text = "input_description_select"
+	default = {
+		{
+			input_action = "confirm",
+			priority = 2,
+			description_text = "input_description_select"
+		},
+		{
+			input_action = "back",
+			priority = 3,
+			description_text = "popup_keep_searching"
+		}
 	},
-	{
-		input_action = "back",
-		priority = 3,
-		description_text = "popup_keep_searching"
+	unavailable = {
+		{
+			input_action = "back",
+			priority = 1,
+			description_text = "popup_keep_searching"
+		}
 	}
 }
 local widgets = {
@@ -986,7 +993,7 @@ PopupJoinLobbyHandler.init = function (self, ingame_ui_context)
 
 	local input_service = Managers.input:get_service("popup_join_lobby_handler")
 	local gui_layer = scenegraph_definition.root.position[3]
-	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, #generic_input_actions, gui_layer, generic_input_actions)
+	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, #generic_input_actions.default, gui_layer, generic_input_actions.default)
 
 	self.menu_input_description:set_input_description(nil)
 	rawset(_G, "GLOBAL_MM_JL_UI", self)
@@ -1179,9 +1186,48 @@ end
 PopupJoinLobbyHandler.update_profiles_data = function (self, profiles_data)
 	self.profiles_data = profiles_data
 
-	self.set_selected_hero(self, self.selected_hero_name)
+	if Application.platform() == "win32" and not Managers.input:is_device_active("gamepad") then
+		self.set_selected_hero(self, self.selected_hero_name)
+	else
+		self._update_controller_input_description(self)
+	end
 
 	return 
+end
+PopupJoinLobbyHandler._update_controller_input_description = function (self)
+	self.controller_selection_index = self.controller_selection_index or 1
+
+	if not self._hero_available_by_controller(self, self.controller_selection_index) then
+		self.menu_input_description:change_generic_actions(generic_input_actions.unavailable)
+	else
+		self.menu_input_description:change_generic_actions(generic_input_actions.default)
+	end
+
+	return 
+end
+PopupJoinLobbyHandler._hero_available_by_controller = function (self, controller_index)
+	local hero_name = nil
+	local selected_button = self.active_button_data[controller_index]
+
+	for name, button in pairs(self.button_hero_widgets) do
+		if button == selected_button then
+			hero_name = name
+
+			break
+		end
+	end
+
+	local profile_slot = nil
+
+	for idx, profile in ipairs(SPProfiles) do
+		if profile.display_name == hero_name then
+			profile_slot = "player_slot_" .. idx
+
+			break
+		end
+	end
+
+	return self.profiles_data[profile_slot] == "available", hero_name
 end
 PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 
@@ -1213,28 +1259,23 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 	if gamepad_active then
 		if input_service.get(input_service, "move_right") then
 			self.controller_select_button_index(self, math.clamp(self.controller_selection_index + 1, 1, #self.active_button_data), nil, true)
+			self._update_controller_input_description(self)
 		end
 
 		if input_service.get(input_service, "move_left") then
 			self.controller_select_button_index(self, math.clamp(self.controller_selection_index - 1, 1, #self.active_button_data), nil, false)
+			self._update_controller_input_description(self)
 		end
 
 		if input_service.get(input_service, "confirm") and self.controller_select_button_index(self, self.controller_selection_index, true) then
-			local hero_name = nil
-			local selected_button = self.active_button_data[self.controller_selection_index]
+			local hero_available, hero_name = self._hero_available_by_controller(self, self.controller_selection_index)
 
-			for name, button in pairs(self.button_hero_widgets) do
-				if button == selected_button then
-					hero_name = name
+			if hero_available then
+				local accepted = true
+				self.selected_hero_name = hero_name
 
-					break
-				end
+				self.set_result(self, accepted)
 			end
-
-			local accepted = true
-			self.selected_hero_name = hero_name
-
-			self.set_result(self, accepted)
 		end
 
 		if input_service.get(input_service, "back") then
@@ -1404,7 +1445,6 @@ PopupJoinLobbyHandler.set_selected_level = function (self, level_key)
 
 	-- decompilation error in this vicinity
 	local display_image, display_name = nil
-	self.background_widget.content.text_level = Localize("level") .. ": " .. Localize(display_name)
 	self.background_widget.content.level_texture = display_image
 
 	return 

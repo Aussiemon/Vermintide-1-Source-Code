@@ -1285,7 +1285,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1317,7 +1317,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1361,7 +1361,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1411,7 +1411,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1455,7 +1455,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1499,7 +1499,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1549,7 +1549,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1593,7 +1593,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1637,7 +1637,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1687,7 +1687,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1731,7 +1731,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1775,7 +1775,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1825,7 +1825,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1869,7 +1869,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1913,7 +1913,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -1963,7 +1963,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"command_change target"
+				"command_change_target"
 			},
 			{
 				"query_context",
@@ -2781,7 +2781,7 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"flee"
+				"fleeing"
 			},
 			{
 				"query_context",
@@ -3408,7 +3408,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"ecr_gameplay_witch_hunter_knocked_down_01",
@@ -3482,7 +3482,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 7,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 7,
 			sound_events = {
 				"ecr_gameplay_seeing_weapon_special_activated_01",
@@ -3753,7 +3753,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 4,
 			sound_events = {
 				"ecr_gameplay_wood_elf_knocked_down_01",
@@ -3786,7 +3786,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_attacking_empire_soldier_backstab_1",
@@ -3930,7 +3930,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 8,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 8,
 			sound_events = {
 				"ecr_gameplay_player_knocked_down_01",
@@ -3979,7 +3979,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"ecr_gameplay_dwarf_ranger_knocked_down_01",
@@ -4125,7 +4125,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_attacking_dwarf_ranger_backstab_1",
@@ -4285,7 +4285,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"ecr_gameplay_bright_wizard_knocked_down_01",
@@ -4559,7 +4559,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_attacking_witch_hunter_backstab_1",
@@ -4731,7 +4731,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_attacking_wood_elf_backstab_1",
@@ -4768,7 +4768,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_attacking_bright_wizard_backstab_1",
@@ -4805,7 +4805,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 8,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 8,
 			sound_events = {
 				"esr_gameplay_shouting_1",
@@ -4854,7 +4854,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_empire_soldier_knocked_down_1",
@@ -4891,7 +4891,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_wood_elf_knocked_down_1",
@@ -5002,7 +5002,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_dwarf_ranger_knocked_down_1",
@@ -5076,7 +5076,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"esr_gameplay_bright_wizard_knocked_down_1",
@@ -5138,21 +5138,19 @@ return function ()
 			randomize_indexes = {}
 		},
 		esr_gameplay_witch_hunter_knocked_down = {
-			sound_events_n = 5,
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 5,
+			face_animations_n = 4,
 			database = "enemies",
-			category = "default",
-			dialogue_animations_n = 5,
+			category = "enemy_basic_prio",
+			dialogue_animations_n = 4,
 			sound_events = {
 				"esr_gameplay_witch_hunter_knocked_down_1",
 				"esr_gameplay_witch_hunter_knocked_down_3",
 				"esr_gameplay_witch_hunter_knocked_down_4",
-				"esr_gameplay_witch_hunter_knocked_down_5",
-				"esr_gameplay_witch_hunter_knocked_down_2"
+				"esr_gameplay_witch_hunter_knocked_down_5"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
 				"dialogue_shout",
 				"dialogue_shout",
 				"dialogue_shout",
@@ -5162,15 +5160,13 @@ return function ()
 				"face_angry",
 				"face_angry",
 				"face_angry",
-				"face_angry",
 				"face_angry"
 			},
 			localization_strings = {
 				"esr_gameplay_witch_hunter_knocked_down_1",
 				"esr_gameplay_witch_hunter_knocked_down_3",
 				"esr_gameplay_witch_hunter_knocked_down_4",
-				"esr_gameplay_witch_hunter_knocked_down_5",
-				"esr_gameplay_witch_hunter_knocked_down_2"
+				"esr_gameplay_witch_hunter_knocked_down_5"
 			},
 			randomize_indexes = {}
 		},
@@ -5228,7 +5224,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 8,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 8,
 			sound_events = {
 				"esr_gameplay_player_knocked_down_1",
@@ -5458,7 +5454,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 6,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 6,
 			sound_events = {
 				"ecr_gameplay_fleeing_01",
@@ -6103,7 +6099,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 7,
 			database = "enemies",
-			category = "default",
+			category = "enemy_high_prio",
 			dialogue_animations_n = 7,
 			sound_events = {
 				"ecr_gameplay_seeing_bomb_thrown_01",
@@ -6399,7 +6395,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 8,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 8,
 			sound_events = {
 				"ecr_gameplay_killing_a_player_01",
@@ -6613,7 +6609,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 5,
 			database = "enemies",
-			category = "default",
+			category = "enemy_basic_prio",
 			dialogue_animations_n = 5,
 			sound_events = {
 				"ecr_gameplay_empire_soldier_knocked_down_01",

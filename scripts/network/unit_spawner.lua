@@ -114,6 +114,10 @@ UnitSpawner.prioritize_death_watch_unit = function (self, unit, t)
 	return 
 end
 UnitSpawner.update_death_watch_list = function (self)
+	if script_data.debug_death_watch_list then
+		Debug.text("Death Watch List (%i)", self.unit_death_watch_list_n)
+	end
+
 	if self.unit_death_watch_list_dirty then
 		table.sort(self.unit_death_watch_list, function (a, b)
 			return a.t < b.t

@@ -692,8 +692,7 @@ FriendsView._extract_level_and_difficulty_from_presence = function (self, presen
 	local index = string.find(presence, "/")
 
 	if index then
-		local new_str = string.sub(presence, index - 1)
-		new_str = string.sub(new_str, 1, -2)
+		local new_str = string.sub(presence, index - 1, index + 1)
 		ret_num_players = new_str
 		presence = string.sub(presence, 1, index - 3)
 	end
@@ -894,7 +893,9 @@ FriendsView.on_join_button_clicked = function (self)
 				_add_player_join_telemetry(joining_player)
 			end
 
-			self.ingame_ui:handle_transition("join_lobby", lobby_data)
+			Managers.matchmaking:request_join_lobby(lobby_data, {
+				friend_join = true
+			})
 		end
 	end
 

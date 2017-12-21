@@ -19,6 +19,7 @@ ActionShotgun.init = function (self, world, item_name, is_server, owner_unit, da
 	end
 
 	self.is_server = is_server
+	self.start_gaze_rotation = QuaternionBox()
 
 	return 
 end
@@ -34,6 +35,17 @@ ActionShotgun.client_owner_start_action = function (self, new_action, t)
 	end
 
 	self.extra_buff_shot = false
+	local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+	if HAS_TOBII and new_action.fire_at_gaze_setting and Application.user_setting(new_action.fire_at_gaze_setting) then
+		local owner_unit = self.owner_unit
+
+		if ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+			local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
+
+			self.start_gaze_rotation:store(eyetracking_extension.gaze_rotation(eyetracking_extension))
+		end
+	end
 
 	return 
 end
@@ -52,7 +64,16 @@ ActionShotgun.client_owner_post_update = function (self, dt, t, world, can_damag
 		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 		local current_position = first_person_extension.current_position(first_person_extension)
 		local current_rotation = first_person_extension.current_rotation(first_person_extension)
-		local num_shots = current_action.shot_count or 1
+
+		if current_action.fire_at_gaze_setting then
+			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
+
+			if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
+				current_rotation = self.start_gaze_rotation:unbox()
+			end
+		end
+
+		num_shots = current_action.shot_count or 1
 		local ammo_usage = current_action.ammo_usage
 
 		if not Managers.player:owner(self.owner_unit).bot_player then

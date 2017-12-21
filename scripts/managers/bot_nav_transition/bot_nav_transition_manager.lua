@@ -34,7 +34,7 @@ BotNavTransitionManager.init = function (self, world, is_server, network_event_d
 	self._layerless_traverse_logic = GwNavTraverseLogic.create(nav_world)
 	self._traverse_logic = GwNavTraverseLogic.create(nav_world)
 	self._navtag_layer_cost_table = GwNavTagLayerCostTable.create()
-	local allowed_layers = BotNavTransitionManager.TRANSITION_LAYERS
+	local allowed_layers = table.clone(BotNavTransitionManager.TRANSITION_LAYERS)
 
 	table.merge(allowed_layers, NAV_TAG_VOLUME_LAYER_COST_BOTS)
 	AiUtils.initialize_cost_table(self._navtag_layer_cost_table, allowed_layers)

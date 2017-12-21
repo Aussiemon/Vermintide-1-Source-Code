@@ -385,7 +385,8 @@ local action_data = {
 			true,
 			true,
 			true,
-			false
+			false,
+			true
 		}
 	},
 	stagger = {

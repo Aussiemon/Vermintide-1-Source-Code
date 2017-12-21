@@ -12,7 +12,6 @@ require("scripts/ui/views/gdc_start_ui")
 require("scripts/ui/views/ingame_player_list_ui")
 require("scripts/ui/hud_ui/wait_for_rescue_ui")
 require("scripts/ui/views/positive_reinforcement_ui")
-require("scripts/ui/hud_ui/input_helper_ui")
 require("scripts/ui/hud_ui/observer_ui")
 require("scripts/ui/hud_ui/ingame_news_ticker_ui")
 require("scripts/ui/hud_ui/game_timer_ui")
@@ -33,6 +32,8 @@ IngameHud.init = function (self, ingame_ui_context)
 	local cutscene_system = Managers.state.entity:system("cutscene_system")
 	self.cutscene_system = cutscene_system
 	self.gdc_build = Development.parameter("gdc")
+	ingame_ui_context.cleanui = UICleanUI.create()
+	self.cleanui = ingame_ui_context.cleanui
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
 
@@ -54,7 +55,6 @@ IngameHud.init = function (self, ingame_ui_context)
 	self.ingame_player_list_ui = IngamePlayerListUI:new(ingame_ui_context)
 	self.wait_for_rescue_ui = WaitForRescueUI:new(ingame_ui_context)
 	self.positive_reinforcement_ui = PositiveReinforcementUI:new(ingame_ui_context)
-	self.input_helper_ui = InputHelperUI:new(ingame_ui_context)
 	self.observer_ui = ObserverUI:new(ingame_ui_context)
 	self.overcharge_bar_ui = OverchargeBarUI:new(ingame_ui_context)
 
@@ -72,11 +72,9 @@ IngameHud.init = function (self, ingame_ui_context)
 	self.boon_ui = BoonUI:new(ingame_ui_context)
 	local backend_settings = GameSettingsDevelopment.backend_settings
 
-	if not self.is_in_inn and backend_settings.quests_enabled then
+	if backend_settings.quests_enabled then
 		self.contract_log_ui = ContractLogUI:new(ingame_ui_context)
 	end
-
-	self.game_timer_ui = GameTimerUI:new(ingame_ui_context)
 
 	if game_mode_key == "survival" then
 		self.game_timer_ui = GameTimerUI:new(ingame_ui_context)
@@ -137,7 +135,6 @@ IngameHud.destroy = function (self)
 	self.ingame_player_list_ui:destroy()
 	self.wait_for_rescue_ui:destroy()
 	self.positive_reinforcement_ui:destroy()
-	self.input_helper_ui:destroy()
 	self.observer_ui:destroy()
 
 	if self.gdc_build then
@@ -199,7 +196,7 @@ IngameHud.set_visible = function (self, visible)
 	local observer_ui = self.observer_ui
 
 	if observer_ui then
-		local observer_ui_visibility = self.is_own_player_dead(self) and not self.ingame_player_list_ui.active and not self.input_helper_ui.active and visible
+		local observer_ui_visibility = self.is_own_player_dead(self) and not self.ingame_player_list_ui.active and visible
 
 		if observer_ui and observer_ui.is_visible(observer_ui) ~= observer_ui_visibility then
 			observer_ui.set_visible(observer_ui, observer_ui_visibility)
@@ -246,24 +243,27 @@ IngameHud._update_survival_ui = function (self, dt, t)
 				end
 
 				Profiler.stop("endurance badges")
+				Profiler.start("Difficulty notification")
+
+				local difficulty_notification_ui = self.difficulty_notification_ui
+				local active_presentation = false
+
+				if difficulty_notification_ui then
+					difficulty_notification_ui.update(difficulty_notification_ui, dt, mission_data)
+
+					active_presentation = difficulty_notification_ui.is_presentation_active(difficulty_notification_ui)
+				end
+
+				Profiler.stop("Difficulty notification")
 				Profiler.start("Difficulty unlock")
 
 				local difficulty_unlock_ui = self.difficulty_unlock_ui
 
 				if difficulty_unlock_ui then
-					difficulty_unlock_ui.update(difficulty_unlock_ui, dt, mission_data)
+					difficulty_unlock_ui.update(difficulty_unlock_ui, dt, mission_data, active_presentation)
 				end
 
 				Profiler.stop("Difficulty unlock")
-				Profiler.start("Difficulty notification")
-
-				local difficulty_notification_ui = self.difficulty_notification_ui
-
-				if difficulty_notification_ui then
-					difficulty_notification_ui.update(difficulty_notification_ui, dt, mission_data)
-				end
-
-				Profiler.stop("Difficulty notification")
 			end
 		end
 	end
@@ -297,7 +297,7 @@ IngameHud.update = function (self, dt, t, menu_active)
 	local is_own_player_dead = self.is_own_player_dead(self)
 	local gift_popup_ui = self.gift_popup_ui
 
-	if not self.input_helper_ui.active and not menu_active then
+	if not menu_active then
 		gift_popup_ui.update(gift_popup_ui, dt, t)
 	end
 
@@ -308,6 +308,7 @@ IngameHud.update = function (self, dt, t, menu_active)
 	local ui_renderer = self.ui_renderer
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UICleanUI.update(self.cleanui, dt)
 
 	if my_player then
 		Profiler.start("subtitle_gui")
@@ -388,7 +389,7 @@ IngameHud.update = function (self, dt, t, menu_active)
 		Profiler.stop("mission_objective")
 	end
 
-	local observer_ui_visibility = is_own_player_dead and not self.ingame_player_list_ui.active and not self.input_helper_ui.active and not menu_active and not self.is_in_inn
+	local observer_ui_visibility = is_own_player_dead and not self.ingame_player_list_ui.active and not menu_active and not self.is_in_inn
 	local observer_ui = self.observer_ui
 
 	if observer_ui and observer_ui.is_visible(observer_ui) ~= observer_ui_visibility then
@@ -437,7 +438,7 @@ end
 IngameHud.post_update = function (self, dt, t, menu_active)
 	local is_own_player_dead = self.is_own_player_dead(self)
 
-	if not self.input_helper_ui.active and not menu_active then
+	if not menu_active then
 		self.gift_popup_ui:post_update(dt, t)
 	end
 

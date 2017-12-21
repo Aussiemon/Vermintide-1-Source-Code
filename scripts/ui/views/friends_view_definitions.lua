@@ -954,6 +954,30 @@ LEVEL_TRANSLATIONS = {
 		"Quais",
 		"Das Ufer",
 		"Riva"
+	},
+	dlc_dwarf_beacons = {
+		"Chain of Fire",
+		"Chaîne ardente",
+		"\u0141a\u0144cuch ognia",
+		"Cadena de fuego",
+		"Kette aus Feuer",
+		"Corrente de fogo",
+		"\u0426\u0435\u043f\u044c \u043e\u0433\u043d\u044f",
+		"Catena di fuoco"
+	},
+	dlc_dwarf_exterior = {
+		"The Cursed Rune",
+		"La rune maudite",
+		"Przekl\u0119ta runa",
+		"La runa maldita",
+		"Die verfluchte Rune",
+		"A runa amaldiçoada",
+		"\u041f\u0440\u043e\u043a\u043b\u044f\u0442\u0430\u044f \u0440\u0443\u043d\u0430",
+		"La runa maledetta"
+	},
+	dlc_dwarf_interior = {
+		"\u0425\u0430\u0437\u0438\u0434 \u041a\u0440\u043e",
+		"Khazid Kro"
 	}
 }
 DIFFICULTY_TRANSLATIONS = {

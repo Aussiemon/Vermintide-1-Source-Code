@@ -468,7 +468,10 @@ NetworkServer.update = function (self, dt)
 		local host_to_migrate_to = self.host_to_migrate_to
 
 		for peer_id, peer_state_machine in pairs(peer_state_machines) do
-			if peer_id ~= Network.peer_id() and peer_state_machine.current_state == PeerStates.InGame then
+			local peer_state = peer_state_machine.current_state
+			local allowed_to_host = peer_state == PeerStates.InGame or peer_state == PeerStates.InPostGame
+
+			if peer_id ~= Network.peer_id() and allowed_to_host then
 				host_to_migrate_to = peer_id
 				peers_ingame = peers_ingame + 1
 			end

@@ -77,6 +77,64 @@ local IGNORED_DAMAGE_TYPES = {
 	aoe_poison_dot = true,
 	burninating = true
 }
+GenericUnitInteractorExtension._handle_ray_hit = function (self, hits, hits_n, from_position, camera)
+	local hit_non_interaction_unit = false
+	local distance_score = math.huge
+	local selected_interaction_unit, selected_interaction_type = nil
+	local res_w = RESOLUTION_LOOKUP.res_w
+	local res_h = RESOLUTION_LOOKUP.res_h
+	local center_x = res_w*0.5
+	local center_y = res_h*0.5
+
+	for i = 1, hits_n, 1 do
+		local hit = hits[i]
+		local actor = hit[4]
+
+		if actor then
+			local hit_unit = Actor.unit(actor)
+
+			if (hit_unit and hit_unit ~= self.unit and not self.exclusive_interaction_unit) or hit_unit == self.exclusive_interaction_unit then
+				if ScriptUnit.has_extension(hit_unit, "interactable_system") then
+					local interact_actor = Unit.get_data(hit_unit, "interaction_data", "interact_actor")
+
+					if not interact_actor or Unit.actor(hit_unit, interact_actor) == actor then
+						local target_extension = ScriptUnit.extension(hit_unit, "interactable_system")
+						local target_interaction_type = target_extension.interaction_type(target_extension)
+						local can_interact, fail_reason, interaction_type = self.can_interact(self, hit_unit, target_interaction_type)
+						local is_in_chest = self._check_if_interactable_in_chest(self, hit_unit, from_position)
+
+						if (can_interact or fail_reason) and not is_in_chest then
+							local interaction_template = InteractionDefinitions[interaction_type]
+							local config = interaction_template.config or interaction_template.get_config()
+							local does_not_require_line_of_sight = config.does_not_require_line_of_sight
+							local score = self._claculate_interaction_distance_score(self, hit_unit, from_position, center_x, center_y, camera)
+							local block_other_interactions = config.block_other_interactions
+
+							if (hit_non_interaction_unit and does_not_require_line_of_sight) or not hit_non_interaction_unit then
+								if block_other_interactions then
+									selected_interaction_unit = hit_unit
+									selected_interaction_type = interaction_type
+
+									break
+								elseif score < distance_score then
+									selected_interaction_unit = hit_unit
+									selected_interaction_type = interaction_type
+									distance_score = score
+								end
+							end
+						end
+					else
+						hit_non_interaction_unit = true
+					end
+				else
+					hit_non_interaction_unit = true
+				end
+			end
+		end
+	end
+
+	return selected_interaction_unit, selected_interaction_type
+end
 GenericUnitInteractorExtension.update = function (self, unit, input, dt, context, t)
 	local world = self.world
 
@@ -150,59 +208,27 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 			self.ray_casted = true
 			local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 			local camera_position = first_person_extension.current_position(first_person_extension)
-			local camera_rotation = first_person_extension.current_rotation(first_person_extension)
-			local camera_forward = Quaternion.forward(camera_rotation)
-			local hits, hits_n = self.physics_world:immediate_raycast(camera_position, camera_forward, INTERACT_RAY_DISTANCE, "all", "collision_filter", "filter_ray_interaction")
-			local hit_non_interaction_unit = false
 			local camera = self._get_player_camera(self)
-			local distance_score = math.huge
 			local selected_interaction_unit, selected_interaction_type = nil
+			local HAS_TOBII = rawget(_G, "Tobii") and Application.user_setting("tobii_eyetracking") and Application.user_setting("tobii_interact_at_gaze")
+			local interact_at_gaze_enabled = HAS_TOBII and Tobii.user_presence() == Tobii.USER_PRESENT and Tobii.device_status() == Tobii.DEVICE_TRACKING
 
-			for i = 1, hits_n, 1 do
-				local hit = hits[i]
-				local actor = hit[4]
+			if interact_at_gaze_enabled then
+				local player = Managers.player:owner(unit)
 
-				if actor then
-					local hit_unit = Actor.unit(actor)
-
-					if (hit_unit and hit_unit ~= self.unit and not self.exclusive_interaction_unit) or hit_unit == self.exclusive_interaction_unit then
-						if ScriptUnit.has_extension(hit_unit, "interactable_system") then
-							local interact_actor = Unit.get_data(hit_unit, "interaction_data", "interact_actor")
-
-							if not interact_actor or Unit.actor(hit_unit, interact_actor) == actor then
-								local target_extension = ScriptUnit.extension(hit_unit, "interactable_system")
-								local target_interaction_type = target_extension.interaction_type(target_extension)
-								local can_interact, fail_reason, interaction_type = self.can_interact(self, hit_unit, target_interaction_type)
-								local is_in_chest = self._check_if_interactable_in_chest(self, hit_unit, camera_position)
-
-								if (can_interact or fail_reason) and not is_in_chest then
-									local interaction_template = InteractionDefinitions[interaction_type]
-									local config = interaction_template.config or interaction_template.get_config()
-									local does_not_require_line_of_sight = config.does_not_require_line_of_sight
-									local score = self._claculate_interaction_distance_score(self, hit_unit, camera_position, center_x, center_y, camera)
-									local block_other_interactions = config.block_other_interactions
-
-									if (hit_non_interaction_unit and does_not_require_line_of_sight) or not hit_non_interaction_unit then
-										if block_other_interactions then
-											interaction_context.interactable_unit = hit_unit
-											interaction_context.interaction_type = interaction_type
-
-											return 
-										elseif score < distance_score then
-											selected_interaction_unit = hit_unit
-											selected_interaction_type = interaction_type
-											distance_score = score
-										end
-									end
-								end
-							else
-								hit_non_interaction_unit = true
-							end
-						else
-							hit_non_interaction_unit = true
-						end
-					end
+				if player.local_player then
+					local eyetracking_extension = ScriptUnit.extension(unit, "eyetracking_system")
+					local gaze_forward = eyetracking_extension.gaze_forward(eyetracking_extension)
+					local hits, hits_n = self.physics_world:immediate_raycast(camera_position, gaze_forward, INTERACT_RAY_DISTANCE, "all", "collision_filter", "filter_ray_interaction")
+					selected_interaction_unit, selected_interaction_type = self._handle_ray_hit(self, hits, hits_n, camera_position, camera)
 				end
+			end
+
+			if not selected_interaction_unit then
+				local camera_rotation = first_person_extension.current_rotation(first_person_extension)
+				local camera_forward = Quaternion.forward(camera_rotation)
+				local hits, hits_n = self.physics_world:immediate_raycast(camera_position, camera_forward, INTERACT_RAY_DISTANCE, "all", "collision_filter", "filter_ray_interaction")
+				selected_interaction_unit, selected_interaction_type = self._handle_ray_hit(self, hits, hits_n, camera_position, camera)
 			end
 
 			if selected_interaction_unit then

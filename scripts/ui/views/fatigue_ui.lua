@@ -45,7 +45,7 @@ FatigueUI.shield_state = function (self, shield_number, living_shields)
 end
 FatigueUI.setup_hud = function (self, status_extension)
 	local fatigue_points, max_fatigue_points = status_extension.current_fatigue_points(status_extension)
-	local active_shields = math.floor(max_fatigue_points/2 + 0.5)
+	local active_shields = max_fatigue_points/2 + 0.5
 	local offset = 30
 	local total_width = offset*(active_shields - 1)
 	local half_width = total_width/2

@@ -413,8 +413,9 @@ IngamePlayerListUI.update = function (self, dt)
 			end
 
 			if self.private_setting_enabled and (private_checkbox_hotspot.on_release or (gamepad_active and input_service.get(input_service, "toggle_private"))) then
+				local is_private = Managers.matchmaking:is_game_private()
 				local map_save_data = self.map_save_data
-				map_save_data.private_enabled = not map_save_data.private_enabled
+				map_save_data.private_enabled = not is_private
 
 				WwiseWorld.trigger_event(self.wwise_world, "Play_hud_select")
 				self.set_privacy_enabled(self, map_save_data.private_enabled, true)
@@ -693,9 +694,9 @@ IngamePlayerListUI.set_active = function (self, active)
 		chat_gui.show_chat(chat_gui)
 
 		if self.local_player.is_server and not self.is_in_inn then
-			local map_save_data = self.map_save_data
+			local is_private = Managers.matchmaking:is_game_private()
 
-			self.set_privacy_enabled(self, map_save_data.private_enabled)
+			self.set_privacy_enabled(self, is_private)
 		end
 	else
 		chat_gui.hide_chat(chat_gui)

@@ -27,6 +27,7 @@ BaseCamera.parse_parameters = function (self, camera_settings, parent_node)
 	self._fade_to_black = camera_settings.fade_to_black
 	self._vertical_fov = camera_settings.vertical_fov and camera_settings.vertical_fov*degrees_to_radians
 	self._should_apply_fov_multiplier = camera_settings.should_apply_fov_multiplier or parent_node.should_apply_fov_multiplier(parent_node)
+	self._apply_extended_view = camera_settings.apply_extended_view or parent_node._apply_extended_view
 	self._default_fov = (camera_settings.default_fov and camera_settings.default_fov*degrees_to_radians) or parent_node.default_fov(parent_node)
 	self._near_range = camera_settings.near_range or parent_node.near_range(parent_node)
 	self._far_range = camera_settings.far_range or parent_node.far_range(parent_node)

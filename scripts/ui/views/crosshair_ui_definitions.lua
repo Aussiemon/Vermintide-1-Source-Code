@@ -15,9 +15,7 @@ local scenegraph_definition = {
 		}
 	},
 	crosshair_root = {
-		vertical_alignment = "center",
 		parent = "root",
-		horizontal_alignment = "center",
 		position = {
 			0,
 			0,

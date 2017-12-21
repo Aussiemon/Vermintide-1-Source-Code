@@ -27,88 +27,18 @@ generic_icons_atlas = {
 			0.033203
 		}
 	},
-	boon_icon_05_stagger_more = {
-		size = {
-			38,
-			38
-		},
-		uv00 = {
-			0.832031,
-			0.658203
-		},
-		uv11 = {
-			0.850586,
-			0.695313
-		}
-	},
-	locked_icon_01 = {
-		size = {
-			30,
-			38
-		},
-		uv00 = {
-			0.981445,
-			0.396484
-		},
-		uv11 = {
-			0.996094,
-			0.433594
-		}
-	},
-	boon_icon_04_reduced_slowing_effects = {
-		size = {
-			38,
-			38
-		},
-		uv00 = {
-			0.970703,
-			0.609375
-		},
-		uv11 = {
-			0.989258,
-			0.646484
-		}
-	},
-	boon_icon_01_damage_reduced = {
-		size = {
-			38,
-			38
-		},
-		uv00 = {
-			0.950195,
-			0.609375
-		},
-		uv11 = {
-			0.96875,
-			0.646484
-		}
-	},
-	boon_icon_06_stamina = {
-		size = {
-			38,
-			38
-		},
-		uv00 = {
-			0.929688,
-			0.609375
-		},
-		uv11 = {
-			0.948242,
-			0.646484
-		}
-	},
 	boon_icon_02_damage_increased = {
 		size = {
 			38,
 			38
 		},
 		uv00 = {
-			0.676758,
-			0.953125
+			0.880859,
+			0.71875
 		},
 		uv11 = {
-			0.695313,
-			0.990234
+			0.899414,
+			0.755859
 		}
 	},
 	boon_icon_03_extra_starting_gear = {
@@ -117,12 +47,82 @@ generic_icons_atlas = {
 			38
 		},
 		uv00 = {
-			0.676758,
-			0.912109
+			0.860352,
+			0.71875
 		},
 		uv11 = {
-			0.695313,
-			0.949219
+			0.878906,
+			0.755859
+		}
+	},
+	boon_icon_01_damage_reduced = {
+		size = {
+			38,
+			38
+		},
+		uv00 = {
+			0.838867,
+			0.925781
+		},
+		uv11 = {
+			0.857422,
+			0.962891
+		}
+	},
+	boon_icon_04_reduced_slowing_effects = {
+		size = {
+			38,
+			38
+		},
+		uv00 = {
+			0.838867,
+			0.884766
+		},
+		uv11 = {
+			0.857422,
+			0.921875
+		}
+	},
+	boon_icon_05_stagger_more = {
+		size = {
+			38,
+			38
+		},
+		uv00 = {
+			0.838867,
+			0.84375
+		},
+		uv11 = {
+			0.857422,
+			0.880859
+		}
+	},
+	boon_icon_06_stamina = {
+		size = {
+			38,
+			38
+		},
+		uv00 = {
+			0.838867,
+			0.802734
+		},
+		uv11 = {
+			0.857422,
+			0.839844
+		}
+	},
+	locked_icon_01 = {
+		size = {
+			30,
+			38
+		},
+		uv00 = {
+			0.838867,
+			0.761719
+		},
+		uv11 = {
+			0.853516,
+			0.798828
 		}
 	},
 	token_icon_02 = {
@@ -131,40 +131,12 @@ generic_icons_atlas = {
 			40
 		},
 		uv00 = {
-			0.975586,
-			0.216797
+			0.838867,
+			0.71875
 		},
 		uv11 = {
-			0.995117,
-			0.255859
-		}
-	},
-	token_icon_01 = {
-		size = {
-			40,
-			40
-		},
-		uv00 = {
-			0.954102,
-			0.216797
-		},
-		uv11 = {
-			0.973633,
-			0.255859
-		}
-	},
-	token_icon_03 = {
-		size = {
-			40,
-			40
-		},
-		uv00 = {
-			0.868164,
-			0.201172
-		},
-		uv11 = {
-			0.887695,
-			0.240234
+			0.858398,
+			0.757813
 		}
 	},
 	token_icon_04 = {
@@ -173,26 +145,40 @@ generic_icons_atlas = {
 			40
 		},
 		uv00 = {
-			0.741211,
-			0.201172
+			0.979492,
+			0.669922
 		},
 		uv11 = {
-			0.760742,
-			0.240234
+			0.999023,
+			0.708984
 		}
 	},
-	hero_icon_medium_dwarf_ranger_yellow = {
+	token_icon_03 = {
 		size = {
-			46,
-			46
+			40,
+			40
 		},
 		uv00 = {
-			0.905273,
-			0.609375
+			0.958008,
+			0.669922
 		},
 		uv11 = {
-			0.927734,
-			0.654297
+			0.977539,
+			0.708984
+		}
+	},
+	token_icon_01 = {
+		size = {
+			40,
+			40
+		},
+		uv00 = {
+			0.936523,
+			0.669922
+		},
+		uv11 = {
+			0.956055,
+			0.708984
 		}
 	},
 	hero_icon_medium_bright_wizard_white = {
@@ -201,54 +187,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.880859,
-			0.609375
+			0.912109,
+			0.669922
 		},
 		uv11 = {
-			0.90332,
-			0.654297
-		}
-	},
-	hero_icon_medium_bright_wizard_yellow = {
-		size = {
-			46,
-			46
-		},
-		uv00 = {
-			0.856445,
-			0.609375
-		},
-		uv11 = {
-			0.878906,
-			0.654297
-		}
-	},
-	hero_icon_medium_empire_soldier_yellow = {
-		size = {
-			46,
-			46
-		},
-		uv00 = {
-			0.832031,
-			0.609375
-		},
-		uv11 = {
-			0.854492,
-			0.654297
-		}
-	},
-	hero_icon_medium_empire_soldier_white = {
-		size = {
-			46,
-			46
-		},
-		uv00 = {
-			0.799805,
-			0.917969
-		},
-		uv11 = {
-			0.822266,
-			0.962891
+			0.93457,
+			0.714844
 		}
 	},
 	hero_icon_medium_dwarf_ranger_white = {
@@ -257,40 +201,26 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.799805,
-			0.869141
+			0.887695,
+			0.669922
 		},
 		uv11 = {
-			0.822266,
-			0.914063
+			0.910156,
+			0.714844
 		}
 	},
-	hero_icon_medium_witch_hunter_yellow = {
+	hero_icon_medium_dwarf_ranger_yellow = {
 		size = {
 			46,
 			46
 		},
 		uv00 = {
-			0.799805,
-			0.820313
+			0.863281,
+			0.669922
 		},
 		uv11 = {
-			0.822266,
-			0.865234
-		}
-	},
-	hero_icon_medium_witch_hunter_white = {
-		size = {
-			46,
-			46
-		},
-		uv00 = {
-			0.799805,
-			0.771484
-		},
-		uv11 = {
-			0.822266,
-			0.816406
+			0.885742,
+			0.714844
 		}
 	},
 	hero_icon_medium_way_watcher_yellow = {
@@ -299,12 +229,68 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.799805,
-			0.722656
+			0.838867,
+			0.669922
 		},
 		uv11 = {
-			0.822266,
-			0.767578
+			0.861328,
+			0.714844
+		}
+	},
+	hero_icon_medium_empire_soldier_yellow = {
+		size = {
+			46,
+			46
+		},
+		uv00 = {
+			0.964844,
+			0.617188
+		},
+		uv11 = {
+			0.987305,
+			0.662109
+		}
+	},
+	hero_icon_medium_witch_hunter_white = {
+		size = {
+			46,
+			46
+		},
+		uv00 = {
+			0.94043,
+			0.617188
+		},
+		uv11 = {
+			0.962891,
+			0.662109
+		}
+	},
+	hero_icon_medium_empire_soldier_white = {
+		size = {
+			46,
+			46
+		},
+		uv00 = {
+			0.916016,
+			0.617188
+		},
+		uv11 = {
+			0.938477,
+			0.662109
+		}
+	},
+	hero_icon_medium_bright_wizard_yellow = {
+		size = {
+			46,
+			46
+		},
+		uv00 = {
+			0.891602,
+			0.617188
+		},
+		uv11 = {
+			0.914063,
+			0.662109
 		}
 	},
 	hero_icon_medium_way_watcher_white = {
@@ -313,124 +299,26 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.799805,
-			0.673828
+			0.741211,
+			0.951172
 		},
 		uv11 = {
-			0.822266,
-			0.71875
+			0.763672,
+			0.996094
 		}
 	},
-	teammate_consumable_icon_potion = {
+	hero_icon_medium_witch_hunter_yellow = {
 		size = {
-			50,
-			50
+			46,
+			46
 		},
 		uv00 = {
-			0.733398,
-			0.943359
+			0.975586,
+			0.416016
 		},
 		uv11 = {
-			0.757813,
-			0.992188
-		}
-	},
-	teammate_consumable_icon_grenade_empty = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.700195,
-			0.943359
-		},
-		uv11 = {
-			0.724609,
-			0.992188
-		}
-	},
-	teammate_consumable_icon_smoke = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.841797,
-			0.201172
-		},
-		uv11 = {
-			0.866211,
-			0.25
-		}
-	},
-	teammate_consumable_icon_potion_empty = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.81543,
-			0.201172
-		},
-		uv11 = {
-			0.839844,
-			0.25
-		}
-	},
-	teammate_consumable_icon_fire = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.789063,
-			0.201172
-		},
-		uv11 = {
-			0.813477,
-			0.25
-		}
-	},
-	teammate_consumable_icon_speed = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.762695,
-			0.201172
-		},
-		uv11 = {
-			0.787109,
-			0.25
-		}
-	},
-	teammate_consumable_icon_frag = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.714844,
-			0.201172
-		},
-		uv11 = {
-			0.739258,
-			0.25
-		}
-	},
-	teammate_consumable_icon_grenade = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.688477,
-			0.201172
-		},
-		uv11 = {
-			0.712891,
-			0.25
+			0.998047,
+			0.460938
 		}
 	},
 	teammate_consumable_icon_strength = {
@@ -439,12 +327,124 @@ generic_icons_atlas = {
 			50
 		},
 		uv00 = {
-			0.662109,
-			0.201172
+			0.865234,
+			0.617188
 		},
 		uv11 = {
-			0.686523,
-			0.25
+			0.889648,
+			0.666016
+		}
+	},
+	teammate_consumable_icon_potion = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.838867,
+			0.617188
+		},
+		uv11 = {
+			0.863281,
+			0.666016
+		}
+	},
+	teammate_consumable_icon_speed = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.806641,
+			0.945313
+		},
+		uv11 = {
+			0.831055,
+			0.994141
+		}
+	},
+	teammate_consumable_icon_potion_empty = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.806641,
+			0.892578
+		},
+		uv11 = {
+			0.831055,
+			0.941406
+		}
+	},
+	teammate_consumable_icon_grenade_empty = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.806641,
+			0.839844
+		},
+		uv11 = {
+			0.831055,
+			0.888672
+		}
+	},
+	teammate_consumable_icon_frag = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.806641,
+			0.787109
+		},
+		uv11 = {
+			0.831055,
+			0.835938
+		}
+	},
+	teammate_consumable_icon_smoke = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.806641,
+			0.734375
+		},
+		uv11 = {
+			0.831055,
+			0.783203
+		}
+	},
+	teammate_consumable_icon_grenade = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.806641,
+			0.681641
+		},
+		uv11 = {
+			0.831055,
+			0.730469
+		}
+	},
+	teammate_consumable_icon_fire = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.774414,
+			0.939453
+		},
+		uv11 = {
+			0.798828,
+			0.988281
 		}
 	},
 	teammate_consumable_icon_defence = {
@@ -453,96 +453,12 @@ generic_icons_atlas = {
 			50
 		},
 		uv00 = {
-			0.635742,
-			0.201172
+			0.973633,
+			0.486328
 		},
 		uv11 = {
-			0.660156,
-			0.25
-		}
-	},
-	weapon_icon_empty = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.799805,
-			0.609375
-		},
-		uv11 = {
-			0.830078,
-			0.669922
-		}
-	},
-	teammate_consumable_icon_medpack = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.960938,
-			0.544922
-		},
-		uv11 = {
-			0.991211,
-			0.605469
-		}
-	},
-	teammate_consumable_icon_book = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.928711,
-			0.544922
-		},
-		uv11 = {
-			0.958984,
-			0.605469
-		}
-	},
-	teammate_consumable_icon_grimoire = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.896484,
-			0.544922
-		},
-		uv11 = {
-			0.926758,
-			0.605469
-		}
-	},
-	hud_tutorial_survival_icon_attack_direction = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.864258,
-			0.544922
-		},
-		uv11 = {
-			0.894531,
-			0.605469
-		}
-	},
-	grenade_icon = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.832031,
-			0.544922
-		},
-		uv11 = {
-			0.862305,
-			0.605469
+			0.998047,
+			0.535156
 		}
 	},
 	hud_tutorial_survival_icon_reward_drop = {
@@ -551,26 +467,12 @@ generic_icons_atlas = {
 			62
 		},
 		uv00 = {
-			0.799805,
-			0.544922
+			0.806641,
+			0.617188
 		},
 		uv11 = {
-			0.830078,
-			0.605469
-		}
-	},
-	teammate_consumable_icon_medkit = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.766602,
-			0.933594
-		},
-		uv11 = {
-			0.796875,
-			0.994141
+			0.836914,
+			0.677734
 		}
 	},
 	teammate_consumable_icon_medpack_empty = {
@@ -579,26 +481,40 @@ generic_icons_atlas = {
 			62
 		},
 		uv00 = {
-			0.766602,
-			0.869141
+			0.967773,
+			0.552734
 		},
 		uv11 = {
-			0.796875,
-			0.929688
+			0.998047,
+			0.613281
 		}
 	},
-	hud_tutorial_survival_icon_supply_drop = {
+	teammate_consumable_icon_grimoire = {
 		size = {
 			62,
 			62
 		},
 		uv00 = {
-			0.766602,
-			0.804688
+			0.935547,
+			0.552734
 		},
 		uv11 = {
-			0.796875,
-			0.865234
+			0.96582,
+			0.613281
+		}
+	},
+	teammate_consumable_icon_medpack = {
+		size = {
+			62,
+			62
+		},
+		uv00 = {
+			0.90332,
+			0.552734
+		},
+		uv11 = {
+			0.933594,
+			0.613281
 		}
 	},
 	teammate_consumable_icon_potion_01 = {
@@ -607,26 +523,82 @@ generic_icons_atlas = {
 			62
 		},
 		uv00 = {
-			0.766602,
-			0.740234
+			0.871094,
+			0.552734
 		},
 		uv11 = {
-			0.796875,
-			0.800781
+			0.901367,
+			0.613281
 		}
 	},
-	hud_tutorial_survival_icon_resupply = {
+	grenade_icon = {
 		size = {
 			62,
 			62
 		},
 		uv00 = {
-			0.766602,
-			0.675781
+			0.838867,
+			0.552734
 		},
 		uv11 = {
-			0.796875,
-			0.736328
+			0.869141,
+			0.613281
+		}
+	},
+	teammate_consumable_icon_medkit = {
+		size = {
+			62,
+			62
+		},
+		uv00 = {
+			0.806641,
+			0.552734
+		},
+		uv11 = {
+			0.836914,
+			0.613281
+		}
+	},
+	teammate_consumable_icon_book = {
+		size = {
+			62,
+			62
+		},
+		uv00 = {
+			0.774414,
+			0.875
+		},
+		uv11 = {
+			0.804688,
+			0.935547
+		}
+	},
+	hud_tutorial_survival_icon_supply_drop = {
+		size = {
+			62,
+			62
+		},
+		uv00 = {
+			0.774414,
+			0.810547
+		},
+		uv11 = {
+			0.804688,
+			0.871094
+		}
+	},
+	hud_tutorial_survival_icon_attack_direction = {
+		size = {
+			62,
+			62
+		},
+		uv00 = {
+			0.774414,
+			0.746094
+		},
+		uv11 = {
+			0.804688,
+			0.806641
 		}
 	},
 	teammate_consumable_icon_potion_02 = {
@@ -635,166 +607,40 @@ generic_icons_atlas = {
 			62
 		},
 		uv00 = {
-			0.766602,
-			0.611328
+			0.774414,
+			0.681641
 		},
 		uv11 = {
-			0.796875,
-			0.671875
+			0.804688,
+			0.742188
 		}
 	},
-	default_potion_icon = {
+	weapon_icon_empty = {
 		size = {
-			64,
-			64
+			62,
+			62
 		},
 		uv00 = {
-			0.766602,
-			0.544922
+			0.774414,
+			0.617188
 		},
 		uv11 = {
-			0.797852,
-			0.607422
+			0.804688,
+			0.677734
 		}
 	},
-	default_heal_ally_icon_lit = {
+	hud_tutorial_survival_icon_resupply = {
 		size = {
-			64,
-			64
+			62,
+			62
 		},
 		uv00 = {
-			0.96582,
-			0.478516
+			0.774414,
+			0.552734
 		},
 		uv11 = {
-			0.99707,
-			0.541016
-		}
-	},
-	consumables_frag_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.932617,
-			0.478516
-		},
-		uv11 = {
-			0.963867,
-			0.541016
-		}
-	},
-	consumables_medpack = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.899414,
-			0.478516
-		},
-		uv11 = {
-			0.930664,
-			0.541016
-		}
-	},
-	default_heal_ally_icon = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.866211,
-			0.478516
-		},
-		uv11 = {
-			0.897461,
-			0.541016
-		}
-	},
-	consumables_grimoire = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.833008,
-			0.478516
-		},
-		uv11 = {
-			0.864258,
-			0.541016
-		}
-	},
-	default_grenade_icon = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.799805,
-			0.478516
-		},
-		uv11 = {
-			0.831055,
-			0.541016
-		}
-	},
-	consumables_potion_01 = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.766602,
-			0.478516
-		},
-		uv11 = {
-			0.797852,
-			0.541016
-		}
-	},
-	consumables_medpack_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.733398,
-			0.876953
-		},
-		uv11 = {
-			0.764648,
-			0.939453
-		}
-	},
-	consumables_heal_ally_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.733398,
-			0.810547
-		},
-		uv11 = {
-			0.764648,
-			0.873047
-		}
-	},
-	consumables_heal_ally = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.733398,
-			0.744141
-		},
-		uv11 = {
-			0.764648,
-			0.806641
+			0.804688,
+			0.613281
 		}
 	},
 	default_heal_icon_lit = {
@@ -803,12 +649,12 @@ generic_icons_atlas = {
 			64
 		},
 		uv00 = {
-			0.733398,
-			0.677734
+			0.94043,
+			0.486328
 		},
 		uv11 = {
-			0.764648,
-			0.740234
+			0.97168,
+			0.548828
 		}
 	},
 	consumables_potion_02_lit = {
@@ -817,194 +663,26 @@ generic_icons_atlas = {
 			64
 		},
 		uv00 = {
-			0.733398,
-			0.611328
+			0.907227,
+			0.486328
 		},
 		uv11 = {
-			0.764648,
-			0.673828
+			0.938477,
+			0.548828
 		}
 	},
-	consumables_book = {
+	default_potion_icon = {
 		size = {
 			64,
 			64
 		},
 		uv00 = {
-			0.733398,
-			0.544922
+			0.874023,
+			0.486328
 		},
 		uv11 = {
-			0.764648,
-			0.607422
-		}
-	},
-	consumables_frame_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.733398,
-			0.478516
-		},
-		uv11 = {
-			0.764648,
-			0.541016
-		}
-	},
-	consumables_strength_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.876953
-		},
-		uv11 = {
-			0.731445,
-			0.939453
-		}
-	},
-	consumables_potion_01_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.810547
-		},
-		uv11 = {
-			0.731445,
-			0.873047
-		}
-	},
-	default_heal_icon = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.744141
-		},
-		uv11 = {
-			0.731445,
-			0.806641
-		}
-	},
-	default_grenade_icon_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.677734
-		},
-		uv11 = {
-			0.731445,
-			0.740234
-		}
-	},
-	default_potion_icon_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.611328
-		},
-		uv11 = {
-			0.731445,
-			0.673828
-		}
-	},
-	consumables_strength = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.544922
-		},
-		uv11 = {
-			0.731445,
-			0.607422
-		}
-	},
-	consumables_speed_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.700195,
-			0.478516
-		},
-		uv11 = {
-			0.731445,
-			0.541016
-		}
-	},
-	consumables_smoke = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.961914,
-			0.330078
-		},
-		uv11 = {
-			0.993164,
-			0.392578
-		}
-	},
-	consumables_book_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.928711,
-			0.330078
-		},
-		uv11 = {
-			0.959961,
-			0.392578
-		}
-	},
-	killed_a_rat_unlocked = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.895508,
-			0.330078
-		},
-		uv11 = {
-			0.926758,
-			0.392578
-		}
-	},
-	consumables_frag = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.862305,
-			0.330078
-		},
-		uv11 = {
-			0.893555,
-			0.392578
+			0.905273,
+			0.548828
 		}
 	},
 	consumables_potion_02 = {
@@ -1013,124 +691,12 @@ generic_icons_atlas = {
 			64
 		},
 		uv00 = {
-			0.829102,
-			0.330078
+			0.84082,
+			0.486328
 		},
 		uv11 = {
-			0.860352,
-			0.392578
-		}
-	},
-	killed_a_rat_locked = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.795898,
-			0.330078
-		},
-		uv11 = {
-			0.827148,
-			0.392578
-		}
-	},
-	consumables_smoke_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.762695,
-			0.330078
-		},
-		uv11 = {
-			0.793945,
-			0.392578
-		}
-	},
-	consumables_frame_bg_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.956055,
-			0.263672
-		},
-		uv11 = {
-			0.987305,
-			0.326172
-		}
-	},
-	consumables_speed = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.922852,
-			0.263672
-		},
-		uv11 = {
-			0.954102,
-			0.326172
-		}
-	},
-	consumables_grimoire_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.889648,
-			0.263672
-		},
-		uv11 = {
-			0.920898,
-			0.326172
-		}
-	},
-	consumables_empty_potion = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.956055,
-			0.068359
-		},
-		uv11 = {
-			0.987305,
-			0.130859
-		}
-	},
-	consumables_defence_lit = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.922852,
-			0.068359
-		},
-		uv11 = {
-			0.954102,
-			0.130859
-		}
-	},
-	consumables_empty_grenade = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.889648,
-			0.068359
-		},
-		uv11 = {
-			0.920898,
-			0.130859
+			0.87207,
+			0.548828
 		}
 	},
 	consumables_fire_lit = {
@@ -1139,6 +705,440 @@ generic_icons_atlas = {
 			64
 		},
 		uv00 = {
+			0.807617,
+			0.486328
+		},
+		uv11 = {
+			0.838867,
+			0.548828
+		}
+	},
+	consumables_frame_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.774414,
+			0.486328
+		},
+		uv11 = {
+			0.805664,
+			0.548828
+		}
+	},
+	consumables_defence_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.884766
+		},
+		uv11 = {
+			0.772461,
+			0.947266
+		}
+	},
+	consumables_strength_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.818359
+		},
+		uv11 = {
+			0.772461,
+			0.880859
+		}
+	},
+	consumables_frag_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.751953
+		},
+		uv11 = {
+			0.772461,
+			0.814453
+		}
+	},
+	default_heal_icon = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.685547
+		},
+		uv11 = {
+			0.772461,
+			0.748047
+		}
+	},
+	consumables_empty_potion = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.619141
+		},
+		uv11 = {
+			0.772461,
+			0.681641
+		}
+	},
+	default_heal_ally_icon = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.552734
+		},
+		uv11 = {
+			0.772461,
+			0.615234
+		}
+	},
+	default_grenade_icon_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.741211,
+			0.486328
+		},
+		uv11 = {
+			0.772461,
+			0.548828
+		}
+	},
+	consumables_empty_grenade = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.942383,
+			0.416016
+		},
+		uv11 = {
+			0.973633,
+			0.478516
+		}
+	},
+	consumables_heal_ally = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.90918,
+			0.416016
+		},
+		uv11 = {
+			0.94043,
+			0.478516
+		}
+	},
+	default_grenade_icon = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.875977,
+			0.416016
+		},
+		uv11 = {
+			0.907227,
+			0.478516
+		}
+	},
+	consumables_medpack_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.842773,
+			0.416016
+		},
+		uv11 = {
+			0.874023,
+			0.478516
+		}
+	},
+	consumables_strength = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.80957,
+			0.416016
+		},
+		uv11 = {
+			0.84082,
+			0.478516
+		}
+	},
+	consumables_frag = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.776367,
+			0.416016
+		},
+		uv11 = {
+			0.807617,
+			0.478516
+		}
+	},
+	default_potion_icon_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.961914,
+			0.267578
+		},
+		uv11 = {
+			0.993164,
+			0.330078
+		}
+	},
+	consumables_fire = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.928711,
+			0.267578
+		},
+		uv11 = {
+			0.959961,
+			0.330078
+		}
+	},
+	default_heal_ally_icon_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.895508,
+			0.267578
+		},
+		uv11 = {
+			0.926758,
+			0.330078
+		}
+	},
+	consumables_speed_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.862305,
+			0.267578
+		},
+		uv11 = {
+			0.893555,
+			0.330078
+		}
+	},
+	consumables_speed = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.829102,
+			0.267578
+		},
+		uv11 = {
+			0.860352,
+			0.330078
+		}
+	},
+	consumables_grimoire_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.795898,
+			0.267578
+		},
+		uv11 = {
+			0.827148,
+			0.330078
+		}
+	},
+	consumables_frame_bg_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.762695,
+			0.267578
+		},
+		uv11 = {
+			0.793945,
+			0.330078
+		}
+	},
+	consumables_medpack = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.956055,
+			0.201172
+		},
+		uv11 = {
+			0.987305,
+			0.263672
+		}
+	},
+	consumables_smoke_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.922852,
+			0.201172
+		},
+		uv11 = {
+			0.954102,
+			0.263672
+		}
+	},
+	consumables_grimoire = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.889648,
+			0.201172
+		},
+		uv11 = {
+			0.920898,
+			0.263672
+		}
+	},
+	consumables_book = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.956055,
+			0.134766
+		},
+		uv11 = {
+			0.987305,
+			0.197266
+		}
+	},
+	consumables_smoke = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.922852,
+			0.134766
+		},
+		uv11 = {
+			0.954102,
+			0.197266
+		}
+	},
+	consumables_potion_01_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.889648,
+			0.134766
+		},
+		uv11 = {
+			0.920898,
+			0.197266
+		}
+	},
+	consumables_heal_ally_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.956055,
+			0.068359
+		},
+		uv11 = {
+			0.987305,
+			0.130859
+		}
+	},
+	consumables_potion_01 = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.922852,
+			0.068359
+		},
+		uv11 = {
+			0.954102,
+			0.130859
+		}
+	},
+	consumables_book_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.889648,
+			0.068359
+		},
+		uv11 = {
+			0.920898,
+			0.130859
+		}
+	},
+	consumables_defence = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
 			0.956055,
 			0.001953
 		},
@@ -1147,7 +1147,7 @@ generic_icons_atlas = {
 			0.064453
 		}
 	},
-	consumables_fire = {
+	killed_a_rat_locked = {
 		size = {
 			64,
 			64
@@ -1161,7 +1161,7 @@ generic_icons_atlas = {
 			0.064453
 		}
 	},
-	consumables_defence = {
+	killed_a_rat_unlocked = {
 		size = {
 			64,
 			64
@@ -1181,68 +1181,12 @@ generic_icons_atlas = {
 			68
 		},
 		uv00 = {
-			0.946289,
-			0.396484
+			0.741211,
+			0.416016
 		},
 		uv11 = {
-			0.979492,
-			0.462891
-		}
-	},
-	quest_icon_map = {
-		size = {
-			80,
-			80
-		},
-		uv00 = {
-			0.905273,
-			0.396484
-		},
-		uv11 = {
-			0.944336,
-			0.474609
-		}
-	},
-	token_icon_02_large = {
-		size = {
-			80,
-			80
-		},
-		uv00 = {
-			0.864258,
-			0.396484
-		},
-		uv11 = {
-			0.90332,
-			0.474609
-		}
-	},
-	quest_icon_grimoire = {
-		size = {
-			80,
-			80
-		},
-		uv00 = {
-			0.823242,
-			0.396484
-		},
-		uv11 = {
-			0.862305,
-			0.474609
-		}
-	},
-	token_icon_01_large = {
-		size = {
-			80,
-			80
-		},
-		uv00 = {
-			0.782227,
-			0.396484
-		},
-		uv11 = {
-			0.821289,
-			0.474609
+			0.774414,
+			0.482422
 		}
 	},
 	quest_icon_rat_ogre = {
@@ -1251,12 +1195,124 @@ generic_icons_atlas = {
 			80
 		},
 		uv00 = {
-			0.741211,
-			0.396484
+			0.700195,
+			0.908203
 		},
 		uv11 = {
-			0.780273,
-			0.474609
+			0.739258,
+			0.986328
+		}
+	},
+	quest_icon_map = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.700195,
+			0.826172
+		},
+		uv11 = {
+			0.739258,
+			0.904297
+		}
+	},
+	quest_icon_open_chests = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.700195,
+			0.744141
+		},
+		uv11 = {
+			0.739258,
+			0.822266
+		}
+	},
+	quest_icon_grenade_kills = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.700195,
+			0.662109
+		},
+		uv11 = {
+			0.739258,
+			0.740234
+		}
+	},
+	quest_icon_avoid_deaths_team = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.700195,
+			0.580078
+		},
+		uv11 = {
+			0.739258,
+			0.658203
+		}
+	},
+	quest_icon_grimoire = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.700195,
+			0.498047
+		},
+		uv11 = {
+			0.739258,
+			0.576172
+		}
+	},
+	quest_icon_last_stand_waves_defeated = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.700195,
+			0.416016
+		},
+		uv11 = {
+			0.739258,
+			0.494141
+		}
+	},
+	quest_icon_damage_taken_individual = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.946289,
+			0.333984
+		},
+		uv11 = {
+			0.985352,
+			0.412109
+		}
+	},
+	token_icon_01_large = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.905273,
+			0.333984
+		},
+		uv11 = {
+			0.944336,
+			0.412109
 		}
 	},
 	quest_icon_tome = {
@@ -1265,26 +1321,40 @@ generic_icons_atlas = {
 			80
 		},
 		uv00 = {
-			0.700195,
-			0.396484
+			0.864258,
+			0.333984
 		},
 		uv11 = {
-			0.739258,
-			0.474609
+			0.90332,
+			0.412109
 		}
 	},
-	token_icon_04_large = {
+	token_icon_02_large = {
 		size = {
 			80,
 			80
 		},
 		uv00 = {
-			0.635742,
-			0.912109
+			0.823242,
+			0.333984
 		},
 		uv11 = {
-			0.674805,
-			0.990234
+			0.862305,
+			0.412109
+		}
+	},
+	quest_icon_avoid_specials_damage_team = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.782227,
+			0.333984
+		},
+		uv11 = {
+			0.821289,
+			0.412109
 		}
 	},
 	token_icon_03_large = {
@@ -1293,40 +1363,26 @@ generic_icons_atlas = {
 			80
 		},
 		uv00 = {
-			0.954102,
-			0.134766
+			0.741211,
+			0.333984
 		},
 		uv11 = {
-			0.993164,
-			0.212891
+			0.780273,
+			0.412109
 		}
 	},
-	consumables_medpack_big_lit = {
+	token_icon_04_large = {
 		size = {
-			128,
-			128
+			80,
+			80
 		},
 		uv00 = {
-			0.635742,
-			0.783203
+			0.700195,
+			0.333984
 		},
 		uv11 = {
-			0.698242,
-			0.908203
-		}
-	},
-	consumables_medpack_big = {
-		size = {
-			128,
-			128
-		},
-		uv00 = {
-			0.635742,
-			0.654297
-		},
-		uv11 = {
-			0.698242,
-			0.779297
+			0.739258,
+			0.412109
 		}
 	},
 	consumables_frame_bg_big = {
@@ -1336,11 +1392,25 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.635742,
-			0.525391
+			0.849609
 		},
 		uv11 = {
 			0.698242,
-			0.650391
+			0.974609
+		}
+	},
+	consumables_medpack_big_lit = {
+		size = {
+			128,
+			128
+		},
+		uv00 = {
+			0.635742,
+			0.720703
+		},
+		uv11 = {
+			0.698242,
+			0.845703
 		}
 	},
 	consumables_frame_bg_big_lit = {
@@ -1350,11 +1420,11 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.635742,
-			0.396484
+			0.591797
 		},
 		uv11 = {
 			0.698242,
-			0.521484
+			0.716797
 		}
 	},
 	consumables_empty_medpack = {
@@ -1363,57 +1433,43 @@ generic_icons_atlas = {
 			128
 		},
 		uv00 = {
-			0.889648,
-			0.134766
+			0.635742,
+			0.462891
 		},
 		uv11 = {
-			0.952148,
-			0.259766
+			0.698242,
+			0.587891
 		}
 	},
-	weapon_generic_icon_staff_5_lit = {
+	consumables_medpack_big = {
+		size = {
+			128,
+			128
+		},
+		uv00 = {
+			0.635742,
+			0.333984
+		},
+		uv11 = {
+			0.698242,
+			0.458984
+		}
+	},
+	weapon_generic_icon_pick_lit = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.635742,
+			0.267578
+		},
+		uv11 = {
+			0.760742,
 			0.330078
-		},
-		uv11 = {
-			0.760742,
-			0.392578
 		}
 	},
-	weapon_generic_icon_hammer_and_sheild = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.762695,
-			0.263672
-		},
-		uv11 = {
-			0.887695,
-			0.326172
-		}
-	},
-	weapon_generic_icon_repeating_handgun = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.635742,
-			0.263672
-		},
-		uv11 = {
-			0.760742,
-			0.326172
-		}
-	},
-	weapon_generic_icon_longbow = {
+	weapon_generic_icon_axe2h_lit = {
 		size = {
 			256,
 			64
@@ -1441,46 +1497,18 @@ generic_icons_atlas = {
 			0.923828
 		}
 	},
-	weapon_generic_icon_pistol = {
+	weapon_generic_icons_bg_lit = {
 		size = {
 			256,
-			64
+			128
 		},
 		uv00 = {
 			0.508789,
-			0.794922
+			0.732422
 		},
 		uv11 = {
 			0.633789,
 			0.857422
-		}
-	},
-	weapon_generic_icon_axe2h_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.508789,
-			0.728516
-		},
-		uv11 = {
-			0.633789,
-			0.791016
-		}
-	},
-	weapon_generic_icon_drakegun_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.508789,
-			0.662109
-		},
-		uv11 = {
-			0.633789,
-			0.724609
 		}
 	},
 	weapon_generic_icon_axe_and_sheild = {
@@ -1490,151 +1518,109 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.508789,
+			0.666016
+		},
+		uv11 = {
+			0.633789,
+			0.728516
+		}
+	},
+	weapon_generic_icon_sheild_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.508789,
+			0.599609
+		},
+		uv11 = {
+			0.633789,
+			0.662109
+		}
+	},
+	weapon_generic_icon_staff_5 = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.508789,
+			0.533203
+		},
+		uv11 = {
+			0.633789,
 			0.595703
-		},
-		uv11 = {
-			0.633789,
-			0.658203
 		}
 	},
-	weapon_generic_icon_crossbow = {
+	weapon_generic_icon_hammer2h_lit = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.508789,
+			0.466797
+		},
+		uv11 = {
+			0.633789,
 			0.529297
-		},
-		uv11 = {
-			0.633789,
-			0.591797
 		}
 	},
-	weapon_generic_icon_axe_and_sheild_lit = {
+	weapon_generic_icon_handgun_lit = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.508789,
+			0.400391
+		},
+		uv11 = {
+			0.633789,
 			0.462891
-		},
-		uv11 = {
-			0.633789,
-			0.525391
 		}
 	},
-	weapon_generic_icon_bow = {
+	weapon_generic_icon_axe1h_lit = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.508789,
+			0.333984
+		},
+		uv11 = {
+			0.633789,
 			0.396484
-		},
-		uv11 = {
-			0.633789,
-			0.458984
 		}
 	},
-	weapon_generic_icon_blunderbuss = {
+	weapon_generic_icon_repeating_crossbow_lit = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.508789,
+			0.267578
+		},
+		uv11 = {
+			0.633789,
 			0.330078
-		},
-		uv11 = {
-			0.633789,
-			0.392578
 		}
 	},
-	weapon_generic_icon_brace_of_pistol = {
+	weapon_generic_icon_hammer2h = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
-			0.508789,
+			0.762695,
+			0.201172
+		},
+		uv11 = {
+			0.887695,
 			0.263672
-		},
-		uv11 = {
-			0.633789,
-			0.326172
-		}
-	},
-	weapon_generic_icon_repeating_pistol = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.762695,
-			0.134766
-		},
-		uv11 = {
-			0.887695,
-			0.197266
-		}
-	},
-	weapon_generic_icon_daggers = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.635742,
-			0.134766
-		},
-		uv11 = {
-			0.760742,
-			0.197266
-		}
-	},
-	weapon_generic_icons_bg_lit = {
-		size = {
-			256,
-			128
-		},
-		uv00 = {
-			0.508789,
-			0.134766
-		},
-		uv11 = {
-			0.633789,
-			0.259766
-		}
-	},
-	weapon_generic_icon_bow_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.762695,
-			0.068359
-		},
-		uv11 = {
-			0.887695,
-			0.130859
-		}
-	},
-	weapon_generic_icon_staff_2_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.635742,
-			0.068359
-		},
-		uv11 = {
-			0.760742,
-			0.130859
 		}
 	},
 	weapon_generic_icon_drakefire_pistols = {
@@ -1643,6 +1629,104 @@ generic_icons_atlas = {
 			64
 		},
 		uv00 = {
+			0.635742,
+			0.201172
+		},
+		uv11 = {
+			0.760742,
+			0.263672
+		}
+	},
+	weapon_generic_icon_repeating_handgun_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.508789,
+			0.201172
+		},
+		uv11 = {
+			0.633789,
+			0.263672
+		}
+	},
+	weapon_generic_icon_crossbow_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.762695,
+			0.134766
+		},
+		uv11 = {
+			0.887695,
+			0.197266
+		}
+	},
+	weapon_generic_icon_mace_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.635742,
+			0.134766
+		},
+		uv11 = {
+			0.760742,
+			0.197266
+		}
+	},
+	weapon_generic_icon_brace_of_pistol_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.508789,
+			0.134766
+		},
+		uv11 = {
+			0.633789,
+			0.197266
+		}
+	},
+	weapon_generic_icon_repeating_pistol_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.762695,
+			0.068359
+		},
+		uv11 = {
+			0.887695,
+			0.130859
+		}
+	},
+	weapon_generic_icon_blunderbuss = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.635742,
+			0.068359
+		},
+		uv11 = {
+			0.760742,
+			0.130859
+		}
+	},
+	weapon_generic_icon_staff_2 = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
 			0.508789,
 			0.068359
 		},
@@ -1651,7 +1735,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	weapon_generic_icon_mace = {
+	weapon_generic_icon_daggers_lit = {
 		size = {
 			256,
 			64
@@ -1662,244 +1746,6 @@ generic_icons_atlas = {
 		},
 		uv11 = {
 			0.887695,
-			0.064453
-		}
-	},
-	weapon_generic_icon_brace_of_pistol_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.635742,
-			0.001953
-		},
-		uv11 = {
-			0.760742,
-			0.064453
-		}
-	},
-	weapon_generic_icon_staff_6_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.508789,
-			0.001953
-		},
-		uv11 = {
-			0.633789,
-			0.064453
-		}
-	},
-	weapon_generic_icon_sword_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.931641
-		},
-		uv11 = {
-			0.506836,
-			0.994141
-		}
-	},
-	weapon_generic_icon_repeating_crossbow = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.865234
-		},
-		uv11 = {
-			0.506836,
-			0.927734
-		}
-	},
-	weapon_generic_icon_crossbow_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.798828
-		},
-		uv11 = {
-			0.506836,
-			0.861328
-		}
-	},
-	weapon_generic_icon_falken = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.732422
-		},
-		uv11 = {
-			0.506836,
-			0.794922
-		}
-	},
-	weapon_generic_icon_falken_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.666016
-		},
-		uv11 = {
-			0.506836,
-			0.728516
-		}
-	},
-	weapon_generic_icon_sheild = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.599609
-		},
-		uv11 = {
-			0.506836,
-			0.662109
-		}
-	},
-	weapon_generic_icon_daggers_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.533203
-		},
-		uv11 = {
-			0.506836,
-			0.595703
-		}
-	},
-	weapon_generic_icon_dual_elf_sword = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.466797
-		},
-		uv11 = {
-			0.506836,
-			0.529297
-		}
-	},
-	weapon_generic_icon_dual_elf_sword_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.400391
-		},
-		uv11 = {
-			0.506836,
-			0.462891
-		}
-	},
-	weapon_generic_icon_staff_4_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.333984
-		},
-		uv11 = {
-			0.506836,
-			0.396484
-		}
-	},
-	weapon_generic_icon_drakefire_pistols_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.267578
-		},
-		uv11 = {
-			0.506836,
-			0.330078
-		}
-	},
-	weapon_generic_icon_elf_sword = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.201172
-		},
-		uv11 = {
-			0.506836,
-			0.263672
-		}
-	},
-	weapon_generic_icon_elf_sword_and_dagger = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.134766
-		},
-		uv11 = {
-			0.506836,
-			0.197266
-		}
-	},
-	weapon_generic_icon_staff_2 = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.068359
-		},
-		uv11 = {
-			0.506836,
-			0.130859
-		}
-	},
-	weapon_generic_icon_flaming_sword = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.381836,
-			0.001953
-		},
-		uv11 = {
-			0.506836,
 			0.064453
 		}
 	},
@@ -1909,6 +1755,230 @@ generic_icons_atlas = {
 			64
 		},
 		uv00 = {
+			0.635742,
+			0.001953
+		},
+		uv11 = {
+			0.760742,
+			0.064453
+		}
+	},
+	weapon_generic_icon_blunderbuss_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.508789,
+			0.001953
+		},
+		uv11 = {
+			0.633789,
+			0.064453
+		}
+	},
+	weapon_generic_icon_pistol_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.927734
+		},
+		uv11 = {
+			0.506836,
+			0.990234
+		}
+	},
+	weapon_generic_icon_crossbow = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.861328
+		},
+		uv11 = {
+			0.506836,
+			0.923828
+		}
+	},
+	weapon_generic_icon_staff_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.794922
+		},
+		uv11 = {
+			0.506836,
+			0.857422
+		}
+	},
+	weapon_generic_icon_bow = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.728516
+		},
+		uv11 = {
+			0.506836,
+			0.791016
+		}
+	},
+	weapon_generic_icon_rifle_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.662109
+		},
+		uv11 = {
+			0.506836,
+			0.724609
+		}
+	},
+	weapon_generic_icon_daggers = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.595703
+		},
+		uv11 = {
+			0.506836,
+			0.658203
+		}
+	},
+	weapon_generic_icon_hammer_and_sheild_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.529297
+		},
+		uv11 = {
+			0.506836,
+			0.591797
+		}
+	},
+	weapon_generic_icon_bow_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.462891
+		},
+		uv11 = {
+			0.506836,
+			0.525391
+		}
+	},
+	weapon_generic_icon_longbow_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.396484
+		},
+		uv11 = {
+			0.506836,
+			0.458984
+		}
+	},
+	weapon_generic_icon_brace_of_pistol = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.330078
+		},
+		uv11 = {
+			0.506836,
+			0.392578
+		}
+	},
+	weapon_generic_icon_drakefire_pistols_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.263672
+		},
+		uv11 = {
+			0.506836,
+			0.326172
+		}
+	},
+	weapon_generic_icons_bg = {
+		size = {
+			256,
+			128
+		},
+		uv00 = {
+			0.381836,
+			0.134766
+		},
+		uv11 = {
+			0.506836,
+			0.259766
+		}
+	},
+	weapon_generic_icon_grudgeraker_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.068359
+		},
+		uv11 = {
+			0.506836,
+			0.130859
+		}
+	},
+	weapon_generic_icon_elf_sword_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.381836,
+			0.001953
+		},
+		uv11 = {
+			0.506836,
+			0.064453
+		}
+	},
+	weapon_generic_icon_staff_2_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
 			0.254883,
 			0.931641
 		},
@@ -1917,7 +1987,7 @@ generic_icons_atlas = {
 			0.994141
 		}
 	},
-	weapon_generic_icon_flaming_sword_lit = {
+	weapon_generic_icon_flaming_sword = {
 		size = {
 			256,
 			64
@@ -1931,7 +2001,7 @@ generic_icons_atlas = {
 			0.927734
 		}
 	},
-	weapon_generic_icon_longbow_lit = {
+	weapon_generic_icon_staff_3_lit = {
 		size = {
 			256,
 			64
@@ -1945,7 +2015,7 @@ generic_icons_atlas = {
 			0.861328
 		}
 	},
-	weapon_generic_icon_elf_axe2h = {
+	weapon_generic_icon_flaming_sword_lit = {
 		size = {
 			256,
 			64
@@ -1959,7 +2029,7 @@ generic_icons_atlas = {
 			0.794922
 		}
 	},
-	weapon_generic_icon_mace_and_sheild = {
+	weapon_generic_icon_repeating_pistol = {
 		size = {
 			256,
 			64
@@ -1973,7 +2043,7 @@ generic_icons_atlas = {
 			0.728516
 		}
 	},
-	weapon_generic_icon_elf_axe2h_lit = {
+	weapon_generic_icon_falken = {
 		size = {
 			256,
 			64
@@ -1987,7 +2057,7 @@ generic_icons_atlas = {
 			0.662109
 		}
 	},
-	weapon_generic_icon_staff_6 = {
+	weapon_generic_icon_rifle = {
 		size = {
 			256,
 			64
@@ -2001,7 +2071,7 @@ generic_icons_atlas = {
 			0.595703
 		}
 	},
-	weapon_generic_icon_hammer1h = {
+	weapon_generic_icon_falken_lit = {
 		size = {
 			256,
 			64
@@ -2015,7 +2085,7 @@ generic_icons_atlas = {
 			0.529297
 		}
 	},
-	weapon_generic_icon_staff_lit = {
+	weapon_generic_icon_sword_and_sheild = {
 		size = {
 			256,
 			64
@@ -2029,7 +2099,7 @@ generic_icons_atlas = {
 			0.462891
 		}
 	},
-	weapon_generic_icon_sword = {
+	weapon_generic_icon_drakegun = {
 		size = {
 			256,
 			64
@@ -2043,7 +2113,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	weapon_generic_icon_pistol_lit = {
+	weapon_generic_icon_hammer_and_sheild = {
 		size = {
 			256,
 			64
@@ -2057,7 +2127,7 @@ generic_icons_atlas = {
 			0.330078
 		}
 	},
-	weapon_generic_icon_elf_sword_and_dagger_lit = {
+	weapon_generic_icon_drakegun_lit = {
 		size = {
 			256,
 			64
@@ -2071,7 +2141,7 @@ generic_icons_atlas = {
 			0.263672
 		}
 	},
-	weapon_generic_icon_repeating_crossbow_lit = {
+	weapon_generic_icon_staff_6_lit = {
 		size = {
 			256,
 			64
@@ -2085,7 +2155,7 @@ generic_icons_atlas = {
 			0.197266
 		}
 	},
-	weapon_generic_icon_elf_sword_lit = {
+	weapon_generic_icon_hammer1h = {
 		size = {
 			256,
 			64
@@ -2099,7 +2169,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	weapon_generic_icon_hammer2h_lit = {
+	weapon_generic_icon_sword = {
 		size = {
 			256,
 			64
@@ -2127,7 +2197,7 @@ generic_icons_atlas = {
 			0.994141
 		}
 	},
-	weapon_generic_icon_drakegun = {
+	weapon_generic_icon_handgun = {
 		size = {
 			256,
 			64
@@ -2141,7 +2211,7 @@ generic_icons_atlas = {
 			0.927734
 		}
 	},
-	weapon_generic_icon_rifle = {
+	weapon_generic_icon_dual_elf_sword = {
 		size = {
 			256,
 			64
@@ -2155,7 +2225,7 @@ generic_icons_atlas = {
 			0.861328
 		}
 	},
-	weapon_generic_icon_rifle_lit = {
+	weapon_generic_icon_longbow = {
 		size = {
 			256,
 			64
@@ -2169,7 +2239,7 @@ generic_icons_atlas = {
 			0.794922
 		}
 	},
-	weapon_generic_icon_fencing_sword = {
+	weapon_generic_icon_dual_elf_sword_lit = {
 		size = {
 			256,
 			64
@@ -2183,7 +2253,7 @@ generic_icons_atlas = {
 			0.728516
 		}
 	},
-	weapon_generic_icon_sheild_lit = {
+	weapon_generic_icon_sheild = {
 		size = {
 			256,
 			64
@@ -2197,7 +2267,7 @@ generic_icons_atlas = {
 			0.662109
 		}
 	},
-	weapon_generic_icon_fencing_sword_lit = {
+	weapon_generic_icon_fencing_sword = {
 		size = {
 			256,
 			64
@@ -2211,7 +2281,7 @@ generic_icons_atlas = {
 			0.595703
 		}
 	},
-	weapon_generic_icon_axe1h = {
+	weapon_generic_icon_staff = {
 		size = {
 			256,
 			64
@@ -2225,7 +2295,7 @@ generic_icons_atlas = {
 			0.529297
 		}
 	},
-	weapon_generic_icon_repeating_handgun_lit = {
+	weapon_generic_icon_fencing_sword_lit = {
 		size = {
 			256,
 			64
@@ -2239,7 +2309,7 @@ generic_icons_atlas = {
 			0.462891
 		}
 	},
-	weapon_generic_icon_pick = {
+	weapon_generic_icon_mace = {
 		size = {
 			256,
 			64
@@ -2253,7 +2323,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	weapon_generic_icon_repeating_pistol_lit = {
+	weapon_generic_icon_elf_axe2h = {
 		size = {
 			256,
 			64
@@ -2267,7 +2337,7 @@ generic_icons_atlas = {
 			0.330078
 		}
 	},
-	weapon_generic_icon_staff_4 = {
+	weapon_generic_icon_mace_and_sheild_lit = {
 		size = {
 			256,
 			64
@@ -2281,7 +2351,7 @@ generic_icons_atlas = {
 			0.263672
 		}
 	},
-	weapon_generic_icon_grudgeraker = {
+	weapon_generic_icon_elf_axe2h_lit = {
 		size = {
 			256,
 			64
@@ -2295,7 +2365,7 @@ generic_icons_atlas = {
 			0.197266
 		}
 	},
-	weapon_generic_icon_staff_5 = {
+	weapon_generic_icon_staff_4_lit = {
 		size = {
 			256,
 			64
@@ -2309,7 +2379,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	weapon_generic_icon_grudgeraker_lit = {
+	weapon_generic_icon_grudgeraker = {
 		size = {
 			256,
 			64
@@ -2323,74 +2393,18 @@ generic_icons_atlas = {
 			0.064453
 		}
 	},
-	weapon_generic_icon_staff = {
+	weapon_generic_icon_staff_5_lit = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.000977,
-			0.927734
+			0.931641
 		},
 		uv11 = {
 			0.125977,
-			0.990234
-		}
-	},
-	weapon_generic_icon_hammer_and_sheild_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.000977,
-			0.861328
-		},
-		uv11 = {
-			0.125977,
-			0.923828
-		}
-	},
-	weapon_generic_icon_staff_3_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.000977,
-			0.794922
-		},
-		uv11 = {
-			0.125977,
-			0.857422
-		}
-	},
-	weapon_generic_icon_handgun_lit = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.000977,
-			0.728516
-		},
-		uv11 = {
-			0.125977,
-			0.791016
-		}
-	},
-	weapon_generic_icon_sword_and_sheild = {
-		size = {
-			256,
-			64
-		},
-		uv00 = {
-			0.000977,
-			0.662109
-		},
-		uv11 = {
-			0.125977,
-			0.724609
+			0.994141
 		}
 	},
 	weapon_generic_icon_sword_and_sheild_lit = {
@@ -2400,31 +2414,101 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.000977,
-			0.595703
+			0.865234
 		},
 		uv11 = {
 			0.125977,
-			0.658203
+			0.927734
 		}
 	},
-	weapon_generic_icon_hammer2h = {
+	weapon_generic_icon_pick = {
 		size = {
 			256,
 			64
 		},
 		uv00 = {
 			0.000977,
-			0.529297
+			0.798828
 		},
 		uv11 = {
 			0.125977,
-			0.591797
+			0.861328
 		}
 	},
-	weapon_generic_icons_bg = {
+	weapon_generic_icon_elf_sword = {
 		size = {
 			256,
-			128
+			64
+		},
+		uv00 = {
+			0.000977,
+			0.732422
+		},
+		uv11 = {
+			0.125977,
+			0.794922
+		}
+	},
+	weapon_generic_icon_pistol = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.000977,
+			0.666016
+		},
+		uv11 = {
+			0.125977,
+			0.728516
+		}
+	},
+	weapon_generic_icon_elf_sword_and_dagger = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.000977,
+			0.599609
+		},
+		uv11 = {
+			0.125977,
+			0.662109
+		}
+	},
+	weapon_generic_icon_repeating_crossbow = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.000977,
+			0.533203
+		},
+		uv11 = {
+			0.125977,
+			0.595703
+		}
+	},
+	weapon_generic_icon_elf_sword_and_dagger_lit = {
+		size = {
+			256,
+			64
+		},
+		uv00 = {
+			0.000977,
+			0.466797
+		},
+		uv11 = {
+			0.125977,
+			0.529297
+		}
+	},
+	weapon_generic_icon_repeating_handgun = {
+		size = {
+			256,
+			64
 		},
 		uv00 = {
 			0.000977,
@@ -2432,10 +2516,10 @@ generic_icons_atlas = {
 		},
 		uv11 = {
 			0.125977,
-			0.525391
+			0.462891
 		}
 	},
-	weapon_generic_icon_mace_and_sheild_lit = {
+	weapon_generic_icon_sword_lit = {
 		size = {
 			256,
 			64
@@ -2449,7 +2533,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	weapon_generic_icon_mace_lit = {
+	weapon_generic_icon_axe1h = {
 		size = {
 			256,
 			64
@@ -2463,7 +2547,7 @@ generic_icons_atlas = {
 			0.330078
 		}
 	},
-	weapon_generic_icon_handgun = {
+	weapon_generic_icon_staff_6 = {
 		size = {
 			256,
 			64
@@ -2477,7 +2561,7 @@ generic_icons_atlas = {
 			0.263672
 		}
 	},
-	weapon_generic_icon_pick_lit = {
+	weapon_generic_icon_axe_and_sheild_lit = {
 		size = {
 			256,
 			64
@@ -2491,7 +2575,7 @@ generic_icons_atlas = {
 			0.197266
 		}
 	},
-	weapon_generic_icon_blunderbuss_lit = {
+	weapon_generic_icon_mace_and_sheild = {
 		size = {
 			256,
 			64
@@ -2505,7 +2589,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	weapon_generic_icon_axe1h_lit = {
+	weapon_generic_icon_staff_4 = {
 		size = {
 			256,
 			64

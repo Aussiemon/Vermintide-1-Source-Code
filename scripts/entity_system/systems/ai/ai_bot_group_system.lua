@@ -643,7 +643,6 @@ AIBotGroupSystem._find_points = function (self, nav_world, origin_point, rotatio
 
 	return points
 end
-local LARGE_VALUE = 10000
 local SPACE_NEEDED = 0.25
 AIBotGroupSystem._raycast = function (self, nav_world, point, vector, range)
 	local ray_range = range + SPACE_NEEDED
@@ -656,10 +655,6 @@ AIBotGroupSystem._raycast = function (self, nav_world, point, vector, range)
 
 	if success then
 		return range, pos - vector*SPACE_NEEDED, true
-	elseif math.min(pos.x, pos.y, pos.z) < -LARGE_VALUE or LARGE_VALUE < math.max(pos.x, pos.y, pos.z) then
-		Application.warning("GwNavQueries.raycast() returned an extreme value %s, falling back to point of origin", pos)
-
-		return 0, point, false
 	else
 		local distance = Vector3.length(Vector3.flat(pos - point))
 

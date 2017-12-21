@@ -1093,7 +1093,7 @@ local animation_definitions = {
 				progress_bar_style.size[1] = progress_bar_style.uv_scale_pixels*bar_progress
 				progress_bar_content.uvs[2][progress_bar_style.scale_axis] = bar_progress
 
-				if progress == 1 and bar_progress == 1 then
+				if 1 <= progress and 1 <= bar_progress then
 					params.play_completed = true
 				end
 
@@ -1104,6 +1104,14 @@ local animation_definitions = {
 				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
+				if params.play_completed then
+					local player_manager = Managers.player
+					local statistics_db = player_manager.statistics_db(player_manager)
+					local stats_id = player_manager.local_player(player_manager):stats_id()
+
+					statistics_db.increment_stat(statistics_db, stats_id, "contracts_completed")
+				end
+
 				return 
 			end
 		},

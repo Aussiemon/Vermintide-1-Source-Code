@@ -8,6 +8,10 @@ local contract_size = {
 	368,
 	85
 }
+local event_contract_size = {
+	488,
+	115
+}
 local quest_size = {
 	483,
 	85
@@ -247,6 +251,20 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	contract_list_event = {
+		vertical_alignment = "top",
+		parent = "menu_root",
+		horizontal_alignment = "center",
+		size = {
+			event_contract_size[1],
+			event_contract_size[2]
+		},
+		position = {
+			1,
+			900,
+			contract_list_start_position[3]
+		}
+	},
 	contract_log_root = {
 		vertical_alignment = "top",
 		parent = "menu_root",
@@ -425,7 +443,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			50,
+			-25,
 			1
 		}
 	},
@@ -970,6 +988,7 @@ local widgets_definitions = {
 	presentation_item_hero_tooltip = UIWidgets.create_simple_tooltip("", "presentation_item_hero_icon", nil, default_tooltip_style),
 	presentation_item_border = UIWidgets.create_simple_texture("contract_reward_frame", "presentation_item_border"),
 	presentation_item_border_icon = UIWidgets.create_simple_texture("contract_key_icon", "presentation_item_border_icon"),
+	presentation_item_border_icon_2 = UIWidgets.create_simple_texture("contract_key_icon", "presentation_item_border_icon"),
 	presentation_item_name = UIWidgets.create_simple_text("dlc1_2_summary_screen_entry_title", "presentation_item_name", nil, nil, item_name_style),
 	presentation_item_type_name = UIWidgets.create_simple_text("dlc1_2_summary_screen_entry_title", "presentation_item_type_name", nil, nil, presentation_text_style),
 	presentation_trait_button_1 = UIWidgets.create_small_trait_button("presentation_trait_button_1", "presentation_trait_button_1"),
@@ -1021,6 +1040,8 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			0
 		}
 	}
+	local is_event_contract = parent_scenegraph_id == "contract_list_event"
+	local contract_size = (is_event_contract and event_contract_size) or contract_size
 	local hotspot_pass = {
 		style_id = "button_hotspot",
 		pass_type = "hotspot",
@@ -1074,7 +1095,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		texture_id = "background_texture"
 	}
 	passes[#passes + 1] = background_texture_pass
-	content[background_texture_pass.texture_id] = "board_contract_bg_default"
+	content[background_texture_pass.texture_id] = (is_event_contract and "board_contract_bg_event") or "board_contract_bg_default"
 	style[background_texture_pass.style_id] = {
 		color = {
 			255,
@@ -1088,6 +1109,112 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			0
 		}
 	}
+
+	if is_event_contract then
+		local holder_texture_pass = {
+			pass_type = "texture",
+			style_id = "holder_texture",
+			texture_id = "holder_texture"
+		}
+		passes[#passes + 1] = holder_texture_pass
+		content[holder_texture_pass.texture_id] = "board_contract_holder_event"
+		style[holder_texture_pass.style_id] = {
+			color = {
+				255,
+				255,
+				255,
+				255
+			},
+			offset = {
+				(contract_size[1] - 551 - 4)*0.5,
+				(contract_size[2] - 124 + 5)*0.5,
+				1
+			},
+			size = {
+				551,
+				124
+			}
+		}
+		local left_holder_glow_texture_pass = {
+			pass_type = "texture",
+			style_id = "right_holder_glow_texture",
+			texture_id = "holder_glow_texture"
+		}
+		passes[#passes + 1] = left_holder_glow_texture_pass
+		content[left_holder_glow_texture_pass.texture_id] = "quest_event_contract_holder_glow"
+		style[left_holder_glow_texture_pass.style_id] = {
+			color = {
+				255,
+				255,
+				255,
+				255
+			},
+			offset = {
+				-27,
+				(contract_size[2] - 40 + 22)*0.5,
+				2
+			},
+			size = {
+				40,
+				50
+			}
+		}
+		local right_holder_glow_texture_pass = {
+			pass_type = "texture",
+			style_id = "left_holder_glow_texture",
+			texture_id = "holder_glow_texture"
+		}
+		passes[#passes + 1] = right_holder_glow_texture_pass
+		content[right_holder_glow_texture_pass.texture_id] = "quest_event_contract_holder_glow"
+		style[right_holder_glow_texture_pass.style_id] = {
+			color = {
+				255,
+				255,
+				255,
+				255
+			},
+			offset = {
+				contract_size[1] - 18,
+				(contract_size[2] - 40 + 22)*0.5,
+				2
+			},
+			size = {
+				40,
+				50
+			}
+		}
+		local countdown_text_pass = {
+			style_id = "countdown",
+			pass_type = "text",
+			text_id = "countdown"
+		}
+		passes[#passes + 1] = countdown_text_pass
+		content[countdown_text_pass.text_id] = ""
+		style[countdown_text_pass.style_id] = {
+			font_size = 24,
+			localize = false,
+			word_wrap = true,
+			horizontal_alignment = "center",
+			vertical_alignment = "top",
+			font_type = "hell_shark_no_outline",
+			text_color = {
+				255,
+				255,
+				255,
+				255
+			},
+			size = {
+				contract_size[1],
+				contract_size[2]
+			},
+			offset = {
+				0,
+				0,
+				5
+			}
+		}
+	end
+
 	local hover_edge_glow_pass = {
 		pass_type = "texture",
 		style_id = "edge_glow_hover",
@@ -1096,8 +1223,10 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			return not content.button_hotspot.is_selected and content.button_hotspot.is_hover
 		end
 	}
+	local size_x = (is_event_contract and 504) or 401
+	local size_y = (is_event_contract and 135) or 119
 	passes[#passes + 1] = hover_edge_glow_pass
-	content[hover_edge_glow_pass.texture_id] = "contract_glow_02"
+	content[hover_edge_glow_pass.texture_id] = (is_event_contract and "contract_glow_event") or "contract_glow_02"
 	style[hover_edge_glow_pass.style_id] = {
 		color = {
 			150,
@@ -1106,13 +1235,12 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			contract_size[1]/2 - 200.5 - 2,
-			contract_size[2]/2 - 59.5 + 2,
-			5
+			(contract_size[1] - size_x - 4)*0.5,
+			(contract_size[2] - size_y + 5)*0.5
 		},
 		size = {
-			401,
-			119
+			size_x,
+			size_y
 		}
 	}
 	local selected_edge_glow_pass = {
@@ -1124,7 +1252,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		end
 	}
 	passes[#passes + 1] = selected_edge_glow_pass
-	content[selected_edge_glow_pass.texture_id] = "contract_glow_02"
+	content[selected_edge_glow_pass.texture_id] = (is_event_contract and "contract_glow_event") or "contract_glow_02"
 	style[selected_edge_glow_pass.style_id] = {
 		color = {
 			255,
@@ -1132,16 +1260,10 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255,
 			255
 		},
-		offset = {
-			contract_size[1]/2 - 200.5 - 2,
-			contract_size[2]/2 - 59.5 + 2,
-			5
-		},
-		size = {
-			401,
-			119
-		}
+		offset = table.clone(style[hover_edge_glow_pass.style_id].offset),
+		size = table.clone(style[hover_edge_glow_pass.style_id].size)
 	}
+	local reward_offset = (is_event_contract and 40) or 0
 	local boon_reward_texture_pass = {
 		texture_id = "boon_reward_texture",
 		style_id = "boon_reward_texture",
@@ -1160,7 +1282,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			26,
+			reward_offset + 26,
 			contract_size[2]/2 - 19,
 			1
 		},
@@ -1187,13 +1309,41 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			6,
+			reward_offset + 6,
 			contract_size[2]/2 - 40,
 			1
 		},
 		size = {
 			80,
 			80
+		}
+	}
+	local token_text_pass = {
+		style_id = "token_text",
+		pass_type = "text",
+		text_id = "token_text",
+		content_check_function = function (content)
+			return content.has_tokens
+		end
+	}
+	passes[#passes + 1] = token_text_pass
+	content[token_text_pass.text_id] = ""
+	style[token_text_pass.style_id] = {
+		font_size = 20,
+		localize = false,
+		word_wrap = false,
+		horizontal_alignment = "center",
+		vertical_alignment = "center",
+		font_type = "hell_shark",
+		text_color = Colors.get_color_table_with_alpha("black", 255),
+		size = {
+			80,
+			80
+		},
+		offset = {
+			reward_offset + 6,
+			contract_size[2]/2 - 40,
+			2
 		}
 	}
 	local key_reward_texture_pass = {
@@ -1204,7 +1354,13 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			return content.has_key
 		end
 	}
+	local key_reward_texture_pass2 = table.clone(key_reward_texture_pass)
+	key_reward_texture_pass2.content_check_function = function (content)
+		return content.has_key_2
+	end
+	key_reward_texture_pass2.style_id = "key_reward_texture_2"
 	passes[#passes + 1] = key_reward_texture_pass
+	passes[#passes + 1] = key_reward_texture_pass2
 	content[key_reward_texture_pass.texture_id] = "contract_key_icon"
 	style[key_reward_texture_pass.style_id] = {
 		color = {
@@ -1214,7 +1370,24 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			90,
+			reward_offset + 90,
+			contract_size[2]/2 - 27,
+			1
+		},
+		size = {
+			54,
+			54
+		}
+	}
+	style[key_reward_texture_pass2.style_id] = {
+		color = {
+			255,
+			255,
+			255,
+			255
+		},
+		offset = {
+			reward_offset + 100,
 			contract_size[2]/2 - 27,
 			1
 		},
@@ -1281,7 +1454,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			contract_size[2]
 		},
 		offset = {
-			72,
+			reward_offset + 72,
 			2,
 			1
 		}
@@ -1301,7 +1474,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			contract_size[1] - 74,
+			contract_size[1] - ((is_event_contract and 79) or 74),
 			contract_size[2]/2 - 30,
 			1
 		},
@@ -1360,7 +1533,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			contract_size[1] - 133,
+			contract_size[1] - ((is_event_contract and 137) or 133),
 			contract_size[2]/2 - 22.5,
 			1
 		},
@@ -1504,7 +1677,33 @@ local function create_board_contract_widget(parent_scenegraph_id)
 				7
 			}
 		},
-		texture_offsets = {
+		texture_offsets = (is_event_contract and {
+			{
+				1,
+				4,
+				0
+			},
+			{
+				-9,
+				11,
+				0
+			},
+			{
+				-14,
+				20,
+				0
+			},
+			{
+				-9,
+				29,
+				0
+			},
+			{
+				1,
+				35,
+				0
+			}
+		}) or {
 			{
 				0,
 				5,
@@ -1538,8 +1737,8 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			contract_size[1] - 145,
-			7,
+			contract_size[1] - ((is_event_contract and 150) or 145),
+			(is_event_contract and 22) or 7,
 			11
 		}
 	}
@@ -1750,6 +1949,34 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			80
 		}
 	}
+	local token_text_pass = {
+		style_id = "token_text",
+		pass_type = "text",
+		text_id = "token_text",
+		content_check_function = function (content)
+			return content.has_tokens
+		end
+	}
+	passes[#passes + 1] = token_text_pass
+	content[token_text_pass.text_id] = ""
+	style[token_text_pass.style_id] = {
+		font_size = 20,
+		localize = false,
+		word_wrap = false,
+		horizontal_alignment = "center",
+		vertical_alignment = "center",
+		font_type = "hell_shark",
+		text_color = Colors.get_color_table_with_alpha("black", 255),
+		size = {
+			80,
+			80
+		},
+		offset = {
+			6,
+			log_contract_size[2]/2 - 40 - 10,
+			2
+		}
+	}
 	local key_reward_texture_pass = {
 		texture_id = "key_reward_texture",
 		style_id = "key_reward_texture",
@@ -1758,9 +1985,15 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			return content.has_key
 		end
 	}
+	local key_reward_texture_pass2 = table.clone(key_reward_texture_pass)
+	key_reward_texture_pass2.content_check_function = function (content)
+		return content.has_key_2
+	end
+	key_reward_texture_pass2.style_id = "key_reward_texture_2"
 	passes[#passes + 1] = key_reward_texture_pass
+	passes[#passes + 1] = key_reward_texture_pass2
 	content[key_reward_texture_pass.texture_id] = "contract_key_icon"
-	style[key_reward_texture_pass.style_id] = {
+	local key_style_definition = {
 		color = {
 			255,
 			255,
@@ -1777,6 +2010,10 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			54
 		}
 	}
+	style[key_reward_texture_pass.style_id] = key_style_definition
+	local key2_style_definition = table.clone(key_style_definition)
+	key2_style_definition.offset[1] = key2_style_definition.offset[1] + 10
+	style[key_reward_texture_pass2.style_id] = key2_style_definition
 	local key_reward_hotspot_pass = {
 		style_id = "key_reward_texture",
 		pass_type = "hotspot",
@@ -2007,7 +2244,7 @@ local function create_log_contract_widget(parent_scenegraph_id)
 	content[title_text_pass.text_id] = "Title text here"
 	style[title_text_pass.style_id] = {
 		font_size = 24,
-		localize = true,
+		localize = false,
 		word_wrap = true,
 		horizontal_alignment = "left",
 		vertical_alignment = "top",
@@ -2397,7 +2634,8 @@ end
 local contract_lists_scenegraph_ids = {
 	"contract_list_1",
 	"contract_list_2",
-	"contract_list_3"
+	"contract_list_3",
+	"contract_list_event"
 }
 
 return {

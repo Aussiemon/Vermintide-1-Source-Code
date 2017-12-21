@@ -57,7 +57,7 @@ StateTitleScreenMain.on_enter = function (self, params)
 		end
 	}
 
-	if not self._params.menu_screen_music_playing then
+	if (Application.platform() == "xb1" or Application.platform() == "ps4") and not self._params.menu_screen_music_playing then
 		Managers.music:trigger_event("Play_menu_screen_music")
 
 		self._params.menu_screen_music_playing = true

@@ -1,6 +1,5 @@
 debug_decals = false
 
-dofile("scripts/settings/breeds")
 require("scripts/managers/blood/blood_settings")
 
 BloodManager = class(BloodManager)

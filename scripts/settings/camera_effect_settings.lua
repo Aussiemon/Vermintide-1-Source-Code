@@ -765,6 +765,22 @@ CameraEffectSettings = {
 			duration = 5,
 			fade_in = 2,
 			octaves = 7
+		},
+		great_windup = {
+			persistance = 0.85,
+			fade_out = 1,
+			amplitude = 0.3,
+			duration = 3,
+			fade_in = 2,
+			octaves = 7
+		},
+		thunderstorm_ambience = {
+			persistance = 0.5,
+			fade_out = 2,
+			amplitude = 0.65,
+			duration = 10000,
+			fade_in = 2,
+			octaves = 6
 		}
 	}
 }

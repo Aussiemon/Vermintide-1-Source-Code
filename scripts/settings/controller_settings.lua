@@ -426,7 +426,6 @@ PlayerControllerKeymaps = {
 			"held"
 		},
 		dodge_hold_2 = {},
-		dodge = {},
 		crouch = {
 			"gamepad",
 			"b",
@@ -862,8 +861,8 @@ PlayerControllerFilters = {
 		dodge = {
 			filter_type = "or",
 			input_mappings = {
-				button_1 = "dodge_1",
-				button_2 = "dodge_2"
+				button_1 = "dodge_hold_1",
+				button_2 = "dodge_hold_2"
 			}
 		},
 		dodge_hold = {
@@ -952,8 +951,8 @@ PlayerControllerFilters = {
 		dodge = {
 			filter_type = "or",
 			input_mappings = {
-				button_1 = "dodge_1",
-				button_2 = "dodge_2"
+				button_1 = "dodge_hold_1",
+				button_2 = "dodge_hold_2"
 			}
 		},
 		dodge_hold = {
@@ -1324,7 +1323,6 @@ FreeFlightKeymaps = {
 			"f7",
 			"pressed"
 		},
-		free_flight_toggle = {},
 		frustum_freeze_toggle = {},
 		set_drop_position = {
 			"gamepad",
@@ -1410,6 +1408,26 @@ FreeFlightKeymaps = {
 			"keyboard",
 			"left",
 			"pressed"
+		},
+		left_shoulder_held = {
+			"gamepad",
+			"left_shoulder",
+			"held"
+		},
+		right_shoulder = {
+			"gamepad",
+			"right_shoulder",
+			"pressed"
+		},
+		right_thumb_held = {
+			"gamepad",
+			"right_thumb",
+			"held"
+		},
+		left_thumb_held = {
+			"gamepad",
+			"left_thumb",
+			"held"
 		},
 		look_raw_controller = {
 			"gamepad",
@@ -1583,6 +1601,26 @@ FreeFlightKeymaps = {
 			"left",
 			"pressed"
 		},
+		left_shoulder_held = {
+			"gamepad",
+			"l1",
+			"held"
+		},
+		right_shoulder = {
+			"gamepad",
+			"r1",
+			"pressed"
+		},
+		right_thumb_held = {
+			"gamepad",
+			"r3",
+			"held"
+		},
+		left_thumb_held = {
+			"gamepad",
+			"l3",
+			"held"
+		},
 		look_raw_controller = {
 			"gamepad",
 			"right",
@@ -1679,6 +1717,15 @@ FreeFlightFilters = {
 			accelerate_time_ref = 0.1,
 			multiplier_x = 600,
 			filter_type = "scale_vector3_xy_accelerated_x"
+		},
+		free_flight_toggle = {
+			filter_type = "and",
+			input_mappings = {
+				button_2 = "left_thumb_held",
+				button_3 = "left_shoulder_held",
+				button_1 = "right_thumb_held",
+				button_4 = "right_shoulder"
+			}
 		}
 	},
 	ps4 = InputUtils.keymaps_key_approved("ps4") and {
@@ -1701,6 +1748,15 @@ FreeFlightFilters = {
 				back = "move_back",
 				left = "move_left",
 				right = "move_right"
+			}
+		},
+		free_flight_toggle = {
+			filter_type = "and",
+			input_mappings = {
+				button_2 = "left_thumb_held",
+				button_3 = "left_shoulder_held",
+				button_1 = "right_thumb_held",
+				button_4 = "right_shoulder"
 			}
 		}
 	}
@@ -1931,25 +1987,50 @@ TitleLoadingFilters = {
 }
 TitleScreenKeyMaps = {
 	win32 = InputUtils.keymaps_key_approved("win32") and {
-		left = {
+		move_left_raw = {
 			"gamepad",
 			"d_left",
 			"pressed"
 		},
-		right = {
+		move_right_raw = {
 			"gamepad",
 			"d_right",
 			"pressed"
 		},
-		up = {
+		move_up_raw = {
 			"gamepad",
 			"d_up",
 			"pressed"
 		},
-		down = {
+		move_down_raw = {
 			"gamepad",
 			"d_down",
 			"pressed"
+		},
+		move_left_hold_raw = {
+			"gamepad",
+			"d_left",
+			"held"
+		},
+		move_right_hold_raw = {
+			"gamepad",
+			"d_right",
+			"held"
+		},
+		move_up_hold_raw = {
+			"gamepad",
+			"d_up",
+			"held"
+		},
+		move_down_hold_raw = {
+			"gamepad",
+			"d_down",
+			"held"
+		},
+		analog_input = {
+			"gamepad",
+			"left",
+			"axis"
 		},
 		start_1 = {
 			"keyboard",
@@ -1973,30 +2054,65 @@ TitleScreenKeyMaps = {
 		}
 	},
 	xb1 = InputUtils.keymaps_key_approved("xb1") and {
-		left = {
+		move_left_raw = {
 			"gamepad",
 			"d_left",
 			"pressed"
 		},
-		right = {
+		move_right_raw = {
 			"gamepad",
 			"d_right",
 			"pressed"
 		},
-		up = {
+		move_up_raw = {
 			"gamepad",
 			"d_up",
 			"pressed"
 		},
-		down = {
+		move_down_raw = {
 			"gamepad",
 			"d_down",
 			"pressed"
+		},
+		move_left_hold_raw = {
+			"gamepad",
+			"d_left",
+			"held"
+		},
+		move_right_hold_raw = {
+			"gamepad",
+			"d_right",
+			"held"
+		},
+		move_up_hold_raw = {
+			"gamepad",
+			"d_up",
+			"held"
+		},
+		move_down_hold_raw = {
+			"gamepad",
+			"d_down",
+			"held"
+		},
+		analog_input = {
+			"gamepad",
+			"left",
+			"axis"
+		},
+		change_profile = {
+			"gamepad",
+			"x",
+			"released"
 		},
 		start = {
 			"gamepad",
 			"a",
 			"released"
+		},
+		back = {
+			"gamepad",
+			"b",
+			"pressed"
 		},
 		delete_save = {
 			"gamepad",
@@ -2015,25 +2131,50 @@ TitleScreenKeyMaps = {
 		}
 	},
 	ps4 = InputUtils.keymaps_key_approved("ps4") and {
-		left = {
+		move_left_raw = {
 			"gamepad",
 			"left",
 			"pressed"
 		},
-		right = {
+		move_right_raw = {
 			"gamepad",
 			"right",
 			"pressed"
 		},
-		up = {
+		move_up_raw = {
 			"gamepad",
 			"up",
 			"pressed"
 		},
-		down = {
+		move_down_raw = {
 			"gamepad",
 			"down",
 			"pressed"
+		},
+		move_left_hold_raw = {
+			"gamepad",
+			"left",
+			"held"
+		},
+		move_right_hold_raw = {
+			"gamepad",
+			"right",
+			"held"
+		},
+		move_up_hold_raw = {
+			"gamepad",
+			"up",
+			"held"
+		},
+		move_down_hold_raw = {
+			"gamepad",
+			"down",
+			"held"
+		},
+		analog_input = {
+			"gamepad",
+			"left",
+			"axis"
 		},
 		start = {
 			"gamepad",
@@ -2054,6 +2195,407 @@ TitleScreenKeyMaps = {
 			"gamepad",
 			"r1",
 			"held"
+		}
+	}
+}
+TitleScreenFilters = {
+	win32 = InputUtils.keymaps_key_approved("win32") and {
+		move_down = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_down_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				-1,
+				0
+			}
+		},
+		move_up = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_up_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				1,
+				0
+			}
+		},
+		move_left = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_left_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				-1,
+				0,
+				0
+			}
+		},
+		move_right = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_right_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				1,
+				0,
+				0
+			}
+		},
+		move_down_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_down_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				-1,
+				0
+			}
+		},
+		move_up_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_up_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				1,
+				0
+			}
+		},
+		move_left_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_left_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				-1,
+				0,
+				0
+			}
+		},
+		move_right_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_right_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				1,
+				0,
+				0
+			}
+		},
+		show_support_info = {
+			filter_type = "and",
+			input_mappings = {
+				button_1 = "show_support_info_1",
+				button_2 = "show_support_info_2"
+			}
+		}
+	},
+	xb1 = InputUtils.keymaps_key_approved("xb1") and {
+		move_down = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_down_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				-1,
+				0
+			}
+		},
+		move_up = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_up_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				1,
+				0
+			}
+		},
+		move_left = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_left_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				-1,
+				0,
+				0
+			}
+		},
+		move_right = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_right_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				1,
+				0,
+				0
+			}
+		},
+		move_down_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_down_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				-1,
+				0
+			}
+		},
+		move_up_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_up_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				1,
+				0
+			}
+		},
+		move_left_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_left_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				-1,
+				0,
+				0
+			}
+		},
+		move_right_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_right_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				1,
+				0,
+				0
+			}
+		},
+		show_support_info = {
+			filter_type = "and",
+			input_mappings = {
+				button_1 = "show_support_info_1",
+				button_2 = "show_support_info_2"
+			}
+		}
+	},
+	ps4 = InputUtils.keymaps_key_approved("ps4") and {
+		move_down = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_down_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				-1,
+				0
+			}
+		},
+		move_up = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_up_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				1,
+				0
+			}
+		},
+		move_left = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_left_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				-1,
+				0,
+				0
+			}
+		},
+		move_right = {
+			filter_type = "move_filter",
+			threshold = 0.7,
+			input_mappings = {
+				"move_right_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				1,
+				0,
+				0
+			}
+		},
+		move_down_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_down_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				-1,
+				0
+			}
+		},
+		move_up_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_up_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				0,
+				1,
+				0
+			}
+		},
+		move_left_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_left_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				-1,
+				0,
+				0
+			}
+		},
+		move_right_hold = {
+			filter_type = "move_filter",
+			hold = true,
+			threshold = 0.7,
+			input_mappings = {
+				"move_right_hold_raw"
+			},
+			axis_mappings = {
+				"analog_input"
+			},
+			axis = {
+				1,
+				0,
+				0
+			}
+		},
+		show_support_info = {
+			filter_type = "and",
+			input_mappings = {
+				button_1 = "show_support_info_1",
+				button_2 = "show_support_info_2"
+			}
 		}
 	}
 }
