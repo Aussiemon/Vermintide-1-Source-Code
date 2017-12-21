@@ -162,6 +162,9 @@ return {
 	__2reit_nwapser_retsaf_teknirt = {
 		{}
 	},
+	__slluks_aera_daerps_noitop_teknirt = {
+		{}
+	},
 	__ecnatsid_egdod_egnahc = {
 		{}
 	},

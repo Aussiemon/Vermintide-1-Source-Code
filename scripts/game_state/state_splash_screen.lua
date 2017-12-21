@@ -355,7 +355,7 @@ if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		game_require("game_state", "state_context")
 		game_require("entity_system", "entity_system")
 		table.dump(DLCSettings, "DLCSettings", 5)
-		game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "backend/backend_manager", "splitscreen/splitscreen_tester", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "unlock/unlock_manager", "popup/popup_manager", "light_fx/light_fx_manager", "input/input_manager", "debug/debug", "invite/invite_manager", "controller_features/controller_features_manager")
+		game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "backend/backend_manager", "splitscreen/splitscreen_tester", "telemetry/telemetry_manager", "smoketest/smoketest_manager", "debug/updator", "unlock/unlock_manager", "popup/popup_manager", "popup/simple_popup", "light_fx/light_fx_manager", "input/input_manager", "debug/debug", "invite/invite_manager", "controller_features/controller_features_manager")
 		game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 		game_require("network", "unit_spawner", "unit_storage", "network_unit")
 		DefaultUserSettings.set_default_user_settings()

@@ -399,7 +399,7 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 
 				if ammo_extension then
 					local max_ammo = ammo_extension.max_ammo_count(ammo_extension)
-					local restore_amount = math.clamp(math.floor(max_ammo*0.1), 1, math.huge)
+					local restore_amount = math.clamp(math.floor(max_ammo*amount), 1, math.huge)
 
 					ammo_extension.add_ammo_to_reserve(ammo_extension, restore_amount)
 				end

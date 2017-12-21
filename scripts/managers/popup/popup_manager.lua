@@ -65,9 +65,7 @@ PopupManager.has_popup = function (self)
 	return self._handler:has_popup()
 end
 PopupManager.has_popup_with_id = function (self, popup_id)
-	self._handler:has_popup_with_id(popup_id)
-
-	return 
+	return self._handler:has_popup_with_id(popup_id)
 end
 PopupManager.cancel_popup = function (self, popup_id)
 	return self._handler:cancel_popup(popup_id)

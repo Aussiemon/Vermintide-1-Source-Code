@@ -182,6 +182,8 @@ StateTitleScreen._init_popup_manager = function (self)
 
 	Managers.popup:set_input_manager(self._input_manager)
 
+	Managers.simple_popup = SimplePopup:new()
+
 	return 
 end
 StateTitleScreen._init_chat_manager = function (self)

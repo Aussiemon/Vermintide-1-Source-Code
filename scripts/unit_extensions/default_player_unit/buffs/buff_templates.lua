@@ -1352,7 +1352,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heal_proc",
-				bonus = 10,
+				bonus = 5,
 				stat_buff = StatBuffIndex.HEAL_PROC,
 				proc_chance = {
 					0.03,
@@ -1373,7 +1373,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heal_proc",
-				bonus = 10,
+				bonus = 5,
 				stat_buff = StatBuffIndex.HEAL_PROC,
 				proc_chance = {
 					0.02,
@@ -1394,7 +1394,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heal_proc",
-				bonus = 10,
+				bonus = 5,
 				stat_buff = StatBuffIndex.HEAL_PROC,
 				proc_chance = {
 					0.05,
@@ -1631,7 +1631,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "ammo_proc",
-				bonus = 1,
+				bonus = 0.05,
 				stat_buff = StatBuffIndex.AMMO_ON_KILL,
 				proc_chance = {
 					0.1,
@@ -1651,7 +1651,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "ammo_proc",
-				bonus = 1,
+				bonus = 0.05,
 				stat_buff = StatBuffIndex.AMMO_ON_KILL,
 				proc_chance = {
 					0.1,
@@ -2014,7 +2014,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "light_heal_proc",
-				bonus = 10,
+				bonus = 5,
 				stat_buff = StatBuffIndex.LIGHT_HEAL_PROC,
 				proc_chance = {
 					0.01,
@@ -2389,7 +2389,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "ammo_on_kill",
-				bonus = 1,
+				bonus = 0.05,
 				stat_buff = StatBuffIndex.AMMO_ON_KILL,
 				proc_chance = {
 					0.15,
@@ -2483,7 +2483,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "movement",
-				multiplier = 2,
+				multiplier = 1.5,
 				duration = 5,
 				non_stacking = true,
 				remove_buff_func = "remove_movement_buff",
@@ -2516,9 +2516,8 @@ BuffTemplates = {
 	infinite_ammo_from_proc = {
 		buffs = {
 			{
-				non_stacking = true,
-				name = "infinite_ammo_from_proc",
 				duration = 3,
+				name = "infinite_ammo_from_proc",
 				stat_buff = StatBuffIndex.INFINITE_AMMO_FROM_PROC
 			}
 		}
@@ -2747,7 +2746,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.2,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -2763,7 +2762,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.6,
+				multiplier = -0.4,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -2779,7 +2778,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.8,
+				multiplier = -0.6,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -3624,7 +3623,7 @@ BuffTemplates = {
 			{
 				proc_chance = 0.13,
 				name = "ammo_on_kill",
-				bonus = 1,
+				bonus = 0.05,
 				stat_buff = StatBuffIndex.AMMO_ON_KILL
 			},
 			{
@@ -3644,7 +3643,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.5,
+				multiplier = -0.6,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -3663,6 +3662,21 @@ BuffTemplates = {
 				multiplier = 1,
 				name = "damage_taken",
 				stat_buff = StatBuffIndex.DAMAGE_TAKEN
+			}
+		}
+	},
+	trinket_potion_spread_area_skulls = {
+		description = "trinket_potion_spread_area_tier3_description",
+		display_name = "trinket_potion_spread_area_tier3",
+		unique_id = "trinket_potion_spread_area",
+		icon = "trinket_potion_spread_area_tier3",
+		description_values = {
+			"distance"
+		},
+		buffs = {
+			{
+				name = "potion_spread_area_tier3",
+				distance = TrinketSpreadDistance
 			}
 		}
 	}
