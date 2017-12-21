@@ -2661,13 +2661,19 @@ function flow_callback_teleporter(params)
 				local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 				local unit_rotation = first_person_extension.current_rotation(first_person_extension)
 				local entrance_forward = Quaternion.forward(entrance_node_rotation)
+				local entrance_right = Quaternion.right(entrance_node_rotation)
 				local unit_forward = Quaternion.forward(unit_rotation)
+				entrance_forward = Vector3.flat(entrance_forward)
+				entrance_right = Vector3.flat(entrance_right)
+				unit_forward = Vector3.flat(unit_forward)
 				entrance_forward = Vector3.normalize(entrance_forward)
+				entrance_right = Vector3.normalize(entrance_right)
 				unit_forward = Vector3.normalize(unit_forward)
-				local angle = Vector3.flat_angle(unit_forward, entrance_forward)
-				local cross_dot = Vector3.dot(unit_forward, Vector3.up())
+				local forward_dot = Vector3.dot(unit_forward, entrance_forward)
+				local angle = math.acos(forward_dot)
+				local right_dot = Vector3.dot(unit_forward, entrance_right)
 
-				if cross_dot < 0 then
+				if 0 < right_dot then
 					angle = -angle
 				end
 
