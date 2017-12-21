@@ -211,6 +211,7 @@ BTStormVerminAttackAction._attack_threat_over = function (self, unit, blackboard
 		Managers.state.entity:system("surrounding_aware_system"):add_system_event(unit, "enemy_attack", DialogueSettings.enemy_attack_distance, "attack_tag", action.name, "target_name", target_name, "attack_hit", false)
 	end
 
+	blackboard.old_special_attacking_target = target_unit
 	blackboard.special_attacking_target = nil
 
 	return 
@@ -232,11 +233,7 @@ BTStormVerminAttackAction.leave = function (self, unit, blackboard, t, reason, d
 		LocomotionUtils.set_animation_translation_scale(unit, Vector3(1, 1, 1))
 	end
 
-	if blackboard.special_attacking_target and not destroy then
-		self._attack_threat_over(self, unit, blackboard, action)
-	end
-
-	local target_unit = blackboard.special_attacking_target
+	local target_unit = blackboard.special_attacking_target or blackboard.old_special_attacking_target
 	local target_alive = Unit.alive(target_unit)
 	local target_hit = blackboard.hit_players[target_unit]
 	local inc_stat_on_dodged = action.increment_stat_on_attack_dodged
@@ -252,6 +249,10 @@ BTStormVerminAttackAction.leave = function (self, unit, blackboard, t, reason, d
 		elseif owner and owner.is_player_controlled(owner) then
 			RPC.rpc_increment_stat(owner.network_id(owner), NetworkLookup.statistics[inc_stat_on_dodged])
 		end
+	end
+
+	if blackboard.special_attacking_target and not destroy then
+		self._attack_threat_over(self, unit, blackboard, action)
 	end
 
 	blackboard.navigation_extension:set_enabled(true)
@@ -284,6 +285,8 @@ BTStormVerminAttackAction.leave = function (self, unit, blackboard, t, reason, d
 	if flow_event then
 		Unit.flow_event(unit, flow_event)
 	end
+
+	blackboard.old_special_attacking_target = nil
 
 	return 
 end

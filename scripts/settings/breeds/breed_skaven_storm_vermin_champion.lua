@@ -1,16 +1,10 @@
 if not BT_COMPILER then
 	local champion_utility_considerations = dofile("scripts/entity_system/systems/behaviour/utility/storm_vermin_champion_utility_considerations")
-	local breed_name = "breed_skaven_storm_vermin_champion"
 
 	for consideration_name, consideration_data in pairs(champion_utility_considerations) do
-		local existing_breed_name = rawget(UtilityConsiderationsDupeCheck, consideration_name)
+		fassert(not rawget(UtilityConsiderations, consideration_name), "Consideration %s already exists in UtilityConsiderations", consideration_name)
 
-		if existing_breed_name and existing_breed_name ~= breed_name then
-			fassert(false, "Consideration %s already exists in UtilityConsiderations", consideration_name)
-		else
-			UtilityConsiderations[consideration_name] = consideration_data
-			UtilityConsiderationsDupeCheck[consideration_name] = breed_name
-		end
+		UtilityConsiderations[consideration_name] = consideration_data
 	end
 end
 

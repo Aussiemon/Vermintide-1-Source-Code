@@ -332,7 +332,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 
 			local breed = Unit.get_data(hit_unit, "breed")
 			local in_view = first_person_extension.is_within_default_view(first_person_extension, hit_position)
-			local hit_player = player_manager.owner(player_manager, hit_unit)
+			local hit_player = player_manager.is_player_unit(player_manager, hit_unit) and player_manager.owner(player_manager, hit_unit)
 			local hit_self = hit_unit == owner_unit
 			local is_character = breed or hit_player
 			local damage_allowed = true

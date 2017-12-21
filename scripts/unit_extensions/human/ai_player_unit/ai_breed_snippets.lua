@@ -110,6 +110,16 @@ AiBreedSnippets.on_critter_rat_spawn = function (unit, blackboard, t)
 
 	return 
 end
+AiBreedSnippets.on_critter_rat_hot_join_sync = function (sender, unit)
+	if Unit.alive(unit) then
+		local network_manager = Managers.state.network
+		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+
+		RPC.rpc_set_critter_skull(sender, unit_id)
+	end
+
+	return 
+end
 AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
 	local hat_unit = Unit.get_data(unit, "hat_unit")
 
@@ -118,6 +128,11 @@ AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
 
 		World.destroy_unit(world, hat_unit)
 	end
+
+	local network_manager = Managers.state.network
+	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+
+	network_manager.network_transmit:send_rpc_clients("rpc_on_critter_rat_death", unit_id)
 
 	local event_item = Managers.state.quest:is_mutator_active("event_items")
 
@@ -140,6 +155,17 @@ AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
 
 			Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
 		end
+	end
+
+	return 
+end
+AiBreedSnippets.on_critter_rat_husk_death = function (unit)
+	local hat_unit = Unit.get_data(unit, "hat_unit")
+
+	if Unit.alive(hat_unit) then
+		local world = Application.main_world()
+
+		World.destroy_unit(world, hat_unit)
 	end
 
 	return 

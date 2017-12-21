@@ -388,16 +388,20 @@ LevelUnlockUtils.level_unlocked = function (statistics_db, player_stats_id, leve
 	if not act_key then
 		local settings = LevelSettings[level_key]
 		local level_game_mode = settings.game_mode
+		local dlc_name = settings.dlc_name
 
 		if level_game_mode == "survival" then
 			local required_act_unlocked = SurvivalSettings.required_act_unlocked
 
 			if LevelUnlockUtils.act_unlocked(statistics_db, player_stats_id, required_act_unlocked) then
-				return true
+				if dlc_name then
+					return Managers.unlock:is_dlc_unlocked(dlc_name)
+				else
+					return true
+				end
 			end
 		end
 
-		local dlc_name = settings.dlc_name
 		local required_act_completed = settings.required_act_completed
 
 		if required_act_completed then

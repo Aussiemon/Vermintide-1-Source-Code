@@ -253,7 +253,6 @@ DLCSettings = {
 		}
 	},
 	dlc_challenge_wizard = {
-		unit_extension_templates = "scripts/network/unit_extension_templates_stromdorf",
 		product_label = "",
 		level_settings = "scripts/settings/level_settings_dlc_challenge_wizard",
 		package_name = "resource_packages/dlcs/challenge_wizard/challenge_wizard",
@@ -264,18 +263,10 @@ DLCSettings = {
 			}
 		},
 		weapons = {},
-		breeds = {
-			"scripts/settings/breeds/breed_skaven_storm_vermin_champion"
-		},
-		behaviour_trees_precompiled = {
-			"scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin_champion"
-		},
-		behaviour_tree_nodes = {
-			"scripts/entity_system/systems/behaviour/nodes/bt_spawn_allies_action"
-		},
-		behaviour_trees = {
-			"scripts/entity_system/systems/behaviour/bt_storm_vermin_champion"
-		},
+		breeds = {},
+		behaviour_trees_precompiled = {},
+		behaviour_tree_nodes = {},
+		behaviour_trees = {},
 		terror_event_blueprints = {
 			snow_boss = {
 				{

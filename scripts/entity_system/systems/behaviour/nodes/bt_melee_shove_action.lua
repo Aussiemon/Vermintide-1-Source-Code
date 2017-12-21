@@ -148,7 +148,7 @@ BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_act
 				local shove_dir = Vector3.normalize(enemy_pos - self_pos)
 
 				if 0 < Vector3.dot(shove_dir, fwd_dir) then
-					if Managers.player:owner(hit_unit) then
+					if Managers.player:is_player_unit(hit_unit) then
 						local shove_speed = action.shove_speed
 						local blocked = false
 

@@ -173,7 +173,7 @@ DamageUtils.calculate_stagger = function (damage_table, duration_table, target_u
 	return stagger, duration
 end
 DamageUtils.is_player_unit = function (unit)
-	return Managers.player:owner(unit) ~= nil
+	return Managers.player:is_player_unit(unit)
 end
 DamageUtils.hit_zone = function (unit, actor)
 	local breed = Unit.get_data(unit, "breed")
@@ -502,7 +502,7 @@ DamageUtils.create_aoe = function (world, attacker_unit, position, damage_source
 			create_nav_tag_volume = aoe_data.create_nav_tag_volume,
 			nav_tag_volume_layer = aoe_data.nav_tag_volume_layer,
 			explosion_template_name = explosion_template.name,
-			owner_unit = attacker_unit
+			owner_player = attacker_player
 		}
 	}
 	local aoe_unit_name = "units/weapons/projectile/poison_wind_globe/poison_wind_globe"

@@ -641,18 +641,19 @@ go_type_table = {
 			return data_table
 		end,
 		aoe_unit = function (unit, unit_name, unit_template, gameobject_functor_context)
-			local area_damage_system = ScriptUnit.extension(unit, "area_damage_system")
-			local aoe_dot_damage = area_damage_system.aoe_dot_damage
-			local aoe_init_damage = area_damage_system.aoe_init_damage
-			local aoe_dot_damage_interval = area_damage_system.aoe_dot_damage_interval
-			local radius = area_damage_system.radius
-			local life_time = area_damage_system.life_time
-			local player_screen_effect_name = area_damage_system.player_screen_effect_name
-			local dot_effect_name = area_damage_system.dot_effect_name
-			local area_damage_template = area_damage_system.area_damage_template
-			local invisible_unit = area_damage_system.invisible_unit
-			local extra_dot_effect_name = area_damage_system.extra_dot_effect_name
-			local explosion_template_name = area_damage_system.explosion_template_name
+			local area_damage_extension = ScriptUnit.extension(unit, "area_damage_system")
+			local aoe_dot_damage = area_damage_extension.aoe_dot_damage
+			local aoe_init_damage = area_damage_extension.aoe_init_damage
+			local aoe_dot_damage_interval = area_damage_extension.aoe_dot_damage_interval
+			local radius = area_damage_extension.radius
+			local life_time = area_damage_extension.life_time
+			local player_screen_effect_name = area_damage_extension.player_screen_effect_name
+			local dot_effect_name = area_damage_extension.dot_effect_name
+			local area_damage_template = area_damage_extension.area_damage_template
+			local invisible_unit = area_damage_extension.invisible_unit
+			local extra_dot_effect_name = area_damage_extension.extra_dot_effect_name
+			local explosion_template_name = area_damage_extension.explosion_template_name
+			local owner_player = area_damage_extension.owner_player
 
 			if dot_effect_name == nil then
 				dot_effect_name = "n/a"
@@ -670,6 +671,12 @@ go_type_table = {
 				player_screen_effect_name = "n/a"
 			end
 
+			local owner_player_id = NetworkConstants.invalid_game_object_id
+
+			if owner_player then
+				owner_player_id = owner_player.game_object_id
+			end
+
 			local data_table = {
 				go_type = NetworkLookup.go_types.aoe_unit,
 				husk_unit = NetworkLookup.husks[unit_name],
@@ -685,7 +692,8 @@ go_type_table = {
 				extra_dot_effect_name = NetworkLookup.effects[extra_dot_effect_name],
 				invisible_unit = invisible_unit,
 				area_damage_template = NetworkLookup.area_damage_templates[area_damage_template],
-				explosion_template_name = NetworkLookup.explosion_templates[explosion_template_name]
+				explosion_template_name = NetworkLookup.explosion_templates[explosion_template_name],
+				owner_player_id = owner_player_id
 			}
 
 			return data_table
@@ -1546,6 +1554,7 @@ go_type_table = {
 			local invisible_unit = GameSession.game_object_field(game_session, go_id, "invisible_unit")
 			local extra_dot_effect_name = GameSession.game_object_field(game_session, go_id, "extra_dot_effect_name")
 			local explosion_template_name = GameSession.game_object_field(game_session, go_id, "explosion_template_name")
+			local owner_player_id = GameSession.game_object_field(game_session, go_id, "owner_player_id")
 			extra_dot_effect_name = NetworkLookup.effects[extra_dot_effect_name]
 
 			if extra_dot_effect_name == "n/a" then
@@ -1581,6 +1590,12 @@ go_type_table = {
 				end
 			end
 
+			local owner_player = nil
+
+			if owner_player_id ~= NetworkConstants.invalid_game_object_id then
+				owner_player = Managers.player:player_from_game_object_id(owner_player_id)
+			end
+
 			local extension_init_data = {
 				area_damage_system = {
 					aoe_dot_damage = aoe_dot_damage,
@@ -1594,7 +1609,8 @@ go_type_table = {
 					nav_mesh_effect = nav_mesh_effect,
 					extra_dot_effect_name = extra_dot_effect_name,
 					area_damage_template = NetworkLookup.area_damage_templates[area_damage_template],
-					explosion_template_name = explosion_template_name
+					explosion_template_name = explosion_template_name,
+					owner_player = owner_player
 				}
 			}
 			local unit_template_name = "aoe_unit"

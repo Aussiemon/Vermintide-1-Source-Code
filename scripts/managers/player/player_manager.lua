@@ -111,6 +111,15 @@ end
 PlayerManager.player_from_stats_id = function (self, stats_id)
 	return self.player_from_unique_id(self, stats_id)
 end
+PlayerManager.player_from_game_object_id = function (self, game_object_id)
+	for _, player in pairs(self._players) do
+		if player.game_object_id == game_object_id then
+			return player
+		end
+	end
+
+	return 
+end
 PlayerManager.relinquish_unit_ownership = function (self, unit)
 	if script_data.network_debug_connections then
 		printf("PlayerManager:relinquish_unit_ownership")
@@ -183,6 +192,15 @@ PlayerManager.player_exists = function (self, peer_id, local_player_id)
 end
 PlayerManager.owner = function (self, unit)
 	return self._unit_owners[unit]
+end
+PlayerManager.is_player_unit = function (self, unit)
+	local owner = self._unit_owners[unit]
+
+	if owner and owner.player_unit == unit then
+		return true
+	end
+
+	return false
 end
 PlayerManager.add_bot_player = function (self, player_name, bot_player_peer_id, bot_profile_index, profile_index, local_player_id)
 	local peer_id = Network.peer_id()

@@ -29,9 +29,8 @@ end
 
 local function trigger_player_friendly_fire_dialogue(player_unit, attacker_unit)
 	local player_manager = Managers.player
-	local owner = player_manager.unit_owner(player_manager, attacker_unit)
 
-	if player_unit ~= attacker_unit and owner ~= nil then
+	if player_unit ~= attacker_unit and player_manager.is_player_unit(player_manager, attacker_unit) then
 		local profile_name_victim = ScriptUnit.extension(player_unit, "dialogue_system").context.player_profile
 		local profile_name_attacker = ScriptUnit.extension(attacker_unit, "dialogue_system").context.player_profile
 		local dialogue_input = ScriptUnit.extension_input(player_unit, "dialogue_system")
@@ -49,7 +48,7 @@ local function trigger_enemy_armor_hit_dialogue(enemy_unit, player_unit, damage_
 	local player_manager = Managers.player
 	local owner = player_manager.unit_owner(player_manager, player_unit)
 
-	if owner and not owner.remote and player_unit ~= enemy_unit and Unit.alive(enemy_unit) then
+	if player_manager.is_player_unit(player_manager, player_unit) and not owner.remote and player_unit ~= enemy_unit and Unit.alive(enemy_unit) then
 		local buff_extension = ScriptUnit.extension(player_unit, "buff_system")
 
 		if buff_extension and buff_extension.has_buff_type(buff_extension, "armor penetration") == false and damage_dealt < 0.5 then

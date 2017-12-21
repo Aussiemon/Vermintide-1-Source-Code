@@ -341,8 +341,9 @@ local buff_params_2 = {}
 local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_server)
 	if Unit.alive(player_unit) then
 		local player = Managers.player:owner(player_unit)
+		local is_player_unit = Managers.player:is_player_unit(player_unit)
 
-		if player and not player.remote then
+		if is_player_unit and not player.remote then
 			local buff_extension = ScriptUnit.extension(player_unit, "buff_system")
 			local health_extension = ScriptUnit.extension(player_unit, "health_system")
 			local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")

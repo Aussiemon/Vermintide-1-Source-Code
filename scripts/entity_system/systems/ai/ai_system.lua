@@ -20,7 +20,9 @@ local ai_trees_created = false
 local RPCS = {
 	"rpc_alert_enemies_within_range",
 	"rpc_set_allowed_nav_layer",
-	"rpc_set_ward_state"
+	"rpc_set_ward_state",
+	"rpc_set_critter_skull",
+	"rpc_on_critter_rat_death"
 }
 local extensions = {
 	"AISimpleExtension",
@@ -812,6 +814,24 @@ AISystem.rpc_set_ward_state = function (self, peer_id, unit_id, state)
 	local unit = Managers.state.unit_storage:unit(unit_id)
 
 	AiUtils.stormvermin_champion_set_ward_state(unit, state, false)
+
+	return 
+end
+AISystem.rpc_set_critter_skull = function (self, peer_id, unit_id)
+	local unit = Managers.state.unit_storage:unit(unit_id)
+
+	if Unit.alive(unit) then
+		AiBreedSnippets.on_critter_rat_spawn(unit)
+	end
+
+	return 
+end
+AISystem.rpc_on_critter_rat_death = function (self, peer_id, unit_id)
+	local unit = Managers.state.unit_storage:unit(unit_id)
+
+	if Unit.alive(unit) then
+		AiBreedSnippets.on_critter_rat_husk_death(unit)
+	end
 
 	return 
 end

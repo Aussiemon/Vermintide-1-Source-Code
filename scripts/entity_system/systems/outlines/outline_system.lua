@@ -167,7 +167,12 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 
 			self:outline_unit(unit, extension.flag, channel, false, extension.apply_method, false)
 
-			extension.flag = extension.previous_flag
+			if extension.previous_flag then
+				extension.flag = extension.previous_flag
+			else
+				ScriptApplication.send_to_crashify("OutlineSystem", "Tried to unping unit that didn't have a previous flag set. extension.previous_flag: %s extension.flag: %s extension.pinged: %s. Ping Robin", tostring(extension.previous_flag), tostring(extension.flag), tostring(extension.pinged))
+			end
+
 			extension.reapply = true
 		end
 

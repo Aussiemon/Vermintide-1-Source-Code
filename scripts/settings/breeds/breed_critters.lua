@@ -148,6 +148,8 @@ local rat_data = {
 		fire_grenade = 5
 	},
 	run_on_spawn = AiBreedSnippets.on_critter_rat_spawn,
+	run_on_husk_spawn = AiBreedSnippets.on_critter_rat_spawn,
+	hot_join_sync = AiBreedSnippets.on_critter_rat_hot_join_sync,
 	run_on_death = AiBreedSnippets.on_critter_rat_death
 }
 Breeds.critter_rat = table.create_copy(Breeds.critter_rat, rat_data)
