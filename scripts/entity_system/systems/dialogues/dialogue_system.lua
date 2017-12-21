@@ -466,6 +466,10 @@ DialogueSystem.update_currently_playing_dialogues = function (self, dt)
 					function_command_queue.queue_function_command(function_command_queue, Unit.animation_event, unit, "talk_body_end")
 				end
 
+				if Unit.has_data(unit, "receive_dialogue_events") then
+					Unit.flow_event(unit, "lua_dialogue_end")
+				end
+
 				extension.currently_playing_dialogue = nil
 				currently_playing_dialogue.currently_playing_id = nil
 				currently_playing_dialogue.currently_playing_unit = nil
@@ -796,6 +800,10 @@ DialogueSystem.physics_async_update = function (self, context, t)
 							function_command_queue.queue_function_command(function_command_queue, Unit.animation_event, dialogue_actor_unit, "talk_body_end")
 						end
 
+						if Unit.has_data(dialogue_actor_unit, "receive_dialogue_events") then
+							Unit.flow_event(dialogue_actor_unit, "lua_dialogue_end")
+						end
+
 						local go_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, playing_unit)
 
 						network_manager.network_transmit:send_rpc_clients("rpc_interrupt_dialogue_event", go_id, is_level_unit)
@@ -894,6 +902,10 @@ DialogueSystem.physics_async_update = function (self, context, t)
 
 					if Unit.has_data(dialogue_actor_unit, "enemy_dialogue_body_anim") and Unit.has_animation_state_machine(dialogue_actor_unit) then
 						function_command_queue.queue_function_command(function_command_queue, Unit.flow_event, dialogue_actor_unit, "action_talk_body")
+					end
+
+					if Unit.has_data(dialogue_actor_unit, "receive_dialogue_events") then
+						Unit.flow_event(dialogue_actor_unit, "lua_dialogue_start")
 					end
 
 					if script_data.dialogue_debug_last_played_query then
@@ -1578,6 +1590,10 @@ DialogueSystem.rpc_play_dialogue_event = function (self, sender, go_id, is_level
 		Unit.flow_event(dialogue_actor_unit, "action_talk_body")
 	end
 
+	if Unit.has_data(dialogue_actor_unit, "receive_dialogue_events") then
+		Unit.flow_event(dialogue_actor_unit, "lua_dialogue_start")
+	end
+
 	if script_data.dialogue_debug_all_contexts then
 		print(string.format("Played wwise event for dialogues: %q. Defined in rule %q with index %d", sound_event, dialogue_name, dialogue_index))
 	end
@@ -1616,6 +1632,10 @@ DialogueSystem.rpc_interrupt_dialogue_event = function (self, sender, go_id, is_
 
 		if Unit.has_data(dialogue_actor_unit, "enemy_dialogue_body_anim") and Unit.has_animation_state_machine(dialogue_actor_unit) then
 			Unit.animation_event(dialogue_actor_unit, "talk_body_end")
+		end
+
+		if Unit.has_data(dialogue_actor_unit, "receive_dialogue_events") then
+			Unit.flow_event(dialogue_actor_unit, "lua_dialogue_end")
 		end
 	end
 

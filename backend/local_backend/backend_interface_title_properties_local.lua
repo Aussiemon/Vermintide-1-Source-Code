@@ -1,7 +1,7 @@
 BackendInterfaceTitlePropertiesLocal = class(BackendInterfaceTitlePropertiesLocal)
 BackendInterfaceTitlePropertiesLocal.init = function (self)
 	self._data = {
-		brawl_enabled = false
+		brawl_enabled = true
 	}
 
 	return 

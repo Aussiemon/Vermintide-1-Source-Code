@@ -16,6 +16,10 @@ DialogueSettings.auto_load_files = {
 	"dialogues/generated/dwarf_dlc"
 }
 DialogueSettings.level_specific_load_files = {
+	inn_level = {
+		"dialogues/generated/pub_brawl",
+		"dialogues/generated/npcs"
+	},
 	tutorial = {
 		"dialogues/generated/tutorial",
 		"dialogues/generated/enemies"
@@ -156,6 +160,7 @@ for dlc_name, dlc_settings in pairs(DLCSettings) do
 end
 
 DialogueSettings.blocked_auto_load_files = {
+	inn_level = true,
 	tutorial = true
 }
 DialogueSettings.max_view_distance = 50
@@ -185,13 +190,17 @@ DialogueSettings.dialogue_category_config = {
 	default = {
 		mutually_exclusive = true,
 		interrupted_by = {
+			boss_talk_2 = true,
 			boss_talk = true,
-			boss_talk_2 = true
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {}
 	},
 	help_talk = {
-		interrupted_by = {},
+		interrupted_by = {
+			npc_talk_interrupt = true,
+			player_alerts_boss = true
+		},
 		playable_during_category = {
 			default = true,
 			enemy_high_prio = true,
@@ -207,7 +216,9 @@ DialogueSettings.dialogue_category_config = {
 		}
 	},
 	player_alerts_boss = {
-		interrupted_by = {},
+		interrupted_by = {
+			npc_talk_interrupt = true
+		},
 		playable_during_category = {
 			default = true,
 			enemy_high_prio = true,
@@ -226,8 +237,11 @@ DialogueSettings.dialogue_category_config = {
 	},
 	player_alerts = {
 		interrupted_by = {
+			boss_talk_3 = true,
+			boss_talk_2 = true,
+			player_alerts_boss = true,
 			boss_talk = true,
-			boss_talk_2 = true
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -245,7 +259,10 @@ DialogueSettings.dialogue_category_config = {
 	player_feedback = {
 		interrupted_by = {
 			boss_talk = true,
-			boss_talk_2 = true
+			boss_talk_2 = true,
+			player_alerts_boss = true,
+			boss_talk_3 = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -264,7 +281,8 @@ DialogueSettings.dialogue_category_config = {
 	npc_talk_special = {
 		mutually_exclusive = true,
 		interrupted_by = {
-			npc_talk_interrupt_special = true
+			npc_talk_interrupt_special = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -304,7 +322,10 @@ DialogueSettings.dialogue_category_config = {
 		mutually_exclusive = true,
 		interrupted_by = {
 			boss_talk = true,
-			boss_talk_2 = true
+			boss_talk_2 = true,
+			player_alerts_boss = true,
+			boss_talk_3 = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -321,7 +342,10 @@ DialogueSettings.dialogue_category_config = {
 		mutually_exclusive = true,
 		interrupted_by = {
 			boss_talk = true,
-			boss_talk_2 = true
+			boss_talk_2 = true,
+			player_alerts_boss = true,
+			boss_talk_3 = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -338,7 +362,10 @@ DialogueSettings.dialogue_category_config = {
 		mutually_exclusive = true,
 		interrupted_by = {
 			boss_talk = true,
-			boss_talk_2 = true
+			boss_talk_2 = true,
+			player_alerts_boss = true,
+			boss_talk_3 = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -353,7 +380,10 @@ DialogueSettings.dialogue_category_config = {
 		mutually_exclusive = true,
 		interrupted_by = {
 			boss_talk = true,
-			boss_talk_2 = true
+			boss_talk_2 = true,
+			player_alerts_boss = true,
+			boss_talk_3 = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			default = true,
@@ -366,7 +396,10 @@ DialogueSettings.dialogue_category_config = {
 		mutually_exclusive = true,
 		interrupted_by = {
 			boss_talk = true,
-			boss_talk_2 = true
+			boss_talk_2 = true,
+			player_alerts_boss = true,
+			boss_talk_3 = true,
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			enemy_high_prio = true,
@@ -376,8 +409,10 @@ DialogueSettings.dialogue_category_config = {
 	story_talk = {
 		mutually_exclusive = true,
 		interrupted_by = {
+			boss_talk_2 = true,
+			player_alerts_boss = true,
 			boss_talk = true,
-			boss_talk_2 = true
+			npc_talk_interrupt = true
 		},
 		playable_during_category = {
 			enemy_high_prio = true,
@@ -385,7 +420,9 @@ DialogueSettings.dialogue_category_config = {
 		}
 	},
 	knocked_down_override = {
-		interrupted_by = {},
+		interrupted_by = {
+			npc_talk_interrupt = true
+		},
 		playable_during_category = {
 			enemy_alerts = true,
 			enemy_high_prio = true,
@@ -445,6 +482,7 @@ DialogueSettings.dialogue_category_config = {
 	boss_talk = {
 		mutually_exclusive = true,
 		interrupted_by = {
+			boss_talk_3 = true,
 			boss_talk_2 = true
 		},
 		playable_during_category = {
@@ -467,7 +505,9 @@ DialogueSettings.dialogue_category_config = {
 	},
 	boss_talk_2 = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk_3 = true
+		},
 		playable_during_category = {
 			enemy_alerts = true,
 			enemy_high_prio = true,
@@ -485,6 +525,29 @@ DialogueSettings.dialogue_category_config = {
 			knocked_down_override = true,
 			player_alerts_boss = true,
 			boss_talk = true
+		}
+	},
+	boss_talk_3 = {
+		mutually_exclusive = true,
+		interrupted_by = {},
+		playable_during_category = {
+			default = true,
+			enemy_basic_prio = true,
+			player_feedback = true,
+			help_talk = true,
+			enemy_alerts = true,
+			boss_talk_2 = true,
+			boss_talk = true,
+			casual_talk = true,
+			story_talk = true,
+			level_talk = true,
+			boss_reaction_talk = true,
+			knocked_down_override = true,
+			enemy_high_prio = true,
+			guidance = true,
+			seen_items = true,
+			player_alerts = true,
+			player_alerts_boss = true
 		}
 	},
 	boss_reaction_talk = {

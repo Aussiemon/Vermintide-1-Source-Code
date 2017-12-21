@@ -96,7 +96,8 @@ local dialogue_lookup_tables = {
 	"dialogues/generated/lookup_dwarf_ranger_wizard_tower",
 	"dialogues/generated/lookup_witch_hunter_wizard_tower",
 	"dialogues/generated/lookup_wood_elf_wizard_tower",
-	"dialogues/generated/lookup_grey_seer"
+	"dialogues/generated/lookup_grey_seer",
+	"dialogues/generated/lookup_pub_brawl"
 }
 local num_dialogues = #dialogue_lookup_tables
 
