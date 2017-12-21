@@ -3,32 +3,37 @@ InventorySettings = {
 		{
 			type = "trinket",
 			name = "slot_trinket_3",
-			inventory_button_index = 1,
-			category = "attachment"
+			loadout_slot = true,
+			category = "attachment",
+			inventory_button_index = 1
 		},
 		{
 			type = "trinket",
 			name = "slot_trinket_2",
-			inventory_button_index = 2,
-			category = "attachment"
+			loadout_slot = true,
+			category = "attachment",
+			inventory_button_index = 2
 		},
 		{
 			type = "trinket",
 			name = "slot_trinket_1",
-			inventory_button_index = 3,
-			category = "attachment"
+			loadout_slot = true,
+			category = "attachment",
+			inventory_button_index = 3
 		},
 		{
 			type = "hat",
 			name = "slot_hat",
-			inventory_button_index = 6,
-			category = "attachment"
+			loadout_slot = true,
+			category = "attachment",
+			inventory_button_index = 6
 		},
 		{
 			type = "melee",
 			name = "slot_melee",
 			wield_input = "wield_1",
 			category = "weapon",
+			loadout_slot = true,
 			inventory_button_index = 5
 		},
 		{
@@ -36,6 +41,7 @@ InventorySettings = {
 			name = "slot_ranged",
 			wield_input = "wield_2",
 			category = "weapon",
+			loadout_slot = true,
 			inventory_button_index = 4
 		},
 		{

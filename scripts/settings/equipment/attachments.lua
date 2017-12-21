@@ -3,20 +3,40 @@ FirstPersonAttachments = {
 		unit = "units/beings/player/witch_hunter/first_person_base/chr_first_person_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
+	witch_hunter = {
+		unit = "units/beings/player/witch_hunter/first_person_base/chr_first_person_variation_1_mesh",
+		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
+	},
 	bright_wizard = {
 		unit = "units/beings/player/bright_wizard/first_person_base/chr_first_person_mesh",
+		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
+	},
+	bright_wizard_variation_1 = {
+		unit = "units/beings/player/bright_wizard/first_person_base/chr_first_person_variation_1_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
 	wood_elf = {
 		unit = "units/beings/player/way_watcher/first_person_base/chr_first_person_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
+	wood_elf = {
+		unit = "units/beings/player/way_watcher/first_person_base/chr_first_person_variation_1_mesh",
+		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
+	},
 	dwarf_ranger = {
 		unit = "units/beings/player/dwarf_ranger/first_person_base/chr_first_person_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
+	dwarf_ranger_variation_1 = {
+		unit = "units/beings/player/dwarf_ranger/first_person_base/chr_first_person_variation_1_mesh",
+		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
+	},
 	empire_soldier = {
 		unit = "units/beings/player/empire_soldier/first_person_base/chr_first_person_mesh",
+		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
+	},
+	empire_soldier = {
+		unit = "units/beings/player/empire_soldier/first_person_base/chr_first_person_variation_1_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	}
 }

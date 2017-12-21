@@ -389,5 +389,37 @@ UnlockManager.ps4_dlc_product_label = function (self, name)
 
 	return unlock.product_label(unlock)
 end
+local profile_dlc_skins = {}
+UnlockManager.get_skin_settings = function (self, profile_name)
+	local base_skin = nil
+
+	table.clear(profile_dlc_skins)
+
+	for _, skin_settings in pairs(SkinSettings) do
+		local skin_profile_name = skin_settings.profile_name
+
+		if skin_profile_name == profile_name then
+			local unlock_type = skin_settings.unlock_type
+
+			if unlock_type == "default" then
+				base_skin = skin_settings
+			elseif unlock_type == "dlc" then
+				local dlc_name = skin_settings.dlc_name
+
+				if self.is_dlc_unlocked(self, dlc_name) then
+					profile_dlc_skins[#profile_dlc_skins + 1] = skin_settings
+				end
+			end
+		end
+	end
+
+	if #profile_dlc_skins == 0 then
+		return base_skin
+	else
+		return profile_dlc_skins[math.random(1, #profile_dlc_skins)]
+	end
+
+	return 
+end
 
 return 

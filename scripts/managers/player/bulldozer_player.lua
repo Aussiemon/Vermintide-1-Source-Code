@@ -174,7 +174,8 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 		}
 	}
 	local unit_template_name = nil
-	local unit_name = profile.base_units.third_person
+	local skin_settings = Managers.unlock:get_skin_settings(profile.display_name)
+	local unit_name = skin_settings.units.third_person.third_person
 	local spawn_data = {
 		unit_template_name = unit_template_name,
 		unit_name = unit_name,

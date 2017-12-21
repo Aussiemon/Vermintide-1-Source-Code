@@ -53,6 +53,8 @@ local platform_functions = {
 			return unlocked, error_msg
 		end,
 		unlock = function (platform_id, template)
+			print("WAHOOOOOOOOOOOOO", template.name)
+
 			local token, error_msg = Achievement.unlock(template.name)
 
 			return token, error_msg

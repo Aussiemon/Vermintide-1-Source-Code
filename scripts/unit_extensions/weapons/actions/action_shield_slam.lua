@@ -137,6 +137,7 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 				local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 
 				self.weapon_system:rpc_weapon_blood(nil, attacker_unit_id, attack_template_damage_type_id)
+				DamageUtils.buff_on_attack(owner_unit, target_breed_unit, "heavy_attack")
 
 				local backstab_multiplier = 1
 
@@ -165,7 +166,6 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 		local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
 
 		ActionSweep._play_character_impact(self, self.is_server, owner_unit, self.current_action, attack_template, attack_template_damage_type_name, target_breed_unit, target_position, breed, hit_zone_name, attack_direction)
-		DamageUtils.buff_on_attack(owner_unit, target_breed_unit, "heavy_attack")
 
 		local backstab_multiplier = 1
 

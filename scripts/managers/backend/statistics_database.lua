@@ -276,6 +276,9 @@ StatisticsDefinitions = {
 		executor_headshot = {
 			value = 0,
 			database_name = "executor_headshot"
+		},
+		event_items_found = {
+			value = 0
 		}
 	}
 }

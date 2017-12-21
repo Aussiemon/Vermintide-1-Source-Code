@@ -7,7 +7,6 @@ require("scripts/managers/backend/backend_boons")
 require("scripts/managers/backend/backend_quests")
 require("scripts/managers/backend/backend_profile_hash")
 require("scripts/managers/backend/backend_interface_title_properties")
-require("backend/local_backend/backend_interface_title_properties_local")
 
 cjson = cjson.stingray_init()
 local DEBUG_QUESTS_AND_CONTRACTS = false
@@ -83,7 +82,7 @@ BackendManager.init = function (self)
 	end
 
 	self._interfaces.profile_hash = BackendProfileHash:new()
-	self._interfaces.title_properties = BackendInterfaceTitlePropertiesLocal:new()
+	self._interfaces.title_properties = BackendInterfaceTitleProperties:new()
 	self._button_retry = "button_ok"
 	self._button_quit = "button_quit"
 	self._button_local_backend = "button_local_backend"

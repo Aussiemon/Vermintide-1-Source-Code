@@ -49,7 +49,7 @@ ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 			cost = new_action.fatigue_cost
 		end
 
-		status_extension.add_fatigue_points(status_extension, cost)
+		status_extension.add_fatigue_points(status_extension, cost, "push")
 	end
 
 	self.block_end_time = t + 0.5

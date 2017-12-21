@@ -567,6 +567,7 @@ Bulldozer.entrypoint = function (self)
 	Managers.package:load("resource_packages/levels/debug_levels", "boot")
 	Managers.package:load("resource_packages/levels/benchmark_levels", "boot")
 	Managers.package:load("resource_packages/levels/dwarf_levels", "boot")
+	Managers.package:load("resource_packages/dlcs/challenge_wizard/challenge_wizard", "boot")
 
 	script_data.use_optimized_breed_units = false
 	local breed_package = (script_data.use_optimized_breed_units and "resource_packages/ingame_breeds_optimized") or "resource_packages/ingame_breeds"
@@ -608,6 +609,6 @@ Bulldozer.entrypoint = function (self)
 end
 script_data = script_data or {}
 __dgaa = 11.59
-__dgaa = 11.76
+__dgaa = 12.44
 
 return 

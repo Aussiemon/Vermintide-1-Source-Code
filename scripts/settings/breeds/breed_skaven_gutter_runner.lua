@@ -225,7 +225,8 @@ local breed_data = {
 		200,
 		0
 	},
-	debug_class = DebugGutterRunner
+	debug_class = DebugGutterRunner,
+	run_on_death = AiBreedSnippets.spawn_event_item_special
 }
 Breeds.skaven_gutter_runner = table.create_copy(Breeds.skaven_gutter_runner, breed_data)
 local action_data = {

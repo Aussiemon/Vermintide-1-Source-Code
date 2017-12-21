@@ -71,31 +71,31 @@ local pig_data = {
 }
 Breeds.critter_pig = table.create_copy(Breeds.critter_pig, pig_data)
 local rat_data = {
-	detection_radius = 10,
-	radius = 1,
-	walk_speed = 4,
-	unit_template = "ai_unit_critter",
-	run_speed = 6,
-	has_inventory = false,
-	perception_previous_attacker_stickyness_value = 0,
+	base_unit = "units/beings/critters/chr_critter_common_rat/chr_critter_common_rat",
 	target_selection = "pick_closest_target",
-	exchange_order = 1,
+	run_speed = 6,
 	death_reaction = "ai_default",
+	exchange_order = 1,
+	has_inventory = false,
+	not_bot_target = true,
+	animation_sync_rpc = "rpc_sync_anim_state_1",
+	aoe_radius = 0.1,
 	perception = "perception_regular",
+	walk_speed = 4,
+	detection_radius = 10,
+	cannot_far_path = true,
+	hit_reaction = "ai_default",
+	bone_lod_level = 1,
+	hit_effect_template = "HitEffectsCritterRat",
+	radius = 1,
+	unit_template = "ai_unit_critter",
+	perception_previous_attacker_stickyness_value = 0,
 	poison_resistance = 70,
 	armor_category = 1,
-	animation_sync_rpc = "rpc_sync_anim_state_1",
-	cannot_far_path = true,
 	weapon_reach = 2,
-	not_bot_target = true,
-	hit_reaction = "ai_default",
-	aoe_radius = 0.1,
-	bone_lod_level = 1,
-	base_unit = "units/beings/critters/chr_critter_common_rat/chr_critter_common_rat",
-	behavior = "critter_rat",
 	disable_local_hit_reactions = true,
+	behavior = "critter_rat",
 	aoe_height = 0.1,
-	hit_effect_template = "HitEffectsCritterRat",
 	size_variation_range = {
 		0.9,
 		1.1
@@ -146,7 +146,9 @@ local rat_data = {
 		smoke_grenade = 4,
 		bot_poison_wind = 5,
 		fire_grenade = 5
-	}
+	},
+	run_on_spawn = AiBreedSnippets.on_critter_rat_spawn,
+	run_on_death = AiBreedSnippets.on_critter_rat_death
 }
 Breeds.critter_rat = table.create_copy(Breeds.critter_rat, rat_data)
 BreedActions.critter_pig = {

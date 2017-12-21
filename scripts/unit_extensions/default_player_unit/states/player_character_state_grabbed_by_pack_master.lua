@@ -232,7 +232,6 @@ PlayerCharacterStateGrabbedByPackMaster.states = {
 		end,
 		enter = function (parent, unit)
 			parent.locomotion_extension:enable_script_driven_movement()
-			CharacterStateHelper.show_inventory_3p(unit, true, true, Managers.player.is_server)
 
 			local status_extension = parent.status_extension
 			local csm = parent.csm
@@ -246,6 +245,8 @@ PlayerCharacterStateGrabbedByPackMaster.states = {
 
 				csm.change_state(csm, "knocked_down", parent.temp_params)
 			else
+				CharacterStateHelper.show_inventory_3p(unit, true, true, Managers.player.is_server)
+
 				if parent.inventory_extension:get_wielded_slot_name() == "slot_packmaster_claw" then
 					parent.inventory_extension:wield_previous_weapon()
 				end

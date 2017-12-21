@@ -1064,18 +1064,6 @@ MatchmakingManager.lobby_match = function (self, lobby_data, level_key, difficul
 		return false
 	end
 
-	if level_key then
-		local correct_level = lobby_data.level_key == level_key or (lobby_data.selected_level_key and lobby_data.selected_level_key == level_key)
-
-		if not correct_level then
-			return false
-		end
-	end
-
-	if game_mode ~= lobby_data.game_mode then
-		return false
-	end
-
 	local correct_difficulty = lobby_data.difficulty == difficulty
 
 	if not correct_difficulty then
@@ -1087,6 +1075,37 @@ MatchmakingManager.lobby_match = function (self, lobby_data, level_key, difficul
 
 	if not has_empty_slot then
 		return false
+	end
+
+	if game_mode ~= lobby_data.game_mode then
+		return false
+	end
+
+	if level_key then
+		local correct_level = lobby_data.level_key == level_key or (lobby_data.selected_level_key and lobby_data.selected_level_key == level_key)
+
+		if not correct_level then
+			return false
+		end
+	else
+		lobby_level = lobby_data.selected_level_key or lobby_data.level_key
+
+		if lobby_level then
+			local difficulty_settings = DifficultySettings
+			local difficulty_rank = difficulty_settings[difficulty].rank
+			local player_manager = Managers.player
+			local number_of_players = player_manager.num_human_players(player_manager)
+			local player = player_manager.local_player(player_manager)
+			local player_stats_id = player.stats_id(player)
+			local statistics_db = self.statistics_db
+			local level_approved = self.level_unlocked_at_difficulty(self, lobby_level, difficulty_rank, statistics_db, player_stats_id)
+
+			if not level_approved then
+				return false
+			end
+		else
+			return false
+		end
 	end
 
 	if wanted_profile_id then

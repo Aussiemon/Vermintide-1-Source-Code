@@ -252,7 +252,8 @@ local breed_data = {
 		200,
 		0,
 		170
-	}
+	},
+	run_on_death = AiBreedSnippets.spawn_event_item
 }
 Breeds.skaven_storm_vermin = table.create_copy(Breeds.skaven_storm_vermin, breed_data)
 Breeds.skaven_storm_vermin_commander = table.create_copy(Breeds.skaven_storm_vermin_commander, breed_data)

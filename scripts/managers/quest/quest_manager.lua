@@ -34,6 +34,7 @@ QuestManager.init = function (self, statistics_db, level_key)
 		self.available_contracts = quest_interface.get_available_contracts(quest_interface)
 		self.mutators = quest_interface.get_mutators(quest_interface)
 		self.status = quest_interface.get_status(quest_interface)
+		self.active_mutators = self._update_active_mutators(self, {})
 	end
 
 	return 
@@ -59,6 +60,30 @@ QuestManager.evaluate_level_end = function (self, statistics_db, level_key)
 
 	return 
 end
+QuestManager._update_active_mutators = function (self, return_table)
+	table.clear(return_table)
+
+	local params = self.evaluation_params
+	local mutator_data = self.mutators[params.level_key]
+	local current_difficulty_rank = params.difficulty_rank
+
+	if mutator_data then
+		for difficulty_rank, mutators in pairs(mutator_data) do
+			if difficulty_rank <= current_difficulty_rank then
+				for _, mutator in ipairs(mutators) do
+					return_table[mutator] = true
+				end
+			end
+		end
+	end
+
+	return return_table
+end
+QuestManager.is_mutator_active = function (self, mutator_name)
+	local active = self.active_mutators
+
+	return active and active[mutator_name]
+end
 QuestManager.update = function (self, statistics_db, dt, t)
 	local quest_interface = self.quest_interface
 	self.evaluation_params.difficulty_rank = Managers.state.difficulty:get_difficulty_rank()
@@ -69,6 +94,28 @@ QuestManager.update = function (self, statistics_db, dt, t)
 	self.active_contracts = quest_interface.get_active_contracts(quest_interface)
 	self.available_contracts = quest_interface.get_available_contracts(quest_interface)
 	self.mutators = quest_interface.get_mutators(quest_interface)
+	self.active_mutators = self._update_active_mutators(self, self.active_mutators)
+
+	if script_data.debug_mutators then
+		for k, v in pairs(self.mutators) do
+			Debug.text("%s", k)
+
+			for k1, v1 in pairs(v) do
+				Debug.text("   %s", k1)
+
+				for k2, v2 in pairs(v1) do
+					Debug.text("      %s:%s", k2, v2)
+				end
+			end
+		end
+
+		Debug.text("ACTIVE:")
+
+		for k, v in pairs(self.active_mutators) do
+			Debug.text("   " .. k)
+		end
+	end
+
 	local session_progress = self.session_progress
 	local active_contracts = self.active_contracts
 	local params = self.evaluation_params
@@ -319,6 +366,12 @@ QuestManager._calculate_contract_session_progress = function (self, contract, pa
 			end
 
 			return waves
+		elseif task_type == "find_event_items" then
+			local local_player = Managers.player:local_player()
+			local stats_id = local_player.stats_id(local_player)
+			local event_items_found = statistics_db.get_stat(statistics_db, stats_id, "event_items_found")
+
+			return event_items_found
 		end
 
 		fassert(false, "trying to calculate session progress on a contract with an unsuported task: %s", task_type)

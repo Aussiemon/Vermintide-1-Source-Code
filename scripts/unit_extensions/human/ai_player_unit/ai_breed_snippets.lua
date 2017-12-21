@@ -39,6 +39,111 @@ AiBreedSnippets.on_rat_ogre_death = function (unit, blackboard)
 
 	return 
 end
+AiBreedSnippets.spawn_event_item_special = function (unit, blackboard)
+	local event_item = Managers.state.quest:is_mutator_active("event_items")
+
+	if event_item then
+		local num_event_items = 2
+
+		for i = 1, num_event_items, 1 do
+			local pickup_name = "event_item"
+			local pickup_settings = AllPickups[pickup_name]
+
+			if pickup_settings.can_spawn_func() then
+				local extension_init_data = {
+					pickup_system = {
+						has_physics = true,
+						spawn_type = "rare",
+						pickup_name = pickup_name
+					}
+				}
+				local unit_name = pickup_settings.unit_name
+				local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
+				local position = POSITION_LOOKUP[unit] + Vector3(math.random() - 0.5, math.random() - 0.5, 1)
+				local rotation = Quaternion(Vector3.right(), math.random()*2*math.pi)
+
+				Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
+			end
+		end
+	end
+
+	return 
+end
+AiBreedSnippets.spawn_event_item = function (unit, blackboard)
+	local event_item = Managers.state.quest:is_mutator_active("event_items")
+
+	if event_item then
+		local pickup_name = "event_item"
+		local pickup_settings = AllPickups[pickup_name]
+
+		if pickup_settings.can_spawn_func() then
+			local extension_init_data = {
+				pickup_system = {
+					has_physics = true,
+					spawn_type = "rare",
+					pickup_name = pickup_name
+				}
+			}
+			local unit_name = pickup_settings.unit_name
+			local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
+			local position = POSITION_LOOKUP[unit] + Vector3(math.random() - 0.5, math.random() - 0.5, 1)
+			local rotation = Quaternion(Vector3.right(), math.random()*2*math.pi)
+
+			Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
+		end
+	end
+
+	return 
+end
+AiBreedSnippets.on_critter_rat_spawn = function (unit, blackboard, t)
+	local event_item = Managers.state.quest:is_mutator_active("event_items")
+
+	if event_item then
+		local world = Application.main_world()
+		local hat_unit = World.spawn_unit(world, "units/props/skulls/prop_skull_01")
+
+		World.link_unit(world, hat_unit, 0, unit, Unit.node(unit, "j_head"))
+		Unit.set_local_rotation(hat_unit, 0, Quaternion.multiply(Quaternion(Vector3.right(), -math.pi*0.5), Quaternion(Vector3.up(), -math.pi*0.5)))
+		Unit.set_local_position(hat_unit, 0, Vector3(0.07, -0.02, 0))
+		Unit.set_data(unit, "hat_unit", hat_unit)
+	end
+
+	return 
+end
+AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
+	local hat_unit = Unit.get_data(unit, "hat_unit")
+
+	if Unit.alive(hat_unit) then
+		local world = Application.main_world()
+
+		World.destroy_unit(world, hat_unit)
+	end
+
+	local event_item = Managers.state.quest:is_mutator_active("event_items")
+
+	if event_item then
+		local pickup_name = "event_item"
+		local pickup_settings = AllPickups[pickup_name]
+
+		if pickup_settings.can_spawn_func() then
+			local extension_init_data = {
+				pickup_system = {
+					has_physics = true,
+					spawn_type = "rare",
+					pickup_name = pickup_name
+				}
+			}
+			local unit_name = pickup_settings.unit_name
+			local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
+			local rotation = Unit.world_rotation(unit, 0)
+			local position = Unit.world_position(unit, 0) + Vector3(0, 0, 0.3) + Quaternion.forward(rotation)*0.5
+
+			Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
+		end
+	end
+
+	return 
+end
 AiBreedSnippets.on_loot_rat_update = function (unit, blackboard, t)
 	local t = Managers.time:time("game")
 	local cooldown_time = blackboard.dodge_cooldown_time

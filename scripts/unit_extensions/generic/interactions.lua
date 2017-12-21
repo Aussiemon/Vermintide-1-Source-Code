@@ -785,7 +785,8 @@ InteractionDefinitions.pickup_object = {
 			local unique_mission_id = nil
 
 			if result == InteractionResult.SUCCESS then
-				local player = Managers.player:owner(interactor_unit)
+				local player_manager = Managers.player
+				local player = player_manager.owner(player_manager, interactor_unit)
 				local local_human = player.local_player
 				local local_bot_or_human = not player.remote
 				local interactor_is_local_player = player.local_player
@@ -805,6 +806,16 @@ InteractionDefinitions.pickup_object = {
 
 					if local_bot_or_human then
 						Managers.chat:send_system_chat_message(1, "dlc1_2_system_chat_player_picked_up_endurance_badge", player.name(player))
+					end
+				elseif pickup_settings.type == "event_item" then
+					for _, _player in pairs(player_manager.players(player_manager)) do
+						data.statistics_db:increment_stat(_player.stats_id(_player), "event_items_found")
+					end
+
+					Managers.state.event:trigger("add_coop_feedback", player.stats_id(player), local_human, "picked_up_event_item", player)
+
+					if local_bot_or_human then
+						Managers.chat:send_system_chat_message(1, "system_chat_player_picked_up_event_item", player.name(player))
 					end
 				elseif pickup_settings.type == "inventory_item" then
 					local slot_name = pickup_settings.slot_name
@@ -1471,6 +1482,10 @@ InteractionDefinitions.heal = {
 					end
 				end
 
+				local mission_system = Managers.state.entity:system("mission_system")
+
+				mission_system.increment_goal_mission_counter(mission_system, "merchant_no_healing", 1, true)
+
 				if GameSettingsDevelopment.use_telemetry then
 					local player_manager = Managers.player
 					local interactor_player = player_manager.unit_owner(player_manager, interactor_unit)
@@ -1751,39 +1766,56 @@ InteractionDefinitions.chest.server.stop = function (world, interactor_unit, int
 	local success = result == InteractionResult.SUCCESS
 	local can_spawn_dice = Unit.get_data(interactable_unit, "can_spawn_dice")
 
-	if not can_spawn_dice then
-		return 
+	if can_spawn_dice then
+		table.clear(pickup_params)
+
+		local pickup_name = "loot_die"
+		local dice_keeper = data.dice_keeper
+		local pickup_settings = AllPickups[pickup_name]
+		pickup_params.dice_keeper = dice_keeper
+
+		if success and pickup_settings.can_spawn_func(pickup_params) then
+			local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
+			local rand = math.random()
+			local chance = dice_keeper.chest_loot_dice_chance(dice_keeper)
+			chance = buff_extension.apply_buffs_to_value(buff_extension, chance, StatBuffIndex.INCREASE_LUCK)
+
+			if rand < chance then
+				local extension_init_data = {
+					pickup_system = {
+						has_physics = true,
+						spawn_type = "rare",
+						pickup_name = pickup_name
+					}
+				}
+				local unit_name = pickup_settings.unit_name
+				local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
+				local position = Unit.local_position(interactable_unit, 0) + Vector3(0, 0, 0.3)
+				local rotation = Unit.local_rotation(interactable_unit, 0)
+
+				Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
+				dice_keeper.bonus_dice_spawned(dice_keeper)
+			end
+		end
 	end
 
-	table.clear(pickup_params)
-
-	local pickup_name = "loot_die"
-	local dice_keeper = data.dice_keeper
+	local pickup_name = "event_item"
 	local pickup_settings = AllPickups[pickup_name]
-	pickup_params.dice_keeper = dice_keeper
 
-	if success and pickup_settings.can_spawn_func(pickup_params) then
-		local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
-		local rand = math.random()
-		local chance = dice_keeper.chest_loot_dice_chance(dice_keeper)
-		chance = buff_extension.apply_buffs_to_value(buff_extension, chance, StatBuffIndex.INCREASE_LUCK)
-
-		if rand < chance then
-			local extension_init_data = {
-				pickup_system = {
-					has_physics = true,
-					spawn_type = "rare",
-					pickup_name = pickup_name
-				}
+	if pickup_settings.can_spawn_func() then
+		local extension_init_data = {
+			pickup_system = {
+				has_physics = true,
+				spawn_type = "rare",
+				pickup_name = pickup_name
 			}
-			local unit_name = pickup_settings.unit_name
-			local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
-			local position = Unit.local_position(interactable_unit, 0) + Vector3(0, 0, 0.3)
-			local rotation = Unit.local_rotation(interactable_unit, 0)
+		}
+		local unit_name = pickup_settings.unit_name
+		local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
+		local position = Unit.local_position(interactable_unit, 0) + Vector3(0, 0, 0.3)
+		local rotation = Unit.local_rotation(interactable_unit, 0)
 
-			Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
-			dice_keeper.bonus_dice_spawned(dice_keeper)
-		end
+		Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
 	end
 
 	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)

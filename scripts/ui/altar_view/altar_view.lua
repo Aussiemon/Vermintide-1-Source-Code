@@ -617,7 +617,7 @@ AltarView.select_trait_reroll_page = function (self, ignore_sound)
 		exotic = true,
 		plentiful = false,
 		rare = true,
-		unique = false
+		unique = true
 	}
 
 	items_page.clear_disabled_backend_ids(items_page)

@@ -52,9 +52,9 @@ SimpleInventoryExtension.init = function (self, extension_init_context, unit, ex
 	return 
 end
 SimpleInventoryExtension.event_ingame_ui_view_on_enter = function (self, view_name)
-	local buff_extension = ScriptUnit.extension(self._unit, "buff_system")
+	local buff_extension = ScriptUnit.has_extension(self._unit, "buff_system")
 
-	if buff_extension.has_buff_type(buff_extension, "brawl_drunk") then
+	if buff_extension and buff_extension.has_buff_type(buff_extension, "brawl_drunk") then
 		self.set_delayed_drop_pickups_reason(self, "forced_drop")
 	end
 
@@ -847,11 +847,11 @@ SimpleInventoryExtension.get_wielded_slot_name = function (self)
 
 	return wielded_slot
 end
-SimpleInventoryExtension.get_slot_data = function (self, slot_id)
+SimpleInventoryExtension.get_slot_data = function (self, slot_name)
 	local equipment = self._equipment
 	local slots = equipment.slots
 
-	return slots[slot_id]
+	return slots[slot_name]
 end
 SimpleInventoryExtension.get_item_name = function (self, slot_name)
 	local slot_data = self.get_slot_data(self, slot_name)
@@ -1200,6 +1200,12 @@ SimpleInventoryExtension.get_item_slot_extension = function (self, slot_name, sy
 	end
 
 	return extension
+end
+SimpleInventoryExtension.is_showing_first_person_inventory = function (self)
+	return self._show_first_person
+end
+SimpleInventoryExtension.is_showing_third_person_inventory = function (self)
+	return self._show_third_person
 end
 
 return 

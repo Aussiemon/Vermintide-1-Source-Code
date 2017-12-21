@@ -93,18 +93,22 @@ local function profile_packages(profile_index, packages_list, is_first_person)
 		end
 	end
 
-	local base_units = profile.base_units
+	local profile_name = profile.display_name
+	local skin_settings = Managers.unlock:get_skin_settings(profile_name)
+	local units = skin_settings.units
+	local third_person_units = units.third_person
 
 	if is_first_person then
-		packages_list[base_units.first_person] = false
-		packages_list[base_units.first_person_bot] = false
-		packages_list[base_units.third_person] = false
-		packages_list[base_units.third_person_bot] = false
+		local first_person_units = units.first_person
+		packages_list[first_person_units.first_person] = false
+		packages_list[first_person_units.first_person_bot] = false
+		packages_list[third_person_units.third_person] = false
+		packages_list[third_person_units.third_person_bot] = false
 	else
-		packages_list[base_units.third_person_husk] = false
+		packages_list[third_person_units.third_person_husk] = false
 	end
 
-	local first_person_attachment = profile.first_person_attachment
+	local first_person_attachment = skin_settings.first_person_attachment
 
 	if is_first_person then
 		packages_list[first_person_attachment.unit] = false

@@ -68,6 +68,10 @@ WeaponSpreadExtension.update = function (self, unit, input, dt, context, t)
 	current_pitch = math.lerp(current_pitch, new_pitch, dt*lerp_speed)
 	current_yaw = math.lerp(current_yaw, new_yaw, dt*lerp_speed)
 
+	if owner_buff_extension.has_buff_type(owner_buff_extension, "increased_move_speed_while_aiming") then
+		moving = false
+	end
+
 	if moving then
 		if crouching then
 			new_state = "crouch_moving"

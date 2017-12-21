@@ -283,5 +283,11 @@ end
 SimpleHuskInventoryExtension.set_loaded_projectile_override = function (self)
 	return 
 end
+SimpleHuskInventoryExtension.is_showing_first_person_inventory = function (self)
+	return false
+end
+SimpleHuskInventoryExtension.is_showing_third_person_inventory = function (self)
+	return self._show_third_person
+end
 
 return 

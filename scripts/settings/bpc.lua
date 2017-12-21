@@ -230,6 +230,12 @@ return {
 			1.2
 		}
 	},
+	__esaercni_hsup_nopaew_eelem = {
+		{}
+	},
+	__slluks_dniw_nosiop_noitcetorp_teknirt = {
+		{}
+	},
 	__2reit_dniw_nosiop_noitcetorp_teknirt = {
 		{}
 	},
@@ -237,8 +243,22 @@ return {
 		{},
 		{}
 	},
+	__slluks_regnevacs_teknirt = {
+		{
+			1.04
+		},
+		{}
+	},
+	__slluks_nwapser_retsaf_teknirt = {
+		{}
+	},
 	__1reit_deeps_kcatta_nopaew_degnar = {
 		{}
+	},
+	__slluks_llik_no_laeh_teknirt = {
+		{
+			1.04
+		}
 	},
 	__1reit_kcul_esaercni_teknirt = {
 		{}
@@ -246,13 +266,16 @@ return {
 	__1reit_suidar_edanerg_teknirt = {
 		{}
 	},
-	__1reit_rehto_laeh_no_fles_laeh_teknirt = {
-		{}
-	},
 	__neewollah_kcul_esaercni_teknirt = {
 		{}
 	},
 	__reidlos_eripme_sa_ecid_llor_teknirt = {},
+	__1reit_rehto_laeh_no_fles_laeh_teknirt = {
+		{}
+	},
+	__fle_doow_sa_ecid_llor_teknirt = {},
+	__regnar_frawd_sa_ecid_llor_teknirt = {},
+	__retnuh_hctiw_sa_ecid_llor_teknirt = {},
 	__tnemevom_esaerced_gnol_gnitsac_detnalp = {
 		{},
 		{},
@@ -263,13 +286,15 @@ return {
 	},
 	__2reit_edanerg_emusnoc_ton_teknirt = {
 		{
-			1.6
+			2.4
 		}
 	},
-	__fle_doow_sa_ecid_llor_teknirt = {},
+	__egamad_derahs_teknirt = {
+		{}
+	},
 	__2reit_kcatta_nosiop_teknirt = {
 		{
-			0.32
+			0.64
 		}
 	},
 	__1reit_wolb_gnillik_cioreh_nopaew_degnar = {
@@ -289,7 +314,11 @@ return {
 	__eviver_noitpurretni_on_teknirt = {
 		{}
 	},
-	__regnar_frawd_sa_ecid_llor_teknirt = {},
+	__1reit_edanerg_emusnoc_ton_teknirt = {
+		{
+			1.6
+		}
+	},
 	__1reit_noitartenep_desaercni_nopaew_degnar = {
 		{
 			6.4,
@@ -302,16 +331,18 @@ return {
 			0.64
 		}
 	},
-	__retnuh_hctiw_sa_ecid_llor_teknirt = {},
+	__1reit_nwapser_retsaf_teknirt = {
+		{}
+	},
 	__3reit_kcapdem_emusnoc_ton_teknirt = {
 		{
 			1.6
 		}
 	},
-	__egamad_derahs_teknirt = {
+	__3reit_suidar_edanerg_teknirt = {
 		{}
 	},
-	__corp_morf_neger_eugitaf = {
+	__gnirps_ytlanep_eriomirg_ecuder_teknirt = {
 		{}
 	},
 	__kaew_noitop_ytilibarenluvni = {
@@ -323,16 +354,16 @@ return {
 			1.2
 		}
 	},
-	__1reit_nwapser_retsaf_teknirt = {
+	__ytlanep_eriomirg_ecuder_teknirt = {
 		{}
 	},
 	__kcolb_ymene_ot_egamad_esaercni_nopaew_eelem = {
 		{}
 	},
-	__3reit_suidar_edanerg_teknirt = {
+	__3reit_deeps_tnemevom_desaercni_teknirt = {
 		{}
 	},
-	__gnirps_ytlanep_eriomirg_ecuder_teknirt = {
+	__2reit_deeps_tnemevom_desaercni_teknirt = {
 		{}
 	},
 	__3t_tod_W3_gninrub = {
@@ -347,7 +378,7 @@ return {
 	__deelb_nwodkconk = {
 		{}
 	},
-	__ytlanep_eriomirg_ecuder_teknirt = {
+	__1reit_deeps_tnemevom_desaercni_teknirt = {
 		{}
 	},
 	__1reit_yvaeh_corp_egrahcrevo_nopaew_eelem = {
@@ -361,14 +392,18 @@ return {
 	},
 	__3reit_edanerg_emusnoc_ton_teknirt = {
 		{
-			2
+			3.2
 		}
 	},
-	__3reit_deeps_tnemevom_desaercni_teknirt = {
-		{}
+	__3reit_kcatta_nosiop_teknirt = {
+		{
+			0.96
+		}
 	},
-	__2reit_deeps_tnemevom_desaercni_teknirt = {
-		{}
+	__1reit_kcatta_nosiop_teknirt = {
+		{
+			0.32
+		}
 	},
 	__1reit_aera_daerps_kcapdem_teknirt = {
 		{}
@@ -381,7 +416,7 @@ return {
 	__tod_gninrub = {
 		{}
 	},
-	__1reit_deeps_tnemevom_desaercni_teknirt = {
+	__1reit_tsissa_no_no_corp_dleihs_nopaew_degnar = {
 		{}
 	},
 	__3reit_aera_daerps_kcapdem_teknirt = {
@@ -396,35 +431,13 @@ return {
 	__3t_tod_W1_gninrub = {
 		{}
 	},
-	__3reit_kcatta_nosiop_teknirt = {
-		{
-			0.48
-		}
-	},
-	__1reit_kcatta_nosiop_teknirt = {
-		{
-			0.16
-		}
-	},
-	__1reit_rennur_rettug_noitcetorp_teknirt = {
-		{}
-	},
-	__1reit_tsissa_no_no_corp_dleihs_nopaew_degnar = {
-		{}
-	},
 	__3reit_dk_esaercni_ph_teknirt = {
-		{}
-	},
-	__2t_tod_W3_gninrub = {
 		{}
 	},
 	__2reit_dk_esaercni_ph_teknirt = {
 		{}
 	},
-	__1reit_ycarucca_nopaew_degnar = {
-		{}
-	},
-	__tod_nosiop_eoa = {
+	__1reit_rennur_rettug_noitcetorp_teknirt = {
 		{}
 	},
 	__3reit_kcul_esaercni_teknirt = {
@@ -433,10 +446,28 @@ return {
 	__2reit_kcul_esaercni_teknirt = {
 		{}
 	},
+	__2t_tod_W3_gninrub = {
+		{}
+	},
 	__omorp_kcul_esaercni_teknirt = {
 		{}
 	},
+	__1reit_ycarucca_nopaew_degnar = {
+		{}
+	},
+	__tod_nosiop_eoa = {
+		{}
+	},
 	__2reit_eviver_retsaf_teknirt = {
+		{}
+	},
+	__1reit_eviver_retsaf_teknirt = {
+		{}
+	},
+	__omorp_eviver_retsaf_teknirt = {
+		{}
+	},
+	__1reit_batskcab_nopaew_eelem = {
 		{}
 	},
 	__1reit_tsaf_thgil_corp_laeh_nopaew_eelem = {
@@ -463,7 +494,7 @@ return {
 			0.4
 		}
 	},
-	__1reit_eviver_retsaf_teknirt = {
+	__1reit_aera_daerps_noitop_teknirt = {
 		{}
 	},
 	__1reit_wolb_gnillik_no_laeh_nopaew_eelem = {
@@ -477,7 +508,7 @@ return {
 		{},
 		{}
 	},
-	__omorp_eviver_retsaf_teknirt = {
+	__corp_morf_deeps_evom = {
 		{}
 	},
 	__1reit_tsissa_no_no_corp_dleihs_nopaew_eelem = {
@@ -495,7 +526,7 @@ return {
 			0.96
 		}
 	},
-	__1reit_batskcab_nopaew_eelem = {
+	__2reit_retsam_kcap_noitcetorp_teknirt = {
 		{}
 	},
 	__1reit_eugitaf_xam_nopaew_eelem = {
@@ -506,13 +537,13 @@ return {
 		{},
 		{}
 	},
-	__1reit_aera_daerps_noitop_teknirt = {
+	__tod_W1_gninrub = {
 		{}
 	},
 	__3reit_rennur_rettug_noitcetorp_teknirt = {
 		{}
 	},
-	__2reit_retsam_kcap_noitcetorp_teknirt = {
+	__3reit_rennug_gniltar_noitcetorp_teknirt = {
 		{}
 	},
 	__3reit_retsam_kcap_noitcetorp_teknirt = {
@@ -524,10 +555,10 @@ return {
 			1.6
 		}
 	},
-	__tod_W1_gninrub = {
+	__egadnab_noitpurretni_on_teknirt = {
 		{}
 	},
-	__3reit_rennug_gniltar_noitcetorp_teknirt = {
+	__1reit_deeps_daoler_nopaew_degnar = {
 		{}
 	},
 	__1reit_noitop_emusnoc_ton_teknirt = {
@@ -540,26 +571,24 @@ return {
 			0.32
 		}
 	},
-	__egadnab_noitpurretni_on_teknirt = {
-		{}
-	},
-	__1reit_deeps_daoler_nopaew_degnar = {
-		{}
-	},
-	__1reit_edanerg_emusnoc_ton_teknirt = {
-		{
-			1.2
-		}
-	},
 	__2reit_noitop_emusnoc_ton_teknirt = {
 		{
 			1.6
 		}
 	},
+	__corp_morf_omma_etinifni = {
+		{}
+	},
 	__1reit_kcapdem_emusnoc_ton_teknirt = {
 		{
 			0.8
 		}
+	},
+	__corp_morf_noitcuder_egamad = {
+		{}
+	},
+	__corp_morf_neger_eugitaf = {
+		{}
 	},
 	__1reit_egrahcsid_decuder_nopaew_degnar = {
 		{}
@@ -592,7 +621,7 @@ return {
 			1.92
 		}
 	},
-	__esaercni_hsup_nopaew_eelem = {
+	__stnemeveihca_edom_drah_egamad_desaercni_teknirt = {
 		{}
 	},
 	__1reit_corp_deeps_kcatta_nopaew_degnar = {

@@ -150,6 +150,9 @@ DialogueSettings.level_specific_load_files = {
 		"dialogues/generated/wood_elf_chamber",
 		"dialogues/generated/dwarf_ranger_chamber",
 		"dialogues/generated/grey_seer_chamber"
+	},
+	dlc_challenge_wizard = {
+		"dialogues/generated/dlc_challenge_wizard"
 	}
 }
 

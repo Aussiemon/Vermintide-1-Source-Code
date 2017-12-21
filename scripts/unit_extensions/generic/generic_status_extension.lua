@@ -225,6 +225,10 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 		local degen_delay = self.block_broken_degen_delay or PlayerUnitStatusSettings.FATIGUE_DEGEN_DELAY
 		degen_delay = degen_delay/self.buff_extension:apply_buffs_to_value(1, StatBuffIndex.FATIGUE_REGEN_FROM_PROC)
 
+		if self.buff_extension:has_buff_type("max_fatigue") then
+			degen_delay = degen_delay*0.5
+		end
+
 		if previous_max_fatigue_points ~= max_fatigue_points then
 			self.fatigue = (max_fatigue_points ~= 0 or 0) and previous_max_fatigue_points/max_fatigue_points*self.fatigue
 		end
@@ -447,6 +451,10 @@ GenericStatusExtension._get_current_max_fatigue_points = function (self)
 			end
 		end
 
+		if slot_name == "slot_healthkit" and self.buff_extension and self.buff_extension:has_buff_type("no_interruption_bandage") then
+			max_fatigue_points = max_fatigue_points + 6
+		end
+
 		return max_fatigue_points
 	end
 
@@ -483,7 +491,7 @@ GenericStatusExtension.blocked_attack = function (self, fatigue_type, attacking_
 			local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.NO_BLOCK_FATIGUE_COST)
 
 			if not procced then
-				self.add_fatigue_points(self, fatigue_type)
+				self.add_fatigue_points(self, fatigue_type, "block")
 			end
 
 			blocking_unit = equipment.right_hand_wielded_unit or equipment.left_hand_wielded_unit
@@ -586,12 +594,17 @@ GenericStatusExtension.fatigued = function (self)
 
 	return (max_fatigue_points == 0 and true) or max_fatigue - max_fatigue/max_fatigue_points < self.fatigue
 end
-GenericStatusExtension.add_fatigue_points = function (self, fatigue_type)
+GenericStatusExtension.add_fatigue_points = function (self, fatigue_type, action)
 	if Development.parameter("disable_fatigue_system") then
 		return 
 	end
 
 	local amount = PlayerUnitStatusSettings.fatigue_point_costs[fatigue_type]
+
+	if (action and action == "block" and self.buff_extension:has_buff_type("no_block_fatigue_cost")) or (action == "push" and self.buff_extension:has_buff_type("no_push_fatigue_cost")) then
+		amount = amount*0.5
+	end
+
 	local t = Managers.time:time("game")
 	local max_fatigue = PlayerUnitStatusSettings.MAX_FATIGUE
 	local max_fatigue_points = self.max_fatigue_points
@@ -636,12 +649,17 @@ GenericStatusExtension.get_dodge_item_data = function (self)
 	local inventory_extension = self.inventory_extension
 	local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
 	local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+	local buff_extension = self.buff_extension
 	local dodge_count = nil
 
 	if slot_data then
 		local item_data = slot_data.item_data
 		local item_template = BackendUtils.get_item_template(item_data)
 		dodge_count = item_template.dodge_count
+	end
+
+	if buff_extension and buff_extension.has_buff_type(buff_extension, "movement_speed") then
+		dodge_count = 100
 	end
 
 	self.dodge_count = dodge_count or 2
@@ -1565,6 +1583,11 @@ GenericStatusExtension.set_is_dodging = function (self, is_dodging)
 	if is_dodging then
 		self.dodge_position:store(Unit.world_position(self.unit, 0))
 	end
+
+	return 
+end
+GenericStatusExtension.reset_fatigue = function (self)
+	self.fatigue = 0
 
 	return 
 end

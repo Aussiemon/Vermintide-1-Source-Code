@@ -76,6 +76,7 @@ StatBuffs = {
 	"FASTER_REVIVE",
 	"INCREASE_LUCK",
 	"DAMAGE_TAKEN_KD",
+	"DAMAGE_TAKEN",
 	"CURSE_PROTECTION",
 	"GRENADE_RADIUS",
 	"FASTER_RESPAWN",
@@ -85,7 +86,10 @@ StatBuffs = {
 	"COOP_STAMINA",
 	"HEALING_KNOCKED_DOWN_PLAYER_BY_ASSIST",
 	"SHIELDING_PLAYER_BY_ASSIST",
-	"BACKSTAB_MULTIPLIER"
+	"BACKSTAB_MULTIPLIER",
+	"HAWKEYE",
+	"DAMAGE_REDUCTION_FROM_PROC",
+	"INFINITE_AMMO_FROM_PROC"
 }
 StatBuffIndex = {}
 
@@ -112,6 +116,8 @@ StatBuffApplicationMethods = {
 	[StatBuffIndex.ATTACK_SPEED] = "stacking_multiplier",
 	[StatBuffIndex.ATTACK_SPEED_FROM_PROC] = "exclusive_multiplier",
 	[StatBuffIndex.FATIGUE_REGEN_FROM_PROC] = "exclusive_multiplier",
+	[StatBuffIndex.DAMAGE_REDUCTION_FROM_PROC] = "exclusive_multiplier",
+	[StatBuffIndex.INFINITE_AMMO_FROM_PROC] = "exclusive_multiplier",
 	[StatBuffIndex.RELOAD_SPEED] = "stacking_multiplier",
 	[StatBuffIndex.CLIP_SIZE] = "stacking_multiplier",
 	[StatBuffIndex.TOTAL_AMMO] = "stacking_multiplier",
@@ -153,6 +159,7 @@ StatBuffApplicationMethods = {
 	[StatBuffIndex.FASTER_REVIVE] = "stacking_multiplier",
 	[StatBuffIndex.INCREASE_LUCK] = "stacking_multiplier",
 	[StatBuffIndex.DAMAGE_TAKEN_KD] = "stacking_multiplier",
+	[StatBuffIndex.DAMAGE_TAKEN] = "stacking_multiplier",
 	[StatBuffIndex.CURSE_PROTECTION] = "stacking_multiplier",
 	[StatBuffIndex.GRENADE_RADIUS] = "stacking_multiplier",
 	[StatBuffIndex.FASTER_RESPAWN] = "stacking_multiplier",
@@ -162,7 +169,8 @@ StatBuffApplicationMethods = {
 	[StatBuffIndex.COOP_STAMINA] = "proc",
 	[StatBuffIndex.HEALING_KNOCKED_DOWN_PLAYER_BY_ASSIST] = "proc",
 	[StatBuffIndex.SHIELDING_PLAYER_BY_ASSIST] = "proc",
-	[StatBuffIndex.BACKSTAB_MULTIPLIER] = "proc"
+	[StatBuffIndex.BACKSTAB_MULTIPLIER] = "proc",
+	[StatBuffIndex.HAWKEYE] = "stacking_bonus"
 }
 PotionSpreadTrinketTemplates = {
 	damage_boost_potion = {
@@ -1191,7 +1199,7 @@ BuffTemplates = {
 				name = "increase_incoming_damage",
 				reapply_buff_func = "reapply_increase_incoming_damage",
 				non_stacking = true,
-				duration = 2,
+				duration = 4,
 				apply_buff_func = "start_increase_incoming_damage"
 			}
 		}
@@ -1344,7 +1352,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heal_proc",
-				bonus = 5,
+				bonus = 10,
 				stat_buff = StatBuffIndex.HEAL_PROC,
 				proc_chance = {
 					0.03,
@@ -1365,7 +1373,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heal_proc",
-				bonus = 5,
+				bonus = 10,
 				stat_buff = StatBuffIndex.HEAL_PROC,
 				proc_chance = {
 					0.02,
@@ -1386,7 +1394,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heal_proc",
-				bonus = 5,
+				bonus = 10,
 				stat_buff = StatBuffIndex.HEAL_PROC,
 				proc_chance = {
 					0.05,
@@ -1407,7 +1415,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "attack_speed_on_kill",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.ATTACK_SPEED_ON_KILL,
@@ -1430,7 +1438,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "attack_speed_proc",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.ATTACK_SPEED_PROC,
@@ -1453,7 +1461,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "attack_speed_proc",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.ATTACK_SPEED_PROC,
@@ -1590,7 +1598,9 @@ BuffTemplates = {
 		icon = "trait_icon_hawkeye",
 		buffs = {
 			{
-				name = "increased_zoom"
+				name = "increased_zoom",
+				bonus = 2,
+				stat_buff = StatBuffIndex.HAWKEYE
 			}
 		}
 	},
@@ -1604,7 +1614,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.5,
 				name = "accuracy",
 				stat_buff = StatBuffIndex.ACCURACY
 			}
@@ -1622,7 +1632,7 @@ BuffTemplates = {
 			{
 				name = "ammo_proc",
 				bonus = 1,
-				stat_buff = StatBuffIndex.AMMO_PROC,
+				stat_buff = StatBuffIndex.AMMO_ON_KILL,
 				proc_chance = {
 					0.1,
 					0.24
@@ -1642,7 +1652,7 @@ BuffTemplates = {
 			{
 				name = "ammo_proc",
 				bonus = 1,
-				stat_buff = StatBuffIndex.AMMO_PROC,
+				stat_buff = StatBuffIndex.AMMO_ON_KILL,
 				proc_chance = {
 					0.1,
 					0.2
@@ -1771,7 +1781,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.2,
+				multiplier = -0.5,
 				name = "reduced_vent_damage",
 				stat_buff = StatBuffIndex.REDUCED_VENT_DAMAGE
 			}
@@ -1788,7 +1798,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "penetrating_shot_proc",
-				bonus = 1,
+				bonus = 2,
 				stat_buff = StatBuffIndex.PENETRATING_SHOT_PROC,
 				proc_chance = {
 					0.8,
@@ -1899,7 +1909,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.15,
+				multiplier = 0.25,
 				name = "attack_speed",
 				stat_buff = StatBuffIndex.ATTACK_SPEED
 			}
@@ -2004,7 +2014,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "light_heal_proc",
-				bonus = 5,
+				bonus = 10,
 				stat_buff = StatBuffIndex.LIGHT_HEAL_PROC,
 				proc_chance = {
 					0.01,
@@ -2025,7 +2035,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heavy_heal_proc",
-				bonus = 5,
+				bonus = 10,
 				stat_buff = StatBuffIndex.HEAVY_HEAL_PROC,
 				proc_chance = {
 					0.03,
@@ -2046,7 +2056,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heavy_heal_proc",
-				bonus = 5,
+				bonus = 10,
 				stat_buff = StatBuffIndex.HEAVY_HEAL_PROC,
 				proc_chance = {
 					0.01,
@@ -2067,7 +2077,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "attack_speed_on_kill",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.ATTACK_SPEED_ON_KILL,
@@ -2090,7 +2100,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "light_attack_speed_proc",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.LIGHT_ATTACK_SPEED_PROC,
@@ -2113,7 +2123,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "light_attack_speed_proc",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.LIGHT_ATTACK_SPEED_PROC,
@@ -2136,7 +2146,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "heavy_attack_speed_proc",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.HEAVY_ATTACK_SPEED_PROC,
@@ -2159,7 +2169,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.3,
+				multiplier = 0.4,
 				name = "heavy_attack_speed_proc",
 				proc = "attack_speed_from_proc",
 				stat_buff = StatBuffIndex.HEAVY_ATTACK_SPEED_PROC,
@@ -2338,7 +2348,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "light_overcharge_proc",
-				bonus = 4,
+				bonus = 5,
 				stat_buff = StatBuffIndex.LIGHT_OVERCHARGE_PROC,
 				proc_chance = {
 					0.1,
@@ -2359,7 +2369,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "heavy_overcharge_proc",
-				bonus = 4,
+				bonus = 5,
 				stat_buff = StatBuffIndex.HEAVY_OVERCHARGE_PROC,
 				proc_chance = {
 					0.1,
@@ -2469,12 +2479,47 @@ BuffTemplates = {
 			}
 		}
 	},
+	move_speed_from_proc = {
+		buffs = {
+			{
+				name = "movement",
+				multiplier = 2,
+				duration = 5,
+				non_stacking = true,
+				remove_buff_func = "remove_movement_buff",
+				apply_buff_func = "apply_movement_buff",
+				path_to_movement_setting_to_modify = {
+					"move_speed"
+				}
+			}
+		}
+	},
 	fatigue_regen_from_proc = {
 		buffs = {
 			{
 				duration = 5,
 				name = "fatigue_regen_from_proc",
 				stat_buff = StatBuffIndex.FATIGUE_REGEN_FROM_PROC
+			}
+		}
+	},
+	damage_reduction_from_proc = {
+		buffs = {
+			{
+				multiplier = -0.5,
+				name = "damage_reduction_from_proc",
+				duration = 5,
+				stat_buff = StatBuffIndex.DAMAGE_REDUCTION_FROM_PROC
+			}
+		}
+	},
+	infinite_ammo_from_proc = {
+		buffs = {
+			{
+				non_stacking = true,
+				name = "infinite_ammo_from_proc",
+				duration = 3,
+				stat_buff = StatBuffIndex.INFINITE_AMMO_FROM_PROC
 			}
 		}
 	},
@@ -2584,7 +2629,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.15,
+				proc_chance = 0.2,
 				name = "not_consume_grenade",
 				stat_buff = StatBuffIndex.NOT_CONSUME_GRENADE
 			}
@@ -2600,7 +2645,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.2,
+				proc_chance = 0.3,
 				name = "not_consume_grenade",
 				stat_buff = StatBuffIndex.NOT_CONSUME_GRENADE
 			}
@@ -2616,7 +2661,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.25,
+				proc_chance = 0.4,
 				name = "not_consume_grenade",
 				stat_buff = StatBuffIndex.NOT_CONSUME_GRENADE
 			}
@@ -2632,7 +2677,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.1,
+				multiplier = 0.4,
 				name = "heal_self_on_heal_other",
 				stat_buff = StatBuffIndex.HEAL_SELF_ON_HEAL_OTHER
 			}
@@ -2648,7 +2693,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.15,
+				multiplier = 0.6,
 				name = "heal_self_on_heal_other",
 				stat_buff = StatBuffIndex.HEAL_SELF_ON_HEAL_OTHER
 			}
@@ -2664,7 +2709,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = 0.2,
+				multiplier = 0.8,
 				name = "heal_self_on_heal_other",
 				stat_buff = StatBuffIndex.HEAL_SELF_ON_HEAL_OTHER
 			}
@@ -2702,7 +2747,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.2,
+				multiplier = -0.4,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -2718,7 +2763,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.6,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -2734,7 +2779,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.6,
+				multiplier = -0.8,
 				name = "protection_poison_wind",
 				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
 			}
@@ -2750,7 +2795,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.2,
+				multiplier = -0.4,
 				name = "protection_gutter_runner",
 				stat_buff = StatBuffIndex.PROTECTION_GUTTER_RUNNER
 			}
@@ -2766,7 +2811,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.6,
 				name = "protection_gutter_runner",
 				stat_buff = StatBuffIndex.PROTECTION_GUTTER_RUNNER
 			}
@@ -2782,7 +2827,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.6,
+				multiplier = -0.8,
 				name = "protection_gutter_runner",
 				stat_buff = StatBuffIndex.PROTECTION_GUTTER_RUNNER
 			}
@@ -2798,7 +2843,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.2,
+				multiplier = -0.4,
 				name = "protection_ratling_gunner",
 				stat_buff = StatBuffIndex.PROTECTION_RATLING_GUNNER
 			}
@@ -2814,7 +2859,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.6,
 				name = "protection_ratling_gunner",
 				stat_buff = StatBuffIndex.PROTECTION_RATLING_GUNNER
 			}
@@ -2830,7 +2875,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.6,
+				multiplier = -0.8,
 				name = "protection_ratling_gunner",
 				stat_buff = StatBuffIndex.PROTECTION_RATLING_GUNNER
 			}
@@ -2846,7 +2891,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.2,
+				multiplier = -0.4,
 				name = "protection_pack_master",
 				stat_buff = StatBuffIndex.PROTECTION_PACK_MASTER
 			}
@@ -2862,7 +2907,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.6,
 				name = "protection_pack_master",
 				stat_buff = StatBuffIndex.PROTECTION_PACK_MASTER
 			}
@@ -2878,7 +2923,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.6,
+				multiplier = -0.8,
 				name = "protection_pack_master",
 				stat_buff = StatBuffIndex.PROTECTION_PACK_MASTER
 			}
@@ -3121,7 +3166,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.2,
+				multiplier = -0.25,
 				name = "hp_increase_kd",
 				stat_buff = StatBuffIndex.DAMAGE_TAKEN_KD
 			}
@@ -3137,7 +3182,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.3,
+				multiplier = -0.5,
 				name = "hp_increase_kd",
 				stat_buff = StatBuffIndex.DAMAGE_TAKEN_KD
 			}
@@ -3153,7 +3198,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				multiplier = -0.4,
+				multiplier = -0.75,
 				name = "hp_increase_kd",
 				stat_buff = StatBuffIndex.DAMAGE_TAKEN_KD
 			}
@@ -3185,7 +3230,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.02,
+				proc_chance = 0.04,
 				name = "poison_attack",
 				stat_buff = StatBuffIndex.POISON_PROC
 			}
@@ -3201,7 +3246,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.04,
+				proc_chance = 0.08,
 				name = "poison_attack",
 				stat_buff = StatBuffIndex.POISON_PROC
 			}
@@ -3217,7 +3262,7 @@ BuffTemplates = {
 		},
 		buffs = {
 			{
-				proc_chance = 0.06,
+				proc_chance = 0.12,
 				name = "poison_attack",
 				stat_buff = StatBuffIndex.POISON_PROC
 			}
@@ -3234,7 +3279,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "movement_speed",
-				multiplier = 1.02,
+				multiplier = 1.04,
 				remove_buff_func = "remove_movement_buff",
 				apply_buff_func = "apply_movement_buff",
 				path_to_movement_setting_to_modify = {
@@ -3254,7 +3299,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "movement_speed",
-				multiplier = 1.04,
+				multiplier = 1.08,
 				remove_buff_func = "remove_movement_buff",
 				apply_buff_func = "apply_movement_buff",
 				path_to_movement_setting_to_modify = {
@@ -3274,7 +3319,7 @@ BuffTemplates = {
 		buffs = {
 			{
 				name = "movement_speed",
-				multiplier = 1.06,
+				multiplier = 1.12,
 				remove_buff_func = "remove_movement_buff",
 				apply_buff_func = "apply_movement_buff",
 				path_to_movement_setting_to_modify = {
@@ -3529,6 +3574,95 @@ BuffTemplates = {
 				name = "medpack_spread_area",
 				stat_buff = StatBuffIndex.MEDPACK_SPREAD_AREA,
 				distance = TrinketSpreadDistance
+			}
+		}
+	},
+	trinket_heal_on_kill_skulls = {
+		description = "trinket_heal_on_kill_skulls_description",
+		display_name = "trinket_heal_on_kill_skulls",
+		unique_id = "trinket_heal_on_kill",
+		icon = "trait_icon_bloodlust",
+		description_values = {
+			"proc_chance",
+			"bonus"
+		},
+		buffs = {
+			{
+				proc_chance = 0.13,
+				name = "heal_on_kill",
+				bonus = 3,
+				stat_buff = StatBuffIndex.HEAL_ON_KILL
+			}
+		}
+	},
+	trinket_faster_respawn_skulls = {
+		description = "trinket_faster_respawn_tier1_description",
+		display_name = "trinket_faster_respawn_tier1",
+		unique_id = "trinket_faster_respawn",
+		icon = "trinket_faster_respawn_tier3",
+		description_values = {
+			"multiplier"
+		},
+		buffs = {
+			{
+				multiplier = -0.75,
+				name = "faster_respawn",
+				stat_buff = StatBuffIndex.FASTER_RESPAWN
+			}
+		}
+	},
+	trinket_scavenger_skulls = {
+		description = "trinket_scavenger_skulls_description",
+		display_name = "trinket_scavenger_skulls",
+		unique_id = "trinket_scavenger",
+		icon = "trait_icon_trinket_scavenger_skulls",
+		description_values = {
+			"proc_chance",
+			"proc_chance"
+		},
+		buffs = {
+			{
+				proc_chance = 0.13,
+				name = "ammo_on_kill",
+				bonus = 1,
+				stat_buff = StatBuffIndex.AMMO_ON_KILL
+			},
+			{
+				multiplier = -0.13,
+				name = "reduced_overcharge",
+				stat_buff = StatBuffIndex.REDUCED_OVERCHARGE
+			}
+		}
+	},
+	trinket_protection_poison_wind_skulls = {
+		description = "trinket_protection_poison_wind_tier3_description",
+		display_name = "trinket_protection_poison_wind_tier3",
+		unique_id = "trinket_protection_poison_wind",
+		icon = "trinket_protection_poison_wind_tier3",
+		description_values = {
+			"multiplier"
+		},
+		buffs = {
+			{
+				multiplier = -0.5,
+				name = "protection_poison_wind",
+				stat_buff = StatBuffIndex.PROTECTION_POISON_WIND
+			}
+		}
+	},
+	trinket_increased_damage_hard_mode_achievements = {
+		description = "trinket_increased_damage_hard_mode_achievements_description",
+		display_name = "trinket_increased_damage_hard_mode_achievements",
+		unique_id = "trinket_increased_damage_taken",
+		icon = "trait_icon_trinket_increased_damage_hard_mode_achievements",
+		description_values = {
+			"multiplier"
+		},
+		buffs = {
+			{
+				multiplier = 1,
+				name = "damage_taken",
+				stat_buff = StatBuffIndex.DAMAGE_TAKEN
 			}
 		}
 	}

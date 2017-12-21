@@ -269,15 +269,16 @@ ChatGui._update_chat_messages = function (self)
 				show_new_messages = new_message.pop_chat
 			else
 				local player = Managers.player:player_from_peer_id(new_message.message_sender)
-				local ingame_display_name = nil
+				local ingame_display_name, sender = nil
 
 				if player then
 					local profile_index = self.profile_synchronizer:profile_by_peer(player.peer_id, player.local_player_id(player))
 					ingame_display_name = (SPProfiles[profile_index] and SPProfiles[profile_index].ingame_short_display_name) or nil
+					sender = player.name(player)
 				end
 
 				localized_display_name = ingame_display_name and Localize(ingame_display_name)
-				local sender = (rawget(_G, "Steam") and Steam.user_name(new_message.message_sender)) or tostring(new_message.message_sender)
+				local sender = sender or (rawget(_G, "Steam") and Steam.user_name(new_message.message_sender)) or tostring(new_message.message_sender)
 				local message = string.format("%s", tostring(new_message.message))
 				new_message_table.is_dev = new_message.is_dev
 				new_message_table.is_system = false

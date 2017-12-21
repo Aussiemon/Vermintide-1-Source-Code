@@ -87,6 +87,8 @@ SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 			self.create_cover_points(self, spawn_data.cover_points, self.level_analyzer.cover_points_broadphase)
 
 			self.spawn_zones_available = true
+		else
+			ferror("Cant get %s, make sure this is added to the \\resource_packages\\level_scripts.package file. Or have you forgotten to run generate_resource_packages.bat?", spawn_zone_path)
 		end
 	end
 

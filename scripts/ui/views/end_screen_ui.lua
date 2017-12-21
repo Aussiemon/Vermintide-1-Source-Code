@@ -169,7 +169,11 @@ local fake_mission_data = {
 	start_time = 0
 }
 EndScreenUI.show_text_screen = function (self, is_victory)
-	local game_mode_key = Managers.state.game_mode:game_mode_key()
+	local game_mode_manager = Managers.state.game_mode
+	local game_mode_key = game_mode_manager.game_mode_key(game_mode_manager)
+	local level_key = game_mode_manager.level_key(game_mode_manager)
+	local level_settings = LevelSettings[level_key]
+	local use_end_screen_overlay = level_settings.use_end_screen_overlay
 	local is_survival = game_mode_key == "survival"
 	local banner_texture = (is_survival and "end_screen_banner_survival") or (is_victory and "end_screen_banner_victory") or "end_screen_banner_defeat"
 	local banner_effect_color = (is_survival and {
@@ -188,10 +192,21 @@ EndScreenUI.show_text_screen = function (self, is_victory)
 		24,
 		23
 	}
+	local use_overlay = is_victory and use_end_screen_overlay
 	local widget = self.level_completed_widget
 	widget.content.banner_texture = banner_texture
 	widget.style.banner_effect_texture.color = banner_effect_color
 	widget.content.is_survival = is_survival
+	widget.content.use_overlay = use_overlay
+
+	if use_overlay then
+		widget.style.banner_effect_texture.color = {
+			255,
+			220,
+			24,
+			23
+		}
+	end
 
 	if is_survival then
 		local current_difficulty_settings = Managers.state.difficulty:get_difficulty_settings()

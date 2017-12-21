@@ -1447,7 +1447,7 @@ return function ()
 				"pbw_bar_brawl_drink_03",
 				"pbw_bar_brawl_drink_04",
 				"pbw_bar_brawl_challenge_03",
-				"pdr_bar_brawl_challenge_01"
+				"pbw_bar_brawl_challenge_01"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -1471,7 +1471,7 @@ return function ()
 				"pbw_bar_brawl_drink_03",
 				"pbw_bar_brawl_drink_04",
 				"pbw_bar_brawl_challenge_03",
-				"pdr_bar_brawl_challenge_01"
+				"pbw_bar_brawl_challenge_01"
 			},
 			randomize_indexes = {}
 		},
@@ -1491,7 +1491,7 @@ return function ()
 				"pes_bar_brawl_challenge_06",
 				"pes_bar_brawl_challenge_06",
 				"pes_bar_brawl_challenge_06",
-				"pbw_bar_brawl_challenge_02",
+				"pes_bar_brawl_challenge_02",
 				"pes_bar_brawl_challenge_03",
 				"pes_bar_brawl_taunt_01",
 				"pes_bar_brawl_taunt_02",
@@ -1539,7 +1539,7 @@ return function ()
 				"pes_bar_brawl_challenge_06",
 				"pes_bar_brawl_challenge_06",
 				"pes_bar_brawl_challenge_06",
-				"pbw_bar_brawl_challenge_02",
+				"pes_bar_brawl_challenge_02",
 				"pes_bar_brawl_challenge_03",
 				"pes_bar_brawl_taunt_01",
 				"pes_bar_brawl_taunt_02",
@@ -1996,7 +1996,7 @@ return function ()
 			sound_events = {
 				"pdr_bar_brawl_challenge_01",
 				"pdr_bar_brawl_challenge_06",
-				"pbw_bar_brawl_challenge_02",
+				"pdr_bar_brawl_challenge_02",
 				"pdr_bar_brawl_challenge_03",
 				"pdr_bar_brawl_taunt_01",
 				"pdr_bar_brawl_taunt_02",
@@ -2026,7 +2026,7 @@ return function ()
 			localization_strings = {
 				"pdr_bar_brawl_challenge_01",
 				"pdr_bar_brawl_challenge_06",
-				"pbw_bar_brawl_challenge_02",
+				"pdr_bar_brawl_challenge_02",
 				"pdr_bar_brawl_challenge_03",
 				"pdr_bar_brawl_taunt_01",
 				"pdr_bar_brawl_taunt_02",

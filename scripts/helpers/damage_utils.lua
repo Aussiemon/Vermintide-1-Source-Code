@@ -44,7 +44,7 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 	if not has_damage_boost and Unit.alive(attacker_unit) and Unit.alive(target_unit) and ScriptUnit.has_extension(target_unit, "buff_system") then
 		local buff_extension = ScriptUnit.extension(target_unit, "buff_system")
 
-		if buff_extension.has_buff_type(buff_extension, "increase_incoming_damage") then
+		if buff_extension and buff_extension.has_buff_type(buff_extension, "increase_incoming_damage") then
 			local buff = buff_extension.get_non_stacking_buff(buff_extension, "increase_incoming_damage")
 
 			if attacker_unit ~= buff.attacker_unit then
@@ -72,6 +72,13 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 		end
 	else
 		damage = damage_table[target_unit_armor]
+	end
+
+	local buff_extension = ScriptUnit.has_extension(attacker_unit, "buff_system")
+	local hawkeye = buff_extension and buff_extension.has_buff_type(buff_extension, "increased_zoom")
+
+	if hawkeye then
+		headshot_multiplier = headshot_multiplier and buff_extension.apply_buffs_to_value(buff_extension, headshot_multiplier, StatBuffIndex.HAWKEYE)
 	end
 
 	if (hit_zone_name == "head" or hit_zone_name == "neck") and headshot_multiplier ~= -1 then
@@ -288,6 +295,7 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 		end
 
 		local glance_radius = max_damage_radius
+		local grenade_friendly_fire = true
 
 		fassert(radius, "Explosion with attack template %q has no radius or radius_min&radius_max set", attack_template_damage_type_name or "")
 
@@ -295,6 +303,10 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 			local buff_extension = ScriptUnit.extension(attacker_unit, "buff_system")
 			radius = buff_extension.apply_buffs_to_value(buff_extension, radius, StatBuffIndex.GRENADE_RADIUS)
 			max_damage_radius = buff_extension.apply_buffs_to_value(buff_extension, max_damage_radius, StatBuffIndex.GRENADE_RADIUS)
+
+			if buff_extension and buff_extension.has_buff_type(buff_extension, "grenade_radius") then
+				grenade_friendly_fire = false
+			end
 		end
 
 		do_damage = explosion_template.damage or (explosion_template.damage_min and explosion_template.damage_max) or false
@@ -304,7 +316,7 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 		local attacker_player = Managers.player:owner(attacker_unit)
 		local attacker_is_player = attacker_player ~= nil
 
-		if (attacker_is_player and DamageUtils.allow_friendly_fire_ranged(difficulty_settings, attacker_player)) or explosion_template.always_hurt_players then
+		if (attacker_is_player and DamageUtils.allow_friendly_fire_ranged(difficulty_settings, attacker_player) and grenade_friendly_fire) or explosion_template.always_hurt_players then
 			collision_filter = "filter_explosion_overlap"
 		end
 
@@ -454,10 +466,15 @@ end
 DamageUtils.create_aoe = function (world, attacker_unit, position, damage_source, explosion_template)
 	local aoe_data = explosion_template.aoe
 	local radius = aoe_data.radius
+	local grenade_friendly_fire = true
 
 	if ScriptUnit.has_extension(attacker_unit, "buff_system") and (explosion_template.name == "fire_grenade" or explosion_template.name == "smoke_grenade") then
 		local buff_extension = ScriptUnit.extension(attacker_unit, "buff_system")
 		radius = buff_extension.apply_buffs_to_value(buff_extension, radius, StatBuffIndex.GRENADE_RADIUS)
+
+		if buff_extension and buff_extension.has_buff_type(buff_extension, "grenade_radius") then
+			grenade_friendly_fire = false
+		end
 	end
 
 	local attacker_player = Managers.player:owner(attacker_unit)
@@ -465,7 +482,7 @@ DamageUtils.create_aoe = function (world, attacker_unit, position, damage_source
 
 	if attacker_player ~= nil then
 		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
-		damage_players = DamageUtils.allow_friendly_fire_ranged(difficulty_settings, attacker_player)
+		damage_players = DamageUtils.allow_friendly_fire_ranged(difficulty_settings, attacker_player) and grenade_friendly_fire
 	end
 
 	local extension_init_data = {
@@ -808,6 +825,12 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 		buff_params.parent_id = parent_id
 
 		buff_extension.add_buff(buff_extension, "attack_speed_from_proc", buff_params)
+
+		if inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_ranged" and not buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
+			buff_extension.add_buff(buff_extension, "infinite_ammo_from_proc")
+		elseif inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_melee" then
+			buff_extension.add_buff(buff_extension, "move_speed_from_proc")
+		end
 	end
 
 	if attack_type ~= "heavy_attack" then
@@ -816,12 +839,15 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 	local fatigue_regen_multiplier, procced, parent_id = buff_extension.apply_buffs_to_value(buff_extension, 1, StatBuffIndex.FATIGUE_REGEN_PROC)
 
 	if procced then
+		local status_extension = ScriptUnit.has_extension(unit, "status_system")
+
 		table.clear(buff_params)
 
 		buff_params.external_optional_multiplier = fatigue_regen_multiplier - 1
 		buff_params.parent_id = parent_id
 
 		buff_extension.add_buff(buff_extension, "fatigue_regen_from_proc", buff_params)
+		status_extension.reset_fatigue(status_extension)
 	end
 
 	local amount, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.AMMO_PROC)
@@ -847,7 +873,10 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 		end
 
 		if ammo_extension then
-			ammo_extension.add_ammo_to_reserve(ammo_extension, amount)
+			local max_ammo = ammo_extension.max_ammo_count(ammo_extension)
+			local restore_amount = math.clamp(math.floor(max_ammo*0.1), 1, math.huge)
+
+			ammo_extension.add_ammo_to_reserve(ammo_extension, restore_amount)
 		end
 	end
 
@@ -947,6 +976,8 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 
 	if ScriptUnit.has_extension(attacked_unit, "buff_system") then
 		local buff_extension = ScriptUnit.extension(attacked_unit, "buff_system")
+		local status_extension = ScriptUnit.has_extension(attacked_unit, "status_system")
+		local is_packmaster_victim = status_extension and (status_extension.is_grabbed_by_pack_master(status_extension) or status_extension.is_hanging_from_hook(status_extension))
 
 		if damage_source == "skaven_poison_wind_globadier" then
 			damage = buff_extension.apply_buffs_to_value(buff_extension, damage, StatBuffIndex.PROTECTION_POISON_WIND)
@@ -960,8 +991,12 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 			damage = buff_extension.apply_buffs_to_value(buff_extension, damage, StatBuffIndex.PROTECTION_RATLING_GUNNER)
 		end
 
-		if damage_source == "skaven_pack_master" then
+		if is_packmaster_victim then
 			damage = buff_extension.apply_buffs_to_value(buff_extension, damage, StatBuffIndex.PROTECTION_PACK_MASTER)
+		end
+
+		if buff_extension and buff_extension.has_buff_type(buff_extension, "damage_reduction_from_proc") then
+			damage = buff_extension.apply_buffs_to_value(buff_extension, damage, StatBuffIndex.DAMAGE_REDUCTION_FROM_PROC)
 		end
 
 		if buff_extension.has_buff_type(buff_extension, "shared_health_pool") and not ignored_shared_damage_types[damage_source] then
@@ -991,7 +1026,7 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 			damage = 0
 		end
 
-		local status_extension = attacked_player and ScriptUnit.extension(attacked_unit, "status_system")
+		damage = buff_extension.apply_buffs_to_value(buff_extension, damage, StatBuffIndex.DAMAGE_TAKEN)
 		local is_knocked_down = status_extension and status_extension.is_knocked_down(status_extension)
 
 		if is_knocked_down then
@@ -1111,7 +1146,7 @@ DamageUtils.heal_network = function (healed_unit, healer_unit, heal_amount, heal
 	if healed_unit == healer_unit and (heal_type == "bandage" or heal_type == "healing_draught" or heal_type == "buff_shared_medpack") and ScriptUnit.has_extension(healer_unit, "buff_system") then
 		local buff_extension = ScriptUnit.extension(healer_unit, "buff_system")
 
-		if buff_extension.has_buff_type(buff_extension, "medpack_spread_area") then
+		if buff_extension and buff_extension.has_buff_type(buff_extension, "medpack_spread_area") then
 			local player_and_bot_units = PLAYER_AND_BOT_UNITS
 			local num_player_units = #player_and_bot_units
 

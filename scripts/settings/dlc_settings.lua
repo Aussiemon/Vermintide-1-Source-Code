@@ -251,6 +251,574 @@ DLCSettings = {
 			"dlc1_3_lb_vt_stromdorf_holtz_family_title",
 			"dlc1_3_lb_vt_stromdorf_krench_title"
 		}
+	},
+	dlc_challenge_wizard = {
+		unit_extension_templates = "scripts/network/unit_extension_templates_stromdorf",
+		product_label = "",
+		level_settings = "scripts/settings/level_settings_dlc_challenge_wizard",
+		package_name = "resource_packages/dlcs/challenge_wizard/challenge_wizard",
+		level_unlock_settings = "scripts/settings/level_unlock_settings_dlc_challenge_wizard",
+		unlock_settings = {
+			challenge_wizard = {
+				class = "AlwaysUnlocked"
+			}
+		},
+		weapons = {},
+		breeds = {
+			"scripts/settings/breeds/breed_skaven_storm_vermin_champion"
+		},
+		behaviour_trees_precompiled = {
+			"scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin_champion"
+		},
+		behaviour_tree_nodes = {
+			"scripts/entity_system/systems/behaviour/nodes/bt_spawn_allies_action"
+		},
+		behaviour_trees = {
+			"scripts/entity_system/systems/behaviour/bt_storm_vermin_champion"
+		},
+		terror_event_blueprints = {
+			snow_boss = {
+				{
+					"set_master_event_running",
+					name = "snow_boss"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "snow_boss",
+					breed_name = "skaven_rat_ogre"
+				},
+				{
+					"spawn_at_raw",
+					spawner_id = "snow_boss_02",
+					breed_name = "skaven_rat_ogre"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_rat_ogre") == 0
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "snow_boss_killed"
+				}
+			},
+			general_wizard = {
+				{
+					"set_master_event_running",
+					name = "general_wizard"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_wizard",
+					composition_type = "event_general_trickle_hub"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "general_wizard_loop"
+				}
+			},
+			general_forest = {
+				{
+					"set_master_event_running",
+					name = "general_forest"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_forest",
+					composition_type = "event_general_trickle"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "general_forest_loop"
+				}
+			},
+			general_town = {
+				{
+					"set_master_event_running",
+					name = "general_town"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_town",
+					composition_type = "event_general_trickle"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "general_town_loop"
+				}
+			},
+			general_snow = {
+				{
+					"set_master_event_running",
+					name = "general_snow"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_snow",
+					composition_type = "event_general_trickle"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "general_snow_loop"
+				}
+			},
+			general_escher = {
+				{
+					"set_master_event_running",
+					name = "general_escher"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_escher",
+					composition_type = "event_general_trickle"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "general_escher_loop"
+				}
+			},
+			general_final_showdown = {
+				{
+					"set_master_event_running",
+					name = "end"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_wizard",
+					composition_type = "event_general_trickle"
+				},
+				{
+					"delay",
+					duration = 5
+				},
+				{
+					"continue_when",
+					condition = function (t)
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 2
+					end
+				},
+				{
+					"flow_event",
+					flow_event_name = "general_final_showdown_loop"
+				}
+			},
+			town_open_chest = {
+				{
+					"set_master_event_running",
+					name = "town"
+				},
+				{
+					"delay",
+					duration = 3
+				},
+				{
+					"spawn",
+					2,
+					breed_name = "skaven_gutter_runner"
+				}
+			},
+			town_01 = {
+				{
+					"set_master_event_running",
+					name = "town"
+				},
+				{
+					"spawn",
+					2,
+					breed_name = "skaven_poison_wind_globadier"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_pack_master"
+				}
+			},
+			town_02 = {
+				{
+					"set_master_event_running",
+					name = "town"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_ratling_gunner"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_pack_master"
+				}
+			},
+			town_03 = {
+				{
+					"set_master_event_running",
+					name = "town"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_ratling_gunner"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_gutter_runner"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_pack_master"
+				}
+			},
+			town_grabbed_ingredient = {
+				{
+					"set_master_event_running",
+					name = "town"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_town_tear",
+					composition_type = "event_general_trickle"
+				}
+			},
+			snow_01 = {
+				{
+					"set_master_event_running",
+					name = "snow"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_ratling_gunner"
+				}
+			},
+			snow_02 = {
+				{
+					"set_master_event_running",
+					name = "snow"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				}
+			},
+			snow_03 = {
+				{
+					"set_master_event_running",
+					name = "snow"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_ratling_gunner"
+				}
+			},
+			snow_grabbed_ingredient = {
+				{
+					"set_master_event_running",
+					name = "snow"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_snow_tear",
+					composition_type = "event_general_trickle"
+				}
+			},
+			forest_01 = {
+				{
+					"set_master_event_running",
+					name = "forest"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				}
+			},
+			forest_02 = {
+				{
+					"set_master_event_running",
+					name = "forest"
+				},
+				{
+					"spawn",
+					2,
+					breed_name = "skaven_poison_wind_globadier"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_pack_master"
+				}
+			},
+			forest_03 = {
+				{
+					"set_master_event_running",
+					name = "forest"
+				},
+				{
+					"spawn",
+					5,
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_gutter_runner"
+				}
+			},
+			forest_grabbed_ingredient = {
+				{
+					"set_master_event_running",
+					name = "forest"
+				},
+				{
+					"event_horde",
+					spawner_id = "general_forest_tear",
+					composition_type = "event_general_trickle"
+				}
+			},
+			escher_special_01 = {
+				{
+					"set_master_event_running",
+					name = "escher"
+				},
+				{
+					"delay",
+					duration = 5
+				}
+			},
+			final_showdown = {
+				{
+					"set_master_event_running",
+					name = "end"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				},
+				{
+					"delay",
+					duration = 20
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_ratling_gunner"
+				},
+				{
+					"delay",
+					duration = 20
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_pack_master"
+				},
+				{
+					"delay",
+					duration = 20
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_ratling_gunner"
+				},
+				{
+					"delay",
+					duration = 20
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_gutter_runner"
+				},
+				{
+					"spawn",
+					5,
+					breed_name = "skaven_storm_vermin_commander"
+				},
+				{
+					"delay",
+					duration = 20
+				},
+				{
+					"spawn",
+					1,
+					breed_name = "skaven_poison_wind_globadier"
+				}
+			}
+		},
+		weighted_random_terror_events = {},
+		missions = {
+			dlc_challenge_wizard_hub_overall = {
+				mission_template_name = "goal",
+				text = "objective_foolhardy_wizard_hub_overall"
+			},
+			dlc_challenge_wizard_snow_collect_keys = {
+				text = "objective_foolhardy_snow_search_cargo_for_keys",
+				mission_template_name = "collect",
+				collect_amount = 3
+			},
+			dlc_challenge_wizard_forest_break_seals = {
+				text = "objective_foolhardy_forest_break_seals",
+				mission_template_name = "collect",
+				collect_amount = 3
+			},
+			dlc_challenge_wizard_town_ward_area = {
+				text = "objective_foolhardy_town_ward_area",
+				mission_template_name = "collect",
+				collect_amount = 3
+			},
+			dlc_challenge_wizard_end_challenge = {
+				mission_template_name = "goal",
+				text = "objective_foolhardy_wizard_end_challenge_2"
+			}
+		},
+		horde_settings_compositions = {
+			event_boss = {
+				{
+					name = "champion",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_champion",
+						1
+					}
+				}
+			},
+			event_boss_temp = {
+				{
+					name = "ogre",
+					weight = 1,
+					breeds = {
+						"skaven_rat_ogre",
+						1
+					}
+				}
+			},
+			event_general_trickle_hub = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							6,
+							10
+						},
+						"skaven_clan_rat",
+						{
+							8,
+							10
+						}
+					}
+				}
+			},
+			event_general_trickle = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							8,
+							12
+						},
+						"skaven_clan_rat",
+						{
+							10,
+							14
+						},
+						"skaven_storm_vermin_commander",
+						{
+							5,
+							6
+						}
+					}
+				}
+			}
+		},
+		lorebook_pages = {},
+		dialogue_lookup = {
+			"dialogues/generated/lookup_dlc_challenge_wizard"
+		},
+		dialogue_settings = {
+			dlc_challenge_wizard = {
+				"dialogues/generated/dlc_challenge_wizard"
+			}
+		}
 	}
 }
 

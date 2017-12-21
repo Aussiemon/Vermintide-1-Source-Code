@@ -1,4 +1,5 @@
 require("scripts/unit_extensions/generic/generic_health_extension")
+require("scripts/unit_extensions/generic/wizard_ward_health_extension")
 require("scripts/unit_extensions/generic/rat_ogre_health_extension")
 require("scripts/unit_extensions/default_player_unit/player_unit_health_extension")
 

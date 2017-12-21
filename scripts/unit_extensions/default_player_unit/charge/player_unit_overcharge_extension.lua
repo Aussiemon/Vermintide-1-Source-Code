@@ -141,14 +141,19 @@ OverChargeExtension.update = function (self, unit, input, dt, context, t)
 
 	if self.unit == self.right_unit then
 		if not self.is_exploding and self.venting_overcharge and 0 <= self.overcharge_value then
+			local buff_extension = self.buff_extension
 			local wielder = self.owner_unit
 			local vent_amount = self.overcharge_value*self.max_value/80*dt
+
+			if buff_extension and buff_extension.has_buff_type(buff_extension, "reduced_vent_damage") then
+				vent_amount = self.overcharge_value*self.max_value/80*1.25*dt
+			end
+
 			self.vent_damage_pool = self.vent_damage_pool + vent_amount*2
 			self.overcharge_value = self.overcharge_value - vent_amount
 
 			if 20 <= self.vent_damage_pool and not self.no_damage and self.overcharge_threshold < self.overcharge_value then
 				local damage_amount = self.overcharge_value/8 + 2
-				local buff_extension = self.buff_extension
 				damage_amount = buff_extension.apply_buffs_to_value(buff_extension, damage_amount, StatBuffIndex.REDUCED_VENT_DAMAGE)
 
 				DamageUtils.add_damage_network(wielder, wielder, damage_amount, "torso", "overcharge", Vector3(0, 1, 0), "overcharge")
@@ -319,6 +324,10 @@ OverChargeExtension.add_charge = function (self, overcharge_type, charge_level)
 	end
 
 	overcharge_amount = self.buff_extension:apply_buffs_to_value(overcharge_amount, StatBuffIndex.REDUCED_OVERCHARGE)
+
+	if buff_extension and buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
+		overcharge_amount = 0
+	end
 
 	if current_overcharge_value <= self.max_value*0.97 and self.max_value < current_overcharge_value + overcharge_amount then
 		OverChargeExtension:hud_sound(self.overcharge_warning_critical_sound_event or "staff_overcharge_warning_critical", self.first_person_extension)

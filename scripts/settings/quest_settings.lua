@@ -151,7 +151,8 @@ local new_contracts = {
 	avoid_deaths_team = true,
 	damage_taken_individual = true,
 	grenade_kills = false,
-	last_stand_waves_defeated = false
+	last_stand_waves_defeated = false,
+	find_event_items = false
 }
 local req_texts = QuestSettings.task_type_requirement_text
 local detailed_req_texts = QuestSettings.detailed_task_type_requirement_text
@@ -184,6 +185,7 @@ QuestTextSettings = {
 		avoid_deaths_team = 6,
 		damage_taken_individual = 6,
 		last_stand_waves_defeated = 2,
+		find_event_items = 1,
 		avoid_specials_damage_team = 6,
 		tome = 6,
 		ogre = 8,

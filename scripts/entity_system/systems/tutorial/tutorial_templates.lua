@@ -1587,6 +1587,10 @@ TutorialTemplates.objective_pickup = {
 			if unit ~= pickup_unit then
 				local disregard = false
 
+				if Unit.get_data(pickup_unit, "hide_marker") then
+					disregard = true
+				end
+
 				if ScriptUnit.has_extension(pickup_unit, "death_system") then
 					local death_extension = ScriptUnit.extension(pickup_unit, "death_system")
 
@@ -1651,8 +1655,9 @@ TutorialTemplates.objective_socket = {
 
 			for socket_unit, socket_extension in pairs(units) do
 				local sockets_enabled = unit_get_data(socket_unit, "sockets_enabled") ~= false
+				local not_hidden = unit_get_data(socket_unit, "hide_marker") ~= true
 
-				if sockets_enabled then
+				if sockets_enabled and not_hidden then
 					local distance_sq = Vector3.distance_squared(unit_position, POSITION_LOOKUP[socket_unit])
 
 					if socket_extension.num_closed_sockets < socket_extension.num_sockets and distance_sq < best_distance_sq then

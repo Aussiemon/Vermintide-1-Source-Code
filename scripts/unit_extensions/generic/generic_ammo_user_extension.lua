@@ -238,7 +238,14 @@ GenericAmmoUserExtension.add_ammo_to_reserve = function (self, amount)
 	return 
 end
 GenericAmmoUserExtension.use_ammo = function (self, ammo_used)
+	local buff_extension = self.owner_buff_extension
+	local use_ammo = true
+
 	if not self.destroy_when_out_of_ammo and script_data.infinite_ammo then
+		ammo_used = 0
+	end
+
+	if buff_extension and buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
 		ammo_used = 0
 	end
 
@@ -312,6 +319,9 @@ GenericAmmoUserExtension.full_ammo = function (self)
 end
 GenericAmmoUserExtension.using_single_clip = function (self)
 	return self.single_clip
+end
+GenericAmmoUserExtension.max_ammo_count = function (self)
+	return self.max_ammo
 end
 
 return 

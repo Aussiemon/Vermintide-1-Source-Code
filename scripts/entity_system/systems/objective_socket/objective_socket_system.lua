@@ -1,11 +1,13 @@
 require("scripts/unit_extensions/objective_socket/objective_socket_unit_extension")
+require("scripts/unit_extensions/objective_socket/objective_socket_check_visibility_unit_extension")
 
 ObjectiveSocketSystem = class(ObjectiveSocketSystem, ExtensionSystemBase)
 local RPCS = {
 	"rpc_objective_entered_socket_zone"
 }
 local extensions = {
-	"ObjectiveSocketUnitExtension"
+	"ObjectiveSocketUnitExtension",
+	"ObjectiveSocketCheckVisibilityUnitExtension"
 }
 ObjectiveSocketSystem.init = function (self, entity_system_creation_context, system_name)
 	ObjectiveSocketSystem.super.init(self, entity_system_creation_context, system_name, extensions)

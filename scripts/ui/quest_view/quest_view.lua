@@ -1382,7 +1382,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 			local difficulty_settings = DifficultySettings[difficulty_key]
 			local display_name = difficulty_settings.display_name
 			local rank = difficulty_settings.rank
-			style.difficulty_texture.draw_count = (not is_event_contract or 0) and rank
+			style.difficulty_texture.draw_count = (not is_event_contract or rank ~= 5 or 0) and rank
 			content.level_tooltip_text = content.level_tooltip_text .. "\n" .. Localize(display_name)
 		end
 

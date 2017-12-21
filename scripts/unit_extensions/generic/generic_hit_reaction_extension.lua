@@ -577,13 +577,13 @@ GenericHitReactionExtension._execute_effect = function (self, unit, effect_templ
 			WWISE_PARAMETERS[dialogue_extension.wwise_voice_switch_group] = dialogue_extension.wwise_voice_switch_value
 		end
 
-		Managers.state.entity:system("sound_environment_system"):set_source_environment(wwise_source_id, position)
+		Managers.state.entity:system("sound_environment_system"):set_source_environment(wwise_source_id, impact_position)
 
 		for param_name, param_value in pairs(WWISE_PARAMETERS) do
 			WwiseWorld.set_switch(wwise_world, wwise_source_id, param_name, param_value)
 		end
 
-		map_function(effect_template.sound_event, play_sound, wwise_world, wwise_source_id, position, parameters.is_husk)
+		map_function(effect_template.sound_event, play_sound, wwise_world, wwise_source_id, impact_position, parameters.is_husk)
 	end
 
 	if parameters.death and self.death_extension and not self.death_extension:has_death_started() then

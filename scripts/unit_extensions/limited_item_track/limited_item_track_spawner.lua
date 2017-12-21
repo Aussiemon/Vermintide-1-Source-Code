@@ -46,6 +46,7 @@ LimitedItemTrackSpawner.spawn_item = function (self)
 	self.items[id] = unit
 	self.num_items = self.num_items + 1
 
+	Unit.set_flow_variable(self_unit, "lua_spawned_item_unit", unit)
 	Unit.flow_event(self_unit, "lua_spawner_spawn_item")
 
 	return 

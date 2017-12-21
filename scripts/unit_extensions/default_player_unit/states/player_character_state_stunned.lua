@@ -12,13 +12,18 @@ PlayerCharacterStateStunned.on_enter = function (self, unit, input, dt, context,
 	CharacterStateHelper.play_animation_event(unit, params.third_person_anim_name)
 
 	local animation_driven = params.animation_driven
+	local buff_extension = ScriptUnit.extension(unit, "buff_system")
 	self.animation_driven = animation_driven
 
 	if animation_driven then
 		self.locomotion_extension:enable_animation_driven_movement()
 	end
 
-	self.end_time = t + params.duration
+	if buff_extension and buff_extension.has_buff_type(buff_extension, "full_fatigue_on_block_broken") then
+		self.end_time = t + params.duration*0.5
+	else
+		self.end_time = t + params.duration
+	end
 
 	return 
 end

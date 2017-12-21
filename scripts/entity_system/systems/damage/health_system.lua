@@ -1,4 +1,5 @@
 require("scripts/unit_extensions/generic/generic_health_extension")
+require("scripts/unit_extensions/generic/wizard_ward_health_extension")
 require("scripts/unit_extensions/generic/invincible_health_extension")
 require("scripts/unit_extensions/generic/rat_ogre_health_extension")
 require("scripts/unit_extensions/default_player_unit/player_unit_health_extension")
@@ -12,7 +13,8 @@ local extensions = {
 	"PlayerUnitHealthExtension",
 	"GenericHealthExtension",
 	"InvincibleHealthExtension",
-	"RatOgreHealthExtension"
+	"RatOgreHealthExtension",
+	"WizardWardHealthExtension"
 }
 HealthSystem.init = function (self, entity_system_creation_context, system_name)
 	HealthSystem.super.init(self, entity_system_creation_context, system_name, extensions)
@@ -36,7 +38,7 @@ HealthSystem.on_add_extension = function (self, world, unit, extension_name, ext
 	local extension = ScriptUnit.add_extension(self.extension_init_context, unit, extension_name, self.NAME, extension_init_data)
 	self.unit_extensions[unit] = extension
 
-	if extension_name == "PlayerUnitHealthExtension" or extension_name == "RatOgreHealthExtension" then
+	if extension_name == "PlayerUnitHealthExtension" or extension_name == "RatOgreHealthExtension" or extension_name == "WizardWardHealthExtension" then
 		self.updateable_unit_extensions[unit] = extension
 	end
 
@@ -176,7 +178,7 @@ end
 HealthSystem.rpc_sync_damage_taken = function (self, sender, go_id, is_level_unit, damage_amount, state_id)
 	local unit = Managers.state.network:game_object_or_level_unit(go_id, is_level_unit)
 
-	if not Unit.alive(unit) then
+	if not Unit.alive(unit) or not ScriptUnit.has_extension(unit, "health_system") then
 		return 
 	end
 

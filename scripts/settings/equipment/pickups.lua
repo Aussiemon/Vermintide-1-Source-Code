@@ -327,6 +327,20 @@ Pickups.special = {
 			return dice_keeper.num_bonus_dice_spawned(dice_keeper) < 2
 		end
 	},
+	event_item = {
+		only_once = true,
+		unit_name = "units/weapons/player/pup_event_item/pup_event_item_01",
+		pickup_sound_event = "hud_pickup_loot_die",
+		type = "event_item",
+		spawn_weighting = 1,
+		local_pickup_sound = false,
+		hud_description = "pickup_event_item",
+		can_spawn_func = function (params, is_debug_spawn)
+			local can_spawn_event_items = Managers.state.quest:is_mutator_active("event_items")
+
+			return can_spawn_event_items
+		end
+	},
 	endurance_badge_01 = {
 		only_once = true,
 		mission_name = "endurance_badge_01_mission",

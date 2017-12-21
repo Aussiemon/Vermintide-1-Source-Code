@@ -12,14 +12,20 @@ PlayerCharacterStateDead.on_enter = function (self, unit, input, dt, context, t,
 	CharacterStateHelper.play_animation_event(self.unit, "death")
 	self.locomotion_extension:set_wanted_velocity(Vector3.zero())
 
+	local inventory_extension = self.inventory_extension
+	local is_inventory_hidden = not inventory_extension.is_showing_first_person_inventory(inventory_extension) and not inventory_extension.is_showing_third_person_inventory(inventory_extension)
 	local first_person_extension = self.first_person_extension
 
 	first_person_extension.set_wanted_player_height(first_person_extension, "knocked_down", t)
 	first_person_extension.set_first_person_mode(first_person_extension, false)
+
+	if is_inventory_hidden then
+		local include_local_player = true
+
+		CharacterStateHelper.show_inventory_3p(unit, false, include_local_player, self.is_server, inventory_extension)
+	end
+
 	CharacterStateHelper.change_camera_state(self.player, "follow_third_person")
-
-	local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-
 	inventory_extension.check_and_drop_pickups(inventory_extension, "death")
 
 	return 

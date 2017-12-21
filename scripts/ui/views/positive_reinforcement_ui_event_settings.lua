@@ -118,6 +118,23 @@ return {
 			return nil
 		end
 	},
+	picked_up_event_item = {
+		text_function = function (amount, player_name)
+			if 1 < amount then
+				return string.format(Localize("positive_reinforcement_player_picked_up_event_item_multiple"), player_name, amount)
+			else
+				return string.format(Localize("positive_reinforcement_player_picked_up_event_item"), player_name)
+			end
+
+			return 
+		end,
+		sound_function = function ()
+			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
+		end,
+		icon_function = function ()
+			return nil
+		end
+	},
 	picked_up_grimoire = {
 		text_function = function (amount, player_name)
 			return string.format(Localize("positive_reinforcement_player_picked_up_grimoire"), player_name)

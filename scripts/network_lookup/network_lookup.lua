@@ -243,10 +243,15 @@ table.append(damage_sources, breeds)
 NetworkLookup.damage_sources = damage_sources
 NetworkLookup.husks = {
 	"units/beings/player/witch_hunter/third_person_base/chr_third_person_husk_base",
+	"units/beings/player/witch_hunter/third_person_base/chr_third_person_variation_1_husk_base",
 	"units/beings/player/bright_wizard/third_person_base/chr_third_person_husk_base",
+	"units/beings/player/bright_wizard/third_person_base/chr_third_person_variation_1_husk_base",
 	"units/beings/player/dwarf_ranger/third_person_base/chr_third_person_husk_base",
+	"units/beings/player/dwarf_ranger/third_person_base/chr_third_person_variation_1_husk_base",
 	"units/beings/player/way_watcher/third_person_base/chr_third_person_husk_base",
+	"units/beings/player/way_watcher/third_person_base/chr_third_person_variation_1_husk_base",
 	"units/beings/player/empire_soldier/third_person_base/chr_third_person_husk_base",
+	"units/beings/player/empire_soldier/third_person_base/chr_third_person_variation_1_husk_base",
 	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat",
 	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var1",
 	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var2",
@@ -328,7 +333,8 @@ NetworkLookup.husks = {
 	"units/props/endurance_badges/prop_endurance_badge_04",
 	"units/props/endurance_badges/prop_endurance_badge_05",
 	"units/weapons/player/pup_wooden_sword_01/pup_wooden_sword_01",
-	"units/weapons/player/pup_wooden_sword_02/pup_wooden_sword_02"
+	"units/weapons/player/pup_wooden_sword_02/pup_wooden_sword_02",
+	"units/weapons/player/pup_event_item/pup_event_item_01"
 }
 NetworkLookup.go_types = {
 	"player",
@@ -580,9 +586,6 @@ NetworkLookup.anims = {
 	"attack_slam_2",
 	"attack_slam_3",
 	"attack_slam_4",
-	"attack_slam_back",
-	"attack_slam_left",
-	"attack_slam_right",
 	"attack_charge_special",
 	"attack_charge_shatter",
 	"attack_shove_left",

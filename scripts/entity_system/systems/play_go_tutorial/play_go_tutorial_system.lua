@@ -312,18 +312,22 @@ PlayGoTutorialSystem._load_profile_packages = function (self)
 			end
 		end
 
-		local base_units = profile.base_units
+		local profile_name = profile.display_name
+		local skin_settings = Managers.unlock:get_skin_settings(profile_name)
+		local units = skin_settings.units
+		local third_person_units = units.third_person
 
 		if is_first_person[profile_index] then
-			profile_packages[base_units.first_person] = true
-			profile_packages[base_units.first_person_bot] = true
-			profile_packages[base_units.third_person] = true
-			profile_packages[base_units.third_person_bot] = true
+			local first_person_units = units.first_person
+			profile_packages[first_person_units.first_person] = true
+			profile_packages[first_person_units.first_person_bot] = true
+			profile_packages[third_person_units.third_person] = true
+			profile_packages[third_person_units.third_person_bot] = true
 		else
-			profile_packages[base_units.third_person_husk] = true
+			profile_packages[third_person_units.third_person_husk] = true
 		end
 
-		local first_person_attachment = profile.first_person_attachment
+		local first_person_attachment = skin_settings.first_person_attachment
 
 		if is_first_person[profile_index] then
 			profile_packages[first_person_attachment.unit] = true

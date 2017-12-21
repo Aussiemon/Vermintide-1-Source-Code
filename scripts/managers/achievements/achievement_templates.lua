@@ -49,6 +49,31 @@ local function check_unlock(unlock_name)
 	return false
 end
 
+local function get_hard_mode_completed_mission_data(mission_name, difficulty)
+	if not Managers.state.entity then
+		return 
+	end
+
+	if not Managers.state.game_mode:game_won() then
+		return 
+	end
+
+	local difficulty_rank = DifficultySettings[difficulty].rank
+
+	if Managers.state.difficulty:get_difficulty_rank() < difficulty_rank then
+		return 
+	end
+
+	local mission_system = Managers.state.entity:system("mission_system")
+	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+
+	if not completed_missions then
+		return 
+	end
+
+	return completed_missions[mission_name]
+end
+
 AchievementTemplates = {
 	complete_the_horn_of_magnus = {
 		ID_XB1 = "Prologue",
@@ -368,20 +393,24 @@ AchievementTemplates = {
 			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
 				local slots = InventorySettings.slots
 
-				for idx, profile in pairs(SPProfiles) do
-					local non_exotic = false
+				for _, profile in pairs(SPProfiles) do
+					local display_name = profile.display_name
+					local all_exotic = true
 
 					for _, slot in pairs(slots) do
-						local slot_name = slot.name
-						local item_data = BackendUtils.get_loadout_item(profile.display_name, slot_name)
-						non_exotic = non_exotic or (item_data and item_data.rarity ~= "exotic")
+						if slot.loadout_slot then
+							local slot_name = slot.name
+							local item_data = BackendUtils.get_loadout_item(display_name, slot_name)
 
-						if non_exotic then
-							break
+							if not item_data or item_data.rarity ~= "exotic" then
+								all_exotic = false
+
+								break
+							end
 						end
 					end
 
-					if not non_exotic then
+					if all_exotic then
 						return true
 					end
 				end
@@ -696,6 +725,239 @@ AchievementTemplates = {
 	complete_drachenfels_castle_dungeon = {
 		evaluate = function (statistics_db, stats_id)
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle_dungeon")
+		end
+	},
+	complete_challenge_wizard_hard = {
+		evaluate = function (statistics_db, stats_id)
+			return 3 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
+		end
+	},
+	complete_challenge_wizard_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			return 4 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
+		end
+	},
+	complete_challenge_wizard_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			return 5 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
+		end
+	},
+	magnus_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("magnus_speed_run", "harder")
+
+			return mission_data and mission_data.end_time <= 180
+		end
+	},
+	supply_and_demand_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("merchant_no_healing", "harder")
+
+			return mission_data and mission_data.generic_counter == 0
+		end
+	},
+	city_wall_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("city_wall_timed", "harder")
+
+			return mission_data and mission_data.end_time <= 5
+		end
+	},
+	engines_of_war_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("engines_of_war_timed", "harder")
+
+			return mission_data and mission_data.end_time <= 5
+		end
+	},
+	white_rat_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("white_rat_kill_stormvermin", "harder")
+
+			return mission_data and 13 <= mission_data.generic_counter
+		end
+	},
+	well_watch_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("well_watch_keep_wells_alive", "harder")
+
+			return mission_data and mission_data.generic_counter == 0
+		end
+	},
+	waterfront_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("waterfront_speed_run", "harder")
+
+			return mission_data and mission_data.end_time <= 45
+		end
+	},
+	garden_of_morr_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("cemetery_tome_and_grim_bury", "harder")
+
+			return mission_data and mission_data.generic_counter == 5
+		end
+	},
+	enemy_below_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("enemy_below_kill_gutter_runners", "harder")
+
+			return mission_data and 20 <= mission_data.generic_counter
+		end
+	},
+	black_powder_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("black_powder_dont_kill_rat_ogre", "harder")
+
+			return mission_data and mission_data.generic_counter == 0
+		end
+	},
+	wheat_and_chaff_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("farm_dont_drop_sacks", "harder")
+
+			return mission_data and mission_data.generic_counter <= 6
+		end
+	},
+	smugglers_run_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("smugglers_bring_barrels", "harder")
+
+			return mission_data and mission_data.generic_counter == 4
+		end
+	},
+	wizards_tower_hard_mode_nightmare = {
+		evaluate = function (statistics_db, stats_id)
+			if not Managers.state.entity then
+				return 
+			end
+
+			local difficulty = "harder"
+			local difficulty_rank = DifficultySettings[difficulty].rank
+
+			if Managers.state.difficulty:get_difficulty_rank() < difficulty_rank then
+				return 
+			end
+
+			local mission_system = Managers.state.entity:system("mission_system")
+			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+
+			if not active_missions then
+				return 
+			end
+
+			local mission = active_missions.wizards_tower_protect_wards
+
+			return mission and 0 < mission.generic_counter
+		end
+	},
+	magnus_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("magnus_speed_run", "hardest")
+
+			return mission_data and mission_data.end_time <= 180
+		end
+	},
+	supply_and_demand_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("merchant_no_healing", "hardest")
+
+			return mission_data and mission_data.generic_counter == 0
+		end
+	},
+	city_wall_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("city_wall_timed", "hardest")
+
+			return mission_data and mission_data.end_time <= 5
+		end
+	},
+	engines_of_war_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("engines_of_war_timed", "hardest")
+
+			return mission_data and mission_data.end_time <= 5
+		end
+	},
+	white_rat_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("white_rat_kill_stormvermin", "hardest")
+
+			return mission_data and 13 <= mission_data.generic_counter
+		end
+	},
+	well_watch_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("well_watch_keep_wells_alive", "hardest")
+
+			return mission_data and mission_data.generic_counter == 0
+		end
+	},
+	waterfront_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("waterfront_speed_run", "hardest")
+
+			return mission_data and mission_data.end_time <= 45
+		end
+	},
+	garden_of_morr_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("cemetery_tome_and_grim_bury", "hardest")
+
+			return mission_data and mission_data.generic_counter == 5
+		end
+	},
+	enemy_below_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("enemy_below_kill_gutter_runners", "hardest")
+
+			return mission_data and 20 <= mission_data.generic_counter
+		end
+	},
+	black_powder_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("black_powder_dont_kill_rat_ogre", "hardest")
+
+			return mission_data and mission_data.generic_counter == 0
+		end
+	},
+	wheat_and_chaff_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("farm_dont_drop_sacks", "hardest")
+
+			return mission_data and mission_data.generic_counter <= 6
+		end
+	},
+	smugglers_run_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			local mission_data = get_hard_mode_completed_mission_data("smugglers_bring_barrels", "hardest")
+
+			return mission_data and mission_data.generic_counter == 4
+		end
+	},
+	wizards_tower_hard_mode_cataclysm = {
+		evaluate = function (statistics_db, stats_id)
+			if not Managers.state.entity then
+				return 
+			end
+
+			local difficulty = "hardest"
+			local difficulty_rank = DifficultySettings[difficulty].rank
+
+			if Managers.state.difficulty:get_difficulty_rank() < difficulty_rank then
+				return 
+			end
+
+			local mission_system = Managers.state.entity:system("mission_system")
+			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+
+			if not active_missions then
+				return 
+			end
+
+			local mission = active_missions.wizards_tower_protect_wards
+
+			return mission and 0 < mission.generic_counter
 		end
 	}
 }

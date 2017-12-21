@@ -289,7 +289,9 @@ ProfileWorldView.on_enter = function (self, viewport_widget, input_service, char
 				if Unit.get_data(level_unit, display_name) == true then
 					local pos = Unit.local_position(level_unit, 0)
 					local rot = Unit.local_rotation(level_unit, 0)
-					local unit_name = profile.base_units.third_person
+					local skin_settings = Managers.unlock:get_skin_settings(display_name)
+					local units = skin_settings.units
+					local unit_name = units.third_person.third_person
 					local spawned_unit = World.spawn_unit(world, unit_name, pos, rot)
 
 					if Unit.has_lod_object(spawned_unit, "lod") then

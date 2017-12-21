@@ -2603,6 +2603,78 @@ function flow_callback_get_grey_seer_unit(params)
 	return flow_return_table
 end
 
+function flow_callback_teleporter(params)
+	local teleporter_unit = params.unit
+	local unit = params.touching_unit
+	local exit_node = params.exit_node
+	local exit_node_index = Unit.node(teleporter_unit, exit_node)
+	local exit_position = Unit.world_position(teleporter_unit, exit_node_index)
+	local exit_rotation = Unit.world_rotation(teleporter_unit, exit_node_index)
+	local eul_x, eul_y, eul_z = Quaternion.to_euler_angles_xyz(exit_rotation)
+	local wanted_exit_rotation = Quaternion.from_euler_angles_xyz(eul_x, eul_y, eul_z + 90)
+
+	if exit_node_index == 1 then
+		wanted_exit_rotation = Quaternion.from_euler_angles_xyz(eul_x, eul_y, eul_z - 90)
+	end
+
+	local unit_entry_position = Unit.world_position(unit, 0)
+	local network_manager = Managers.state.network
+
+	if Unit.alive(unit) then
+		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+		local peer_id = Network.peer_id()
+		local local_player = Managers.player:local_player()
+		local player_unit = local_player.player_unit
+
+		if unit == player_unit then
+			if ScriptUnit.has_extension(unit, "locomotion_system") then
+				local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+
+				locomotion.teleport_to(locomotion, exit_position, wanted_exit_rotation)
+			end
+
+			flow_return_table.player_ported = true
+		end
+
+		if ScriptUnit.has_extension(unit, "projectile_system") then
+		end
+
+		local bot = Unit.get_data(unit, "bot")
+
+		if bot then
+			local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+
+			navigation_extension.teleport(navigation_extension, exit_position)
+		end
+
+		if DamageUtils.is_enemy(unit) and ScriptUnit.has_extension(unit, "ai_navigation_system") then
+			local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+
+			navigation_extension.set_navbot_position(navigation_extension, exit_position)
+		end
+
+		if not ScriptUnit.has_extension(unit, "projectile_system") and not ScriptUnit.has_extension(unit, "locomotion_system") and not DamageUtils.is_enemy(unit) then
+			local num_actors = Unit.num_actors(unit)
+
+			print(num_actors)
+
+			for i = 2, num_actors, 1 do
+				print(Unit.actor(unit, i))
+
+				local actor = Unit.actor(unit, i)
+
+				if actor ~= nil then
+					Actor.teleport_position(actor, Vector3(exit_position.x, exit_position.y, unit_entry_position.z))
+				end
+			end
+		end
+
+		return flow_return_table
+	end
+
+	return 
+end
+
 function flow_callback_register_level_effects_volume(params)
 	local volume_name = params.volume_name
 	local prio = params.prio
@@ -2694,6 +2766,48 @@ function flow_callback_enforce_player_positions(params)
 	end
 
 	return 
+end
+
+function flow_callback_start_level(params)
+	if Managers.player.is_server then
+		local level_name = params.level_name
+
+		fassert(level_name, "[flow_callback_start_level] No level provided")
+		Managers.state.game_mode:start_specific_level(level_name)
+	end
+
+	return 
+end
+
+function flow_callback_set_savedata_boolean(params)
+	local variable_name = params.variable_name
+	local variable_value = params.variable_value
+	local instant_save = params.instant_save
+	local flow_level_data = PlayerData.flow_level_data or {}
+	flow_level_data[variable_name] = variable_value
+	PlayerData.flow_level_data = flow_level_data
+
+	if instant_save then
+		Managers.save:auto_save(SaveFileName, SaveData, nil)
+	end
+
+	return 
+end
+
+function flow_callback_get_savedata_boolean(params)
+	local flow_level_data = PlayerData.flow_level_data or {}
+	local variable_name = params.variable_name
+	local variable_value = flow_level_data[variable_name] or false
+
+	if variable_value then
+		flow_return_table.is_true = true
+		flow_return_table.is_false = false
+	else
+		flow_return_table.is_true = false
+		flow_return_table.is_false = true
+	end
+
+	return flow_return_table
 end
 
 return 

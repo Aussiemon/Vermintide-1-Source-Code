@@ -157,12 +157,46 @@ PlayerUnitHealthExtension.die = function (self, damage_type)
 		end
 	end
 
+	if self.is_server and damage_type == "volume_insta_kill" then
+		self._update_missions(self)
+	end
+
 	if self.is_server then
 		self.state = "dead"
 
 		StatusUtils.set_dead_network(unit, true)
 		SurroundingAwareSystem.add_event(unit, "player_death", DialogueSettings.death_discover_distance, "target", unit, "target_name", ScriptUnit.extension(unit, "dialogue_system").context.player_profile)
 	end
+
+	return 
+end
+PlayerUnitHealthExtension._update_missions = function (self)
+	local unit = self.unit
+	local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
+	local equipment = inventory_extension.equipment(inventory_extension)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local has_grimoire, has_tome = nil
+	local slot_potion_data = equipment.slots.slot_potion
+
+	if slot_potion_data and slot_potion_data.item_data.name == "wpn_grimoire_01" then
+		has_grimoire = true
+	end
+
+	local slot_healthkit_data = equipment.slots.slot_healthkit
+
+	if slot_healthkit_data and slot_healthkit_data.item_data.name == "wpn_side_objective_tome_01" then
+		has_tome = true
+	end
+
+	if has_grimoire then
+		mission_system.increment_goal_mission_counter(mission_system, "cemetery_tome_and_grim_bury", 1, true)
+	end
+
+	if has_tome then
+		mission_system.increment_goal_mission_counter(mission_system, "cemetery_tome_and_grim_bury", 1, true)
+	end
+
+	print("yay", has_grimoire, has_tome)
 
 	return 
 end

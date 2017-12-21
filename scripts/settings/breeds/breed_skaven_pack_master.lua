@@ -178,7 +178,8 @@ local breed_data = {
 		200,
 		200,
 		0
-	}
+	},
+	run_on_death = AiBreedSnippets.spawn_event_item_special
 }
 Breeds.skaven_pack_master = table.create_copy(Breeds.skaven_pack_master, breed_data)
 local action_data = {

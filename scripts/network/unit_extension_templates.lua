@@ -886,14 +886,22 @@ local unit_templates = {
 		go_type = "base_level_unit"
 	}
 }
+local LOADED_UNIT_TEMPLATES = LOADED_UNIT_TEMPLATES or {}
 
-for _, dlc in pairs(DLCSettings) do
-	local templates = dofile(dlc.unit_extension_templates)
+for name, dlc in pairs(DLCSettings) do
+	local unit_extension_templates_name = dlc.unit_extension_templates
 
-	for k, v in pairs(templates) do
-		fassert(not unit_templates[k], "Unit template %s from dlc %s already exists.", k, dlc.name)
+	if unit_extension_templates_name and not LOADED_UNIT_TEMPLATES[unit_extension_templates_name] then
+		LOADED_UNIT_TEMPLATES[unit_extension_templates_name] = name
+		local templates = dofile(unit_extension_templates_name)
 
-		unit_templates[k] = v
+		for k, v in pairs(templates) do
+			fassert(not unit_templates[k], "Unit template %s from dlc %s already exists.", k, name)
+
+			unit_templates[k] = v
+		end
+	elseif unit_extension_templates_name then
+		Application.warning(string.format("[UnitExtensionTemplates] %q was already loaded from the DLC %q", unit_extension_templates_name, LOADED_UNIT_TEMPLATES[unit_extension_templates_name]))
 	end
 end
 

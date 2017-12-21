@@ -1,5 +1,6 @@
 require("scripts/entity_system/systems/behaviour/utility/utility_considerations")
 
+UtilityConsiderationsDupeCheck = {}
 Utility = Utility or {}
 Utility.GetUtilityValueFromSpline = function (spline, norm_value)
 	for i = 3, #spline, 2 do

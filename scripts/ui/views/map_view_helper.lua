@@ -42,6 +42,7 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 	local dlc_name = level_settings.dlc_name
 	local is_dlc_level = dlc_name ~= nil
 	local is_dlc_unlocked = is_dlc_level and Managers.unlock:is_dlc_unlocked(dlc_name)
+	local dlc_stat_dependency_func = level_settings.dlc_stat_dependency_func
 	local required_act_completed = level_settings.required_act_completed
 
 	if required_act_completed and not LevelUnlockUtils.act_completed(statistics_db, player_stats_id, required_act_completed) and (not is_dlc_level or is_dlc_unlocked) then
@@ -53,12 +54,22 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 	end
 
 	if is_dlc_level then
-		if is_dlc_unlocked then
-			return "visible"
-		else
-			local tooltip_text = Localize("dlc1_2_dlc_level_locked_tooltip")
+		local fulfills_stat_dependencies = true
 
-			return "dlc", tooltip_text
+		if dlc_stat_dependency_func then
+			fulfills_stat_dependencies = dlc_stat_dependency_func(statistics_db, player_stats_id)
+		end
+
+		if fulfills_stat_dependencies then
+			if is_dlc_unlocked then
+				return "visible"
+			else
+				local tooltip_text = Localize("dlc1_2_dlc_level_locked_tooltip")
+
+				return "dlc", tooltip_text
+			end
+		else
+			return "hidden"
 		end
 	end
 

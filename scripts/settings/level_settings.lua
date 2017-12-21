@@ -17,6 +17,7 @@ COLD_CAMERA_BACKLIGHT = {
 }
 
 dofile("scripts/settings/level_settings_dlc_dwarf")
+dofile("scripts/settings/level_settings_dlc_challenge_wizard")
 
 for _, dlc in pairs(DLCSettings) do
 	local level_settings = dlc.level_settings
@@ -238,17 +239,17 @@ LevelSettings.whitebox_zones = {
 	}
 }
 LevelSettings.whitebox_ai = {
-	level_name = "levels/debug/whitebox_ai/world",
-	display_name = "level_whitebox_ai",
 	ambient_sound_event = "silent_default_world_sound",
+	display_name = "level_whitebox_ai",
+	player_aux_bus_name = "environment_reverb_outside",
 	music_won_state = "won_boat",
 	environment_state = "exterior",
-	player_aux_bus_name = "environment_reverb_outside",
+	package_name = "resource_packages/levels/debug/whitebox_ai",
 	loading_bg_image = "loading_screen_cemetery",
 	level_image = "level_image_any",
 	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_cemetery",
 	knocked_down_setting = "knocked_down",
-	package_name = "resource_packages/levels/debug/whitebox_ai",
+	level_name = "levels/debug/whitebox_ai/world",
 	source_aux_bus_name = "environment_reverb_outside_source",
 	level_particle_effects = {},
 	level_screen_effects = {},
@@ -267,10 +268,6 @@ LevelSettings.whitebox_ai = {
 				}
 			}
 		}
-	},
-	loading_screen_wwise_events = {
-		"nik_loading_screen_magnus_tower_01",
-		"nik_loading_screen_magnus_tower_02"
 	},
 	locations = {},
 	map_settings = {
@@ -2404,6 +2401,90 @@ LevelSettings.bridge = {
 		"location_bridge_port",
 		"location_bridge_underbelly"
 	},
+	map_settings = {
+		area = "ubersreik",
+		sorting = 5,
+		icon = "level_location_short_icon_02",
+		wwise_events = {
+			"nik_map_brief_bridge_01",
+			"nik_map_brief_bridge_02"
+		},
+		area_position = {
+			70,
+			0
+		}
+	}
+}
+LevelSettings.jansson = {
+	knocked_down_setting = "knocked_down",
+	display_name = "level_short_2",
+	environment_state = "exterior",
+	music_won_state = "won_boat",
+	player_aux_bus_name = "environment_reverb_outside",
+	act = "act_1",
+	loading_bg_image = "loading_screen_bridge",
+	level_image = "level_image_bridge",
+	loading_ui_package_name = "resource_packages/loading_screens/loading_bg_bridge",
+	level_name = "levels/debug/testrange_jansson/world",
+	ambient_sound_event = "silent_default_world_sound",
+	loading_screen_gamemode_name = "level_gamemode_raid",
+	loading_screen_gamemode_prefix = "level_gamemode_prefix_event",
+	default_surface_material = "stone",
+	conflict_settings = "event_level_with_roaming",
+	package_name = "resource_packages/levels/debug/testrange_jansson",
+	source_aux_bus_name = "environment_reverb_outside_source",
+	level_particle_effects = {},
+	level_screen_effects = {},
+	pickup_settings = {
+		{
+			ammo = 4,
+			lorebook_pages = 2,
+			potions = 5,
+			grenades = 4,
+			healing = 12
+		},
+		{
+			ammo = 4,
+			lorebook_pages = 2,
+			potions = 5,
+			grenades = 4,
+			healing = 12
+		},
+		{
+			ammo = 3,
+			lorebook_pages = 2,
+			potions = 4,
+			grenades = 2,
+			healing = 7
+		},
+		{
+			ammo = 3,
+			lorebook_pages = 2,
+			potions = 4,
+			grenades = 2,
+			healing = 7
+		},
+		{
+			ammo = 3,
+			lorebook_pages = 2,
+			potions = 4,
+			grenades = 2,
+			healing = 7
+		}
+	},
+	map_screen_wwise_events = {
+		"nik_map_brief_bridge_01",
+		"nik_map_brief_bridge_02",
+		"nik_map_brief_bridge_03",
+		"nik_map_brief_bridge_03"
+	},
+	loading_screen_wwise_events = {
+		"nik_loading_screen_bridge_01",
+		"nik_loading_screen_bridge_02",
+		"nik_loading_screen_bridge_03",
+		"nik_loading_screen_bridge_04"
+	},
+	locations = {},
 	map_settings = {
 		area = "ubersreik",
 		sorting = 5,

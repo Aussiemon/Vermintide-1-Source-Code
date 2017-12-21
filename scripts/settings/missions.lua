@@ -262,6 +262,71 @@ Missions.endurance_badge_05_mission.experience_per_amount = 500
 Missions.endurance_badge_05_mission.tokens_per_amount = 13
 Missions.endurance_badge_05_mission.token_type = "gold_tokens"
 Missions.endurance_badge_05_mission.collected_item_texture = "survival_badge_icon_05"
+Missions.magnus_speed_run = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.merchant_no_healing = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.city_wall_timed = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.engines_of_war_timed = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.white_rat_kill_stormvermin = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.well_watch_keep_wells_alive = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.waterfront_speed_run = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.cemetery_tome_and_grim_bury = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.enemy_below_kill_gutter_runners = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.black_powder_dont_kill_rat_ogre = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.farm_dont_drop_sacks = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.smugglers_bring_barrels = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
+Missions.wizards_tower_protect_wards = {
+	text = "n/a",
+	hidden = true,
+	mission_template_name = "goal"
+}
 Missions.whitebox_tutorial_goal_1 = {
 	mission_template_name = "goal",
 	text = "forest_ambush_call_boat_mission_text"

@@ -145,6 +145,20 @@ local scenegraph_definition = {
 			320
 		}
 	},
+	end_screen_banner_overlay = {
+		vertical_alignment = "center",
+		parent = "end_screen_banner",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			824,
+			320
+		}
+	},
 	end_screen_banner_effect = {
 		vertical_alignment = "center",
 		parent = "end_screen_banner",
@@ -417,6 +431,14 @@ local widget_definitions = {
 					pass_type = "texture"
 				},
 				{
+					texture_id = "banner_overlay_texture",
+					style_id = "banner_overlay_texture",
+					pass_type = "texture",
+					content_check_function = function (content)
+						return content.use_overlay
+					end
+				},
+				{
 					texture_id = "banner_effect_texture",
 					style_id = "banner_effect_texture",
 					pass_type = "texture"
@@ -468,14 +490,15 @@ local widget_definitions = {
 			}
 		},
 		content = {
-			banner_effect_texture = "end_screen_banner_effect",
+			banner_texture = "end_screen_banner_survival",
+			is_survival = false,
 			time = "00:00:00",
-			time_title = "dlc1_2_end_screen_time",
-			waves = "24",
 			difficulty_title = "",
 			waves_title = "dlc1_2_end_screen_waves",
-			banner_texture = "end_screen_banner_survival",
-			is_survival = false
+			banner_overlay_texture = "end_screen_banner_skaven_overlay",
+			time_title = "dlc1_2_end_screen_time",
+			waves = "24",
+			banner_effect_texture = "end_screen_banner_effect"
 		},
 		style = {
 			rect = {
@@ -496,6 +519,15 @@ local widget_definitions = {
 				scenegraph_id = "end_screen_banner",
 				color = {
 					255,
+					255,
+					255,
+					255
+				}
+			},
+			banner_overlay_texture = {
+				scenegraph_id = "end_screen_banner_overlay",
+				color = {
+					0,
 					255,
 					255,
 					255
@@ -664,6 +696,7 @@ local animations = {
 				widget.style.rect.color[1] = 255
 				widget.style.banner_effect_texture.color[1] = 255
 				widget.style.banner_texture.color[1] = 255
+				widget.style.banner_overlay_texture.color[1] = 255
 
 				return 
 			end,
@@ -734,6 +767,7 @@ local animations = {
 				local widget = widgets[1]
 				local alpha = local_progress*255
 				widget.style.banner_texture.color[1] = alpha
+				widget.style.banner_overlay_texture.color[1] = alpha
 				widget.style.banner_effect_texture.color[1] = alpha
 
 				return 
@@ -757,6 +791,7 @@ local animations = {
 				local widget = widgets[1]
 				local alpha = local_progress*255 - 255
 				widget.style.banner_texture.color[1] = alpha
+				widget.style.banner_overlay_texture.color[1] = alpha
 				widget.style.banner_effect_texture.color[1] = alpha
 
 				return 

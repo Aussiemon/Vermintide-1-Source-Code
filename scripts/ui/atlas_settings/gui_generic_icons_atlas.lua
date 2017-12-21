@@ -187,12 +187,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.904297,
-			0.828125
+			0.90625,
+			0.925781
 		},
 		uv11 = {
-			0.926758,
-			0.873047
+			0.928711,
+			0.970703
 		}
 	},
 	hero_icon_medium_way_watcher_white = {
@@ -201,12 +201,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.953125,
-			0.779297
+			0.90625,
+			0.876953
 		},
 		uv11 = {
-			0.975586,
-			0.824219
+			0.928711,
+			0.921875
 		}
 	},
 	hero_icon_medium_dwarf_ranger_yellow = {
@@ -215,12 +215,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.928711,
-			0.779297
+			0.90625,
+			0.828125
 		},
 		uv11 = {
-			0.951172,
-			0.824219
+			0.928711,
+			0.873047
 		}
 	},
 	hero_icon_medium_bright_wizard_yellow = {
@@ -229,11 +229,11 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.904297,
+			0.955078,
 			0.779297
 		},
 		uv11 = {
-			0.926758,
+			0.977539,
 			0.824219
 		}
 	},
@@ -243,12 +243,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.879883,
-			0.925781
+			0.930664,
+			0.779297
 		},
 		uv11 = {
-			0.902344,
-			0.970703
+			0.953125,
+			0.824219
 		}
 	},
 	hero_icon_medium_bright_wizard_white = {
@@ -257,12 +257,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.879883,
-			0.876953
+			0.90625,
+			0.779297
 		},
 		uv11 = {
-			0.902344,
-			0.921875
+			0.928711,
+			0.824219
 		}
 	},
 	hero_icon_medium_dwarf_ranger_white = {
@@ -272,11 +272,11 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.879883,
-			0.828125
+			0.929688
 		},
 		uv11 = {
 			0.902344,
-			0.873047
+			0.974609
 		}
 	},
 	hero_icon_medium_witch_hunter_yellow = {
@@ -286,11 +286,11 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.879883,
-			0.779297
+			0.880859
 		},
 		uv11 = {
 			0.902344,
-			0.824219
+			0.925781
 		}
 	},
 	hero_icon_medium_empire_soldier_yellow = {
@@ -299,12 +299,12 @@ generic_icons_atlas = {
 			46
 		},
 		uv00 = {
-			0.958984,
-			0.726563
+			0.879883,
+			0.832031
 		},
 		uv11 = {
-			0.981445,
-			0.771484
+			0.902344,
+			0.876953
 		}
 	},
 	hero_icon_medium_way_watcher_yellow = {
@@ -327,6 +327,34 @@ generic_icons_atlas = {
 			50
 		},
 		uv00 = {
+			0.879883,
+			0.779297
+		},
+		uv11 = {
+			0.904297,
+			0.828125
+		}
+	},
+	teammate_consumable_icon_grenade_empty = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
+			0.958984,
+			0.726563
+		},
+		uv11 = {
+			0.983398,
+			0.775391
+		}
+	},
+	teammate_consumable_icon_speed = {
+		size = {
+			50,
+			50
+		},
+		uv00 = {
 			0.932617,
 			0.726563
 		},
@@ -335,7 +363,7 @@ generic_icons_atlas = {
 			0.775391
 		}
 	},
-	teammate_consumable_icon_grenade_empty = {
+	teammate_consumable_icon_potion_empty = {
 		size = {
 			50,
 			50
@@ -349,7 +377,7 @@ generic_icons_atlas = {
 			0.775391
 		}
 	},
-	teammate_consumable_icon_speed = {
+	teammate_consumable_icon_smoke = {
 		size = {
 			50,
 			50
@@ -363,34 +391,6 @@ generic_icons_atlas = {
 			0.775391
 		}
 	},
-	teammate_consumable_icon_potion_empty = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.847656,
-			0.949219
-		},
-		uv11 = {
-			0.87207,
-			0.998047
-		}
-	},
-	teammate_consumable_icon_smoke = {
-		size = {
-			50,
-			50
-		},
-		uv00 = {
-			0.847656,
-			0.896484
-		},
-		uv11 = {
-			0.87207,
-			0.945313
-		}
-	},
 	teammate_consumable_icon_strength = {
 		size = {
 			50,
@@ -398,11 +398,11 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.847656,
-			0.84375
+			0.908203
 		},
 		uv11 = {
 			0.87207,
-			0.892578
+			0.957031
 		}
 	},
 	teammate_consumable_icon_grenade = {
@@ -412,11 +412,11 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.847656,
-			0.791016
+			0.855469
 		},
 		uv11 = {
 			0.87207,
-			0.839844
+			0.904297
 		}
 	},
 	teammate_consumable_icon_defence = {
@@ -468,6 +468,20 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.847656,
+			0.791016
+		},
+		uv11 = {
+			0.87793,
+			0.851563
+		}
+	},
+	teammate_consumable_icon_medpack = {
+		size = {
+			62,
+			62
+		},
+		uv00 = {
+			0.847656,
 			0.726563
 		},
 		uv11 = {
@@ -475,7 +489,7 @@ generic_icons_atlas = {
 			0.787109
 		}
 	},
-	teammate_consumable_icon_medpack = {
+	teammate_consumable_icon_potion_01 = {
 		size = {
 			62,
 			62
@@ -489,7 +503,7 @@ generic_icons_atlas = {
 			0.722656
 		}
 	},
-	teammate_consumable_icon_potion_01 = {
+	grenade_icon = {
 		size = {
 			62,
 			62
@@ -503,7 +517,7 @@ generic_icons_atlas = {
 			0.722656
 		}
 	},
-	grenade_icon = {
+	hud_tutorial_survival_icon_supply_drop = {
 		size = {
 			62,
 			62
@@ -517,7 +531,7 @@ generic_icons_atlas = {
 			0.722656
 		}
 	},
-	hud_tutorial_survival_icon_supply_drop = {
+	teammate_consumable_icon_medpack_empty = {
 		size = {
 			62,
 			62
@@ -531,7 +545,7 @@ generic_icons_atlas = {
 			0.722656
 		}
 	},
-	teammate_consumable_icon_medpack_empty = {
+	teammate_consumable_icon_book = {
 		size = {
 			62,
 			62
@@ -545,7 +559,7 @@ generic_icons_atlas = {
 			0.980469
 		}
 	},
-	teammate_consumable_icon_book = {
+	teammate_consumable_icon_grimoire = {
 		size = {
 			62,
 			62
@@ -559,7 +573,7 @@ generic_icons_atlas = {
 			0.916016
 		}
 	},
-	teammate_consumable_icon_grimoire = {
+	teammate_consumable_icon_potion_02 = {
 		size = {
 			62,
 			62
@@ -573,7 +587,7 @@ generic_icons_atlas = {
 			0.851563
 		}
 	},
-	teammate_consumable_icon_potion_02 = {
+	hud_tutorial_survival_icon_attack_direction = {
 		size = {
 			62,
 			62
@@ -587,7 +601,7 @@ generic_icons_atlas = {
 			0.787109
 		}
 	},
-	hud_tutorial_survival_icon_attack_direction = {
+	hud_tutorial_survival_icon_resupply = {
 		size = {
 			62,
 			62
@@ -601,31 +615,17 @@ generic_icons_atlas = {
 			0.722656
 		}
 	},
-	hud_tutorial_survival_icon_resupply = {
-		size = {
-			62,
-			62
-		},
-		uv00 = {
-			0.946289,
-			0.595703
-		},
-		uv11 = {
-			0.976563,
-			0.65625
-		}
-	},
 	weapon_icon_empty = {
 		size = {
 			62,
 			62
 		},
 		uv00 = {
-			0.914063,
+			0.947266,
 			0.595703
 		},
 		uv11 = {
-			0.944336,
+			0.977539,
 			0.65625
 		}
 	},
@@ -635,15 +635,29 @@ generic_icons_atlas = {
 			62
 		},
 		uv00 = {
-			0.881836,
+			0.915039,
 			0.595703
 		},
 		uv11 = {
-			0.912109,
+			0.945313,
 			0.65625
 		}
 	},
 	default_heal_icon_lit = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.881836,
+			0.595703
+		},
+		uv11 = {
+			0.913086,
+			0.658203
+		}
+	},
+	default_grenade_icon_lit = {
 		size = {
 			64,
 			64
@@ -657,7 +671,7 @@ generic_icons_atlas = {
 			0.658203
 		}
 	},
-	default_grenade_icon_lit = {
+	default_potion_icon_lit = {
 		size = {
 			64,
 			64
@@ -671,7 +685,7 @@ generic_icons_atlas = {
 			0.658203
 		}
 	},
-	default_potion_icon_lit = {
+	default_heal_icon = {
 		size = {
 			64,
 			64
@@ -685,7 +699,7 @@ generic_icons_atlas = {
 			0.990234
 		}
 	},
-	default_heal_icon = {
+	consumables_potion_01 = {
 		size = {
 			64,
 			64
@@ -699,7 +713,7 @@ generic_icons_atlas = {
 			0.923828
 		}
 	},
-	consumables_potion_01 = {
+	default_potion_icon = {
 		size = {
 			64,
 			64
@@ -713,7 +727,7 @@ generic_icons_atlas = {
 			0.857422
 		}
 	},
-	consumables_medpack = {
+	consumables_potion_02 = {
 		size = {
 			64,
 			64
@@ -727,7 +741,7 @@ generic_icons_atlas = {
 			0.791016
 		}
 	},
-	consumables_potion_02 = {
+	consumables_defence = {
 		size = {
 			64,
 			64
@@ -741,7 +755,7 @@ generic_icons_atlas = {
 			0.724609
 		}
 	},
-	consumables_defence = {
+	default_grenade_icon = {
 		size = {
 			64,
 			64
@@ -755,7 +769,7 @@ generic_icons_atlas = {
 			0.658203
 		}
 	},
-	default_grenade_icon = {
+	consumables_medpack_lit = {
 		size = {
 			64,
 			64
@@ -769,7 +783,7 @@ generic_icons_atlas = {
 			0.591797
 		}
 	},
-	consumables_medpack_lit = {
+	default_heal_ally_icon = {
 		size = {
 			64,
 			64
@@ -783,7 +797,7 @@ generic_icons_atlas = {
 			0.591797
 		}
 	},
-	default_potion_icon = {
+	consumables_book = {
 		size = {
 			64,
 			64
@@ -797,7 +811,7 @@ generic_icons_atlas = {
 			0.591797
 		}
 	},
-	consumables_heal_ally = {
+	consumables_grimoire_lit = {
 		size = {
 			64,
 			64
@@ -811,7 +825,7 @@ generic_icons_atlas = {
 			0.591797
 		}
 	},
-	consumables_grimoire_lit = {
+	default_heal_ally_icon_lit = {
 		size = {
 			64,
 			64
@@ -825,7 +839,7 @@ generic_icons_atlas = {
 			0.591797
 		}
 	},
-	default_heal_ally_icon_lit = {
+	consumables_grimoire = {
 		size = {
 			64,
 			64
@@ -839,20 +853,6 @@ generic_icons_atlas = {
 			0.591797
 		}
 	},
-	consumables_grimoire = {
-		size = {
-			64,
-			64
-		},
-		uv00 = {
-			0.741211,
-			0.912109
-		},
-		uv11 = {
-			0.772461,
-			0.974609
-		}
-	},
 	consumables_potion_01_lit = {
 		size = {
 			64,
@@ -860,11 +860,11 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.741211,
-			0.845703
+			0.927734
 		},
 		uv11 = {
 			0.772461,
-			0.908203
+			0.990234
 		}
 	},
 	consumables_smoke = {
@@ -909,7 +909,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	consumables_book_lit = {
+	consumables_speed_lit = {
 		size = {
 			64,
 			64
@@ -923,7 +923,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	default_heal_ally_icon = {
+	consumables_book_lit = {
 		size = {
 			64,
 			64
@@ -937,7 +937,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	consumables_heal_ally_lit = {
+	consumables_medpack = {
 		size = {
 			64,
 			64
@@ -951,7 +951,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	consumables_book = {
+	consumables_heal_ally_lit = {
 		size = {
 			64,
 			64
@@ -965,7 +965,7 @@ generic_icons_atlas = {
 			0.396484
 		}
 	},
-	consumables_speed_lit = {
+	consumables_heal_ally = {
 		size = {
 			64,
 			64
@@ -993,7 +993,7 @@ generic_icons_atlas = {
 			0.330078
 		}
 	},
-	consumables_frag_lit = {
+	consumables_smoke_lit = {
 		size = {
 			64,
 			64
@@ -1007,7 +1007,7 @@ generic_icons_atlas = {
 			0.330078
 		}
 	},
-	consumables_empty_grenade = {
+	killed_a_rat_locked = {
 		size = {
 			64,
 			64
@@ -1021,7 +1021,7 @@ generic_icons_atlas = {
 			0.263672
 		}
 	},
-	killed_a_rat_unlocked = {
+	consumables_empty_grenade = {
 		size = {
 			64,
 			64
@@ -1035,7 +1035,7 @@ generic_icons_atlas = {
 			0.263672
 		}
 	},
-	consumables_smoke_lit = {
+	consumables_potion_02_lit = {
 		size = {
 			64,
 			64
@@ -1049,7 +1049,7 @@ generic_icons_atlas = {
 			0.263672
 		}
 	},
-	consumables_fire = {
+	killed_a_rat_unlocked = {
 		size = {
 			64,
 			64
@@ -1063,7 +1063,7 @@ generic_icons_atlas = {
 			0.197266
 		}
 	},
-	consumables_frag = {
+	consumables_frag_lit = {
 		size = {
 			64,
 			64
@@ -1077,7 +1077,7 @@ generic_icons_atlas = {
 			0.197266
 		}
 	},
-	consumables_fire_lit = {
+	consumables_frame_lit = {
 		size = {
 			64,
 			64
@@ -1105,7 +1105,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	consumables_potion_02_lit = {
+	consumables_frag = {
 		size = {
 			64,
 			64
@@ -1119,7 +1119,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	killed_a_rat_locked = {
+	consumables_defence_lit = {
 		size = {
 			64,
 			64
@@ -1133,7 +1133,7 @@ generic_icons_atlas = {
 			0.130859
 		}
 	},
-	consumables_frame_lit = {
+	consumables_fire = {
 		size = {
 			64,
 			64
@@ -1147,7 +1147,7 @@ generic_icons_atlas = {
 			0.064453
 		}
 	},
-	consumables_defence_lit = {
+	consumables_fire_lit = {
 		size = {
 			64,
 			64
@@ -1182,11 +1182,25 @@ generic_icons_atlas = {
 		},
 		uv00 = {
 			0.741211,
-			0.775391
+			0.857422
 		},
 		uv11 = {
 			0.774414,
-			0.841797
+			0.923828
+		}
+	},
+	quest_icon_rat_ogre = {
+		size = {
+			80,
+			80
+		},
+		uv00 = {
+			0.741211,
+			0.775391
+		},
+		uv11 = {
+			0.780273,
+			0.853516
 		}
 	},
 	quest_icon_last_stand_waves_defeated = {
@@ -1203,7 +1217,7 @@ generic_icons_atlas = {
 			0.771484
 		}
 	},
-	quest_icon_rat_ogre = {
+	quest_icon_grimoire = {
 		size = {
 			80,
 			80
@@ -1217,7 +1231,7 @@ generic_icons_atlas = {
 			0.689453
 		}
 	},
-	token_icon_01_large = {
+	quest_icon_map = {
 		size = {
 			80,
 			80
@@ -1231,7 +1245,7 @@ generic_icons_atlas = {
 			0.607422
 		}
 	},
-	quest_icon_tome = {
+	quest_icon_open_chests = {
 		size = {
 			80,
 			80
@@ -1245,7 +1259,7 @@ generic_icons_atlas = {
 			0.935547
 		}
 	},
-	quest_icon_damage_taken_individual = {
+	token_icon_02_large = {
 		size = {
 			80,
 			80
@@ -1259,7 +1273,7 @@ generic_icons_atlas = {
 			0.853516
 		}
 	},
-	quest_icon_map = {
+	quest_icon_avoid_specials_damage_team = {
 		size = {
 			80,
 			80
@@ -1273,7 +1287,7 @@ generic_icons_atlas = {
 			0.771484
 		}
 	},
-	token_icon_02_large = {
+	quest_icon_tome = {
 		size = {
 			80,
 			80
@@ -1287,7 +1301,7 @@ generic_icons_atlas = {
 			0.689453
 		}
 	},
-	quest_icon_avoid_specials_damage_team = {
+	quest_icon_damage_taken_individual = {
 		size = {
 			80,
 			80
@@ -1301,7 +1315,7 @@ generic_icons_atlas = {
 			0.607422
 		}
 	},
-	quest_icon_grimoire = {
+	token_icon_01_large = {
 		size = {
 			80,
 			80
@@ -1315,7 +1329,7 @@ generic_icons_atlas = {
 			0.478516
 		}
 	},
-	quest_icon_open_chests = {
+	quest_icon_grenade_kills = {
 		size = {
 			80,
 			80
@@ -1357,7 +1371,7 @@ generic_icons_atlas = {
 			0.478516
 		}
 	},
-	quest_icon_grenade_kills = {
+	quest_icon_find_event_items = {
 		size = {
 			80,
 			80

@@ -461,7 +461,11 @@ GameNetworkManager.game_object_destroyed_player = function (self, go_id, owner_p
 		player_manager.remove_player(player_manager, peer_id, local_player_id)
 		debug_print("removing peer_id=%s local_player_id=%d", peer_id, local_player_id)
 	else
+		local player = player_manager.player(player_manager, peer_id, local_player_id)
+
 		debug_print("not removing peer_id=%s local_player_id=%d", peer_id, local_player_id)
+
+		player.game_object_id = nil
 	end
 
 	return 

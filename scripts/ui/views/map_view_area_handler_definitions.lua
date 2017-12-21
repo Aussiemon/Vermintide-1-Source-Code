@@ -590,7 +590,7 @@ local function create_level_widget(index)
 			position = {
 				-2,
 				16,
-				2
+				5
 			},
 			size = {
 				1,

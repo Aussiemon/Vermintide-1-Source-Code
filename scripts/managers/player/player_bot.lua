@@ -176,7 +176,8 @@ PlayerBot.spawn = function (self, position, rotation, is_initial_spawn, ammo_mel
 		}
 	}
 	local unit_template_name = "player_bot_unit"
-	local unit_name = profile.base_units.third_person_bot
+	local skin_settings = Managers.unlock:get_skin_settings(profile.display_name)
+	local unit_name = skin_settings.units.third_person.third_person_bot
 	local spawn_data = {
 		unit_template_name = unit_template_name,
 		unit_name = unit_name,

@@ -41,7 +41,8 @@ go_type_table = {
 
 			assert(profile, "No such profile with index %s", tostring(profile_id))
 
-			local husk_unit = profile.base_units.third_person_husk
+			local skin_settings = Managers.unlock:get_skin_settings(profile.display_name)
+			local husk_unit = skin_settings.units.third_person.third_person_husk
 			local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 			local aim_position = first_person_extension.current_position(first_person_extension)
 			local rotation = Unit.local_rotation(unit, 0)
@@ -106,7 +107,8 @@ go_type_table = {
 
 			assert(profile, "No such profile with index %s", tostring(profile_id))
 
-			local husk_unit = profile.base_units.third_person_husk
+			local skin_settings = Managers.unlock:get_skin_settings(profile.display_name)
+			local husk_unit = skin_settings.units.third_person.third_person_husk
 			local max_health = ScriptUnit.extension(unit, "health_system"):initial_max_health()
 			local max_wounds = ScriptUnit.extension(unit, "status_system"):max_wounds_network_safe()
 			local rotation = Unit.local_rotation(unit, 0)

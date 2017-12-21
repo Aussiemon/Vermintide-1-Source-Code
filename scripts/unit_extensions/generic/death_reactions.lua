@@ -336,6 +336,7 @@ local function trigger_unit_dialogue_death_event(killed_unit, killer_unit, hit_z
 end
 
 local buff_params = {}
+local buff_params_2 = {}
 
 local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_server)
 	if Unit.alive(player_unit) then
@@ -344,6 +345,7 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 		if player and not player.remote then
 			local buff_extension = ScriptUnit.extension(player_unit, "buff_system")
 			local health_extension = ScriptUnit.extension(player_unit, "health_system")
+			local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
 
 			if health_extension.current_health_percent(health_extension) < 1 then
 				local heal_amount, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.HEAL_ON_KILL)
@@ -370,14 +372,20 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 
 				buff_params.external_optional_multiplier = attack_speed_multiplier - 1
 				buff_params.parent_id = parent_id
+				buff_params_2.parent_id = parent_id
 
 				buff_extension.add_buff(buff_extension, "attack_speed_from_proc", buff_params)
+
+				if inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_ranged" and not buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
+					buff_extension.add_buff(buff_extension, "infinite_ammo_from_proc")
+				elseif inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_melee" then
+					buff_extension.add_buff(buff_extension, "damage_reduction_from_proc")
+				end
 			end
 
 			local amount, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.AMMO_ON_KILL)
 
 			if procced then
-				local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
 				local slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_ranged")
 				local right_unit_1p = slot_data.right_unit_1p
 				local left_unit_1p = slot_data.left_unit_1p
@@ -390,7 +398,10 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 				end
 
 				if ammo_extension then
-					ammo_extension.add_ammo_to_reserve(ammo_extension, amount)
+					local max_ammo = ammo_extension.max_ammo_count(ammo_extension)
+					local restore_amount = math.clamp(math.floor(max_ammo*0.1), 1, math.huge)
+
+					ammo_extension.add_ammo_to_reserve(ammo_extension, restore_amount)
 				end
 			end
 		end
@@ -434,6 +445,21 @@ DeathReactions.templates = {
 
 				if unit ~= killing_blow[DamageDataIndex.ATTACKER] and ScriptUnit.has_extension(unit, "ai_system") then
 					ScriptUnit.extension(unit, "ai_system"):attacked(killing_blow[DamageDataIndex.ATTACKER], t, killing_blow)
+				end
+
+				local breed = Unit.get_data(unit, "breed")
+				local breed_name = breed.name
+
+				if killing_blow[DamageDataIndex.DAMAGE_TYPE] == "volume_generic_dot" and (breed_name == "skaven_storm_vermin" or breed_name == "skaven_storm_vermin_commander") then
+					local mission_system = Managers.state.entity:system("mission_system")
+
+					mission_system.increment_goal_mission_counter(mission_system, "white_rat_kill_stormvermin", 1, true)
+				end
+
+				if breed_name == "skaven_rat_ogre" then
+					local mission_system = Managers.state.entity:system("mission_system")
+
+					mission_system.increment_goal_mission_counter(mission_system, "black_powder_dont_kill_rat_ogre", 1, true)
 				end
 
 				return data, result
@@ -514,6 +540,10 @@ DeathReactions.templates = {
 				StatisticsUtil.register_kill(unit, killing_blow, context.statistics_db, true)
 				trigger_unit_dialogue_death_event(unit, killing_blow[DamageDataIndex.ATTACKER], killing_blow[DamageDataIndex.HIT_ZONE], killing_blow[DamageDataIndex.DAMAGE_TYPE])
 				trigger_player_killing_blow_ai_buffs(unit, killing_blow[DamageDataIndex.ATTACKER], true)
+
+				local mission_system = Managers.state.entity:system("mission_system")
+
+				mission_system.increment_goal_mission_counter(mission_system, "enemy_below_kill_gutter_runners", 1, true)
 
 				return data, result
 			end,

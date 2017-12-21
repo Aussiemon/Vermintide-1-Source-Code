@@ -220,7 +220,9 @@ InventoryViewPreviewer.update_selected_character = function (self, profile_name)
 
 	local world = self.world
 	local sp_profile = SPProfiles[FindProfileIndex(profile_name)]
-	local character_unit = World.spawn_unit(world, sp_profile.base_units.third_person)
+	local skin_settings = Managers.unlock:get_skin_settings(profile_name)
+	local unit_name = skin_settings.units.third_person.third_person
+	local character_unit = World.spawn_unit(world, unit_name)
 	self.character_unit = character_unit
 
 	if Unit.has_lod_object(character_unit, "lod") then

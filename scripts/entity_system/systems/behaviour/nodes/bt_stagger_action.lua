@@ -31,6 +31,10 @@ BTStaggerAction.enter = function (self, unit, blackboard, t)
 	local impact_dir = blackboard.stagger_direction:unbox()
 	local push_anim, impact_rot = self._select_animation(self, unit, blackboard, impact_dir, stagger_anims)
 
+	if action_data.disable_stagger_rotation then
+		impact_rot = Unit.local_rotation(unit, 0)
+	end
+
 	Unit.set_local_rotation(unit, 0, impact_rot)
 
 	local network_manager = Managers.state.network

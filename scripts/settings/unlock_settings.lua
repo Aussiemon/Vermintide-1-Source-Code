@@ -47,6 +47,26 @@ UnlockSettings = {
 			dwarfs = {
 				class = "UnlockDlc",
 				id = "463791"
+			},
+			witch_hunter_skin_01 = {
+				class = "UnlockDlc",
+				id = "463790"
+			},
+			bright_wizard_skin_01 = {
+				class = "UnlockDlc",
+				id = "463796"
+			},
+			dwarf_ranger_skin_01 = {
+				class = "UnlockDlc",
+				id = "463799"
+			},
+			wood_elf_skin_01 = {
+				class = "UnlockDlc",
+				id = "463798"
+			},
+			empire_soldier_skin_01 = {
+				class = "UnlockDlc",
+				id = "463797"
 			}
 		},
 		unlock_script = GameSettingsDevelopment.backend_settings.dlcs_unlock_script

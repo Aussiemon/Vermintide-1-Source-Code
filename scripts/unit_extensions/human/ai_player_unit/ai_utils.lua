@@ -626,7 +626,7 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 		for i = 1, array_length/stride, 1 do
 			local attacker_unit = strided_array[index + DamageDataIndex.ATTACKER]
 			local damage_amount = strided_array[index + DamageDataIndex.DAMAGE_AMOUNT]
-			local damage_source = strided_array[DamageDataIndex.DAMAGE_SOURCE_NAME]
+			local damage_source = strided_array[index + DamageDataIndex.DAMAGE_SOURCE_NAME]
 			local master_list_item = rawget(ItemMasterList, damage_source)
 
 			if master_list_item then

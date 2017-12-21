@@ -13,6 +13,10 @@ PlayerCharacterStateWaitingForAssistedRespawn.on_enter = function (self, unit, i
 
 	first_person_extension.set_first_person_mode(first_person_extension, false)
 
+	local include_local_player = true
+
+	CharacterStateHelper.show_inventory_3p(unit, false, include_local_player, self.is_server, self.inventory_extension)
+
 	local input_extension = self.input_extension
 
 	input_extension.set_enabled(input_extension, false)
@@ -30,7 +34,6 @@ PlayerCharacterStateWaitingForAssistedRespawn.on_enter = function (self, unit, i
 	return 
 end
 PlayerCharacterStateWaitingForAssistedRespawn.on_exit = function (self, unit, input, dt, context, t, next_state)
-	local flavour_unit = self.flavour_unit
 	local first_person_extension = self.first_person_extension
 
 	first_person_extension.toggle_visibility(first_person_extension, CameraTransitionSettings.perspective_transition_time)
@@ -42,6 +45,10 @@ PlayerCharacterStateWaitingForAssistedRespawn.on_exit = function (self, unit, in
 	local player = self.player
 
 	CharacterStateHelper.change_camera_state(player, "follow")
+
+	local include_local_player = true
+
+	CharacterStateHelper.show_inventory_3p(unit, true, include_local_player, self.is_server, self.inventory_extension)
 	LocomotionUtils.disable_linked_movement(unit)
 
 	local locomotion_extension = self.locomotion_extension
@@ -61,8 +68,9 @@ PlayerCharacterStateWaitingForAssistedRespawn.on_exit = function (self, unit, in
 		local go_id = network_manager.unit_game_object_id(network_manager, unit) or 0
 		local helper_go_id = (helper_unit and network_manager.unit_game_object_id(network_manager, helper_unit)) or 0
 		local peer_id = Network.peer_id()
+		local status_id = NetworkLookup.statuses.respawned
 
-		network_manager.network_transmit:send_rpc_server("rpc_status_change_bool", NetworkLookup.statuses.respawned, true, go_id, helper_go_id)
+		network_manager.network_transmit:send_rpc_server("rpc_status_change_bool", status_id, true, go_id, helper_go_id)
 	end
 
 	return 

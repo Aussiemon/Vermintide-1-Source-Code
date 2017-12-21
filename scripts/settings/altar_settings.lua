@@ -29,6 +29,11 @@ AltarSettings = {
 			cost = 5,
 			token_type = "gold_tokens",
 			token_texture = "token_icon_04"
+		},
+		unique = {
+			cost = 0,
+			token_type = "gold_tokens",
+			token_texture = "token_icon_04"
 		}
 	},
 	proc_reroll_trait = {

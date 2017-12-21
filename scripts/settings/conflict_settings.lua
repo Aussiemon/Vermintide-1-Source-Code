@@ -1593,6 +1593,12 @@ RoamingSettings = {
 		despawn_distance = 45,
 		despawn_path_distance = 90,
 		despawn_distance_z = 30
+	},
+	challenge = {
+		despawn_distance = 45,
+		despawn_path_distance = 400,
+		despawn_distance_z = 30,
+		disabled = false
 	}
 }
 SpecialsSettings = {
@@ -2138,6 +2144,14 @@ ConflictDirectors = {
 		boss = BossSettings.disabled,
 		specials = SpecialsSettings.disabled,
 		roaming = RoamingSettings.disabled
+	},
+	challenge = {
+		disabled = false,
+		intensity = IntensitySettings.default,
+		pacing = PacingSettings.default,
+		boss = BossSettings.default,
+		specials = SpecialsSettings.default,
+		roaming = RoamingSettings.challenge
 	}
 }
 RecycleSettings = {

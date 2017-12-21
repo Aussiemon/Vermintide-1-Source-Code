@@ -459,6 +459,14 @@ BuffExtension.apply_buffs_to_value = function (self, value, stat_buff)
 				procced = true
 				parent_id = stat_buff_data.parent_id
 
+				if stat_buff_data.proc_chance < 0.8 then
+					local first_person_extension = ScriptUnit.has_extension(self._unit, "first_person_system")
+
+					if first_person_extension then
+						first_person_extension.play_hud_sound_event(first_person_extension, "Play_hud_trait_active")
+					end
+				end
+
 				break
 			end
 		end

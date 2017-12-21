@@ -306,6 +306,13 @@ ProjectileSystem.rpc_spawn_pickup_projectile_limited = function (self, sender, p
 	local projectile_unit_template_name = NetworkLookup.go_types[projectile_unit_template_name_id]
 	local pickup_name = NetworkLookup.pickup_names[pickup_name_id]
 	local pickup_spawn_type = NetworkLookup.pickup_spawn_types[pickup_spawn_type_id]
+
+	if pickup_name == "grain_sack" then
+		local mission_system = Managers.state.entity:system("mission_system")
+
+		mission_system.increment_goal_mission_counter(mission_system, "farm_dont_drop_sacks", 1, true)
+	end
+
 	local level = LevelHelper:current_level(self.world)
 	local spawner_unit = Level.unit_by_index(level, spawner_unit_id)
 	local extension_init_data = {

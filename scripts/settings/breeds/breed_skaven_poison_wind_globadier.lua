@@ -181,7 +181,8 @@ local breed_data = {
 		200,
 		200,
 		0
-	}
+	},
+	run_on_death = AiBreedSnippets.spawn_event_item_special
 }
 Breeds.skaven_poison_wind_globadier = table.create_copy(Breeds.skaven_poison_wind_globadier, breed_data)
 local GLOBE_RADIUS = 4

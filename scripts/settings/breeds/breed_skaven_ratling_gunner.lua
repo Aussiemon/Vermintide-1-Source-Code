@@ -183,7 +183,8 @@ local breed_data = {
 		current_index = 1,
 		c_head = false,
 		c_spine1 = false
-	}
+	},
+	run_on_death = AiBreedSnippets.spawn_event_item_special
 }
 Breeds.skaven_ratling_gunner = table.create_copy(Breeds.skaven_ratling_gunner, breed_data)
 local action_data = {
