@@ -74,13 +74,6 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 		damage = damage_table[target_unit_armor]
 	end
 
-	local buff_extension = ScriptUnit.has_extension(attacker_unit, "buff_system")
-	local hawkeye = buff_extension and buff_extension.has_buff_type(buff_extension, "increased_zoom")
-
-	if hawkeye then
-		headshot_multiplier = headshot_multiplier and buff_extension.apply_buffs_to_value(buff_extension, headshot_multiplier, StatBuffIndex.HAWKEYE)
-	end
-
 	if (hit_zone_name == "head" or hit_zone_name == "neck") and headshot_multiplier ~= -1 then
 		if headshot_multiplier and 0 < damage then
 			damage = damage*headshot_multiplier

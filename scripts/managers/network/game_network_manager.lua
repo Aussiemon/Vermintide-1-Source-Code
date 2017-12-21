@@ -1,12 +1,10 @@
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
 require("scripts/network_lookup/network_lookup")
 
 local game_object_templates = dofile("scripts/network/game_object_templates")
 
 local function debug_print(format, ...)
-	if script_data.network_debug then
-		printf("[GameNetworkManager] " .. format, ...)
-	end
-
 	return 
 end
 
@@ -14,6 +12,8 @@ GameNetworkManager = class(GameNetworkManager)
 local PING_SAMPLES_MAX_SIZE = 10
 local PING_SAMPLE_INTERVAL = 1
 GameNetworkManager.init = function (self, world, lobby, is_server)
+
+	-- decompilation error in this vicinity
 	Network.create_game_session()
 
 	local session = Network.game_session()

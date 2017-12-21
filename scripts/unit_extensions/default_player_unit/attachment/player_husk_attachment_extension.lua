@@ -49,10 +49,10 @@ PlayerHuskAttachmentExtension.create_attachment = function (self, slot_name, ite
 
 	local slot_data = AttachmentUtils.create_attachment(self._world, self._unit, attachments, slot_name, item_data, true)
 	local item_template = BackendUtils.get_item_template(item_data)
-	local on_equip_flow_event = item_template.on_equip_flow_event
+	local show_attachments_event = item_template.show_attachments_event
 
-	if on_equip_flow_event then
-		Unit.flow_event(self._unit, on_equip_flow_event)
+	if show_attachments_event then
+		Unit.flow_event(self._unit, show_attachments_event)
 	end
 
 	AttachmentUtils.apply_attachment_buffs(self.current_item_buffs, self.buff_extension, slot_name, item_data)

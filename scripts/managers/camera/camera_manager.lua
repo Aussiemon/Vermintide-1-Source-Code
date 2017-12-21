@@ -346,6 +346,7 @@ CameraManager.shading_callback = function (self, world, shading_env, viewport)
 
 		if fog then
 			ShadingEnvironment.set_vector2(shading_env, "fog_depth_range", Vector2(fog[1], fog[2]))
+			ShadingEnvironment.set_scalar(shading_env, "fog_type", 2)
 		end
 	end
 
@@ -810,11 +811,11 @@ CameraManager._update_camera = function (self, dt, t, viewport_name)
 	end
 
 	if self._sequence_event_settings.event then
-		camera_data = self._apply_sequence_event(self, table.clone(camera_data), t)
+		self._apply_sequence_event(self, camera_data, t)
 	end
 
 	for settings, _ in pairs(self._shake_event_settings) do
-		camera_data = self._apply_shake_event(self, settings, table.clone(camera_data), t)
+		self._apply_shake_event(self, settings, camera_data, t)
 	end
 
 	self._update_camera_properties(self, camera, shadow_cull_camera, current_node, camera_data, viewport_name)
@@ -834,7 +835,7 @@ CameraManager._update_camera = function (self, dt, t, viewport_name)
 
 	return 
 end
-CameraManager._apply_sequence_event = function (self, current_data, t)
+CameraManager._apply_sequence_event = function (self, camera_data, t)
 	local sequence_event_settings = self._sequence_event_settings
 	local new_values = nil
 	local time_to_recover = sequence_event_settings.time_to_recover
@@ -848,9 +849,8 @@ CameraManager._apply_sequence_event = function (self, current_data, t)
 		new_values = self._calculate_sequence_event_values_normal(self, event_values, total_progress)
 	end
 
-	local new_data = current_data
-	new_data.position = self._calculate_sequence_event_position(self, current_data, new_values)
-	new_data.rotation = self._calculate_sequence_event_rotation(self, current_data, new_values)
+	camera_data.position = self._calculate_sequence_event_position(self, camera_data, new_values)
+	camera_data.rotation = self._calculate_sequence_event_rotation(self, camera_data, new_values)
 	sequence_event_settings.current_values = new_values
 
 	if self._sequence_event_settings.end_time <= t then
@@ -863,7 +863,7 @@ CameraManager._apply_sequence_event = function (self, current_data, t)
 		sequence_event_settings.transition_function = nil
 	end
 
-	return new_data
+	return 
 end
 CameraManager._calculate_sequence_event_values_recovery = function (self, t)
 	local new_values = {
@@ -927,17 +927,17 @@ CameraManager._calculate_sequence_event_values_normal = function (self, event_va
 
 	return new_values
 end
-CameraManager._calculate_sequence_event_position = function (self, current_data, new_values)
-	local current_pos = current_data.position
-	local current_rot = current_data.rotation
+CameraManager._calculate_sequence_event_position = function (self, camera_data, new_values)
+	local current_pos = camera_data.position
+	local current_rot = camera_data.rotation
 	local x = new_values.x*Quaternion.right(current_rot)
 	local y = new_values.y*Quaternion.forward(current_rot)
 	local z = Vector3(0, 0, new_values.z)
 
 	return current_pos + x + y + z
 end
-CameraManager._calculate_sequence_event_rotation = function (self, current_data, new_values)
-	local current_rot = current_data.rotation
+CameraManager._calculate_sequence_event_rotation = function (self, camera_data, new_values)
+	local current_rot = camera_data.rotation
 	local deg_to_rad = math.pi/180
 	local yaw_offset = Quaternion(Vector3.up(), new_values.yaw*deg_to_rad)
 	local pitch_offset = Quaternion(Vector3.right(), new_values.pitch*deg_to_rad)
@@ -947,7 +947,7 @@ CameraManager._calculate_sequence_event_rotation = function (self, current_data,
 	return Quaternion.multiply(current_rot, total_offset)
 end
 local deg_to_rad = math.pi/180
-CameraManager._apply_shake_event = function (self, settings, current_data, t)
+CameraManager._apply_shake_event = function (self, settings, camera_data, t)
 	local shake_event_settings = self._shake_event_settings
 	local start_time = settings.start_time
 	local end_time = settings.end_time
@@ -962,18 +962,17 @@ CameraManager._apply_shake_event = function (self, settings, current_data, t)
 
 	local pitch_noise_value = self._calculate_perlin_value(self, t - settings.start_time, settings)*settings.scale
 	local yaw_noise_value = self._calculate_perlin_value(self, t - settings.start_time + 10, settings)*settings.scale
-	local new_data = current_data
-	local current_rot = current_data.rotation
+	local current_rot = camera_data.rotation
 	local yaw_offset = Quaternion(Vector3.up(), yaw_noise_value*deg_to_rad)
 	local pitch_offset = Quaternion(Vector3.right(), pitch_noise_value*deg_to_rad)
 	local total_offset = Quaternion.multiply(yaw_offset, pitch_offset)
-	new_data.rotation = Quaternion.multiply(current_rot, total_offset)
+	camera_data.rotation = Quaternion.multiply(current_rot, total_offset)
 
 	if settings.end_time and settings.end_time <= t then
 		shake_event_settings[settings] = nil
 	end
 
-	return new_data
+	return 
 end
 
 function TobiiCurve(normalizedValue, powerOf, falloffPoint, deadZone)

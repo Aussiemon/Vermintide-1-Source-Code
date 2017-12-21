@@ -52,7 +52,6 @@ local function clean_inventory(items, loadout)
 		for slot, backend_id in pairs(slots) do
 			if slot == "backend_id" then
 			elseif not items[backend_id] then
-				ScriptApplication.send_to_crashify("ScriptBackendItem", "Tried to equip item not found in items list, clearing slot. Profile: %q, Backend id: %d, Slot: %q", profile_name, backend_id, slot)
 				BackendItem.set_loadout_item(nil, loadout[profile_name].backend_id, slot)
 
 				slots[slot] = nil
@@ -64,7 +63,6 @@ local function clean_inventory(items, loadout)
 					}
 				end
 			elseif missing_items and missing_items[backend_id] then
-				ScriptApplication.send_to_crashify("ScriptBackendItem", "Tried to equip item not found in ItemMasterList, clearing slot. Profile: %q, Item: %q, Backend id: %d, Slot: %q", profile_name, missing_items[backend_id], backend_id, slot)
 				BackendItem.set_loadout_item(nil, loadout[profile_name].backend_id, slot)
 
 				slots[slot] = nil
@@ -81,8 +79,6 @@ local function clean_inventory(items, loadout)
 
 	if missing_items then
 		for backend_id, key in pairs(missing_items) do
-			ScriptApplication.send_to_crashify("ScriptBackendItem", "Missing item %q in backend, removing it. Backend id: %q", key, backend_id)
-
 			items[backend_id] = nil
 		end
 	end
@@ -93,7 +89,6 @@ local function clean_inventory(items, loadout)
 		local backend_id = find_item_for_slot(items, profile_name, slot)
 
 		if backend_id then
-			ScriptApplication.send_to_crashify("ScriptBackendItem", "Slot %q was empty, putting item %d in it", slot, backend_id)
 			BackendItem.set_loadout_item(backend_id, loadout[profile_name].backend_id, slot)
 
 			empty_must_have_slots[index] = nil

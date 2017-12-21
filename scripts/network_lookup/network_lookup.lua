@@ -1545,7 +1545,7 @@ NetworkLookup.boons = create_lookup({
 }, BoonTemplates)
 
 local function statistics_path_names(path_names, stat)
-	if not stat.value then
+	if stat.value == nil then
 		for stat_name, stat_definition in pairs(stat) do
 			path_names[stat_name] = true
 

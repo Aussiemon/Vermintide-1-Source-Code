@@ -245,7 +245,9 @@ DarknessSystem.calculate_light_value = function (self, position)
 		light_value = light_value + intensity*dist_sq/1
 	end
 
-	if self._local_players_light_intensity then
+	local local_player_intensity = self._local_players_light_intensity
+
+	if local_player_intensity then
 		local player_manager = Managers.player
 		local player = player_manager.local_player(player_manager, 1)
 		local player_unit = player and player.player_unit
@@ -253,8 +255,7 @@ DarknessSystem.calculate_light_value = function (self, position)
 		if Unit.alive(player_unit) then
 			local pos = POSITION_LOOKUP[player_unit]
 			local dist_sq = math.max(Vector3.distance_squared(position, pos), 1)
-			local intensity = data.intensity
-			light_value = light_value + intensity*dist_sq/1
+			light_value = light_value + local_player_intensity*dist_sq/1
 		end
 	end
 

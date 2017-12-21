@@ -258,12 +258,17 @@ end
 StateLoading.setup_loading_view = function (self, level_key)
 	self._level_key = level_key or self._level_transition_handler:default_level_key()
 	local package_manager = Managers.package
+	local old_ui_package_name = self._ui_package_name
+	local new_ui_package_name = LevelSettings[self._level_key].loading_ui_package_name
+	local same_package = old_ui_package_name == new_ui_package_name
+	local has_loaded_old = old_ui_package_name and package_manager.has_loaded(package_manager, old_ui_package_name, "global_loading_screens")
+	local is_loading_old = old_ui_package_name and package_manager.is_loading(package_manager, old_ui_package_name)
+	local unload = (not same_package and has_loaded_old) or is_loading_old
 
-	if self._ui_package_name and (package_manager.has_loaded(package_manager, self._ui_package_name, "global_loading_screens") or package_manager.is_loading(package_manager, self._ui_package_name)) then
-		package_manager.unload(package_manager, self._ui_package_name, "global_loading_screens")
+	if unload then
+		package_manager.unload(package_manager, old_ui_package_name, "global_loading_screens")
 	end
 
-	self._ui_package_name = LevelSettings[self._level_key].loading_ui_package_name
 	local act_progression_index = nil
 
 	if self._level_key == "inn_level" then
@@ -271,16 +276,20 @@ StateLoading.setup_loading_view = function (self, level_key)
 		local has_multiple_loading_images = LevelSettings[self._level_key].has_multiple_loading_images
 
 		if has_multiple_loading_images and act_progression_index and 1 <= act_progression_index then
-			self._ui_package_name = self._ui_package_name .. "_" .. act_progression_index
+			new_ui_package_name = new_ui_package_name .. "_" .. act_progression_index
 		end
 	end
 
-	if not package_manager.has_loaded(package_manager, self._ui_package_name) and not package_manager.has_loaded(package_manager, self._ui_package_name, "global_loading_screens") then
-		package_manager.load(package_manager, self._ui_package_name, "global_loading_screens", callback(self, "cb_loading_screen_loaded", self._level_key, act_progression_index), true, true)
-	else
+	has_loaded_new = new_ui_package_name and package_manager.has_loaded(package_manager, new_ui_package_name, "global_loading_screens")
+	local is_loading_new = new_ui_package_name and package_manager.is_loading(package_manager, new_ui_package_name)
+
+	if not has_loaded_new and not is_loading_new then
+		package_manager.load(package_manager, new_ui_package_name, "global_loading_screens", callback(self, "cb_loading_screen_loaded", self._level_key, act_progression_index), true, true)
+	elseif has_loaded_new then
 		self.cb_loading_screen_loaded(self, self._level_key, act_progression_index, true)
 	end
 
+	self._ui_package_name = new_ui_package_name
 	self._loading_view_setup_done = true
 
 	return 

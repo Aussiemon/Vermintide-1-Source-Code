@@ -199,12 +199,6 @@ BTSmashDoorAction.StateOpening.on_enter = function (self, params)
 
 	locomotion_extension.set_wanted_rotation(locomotion_extension, rotation)
 
-	local door_extension = ScriptUnit.extension(target_unit, "door_system")
-
-	door_extension.interacted_with(door_extension, unit)
-
-	blackboard.is_opening_door = true
-
 	return 
 end
 BTSmashDoorAction.StateOpening.update = function (self, dt, t)
@@ -218,8 +212,14 @@ BTSmashDoorAction.StateOpening.update = function (self, dt, t)
 
 	local door_extension = ScriptUnit.extension(target_unit, "door_system")
 
-	if not door_extension.is_opening(door_extension) then
+	if door_extension.is_open(door_extension) and not door_extension.is_opening(door_extension) then
 		return BTSmashDoorAction.StateMovingToSmartObjectExit
+	elseif not door_extension.is_open(door_extension) then
+		local unit = self.unit
+
+		door_extension.interacted_with(door_extension, unit)
+
+		blackboard.is_opening_door = true
 	end
 
 	return 

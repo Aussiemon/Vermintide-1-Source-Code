@@ -3,7 +3,19 @@ PlayerUnitHealthExtension.init = function (self, extension_init_context, unit, e
 	self.unit = unit
 	local is_server = Managers.player.is_server
 	self.is_server = is_server
+	self.player = extension_init_data.player
+	self.is_bot = not self.player:is_player_controlled()
 	local max_health = extension_init_data.health
+	local game_object_id = extension_init_data.game_object_id
+
+	if (not max_health or max_health < 1) and not game_object_id then
+		ScriptApplication.send_to_crashify("PlayerUnitHealthExtension", "Initialized local extension with invalid max health value %q, is bot: %s", tostring(max_health), tostring(self.is_bot))
+
+		local difficulty_manager = Managers.state.difficulty
+		local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+		max_health = difficulty_settings.max_hp
+	end
+
 	self._initial_max_health = max_health
 
 	self.set_max_health(self, max_health, true)
@@ -11,9 +23,7 @@ PlayerUnitHealthExtension.init = function (self, extension_init_context, unit, e
 	self.unmodified_max_health_changed = false
 	self.damage = extension_init_data.damage or 0
 	self.state = "alive"
-	self.player = extension_init_data.player
-	self.game_object_id = extension_init_data.game_object_id
-	self.is_bot = not self.player:is_player_controlled()
+	self.game_object_id = game_object_id
 
 	return 
 end
@@ -195,8 +205,6 @@ PlayerUnitHealthExtension._update_missions = function (self)
 	if has_tome then
 		mission_system.increment_goal_mission_counter(mission_system, "cemetery_tome_and_grim_bury", 1, true)
 	end
-
-	print("yay", has_grimoire, has_tome)
 
 	return 
 end

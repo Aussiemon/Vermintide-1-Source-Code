@@ -1245,6 +1245,7 @@ for name, template in pairs(AchievementTemplates) do
 	template.name = name
 	AchievementTemplates_n = AchievementTemplates_n + 1
 	templates[AchievementTemplates_n] = template
+	templates[name] = template
 end
 
 AchievementTemplates = templates

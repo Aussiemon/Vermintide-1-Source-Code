@@ -400,6 +400,8 @@ LevelUnlockUtils.level_unlocked = function (statistics_db, player_stats_id, leve
 					return true
 				end
 			end
+
+			return false
 		end
 
 		local required_act_completed = settings.required_act_completed

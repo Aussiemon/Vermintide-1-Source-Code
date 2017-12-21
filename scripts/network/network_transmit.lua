@@ -118,8 +118,10 @@ NetworkTransmit.send_rpc_server = function (self, rpc_name, ...)
 	if self.is_server then
 		self.queue_local_rpc(self, rpc_name, ...)
 	else
-		assert(self.server_peer_id, "We don't have any server connection when trying to send RPC %q", rpc_name)
-		rpc(self.server_peer_id, ...)
+		local server_peer_id = self.server_peer_id
+
+		assert(server_peer_id, "We don't have any server connection when trying to send RPC %q", rpc_name)
+		rpc(server_peer_id, ...)
 	end
 
 	return 

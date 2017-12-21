@@ -386,6 +386,16 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 	ingame_ui.suspend_active_view(ingame_ui)
 	Managers.popup:cancel_all_popups()
 
+	local function check_hard_mode_complete(player)
+		local is_complete = Managers.state.achievement:has_unlocked("magnus_hard_mode_nightmare", "supply_and_demand_hard_mode_nightmare", "city_wall_hard_mode_nightmare", "engines_of_war_hard_mode_nightmare", "white_rat_hard_mode_nightmare", "well_watch_hard_mode_nightmare", "waterfront_hard_mode_nightmare", "garden_of_morr_hard_mode_nightmare", "enemy_below_hard_mode_nightmare", "black_powder_hard_mode_nightmare", "wheat_and_chaff_hard_mode_nightmare", "smugglers_run_hard_mode_nightmare", "wizards_tower_hard_mode_nightmare", "magnus_hard_mode_cataclysm", "supply_and_demand_hard_mode_cataclysm", "city_wall_hard_mode_cataclysm", "engines_of_war_hard_mode_cataclysm", "white_rat_hard_mode_cataclysm", "well_watch_hard_mode_cataclysm", "waterfront_hard_mode_cataclysm", "garden_of_morr_hard_mode_cataclysm", "enemy_below_hard_mode_cataclysm", "black_powder_hard_mode_cataclysm", "wheat_and_chaff_hard_mode_cataclysm", "smugglers_run_hard_mode_cataclysm", "wizards_tower_hard_mode_cataclysm")
+
+		if is_complete then
+			Managers.player:statistics_db():set_stat(player.stats_id(player), "hard_mode_complete", true)
+		end
+
+		return 
+	end
+
 	if game_mode_key == "survival" then
 		if game_won then
 			print("Game won")
@@ -406,6 +416,7 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 
 			local player = Managers.player:local_player()
 
+			check_hard_mode_complete(player)
 			Managers.player:set_stats_backend(player)
 			Managers.package:load(dicegame_resource_path, "state_ingame_running", nil, true)
 		end
@@ -423,6 +434,7 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 
 		local player = Managers.player:local_player()
 
+		check_hard_mode_complete(player)
 		Managers.player:set_stats_backend(player)
 		Managers.package:load(dicegame_resource_path, "state_ingame_running", nil, true)
 		Managers.package:load(menu_assets_resource_path, "menu_assets_postgame", nil, true)
@@ -615,6 +627,12 @@ StateInGameRunning._update_invites = function (self, dt, t)
 			current_lobby_id = (self._lobby_host and self._lobby_host.lobby._data.session_name) or self._lobby_client.lobby._data.session_name
 		else
 			current_lobby_id = (self._lobby_host and self._lobby_host:id()) or self._lobby_client:id()
+		end
+
+		if self.popup_id then
+			Managers.popup:cancel_popup(self.popup_id)
+
+			self.popup_id = nil
 		end
 
 		local current_level = self.level_transition_handler.level_key

@@ -31,11 +31,7 @@ PlayerUnitAttachmentExtension.extensions_ready = function (self, world, unit)
 
 		if not item_data then
 		else
-			local slot_data = AttachmentUtils.create_attachment(world, unit, attachments, slot_name, item_data, false)
-
-			AttachmentUtils.apply_attachment_buffs(self.current_item_buffs, self.buff_extension, slot_name, item_data)
-
-			attachments.slots[slot_name] = slot_data
+			self.create_attachment(self, slot_name, item_data)
 		end
 	end
 
@@ -83,14 +79,18 @@ PlayerUnitAttachmentExtension.hot_join_sync = function (self, sender)
 end
 PlayerUnitAttachmentExtension.create_attachment = function (self, slot_name, item_data)
 	local attachments = self._attachments
-	local slot_data = AttachmentUtils.create_attachment(self._world, self._unit, attachments, slot_name, item_data, false)
+	local unit = self._unit
+	local slot_data = AttachmentUtils.create_attachment(self._world, unit, attachments, slot_name, item_data, false)
 	attachments.slots[slot_name] = slot_data
 	local item_data = slot_data.item_data
-	local item_template = BackendUtils.get_item_template(item_data)
-	local on_equip_flow_event = item_template.on_equip_flow_event
 
-	if on_equip_flow_event then
-		Unit.flow_event(self._unit, on_equip_flow_event)
+	if not ScriptUnit.extension(unit, "first_person_system").first_person_mode then
+		local item_template = BackendUtils.get_item_template(item_data)
+		local show_attachments_event = item_template.show_attachments_event
+
+		if show_attachments_event then
+			Unit.flow_event(unit, show_attachments_event)
+		end
 	end
 
 	AttachmentUtils.apply_attachment_buffs(self.current_item_buffs, self.buff_extension, slot_name, item_data)
@@ -134,6 +134,14 @@ PlayerUnitAttachmentExtension.show_attachments = function (self, show)
 
 		if show then
 			Unit.flow_event(unit, "lua_attachment_unhidden")
+
+			local item_data = slot_data.item_data
+			local item_template = BackendUtils.get_item_template(item_data)
+			local show_attachments_event = item_template.show_attachments_event
+
+			if show_attachments_event then
+				Unit.flow_event(self._unit, show_attachments_event)
+			end
 		else
 			Unit.flow_event(unit, "lua_attachment_hidden")
 		end

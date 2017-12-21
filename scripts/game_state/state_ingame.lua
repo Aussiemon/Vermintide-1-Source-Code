@@ -167,6 +167,10 @@ StateIngame.on_enter = function (self)
 	elseif self.network_client then
 		print("[StateIngame] Client ingame")
 
+		if loading_context.network_transmit then
+			print("Using old NetworkTransmit")
+		end
+
 		self.network_transmit = loading_context.network_transmit or NetworkTransmit:new(is_server, self.network_client.connection_handler)
 
 		self.network_client:register_rpcs(network_event_delegate, self.network_transmit)
@@ -510,6 +514,22 @@ StateIngame.on_enter = function (self)
 
 			Managers.account:set_presence("playing", level_display_name)
 		end
+	end
+
+	local in_game_session = Managers.state.network:in_game_session()
+
+	print("In gamesession", in_game_session)
+	self._check_mutators(self)
+
+	return 
+end
+StateIngame._check_mutators = function (self)
+	if Managers.state.quest:is_mutator_active("fog") then
+		local darkness_system = Managers.state.entity:system("darkness_system")
+
+		darkness_system.set_global_darkness(darkness_system, true)
+		darkness_system.set_local_players_light_intensity(darkness_system, 3)
+		Managers.state.camera:set_fog_depth_override(0, 5)
 	end
 
 	return 
@@ -1490,6 +1510,8 @@ StateIngame.on_exit = function (self, application_shutdown)
 		self.network_transmit:destroy()
 
 		self.network_transmit = nil
+
+		print("Cleaned up NetworkTransmit", self.network_transmit, self.parent.loading_context.network_transmit)
 	else
 		self.profile_synchronizer:unregister_network_events()
 

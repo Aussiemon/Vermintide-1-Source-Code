@@ -165,7 +165,11 @@ PlayerUnitSmartTargetingExtension.update_opt2 = function (self, unit, input, dt,
 	local targeting_data = self.targeting_data
 	targeting_data.unit = target_unit
 	targeting_data.aim_score = aim_score
-	targeting_data.target_position = target_position
+
+	if target_position then
+		targeting_data.target_position = target_position
+	end
+
 	targeting_data.targets_within_range = targets_within_range
 
 	Profiler.stop("rest")

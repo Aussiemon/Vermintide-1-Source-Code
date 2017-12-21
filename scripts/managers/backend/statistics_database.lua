@@ -279,6 +279,11 @@ StatisticsDefinitions = {
 		},
 		event_items_found = {
 			value = 0
+		},
+		hard_mode_complete = {
+			value = false,
+			database_name = "hard_mode_complete",
+			database_type = "lua"
 		}
 	}
 }
@@ -493,7 +498,7 @@ end
 
 local function add_names(stats)
 	for stat_name, stat_definition in pairs(stats) do
-		if not stat_definition.value then
+		if stat_definition.value == nil then
 			add_names(stat_definition)
 		else
 			stat_definition.name = stat_name
@@ -511,6 +516,8 @@ local function convert_from_backend(raw_value, database_type)
 		return tonumber(raw_value)
 	elseif database_type == "string" then
 		return raw_value
+	elseif database_type == "lua" then
+		return cjson.decode(raw_value)
 	elseif database_type == "hexarray" then
 		local value = {}
 		local value_n = 0
@@ -542,6 +549,18 @@ local function convert_to_backend(value, database_type)
 		return tostring(value)
 	elseif database_type == "string" then
 		return value
+	elseif database_type == "lua" then
+		local json_data = cjson.encode(value)
+		local length = string.len(json_data)
+
+		if 255 < length then
+			ScriptApplication.send_to_crashify("Backend", "Too much data (%d characters) in backend lua json encode", length)
+			print(json_data)
+		end
+
+		fassert(length < 256, "Too much data in backend lua json, see above")
+
+		return json_data
 	elseif database_type == "hexarray" then
 		local raw_value = ""
 		local value_n = #value
@@ -639,6 +658,10 @@ local function init_stat(stat, backend_stats)
 
 				if stat.database_type == nil then
 					stat.persistent_value = 0
+				elseif stat.database_type == "string" then
+					stat.persistent_value = ""
+				elseif stat.database_type == "lua" then
+					stat.persistent_value = nil
 				elseif stat.database_type == "hexarray" then
 					stat.persistent_value = table.clone(stat.value)
 				end
@@ -702,7 +725,7 @@ local function networkified_path(path)
 end
 
 local function sync_stat(peer_id, stat_peer_id, stat_local_player_id, path, path_step, stat)
-	if stat.value then
+	if stat.value ~= nil then
 		if stat.sync_on_hot_join then
 			fassert(type(stat.value) == "number", "Not supporting hot join syncing of value %q", type(stat.value))
 			fassert(path_step <= NetworkConstants.statistics_path_max_size, "statistics path is longer than max size, increase in global.networks_config")
@@ -738,9 +761,13 @@ StatisticsDatabase.hot_join_sync = function (self, peer_id)
 end
 
 local function reset_stat(stat)
-	if stat.value then
+	if stat.value ~= nil then
 		if stat.database_type == nil then
 			stat.value = 0
+		elseif stat.database_type == "string" then
+			stat.value = ""
+		elseif stat.database_type == "lua" then
+			stat.value = nil
 		elseif stat.database_type == "hexarray" then
 			for i = 1, #stat.value, 1 do
 				stat.value[i] = false
@@ -768,7 +795,7 @@ StatisticsDatabase.reset_session_stats = function (self)
 end
 
 local function generate_backend_stats(stat, backend_stats)
-	if stat.value then
+	if stat.value ~= nil then
 		local database_name = stat.database_name
 
 		if database_name then

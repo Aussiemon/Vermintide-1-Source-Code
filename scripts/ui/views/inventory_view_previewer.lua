@@ -521,10 +521,10 @@ InventoryViewPreviewer._spawn_item = function (self, item_name)
 				self.equip_item_unit(self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
 			end
 
-			local on_equip_flow_event = item_template.on_equip_flow_event
+			local show_attachments_event = item_template.show_attachments_event
 
-			if on_equip_flow_event then
-				Unit.flow_event(character_unit, on_equip_flow_event)
+			if show_attachments_event then
+				Unit.flow_event(character_unit, show_attachments_event)
 			end
 		end
 	end

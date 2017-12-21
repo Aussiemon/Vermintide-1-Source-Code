@@ -237,6 +237,24 @@ end
 local ACHIEVEMENTS_PER_FRAME = 1
 local AchievementTemplates = AchievementTemplates
 local AchievementTemplates_n = AchievementTemplates_n
+AchievementManager.has_unlocked = function (self, ...)
+	local num_template_names = select("#", ...)
+	local templates = AchievementTemplates
+	local platform = self.platform
+	local functions = platform_functions[platform]
+
+	for i = 1, num_template_names, 1 do
+		local template_name = select(i, ...)
+		local template = templates[template_name]
+		local unlocked, error = functions.is_unlocked(template)
+
+		if not unlocked then
+			return false
+		end
+	end
+
+	return true
+end
 AchievementManager.update = function (self, dt, t)
 	if self.error_timeout then
 		self.error_timeout = self.error_timeout - dt

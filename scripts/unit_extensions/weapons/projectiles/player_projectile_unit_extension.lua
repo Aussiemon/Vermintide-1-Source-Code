@@ -404,6 +404,12 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	end
 
 	local backstab_multiplier = 1
+	local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+	local hawkeye = buff_extension and buff_extension.has_buff_type(buff_extension, "increased_zoom")
+
+	if hawkeye and (hit_zone_name == "head" or hit_zone_name == "neck") then
+		backstab_multiplier = buff_extension.apply_buffs_to_value(buff_extension, backstab_multiplier, StatBuffIndex.HAWKEYE)
+	end
 
 	if self.is_server then
 		self.weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors[hit_ragdoll_actor], backstab_multiplier)
@@ -449,7 +455,6 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	end
 
 	if hit_zone_name == "head" then
-		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.COOP_STAMINA)
 
 		if (procced or script_data.debug_legendary_traits) and AiUtils.unit_alive(hit_unit) then

@@ -68,7 +68,7 @@ Attachments.flat_trophy = table.clone(flat_trophy)
 local wh_hats = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_show_ears",
+	show_attachments_event = "lua_show_ears",
 	attachment_node_linking = AttachmentNodeLinking.hat,
 	slots = {
 		"slot_hat"
@@ -79,7 +79,7 @@ Attachments.wh_hats = table.clone(wh_hats)
 local wh_hats_skinned = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_show_ears",
+	show_attachments_event = "lua_show_ears",
 	attachment_node_linking = AttachmentNodeLinking.hat_skinned,
 	slots = {
 		"slot_hat"
@@ -100,7 +100,7 @@ Attachments.ww_hoods = table.clone(ww_hoods)
 local es_hats = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_show_ears",
+	show_attachments_event = "lua_show_ears",
 	attachment_node_linking = AttachmentNodeLinking.hat,
 	slots = {
 		"slot_hat"
@@ -111,7 +111,7 @@ Attachments.es_hats = table.clone(es_hats)
 local es_hats_no_ear = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_hide_ears",
+	show_attachments_event = "lua_hide_ears",
 	attachment_node_linking = AttachmentNodeLinking.hat,
 	slots = {
 		"slot_hat"
@@ -122,7 +122,7 @@ Attachments.es_hats_no_ear = table.clone(es_hats_no_ear)
 local es_hats_skinned = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet_es_hood",
-	on_equip_flow_event = "lua_show_ears",
+	show_attachments_event = "lua_show_ears",
 	attachment_node_linking = AttachmentNodeLinking.es_hat_skinned,
 	slots = {
 		"slot_hat"
@@ -133,7 +133,7 @@ Attachments.es_hats_skinned = table.clone(es_hats_skinned)
 local dr_helmets = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_show_ears",
+	show_attachments_event = "lua_show_ears",
 	attachment_node_linking = AttachmentNodeLinking.hat,
 	slots = {
 		"slot_hat"
@@ -144,7 +144,7 @@ Attachments.dr_helmets = table.clone(dr_helmets)
 local dr_helmets_no_ear = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_hide_ears",
+	show_attachments_event = "lua_hide_ears",
 	attachment_node_linking = AttachmentNodeLinking.hat,
 	slots = {
 		"slot_hat"
@@ -155,7 +155,7 @@ Attachments.dr_helmets_no_ear = table.clone(dr_helmets_no_ear)
 local bw_gates = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_show_breastplate",
+	show_attachments_event = "lua_show_breastplate",
 	attachment_node_linking = AttachmentNodeLinking.bw_gate,
 	slots = {
 		"slot_hat"
@@ -166,7 +166,7 @@ Attachments.bw_gates = table.clone(bw_gates)
 local bw_gates_facemask = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_show_breastplate",
+	show_attachments_event = "lua_show_breastplate",
 	attachment_node_linking = AttachmentNodeLinking.bw_gate_facemask,
 	slots = {
 		"slot_hat"
@@ -177,7 +177,7 @@ Attachments.bw_gates_facemask = table.clone(bw_gates_facemask)
 local bw_gates_no_breastplate = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_hide_breastplate",
+	show_attachments_event = "lua_hide_breastplate",
 	attachment_node_linking = AttachmentNodeLinking.bw_gate,
 	slots = {
 		"slot_hat"
@@ -188,7 +188,7 @@ Attachments.bw_gates_no_breastplate = table.clone(bw_gates_no_breastplate)
 local bw_gates_facemask_no_breastplate = {
 	unit = "",
 	display_unit = "units/weapons/weapon_display/display_helmet",
-	on_equip_flow_event = "lua_hide_breastplate",
+	show_attachments_event = "lua_hide_breastplate",
 	attachment_node_linking = AttachmentNodeLinking.bw_gate_facemask,
 	slots = {
 		"slot_hat"
