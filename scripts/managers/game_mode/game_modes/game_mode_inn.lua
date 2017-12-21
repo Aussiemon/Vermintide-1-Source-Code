@@ -7,7 +7,7 @@ GameModeInn.init = function (self, settings, world, ...)
 	GameModeInn.super.init(self, settings, world, ...)
 
 	local title_properties = Managers.backend:get_interface("title_properties")
-	local brawl_enabled = false
+	local brawl_enabled = title_properties.get_value(title_properties, "brawl_enabled")
 	self._pvp_enabled = brawl_enabled
 
 	return 
