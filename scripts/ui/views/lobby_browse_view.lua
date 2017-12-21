@@ -186,6 +186,9 @@ LobbyBrowseView.on_enter = function (self)
 	self.active = true
 
 	self.search(self)
+
+	self.join_lobby_data_id = nil
+
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	return 
@@ -246,9 +249,9 @@ LobbyBrowseView.cancel_join_lobby = function (self, status_message)
 		if status_message and not self.cancel_join_lobby_popup_id then
 			self.cancel_join_lobby_popup_id = Managers.popup:queue_popup(Localize(status_message), Localize("popup_message_topic"), "ok", Localize("popup_choice_ok"))
 		end
-
-		self.join_lobby_data_id = nil
 	end
+
+	self.join_lobby_data_id = nil
 
 	return 
 end

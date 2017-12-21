@@ -1519,6 +1519,9 @@ MatchmakingManager.request_join_lobby = function (self, lobby)
 	matchmaking_ui.large_window_set_title(matchmaking_ui, "status_matchmaking")
 	matchmaking_ui.large_window_set_level(matchmaking_ui, lobby.selected_level_key)
 	matchmaking_ui.large_window_set_difficulty(matchmaking_ui, lobby.difficulty)
+
+	self.state_context = state_context
+
 	self._change_state(self, MatchmakingStateRequestJoinGame, self.params, state_context)
 
 	return 

@@ -1245,19 +1245,14 @@ LobbyItemsList.sort_lobbies = function (self, lobbies, sort_func)
 
 	return 
 end
-LobbyItemsList.remove_invalid_lobbies = function (self, lobbies)
-	local valid_lobbies = {}
-	local num_lobbies = #lobbies
+LobbyItemsList.convert_to_array = function (self, table)
+	local array = {}
 
-	for i = 1, num_lobbies, 1 do
-		local lobby = lobbies[i]
-
-		if lobby then
-			valid_lobbies[#valid_lobbies + 1] = lobby
-		end
+	for _, data in pairs(table) do
+		array[#array + 1] = data
 	end
 
-	return valid_lobbies
+	return array
 end
 LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_reset)
 	local settings = self.settings
@@ -1267,13 +1262,13 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 	local num_lobbies = 0
 	local sort_func = self.sort_lobbies_function
 	local selected_lobby = self.selected_lobby(self)
-	local valid_lobbies = self.remove_invalid_lobbies(self, lobbies)
+	local lobbies_array = self.convert_to_array(self, lobbies)
 
 	if sort_func then
-		self.sort_lobbies(self, valid_lobbies, sort_func)
+		self.sort_lobbies(self, lobbies_array, sort_func)
 	end
 
-	for lobby_id, lobby_data in pairs(valid_lobbies) do
+	for lobby_id, lobby_data in pairs(lobbies_array) do
 		local style = create_lobby_list_entry_style()
 		local content = create_lobby_list_entry_content(lobby_data)
 
@@ -1288,7 +1283,7 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 		end
 	end
 
-	self.lobbies = valid_lobbies
+	self.lobbies = lobbies_array
 	self.number_of_items_in_list = num_lobbies
 	item_list_widget.content.list_content = list_content
 	item_list_widget.style.list_style = list_style
