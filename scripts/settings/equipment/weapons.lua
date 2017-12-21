@@ -1,6 +1,7 @@
 require("scripts/settings/attachment_node_linking")
 require("scripts/unit_extensions/generic/interactions")
 require("scripts/utils/action_assert_funcs")
+require("scripts/settings/dlc_settings")
 dofile("scripts/settings/explosion_templates")
 dofile("scripts/settings/equipment/projectiles")
 require("scripts/settings/action_templates")
@@ -19,7 +20,6 @@ dofile("scripts/settings/equipment/1h_axes")
 dofile("scripts/settings/equipment/1h_hammers")
 dofile("scripts/settings/equipment/1h_hammers_wizard")
 dofile("scripts/settings/equipment/2h_swords")
-dofile("scripts/settings/equipment/2h_swords_executioner")
 dofile("scripts/settings/equipment/2h_axes")
 dofile("scripts/settings/equipment/2h_axes_wood_elf")
 dofile("scripts/settings/equipment/2h_hammers")
@@ -60,6 +60,14 @@ dofile("scripts/settings/equipment/grenades")
 dofile("scripts/settings/equipment/torches")
 dofile("scripts/settings/equipment/grimoire")
 dofile("scripts/settings/equipment/packmaster_claw")
+
+for dlc_name, dlc in pairs(DLCSettings) do
+	local weapons = dlc.weapons
+
+	for _, weapon in ipairs(weapons) do
+		dofile(weapon)
+	end
+end
 
 Weapons = Weapons or {}
 local POSITION_LOOKUP = POSITION_LOOKUP
@@ -1732,7 +1740,7 @@ AttackTemplates = {
 			0
 		}
 	},
-	slashing_tank_executioner = {
+	slashing_tank_hs = {
 		stagger_type = "ai_stagger",
 		sound_type = "heavy",
 		damage_type = "slashing_tank",

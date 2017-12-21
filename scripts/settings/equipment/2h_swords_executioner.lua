@@ -498,28 +498,28 @@ weapon_template.actions = {
 			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
-				attack_template = "slashing_tank_executioner"
+				attack_template = "slashing_tank_hs"
 			},
 			targets = {
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				}
 			}
 		},
@@ -591,28 +591,28 @@ weapon_template.actions = {
 			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
-				attack_template = "slashing_tank_executioner"
+				attack_template = "slashing_tank_hs"
 			},
 			targets = {
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				}
 			}
 		},
@@ -684,28 +684,28 @@ weapon_template.actions = {
 			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
-				attack_template = "slashing_tank_executioner"
+				attack_template = "slashing_tank_hs"
 			},
 			targets = {
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				}
 			}
 		},
@@ -777,28 +777,28 @@ weapon_template.actions = {
 			max_targets = math.huge,
 			default_target = {
 				attack_template_damage_type = "no_damage",
-				attack_template = "slashing_tank_executioner"
+				attack_template = "slashing_tank_hs"
 			},
 			targets = {
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				},
 				{
 					attack_template_damage_type = "two_h_tank_L_weak",
-					attack_template = "slashing_tank_executioner"
+					attack_template = "slashing_tank_hs"
 				}
 			}
 		},
@@ -979,7 +979,7 @@ weapon_template.wwise_dep_right_hand = {
 }
 Weapons = Weapons or {}
 Weapons.two_handed_swords_executioner_template_1 = table.create_copy(Weapons.two_handed_swords_executioner_template_1, weapon_template)
-Weapons.two_handed_swords_executioner_template_1_co = table.create_copy(Weapons.two_handed_swords_template_1_co, weapon_template)
+Weapons.two_handed_swords_executioner_template_1_co = table.create_copy(Weapons.two_handed_swords_executioner_template_1_co, weapon_template)
 Weapons.two_handed_swords_executioner_template_1_co.compare_statistics.attacks.light_attack.damage = 0.4296875
 Weapons.two_handed_swords_executioner_template_1_co.compare_statistics.attacks.heavy_attack.damage = 0.64625
 Weapons.two_handed_swords_executioner_template_1_t2 = table.create_copy(Weapons.two_handed_swords_executioner_template_1_t2, weapon_template)
