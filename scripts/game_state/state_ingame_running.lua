@@ -637,12 +637,14 @@ StateInGameRunning._update_invites = function (self, dt, t)
 			self.popup_id = Managers.popup:queue_popup(Localize("popup_join_blocked_by_joining_player"), Localize("popup_invite_not_installed_header"), "not_installed", Localize("menu_ok"))
 		end
 
-		if self._lobby_client or not self.is_in_inn then
-			self._invite_lobby_data = invite_data
-		elseif not self.popup_id then
-			Managers.matchmaking:request_join_lobby(invite_data, {
-				friend_join = true
-			})
+		if not self.popup_id then
+			if self._lobby_client or not self.is_in_inn then
+				self._invite_lobby_data = invite_data
+			else
+				Managers.matchmaking:request_join_lobby(invite_data, {
+					friend_join = true
+				})
+			end
 		end
 	end
 

@@ -1606,6 +1606,12 @@ GenericStatusExtension.set_falling_height = function (self, override)
 
 	return 
 end
+GenericStatusExtension.reset_falling_height = function (self)
+	self.fall_height = 0
+	self.update_funcs.falling = GenericStatusExtension.update_falling
+
+	return 
+end
 GenericStatusExtension.modify_poison = function (self, increase, attacker_unit)
 	local poison_level_old = self.poison_level
 

@@ -236,6 +236,41 @@ function flow_callback_activate_triggered_pickup_spawners(params)
 	return flow_return_table
 end
 
+function flow_callback_hide_pickup(params)
+	local units = Managers.state.entity:get_entities("ObjectivePickupTutorialExtension")
+
+	for pickup_unit, pickup_extension in pairs(units) do
+		local pickup_extension = ScriptUnit.extension(pickup_unit, "pickup_system")
+
+		if pickup_extension.pickup_name == params.pickup_name and Unit.alive(pickup_unit) then
+			Unit.set_unit_visibility(pickup_unit, false)
+			Unit.flow_event(pickup_unit, "lua_hidden")
+			Unit.set_data(pickup_unit, "interaction_data", "used", true)
+			Unit.set_data(pickup_unit, "hide_marker", true)
+
+			flow_return_table.hidden = true
+		end
+	end
+
+	flow_return_table.hidden = false
+
+	return flow_return_table
+end
+
+function flow_callback_hide_pickup_marker(params)
+	local units = Managers.state.entity:get_entities("ObjectivePickupTutorialExtension")
+
+	for pickup_unit, pickup_extension in pairs(units) do
+		local pickup_extension = ScriptUnit.extension(pickup_unit, "pickup_system")
+
+		if pickup_extension.pickup_name == params.pickup_name and Unit.alive(pickup_unit) then
+			Unit.set_data(pickup_unit, "hide_marker", true)
+		end
+	end
+
+	return 
+end
+
 function flow_query_wielded_weapon(params)
 	local player_unit = params.player_unit
 	local equipment = nil
@@ -2624,10 +2659,18 @@ function flow_callback_teleporter(params)
 		if unit == player_unit then
 			if ScriptUnit.has_extension(unit, "locomotion_system") then
 				local locomotion = ScriptUnit.extension(unit, "locomotion_system")
-				local player_direction = Vector3.normalize(Quaternion.forward(locomotion.current_rotation(locomotion)))
-				local exit_rotation = Quaternion.inverse(Quaternion.look(Quaternion.rotate(entrance_node_rotation, player_direction)))
+				local status_extension = ScriptUnit.extension(unit, "status_system")
+				local source_matrix = Matrix4x4.from_quaternion(entrance_node_rotation)
+				local destionationFlipRotation = Matrix4x4.from_quaternion(Quaternion.axis_angle(Vector3.up(), math.pi*2))
+				local sourveInvMat = Matrix4x4.multiply(destionationFlipRotation, Matrix4x4.inverse(source_matrix))
+				local player_world_rot = Unit.world_rotation(unit, 0)
+				local RotationInSourceSpace = Quaternion.multiply(Quaternion.from_matrix4x4(sourveInvMat), player_world_rot)
+				local new_rot = Quaternion.multiply(exit_node_rotation, RotationInSourceSpace)
+				local rx, ry, rz = Quaternion.to_euler_angles_xyz(new_rot)
+				local new_rot_180 = Quaternion.from_euler_angles_xyz(rx, ry, rz + 180)
 
-				locomotion.teleport_to(locomotion, exit_position, exit_node_rotation)
+				locomotion.teleport_to(locomotion, exit_position, new_rot_180)
+				status_extension.reset_falling_height(status_extension)
 			end
 
 			flow_return_table.player_ported = true

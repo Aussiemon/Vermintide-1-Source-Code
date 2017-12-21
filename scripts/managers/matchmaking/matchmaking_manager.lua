@@ -1550,13 +1550,18 @@ MatchmakingManager.request_join_lobby = function (self, lobby, state_context_par
 
 	return 
 end
-MatchmakingManager.cancel_join_lobby = function (self, reason)
+MatchmakingManager.cancel_join_lobby = function (self, reason, ...)
 	self.state_context.non_matchmaking_join = nil
 
 	if self.state_context.join_by_lobby_browser and self.lobby_browser_view_ui then
 		self.state_context.join_by_lobby_browser = nil
 
 		self.lobby_browser_view_ui:cancel_join_lobby(reason)
+	else
+		local localized_reason = Localize(reason)
+		localized_reason = string.format(localized_reason, ...)
+
+		Managers.simple_popup:queue_popup(localized_reason, Localize("popup_error_topic"), "ok", Localize("button_ok"))
 	end
 
 	return 

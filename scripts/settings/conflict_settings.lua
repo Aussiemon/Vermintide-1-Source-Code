@@ -1596,7 +1596,7 @@ RoamingSettings = {
 	},
 	challenge = {
 		despawn_distance = 45,
-		despawn_path_distance = 400,
+		despawn_path_distance = 90,
 		despawn_distance_z = 30,
 		disabled = false
 	}

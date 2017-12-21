@@ -105,20 +105,43 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 		if self.handshaker_client:handshake_done() then
 			self.matchmaking_manager.debug.text = "Requesting to join"
 
-			mm_printf("Handshake done, requesting to join game...")
-
-			local friend_join = not not self.state_context.friend_join
-
-			self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_join_lobby", lobby_id, friend_join)
+			mm_printf("Handshake done, verifying network hash...")
 
 			self.join_timeout = t + MatchmakingSettings.REQUEST_JOIN_LOBBY_REPLY_TIME
-			self.state = "asking_to_join"
+			self.state = "verifying_network_hash"
 		elseif self.handshake_timeout < t then
 			local host_name = (LobbyInternal.user_name and LobbyInternal.user_name(host)) or "-"
 
 			mm_printf("Failed to resolve handshake in time. lobby_id=%s, host_id:%s", lobby_id, host_name)
 
 			return self.join_game_failed(self, lobby_id, "handshake_timeout", t, true)
+		end
+	elseif state == "verifying_network_hash" then
+		local network_hash = self.lobby_client:lobby_data("network_hash")
+
+		if network_hash ~= nil then
+			if network_hash == self.lobby_client.network_hash then
+				mm_printf("Verifying network hash done, requesting to join game...")
+
+				local friend_join = not not self.state_context.friend_join
+
+				self.handshaker_client:send_rpc_to_host("rpc_matchmaking_request_join_lobby", lobby_id, friend_join)
+
+				self.join_timeout = t + MatchmakingSettings.REQUEST_JOIN_LOBBY_REPLY_TIME
+				self.state = "asking_to_join"
+			else
+				host_name = (LobbyInternal.user_name and LobbyInternal.user_name(host)) or "-"
+
+				mm_printf("Non-mathching network hash, aborting join... lobby_id=%s, host_id:%s", lobby_id, host_name)
+
+				return self.join_game_failed(self, lobby_id, "failure_start_join_server_incorrect_hash", t, true, self.lobby_client.network_hash, network_hash)
+			end
+		elseif self.join_timeout < t then
+			local host_name = (LobbyInternal.user_name and LobbyInternal.user_name(host)) or "-"
+
+			mm_printf("Failed to fetch network hash in time. lobby_id=%s, host_id:%s", lobby_id, host_name)
+
+			return self.join_game_failed(self, lobby_id, "join_timeout", t, true)
 		end
 	elseif state == "asking_to_join" then
 		local join_time = MatchmakingSettings.REQUEST_JOIN_LOBBY_REPLY_TIME - self.join_timeout - t
@@ -150,7 +173,7 @@ MatchmakingStateRequestJoinGame.join_game_success = function (self, t)
 
 	return MatchmakingStateRequestProfiles, self.state_context
 end
-MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, reason, t, is_bad_connection)
+MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, reason, t, is_bad_connection, ...)
 	self.matchmaking_manager:add_broken_lobby(lobby_id, t, is_bad_connection)
 	self.lobby_client:destroy()
 
@@ -162,7 +185,7 @@ MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, rea
 	local non_matchmaking_join = self.state_context.non_matchmaking_join
 
 	if non_matchmaking_join then
-		self.matchmaking_manager:cancel_join_lobby(reason)
+		self.matchmaking_manager:cancel_join_lobby(reason, ...)
 
 		return MatchmakingStateIdle, self.state_context
 	else
