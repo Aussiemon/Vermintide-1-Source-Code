@@ -509,8 +509,9 @@ GenericStatusExtension.blocked_attack = function (self, fatigue_type, attacking_
 				local hit_zone_id = NetworkLookup.hit_zones.full
 				local attack_direction = Vector3.normalize(POSITION_LOOKUP[attacking_unit] - POSITION_LOOKUP[unit])
 				local backstab_multiplier = 1
+				local hawkeye_multiplier = 0
 
-				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, NetworkLookup.attack_damage_values["n/a"], NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, NetworkLookup.attack_damage_values["n/a"], NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 			end
 
 			_, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.INCREASE_DAMAGE_TO_ENEMY_BLOCK)

@@ -987,6 +987,7 @@ DeathReactions._add_ai_killed_by_player_telemetry = function (victim_unit, breed
 		telemetry_data.player_id = player_id
 		telemetry_data.hero = hero
 		telemetry_data.hit_zone = death_hit_zone
+		telemetry_data.is_bot = is_bot == true
 
 		Managers.telemetry:register_event("player_killed_ai", telemetry_data)
 	end

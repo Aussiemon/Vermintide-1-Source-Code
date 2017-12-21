@@ -163,7 +163,6 @@ GameSettingsDevelopment.use_telemetry = rawget(_G, "Curl") and Development.param
 GameSettingsDevelopment.use_session_survey = GameSettingsDevelopment.use_telemetry and Development.parameter("use-session-survey")
 GameSettingsDevelopment.use_tech_telemetry = GameSettingsDevelopment.use_telemetry and Development.parameter("use-tech-telemetry")
 GameSettingsDevelopment.telemetry_log_interval = GameSettingsDevelopment.use_telemetry and Development.parameter("telemetry-log-interval")
-GameSettingsDevelopment.telemetry_sessions_mod = GameSettingsDevelopment.use_telemetry and Development.parameter("telemetry-sessions-mod")
 GameSettingsDevelopment.telemetry_whitelist = GameSettingsDevelopment.use_telemetry and Development.parameter("telemetry-whitelist")
 GameSettingsDevelopment.telemetry_base_url = "ftp.fatshark.se/pub/bulldozer/telemetry/"
 GameSettingsDevelopment.telemetry_compress_data = true

@@ -12,7 +12,7 @@ DamageUtils.get_breed_armor = function (target_unit)
 
 	return target_unit_armor
 end
-DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_unit, hit_zone_name, headshot_multiplier, backstab_multiplier)
+DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_unit, hit_zone_name, headshot_multiplier, backstab_multiplier, hawkeye_multiplier)
 	local target_unit_armor = DamageUtils.get_breed_armor(target_unit)
 	local breed = target_unit and Unit.get_data(target_unit, "breed")
 	local blackboard = nil
@@ -72,6 +72,10 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 		end
 	else
 		damage = damage_table[target_unit_armor]
+	end
+
+	if headshot_multiplier and headshot_multiplier ~= -1 and hawkeye_multiplier then
+		headshot_multiplier = headshot_multiplier + hawkeye_multiplier
 	end
 
 	if (hit_zone_name == "head" or hit_zone_name == "neck") and headshot_multiplier ~= -1 then
@@ -366,8 +370,9 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 
 							if attack_template_id then
 								local backstab_multiplier = 1
+								local hawkeye_multiplier = 0
 
-								weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+								weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 							end
 
 							if breed then
@@ -1069,14 +1074,15 @@ DamageUtils.buff_attack_hit = function (inventory_extension, unit, hit_unit, att
 	local attack_direction = Vector3.normalize(POSITION_LOOKUP[hit_unit] - POSITION_LOOKUP[unit])
 	local hit_ragdoll_actor_id = NetworkLookup.hit_ragdoll_actors["n/a"]
 	local backstab_multiplier = 1
+	local hawkeye_multiplier = 0
 	local is_server = network_manager.is_server
 
 	if is_server or LEVEL_EDITOR_TEST then
 		local weapon_system = Managers.state.entity:system("weapon_system")
 
-		weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[item_name], unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_values_id, hit_ragdoll_actor_id, backstab_multiplier)
+		weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[item_name], unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_values_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 	else
-		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_values_id, hit_ragdoll_actor_id, backstab_multiplier)
+		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_values_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 	end
 
 	return 
@@ -1214,8 +1220,9 @@ DamageUtils.debug_deal_damage = function (victim_unit, attack_template_name, hit
 	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
 	local attack_template_damage_type_id = NetworkLookup.attack_damage_values["n/a"]
 	local backstab_multiplier = 1
+	local hawkeye_multiplier = 0
 
-	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources.debug, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources.debug, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 
 	return 
 end
@@ -1229,8 +1236,9 @@ DamageUtils.deal_damage = function (source, victim_unit, attacker_unit, attack_d
 	local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
 	local attack_template_damage_type_id = NetworkLookup.attack_damage_values["n/a"]
 	local backstab_multiplier = 1
+	local hawkeye_multiplier = 0
 
-	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+	network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 
 	return 
 end
@@ -1455,9 +1463,13 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 	local num_penetrations = 0
 	local max_penetrations = current_action.max_penetrations or 1
+	local buff_extension = nil
+
+	if ScriptUnit.has_extension(owner_unit, "buff_system") then
+		buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+	end
 
 	if owner_is_player then
-		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 		max_penetrations = buff_extension.apply_buffs_to_value(buff_extension, max_penetrations, StatBuffIndex.PENETRATING_SHOT_PROC)
 	end
 
@@ -1518,13 +1530,14 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 					local attack_template_id = NetworkLookup.attack_templates[current_action.attack_template]
 					local attack_template_damage_type_id = NetworkLookup.attack_damage_values[current_action.attack_template_damage_type or "n/a"]
 					local backstab_multiplier = 1
+					local hawkeye_multiplier = 0
 
 					if is_server or LEVEL_EDITOR_TEST then
 						local weapon_system = Managers.state.entity:system("weapon_system")
 
-						weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+						weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 					else
-						network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+						network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 					end
 
 					EffectHelper.play_surface_material_effects(hit_effect, world, hit_unit, hit_position, hit_rotation, hit_normal, nil, is_husk)
@@ -1579,7 +1592,6 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 					hit_zone_name = hit_zone.name
 
 					if hit_zone_name ~= "afro" and owner_is_player then
-						local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 						local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.AUTOMATIC_HEAD_SHOT)
 
 						if procced and breed.hit_zones.head then
@@ -1591,7 +1603,6 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 				end
 
 				if breed and hit_zone_name == "head" and owner_is_player then
-					local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 					local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.COOP_STAMINA)
 
 					if (procced or script_data.debug_legendary_traits) and AiUtils.unit_alive(hit_unit) then
@@ -1652,13 +1663,20 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 
 					local damage_sound = attack_template.sound_type
 					local backstab_multiplier = 1
+					local hawkeye_multiplier = 0
+					local hawkeye = buff_extension and buff_extension.has_buff_type(buff_extension, "increased_zoom")
+
+					if hawkeye and (hit_zone_name == "head" or hit_zone_name == "neck") then
+						hawkeye_multiplier = buff_extension.apply_buffs_to_value(buff_extension, hawkeye_multiplier, StatBuffIndex.HAWKEYE)
+					end
+
 					local predicted_damage = 0
 
 					if attack_template.attack_type then
 						local attack_damage_value = AttackDamageValues[attack_damage_values_name]
 						local attack = Attacks[attack_template.attack_type]
 						local hit_ragdoll_actor = nil
-						predicted_damage = attack.get_damage_amount(damage_source, attack_template, owner_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier)
+						predicted_damage = attack.get_damage_amount(damage_source, attack_template, owner_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 					end
 
 					no_damage = predicted_damage <= 0
@@ -1692,9 +1710,9 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 						if is_server or LEVEL_EDITOR_TEST then
 							local weapon_system = Managers.state.entity:system("weapon_system")
 
-							weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+							weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 						else
-							network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+							network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier, hawkeye_multiplier)
 						end
 					end
 
@@ -1829,11 +1847,11 @@ DamageUtils.modify_push_distance_with_buff = function (attacker, value)
 
 	return value
 end
-DamageUtils.server_apply_hit = function (t, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, hit_ragdoll_actor, damage_source, attack_damage_value_type, backstab_multiplier)
+DamageUtils.server_apply_hit = function (t, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, hit_ragdoll_actor, damage_source, attack_damage_value_type, backstab_multiplier, hawkeye_multiplier)
 	if attack_template.attack_type then
 		local attack_type = attack_template.attack_type
 		local attack = Attacks[attack_type]
-		local damage_amount = attack.get_damage_amount(damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value_type, hit_ragdoll_actor, backstab_multiplier)
+		local damage_amount = attack.get_damage_amount(damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value_type, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 
 		attack.do_damage(damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value_type, hit_ragdoll_actor, damage_amount)
 	end

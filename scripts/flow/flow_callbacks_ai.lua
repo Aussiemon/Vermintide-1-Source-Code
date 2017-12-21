@@ -71,11 +71,12 @@ function flow_callback_ai_kill(params)
 	local damage_source = "flow"
 	local hit_ragdoll_actor = NetworkLookup.hit_ragdoll_actors["n/a"]
 	local backstab_multiplier = 1
+	local hawkeye_multiplier = 0
 
 	if Managers.player.is_server or LEVEL_EDITOR_TEST then
-		Managers.state.entity:system("weapon_system"):rpc_attack_hit(nil, NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_value_id, hit_ragdoll_actor, backstab_multiplier)
+		Managers.state.entity:system("weapon_system"):rpc_attack_hit(nil, NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_value_id, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 	else
-		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_value_id, hit_ragdoll_actor, backstab_multiplier)
+		network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[damage_source], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_damage_value_id, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 	end
 
 	return 

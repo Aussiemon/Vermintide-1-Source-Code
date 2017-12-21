@@ -210,11 +210,12 @@ ActionGeiser._update_damage = function (self)
 			local attack_template_damage_type_id = NetworkLookup.attack_damage_values[damage_data.attack_template_damage_type_name]
 			local hit_ragdoll_actor_id = NetworkLookup.hit_ragdoll_actors[damage_data.hit_ragdoll_actor]
 			local backstab_multiplier = damage_data.backstab_multiplier
+			local hawkeye_multiplier = 0
 
 			if is_server or LEVEL_EDITOR_TEST then
-				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
+				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 			else
-				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
+				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 			end
 		end
 	end

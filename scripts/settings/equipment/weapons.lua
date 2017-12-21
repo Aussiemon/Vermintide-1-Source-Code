@@ -74,9 +74,9 @@ Weapons = Weapons or {}
 local POSITION_LOOKUP = POSITION_LOOKUP
 Attacks = {
 	damage = {
-		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier)
+		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 			local damage = attack_damage_value or attack_template.damage
-			local damage_amount = DamageUtils.calculate_damage(damage, hit_unit, attacker_unit, hit_zone_name, nil, backstab_multiplier)
+			local damage_amount = DamageUtils.calculate_damage(damage, hit_unit, attacker_unit, hit_zone_name, nil, backstab_multiplier, hawkeye_multiplier)
 
 			return damage_amount
 		end,
@@ -89,9 +89,9 @@ Attacks = {
 		end
 	},
 	damage_headshot = {
-		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier)
+		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 			local damage = attack_damage_value or attack_template.damage
-			local damage_amount = DamageUtils.calculate_damage(damage, hit_unit, attacker_unit, hit_zone_name, attack_template.headshot_multiplier, backstab_multiplier)
+			local damage_amount = DamageUtils.calculate_damage(damage, hit_unit, attacker_unit, hit_zone_name, attack_template.headshot_multiplier, backstab_multiplier, hawkeye_multiplier)
 
 			return damage_amount
 		end,
@@ -104,9 +104,9 @@ Attacks = {
 		end
 	},
 	hacky_damage_burn = {
-		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier)
+		get_damage_amount = function (damage_source, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 			local damage = attack_damage_value or attack_template.damage
-			local damage_amount = DamageUtils.calculate_damage(damage, hit_unit, attacker_unit, hit_zone_name, nil, backstab_multiplier)
+			local damage_amount = DamageUtils.calculate_damage(damage, hit_unit, attacker_unit, hit_zone_name, nil, backstab_multiplier, hawkeye_multiplier)
 
 			return damage_amount
 		end,

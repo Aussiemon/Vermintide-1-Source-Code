@@ -320,9 +320,10 @@ AreaDamageTemplates.templates = {
 				local hit_zone_id = NetworkLookup.hit_zones[data.hit_zone_name]
 				local hit_ragdoll_actor_id = NetworkLookup.hit_ragdoll_actors[data.hit_ragdoll_actor]
 				local backstab_multiplier = data.backstab_multiplier
+				local hawkeye_multiplier = 0
 				local weapon_system = Managers.state.entity:system("weapon_system")
 
-				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
+				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 
 				return 
 			end

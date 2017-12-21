@@ -250,12 +250,9 @@ StateIngame.on_enter = function (self)
 	end
 
 	if GameSettingsDevelopment.use_telemetry then
-		local level_name = LevelSettings[level_key].level_name
 		local difficulty = Managers.state.difficulty:get_difficulty()
-		local content_revision = script_data.settings.content_revision
-		local engine_revision = script_data.build_identifier
 
-		self._add_session_started_telemetry(self, level_key, level_name, difficulty, content_revision, engine_revision, is_server)
+		self._add_session_started_telemetry(self, level_key, difficulty, is_server)
 		Managers.telemetry:register_network_event_delegate(network_event_delegate)
 	end
 
@@ -480,8 +477,9 @@ StateIngame.on_enter = function (self)
 		local my_peer_id = self.network_transmit.peer_id
 		local player = player_manager.player_from_peer_id(player_manager, my_peer_id)
 		local telemetry_id = player.telemetry_id(player)
+		local difficulty = Managers.state.difficulty:get_difficulty()
 
-		self._add_session_joined_telemetry(self, telemetry_id)
+		self._add_session_joined_telemetry(self, telemetry_id, level_key, difficulty)
 
 		local fullscreen = Application.user_setting("fullscreen")
 		local borderless_fullscreen = Application.user_setting("borderless_fullscreen")
@@ -496,7 +494,7 @@ StateIngame.on_enter = function (self)
 		local system_info = Application.sysinfo()
 		local adapter_index = Application.user_setting("adapter_index")
 
-		self._add_system_info_telemetry(self, system_info, adapter_index, telemetry_id)
+		self._add_system_info_telemetry(self, system_info, adapter_index)
 	end
 
 	if Application.platform() == "xb1" then
@@ -1580,20 +1578,17 @@ StateIngame.on_exit = function (self, application_shutdown)
 	return 
 end
 local telemetry_data = {}
-StateIngame._add_session_started_telemetry = function (self, level_key, level_name, difficulty, content_revision, engine_revision, is_server)
+StateIngame._add_session_started_telemetry = function (self, level_key, difficulty, is_server)
 	table.clear(telemetry_data)
 
 	telemetry_data.level_key = level_key
-	telemetry_data.level_name = level_name
 	telemetry_data.difficulty = difficulty
-	telemetry_data.content_revision = content_revision
-	telemetry_data.engine_revision = engine_revision
 
 	Managers.telemetry:session_start(telemetry_data, is_server)
 
 	return 
 end
-StateIngame._add_session_joined_telemetry = function (self, player_id)
+StateIngame._add_session_joined_telemetry = function (self, player_id, level_key, difficulty)
 	table.clear(telemetry_data)
 
 	telemetry_data.player_id = player_id
@@ -1610,6 +1605,8 @@ StateIngame._add_session_joined_telemetry = function (self, player_id)
 	end
 
 	telemetry_data.join_type = join_type
+	telemetry_data.level_key = level_key
+	telemetry_data.difficulty = difficulty
 
 	Managers.telemetry:register_event("session_joined", telemetry_data)
 
@@ -1643,192 +1640,26 @@ StateIngame._add_settings_telemetry = function (self, resolution, graphics_quali
 
 	return 
 end
-local NEWLINE_PATTERN = "(.-)\n"
-local FEATURE_BITS_PATTERN = "[^\n]+:\n"
-local SUB_COMPONENT_PATTERN = "(.-)(,%s)"
-local COMPONENT_PATTERN = "(.-)(:%s)"
-
-local function string_splitter_cpu(text_string, data)
-	text_string = string.gsub(text_string, FEATURE_BITS_PATTERN, "")
-	local lines = {}
-
-	for current_line in string.gmatch(text_string, NEWLINE_PATTERN) do
-		if current_line ~= "" then
-			lines[#lines + 1] = current_line
-		end
-	end
-
-	local sub_components = {}
-	local num_lines = #lines
-
-	for line_index = 1, num_lines, 1 do
-		local current_line = lines[line_index]
-		current_line = string.format("%s, ", current_line)
-
-		for sub_component in string.gmatch(current_line, SUB_COMPONENT_PATTERN) do
-			sub_components[#sub_components + 1] = sub_component
-		end
-	end
-
-	local components = {}
-	local num_subcomponents = #sub_components
-
-	for subcomponent_index = 1, num_subcomponents, 1 do
-		local current_subcomponent = sub_components[subcomponent_index]
-		current_subcomponent = string.format("%s: ", current_subcomponent)
-
-		for current_component in string.gmatch(current_subcomponent, COMPONENT_PATTERN) do
-			components[#components + 1] = current_component
-		end
-	end
-
-	local num_components = #components
-
-	if 1 < num_components then
-		for component_index = 1, num_components - 1, 2 do
-			local entry_name = string.format("CPU - %s", components[component_index])
-			local entry_data = components[component_index + 1]
-			data[entry_name] = entry_data
-		end
-	end
-
-	return 
-end
-
-local OS_SYSTEM_INFO_VERSION_INDEX = 1
-local OS_SYSTEM_INFO_BITS_INDEX = 2
-
-local function string_splitter_os(text_string, data)
-	local lines = {}
-
-	for current_line in string.gmatch(text_string, NEWLINE_PATTERN) do
-		if current_line ~= "" then
-			lines[#lines + 1] = current_line
-		end
-	end
-
-	local num_lines = #lines
-
-	if 1 < num_lines then
-		local os_info_line = lines[1]
-		os_info_line = string.format("%s, ", os_info_line)
-		local os_info_index = 1
-
-		for sub_info in string.gmatch(os_info_line, SUB_COMPONENT_PATTERN) do
-			if os_info_index == OS_SYSTEM_INFO_VERSION_INDEX then
-				data["OS - Tech"] = sub_info
-				os_info_index = os_info_index + 1
-			elseif os_info_index == OS_SYSTEM_INFO_BITS_INDEX then
-				data["OS - Bits"] = sub_info
-				os_info_index = os_info_index + 1
-			else
-				break
-			end
-		end
-
-		local os_version_line = lines[2]
-		data["OS - Version"] = os_version_line
-	end
-
-	return 
-end
-
-local function string_splitter_gpu(text_string, data, adapter_index)
-	if not adapter_index then
-		return 
-	end
-
-	local lines = {}
-
-	for current_line in string.gmatch(text_string, NEWLINE_PATTERN) do
-		if current_line ~= "" then
-			lines[#lines + 1] = current_line
-		end
-	end
-
-	local num_lines = #lines
-
-	if 0 < num_lines and 0 < adapter_index and adapter_index < num_lines then
-		local used_gpu_line = lines[adapter_index]
-		used_gpu_line = string.format("%s: ", used_gpu_line)
-		local components = {}
-
-		for current_component in string.gmatch(used_gpu_line, COMPONENT_PATTERN) do
-			components[#components + 1] = current_component
-		end
-
-		local num_components = #components
-
-		if 1 < num_components then
-			local gpu_category_name = components[1]
-			local gpu_model_name = components[2]
-			data[gpu_category_name] = gpu_model_name
-		end
-	end
-
-	return 
-end
-
-local CPU_SYSTEM_INFO_INDEX = 1
-local OS_SYSTEM_INFO_INDEX = 2
-local GPU_SYSTEM_INFO_INDEX = 3
-
-function system_information_text_splitter(input_string, graphics_adapter_index, data)
-	if not data then
-		return 
-	end
-
-	local category_pattern = "(.-)(%-%-%-%s[%w]*)"
-	local appended_string = string.format("%s%s", input_string, "--- END")
-	local category_table = {}
-
-	for category_string in string.gmatch(appended_string, category_pattern) do
-		if category_string ~= "" then
-			category_table[#category_table + 1] = category_string
-		end
-	end
-
-	local num_categories = #category_table
-
-	for i = 1, num_categories, 1 do
-		local category_string = category_table[i]
-
-		if category_string.sub(category_string, -1) ~= "\n" then
-			category_string = string.format("%s\n", category_string)
-		end
-
-		if i == CPU_SYSTEM_INFO_INDEX then
-			string_splitter_cpu(category_string, data)
-		elseif i == OS_SYSTEM_INFO_INDEX then
-			string_splitter_os(category_string, data)
-		elseif i == GPU_SYSTEM_INFO_INDEX then
-			string_splitter_gpu(category_string, data, graphics_adapter_index)
-		else
-			break
-		end
-	end
-
-	return 
-end
-
-StateIngame._add_system_info_telemetry = function (self, system_info, adapter_index, player_id)
+StateIngame._add_system_info_telemetry = function (self, system_info, adapter_index)
 	if not adapter_index then
 		return 
 	end
 
 	table.clear(telemetry_data)
 
-	adapter_index = adapter_index + 1
-
-	system_information_text_splitter(system_info, adapter_index, telemetry_data)
-
-	telemetry_data.player_id = player_id
+	telemetry_data.system_info = system_info
 
 	Managers.telemetry:register_event("tech_system", telemetry_data)
 
 	return 
 end
 StateIngame._check_and_add_end_game_telemetry = function (self, application_shutdown)
+	local player_manager = Managers.player
+	local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
+	local telemetry_id = player.telemetry_id(player)
+	local level_key = self.level_key
+	local difficulty = Managers.state.difficulty:get_difficulty()
+	local hero = player.profile_display_name(player)
 	local reason = self.exit_type
 
 	if application_shutdown then
@@ -1850,16 +1681,16 @@ StateIngame._check_and_add_end_game_telemetry = function (self, application_shut
 			end
 
 			if self.is_server then
-				self._add_game_ended_telemetry_bots(self, reason)
+				self._add_game_ended_telemetry_bots(self, level_key, difficulty, reason)
 			end
 		end
 	end
 
-	self._add_game_ended_telemetry(self, reason)
+	self._add_game_ended_telemetry(self, telemetry_id, level_key, difficulty, hero, reason)
 
 	return 
 end
-StateIngame._add_game_ended_telemetry_bots = function (self, reason)
+StateIngame._add_game_ended_telemetry_bots = function (self, level_key, difficulty, reason)
 	assert(self.is_server, "Trying to log bot telemetry when not being server!")
 
 	local player_manager = Managers.player
@@ -1867,6 +1698,8 @@ StateIngame._add_game_ended_telemetry_bots = function (self, reason)
 
 	table.clear(telemetry_data)
 
+	telemetry_data.level_key = level_key
+	telemetry_data.difficulty = difficulty
 	telemetry_data.end_reason = reason
 
 	for _, player in pairs(players) do
@@ -1875,6 +1708,7 @@ StateIngame._add_game_ended_telemetry_bots = function (self, reason)
 			local hero = player.profile_display_name(player)
 			telemetry_data.player_id = telemetry_id
 			telemetry_data.hero = hero
+			telemetry_data.is_bot = true
 
 			Managers.telemetry:register_event("game_ended", telemetry_data)
 		end
@@ -1882,17 +1716,15 @@ StateIngame._add_game_ended_telemetry_bots = function (self, reason)
 
 	return 
 end
-StateIngame._add_game_ended_telemetry = function (self, reason)
-	local player_manager = Managers.player
-	local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
-	local telemetry_id = player.telemetry_id(player)
-	local hero = player.profile_display_name(player)
-
+StateIngame._add_game_ended_telemetry = function (self, telemetry_id, level_key, difficulty, hero, reason)
 	table.clear(telemetry_data)
 
-	telemetry_data.end_reason = reason
 	telemetry_data.player_id = telemetry_id
+	telemetry_data.level_key = level_key
+	telemetry_data.difficulty = difficulty
 	telemetry_data.hero = hero
+	telemetry_data.is_bot = false
+	telemetry_data.end_reason = reason
 	local telemetry_manager = Managers.telemetry
 
 	telemetry_manager.register_event(telemetry_manager, "animal", {

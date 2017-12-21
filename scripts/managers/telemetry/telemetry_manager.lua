@@ -7,7 +7,6 @@ local RPCS = {
 	"rpc_to_client_session_synch"
 }
 local DEFAULT_TECH_TELEMETRY_INTERVAL = 1
-local DEFAULT_SESSIONS_TO_KEEP_MOD = 10
 local TelemetryFileName = "telemetry_data"
 
 local function debug_print(...)
@@ -28,12 +27,15 @@ local function parse_whitelist(whitelist_string)
 	return whitelist
 end
 
+local function timestamp()
+	return os.time(os.date("!*t"))
+end
+
 TelemetryManager.init = function (self)
 	self.use_telemetry = GameSettingsDevelopment.use_telemetry
 	self.local_telemetry_test = GameSettingsDevelopment.local_telemetry_test
 	self.use_tech_telemetry = GameSettingsDevelopment.use_tech_telemetry
 	self.tech_telemetry_interval = tonumber(GameSettingsDevelopment.telemetry_log_interval) or DEFAULT_TECH_TELEMETRY_INTERVAL
-	self.session_to_keep_mod = tonumber(GameSettingsDevelopment.telemetry_sessions_mod) or DEFAULT_SESSIONS_TO_KEEP_MOD
 
 	if GameSettingsDevelopment.telemetry_whitelist then
 		local whitelist_string = tostring(GameSettingsDevelopment.telemetry_whitelist)
@@ -60,7 +62,7 @@ TelemetryManager.init = function (self)
 	self.string_table = {}
 	self.send_string = ""
 	self.session_start_timestamp = 0
-	self.version = 1
+	self.version = 2
 	self.is_server = nil
 	self.tech_telemetry_timer = 0
 	self.dispatch_callbacks = {}
@@ -185,14 +187,21 @@ TelemetryManager.session_start = function (self, session_data, is_server)
 	self.current_tick = 0
 	self.tech_telemetry_timer = 0
 	self.next_save_tick = 0
-	session_data.timestamp = os.time()
-
-	debug_print("TelemetryManager: SESSION START %d", session_data.timestamp)
-
-	local version_event = {
-		type = "version",
-		version = self.version
+	local header_event = {
+		type = "header",
+		title_id = GameSettingsDevelopment.backend_settings.title_id,
+		created_at = timestamp(),
+		params = {
+			version = self.version,
+			content_revision = script_data.settings.content_revision,
+			engine_revision = script_data.build_identifier,
+			platform = Application.platform(),
+			level_key = session_data.level_key,
+			difficulty = session_data.difficulty
+		}
 	}
+
+	debug_print("TelemetryManager: SESSION START %d", header_event.timestamp)
 
 	if not self.prev_telemetry_data_sent then
 		self._load_telemetry_data(self)
@@ -200,7 +209,7 @@ TelemetryManager.session_start = function (self, session_data, is_server)
 
 	table.clear(self.unregistered_events)
 	table.clear(self.string_table)
-	table.insert(self.string_table, json.encode(version_event))
+	table.insert(self.string_table, json.encode(header_event))
 
 	if self.local_telemetry_test and self.use_stress_test then
 		self.generate_stress_test(self)
@@ -320,10 +329,6 @@ TelemetryManager.send_telemetry_to_database = function (self, callback_func, dat
 		return 
 	end
 
-	local session_part = string.sub(session, 1, 8)
-	local session_part_number = tonumber(session_part, 16)
-	local session_mod = session_part_number%self.session_to_keep_mod
-
 	debug_print("TelemetryManager.send_telemetry_to_database(", tostring(callback_func), ") data_to_send length: ", string.len(data_to_send))
 
 	if self.local_telemetry_test then
@@ -332,12 +337,14 @@ TelemetryManager.send_telemetry_to_database = function (self, callback_func, dat
 		return 
 	end
 
-	if session_mod ~= 0 then
+	local game_mode_key = Managers.state.game_mode:game_mode_key()
+
+	if game_mode_key == "inn" then
 		self._clear_telemetry_file(self)
 
 		self.prev_telemetry_data_sent = true
 
-		debug_print("TelemetryManager: Skipped uploading telemetry for this session (", session, ") in order to limit the number of concurrent connections to the database.")
+		debug_print("TelemetryManager: Skipped uploading telemetry for game mode key '%s'", game_mode_key)
 
 		return 
 	end

@@ -56,7 +56,7 @@ WeaponSystem.rpc_alert_enemy = function (self, sender, enemy_unit_id, player_uni
 
 	return 
 end
-WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier)
+WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 	local hit_unit = self.unit_storage:unit(hit_unit_id)
 	local attacker_unit = self.unit_storage:unit(attacker_unit_id)
 
@@ -119,7 +119,7 @@ WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker
 
 	local t = self.t
 
-	DamageUtils.server_apply_hit(t, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, hit_ragdoll_actor, damage_source, attack_damage_values, backstab_multiplier)
+	DamageUtils.server_apply_hit(t, attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, hit_ragdoll_actor, damage_source, attack_damage_values, backstab_multiplier, hawkeye_multiplier)
 
 	return 
 end
