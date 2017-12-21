@@ -1,0 +1,132 @@
+require("scripts/network/lobby_host")
+require("scripts/network/lobby_client")
+require("scripts/network/lobby_finder")
+require("scripts/game_state/components/level_transition_handler")
+require("scripts/network/network_event_delegate")
+require("scripts/network/network_server")
+require("scripts/network/network_client")
+require("scripts/network/network_transmit")
+require("scripts/ui/views/title_loading_ui")
+
+StateLoadingRestartNetwork = class(StateLoadingRestartNetwork)
+StateLoadingRestartNetwork.NAME = "StateLoadingRestartNetwork"
+StateLoadingRestartNetwork.on_enter = function (self, params)
+	print("[Gamestate] Enter Substate StateLoadingRestartNetwork")
+	self._init_params(self, params)
+	self._init_network(self)
+
+	return 
+end
+StateLoadingRestartNetwork._init_params = function (self, params)
+	self._world = params.world
+	self._viewport = params.viewport
+	self._loading_view = params.loading_view
+	self._server_created = true
+	self._lobby_joined = true
+	self._previous_session_error_headers_lookup = {
+		host_left_game = "popup_notice_topic",
+		kicked_by_server = "popup_notice_topic",
+		afk_kick = "popup_notice_topic"
+	}
+
+	return 
+end
+StateLoadingRestartNetwork._init_network = function (self)
+	local auto_join_setting = Development.parameter("auto_join")
+
+	assert(not auto_join_setting or Development.parameter("unique_server_name"), "Can't use auto_join without unique_server_name")
+	Development.set_parameter("auto_join", nil)
+
+	local lobby_to_join, host_to_join = nil
+	local loading_context = self.parent.parent.loading_context
+
+	self.parent:setup_network_options()
+
+	LOBBY_PORT_INCREMENT = LOBBY_PORT_INCREMENT + 1
+	local platform = Application.platform()
+
+	if not rawget(_G, "LobbyInternal") or not LobbyInternal.network_initialized() then
+		if platform == "win32" then
+			if rawget(_G, "Steam") and not LEVEL_EDITOR_TEST and not Development.parameter("use_lan_backend") then
+				require("scripts/network/lobby_steam")
+
+				local invite_type, lobby_id = Friends.boot_invite()
+				lobby_to_join = lobby_id
+			else
+				rawset(_G, "Steam", nil)
+				require("scripts/network/lobby_lan")
+
+				host_to_join = script_data.host_to_join
+			end
+		elseif platform == "xb1" then
+			require("scripts/network/lobby_xbox_live")
+		elseif platform == "ps4" then
+			require("scripts/network/lobby_psn")
+		end
+
+		LobbyInternal.init_client(self.parent:network_options())
+	elseif Application.platform() == "xb1" then
+		require("scripts/network/lobby_xbox_live")
+		LobbyInternal.init_client(self.parent:network_options())
+	end
+
+	if script_data.done_initial_join then
+		lobby_to_join, host_to_join = nil
+	else
+		script_data.done_initial_join = true
+	end
+
+	if not self.parent:has_registered_rpcs() then
+		self.parent:register_rpcs()
+	end
+
+	if loading_context.join_lobby_data then
+		self.parent:setup_join_lobby()
+	elseif auto_join_setting or lobby_to_join or host_to_join then
+		self.parent:setup_lobby_finder(callback(self, "cb_lobby_joined"), lobby_to_join, host_to_join)
+
+		self._lobby_joined = false
+	elseif platform == "xb1" or platform == "ps4" then
+		self._server_created = false
+		self._creating_lobby = false
+	else
+		self.parent:setup_lobby_host()
+
+		self._server_created = true
+	end
+
+	if loading_context.previous_session_error then
+		local previous_session_error = loading_context.previous_session_error
+		loading_context.previous_session_error = nil
+
+		self.parent:create_popup(previous_session_error, self._previous_session_error_headers_lookup[previous_session_error], "continue")
+	end
+
+	return 
+end
+StateLoadingRestartNetwork.update = function (self, dt, t)
+	if self._server_created and self._lobby_joined then
+		return StateLoadingRunning
+	elseif Managers.account:all_lobbies_freed() and not self._creating_lobby then
+		self.parent:setup_lobby_host(callback(self, "cb_server_created"))
+
+		self._creating_lobby = true
+	end
+
+	return 
+end
+StateLoadingRestartNetwork.on_exit = function (self, application_shutdown)
+	return 
+end
+StateLoadingRestartNetwork.cb_server_created = function (self)
+	self._server_created = true
+
+	return 
+end
+StateLoadingRestartNetwork.cb_lobby_joined = function (self)
+	self._lobby_joined = true
+
+	return 
+end
+
+return 

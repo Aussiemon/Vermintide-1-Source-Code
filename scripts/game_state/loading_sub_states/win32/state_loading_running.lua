@@ -1,0 +1,84 @@
+require("scripts/ui/views/loading_view")
+
+DO_RELOAD = false
+StateLoadingRunning = class(StateLoadingRunning)
+StateLoadingRunning.NAME = "StateLoadingRunning"
+StateLoadingRunning.on_enter = function (self, params)
+	print("[Gamestate] Enter Substate StateLoadingRunning")
+	self._init_network(self)
+
+	self._loading_view = params.loading_view
+	self._level_transition_handler = params.level_transition_handler
+	local level_key = self._level_transition_handler:get_next_level_key()
+
+	self.parent:set_lobby_host_data(level_key)
+
+	DO_RELOAD = false
+
+	return 
+end
+StateLoadingRunning._init_network = function (self)
+	local loading_context = self.parent.parent.loading_context
+	Managers.state.event = EventManager:new()
+
+	if not self.parent:has_registered_rpcs() then
+		self.parent:register_rpcs()
+	end
+
+	if loading_context.join_lobby_data then
+		self.parent:set_matchmaking(false)
+		self.parent:setup_network_options()
+		self.parent:setup_join_lobby(true)
+		self.parent:clear_network_loading_context()
+		Managers.transition:show_icon_background()
+	elseif loading_context.start_lobby_data then
+		self.parent:set_matchmaking(true)
+		self.parent:clear_network_loading_context()
+
+		local start_lobby_data = loading_context.start_lobby_data
+		local lobby_client = start_lobby_data.lobby_client
+		local network_client_setup_successful = self.parent:setup_network_client(true, lobby_client)
+
+		if network_client_setup_successful then
+			self.parent:setup_chat_manager(lobby_client, lobby_client.lobby_host(lobby_client), Network.peer_id(), false)
+		end
+
+		loading_context.start_lobby_data = nil
+
+		Managers.transition:show_icon_background()
+	else
+		self._network_server = loading_context.network_server
+		self._network_client = loading_context.network_client
+
+		if self._network_server then
+			self.parent:setup_network_transmit(self._network_server)
+		elseif self._network_client then
+			self._network_client:set_wait_for_state_loading(nil)
+			self.parent:setup_network_transmit(self._network_client)
+		end
+	end
+
+	return 
+end
+StateLoadingRunning.update = function (self, dt)
+	if Application.platform() == "xb1" and self.parent:waiting_for_cleanup() then
+		return 
+	end
+
+	if not LEVEL_EDITOR_TEST and self._level_transition_handler.transition_type ~= nil then
+		if not self.parent:loading_view_setup_done() then
+			local level_key = self.parent:get_next_level_key()
+
+			self.parent:setup_loading_view(level_key)
+		end
+
+		self._level_transition_handler:load_next_level()
+	end
+
+	return 
+end
+StateLoadingRunning.on_exit = function (self, application_shutdown)
+	return 
+end
+
+return 
