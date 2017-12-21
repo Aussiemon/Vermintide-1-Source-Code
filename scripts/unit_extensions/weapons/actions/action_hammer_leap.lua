@@ -125,12 +125,11 @@ ActionHammerLeap.landing_overlap_callback = function (self, actors)
 			local attack_template_id = 2
 			local attack_template_damage_type_id = 0
 			local weapon_system = Managers.state.entity:system("weapon_system")
-			local backstab_multiplier = 1
 
 			if self.is_server or LEVEL_EDITOR_TEST then
-				weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+				weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id)
 			else
-				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id, NetworkLookup.hit_ragdoll_actors["n/a"], backstab_multiplier)
+				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id)
 			end
 		end
 	end

@@ -34,6 +34,13 @@ ActionScrollPush.finish = function (self, reason)
 	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, self.owner_unit)
 	local attack_template = AttackTemplates[current_action.attack_template]
 	local attack_template_id = attack_template.lookup_id
+
+	if self.is_server or LEVEL_EDITOR_TEST then
+		self.weapon_system:aoe_push(attacker_unit_id, attack_template_id, unit_position, radius)
+	else
+		network_manager.network_transmit:send_rpc_server("rpc_aoe_push", attacker_unit_id, attack_template_id, unit_position, radius)
+	end
+
 	local effect_name = current_action.effect_name
 	local game_object_id = attacker_unit_id
 	local unit_node = 0

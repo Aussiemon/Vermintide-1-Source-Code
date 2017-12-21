@@ -46,11 +46,6 @@ BTChaseAction.leave = function (self, unit, blackboard, t)
 		blackboard.start_anim_locked_time = nil
 	end
 
-	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
-	local navigation_extension = blackboard.navigation_extension
-
-	navigation_extension.set_max_speed(navigation_extension, default_move_speed)
-
 	return 
 end
 BTChaseAction.attack = function (self, unit, t, dt, blackboard, locomotion, action)

@@ -1,4 +1,3 @@
-local RETAINED_MODE_ENABLED = true
 local scenegraph_definition = {
 	root = {
 		is_root = true,
@@ -127,18 +126,6 @@ local scenegraph_definition = {
 		},
 		size = {
 			188,
-			24
-		}
-	},
-	hp_bar_shield_fill = {
-		parent = "hp_bar_bg",
-		position = {
-			10,
-			0,
-			1
-		},
-		size = {
-			178,
 			24
 		}
 	},
@@ -352,19 +339,6 @@ local function create_player_portrait_widget_scenegraph_small(index)
 			16
 		}
 	}
-	scenegraph_definition["hp_bar_shield_fill_" .. index] = {
-		vertical_alignment = "center",
-		parent = hp_bar_bg_name,
-		position = {
-			6,
-			2,
-			2
-		},
-		size = {
-			178,
-			18
-		}
-	}
 	scenegraph_definition["hp_bar_divider_" .. index] = {
 		vertical_alignment = "center",
 		parent = hp_bar_fg_name,
@@ -451,20 +425,17 @@ UIElements.TeamPlayerPortrait = {
 		{
 			pass_type = "texture",
 			style_id = "portrait_frame",
-			texture_id = "portrait_frame",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "portrait_frame"
 		},
 		{
 			pass_type = "texture",
 			style_id = "character_portrait",
-			texture_id = "character_portrait",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "character_portrait"
 		},
 		{
 			pass_type = "texture",
 			style_id = "portrait_overlay",
 			texture_id = "portrait_overlay",
-			retained_mode = RETAINED_MODE_ENABLED,
 			content_check_function = function (content)
 				return content.display_portrait_overlay
 			end
@@ -473,7 +444,6 @@ UIElements.TeamPlayerPortrait = {
 			pass_type = "texture",
 			style_id = "portrait_icon",
 			texture_id = "portrait_icon",
-			retained_mode = RETAINED_MODE_ENABLED,
 			content_check_function = function (content)
 				return content.display_portrait_icon
 			end
@@ -489,32 +459,27 @@ UIElements.TeamPlayerPortrait = {
 		{
 			pass_type = "texture",
 			style_id = "talk_indicator_highlight",
-			texture_id = "talk_indicator_highlight",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "talk_indicator_highlight"
 		},
 		{
 			pass_type = "texture",
 			style_id = "inventory_bg",
-			texture_id = "inventory_bg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "inventory_bg"
 		},
 		{
 			pass_type = "texture",
 			style_id = "hp_bar_bg",
-			texture_id = "hp_bar_bg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "hp_bar_bg"
 		},
 		{
 			pass_type = "texture",
 			style_id = "hp_bar_fg",
-			texture_id = "hp_bar_fg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "hp_bar_fg"
 		},
 		{
 			pass_type = "texture",
 			style_id = "hp_bar_highlight",
-			texture_id = "hp_bar_highlight",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "hp_bar_highlight"
 		},
 		{
 			style_id = "hp_bar",
@@ -583,39 +548,6 @@ UIElements.TeamPlayerPortrait = {
 			end
 		},
 		{
-			style_id = "hp_bar_shield",
-			pass_type = "texture_uv_dynamic_color_uvs_size_offset",
-			content_id = "hp_bar_shield",
-			dynamic_function = function (content, style, size, dt, ui_renderer)
-				local bar_value_position = content.bar_value_position
-				local bar_value_offset = content.bar_value_offset
-				local bar_value_size = content.bar_value_size
-				local uv_start_pixels = style.uv_start_pixels
-				local uv_scale_pixels = style.uv_scale_pixels
-				local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value_position
-				local uvs = style.uvs
-				local uv_scale_axis = style.scale_axis
-				local offset_scale = style.offset_scale
-				local offset = temp_offext
-				offset[1] = 0
-				offset[2] = 0
-				offset[3] = 0
-				uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
-				local shield_size = uv_start_pixels + uv_scale_pixels*bar_value_size
-				size[uv_scale_axis] = shield_size
-				local bar_offset = bar_value_offset*uv_scale_pixels
-				local pos = uv_scale_pixels - shield_size - bar_offset
-
-				if shield_size + uv_pixels < uv_scale_pixels - bar_offset then
-					pos = uv_pixels
-				end
-
-				offset[uv_scale_axis] = pos
-
-				return style.color, uvs, size, offset
-			end
-		},
-		{
 			pass_type = "centered_texture_amount",
 			style_id = "hp_bar_divider",
 			texture_id = "hp_bar_divider",
@@ -628,7 +560,6 @@ UIElements.TeamPlayerPortrait = {
 			style_id = "hp_bar_grimoire_icon",
 			texture_id = "hp_bar_grimoire_icon",
 			content_id = "hp_bar_grimoire_icon",
-			retained_mode = RETAINED_MODE_ENABLED,
 			content_check_function = function (content, style)
 				return content.active
 			end
@@ -638,7 +569,6 @@ UIElements.TeamPlayerPortrait = {
 			style_id = "hp_bar_max_health_divider",
 			texture_id = "hp_bar_max_health_divider",
 			content_id = "hp_bar_max_health_divider",
-			retained_mode = RETAINED_MODE_ENABLED,
 			content_check_function = function (content, style)
 				return content.active
 			end
@@ -646,20 +576,17 @@ UIElements.TeamPlayerPortrait = {
 		{
 			style_id = "player_name",
 			pass_type = "text",
-			text_id = "player_name",
-			retained_mode = RETAINED_MODE_ENABLED
+			text_id = "player_name"
 		},
 		{
 			pass_type = "texture",
 			style_id = "player_level_bg",
-			texture_id = "player_level_bg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "player_level_bg"
 		},
 		{
 			style_id = "player_level",
 			pass_type = "text",
-			text_id = "player_level",
-			retained_mode = RETAINED_MODE_ENABLED
+			text_id = "player_level"
 		},
 		{
 			pass_type = "texture",
@@ -700,32 +627,23 @@ local function create_player_portrait_widget_definition_small(index)
 			connecting_icon = "matchmaking_connecting_icon",
 			hp_bar_fg = "teammate_hp_bar_fg",
 			player_name = "Ola Bengtsson",
+			character_portrait = "unit_frame_portrait_empire_soldier",
 			inventory_bg = "teammate_bg",
 			hp_bar_bg = "teammate_hp_bar_bg",
-			character_portrait = "unit_frame_portrait_empire_soldier",
 			player_level = "1",
 			host_icon = "host_icon",
 			hp_bar_highlight = "teammate_hp_bar_highlight",
 			bar_value = 1,
 			hp_bar = {
-				low_health = false,
 				wounded_texture_id = "teammate_hp_bar",
 				texture_id = "teammate_hp_bar",
 				draw_health_bar = true,
 				bar_value = 1,
-				is_knocked_down = false,
-				is_wounded = false,
 				normal_texture_id = "teammate_hp_bar_color_tint_" .. index
 			},
 			hp_bar_grimoire_debuff = {
 				texture_id = "teammate_hp_bar_overlay",
 				bar_value = 0
-			},
-			hp_bar_shield = {
-				texture_id = "teammate_hp_bar",
-				bar_value_offset = 0,
-				bar_value_position = 0,
-				bar_value_size = 0
 			},
 			hp_bar_grimoire_icon = {
 				hp_bar_grimoire_icon = "grimoire_icon",
@@ -889,34 +807,6 @@ local function create_player_portrait_widget_definition_small(index)
 					0
 				}
 			},
-			hp_bar_shield = {
-				uv_start_pixels = 0,
-				uv_scale_pixels = 178,
-				offset_scale = 1,
-				scale_axis = 1,
-				scenegraph_id = "hp_bar_shield_fill_" .. index,
-				color = {
-					255,
-					0,
-					166,
-					255
-				},
-				uvs = {
-					{
-						0,
-						0
-					},
-					{
-						1,
-						1
-					}
-				},
-				offset = {
-					0,
-					0,
-					0
-				}
-			},
 			hp_bar_divider = {
 				texture_axis = 1,
 				texture_amount = 9,
@@ -983,14 +873,12 @@ UIElements.PlayerPortrait = {
 		{
 			pass_type = "texture",
 			style_id = "portrait_frame",
-			texture_id = "portrait_frame",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "portrait_frame"
 		},
 		{
 			pass_type = "texture",
 			style_id = "character_portrait",
-			texture_id = "character_portrait",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "character_portrait"
 		},
 		{
 			pass_type = "texture",
@@ -998,8 +886,7 @@ UIElements.PlayerPortrait = {
 			texture_id = "host_icon",
 			content_check_function = function (content)
 				return content.is_host
-			end,
-			retained_mode = RETAINED_MODE_ENABLED
+			end
 		},
 		{
 			pass_type = "texture",
@@ -1007,8 +894,7 @@ UIElements.PlayerPortrait = {
 			texture_id = "portrait_overlay",
 			content_check_function = function (content)
 				return content.display_portrait_overlay
-			end,
-			retained_mode = RETAINED_MODE_ENABLED
+			end
 		},
 		{
 			pass_type = "texture",
@@ -1016,32 +902,27 @@ UIElements.PlayerPortrait = {
 			texture_id = "portrait_icon",
 			content_check_function = function (content)
 				return content.display_portrait_icon
-			end,
-			retained_mode = RETAINED_MODE_ENABLED
+			end
 		},
 		{
 			pass_type = "texture",
 			style_id = "talk_indicator_highlight",
-			texture_id = "talk_indicator_highlight",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "talk_indicator_highlight"
 		},
 		{
 			pass_type = "texture",
 			style_id = "hp_bar_bg",
-			texture_id = "hp_bar_bg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "hp_bar_bg"
 		},
 		{
 			pass_type = "texture",
 			style_id = "hp_bar_fg",
-			texture_id = "hp_bar_fg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "hp_bar_fg"
 		},
 		{
 			pass_type = "texture",
 			style_id = "hp_bar_highlight",
-			texture_id = "hp_bar_highlight",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "hp_bar_highlight"
 		},
 		{
 			style_id = "hp_bar",
@@ -1110,39 +991,6 @@ UIElements.PlayerPortrait = {
 			end
 		},
 		{
-			style_id = "hp_bar_shield",
-			pass_type = "texture_uv_dynamic_color_uvs_size_offset",
-			content_id = "hp_bar_shield",
-			dynamic_function = function (content, style, size, dt, ui_renderer)
-				local bar_value_position = content.bar_value_position
-				local bar_value_offset = content.bar_value_offset
-				local bar_value_size = content.bar_value_size
-				local uv_start_pixels = style.uv_start_pixels
-				local uv_scale_pixels = style.uv_scale_pixels
-				local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value_position
-				local uvs = style.uvs
-				local uv_scale_axis = style.scale_axis
-				local offset_scale = style.offset_scale
-				local offset = temp_offext
-				offset[1] = 0
-				offset[2] = 0
-				offset[3] = 0
-				uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
-				local shield_size = uv_start_pixels + uv_scale_pixels*bar_value_size
-				size[uv_scale_axis] = shield_size
-				local bar_offset = bar_value_offset*uv_scale_pixels
-				local pos = bar_offset
-
-				if shield_size + uv_pixels < uv_scale_pixels - bar_offset then
-					pos = ((uv_start_pixels + uv_scale_pixels) - uv_pixels)*offset_scale - shield_size
-				end
-
-				offset[uv_scale_axis] = pos
-
-				return style.color, uvs, size, offset
-			end
-		},
-		{
 			pass_type = "centered_texture_amount",
 			style_id = "hp_bar_divider",
 			texture_id = "hp_bar_divider",
@@ -1155,7 +1003,6 @@ UIElements.PlayerPortrait = {
 			style_id = "hp_bar_grimoire_icon",
 			texture_id = "hp_bar_grimoire_icon",
 			content_id = "hp_bar_grimoire_icon",
-			retained_mode = RETAINED_MODE_ENABLED,
 			content_check_function = function (content, style)
 				return content.active
 			end
@@ -1165,7 +1012,6 @@ UIElements.PlayerPortrait = {
 			style_id = "hp_bar_max_health_divider",
 			texture_id = "hp_bar_max_health_divider",
 			content_id = "hp_bar_max_health_divider",
-			retained_mode = RETAINED_MODE_ENABLED,
 			content_check_function = function (content, style)
 				return content.active
 			end
@@ -1173,20 +1019,17 @@ UIElements.PlayerPortrait = {
 		{
 			style_id = "player_name",
 			pass_type = "text",
-			text_id = "player_name",
-			retained_mode = RETAINED_MODE_ENABLED
+			text_id = "player_name"
 		},
 		{
 			pass_type = "texture",
 			style_id = "player_level_bg",
-			texture_id = "player_level_bg",
-			retained_mode = RETAINED_MODE_ENABLED
+			texture_id = "player_level_bg"
 		},
 		{
 			style_id = "player_level",
 			pass_type = "text",
-			text_id = "player_level",
-			retained_mode = RETAINED_MODE_ENABLED
+			text_id = "player_level"
 		}
 	}
 }
@@ -1195,39 +1038,30 @@ local player_portrait_widget_definition = {
 	element = UIElements.PlayerPortrait,
 	content = {
 		talk_indicator_highlight = "talk_indicator_frame",
+		hp_bar_divider = "player_hp_bar_divider",
 		host_icon = "host_icon",
 		portrait_frame = "unit_frame_01",
 		player_level_bg = "unit_frame_lvl_bg",
 		portrait_icon = "unit_frame_icon_01",
-		hp_bar_divider = "player_hp_bar_divider",
+		hp_bar_highlight = "player_hp_bar_highlight",
 		display_portrait_overlay = true,
 		display_portrait_icon = true,
 		character_portrait = "unit_frame_portrait_empire_soldier",
 		portrait_overlay = "unit_frame_red_overlay",
-		hp_bar_fg = "player_hp_bar_fg",
 		player_name = "",
-		hp_bar_highlight = "player_hp_bar_highlight",
+		hp_bar_fg = "player_hp_bar_fg",
 		player_level = "30",
 		hp_bar_bg = "player_hp_bar_bg",
 		hp_bar = {
-			low_health = false,
 			wounded_texture_id = "player_hp_bar",
 			texture_id = "player_hp_bar",
 			draw_health_bar = true,
 			bar_value = 1,
-			is_knocked_down = false,
-			is_wounded = false,
 			normal_texture_id = "player_hp_bar_color_tint"
 		},
 		hp_bar_grimoire_debuff = {
 			texture_id = "player_hp_bar_overlay",
 			bar_value = 0
-		},
-		hp_bar_shield = {
-			texture_id = "player_hp_bar",
-			bar_value_offset = 0,
-			bar_value_position = 0,
-			bar_value_size = 0
 		},
 		hp_bar_grimoire_icon = {
 			hp_bar_grimoire_icon = "grimoire_icon",
@@ -1338,34 +1172,6 @@ local player_portrait_widget_definition = {
 				0,
 				0,
 				0
-			},
-			uvs = {
-				{
-					0,
-					0
-				},
-				{
-					1,
-					1
-				}
-			},
-			offset = {
-				0,
-				0,
-				0
-			}
-		},
-		hp_bar_shield = {
-			uv_start_pixels = 0,
-			scenegraph_id = "hp_bar_shield_fill",
-			uv_scale_pixels = 178,
-			offset_scale = 1,
-			scale_axis = 1,
-			color = {
-				255,
-				0,
-				166,
-				255
 			},
 			uvs = {
 				{

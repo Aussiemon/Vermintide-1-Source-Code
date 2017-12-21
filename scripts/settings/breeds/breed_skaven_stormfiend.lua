@@ -1,26 +1,24 @@
 local breed_data = {
+	base_unit = "units/beings/enemies/skaven_stormfiend/chr_skaven_stormfiend",
+	walk_speed = 5,
 	detection_radius = 9999999,
-	has_inventory = true,
 	no_stagger_duration = true,
 	awards_positive_reinforcement_message = true,
 	perception = "perception_rat_ogre",
 	death_reaction = "ai_default",
 	smart_object_template = "rat_ogre",
-	target_selection = "pick_rat_ogre_target_with_weights",
-	exchange_order = 1,
+	has_inventory = true,
+	run_speed = 8,
 	animation_sync_rpc = "rpc_sync_anim_state_7",
 	jump_slam_gravity = 19,
 	reach_distance = 3,
-	run_speed = 8,
-	walk_speed = 5,
+	target_selection = "pick_rat_ogre_target_with_weights",
 	aoe_radius = 1,
 	hit_reaction = "ai_default",
-	use_aggro = true,
 	bone_lod_level = 0,
 	default_inventory_template = "rat_ogre",
-	smart_targeting_outer_width = 1.4,
+	use_aggro = true,
 	hit_effect_template = "HitEffectsRatOgre",
-	smart_targeting_height_multiplier = 2,
 	radius = 2,
 	unit_template = "ai_unit_rat_ogre",
 	combat_spawn_stinger = "enemy_ratogre_stinger",
@@ -31,10 +29,8 @@ local breed_data = {
 	player_locomotion_constrain_radius = 1.5,
 	far_off_despawn_immunity = true,
 	trigger_dialogue_on_target_switch = true,
-	smart_targeting_width = 0.6,
 	perception_continuous = "perception_continuous_rat_ogre",
 	behavior = "ogre",
-	base_unit = "units/beings/enemies/skaven_stormfiend/chr_skaven_stormfiend",
 	aoe_height = 2.4,
 	hit_zones = {
 		full = {
@@ -44,8 +40,7 @@ local breed_data = {
 		head = {
 			prio = 1,
 			actors = {
-				"c_head",
-				"c_packmaster_sling_02"
+				"c_head"
 			},
 			push_actors = {
 				"j_head",
@@ -143,12 +138,6 @@ local breed_data = {
 			prio = 5,
 			actors = {
 				"c_afro"
-			}
-		},
-		aux = {
-			prio = 6,
-			actors = {
-				"c_packmaster_sling"
 			}
 		}
 	},
