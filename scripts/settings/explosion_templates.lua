@@ -44,7 +44,7 @@ ExplosionTemplates = {
 			sound_event_name = "drakegun_hit",
 			effect_name = "fx/wpnfx_drake_projectile_impact_charged",
 			damage_min = {
-				3,
+				2,
 				1,
 				12,
 				2
@@ -63,17 +63,17 @@ ExplosionTemplates = {
 			radius_max = 3,
 			attack_template_glance = "drakegun_glance",
 			damage_type_glance = "drakegun_glance",
-			radius_min = 3,
+			radius_min = 0.75,
 			attack_template = "drakegun",
 			alert_enemies = true,
 			alert_enemies_radius = 10,
-			max_damage_radius_max = 1,
+			max_damage_radius_max = 2,
 			damage_type = "drakegun",
 			sound_event_name = "fireball_big_hit",
 			effect_name = "fx/wpnfx_fireball_charged_impact",
 			damage_min = {
 				2,
-				1,
+				0,
 				12,
 				1
 			},
@@ -253,7 +253,7 @@ ExplosionTemplates = {
 			nav_tag_volume_layer = "fire_grenade",
 			radius = 4,
 			create_nav_tag_volume = true,
-			attack_template = "fire_grenade_dot",
+			attack_template = "wizard_staff_geiser",
 			sound_event_name = "player_combat_weapon_fire_grenade_explosion",
 			damage_interval = 1,
 			duration = 4,
@@ -270,7 +270,7 @@ ExplosionTemplates = {
 			nav_tag_volume_layer = "fire_grenade",
 			radius = 4,
 			create_nav_tag_volume = true,
-			attack_template = "fire_grenade_dot",
+			attack_template = "wizard_staff_geiser_t2",
 			sound_event_name = "player_combat_weapon_fire_grenade_explosion",
 			damage_interval = 1,
 			duration = 4,
@@ -287,7 +287,7 @@ ExplosionTemplates = {
 			nav_tag_volume_layer = "fire_grenade",
 			radius = 4,
 			create_nav_tag_volume = true,
-			attack_template = "fire_grenade_dot",
+			attack_template = "wizard_staff_geiser_t3",
 			sound_event_name = "player_combat_weapon_fire_grenade_explosion",
 			damage_interval = 1,
 			duration = 4,
@@ -364,14 +364,14 @@ ExplosionTemplates.drakegun_charged_t3.explosion.attack_template = "drakegun_t3"
 ExplosionTemplates.drakegun_charged_t3.explosion.attack_template_glance = "drakegun_glance_t3"
 ExplosionTemplates.fireball_charged_t2 = table.clone(ExplosionTemplates.fireball_charged)
 ExplosionTemplates.fireball_charged_t2.explosion.damage_min = {
-	4,
-	3,
+	2.5,
+	0,
 	18,
 	2
 }
 ExplosionTemplates.fireball_charged_t2.explosion.damage_max = {
-	6,
 	5,
+	3,
 	30,
 	3
 }
@@ -379,14 +379,14 @@ ExplosionTemplates.fireball_charged_t2.explosion.attack_template = "drakegun_t2"
 ExplosionTemplates.fireball_charged_t2.explosion.attack_template_glance = "drakegun_glance_t2"
 ExplosionTemplates.fireball_charged_t3 = table.clone(ExplosionTemplates.fireball_charged)
 ExplosionTemplates.fireball_charged_t3.explosion.damage_min = {
-	5,
-	4,
+	3,
+	0,
 	22,
 	2.5
 }
 ExplosionTemplates.fireball_charged_t3.explosion.damage_max = {
-	8,
-	7,
+	6,
+	4,
 	36,
 	4
 }

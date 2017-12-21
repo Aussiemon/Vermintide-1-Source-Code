@@ -130,7 +130,11 @@ Weapons.wpn_side_objective_tome_01.actions = {
 					sub_action = "push",
 					start_time = 0.1,
 					action = "action_one",
-					input = "action_one"
+					doubleclick_window = 0,
+					input = "action_one",
+					hold_required = {
+						"action_two_hold"
+					}
 				}
 			}
 		}

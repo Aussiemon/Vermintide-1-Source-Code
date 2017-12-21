@@ -6,11 +6,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.986328,
-			0.556641
+			0.502441
 		},
 		uv11 = {
 			0.995605,
-			0.568848
+			0.514648
 		}
 	},
 	kick_player_icon = {
@@ -20,11 +20,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.982422,
-			0.631836
+			0.628418
 		},
 		uv11 = {
 			0.999023,
-			0.648438
+			0.64502
 		}
 	},
 	level_title_banner_middle = {
@@ -34,11 +34,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.986328,
-			0.451172
+			0.45166
 		},
 		uv11 = {
 			0.999023,
-			0.468262
+			0.46875
 		}
 	},
 	level_location_dlc_icon_dwarf_beacon = {
@@ -48,25 +48,25 @@ map_atlas = {
 		},
 		uv00 = {
 			0.429199,
-			0.823242
+			0.966797
 		},
 		uv11 = {
 			0.449707,
-			0.845215
+			0.98877
 		}
 	},
-	level_location_dlc_icon_dwarf_exterior = {
+	level_location_long_icon_01 = {
 		size = {
 			42,
 			45
 		},
 		uv00 = {
 			0.429199,
-			0.799316
+			0.942871
 		},
 		uv11 = {
 			0.449707,
-			0.821289
+			0.964844
 		}
 	},
 	drachenfels_location_icon_part_06 = {
@@ -90,6 +90,90 @@ map_atlas = {
 		},
 		uv00 = {
 			0.429199,
+			0.918945
+		},
+		uv11 = {
+			0.449707,
+			0.940918
+		}
+	},
+	level_location_short_icon_01 = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.429199,
+			0.89502
+		},
+		uv11 = {
+			0.449707,
+			0.916992
+		}
+	},
+	level_location_any_icon = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.429199,
+			0.871094
+		},
+		uv11 = {
+			0.449707,
+			0.893066
+		}
+	},
+	level_location_long_icon_07 = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.429199,
+			0.847168
+		},
+		uv11 = {
+			0.449707,
+			0.869141
+		}
+	},
+	level_location_long_icon_03 = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.429199,
+			0.823242
+		},
+		uv11 = {
+			0.449707,
+			0.845215
+		}
+	},
+	level_location_short_icon_03 = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.429199,
+			0.799316
+		},
+		uv11 = {
+			0.449707,
+			0.821289
+		}
+	},
+	level_location_dlc_icon_dungeon = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.429199,
 			0.775391
 		},
 		uv11 = {
@@ -97,7 +181,7 @@ map_atlas = {
 			0.797363
 		}
 	},
-	level_location_long_icon_06 = {
+	level_location_short_icon_05 = {
 		size = {
 			42,
 			45
@@ -111,7 +195,7 @@ map_atlas = {
 			0.773438
 		}
 	},
-	level_location_short_icon_06 = {
+	level_location_dlc_icon_02 = {
 		size = {
 			42,
 			45
@@ -125,7 +209,7 @@ map_atlas = {
 			0.749512
 		}
 	},
-	level_location_long_icon_01 = {
+	level_location_long_icon_02 = {
 		size = {
 			42,
 			45
@@ -139,7 +223,7 @@ map_atlas = {
 			0.725586
 		}
 	},
-	level_location_long_icon_03 = {
+	level_location_dlc_icon_01 = {
 		size = {
 			42,
 			45
@@ -153,7 +237,7 @@ map_atlas = {
 			0.70166
 		}
 	},
-	level_location_short_icon_01 = {
+	level_location_long_icon_04 = {
 		size = {
 			42,
 			45
@@ -167,88 +251,18 @@ map_atlas = {
 			0.677734
 		}
 	},
-	level_location_dlc_icon_dungeon = {
+	level_location_short_icon_06 = {
 		size = {
 			42,
 			45
 		},
 		uv00 = {
 			0.398438,
-			0.970215
+			0.966797
 		},
 		uv11 = {
 			0.418945,
-			0.992188
-		}
-	},
-	level_location_short_icon_05 = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.398438,
-			0.946289
-		},
-		uv11 = {
-			0.418945,
-			0.968262
-		}
-	},
-	level_location_dlc_icon_02 = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.398438,
-			0.922363
-		},
-		uv11 = {
-			0.418945,
-			0.944336
-		}
-	},
-	level_location_long_icon_02 = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.398438,
-			0.898438
-		},
-		uv11 = {
-			0.418945,
-			0.92041
-		}
-	},
-	level_location_long_icon_04 = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.398438,
-			0.874512
-		},
-		uv11 = {
-			0.418945,
-			0.896484
-		}
-	},
-	level_location_any_icon = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.398438,
-			0.850586
-		},
-		uv11 = {
-			0.418945,
-			0.872559
+			0.98877
 		}
 	},
 	level_location_dlc_icon_portals = {
@@ -258,25 +272,25 @@ map_atlas = {
 		},
 		uv00 = {
 			0.398438,
-			0.82666
+			0.942871
 		},
 		uv11 = {
 			0.418945,
-			0.848633
+			0.964844
 		}
 	},
-	level_location_short_icon_02 = {
+	level_location_dlc_icon_dwarf_exterior = {
 		size = {
 			42,
 			45
 		},
 		uv00 = {
 			0.398438,
-			0.802734
+			0.918945
 		},
 		uv11 = {
 			0.418945,
-			0.824707
+			0.940918
 		}
 	},
 	level_location_dlc_icon_dwarf_interior = {
@@ -286,28 +300,28 @@ map_atlas = {
 		},
 		uv00 = {
 			0.398438,
-			0.778809
+			0.89502
 		},
 		uv11 = {
 			0.418945,
-			0.800781
+			0.916992
 		}
 	},
-	level_location_dlc_icon_01 = {
+	level_location_long_icon_05 = {
 		size = {
 			42,
 			45
 		},
 		uv00 = {
-			0.365234,
-			0.975586
+			0.398438,
+			0.871094
 		},
 		uv11 = {
-			0.385742,
-			0.997559
+			0.418945,
+			0.893066
 		}
 	},
-	level_location_long_icon_05 = {
+	level_location_long_icon_06 = {
 		size = {
 			42,
 			45
@@ -321,7 +335,7 @@ map_atlas = {
 			0.997559
 		}
 	},
-	level_location_long_icon_07 = {
+	level_location_short_icon_04 = {
 		size = {
 			42,
 			45
@@ -335,21 +349,7 @@ map_atlas = {
 			0.997559
 		}
 	},
-	level_location_short_icon_04 = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.258789,
-			0.975586
-		},
-		uv11 = {
-			0.279297,
-			0.997559
-		}
-	},
-	level_location_short_icon_03 = {
+	level_location_short_icon_02 = {
 		size = {
 			42,
 			45
@@ -363,32 +363,18 @@ map_atlas = {
 			0.997559
 		}
 	},
-	difficulty_icon_small_01 = {
+	difficulty_icon_small_locked = {
 		size = {
 			21,
 			50
 		},
 		uv00 = {
 			0.986328,
-			0.530273
+			0.577637
 		},
 		uv11 = {
 			0.996582,
-			0.554688
-		}
-	},
-	difficulty_icon_small_03 = {
-		size = {
-			21,
-			50
-		},
-		uv00 = {
-			0.986328,
-			0.501953
-		},
-		uv11 = {
-			0.996582,
-			0.526367
+			0.602051
 		}
 	},
 	difficulty_icon_small_05 = {
@@ -398,11 +384,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.986328,
-			0.475586
+			0.526855
 		},
 		uv11 = {
 			0.996582,
-			0.5
+			0.55127
 		}
 	},
 	difficulty_icon_small_04 = {
@@ -412,25 +398,25 @@ map_atlas = {
 		},
 		uv00 = {
 			0.986328,
-			0.424805
+			0.476074
 		},
 		uv11 = {
 			0.996582,
-			0.449219
+			0.500488
 		}
 	},
-	difficulty_icon_small_locked = {
+	difficulty_icon_small_03 = {
 		size = {
 			21,
 			50
 		},
 		uv00 = {
-			0.988281,
-			0.276367
+			0.986328,
+			0.425293
 		},
 		uv11 = {
-			0.998535,
-			0.300781
+			0.996582,
+			0.449707
 		}
 	},
 	difficulty_icon_small_02 = {
@@ -440,11 +426,25 @@ map_atlas = {
 		},
 		uv00 = {
 			0.988281,
-			0.25
+			0.334473
 		},
 		uv11 = {
 			0.998535,
-			0.274414
+			0.358887
+		}
+	},
+	difficulty_icon_small_01 = {
+		size = {
+			21,
+			50
+		},
+		uv00 = {
+			0.988281,
+			0.308105
+		},
+		uv11 = {
+			0.998535,
+			0.33252
 		}
 	},
 	level_title_banner_right = {
@@ -453,12 +453,12 @@ map_atlas = {
 			43
 		},
 		uv00 = {
-			0.322754,
-			0.870117
+			0.258789,
+			0.975586
 		},
 		uv11 = {
-			0.351074,
-			0.891113
+			0.287109,
+			0.996582
 		}
 	},
 	level_title_banner_left = {
@@ -482,6 +482,48 @@ map_atlas = {
 		},
 		uv00 = {
 			0.398438,
+			0.840332
+		},
+		uv11 = {
+			0.427246,
+			0.869141
+		}
+	},
+	difficulty_icon_disabled = {
+		size = {
+			59,
+			59
+		},
+		uv00 = {
+			0.398438,
+			0.80957
+		},
+		uv11 = {
+			0.427246,
+			0.838379
+		}
+	},
+	difficulty_icon_large_glow_effect = {
+		size = {
+			59,
+			59
+		},
+		uv00 = {
+			0.398438,
+			0.778809
+		},
+		uv11 = {
+			0.427246,
+			0.807617
+		}
+	},
+	difficulty_icon_large_04 = {
+		size = {
+			59,
+			59
+		},
+		uv00 = {
+			0.398438,
 			0.748047
 		},
 		uv11 = {
@@ -489,7 +531,7 @@ map_atlas = {
 			0.776855
 		}
 	},
-	difficulty_icon_disabled = {
+	difficulty_icon_large_03 = {
 		size = {
 			59,
 			59
@@ -503,7 +545,7 @@ map_atlas = {
 			0.746094
 		}
 	},
-	difficulty_icon_large_glow_effect = {
+	difficulty_icon_large_02_selected = {
 		size = {
 			59,
 			59
@@ -517,7 +559,7 @@ map_atlas = {
 			0.715332
 		}
 	},
-	difficulty_icon_large_04 = {
+	difficulty_icon_large_02 = {
 		size = {
 			59,
 			59
@@ -531,48 +573,6 @@ map_atlas = {
 			0.68457
 		}
 	},
-	difficulty_icon_large_03 = {
-		size = {
-			59,
-			59
-		},
-		uv00 = {
-			0.365234,
-			0.944824
-		},
-		uv11 = {
-			0.394043,
-			0.973633
-		}
-	},
-	difficulty_icon_large_02_selected = {
-		size = {
-			59,
-			59
-		},
-		uv00 = {
-			0.365234,
-			0.914063
-		},
-		uv11 = {
-			0.394043,
-			0.942871
-		}
-	},
-	difficulty_icon_large_02 = {
-		size = {
-			59,
-			59
-		},
-		uv00 = {
-			0.365234,
-			0.883301
-		},
-		uv11 = {
-			0.394043,
-			0.912109
-		}
-	},
 	difficulty_icon_large_01 = {
 		size = {
 			59,
@@ -580,11 +580,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.365234,
-			0.852539
+			0.952148
 		},
 		uv11 = {
 			0.394043,
-			0.881348
+			0.980957
 		}
 	},
 	difficulty_icon_large_01_selected = {
@@ -594,14 +594,56 @@ map_atlas = {
 		},
 		uv00 = {
 			0.365234,
-			0.821777
+			0.921387
 		},
 		uv11 = {
 			0.394043,
-			0.850586
+			0.950195
 		}
 	},
-	octagon_button_hover = {
+	map_icon_search_02 = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.365234,
+			0.888184
+		},
+		uv11 = {
+			0.396484,
+			0.919434
+		}
+	},
+	map_icon_advanced_settings_02 = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.365234,
+			0.85498
+		},
+		uv11 = {
+			0.396484,
+			0.88623
+		}
+	},
+	octagon_button_clicked = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.365234,
+			0.821777
+		},
+		uv11 = {
+			0.396484,
+			0.853027
+		}
+	},
+	map_icon_browser_01 = {
 		size = {
 			64,
 			64
@@ -615,7 +657,7 @@ map_atlas = {
 			0.819824
 		}
 	},
-	octagon_button_toggled = {
+	octagon_button_hover = {
 		size = {
 			64,
 			64
@@ -629,7 +671,7 @@ map_atlas = {
 			0.786621
 		}
 	},
-	octagon_button_clicked = {
+	map_icon_search_01 = {
 		size = {
 			64,
 			64
@@ -643,7 +685,7 @@ map_atlas = {
 			0.753418
 		}
 	},
-	octagon_button_normal = {
+	map_icon_reset_01 = {
 		size = {
 			64,
 			64
@@ -657,7 +699,7 @@ map_atlas = {
 			0.720215
 		}
 	},
-	map_icon_friends_01 = {
+	octagon_button_toggled = {
 		size = {
 			64,
 			64
@@ -671,7 +713,7 @@ map_atlas = {
 			0.687012
 		}
 	},
-	map_icon_advanced_settings_02 = {
+	map_icon_friends_02 = {
 		size = {
 			64,
 			64
@@ -685,7 +727,7 @@ map_atlas = {
 			0.973633
 		}
 	},
-	map_icon_browser_02 = {
+	octagon_button_toggled_hover = {
 		size = {
 			64,
 			64
@@ -699,7 +741,7 @@ map_atlas = {
 			0.973633
 		}
 	},
-	map_icon_friends_02 = {
+	map_icon_reset_02 = {
 		size = {
 			64,
 			64
@@ -713,18 +755,32 @@ map_atlas = {
 			0.973633
 		}
 	},
-	octagon_button_toggled_hover = {
+	map_icon_friends_01 = {
 		size = {
 			64,
 			64
 		},
 		uv00 = {
 			0.322754,
-			0.836914
+			0.859375
 		},
 		uv11 = {
 			0.354004,
-			0.868164
+			0.890625
+		}
+	},
+	octagon_button_normal = {
+		size = {
+			64,
+			64
+		},
+		uv00 = {
+			0.322754,
+			0.826172
+		},
+		uv11 = {
+			0.354004,
+			0.857422
 		}
 	},
 	map_icon_advanced_settings_01 = {
@@ -741,7 +797,7 @@ map_atlas = {
 			0.975586
 		}
 	},
-	map_icon_browser_01 = {
+	map_icon_browser_02 = {
 		size = {
 			64,
 			64
@@ -761,12 +817,12 @@ map_atlas = {
 			18
 		},
 		uv00 = {
-			0.322754,
-			0.826172
+			0.94043,
+			0.643555
 		},
 		uv11 = {
-			0.362305,
-			0.834961
+			0.97998,
+			0.652344
 		}
 	},
 	zoom_button_hover = {
@@ -783,7 +839,7 @@ map_atlas = {
 			0.824219
 		}
 	},
-	zoom_button_selected = {
+	zoom_button_normal = {
 		size = {
 			82,
 			27
@@ -797,21 +853,21 @@ map_atlas = {
 			0.98877
 		}
 	},
-	zoom_button_normal = {
+	zoom_button_selected = {
 		size = {
 			82,
 			27
 		},
 		uv00 = {
 			0.94043,
-			0.631836
+			0.628418
 		},
 		uv11 = {
 			0.980469,
-			0.64502
+			0.641602
 		}
 	},
-	last_stand_back_button_hover = {
+	last_stand_back_button_normal = {
 		size = {
 			84,
 			84
@@ -825,7 +881,7 @@ map_atlas = {
 			0.983398
 		}
 	},
-	last_stand_back_button_normal = {
+	last_stand_back_button_hover = {
 		size = {
 			84,
 			84
@@ -867,7 +923,7 @@ map_atlas = {
 			0.833496
 		}
 	},
-	level_location_bg_01 = {
+	level_location_bg_02 = {
 		size = {
 			90,
 			100
@@ -881,6 +937,34 @@ map_atlas = {
 			0.735352
 		}
 	},
+	level_location_icon_03 = {
+		size = {
+			90,
+			100
+		},
+		uv00 = {
+			0.94043,
+			0.577637
+		},
+		uv11 = {
+			0.984375,
+			0.626465
+		}
+	},
+	level_location_bg_01 = {
+		size = {
+			90,
+			100
+		},
+		uv00 = {
+			0.94043,
+			0.526855
+		},
+		uv11 = {
+			0.984375,
+			0.575684
+		}
+	},
 	level_location_icon_05 = {
 		size = {
 			90,
@@ -888,25 +972,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.94043,
-			0.581055
+			0.476074
 		},
 		uv11 = {
 			0.984375,
-			0.629883
-		}
-	},
-	level_location_bg_02 = {
-		size = {
-			90,
-			100
-		},
-		uv00 = {
-			0.94043,
-			0.530273
-		},
-		uv11 = {
-			0.984375,
-			0.579102
+			0.524902
 		}
 	},
 	level_location_icon_01_unlocked = {
@@ -916,25 +986,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.94043,
-			0.475586
+			0.425293
 		},
 		uv11 = {
 			0.984375,
-			0.524414
-		}
-	},
-	level_location_icon_03 = {
-		size = {
-			90,
-			100
-		},
-		uv00 = {
-			0.94043,
-			0.424805
-		},
-		uv11 = {
-			0.984375,
-			0.473633
+			0.474121
 		}
 	},
 	drachenfels_location_icon_part_fg = {
@@ -944,11 +1000,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.94043,
-			0.367188
+			0.068359
 		},
 		uv11 = {
 			0.995117,
-			0.422852
+			0.124023
 		}
 	},
 	drachenfels_location_icon_part_01 = {
@@ -958,11 +1014,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.94043,
-			0.308594
+			0.366699
 		},
 		uv11 = {
 			0.996094,
-			0.365234
+			0.42334
 		}
 	},
 	karak_azgaraz_icon = {
@@ -972,39 +1028,11 @@ map_atlas = {
 		},
 		uv00 = {
 			0.94043,
-			0.25
+			0.308105
 		},
 		uv11 = {
 			0.986328,
-			0.306641
-		}
-	},
-	level_location_bg_03_hover = {
-		size = {
-			110,
-			120
-		},
-		uv00 = {
-			0.94043,
-			0.189453
-		},
-		uv11 = {
-			0.994141,
-			0.248047
-		}
-	},
-	level_location_bg_02_hover = {
-		size = {
-			110,
-			120
-		},
-		uv00 = {
-			0.94043,
-			0.128906
-		},
-		uv11 = {
-			0.994141,
-			0.1875
+			0.364746
 		}
 	},
 	level_location_bg_01_hover = {
@@ -1014,11 +1042,39 @@ map_atlas = {
 		},
 		uv00 = {
 			0.94043,
-			0.068359
+			0.247559
 		},
 		uv11 = {
 			0.994141,
-			0.126953
+			0.306152
+		}
+	},
+	level_location_bg_03_hover = {
+		size = {
+			110,
+			120
+		},
+		uv00 = {
+			0.94043,
+			0.187012
+		},
+		uv11 = {
+			0.994141,
+			0.245605
+		}
+	},
+	level_location_bg_02_hover = {
+		size = {
+			110,
+			120
+		},
+		uv00 = {
+			0.94043,
+			0.126465
+		},
+		uv11 = {
+			0.994141,
+			0.185059
 		}
 	},
 	drachenfels_location_icon_glow = {
@@ -1077,7 +1133,7 @@ map_atlas = {
 			0.90918
 		}
 	},
-	survival_button_hover = {
+	survival_button_disabled = {
 		size = {
 			209,
 			25
@@ -1105,7 +1161,7 @@ map_atlas = {
 			0.92627
 		}
 	},
-	survival_button_disabled = {
+	survival_button_hover = {
 		size = {
 			209,
 			25
@@ -1175,7 +1231,7 @@ map_atlas = {
 			0.809082
 		}
 	},
-	map_level_preview_frame_02 = {
+	map_level_preview_frame = {
 		size = {
 			325,
 			197
@@ -1189,7 +1245,7 @@ map_atlas = {
 			0.880859
 		}
 	},
-	map_level_preview_frame = {
+	map_level_preview_frame_02 = {
 		size = {
 			325,
 			197
@@ -1217,20 +1273,6 @@ map_atlas = {
 			0.68457
 		}
 	},
-	console_input_field_overlay = {
-		size = {
-			1920,
-			253
-		},
-		uv00 = {
-			0.000977,
-			0.530273
-		},
-		uv11 = {
-			0.938477,
-			0.653809
-		}
-	},
 	map_screen_bg = {
 		size = {
 			1920,
@@ -1238,11 +1280,25 @@ map_atlas = {
 		},
 		uv00 = {
 			0.000977,
+			0.126465
+		},
+		uv11 = {
+			0.938477,
+			0.653809
+		}
+	},
+	console_input_field_overlay = {
+		size = {
+			1920,
+			253
+		},
+		uv00 = {
+			0.000977,
 			0.000977
 		},
 		uv11 = {
 			0.938477,
-			0.52832
+			0.124512
 		}
 	}
 }

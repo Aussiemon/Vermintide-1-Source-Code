@@ -609,15 +609,15 @@ AchievementTemplates = {
 		ID_XB1 = "Defient",
 		ID_PS4 = "033",
 		evaluate = function (statistics_db, stats_id)
-			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
 		end
 	},
 	last_stand_town_meeting_silver = {
 		ID_XB1 = "Stalwart",
 		ID_PS4 = "034",
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
+			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
 
 			return complete
 		end
@@ -626,31 +626,31 @@ AchievementTemplates = {
 		ID_XB1 = "Unbreakable",
 		ID_PS4 = "035",
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
+			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
 
 			return complete
 		end
 	},
 	last_stand_the_fall_bronze = {
 		evaluate = function (statistics_db, stats_id)
-			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
 		end
 	},
 	last_stand_the_fall_silver = {
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
+			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
 
 			return complete
 		end
 	},
 	last_stand_the_fall_gold = {
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
+			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
 
 			return complete
 		end
@@ -659,12 +659,12 @@ AchievementTemplates = {
 		ID_XB1 = "OneDownEndlessToGo",
 		ID_PS4 = "036",
 		evaluate = function (statistics_db, stats_id)
-			local complete = 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
-			complete = complete or 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
-			complete = complete or 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
-			complete = complete or 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
-			complete = complete or 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
-			complete = complete or 1 <= statistics_db.get_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
+			local complete = 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
+			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
+			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
+			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
 
 			return complete
 		end

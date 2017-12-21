@@ -12,6 +12,7 @@ UISettings = {
 		Application.user_setting("root_scale_x") or 1,
 		Application.user_setting("root_scale_y") or 1
 	},
+	ui_scale = Application.user_setting("ui_scale") or 100,
 	use_hud_screen_fit = Application.user_setting("use_hud_screen_fit") or false,
 	interaction = {
 		bar = {

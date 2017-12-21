@@ -597,7 +597,7 @@ PlayerControllerKeymaps = {
 		wield_0 = {},
 		wield_switch_1 = {
 			"gamepad",
-			"y",
+			"triangle",
 			"pressed"
 		},
 		wield_switch_2 = {
@@ -955,6 +955,13 @@ PlayerControllerFilters = {
 				button_1 = "dodge_1",
 				button_2 = "dodge_2"
 			}
+		},
+		dodge_hold = {
+			filter_type = "or",
+			input_mappings = {
+				button_1 = "dodge_hold_1",
+				button_2 = "dodge_hold_2"
+			}
 		}
 	}
 }
@@ -1061,7 +1068,7 @@ ChatControllerSettings = {
 	ps4 = InputUtils.keymaps_key_approved("ps4") and {
 		activate_chat_input = {
 			"keyboard",
-			"y",
+			"triangle",
 			"pressed"
 		},
 		execute_chat_input = {
@@ -1485,11 +1492,6 @@ FreeFlightKeymaps = {
 			"keyboard",
 			"f7",
 			"pressed"
-		},
-		free_flight_toggle = {
-			"gamepad",
-			"l3",
-			"held"
 		},
 		frustum_freeze_toggle = {
 			"keyboard",
@@ -2387,7 +2389,7 @@ IngameMenuKeymaps = {
 		},
 		hotkey_journal = {
 			"keyboard",
-			"j",
+			"o",
 			"pressed"
 		},
 		hotkey_forge = {

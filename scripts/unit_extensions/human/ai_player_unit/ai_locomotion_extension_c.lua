@@ -9,7 +9,9 @@ AILocomotionExtensionC.init = function (self, extension_init_context, unit, exte
 	self._unit = unit
 	local blackboard = Unit.get_data(unit, "blackboard")
 	local locomotion_gravity = 20
-	local breed_run_speed = blackboard.breed.run_speed
+	local breed = blackboard.breed
+	self._breed = breed
+	local breed_run_speed = breed.run_speed
 	self._engine_extension_id = EngineOptimizedExtensions.ai_locomotion_register_extension(unit, locomotion_gravity, breed_run_speed)
 	self._mover_state = MoverHelper.create_mover_state()
 	local collision_actor_name = "c_mover_collision"
@@ -174,9 +176,10 @@ AILocomotionExtensionC.set_movement_type = function (self, movement_type, overri
 		MoverHelper.set_disable_reason(self._unit, self._mover_state, "constrained_by_mover", false)
 	end
 
+	local breed = self._breed
 	local kill = EngineOptimizedExtensions.ai_locomotion_set_movement_type(self._engine_extension_id, movement_types[movement_type], override_mover_move_distance)
 
-	if kill then
+	if kill and not breed.ignore_forced_mover_kill then
 		local damage_type = "forced"
 		local damage_direction = Vector3(0, 0, -1)
 

@@ -1831,6 +1831,8 @@ MapView.on_enter = function (self)
 	self.menu_active = true
 	self.active = true
 
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
+
 	return 
 end
 MapView.on_exit = function (self)
@@ -1855,6 +1857,8 @@ MapView.on_exit = function (self)
 	self.active = nil
 	self.exiting = nil
 	self.menu_active = nil
+
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end

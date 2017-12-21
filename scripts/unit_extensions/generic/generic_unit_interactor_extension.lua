@@ -369,7 +369,9 @@ GenericUnitInteractorExtension._stop_interaction = function (self, interactable_
 	self.state = "waiting_to_interact"
 	local flow_event = "lua_interaction_stopped_" .. interaction_type .. "_" .. InteractionResult[interaction_result]
 
-	Unit.flow_event(interactable_unit, flow_event)
+	if Unit.alive(interactable_unit) then
+		Unit.flow_event(interactable_unit, flow_event)
+	end
 
 	return 
 end

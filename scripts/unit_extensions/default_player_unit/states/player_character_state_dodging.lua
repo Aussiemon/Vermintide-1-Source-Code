@@ -141,7 +141,7 @@ PlayerCharacterStateDodging.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	if input_extension.get(input_extension, "jump") and status_extension.can_override_dodge_with_jump(status_extension, t) then
+	if input_extension.get(input_extension, "jump") and self.locomotion_extension:jump_allowed() and status_extension.can_override_dodge_with_jump(status_extension, t) then
 		local params = self.temp_params
 		params.post_dodge_jump = true
 

@@ -472,12 +472,12 @@ PlayerUnitLocomotionExtension.update_script_driven_ladder_transition_movement = 
 	local animation_position = Matrix4x4.translation(wanted_pose)
 	local current_position = POSITION_LOOKUP[unit]
 	local wanted_position = animation_position
+	local mover = Unit.mover(unit)
 
 	if self.velocity_forced then
 		self.velocity_forced = nil
 	end
 
-	local mover = Unit.mover(unit)
 	local delta = wanted_position - current_position
 
 	Mover.move(mover, delta, dt)
@@ -712,6 +712,7 @@ PlayerUnitLocomotionExtension.enable_animation_driven_movement_with_rotation_no_
 	return 
 end
 PlayerUnitLocomotionExtension.enable_script_driven_movement = function (self)
+	self.velocity_forced = nil
 	self.state = "script_driven"
 
 	return 
@@ -725,7 +726,6 @@ PlayerUnitLocomotionExtension.enable_script_driven_ladder_movement = function (s
 end
 PlayerUnitLocomotionExtension.enable_script_driven_ladder_transition_movement = function (self)
 	self.state = "script_driven_ladder_transition_movement"
-	self.velocity_forced = nil
 	self.old_error = Vector3Box(0, 0, 0)
 
 	return 

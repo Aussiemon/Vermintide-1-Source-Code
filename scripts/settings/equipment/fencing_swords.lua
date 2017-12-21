@@ -66,13 +66,6 @@ weapon_template.actions = {
 					input = "action_one_hold"
 				},
 				{
-					sub_action = "heavy_attack",
-					action = "action_one",
-					auto_chain = true,
-					end_time = 0.7,
-					start_time = 0.45
-				},
-				{
 					sub_action = "heavy_attack_charged",
 					start_time = 1,
 					action = "action_one",
@@ -144,13 +137,6 @@ weapon_template.actions = {
 					input = "action_one_hold"
 				},
 				{
-					sub_action = "heavy_attack",
-					action = "action_one",
-					auto_chain = true,
-					end_time = 0.7,
-					start_time = 0.45
-				},
-				{
 					sub_action = "heavy_attack_charged",
 					start_time = 1,
 					action = "action_one",
@@ -220,13 +206,6 @@ weapon_template.actions = {
 					start_time = 0.35,
 					end_time = 1,
 					input = "action_one_hold"
-				},
-				{
-					sub_action = "heavy_attack",
-					action = "action_one",
-					auto_chain = true,
-					end_time = 0.7,
-					start_time = 0.45
 				},
 				{
 					sub_action = "heavy_attack_charged",
@@ -739,6 +718,7 @@ weapon_template.actions = {
 					sub_action = "default",
 					start_time = 0.3,
 					action = "action_one",
+					doubleclick_window = 0,
 					release_required = "action_two_hold",
 					input = "action_one",
 					end_time = math.huge
@@ -747,8 +727,12 @@ weapon_template.actions = {
 					sub_action = "push",
 					start_time = 0.3,
 					action = "action_one",
+					doubleclick_window = 0,
 					input = "action_one",
-					end_time = math.huge
+					end_time = math.huge,
+					hold_required = {
+						"action_two_hold"
+					}
 				},
 				{
 					sub_action = "block_shot",

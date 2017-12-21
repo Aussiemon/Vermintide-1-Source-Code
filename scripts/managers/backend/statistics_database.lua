@@ -389,12 +389,14 @@ local function convert_from_backend(raw_value, database_type)
 		for hex_char in raw_value.gmatch(raw_value, ".") do
 			local hex_value = tonumber(hex_char, 16)
 
-			for i = 1, 4, 1 do
+			for i = 4, 1, -1 do
 				local hex_temp = hex_value/2
 				hex_value = floor(hex_temp)
-				value_n = value_n + 1
-				value[value_n] = (hex_value ~= hex_temp and true) or false
+				local new_value_n = value_n + i
+				value[new_value_n] = (hex_value ~= hex_temp and true) or false
 			end
+
+			value_n = value_n + 4
 		end
 
 		return value

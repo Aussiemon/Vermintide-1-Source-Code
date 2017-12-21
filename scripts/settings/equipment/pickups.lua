@@ -228,19 +228,6 @@ Pickups.grenades.frag_grenade_t1 = {
 	local_pickup_sound = true,
 	hud_description = "pickup_frag_grenade_t1"
 }
-Pickups.grenades.smoke_grenade_t1 = {
-	only_once = true,
-	item_description = "grenade_smoke",
-	slot_name = "slot_grenade",
-	type = "inventory_item",
-	spawn_weighting = 0,
-	pickup_sound_event = "pickup_grenade",
-	dupable = true,
-	item_name = "grenade_smoke_01",
-	unit_name = "units/weapons/player/pup_grenades/pup_grenade_02_t1",
-	local_pickup_sound = true,
-	hud_description = "pickup_smoke_grenade_t1"
-}
 Pickups.grenades.fire_grenade_t1 = {
 	only_once = true,
 	item_description = "grenade_fire",
@@ -267,19 +254,6 @@ Pickups.improved_grenades.frag_grenade_t2 = {
 	unit_name = "units/weapons/player/pup_grenades/pup_grenade_01_t2",
 	local_pickup_sound = true,
 	hud_description = "pickup_frag_grenade_t1"
-}
-Pickups.improved_grenades.smoke_grenade_t2 = {
-	only_once = true,
-	type = "inventory_item",
-	slot_name = "slot_grenade",
-	item_description = "grenade_smoke",
-	spawn_weighting = 0,
-	pickup_sound_event = "pickup_grenade",
-	dupable = true,
-	item_name = "grenade_smoke_02",
-	unit_name = "units/weapons/player/pup_grenades/pup_grenade_02_t2",
-	local_pickup_sound = true,
-	hud_description = "pickup_smoke_grenade_t1"
 }
 Pickups.improved_grenades.fire_grenade_t2 = {
 	only_once = true,
@@ -337,57 +311,69 @@ Pickups.special.endurance_badge_04.mission_name = "endurance_badge_04_mission"
 Pickups.special.endurance_badge_05 = table.clone(Pickups.special.endurance_badge_01)
 Pickups.special.endurance_badge_05.unit_name = "units/props/endurance_badges/prop_endurance_badge_05"
 Pickups.special.endurance_badge_05.mission_name = "endurance_badge_05_mission"
-script_data.lorebook_enabled = script_data.lorebook_enabled or Development.parameter("lorebook_enabled")
+
+local function lorebook_pages_unlocked(pages, statistics_db, stats_id)
+	local num_pages = #pages
+
+	for i = 1, num_pages, 1 do
+		local category_name = pages[i]
+		local id = LorebookCategoryLookup[category_name]
+		local unlocked = statistics_db.get_persistent_array_stat(statistics_db, stats_id, "lorebook_unlocks", id)
+
+		if not unlocked then
+			return false
+		end
+	end
+
+	return true
+end
+
+local function lorebook_pages_unlocked_sesssion(level_key)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+	local mission_data = active_missions.lorebook_page_hidden_mission
+	local difficulty_manager = Managers.state.difficulty
+	local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
+	local level_settings = LevelSettings[level_key]
+	local pickup_settings = (level_settings.pickup_settings and level_settings.pickup_settings[difficulty_rank]) or nil
+	local n_collected = 0
+	local n_pages_in_level = (pickup_settings and pickup_settings.lorebook_pages) or math.huge
+
+	if mission_data then
+		n_collected = mission_data.get_current_amount(mission_data)
+	end
+
+	return n_pages_in_level <= n_collected
+end
+
 Pickups.lorebook_pages = {
 	lorebook_page = {
-		spawn_weighting = 1,
-		hide_on_pickup = true,
-		type = "lorebook_page",
-		pickup_sound_event = "Play_hud_lorebook_unlock_page",
 		only_once = false,
 		unit_name = "units/weapons/player/pup_lore_page/pup_lore_page_01",
+		hide_on_pickup = true,
+		type = "lorebook_page",
+		spawn_weighting = 1,
+		mission_name = "lorebook_page_hidden_mission",
 		hud_description = "pickup_lorebook_page",
 		hide_func = function (statistics_db)
 			local level_key = Managers.state.game_mode:level_key()
-			local pages = LorebookCollectablePages[level_key]
-
-			fassert(pages, "Trying to a pick up a lorebook page on a level where pages can not be unlocked")
-
-			local num_pages = #pages
+			local level_pages = LorebookCollectablePages[level_key]
+			local any_level_pages = LorebookCollectablePages.any
 			local local_player = Managers.player:local_player()
 			local stats_id = local_player.stats_id(local_player)
 			local unlocked_all = true
 
-			for i = 1, num_pages, 1 do
-				local category_name = pages[i]
-				local id = LorebookCategoryLookup[category_name]
-				local unlocked = statistics_db.get_persistent_array_stat(statistics_db, stats_id, "lorebook_unlocks", id)
-
-				if not unlocked then
-					unlocked_all = false
-
-					break
-				end
+			if 0 < #level_pages then
+				unlocked_all = lorebook_pages_unlocked(level_pages, statistics_db, stats_id)
 			end
 
-			return unlocked_all
-		end,
-		can_spawn_func = function (params, is_debug_spawn)
-			if is_debug_spawn then
-				return true
+			if unlocked_all and 0 < #any_level_pages then
+				unlocked_all = lorebook_pages_unlocked(any_level_pages, statistics_db, stats_id)
 			end
 
-			if not script_data.lorebook_enabled then
-				return false
-			end
+			local unlocked_all_session = lorebook_pages_unlocked_sesssion(level_key)
 
-			local level_key = Managers.state.game_mode:level_key()
-
-			if LorebookCollectablePages[level_key] then
-				return true
-			end
-
-			return false
+			return unlocked_all or unlocked_all_session
 		end
 	}
 }

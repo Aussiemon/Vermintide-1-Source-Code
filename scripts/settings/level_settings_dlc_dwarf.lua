@@ -25,35 +25,35 @@ LevelSettings.dlc_dwarf_interior = {
 	pickup_settings = {
 		{
 			ammo = 8,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 16
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 17
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 12
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 12
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 12
@@ -125,35 +125,35 @@ LevelSettings.dlc_dwarf_exterior = {
 	pickup_settings = {
 		{
 			ammo = 10,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 14
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 15
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 12
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 12
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 12
@@ -222,35 +222,35 @@ LevelSettings.dlc_dwarf_beacons = {
 	pickup_settings = {
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 12
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 10
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 9
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 8
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 7

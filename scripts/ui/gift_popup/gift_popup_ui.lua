@@ -60,7 +60,7 @@ GiftPopupUI.init = function (self, ingame_ui_context)
 end
 GiftPopupUI._create_world = function (self)
 	local reward_world = self.world_manager:create_world("gift_world", "environment/blank_offscreen_chest", nil, 990)
-	local reward_viewport = ScriptWorld.create_viewport(reward_world, "gift_world_viewport_default", "default", 0)
+	local reward_viewport = ScriptWorld.create_viewport(reward_world, "gift_world_viewport_default", "default_forward", 0)
 
 	ScriptWorld.deactivate_viewport(reward_world, reward_viewport)
 

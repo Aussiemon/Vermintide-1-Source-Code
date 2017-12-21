@@ -36,7 +36,7 @@ local function add_grimoire()
 	local mission_name = "grimoire_hidden_mission"
 
 	mission_system.request_mission(mission_system, mission_name)
-	mission_system.update_mission(mission_system, mission_name, true, nil, true)
+	mission_system.update_mission(mission_system, mission_name, true, nil, nil, nil, true)
 
 	local group_buff_name_id = NetworkLookup.group_buff_templates.grimoire
 
@@ -50,7 +50,7 @@ local function remove_grimoire()
 	local buff_system = Managers.state.entity:system("buff_system")
 	local mission_name = "grimoire_hidden_mission"
 
-	mission_system.update_mission(mission_system, mission_name, false, nil, true)
+	mission_system.update_mission(mission_system, mission_name, false, nil, nil, nil, true)
 
 	local group_buff_name_id = NetworkLookup.group_buff_templates.grimoire
 
@@ -64,7 +64,7 @@ local function add_side_objective()
 	local mission_name = "tome_bonus_mission"
 
 	mission_system.request_mission(mission_system, mission_name)
-	mission_system.update_mission(mission_system, mission_name, true, nil, true)
+	mission_system.update_mission(mission_system, mission_name, true, nil, nil, nil, true)
 
 	return 
 end
@@ -73,7 +73,7 @@ local function remove_side_objective()
 	local mission_system = Managers.state.entity:system("mission_system")
 	local mission_name = "tome_bonus_mission"
 
-	mission_system.update_mission(mission_system, mission_name, false, nil, true)
+	mission_system.update_mission(mission_system, mission_name, false, nil, nil, nil, true)
 
 	return 
 end

@@ -118,9 +118,11 @@ end
 InteractionHelper.request_denied = function (self, interactor_unit)
 	InteractionHelper.printf("InteractionHelper:request_denied(%s)", tostring(interactor_unit))
 
-	local interactor_extension = ScriptUnit.extension(interactor_unit, "interactor_system")
+	if Unit.alive(interactor_unit) then
+		local interactor_extension = ScriptUnit.extension(interactor_unit, "interactor_system")
 
-	interactor_extension.interaction_denied(interactor_extension)
+		interactor_extension.interaction_denied(interactor_extension)
+	end
 
 	return 
 end

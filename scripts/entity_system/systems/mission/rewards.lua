@@ -5,6 +5,7 @@ Rewards.init = function (self, level_key)
 	self._level_key = level_key
 	self._base_experience = ScriptBackendProfileAttribute.get("experience")
 	self._multiplier = ExperienceSettings.multiplier
+	self.mission_rewards_n = 0
 
 	return 
 end
@@ -26,21 +27,20 @@ local token_textures = {
 	gold_tokens = "token_icon_04"
 }
 local line_break_table = {}
-Rewards._add_missions_from_mission_system = function (self, mission_rewards, difficulty_rank, level_length_modifier)
-	local mission_rewards_n = 0
-	local mission_system = Managers.state.entity:system("mission_system")
-	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+Rewards._add_rewards_from_completed_missions = function (self, completed_missions, mission_rewards, difficulty_rank, level_length_modifier)
+	local mission_rewards_n = self.mission_rewards_n
 
 	for mission_name, data in pairs(completed_missions) do
 		if not data.is_goal then
 			local experience = data.experience or 0
 			local bonus_dice = data.bonus_dice or 0
 			local bonus_tokens = data.bonus_tokens or 0
+			local lorebook_pages = data.lorebook_pages or 0
 			local dice_type = data.dice_type
 			local token_type = data.token_type
 			local line_break = false
 
-			if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens then
+			if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens or 0 < lorebook_pages then
 				mission_rewards_n = mission_rewards_n + 1
 				mission_rewards[mission_rewards_n] = {
 					text = data.mission_data.text
@@ -76,12 +76,29 @@ Rewards._add_missions_from_mission_system = function (self, mission_rewards, dif
 				}
 			end
 
+			if 0 < lorebook_pages then
+				mission_rewards_n = mission_rewards_n + 1
+				mission_rewards[mission_rewards_n] = {
+					icon = "summary_lore_page",
+					text = "dlc1_3_lorebook_pages",
+					bonus = false,
+					value = lorebook_pages
+				}
+			end
+
 			if line_break then
 				mission_rewards_n = mission_rewards_n + 1
 				mission_rewards[mission_rewards_n] = line_break_table
 			end
 		end
 	end
+
+	self.mission_rewards_n = mission_rewards_n
+
+	return 
+end
+Rewards._add_rewards_from_active_missions = function (self, active_missions, mission_rewards, difficulty_rank, level_length_modifier)
+	local mission_rewards_n = self.mission_rewards_n
 
 	for mission_name, data in pairs(active_missions) do
 		if not data.is_goal then
@@ -95,6 +112,7 @@ Rewards._add_missions_from_mission_system = function (self, mission_rewards, dif
 			local bonus_dice = 0
 			local dice_type = data.dice_type
 			local bonus_tokens = 0
+			local lorebook_pages = 0
 			local token_type = data.token_type
 			local line_break = false
 
@@ -103,11 +121,13 @@ Rewards._add_missions_from_mission_system = function (self, mission_rewards, dif
 				local experience_per_percent = data.experience_per_percent or 0
 				local dice_per_percent = data.dice_per_percent or 0
 				local tokens_per_percent = data.tokens_per_percent or 0
+				local lorebook_pages_per_percent = data.lorebook_pages_per_percent or 0
 				experience = math.ceil(percent_completed*experience_per_percent)
 				bonus_dice = math.floor(percent_completed*dice_per_percent)
 				bonus_tokens = math.floor(percent_completed*tokens_per_percent)
+				lorebook_pages = math.floor(percent_completed*lorebook_pages_per_percent)
 
-				if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens then
+				if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens or 0 < lorebook_pages then
 					mission_rewards_n = mission_rewards_n + 1
 					mission_rewards[mission_rewards_n] = {
 						text = data.mission_data.text
@@ -119,11 +139,13 @@ Rewards._add_missions_from_mission_system = function (self, mission_rewards, dif
 				local experience_per_amount = data.experience_per_amount or 0
 				local dice_per_amount = data.dice_per_amount or 0
 				local tokens_per_amount = data.tokens_per_amount or 0
+				local lorebook_pages_per_amount = data.lorebook_pages_per_amount or 0
 				experience = collected_amount*experience_per_amount
 				bonus_dice = collected_amount*dice_per_amount
 				bonus_tokens = collected_amount*tokens_per_amount
+				lorebook_pages = collected_amount*lorebook_pages_per_amount
 
-				if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens then
+				if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens or 0 < lorebook_pages then
 					mission_rewards_n = mission_rewards_n + 1
 					mission_rewards[mission_rewards_n] = {
 						text = data.mission_data.text
@@ -167,12 +189,34 @@ Rewards._add_missions_from_mission_system = function (self, mission_rewards, dif
 				}
 			end
 
+			if 0 < lorebook_pages then
+				mission_rewards_n = mission_rewards_n + 1
+				mission_rewards[mission_rewards_n] = {
+					icon = "summary_lore_page",
+					text = "dlc1_3_lorebook_pages",
+					bonus = false,
+					value = lorebook_pages
+				}
+			end
+
 			if line_break then
 				mission_rewards_n = mission_rewards_n + 1
 				mission_rewards[mission_rewards_n] = line_break_table
 			end
 		end
 	end
+
+	self.mission_rewards_n = mission_rewards_n
+
+	return 
+end
+Rewards._add_missions_from_mission_system = function (self, mission_rewards, difficulty_rank, level_length_modifier)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+	self.mission_rewards_n = 0
+
+	self._add_rewards_from_completed_missions(self, completed_missions, mission_rewards, difficulty_rank, level_length_modifier)
+	self._add_rewards_from_active_missions(self, active_missions, mission_rewards, difficulty_rank, level_length_modifier)
 
 	return 
 end

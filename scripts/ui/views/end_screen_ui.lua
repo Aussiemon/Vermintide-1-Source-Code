@@ -88,6 +88,7 @@ EndScreenUI.on_enter = function (self, you_win, checkpoint_available)
 	self.show_text_screen(self, you_win)
 	self.play_sound(self, "mute_all_world_sounds")
 	self.play_sound(self, "hud_gameplay_stance_deactivate")
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	return 
 end
@@ -111,6 +112,8 @@ EndScreenUI.on_exit = function (self)
 		input_manager.device_unblock_all_services(input_manager, "keyboard", 1)
 		input_manager.device_unblock_all_services(input_manager, "gamepad", 1)
 	end
+
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end

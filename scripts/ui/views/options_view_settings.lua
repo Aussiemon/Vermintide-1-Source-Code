@@ -786,6 +786,13 @@ local keybind_settings_definition = {
 		keymappings_key = "IngameMenuKeymaps",
 		widget_type = "keybind",
 		actions = {
+			"hotkey_journal"
+		}
+	},
+	{
+		keymappings_key = "IngameMenuKeymaps",
+		widget_type = "keybind",
+		actions = {
 			"hotkey_forge"
 		}
 	},
@@ -953,13 +960,6 @@ local gamepad_settings_definition = {
 		saved_value = "cb_gamepad_auto_aim_enabled_saved_value",
 		callback = "cb_gamepad_auto_aim_enabled",
 		tooltip_text = "tooltip_gamepad_auto_aim_enabled",
-		widget_type = "stepper"
-	},
-	{
-		setup = "cb_gamepad_rumble_enabled_setup",
-		saved_value = "cb_gamepad_rumble_enabled_saved_value",
-		callback = "cb_gamepad_rumble_enabled",
-		tooltip_text = "tooltip_gamepad_rumble_enabled",
 		widget_type = "stepper"
 	},
 	{

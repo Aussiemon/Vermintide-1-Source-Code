@@ -1671,7 +1671,7 @@ end
 AltarTraitRollUI.on_gamepad_activated = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local input_manager = self.input_manager
-	local input_service = self.parent:page_input_service()
+	local input_service = input_manager.get_service(input_manager, "enchantment_view")
 	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
 	local button_texture = button_texture_data.texture
 	local button_size = button_texture_data.size

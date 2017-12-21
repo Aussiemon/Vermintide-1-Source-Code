@@ -52,17 +52,24 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 	self.function_command_queue = FunctionCommandQueue:new(max_num_args)
 	local level_name = entity_system_creation_context.startup_data.level_key
 	local dialogue_filename = "dialogues/generated/" .. level_name
+	local auto_load_files = DialogueSettings.auto_load_files
+	local level_specific_load_files = DialogueSettings.level_specific_load_files[level_name]
 
 	if Application.can_get("lua", dialogue_filename) then
 		self.tagquery_loader:load_file(dialogue_filename)
 	end
 
-	local level_specific_load_files = DialogueSettings.level_specific_load_files[level_name]
-	local auto_load_files = level_specific_load_files or DialogueSettings.auto_load_files
-
 	for _, file_name in ipairs(auto_load_files) do
 		if Application.can_get("lua", file_name) then
 			self.tagquery_loader:load_file(file_name)
+		end
+	end
+
+	if level_specific_load_files then
+		for _, file_name in ipairs(level_specific_load_files) do
+			if Application.can_get("lua", file_name) then
+				self.tagquery_loader:load_file(file_name)
+			end
 		end
 	end
 

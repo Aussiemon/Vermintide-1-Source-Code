@@ -5,7 +5,7 @@ local animation_definitions = local_require("scripts/ui/views/inventory_view_ani
 local element_settings = {
 	height_spacing = 5,
 	height = 45,
-	width = 1394
+	width = 1348
 }
 local ListSettings = {
 	font_size = 18
@@ -14,27 +14,27 @@ local scrollbar_width = 22
 local max_list_entries = 100
 local time_until_remove = 5
 local title_text_position = {
-	20,
+	10,
 	0,
 	2
 }
 local level_text_position = {
-	400,
+	380,
 	0,
 	2
 }
 local difficulty_text_position = {
-	650,
+	630,
 	0,
 	2
 }
 local num_players_text_position = {
-	850,
+	790,
 	0,
 	2
 }
 local status_text_position = {
-	1000,
+	910,
 	0,
 	2
 }
@@ -44,22 +44,22 @@ local country_text_position = {
 	2
 }
 local country_button_position = {
-	1285,
+	1240,
 	0,
 	2
 }
 local level_lock_position = {
-	380,
+	360,
 	10,
 	3
 }
 local difficulty_lock_position = {
-	630,
+	610,
 	10,
 	3
 }
 local status_lock_position = {
-	980,
+	890,
 	10,
 	3
 }
@@ -931,7 +931,7 @@ local function sort_lobbies_on_country_desc(lobby_a, lobby_b)
 	return country_text_b < country_text_a
 end
 
-LobbyItemsList.update = function (self, dt, loading)
+LobbyItemsList.update = function (self, dt, loading, ignore_gamepad_input)
 	self.ui_animator:update(dt)
 
 	if loading then
@@ -957,7 +957,7 @@ LobbyItemsList.update = function (self, dt, loading)
 	self.inventory_list_index_pressed = nil
 	local num_list_content = #list_content
 
-	if gamepad_active then
+	if gamepad_active and not ignore_gamepad_input then
 		if 0 < number_of_items_in_list then
 			self.handle_gamepad_input(self, dt, number_of_items_in_list)
 			self.update_gamepad_list_scroll(self)

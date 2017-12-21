@@ -234,7 +234,7 @@ local generic_input_actions = {
 		},
 		{
 			input_action = "back",
-			priority = 3,
+			priority = 4,
 			description_text = "input_description_close"
 		}
 	},
@@ -252,11 +252,25 @@ local generic_input_actions = {
 		},
 		{
 			input_action = "back",
-			priority = 3,
+			priority = 4,
 			description_text = "input_description_close"
 		}
 	}
 }
+
+if Application.platform() == "ps4" then
+	generic_input_actions.default[#generic_input_actions.default + 1] = {
+		input_action = "refresh",
+		priority = 3,
+		description_text = "lobby_browser_button_name"
+	}
+	generic_input_actions.quick_play[#generic_input_actions.quick_play + 1] = {
+		input_action = "refresh",
+		priority = 3,
+		description_text = "lobby_browser_button_name"
+	}
+end
+
 local MASKED = true
 
 local function create_element(scenegraph_id, title, textures, description_text)

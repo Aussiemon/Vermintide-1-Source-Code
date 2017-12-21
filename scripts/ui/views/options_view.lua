@@ -966,11 +966,15 @@ OptionsView.on_enter = function (self)
 
 	self.active = true
 
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
+
 	return 
 end
 OptionsView.on_exit = function (self)
 	self.exiting = nil
 	self.active = nil
+
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end
@@ -1201,6 +1205,10 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 
 	if voip_bus_volume then
 		self.voip:set_volume(voip_bus_volume)
+
+		if Application.platform() == "xb1" then
+			Managers.voice_chat:set_chat_volume(voip_bus_volume)
+		end
 	end
 
 	local voip_enabled = user_settings.voip_is_enabled
@@ -1553,6 +1561,15 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 
 	if language_id then
 		self.reload_language(self, language_id)
+	end
+
+	local ui_scale = user_settings.ui_scale
+
+	if ui_scale ~= nil then
+		UISettings.ui_scale = ui_scale
+		local force_update = true
+
+		UPDATE_RESOLUTION_LOOKUP(force_update)
 	end
 
 	if Application.platform() == "win32" then
@@ -4702,6 +4719,36 @@ OptionsView.cb_mouse_look_sensitivity = function (self, content)
 
 	return 
 end
+OptionsView.cb_ui_scale_setup = function (self)
+	local min = 90
+	local max = 100
+	local ui_scale = Application.user_setting("ui_scale") or 100
+	local value = get_slider_value(min, max, ui_scale)
+	local default_value = math.clamp(DefaultUserSettings.get("user_settings", "ui_scale"), min, max)
+
+	return value, min, max, 1, "settings_menu_ui_scale", default_value
+end
+OptionsView.cb_ui_scale_saved_value = function (self, widget)
+	local content = widget.content
+	local min = content.min
+	local max = content.max
+	local ui_scale = assigned(self.changed_user_settings.ui_scale, Application.user_setting("ui_scale")) or 100
+	ui_scale = math.clamp(ui_scale, min, max)
+	content.internal_value = get_slider_value(min, max, ui_scale)
+	content.value = ui_scale
+
+	return 
+end
+OptionsView.cb_ui_scale = function (self, content)
+	local value = content.value
+	self.changed_user_settings.ui_scale = value
+	UISettings.ui_scale = value
+	local force_update = true
+
+	UPDATE_RESOLUTION_LOOKUP(force_update)
+
+	return 
+end
 OptionsView.cb_gamepad_look_sensitivity_setup = function (self)
 	local min = -10
 	local max = 10
@@ -5681,6 +5728,10 @@ OptionsView.cb_voip_bus_volume = function (self, content)
 
 	self.voip:set_volume(value)
 
+	if Application.platform() == "xb1" then
+		Managers.voice_chat:set_chat_volume(value)
+	end
+
 	return 
 end
 OptionsView.cb_voip_enabled_setup = function (self)
@@ -5703,6 +5754,10 @@ OptionsView.cb_voip_enabled_setup = function (self)
 
 	if self.voip then
 		self.voip:set_enabled(voip_enabled)
+	end
+
+	if Application.platform() == "xb1" and Managers.voice_chat then
+		Managers.voice_chat:set_enabled(voip_enabled)
 	end
 
 	local selected_option = 1
@@ -5747,6 +5802,10 @@ OptionsView.cb_voip_enabled = function (self, content)
 	self.changed_user_settings.voip_is_enabled = value
 
 	self.voip:set_enabled(value)
+
+	if Application.platform() == "xb1" then
+		Managers.voice_chat:set_enabled(value)
+	end
 
 	return 
 end

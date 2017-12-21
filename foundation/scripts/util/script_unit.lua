@@ -40,6 +40,8 @@ local function set_extension_script(unit, system_name, extension)
 		Entities[unit] = unit_extensions
 	end
 
+	assert(type(extension) ~= "number", "Trying to set extension %s for unit %s to a number value", tostring(system_name), tostring(unit))
+
 	unit_extensions[system_name] = extension
 
 	return 

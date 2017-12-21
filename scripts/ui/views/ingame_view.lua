@@ -275,6 +275,11 @@ elseif Application.platform() == "xb1" then
 				},
 				{
 					fade = false,
+					transition = "lorebook_menu",
+					display_name = "lorebook_menu_button_name"
+				},
+				{
+					fade = false,
 					transition = "return_to_title_screen",
 					display_name = "quit_menu_button_name_xb1"
 				}
@@ -304,6 +309,11 @@ elseif Application.platform() == "xb1" then
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "lorebook_menu",
+					display_name = "lorebook_menu_button_name"
 				},
 				{
 					fade = false,
@@ -341,6 +351,11 @@ elseif Application.platform() == "xb1" then
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "lorebook_menu",
+					display_name = "lorebook_menu_button_name"
 				},
 				{
 					fade = false,
@@ -378,6 +393,11 @@ elseif Application.platform() == "xb1" then
 				},
 				{
 					fade = false,
+					transition = "lorebook_menu",
+					display_name = "lorebook_menu_button_name"
+				},
+				{
+					fade = false,
 					transition = "leave_group",
 					display_name = "leave_game_menu_button_name"
 				},
@@ -410,6 +430,11 @@ elseif Application.platform() == "xb1" then
 				},
 				{
 					fade = false,
+					transition = "lorebook_menu",
+					display_name = "lorebook_menu_button_name"
+				},
+				{
+					fade = false,
 					transition = "leave_group",
 					display_name = disband_party_button_text
 				},
@@ -439,6 +464,11 @@ elseif Application.platform() == "xb1" then
 					fade = false,
 					transition = "credits_menu",
 					display_name = "credits_menu_button_name"
+				},
+				{
+					fade = false,
+					transition = "lorebook_menu",
+					display_name = "lorebook_menu_button_name"
 				},
 				{
 					fade = false,

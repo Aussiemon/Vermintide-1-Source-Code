@@ -421,12 +421,12 @@ Projectiles.drakegun_projectile = {
 			enemy_unit_hit = {
 				default_target = {
 					attack_template_damage_type = "carbine_AP",
-					attack_template = "drakegun_shot"
+					attack_template = "fireball"
 				}
 			},
 			damagable_prop_hit = {
 				attack_template_damage_type = "carbine_AP",
-				attack_template = "drakegun_shot"
+				attack_template = "fireball"
 			}
 		}
 	}
@@ -539,12 +539,12 @@ Projectiles.fireball = {
 			enemy_unit_hit = {
 				default_target = {
 					attack_template_damage_type = "carbine_AP",
-					attack_template = "drakegun_shot"
+					attack_template = "fireball"
 				}
 			},
 			damagable_prop_hit = {
 				attack_template_damage_type = "carbine_AP",
-				attack_template = "drakegun_shot"
+				attack_template = "fireball"
 			}
 		}
 	}
@@ -552,10 +552,14 @@ Projectiles.fireball = {
 Projectiles.fireball = table.clone(Projectiles.fireball) or table.clone(Projectiles.default)
 Projectiles.fireball_t2 = table.clone(Projectiles.fireball)
 Projectiles.fireball_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "carbine_AP_t2"
+Projectiles.fireball_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template = "fireball_t2"
 Projectiles.fireball_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "carbine_AP_t2"
+Projectiles.fireball_t2.impact_data.damage.damagable_prop_hit.attack_template = "fireball_t2"
 Projectiles.fireball_t3 = table.clone(Projectiles.fireball)
 Projectiles.fireball_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "carbine_AP_t3"
+Projectiles.fireball_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template = "fireball_t3"
 Projectiles.fireball_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "carbine_AP_t3"
+Projectiles.fireball_t3.impact_data.damage.damagable_prop_hit.attack_template = "fireball_t3"
 Projectiles.fireball_charged = {
 	impact_type = "sphere_sweep",
 	fire_from_muzzle = false,
@@ -564,6 +568,7 @@ Projectiles.fireball_charged = {
 	muzzle_name = "fx_01",
 	radius_min = 0.2,
 	projectile_unit_name = "units/weapons/player/fireball_projectile/charged_fireball_projectile_3ps",
+	forced_hitzone = "torso",
 	gravity_settings = "drakegun",
 	times_bigger = 4,
 	projectile_unit_template_name = "player_projectile_unit",
@@ -574,12 +579,12 @@ Projectiles.fireball_charged = {
 			enemy_unit_hit = {
 				default_target = {
 					attack_template_damage_type = "boomer",
-					attack_template = "drakegun_shot"
+					attack_template = "fireball"
 				}
 			},
 			damagable_prop_hit = {
 				attack_template_damage_type = "boomer",
-				attack_template = "drakegun_shot"
+				attack_template = "fireball"
 			}
 		}
 	},
@@ -591,10 +596,16 @@ Projectiles.fireball_charged = {
 Projectiles.fireball_charged = table.clone(Projectiles.fireball_charged) or table.clone(Projectiles.default)
 Projectiles.fireball_charged_t2 = table.clone(Projectiles.fireball_charged)
 Projectiles.fireball_charged_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "boomer_t2"
+Projectiles.fireball_charged_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template = "fireball_t2"
+Projectiles.fireball_charged_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "boomer_t2"
+Projectiles.fireball_charged_t2.impact_data.damage.damagable_prop_hit.attack_template = "fireball_t2"
 Projectiles.fireball_charged_t2.impact_data.aoe = ExplosionTemplates.fireball_charged_t2
 Projectiles.fireball_charged_t2.timed_data.aoe = ExplosionTemplates.fireball_charged_t2
 Projectiles.fireball_charged_t3 = table.clone(Projectiles.fireball_charged)
 Projectiles.fireball_charged_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "boomer_t3"
+Projectiles.fireball_charged_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template = "fireball_t3"
+Projectiles.fireball_charged_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "boomer_t3"
+Projectiles.fireball_charged_t3.impact_data.damage.damagable_prop_hit.attack_template = "fireball_t3"
 Projectiles.fireball_charged_t3.impact_data.aoe = ExplosionTemplates.fireball_charged_t3
 Projectiles.fireball_charged_t3.timed_data.aoe = ExplosionTemplates.fireball_charged_t3
 local flame_wave_fireball = {
@@ -610,12 +621,12 @@ local flame_wave_fireball = {
 			enemy_unit_hit = {
 				default_target = {
 					attack_template_damage_type = "carbine_AP",
-					attack_template = "drakegun_shot"
+					attack_template = "fireball"
 				}
 			},
 			damagable_prop_hit = {
 				attack_template_damage_type = "carbine_AP",
-				attack_template = "drakegun_shot"
+				attack_template = "fireball"
 			}
 		},
 		projectile_spawn = {
@@ -667,12 +678,12 @@ local bouncing_fireball = {
 			enemy_unit_hit = {
 				default_target = {
 					attack_template_damage_type = "carbine_AP",
-					attack_template = "drakegun_shot"
+					attack_template = "fireball"
 				}
 			},
 			damagable_prop_hit = {
 				attack_template_damage_type = "carbine_AP",
-				attack_template = "drakegun_shot"
+				attack_template = "fireball"
 			}
 		},
 		projectile_spawn = {
@@ -724,9 +735,9 @@ Projectiles.spark_t3.impact_data.damage.enemy_unit_hit.default_target.attack_tem
 Projectiles.spark_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "spark_AP_t3"
 Projectiles.spear = {
 	impact_type = "sphere_sweep",
-	radius_max = 0.35,
+	radius_max = 0.15,
 	trajectory_template_name = "throw_trajectory",
-	radius_min = 0.25,
+	radius_min = 0.15,
 	projectile_unit_name = "units/weapons/player/spear_projectile/spear_3ps",
 	gravity_settings = "spark",
 	projectile_unit_template_name = "player_projectile_unit",
@@ -753,33 +764,33 @@ Projectiles.spear = {
 Projectiles.spear = table.clone(Projectiles.spear) or table.clone(Projectiles.default)
 Projectiles.spear_2 = table.clone(Projectiles.spear)
 Projectiles.spear_2.impact_data.targets = 2
-Projectiles.spear_2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_AP"
-Projectiles.spear_2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP"
+Projectiles.spear_2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper"
+Projectiles.spear_2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper"
 Projectiles.spear_3 = table.clone(Projectiles.spear)
 Projectiles.spear_3.impact_data.targets = 5
-Projectiles.spear_3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_shot_AP"
+Projectiles.spear_3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_AP"
 Projectiles.spear_3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP"
 Projectiles.spear_t2 = table.clone(Projectiles.spear)
 Projectiles.spear_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "carbine_AP_t2"
-Projectiles.spear_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP_t2"
+Projectiles.spear_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "carbine_AP_t2"
 Projectiles.spear_2_t2 = table.clone(Projectiles.spear)
 Projectiles.spear_2_t2.impact_data.targets = 2
-Projectiles.spear_2_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_AP_t2"
-Projectiles.spear_2_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP_t2"
+Projectiles.spear_2_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_t2"
+Projectiles.spear_2_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_t2"
 Projectiles.spear_3_t2 = table.clone(Projectiles.spear)
 Projectiles.spear_3_t2.impact_data.targets = 5
-Projectiles.spear_3_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_shot_AP_t2"
+Projectiles.spear_3_t2.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_AP_t2"
 Projectiles.spear_3_t2.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP_t2"
 Projectiles.spear_t3 = table.clone(Projectiles.spear)
 Projectiles.spear_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "carbine_AP_t3"
-Projectiles.spear_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP_t3"
+Projectiles.spear_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "carbine_AP_t3"
 Projectiles.spear_2_t3 = table.clone(Projectiles.spear)
 Projectiles.spear_2_t3.impact_data.targets = 2
-Projectiles.spear_2_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_AP_t3"
-Projectiles.spear_2_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP_t3"
+Projectiles.spear_2_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_t3"
+Projectiles.spear_2_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_t3"
 Projectiles.spear_3_t3 = table.clone(Projectiles.spear)
 Projectiles.spear_3_t3.impact_data.targets = 5
-Projectiles.spear_3_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_shot_AP_t3"
+Projectiles.spear_3_t3.impact_data.damage.enemy_unit_hit.default_target.attack_template_damage_type = "sniper_AP_t3"
 Projectiles.spear_3_t3.impact_data.damage.damagable_prop_hit.attack_template_damage_type = "sniper_AP_t3"
 Projectiles.grenade = {
 	projectile_template_name = "explosion",
@@ -876,39 +887,6 @@ Projectiles.grenade_fire = {
 	timed_data = {
 		life_time = 3,
 		aoe = ExplosionTemplates.fire_grenade
-	}
-}
-Projectiles.conflag_aoe_t1 = {
-	impact_data = {
-		sound_event_name = "player_combat_weapon_fire_grenade_explosion",
-		targets = 1,
-		aoe = ExplosionTemplates.conflag_t1
-	},
-	timed_data = {
-		life_time = 3,
-		aoe = ExplosionTemplates.conflag_t1
-	}
-}
-Projectiles.conflag_aoe_t2 = {
-	impact_data = {
-		sound_event_name = "player_combat_weapon_fire_grenade_explosion",
-		targets = 1,
-		aoe = ExplosionTemplates.conflag_t2
-	},
-	timed_data = {
-		life_time = 3,
-		aoe = ExplosionTemplates.conflag_t2
-	}
-}
-Projectiles.conflag_aoe_t3 = {
-	impact_data = {
-		sound_event_name = "player_combat_weapon_fire_grenade_explosion",
-		targets = 1,
-		aoe = ExplosionTemplates.conflag_t3
-	},
-	timed_data = {
-		life_time = 3,
-		aoe = ExplosionTemplates.conflag_t3
 	}
 }
 Projectiles.grenade_gas = {

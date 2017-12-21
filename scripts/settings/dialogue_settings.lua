@@ -147,7 +147,7 @@ DialogueSettings.level_specific_load_files = {
 		"dialogues/generated/special_occasions",
 		"dialogues/generated/enemies"
 	},
-	magnus_tower = {
+	magnus = {
 		"dialogues/generated/bright_wizard_magnus_tower",
 		"dialogues/generated/dwarf_ranger_magnus_tower",
 		"dialogues/generated/witch_hunter_magnus_tower",

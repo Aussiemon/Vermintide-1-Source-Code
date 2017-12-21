@@ -1,4 +1,3 @@
-require("scripts/ui/views/friends_view")
 require("scripts/settings/experience_settings")
 require("scripts/settings/area_settings")
 require("scripts/ui/views/menu_input_description_ui")
@@ -149,11 +148,6 @@ ConsoleMapView.create_ui_elements = function (self)
 
 	return 
 end
-ConsoleMapView.set_friends_view = function (self, friends_view)
-	self.friends = friends_view
-
-	return 
-end
 ConsoleMapView._setup_state_machine = function (self, state_machine_params)
 	if self._machine then
 		self._machine:destroy()
@@ -176,18 +170,9 @@ ConsoleMapView.update = function (self, dt, t)
 	local map_view_area_handler = self.map_view_area_handler
 	local draw_intro_description = self.draw_intro_description
 	local transitioning = self.transitioning(self)
-	local friends = self.friends
-	local friends_menu_active = friends.is_active(friends)
 	local input_manager = self.input_manager
-	local input_service = ((transitioning or friends_menu_active) and fake_input_service) or input_manager.get_service(input_manager, "map_menu")
+	local input_service = (transitioning and fake_input_service) or input_manager.get_service(input_manager, "map_menu")
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-	local is_sub_menu = true
-
-	friends.update(friends, dt, t, is_sub_menu)
-
-	if self._xbox_trying_to_open_invite_friends then
-		self._update_invite_friends(self)
-	end
 
 	if self.popup_id then
 		local popup_result = Managers.popup:query_result(self.popup_id)
@@ -339,6 +324,8 @@ ConsoleMapView.on_exit = function (self)
 		self._machine = nil
 	end
 
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
+
 	return 
 end
 ConsoleMapView.suspend = function (self)
@@ -369,14 +356,10 @@ ConsoleMapView.transitioning = function (self)
 	return 
 end
 ConsoleMapView.input_service = function (self)
-	local friends = self.friends
-	local friends_menu_active = friends.is_active(friends)
-
-	return (friends_menu_active and friends.input_service(friends)) or self.input_manager:get_service("map_menu")
+	return self.input_manager:get_service("map_menu")
 end
 ConsoleMapView.destroy = function (self)
 	self.ui_animator = nil
-	self.friends = nil
 
 	if self.popup_id then
 		Managers.popup:cancel_popup(self.popup_id)
@@ -394,16 +377,10 @@ ConsoleMapView.destroy = function (self)
 
 	return 
 end
-ConsoleMapView.exit = function (self, return_to_game)
-	local friends_menu_active = self.friends:is_active()
+ConsoleMapView.exit = function (self, return_to_game, exit_transition)
+	local transition = exit_transition or (return_to_game and "exit_menu") or "ingame_menu"
 
-	if friends_menu_active then
-		self.deactivate_friends_menu(self)
-	end
-
-	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
-
-	self.ingame_ui:transition_with_fade(exit_transition)
+	self.ingame_ui:transition_with_fade(transition)
 
 	self.exiting = true
 
@@ -423,6 +400,7 @@ ConsoleMapView.on_enter = function (self)
 	params.initial_state = true
 
 	self._setup_state_machine(self, self._state_machine_params)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	return 
 end
@@ -544,36 +522,6 @@ ConsoleMapView.handle_popup_result = function (self, popup_result)
 	end
 
 	return 
-end
-ConsoleMapView._update_invite_friends = function (self)
-	local session_id = Managers.matchmaking.lobby:session_id()
-	local status = MultiplayerSession.status(session_id)
-
-	if status ~= MultiplayerSession.READY then
-		return 
-	end
-
-	self._xbox_trying_to_open_invite_friends = nil
-
-	MultiplayerSession.invite_friends(Managers.account:user_id(), self.lobby:session_id(), 0, 3)
-
-	return 
-end
-ConsoleMapView.on_friends_pressed = function (self)
-	self.friends:set_active(true)
-
-	return 
-end
-ConsoleMapView.deactivate_friends_menu = function (self)
-	self.friends:set_active(false)
-	self.input_manager:block_device_except_service("map_menu", "keyboard", 1)
-	self.input_manager:block_device_except_service("map_menu", "mouse", 1)
-	self.input_manager:block_device_except_service("map_menu", "gamepad", 1)
-
-	return 
-end
-ConsoleMapView.friends_list_active = function (self)
-	return self.friends:is_active()
 end
 
 return 

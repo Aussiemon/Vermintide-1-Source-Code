@@ -260,37 +260,37 @@ AttackDamageValues = {
 	one_h_smiter_L = {
 		4,
 		2,
-		16,
+		14,
 		2
 	},
 	one_h_smiter_L_t2 = {
 		5,
 		2.5,
-		18,
+		16,
 		2
 	},
 	one_h_smiter_L_t3 = {
 		6,
 		3.5,
-		20,
+		18,
 		2
 	},
 	one_h_smiter_L_ap = {
 		4,
 		3,
-		20,
+		16,
 		2
 	},
 	one_h_smiter_L_ap_t2 = {
 		5,
 		4,
-		25,
+		18,
 		2
 	},
 	one_h_smiter_L_ap_t3 = {
 		6,
 		5,
-		30,
+		20,
 		2
 	},
 	one_h_smiter_H = {
@@ -308,25 +308,26 @@ AttackDamageValues = {
 	one_h_smiter_H_t3 = {
 		10,
 		4.5,
-		30,
+		28,
 		2
 	},
 	two_h_smiter_L = {
 		5,
 		2.5,
-		20,
-		2
+		16,
+		2,
+		1
 	},
 	two_h_smiter_L_t2 = {
 		6,
 		3.5,
-		24,
+		18,
 		2
 	},
 	two_h_smiter_L_t3 = {
 		7,
 		4.5,
-		30,
+		20,
 		2
 	},
 	two_h_smiter_L_1 = {
@@ -350,49 +351,49 @@ AttackDamageValues = {
 	two_h_smiter_H = {
 		6,
 		3.5,
-		25,
+		20,
 		2
 	},
 	two_h_smiter_H_t2 = {
 		7,
 		4.5,
-		30,
+		25,
 		2
 	},
 	two_h_smiter_H_t3 = {
 		8,
 		5.5,
-		35,
+		30,
 		2
 	},
 	two_h_smiter_H_1 = {
 		12,
 		10,
-		15,
+		16,
 		2
 	},
 	two_h_smiter_H_1_t2 = {
 		15,
 		12,
-		20,
+		18,
 		2
 	},
 	two_h_smiter_H_1_t3 = {
 		20,
 		16,
-		25,
+		20,
 		2
 	},
 	two_h_smiter_H_2 = {
 		10,
-		8,
-		20,
+		10,
+		28,
 		2
 	},
 	two_h_smiter_H_2_t2 = {
 		20,
-		14,
-		30,
+		12,
+		34,
 		2
 	},
 	two_h_smiter_H_2_t3 = {
@@ -404,73 +405,73 @@ AttackDamageValues = {
 	one_h_linesman_L = {
 		1,
 		0,
-		4,
+		6,
 		2
 	},
 	one_h_linesman_L_t2 = {
 		1.5,
 		0,
-		5,
+		8,
 		2
 	},
 	one_h_linesman_L_t3 = {
 		2,
 		0,
-		6,
+		10,
 		2
 	},
 	one_h_linesman_L_1 = {
 		2,
 		0,
-		4,
+		6,
 		2
 	},
 	one_h_linesman_L_1_t2 = {
 		2.5,
 		0,
-		5,
+		8,
 		2
 	},
 	one_h_linesman_L_1_t3 = {
 		3,
 		0,
-		6,
+		10,
 		2
 	},
 	one_h_linesman_H = {
 		2,
 		1,
-		8,
+		10,
 		2
 	},
 	one_h_linesman_H_t2 = {
 		2.5,
 		1.25,
-		10,
+		12,
 		2
 	},
 	one_h_linesman_H_t3 = {
 		3,
 		1.5,
-		12,
+		14,
 		2
 	},
 	one_h_linesman_H_1 = {
 		4,
-		2,
-		8,
-		2
-	},
-	one_h_linesman_H_1_t2 = {
-		5,
 		3,
 		10,
 		2
 	},
-	one_h_linesman_H_1_t3 = {
-		6,
+	one_h_linesman_H_1_t2 = {
+		5,
 		4,
 		12,
+		2
+	},
+	one_h_linesman_H_1_t3 = {
+		6,
+		5,
+		14,
 		2
 	},
 	two_h_linesman_L = {
@@ -584,37 +585,37 @@ AttackDamageValues = {
 	two_h_linesman_H_ap = {
 		3,
 		1.5,
-		12,
+		16,
 		2
 	},
 	two_h_linesman_H_ap_t2 = {
 		3.5,
 		2,
-		14,
+		18,
 		2
 	},
 	two_h_linesman_H_ap_t3 = {
 		4,
 		2.5,
-		16,
+		20,
 		2
 	},
 	two_h_linesman_H_ap_1 = {
 		4,
 		2,
-		12,
+		16,
 		2
 	},
 	two_h_linesman_H_ap_1_t2 = {
 		5,
 		3,
-		14,
+		18,
 		2
 	},
 	two_h_linesman_H_ap_1_t3 = {
 		6,
 		4,
-		16,
+		20,
 		2
 	},
 	one_h_ninja_L = {
@@ -656,19 +657,19 @@ AttackDamageValues = {
 	one_h_ninja_L_2 = {
 		3,
 		0,
-		15,
+		8,
 		1
 	},
 	one_h_ninja_L_2_t2 = {
 		3.5,
 		0,
-		20,
+		10,
 		1
 	},
 	one_h_ninja_L_2_t3 = {
 		4,
 		0,
-		25,
+		12,
 		1
 	},
 	one_h_ninja_H = {
@@ -728,37 +729,37 @@ AttackDamageValues = {
 	one_h_tank_L = {
 		1,
 		0,
-		4,
+		6,
 		2
 	},
 	one_h_tank_L_t2 = {
 		1.5,
 		0,
-		5,
+		7,
 		2
 	},
 	one_h_tank_L_t3 = {
 		2,
 		0,
-		6,
+		8,
 		2
 	},
 	one_h_tank_L_1 = {
 		2,
 		0,
-		4,
+		6,
 		2
 	},
 	one_h_tank_L_1_t2 = {
 		2.5,
 		0,
-		5,
+		7,
 		2
 	},
 	one_h_tank_L_1_t3 = {
 		3,
 		0,
-		6,
+		8,
 		2
 	},
 	one_h_tank_H = {
@@ -852,13 +853,13 @@ AttackDamageValues = {
 		2
 	},
 	sniper = {
-		6,
+		5,
 		2,
 		16,
 		3
 	},
 	sniper_t2 = {
-		7,
+		6.5,
 		3,
 		20,
 		3.5
@@ -870,21 +871,21 @@ AttackDamageValues = {
 		4
 	},
 	sniper_AP = {
-		4,
+		5,
 		6,
-		20,
+		25,
 		3.5
 	},
 	sniper_AP_t2 = {
-		6,
+		7.5,
 		7,
-		25,
+		30,
 		4
 	},
 	sniper_AP_t3 = {
 		10,
 		8,
-		30,
+		35,
 		5
 	},
 	sniper_shot_AP = {
@@ -1004,13 +1005,13 @@ AttackDamageValues = {
 	spark_AP_t2 = {
 		2.5,
 		1,
-		5,
+		6,
 		2.5
 	},
 	spark_AP_t3 = {
 		3.5,
 		1.5,
-		6,
+		8,
 		3
 	},
 	shotgun = {
@@ -1032,21 +1033,21 @@ AttackDamageValues = {
 		2
 	},
 	boomer = {
-		1,
-		0.5,
-		20,
+		0.25,
+		0,
+		6,
 		1
 	},
 	boomer_t2 = {
-		1.5,
-		1,
-		25,
+		0.5,
+		0,
+		8,
 		1.5
 	},
 	boomer_t3 = {
-		2,
-		1.5,
-		30,
+		0.75,
+		0,
+		10,
 		2
 	},
 	arrow_poison_machinegun = {
@@ -1160,20 +1161,20 @@ AttackDamageValues = {
 	beam_burning_dot = {
 		0.5,
 		0.25,
-		2,
-		0.1
+		4,
+		0.25
 	},
 	beam_burning_dot_t2 = {
 		0.5,
 		0.25,
-		3,
-		0.1
+		4,
+		0.25
 	},
 	beam_burning_dot_t3 = {
 		0.5,
 		0.25,
 		4,
-		0.1
+		0.25
 	},
 	ratlinggun_easy = {
 		3,
@@ -1208,16 +1209,6 @@ AttackTemplates = {
 	poison_proc = {
 		dot_template_name = "arrow_poison_dot",
 		dot_type = "poison_dot"
-	},
-	damage_on_timed_block = {
-		attack_type = "damage",
-		sound_type = "light",
-		damage_type = "slashing",
-		damage = {
-			1,
-			1,
-			1
-		}
 	},
 	added_push = {
 		sound_type = "stun_heavy",
@@ -1263,7 +1254,8 @@ AttackTemplates = {
 		damage = {
 			1,
 			1,
-			10
+			10,
+			1
 		}
 	},
 	basic_debug_damage_player = {
@@ -1292,6 +1284,7 @@ AttackTemplates = {
 		damage_type = "slashing",
 		stagger_length = 1,
 		damage = {
+			9,
 			9,
 			9,
 			9
@@ -1353,7 +1346,7 @@ AttackTemplates = {
 		stagger_type = "ai_stagger",
 		sound_type = "light",
 		damage_type = "slashing_linesman",
-		headshot_multiplier = 3,
+		headshot_multiplier = 2.5,
 		attack_type = "damage_headshot",
 		stagger_length = 0.5,
 		stagger_impact = {
@@ -1487,6 +1480,7 @@ AttackTemplates = {
 		}
 	},
 	light_slashing_smiter = {
+		stagger_angle = "down",
 		sound_type = "light",
 		damage_type = "light_slashing_smiter",
 		stagger_type = "ai_stagger",
@@ -1500,7 +1494,7 @@ AttackTemplates = {
 		},
 		stagger_duration = {
 			1.25,
-			1,
+			0.5,
 			0,
 			0
 		}
@@ -1521,7 +1515,7 @@ AttackTemplates = {
 		},
 		stagger_duration = {
 			1.5,
-			1.5,
+			0.75,
 			0,
 			0
 		}
@@ -1549,7 +1543,7 @@ AttackTemplates = {
 	slashing_smiter_hs = {
 		stagger_type = "ai_stagger",
 		sound_type = "medium",
-		headshot_multiplier = 2.25,
+		headshot_multiplier = 2,
 		attack_type = "damage_headshot",
 		damage_type = "slashing_linesman",
 		stagger_angle = "smiter",
@@ -2172,11 +2166,13 @@ AttackTemplates = {
 		}
 	},
 	burning_stab_fencer = {
+		damage_type = "burning_stab_fencer",
 		stagger_type = "ai_stagger",
 		sound_type = "medium",
+		dot_template_name = "burning_1W_dot",
 		headshot_multiplier = 2,
 		attack_type = "damage_headshot",
-		damage_type = "burning_stab_fencer",
+		dot_type = "burning_dot",
 		stagger_angle = "stab",
 		stagger_length = 0.5,
 		stagger_impact = {
@@ -3129,14 +3125,14 @@ AttackTemplates = {
 			0
 		},
 		stagger_impact = {
-			3,
 			2,
+			0,
 			0,
 			0
 		},
 		stagger_duration = {
 			3,
-			0.5,
+			0,
 			0,
 			0
 		}
@@ -3156,14 +3152,14 @@ AttackTemplates = {
 			0
 		},
 		stagger_impact = {
-			3,
 			2,
+			0,
 			0,
 			0
 		},
 		stagger_duration = {
 			3,
-			0.5,
+			0,
 			0,
 			0
 		}
@@ -3183,14 +3179,14 @@ AttackTemplates = {
 			0
 		},
 		stagger_impact = {
-			3,
 			2,
+			0,
 			0,
 			0
 		},
 		stagger_duration = {
 			3,
-			0.5,
+			0,
 			0,
 			0
 		}
@@ -3204,20 +3200,20 @@ AttackTemplates = {
 		damage_type = "burn",
 		stagger_length = 1,
 		damage = {
-			1,
 			0.5,
+			0,
 			8,
 			0
 		},
 		stagger_impact = {
-			2,
+			3,
 			2,
 			0,
 			1
 		},
 		stagger_duration = {
 			2,
-			0.5,
+			1.5,
 			0,
 			0
 		}
@@ -3231,20 +3227,20 @@ AttackTemplates = {
 		damage_type = "burn",
 		stagger_length = 1,
 		damage = {
-			1.5,
-			0.75,
+			1,
+			0,
 			12,
 			0
 		},
 		stagger_impact = {
-			2,
+			3,
 			2,
 			0,
 			0
 		},
 		stagger_duration = {
 			2,
-			0.5,
+			1.5,
 			0,
 			0
 		}
@@ -3259,19 +3255,19 @@ AttackTemplates = {
 		stagger_length = 1,
 		damage = {
 			2,
-			1,
+			0,
 			16,
 			0
 		},
 		stagger_impact = {
-			2,
+			3,
 			2,
 			0,
 			0
 		},
 		stagger_duration = {
 			2,
-			0.5,
+			1.5,
 			0,
 			0
 		}
@@ -3285,20 +3281,20 @@ AttackTemplates = {
 		damage_type = "fire_grenade_glance",
 		stagger_length = 1,
 		damage = {
-			2,
+			3,
 			1,
 			16,
 			2
 		},
 		stagger_impact = {
 			6,
-			6,
+			3,
 			0,
 			0
 		},
 		stagger_duration = {
 			4,
-			0.5,
+			2,
 			0,
 			0
 		}
@@ -3312,20 +3308,20 @@ AttackTemplates = {
 		damage_type = "fire_grenade_glance",
 		stagger_length = 1,
 		damage = {
-			3,
+			4,
 			2,
 			20,
 			2.5
 		},
 		stagger_impact = {
 			6,
-			6,
+			3,
 			0,
 			0
 		},
 		stagger_duration = {
 			4,
-			0.5,
+			2,
 			0,
 			0
 		}
@@ -3339,20 +3335,20 @@ AttackTemplates = {
 		damage_type = "fire_grenade_glance",
 		stagger_length = 1,
 		damage = {
-			4,
+			5,
 			3,
 			24,
 			4
 		},
 		stagger_impact = {
 			6,
-			6,
+			3,
 			0,
 			0
 		},
 		stagger_duration = {
 			4,
-			0.5,
+			2,
 			0,
 			0
 		}
@@ -3490,7 +3486,7 @@ AttackTemplates = {
 			dropoff_end = 10
 		},
 		stagger_impact = {
-			2,
+			3,
 			0,
 			0,
 			0
@@ -3528,7 +3524,7 @@ AttackTemplates = {
 			dropoff_end = 10
 		},
 		stagger_impact = {
-			2,
+			3,
 			0,
 			0,
 			0
@@ -3623,7 +3619,7 @@ AttackTemplates = {
 	wizard_staff_spear = {
 		stagger_type = "ai_stagger",
 		sound_type = "heavy",
-		headshot_multiplier = 3,
+		headshot_multiplier = 3.5,
 		attack_type = "damage_headshot",
 		damage_type = "burn_sniper",
 		stagger_angle = "stab",
@@ -3636,7 +3632,7 @@ AttackTemplates = {
 		},
 		stagger_duration = {
 			1.5,
-			1.5,
+			1,
 			0,
 			0
 		}
@@ -3646,7 +3642,7 @@ AttackTemplates = {
 		sound_type = "light",
 		damage_type = "burn"
 	},
-	drakegun_shot = {
+	fireball = {
 		dot_template_name = "burning_1W_dot",
 		sound_type = "light",
 		stagger_type = "ai_stagger",
@@ -3662,25 +3658,49 @@ AttackTemplates = {
 		},
 		stagger_duration = {
 			1,
-			0.25,
+			0.75,
 			0,
 			0
 		}
 	},
-	drakegun_shot_glance = {
-		dot_type = "burning_dot",
-		dot_template_name = "burning_1W_dot",
+	fireball_t2 = {
+		dot_template_name = "burning_1W_dot_t2",
+		sound_type = "light",
 		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		dot_type = "burning_dot",
+		damage_type = "burn_shotgun",
 		stagger_length = 1,
 		stagger_impact = {
-			2,
+			3,
 			1,
 			0,
 			0
 		},
 		stagger_duration = {
-			2,
 			1,
+			0.75,
+			0,
+			0
+		}
+	},
+	fireball_t3 = {
+		dot_template_name = "burning_1W_dot_t3",
+		sound_type = "light",
+		stagger_type = "ai_stagger",
+		attack_type = "damage",
+		dot_type = "burning_dot",
+		damage_type = "burn_shotgun",
+		stagger_length = 1,
+		stagger_impact = {
+			3,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			0.75,
 			0,
 			0
 		}
@@ -3692,7 +3712,7 @@ AttackTemplates = {
 		stagger_length = 1,
 		stagger_impact = {
 			6,
-			2,
+			3,
 			0,
 			0
 		},
@@ -3705,12 +3725,12 @@ AttackTemplates = {
 	},
 	drakegun_t2 = {
 		dot_type = "burning_dot",
-		dot_template_name = "burning_1W_dot",
+		dot_template_name = "burning_1W_dot_t2",
 		stagger_type = "ai_stagger",
 		stagger_length = 1,
 		stagger_impact = {
 			6,
-			2,
+			3,
 			0,
 			0
 		},
@@ -3723,12 +3743,12 @@ AttackTemplates = {
 	},
 	drakegun_t3 = {
 		dot_type = "burning_dot",
-		dot_template_name = "burning_1W_dot_t2",
+		dot_template_name = "burning_1W_dot_t3",
 		stagger_type = "ai_stagger",
 		stagger_length = 1,
 		stagger_impact = {
 			6,
-			2,
+			3,
 			0,
 			0
 		},
@@ -3741,7 +3761,7 @@ AttackTemplates = {
 	},
 	drakegun_glance = {
 		dot_type = "burning_dot",
-		dot_template_name = "burning_1W_dot_t3",
+		dot_template_name = "burning_1W_dot",
 		stagger_type = "ai_stagger",
 		stagger_length = 0.75,
 		stagger_impact = {
@@ -3794,11 +3814,10 @@ AttackTemplates = {
 		}
 	},
 	drake_pistol_shot = {
-		headshot_multiplier = 1.5,
+		damage_type = "burn_carbine",
 		sound_type = "light",
 		stagger_type = "ai_stagger",
 		attack_type = "damage_dropoff",
-		damage_type = "burn_carbine",
 		stagger_angle = "stab",
 		stagger_length = 1,
 		damage_near = {
@@ -3819,23 +3838,22 @@ AttackTemplates = {
 		},
 		stagger_impact = {
 			3,
-			4,
+			1,
 			0,
 			0
 		},
 		stagger_duration = {
 			4,
-			0.75,
+			0,
 			0,
 			0
 		}
 	},
 	drake_pistol_shot_t2 = {
-		headshot_multiplier = 1.5,
+		damage_type = "burn_carbine",
 		sound_type = "light",
 		stagger_type = "ai_stagger",
 		attack_type = "damage_dropoff",
-		damage_type = "burn_carbine",
 		stagger_angle = "stab",
 		stagger_length = 1,
 		damage_near = {
@@ -3856,23 +3874,22 @@ AttackTemplates = {
 		},
 		stagger_impact = {
 			3,
-			4,
+			1,
 			0,
 			0
 		},
 		stagger_duration = {
 			4,
-			0.75,
+			0,
 			0,
 			0
 		}
 	},
 	drake_pistol_shot_t3 = {
-		headshot_multiplier = 1.5,
+		damage_type = "burn_carbine",
 		sound_type = "light",
 		stagger_type = "ai_stagger",
 		attack_type = "damage_dropoff",
-		damage_type = "burn_carbine",
 		stagger_angle = "stab",
 		stagger_length = 1,
 		damage_near = {
@@ -3893,13 +3910,13 @@ AttackTemplates = {
 		},
 		stagger_impact = {
 			3,
-			4,
+			1,
 			0,
 			0
 		},
 		stagger_duration = {
 			4,
-			0.75,
+			0,
 			0,
 			0
 		}

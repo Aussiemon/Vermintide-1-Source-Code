@@ -11,10 +11,10 @@ end
 
 SaveData = SaveData or {
 	profiles_version = 45,
-	player_data_version = 7,
+	player_data_version = 8,
 	save_loaded = false,
 	video_version = 1,
-	version = 6
+	version = 7
 }
 
 function populate_save_data(save_data)

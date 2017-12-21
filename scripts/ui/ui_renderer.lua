@@ -37,7 +37,7 @@ local function get_relative_uvs(global_uv00, global_uv11, local_uvs)
 end
 
 local function snap_to_position(position)
-	local ui_scale = UIResolutionScale()
+	local ui_scale = RESOLUTION_LOOKUP.scale
 
 	if 1 <= ui_scale then
 		position[1] = math.round(position[1])

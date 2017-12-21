@@ -410,7 +410,6 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 
 	ingame_ui.suspend_active_view(ingame_ui)
 	Managers.popup:cancel_all_popups()
-	LoreBookHelper.save_new_pages()
 
 	if game_mode_key == "survival" then
 		if game_won then
@@ -424,6 +423,7 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 
 			leaderboard_system.round_completed(leaderboard_system)
 			StatisticsUtil.register_complete_survival_level(self.statistics_db)
+			StatisticsUtil.register_unlocked_lorebook_pages(self.statistics_db)
 
 			local player = Managers.player:local_player()
 
@@ -438,6 +438,7 @@ StateInGameRunning.gm_event_end_conditions_met = function (self, reason, checkpo
 		mission_system.start_mission(mission_system, "players_alive_mission")
 		mission_system.evaluate_level_end_missions(mission_system)
 		StatisticsUtil.register_complete_level(self.statistics_db)
+		StatisticsUtil.register_unlocked_lorebook_pages(self.statistics_db)
 
 		local player = Managers.player:local_player()
 

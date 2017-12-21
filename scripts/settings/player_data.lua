@@ -1,6 +1,6 @@
 PlayerData = PlayerData or {
 	new_item_data_version = 1,
-	controls_version = 9,
+	controls_version = 11,
 	new_item_ids = {},
 	controls = {}
 }

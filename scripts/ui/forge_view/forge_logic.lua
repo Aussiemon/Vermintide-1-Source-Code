@@ -59,7 +59,7 @@ end
 ForgeLogic.poll_forge = function (self)
 	local fuse_item = self._fuse_item
 
-	if fuse_item.is_done(fuse_item) then
+	if fuse_item.is_done(fuse_item) and not fuse_item.error_message(fuse_item) then
 		local items = fuse_item.items(fuse_item)
 		local backend_id, item_key = next(items)
 		local config = ItemMasterList[item_key]
@@ -224,15 +224,12 @@ end
 ForgeLogic.poll_pray_for_loot = function (self)
 	local prayer_item = self._prayer_item
 
-	if prayer_item.is_done(prayer_item) then
+	if prayer_item.is_done(prayer_item) and not prayer_item.error_message(prayer_item) then
 		self._prayer_item = nil
 		local items = prayer_item.items(prayer_item)
+		local backend_id, item_key = next(items)
 
-		if items then
-			for backend_id, item_key in pairs(items) do
-				return item_key, backend_id
-			end
-		end
+		return item_key, backend_id
 	end
 
 	return 

@@ -1,3 +1,4 @@
+local Localize = LocalizeLorebook
 local scenegraph_definition = {
 	root = {
 		is_root = true,
@@ -60,6 +61,20 @@ local scenegraph_definition = {
 			1
 		}
 	},
+	index_list = {
+		vertical_alignment = "top",
+		parent = "contents_title",
+		horizontal_alignment = "center",
+		size = {
+			600,
+			100
+		},
+		position = {
+			0,
+			95,
+			1
+		}
+	},
 	contents_title = {
 		vertical_alignment = "top",
 		parent = "contents_list",
@@ -70,7 +85,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			120,
+			80,
 			1
 		}
 	},
@@ -79,12 +94,26 @@ local scenegraph_definition = {
 		parent = "contents_title",
 		horizontal_alignment = "center",
 		size = {
-			289,
-			31
+			430,
+			20
 		},
 		position = {
 			0,
-			-30,
+			-10,
+			1
+		}
+	},
+	contents_title_divider_top = {
+		vertical_alignment = "top",
+		parent = "contents_title",
+		horizontal_alignment = "center",
+		size = {
+			200,
+			10
+		},
+		position = {
+			0,
+			-10,
 			1
 		}
 	},
@@ -93,12 +122,12 @@ local scenegraph_definition = {
 		parent = "background",
 		horizontal_alignment = "left",
 		size = {
-			640,
-			700
+			590,
+			620
 		},
 		position = {
-			1080,
-			-190,
+			1105,
+			-220,
 			1
 		}
 	},
@@ -117,16 +146,16 @@ local scenegraph_definition = {
 		}
 	},
 	front_page_title_image = {
-		vertical_alignment = "center",
-		parent = "contents_list",
-		horizontal_alignment = "center",
+		vertical_alignment = "top",
+		parent = "background",
+		horizontal_alignment = "left",
 		size = {
 			724,
 			316
 		},
 		position = {
-			0,
-			250,
+			1038,
+			-180,
 			1
 		}
 	},
@@ -139,8 +168,8 @@ local scenegraph_definition = {
 			30
 		},
 		position = {
-			-30,
-			0,
+			-50,
+			20,
 			1
 		}
 	},
@@ -153,8 +182,8 @@ local scenegraph_definition = {
 			30
 		},
 		position = {
-			-30,
-			-30,
+			-50,
+			-10,
 			1
 		}
 	},
@@ -276,11 +305,11 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		size = {
 			600,
-			50
+			20
 		},
 		position = {
 			0,
-			280,
+			-300,
 			1
 		}
 	},
@@ -290,11 +319,11 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		size = {
 			600,
-			50
+			20
 		},
 		position = {
 			0,
-			-125,
+			-60,
 			1
 		}
 	},
@@ -303,12 +332,12 @@ local scenegraph_definition = {
 		parent = "lorebook_front_page_collectible_title",
 		horizontal_alignment = "center",
 		size = {
-			289,
-			31
+			200,
+			20
 		},
 		position = {
 			0,
-			-65,
+			-30,
 			1
 		}
 	},
@@ -319,20 +348,6 @@ local scenegraph_definition = {
 		size = {
 			730,
 			390
-		},
-		position = {
-			15,
-			-20,
-			1
-		}
-	},
-	tutorial_front_page_image = {
-		vertical_alignment = "bottom",
-		parent = "page_content",
-		horizontal_alignment = "center",
-		size = {
-			696,
-			406
 		},
 		position = {
 			15,
@@ -396,60 +411,18 @@ local scenegraph_definition = {
 			2
 		}
 	},
-	tab_button_1 = {
-		vertical_alignment = "top",
-		parent = "background",
-		horizontal_alignment = "left",
-		size = {
-			90,
-			162
-		},
-		position = {
-			53,
-			-216,
-			1
-		}
-	},
-	tab_button_2 = {
-		vertical_alignment = "top",
-		parent = "background",
-		horizontal_alignment = "left",
-		size = {
-			87,
-			156
-		},
-		position = {
-			58,
-			-458,
-			1
-		}
-	},
 	page_back_button = {
 		vertical_alignment = "bottom",
 		parent = "contents_list",
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		size = {
 			52,
 			52
 		},
 		position = {
-			-70,
 			0,
+			15,
 			2
-		}
-	},
-	page_index_path = {
-		vertical_alignment = "center",
-		parent = "page_back_button",
-		horizontal_alignment = "left",
-		size = {
-			700,
-			50
-		},
-		position = {
-			60,
-			0,
-			1
 		}
 	},
 	page_reveal_mask_cover = {
@@ -784,22 +757,70 @@ local page_reveal_mask_textures = {
 local widget_definitions = {
 	title_text = UIWidgets.create_title_text("contents_title", "title_text"),
 	page_back_button = UIWidgets.create_journal_back_arrow_button("page_back_button", masked),
-	page_index_path = UIWidgets.create_simple_text("", "page_index_path", 18, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark"),
-	tab_button_1 = UIWidgets.create_journal_tab("tab_button_1", "journal_tab_02", masked),
-	tab_button_2 = UIWidgets.create_journal_tab("tab_button_2", "journal_tab_01", masked),
 	exit_button = UIWidgets.create_menu_button_medium("close", "exit_button"),
-	contents_title_divider = UIWidgets.create_simple_texture("journal_divider", "contents_title_divider", masked),
-	lorebook_front_page_image = UIWidgets.create_simple_texture("journal_image_large_01", "lorebook_front_page_image", masked),
-	lorebook_front_page_collectible_title = UIWidgets.create_simple_text("dlc1_3_lorebook_collectibles_title", "lorebook_front_page_collectible_title", 52, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark_header"),
-	lorebook_front_page_collectible_counter = UIWidgets.create_simple_text("", "lorebook_front_page_collectible_counter", 32, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark"),
-	lorebook_front_page_collectible_divider = UIWidgets.create_simple_texture("journal_divider", "lorebook_front_page_collectible_divider", masked),
-	tutorial_front_page_image = UIWidgets.create_simple_texture("journal_image_10", "tutorial_front_page_image", masked),
+	contents_title_divider = UIWidgets.create_simple_texture("journal_divider_02", "contents_title_divider", masked),
+	contents_title_divider_top = UIWidgets.create_simple_texture("journal_divider_01", "contents_title_divider_top", masked),
+	lorebook_front_page_collectible_title = UIWidgets.create_simple_text(Localize("dlc1_3_lorebook_collectibles_title"), "lorebook_front_page_collectible_title", nil, nil, {
+		vertical_alignment = "center",
+		font_size = 24,
+		localize = false,
+		horizontal_alignment = "center",
+		word_wrap = true,
+		font_type = "hell_shark",
+		text_color = Colors.get_color_table_with_alpha("black", 160),
+		offset = {
+			0,
+			0,
+			2
+		}
+	}),
+	lorebook_front_page_collectible_counter = UIWidgets.create_simple_text("", "lorebook_front_page_collectible_counter", 20, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark"),
+	lorebook_front_page_collectible_divider = UIWidgets.create_simple_texture("journal_page_divider_01_medium", "lorebook_front_page_collectible_divider", masked),
 	front_page_new_icon = UIWidgets.create_simple_texture("journal_icon_02", "front_page_new_icon", masked),
 	front_page_lock_icon = UIWidgets.create_simple_texture("journal_icon_01", "front_page_lock_icon", masked),
 	front_page_title_image = UIWidgets.create_simple_texture("journal_vermintide_logo", "front_page_title_image", masked),
-	front_page_new_icon_text = UIWidgets.create_simple_text("dlc1_3_journal_new_icon_description", "front_page_new_icon_text", 18, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark"),
-	front_page_lock_icon_text = UIWidgets.create_simple_text("dlc1_3_journal_lock_icon_description", "front_page_lock_icon_text", 18, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark"),
-	front_page_description_text = UIWidgets.create_simple_text("dlc1_3_journal_front_page_description", "front_page_description_text", 20, Colors.get_color_table_with_alpha("black", 160), nil, "hell_shark"),
+	front_page_new_icon_text = UIWidgets.create_simple_text(Localize("dlc1_3_journal_new_icon_description"), "front_page_new_icon_text", nil, nil, {
+		vertical_alignment = "center",
+		font_size = 18,
+		localize = false,
+		horizontal_alignment = "center",
+		word_wrap = true,
+		font_type = "hell_shark",
+		text_color = Colors.get_color_table_with_alpha("black", 160),
+		offset = {
+			0,
+			0,
+			2
+		}
+	}),
+	front_page_lock_icon_text = UIWidgets.create_simple_text(Localize("dlc1_3_journal_lock_icon_description"), "front_page_lock_icon_text", nil, nil, {
+		vertical_alignment = "center",
+		font_size = 18,
+		localize = false,
+		horizontal_alignment = "center",
+		word_wrap = true,
+		font_type = "hell_shark",
+		text_color = Colors.get_color_table_with_alpha("black", 160),
+		offset = {
+			0,
+			0,
+			2
+		}
+	}),
+	front_page_description_text = UIWidgets.create_simple_text(Localize("dlc1_3_journal_front_page_description"), "front_page_description_text", nil, nil, {
+		vertical_alignment = "center",
+		font_size = 20,
+		localize = false,
+		horizontal_alignment = "center",
+		word_wrap = true,
+		font_type = "hell_shark",
+		text_color = Colors.get_color_table_with_alpha("black", 160),
+		offset = {
+			0,
+			0,
+			2
+		}
+	}),
 	page_reveal_mask = UIWidgets.create_journal_reveal_mask(page_reveal_mask_textures, {
 		"page_reveal_mask_1",
 		"page_reveal_mask_2",
@@ -821,8 +842,8 @@ local widget_definitions = {
 			text = {
 				vertical_alignment = "center",
 				horizontal_alignment = "center",
-				localize = true,
-				font_size = 55,
+				localize = false,
+				font_size = 42,
 				font_type = "hell_shark_header",
 				text_color = Colors.get_color_table_with_alpha("black", 160),
 				offset = {
@@ -845,7 +866,7 @@ local widget_definitions = {
 				horizontal_alignment = "center",
 				localize = false,
 				font_size = 32,
-				font_type = "hell_shark_header",
+				font_type = "hell_shark_header_masked",
 				text_color = Colors.get_color_table_with_alpha("black", 160),
 				masked = page_masked,
 				offset = {
@@ -860,7 +881,7 @@ local widget_definitions = {
 		scenegraph_id = "page_content",
 		element = UIElements.LorebookMultipleTexts,
 		content = {
-			max_texts = 18,
+			max_texts = 20,
 			text_start_index = 1,
 			text_field = "page_content",
 			text_exclusion_zones = {
@@ -874,7 +895,7 @@ local widget_definitions = {
 		},
 		style = {
 			text = {
-				font_size = 20,
+				font_size = 18,
 				word_wrap = true,
 				localize = false,
 				horizontal_alignment = "left",
@@ -898,12 +919,12 @@ local widget_definitions = {
 				{
 					pass_type = "lorebook_paragraph_divider",
 					style_id = "texture_id",
-					texture_id = "texture_id"
+					texture_id = "texture_ids"
 				}
 			}
 		},
 		content = {
-			texture_id = "journal_content_divider_large",
+			texture_ids = {},
 			positions = {}
 		},
 		style = {
@@ -930,12 +951,12 @@ local widget_definitions = {
 				{
 					pass_type = "lorebook_paragraph_divider",
 					style_id = "texture_id",
-					texture_id = "texture_id"
+					texture_id = "texture_ids"
 				}
 			}
 		},
 		content = {
-			texture_id = "journal_content_divider_medium",
+			texture_ids = {},
 			positions = {}
 		},
 		style = {
@@ -962,12 +983,12 @@ local widget_definitions = {
 				{
 					pass_type = "lorebook_paragraph_divider",
 					style_id = "texture_id",
-					texture_id = "texture_id"
+					texture_id = "texture_ids"
 				}
 			}
 		},
 		content = {
-			texture_id = "journal_content_divider_small",
+			texture_ids = {},
 			positions = {}
 		},
 		style = {
@@ -1053,7 +1074,7 @@ local widget_definitions = {
 				dynamic_font = true,
 				horizontal_alignment = "center",
 				font_size = 24,
-				font_type = "hell_shark",
+				font_type = "hell_shark_masked",
 				text_color = Colors.get_color_table_with_alpha("black", 160),
 				offset = {
 					0,
@@ -1072,8 +1093,8 @@ local widget_definitions = {
 			0,
 			1
 		}
-	}),
-	previous_page_button = UIWidgets.create_journal_page_arrow_button("previous_page_button"),
+	}, true),
+	previous_page_button = UIWidgets.create_journal_page_arrow_button("previous_page_button", nil, true),
 	dead_space_filler = {
 		scenegraph_id = "dead_space_filler",
 		element = {
@@ -1172,7 +1193,9 @@ local contents_list_definition = {
 						style_id = "selected_texture_left",
 						texture_id = "selected_texture_left",
 						content_check_function = function (content)
-							return content.selected
+							local button_hotspot = content.button_hotspot
+
+							return content.selected or (not button_hotspot.disabled and (button_hotspot.is_clicked == 0 or button_hotspot.is_selected))
 						end
 					},
 					{
@@ -1180,7 +1203,9 @@ local contents_list_definition = {
 						style_id = "selected_texture_right",
 						texture_id = "selected_texture_right",
 						content_check_function = function (content)
-							return content.selected
+							local button_hotspot = content.button_hotspot
+
+							return content.selected or (not button_hotspot.disabled and (button_hotspot.is_clicked == 0 or button_hotspot.is_selected))
 						end
 					}
 				}
@@ -1208,6 +1233,89 @@ local contents_list_definition = {
 			list_member_offset = {
 				0,
 				-50,
+				0
+			}
+		}
+	}
+}
+local index_list_definition = {
+	scenegraph_id = "index_list",
+	element = {
+		passes = {
+			{
+				style_id = "list_style",
+				pass_type = "list_pass",
+				content_id = "list_content",
+				passes = {
+					{
+						style_id = "hotspot",
+						pass_type = "hotspot",
+						content_id = "button_hotspot",
+						content_check_function = function (content, style)
+							return not content.button_hotspot.is_selected and content.visible
+						end
+					},
+					{
+						style_id = "name",
+						pass_type = "text",
+						text_id = "name",
+						content_check_function = function (content, style)
+							return content.visible
+						end
+					},
+					{
+						style_id = "divider",
+						pass_type = "text",
+						text_id = "divider",
+						content_check_function = function (content, style)
+							return content.visible and not content.last_element
+						end
+					},
+					{
+						pass_type = "texture",
+						style_id = "hover_texture",
+						texture_id = "hover_texture",
+						content_check_function = function (content)
+							local button_hotspot = content.button_hotspot
+
+							return not button_hotspot.is_selected and (button_hotspot.is_hover or content.gamepad_hover)
+						end
+					},
+					{
+						pass_type = "texture",
+						style_id = "selected_texture",
+						texture_id = "selected_texture",
+						content_check_function = function (content)
+							local button_hotspot = content.button_hotspot
+
+							return not button_hotspot.disabled and (button_hotspot.is_clicked == 0 or button_hotspot.is_selected)
+						end
+					}
+				}
+			}
+		}
+	},
+	content = {
+		list_content = {}
+	},
+	style = {
+		list_style = {
+			columns = 1,
+			scenegraph_id = "index_list",
+			start_index = 1,
+			horizontal_alignment = "center",
+			vertical_alignment = "bottom",
+			num_draws = 0,
+			column_offset = 0,
+			offset = {
+				0,
+				0,
+				0
+			},
+			item_styles = {},
+			list_member_offset = {
+				0,
+				0,
 				0
 			}
 		}
@@ -1322,6 +1430,52 @@ local animations = {
 			end
 		}
 	},
+	on_index_element_hover = {
+		{
+			name = "fade",
+			scale_duration_by_speed = true,
+			start_progress = 0,
+			end_progress = 0.2,
+			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
+				return 
+			end,
+			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
+				local contents_list = widgets[1]
+				local contents_list_content = contents_list.content.list_content
+				local contents_list_style = contents_list.style.list_style
+				local item_styles = contents_list_style.item_styles
+				local start_index = contents_list_style.start_index
+				local num_draws = contents_list_style.num_draws - 1
+				local stop_index = math.min(start_index + num_draws, #contents_list_content)
+				local hover_alpha = local_progress*255
+				local hover_index = params.hover_index
+
+				for i = start_index, stop_index, 1 do
+					local is_hover_element = i == hover_index
+					local texture_color = item_styles[i].hover_texture.color
+
+					if is_hover_element then
+						local alpha = hover_alpha
+
+						if texture_color[1] < alpha then
+							texture_color[1] = alpha
+						end
+					else
+						local alpha = hover_alpha - 255
+
+						if alpha < texture_color[1] then
+							texture_color[1] = alpha
+						end
+					end
+				end
+
+				return 
+			end,
+			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
+				return 
+			end
+		}
+	},
 	page_reveal = {
 		{
 			name = "start",
@@ -1406,14 +1560,7 @@ local animations = {
 		}
 	}
 }
-local generic_input_actions = {
-	{
-		input_action = "l2_r2",
-		priority = 1,
-		description_text = "dlc1_3_input_description_switch_tab",
-		ignore_keybinding = true
-	}
-}
+local generic_input_actions = {}
 local input_actions = {
 	default = {
 		{
@@ -1480,6 +1627,7 @@ return {
 	scenegraph_definition = scenegraph_definition,
 	widget_definitions = widget_definitions,
 	contents_list_definition = contents_list_definition,
+	index_list_definition = index_list_definition,
 	create_simple_texture_widget = create_simple_texture_widget,
 	animations = animations
 }

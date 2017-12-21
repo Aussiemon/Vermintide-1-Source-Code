@@ -347,19 +347,33 @@ StatisticsUtil._register_completed_level_difficulty = function (statistics_db, l
 
 	return 
 end
-StatisticsUtil.unlock_lorebook_page = function (page_id, statistics_db)
+StatisticsUtil.register_unlocked_lorebook_pages = function (statistics_db)
+	local mission_system = Managers.state.entity:system("mission_system")
+	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+	local mission_data = active_missions.lorebook_page_hidden_mission
+
+	if not mission_data then
+		return 
+	end
+
 	local player = Managers.player:local_player()
 
-	if player then
-		local stats_id = player.stats_id(player)
+	if not player then
+		return 
+	end
 
-		print("unlock_lorebook_page", page_id)
+	local stats_id = player.stats_id(player)
+	local unique_ids = mission_data.get_unique_ids(mission_data)
+
+	for page_id, _ in pairs(unique_ids) do
 		statistics_db.set_array_stat(statistics_db, stats_id, "lorebook_unlocks", page_id, true)
 
-		local category_name = LorebookCategoryNames[page_id]
+		local category_name = LorebookCategoryNames[tonumber(page_id)]
 
 		LoreBookHelper.mark_page_id_as_new(category_name)
 	end
+
+	LoreBookHelper.save_new_pages()
 
 	return 
 end

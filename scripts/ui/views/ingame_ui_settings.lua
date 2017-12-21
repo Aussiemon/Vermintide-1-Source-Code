@@ -343,6 +343,15 @@ local transitions = {
 
 		return 
 	end,
+	lorebook_menu = function (self)
+		self.input_manager:block_device_except_service("lorebook_menu", "keyboard", 1)
+		self.input_manager:block_device_except_service("lorebook_menu", "mouse", 1)
+		self.input_manager:block_device_except_service("lorebook_menu", "gamepad", 1)
+
+		self.current_view = "lorebook_view"
+
+		return 
+	end,
 	restart_game = function (self)
 		self.input_manager:device_unblock_all_services("keyboard", 1)
 		self.input_manager:device_unblock_all_services("mouse", 1)
@@ -492,9 +501,10 @@ view_settings = {
 				in_transition_menu = "altar_view"
 			},
 			hotkey_journal = {
-				view = "lorebook_view",
 				can_interact_func = "is_lorebook_enabled",
 				in_transition = "lorebook_view_force",
+				error_message = "dlc1_3_matchmaking_ready_interaction_message_lorebook",
+				view = "lorebook_view",
 				in_transition_menu = "lorebook_view"
 			},
 			hotkey_inventory = {
@@ -577,9 +587,10 @@ view_settings = {
 				in_transition_menu = "altar_view"
 			},
 			hotkey_journal = {
-				view = "lorebook_view",
 				can_interact_func = "is_lorebook_enabled",
 				in_transition = "lorebook_view_force",
+				error_message = "dlc1_3_matchmaking_ready_interaction_message_lorebook",
+				view = "lorebook_view",
 				in_transition_menu = "lorebook_view"
 			},
 			hotkey_inventory = {

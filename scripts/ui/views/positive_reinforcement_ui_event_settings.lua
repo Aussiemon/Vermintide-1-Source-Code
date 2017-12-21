@@ -198,7 +198,7 @@ return {
 	},
 	picked_up_lorebook_page = {
 		text_function = function (amount, page_title)
-			return string.format(Localize("dlc1_3_positive_reinforcement_picked_up_lorebook_page"), Localize(page_title))
+			return string.format(Localize("dlc1_3_positive_reinforcement_picked_up_lorebook_page"), LocalizeLorebook(page_title))
 		end,
 		sound_function = function ()
 			return "Play_hud_lorebook_unlock_page"

@@ -588,6 +588,7 @@ QuestView.on_enter = function (self)
 	self._debug_menu = Development.parameter("debug_quest_view")
 
 	self._sync_quests_and_contracts(self)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	return 
 end
@@ -608,6 +609,7 @@ QuestView.on_exit = function (self)
 	self.reward_screen:exit()
 	self._terminate_all_popups(self)
 	self._deselect_selection_widget(self)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end

@@ -49,7 +49,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, positive, dt)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			local collect_amount = data.collect_amount
 			local evaluate_at_level_end = data.evaluate_at_level_end
 			local current_amount = data.increase_current_amount(data, (positive and 1) or -1)
@@ -102,7 +102,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, dt)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			local current_amount = data.current_amount - 1
 			data.current_amount = current_amount
 
@@ -151,7 +151,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, dt)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			data.done = true
 
 			return true
@@ -189,7 +189,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, positive, dt, network_time)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			local end_time = data.end_time
 			data.time_left = math.max(end_time - network_time, 0)
 
@@ -237,7 +237,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, positive, dt, network_time)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			return 
 		end,
 		update_text = function (data)
@@ -273,7 +273,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, positive, dt)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			return 
 		end,
 		update_text = function (data)
@@ -359,7 +359,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, positive, dt, network_time)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			if data.wave_state == data.states.wave and data.wave_completed_text then
 				data.wave_state = data.states.completed
 				data.wave_completed = data.wave
@@ -438,7 +438,7 @@ MissionTemplates = {
 
 			return data
 		end,
-		update = function (data, dt)
+		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			data.done = true
 
 			return true
@@ -464,6 +464,74 @@ MissionTemplates = {
 MissionTemplates.collect_uncompletable = table.clone(MissionTemplates.collect)
 MissionTemplates.collect_uncompletable.evaluate_mission = function (data, dt)
 	return false, data.get_current_amount(data)
+end
+MissionTemplates.collect_unique_uncompletable = table.clone(MissionTemplates.collect)
+MissionTemplates.collect_unique_uncompletable.init = function (mission_data, unit)
+	local evaluate_at_level_end = mission_data.evaluate_at_level_end
+	local data = {
+		info_slate_type = "mission_objective",
+		update_sound = true,
+		manual_update = true,
+		add_unique_id_for_peer = function (self, peer_id, unique_id)
+			if not self.unique_ids_per_peer[peer_id] then
+				self.unique_ids_per_peer[peer_id] = {}
+			end
+
+			self.unique_ids_per_peer[peer_id][unique_id] = true
+
+			return 
+		end,
+		get_current_amount = function (self)
+			return table.size(self.unique_ids_per_peer[Network.peer_id()] or {})
+		end,
+		get_unique_ids = function (self)
+			return self.unique_ids_per_peer[Network.peer_id()] or {}
+		end,
+		get_unique_ids_for_peer_id = function (self, peer_id)
+			return self.unique_ids_per_peer[peer_id] or {}
+		end,
+		unique_ids_per_peer = {},
+		unit = unit,
+		mission_data = mission_data,
+		evaluate_at_level_end = evaluate_at_level_end,
+		evaluation_type = mission_data.evaluation_type,
+		lorebook_pages_per_amount = mission_data.lorebook_pages_per_amount
+	}
+
+	return data
+end
+MissionTemplates.collect_unique_uncompletable.update = function (data, positive, unique_id, peer_id, dt, network_time)
+	data.add_unique_id_for_peer(data, peer_id, unique_id)
+
+	return false
+end
+MissionTemplates.collect_unique_uncompletable.update_text = function (data)
+	data.text = ""
+
+	return 
+end
+MissionTemplates.collect_unique_uncompletable.evaluate_mission = function (data, dt)
+	return false, data.get_current_amount(data)
+end
+MissionTemplates.collect_unique_uncompletable.create_sync_data = function (data, peer_id)
+	local sync_data = {}
+	local counter = 1
+
+	for unique_id, _ in pairs(data.get_unique_ids_for_peer_id(data, peer_id)) do
+		sync_data[counter] = unique_id
+		counter = counter + 1
+	end
+
+	return sync_data
+end
+MissionTemplates.collect_unique_uncompletable.sync = function (data, sync_data)
+	local peer_id = Network.peer_id()
+
+	for _, unique_id in pairs(sync_data) do
+		data.add_unique_id_for_peer(data, peer_id, unique_id)
+	end
+
+	return 
 end
 
 return 

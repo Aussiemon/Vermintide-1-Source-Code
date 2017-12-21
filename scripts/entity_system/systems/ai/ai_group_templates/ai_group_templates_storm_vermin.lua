@@ -123,9 +123,9 @@ AIGroupTemplates.storm_vermin_formation_patrol = {
 			check_is_in_formation(group, dt)
 			check_for_players(nav_world, group, t, dt)
 		elseif state == "patrolling" then
-			check_for_doors(group)
+			local door_found = check_for_doors(group)
 
-			if state == "opening_door" then
+			if door_found then
 				return 
 			end
 
@@ -1354,7 +1354,7 @@ function check_for_doors(group)
 
 			enter_state_opening_door(group, door_unit)
 
-			return 
+			return true
 		end
 	end
 

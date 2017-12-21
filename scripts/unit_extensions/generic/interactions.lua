@@ -776,6 +776,8 @@ InteractionDefinitions.pickup_object = {
 
 			Unit.animation_event(interactor_unit, "interaction_end")
 
+			local unique_mission_id = nil
+
 			if result == InteractionResult.SUCCESS then
 				local player = Managers.player:owner(interactor_unit)
 				local local_human = player.local_player
@@ -842,6 +844,43 @@ InteractionDefinitions.pickup_object = {
 							end
 						end
 					end
+				elseif pickup_settings.type == "lorebook_page" and local_human then
+					local level_key = Managers.state.game_mode:level_key()
+					local pages = table.clone(LorebookCollectablePages[level_key])
+					local any_level_pages = table.clone(LorebookCollectablePages.any)
+
+					table.append(pages, any_level_pages)
+					table.shuffle(pages)
+
+					local num_pages = #pages
+					local local_player = Managers.player:local_player()
+					local stats_id = local_player.stats_id(local_player)
+					local statistics_db = data.statistics_db
+
+					for i = 1, num_pages, 1 do
+						local category_name = pages[i]
+						local page_id = LorebookCategoryLookup[category_name]
+						local persistent_unlocked = statistics_db.get_persistent_array_stat(statistics_db, stats_id, "lorebook_unlocks", page_id)
+						local session_unlocked = false
+						local mission_system = Managers.state.entity:system("mission_system")
+						local active_missions, completed_missions = mission_system.get_missions(mission_system)
+						local mission_data = active_missions.lorebook_page_hidden_mission
+
+						if mission_data then
+							local unique_ids = mission_data.get_unique_ids(mission_data)
+							session_unlocked = unique_ids[page_id]
+						end
+
+						if not persistent_unlocked and not session_unlocked then
+							unique_mission_id = page_id
+
+							Managers.state.event:trigger("add_personal_feedback", player.stats_id(player) .. page_id, local_human, "picked_up_lorebook_page", category_name)
+
+							break
+						end
+
+						unique_mission_id = nil
+					end
 				end
 
 				local local_pickup_sound = pickup_settings.local_pickup_sound
@@ -870,8 +909,6 @@ InteractionDefinitions.pickup_object = {
 
 					SurroundingAwareSystem.add_event(interactor_unit, "on_other_pickup", DialogueSettings.default_view_distance, "pickup_name", pickup_name, "target_name", target_name)
 
-					local statistics_db = data.statistics_db
-
 					if GameSettingsDevelopment.use_telemetry then
 						local player_id = player.telemetry_id(player)
 						local hero = player.profile_display_name(player)
@@ -880,14 +917,6 @@ InteractionDefinitions.pickup_object = {
 						local pickup_position = POSITION_LOOKUP[interactable_unit]
 
 						_add_pickup_telemetry(player_id, hero, pickup_name, pickup_spawn_type, pickup_position)
-					end
-
-					local lorebook_page_name = pickup_settings.lorebook_page_name
-
-					if lorebook_page_name then
-						local id = LorebookPageLookup[lorebook_page_name]
-
-						StatisticsUtil.unlock_lorebook_page(id, statistics_db)
 					end
 
 					if pickup_settings.hide_on_pickup then
@@ -1080,28 +1109,11 @@ InteractionDefinitions.pickup_object = {
 						local network_transmit = network_manager.network_transmit
 
 						network_transmit.send_rpc_server(network_transmit, "rpc_request_mission", mission_name_id)
-						network_transmit.send_rpc_server(network_transmit, "rpc_request_mission_update", mission_name_id, true)
-					elseif pickup_settings.type == "lorebook_page" then
-						local level_key = Managers.state.game_mode:level_key()
-						local pages = table.clone(LorebookCollectablePages[level_key])
 
-						table.shuffle(pages)
-
-						local num_pages = #pages
-						local local_player = Managers.player:local_player()
-						local stats_id = local_player.stats_id(local_player)
-
-						for i = 1, num_pages, 1 do
-							local category_name = pages[i]
-							local id = LorebookCategoryLookup[category_name]
-							local unlocked = statistics_db.get_persistent_array_stat(statistics_db, stats_id, "lorebook_unlocks", id)
-
-							if not unlocked then
-								StatisticsUtil.unlock_lorebook_page(id, statistics_db)
-								Managers.state.event:trigger("add_personal_feedback", player.stats_id(player) .. id, local_human, "picked_up_lorebook_page", category_name)
-
-								break
-							end
+						if unique_mission_id then
+							network_transmit.send_rpc_server(network_transmit, "rpc_request_unique_mission_update", mission_name_id, unique_mission_id)
+						else
+							network_transmit.send_rpc_server(network_transmit, "rpc_request_mission_update", mission_name_id, true)
 						end
 					end
 				end
@@ -1486,7 +1498,7 @@ InteractionDefinitions.heal = {
 			local owner_player = Managers.player:unit_owner(interactor_unit)
 
 			if result == InteractionResult.SUCCESS then
-				if not owner_player.remote then
+				if owner_player and not owner_player.remote then
 					local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
 					local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
 					local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.NOT_CONSUME_MEDPACK)

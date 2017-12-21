@@ -213,6 +213,17 @@ Missions = {
 		evaluate_at_level_end = true,
 		hidden = true
 	},
+	lorebook_page_hidden_mission = {
+		is_side_mission = true,
+		lorebook_pages_per_amount = 1,
+		mission_template_name = "collect_unique_uncompletable",
+		evaluate_at_level_end = true,
+		unique_mission = true,
+		evaluation_type = "amount",
+		text = "dlc1_3_lorebook_pages_hidden_mission_text",
+		hidden = true,
+		collect_amount = math.huge
+	},
 	endurance_badge_01_mission = {
 		is_side_mission = true,
 		evaluation_type = "amount",
@@ -969,39 +980,6 @@ Missions.tutorial = {
 	mission_template_name = "tutorial",
 	hidden = true
 }
-Missions.catacombs_search_building = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_search_building"
-}
-Missions.catacombs_follow_trail = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_follow_trail"
-}
-Missions.catacombs_open_door = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_open_door"
-}
-Missions.catacombs_find_ritual = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_find_ritual"
-}
-Missions.catacombs_disrupt_ritual = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_disrupt_ritual"
-}
-Missions.catacombs_crash_chandelier = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_crash_chandelier"
-}
-Missions.catacombs_escape = {
-	mission_template_name = "goal",
-	text = "mission_catacombs_escape"
-}
-Missions.catacombs_kill_sorcerers = {
-	text = "mission_catacombs_kill_sorcerers",
-	mission_template_name = "collect",
-	collect_amount = 3
-}
 Missions.chamber_inn = {
 	mission_template_name = "goal",
 	text = "mission_chamber_defend"
@@ -1017,31 +995,6 @@ Missions.chamber_sewer = {
 Missions.chamber_machine = {
 	mission_template_name = "goal",
 	text = "mission_chamber_stop_machine"
-}
-Missions.elven_ruins_get_to_ruins = {
-	mission_template_name = "goal",
-	text = "mission_elven_ruins_get_to_ruins"
-}
-Missions.elven_ruins_proceed_through_woods = {
-	mission_template_name = "goal",
-	text = "mission_elven_ruins_proceed_through_woods"
-}
-Missions.elven_ruins_break_through_maze = {
-	mission_template_name = "goal",
-	text = "mission_elven_ruins_break_through_maze"
-}
-Missions.elven_ruins_make_way_to_puzzle = {
-	mission_template_name = "goal",
-	text = "mission_elven_ruins_make_way_to_puzzle"
-}
-Missions.elven_ruins_realign_leylines = {
-	text = "mission_elven_ruins_realign_leylines",
-	mission_template_name = "collect",
-	collect_amount = 3
-}
-Missions.elven_ruins_escape_into_portal = {
-	mission_template_name = "goal",
-	text = "mission_elven_ruins_escape_into_portal"
 }
 
 for name, data in pairs(Missions) do

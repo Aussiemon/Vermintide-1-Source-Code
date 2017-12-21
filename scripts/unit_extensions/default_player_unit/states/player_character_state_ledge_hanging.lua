@@ -89,6 +89,8 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 		params.ledge_unit = self.ledge_unit
 
 		csm.change_state(csm, "leave_ledge_hanging_pull_up", params)
+
+		return 
 	end
 
 	if self.fall_down_time < t or CharacterStateHelper.is_knocked_down(status_extension) then

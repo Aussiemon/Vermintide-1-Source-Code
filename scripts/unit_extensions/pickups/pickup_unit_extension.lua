@@ -76,6 +76,7 @@ PickupUnitExtension.hide = function (self)
 
 	Unit.set_unit_visibility(unit, false)
 	Unit.disable_physics(unit)
+	Unit.flow_event(unit, "lua_hidden")
 
 	return 
 end

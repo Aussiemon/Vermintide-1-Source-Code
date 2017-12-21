@@ -191,6 +191,8 @@ InventoryView.on_enter = function (self)
 	self.waiting_for_post_update_enter = true
 	self.active = true
 
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
+
 	return 
 end
 InventoryView.post_update_on_enter = function (self)
@@ -237,6 +239,7 @@ InventoryView.on_exit = function (self)
 	local viewport = ScriptWorld.viewport(world, viewport_name)
 
 	ScriptWorld.activate_viewport(world, viewport)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end

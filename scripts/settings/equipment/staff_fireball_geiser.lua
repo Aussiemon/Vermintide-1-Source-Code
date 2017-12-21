@@ -301,24 +301,24 @@ Weapons.staff_fireball_geiser_template_1_co.compare_statistics.attacks.light_att
 Weapons.staff_fireball_geiser_template_1_co.compare_statistics.attacks.heavy_attack.damage = 0.4125
 Weapons.staff_fireball_geiser_template_1_t2 = table.clone(weapon_template)
 Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.default.projectile_info = Projectiles.fireball_t2
+Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.geiser_launch.aoe_name = "conflag_t2"
 Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.geiser_launch.attack_template = "wizard_staff_geiser_t2"
 Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.geiser_launch.attack_template_list = {
 	"wizard_staff_geiser_t2",
 	"wizard_staff_geiser_fryem_t2",
 	"wizard_staff_geiser_crit_t2"
 }
-Weapons.staff_fireball_geiser_template_1_t2.actions.action_one.geiser_launch.projectile_info = Projectiles.conflag_aoe_t2
 Weapons.staff_fireball_geiser_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.625
 Weapons.staff_fireball_geiser_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.5
 Weapons.staff_fireball_geiser_template_1_t3 = table.clone(weapon_template)
 Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.default.projectile_info = Projectiles.fireball_t3
+Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.geiser_launch.aoe_name = "conflag_t3"
 Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.geiser_launch.attack_template = "wizard_staff_geiser_t3"
 Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.geiser_launch.attack_template_list = {
 	"wizard_staff_geiser_t3",
 	"wizard_staff_geiser_fryem_t3",
 	"wizard_staff_geiser_crit_t3"
 }
-Weapons.staff_fireball_geiser_template_1_t3.actions.action_one.geiser_launch.projectile_info = Projectiles.conflag_aoe_t3
 Weapons.staff_fireball_geiser_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.staff_fireball_geiser_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.625
 

@@ -51,16 +51,28 @@ SubtitleGui.init = function (self, ingame_ui_context)
 	self._subtitle_text = ""
 	local level_key, _ = ingame_ui_context.level_transition_handler:get_current_level_keys()
 	local dialogue_filename = "dialogues/generated/" .. level_key
+	local auto_load_files = DialogueSettings.auto_load_files
+	local level_specific_load_files = DialogueSettings.level_specific_load_files[level_key]
 
 	if Application.can_get("strings", dialogue_filename) then
 		localizers[level_key] = Localizer(dialogue_filename)
 	end
 
-	for i, file_name in ipairs(DialogueSettings.auto_load_files) do
+	for i, file_name in ipairs(auto_load_files) do
 		if Application.can_get("strings", file_name) then
 			local last_slash = string.match(file_name, "^.*()/")
 			local database_name = string.sub(file_name, last_slash + 1)
 			localizers[database_name] = Localizer(file_name)
+		end
+	end
+
+	if level_specific_load_files then
+		for i, file_name in ipairs(level_specific_load_files) do
+			if Application.can_get("strings", file_name) then
+				local last_slash = string.match(file_name, "^.*()/")
+				local database_name = string.sub(file_name, last_slash + 1)
+				localizers[database_name] = Localizer(file_name)
+			end
 		end
 	end
 

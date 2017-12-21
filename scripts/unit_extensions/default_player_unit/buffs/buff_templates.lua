@@ -1066,7 +1066,7 @@ BuffTemplates = {
 			{
 				attack_damage_template = "burning_dot",
 				name = "burning dot",
-				duration = 4,
+				duration = 3,
 				end_flow_event = "smoke",
 				start_flow_event = "burn",
 				remove_buff_func = "remove_dot_damage",
@@ -1082,7 +1082,7 @@ BuffTemplates = {
 			{
 				attack_damage_template = "burning_dot_t2",
 				name = "burning dot",
-				duration = 4,
+				duration = 3.5,
 				end_flow_event = "smoke",
 				start_flow_event = "burn",
 				remove_buff_func = "remove_dot_damage",

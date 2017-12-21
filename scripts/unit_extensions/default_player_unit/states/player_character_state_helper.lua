@@ -771,7 +771,7 @@ CharacterStateHelper._get_streak_action_data = function (item_template, current_
 
 	return new_action, new_sub_action, wield_input
 end
-CharacterStateHelper._get_chain_action_data = function (item_template, current_action_extension, current_action_settings, input_extension, inventory_extension, unit, t)
+CharacterStateHelper._get_chain_action_data = function (item_template, current_action_extension, current_action_settings, input_extension, inventory_extension, unit, t, is_bot_player)
 	local chain_actions = current_action_settings.allowed_chain_actions or empty_table
 	local new_action, new_sub_action, wield_input, send_buffer, clear_buffer = nil
 
@@ -780,13 +780,13 @@ CharacterStateHelper._get_chain_action_data = function (item_template, current_a
 		local release_required = action_data.release_required
 		local input_extra_requirement = true
 
-		if release_required then
+		if release_required and not is_bot_player then
 			input_extra_requirement = input_extension.released_input(input_extension, release_required)
 		end
 
 		local hold_required = action_data.hold_required
 
-		if hold_required then
+		if hold_required and not is_bot_player then
 			for index, hold_require in pairs(hold_required) do
 				if input_extension.released_input(input_extension, hold_require) then
 					input_extra_requirement = false
@@ -922,6 +922,8 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 	local recent_damage_type = damage_extension.recently_damaged(damage_extension)
 	local status_extension = ScriptUnit.extension(unit, "status_system")
 	local can_interrupt, reloading = nil
+	local player = Managers.player:owner(unit)
+	local is_bot_player = player and player.bot_player
 
 	if recent_damage_type and weapon_action_interrupt_damage_types[recent_damage_type] then
 		local ammo_extension = (left_hand_weapon_extension and left_hand_weapon_extension.ammo_extension) or (right_hand_weapon_extension and right_hand_weapon_extension.ammo_extension)
@@ -935,9 +937,6 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 				reloading = right_hand_weapon_extension.ammo_extension:is_reloading()
 			end
 		end
-
-		local player = Managers.player:owner(unit)
-		local is_bot_player = player and player.bot_player
 
 		if (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible or reloading or is_bot_player then
 			can_interrupt = false
@@ -964,7 +963,7 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 		new_action, new_sub_action = CharacterStateHelper._get_streak_action_data(item_template, current_action_extension, current_action_settings, input_extension, inventory_extension, unit, t)
 
 		if not new_action then
-			new_action, new_sub_action = CharacterStateHelper._get_chain_action_data(item_template, current_action_extension, current_action_settings, input_extension, inventory_extension, unit, t)
+			new_action, new_sub_action = CharacterStateHelper._get_chain_action_data(item_template, current_action_extension, current_action_settings, input_extension, inventory_extension, unit, t, is_bot_player)
 		end
 
 		if not new_action then

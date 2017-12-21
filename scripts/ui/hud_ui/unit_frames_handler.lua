@@ -286,14 +286,37 @@ local function get_overcharge_amount(left_hand_wielded_unit, right_hand_wielded_
 end
 
 UnitFramesHandler._set_player_extensions = function (self, player_data, player_unit)
-	local extensions = {
-		health = ScriptUnit.extension(player_unit, "health_system"),
-		status = ScriptUnit.extension(player_unit, "status_system"),
-		damage = ScriptUnit.extension(player_unit, "damage_system"),
-		inventory = ScriptUnit.extension(player_unit, "inventory_system"),
-		dialogue = ScriptUnit.extension(player_unit, "dialogue_system"),
-		buff = ScriptUnit.extension(player_unit, "buff_system")
-	}
+	local extensions = {}
+	local health_extension = ScriptUnit.extension(player_unit, "health_system")
+	extensions.health = health_extension
+
+	assert(type(health_extension) == "table", "[UnitFramesHandler] - Extension is not of the type (table)")
+
+	local status_extension = ScriptUnit.extension(player_unit, "status_system")
+	extensions.status = status_extension
+
+	assert(type(status_extension) == "table", "[UnitFramesHandler] - Extension is not of the type (table)")
+
+	local damage_extension = ScriptUnit.extension(player_unit, "damage_system")
+	extensions.damage = damage_extension
+
+	assert(type(damage_extension) == "table", "[UnitFramesHandler] - Extension is not of the type (table)")
+
+	local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
+	extensions.inventory = inventory_extension
+
+	assert(type(inventory_extension) == "table", "[UnitFramesHandler] - Extension is not of the type (table)")
+
+	local dialogue_extension = ScriptUnit.extension(player_unit, "dialogue_system")
+	extensions.dialogue = dialogue_extension
+
+	assert(type(dialogue_extension) == "table", "[UnitFramesHandler] - Extension is not of the type (table)")
+
+	local buff_extension = ScriptUnit.extension(player_unit, "buff_system")
+	extensions.buff = buff_extension
+
+	assert(type(buff_extension) == "table", "[UnitFramesHandler] - Extension is not of the type (table)")
+
 	player_data.extensions = extensions
 	player_data.player_unit = player_unit
 

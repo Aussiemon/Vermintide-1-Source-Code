@@ -247,8 +247,8 @@ UIPasses.list_pass = {
 
 		if ui_style.scenegraph_id then
 			local parent_size = ui_scenegraph[ui_style.scenegraph_id].size
-			local total_width = num_draws*list_member_offset[1] + size[1]
-			local total_height = num_draws*list_member_offset[2] + size[2]
+			local total_width = ui_style.total_width or num_draws*list_member_offset[1] + size[1]
+			local total_height = ui_style.total_height or num_draws*list_member_offset[2] + size[2]
 
 			if ui_style.horizontal_alignment == "center" then
 				element_alignment_position[1] = (position[1] + parent_size[1]/2) - total_width/2
@@ -1352,16 +1352,18 @@ UIPasses.lorebook_paragraph_divider = {
 		if pass_definition.retained_mode then
 			for i = 1, num_dividers, 1 do
 				position[2] = initial_y + divider_positions[i]
+				local texture = ui_content[texture_id][i]
 				local retained_id = pass_definition.retained_mode and ((pass_data.retained_id and pass_data.retained_id) or true)
-				retained_id = UIRenderer_draw_texture(ui_renderer, ui_content[texture_id], position, size, ui_style and ui_style.color, ui_style and ui_style.masked, ui_style and ui_style.saturated, retained_id)
+				retained_id = UIRenderer_draw_texture(ui_renderer, texture, position, size, ui_style and ui_style.color, ui_style and ui_style.masked, ui_style and ui_style.saturated, retained_id)
 				pass_data.retained_id = (retained_id and retained_id) or pass_data.retained_id
 				pass_data.dirty = false
 			end
 		else
 			for i = 1, num_dividers, 1 do
 				position[2] = initial_y + divider_positions[i]
+				local texture = ui_content[texture_id][i]
 
-				UIRenderer_draw_texture(ui_renderer, ui_content[texture_id], position, size, ui_style and ui_style.color, ui_style and ui_style.masked, ui_style and ui_style.saturated)
+				UIRenderer_draw_texture(ui_renderer, texture, position, size, ui_style and ui_style.color, ui_style and ui_style.masked, ui_style and ui_style.saturated)
 			end
 		end
 

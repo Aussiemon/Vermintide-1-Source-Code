@@ -308,6 +308,7 @@ ForgeView.on_enter = function (self)
 	self.melt_active = false
 
 	self.play_sound(self, "Play_hud_forge_open")
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	return 
 end
@@ -324,6 +325,7 @@ ForgeView.on_exit = function (self)
 	local viewport = ScriptWorld.viewport(world, viewport_name)
 
 	ScriptWorld.activate_viewport(world, viewport)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end

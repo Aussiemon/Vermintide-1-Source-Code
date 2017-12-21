@@ -246,6 +246,7 @@ LevelSettings.whitebox_ai = {
 	level_screen_effects = {},
 	pickup_settings = {
 		{
+			lorebook_pages = 3,
 			primary = {
 				ammo = 2,
 				grenades = 4,
@@ -518,35 +519,35 @@ LevelSettings.merchant = {
 	pickup_settings = {
 		{
 			ammo = 13,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 8,
 			healing = 16
 		},
 		{
 			ammo = 13,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 7,
 			healing = 16
 		},
 		{
 			ammo = 11,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 5,
 			healing = 14
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 5,
 			healing = 14
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 5,
 			healing = 14
@@ -625,35 +626,35 @@ LevelSettings.tunnels = {
 	pickup_settings = {
 		{
 			ammo = 9,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 19
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 17
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 14
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 14
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 14
@@ -796,35 +797,35 @@ LevelSettings.farm = {
 	pickup_settings = {
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 12
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 12
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 9
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 7
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 7
@@ -900,35 +901,35 @@ LevelSettings.city_wall = {
 	pickup_settings = {
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 12,
 			grenades = 9,
 			healing = 15
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 12,
 			grenades = 9,
 			healing = 15
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 12,
 			grenades = 9,
 			healing = 10
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 12,
 			grenades = 9,
 			healing = 10
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 12,
 			grenades = 9,
 			healing = 10
@@ -1001,35 +1002,35 @@ LevelSettings.cemetery = {
 	pickup_settings = {
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 18
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 18
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 13
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 13
 		},
 		{
 			ammo = 10,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 12,
 			grenades = 9,
 			healing = 13
@@ -1120,35 +1121,35 @@ LevelSettings.courtyard_level = {
 	pickup_settings = {
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 8
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 10
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 8
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 6
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 6,
 			healing = 6
@@ -1218,35 +1219,35 @@ LevelSettings.sewers_short = {
 	pickup_settings = {
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 11
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 10
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 9
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 8
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 8
@@ -1305,35 +1306,35 @@ LevelSettings.wizard = {
 	pickup_settings = {
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 14
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 15
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 10
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 10
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 10
@@ -1411,35 +1412,35 @@ LevelSettings.magnus = {
 	pickup_settings = {
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 14
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 15
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 10
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 10
 		},
 		{
 			ammo = 8,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 10,
 			grenades = 9,
 			healing = 10
@@ -1516,35 +1517,35 @@ LevelSettings.end_boss = {
 	pickup_settings = {
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 9,
 			grenades = 9,
 			healing = 11
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 9,
 			grenades = 9,
 			healing = 12
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 9,
 			grenades = 9,
 			healing = 8
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 9,
 			grenades = 9,
 			healing = 7
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 9,
 			grenades = 9,
 			healing = 7
@@ -1605,35 +1606,35 @@ LevelSettings.forest_ambush = {
 	pickup_settings = {
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 6,
 			grenades = 7,
 			healing = 14
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 6,
 			grenades = 7,
 			healing = 15
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 6,
 			grenades = 5,
 			healing = 10
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 6,
 			grenades = 5,
 			healing = 10
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 4,
+			lorebook_pages = 3,
 			potions = 6,
 			grenades = 5,
 			healing = 10
@@ -1707,35 +1708,35 @@ LevelSettings.docks_short_level = {
 	pickup_settings = {
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 3,
 			grenades = 4,
 			healing = 10
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 3,
 			grenades = 4,
 			healing = 11
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 3,
 			grenades = 4,
 			healing = 7
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 3,
 			grenades = 4,
 			healing = 6
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 3,
 			grenades = 4,
 			healing = 6
@@ -1799,35 +1800,35 @@ LevelSettings.dlc_castle = {
 	pickup_settings = {
 		{
 			ammo = 7,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 8,
 			grenades = 8,
 			healing = 12
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 8,
 			grenades = 8,
 			healing = 13
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 8,
 			grenades = 8,
 			healing = 9
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 8,
 			grenades = 8,
 			healing = 9
 		},
 		{
 			ammo = 7,
-			lorebook_pages = 0,
+			lorebook_pages = 3,
 			potions = 8,
 			grenades = 8,
 			healing = 9
@@ -1903,35 +1904,35 @@ LevelSettings.dlc_castle_dungeon = {
 	pickup_settings = {
 		{
 			ammo = 6,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 9,
 			grenades = 7,
 			healing = 10
 		},
 		{
 			ammo = 6,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 8,
 			grenades = 7,
 			healing = 11
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 7,
 			grenades = 7,
 			healing = 9
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 7,
 			grenades = 7,
 			healing = 9
 		},
 		{
 			ammo = 5,
-			lorebook_pages = 0,
+			lorebook_pages = 2,
 			potions = 7,
 			grenades = 7,
 			healing = 9
@@ -1999,35 +2000,35 @@ LevelSettings.dlc_portals = {
 	pickup_settings = {
 		{
 			ammo = 12,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 6,
 			grenades = 8,
 			healing = 10
 		},
 		{
 			ammo = 12,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 6,
 			grenades = 8,
 			healing = 10
 		},
 		{
 			ammo = 12,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 6,
 			grenades = 8,
 			healing = 10
 		},
 		{
 			ammo = 12,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 6,
 			grenades = 8,
 			healing = 10
 		},
 		{
 			ammo = 12,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 6,
 			grenades = 8,
 			healing = 10
@@ -2435,35 +2436,35 @@ LevelSettings.bridge = {
 	pickup_settings = {
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 12
 		},
 		{
 			ammo = 4,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 5,
 			grenades = 4,
 			healing = 12
 		},
 		{
 			ammo = 3,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 2,
 			healing = 7
 		},
 		{
 			ammo = 3,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 2,
 			healing = 7
 		},
 		{
 			ammo = 3,
-			lorebook_pages = 4,
+			lorebook_pages = 2,
 			potions = 4,
 			grenades = 2,
 			healing = 7

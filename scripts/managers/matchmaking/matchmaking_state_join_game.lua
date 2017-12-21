@@ -111,8 +111,9 @@ MatchmakingStateJoinGame.update = function (self, dt, t)
 		local backend_manager = Managers.backend
 		local waiting_user_input = backend_manager.is_waiting_for_user_input(backend_manager)
 		local waiting_for_item_poll = ScriptBackendItem.num_current_item_server_requests() ~= 0
+		local rerolling = ScriptBackendItem.get_rerolling_trait_state() and not backend_manager.is_disconnected(backend_manager)
 
-		if not waiting_user_input and not waiting_for_item_poll then
+		if not waiting_user_input and not waiting_for_item_poll and not rerolling then
 			self.show_popup = false
 
 			self.spawn_join_popup(self)

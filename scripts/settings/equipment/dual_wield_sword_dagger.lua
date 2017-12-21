@@ -295,7 +295,7 @@ weapon_template.actions = {
 			first_person_hit_anim = "shake_hit",
 			no_damage_impact_sound_event = "slashing_hit_armour",
 			use_target = false,
-			max_targets = 3,
+			max_targets = 2,
 			hit_effect = "melee_hit_dagger",
 			damage_window_end = 0.4,
 			impact_sound_event = "slashing_hit",
@@ -905,7 +905,7 @@ weapon_template.actions = {
 			buff_data = {
 				{
 					start_time = 0,
-					external_multiplier = 0.95,
+					external_multiplier = 0.85,
 					buff_name = "planted_decrease_movement"
 				}
 			},
@@ -914,6 +914,18 @@ weapon_template.actions = {
 					sub_action = "push",
 					start_time = 0.3,
 					action = "action_one",
+					doubleclick_window = 0,
+					input = "action_one",
+					hold_required = {
+						"action_two_hold"
+					}
+				},
+				{
+					sub_action = "default",
+					start_time = 0.3,
+					action = "action_one",
+					release_required = "action_two_hold",
+					doubleclick_window = 0,
 					input = "action_one"
 				},
 				{

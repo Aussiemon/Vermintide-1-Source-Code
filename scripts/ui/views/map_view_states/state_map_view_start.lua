@@ -36,7 +36,7 @@ StateMapViewStart.on_enter = function (self, params)
 	self._stats_id = local_player.stats_id(local_player)
 	local input_service = self.input_manager:get_service("map_menu")
 	local gui_layer = UILayer.default + 30
-	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 3, gui_layer, generic_input_actions.default)
+	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 4, gui_layer, generic_input_actions.default)
 
 	self.menu_input_description:set_input_description(nil)
 
@@ -400,6 +400,8 @@ StateMapViewStart._handle_input = function (self, dt, t)
 			local return_to_game = not self.parent.ingame_ui.menu_active
 
 			self.parent:exit(return_to_game)
+		elseif input_service.get(input_service, "refresh") then
+			self.parent:exit(nil, "lobby_browser_view")
 		elseif self._selection_index and self._selection_index == 1 then
 			if input_service.get(input_service, "confirm") then
 				self._play_sound(self, "hud_menu_press_start")

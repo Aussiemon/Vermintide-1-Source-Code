@@ -350,7 +350,8 @@ BuffFunctionTemplates.functions = {
 		return 
 	end,
 	start_dot_damage = function (unit, buff, params)
-		buff.next_poison_damage_time = params.t + math.random(buff.template.time_between_dot_damages*0.75, buff.template.time_between_dot_damages*1.25)
+		local random_mod_next_dot_time = buff.template.time_between_dot_damages*0.75 + math.random()*0.5*buff.template.time_between_dot_damages
+		buff.next_poison_damage_time = params.t + random_mod_next_dot_time
 
 		if buff.template.start_flow_event then
 			Unit.flow_event(unit, buff.template.start_flow_event)
@@ -364,7 +365,8 @@ BuffFunctionTemplates.functions = {
 
 			if health_extension.is_alive(health_extension) then
 				local buff_template = buff.template
-				buff.next_poison_damage_time = buff.next_poison_damage_time + math.random(buff.template.time_between_dot_damages*0.75, buff.template.time_between_dot_damages*1.25)
+				local random_mod_next_dot_time = buff.template.time_between_dot_damages*0.75 + math.random()*0.5*buff.template.time_between_dot_damages
+				buff.next_poison_damage_time = buff.next_poison_damage_time + random_mod_next_dot_time
 
 				if Unit.alive(params.attacker_unit) then
 					local damage = DamageUtils.calculate_damage(AttackDamageValues[buff_template.attack_damage_template], unit, params.attacker_unit, "full", 1)

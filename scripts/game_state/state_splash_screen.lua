@@ -248,7 +248,9 @@ StateSplashScreen.unload_packages = function (self)
 	local package_manager = Managers.package
 
 	for i, name in ipairs(StateSplashScreen.packages_to_load) do
-		package_manager.unload(package_manager, name, "state_splash_screen")
+		if package_manager.has_loaded(package_manager, name, "state_splash_screen") then
+			package_manager.unload(package_manager, name, "state_splash_screen")
+		end
 	end
 
 	if GlobalResources.loaded then
@@ -265,7 +267,7 @@ StateSplashScreen.load_packages = function (self)
 	local package_manager = Managers.package
 
 	for i, name in ipairs(StateSplashScreen.packages_to_load) do
-		if not package_manager.has_loaded(package_manager, name) then
+		if not package_manager.has_loaded(package_manager, name, "state_splash_screen") then
 			package_manager.load(package_manager, name, "state_splash_screen", nil, true)
 		end
 	end

@@ -9,7 +9,8 @@ local RPCS = {
 	"rpc_request_mission",
 	"rpc_request_mission_with_unit",
 	"rpc_update_mission",
-	"rpc_request_mission_update"
+	"rpc_request_mission_update",
+	"rpc_request_unique_mission_update"
 }
 local ACHIEVEMENT_MISSION_STATS = {
 	tutorial_revive_ally = true
@@ -113,7 +114,7 @@ MissionSystem.update = function (self, context, t)
 
 	for name, data in pairs(active_missions) do
 		if not data.manual_update then
-			self.update_mission(self, name, nil, dt)
+			self.update_mission(self, name, nil, nil, nil, dt, false)
 		end
 	end
 
@@ -126,7 +127,7 @@ MissionSystem.update = function (self, context, t)
 
 	return 
 end
-MissionSystem.request_mission = function (self, mission_name, unit)
+MissionSystem.request_mission = function (self, mission_name, unit, requesting_peer_id)
 	local mission_name_id = NetworkLookup.mission_names[mission_name]
 	local level_unit_id = nil
 
@@ -151,7 +152,7 @@ MissionSystem.request_mission = function (self, mission_name, unit)
 		local mission_data = data.mission_data
 		local mission_template_name = mission_data.mission_template_name
 		local template = MissionTemplates[mission_template_name]
-		local sync_data = template.create_sync_data(data)
+		local sync_data = template.create_sync_data(data, requesting_peer_id)
 
 		if level_unit_id then
 			self.network_transmit:send_rpc_clients("rpc_start_mission_with_unit", mission_name_id, level_unit_id, sync_data)
@@ -236,14 +237,14 @@ MissionSystem.end_mission = function (self, mission_name, sync)
 
 	return 
 end
-MissionSystem.update_mission = function (self, mission_name, positive, dt, sync)
+MissionSystem.update_mission = function (self, mission_name, positive, unique_id, requesting_peer_id, dt, sync)
 	fassert(self.active_missions[mission_name], "No active mission with passed mission_name %q", mission_name)
 
 	local data = self.active_missions[mission_name]
 	local network_time = self.network_manager:network_time()
 	local mission_template_name = data.mission_data.mission_template_name
 	local template = MissionTemplates[mission_template_name]
-	local done = template.update(data, positive, dt, network_time)
+	local done = template.update(data, positive, unique_id, requesting_peer_id, dt, network_time)
 
 	template.update_text(data)
 
@@ -256,9 +257,13 @@ MissionSystem.update_mission = function (self, mission_name, positive, dt, sync)
 
 	if sync and self.is_server then
 		local mission_name_id = NetworkLookup.mission_names[mission_name]
-		local sync_data = template.create_sync_data(data)
+		local sync_data = template.create_sync_data(data, requesting_peer_id)
 
-		self.network_transmit:send_rpc_clients("rpc_update_mission", mission_name_id, sync_data)
+		if data.mission_data.unique_mission then
+			self.network_transmit:send_rpc("rpc_update_mission", requesting_peer_id, mission_name_id, sync_data)
+		else
+			self.network_transmit:send_rpc_clients("rpc_update_mission", mission_name_id, sync_data)
+		end
 	end
 
 	if done then
@@ -299,7 +304,7 @@ MissionSystem.hot_join_sync = function (self, sender)
 		local mission_name_id = NetworkLookup.mission_names[name]
 		local mission_template_name = data.mission_data.mission_template_name
 		local template = MissionTemplates[mission_template_name]
-		local sync_data = template.create_sync_data(data)
+		local sync_data = template.create_sync_data(data, sender)
 		local level_unit = data.unit
 
 		if level_unit then
@@ -332,7 +337,7 @@ MissionSystem.flow_callback_update_mission = function (self, mission_name)
 	local data = self.active_missions[mission_name]
 
 	fassert(data.manual_update, "MissionSystem:flow_callback_update_mission() Trying to update mission %q from flow", mission_name)
-	self.update_mission(self, mission_name, true, nil, true)
+	self.update_mission(self, mission_name, true, nil, nil, nil, true)
 
 	return 
 end
@@ -365,7 +370,7 @@ MissionSystem.rpc_request_mission = function (self, peer_id, mission_name_id)
 
 	local mission_name = NetworkLookup.mission_names[mission_name_id]
 
-	self.request_mission(self, mission_name)
+	self.request_mission(self, mission_name, nil, peer_id)
 
 	return 
 end
@@ -375,7 +380,7 @@ MissionSystem.rpc_request_mission_with_unit = function (self, peer_id, mission_n
 	local mission_name = NetworkLookup.mission_names[mission_name_id]
 	local unit = Level.unit_by_index(LevelHelper:current_level(self.world), level_unit_id)
 
-	self.request_mission(self, mission_name, unit)
+	self.request_mission(self, mission_name, unit, peer_id)
 
 	return 
 end
@@ -388,7 +393,21 @@ MissionSystem.rpc_request_mission_update = function (self, peer_id, mission_name
 		local data = self.active_missions[mission_name]
 
 		fassert(data.manual_update, "[MissionSystem] Requested an update on a mission not using manual updates", mission_name)
-		self.update_mission(self, mission_name, positive, nil, true)
+		self.update_mission(self, mission_name, positive, nil, nil, nil, true)
+	end
+
+	return 
+end
+MissionSystem.rpc_request_unique_mission_update = function (self, peer_id, mission_name_id, unique_id)
+	fassert(self.is_server, "[MissionSystem] Request unique mission update ended up on a client")
+
+	local mission_name = NetworkLookup.mission_names[mission_name_id]
+
+	if self.active_missions[mission_name] then
+		local data = self.active_missions[mission_name]
+
+		fassert(data.manual_update, "[MissionSystem] Requested an update on a unique mission not using manual updates", mission_name)
+		self.update_mission(self, mission_name, nil, unique_id, peer_id, nil, true)
 	end
 
 	return 

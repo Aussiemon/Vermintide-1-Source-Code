@@ -1714,7 +1714,7 @@ ScoreboardUI.set_compact_topic_data = function (self, topic_index, topic_data_in
 		title_style.font_size = 22
 		title_style.offset[1] = 52
 		title_style.offset[2] = -25
-		title_style.size[1] = 200
+		title_style.size[1] = 220
 	else
 		title_style.word_wrap = false
 		title_style.font_size = 28

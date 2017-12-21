@@ -835,6 +835,13 @@ go_type_table = {
 			local profile = SPProfiles[profile_id]
 
 			assert(profile, "No such profile with index %s", tostring(profile_id))
+
+			if player_health == 0 then
+				local difficulty_manager = Managers.state.difficulty
+				local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+				player_health = difficulty_settings.max_hp
+			end
+
 			Unit.set_data(unit, "sound_character", SPProfiles[profile_id].sound_character)
 
 			local player_id = GameSession.game_object_field(game_session, go_id, "local_player_id")

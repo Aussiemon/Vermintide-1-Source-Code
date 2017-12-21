@@ -75,10 +75,7 @@ IngameUI.init = function (self, ingame_ui_context)
 	end
 
 	if GameSettingsDevelopment.beta then
-		self.blocked_transitions = {
-			lorebook_view_force = true,
-			lorebook_view = true
-		}
+		self.blocked_transitions = {}
 
 		if Development.parameter("gdc") then
 			self.blocked_transitions = {
@@ -122,7 +119,7 @@ IngameUI.init = function (self, ingame_ui_context)
 	InitVideo()
 	self.setup_views(self, ingame_ui_context)
 
-	if self.views.map_view then
+	if self.views.map_view and self.views.map_view.set_friends_view then
 		self.views.map_view:set_friends_view(self.views.friends_view)
 	end
 
@@ -251,12 +248,7 @@ IngameUI.is_quests_unlocked = function (self)
 
 	return can_use and backend_settings.quests_enabled
 end
-script_data.lorebook_enabled = script_data.lorebook_enabled or Development.parameter("lorebook_enabled")
 IngameUI.is_lorebook_enabled = function (self)
-	if not script_data.lorebook_enabled then
-		return false
-	end
-
 	return true
 end
 IngameUI.register_rpcs = function (self, network_event_delegate)

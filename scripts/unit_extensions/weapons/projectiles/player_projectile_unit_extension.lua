@@ -249,6 +249,38 @@ PlayerProjectileUnitExtension.handle_impacts = function (self, impacts, num_impa
 			end
 
 			if not hit_affro then
+				if breed then
+					local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+					local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.AUTOMATIC_HEAD_SHOT)
+					local node = Actor.node(hit_actor)
+					local hit_zone = breed.hit_zones_lookup[node]
+
+					if procced and breed.hit_zones.head and hit_zone.name ~= "head" then
+						local head_hit_zone = breed.hit_zones.head
+						local actors = head_hit_zone.actors
+						local num_actors = #actors
+
+						for i = 1, num_actors, 1 do
+							local actor_name = actors[i]
+							local head_actor_index = Unit.find_actor(hit_unit, actor_name)
+
+							if head_actor_index then
+								local head_actor = Unit.actor(hit_unit, head_actor_index)
+								local actor_position = Actor.center_of_mass(head_actor)
+								local validate_position = self.validate_position(self, actor_position, pos_min, pos_max)
+
+								if validate_position then
+									hit_actor = head_actor
+									actor_index = head_actor_index
+									hit_position = actor_position
+
+									break
+								end
+							end
+						end
+					end
+				end
+
 				local level_index, is_level_unit = network_manager.game_object_or_level_id(network_manager, hit_unit)
 
 				if self.is_server then
@@ -333,7 +365,7 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	local action = self.action
 	local node = Actor.node(hit_actor)
 	local hit_zone = breed.hit_zones_lookup[node]
-	local hit_zone_name = hit_zone.name
+	local hit_zone_name = action.projectile_info.forced_hitzone or hit_zone.name
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 	local attack_direction = hit_direction
 	local hit_targets = self.hit_targets

@@ -217,7 +217,7 @@ end
 Items.poll_upgrades = function (self)
 	local upgrades_item = self._upgrades_item
 
-	if upgrades_item and upgrades_item.is_done(upgrades_item) then
+	if upgrades_item and upgrades_item.is_done(upgrades_item) and not upgrades_item.error_message(upgrades_item) then
 		self._upgrades_item = nil
 
 		return upgrades_item.items(upgrades_item)

@@ -234,6 +234,8 @@ AltarView.on_enter = function (self)
 
 	self.active = true
 
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
+
 	return 
 end
 AltarView.post_update_on_enter = function (self)
@@ -270,6 +272,8 @@ AltarView.on_exit = function (self)
 	UIPasses.is_dragging_item = false
 	self.exiting = nil
 	self.active = nil
+
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end

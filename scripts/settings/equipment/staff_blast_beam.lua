@@ -155,7 +155,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "charged_beam",
-					start_time = 0.2,
+					start_time = 0.4,
 					action = "action_one",
 					input = "action_one"
 				},

@@ -43,19 +43,19 @@ function UPDATE_POSITION_LOOKUP()
 	return 
 end
 
-function UPDATE_RESOLUTION_LOOKUP()
+function UPDATE_RESOLUTION_LOOKUP(force_update)
 	Profiler.start("UPDATE_RESOLUTION_LOOKUP")
 
 	local w, h = Application.resolution()
 	local resolution_modified = w ~= resolution_lookup.res_w or h ~= resolution_lookup.res_h
 
-	if resolution_modified then
+	if resolution_modified or force_update then
 		resolution_lookup.res_w = w
 		resolution_lookup.res_h = h
 
 		AccomodateViewport()
 
-		resolution_lookup.scale = UIResolutionScale()
+		resolution_lookup.scale = UIResolutionScale()*UISettings.ui_scale/100
 		resolution_lookup.inv_scale = resolution_lookup.scale/1
 	end
 

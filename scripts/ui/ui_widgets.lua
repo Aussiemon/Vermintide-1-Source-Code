@@ -7705,7 +7705,7 @@ UIWidgets.create_map_settings_title_stepper = function (tooltip_text, scenegraph
 		scenegraph_id = scenegraph_id
 	}
 end
-UIWidgets.create_lobby_browser_stepper = function (scenegraph_id)
+UIWidgets.create_lobby_browser_stepper = function (scenegraph_id, gamepad_selection_scenegraph_id)
 	return {
 		element = {
 			passes = {
@@ -7720,7 +7720,7 @@ UIWidgets.create_lobby_browser_stepper = function (scenegraph_id)
 					content_check_function = function (content)
 						local button_hotspot = content.button_hotspot
 
-						return button_hotspot.is_selected or button_hotspot.is_hover
+						return (not button_hotspot.gamepad_active and button_hotspot.is_selected) or button_hotspot.is_hover
 					end
 				},
 				{
@@ -7741,22 +7741,66 @@ UIWidgets.create_lobby_browser_stepper = function (scenegraph_id)
 				{
 					pass_type = "texture",
 					style_id = "left_button_texture",
-					texture_id = "left_button_texture"
+					texture_id = "left_button_texture",
+					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+
+						if button_hotspot.gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
+					end
 				},
 				{
 					pass_type = "rotated_texture",
 					style_id = "right_button_texture",
-					texture_id = "right_button_texture"
+					texture_id = "right_button_texture",
+					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+
+						if button_hotspot.gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
+					end
 				},
 				{
 					pass_type = "texture",
 					style_id = "left_button_texture_clicked",
-					texture_id = "left_button_texture_clicked"
+					texture_id = "left_button_texture_clicked",
+					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+
+						if button_hotspot.gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
+					end
 				},
 				{
 					pass_type = "rotated_texture",
 					style_id = "right_button_texture_clicked",
-					texture_id = "right_button_texture_clicked"
+					texture_id = "right_button_texture_clicked",
+					content_check_function = function (content)
+						local button_hotspot = content.button_hotspot
+
+						if button_hotspot.gamepad_active then
+							return button_hotspot.is_selected
+						else
+							return true
+						end
+
+						return 
+					end
 				}
 			}
 		},
@@ -7772,6 +7816,13 @@ UIWidgets.create_lobby_browser_stepper = function (scenegraph_id)
 			right_button_hotspot = {}
 		},
 		style = {
+			gamepad_selection = (gamepad_selection_scenegraph_id and {
+				texture_size = {
+					30,
+					30
+				},
+				scenegraph_id = gamepad_selection_scenegraph_id
+			}) or nil,
 			hover_texture = {
 				size = {
 					340,
@@ -9492,7 +9543,7 @@ UIWidgets.create_journal_back_arrow_button = function (scenegraph_id, masked)
 			}
 		},
 		content = {
-			texture_hover_id = "journal_arrow_02",
+			texture_hover_id = "journal_arrow_02_hover",
 			texture_selected_id = "journal_arrow_02_clicked",
 			texture_id = "journal_arrow_02",
 			button_hotspot = {}

@@ -5,6 +5,12 @@ LorebookCollectablePages = {}
 LorebookCollectablePagesAmount = 0
 LorebookDefaultUnlocks = {}
 LorebookPaths = {}
+
+for level_name, _ in pairs(LevelSettings) do
+	LorebookCollectablePages[level_name] = {}
+end
+
+LorebookCollectablePages.any = {}
 local fill_page_names = nil
 
 function fill_page_names(categories, parent_path)
@@ -20,10 +26,6 @@ function fill_page_names(categories, parent_path)
 		local unlock_level = category.unlock_level
 
 		if unlock_level then
-			if not LorebookCollectablePages[unlock_level] then
-				LorebookCollectablePages[unlock_level] = {}
-			end
-
 			local collectable_pages_per_level = LorebookCollectablePages[unlock_level]
 			collectable_pages_per_level[#collectable_pages_per_level + 1] = category_name
 			LorebookCollectablePagesAmount = LorebookCollectablePagesAmount + 1

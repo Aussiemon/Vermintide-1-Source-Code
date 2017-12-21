@@ -33,12 +33,12 @@ quest_atlas = {
 			20
 		},
 		uv00 = {
-			0.525879,
-			0.259033
+			0.58667,
+			0.25708
 		},
 		uv11 = {
-			0.530762,
-			0.263916
+			0.591553,
+			0.261963
 		}
 	},
 	hud_quest_icon_01_bg = {
@@ -47,11 +47,11 @@ quest_atlas = {
 			20
 		},
 		uv00 = {
-			0.52002,
+			0.576172,
 			0.259033
 		},
 		uv11 = {
-			0.524902,
+			0.581055,
 			0.263916
 		}
 	},
@@ -69,7 +69,7 @@ quest_atlas = {
 			0.262207
 		}
 	},
-	quest_reward_boon_frame_06 = {
+	quest_progress_bar_bg = {
 		size = {
 			33,
 			33
@@ -83,7 +83,7 @@ quest_atlas = {
 			0.225342
 		}
 	},
-	quest_reward_boon_frame_03 = {
+	quest_reward_boon_frame_07 = {
 		size = {
 			33,
 			33
@@ -97,7 +97,7 @@ quest_atlas = {
 			0.216309
 		}
 	},
-	quest_progress_bar_bg = {
+	quest_reward_boon_frame_04 = {
 		size = {
 			33,
 			33
@@ -111,7 +111,7 @@ quest_atlas = {
 			0.077881
 		}
 	},
-	quest_reward_boon_frame_07 = {
+	quest_reward_boon_frame_08 = {
 		size = {
 			33,
 			33
@@ -125,7 +125,7 @@ quest_atlas = {
 			0.077881
 		}
 	},
-	quest_reward_boon_frame_05 = {
+	quest_reward_boon_frame_02 = {
 		size = {
 			33,
 			33
@@ -139,7 +139,7 @@ quest_atlas = {
 			0.026611
 		}
 	},
-	quest_reward_boon_frame_02 = {
+	quest_reward_boon_frame_06 = {
 		size = {
 			33,
 			33
@@ -153,7 +153,7 @@ quest_atlas = {
 			0.017578
 		}
 	},
-	quest_reward_boon_frame_01 = {
+	quest_reward_boon_frame_05 = {
 		size = {
 			33,
 			33
@@ -167,7 +167,7 @@ quest_atlas = {
 			0.008545
 		}
 	},
-	quest_reward_boon_frame_04 = {
+	quest_reward_boon_frame_01 = {
 		size = {
 			33,
 			33
@@ -181,7 +181,7 @@ quest_atlas = {
 			0.230225
 		}
 	},
-	quest_reward_boon_frame_08 = {
+	quest_reward_boon_frame_03 = {
 		size = {
 			33,
 			33
@@ -209,7 +209,7 @@ quest_atlas = {
 			0.999268
 		}
 	},
-	level_location_dlc_icon_castle_quest_screen = {
+	level_location_dlc_icon_dungeon_quest_screen = {
 		size = {
 			42,
 			45
@@ -223,7 +223,7 @@ quest_atlas = {
 			0.994873
 		}
 	},
-	level_location_dlc_icon_dungeon_quest_screen = {
+	level_location_short_icon_06_quest_screen = {
 		size = {
 			42,
 			45
@@ -237,7 +237,7 @@ quest_atlas = {
 			0.98291
 		}
 	},
-	level_location_long_icon_03_quest_screen = {
+	level_location_long_icon_01_quest_screen = {
 		size = {
 			42,
 			45
@@ -249,6 +249,34 @@ quest_atlas = {
 		uv11 = {
 			0.344238,
 			0.970947
+		}
+	},
+	level_location_long_icon_07_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.322754,
+			0.959961
+		},
+		uv11 = {
+			0.333008,
+			0.970947
+		}
+	},
+	level_location_dlc_icon_castle_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.333984,
+			0.947998
+		},
+		uv11 = {
+			0.344238,
+			0.958984
 		}
 	},
 	level_location_short_icon_02_quest_screen = {
@@ -258,70 +286,42 @@ quest_atlas = {
 		},
 		uv00 = {
 			0.322754,
-			0.959961
-		},
-		uv11 = {
-			0.333008,
-			0.970947
-		}
-	},
-	level_location_long_icon_04_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.333984,
-			0.947998
-		},
-		uv11 = {
-			0.344238,
-			0.958984
-		}
-	},
-	level_location_dlc_icon_portals_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.322754,
 			0.947998
 		},
 		uv11 = {
 			0.333008,
 			0.958984
-		}
-	},
-	level_location_long_icon_01_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.333984,
-			0.936035
-		},
-		uv11 = {
-			0.344238,
-			0.947021
-		}
-	},
-	level_location_long_icon_02_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.322754,
-			0.936035
-		},
-		uv11 = {
-			0.333008,
-			0.947021
 		}
 	},
 	level_location_dlc_icon_dwarf_exterior_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.333984,
+			0.936035
+		},
+		uv11 = {
+			0.344238,
+			0.947021
+		}
+	},
+	level_location_short_icon_04_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.322754,
+			0.936035
+		},
+		uv11 = {
+			0.333008,
+			0.947021
+		}
+	},
+	level_location_dlc_icon_portals_quest_screen = {
 		size = {
 			42,
 			45
@@ -349,7 +349,7 @@ quest_atlas = {
 			0.995117
 		}
 	},
-	level_location_dlc_icon_dwarf_interior_quest_screen = {
+	level_location_long_icon_02_quest_screen = {
 		size = {
 			42,
 			45
@@ -377,7 +377,7 @@ quest_atlas = {
 			0.931641
 		}
 	},
-	level_location_short_icon_01_quest_screen = {
+	level_location_short_icon_03_quest_screen = {
 		size = {
 			42,
 			45
@@ -391,7 +391,7 @@ quest_atlas = {
 			0.919678
 		}
 	},
-	level_location_short_icon_06_quest_screen = {
+	level_location_dlc_icon_dwarf_interior_quest_screen = {
 		size = {
 			42,
 			45
@@ -405,7 +405,7 @@ quest_atlas = {
 			0.253174
 		}
 	},
-	level_location_short_icon_04_quest_screen = {
+	level_location_long_icon_04_quest_screen = {
 		size = {
 			42,
 			45
@@ -419,7 +419,7 @@ quest_atlas = {
 			0.238037
 		}
 	},
-	level_location_short_icon_03_quest_screen = {
+	level_location_short_icon_01_quest_screen = {
 		size = {
 			42,
 			45
@@ -433,7 +433,7 @@ quest_atlas = {
 			0.147461
 		}
 	},
-	level_location_long_icon_07_quest_screen = {
+	level_location_long_icon_06_quest_screen = {
 		size = {
 			42,
 			45
@@ -447,7 +447,7 @@ quest_atlas = {
 			0.147461
 		}
 	},
-	level_location_long_icon_06_quest_screen = {
+	level_location_long_icon_03_quest_screen = {
 		size = {
 			42,
 			45
@@ -503,7 +503,7 @@ quest_atlas = {
 			0.973633
 		}
 	},
-	quest_class_icon_wood_elf = {
+	quest_class_icon_dwarf_ranger = {
 		size = {
 			58,
 			58
@@ -517,7 +517,7 @@ quest_atlas = {
 			0.959473
 		}
 	},
-	quest_class_icon_bright_wizard = {
+	quest_class_icon_witch_hunter = {
 		size = {
 			58,
 			58
@@ -531,7 +531,7 @@ quest_atlas = {
 			0.944336
 		}
 	},
-	quest_class_icon_empire_soldier = {
+	quest_class_icon_bright_wizard = {
 		size = {
 			58,
 			58
@@ -545,7 +545,7 @@ quest_atlas = {
 			0.256348
 		}
 	},
-	quest_class_icon_dwarf_ranger = {
+	quest_class_icon_wood_elf = {
 		size = {
 			58,
 			58
@@ -559,7 +559,7 @@ quest_atlas = {
 			0.241211
 		}
 	},
-	quest_class_icon_witch_hunter = {
+	quest_class_icon_empire_soldier = {
 		size = {
 			58,
 			58
@@ -587,7 +587,7 @@ quest_atlas = {
 			0.2229
 		}
 	},
-	quest_board_arrow_normal = {
+	quest_board_arrow_hover = {
 		size = {
 			42,
 			64
@@ -601,7 +601,7 @@ quest_atlas = {
 			0.045898
 		}
 	},
-	quest_board_arrow_hover = {
+	quest_board_arrow_normal = {
 		size = {
 			42,
 			64
@@ -657,7 +657,7 @@ quest_atlas = {
 			0.11792
 		}
 	},
-	quest_icon_01 = {
+	quest_icon_03 = {
 		size = {
 			74,
 			74
@@ -671,7 +671,7 @@ quest_atlas = {
 			0.098877
 		}
 	},
-	quest_icon_03 = {
+	quest_icon_01 = {
 		size = {
 			74,
 			74
@@ -797,7 +797,7 @@ quest_atlas = {
 			0.928223
 		}
 	},
-	quest_screen_bg_contract_04_corner_03 = {
+	quest_screen_bg_contract_02_corner_03 = {
 		size = {
 			126,
 			193
@@ -811,7 +811,7 @@ quest_atlas = {
 			0.804688
 		}
 	},
-	quest_screen_bg_contract_02_corner_01 = {
+	quest_screen_bg_contract_01_corner_03 = {
 		size = {
 			126,
 			193
@@ -825,7 +825,7 @@ quest_atlas = {
 			0.804688
 		}
 	},
-	quest_screen_bg_contract_05_corner_04 = {
+	quest_screen_bg_contract_05_corner_03 = {
 		size = {
 			126,
 			193
@@ -839,7 +839,7 @@ quest_atlas = {
 			0.756592
 		}
 	},
-	quest_screen_bg_contract_01_corner_01 = {
+	quest_screen_bg_contract_02_corner_02 = {
 		size = {
 			126,
 			193
@@ -853,7 +853,7 @@ quest_atlas = {
 			0.756592
 		}
 	},
-	quest_screen_bg_contract_04_corner_01 = {
+	quest_screen_bg_contract_05_corner_02 = {
 		size = {
 			126,
 			193
@@ -867,7 +867,7 @@ quest_atlas = {
 			0.756592
 		}
 	},
-	quest_screen_bg_contract_01_corner_04 = {
+	quest_screen_bg_contract_03_corner_04 = {
 		size = {
 			126,
 			193
@@ -881,7 +881,7 @@ quest_atlas = {
 			0.756592
 		}
 	},
-	quest_screen_bg_contract_05_corner_02 = {
+	quest_screen_bg_contract_02_corner_01 = {
 		size = {
 			126,
 			193
@@ -909,7 +909,7 @@ quest_atlas = {
 			0.708496
 		}
 	},
-	quest_screen_bg_contract_03_corner_04 = {
+	quest_screen_bg_contract_03_corner_01 = {
 		size = {
 			126,
 			193
@@ -923,7 +923,7 @@ quest_atlas = {
 			0.708496
 		}
 	},
-	quest_screen_bg_contract_02_corner_03 = {
+	quest_screen_bg_contract_04_corner_01 = {
 		size = {
 			126,
 			193
@@ -937,7 +937,7 @@ quest_atlas = {
 			0.708496
 		}
 	},
-	quest_screen_bg_contract_01_corner_03 = {
+	quest_screen_bg_contract_05_corner_04 = {
 		size = {
 			126,
 			193
@@ -951,7 +951,7 @@ quest_atlas = {
 			0.708496
 		}
 	},
-	quest_screen_bg_contract_01_corner_02 = {
+	quest_screen_bg_contract_01_corner_04 = {
 		size = {
 			126,
 			193
@@ -965,7 +965,7 @@ quest_atlas = {
 			0.708496
 		}
 	},
-	quest_screen_bg_contract_02_corner_02 = {
+	quest_screen_bg_contract_03_corner_03 = {
 		size = {
 			126,
 			193
@@ -979,7 +979,7 @@ quest_atlas = {
 			0.6604
 		}
 	},
-	quest_screen_bg_contract_03_corner_01 = {
+	quest_screen_bg_contract_01_corner_02 = {
 		size = {
 			126,
 			193
@@ -993,7 +993,7 @@ quest_atlas = {
 			0.6604
 		}
 	},
-	quest_screen_bg_contract_03_corner_03 = {
+	quest_screen_bg_contract_03_corner_02 = {
 		size = {
 			126,
 			193
@@ -1007,7 +1007,7 @@ quest_atlas = {
 			0.6604
 		}
 	},
-	quest_screen_bg_contract_05_corner_01 = {
+	quest_screen_bg_contract_02_corner_04 = {
 		size = {
 			126,
 			193
@@ -1021,7 +1021,7 @@ quest_atlas = {
 			0.6604
 		}
 	},
-	quest_screen_bg_contract_03_corner_02 = {
+	quest_screen_bg_contract_05_corner_01 = {
 		size = {
 			126,
 			193
@@ -1035,7 +1035,7 @@ quest_atlas = {
 			0.6604
 		}
 	},
-	quest_screen_bg_contract_02_corner_04 = {
+	quest_screen_bg_contract_01_corner_01 = {
 		size = {
 			126,
 			193
@@ -1049,7 +1049,7 @@ quest_atlas = {
 			0.444824
 		}
 	},
-	quest_screen_bg_contract_05_corner_03 = {
+	quest_screen_bg_contract_04_corner_03 = {
 		size = {
 			126,
 			193
@@ -1083,12 +1083,12 @@ quest_atlas = {
 			2
 		},
 		uv00 = {
-			0.470215,
-			0.259033
+			0.661865,
+			0.262207
 		},
 		uv11 = {
-			0.519043,
-			0.259521
+			0.710693,
+			0.262695
 		}
 	},
 	ingame_contract_bg_01 = {
@@ -1271,6 +1271,20 @@ quest_atlas = {
 		uv11 = {
 			0.291748,
 			0.935059
+		}
+	},
+	quest_content_divider = {
+		size = {
+			430,
+			20
+		},
+		uv00 = {
+			0.470215,
+			0.259033
+		},
+		uv11 = {
+			0.575195,
+			0.263916
 		}
 	},
 	quest_screen_divider_2 = {
@@ -1483,20 +1497,6 @@ quest_atlas = {
 			0.232178
 		}
 	},
-	leather_bg = {
-		size = {
-			709,
-			340
-		},
-		uv00 = {
-			0.352051,
-			0.473877
-		},
-		uv11 = {
-			0.525146,
-			0.556885
-		}
-	},
 	leather_bg_01 = {
 		size = {
 			709,
@@ -1509,6 +1509,20 @@ quest_atlas = {
 		uv11 = {
 			0.173584,
 			0.98877
+		}
+	},
+	leather_bg = {
+		size = {
+			709,
+			340
+		},
+		uv00 = {
+			0.352051,
+			0.473877
+		},
+		uv11 = {
+			0.525146,
+			0.556885
 		}
 	},
 	quest_paper_bg = {
@@ -1525,7 +1539,7 @@ quest_atlas = {
 			0.466064
 		}
 	},
-	contract_large_ubersreik = {
+	contract_large_01 = {
 		size = {
 			651,
 			851
@@ -1539,7 +1553,7 @@ quest_atlas = {
 			0.4729
 		}
 	},
-	contract_large_01 = {
+	contract_large_ubersreik = {
 		size = {
 			651,
 			851
@@ -1553,7 +1567,7 @@ quest_atlas = {
 			0.4729
 		}
 	},
-	contract_large_drachenfels = {
+	contract_large_01 = {
 		size = {
 			651,
 			851
@@ -1567,7 +1581,7 @@ quest_atlas = {
 			0.890381
 		}
 	},
-	contract_large_01 = {
+	contract_large_drachenfels = {
 		size = {
 			651,
 			851
@@ -1609,7 +1623,7 @@ quest_atlas = {
 			0.929199
 		}
 	},
-	quest_screen_bg_contract_02 = {
+	quest_screen_bg_contract_04 = {
 		size = {
 			781,
 			904
@@ -1623,7 +1637,7 @@ quest_atlas = {
 			0.70752
 		}
 	},
-	quest_screen_bg_contract_04 = {
+	quest_screen_bg_contract_02 = {
 		size = {
 			781,
 			904

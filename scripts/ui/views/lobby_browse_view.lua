@@ -3,6 +3,7 @@ require("scripts/ui/views/lobby_item_list")
 require("scripts/network/lobby_aux")
 
 local LobbyBrowseDefinitions = require("scripts/ui/views/lobby_browse_view_definitions")
+DO_RELOAD = false
 LobbyBrowseView = class(LobbyBrowseView)
 local input_delay_before_start_new_search = 0
 local platform = Application.platform()
@@ -23,65 +24,38 @@ end
 local generic_input_actions = {
 	default = {
 		{
-			input_action = "d_horizontal",
-			priority = 2,
-			description_text = "input_description_switch_settings",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "l1_r1",
-			priority = 3,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
 			input_action = "confirm",
-			priority = 49,
-			description_text = "lb_join"
-		},
-		{
-			input_action = "special_1",
-			priority = 50,
-			description_text = "lb_reset_filters"
-		},
-		{
-			input_action = "refresh",
-			priority = 51,
+			priority = 1,
 			description_text = "lb_search"
 		},
 		{
+			input_action = "special_1",
+			priority = 2,
+			description_text = "lb_reset_filters"
+		},
+		{
 			input_action = "back",
-			priority = 52,
+			priority = 3,
 			description_text = "input_description_close"
 		}
 	},
-	no_join = {
+	lobby_list = {
 		{
-			input_action = "d_horizontal",
-			priority = 2,
-			description_text = "input_description_switch_settings",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "l1_r1",
-			priority = 3,
-			description_text = "input_description_navigate",
-			ignore_keybinding = true
-		},
-		{
-			input_action = "special_1",
-			priority = 50,
-			description_text = "lb_reset_filters"
-		},
-		{
-			input_action = "refresh",
-			priority = 51,
-			description_text = "lb_search"
+			input_action = "confirm",
+			priority = 1,
+			description_text = "lb_join"
 		},
 		{
 			input_action = "back",
-			priority = 52,
-			description_text = "input_description_close"
+			priority = 2,
+			description_text = "input_description_back"
+		}
+	},
+	lobby_list_no_join = {
+		{
+			input_action = "back",
+			priority = 1,
+			description_text = "input_description_back"
 		}
 	}
 }
@@ -117,17 +91,12 @@ LobbyBrowseView.init = function (self, ingame_ui_context)
 		use_top_renderer = false,
 		num_list_items = 17
 	}
-	local lobby_list_position = {
-		443,
-		-110,
-		10
-	}
-	self.lobby_list = LobbyItemsList:new(lobby_list_position, ingame_ui_context, settings)
+	self.lobby_list = LobbyItemsList:new(LobbyBrowseDefinitions.lobby_list_position, ingame_ui_context, settings)
 	self.lobby_list_update_timer = MatchmakingSettings.TIME_BETWEEN_EACH_SEARCH
 	self.show_invalid = false
 	self.selected_gamepad_widget_index = 1
 	local input_service = self.input_service(self)
-	self.menu_input_description_ui = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 8, UILayer.default, generic_input_actions.default)
+	self.menu_input_description_ui = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 3, UILayer.default, generic_input_actions.default)
 
 	self.menu_input_description_ui:change_generic_actions(generic_input_actions.default)
 
@@ -136,6 +105,7 @@ LobbyBrowseView.init = function (self, ingame_ui_context)
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 	self._draw_invalid_checkbox = Application.build() == "dev" or Application.build() == "debug"
+	self.gamepad_selected_page = "filters"
 
 	return 
 end
@@ -167,6 +137,10 @@ LobbyBrowseView.create_ui_elements = function (self)
 	self.show_lobbies_banner_widget = UIWidget.init(LobbyBrowseDefinitions.show_lobbies_banner_widget)
 	self.distance_banner_widget = UIWidget.init(LobbyBrowseDefinitions.distance_banner_widget)
 	self.dead_space_filler = UIWidget.init(LobbyBrowseDefinitions.dead_space_filler)
+	self.gamepad_stepper_selection_widget = UIWidget.init(LobbyBrowseDefinitions.gamepad_stepper_selection)
+	self.frame_divider_widget = UIWidget.init(LobbyBrowseDefinitions.frame_divider)
+	self.left_frame_glow_widget = UIWidget.init(LobbyBrowseDefinitions.left_frame_glow)
+	self.right_frame_glow_widget = UIWidget.init(LobbyBrowseDefinitions.right_frame_glow)
 	self.checkboxes = {
 		invalid = UIWidget.init(LobbyBrowseDefinitions.invalid_checkbox)
 	}
@@ -212,6 +186,7 @@ LobbyBrowseView.on_enter = function (self)
 	self.active = true
 
 	self.search(self)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	return 
 end
@@ -237,6 +212,7 @@ LobbyBrowseView.on_exit = function (self)
 	local viewport = ScriptWorld.viewport(world, viewport_name)
 
 	ScriptWorld.activate_viewport(world, viewport)
+	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	return 
 end
@@ -409,7 +385,118 @@ LobbyBrowseView.update_auto_refresh = function (self, dt)
 
 	return 
 end
+LobbyBrowseView._handle_input = function (self, dt)
+	local input_service = self.input_service(self)
+	local join_button_hotspot = self.join_button.content.button_hotspot
+	local back_button_hotspot = self.back_button.content.button_hotspot
+	local search_button_hotspot = self.search_button.content.button_hotspot
+	local reset_button_hotspot = self.reset_button.content.button_hotspot
+	local lobby_data = self.lobby_list:selected_lobby()
+
+	self._update_join_button(self, lobby_data)
+
+	if back_button_hotspot.on_hover_enter or search_button_hotspot.on_hover_enter or join_button_hotspot.on_hover_enter or reset_button_hotspot.on_hover_enter then
+		self.play_sound(self, "Play_hud_hover")
+	end
+
+	if not join_button_hotspot.disabled and join_button_hotspot.on_release and not self.join_lobby_data_id then
+		local lobby_data = self.lobby_list:selected_lobby()
+
+		if lobby_data then
+			self.play_sound(self, "Play_hud_select")
+			Managers.matchmaking:request_join_lobby(lobby_data)
+
+			self.join_lobby_data_id = lobby_data.id
+		end
+	end
+
+	if input_service.get(input_service, "toggle_menu") or back_button_hotspot.on_release then
+		self.play_sound(self, "Play_hud_select")
+
+		local return_to_game = not self.ingame_ui.menu_active
+
+		self.exit(self, return_to_game)
+	end
+
+	if search_button_hotspot.on_release then
+		self.play_sound(self, "Play_hud_select")
+
+		search_button_hotspot.on_release = nil
+
+		self.search(self)
+	end
+
+	if reset_button_hotspot.on_release then
+		self.play_sound(self, "Play_hud_select")
+
+		reset_button_hotspot.on_release = nil
+
+		self._reset_filters(self)
+	end
+
+	self._handle_stepper_input(self, dt)
+
+	return 
+end
+LobbyBrowseView._handle_gamepad_input = function (self, dt)
+	local input_service = self.input_service(self)
+	local gamepad_selected_page = self.gamepad_selected_page
+
+	if gamepad_selected_page == "filters" then
+		if input_service.get(input_service, "confirm") then
+			self.search(self)
+			self.deselect_gamepad_widget_by_index(self, self.selected_gamepad_widget_index)
+
+			gamepad_selected_page = "lobby_list"
+		elseif input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back") then
+			local return_to_game = not self.ingame_ui.menu_active
+
+			self.exit(self, return_to_game)
+		end
+
+		self.handle_gamepad_navigation_input(self, dt)
+		self._handle_stepper_input(self, dt)
+	elseif input_service.get(input_service, "confirm") then
+		local lobby_data = self.lobby_list:selected_lobby()
+
+		if lobby_data then
+			self.play_sound(self, "Play_hud_select")
+			Managers.matchmaking:request_join_lobby(lobby_data)
+
+			self.join_lobby_data_id = lobby_data.id
+		end
+	elseif input_service.get(input_service, "back") then
+		gamepad_selected_page = "filters"
+
+		self._set_selected_gamepad_widget(self, self.selected_gamepad_widget_index)
+	elseif input_service.get(input_service, "toggle_menu") then
+		local return_to_game = not self.ingame_ui.menu_active
+
+		self.exit(self, return_to_game)
+	end
+
+	self._update_input_description(self)
+
+	self.gamepad_selected_page = gamepad_selected_page
+
+	return 
+end
+LobbyBrowseView._handle_stepper_input = function (self, dt)
+	self.handle_stepper_input(self, "game_mode_stepper", self.game_mode_stepper, callback(self, "on_game_mode_stepper_input"))
+	self.handle_stepper_input(self, "level_stepper", self.level_stepper, callback(self, "on_level_stepper_input"))
+	self.handle_stepper_input(self, "difficulty_stepper", self.difficulty_stepper, callback(self, "on_difficulty_stepper_input"))
+	self.handle_stepper_input(self, "show_lobbies_stepper", self.show_lobbies_stepper, callback(self, "on_show_lobbies_stepper_input"))
+	self.handle_stepper_input(self, "distance_stepper", self.distance_stepper, callback(self, "on_distance_stepper_input"))
+
+	return 
+end
 LobbyBrowseView.update = function (self, dt)
+	if DO_RELOAD then
+		DO_RELOAD = false
+
+		self.create_ui_elements(self)
+	end
+
 	local ui_renderer = self.ui_renderer
 	local input_manager = self.input_manager
 	local input_service = self.input_service(self)
@@ -433,8 +520,6 @@ LobbyBrowseView.update = function (self, dt)
 		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 		UIRenderer.draw_widget(ui_renderer, self.background_widget)
 		UIRenderer.draw_widget(ui_renderer, self.title_widget)
-		UIRenderer.draw_widget(ui_renderer, self.lobby_list_frame_widget)
-		UIRenderer.draw_widget(ui_renderer, self.filter_frame_widget)
 		UIRenderer.draw_widget(ui_renderer, self.lobby_list_title_line_widget)
 		UIRenderer.draw_widget(ui_renderer, self.level_stepper)
 		UIRenderer.draw_widget(ui_renderer, self.game_mode_stepper)
@@ -447,6 +532,7 @@ LobbyBrowseView.update = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, self.show_lobbies_banner_widget)
 		UIRenderer.draw_widget(ui_renderer, self.distance_banner_widget)
 		UIRenderer.draw_widget(ui_renderer, self.dead_space_filler)
+		UIRenderer.draw_widget(ui_renderer, self.frame_divider_widget)
 
 		if not gamepad_active then
 			UIRenderer.draw_widget(ui_renderer, self.back_button)
@@ -454,6 +540,15 @@ LobbyBrowseView.update = function (self, dt)
 			UIRenderer.draw_widget(ui_renderer, self.reset_button)
 			UIRenderer.draw_widget(ui_renderer, self.search_button)
 			UIRenderer.draw_widget(ui_renderer, self.filter_divider_widget)
+		end
+
+		if gamepad_active then
+			if self.gamepad_selected_page == "filters" then
+				UIRenderer.draw_widget(ui_renderer, self.left_frame_glow_widget)
+				UIRenderer.draw_widget(ui_renderer, self.gamepad_stepper_selection_widget)
+			else
+				UIRenderer.draw_widget(ui_renderer, self.right_frame_glow_widget)
+			end
 		end
 
 		if self._draw_invalid_checkbox then
@@ -485,25 +580,23 @@ LobbyBrowseView.update = function (self, dt)
 		end
 
 		self.menu_input_description_ui:draw(ui_renderer, dt)
-		self.handle_gamepad_navigation_input(self, dt)
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
 		self._on_gamepad_deactivated(self)
 	end
 
-	self.handle_stepper_input(self, "game_mode_stepper", self.game_mode_stepper, callback(self, "on_game_mode_stepper_input"))
-	self.handle_stepper_input(self, "level_stepper", self.level_stepper, callback(self, "on_level_stepper_input"))
-	self.handle_stepper_input(self, "difficulty_stepper", self.difficulty_stepper, callback(self, "on_difficulty_stepper_input"))
-	self.handle_stepper_input(self, "show_lobbies_stepper", self.show_lobbies_stepper, callback(self, "on_show_lobbies_stepper_input"))
-	self.handle_stepper_input(self, "distance_stepper", self.distance_stepper, callback(self, "on_distance_stepper_input"))
-
-	local join_lobby_data_id = self.join_lobby_data_id
-	local is_matchmaking = matchmaking_manager.is_game_matchmaking(matchmaking_manager)
-	local lobby_list = self.lobby_list
+	if gamepad_active then
+		self._handle_gamepad_input(self, dt)
+	else
+		self._handle_input(self, dt)
+	end
 
 	self.update_auto_refresh(self, dt)
-	self.lobby_list:update(dt, loading)
+
+	local ignore_gamepad_input = self.gamepad_selected_page == "filters"
+
+	self.lobby_list:update(dt, loading, ignore_gamepad_input)
 
 	if self.active then
 		self.lobby_list:draw(dt)
@@ -513,54 +606,6 @@ LobbyBrowseView.update = function (self, dt)
 
 	if lobby_index_selected then
 		self.lobby_list:on_lobby_selected(lobby_index_selected)
-	end
-
-	local join_button_hotspot = self.join_button.content.button_hotspot
-	local back_button_hotspot = self.back_button.content.button_hotspot
-	local search_button_hotspot = self.search_button.content.button_hotspot
-	local reset_button_hotspot = self.reset_button.content.button_hotspot
-	local status_cancel_button_hotspot = self.status_cancel_button.content.button_hotspot
-	local lobby_data = self.lobby_list:selected_lobby()
-
-	self._update_join_button(self, lobby_data)
-
-	if back_button_hotspot.on_hover_enter or search_button_hotspot.on_hover_enter or join_button_hotspot.on_hover_enter or reset_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
-	end
-
-	if not join_button_hotspot.disabled and (join_button_hotspot.on_release or (gamepad_active and input_service.get(input_service, "confirm") and not self.join_lobby_data_id)) then
-		local lobby_data = self.lobby_list:selected_lobby()
-
-		if lobby_data then
-			self.play_sound(self, "Play_hud_select")
-			Managers.matchmaking:request_join_lobby(lobby_data)
-
-			self.join_lobby_data_id = lobby_data.id
-		end
-	end
-
-	if input_service.get(input_service, "toggle_menu") or (gamepad_active and input_service.get(input_service, "back")) or back_button_hotspot.on_release then
-		self.play_sound(self, "Play_hud_select")
-
-		local return_to_game = not self.ingame_ui.menu_active
-
-		self.exit(self, return_to_game)
-	end
-
-	if (gamepad_active and input_service.get(input_service, "refresh")) or search_button_hotspot.on_release then
-		self.play_sound(self, "Play_hud_select")
-
-		search_button_hotspot.on_release = nil
-
-		self.search(self)
-	end
-
-	if (gamepad_active and input_service.get(input_service, "special_1")) or reset_button_hotspot.on_release then
-		self.play_sound(self, "Play_hud_select")
-
-		reset_button_hotspot.on_release = nil
-
-		self._reset_filters(self)
 	end
 
 	if self.search_timer then
@@ -610,28 +655,42 @@ LobbyBrowseView._update_join_button = function (self, lobby_data)
 
 		if valid_lobby then
 			self.join_button.content.button_hotspot.disabled = false
-
-			if active_menu_input_description ~= "default" then
-				menu_input_description_ui.change_generic_actions(menu_input_description_ui, generic_input_actions.default)
-
-				self.active_menu_input_description = "default"
-			end
 		else
 			self.join_button.content.button_hotspot.disabled = true
-
-			if active_menu_input_description ~= "no_join" then
-				menu_input_description_ui.change_generic_actions(menu_input_description_ui, generic_input_actions.no_join)
-
-				self.active_menu_input_description = "no_join"
-			end
 		end
 	else
 		self.join_button.content.button_hotspot.disabled = true
+	end
 
-		if active_menu_input_description ~= "no_join" then
-			menu_input_description_ui.change_generic_actions(menu_input_description_ui, generic_input_actions.no_join)
+	return 
+end
+LobbyBrowseView._update_input_description = function (self)
+	local menu_input_description_ui = self.menu_input_description_ui
+	local active_menu_input_description = self.active_menu_input_description
+	local matchmaking_manager = Managers.matchmaking
+	local is_matchmaking = matchmaking_manager.is_game_matchmaking(matchmaking_manager)
+	local gamepad_selected_page = self.gamepad_selected_page
 
-			self.active_menu_input_description = "no_join"
+	if gamepad_selected_page == "filters" then
+		if active_menu_input_description ~= "default" then
+			menu_input_description_ui.change_generic_actions(menu_input_description_ui, generic_input_actions.default)
+
+			self.active_menu_input_description = "default"
+		end
+	else
+		local lobby_data = self.lobby_list:selected_lobby()
+		local valid_lobby = lobby_data and self.valid_lobby(self, lobby_data)
+
+		if valid_lobby then
+			if active_menu_input_description ~= "lobby_list" then
+				menu_input_description_ui.change_generic_actions(menu_input_description_ui, generic_input_actions.lobby_list)
+
+				self.active_menu_input_description = "lobby_list"
+			end
+		elseif active_menu_input_description ~= "lobby_list_no_join" then
+			menu_input_description_ui.change_generic_actions(menu_input_description_ui, generic_input_actions.lobby_list_no_join)
+
+			self.active_menu_input_description = "lobby_list_no_join"
 		end
 	end
 
@@ -1044,26 +1103,60 @@ LobbyBrowseView._set_selected_gamepad_widget = function (self, index)
 	local widget = selected_gamepad_widget.widget
 	local button_hotspot = widget.content.button_hotspot
 	button_hotspot.is_selected = true
+	local gamepad_selection_style = widget.style.gamepad_selection
+
+	if gamepad_selection_style then
+		local scenegraph_id = gamepad_selection_style.scenegraph_id
+		local texture_size = gamepad_selection_style.texture_size
+		self.gamepad_stepper_selection_widget.scenegraph_id = scenegraph_id
+		local gamepad_widget_style = self.gamepad_stepper_selection_widget.style
+		gamepad_widget_style.texture_top_left.texture_size = texture_size
+		gamepad_widget_style.texture_top_right.texture_size = texture_size
+		gamepad_widget_style.texture_bottom_left.texture_size = texture_size
+		gamepad_widget_style.texture_bottom_right.texture_size = texture_size
+	end
+
+	return 
+end
+LobbyBrowseView.deselect_gamepad_widget_by_index = function (self, index)
+	self.selected_gamepad_widget_index = index
+	local selected_gamepad_widget = self.gamepad_widgets[index]
+	local widget = selected_gamepad_widget.widget
+	widget.content.button_hotspot.is_selected = nil
 
 	return 
 end
 LobbyBrowseView.handle_gamepad_navigation_input = function (self, dt)
+	local input_service = self.input_service(self)
 	local controller_cooldown = self.controller_cooldown
 
 	if controller_cooldown and 0 < controller_cooldown then
 		self.controller_cooldown = controller_cooldown - dt
+		local speed_multiplier = self.speed_multiplier or 1
+		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
+		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
+		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
 
 		return 
-	end
+	else
+		speed_multiplier = self.speed_multiplier or 1
+		local move_up = input_service.get(input_service, "move_up")
+		local move_up_hold = input_service.get(input_service, "move_up_hold")
 
-	local input_service = self.input_service(self)
+		if move_up or move_up_hold then
+			self._cycle_previous_gamepad_widget(self)
 
-	if input_service.get(input_service, "cycle_previous") then
-		self._cycle_previous_gamepad_widget(self)
-	end
+			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+		else
+			local move_down = input_service.get(input_service, "move_down")
+			local move_down_hold = input_service.get(input_service, "move_down_hold")
 
-	if input_service.get(input_service, "cycle_next") then
-		self._cycle_next_gamepad_widget(self)
+			if move_down or move_down_hold then
+				self._cycle_next_gamepad_widget(self)
+
+				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+			end
+		end
 	end
 
 	local selected_gamepad_widget = self._get_selected_gamepad_widget(self)
@@ -1073,10 +1166,10 @@ LobbyBrowseView.handle_gamepad_navigation_input = function (self, dt)
 	local input_handled = input_function(widget, input_service)
 
 	if input_handled then
-		self.controller_cooldown = GamepadSettings.menu_cooldown
-
 		return 
 	end
+
+	self.speed_multiplier = 1
 
 	return 
 end

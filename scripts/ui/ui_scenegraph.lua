@@ -205,14 +205,16 @@ UISceneGraph.update_scenegraph = function (scenegraph, parent_scenegraph, sceneg
 
 	local hierarchical_scenegraph = scenegraph.hierarchical_scenegraph
 	local scale = RESOLUTION_LOOKUP.scale
-	local root_scale_x = UISettings.root_scale[1]
-	local root_scale_y = UISettings.root_scale[2]
+	local inverse_scale = RESOLUTION_LOOKUP.inv_scale
+	local root_scale_x = UISettings.root_scale[1]*UISettings.ui_scale/100
+	local root_scale_y = UISettings.root_scale[2]*UISettings.ui_scale/100
 
 	if UISettings.use_hud_screen_fit then
 		root_scale_x = w/(UIResolutionWidthFragments()*scale)
+	else
+		root_scale_x = UISettings.root_scale[1]
 	end
 
-	local inverse_scale = scale/1
 	local w_inverse_scale = w*inverse_scale
 	local h_inverse_scale = h*inverse_scale
 
@@ -297,11 +299,13 @@ UISceneGraph.get_size_scaled = function (scenegraph, scenegraph_object_name, opt
 			scale = scale*optional_scale
 		end
 
-		local root_scale_x = UISettings.root_scale[1]
-		local root_scale_y = UISettings.root_scale[2]
+		local root_scale_x = UISettings.root_scale[1]*UISettings.ui_scale/100
+		local root_scale_y = UISettings.root_scale[2]*UISettings.ui_scale/100
 
 		if UISettings.use_hud_screen_fit then
 			root_scale_x = w/(UIResolutionWidthFragments()*scale)
+		else
+			root_scale_x = UISettings.root_scale[1]
 		end
 
 		local size_x = size[1]
@@ -358,7 +362,7 @@ local function debug_render_scenegraph(ui_renderer, scenegraph, n_scenegraph)
 		local size = table.clone(scenegraph_object.size) or table.clone(default_size)
 
 		if scenegraph_object.scale == "fit" then
-			local inverse_scale = UIInverseResolutionScale()
+			local inverse_scale = RESOLUTION_LOOKUP.inv_scale
 			local w = RESOLUTION_LOOKUP.res_w
 			local h = RESOLUTION_LOOKUP.res_h
 			size[1] = w*inverse_scale
@@ -366,8 +370,8 @@ local function debug_render_scenegraph(ui_renderer, scenegraph, n_scenegraph)
 		end
 
 		if scenegraph_object.is_root then
-			local root_scale_x = UISettings.root_scale[1]
-			local root_scale_y = UISettings.root_scale[2]
+			local root_scale_x = UISettings.root_scale[1]*UISettings.ui_scale/100
+			local root_scale_y = UISettings.root_scale[2]*UISettings.ui_scale/100
 			local scale = RESOLUTION_LOOKUP.scale
 			local w = RESOLUTION_LOOKUP.res_w
 			local h = RESOLUTION_LOOKUP.res_h

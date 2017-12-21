@@ -2,13 +2,14 @@ require("scripts/settings/level_settings")
 require("scripts/settings/level_unlock_settings")
 require("scripts/settings/difficulty_settings")
 
+local default = UILayer.default
 local scenegraph_definition = {
 	root = {
 		is_root = true,
 		position = {
 			0,
 			0,
-			UILayer.default
+			default
 		},
 		size = {
 			1920,
@@ -32,7 +33,7 @@ local scenegraph_definition = {
 		position = {
 			0,
 			0,
-			UILayer.default - 2
+			default - 2
 		},
 		size = {
 			1920,
@@ -85,7 +86,7 @@ local scenegraph_definition = {
 		parent = "background",
 		horizontal_alignment = "right",
 		position = {
-			-50,
+			-60,
 			40,
 			1
 		},
@@ -104,7 +105,7 @@ local scenegraph_definition = {
 			2
 		},
 		size = {
-			1440,
+			1414,
 			900
 		}
 	},
@@ -113,12 +114,12 @@ local scenegraph_definition = {
 		parent = "lobby_list_frame",
 		horizontal_alignment = "center",
 		position = {
-			0,
+			10,
 			-37,
 			-1
 		},
 		size = {
-			1440,
+			1373,
 			8
 		}
 	},
@@ -126,7 +127,7 @@ local scenegraph_definition = {
 		parent = "lobby_list_frame",
 		horizontal_alignment = "left",
 		position = {
-			0,
+			30,
 			-70,
 			1
 		},
@@ -222,7 +223,7 @@ local scenegraph_definition = {
 		parent = "background",
 		horizontal_alignment = "left",
 		position = {
-			50,
+			30,
 			-70,
 			2
 		},
@@ -237,7 +238,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "left",
 		position = {
 			60,
-			-73,
+			-83,
 			1
 		},
 		size = {
@@ -249,7 +250,7 @@ local scenegraph_definition = {
 		parent = "game_mode_stepper",
 		position = {
 			-45,
-			30,
+			40,
 			1
 		},
 		size = {
@@ -289,7 +290,7 @@ local scenegraph_definition = {
 		parent = "level_stepper",
 		position = {
 			-45,
-			30,
+			40,
 			1
 		},
 		size = {
@@ -329,7 +330,7 @@ local scenegraph_definition = {
 		parent = "difficulty_stepper",
 		position = {
 			-45,
-			30,
+			40,
 			1
 		},
 		size = {
@@ -369,7 +370,7 @@ local scenegraph_definition = {
 		parent = "show_lobbies_stepper",
 		position = {
 			-45,
-			30,
+			40,
 			1
 		},
 		size = {
@@ -409,7 +410,7 @@ local scenegraph_definition = {
 		parent = "distance_stepper",
 		position = {
 			-45,
-			30,
+			40,
 			1
 		},
 		size = {
@@ -429,6 +430,76 @@ local scenegraph_definition = {
 		size = {
 			340,
 			40
+		}
+	},
+	gamepad_node_game_mode_stepper = {
+		vertical_alignment = "center",
+		parent = "game_mode_stepper",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			270,
+			67
+		}
+	},
+	gamepad_node_level_stepper = {
+		vertical_alignment = "center",
+		parent = "level_stepper",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			270,
+			67
+		}
+	},
+	gamepad_node_difficulty_stepper = {
+		vertical_alignment = "center",
+		parent = "difficulty_stepper",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			270,
+			67
+		}
+	},
+	gamepad_node_show_lobbies_stepper = {
+		vertical_alignment = "center",
+		parent = "show_lobbies_stepper",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			270,
+			67
+		}
+	},
+	gamepad_node_distance_stepper = {
+		vertical_alignment = "center",
+		parent = "distance_stepper",
+		horizontal_alignment = "center",
+		position = {
+			0,
+			0,
+			10
+		},
+		size = {
+			270,
+			67
 		}
 	},
 	reset_button = {
@@ -471,6 +542,90 @@ local scenegraph_definition = {
 		size = {
 			318,
 			84
+		}
+	},
+	gamepad_stepper_selection = {
+		vertical_alignment = "bottom",
+		parent = "filter_frame",
+		horizontal_alignment = "left",
+		position = {
+			0,
+			0,
+			1
+		},
+		size = {
+			240,
+			32
+		}
+	},
+	frame_divider = {
+		vertical_alignment = "top",
+		parent = "background",
+		horizontal_alignment = "left",
+		position = {
+			420,
+			-150,
+			2
+		},
+		size = {
+			36,
+			746
+		}
+	},
+	left_frame_glow = {
+		vertical_alignment = "center",
+		parent = "frame_divider",
+		horizontal_alignment = "center",
+		position = {
+			-72,
+			0,
+			-1
+		},
+		size = {
+			144,
+			758
+		}
+	},
+	right_frame_glow = {
+		vertical_alignment = "center",
+		parent = "frame_divider",
+		horizontal_alignment = "center",
+		position = {
+			72,
+			0,
+			-1
+		},
+		size = {
+			144,
+			758
+		}
+	},
+	reset_button_octagon = {
+		vertical_alignment = "top",
+		parent = "distance_stepper",
+		horizontal_alignment = "center",
+		position = {
+			-70,
+			-80,
+			1
+		},
+		size = {
+			64,
+			64
+		}
+	},
+	search_button_octagon = {
+		vertical_alignment = "top",
+		parent = "distance_stepper",
+		horizontal_alignment = "center",
+		position = {
+			70,
+			-80,
+			1
+		},
+		size = {
+			64,
+			64
 		}
 	}
 }
@@ -577,6 +732,12 @@ local function create_banner_text_config(scenegraph_id)
 	}
 end
 
+local lobby_list_position = {
+	489,
+	-110,
+	10
+}
+
 return {
 	status_background = UIWidgets.create_simple_texture("unlock_key_bg", "status_background"),
 	status_title = UIWidgets.create_simple_text("setting_privacy", "status_title", 32, Colors.get_table("cheeseburger")),
@@ -588,11 +749,11 @@ return {
 		0,
 		0
 	}),
-	game_mode_stepper = UIWidgets.create_lobby_browser_stepper("game_mode_stepper"),
-	level_stepper = UIWidgets.create_lobby_browser_stepper("level_stepper"),
-	difficulty_stepper = UIWidgets.create_lobby_browser_stepper("difficulty_stepper"),
-	show_lobbies_stepper = UIWidgets.create_lobby_browser_stepper("show_lobbies_stepper"),
-	distance_stepper = UIWidgets.create_lobby_browser_stepper("distance_stepper"),
+	game_mode_stepper = UIWidgets.create_lobby_browser_stepper("game_mode_stepper", "gamepad_node_game_mode_stepper"),
+	level_stepper = UIWidgets.create_lobby_browser_stepper("level_stepper", "gamepad_node_level_stepper"),
+	difficulty_stepper = UIWidgets.create_lobby_browser_stepper("difficulty_stepper", "gamepad_node_difficulty_stepper"),
+	show_lobbies_stepper = UIWidgets.create_lobby_browser_stepper("show_lobbies_stepper", "gamepad_node_show_lobbies_stepper"),
+	distance_stepper = UIWidgets.create_lobby_browser_stepper("distance_stepper", "gamepad_node_distance_stepper"),
 	search_button = UIWidgets.create_menu_button("lb_search", "search_button"),
 	back_button = UIWidgets.create_menu_button_medium("close", "back_button"),
 	join_button = UIWidgets.create_menu_button_medium("lb_join", "join_button"),
@@ -649,5 +810,34 @@ return {
 	level_banner_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", "map_level_setting", "map_level_setting_tooltip", "level_banner", "level_banner_text", create_banner_text_config("level_banner_text")),
 	difficulty_banner_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", "map_difficulty_setting", "map_difficulty_setting_tooltip", "difficulty_banner", "difficulty_banner_text", create_banner_text_config("difficulty_banner_text")),
 	show_lobbies_banner_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", "lb_show_lobbies", "lb_show_lobbies_tooltip", "show_lobbies_banner", "show_lobbies_banner_text", create_banner_text_config("show_lobbies_banner_text")),
-	distance_banner_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", "map_search_zone_setting", "map_search_zone_setting_tooltip", "distance_banner", "distance_banner_text", create_banner_text_config("distance_banner_text"))
+	distance_banner_widget = UIWidgets.create_texture_with_text_and_tooltip("title_bar", "map_search_zone_setting", "map_search_zone_setting_tooltip", "distance_banner", "distance_banner_text", create_banner_text_config("distance_banner_text")),
+	lobby_list_position = lobby_list_position,
+	gamepad_stepper_selection = UIWidgets.create_gamepad_selection("gamepad_stepper_selection", nil, nil, {
+		70,
+		70
+	}),
+	frame_divider = {
+		scenegraph_id = "frame_divider",
+		element = UIElements.SimpleTexture,
+		content = {
+			texture_id = "options_menu_divider"
+		},
+		style = {}
+	},
+	left_frame_glow = UIWidgets.create_simple_texture("options_menu_divider_glow_01", "left_frame_glow"),
+	right_frame_glow = UIWidgets.create_simple_texture("options_menu_divider_glow_02", "right_frame_glow"),
+	reset_button_octagon = UIWidgets.create_octagon_button({
+		"map_icon_reset_01",
+		"map_icon_reset_02"
+	}, {
+		"lb_reset_filters",
+		"lb_reset_filters"
+	}, "reset_button_octagon"),
+	search_button_octagon = UIWidgets.create_octagon_button({
+		"map_icon_search_01",
+		"map_icon_search_02"
+	}, {
+		"lb_search",
+		"lb_search"
+	}, "search_button_octagon")
 }

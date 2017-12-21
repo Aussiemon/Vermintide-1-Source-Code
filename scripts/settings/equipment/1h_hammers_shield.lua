@@ -681,6 +681,18 @@ weapon_template.actions = {
 					sub_action = "push",
 					start_time = 0.3,
 					action = "action_one",
+					doubleclick_window = 0,
+					input = "action_one",
+					hold_required = {
+						"action_two_hold"
+					}
+				},
+				{
+					sub_action = "default",
+					start_time = 0.3,
+					action = "action_one",
+					release_required = "action_two_hold",
+					doubleclick_window = 0,
 					input = "action_one"
 				},
 				{

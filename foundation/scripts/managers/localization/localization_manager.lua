@@ -9,6 +9,7 @@ LocalizationManager.init = function (self, path)
 	self._localizer = Localizer(path)
 	self._macros = {}
 	self._find_macro_callback_to_self = callback(self._find_macro, self)
+	self._lorebook_localizer = Localizer("localization/lorebook")
 
 	return 
 end
@@ -17,14 +18,15 @@ LocalizationManager.add_macro = function (self, macro, callback_function)
 
 	return 
 end
-LocalizationManager.lookup = function (self, text_id)
+LocalizationManager.lookup = function (self, text_id, use_lorebook_localizer)
 	if script_data.show_longest_localizations then
 		return localize_longest(text_id)
 	end
 
 	assert(self._localizer, "LocalizationManager not initialized")
 
-	local str = Localizer.lookup(self._localizer, text_id) or "<" .. tostring(text_id) .. ">"
+	local localizer = (use_lorebook_localizer and self._lorebook_localizer) or self._localizer
+	local str = Localizer.lookup(localizer, text_id) or "<" .. tostring(text_id) .. ">"
 
 	return self.apply_macro(self, str)
 end
@@ -53,6 +55,10 @@ end
 
 function Localize(text_id)
 	return Managers.localizer:lookup(text_id)
+end
+
+function LocalizeLorebook(text_id)
+	return Managers.localizer:lookup(text_id, true)
 end
 
 local locales = {
@@ -169,7 +175,7 @@ end
 
 LocalizationManager.get_input_action = function (self, text_id)
 	local str = Localizer.lookup(self._localizer, text_id) or "<" .. tostring(text_id) .. ">"
-	local macro = string.match(str, "%b$;[%a_\u200b]*:")
+	local macro = string.match(str, "%b$;[%a%d_\u200b]*:")
 	local input_action = nil
 
 	if macro then
@@ -183,7 +189,7 @@ LocalizationManager.get_input_action = function (self, text_id)
 end
 LocalizationManager.replace_macro_in_string = function (self, text_id, replacement_str)
 	local str = Localizer.lookup(self._localizer, text_id) or "<" .. tostring(text_id) .. ">"
-	local result, \u200b_ = string.gsub(str, "%b$;[%a_\u200b]*:", replacement_str)
+	local result, \u200b_ = string.gsub(str, "%b$;[%a%d_\u200b]*:", replacement_str)
 
 	return result, str, Localize(text_id)
 end

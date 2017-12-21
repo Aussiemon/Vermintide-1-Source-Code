@@ -228,8 +228,8 @@ weapon_template.crosshair_style = "default"
 weapon_template.no_ammo_reload_event = "reload"
 weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.default_projectile_action = weapon_template.actions.action_one.default
-weapon_template.dodge_distance = 1.3
-weapon_template.dodge_speed = 1.3
+weapon_template.dodge_distance = 1.25
+weapon_template.dodge_speed = 1.25
 weapon_template.dodge_count = 100
 weapon_template.wwise_dep_left_hand = {
 	"wwise/bow"
