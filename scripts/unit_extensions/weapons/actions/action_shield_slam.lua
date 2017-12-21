@@ -29,8 +29,9 @@ end
 ActionShieldSlam.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.target_breed_unit = nil
+	local owner_unit = self.owner_unit
 
-	if not Managers.player:owner(self.owner_unit).bot_player then
+	if not Managers.player:owner(owner_unit).bot_player then
 		Managers.state.controller_features:add_effect("rumble", {
 			rumble_effect = "light_swing"
 		})
@@ -42,7 +43,7 @@ ActionShieldSlam.client_owner_start_action = function (self, new_action, t)
 		ammo_extension.abort_reload(ammo_extension)
 	end
 
-	local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
+	local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 	local physics_world = World.get_data(self.world, "physics_world")
 	local pos = first_person_extension.current_position(first_person_extension)
 	local rot = first_person_extension.current_rotation(first_person_extension)
@@ -60,7 +61,8 @@ ActionShieldSlam.client_owner_start_action = function (self, new_action, t)
 	end
 
 	self.state = "waiting_to_hit"
-	self.time_to_hit = t + new_action.hit_time or 0
+	local attack_speed_modifier = ActionUtils.apply_attack_speed_buff(1, owner_unit)
+	self.time_to_hit = t + (new_action.hit_time or 0)/attack_speed_modifier
 
 	table.clear(self.hit_units)
 

@@ -282,43 +282,6 @@ StateInGameRunning.wanted_transition = function (self)
 		return 
 	end
 
-	local invite_transition = nil
-	local invite_data = Managers.invite:get_invited_lobby_data()
-
-	if invite_data then
-		local platform = Application.platform()
-		local lobby_id = invite_data.id or invite_data.name
-		local current_lobby_id = nil
-
-		if platform == "xb1" then
-			current_lobby_id = (self._lobby_host and self._lobby_host.lobby._data.session_name) or self._lobby_client.lobby._data.session_name
-		else
-			current_lobby_id = (self._lobby_host and self._lobby_host:id()) or self._lobby_client:id()
-		end
-
-		local current_level = self.level_transition_handler.level_key
-
-		if Managers.matchmaking:is_game_matchmaking() and self.network_server and current_level == "inn_level" then
-			mm_printf("Found an invite, but was matchmaking.")
-
-			self.popup_id = Managers.popup:queue_popup(Localize("popup_join_while_matchmaking"), Localize("popup_error_topic"), "ok", Localize("button_ok"))
-		elseif lobby_id == current_lobby_id then
-			mm_printf("Found an invite, but was already in lobby.")
-
-			self.popup_id = Managers.popup:queue_popup(Localize("popup_already_in_same_lobby"), Localize("popup_error_topic"), "ok", Localize("button_ok"))
-		elseif not Managers.play_go:installed() then
-			mm_printf("Found an invite, but game was not fully installed.")
-
-			self.popup_id = Managers.popup:queue_popup(Localize("popup_invite_not_installed"), Localize("popup_invite_not_installed_header"), "not_installed", Localize("menu_ok"))
-		elseif self.network_server and not self.network_server:are_all_peers_ingame() then
-			mm_printf("Found an invite, but someone is trying to join the game.")
-
-			self.popup_id = Managers.popup:queue_popup(Localize("popup_join_blocked_by_joining_player"), Localize("popup_invite_not_installed_header"), "not_installed", Localize("menu_ok"))
-		else
-			invite_transition = "join_lobby"
-		end
-	end
-
 	if self.network_server and not self.network_server:are_all_peers_ingame() then
 		return 
 	end
@@ -327,11 +290,12 @@ StateInGameRunning.wanted_transition = function (self)
 
 	if wanted_transition then
 		mm_printf("Doing transition %s from UI", wanted_transition)
-	elseif invite_transition then
+	elseif self._invite_lobby_data then
 		mm_printf("Found an invite, joining that lobby.")
 
-		wanted_transition = invite_transition
-		data = invite_data
+		wanted_transition = "join_lobby"
+		data = self._invite_lobby_data
+		self._invite_lobby_data = nil
 	end
 
 	if not wanted_transition then
@@ -673,7 +637,9 @@ StateInGameRunning._update_invites = function (self, dt, t)
 			self.popup_id = Managers.popup:queue_popup(Localize("popup_join_blocked_by_joining_player"), Localize("popup_invite_not_installed_header"), "not_installed", Localize("menu_ok"))
 		end
 
-		if not self.popup_id then
+		if self._lobby_client or not self.is_in_inn then
+			self._invite_lobby_data = invite_data
+		elseif not self.popup_id then
 			Managers.matchmaking:request_join_lobby(invite_data, {
 				friend_join = true
 			})

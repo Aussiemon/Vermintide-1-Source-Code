@@ -52,7 +52,15 @@ BTMeleeSlamAction.init_attack = function (self, unit, blackboard, action, t)
 
 	Managers.state.network:anim_event(unit, randomize(attack_anim or action.attack_anim))
 
-	blackboard.attacking_target = blackboard.target_unit
+	local target = blackboard.target_unit
+	blackboard.attacking_target = target
+	local self_pos = POSITION_LOOKUP[unit]
+	local fwd = Vector3.normalize(POSITION_LOOKUP[target] - self_pos)
+	local pos, rotation, size = self._calculate_collision(self, action, self_pos, fwd)
+	size.x = size.x*1.2
+	size.z = size.z*1.2
+
+	Managers.state.entity:system("ai_bot_group_system"):aoe_threat_created(pos, "cylinder", size, nil, action.bot_threat_duration)
 
 	return 
 end
@@ -75,20 +83,25 @@ BTMeleeSlamAction.leave = function (self, unit, blackboard, t)
 	return 
 end
 local temp_hit_units = {}
+BTMeleeSlamAction._calculate_collision = function (self, action, self_pos, forward_direction)
+	local height = action.height
+	local pos = self_pos + forward_direction*action.forward_offset + Vector3(0, 0, height*0.5)
+	local radius = action.radius
+	local size = Vector3(action.radius, height, action.radius)
+	local rotation = Quaternion.look(Vector3.up(), Vector3.up())
+
+	return pos, rotation, size
+end
 BTMeleeSlamAction.anim_cb_ratogre_slam = function (self, unit, blackboard)
 	local world = blackboard.world
 	local physics_world = World.get_data(world, "physics_world")
 	local action = blackboard.action
 	local unit_forward = Quaternion.forward(Unit.local_rotation(unit, 0))
 	local self_pos = POSITION_LOOKUP[unit]
-	local height = action.height
-	local pos = self_pos + unit_forward*action.forward_offset + Vector3(0, 0, height*0.5)
-	local radius = action.radius
-	local size = Vector3(action.radius, height, action.radius)
-	local rotation = Quaternion.look(Vector3.up(), Vector3.up())
+	local pos, rotation, size = self._calculate_collision(self, action, self_pos, unit_forward)
 
 	table.clear(temp_hit_units)
-	PhysicsWorld.prepare_actors_for_overlap(physics_world, pos, math.max(action.radius, height))
+	PhysicsWorld.prepare_actors_for_overlap(physics_world, pos, math.max(action.radius, action.height))
 
 	local hit_actors, num_actors = PhysicsWorld.immediate_overlap(physics_world, "shape", "capsule", "position", pos, "rotation", rotation, "size", size, "types", "both", "collision_filter", "filter_rat_ogre_melee_slam", "use_global_table")
 

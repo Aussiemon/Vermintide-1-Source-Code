@@ -26,19 +26,20 @@ end
 ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.has_played_rumble_effect = false
+	local owner_unit = self.owner_unit
 
 	for k, v in pairs(self.hit_units) do
 		self.hit_units[k] = nil
 	end
 
-	if not Managers.player:owner(self.owner_unit).bot_player then
+	if not Managers.player:owner(owner_unit).bot_player then
 		Managers.state.controller_features:add_effect("rumble", {
 			rumble_effect = "light_swing"
 		})
 	end
 
 	local status_extension = self._status_extension
-	self.owner_buff_extension = ScriptUnit.extension(self.owner_unit, "buff_system")
+	self.owner_buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 	local _, procced = self.owner_buff_extension:apply_buffs_to_value(0, StatBuffIndex.NO_PUSH_FATIGUE_COST)
 
 	if not procced then
@@ -52,6 +53,16 @@ ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 	end
 
 	self.block_end_time = t + 0.5
+
+	if not LEVEL_EDITOR_TEST then
+		local go_id = Managers.state.unit_storage:go_id(owner_unit)
+
+		if self.is_server then
+			Managers.state.network.network_transmit:send_rpc_clients("rpc_set_blocking", go_id, true)
+		else
+			Managers.state.network.network_transmit:send_rpc_server("rpc_set_blocking", go_id, true)
+		end
+	end
 
 	status_extension.set_blocking(status_extension, true)
 
@@ -84,6 +95,16 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 	local owner_unit = self.owner_unit
 
 	if self.block_end_time and self.block_end_time < t then
+		if not LEVEL_EDITOR_TEST then
+			local go_id = Managers.state.unit_storage:go_id(owner_unit)
+
+			if self.is_server then
+				Managers.state.network.network_transmit:send_rpc_clients("rpc_set_blocking", go_id, false)
+			else
+				Managers.state.network.network_transmit:send_rpc_server("rpc_set_blocking", go_id, false)
+			end
+		end
+
 		local status_extension = self._status_extension
 
 		status_extension.set_blocking(status_extension, false)
@@ -141,7 +162,7 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 					local hit_effect = current_action.impact_particle_effect or "fx/impact_block_push"
 
 					if hit_effect then
-						EffectHelper.player_melee_hit_particles(world, hit_effect, hit_position, attack_direction, nil, hit_unit)
+						EffectHelper.player_melee_hit_particles(world, hit_effect, hit_position, attack_direction, hit_unit)
 					end
 
 					local sound_event = current_action.stagger_impact_sound_event or "blunt_hit"
@@ -149,19 +170,17 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 					if sound_event then
 						local sound_type = attack_template.sound_type or "stun_heavy"
 						local husk = Managers.player:owner(owner_unit).bot_player
-						local breed_name = breed.name
 
-						EffectHelper.play_melee_hit_effects(sound_event, world, hit_position, sound_type, husk, breed_name)
+						EffectHelper.play_melee_hit_effects(sound_event, world, hit_position, sound_type, husk, hit_unit)
 
 						local sound_event_id = NetworkLookup.sound_events[sound_event]
 						local sound_type_id = NetworkLookup.melee_impact_sound_types[sound_type]
-						local breed_name_id = NetworkLookup.breeds[breed_name]
 						hit_position = Vector3(math.clamp(hit_position.x, -600, 600), math.clamp(hit_position.y, -600, 600), math.clamp(hit_position.z, -600, 600))
 
 						if self.is_server then
-							network_manager.network_transmit:send_rpc_clients("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, breed_name_id)
+							network_manager.network_transmit:send_rpc_clients("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, hit_unit_id)
 						else
-							network_manager.network_transmit:send_rpc_server("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, breed_name_id)
+							network_manager.network_transmit:send_rpc_server("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, hit_unit_id)
 						end
 					else
 						Application.warning("[ActionSweep] Missing sound event for push action in unit %q.", self.weapon_unit)
@@ -213,6 +232,18 @@ ActionPushStagger.finish = function (self, reason)
 		local play_reload_animation = true
 
 		ammo_extension.start_reload(ammo_extension, play_reload_animation)
+	end
+
+	local owner_unit = self.owner_unit
+
+	if not LEVEL_EDITOR_TEST then
+		local go_id = Managers.state.unit_storage:go_id(owner_unit)
+
+		if self.is_server then
+			Managers.state.network.network_transmit:send_rpc_clients("rpc_set_blocking", go_id, false)
+		else
+			Managers.state.network.network_transmit:send_rpc_server("rpc_set_blocking", go_id, false)
+		end
 	end
 
 	local status_extension = self._status_extension

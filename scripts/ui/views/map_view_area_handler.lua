@@ -97,9 +97,11 @@ MapViewAreaHandler._create_ui_elements = function (self)
 	}
 	local area_widgets = {}
 
-	for area_key, settings in pairs(AreaSettings) do
-		if area_key ~= "world" then
-			area_widgets[area_key] = create_area_widget(area_key)
+	if Application.platform() ~= "ps4" then
+		for area_key, settings in pairs(AreaSettings) do
+			if area_key ~= "world" then
+				area_widgets[area_key] = create_area_widget(area_key)
+			end
 		end
 	end
 

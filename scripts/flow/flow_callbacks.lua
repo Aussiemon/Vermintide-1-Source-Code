@@ -1794,6 +1794,27 @@ function flow_callback_trigger_cutscene_subtitles(params)
 	return 
 end
 
+function flow_callback_add_memory_time(params)
+	local memory = params.memory
+	local name = params.name
+	local unit = params.unit
+	local addition = params.addition
+
+	DialogueSystem:AddMemoryTime(memory, name, unit, addition)
+
+	return 
+end
+
+function flow_callback_reset_memory_time(params)
+	local memory = params.memory
+	local name = params.name
+	local unit = params.unit
+
+	DialogueSystem:ResetMemoryTime(memory, name, unit)
+
+	return 
+end
+
 function flow_callback_damage_unit(params)
 	if not Managers.player.is_server then
 		return 
@@ -2169,6 +2190,28 @@ function flow_callback_enter_post_game(params)
 	if network_server then
 		network_server.enter_post_game(network_server)
 		print("flow_callback_enter_post_game")
+	end
+
+	return 
+end
+
+function flow_callback_level_unit_play_networked_animation_event(params)
+	local unit = params.unit
+	local event = params.event
+	local animation_extension = ScriptUnit.extension(unit, "animation_system")
+
+	animation_extension.play_animation_event(animation_extension, event)
+
+	return 
+end
+
+function flow_callback_pub_brawl_enter_inn(params)
+	local game_mode_manager = Managers.state.game_mode
+
+	if game_mode_manager.pvp_enabled(game_mode_manager) then
+		local world = Application.flow_callback_context_world()
+
+		LevelHelper:flow_event(world, "pub_brawl_fetch_new_beer")
 	end
 
 	return 

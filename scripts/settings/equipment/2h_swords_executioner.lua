@@ -947,11 +947,11 @@ weapon_template.increment_stat_on_headshot_kill = "executor_headshot"
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,
-		arc = 0
+		arc = 2
 	},
 	hold_attack = {
 		penetrating = true,
-		arc = 1
+		arc = 0
 	}
 }
 weapon_template.aim_assist_settings = {

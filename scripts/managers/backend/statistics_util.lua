@@ -71,7 +71,15 @@ StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db
 				elseif slot_type == "ranged" then
 					statistics_db.increment_stat(statistics_db, stats_id, "kills_ranged")
 				elseif slot_type == "grenade" then
-					statistics_db.increment_stat(statistics_db, stats_id, "kills_grenade")
+					if is_server then
+						local stat = "kills_grenade"
+
+						statistics_db.increment_stat(statistics_db, stats_id, stat)
+
+						if attacker_player.remote then
+							RPC.rpc_increment_stat(attacker_player.network_id(attacker_player), NetworkLookup.statistics[stat])
+						end
+					end
 
 					grenade_kill = true
 				end
@@ -93,8 +101,14 @@ StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db
 
 				statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_per_breed", breed_name)
 
-				if grenade_kill then
-					statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_grenade")
+				if grenade_kill and is_server then
+					local stat = "kill_assists_grenade"
+
+					statistics_db.increment_stat(statistics_db, stats_id, stat)
+
+					if player.remote then
+						RPC.rpc_increment_stat(player.network_id(player), NetworkLookup.statistics[stat])
+					end
 				end
 			end
 		end

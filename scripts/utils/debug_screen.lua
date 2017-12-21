@@ -257,6 +257,8 @@ DebugScreen.update = function (dt, t, input_service, input_manager)
 	local gui = DebugScreen.gui
 	local time_scale = GLOBAL_TIME_SCALE
 	dt = dt/GLOBAL_TIME_SCALE
+	DebugScreen.time = (DebugScreen.time or 0) + dt
+	local t = DebugScreen.time
 	local DebugScreen = DebugScreen
 	local script_data = script_data
 	local opened_this_frame = false
@@ -350,10 +352,10 @@ DebugScreen.update = function (dt, t, input_service, input_manager)
 
 	if input_service.get(input_service, "up_key") and DebugScreen.hold_to_move_timer < t then
 		if DebugScreen.is_holding then
-			DebugScreen.hold_to_move_timer = t + GLOBAL_TIME_SCALE*0.1*accelerate_factor
+			DebugScreen.hold_to_move_timer = t + accelerate_factor*0.1
 			accelerate_factor = accelerate_factor*0.95
 		else
-			DebugScreen.hold_to_move_timer = t + GLOBAL_TIME_SCALE*0.1
+			DebugScreen.hold_to_move_timer = t + 0.1
 			DebugScreen.is_holding = true
 			accelerate_factor = 1
 		end
@@ -400,10 +402,10 @@ DebugScreen.update = function (dt, t, input_service, input_manager)
 
 	if input_service.get(input_service, "down_key") and DebugScreen.hold_to_move_timer < t then
 		if DebugScreen.is_holding then
-			DebugScreen.hold_to_move_timer = t + GLOBAL_TIME_SCALE*0.1*accelerate_factor
+			DebugScreen.hold_to_move_timer = t + accelerate_factor*0.1
 			accelerate_factor = accelerate_factor*0.95
 		else
-			DebugScreen.hold_to_move_timer = t + GLOBAL_TIME_SCALE*0.1
+			DebugScreen.hold_to_move_timer = t + 0.1
 			DebugScreen.is_holding = true
 			accelerate_factor = 1
 		end
@@ -518,7 +520,7 @@ DebugScreen.update = function (dt, t, input_service, input_manager)
 	Gui.rect(gui, Vector3(0, 0, 800), Vector2(offset_x, res_y), Color(offset_lerp*220, 25, 50, 25))
 	Gui.rect(gui, Vector3(0, res_y - scrollbar_pos - scrollbar_size, 900), Vector2(3, scrollbar_size), Color(offset_lerp*150, 200, 200, 25))
 
-	local hot_anim_t = (math.sin(t/GLOBAL_TIME_SCALE*10) + 1)*0.5
+	local hot_anim_t = (math.sin(t*10) + 1)*0.5
 	local white = Color(offset_lerp*250, 255, 255, 255)
 	local text_color = Color(offset_lerp*250, 120, 120, 0)
 	local text_color_overridden = Color(offset_lerp*255, 200, 200, 0)
@@ -914,7 +916,7 @@ DebugScreen.update_search = function (input_manager, input_service, gui, t, dt)
 		end
 	end
 
-	local hot_anim_t = (math.sin(t/GLOBAL_TIME_SCALE*10) + 1)*0.5
+	local hot_anim_t = (math.sin(t*10) + 1)*0.5
 	local res_x = RESOLUTION_LOOKUP.res_w
 	local res_y = RESOLUTION_LOOKUP.res_h
 	local search_title_box_pos = Vector3(50, res_y - 60, 950)

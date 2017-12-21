@@ -90,7 +90,7 @@ weapon_template.actions = {
 					sub_action = "default",
 					start_time = 0.7,
 					action = "action_one",
-					release_required = "action_one_hold",
+					release_required = "action_two_hold",
 					input = "action_one"
 				},
 				{

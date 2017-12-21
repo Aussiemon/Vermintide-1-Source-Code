@@ -1,4 +1,5 @@
 DialogueSettings = DialogueSettings or {}
+DialogueSettings.markers_enabled = false
 DialogueSettings.auto_load_files = {
 	"dialogues/generated/witch_hunter",
 	"dialogues/generated/bright_wizard",
@@ -127,6 +128,24 @@ DialogueSettings.level_specific_load_files = {
 		"dialogues/generated/wood_elf_stromdorf_hill",
 		"dialogues/generated/dwarf_ranger_stromdorf_hill",
 		"dialogues/generated/hero_conversations_stromdorf"
+	},
+	chamber = {
+		"dialogues/generated/bright_wizard_chamber",
+		"dialogues/generated/empire_soldier_chamber",
+		"dialogues/generated/dwarf_ranger_chamber",
+		"dialogues/generated/witch_hunter_chamber",
+		"dialogues/generated/wood_elf_chamber",
+		"dialogues/generated/dwarf_ranger_chamber",
+		"dialogues/generated/grey_seer_chamber"
+	},
+	whitebox_climb = {
+		"dialogues/generated/bright_wizard_chamber",
+		"dialogues/generated/empire_soldier_chamber",
+		"dialogues/generated/dwarf_ranger_chamber",
+		"dialogues/generated/witch_hunter_chamber",
+		"dialogues/generated/wood_elf_chamber",
+		"dialogues/generated/dwarf_ranger_chamber",
+		"dialogues/generated/grey_seer_chamber"
 	}
 }
 

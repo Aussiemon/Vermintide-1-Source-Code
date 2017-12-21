@@ -130,6 +130,11 @@ weapon_template.buff_type = BuffTypes.RANGED
 weapon_template.dodge_distance = 1
 weapon_template.dodge_speed = 1
 weapon_template.dodge_count = 3
+weapon_template.attack_meta_data = {
+	max_range = 30,
+	aim_at_node = "j_spine",
+	ignore_enemies_for_obstruction = true
+}
 weapon_template.wwise_dep_right_hand = {
 	"wwise/blunderbuss"
 }

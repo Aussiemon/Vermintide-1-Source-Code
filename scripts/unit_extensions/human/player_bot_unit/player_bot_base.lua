@@ -16,6 +16,7 @@ local ALLY_PATH_FAILED_REPATH_THRESHOLD = 0.25
 local FLAT_MOVE_TO_EPSILON = 0.05
 local Z_MOVE_TO_EPSILON = 0.3
 local WANTS_TO_HEAL_THRESHOLD = 0.25
+local WANTS_TO_GIVE_HEAL_TO_OTHER = 0.5
 local SELF_UNIT = nil
 
 function dprint(...)
@@ -82,6 +83,22 @@ PlayerBotBase.init = function (self, extension_init_context, unit, extension_ini
 	self._update_broadphase = -math.huge
 	self._attempted_enemy_paths = {}
 	self._attempted_ally_paths = {}
+	self._last_health_pickup_attempt = {
+		blacklist = false,
+		distance = 0,
+		index = 1,
+		path_failed = false,
+		rotation = QuaternionBox(),
+		path_position = Vector3Box()
+	}
+	self._last_mule_pickup_attempt = {
+		blacklist = false,
+		distance = 0,
+		index = 1,
+		path_failed = false,
+		rotation = QuaternionBox(),
+		path_position = Vector3Box()
+	}
 
 	return 
 end
@@ -116,11 +133,14 @@ PlayerBotBase.extensions_ready = function (self, world, unit)
 	local health_ext = ScriptUnit.extension(unit, "health_system")
 	local ai_bot_group_ext = ScriptUnit.extension(unit, "ai_bot_group_system")
 	local ai_system_ext = ScriptUnit.extension(unit, "ai_system")
+	local locomotion_ext = ScriptUnit.extension(unit, "locomotion_system")
 	self._health_extension = health_ext
 	self._status_extension = status_ext
+	self._locomotion_extension = locomotion_ext
 	blackboard.input_extension = input_ext
 	blackboard.inventory_extension = inventory_ext
 	blackboard.navigation_extension = nav_ext
+	blackboard.locomotion_extension = locomotion_ext
 	blackboard.first_person_extension = first_person_ext
 	blackboard.status_extension = status_ext
 	blackboard.interaction_extension = interaction_ext
@@ -166,7 +186,7 @@ PlayerBotBase.update = function (self, unit, input, dt, context, t)
 	local is_alive = health_extension.is_alive(health_extension)
 	local is_ready_for_assisted_respawn = status_extension.is_ready_for_assisted_respawn(status_extension)
 
-	if is_alive and not is_ready_for_assisted_respawn then
+	if is_alive and not is_ready_for_assisted_respawn and not self._locomotion_extension:get_moving_platform() then
 		SELF_UNIT = unit
 
 		Profiler.start("update blackboard")
@@ -374,18 +394,20 @@ PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 end
 local PROXIMITY_UP_DOWN_THRESHOLD = math.sin(math.pi*0.25)
 PlayerBotBase._target_valid = function (self, unit, enemy_offset)
-	if ScriptUnit.has_extension(unit, "ai_group_system") then
-		local blackboard = Unit.get_data(unit, "blackboard")
+	local blackboard = Unit.get_data(unit, "blackboard")
 
-		if not blackboard.target_unit then
-			return false
-		end
+	if not blackboard or blackboard.breed.not_bot_target then
+		return false
+	end
 
-		local up_dot_product = Vector3.dot(Vector3.up(), Vector3.normalize(enemy_offset))
+	if ScriptUnit.has_extension(unit, "ai_group_system") and not blackboard.target_unit then
+		return false
+	end
 
-		if PROXIMITY_UP_DOWN_THRESHOLD < up_dot_product or up_dot_product < -PROXIMITY_UP_DOWN_THRESHOLD then
-			return false
-		end
+	local up_dot_product = Vector3.dot(Vector3.up(), Vector3.normalize(enemy_offset))
+
+	if PROXIMITY_UP_DOWN_THRESHOLD < up_dot_product or up_dot_product < -PROXIMITY_UP_DOWN_THRESHOLD then
+		return false
 	end
 
 	return true
@@ -485,7 +507,7 @@ PlayerBotBase._alter_target_position = function (self, nav_world, self_position,
 		local rotation = Unit.local_rotation(unit, 0)
 		local forward_vector_flat = Vector3.normalize(Vector3.flat(Quaternion.forward(rotation)))
 		wanted_position = target_position - forward_vector_flat*0.5
-	elseif reason == "in_need_of_heal" then
+	elseif reason == "in_need_of_heal" or reason == "can_accept_grenade" or reason == "can_accept_potion" then
 		wanted_position = target_position + Vector3.normalize(self_position - target_position)
 	elseif reason == "knocked_down" and self._blackboard.aggressive_mode then
 		wanted_position = target_position + Vector3.normalize(self_position - target_position)
@@ -580,35 +602,76 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 	local closest_in_need_type = nil
 	local inventory_ext = blackboard.inventory_extension
 	local health_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
-	local can_heal_other = health_slot_data and inventory_ext.get_item_template(inventory_ext, health_slot_data).can_heal_other
+	local can_heal_other = false
+	local can_give_healing_to_other = false
+
+	if health_slot_data then
+		local template = inventory_ext.get_item_template(inventory_ext, health_slot_data)
+		can_heal_other = template.can_heal_other
+		can_give_healing_to_other = template.can_give_other
+	end
+
+	local can_give_grenade_to_other = false
+	local grenade_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_grenade")
+
+	if grenade_slot_data then
+		local template = inventory_ext.get_item_template(inventory_ext, grenade_slot_data)
+		can_give_grenade_to_other = template.can_give_other
+	end
+
+	local can_give_potion_to_other = false
+	local potion_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_potion")
+
+	if potion_slot_data then
+		local template = inventory_ext.get_item_template(inventory_ext, potion_slot_data)
+		can_give_potion_to_other = template.can_give_other
+	end
+
 	local players = Managers.player:players()
 
 	for k, player in pairs(players) do
 		local player_unit = player.player_unit
+		local is_bot = player.bot_player
 
 		if AiUtils.unit_alive(player_unit) and player_unit ~= unit then
 			local status_ext = ScriptUnit.extension(player_unit, "status_system")
+			local utility = 0
 
 			if not status_ext.is_ready_for_assisted_respawn(status_ext) then
 				local in_need_type = nil
 
 				if status_ext.is_knocked_down(status_ext) then
 					in_need_type = "knocked_down"
+					utility = 40
 				elseif status_ext.get_is_ledge_hanging(status_ext) and not status_ext.is_pulled_up(status_ext) then
 					in_need_type = "ledge"
+					utility = 40
 				elseif status_ext.is_hanging_from_hook(status_ext) then
 					in_need_type = "hook"
-				elseif can_heal_other then
+					utility = 40
+				else
 					local health_percent = ScriptUnit.extension(player_unit, "health_system"):current_health_percent()
+					local inventory_ext = ScriptUnit.extension(player_unit, "inventory_system")
+					local is_wounded = status_ext.is_wounded(status_ext)
 
-					if health_percent < WANTS_TO_HEAL_THRESHOLD or status_ext.is_wounded(status_ext) then
+					if can_heal_other and (health_percent < WANTS_TO_HEAL_THRESHOLD or is_wounded) then
 						in_need_type = "in_need_of_heal"
-					else
-						in_need_type = nil
+						local health_utility = ((is_wounded and health_percent*0.33) or health_percent) - 1
+						utility = health_utility*15 + 10
+					elseif can_give_healing_to_other and (health_percent < WANTS_TO_GIVE_HEAL_TO_OTHER or is_wounded) and not inventory_ext.get_slot_data(inventory_ext, "slot_healthkit") then
+						in_need_type = "can_accept_heal_item"
+						local health_utility = ((is_wounded and health_percent - 0.5) or health_percent) - 1
+						utility = health_utility*10 + 10
+					elseif can_give_grenade_to_other and not inventory_ext.get_slot_data(inventory_ext, "slot_grenade") and not is_bot then
+						in_need_type = "can_accept_grenade"
+						utility = 10
+					elseif can_give_potion_to_other and not inventory_ext.get_slot_data(inventory_ext, "slot_potion") and not is_bot then
+						in_need_type = "can_accept_potion"
+						utility = 10
 					end
 				end
 
-				if in_need_type or not player.bot_player then
+				if in_need_type or not is_bot then
 					local target_pos = POSITION_LOOKUP[player_unit]
 					local allowed_follow_path, allowed_aid_path = self._ally_path_allowed(self, player_unit, t)
 
@@ -630,9 +693,9 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 							end
 						end
 
-						if in_need_type or not player.bot_player then
+						if in_need_type or not is_bot then
 							local real_dist = Vector3.distance(self_pos, target_pos)
-							local dist = real_dist - ((in_need_type == "in_need_of_heal" and 10) or (in_need_type and 30) or 0)
+							local dist = real_dist - utility
 
 							if dist < closest_dist then
 								closest_dist = dist
@@ -907,7 +970,7 @@ PlayerBotBase.cb_cover_point_path_result = function (self, hash, success, destin
 		cover_bb.failed_cover_points[hash] = true
 
 		table.clear(cover_bb.active_threats)
-		print("failed cover point", destination)
+		dprint("failed cover point", destination)
 	end
 
 	return 
@@ -1066,20 +1129,26 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 				target_position = func(nav_world, unit, target_ally_unit)
 
 				dprint("path to goal")
-			elseif alive(blackboard.health_pickup) and blackboard.allowed_to_take_health_pickup and t < blackboard.health_pickup_valid_until then
-				local health_position = POSITION_LOOKUP[blackboard.health_pickup]
-				local dir = Vector3.normalize(self_pos - health_position)
-				local above = 0.5
-				local below = 1.5
-				local lateral = 1
-				local distance = 0
-				target_position = self._find_position_on_navmesh(self, nav_world, health_position, health_position + dir, above, below, INTERACT_RAY_DISTANCE - 0.3, distance)
+			elseif alive(blackboard.health_pickup) and blackboard.allowed_to_take_health_pickup and t < blackboard.health_pickup_valid_until and (self._last_health_pickup_attempt.unit ~= blackboard.health_pickup or not self._last_health_pickup_attempt.blacklist) then
+				local pickup_unit = blackboard.health_pickup
+				target_position = self._find_pickup_position_on_navmesh(self, nav_world, self_pos, pickup_unit, self._last_health_pickup_attempt)
 
 				if target_position then
-					blackboard.interaction_unit = blackboard.health_pickup
+					path_callback = callback(self, "cb_health_pickup_path_result", pickup_unit)
+					blackboard.interaction_unit = pickup_unit
 				end
 
 				dprint("path to health pickup")
+			elseif alive(blackboard.mule_pickup) and (self._last_mule_pickup_attempt.unit ~= blackboard.mule_pickup or not self._last_mule_pickup_attempt.blacklist) then
+				local pickup_unit = blackboard.mule_pickup
+				target_position = self._find_pickup_position_on_navmesh(self, nav_world, self_pos, pickup_unit, self._last_mule_pickup_attempt)
+
+				if target_position then
+					path_callback = callback(self, "cb_mule_pickup_path_result", pickup_unit)
+					blackboard.interaction_unit = pickup_unit
+				end
+
+				dprint("path to mule pickup")
 			end
 
 			if not target_position and alive(blackboard.ammo_pickup) and blackboard.needs_ammo and t < blackboard.ammo_pickup_valid_until then
@@ -1135,6 +1204,93 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 
 			blackboard.using_navigation_destination_override = false
 		end
+	end
+
+	return 
+end
+local PICKUP_ROTATIONS = {
+	QuaternionBox(Quaternion(Vector3.up(), 0)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi*0.25)),
+	QuaternionBox(Quaternion(Vector3.up(), -math.pi*0.25)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi*0.5)),
+	QuaternionBox(Quaternion(Vector3.up(), -math.pi*0.5)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi*0.75)),
+	QuaternionBox(Quaternion(Vector3.up(), -math.pi*0.75)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi))
+}
+PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self_pos, pickup_unit, pickup_attempt)
+	local above = 1.5
+	local below = 2.2
+	local STEP = 0.1
+	local range = INTERACT_RAY_DISTANCE - 0.3
+	local max_index = #PICKUP_ROTATIONS
+	local pickup_pos = POSITION_LOOKUP[pickup_unit]
+
+	if pickup_attempt.unit ~= pickup_unit then
+		pickup_attempt.unit = pickup_unit
+		pickup_attempt.index = 1
+		pickup_attempt.distance = 0
+		pickup_attempt.path_failed = true
+
+		pickup_attempt.rotation:store(Quaternion.look(Vector3.flat(self_pos - pickup_pos), Vector3.up()))
+
+		pickup_attempt.blacklist = false
+	end
+
+	if pickup_attempt.path_failed then
+		local index = pickup_attempt.index
+		local attempt_rotation = pickup_attempt.rotation:unbox()
+		local dist = pickup_attempt.distance
+		local found_position = nil
+
+		while index <= max_index and not found_position do
+			local rot = Quaternion.multiply(PICKUP_ROTATIONS[index]:unbox(), attempt_rotation)
+			local dir = Quaternion.forward(rot)
+			dist = math.min(dist + STEP, 1)
+			local pos = pickup_pos + dir*dist*range
+			local success, z = GwNavQueries.triangle_from_position(nav_world, pos, above, below)
+
+			if success then
+				pos.z = z
+
+				if 0.8 <= dist then
+					found_position = pos
+				else
+					local ray_end_pos = pos + (dist - 1)*dir*range
+					local success, ray_hit_pos = GwNavQueries.raycast(nav_world, pos, ray_end_pos)
+
+					if success then
+						found_position = ray_end_pos
+						dist = 1
+					else
+						found_position = pos*0.1 + ray_hit_pos*0.9
+						dist = Vector3.dot(Vector3.flat(found_position - pickup_pos), dir)
+					end
+				end
+			end
+
+			if 1 <= dist then
+				index = index + 1
+				dist = 0
+			end
+		end
+
+		pickup_attempt.distance = dist
+		pickup_attempt.index = index
+
+		if found_position then
+			pickup_attempt.path_failed = false
+
+			pickup_attempt.path_position:store(found_position)
+
+			return found_position
+		else
+			pickup_attempt.blacklist = true
+
+			return 
+		end
+	else
+		return pickup_attempt.path_position:unbox()
 	end
 
 	return 
@@ -1243,6 +1399,20 @@ PlayerBotBase._enemy_path_allowed = function (self, enemy_unit)
 	end
 
 	return true
+end
+PlayerBotBase.cb_health_pickup_path_result = function (self, pickup_unit, success, destination)
+	if pickup_unit == self._last_health_pickup_attempt.unit then
+		self._last_health_pickup_attempt.path_failed = not success
+	end
+
+	return 
+end
+PlayerBotBase.cb_mule_pickup_path_result = function (self, pickup_unit, success, destination)
+	if pickup_unit == self._last_mule_pickup_attempt.unit then
+		self._last_mule_pickup_attempt.path_failed = not success
+	end
+
+	return 
 end
 PlayerBotBase.cb_ally_path_result = function (self, ally_unit, success, destination)
 	local paths = self._attempted_ally_paths

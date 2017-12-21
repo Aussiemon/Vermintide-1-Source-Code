@@ -88,6 +88,10 @@ ScoreboardHelper.scoreboard_topic_stats = {
 			{
 				"kills_per_breed",
 				"skaven_pack_master"
+			},
+			{
+				"kills_per_breed",
+				"skaven_ratling_gunner"
 			}
 		},
 		sort_function = function (a, b)

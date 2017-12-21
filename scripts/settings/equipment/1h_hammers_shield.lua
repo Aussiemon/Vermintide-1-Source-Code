@@ -744,8 +744,11 @@ weapon_template.attack_meta_data = {
 	},
 	hold_attack = {
 		penetrating = true,
-		arc = 0
+		arc = 2
 	}
+}
+weapon_template.defense_meta_data = {
+	push = "heavy"
 }
 weapon_template.aim_assist_settings = {
 	max_range = 5,

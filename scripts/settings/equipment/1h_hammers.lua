@@ -718,7 +718,7 @@ weapon_template.dodge_count = 3
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,
-		arc = 1
+		arc = 2
 	},
 	hold_attack = {
 		penetrating = true,

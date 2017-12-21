@@ -107,8 +107,6 @@ for dlc_name, dlc_settings in pairs(DLCSettings) do
 	end
 end
 
-table.dump(dialogue_lookup_tables)
-
 for _, dialogue_lookup_table in ipairs(dialogue_lookup_tables) do
 	dofile(dialogue_lookup_table)
 
@@ -210,7 +208,10 @@ for breed_name, breed in pairs(Breeds) do
 	end
 end
 
-NetworkLookup.breeds = breeds
+NetworkLookup.breeds = {}
+
+table.append(NetworkLookup.breeds, breeds)
+
 local hit_ragdoll_actors = {
 	"n/a"
 }
@@ -236,7 +237,7 @@ for hazard, _ in pairs(EnvironmentalHazards) do
 end
 
 table.append(damage_sources, NetworkLookup.item_names)
-table.append(damage_sources, NetworkLookup.breeds)
+table.append(damage_sources, breeds)
 
 NetworkLookup.damage_sources = damage_sources
 NetworkLookup.husks = {
@@ -324,7 +325,9 @@ NetworkLookup.husks = {
 	"units/props/endurance_badges/prop_endurance_badge_02",
 	"units/props/endurance_badges/prop_endurance_badge_03",
 	"units/props/endurance_badges/prop_endurance_badge_04",
-	"units/props/endurance_badges/prop_endurance_badge_05"
+	"units/props/endurance_badges/prop_endurance_badge_05",
+	"units/weapons/player/pup_wooden_sword_01/pup_wooden_sword_01",
+	"units/weapons/player/pup_wooden_sword_02/pup_wooden_sword_02"
 }
 NetworkLookup.go_types = {
 	"player",
@@ -481,6 +484,8 @@ NetworkLookup.anims = {
 	"attack_shoot_twin_barrel",
 	"attack_shoot_last_twin_barrel",
 	"attack_shoot_double_barrel",
+	"attack_slap_left",
+	"attack_slap_right",
 	"attack_staff_melee",
 	"attack_swing_left",
 	"attack_swing_left_diagonal",
@@ -623,6 +628,9 @@ NetworkLookup.anims = {
 	"spawn_floor",
 	"spawn_floor_2",
 	"spawn_floor_3",
+	"spawn_floor_silent",
+	"spawn_floor_silent_2",
+	"spawn_floor_silent_3",
 	"spawn_window",
 	"spawn_window_2",
 	"spawn_well",
@@ -835,6 +843,7 @@ NetworkLookup.anims = {
 	"hanging",
 	"hanging_loop",
 	"hanging_exit",
+	"revive_complete",
 	"call_allies",
 	"turn_bwd",
 	"turn_left",
@@ -842,7 +851,8 @@ NetworkLookup.anims = {
 	"defensive_idle",
 	"attack_sweep_left",
 	"attack_sweep_right",
-	"charge_attack_lunge_miss"
+	"charge_attack_lunge_miss",
+	"bring_beer"
 }
 NetworkLookup.lobby_data = {
 	"level_key",
@@ -1081,7 +1091,8 @@ NetworkLookup.buff_templates = {
 	"movement_volume_generic_slowdown",
 	"globadier_gas_dot",
 	"grimoire_health_debuff",
-	"increase_incoming_damage"
+	"increase_incoming_damage",
+	"brawl_beer"
 }
 NetworkLookup.group_buff_templates = {
 	"grimoire"
@@ -1296,6 +1307,10 @@ for _, weapon_table in pairs(Weapons) do
 				weapon_sound_events[sub_action_table.impact_sound_event] = true
 			end
 
+			if sub_action_table.armor_impact_sound_event then
+				weapon_sound_events[sub_action_table.armor_impact_sound_event] = true
+			end
+
 			if sub_action_table.no_damage_impact_sound_event then
 				weapon_sound_events[sub_action_table.no_damage_impact_sound_event] = true
 			end
@@ -1448,7 +1463,9 @@ NetworkLookup.locations = {
 NetworkLookup.statistics = {
 	"dodged_storm_vermin_champion",
 	"killed_patrols",
-	"best_projectile_multikill"
+	"best_projectile_multikill",
+	"kills_grenade",
+	"kill_assists_grenade"
 }
 local music_group_states = {}
 local music_lookups = NetworkLookup.music_group_states

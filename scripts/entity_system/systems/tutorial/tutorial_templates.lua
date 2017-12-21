@@ -100,6 +100,12 @@ TutorialTemplates = {
 			return 
 		end,
 		can_show = function (t, unit, data, raycast_unit)
+			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
+
+			if in_brawl_mode then
+				return false
+			end
+
 			local status_extension = ScriptUnit.extension(unit, "status_system")
 
 			if status_extension.is_knocked_down(status_extension) then
@@ -315,6 +321,12 @@ TutorialTemplates = {
 			return 
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
+			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
+
+			if in_brawl_mode then
+				return false
+			end
+
 			local players = Managers.player:human_and_bot_players()
 			local unit_position = POSITION_LOOKUP[unit]
 			local best_distance_sq = math.huge
@@ -928,6 +940,12 @@ TutorialTemplates.advanced_avoid_friendly_fire = {
 		return 
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
+		local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
+
+		if in_brawl_mode then
+			return false
+		end
+
 		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 
 		if difficulty_settings.friendly_fire_ranged then

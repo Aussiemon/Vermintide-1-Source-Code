@@ -703,12 +703,21 @@ GameNetworkManager.rpc_gm_event_survival_wave_completed = function (self, sender
 
 	return 
 end
-GameNetworkManager.rpc_play_melee_hit_effects = function (self, sender, sound_event_id, hit_position, sound_type_id, breed_name_id)
+GameNetworkManager.rpc_play_melee_hit_effects = function (self, sender, sound_event_id, hit_position, sound_type_id, unit_game_object_id)
+	local hit_unit = self.unit_storage:unit(unit_game_object_id)
+
+	if not Unit.alive(hit_unit) then
+		return 
+	end
+
+	if self.is_server then
+		self.network_transmit:send_rpc_clients_except("rpc_play_melee_hit_effects", sender, sound_event_id, hit_position, sound_type_id, unit_game_object_id)
+	end
+
 	local sound_event = NetworkLookup.sound_events[sound_event_id]
 	local sound_type = NetworkLookup.melee_impact_sound_types[sound_type_id]
-	local breed_name = NetworkLookup.breeds[breed_name_id]
 
-	EffectHelper.play_melee_hit_effects(sound_event, self._world, hit_position, sound_type, true, breed_name)
+	EffectHelper.play_melee_hit_effects(sound_event, self._world, hit_position, sound_type, true, hit_unit)
 
 	return 
 end

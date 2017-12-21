@@ -79,13 +79,14 @@ PlayerBotInput._update_actions = function (self)
 		self._melee_push = false
 		self._defend = false
 
-		if not self._defend_held then
+		if self._defend_held then
+			input.action_one = true
+		else
 			self._defend_held = true
 			input.action_two = true
 		end
 
 		input.action_two_hold = true
-		input.action_one = true
 	elseif self._defend then
 		self._defend = false
 
@@ -273,14 +274,7 @@ PlayerBotInput._update_movement = function (self, dt, t)
 	local transition_jump = nil
 	local up = Vector3.up()
 
-	if self._aiming and self._aim_with_rotation then
-		wanted_rotation = self._aim_rotation:unbox()
-	elseif self._aiming and self._soft_aiming then
-		local direction = self._aim_target:unbox() - camera_position
-		wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(direction, up), math.min(dt*5, 1))
-	elseif self._aiming then
-		wanted_rotation = Quaternion_look(self._aim_target:unbox() - camera_position, up)
-	elseif current_goal and on_ladder then
+	if current_goal and on_ladder then
 		local dir = current_goal - POSITION_LOOKUP[self.unit]
 		local ladder_up = Quaternion.up(Unit.local_rotation(ladder_unit, 0))
 		local z = dir.z
@@ -292,6 +286,13 @@ PlayerBotInput._update_movement = function (self, dt, t)
 		else
 			wanted_rotation = Quaternion_look(ladder_up, up)
 		end
+	elseif self._aiming and self._aim_with_rotation then
+		wanted_rotation = self._aim_rotation:unbox()
+	elseif self._aiming and self._soft_aiming then
+		local direction = self._aim_target:unbox() - camera_position
+		wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(direction, up), math.min(dt*5, 1))
+	elseif self._aiming then
+		wanted_rotation = Quaternion_look(self._aim_target:unbox() - camera_position, up)
 	elseif current_goal then
 		local dir = current_goal - position
 
@@ -487,7 +488,7 @@ PlayerBotInput.add_wield_cooldown = function (self, cooldown_time)
 	return 
 end
 PlayerBotInput.released_input = function (self, input)
-	return true
+	return not self._input[input]
 end
 PlayerBotInput.add_stun_buffer = function (self, input_key)
 	return 

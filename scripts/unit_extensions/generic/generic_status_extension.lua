@@ -817,11 +817,13 @@ local biggest_hit = {}
 GenericStatusExtension.set_knocked_down = function (self, knocked_down)
 	self.knocked_down = knocked_down
 	local unit = self.unit
+	local player = self.player
+	local is_server = self.is_server
+	local game = Managers.state.network:game()
+	local player_unit_go_id = Managers.state.unit_storage:go_id(unit)
 	local damage_extension = self.damage_extension or ScriptUnit.extension(unit, "damage_system")
 	local health_extension = self.health_extension or ScriptUnit.extension(unit, "health_system")
 	local buff_extension = self.buff_extension or ScriptUnit.extension(unit, "buff_system")
-	local player = self.player
-	local is_server = self.is_server
 
 	self.set_outline_incapacitated(self, knocked_down)
 
@@ -851,7 +853,13 @@ GenericStatusExtension.set_knocked_down = function (self, knocked_down)
 		health_extension.set_max_health(health_extension, PlayerUnitDamageSettings.KNOCKEDDOWN_MAX_HP, true)
 
 		if is_server then
-			self.knocked_down_bleed_id = buff_extension.add_buff(buff_extension, "knockdown_bleed")
+			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
+
+			if in_brawl_mode then
+				buff_extension.add_buff(buff_extension, "brawl_knocked_down")
+			else
+				self.knocked_down_bleed_id = buff_extension.add_buff(buff_extension, "knockdown_bleed")
+			end
 		end
 
 		if player.local_player then

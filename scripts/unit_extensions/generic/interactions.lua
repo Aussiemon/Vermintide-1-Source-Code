@@ -235,8 +235,10 @@ InteractionDefinitions.revive = {
 			local grabbed = status_extension.is_grabbed_by_pack_master(status_extension)
 			local ledge_hanging = status_extension.get_is_ledge_hanging(status_extension)
 			local hanging_from_hook = status_extension.is_hanging_from_hook(status_extension)
+			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
+			local can_revive = knocked_down and alive and not pounced and not grabbed and not ledge_hanging and not hanging_from_hook and not in_brawl_mode
 
-			return knocked_down and alive and not pounced and not grabbed and not ledge_hanging and not hanging_from_hook
+			return can_revive
 		end
 	},
 	client = {
@@ -327,10 +329,14 @@ InteractionDefinitions.revive = {
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
 			local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
+			local knocked_down = status_extension.is_knocked_down(status_extension)
+			local pounced = status_extension.is_pounced_down(status_extension)
+			local alive = health_extension.is_alive(health_extension)
 			local grabbed = status_extension.is_grabbed_by_pack_master(status_extension)
 			local ledge_hanging = status_extension.get_is_ledge_hanging(status_extension)
 			local hanging_from_hook = status_extension.is_hanging_from_hook(status_extension)
-			local can_revive = not status_extension.is_pounced_down(status_extension) and not grabbed and not ledge_hanging and not hanging_from_hook and status_extension.is_knocked_down(status_extension) and health_extension.is_alive(health_extension)
+			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
+			local can_revive = knocked_down and alive and not pounced and not grabbed and not ledge_hanging and not hanging_from_hook and not in_brawl_mode
 
 			return can_revive
 		end
@@ -1924,6 +1930,75 @@ InteractionDefinitions.map_access.client.stop = function (world, interactor_unit
 	Unit.set_data(interactable_unit, "interaction_data", "being_used", false)
 
 	return 
+end
+InteractionDefinitions.brawl_access = InteractionDefinitions.brawl_access or table.clone(InteractionDefinitions.smartobject)
+InteractionDefinitions.brawl_access.config.swap_to_3p = false
+InteractionDefinitions.brawl_access.client.stop = function (world, interactor_unit, interactable_unit, data, config, t, result)
+	data.start_time = nil
+
+	if result == InteractionResult.SUCCESS then
+		if not data.is_husk then
+			local pickup_settings = Pickups.level_events.brawl_unarmed
+			local slot_name = pickup_settings.slot_name
+			local item_name = pickup_settings.item_name
+			local unit_template, extra_extension_init_data = nil
+			local pickup_item_data = ItemMasterList[item_name]
+			local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
+			local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+
+			inventory_extension.destroy_slot(inventory_extension, slot_name)
+			inventory_extension.add_equipment(inventory_extension, slot_name, pickup_item_data, unit_template, extra_extension_init_data)
+
+			if not LEVEL_EDITOR_TEST then
+				local unit_object_id = Managers.state.unit_storage:go_id(interactor_unit)
+				local slot_id = NetworkLookup.equipment_slots[slot_name]
+				local item_id = NetworkLookup.item_names[item_name]
+				local network_manager = Managers.state.network
+
+				if data.is_server then
+					network_manager.network_transmit:send_rpc_clients("rpc_add_equipment", unit_object_id, slot_id, item_id)
+				else
+					network_manager.network_transmit:send_rpc_server("rpc_add_equipment", unit_object_id, slot_id, item_id)
+				end
+
+				if slot_data then
+					local drop_item_data = slot_data.item_data
+					local item_template = BackendUtils.get_item_template(drop_item_data)
+					local pickup_data = item_template.pickup_data
+
+					if pickup_data then
+						local position = POSITION_LOOKUP[interactable_unit]
+						local rotation = Unit.local_rotation(interactable_unit, 0)
+						local pickup_spawn_type = "dropped"
+						local pickup_name = pickup_data.pickup_name
+						local pickup_name_id = NetworkLookup.pickup_names[pickup_name]
+						local pickup_spawn_type_id = NetworkLookup.pickup_spawn_types[pickup_spawn_type]
+
+						network_manager.network_transmit:send_rpc_server("rpc_spawn_pickup", pickup_name_id, position, rotation, pickup_spawn_type_id)
+					end
+				end
+
+				local wielded_slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+
+				if pickup_settings.wield_on_pickup or wielded_slot_name == slot_name then
+					CharacterStateHelper.stop_weapon_actions(inventory_extension, "picked_up_object")
+					inventory_extension.wield(inventory_extension, slot_name)
+				end
+			end
+		end
+
+		Unit.set_data(interactable_unit, "interaction_data", "being_used", true)
+		LevelHelper:flow_event(world, "pub_brawl_fetch_new_beer")
+	end
+
+	return 
+end
+InteractionDefinitions.brawl_access.client.can_interact = function (interactor_unit, interactable_unit, data, config)
+	local used = Unit.get_data(interactable_unit, "interaction_data", "used")
+	local being_used = Unit.get_data(interactable_unit, "interaction_data", "being_used")
+	local buff_extension = ScriptUnit.extension(interactor_unit, "buff_system")
+
+	return not being_used and not used and not buff_extension.has_buff_type(buff_extension, "brawl_drunk")
 end
 InteractionDefinitions.unlock_key_access = InteractionDefinitions.unlock_key_access or table.clone(InteractionDefinitions.smartobject)
 InteractionDefinitions.unlock_key_access.config.swap_to_3p = false

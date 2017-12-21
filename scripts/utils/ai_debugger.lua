@@ -180,7 +180,10 @@ AIDebugger.update = function (self, t, dt)
 
 				if group_extension and group_extension.template then
 					local group_template = AIGroupTemplates[group_extension.template]
-					extra_info = group_template.BT_debug(group_extension.group)
+
+					if group_template.BT_debug then
+						extra_info = group_template.BT_debug(group_extension.group)
+					end
 				end
 
 				local running_outside_offset = DrawAiBehaviour.draw_tree(bt, self.screen_gui, root_node, blackboard, 1, t, dt, self.tree_x, 0, nil, extra_info)
@@ -402,7 +405,7 @@ AIDebugger.mouse_raycast = function (self, input)
 		local unit_position = Unit.world_position(unit, 0)
 		local breed = Unit.get_data(unit, "breed")
 
-		if breed then
+		if breed or (Managers.player:owner(unit) and Managers.player:owner(unit).bot_player) then
 			self.hot_unit = unit
 			self.hot_actor = actor
 		end

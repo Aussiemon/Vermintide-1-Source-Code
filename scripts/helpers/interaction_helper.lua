@@ -20,7 +20,8 @@ InteractionHelper.interactions = {
 	quest_access = {},
 	journal_access = {},
 	door = {},
-	map_access = {}
+	map_access = {},
+	brawl_access = {}
 }
 
 for interaction, config_table in pairs(InteractionHelper.interactions) do

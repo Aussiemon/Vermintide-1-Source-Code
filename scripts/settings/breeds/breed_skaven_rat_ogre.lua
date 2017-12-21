@@ -70,8 +70,7 @@ local breed_data = {
 		neck = {
 			prio = 1,
 			actors = {
-				"c_neck1",
-				"c_spine1"
+				"c_neck1"
 			},
 			push_actors = {
 				"j_head",
@@ -81,6 +80,7 @@ local breed_data = {
 		torso = {
 			prio = 3,
 			actors = {
+				"c_spine1",
 				"c_spine2",
 				"c_spine",
 				"c_hips",
@@ -324,6 +324,7 @@ local action_data = {
 		cooldown = -1,
 		fatigue_type = "blocked_slam",
 		radius = 1.2,
+		bot_threat_duration = 0.9,
 		damage_type = "cutting",
 		player_push_speed = 8,
 		action_weight = 1,

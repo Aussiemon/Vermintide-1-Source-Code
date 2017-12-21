@@ -6,6 +6,7 @@ SimpleHuskInventoryExtension.init = function (self, extension_init_context, unit
 		slots = {}
 	}
 	self._attached_units = {}
+	self._show_third_person = true
 
 	return 
 end
@@ -30,7 +31,7 @@ SimpleHuskInventoryExtension.drop_level_event_item = function (self, slot_data)
 	local action = item_template.actions.action_one.default
 	local projectile_info = action.projectile_info
 
-	if projectile_info.drop_on_player_destroyed then
+	if projectile_info and projectile_info.drop_on_player_destroyed then
 		local unit = self._unit
 		local weapon_unit = self._equipment.right_hand_wielded_unit_3p or self._equipment.left_hand_wielded_unit_3p
 		local position = Unit.world_position(unit, 0) + Vector3(0, 0, 2)
@@ -116,7 +117,6 @@ end
 SimpleHuskInventoryExtension.wield = function (self, slot_name)
 	local equipment = self._equipment
 
-	self._despawn_attached_units(self)
 	GearUtils.wield(self._world, equipment, slot_name, nil, self._unit)
 
 	self.wielded_slot = slot_name
@@ -125,9 +125,7 @@ SimpleHuskInventoryExtension.wield = function (self, slot_name)
 		local slot_data = equipment.slots[slot_name]
 
 		if slot_data then
-			local item_template = self.get_item_template(self, slot_data)
-
-			self._spawn_attached_units(self, item_template.third_person_attached_units)
+			self.show_third_person_inventory(self, self._show_third_person)
 
 			if ScriptUnit.has_extension(self._unit, "outline_system") then
 				local outline_extension = ScriptUnit.extension(self._unit, "outline_system")
@@ -168,6 +166,7 @@ SimpleHuskInventoryExtension._spawn_attached_units = function (self, attached_un
 	return 
 end
 SimpleHuskInventoryExtension.show_third_person_inventory = function (self, show)
+	self._show_third_person = show
 	local right_hand_wielded_unit = self._equipment.right_hand_wielded_unit_3p
 
 	if right_hand_wielded_unit then

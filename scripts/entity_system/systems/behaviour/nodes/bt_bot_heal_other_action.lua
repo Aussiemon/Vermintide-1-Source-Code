@@ -61,7 +61,9 @@ BTBotHealOtherAction.run = function (self, unit, blackboard, t, dt)
 	if self._initializing then
 		self._initializing = false
 	else
-		input_ext.charge_shot(input_ext)
+		local input = action_data.input or "charge_shot"
+
+		input_ext[input](input_ext)
 	end
 
 	return "running"

@@ -267,7 +267,7 @@ BuffFunctionTemplates.functions = {
 	end,
 	apply_curse_protection = function (unit, buff, params)
 		local health_extension = ScriptUnit.extension(unit, "health_system")
-		local max_health = health_extension.get_max_health(health_extension)
+		local max_health = health_extension.unmodified_max_health
 
 		health_extension.set_max_health(health_extension, max_health, true)
 
@@ -275,7 +275,7 @@ BuffFunctionTemplates.functions = {
 	end,
 	remove_curse_protection = function (unit, buff, params)
 		local health_extension = ScriptUnit.extension(unit, "health_system")
-		local max_health = health_extension.get_max_health(health_extension)
+		local max_health = health_extension.unmodified_max_health
 
 		health_extension.set_max_health(health_extension, max_health, true)
 
@@ -314,6 +314,85 @@ BuffFunctionTemplates.functions = {
 		end
 
 		set_variable(path_to_movement_setting_to_modify, unit, movement_setting_value)
+
+		return 
+	end,
+	apply_brawl_defeated_buff = function (unit, buff, params)
+		return 
+	end,
+	remove_brawl_defeated_buff = function (unit, buff, params)
+		CharacterStateHelper.play_animation_event(unit, "revive_complete")
+		StatusUtils.set_knocked_down_network(unit, false)
+
+		local difficulty_manager = Managers.state.difficulty
+		local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+		local player_health = difficulty_settings.max_hp
+		local health_extension = ScriptUnit.extension(unit, "health_system")
+
+		health_extension.reset(health_extension)
+		health_extension.set_max_health(health_extension, player_health, true)
+
+		local network_manager = Managers.state.network
+		local go_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, unit)
+		local state_id = NetworkLookup.health_statuses[health_extension.state]
+
+		network_manager.network_transmit:send_rpc_clients("rpc_sync_damage_taken", go_id, is_level_unit, 0, state_id)
+		StatusUtils.set_wounded_network(unit, false, "healed", params.t)
+
+		return 
+	end,
+	apply_brawl_drunk_buff = function (unit, buff, params)
+		local player_manager = Managers.player
+		local player = player_manager.unit_owner(player_manager, unit)
+
+		if player and player.local_player then
+			local game = Managers.state.network:game()
+			local player_unit_go_id = Managers.state.unit_storage:go_id(unit)
+
+			GameSession.set_game_object_field(game, player_unit_go_id, "friendly_fire_melee", true)
+
+			local fx_name = "fx/screenspace_drunken_lens_01"
+			local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
+			local particle_id = first_person_extension.create_screen_particles(first_person_extension, fx_name)
+			buff.particle_id = particle_id
+		end
+
+		return 
+	end,
+	remove_brawl_drunk_buff = function (unit, buff, params, world)
+		local player_manager = Managers.player
+		local player = player_manager.unit_owner(player_manager, unit)
+
+		if player and player.local_player then
+			local network_manager = Managers.state.network
+			local game = network_manager.game(network_manager)
+			local player_unit_go_id = Managers.state.unit_storage:go_id(unit)
+
+			GameSession.set_game_object_field(game, player_unit_go_id, "friendly_fire_melee", false)
+
+			local particle_id = buff.particle_id
+
+			World.destroy_particles(world, particle_id)
+
+			buff.particle_id = nil
+			local status_extension = ScriptUnit.extension(unit, "status_system")
+
+			if not status_extension.is_knocked_down(status_extension) then
+				local difficulty_manager = Managers.state.difficulty
+				local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+				local player_health = difficulty_settings.max_hp
+				local heal_type = "buff"
+
+				if player_manager.is_server then
+					DamageUtils.heal_network(unit, unit, player_health, heal_type)
+				else
+					local network_transmit = network_manager.network_transmit
+					local heal_type_id = NetworkLookup.heal_types[heal_type]
+
+					network_transmit.send_rpc_server(network_transmit, "rpc_request_heal", player_unit_go_id, player_health, heal_type_id)
+				end
+			end
+		end
 
 		return 
 	end,

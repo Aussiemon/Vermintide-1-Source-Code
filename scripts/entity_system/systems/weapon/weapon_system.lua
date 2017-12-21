@@ -2,7 +2,6 @@ require("scripts/unit_extensions/weapons/weapon_unit_extension")
 require("scripts/unit_extensions/weapons/ai_weapon_unit_extension")
 
 WeaponSystem = class(WeaponSystem, ExtensionSystemBase)
-global_is_inside_inn = false
 local RPCS = {
 	"rpc_attack_hit",
 	"rpc_attack_hit_multiple",
@@ -29,9 +28,9 @@ WeaponSystem.init = function (self, entity_system_creation_context, system_name)
 
 	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
 
-	global_is_inside_inn = entity_system_creation_context.startup_data.level_key == "inn_level"
 	self.game = Managers.state.network:game()
 	self.network_manager = Managers.state.network
+	self.game_mode_manager = Managers.state.game_mode
 	self.beam_particle_effects = {}
 	self.geiser_particle_effects = {}
 
@@ -65,19 +64,35 @@ WeaponSystem.rpc_attack_hit = function (self, sender, damage_source_id, attacker
 		return 
 	end
 
-	if global_is_inside_inn and table.contains(PLAYER_AND_BOT_UNITS, hit_unit) and table.contains(PLAYER_AND_BOT_UNITS, attacker_unit) then
-		return 
+	local player_manager = Managers.player
+	local hit_player = player_manager.owner(player_manager, hit_unit)
+	local attacker_player = player_manager.owner(player_manager, attacker_unit)
+	local attack_template_name = NetworkLookup.attack_templates[attack_template_id]
+	local attack_template = AttackTemplates[attack_template_name]
+
+	if hit_player and attacker_player then
+		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
+		local hit_unit_friendly_fire_melee = DamageUtils.allow_friendly_fire_melee(difficulty_settings, hit_player)
+		local attacker_unit_friendly_fire_melee = DamageUtils.allow_friendly_fire_melee(difficulty_settings, attacker_player)
+
+		if hit_unit_friendly_fire_melee and attacker_unit_friendly_fire_melee then
+			local fatigue_type = attack_template.fatigue_type or "blocked_attack"
+
+			if DamageUtils.check_block(attacker_unit, hit_unit, fatigue_type) then
+				return 
+			end
+		else
+			return 
+		end
 	end
 
 	local damage_source = NetworkLookup.damage_sources[damage_source_id]
 	local hit_zone_name = NetworkLookup.hit_zones[hit_zone_id]
-	local attack_template_name = NetworkLookup.attack_templates[attack_template_id]
-	local attack_template = AttackTemplates[attack_template_name]
 	local attack_damage_values = nil
 	local blackboard = Unit.get_data(hit_unit, "blackboard")
 	local uses_slot_system = ScriptUnit.has_extension(hit_unit, "ai_slot_system")
-	local target_override_extension = (ScriptUnit.has_extension(attacker_unit, "target_override_system") and ScriptUnit.extension(attacker_unit, "target_override_system")) or nil
-	local status_extension = (ScriptUnit.has_extension(attacker_unit, "status_system") and ScriptUnit.extension(attacker_unit, "status_system")) or nil
+	local target_override_extension = ScriptUnit.has_extension(attacker_unit, "target_override_system") or nil
+	local status_extension = ScriptUnit.has_extension(attacker_unit, "status_system") or nil
 	local attacker_not_incapacitated = (status_extension and not status_extension.is_disabled(status_extension)) or nil
 	local hit_unit_is_enemy = DamageUtils.is_enemy(hit_unit)
 	local hit_ragdoll_actor = NetworkLookup.hit_ragdoll_actors[hit_ragdoll_actor_id]

@@ -82,6 +82,11 @@ PlayerWhereaboutsExtension.update = function (self, unit, input, dt, context, t)
 	return 
 end
 local EPSILON = 0.0001
+PlayerWhereaboutsExtension.last_position_onground_on_navmesh = function (self)
+	local pos = self._last_onground_pos_on_nav_mesh:unbox()
+
+	return (Vector3.is_valid(pos) and pos) or nil
+end
 PlayerWhereaboutsExtension._find_start_position = function (self, current_position)
 	local last_pos = self._last_onground_pos_on_nav_mesh:unbox()
 

@@ -363,6 +363,8 @@ BulldozerPlayer.destroy = function (self)
 	Managers.free_flight:unregister_player(self.local_player_id(self))
 	Managers.music:unregister_active_player(self._local_player_id)
 
+	self.game_object_id = nil
+
 	return 
 end
 

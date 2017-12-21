@@ -110,7 +110,7 @@ end
 DebugDrawer.circle = function (self, center, radius, normal, color, segments)
 	color = color or Color(255, 255, 255)
 
-	LineObject.add_circle(self._line_object, color, center, radius, normal, 20)
+	LineObject.add_circle(self._line_object, color, center, radius, normal, segments or 20)
 
 	return 
 end

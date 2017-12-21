@@ -312,7 +312,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 	local world = self._world
 	local ph_world = World.get_data(world, "physics_world")
 	local ray_from = align_pos + back*1
-	local ray_length = length + 2
+	local ray_length = length + 10
 	local hit, hit_position = PhysicsWorld.immediate_raycast(ph_world, ray_from, down, ray_length, "closest", "collision_filter", "filter_bot_nav_transition_ladder_ray")
 
 	if script_data.ai_bots_debug then
@@ -425,17 +425,18 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 
 	if not data.failed then
 		local index = self._ladder_smart_object_index + 1
-		local ladder_is_bidirectional = true
+		local climbable_height = 1.5
+		local ladder_is_bidirectional = bottom_pos.z - climbable_height < hit_position.z
 		local layer_name = "bot_ladders"
 		local layer_id = LAYER_ID_MAPPING[layer_name]
 
 		fassert(layer_id, "Layer %s is not defined.", layer_name)
 
 		local graph = GwNavGraph.create(nav_world, ladder_is_bidirectional, {
-			from,
-			hit_position + back*0.2,
+			to,
 			align_pos,
-			to
+			hit_position + back*0.2,
+			from
 		}, Colors.get("blue"), layer_id, index)
 
 		GwNavGraph.add_to_database(graph)

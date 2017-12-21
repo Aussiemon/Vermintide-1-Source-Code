@@ -56,7 +56,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.2,
+					start_time = 0.1,
 					action = "weapon_reload",
 					input = "weapon_reload"
 				}
@@ -122,7 +122,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.2,
+					start_time = 0.1,
 					action = "weapon_reload",
 					input = "weapon_reload"
 				}

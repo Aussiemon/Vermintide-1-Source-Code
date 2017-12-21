@@ -25,6 +25,8 @@ ActionSweep.init = function (self, world, item_name, is_server, owner_unit, dama
 	self.hit_units = {}
 	self.could_damage_last_update = false
 	self.status_extension = ScriptUnit.extension(owner_unit, "status_system")
+	self.game_mode_manager = Managers.state.game_mode
+	self.game = Managers.state.network:game()
 	self.is_server = is_server
 	self.action_buff_data = {}
 	self._drawer = Managers.state.debug:drawer({
@@ -53,12 +55,17 @@ ActionSweep.client_owner_start_action = function (self, new_action, t)
 
 	local owner_unit = self.owner_unit
 	local owner_player = Managers.player:owner(owner_unit)
-	self.buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+	local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
+	self.buff_extension = buff_extension
+	local in_brawl_mode = buff_extension.has_buff_type(buff_extension, "brawl_drunk")
+	local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
 
-	if global_is_inside_inn then
+	if is_inside_inn and not in_brawl_mode then
 		self.down_offset = 0
 	end
 
+	local anim_time_scale = new_action.anim_time_scale or 1
+	self.anim_time_scale = ActionUtils.apply_attack_speed_buff(anim_time_scale, owner_unit)
 	self.attack_aborted = false
 
 	for k, v in pairs(self.hit_units) do
@@ -167,8 +174,7 @@ ActionSweep._is_within_damage_window = function (self, current_time_in_action, a
 		return false
 	end
 
-	local anim_time_scale = action.anim_time_scale or 1
-	anim_time_scale = ActionUtils.apply_attack_speed_buff(anim_time_scale, owner_unit)
+	local anim_time_scale = self.anim_time_scale
 	damage_window_start = damage_window_start/anim_time_scale
 	damage_window_end = damage_window_end or action.total_time or math.huge
 	damage_window_end = damage_window_end/anim_time_scale
@@ -213,8 +219,11 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 	local weapon_half_length = weapon_half_extents.z
 	local range_mod = current_action.range_mod or 1
 	local width_mod = (current_action.width_mod and current_action.width_mod*1.25) or 25
+	local buff_extension = self.buff_extension
+	local in_brawl_mode = buff_extension.has_buff_type(buff_extension, "brawl_drunk")
+	local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
 
-	if global_is_inside_inn then
+	if is_inside_inn and not in_brawl_mode then
 		range_mod = range_mod*0.65
 		width_mod = width_mod/4
 	end
@@ -234,10 +243,12 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 	local position_end = (position_previous + current_rot_up*weapon_half_length*2) - Quaternion.up(rotation_previous)*weapon_half_length
 	local max_num_hits = 5
 	local attack_direction = calculate_attack_direction(current_action, weapon_rot)
-	local owner_player = Managers.player:owner(owner_unit)
+	local player_manager = Managers.player
+	local owner_player = player_manager.owner(player_manager, owner_unit)
 	local weapon_cross_section = Vector3(weapon_half_extents.x, weapon_half_extents.y, 0.0001)
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
-	local collision_filter = (DamageUtils.allow_friendly_fire_melee(difficulty_settings, owner_player) and "filter_melee_sweep") or "filter_melee_sweep_no_player"
+	local friendly_fire_melee_allowed = DamageUtils.allow_friendly_fire_melee(difficulty_settings, owner_player)
+	local collision_filter = (friendly_fire_melee_allowed and "filter_melee_sweep") or "filter_melee_sweep_no_player"
 
 	if PhysicsWorld.start_reusing_sweep_tables then
 		PhysicsWorld.start_reusing_sweep_tables()
@@ -303,6 +314,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 	local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
 	local owner_unit_direction = Quaternion.forward(Unit.local_rotation(owner_unit, 0))
 	local owner_unit_pos = Unit.world_position(owner_unit, 0)
+	local is_server = self.is_server
 	local hit_units = self.hit_units
 	local environment_unit_hit = false
 	local max_targets = current_action.max_targets or 1
@@ -320,11 +332,23 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 
 			local breed = Unit.get_data(hit_unit, "breed")
 			local in_view = first_person_extension.is_within_default_view(first_person_extension, hit_position)
-			local is_player = table.contains(PLAYER_AND_BOT_UNITS, hit_unit)
-			local is_character = breed or is_player
+			local hit_player = player_manager.owner(player_manager, hit_unit)
 			local hit_self = hit_unit == owner_unit
+			local is_character = breed or hit_player
+			local damage_allowed = true
+			local is_pvp_friendly_fire_melee = false
 
-			if is_character and hit_units[hit_unit] == nil and in_view and not hit_self then
+			if not hit_self and hit_player then
+				local hit_unit_friendly_fire_melee = DamageUtils.allow_friendly_fire_melee(difficulty_settings, hit_player)
+
+				if hit_unit_friendly_fire_melee then
+					is_pvp_friendly_fire_melee = true
+				else
+					damage_allowed = false
+				end
+			end
+
+			if is_character and hit_units[hit_unit] == nil and in_view and not hit_self and damage_allowed then
 				hit_units[hit_unit] = true
 				local health_extension = ScriptUnit.extension(hit_unit, "health_system")
 				local number_of_hit_enemies = self.number_of_hit_enemies
@@ -340,7 +364,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 						attack_template_name, attack_template_damage_type_name = ActionUtils.select_attack_template(attack_target_settings, self.is_critical_strike)
 					end
 				elseif self.number_of_hit_enemies < max_targets then
-					if not is_player and health_extension.is_alive(health_extension) then
+					if not hit_player and health_extension.is_alive(health_extension) then
 						self.number_of_hit_enemies = self.number_of_hit_enemies + 1
 					end
 
@@ -354,9 +378,10 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 					local attack_template = AttackTemplates[attack_template_name]
 					local attack_template_id = NetworkLookup.attack_templates[attack_template_name]
 					local attack_template_damage_type_id = NetworkLookup.attack_damage_values[attack_template_damage_type_name or "n/a"]
-					local hit_zone_name = nil
+					local hit_zone_name, armor_category = nil
 
 					if breed then
+						armor_category = breed.armor_category
 						local node = Actor.node(hit_actor)
 						local hit_zone = breed.hit_zones_lookup[node]
 						hit_zone_name = hit_zone.name
@@ -370,21 +395,22 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 							end
 						end
 
-						hit_armor = (health_extension.is_alive(health_extension) and breed.armor_category == 2) or breed.armor_category == 3
+						hit_armor = (health_extension.is_alive(health_extension) and armor_category == 2) or armor_category == 3
 					else
 						hit_zone_name = "torso"
+						armor_category = 4
+						local status_extension = ScriptUnit.has_extension(hit_unit, "status_system")
+						hit_armor = status_extension.is_blocking(status_extension)
 					end
 
-					local armor_type = breed.armor_category
-					local abort_attack = self.number_of_hit_enemies == max_targets or hit_armor
+					abort_attack = self.number_of_hit_enemies == max_targets or hit_armor
 
-					self._play_hit_animations(self, owner_unit, current_action, abort_attack, hit_zone_name, armor_type)
+					self._play_hit_animations(self, owner_unit, current_action, abort_attack, hit_zone_name, armor_category)
 
 					local network_manager = Managers.state.network
 					local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
 					local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
 					local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
-					local is_server = self.is_server
 					local backstab_multiplier = 1
 
 					if breed and AiUtils.unit_alive(hit_unit) then
@@ -408,8 +434,8 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 						end
 					end
 
-					if breed then
-						self._play_character_impact(self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier)
+					if breed or is_pvp_friendly_fire_melee then
+						self._play_character_impact(self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier, is_pvp_friendly_fire_melee)
 					end
 
 					if Managers.state.controller_features and self.owner.local_player and not self.has_played_rumble_effect then
@@ -432,7 +458,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 
 					local charge_value = current_action.charge_value
 					local buff_result = DamageUtils.buff_on_attack(owner_unit, hit_unit, charge_value)
-					local show_blood = not breed.no_blood_splatter_on_damage
+					local show_blood = breed and not breed.no_blood_splatter_on_damage
 
 					if show_blood then
 						self.weapon_system:rpc_weapon_blood(nil, attacker_unit_id, attack_template_damage_type_id)
@@ -515,7 +541,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 						hit_environment_rumble = true
 					end
 				elseif hit_units[hit_unit] == nil then
-					if global_is_inside_inn then
+					if is_inside_inn and not in_brawl_mode then
 						local abort_attack = true
 
 						self._play_hit_animations(self, owner_unit, current_action, abort_attack)
@@ -544,7 +570,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 
 			self._play_environmental_effect(self, current_rotation, current_action, hit_unit, hit_position, hit_normal)
 
-			if Managers.state.controller_features and global_is_inside_inn and self.owner.local_player and not self.has_played_rumble_effect then
+			if Managers.state.controller_features and is_inside_inn and self.owner.local_player and not self.has_played_rumble_effect then
 				Managers.state.controller_features:add_effect("rumble", {
 					rumble_effect = "hit_environment"
 				})
@@ -563,7 +589,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 		self.attack_aborted = true
 	end
 
-	if Managers.state.controller_features and global_is_inside_inn and hit_environment_rumble and self.owner.local_player and not self.has_played_rumble_effect then
+	if Managers.state.controller_features and is_inside_inn and hit_environment_rumble and self.owner.local_player and not self.has_played_rumble_effect then
 		Managers.state.controller_features:add_effect("rumble", {
 			rumble_effect = "hit_environment"
 		})
@@ -620,11 +646,10 @@ ActionSweep._play_environmental_effect = function (self, weapon_rotation, curren
 
 	return 
 end
-ActionSweep._play_character_impact = function (self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier)
+ActionSweep._play_character_impact = function (self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier, is_pvp_friendly_fire)
 	local sound_type = attack_template.sound_type
 	local owner_player = Managers.player:owner(owner_unit)
 	local husk = owner_player.bot_player
-	local breed_name = breed.name
 	local world = self.world
 	local predicted_damage = 0
 	local attack_damage_value = (attack_template_damage_type_name and AttackDamageValues[attack_template_damage_type_name]) or nil
@@ -634,25 +659,37 @@ ActionSweep._play_character_impact = function (self, is_server, owner_unit, curr
 		predicted_damage = attack.get_damage_amount(self.item_name, attack_template, owner_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, nil, backstab_multiplier)
 	end
 
-	target_unit_armor = (breed and breed.armor_category) or 4
-	local sound_event = (predicted_damage <= 0 and current_action.stagger_impact_sound_event) or current_action.impact_sound_event
+	local pvp_target_is_blocking = false
 
-	if target_unit_armor == 2 then
+	if is_pvp_friendly_fire then
+		local target_status_extension = ScriptUnit.has_extension(hit_unit, "status_system")
+
+		if target_status_extension and target_status_extension.is_blocking(target_status_extension) then
+			pvp_target_is_blocking = true
+		end
+	end
+
+	local sound_event = nil
+	local target_unit_armor = (breed and breed.armor_category) or 4
+
+	if pvp_target_is_blocking then
+		sound_event = current_action.armor_impact_sound_event
+	elseif target_unit_armor == 2 then
 		sound_event = (predicted_damage <= 0 and current_action.no_damage_impact_sound_event) or current_action.armor_impact_sound_event or current_action.impact_sound_event
+	else
+		sound_event = (predicted_damage <= 0 and current_action.stagger_impact_sound_event) or current_action.impact_sound_event
 	end
 
 	local hit_effect = nil
 
-	if not attack_template_damage_type_name or attack_template_damage_type_name == "no_damage" then
+	if breed and breed.no_blood_splatter_on_damage and hit_effect == "fx/impact_blood" then
+		hit_effect = current_action.no_damage_impact_particle_effect
+	elseif not attack_template_damage_type_name or attack_template_damage_type_name == "no_damage" then
 		hit_effect = current_action.no_damage_impact_particle_effect
 	elseif predicted_damage <= 0 and target_unit_armor == 2 then
 		hit_effect = current_action.armour_impact_particle_effect or "fx/hit_armored"
 	else
-		hit_effect = (predicted_damage > 0 or current_action.no_damage_impact_particle_effect) and (current_action.impact_particle_effect or "fx/impact_blood")
-	end
-
-	if breed.no_blood_splatter_on_damage and hit_effect == "fx/impact_blood" then
-		hit_effect = current_action.no_damage_impact_particle_effect
+		hit_effect = (predicted_damage > 0 or current_action.no_damage_impact_particle_effect) and (not pvp_target_is_blocking or current_action.no_damage_impact_particle_effect) and (current_action.impact_particle_effect or "fx/impact_blood")
 	end
 
 	if hit_effect then
@@ -664,28 +701,28 @@ ActionSweep._play_character_impact = function (self, is_server, owner_unit, curr
 	end
 
 	if sound_event then
-		EffectHelper.play_melee_hit_effects(sound_event, world, hit_position, sound_type, husk, breed_name)
-
-		if not sound_type or not breed_name then
+		if not sound_type then
 			return 
 		end
 
+		EffectHelper.play_melee_hit_effects(sound_event, world, hit_position, sound_type, husk, hit_unit)
+
+		local network_manager = Managers.state.network
 		local sound_event_id = NetworkLookup.sound_events[sound_event]
 		local sound_type_id = NetworkLookup.melee_impact_sound_types[sound_type]
-		local breed_name_id = NetworkLookup.breeds[breed_name]
-		local network_manager = Managers.state.network
+		local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
 
 		if is_server then
-			network_manager.network_transmit:send_rpc_clients("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, breed_name_id)
+			network_manager.network_transmit:send_rpc_clients("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, hit_unit_id)
 		else
-			network_manager.network_transmit:send_rpc_server("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, breed_name_id)
+			network_manager.network_transmit:send_rpc_server("rpc_play_melee_hit_effects", sound_event_id, hit_position, sound_type_id, hit_unit_id)
 		end
 	else
 		Application.warning("[ActionSweep] Missing sound event for sweep action in unit %q.", self.weapon_unit)
 	end
 
-	local damage_extensions = ScriptUnit.extension(hit_unit, "health_system")
-	local wounds_left = damage_extensions.current_health(damage_extensions)
+	local target_health_extension = ScriptUnit.extension(hit_unit, "health_system")
+	local wounds_left = target_health_extension.current_health(target_health_extension)
 	local target_presumed_dead = wounds_left <= predicted_damage
 
 	if not target_presumed_dead and breed and not breed.disable_local_hit_reactions and Unit.has_animation_state_machine(hit_unit) then
@@ -794,8 +831,8 @@ ActionSweep.destroy = function (self)
 
 	return 
 end
-ActionSweep._play_hit_animations = function (self, owner_unit, current_action, abort_attack, hit_zone_name, armor_type)
-	local first_person_hit_anim = (hit_zone_name ~= "head" and armor_type == 2 and abort_attack and current_action.hit_armor_anim) or (abort_attack and current_action.hit_stop_anim) or current_action.first_person_hit_anim
+ActionSweep._play_hit_animations = function (self, owner_unit, current_action, abort_attack, hit_zone_name, armor_category)
+	local first_person_hit_anim = (hit_zone_name ~= "head" and armor_category == 2 and abort_attack and current_action.hit_armor_anim) or (abort_attack and current_action.hit_stop_anim) or current_action.first_person_hit_anim
 	local third_person_hit_anim = abort_attack and current_action.hit_stop_anim
 	self.attack_aborted = self.attack_aborted or abort_attack
 

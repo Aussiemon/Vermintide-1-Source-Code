@@ -6,6 +6,8 @@ require("scripts/managers/backend/script_backend_session")
 require("scripts/managers/backend/backend_boons")
 require("scripts/managers/backend/backend_quests")
 require("scripts/managers/backend/backend_profile_hash")
+require("scripts/managers/backend/backend_interface_title_properties")
+require("backend/local_backend/backend_interface_title_properties_local")
 
 cjson = cjson.stingray_init()
 local DEBUG_QUESTS_AND_CONTRACTS = false
@@ -51,7 +53,7 @@ ERROR_CODES[BACKEND_LUA_ERRORS.ERR_LOADING_PLUGIN] = "backend_err_loading_plugin
 BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED = 256
 ERROR_CODES[BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED] = "backend_err_use_local_backend_not_allowed"
 BackendManager = class(BackendManager)
-local TIMEOUT_SIGNIN = 40
+local TIMEOUT_SIGNIN = 20
 BackendManager.init = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 
@@ -81,6 +83,7 @@ BackendManager.init = function (self)
 	end
 
 	self._interfaces.profile_hash = BackendProfileHash:new()
+	self._interfaces.title_properties = BackendInterfaceTitlePropertiesLocal:new()
 	self._button_retry = "button_ok"
 	self._button_quit = "button_quit"
 	self._button_local_backend = "button_local_backend"

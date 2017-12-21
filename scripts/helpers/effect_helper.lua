@@ -214,21 +214,33 @@ EffectHelper.play_skinned_surface_material_effects = function (effect_name, worl
 
 	return 
 end
-EffectHelper.player_melee_hit_particles = function (world, particles_name, hit_position, hit_direction, damage_type, hit_unit)
+EffectHelper.player_melee_hit_particles = function (world, particles_name, hit_position, hit_direction, hit_unit)
 	local hit_rotation = Quaternion.look(hit_direction)
 
 	World.create_particles(world, particles_name, hit_position, hit_rotation)
 
-	if damage_type then
-		Managers.state.blood:spawn_blood_ball(hit_position, hit_direction, damage_type, hit_unit)
-	end
+	return 
+end
+EffectHelper.player_melee_hit_spawn_blood_ball = function (hit_position, hit_direction, damage_type, hit_unit)
+	Managers.state.blood:spawn_blood_ball(hit_position, hit_direction, damage_type, hit_unit)
 
 	return 
 end
-EffectHelper.play_melee_hit_effects = function (sound_event, world, hit_position, sound_type, husk, enemy_type, dealt_damage)
+EffectHelper.play_melee_hit_effects = function (sound_event, world, hit_position, sound_type, husk, hit_unit)
 	local source_id, wwise_world = WwiseUtils.make_position_auto_source(world, hit_position)
+	local player = Managers.player:owner(hit_unit)
 
-	WwiseWorld.set_switch(wwise_world, "enemy_type", enemy_type, source_id)
+	if player then
+		local target_is_local_player = player.local_player
+
+		WwiseWorld.set_switch(wwise_world, "target_is_local_player", tostring(target_is_local_player or false), source_id)
+	else
+		local breed = Unit.get_data(hit_unit, "breed")
+		local enemy_type = breed.name
+
+		WwiseWorld.set_switch(wwise_world, "enemy_type", enemy_type, source_id)
+	end
+
 	WwiseWorld.set_switch(wwise_world, "damage_sound", sound_type, source_id)
 	WwiseWorld.set_switch(wwise_world, "husk", tostring(husk or false), source_id)
 	WwiseWorld.trigger_event(wwise_world, sound_event, source_id)

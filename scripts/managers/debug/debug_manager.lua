@@ -1,4 +1,5 @@
 require("scripts/managers/debug/debug_drawer")
+require("scripts/managers/debug/debug_drawer_release")
 require("scripts/managers/debug/debug")
 require("scripts/managers/debug/profiler_scopes")
 
@@ -90,14 +91,15 @@ DebugManager.drawer = function (self, options)
 	options = options or {}
 	local drawer_name = options.name
 	local drawer = nil
+	local drawer_api = (Application.build() == "release" and DebugDrawerRelease) or DebugDrawer
 
 	if drawer_name == nil then
 		local line_object = World.create_line_object(self._world)
-		drawer = DebugDrawer:new(line_object, options.mode)
+		drawer = drawer_api.new(drawer_api, line_object, options.mode)
 		self._drawers[#self._drawers + 1] = drawer
 	elseif self._drawers[drawer_name] == nil then
 		local line_object = World.create_line_object(self._world)
-		drawer = DebugDrawer:new(line_object, options.mode)
+		drawer = drawer_api.new(drawer_api, line_object, options.mode)
 		self._drawers[drawer_name] = drawer
 	else
 		drawer = self._drawers[drawer_name]

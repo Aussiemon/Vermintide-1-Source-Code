@@ -68,6 +68,7 @@ GenericHuskInteractorExtension.update = function (self, unit, input, dt, context
 		self.state = "doing_interaction"
 		local flow_event = "lua_interaction_started_" .. interaction_type
 
+		Unit.set_flow_variable(interactable_unit, "lua_interactor_unit", unit)
 		Unit.flow_event(interactable_unit, flow_event)
 	end
 

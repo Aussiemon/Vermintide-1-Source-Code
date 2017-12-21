@@ -390,6 +390,65 @@ BuffTemplates = {
 			}
 		}
 	},
+	brawl_knocked_down = {
+		buffs = {
+			{
+				remove_buff_func = "remove_brawl_defeated_buff",
+				name = "brawl_defeated",
+				apply_buff_func = "apply_brawl_defeated_buff",
+				duration = 6
+			}
+		}
+	},
+	brawl_beer = {
+		trait_name = "brawl_beer",
+		apply_on = "wield",
+		deactivation_sound = "Stop_pub_brawl_drunk_loop",
+		activation_sound = "Play_pub_brawl_drunk_loop",
+		buffs = {
+			{
+				remove_buff_func = "remove_brawl_drunk_buff",
+				name = "brawl_drunk",
+				apply_buff_func = "apply_brawl_drunk_buff"
+			},
+			{
+				remove_buff_name = "planted_return_to_normal_movement",
+				name = "decrease_speed",
+				lerp_time = 0.2,
+				multiplier = 0.8,
+				update_func = "update_action_lerp_movement_buff",
+				remove_buff_func = "remove_action_lerp_movement_buff",
+				apply_buff_func = "apply_action_lerp_movement_buff",
+				path_to_movement_setting_to_modify = {
+					"move_speed"
+				}
+			},
+			{
+				remove_buff_name = "planted_return_to_normal_crouch_movement",
+				name = "decrease_crouch_speed",
+				lerp_time = 0.2,
+				multiplier = 0.8,
+				update_func = "update_charging_action_lerp_movement_buff",
+				remove_buff_func = "remove_action_lerp_movement_buff",
+				apply_buff_func = "apply_action_lerp_movement_buff",
+				path_to_movement_setting_to_modify = {
+					"crouch_move_speed"
+				}
+			},
+			{
+				remove_buff_name = "planted_return_to_normal_walk_movement",
+				name = "decrease_walk_speed",
+				lerp_time = 0.2,
+				multiplier = 0.8,
+				update_func = "update_charging_action_lerp_movement_buff",
+				remove_buff_func = "remove_action_lerp_movement_buff",
+				apply_buff_func = "apply_action_lerp_movement_buff",
+				path_to_movement_setting_to_modify = {
+					"walk_move_speed"
+				}
+			}
+		}
+	},
 	damage_boost_potion_weak = {
 		activation_effect = "fx/screenspace_potion_01",
 		deactivation_sound = "hud_gameplay_stance_deactivate",

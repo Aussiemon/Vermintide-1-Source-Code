@@ -1240,8 +1240,10 @@ StateIngame._check_exit = function (self, t)
 			end
 
 			local is_private = self._lobby_client:lobby_data("is_private")
+			local difficulty = Managers.state.difficulty:get_difficulty()
 			host_migration_info.lobby_data = {
-				is_private = is_private
+				is_private = is_private,
+				difficulty = difficulty
 			}
 			self.parent.loading_context.host_migration_info = host_migration_info
 			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
@@ -1509,9 +1511,6 @@ StateIngame.on_exit = function (self, application_shutdown)
 
 	self.free_flight_manager = nil
 	self.parent = nil
-
-	if rawget(_G, "Steam") then
-	end
 
 	if self._debug_event_manager_rpc then
 		self._debug_event_manager_rpc:delete()

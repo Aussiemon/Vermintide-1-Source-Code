@@ -73,10 +73,11 @@ InventorySettings = {
 			name = "slot_level_event",
 			category = "level_event",
 			drop_reasons = {
+				grabbed_by_pack_master = true,
+				pounced_down = true,
 				death = true,
 				knocked_down = true,
-				grabbed_by_pack_master = true,
-				pounced_down = true
+				forced_drop = true
 			}
 		}
 	},

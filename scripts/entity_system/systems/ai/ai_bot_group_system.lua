@@ -74,6 +74,16 @@ AIBotGroupSystem.init = function (self, context, system_name)
 	}
 	self._available_health_pickups = {}
 	self._available_ammo_pickups = {}
+	local mule_pickups = {}
+
+	for name, pickup_settings in pairs(AllPickups) do
+		if pickup_settings.bots_mule_pickup then
+			local slot = pickup_settings.slot_name
+			mule_pickups[slot] = mule_pickups[slot] or {}
+		end
+	end
+
+	self._available_mule_pickups = mule_pickups
 	self._last_key_in_available_pickups = nil
 	self._update_pickups_at = -math.huge
 	self._used_covers = {}
@@ -404,7 +414,6 @@ AIBotGroupSystem._find_origin = function (self, nav_world, selected_unit)
 	return origin_pos
 end
 AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_unit)
-	local unit_pos = POSITION_LOOKUP[selected_unit]
 	local locomotion_ext = ScriptUnit.extension(selected_unit, "locomotion_system")
 	local current_velocity = locomotion_ext.current_velocity(locomotion_ext)
 	local velocity = nil
@@ -415,20 +424,27 @@ AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_un
 		velocity = locomotion_ext.average_velocity(locomotion_ext)
 	end
 
-	local unit_is_on_navmesh, z = GwNavQueries.triangle_from_position(nav_world, unit_pos, 5, 5)
+	local unit_pos = POSITION_LOOKUP[selected_unit]
+	local last_nav_mesh_pos = ScriptUnit.extension(selected_unit, "whereabouts_system"):last_position_onground_on_navmesh()
 	local ray_start_pos = nil
 
-	if unit_is_on_navmesh then
-		ray_start_pos = Vector3(unit_pos.x, unit_pos.y, z)
+	if last_nav_mesh_pos and Vector3.distance_squared(unit_pos, last_nav_mesh_pos) < 4 then
+		ray_start_pos = last_nav_mesh_pos
 	else
-		ray_start_pos = GwNavQueries.inside_position_from_outside_position(nav_world, unit_pos, 5, 5, 5, 0.5)
+		local unit_is_on_navmesh, z = GwNavQueries.triangle_from_position(nav_world, unit_pos, 5, 5)
+
+		if unit_is_on_navmesh then
+			ray_start_pos = Vector3(unit_pos.x, unit_pos.y, z)
+		else
+			ray_start_pos = GwNavQueries.inside_position_from_outside_position(nav_world, unit_pos, 5, 5, 5, 0.5)
+		end
 	end
 
 	local cluster_position = nil
 
 	if ray_start_pos then
 		local distance, ray_pos = self._raycast(self, nav_world, ray_start_pos, velocity, 5)
-		cluster_position = Vector3.lerp(unit_pos, ray_pos, 0.6)
+		cluster_position = Vector3.lerp(ray_start_pos, ray_pos, 0.6)
 		local success, z = GwNavQueries.triangle_from_position(nav_world, cluster_position, 5, 5)
 
 		if success then
@@ -901,6 +917,9 @@ AIBotGroupSystem._update_pickups = function (self, dt, t)
 	Profiler.start("update who takes what health")
 	self._update_health_pickups(self, dt, t)
 	Profiler.stop("update who takes what health")
+	Profiler.start("update who takes what mule pickup")
+	self._update_mule_pickups(self, dt, t)
+	Profiler.stop("update who takes what mule pickup")
 	Profiler.stop("update pickups")
 
 	return 
@@ -910,6 +929,7 @@ local PICKUP_FETCH_RESULTS = {}
 AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 	local self_pos = POSITION_LOOKUP[unit]
 	local hp_pickups = self._available_health_pickups
+	local mule_pickups = self._available_mule_pickups
 	local bot_ai_data = self._bot_ai_data
 	local valid_until = t + 5
 
@@ -939,9 +959,10 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 
 		if pickup_extension and (not aware_extension or aware_extension.has_been_seen or ScriptUnit.extension(pickup_unit, "ping_system"):pinged()) then
 			local pickup_name = pickup_extension.pickup_name
+			local pickup_data = AllPickups[pickup_name]
 
 			if pickup_name == "healing_draught" or pickup_name == "first_aid_kit" or pickup_name == "tome" then
-				local template = BackendUtils.get_item_template(ItemMasterList[AllPickups[pickup_name].item_name])
+				local template = BackendUtils.get_item_template(ItemMasterList[pickup_data.item_name])
 
 				if not hp_pickups[pickup_unit] then
 					hp_pickups[pickup_unit] = {
@@ -952,6 +973,9 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 					hp_pickups[pickup_unit].valid_until = valid_until
 					hp_pickups[pickup_unit].template = template
 				end
+			elseif pickup_data.bots_mule_pickup then
+				local slot_name = pickup_data.slot_name
+				mule_pickups[slot_name][pickup_unit] = valid_until
 			elseif pickup_name == "all_ammo" or (pickup_name == "all_ammo_small" and game_mode_key == "survival") then
 				for unit, data in pairs(bot_ai_data) do
 					local bb = data.blackboard
@@ -1039,13 +1063,115 @@ local function find_permutation(current_bot_index, current_utility, solution, be
 	return 
 end
 
+local ASSIGNED_MULE_PICKUPS_TEMP = {}
+AIBotGroupSystem._update_mule_pickups = function (self, dt, t)
+	local Unit_alive = Unit.alive
+	local Vector3_distance_squared = Vector3.distance_squared
+	local human_players = Managers.player:human_players()
+	local max_pickup_dist_sq = 400
+	local assigned_pickup_valid_until = t + 15
+
+	table.clear(ASSIGNED_MULE_PICKUPS_TEMP)
+
+	for unit, data in pairs(self._bot_ai_data) do
+		local blackboard = data.blackboard
+		local current_pickup = blackboard.mule_pickup
+
+		if current_pickup then
+			if not Unit.alive(current_pickup) or max_pickup_dist_sq < Vector3_distance_squared(POSITION_LOOKUP[current_pickup], data.follow_position or POSITION_LOOKUP[current_pickup]) then
+				blackboard.mule_pickup = nil
+			else
+				local pickup_ext = ScriptUnit.extension(current_pickup, "pickup_system")
+				local pickup_name = pickup_ext.pickup_name
+				local slot_name = AllPickups[pickup_name].slot_name
+
+				if ScriptUnit.extension(unit, "inventory_system"):get_slot_data(slot_name) then
+					blackboard.mule_pickup = nil
+				else
+					ASSIGNED_MULE_PICKUPS_TEMP[blackboard.mule_pickup] = true
+					blackboard.mule_pickup_dist_squared = Vector3_distance_squared(POSITION_LOOKUP[unit], POSITION_LOOKUP[blackboard.mule_pickup])
+				end
+			end
+		end
+	end
+
+	for slot_name, available_pickups in pairs(self._available_mule_pickups) do
+		local num_items = 0
+
+		for unit, valid_until in pairs(available_pickups) do
+			if Unit_alive(unit) and t <= valid_until then
+				num_items = num_items + 1
+			else
+				available_pickups[unit] = nil
+			end
+		end
+
+		local num_players = 0
+
+		for _, player in pairs(human_players) do
+			local player_unit = player.player_unit
+
+			if AiUtils.unit_alive(player_unit) then
+				local inventory_ext = ScriptUnit.extension(player_unit, "inventory_system")
+				local status_ext = ScriptUnit.extension(player_unit, "status_system")
+				local item = inventory_ext.get_slot_data(inventory_ext, slot_name)
+
+				if not item and not status_ext.is_ready_for_assisted_respawn(status_ext) then
+					local player_pos = POSITION_LOOKUP[player_unit]
+
+					for pickup_unit, data in pairs(available_pickups) do
+						local pos = POSITION_LOOKUP[pickup_unit]
+
+						if Vector3_distance_squared(pos, player_pos) < max_pickup_dist_sq then
+							num_players = num_players + 1
+						end
+					end
+				end
+			end
+		end
+
+		if num_players == 0 then
+			for unit, data in pairs(self._bot_ai_data) do
+				local blackboard = data.blackboard
+
+				if not blackboard.mule_pickup and not ScriptUnit.extension(unit, "inventory_system"):get_slot_data(slot_name) then
+					local best_pickup_dist_sq = math.huge
+					local best_pickup = nil
+
+					for pickup_unit, valid_until in pairs(available_pickups) do
+						if not ASSIGNED_MULE_PICKUPS_TEMP[pickup_unit] then
+							local pickup_pos = POSITION_LOOKUP[pickup_unit]
+							local bot_pos = POSITION_LOOKUP[unit]
+							local bot_dist_sq = Vector3_distance_squared(bot_pos, pickup_pos)
+							local follow_dist_sq = Vector3_distance_squared(data.follow_position or bot_pos, pickup_pos)
+
+							if follow_dist_sq < max_pickup_dist_sq and bot_dist_sq < best_pickup_dist_sq then
+								best_pickup = pickup_unit
+								best_pickup_dist_sq = bot_dist_sq
+							end
+						end
+					end
+
+					if best_pickup then
+						blackboard.mule_pickup = best_pickup
+						blackboard.mule_pickup_dist_squared = best_pickup_dist_sq
+						ASSIGNED_MULE_PICKUPS_TEMP[best_pickup] = true
+					end
+				end
+			end
+		end
+	end
+
+	return 
+end
 AIBotGroupSystem._update_health_pickups = function (self, dt, t)
+	local Unit_alive = Unit.alive
 	local available_pickups = self._available_health_pickups
 	local num_health_items = 0
 	local num_aux_items = 0
 
 	for unit, info in pairs(available_pickups) do
-		if not Unit.alive(unit) or info.valid_until < t then
+		if not Unit_alive(unit) or info.valid_until < t then
 			available_pickups[unit] = nil
 		elseif info.template.can_heal_self then
 			num_health_items = num_health_items + 1
@@ -1638,7 +1764,7 @@ local function detect_oobb(nav_world, traverse_logic, bot_position, bot_height, 
 	return 
 end
 
-AIBotGroupSystem.aoe_thread_created = function (self, position, shape, size, rotation, duration)
+AIBotGroupSystem.aoe_threat_created = function (self, position, shape, size, rotation, duration)
 	local bot_radius = 0.5
 	local bot_height = 1.8
 	local detect_func = nil

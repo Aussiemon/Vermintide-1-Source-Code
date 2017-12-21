@@ -764,6 +764,8 @@ PlayerUnitLocomotionExtension.teleport_to = function (self, pos, rot)
 		self.first_person_extension:set_rotation(rot)
 	end
 
+	self.move_to_non_intersecting_position(self)
+
 	return 
 end
 PlayerUnitLocomotionExtension.enable_rotation_towards_velocity = function (self, enabled, target_rotation, duration)

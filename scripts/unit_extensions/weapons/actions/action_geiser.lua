@@ -85,12 +85,13 @@ ActionGeiser.fire = function (self, reason)
 	local size = "_large"
 	local overcharge = current_action.overcharge_type
 	local ignore_hitting_allies = not Managers.state.difficulty:get_difficulty_settings().friendly_fire_ranged
+	local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
 
 	if charge_value < 0.33 then
 		size = "_small"
 	elseif charge_value < 0.66 then
 		size = "_medium"
-	elseif 1 <= charge_value and not global_is_inside_inn then
+	elseif 1 <= charge_value and not is_inside_inn then
 		local owner_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
 		local damage_source_id = NetworkLookup.damage_sources[self.item_name]
 		local explosion_template_name = current_action.aoe_name

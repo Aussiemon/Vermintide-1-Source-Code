@@ -70,7 +70,7 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 				self.tagquery_loader:load_file(file_name)
 			end
 
-			if Application.can_get("lua", file_name .. "_markers") then
+			if DialogueSettings.markers_enabled and Application.can_get("lua", file_name .. "_markers") then
 				local markers = dofile(file_name .. "_markers")
 
 				for name, marker in pairs(markers) do
@@ -88,7 +88,7 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 				self.tagquery_loader:load_file(file_name)
 			end
 
-			if Application.can_get("lua", file_name .. "_markers") then
+			if DialogueSettings.markers_enabled and Application.can_get("lua", file_name .. "_markers") then
 				local markers = dofile(file_name .. "_markers")
 
 				for name, marker in pairs(markers) do
@@ -642,7 +642,7 @@ DialogueSystem._trigger_marker = function (self, marker_data)
 			local go_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, source_player)
 			local source_id = wwise_world.trigger_event(wwise_world, sound_event, wwise_source_id)
 
-			if source_id ~= 0 then
+			if source_id ~= 0 and DialogueSettings.markers_enabled then
 				local marker_id = NetworkLookup.markers[sound_event]
 
 				network_manager.network_transmit:send_rpc_clients("rpc_play_marker_event", go_id, marker_id)
@@ -694,7 +694,10 @@ DialogueSystem.physics_async_update = function (self, context, t)
 	end
 
 	self.dialogue_state_handler:update(t)
-	self._handle_wwise_markers(self, dt, t)
+
+	if DialogueSettings.markers_enabled then
+		self._handle_wwise_markers(self, dt, t)
+	end
 
 	local player_manager = Managers.player
 	self.global_context.level_time = t
@@ -1454,6 +1457,15 @@ DialogueSystem.ResetMemoryTime = function (self, memory, name, unit)
 
 	if name == "time_since_conversation" then
 		story_tick_time = 0
+	end
+
+	return 
+end
+DialogueSystem.AddMemoryTime = function (self, memory, name, unit, addition)
+	local newtime = LOCAL_GAMETIME + addition
+
+	if Unit.alive(unit) then
+		ScriptUnit.extension(unit, "dialogue_system")[memory][name] = newtime
 	end
 
 	return 

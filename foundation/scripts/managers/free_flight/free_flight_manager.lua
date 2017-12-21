@@ -414,6 +414,9 @@ FreeFlightManager._enter_global_free_flight = function (self, data)
 	self.input_manager:device_unblock_service("keyboard", 1, "Debug")
 	self.input_manager:device_unblock_service("mouse", 1, "Debug")
 	self.input_manager:device_unblock_service("gamepad", 1, "Debug")
+	self.input_manager:device_unblock_service("keyboard", 1, "DebugMenu")
+	self.input_manager:device_unblock_service("mouse", 1, "DebugMenu")
+	self.input_manager:device_unblock_service("gamepad", 1, "DebugMenu")
 
 	return 
 end
@@ -544,6 +547,12 @@ FreeFlightManager._enter_free_flight = function (self, player, data)
 	self.input_manager:block_device_except_service("FreeFlight", "keyboard", nil, "free_flight")
 	self.input_manager:block_device_except_service("FreeFlight", "mouse", nil, "free_flight")
 	self.input_manager:block_device_except_service("FreeFlight", "gamepad", nil, "free_flight")
+	self.input_manager:device_unblock_service("keyboard", 1, "Debug")
+	self.input_manager:device_unblock_service("mouse", 1, "Debug")
+	self.input_manager:device_unblock_service("gamepad", 1, "Debug")
+	self.input_manager:device_unblock_service("keyboard", 1, "DebugMenu")
+	self.input_manager:device_unblock_service("mouse", 1, "DebugMenu")
+	self.input_manager:device_unblock_service("gamepad", 1, "DebugMenu")
 
 	return 
 end

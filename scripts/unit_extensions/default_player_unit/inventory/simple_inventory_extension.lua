@@ -44,6 +44,19 @@ SimpleInventoryExtension.init = function (self, extension_init_context, unit, ex
 	self._loaded_projectile_settings = {}
 	self._selected_consumable_slot = nil
 	self._previously_wielded_weapon_slot = "slot_melee"
+	self._delayed_drop_pickups_reason = nil
+	self._finish_wield_time = 0
+
+	Managers.state.event:register(self, "ingame_ui_view_on_enter", "event_ingame_ui_view_on_enter")
+
+	return 
+end
+SimpleInventoryExtension.event_ingame_ui_view_on_enter = function (self, view_name)
+	local buff_extension = ScriptUnit.extension(self._unit, "buff_system")
+
+	if buff_extension.has_buff_type(buff_extension, "brawl_drunk") then
+		self.set_delayed_drop_pickups_reason(self, "forced_drop")
+	end
 
 	return 
 end
@@ -151,6 +164,7 @@ SimpleInventoryExtension.destroy = function (self)
 		GearUtils.destroy_slot(self._world, self._unit, slot_data, self._equipment, true)
 	end
 
+	Managers.state.event:unregister("ingame_ui_view_on_enter", self)
 	self._despawn_attached_units(self)
 
 	return 
@@ -222,6 +236,14 @@ SimpleInventoryExtension.update = function (self, unit, input, dt, context, t)
 	self.update_loaded_projectile_settings(self)
 	self.update_resync_loadout(self)
 
+	local delayed_drop_pickups_reason = self._delayed_drop_pickups_reason
+
+	if delayed_drop_pickups_reason ~= nil then
+		self.check_and_drop_pickups(self, delayed_drop_pickups_reason)
+
+		self._delayed_drop_pickups_reason = nil
+	end
+
 	return 
 end
 SimpleInventoryExtension.recently_acquired = function (self, slot_name)
@@ -283,8 +305,6 @@ SimpleInventoryExtension.rewield_wielded_slot = function (self)
 	return 
 end
 SimpleInventoryExtension.wield = function (self, slot_name)
-	self._despawn_attached_units(self)
-
 	local equipment = self._equipment
 	local slot_data = equipment.slots[slot_name]
 
@@ -336,13 +356,20 @@ SimpleInventoryExtension.wield = function (self, slot_name)
 		end
 	end
 
-	self._spawn_attached_units(self, item_template.first_person_attached_units)
-
 	if slot_name == "slot_melee" or slot_name == "slot_ranged" then
 		self._previously_wielded_weapon_slot = slot_name
 	end
 
+	local t = Managers.time:time("game")
+	local wield_time = item_template.wield_time or 0
+	self._finish_wield_time = t + wield_time
+
 	return 
+end
+SimpleInventoryExtension.is_wielding = function (self)
+	local t = Managers.time:time("game")
+
+	return t < self._finish_wield_time
 end
 SimpleInventoryExtension._despawn_attached_units = function (self)
 	local attached_units = self._attached_units
@@ -1009,25 +1036,27 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 			local should_drop = slot_drop_reasons and slot_drop_reasons[drop_reason]
 
 			if should_drop then
-				if pickup_data and slot_name ~= "slot_level_event" then
-					local random_vector = Vector3(math.random(-1, 1) + i*2, math.random(-1, 1) + i, math.random(0, 1))
-					local random_angle = math.random(-math.half_pi, math.half_pi)
-					local random_direction = Vector3.normalize(random_vector)
-					local position = self_pos + random_vector*0.2
-					local rotation = Quaternion.axis_angle(random_direction, random_angle)
-					local pickup_name = pickup_data.pickup_name
-					local pickup_name_id = NetworkLookup.pickup_names[pickup_name]
-					local pickup_spawn_type = "dropped"
-					local pickup_spawn_type_id = NetworkLookup.pickup_spawn_types[pickup_spawn_type]
-					local network_manager = Managers.state.network
+				if not item_data.destroy_on_drop then
+					if pickup_data and slot_name ~= "slot_level_event" then
+						local random_vector = Vector3(math.random(-1, 1) + i*2, math.random(-1, 1) + i, math.random(0, 1))
+						local random_angle = math.random(-math.half_pi, math.half_pi)
+						local random_direction = Vector3.normalize(random_vector)
+						local position = self_pos + random_vector*0.2
+						local rotation = Quaternion.axis_angle(random_direction, random_angle)
+						local pickup_name = pickup_data.pickup_name
+						local pickup_name_id = NetworkLookup.pickup_names[pickup_name]
+						local pickup_spawn_type = "dropped"
+						local pickup_spawn_type_id = NetworkLookup.pickup_spawn_types[pickup_spawn_type]
+						local network_manager = Managers.state.network
 
-					if is_within_level then
-						network_manager.network_transmit:send_rpc_server("rpc_spawn_pickup_with_physics", pickup_name_id, position, rotation, pickup_spawn_type_id)
+						if is_within_level then
+							network_manager.network_transmit:send_rpc_server("rpc_spawn_pickup_with_physics", pickup_name_id, position, rotation, pickup_spawn_type_id)
+						end
+
+						i = i + 1
+					elseif slot_name == "slot_level_event" then
+						self.drop_level_event_item(self, slot_data)
 					end
-
-					i = i + 1
-				elseif slot_name == "slot_level_event" then
-					self.drop_level_event_item(self, slot_data)
 				end
 
 				self.destroy_slot(self, slot_name)
@@ -1038,6 +1067,11 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 			end
 		end
 	end
+
+	return 
+end
+SimpleInventoryExtension.set_delayed_drop_pickups_reason = function (self, reason)
+	self._delayed_drop_pickups_reason = reason
 
 	return 
 end

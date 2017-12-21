@@ -736,6 +736,10 @@ StateLoading._update_loading_screen = function (self, dt, t)
 	if script_data.subtitle_debug then
 		local skip = Mouse.button(Mouse.button_index("left")) == 1 and Mouse.button(Mouse.button_index("right")) == 1
 		waiting_for_vo = not skip
+
+		if permission_to_go_to_next_state and waiting_for_vo then
+			Debug.text("[SubtitleDebug] Waiting for both mouse buttons to progress...")
+		end
 	end
 
 	if permission_to_go_to_next_state and not self._permission_to_go_to_next_state and not waiting_for_vo then

@@ -1,4 +1,5 @@
 require("scripts/entity_system/systems/animation/animation_callback_templates")
+require("scripts/unit_extensions/animation/level_unit_animation_extension")
 
 AnimationSystem = class(AnimationSystem, ExtensionSystemBase)
 local position_lookup = POSITION_LOOKUP
@@ -10,8 +11,10 @@ local RPCS = {
 	"rpc_sync_anim_state_7",
 	"rpc_sync_anim_state_9",
 	"rpc_sync_anim_state_11",
+	"rpc_sync_level_unit_anim_state_1",
 	"rpc_anim_event",
 	"rpc_anim_event_variable_float",
+	"rpc_level_unit_anim_event",
 	"rpc_link_unit",
 	"rpc_set_ragdoll_start_parameters",
 	"rpc_add_ragdoll_to_update_list",
@@ -20,7 +23,9 @@ local RPCS = {
 	"rpc_anim_set_variable_by_time",
 	"rpc_update_anim_variable_done"
 }
-local extensions = {}
+local extensions = {
+	"LevelUnitAnimationExtension"
+}
 AnimationSystem.init = function (self, entity_system_creation_context, system_name)
 	AnimationSystem.super.init(self, entity_system_creation_context, system_name, extensions)
 	Managers.state.event:register(self, "animation_callback", "animation_callback")
@@ -380,6 +385,14 @@ AnimationSystem.rpc_sync_anim_state = function (self, sender, go_id, ...)
 
 	return 
 end
+AnimationSystem.rpc_sync_level_unit_anim_state = function (self, sender, level_unit_index, ...)
+	local world = self.world
+	local unit = LevelHelper:unit_by_index(world, level_unit_index)
+
+	Unit.animation_set_state(unit, ...)
+
+	return 
+end
 AnimationSystem.rpc_sync_anim_state_1 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_3 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_4 = AnimationSystem.rpc_sync_anim_state
@@ -387,6 +400,7 @@ AnimationSystem.rpc_sync_anim_state_5 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_7 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_9 = AnimationSystem.rpc_sync_anim_state
 AnimationSystem.rpc_sync_anim_state_11 = AnimationSystem.rpc_sync_anim_state
+AnimationSystem.rpc_sync_level_unit_anim_state_1 = AnimationSystem.rpc_sync_level_unit_anim_state
 AnimationSystem.rpc_anim_event_variable_float = function (self, sender, anim_id, go_id, variable_id, variable_value)
 	local unit = self.unit_storage:unit(go_id)
 
@@ -421,6 +435,27 @@ AnimationSystem.rpc_anim_event = function (self, sender, anim_id, go_id)
 
 	if self.is_server then
 		self.network_transmit:send_rpc_clients_except("rpc_anim_event", sender, anim_id, go_id)
+	end
+
+	if Unit.has_animation_state_machine(unit) then
+		local event = NetworkLookup.anims[anim_id]
+
+		assert(event, "[GameNetworkManager] Lookup missing for event_id", anim_id)
+		Unit.animation_event(unit, event)
+	end
+
+	return 
+end
+AnimationSystem.rpc_level_unit_anim_event = function (self, sender, anim_id, level_unit_index)
+	local world = self.world
+	local unit = LevelHelper:unit_by_index(world, level_unit_index)
+
+	if not unit or not Unit.alive(unit) then
+		return 
+	end
+
+	if self.is_server then
+		self.network_transmit:send_rpc_clients_except("rpc_level_unit_anim_event", sender, anim_id, level_unit_index)
 	end
 
 	if Unit.has_animation_state_machine(unit) then

@@ -973,6 +973,9 @@ weapon_template.attack_meta_data = {
 		arc = 0
 	}
 }
+weapon_template.defense_meta_data = {
+	push = "light"
+}
 weapon_template.aim_assist_settings = {
 	max_range = 5,
 	no_aim_input_multiplier = 0,

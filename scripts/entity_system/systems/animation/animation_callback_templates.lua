@@ -339,7 +339,7 @@ AnimationCallbackTemplates.server.anim_cb_stormvermin_push = function (unit, par
 	local anim_cb = active_node.anim_cb_stormvermin_push
 
 	if anim_cb then
-		anim_cb(anim_cb, unit, blackboard, target_unit)
+		anim_cb(active_node, unit, blackboard, target_unit)
 	end
 
 	return 
@@ -361,7 +361,7 @@ AnimationCallbackTemplates.server.anim_cb_ratogre_slam = function (unit, param)
 	local anim_cb = active_node.anim_cb_ratogre_slam
 
 	if anim_cb then
-		anim_cb(anim_cb, unit, blackboard)
+		anim_cb(active_node, unit, blackboard)
 	end
 
 	return 
@@ -377,7 +377,7 @@ AnimationCallbackTemplates.server.anim_cb_shove_done = function (unit, param)
 	local anim_cb = active_node.anim_cb_shove_done
 
 	if anim_cb then
-		anim_cb(anim_cb, unit, blackboard)
+		anim_cb(active_node, unit, blackboard)
 	end
 
 	return 
@@ -394,7 +394,7 @@ AnimationCallbackTemplates.server.anim_cb_change_target_finished = function (uni
 	local anim_cb = active_node.anim_cb_change_target_finished
 
 	if anim_cb then
-		anim_cb(anim_cb, unit, blackboard)
+		anim_cb(active_node, unit, blackboard)
 	end
 
 	return 

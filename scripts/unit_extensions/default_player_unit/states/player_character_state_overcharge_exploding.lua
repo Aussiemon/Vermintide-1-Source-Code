@@ -6,7 +6,8 @@ PLayerCharacterStateOverchargeExploding.init = function (self, character_state_i
 	self.movement_speed = 0
 	self.movement_speed_limit = 1
 	self.last_input_direction = Vector3Box(0, 0, 0)
-	self.inside_inn = global_is_inside_inn
+	local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
+	self.inside_inn = is_inside_inn
 
 	return 
 end

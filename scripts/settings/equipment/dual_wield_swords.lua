@@ -873,11 +873,11 @@ weapon_template.wield_anim = "to_dual_swords"
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,
-		arc = 0
+		arc = 1
 	},
 	hold_attack = {
 		penetrating = true,
-		arc = 0
+		arc = 1
 	}
 }
 weapon_template.aim_assist_settings = {

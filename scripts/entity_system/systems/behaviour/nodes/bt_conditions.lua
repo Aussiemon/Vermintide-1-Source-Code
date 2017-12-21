@@ -248,8 +248,10 @@ BTConditions.has_target_and_ammo_greater_than = function (blackboard, args)
 
 	return ammo_ok and overcharge_ok and not obstructed
 end
-BTConditions.can_loot_ammo = function (blackboard)
-	return blackboard.ammo_pickup and blackboard.needs_ammo and blackboard.ammo_dist < 2.5 and blackboard.ammo_pickup == blackboard.interaction_unit
+BTConditions.can_loot = function (blackboard)
+	local max_dist = 3.2
+
+	return (blackboard.health_pickup and blackboard.allowed_to_take_health_pickup and blackboard.health_dist < max_dist and blackboard.health_pickup == blackboard.interaction_unit) or (blackboard.ammo_pickup and blackboard.needs_ammo and blackboard.ammo_dist < max_dist and blackboard.ammo_pickup == blackboard.interaction_unit) or (blackboard.mule_pickup and blackboard.mule_pickup == blackboard.interaction_unit and blackboard.mule_pickup_dist_squared < max_dist*max_dist)
 end
 BTConditions.bot_should_heal = function (blackboard)
 	local self_unit = blackboard.unit
@@ -270,9 +272,6 @@ BTConditions.bot_should_heal = function (blackboard)
 
 	return is_safe and (hurt or blackboard.force_use_health_pickup or wounded)
 end
-BTConditions.can_loot_med = function (blackboard)
-	return blackboard.health_pickup and blackboard.allowed_to_take_health_pickup and blackboard.health_dist < 2.5 and blackboard.health_pickup == blackboard.interaction_unit
-end
 BTConditions.can_open_door = function (blackboard)
 	local can_interact = false
 
@@ -286,21 +285,11 @@ BTConditions.can_open_door = function (blackboard)
 
 	return can_interact
 end
-BTConditions.is_slot_1_not_wielded = function (blackboard)
-	local self_unit = blackboard.unit
+BTConditions.is_slot_not_wielded = function (blackboard, args)
 	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
+	local wanted_slot = args[1]
 
-	return wielded_slot ~= "slot_melee"
-end
-BTConditions.is_slot_2_not_wielded = function (blackboard)
-	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
-
-	return wielded_slot ~= "slot_ranged"
-end
-BTConditions.is_slot_healthkit_not_wielded = function (blackboard)
-	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
-
-	return wielded_slot ~= "slot_healthkit"
+	return wielded_slot ~= wanted_slot
 end
 
 local function is_there_threat_to_aid(self_unit, proximite_enemies, force_aid)
@@ -338,14 +327,15 @@ BTConditions.can_revive = function (blackboard)
 		local target_ally_unit = blackboard.target_ally_unit
 		local health = ScriptUnit.extension(target_ally_unit, "health_system"):current_health_percent()
 
-		if 0.2 < health and is_there_threat_to_aid(self_unit, blackboard.proximite_enemies, blackboard.force_aid) then
+		if 0.3 < health and is_there_threat_to_aid(self_unit, blackboard.proximite_enemies, blackboard.force_aid) then
 			return false
 		end
 
 		local destination_reached = blackboard.navigation_extension:destination_reached()
 		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
+		local bot_stuck_threshold = 1
 
-		if can_interact_with_ally and (destination_reached or ally_distance < 1) then
+		if can_interact_with_ally and (destination_reached or ally_distance < 1 or Vector3.length_squared(blackboard.locomotion_extension:current_velocity()) < bot_stuck_threshold*bot_stuck_threshold) then
 			return true
 		end
 	end
@@ -365,6 +355,28 @@ BTConditions.can_heal_player = function (blackboard)
 		end
 
 		if 0 < #blackboard.proximite_enemies then
+			return false
+		end
+
+		local self_unit = blackboard.unit
+		local target_ally_unit = blackboard.target_ally_unit
+		local destination_reached = blackboard.navigation_extension:destination_reached()
+		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
+
+		if can_interact_with_ally and destination_reached then
+			return true
+		end
+	end
+
+	return 
+end
+BTConditions.can_help_in_need_player = function (blackboard, args)
+	local need_type = args[1]
+
+	if blackboard.target_ally_need_type == need_type then
+		local ally_distance = blackboard.ally_distance
+
+		if 2.5 < ally_distance then
 			return false
 		end
 

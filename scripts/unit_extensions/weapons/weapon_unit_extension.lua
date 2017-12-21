@@ -170,6 +170,10 @@ WeaponUnitExtension.destroy = function (self)
 		local action_kind = self.current_action_settings.kind
 		local attack_prev = self.actions[action_kind]
 
+		if Unit.alive(self.owner_unit) then
+			self.stop_action(self, "destroy")
+		end
+
 		if attack_prev.destroy then
 			attack_prev.destroy(attack_prev)
 		end

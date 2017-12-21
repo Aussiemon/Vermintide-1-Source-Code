@@ -828,12 +828,12 @@ weapon_template.dodge_speed = 0.9
 weapon_template.dodge_count = 1
 weapon_template.attack_meta_data = {
 	tap_attack = {
-		penetrating = true,
-		arc = 0
+		penetrating = false,
+		arc = 2
 	},
 	hold_attack = {
-		penetrating = false,
-		arc = 1
+		penetrating = true,
+		arc = 0
 	}
 }
 weapon_template.wwise_dep_right_hand = {

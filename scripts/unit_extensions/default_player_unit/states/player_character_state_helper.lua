@@ -785,13 +785,13 @@ CharacterStateHelper._get_chain_action_data = function (item_template, current_a
 		local release_required = action_data.release_required
 		local input_extra_requirement = true
 
-		if release_required and not is_bot_player then
+		if release_required then
 			input_extra_requirement = input_extension.released_input(input_extension, release_required)
 		end
 
 		local hold_required = action_data.hold_required
 
-		if hold_required and not is_bot_player then
+		if hold_required then
 			for index, hold_require in pairs(hold_required) do
 				if input_extension.released_input(input_extension, hold_require) then
 					input_extra_requirement = false

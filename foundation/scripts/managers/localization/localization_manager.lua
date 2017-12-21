@@ -175,7 +175,7 @@ end
 
 LocalizationManager.get_input_action = function (self, text_id)
 	local str = Localizer.lookup(self._localizer, text_id) or "<" .. tostring(text_id) .. ">"
-	local macro = string.match(str, "%b$;[%a%d_\u200b]*:")
+	local macro = string.match(str, "%b$;[%a%d_]*:")
 	local input_action = nil
 
 	if macro then
@@ -189,7 +189,7 @@ LocalizationManager.get_input_action = function (self, text_id)
 end
 LocalizationManager.replace_macro_in_string = function (self, text_id, replacement_str)
 	local str = Localizer.lookup(self._localizer, text_id) or "<" .. tostring(text_id) .. ">"
-	local result, \u200b_ = string.gsub(str, "%b$;[%a%d_\u200b]*:", replacement_str)
+	local result, _ = string.gsub(str, "%b$;[%a%d_]*:", replacement_str)
 
 	return result, str, Localize(text_id)
 end

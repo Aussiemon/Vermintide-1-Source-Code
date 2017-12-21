@@ -123,6 +123,11 @@ weapon_template.ammo_data = {
 	reload_time = 1.8,
 	reload_on_ammo_pickup = true
 }
+weapon_template.attack_meta_data = {
+	max_range = 30,
+	aim_at_node = "j_spine",
+	ignore_enemies_for_obstruction = true
+}
 weapon_template.default_spread_template = "rake_shot"
 weapon_template.right_hand_unit = ""
 weapon_template.right_hand_attachment_node_linking = AttachmentNodeLinking.grudge_raker

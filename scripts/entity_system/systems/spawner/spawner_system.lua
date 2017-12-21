@@ -170,7 +170,6 @@ end
 table.sort(exchange_order, function (name1, name2)
 	return Breeds[name1].exchange_order < Breeds[name2].exchange_order
 end)
-table.dump(exchange_order)
 
 SpawnerSystem._try_spawn_breed = function (self, breed_name, spawn_list_per_breed, spawn_list, breed_limits, active_enemies, group_template)
 	local amount = spawn_list_per_breed[breed_name]

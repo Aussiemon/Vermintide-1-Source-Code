@@ -875,10 +875,11 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 			self.views[old_view]:on_exit(unpack(transition_params))
 		end
 
+		local player_manager = Managers.player
+		local player = player_manager.local_player(player_manager)
+
 		if GameSettingsDevelopment.use_telemetry then
-			local player_manager = Managers.player
 			local time_manager = Managers.time
-			local player = player_manager.local_player(player_manager)
 			local player_id = player.telemetry_id(player)
 			local curr_t = time_manager.time(time_manager, "game")
 
@@ -901,6 +902,7 @@ IngameUI.handle_transition = function (self, new_transition, ...)
 		if new_view and self.views[new_view] and self.views[new_view].on_enter then
 			printf("[IngameUI] menu view on_enter %s", new_view)
 			self.views[new_view]:on_enter(unpack(transition_params))
+			Managers.state.event:trigger("ingame_ui_view_on_enter", new_view)
 		end
 	end
 

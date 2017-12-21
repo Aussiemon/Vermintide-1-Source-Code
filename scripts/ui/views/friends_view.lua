@@ -117,6 +117,8 @@ FriendsView.init = function (self, ingame_ui_context)
 		snap_pixel_positions = true
 	}
 	self.network_server = ingame_ui_context.network_server
+	self.is_server = ingame_ui_context.is_server
+	self.is_in_inn = ingame_ui_context.is_in_inn
 	local input_manager = ingame_ui_context.input_manager
 
 	input_manager.create_input_service(input_manager, "friends_view", "IngameMenuKeymaps", "IngameMenuFilters")
@@ -893,9 +895,13 @@ FriendsView.on_join_button_clicked = function (self)
 				_add_player_join_telemetry(joining_player)
 			end
 
-			Managers.matchmaking:request_join_lobby(lobby_data, {
-				friend_join = true
-			})
+			if not self.is_server or not self.is_in_inn then
+				self.ingame_ui:handle_transition("join_lobby", lobby_data)
+			else
+				Managers.matchmaking:request_join_lobby(lobby_data, {
+					friend_join = true
+				})
+			end
 		end
 	end
 

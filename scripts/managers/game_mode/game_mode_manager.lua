@@ -16,7 +16,6 @@ GameModeManager.init = function (self, world, lobby_host, lobby_client, level_tr
 	self._lobby_client = lobby_client
 	self.is_server = not not lobby_host
 	self._world = world
-	self._game_mode_key = game_mode_key
 	self._level_key = level_key
 	self._end_conditions_met = false
 	self._gm_event_end_conditions_met = false
@@ -302,6 +301,12 @@ GameModeManager._init_game_mode = function (self, game_mode_key)
 	local settings = GameModeSettings[game_mode_key]
 	local class = rawget(_G, settings.class_name)
 	self._game_mode = class.new(class, settings, self._world, self.network_server, self.level_transition_handler)
+	self._game_mode_key = game_mode_key
+
+	return 
+end
+GameModeManager.change_game_mode = function (self, new_game_mode_key)
+	self._init_game_mode(self, new_game_mode_key)
 
 	return 
 end
@@ -356,6 +361,9 @@ GameModeManager.retry_level = function (self)
 	self.level_transition_handler:reload_level()
 
 	return 
+end
+GameModeManager.pvp_enabled = function (self)
+	return self._game_mode:pvp_enabled()
 end
 GameModeManager.start_specific_level = function (self, level_key, time_until_start)
 	if time_until_start then

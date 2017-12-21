@@ -189,14 +189,29 @@ BTStormVerminAttackAction._init_attack = function (self, unit, blackboard, actio
 			local pos = self._calculate_cylinder_collision(self, action, POSITION_LOOKUP[unit], rot)
 			local size = Vector3(action.radius, action.radius, action.height*0.5)
 
-			Managers.state.entity:system("ai_bot_group_system"):aoe_thread_created(pos, "cylinder", size, nil, bot_threat_duration)
+			Managers.state.entity:system("ai_bot_group_system"):aoe_threat_created(pos, "cylinder", size, nil, bot_threat_duration)
 		elseif action.collision_type == "oobb" or not action.collision_type then
 			local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.special_attacking_target)
 			local pos, rot, size = self._calculate_oobb_collision(self, action, POSITION_LOOKUP[unit], rot)
 
-			Managers.state.entity:system("ai_bot_group_system"):aoe_thread_created(pos, "oobb", size, rot, bot_threat_duration)
+			Managers.state.entity:system("ai_bot_group_system"):aoe_threat_created(pos, "oobb", size, rot, bot_threat_duration)
 		end
 	end
+
+	return 
+end
+BTStormVerminAttackAction._attack_threat_over = function (self, unit, blackboard, action)
+	local target_unit = blackboard.special_attacking_target
+	local target_alive = Unit.alive(target_unit)
+	local target_hit = blackboard.hit_players[target_unit]
+
+	if target_alive and not target_hit and ((action.throw_dialogue_system_event_on_dodged_attack and blackboard.target_dodged) or action.throw_dialogue_system_event_on_missed_attack) then
+		local target_name = ScriptUnit.extension(target_unit, "dialogue_system").context.player_profile
+
+		Managers.state.entity:system("surrounding_aware_system"):add_system_event(unit, "enemy_attack", DialogueSettings.enemy_attack_distance, "attack_tag", action.name, "target_name", target_name, "attack_hit", false)
+	end
+
+	blackboard.special_attacking_target = nil
 
 	return 
 end
@@ -217,16 +232,13 @@ BTStormVerminAttackAction.leave = function (self, unit, blackboard, t, reason, d
 		LocomotionUtils.set_animation_translation_scale(unit, Vector3(1, 1, 1))
 	end
 
+	if blackboard.special_attacking_target and not destroy then
+		self._attack_threat_over(self, unit, blackboard, action)
+	end
+
 	local target_unit = blackboard.special_attacking_target
 	local target_alive = Unit.alive(target_unit)
 	local target_hit = blackboard.hit_players[target_unit]
-
-	if not destroy and target_alive and not target_hit and ((action.throw_dialogue_system_event_on_dodged_attack and blackboard.target_dodged) or action.throw_dialogue_system_event_on_missed_attack) then
-		local target_name = ScriptUnit.extension(target_unit, "dialogue_system").context.player_profile
-
-		Managers.state.entity:system("surrounding_aware_system"):add_system_event(unit, "enemy_attack", DialogueSettings.enemy_attack_distance, "attack_tag", action.name, "target_name", target_name, "attack_hit", false)
-	end
-
 	local inc_stat_on_dodged = action.increment_stat_on_attack_dodged
 
 	if inc_stat_on_dodged and not destroy and target_alive and not target_hit and blackboard.target_dodged then
@@ -463,6 +475,8 @@ BTStormVerminAttackAction._update_overlap = function (self, unit, blackboard, ac
 				Managers.state.network:anim_event(unit, randomize(action.wall_collision_anim))
 			end
 		end
+	elseif blackboard.special_attacking_target and end_t < last_t then
+		self._attack_threat_over(self, unit, blackboard, action)
 	end
 
 	blackboard.last_attack_overlap_position:store(new_pos)
@@ -477,7 +491,11 @@ BTStormVerminAttackAction._update_nav_mesh_wave = function (self, unit, blackboa
 	local start_t = blackboard.overlap_start_time
 	local end_t = blackboard.overlap_end_time
 
-	if t < start_t or end_t < t then
+	if end_t < t and blackboard.special_attacking_target then
+		self._attack_threat_over(self, unit, blackboard, action)
+
+		return 
+	elseif t < start_t or end_t < t then
 		return 
 	end
 
@@ -597,10 +615,16 @@ BTStormVerminAttackAction.anim_cb_damage = function (self, unit, blackboard)
 		self._deal_damage(self, unit, blackboard, action, self_pos, hit_actors, actor_count, true)
 	end
 
+	self._attack_threat_over(self, unit, blackboard, action)
+
 	return 
 end
 BTStormVerminAttackAction._update_radial_cylinder = function (self, unit, blackboard, action, dt, t)
-	if t < blackboard.overlap_start_time or blackboard.overlap_end_time < t then
+	if blackboard.overlap_end_time < t and blackboard.special_attacking_target then
+		self._attack_threat_over(self, unit, blackboard, action)
+
+		return 
+	elseif t < blackboard.overlap_start_time or blackboard.overlap_end_time < t then
 		return 
 	end
 

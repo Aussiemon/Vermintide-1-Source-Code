@@ -2308,6 +2308,454 @@ MaterialEffectMappings.melee_hit_hammers_1h = MaterialEffectMappings.melee_hit_h
 		metal_hollow = "fx/hit_metal_hollow_blunt"
 	}
 }
+MaterialEffectMappings.punch_hit = MaterialEffectMappings.punch_hit or {
+	decal = {
+		material_drawer_mapping = {
+			fruit = "hit_fruit_pierce_1",
+			dirt = "hit_dirt_pierce_1",
+			stone = "hit_stone_pierce_1",
+			water = "empty",
+			glass = "hit_glass_pierce_1",
+			sand = "hit_sand_pierce_1",
+			armored = "hit_metal_hollow_pierce_1",
+			flesh = "hit_flesh_pierce_1",
+			stone_dirt = "hit_stone_pierce_1",
+			forest_grass = "hit_grass_pierce_1",
+			grass = "hit_grass_pierce_1",
+			hay = "empty",
+			stone_wet = "hit_stone_pierce_1",
+			mud = "hit_dirt_pierce_1",
+			metal_solid = "hit_metal_solid_pierce_1",
+			metal_hollow = "hit_metal_hollow_pierce_1",
+			cloth = {
+				"hit_cloth_pierce_1",
+				"hit_cloth_pierce_2"
+			},
+			plaster = {
+				"hit_plaster_pierce_1",
+				"hit_plaster_pierce_2"
+			},
+			wood_bridge = {
+				"hit_wood_pierce_1",
+				"hit_wood_pierce_2",
+				"hit_wood_pierce_3"
+			},
+			wood_solid = {
+				"hit_wood_pierce_1",
+				"hit_wood_pierce_2",
+				"hit_wood_pierce_3"
+			},
+			wood_hollow = {
+				"hit_wood_pierce_1",
+				"hit_wood_pierce_2",
+				"hit_wood_pierce_3"
+			}
+		},
+		settings = {
+			depth = 0.6,
+			height = 0.6,
+			width = 0.6,
+			depth_offset = -0.2
+		}
+	},
+	sound = {
+		cloth = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "cloth",
+				damage_type = "piercing"
+			}
+		},
+		dirt = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "dirt",
+				damage_type = "piercing"
+			}
+		},
+		flesh = {
+			event = "melee_hit",
+			parameters = {
+				weapon_type = "1h_sword",
+				material = "cloth",
+				damage_type = "piercing"
+			}
+		},
+		fruit = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "fruit",
+				damage_type = "piercing"
+			}
+		},
+		forest_grass = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "forest_grass",
+				damage_type = "piercing"
+			}
+		},
+		glass = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "glass",
+				damage_type = "piercing"
+			}
+		},
+		grass = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "grass",
+				damage_type = "piercing"
+			}
+		},
+		hay = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "hay",
+				damage_type = "piercing"
+			}
+		},
+		metal_hollow = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "metal_hollow",
+				damage_type = "piercing"
+			}
+		},
+		armored = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "metal_hollow",
+				damage_type = "piercing"
+			}
+		},
+		metal_solid = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "metal_solid",
+				damage_type = "piercing"
+			}
+		},
+		mud = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "mud",
+				damage_type = "piercing"
+			}
+		},
+		plaster = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "plaster",
+				damage_type = "piercing"
+			}
+		},
+		sand = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "grass",
+				damage_type = "piercing"
+			}
+		},
+		stone = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "stone",
+				damage_type = "piercing"
+			}
+		},
+		stone_dirt = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "stone_dirt",
+				damage_type = "piercing"
+			}
+		},
+		stone_wet = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "stone_wet",
+				damage_type = "piercing"
+			}
+		},
+		water = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "water",
+				damage_type = "piercing"
+			}
+		},
+		wood_bridge = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "wood_bridge",
+				damage_type = "piercing"
+			}
+		},
+		wood_hollow = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "wood_hollow",
+				damage_type = "piercing"
+			}
+		},
+		wood_solid = {
+			event = "Play_melee_punch_hit_static",
+			parameters = {
+				material = "wood_solid",
+				damage_type = "piercing"
+			}
+		}
+	},
+	particles = {
+		plaster = "fx/hit_plaster_blunt",
+		fruit = "fx/hit_fruit_blunt",
+		dirt = "fx/hit_dirt_blunt",
+		stone = "fx/hit_stone_blunt",
+		water = "fx/hit_water_blunt",
+		wood_bridge = "fx/hit_wood_hollow_blunt",
+		glass = "fx/hit_glass",
+		sand = "fx/hit_sand",
+		armored = "fx/hit_armored",
+		flesh = "fx/hit_flesh_blunt",
+		stone_dirt = "fx/hit_stone_blunt",
+		cloth = "fx/hit_cloth_blunt",
+		forest_grass = "fx/hit_grass_blunt",
+		grass = "fx/hit_grass_blunt",
+		hay = "fx/hit_hay_blunt",
+		wood_hollow = "fx/hit_wood_hollow_blunt",
+		stone_wet = "fx/hit_stone_blunt",
+		mud = "fx/hit_dirt_blunt",
+		wood_solid = "fx/hit_wood_solid_blunt",
+		metal_solid = "fx/hit_metal_solid_blunt",
+		metal_hollow = "fx/hit_metal_hollow_blunt"
+	}
+}
+MaterialEffectMappings.wooden_sword_hit = MaterialEffectMappings.wooden_sword_hit or {
+	decal = {
+		material_drawer_mapping = {
+			fruit = "hit_fruit_pierce_1",
+			dirt = "hit_dirt_pierce_1",
+			stone = "hit_stone_pierce_1",
+			water = "empty",
+			glass = "hit_glass_pierce_1",
+			sand = "hit_sand_pierce_1",
+			armored = "hit_metal_hollow_pierce_1",
+			flesh = "hit_flesh_pierce_1",
+			stone_dirt = "hit_stone_pierce_1",
+			forest_grass = "hit_grass_pierce_1",
+			grass = "hit_grass_pierce_1",
+			hay = "empty",
+			stone_wet = "hit_stone_pierce_1",
+			mud = "hit_dirt_pierce_1",
+			metal_solid = "hit_metal_solid_pierce_1",
+			metal_hollow = "hit_metal_hollow_pierce_1",
+			cloth = {
+				"hit_cloth_pierce_1",
+				"hit_cloth_pierce_2"
+			},
+			plaster = {
+				"hit_plaster_pierce_1",
+				"hit_plaster_pierce_2"
+			},
+			wood_bridge = {
+				"hit_wood_pierce_1",
+				"hit_wood_pierce_2",
+				"hit_wood_pierce_3"
+			},
+			wood_solid = {
+				"hit_wood_pierce_1",
+				"hit_wood_pierce_2",
+				"hit_wood_pierce_3"
+			},
+			wood_hollow = {
+				"hit_wood_pierce_1",
+				"hit_wood_pierce_2",
+				"hit_wood_pierce_3"
+			}
+		},
+		settings = {
+			depth = 0.6,
+			height = 0.6,
+			width = 0.6,
+			depth_offset = -0.2
+		}
+	},
+	sound = {
+		cloth = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "cloth",
+				damage_type = "piercing"
+			}
+		},
+		dirt = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "dirt",
+				damage_type = "piercing"
+			}
+		},
+		flesh = {
+			event = "melee_hit",
+			parameters = {
+				weapon_type = "1h_sword",
+				material = "cloth",
+				damage_type = "piercing"
+			}
+		},
+		fruit = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "fruit",
+				damage_type = "piercing"
+			}
+		},
+		forest_grass = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "forest_grass",
+				damage_type = "piercing"
+			}
+		},
+		glass = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "glass",
+				damage_type = "piercing"
+			}
+		},
+		grass = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "grass",
+				damage_type = "piercing"
+			}
+		},
+		hay = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "hay",
+				damage_type = "piercing"
+			}
+		},
+		metal_hollow = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "metal_hollow",
+				damage_type = "piercing"
+			}
+		},
+		armored = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "metal_hollow",
+				damage_type = "piercing"
+			}
+		},
+		metal_solid = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "metal_solid",
+				damage_type = "piercing"
+			}
+		},
+		mud = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "mud",
+				damage_type = "piercing"
+			}
+		},
+		plaster = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "plaster",
+				damage_type = "piercing"
+			}
+		},
+		sand = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "grass",
+				damage_type = "piercing"
+			}
+		},
+		stone = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "stone",
+				damage_type = "piercing"
+			}
+		},
+		stone_dirt = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "stone_dirt",
+				damage_type = "piercing"
+			}
+		},
+		stone_wet = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "stone_wet",
+				damage_type = "piercing"
+			}
+		},
+		water = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "water",
+				damage_type = "piercing"
+			}
+		},
+		wood_bridge = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "wood_bridge",
+				damage_type = "piercing"
+			}
+		},
+		wood_hollow = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "wood_hollow",
+				damage_type = "piercing"
+			}
+		},
+		wood_solid = {
+			event = "Play_weapon_wooden_sword_hit_static",
+			parameters = {
+				material = "wood_solid",
+				damage_type = "piercing"
+			}
+		}
+	},
+	particles = {
+		plaster = "fx/hit_plaster_blunt",
+		fruit = "fx/hit_fruit_blunt",
+		dirt = "fx/hit_dirt_blunt",
+		stone = "fx/hit_stone_blunt",
+		water = "fx/hit_water_blunt",
+		wood_bridge = "fx/hit_wood_hollow_blunt",
+		glass = "fx/hit_glass",
+		sand = "fx/hit_sand",
+		armored = "fx/hit_armored",
+		flesh = "fx/hit_flesh_blunt",
+		stone_dirt = "fx/hit_stone_blunt",
+		cloth = "fx/hit_cloth_blunt",
+		forest_grass = "fx/hit_grass_blunt",
+		grass = "fx/hit_grass_blunt",
+		hay = "fx/hit_hay_blunt",
+		wood_hollow = "fx/hit_wood_hollow_blunt",
+		stone_wet = "fx/hit_stone_blunt",
+		mud = "fx/hit_dirt_blunt",
+		wood_solid = "fx/hit_wood_solid_blunt",
+		metal_solid = "fx/hit_metal_solid_blunt",
+		metal_hollow = "fx/hit_metal_hollow_blunt"
+	}
+}
 MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 	decal = {
 		material_drawer_mapping = {

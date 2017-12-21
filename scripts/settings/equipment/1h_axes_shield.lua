@@ -704,12 +704,15 @@ weapon_template.can_block_ranged_attacks = true
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = true,
-		arc = 1
+		arc = 0
 	},
 	hold_attack = {
-		penetrating = true,
-		arc = 0
+		penetrating = false,
+		arc = 2
 	}
+}
+weapon_template.defense_meta_data = {
+	push = "heavy"
 }
 weapon_template.aim_assist_settings = {
 	max_range = 5,

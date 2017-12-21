@@ -2,6 +2,64 @@ AimTemplates = {}
 local AIM_DIRECTION_MAX = 1.9999999
 local HUSK_MIN_PITCH = -0.95
 local HUSK_MAX_PITCH = 0.6
+
+local function look_at_target_unit(unit, data, dt, unit_position, target_unit, target_distance, head_constraint_target)
+	local previously_used_head_constraint = data.is_using_head_constraint
+
+	if not previously_used_head_constraint then
+		data.is_using_head_constraint = true
+
+		Unit.animation_event(unit, "look_at_on")
+	end
+
+	if not target_unit or not Unit.alive(target_unit) then
+		AiUtils.set_default_anim_constraint(unit, head_constraint_target)
+
+		return 
+	end
+
+	local look_target = nil
+	local first_person_extension = ScriptUnit.has_extension(target_unit, "first_person_system")
+
+	if first_person_extension ~= nil then
+		look_target = first_person_extension.current_position(first_person_extension)
+	else
+		local head_index = Unit.node(target_unit, "j_head")
+		look_target = Unit.world_position(target_unit, head_index)
+	end
+
+	local rotation = Unit.world_rotation(unit, 0)
+	local rotation_forward = Vector3.flat(Quaternion.forward(rotation))
+	local rotation_forward_normalized = Vector3.normalize(rotation_forward)
+	local to_target = Vector3.flat(look_target - unit_position)
+	local to_target_normalized = Vector3.normalize(to_target)
+	local dot = Vector3.dot(to_target_normalized, rotation_forward_normalized)
+
+	if dot < math.inverse_sqrt_2 then
+		local old_z = look_target.z
+		local rotation_right = Vector3.flat(Quaternion.right(rotation))
+
+		if 0 < Vector3.cross(rotation_forward_normalized, to_target_normalized).z then
+			look_target = unit_position + (rotation_forward - rotation_right)*target_distance
+		else
+			look_target = unit_position + (rotation_forward + rotation_right)*target_distance
+		end
+
+		look_target.z = old_z
+	end
+
+	if previously_used_head_constraint then
+		local previous_look_target = data.previous_look_target:unbox()
+		local lerp_t = math.min(dt*5, 1)
+		look_target = Vector3.lerp(previous_look_target, look_target, lerp_t)
+	end
+
+	data.previous_look_target:store(look_target)
+	Unit.animation_set_constraint_target(unit, head_constraint_target, look_target)
+
+	return 
+end
+
 AimTemplates.player = {
 	owner = {
 		init = function (unit, data)
@@ -213,71 +271,60 @@ AimTemplates.innkeeper = {
 		init = function (unit, data)
 			data.constraint_target = Unit.animation_find_constraint_target(unit, "lookat")
 			data.current_target = nil
-			data.interpolation_origin_position = Vector3Box()
-			data.last_position = Vector3Box()
-			data.interpolation_time = -math.huge
+			data.previous_look_target = Vector3Box()
 
 			return 
 		end,
 		update = function (unit, t, dt, data)
-			local inn_keeper_position = Unit.local_position(unit, 0)
-			local best_player = nil
-			local best_dist_sq = 9
-			local PLAYER_UNITS = PLAYER_UNITS
-			local old_target = data.current_target
-			local stickiness_multiplier = 0.9025
+			local ignore_aim_constraint = Unit.get_data(unit, "ignore_aim_constraint")
 
-			for i = 1, #PLAYER_UNITS, 1 do
-				local player_unit = PLAYER_UNITS[i]
-				local dist_sq = Vector3.distance_squared(POSITION_LOOKUP[player_unit], inn_keeper_position)
+			if ignore_aim_constraint then
+				if data.is_using_head_constraint then
+					Unit.animation_event(unit, "lookat_off")
 
-				if player_unit == old_target then
-					dist_sq = dist_sq*stickiness_multiplier
+					data.is_using_head_constraint = false
+					data.current_target = nil
+				end
+			else
+				local inn_keeper_position = Unit.local_position(unit, 0)
+				local best_player = nil
+				local best_dist_sq = 9
+				local PLAYER_UNITS = PLAYER_UNITS
+				local old_target = data.current_target
+				local stickiness_multiplier = 0.9025
+
+				for i = 1, #PLAYER_UNITS, 1 do
+					local player_unit = PLAYER_UNITS[i]
+					local dist_sq = Vector3.distance_squared(POSITION_LOOKUP[player_unit], inn_keeper_position)
+
+					if player_unit == old_target then
+						dist_sq = dist_sq*stickiness_multiplier
+					end
+
+					if dist_sq < best_dist_sq then
+						best_dist_sq = dist_sq
+						best_player = player_unit
+					end
 				end
 
-				if dist_sq < best_dist_sq then
-					best_dist_sq = dist_sq
-					best_player = player_unit
+				if best_player and not old_target then
+					Unit.animation_event(unit, "lookat_on")
+
+					data.is_using_head_constraint = true
+				elseif not best_player and old_target then
+					Unit.animation_event(unit, "lookat_off")
+
+					data.is_using_head_constraint = false
 				end
+
+				if best_player then
+					local target_distance = math.sqrt(best_dist_sq)
+
+					look_at_target_unit(unit, data, dt, inn_keeper_position, best_player, target_distance, data.constraint_target)
+				end
+
+				data.current_target = best_player
 			end
-
-			local interpolation_duration = 0.5
-
-			if best_player and not old_target then
-				Unit.animation_event(unit, "lookat_on")
-			elseif not best_player and old_target then
-				Unit.animation_event(unit, "lookat_off")
-
-				data.interpolation_time = -math.huge
-			elseif best_player ~= old_target then
-				data.interpolation_time = t + interpolation_duration
-
-				data.interpolation_origin_position:store(data.last_position:unbox())
-			end
-
-			local interpolation_time = data.interpolation_time
-
-			if best_player then
-				local aim_target = nil
-
-				if ScriptUnit.has_extension(best_player, "first_person_system") then
-					aim_target = ScriptUnit.extension(best_player, "first_person_system"):current_position()
-				else
-					local head_index = Unit.node(best_player, "j_head")
-					aim_target = Unit.world_position(best_player, head_index)
-				end
-
-				if t < interpolation_time then
-					local lerp_t = math.sin(((interpolation_time - t)/interpolation_duration - 1)*math.pi*0.5)
-					local from = data.interpolation_origin_position:unbox()
-					aim_target = Vector3.lerp(from, aim_target, lerp_t)
-				end
-
-				data.last_position:store(aim_target)
-				Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
-			end
-
-			data.current_target = best_player
 
 			return 
 		end

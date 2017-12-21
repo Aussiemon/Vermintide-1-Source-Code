@@ -20,7 +20,10 @@ BotBehaviors = {
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_melee",
-				condition = "is_slot_1_not_wielded",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_melee"
+				},
 				action_data = BotActions.default.switch_melee
 			},
 			{
@@ -36,7 +39,10 @@ BotBehaviors = {
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_melee",
-				condition = "is_slot_1_not_wielded",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_melee"
+				},
 				action_data = BotActions.default.switch_melee
 			},
 			{
@@ -52,7 +58,10 @@ BotBehaviors = {
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_melee",
-				condition = "is_slot_1_not_wielded",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_melee"
+				},
 				action_data = BotActions.default.switch_melee
 			},
 			{
@@ -68,7 +77,10 @@ BotBehaviors = {
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_healing_kit",
-				condition = "is_slot_healthkit_not_wielded",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_healthkit"
+				},
 				action_data = BotActions.default.switch_heal
 			},
 			{
@@ -80,16 +92,85 @@ BotBehaviors = {
 			name = "heal_other"
 		},
 		{
+			"BTSelector",
+			{
+				"BTBotInventorySwitchAction",
+				name = "switch_healing_draught",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_healthkit"
+				},
+				action_data = BotActions.default.switch_heal
+			},
+			{
+				"BTBotHealOtherAction",
+				name = "do_give_heal_item",
+				action_data = BotActions.default.do_give_heal_item
+			},
+			name = "give_heal_item",
+			condition = "can_help_in_need_player",
+			condition_args = {
+				"can_accept_heal_item"
+			}
+		},
+		{
+			"BTSelector",
+			{
+				"BTBotInventorySwitchAction",
+				name = "switch_grenade",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_grenade"
+				},
+				action_data = BotActions.default.switch_grenade
+			},
+			{
+				"BTBotHealOtherAction",
+				name = "do_give_grenade",
+				action_data = BotActions.default.do_give_grenade
+			},
+			name = "give_grenade",
+			condition = "can_help_in_need_player",
+			condition_args = {
+				"can_accept_grenade"
+			}
+		},
+		{
+			"BTSelector",
+			{
+				"BTBotInventorySwitchAction",
+				name = "switch_potion",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_potion"
+				},
+				action_data = BotActions.default.switch_potion
+			},
+			{
+				"BTBotHealOtherAction",
+				name = "do_give_potion",
+				action_data = BotActions.default.do_give_potion
+			},
+			name = "give_potion",
+			condition = "can_help_in_need_player",
+			condition_args = {
+				"can_accept_potion"
+			}
+		},
+		{
 			"BTBotInteractAction",
-			condition = "can_loot_ammo",
-			name = "loot_ammo"
+			condition = "can_loot",
+			name = "loot"
 		},
 		{
 			"BTSelector",
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_healing_kit",
-				condition = "is_slot_healthkit_not_wielded",
+				condition = "is_slot_not_wielded",
+				condition_args = {
+					"slot_healthkit"
+				},
 				action_data = BotActions.default.switch_heal
 			},
 			{
@@ -100,18 +181,16 @@ BotBehaviors = {
 			name = "heal_self"
 		},
 		{
-			"BTBotInteractAction",
-			condition = "can_loot_med",
-			name = "loot_med"
-		},
-		{
 			"BTSelector",
 			{
 				"BTSelector",
 				{
 					"BTBotInventorySwitchAction",
 					name = "switch_melee_priority_target",
-					condition = "is_slot_1_not_wielded",
+					condition = "is_slot_not_wielded",
+					condition_args = {
+						"slot_melee"
+					},
 					action_data = BotActions.default.switch_melee
 				},
 				{
@@ -127,7 +206,10 @@ BotBehaviors = {
 				{
 					"BTBotInventorySwitchAction",
 					name = "switch_ranged_priority_target",
-					condition = "is_slot_2_not_wielded",
+					condition = "is_slot_not_wielded",
+					condition_args = {
+						"slot_ranged"
+					},
 					action_data = BotActions.default.switch_ranged
 				},
 				{
@@ -155,7 +237,10 @@ BotBehaviors = {
 					{
 						"BTBotInventorySwitchAction",
 						name = "switch_melee",
-						condition = "is_slot_1_not_wielded",
+						condition = "is_slot_not_wielded",
+						condition_args = {
+							"slot_melee"
+						},
 						action_data = BotActions.default.switch_melee
 					},
 					{
@@ -171,7 +256,10 @@ BotBehaviors = {
 					{
 						"BTBotInventorySwitchAction",
 						name = "switch_ranged",
-						condition = "is_slot_2_not_wielded",
+						condition = "is_slot_not_wielded",
+						condition_args = {
+							"slot_ranged"
+						},
 						action_data = BotActions.default.switch_ranged
 					},
 					{
@@ -202,7 +290,10 @@ BotBehaviors = {
 					{
 						"BTBotInventorySwitchAction",
 						name = "switch_melee_breakable",
-						condition = "is_slot_1_not_wielded",
+						condition = "is_slot_not_wielded",
+						condition_args = {
+							"slot_melee"
+						},
 						action_data = BotActions.default.switch_melee
 					},
 					{

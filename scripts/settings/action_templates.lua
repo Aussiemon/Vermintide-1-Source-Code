@@ -501,7 +501,11 @@ ActionTemplates.instant_give_item = {
 }
 ActionTemplates.wield_left = table.clone(ActionTemplates.wield)
 ActionTemplates.wield_left.default.weapon_action_hand = "left"
+ActionTemplates.wield_right = table.clone(ActionTemplates.wield)
+ActionTemplates.wield_right.default.weapon_action_hand = "right"
 ActionTemplates.action_inspect_left = table.clone(ActionTemplates.action_inspect)
 ActionTemplates.action_inspect_left.default.weapon_action_hand = "left"
+ActionTemplates.action_inspect_right = table.clone(ActionTemplates.action_inspect)
+ActionTemplates.action_inspect_right.default.weapon_action_hand = "right"
 
 return 

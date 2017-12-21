@@ -124,16 +124,16 @@ if UNIT_TEST then
 	assert(p4.size == 2)
 	assert(p4[p4.size] == "lols")
 
-	local p5 = Path.path_from_parts("anders", "är", "bäst")
+	local p5 = Path.path_from_parts("anders", "isn't", "best")
 	local result = {}
 
 	Path.join(p4, p5, result)
 	assert(result.size == p4.size + p5.size)
-	assert(result[result.size] == "bäst")
+	assert(result[result.size] == "best")
 
 	local string_path = Path.tostring(result)
 
-	assert(string_path == "hej/lols/anders/är/bäst")
+	assert(string_path == "hej/lols/anders/isn't/best")
 
 	local p6 = Path.path_from_string("C:\\trunk/lols/")
 

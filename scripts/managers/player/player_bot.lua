@@ -234,6 +234,8 @@ PlayerBot.destroy = function (self)
 		Managers.state.network:destroy_game_object(self.game_object_id)
 	end
 
+	self.game_object_id = nil
+
 	return 
 end
 

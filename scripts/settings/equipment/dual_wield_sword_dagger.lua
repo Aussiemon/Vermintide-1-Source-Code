@@ -966,7 +966,7 @@ weapon_template.attack_meta_data = {
 	},
 	hold_attack = {
 		penetrating = true,
-		arc = 0
+		arc = 1
 	}
 }
 weapon_template.aim_assist_settings = {

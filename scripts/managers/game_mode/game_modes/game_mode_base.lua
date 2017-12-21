@@ -7,6 +7,7 @@ GameModeBase.init = function (self, settings, world, network_server, level_trans
 	self._level_completed = false
 	self._level_failed = false
 	self._lose_condition_disabled = false
+	self._pvp_enabled = false
 
 	return 
 end
@@ -41,6 +42,9 @@ GameModeBase.complete_level = function (self)
 	self._level_completed = true
 
 	return 
+end
+GameModeBase.pvp_enabled = function (self)
+	return self._pvp_enabled
 end
 GameModeBase.evaluate_end_conditions = function (self)
 	return false, nil

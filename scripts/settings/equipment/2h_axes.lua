@@ -600,7 +600,7 @@ weapon_template.attack_meta_data = {
 		arc = 0
 	},
 	hold_attack = {
-		penetrating = false,
+		penetrating = true,
 		arc = 1
 	}
 }

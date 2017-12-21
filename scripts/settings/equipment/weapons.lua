@@ -59,6 +59,7 @@ dofile("scripts/settings/equipment/barrels")
 dofile("scripts/settings/equipment/grenades")
 dofile("scripts/settings/equipment/torches")
 dofile("scripts/settings/equipment/grimoire")
+dofile("scripts/settings/equipment/brawl_weapons")
 dofile("scripts/settings/equipment/packmaster_claw")
 
 for dlc_name, dlc in pairs(DLCSettings) do
@@ -901,6 +902,18 @@ AttackDamageValues = {
 		4,
 		16,
 		2
+	},
+	one_h_brawl_L = {
+		0,
+		0,
+		0,
+		15
+	},
+	one_h_brawl_H = {
+		0,
+		0,
+		0,
+		35
 	},
 	sniper = {
 		5,
@@ -4252,6 +4265,66 @@ AttackTemplates = {
 		stagger_duration = {
 			4,
 			2.5,
+			0,
+			0
+		}
+	},
+	brawl_light = {
+		attack_type = "damage",
+		sound_type = "light",
+		damage_type = "cutting",
+		stagger_type = "ai_stagger",
+		fatigue_type = "blocked_attack",
+		stagger_length = 0.8,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			1.5,
+			0.4,
+			0,
+			0
+		}
+	},
+	brawl_light_slap = {
+		attack_type = "damage",
+		sound_type = "light",
+		damage_type = "cutting",
+		stagger_type = "ai_stagger",
+		fatigue_type = "blocked_attack",
+		stagger_length = 0.8,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			1.5,
+			0.4,
+			0,
+			0
+		}
+	},
+	brawl_heavy = {
+		attack_type = "damage",
+		sound_type = "heavy",
+		damage_type = "cutting",
+		stagger_type = "ai_stagger",
+		fatigue_type = "complete",
+		stagger_length = 0.8,
+		stagger_impact = {
+			2,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			1.5,
+			0.4,
 			0,
 			0
 		}

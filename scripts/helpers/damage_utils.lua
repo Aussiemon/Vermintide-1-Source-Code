@@ -310,6 +310,7 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 
 		local physics_world = World.physics_world(world)
 		local actors, num_actors = PhysicsWorld.immediate_overlap(physics_world, "shape", "sphere", "position", position, "size", radius, "collision_filter", collision_filter, "use_global_table")
+		local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
 
 		table.clear(units)
 
@@ -418,7 +419,7 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 								hit_ragdoll_actor = breed.hitbox_ragdoll_translation.j_spine
 							end
 
-							if not global_is_inside_inn then
+							if not is_inside_inn then
 								DamageUtils.add_damage_network(hit_unit, attacker_unit, damage, hit_zone_name, damage_type_real, hit_direction_normalized, damage_source, hit_ragdoll_actor, damaging_unit)
 							end
 
@@ -664,7 +665,7 @@ local victim_units = {}
 DamageUtils.add_damage_network = function (attacked_unit, attacker_unit, original_damage_amount, hit_zone_name, damage_type, damage_direction, damage_source, hit_ragdoll_actor, damaging_unit)
 	local network_manager = Managers.state.network
 
-	if not network_manager.game(network_manager) or DamageUtils.is_in_inn then
+	if not network_manager.game(network_manager) then
 		return 
 	end
 
@@ -1283,7 +1284,10 @@ DamageUtils.check_block = function (attacking_unit, target_unit, fatigue_type)
 			network_manager.network_transmit:send_rpc_clients("rpc_player_blocked_attack", go_id, fatigue_type_id, attacking_unit_id)
 
 			local blackboard = Unit.get_data(attacking_unit, "blackboard")
-			blackboard.blocked = true
+
+			if blackboard then
+				blackboard.blocked = true
+			end
 		end
 
 		return true
@@ -1377,7 +1381,13 @@ DamageUtils.allow_friendly_fire_ranged = function (difficulty_settings, attacker
 	return difficulty_settings.friendly_fire_ranged and not attacker_player.bot_player
 end
 DamageUtils.allow_friendly_fire_melee = function (difficulty_settings, attacker_player)
-	return difficulty_settings.friendly_fire_melee and not attacker_player.bot_player
+	local network_manager = Managers.state.network
+	local game = network_manager.game(network_manager)
+	local attacker_unit = attacker_player.player_unit
+	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, attacker_unit)
+	local friendly_fire_override = GameSession.game_object_field(game, attacker_unit_id, "friendly_fire_melee")
+
+	return friendly_fire_override or (difficulty_settings.friendly_fire_melee and not attacker_player.bot_player)
 end
 DamageUtils.damage_level_unit = function (hit_unit, hit_normal, level_index, attack_template_name, attack_template_damage_type_name, damage_source, attacker_unit, attack_direction, is_server)
 	local attack_template = AttackTemplates[attack_template_name]

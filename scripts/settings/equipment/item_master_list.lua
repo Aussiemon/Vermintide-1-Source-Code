@@ -3,6 +3,7 @@ dofile("scripts/settings/equipment/weapons")
 dofile("scripts/settings/equipment/attachments")
 dofile("scripts/settings/equipment/item_master_list_local")
 dofile("scripts/settings/equipment/item_master_list_exported")
+dofile("scripts/settings/equipment/item_master_list_brawl")
 
 all_item_types = {}
 local all_loot = {}

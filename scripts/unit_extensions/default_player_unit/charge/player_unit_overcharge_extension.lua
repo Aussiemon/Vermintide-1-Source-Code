@@ -15,9 +15,10 @@ OverChargeExtension.init = function (self, extension_init_context, unit, extensi
 	self.above_threshold = false
 	self.overcharge_crit_time = 0
 	self.overcharge_crit_interval = 1
+	local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
 	self.venting_overcharge = false
 	self.vent_damage_pool = 0
-	self.no_damage = global_is_inside_inn
+	self.no_damage = is_inside_inn
 	self.overcharge_limit = self.max_value*0.65
 	self.overcharge_critical_limit = self.max_value*0.8
 	self.overcharge_threshold = overcharge_data.overcharge_threshold or 0

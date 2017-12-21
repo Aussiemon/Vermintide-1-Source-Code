@@ -35,23 +35,29 @@ BotActions.default = {
 		wanted_slot = "slot_healthkit",
 		action_weight = 1
 	},
+	switch_potion = {
+		wanted_slot = "slot_potion"
+	},
+	switch_grenade = {
+		wanted_slot = "slot_grenade"
+	},
 	fight_melee_priority_target = {
-		engage_range_passive_patrol = math.huge,
 		engage_range = math.huge,
 		engage_range_near_follow_pos = math.huge,
-		override_engage_range_to_follow_pos = math.huge
+		override_engage_range_to_follow_pos = math.huge,
+		override_engage_range_to_follow_pos_horde = math.huge
 	},
 	fight_melee = {
+		override_engage_range_to_follow_pos_horde = 9,
+		override_engage_range_to_follow_pos = 20,
 		engage_range_near_follow_pos = 15,
-		engage_range_passive_patrol = 0,
-		engage_range = 10,
-		override_engage_range_to_follow_pos = 20
+		engage_range = 6
 	},
 	destroy_object_melee = {
-		engage_range_passive_patrol = 10,
+		override_engage_range_to_follow_pos_horde = 9,
 		destroy_object = true,
-		engage_range = 10,
 		override_engage_range_to_follow_pos = 20,
+		engage_range = 6,
 		engage_range_near_follow_pos = 15
 	},
 	combat = {
@@ -63,6 +69,18 @@ BotActions.default = {
 	},
 	use_heal_on_player = {
 		aim_node = "j_head"
+	},
+	do_give_grenade = {
+		aim_node = "j_head",
+		input = "interact"
+	},
+	do_give_potion = {
+		aim_node = "j_head",
+		input = "interact"
+	},
+	do_give_heal_item = {
+		aim_node = "j_head",
+		input = "interact"
 	},
 	rescue_hanging_from_hook = {
 		aim_node = "j_hips",

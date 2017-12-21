@@ -34,7 +34,7 @@ function profiler_scopes_trace()
 	end
 
 	overloaded = true
-	local real_start = Profiler.start
+	local Profiler_start = Profiler.start
 	Profiler.start = function (scope)
 		if scope == nil then
 			Application.error("Profiler with nil scope")
@@ -61,13 +61,13 @@ function profiler_scopes_trace()
 
 		depth = depth + 1
 
-		real_start(scope)
+		Profiler_start(scope)
 
 		return 
 	end
-	local real_stop = Profiler.stop
+	local Profiler_stop = Profiler.stop
 	Profiler.stop = function (scope)
-		real_stop()
+		Profiler_stop()
 
 		depth = depth - 1
 
