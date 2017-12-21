@@ -2,10 +2,12 @@ PlayerProjectileUnitExtension = class(PlayerProjectileUnitExtension)
 local DELETION_GRACE_TIMER = 0.3
 PlayerProjectileUnitExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	local world = extension_init_context.world
+	local owner_unit = extension_init_data.owner_unit
 	self.world = world
 	self.physics_world = World.get_data(world, "physics_world")
 	self.unit = unit
-	self.owner_unit = extension_init_data.owner_unit
+	self.owner_unit = owner_unit
+	self.owner_player = Managers.player:owner(owner_unit)
 	local item_name = extension_init_data.item_name
 	self.item_name = item_name
 	local item_data = ItemMasterList[item_name]
@@ -35,7 +37,6 @@ PlayerProjectileUnitExtension.init = function (self, extension_init_context, uni
 
 	self.initialize_projectile(self, projectile_info)
 
-	self.is_server = Managers.player.is_server
 	self._kills = 0
 
 	return 
@@ -136,8 +137,8 @@ PlayerProjectileUnitExtension.handle_timed_events = function (self, t)
 end
 PlayerProjectileUnitExtension.destroy = function (self)
 	if 0 < self._kills and self.projectile_info.is_grenade then
+		local player = self.owner_player
 		local player_manager = Managers.player
-		local player = player_manager.owner(player_manager, self.owner_unit)
 		local local_player = player_manager.local_player(player_manager)
 
 		if self.is_server and player then
@@ -327,7 +328,7 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	local enemy_impact_data = damage_data.enemy_unit_hit
 	local network_manager = Managers.state.network
 	local owner_unit = self.owner_unit
-	local owner = Managers.player:owner(owner_unit)
+	local owner = self.owner_player
 	local action = self.action
 	local node = Actor.node(hit_actor)
 	local hit_zone = breed.hit_zones_lookup[node]
@@ -436,9 +437,10 @@ end
 PlayerProjectileUnitExtension.hit_player = function (self, impact_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor)
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 	local hit = false
+	local owner_player = self.owner_player
 	local damage_data = impact_data.damage
 
-	if damage_data and difficulty_settings.friendly_fire_ranged then
+	if damage_data and DamageUtils.allow_friendly_fire_ranged(difficulty_settings, owner_player) then
 		self.hit_player_damage(self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor)
 
 		hit = true
@@ -554,7 +556,7 @@ PlayerProjectileUnitExtension.hit_player_damage = function (self, damage_data, h
 
 	local action = self.action
 	local hit_effect = action.hit_effect
-	local owner = Managers.player:owner(owner_unit)
+	local owner = self.owner_player
 	local is_husk = not owner.local_player
 	local damage_sound = attack_template.sound_type
 	local hit_rotation = Quaternion.look(hit_direction, Vector3.up())
@@ -578,7 +580,9 @@ PlayerProjectileUnitExtension.hit_player_damage = function (self, damage_data, h
 		self.did_damage = predicted_damage
 	end
 
-	EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk)
+	if hit_effect then
+		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk)
+	end
 
 	return 
 end
@@ -610,7 +614,7 @@ PlayerProjectileUnitExtension.hit_level_unit = function (self, impact_data, hit_
 		local world = self.world
 		local hit_rotation = Quaternion.look(hit_direction)
 		local owner_unit = self.owner_unit
-		local owner = Managers.player:owner(owner_unit)
+		local owner = self.owner_player
 		local is_husk = not owner.local_player
 
 		EffectHelper.play_surface_material_effects(hit_effect, world, hit_unit, hit_position, hit_rotation, hit_normal, nil, is_husk)
@@ -707,8 +711,7 @@ PlayerProjectileUnitExtension.hit_non_level_damagable_unit = function (self, dam
 	if hit_effect then
 		local world = self.world
 		local hit_rotation = Quaternion.look(hit_direction)
-		local owner_unit = self.owner_unit
-		local owner = Managers.player:owner(owner_unit)
+		local owner = self.owner_player
 		local is_husk = not owner.local_player
 
 		EffectHelper.play_surface_material_effects(hit_effect, world, hit_unit, hit_position, hit_rotation, hit_normal, nil, is_husk)

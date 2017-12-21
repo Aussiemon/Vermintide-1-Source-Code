@@ -12,6 +12,7 @@ StateLoading.NAME = "StateLoading"
 local CHAT_INPUT_DEFAULT_COMMAND = "say"
 local MAX_CHAT_INPUT_CHARS = 150
 local DO_RELOAD = true
+local ALWAYS_LOAD_ALL_VIEWS = script_data.always_load_all_views or Development.parameter("always_load_all_views")
 StateLoading.round_start_auto_join = 10
 StateLoading.round_start_join_allowed = 20
 StateLoading.join_lobby_timeout = 120
@@ -52,6 +53,7 @@ StateLoading.on_enter = function (self, param_block)
 	Managers.light_fx:set_lightfx_color_scheme("loading")
 
 	self._loading_view_setup_done = false
+	self._menu_setup_done = false
 
 	return 
 end
@@ -149,9 +151,27 @@ StateLoading._unmute_all_world_sounds = function (self)
 
 	return 
 end
+StateLoading._get_game_difficulty = function (self)
+	local game_difficulty = self.parent.loading_context.difficulty
+
+	if not game_difficulty and self._lobby_host then
+		local stored_lobby_data = self._lobby_host:get_stored_lobby_data()
+
+		if stored_lobby_data then
+			game_difficulty = stored_lobby_data.difficulty
+		end
+	elseif not game_difficulty and self._lobby_client then
+		local stored_lobby_data = self._lobby_client:get_stored_lobby_data()
+
+		if stored_lobby_data then
+			game_difficulty = stored_lobby_data.difficulty
+		end
+	end
+
+	return game_difficulty
+end
 StateLoading._create_loading_view = function (self, level_key, act_progression_index)
-	local loading_context = self.parent.loading_context
-	local game_difficulty = loading_context.difficulty
+	local game_difficulty = self._get_game_difficulty(self)
 	local ui_context = {
 		world = self._world,
 		input_manager = self._input_manager,
@@ -198,8 +218,9 @@ StateLoading.setup_loading_view = function (self, level_key)
 
 	if self._level_key == "inn_level" then
 		act_progression_index = LevelUnlockUtils.current_act_progression_raw()
+		local has_multiple_loading_images = LevelSettings[self._level_key].has_multiple_loading_images
 
-		if act_progression_index and 1 <= act_progression_index then
+		if has_multiple_loading_images and act_progression_index and 1 <= act_progression_index then
 			self._ui_package_name = self._ui_package_name .. "_" .. act_progression_index
 		end
 	end
@@ -217,12 +238,60 @@ end
 StateLoading.loading_view_setup_done = function (self)
 	return self._loading_view_setup_done
 end
+StateLoading.setup_menu_assets = function (self)
+	local package_name_ingame = "resource_packages/menu_assets"
+	local package_name_inn = "resource_packages/menu_assets_inn"
+	local package_manager = Managers.package
+	local ingame_package_loaded = package_manager.has_loaded(package_manager, package_name_ingame)
+	local inn_package_loaded = package_manager.has_loaded(package_manager, package_name_inn)
+
+	if ALWAYS_LOAD_ALL_VIEWS then
+		local package_manager = Managers.package
+
+		if not ingame_package_loaded then
+			package_manager.load(package_manager, package_name_ingame, "menu_assets", nil, true, true)
+		end
+
+		if not inn_package_loaded then
+			package_manager.load(package_manager, package_name_inn, "menu_assets_inn", nil, true, true)
+		end
+	else
+		should_load_inn_package = self._level_key == "inn_level"
+
+		if should_load_inn_package then
+			if ingame_package_loaded then
+				package_manager.unload(package_manager, package_name_ingame, "menu_assets")
+			end
+
+			if not inn_package_loaded then
+				package_manager.load(package_manager, package_name_inn, "menu_assets", nil, true, true)
+			end
+		else
+			if inn_package_loaded then
+				package_manager.unload(package_manager, package_name_inn, "menu_assets")
+			end
+
+			if not ingame_package_loaded then
+				package_manager.load(package_manager, package_name_ingame, "menu_assets", nil, true, true)
+			end
+		end
+
+		self._menu_setup_done = true
+	end
+
+	return 
+end
+StateLoading.menu_assets_setup_done = function (self)
+	return self._menu_setup_done
+end
 StateLoading.cb_loading_screen_loaded = function (self, act_progression_index)
 	if not self._loading_view then
-		self._create_loading_view(self, self._level_key, act_progression_index)
+		local level_key = self._level_key
+
+		self._create_loading_view(self, level_key, act_progression_index)
 
 		if not self._first_time_view then
-			self._trigger_loading_view(self, self._level_key, act_progression_index)
+			self._trigger_loading_view(self, level_key, act_progression_index)
 		end
 	end
 
@@ -1022,6 +1091,10 @@ StateLoading.setup_lobby_host = function (self, wait_for_joined_callback)
 		self.setup_loading_view(self, level_key)
 	end
 
+	if not self.menu_assets_setup_done(self) then
+		self.setup_menu_assets(self)
+	end
+
 	self._load_level(self, level_key)
 
 	if not wait_for_joined_callback then
@@ -1124,7 +1197,7 @@ StateLoading.create_join_popup = function (self, host_name)
 	end
 
 	local header = Localize("popup_migrating_to_host_header")
-	local message = Localize("popup_migrating_to_host_message") .. host_name
+	local message = Localize("popup_migrating_to_host_message") .. "\n" .. host_name
 	local time = StateLoading.join_lobby_timeout
 
 	assert(self._join_popup_id == nil, "Tried to show popup even though we already had one.")

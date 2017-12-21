@@ -1402,96 +1402,96 @@ local Credits = {
 		{
 			text = "adsk_legal_1",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "fatshark_legal_1",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits_2",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits_3",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits_4",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits_5",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits_6",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "gw_legal_credits_7",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "partner_legal_1",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "partner_legal_2_1",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "partner_legal_2_2",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "partner_legal_3",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = "partner_legal_4",
 			localized = true,
-			type = "person"
+			type = "legal"
 		},
 		{
 			text = " ",

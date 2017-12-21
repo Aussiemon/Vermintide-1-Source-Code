@@ -371,7 +371,7 @@ BoonUI._set_widget_time_progress = function (self, widget, progress, time_left)
 
 		if 0 < days then
 			widget.content.timer_text = tostring(days) .. "d"
-		elseif 0 < hours then
+		elseif 2 < hours then
 			widget.content.timer_text = tostring(hours) .. "h"
 		elseif 0 < minutes then
 			widget.content.timer_text = tostring(minutes) .. "m"

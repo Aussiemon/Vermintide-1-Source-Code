@@ -301,7 +301,9 @@ end
 backend_items = backend_items or Items.new(Items)
 ScriptBackendItem = ScriptBackendItem or {}
 ScriptBackendItem.update = function ()
+	Profiler.start("ScriptBackendItem update")
 	backend_items:update()
+	Profiler.stop()
 
 	return 
 end
@@ -365,6 +367,10 @@ ScriptBackendItem.get_key = function (backend_id)
 	return 
 end
 ScriptBackendItem.get_item_from_id = function (backend_id)
+	if backend_id == 0 then
+		ScriptApplication.send_to_crashify("[ScriptBackendItem.get_item_from_id] tried to get item from backend_id 0")
+	end
+
 	local items = backend_items:get_all_backend_items()
 
 	return items[backend_id]
@@ -599,6 +605,25 @@ ScriptBackendItem.is_salvageable = function (backend_id)
 	local salvageable_rarity = SalvageableRarities[item_config.rarity]
 
 	return unequipped and salvageable_slot_type and salvageable_rarity
+end
+local FuseableSlotTypes = {
+	melee = true,
+	ranged = true
+}
+local FuseableRarities = {
+	common = true,
+	plentiful = true,
+	rare = true
+}
+ScriptBackendItem.is_fuseable = function (backend_id)
+	local unequipped = not ScriptBackendItem.is_equipped(backend_id)
+	local items = backend_items:get_all_backend_items()
+	local item = items[backend_id]
+	local item_config = ItemMasterList[item.key]
+	local fuseable_slot_type = FuseableSlotTypes[item_config.slot_type]
+	local fuseable_rarity = FuseableRarities[item_config.rarity]
+
+	return unequipped and fuseable_slot_type and fuseable_rarity
 end
 ScriptBackendItem.set_rerolling_trait_state = function (state)
 	backend_items:set_rerolling_trait_state(state)

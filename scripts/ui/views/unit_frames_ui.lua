@@ -413,6 +413,8 @@ UnitFramesUI.update_teammates_unit_frames = function (self, dt, t, ui_scenegraph
 					active_percentage = num_grimoires*multiplier - 1
 				end
 
+				fassert(health_percent*active_percentage <= 1, "Health was greater then 1. %s , %s", health_percent, active_percentage)
+
 				local health_changed = self.on_player_health_changed(self, "player_" .. index, player_portrait_widget, health_percent*active_percentage)
 				local grims_changed = self.on_num_grimoires_changed(self, "player_" .. index .. "_grimoires", player_portrait_widget, active_percentage - 1)
 				modified_teammate[i] = modified_teammate[i] or health_changed or grims_changed
@@ -439,9 +441,9 @@ UnitFramesUI.update_teammates_unit_frames = function (self, dt, t, ui_scenegraph
 				end
 
 				low_health = (not is_dead and not is_knocked_down and health_percent < UISettings.unit_frames.low_health_threshold) or nil
-				portrait_content.hp_bar.low_health = low_health
-				portrait_content.hp_bar.is_knocked_down = is_knocked_down
-				portrait_content.hp_bar.is_wounded = is_wounded
+				portrait_content.hp_bar.low_health = low_health or false
+				portrait_content.hp_bar.is_knocked_down = is_knocked_down or false
+				portrait_content.hp_bar.is_wounded = is_wounded or false
 				portrait_content.character_portrait = character_portrait
 				portrait_content.connecting = false
 				portrait_content.display_portrait_icon = show_icon
@@ -639,6 +641,9 @@ UnitFramesUI.update_player_unit_frame = function (self, dt, t, ui_scenegraph, ui
 	is_dead = health_percent <= 0
 	local num_of_health_dividers = 0
 	local low_health = (not is_dead and not is_knocked_down and health_percent < UISettings.unit_frames.low_health_threshold) or nil
+
+	fassert(health_percent*active_percentage <= 1, "Health was greater then 1. %s , %s", health_percent, active_percentage)
+
 	local health_changed = self.on_player_health_changed(self, "my_player", player_portrait, health_percent*active_percentage)
 	local grims_changed = self.on_num_grimoires_changed(self, "my_player_grimoires", player_portrait, active_percentage - 1)
 	modified_portrait = modified_portrait or health_changed or grims_changed
@@ -707,9 +712,9 @@ UnitFramesUI.update_player_unit_frame = function (self, dt, t, ui_scenegraph, ui
 			portrait_style.portrait_overlay.color[1] = alpha
 		end
 
-		portrait_content.hp_bar.low_health = low_health
-		portrait_content.hp_bar.is_knocked_down = is_knocked_down
-		portrait_content.hp_bar.is_wounded = is_wounded
+		portrait_content.hp_bar.low_health = low_health or false
+		portrait_content.hp_bar.is_knocked_down = is_knocked_down or false
+		portrait_content.hp_bar.is_wounded = is_wounded or false
 		portrait_content.character_portrait = character_portrait
 		portrait_content.display_portrait_icon = show_icon
 		portrait_content.display_portrait_overlay = show_overlay
@@ -779,7 +784,7 @@ UnitFramesUI.on_player_health_changed = function (self, name, widget, health_per
 	local health_percent_current = widget_animation_data.current_health
 	widget_animation_data.current_health = health_percent
 
-	if health_percent <= 1 and health_percent ~= health_percent_current then
+	if health_percent ~= health_percent_current then
 		local is_knocked_down = widget.content.hp_bar.is_knocked_down
 		local current_bar_health = widget.content.hp_bar.bar_value
 		local lerp_time = UISettings.unit_frames.health_bar_lerp_time

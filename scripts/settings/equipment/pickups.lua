@@ -96,6 +96,18 @@ Pickups.level_events.explosive_barrel = {
 	wield_on_pickup = true,
 	hud_description = "pickup_explosive_barrel"
 }
+Pickups.level_events.dwarf_explosive_barrel = {
+	only_once = true,
+	slot_name = "slot_level_event",
+	type = "explosive_inventory_item",
+	spawn_weighting = 1,
+	item_name = "dwarf_explosive_barrel",
+	unit_name = "units/weapons/player/pup_dwarf_barrel_01/pup_dwarf_barrel_01",
+	additional_data_func = "explosive_barrel",
+	unit_template_name = "explosive_pickup_projectile_unit_limited",
+	wield_on_pickup = true,
+	hud_description = "pickup_explosive_barrel"
+}
 Pickups.level_events.explosive_barrel_objective = {
 	only_once = true,
 	slot_name = "slot_level_event",
@@ -261,41 +273,15 @@ Pickups.special = {
 		unit_name = "units/props/dice_bowl/pup_loot_die",
 		local_pickup_sound = false,
 		hud_description = "pickup_loot_die",
-		can_spawn_func = function (params)
+		can_spawn_func = function (params, is_debug_spawn)
+			if is_debug_spawn then
+				return true
+			end
+
 			local dice_keeper = params.dice_keeper
 
 			return dice_keeper.num_bonus_dice_spawned(dice_keeper) < 2
 		end
-	},
-	survival_metal_loot_die = {
-		only_once = true,
-		mission_name = "metal_dice_survival_mission",
-		unit_name = "units/props/dice_bowl/pup_loot_die",
-		type = "loot_die",
-		spawn_weighting = 1,
-		local_pickup_sound = false,
-		hud_description = "pickup_loot_die",
-		pickup_sound_event = "hud_pickup_loot_die"
-	},
-	survival_gold_loot_die = {
-		only_once = true,
-		mission_name = "gold_dice_survival_mission",
-		unit_name = "units/props/dice_bowl/pup_loot_die",
-		type = "loot_die",
-		spawn_weighting = 1,
-		local_pickup_sound = false,
-		hud_description = "pickup_loot_die",
-		pickup_sound_event = "hud_pickup_loot_die"
-	},
-	survival_warpstone_loot_die = {
-		only_once = true,
-		mission_name = "warpstone_dice_survival_mission",
-		unit_name = "units/props/dice_bowl/pup_loot_die",
-		type = "loot_die",
-		spawn_weighting = 1,
-		local_pickup_sound = false,
-		hud_description = "pickup_loot_die",
-		pickup_sound_event = "hud_pickup_loot_die"
 	},
 	endurance_badge_01 = {
 		only_once = true,
@@ -355,7 +341,11 @@ Pickups.lorebook_pages = {
 
 			return unlocked_all
 		end,
-		can_spawn_func = function ()
+		can_spawn_func = function (params, is_debug_spawn)
+			if is_debug_spawn then
+				return true
+			end
+
 			if not script_data.lorebook_enabled then
 				return false
 			end

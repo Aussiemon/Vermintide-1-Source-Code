@@ -47,7 +47,7 @@ function populate_save_data(save_data)
 		print("Wrong version for save file, saved: ", save_data.version, " current: ", SaveData.version)
 	end
 
-	local id = (steam and Steam.user_id()) or "local_save"
+	local id = (rawget(_G, "Steam") and Steam.user_id()) or "local_save"
 
 	populate_player_data_from_save(SaveData, id, version_match)
 

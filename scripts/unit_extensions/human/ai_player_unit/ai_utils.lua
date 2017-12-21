@@ -70,6 +70,15 @@ AiUtils.aggro_unit_of_enemy = function (unit, enemy_unit)
 
 	return 
 end
+AiUtils.activate_unit = function (blackboard)
+	if not blackboard.confirmed_player_sighting then
+		Managers.state.event:trigger("ai_unit_activated", blackboard.breed.name, blackboard.event_spawned)
+
+		blackboard.confirmed_player_sighting = true
+	end
+
+	return 
+end
 AiUtils.alert_unit_of_enemy = function (unit, enemy_unit)
 	enemy_unit = AiUtils.get_actual_attacker_unit(enemy_unit)
 
@@ -203,22 +212,24 @@ AiUtils.poison_explode_unit = function (unit, action, blackboard)
 	local aoe_init_damage = DamageUtils.calculate_damage(aoe_init_damage_table)
 	local aoe_dot_damage_interval = action.aoe_dot_damage_interval
 	local radius = action.radius
+	local initial_radius = action.initial_radius
 	local duration = action.duration
 	local create_nav_tag_volume = action.create_nav_tag_volume
 	local nav_tag_volume_layer = action.nav_tag_volume_layer
 	local extension_init_data = {
 		area_damage_system = {
-			area_damage_template = "area_dot_damage",
+			dot_effect_name = "fx/wpnfx_poison_wind_globe_impact",
 			invisible_unit = true,
 			player_screen_effect_name = "fx/screenspace_poison_globe_impact",
 			area_ai_random_death_template = "area_poison_ai_random_death",
-			dot_effect_name = "fx/wpnfx_poison_wind_globe_impact",
+			area_damage_template = "area_dot_damage",
 			extra_dot_effect_name = "fx/chr_gutter_death",
 			damage_players = true,
 			aoe_dot_damage = aoe_dot_damage,
 			aoe_init_damage = aoe_init_damage,
 			aoe_dot_damage_interval = aoe_dot_damage_interval,
 			radius = radius,
+			initial_radius = initial_radius,
 			life_time = duration,
 			damage_source = blackboard.breed.name,
 			create_nav_tag_volume = create_nav_tag_volume,

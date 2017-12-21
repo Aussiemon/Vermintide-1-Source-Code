@@ -99,6 +99,7 @@ weapon_template.actions = {
 			minimum_hold_time = 0.15,
 			hold_input = "action_two_hold",
 			anim_event = "to_zoom",
+			allow_hold_toggle = true,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
 			end,
@@ -144,14 +145,13 @@ weapon_template.actions = {
 	action_instant_equip_healing_draught = ActionTemplates.instant_equip_and_drink_healing_draught
 }
 weapon_template.ammo_data = {
+	max_ammo = 45,
 	ammo_per_reload = 15,
 	ammo_unit = "units/weapons/player/wpn_crossbow_quiver_pile/wpn_crossbow_bolt_pile",
-	destroy_when_out_of_ammo = false,
 	ammo_per_clip = 15,
 	ammo_hand = "left",
 	play_reload_anim_on_wield_reload = true,
-	ammo_unit_3p = "units/weapons/player/wpn_crossbow_quiver/wpn_crossbow_bolt_3p",
-	max_ammo = 45,
+	destroy_when_out_of_ammo = false,
 	reload_on_ammo_pickup = false,
 	reload_time = 5,
 	ammo_unit_attachment_node_linking = AttachmentNodeLinking.repeating_bolt

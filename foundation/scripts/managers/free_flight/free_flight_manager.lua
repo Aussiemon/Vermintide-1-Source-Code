@@ -369,6 +369,10 @@ FreeFlightManager._update_global_free_flight = function (self, dt, data, input_s
 		print("Control Point: " .. tostring(self.current_control_point))
 	end
 
+	if input_service.get(input_service, "set_drop_position") then
+		self.drop_player_at_camera_pos(self, cam)
+	end
+
 	ScriptCamera.set_local_pose(cam, cm)
 
 	return 
@@ -635,20 +639,7 @@ FreeFlightManager._update_free_flight = function (self, dt, player, data)
 	ScatterSystem.move_observer(World.scatter_system(world), data.scatter_system_observer, trans, rot)
 
 	if input.get(input, "set_drop_position") then
-		local pos = Camera.local_position(cam)
-		local rot = Camera.local_rotation(cam)
-
-		if self._teleport_override then
-			self._teleport_override(pos, rot)
-		elseif player.camera_follow_unit then
-			Unit.set_local_position(player.camera_follow_unit, 0, pos)
-
-			local mover = Unit.mover(player.camera_follow_unit)
-
-			if mover then
-				Mover.set_position(mover, pos)
-			end
-		end
+		self.drop_player_at_camera_pos(self, cam, player)
 	end
 
 	if input.get(input, "increase_fov") then
@@ -661,6 +652,24 @@ FreeFlightManager._update_free_flight = function (self, dt, player, data)
 		local old_fov = Camera.vertical_fov(cam)
 
 		Camera.set_vertical_fov(cam, old_fov - math.pi/72)
+	end
+
+	return 
+end
+FreeFlightManager.drop_player_at_camera_pos = function (self, cam, player)
+	local pos = Camera.local_position(cam)
+	local rot = Camera.local_rotation(cam)
+
+	if self._teleport_override then
+		self._teleport_override(pos, rot)
+	elseif player and player.camera_follow_unit then
+		Unit.set_local_position(player.camera_follow_unit, 0, pos)
+
+		local mover = Unit.mover(player.camera_follow_unit)
+
+		if mover then
+			Mover.set_position(mover, pos)
+		end
 	end
 
 	return 

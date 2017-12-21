@@ -21,9 +21,6 @@ BTBotFollowAction.leave = function (self, unit, blackboard, t)
 	return 
 end
 BTBotFollowAction.run = function (self, unit, blackboard, t, dt)
-	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
-	local input = ScriptUnit.extension(unit, "input_system")
-
 	return "running", "evaluate"
 end
 

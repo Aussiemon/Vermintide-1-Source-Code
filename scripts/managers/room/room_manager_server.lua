@@ -58,28 +58,33 @@ RoomManagerServer.move_players_from_room = function (self, room_id)
 	local player_manager = Managers.player
 	local players = player_manager.human_players(player_manager)
 
-	for index, player in pairs(players) do
+	for _, player in pairs(players) do
 		local player_unit = player.player_unit
 
 		if not Unit.alive(player_unit) then
 		else
-			local position = POSITION_LOOKUP[player_unit]
+			local unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
 
-			if Level.is_point_inside_volume(level, "room_volume", position) then
-				local peer_id = player.peer_id
-				local spawn_point_id = self.get_spawn_point_by_peer(self, peer_id)
-				local spawn_point = spawn_points[spawn_point_id]
-				local spawn_pos = spawn_point.pos:unbox()
-				local spawn_rot = spawn_point.rot:unbox()
+			if not unit_id then
+			else
+				local position = POSITION_LOOKUP[player_unit]
 
-				if player.local_player then
-					local locomotion_extension = ScriptUnit.extension(player_unit, "locomotion_system")
+				if Level.is_point_inside_volume(level, "room_volume", position) then
+					local peer_id = player.peer_id
+					local spawn_point_id = self.get_spawn_point_by_peer(self, peer_id)
+					local spawn_point = spawn_points[spawn_point_id]
+					local spawn_pos = spawn_point.pos:unbox()
+					local spawn_rot = spawn_point.rot:unbox()
 
-					locomotion_extension.teleport_to(locomotion_extension, spawn_pos, spawn_rot)
-				else
-					local unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
+					if player.local_player then
+						local locomotion_extension = ScriptUnit.extension(player_unit, "locomotion_system")
 
-					RPC.rpc_teleport_unit_to(peer_id, unit_id, spawn_pos, spawn_rot)
+						locomotion_extension.teleport_to(locomotion_extension, spawn_pos, spawn_rot)
+					else
+						local unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
+
+						RPC.rpc_teleport_unit_to(peer_id, unit_id, spawn_pos, spawn_rot)
+					end
 				end
 			end
 		end

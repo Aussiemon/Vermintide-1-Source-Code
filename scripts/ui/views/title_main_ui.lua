@@ -1,3 +1,5 @@
+require("scripts/ui/ui_animations")
+
 local scenegraph = {
 	root = {
 		is_root = true,

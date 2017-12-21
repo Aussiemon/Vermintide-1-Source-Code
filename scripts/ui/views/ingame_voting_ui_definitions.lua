@@ -16,7 +16,7 @@ local scenegraph_definition = {
 		parent = "root",
 		horizontal_alignment = "left",
 		position = {
-			10,
+			50,
 			0,
 			0
 		},
@@ -35,22 +35,50 @@ local scenegraph_definition = {
 			1
 		},
 		size = {
-			358,
-			53
+			450,
+			134
 		}
 	},
-	info_box_top = {
-		vertical_alignment = "top",
+	bar_frame = {
+		vertical_alignment = "bottom",
 		parent = "info_box",
-		horizontal_alignment = "left",
+		horizontal_alignment = "center",
 		position = {
 			0,
-			29,
-			0
+			-22,
+			1
 		},
 		size = {
-			358,
-			29
+			246,
+			24
+		}
+	},
+	input_icon_pivot_yes = {
+		vertical_alignment = "top",
+		parent = "bar_frame",
+		horizontal_alignment = "center",
+		position = {
+			-45,
+			-28,
+			1
+		},
+		size = {
+			0,
+			0
+		}
+	},
+	input_icon_pivot_no = {
+		vertical_alignment = "top",
+		parent = "bar_frame",
+		horizontal_alignment = "center",
+		position = {
+			45,
+			-28,
+			1
+		},
+		size = {
+			0,
+			0
 		}
 	},
 	info_text = {
@@ -131,18 +159,26 @@ local option_element = {
 	passes = {
 		{
 			pass_type = "texture",
-			style_id = "checkbox_texture",
-			texture_id = "checkbox_texture"
-		},
-		{
-			pass_type = "texture",
 			style_id = "option_texture",
 			texture_id = "option_texture"
 		},
 		{
+			style_id = "bar",
+			pass_type = "texture_uv",
+			content_id = "bar",
+			content_check_function = function (content)
+				local parent = content.parent
+
+				return parent.can_vote and not parent.has_voted
+			end
+		},
+		{
 			pass_type = "texture",
-			style_id = "glow_effect_texture",
-			texture_id = "glow_effect_texture"
+			style_id = "bar_bg",
+			texture_id = "bar_bg",
+			content_check_function = function (content)
+				return content.can_vote and not content.has_voted
+			end
 		},
 		{
 			style_id = "option_text",
@@ -159,6 +195,22 @@ local option_element = {
 			content_check_function = function (content)
 				return content.has_voted
 			end
+		},
+		{
+			style_id = "input_text",
+			pass_type = "text",
+			text_id = "input_text",
+			content_check_function = function (content)
+				return content.can_vote and not content.has_voted
+			end
+		},
+		{
+			pass_type = "texture",
+			style_id = "input_icon",
+			texture_id = "input_icon",
+			content_check_function = function (content)
+				return content.can_vote and not content.has_voted and content.input_icon
+			end
 		}
 	}
 }
@@ -169,18 +221,45 @@ local widget_definitions = {
 			passes = {
 				{
 					pass_type = "texture",
-					style_id = "info_box_top",
-					texture_id = "info_box_top"
-				},
-				{
-					pass_type = "tiled_texture",
-					style_id = "info_box_middle",
-					texture_id = "info_box_middle"
+					style_id = "info_box",
+					texture_id = "info_box"
 				},
 				{
 					pass_type = "texture",
-					style_id = "option_box",
-					texture_id = "option_box"
+					style_id = "bar_frame",
+					texture_id = "bar_frame",
+					content_check_function = function (content)
+						return content.can_vote and not content.has_voted
+					end
+				},
+				{
+					pass_type = "texture",
+					style_id = "bar_bg",
+					texture_id = "bar_bg",
+					content_check_function = function (content)
+						return content.can_vote and not content.has_voted
+					end
+				},
+				{
+					pass_type = "texture",
+					style_id = "input_info_bg",
+					texture_id = "input_info_bg",
+					content_check_function = function (content)
+						return not content.has_voted and not content.can_vote
+					end
+				},
+				{
+					style_id = "input_text",
+					pass_type = "text",
+					text_id = "input_text",
+					content_check_function = function (content)
+						return not content.has_voted and not content.can_vote
+					end
+				},
+				{
+					style_id = "title_text",
+					pass_type = "text",
+					text_id = "title_text"
 				},
 				{
 					style_id = "info_text",
@@ -190,27 +269,18 @@ local widget_definitions = {
 			}
 		},
 		content = {
-			option_box = "vote_kick_window_bottom",
-			info_box_top = "vote_kick_window_top",
-			info_box_middle = "vote_kick_window_middle",
-			info_text = ""
+			info_box = "voting_frame_01",
+			title_text = "",
+			can_vote = false,
+			input_text = "voting_open_description",
+			has_voted = false,
+			input_info_bg = "voting_bottom_fade",
+			info_text = "",
+			bar_frame = "voting_frame_02",
+			bar_bg = "voting_frame_02_bg"
 		},
 		style = {
-			info_box_top = {
-				scenegraph_id = "info_box_top",
-				color = {
-					255,
-					255,
-					255,
-					255
-				},
-				offset = {
-					0,
-					0,
-					0
-				}
-			},
-			info_box_middle = {
+			info_box = {
 				scenegraph_id = "info_box",
 				color = {
 					255,
@@ -222,14 +292,28 @@ local widget_definitions = {
 					0,
 					0,
 					0
-				},
-				texture_tiling_size = {
-					358,
-					53
 				}
 			},
-			option_box = {
-				scenegraph_id = "option_box",
+			input_info_bg = {
+				scenegraph_id = "info_box",
+				size = {
+					434,
+					60
+				},
+				color = {
+					255,
+					255,
+					255,
+					255
+				},
+				offset = {
+					8,
+					-58,
+					2
+				}
+			},
+			bar_frame = {
+				scenegraph_id = "bar_frame",
 				color = {
 					255,
 					255,
@@ -239,24 +323,64 @@ local widget_definitions = {
 				offset = {
 					0,
 					0,
-					0
+					2
+				}
+			},
+			bar_bg = {
+				scenegraph_id = "bar_frame",
+				color = {
+					255,
+					255,
+					255,
+					255
+				},
+				offset = {
+					0,
+					0,
+					-5
+				}
+			},
+			input_text = {
+				vertical_alignment = "bottom",
+				scenegraph_id = "info_box",
+				localize = true,
+				horizontal_alignment = "center",
+				font_size = 24,
+				font_type = "hell_shark",
+				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
+				offset = {
+					0,
+					-30,
+					2
 				}
 			},
 			info_text = {
-				word_wrap = true,
-				scenegraph_id = "info_text",
+				font_size = 20,
+				scenegraph_id = "info_box",
 				localize = false,
-				font_size = 28,
-				pixel_perfect = true,
-				horizontal_alignment = "left",
-				vertical_alignment = "top",
-				dynamic_font = true,
+				word_wrap = true,
+				horizontal_alignment = "center",
+				vertical_alignment = "center",
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
 					0,
-					0,
+					2,
 					0
+				}
+			},
+			title_text = {
+				vertical_alignment = "top",
+				scenegraph_id = "info_box",
+				localize = false,
+				horizontal_alignment = "center",
+				font_size = 24,
+				font_type = "hell_shark",
+				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
+				offset = {
+					0,
+					-12,
+					1
 				}
 			}
 		}
@@ -265,18 +389,35 @@ local widget_definitions = {
 		scenegraph_id = "option_yes",
 		element = option_element,
 		content = {
-			checkbox_texture = "vote_kick_window_checkbox",
-			option_text = "",
-			glow_effect_texture = "vote_kick_window_glow_effect_green",
-			option_texture = "vote_kick_window_icon_01",
+			option_texture = "voting_icon_01",
+			can_vote = false,
+			input_text = "",
+			has_voted = false,
 			result_text = "0",
-			has_voted = false
+			gamepad_active = false,
+			option_text = "",
+			bar_bg = "voting_bar_01",
+			bar = {
+				texture_id = "voting_bar_01",
+				uvs = {
+					{
+						0,
+						0
+					},
+					{
+						1,
+						1
+					}
+				}
+			}
 		},
 		style = {
-			checkbox_texture = {
+			bar = {
+				default_width = 115,
+				scenegraph_id = "bar_frame",
 				size = {
-					26,
-					26
+					115,
+					19
 				},
 				color = {
 					255,
@@ -285,15 +426,45 @@ local widget_definitions = {
 					255
 				},
 				offset = {
-					0,
-					0,
-					0
+					6,
+					4,
+					-3
+				},
+				default_offset = {
+					6,
+					4,
+					-3
+				}
+			},
+			bar_bg = {
+				default_width = 115,
+				scenegraph_id = "bar_frame",
+				size = {
+					115,
+					19
+				},
+				color = {
+					150,
+					255,
+					255,
+					255
+				},
+				offset = {
+					6,
+					4,
+					-3
+				},
+				default_offset = {
+					6,
+					4,
+					-4
 				}
 			},
 			option_texture = {
+				scenegraph_id = "info_box",
 				size = {
-					15,
-					15
+					31,
+					25
 				},
 				color = {
 					255,
@@ -302,57 +473,73 @@ local widget_definitions = {
 					255
 				},
 				offset = {
-					5.5,
-					5.5,
+					144.5,
+					10,
 					1
 				}
 			},
-			glow_effect_texture = {
-				size = {
-					74,
-					74
-				},
+			input_icon = {
+				scenegraph_id = "input_icon_pivot_yes",
 				color = {
-					0,
+					255,
 					255,
 					255,
 					255
 				},
 				offset = {
-					-24,
-					-24,
-					2
+					0,
+					0,
+					1
 				}
 			},
 			option_text = {
-				font_size = 24,
+				scenegraph_id = "info_box",
 				localize = false,
 				horizontal_alignment = "left",
 				word_wrap = false,
 				pixel_perfect = true,
-				vertical_alignment = "center",
+				font_size = 24,
+				vertical_alignment = "bottom",
 				dynamic_font = true,
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					35,
-					-2,
+					174.5,
+					3,
 					1
 				}
 			},
 			result_text = {
-				font_size = 24,
+				scenegraph_id = "info_box",
 				localize = false,
 				horizontal_alignment = "left",
 				word_wrap = false,
 				pixel_perfect = true,
-				vertical_alignment = "center",
+				font_size = 24,
+				vertical_alignment = "bottom",
 				dynamic_font = true,
 				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
+				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					35,
-					-2,
+					174.5,
+					3,
+					1
+				}
+			},
+			input_text = {
+				scenegraph_id = "info_box",
+				localize = false,
+				horizontal_alignment = "right",
+				word_wrap = false,
+				pixel_perfect = true,
+				font_size = 24,
+				vertical_alignment = "bottom",
+				dynamic_font = true,
+				font_type = "hell_shark",
+				text_color = Colors.get_color_table_with_alpha("white", 255),
+				offset = {
+					-235,
+					-55,
 					1
 				}
 			}
@@ -362,18 +549,35 @@ local widget_definitions = {
 		scenegraph_id = "option_no",
 		element = option_element,
 		content = {
-			checkbox_texture = "vote_kick_window_checkbox",
-			option_text = "",
-			glow_effect_texture = "vote_kick_window_glow_effect_red",
-			option_texture = "vote_kick_window_icon_02",
+			option_texture = "voting_icon_02",
+			can_vote = false,
+			input_text = "",
+			has_voted = false,
 			result_text = "0",
-			has_voted = false
+			gamepad_active = false,
+			option_text = "",
+			bar_bg = "voting_bar_02",
+			bar = {
+				texture_id = "voting_bar_02",
+				uvs = {
+					{
+						0,
+						0
+					},
+					{
+						1,
+						1
+					}
+				}
+			}
 		},
 		style = {
-			checkbox_texture = {
+			bar = {
+				default_width = 115,
+				scenegraph_id = "bar_frame",
 				size = {
-					26,
-					26
+					115,
+					19
 				},
 				color = {
 					255,
@@ -382,15 +586,45 @@ local widget_definitions = {
 					255
 				},
 				offset = {
-					0,
-					0,
-					0
+					125,
+					4,
+					-3
+				},
+				default_offset = {
+					125,
+					4,
+					-3
+				}
+			},
+			bar_bg = {
+				default_width = 115,
+				scenegraph_id = "bar_frame",
+				size = {
+					115,
+					19
+				},
+				color = {
+					150,
+					255,
+					255,
+					255
+				},
+				offset = {
+					125,
+					4,
+					-3
+				},
+				default_offset = {
+					125,
+					4,
+					-4
 				}
 			},
 			option_texture = {
+				scenegraph_id = "info_box",
 				size = {
-					15,
-					15
+					31,
+					25
 				},
 				color = {
 					255,
@@ -399,57 +633,67 @@ local widget_definitions = {
 					255
 				},
 				offset = {
-					5.5,
-					5.5,
+					254.5,
+					10,
 					1
 				}
 			},
-			glow_effect_texture = {
-				size = {
-					74,
-					74
-				},
+			input_icon = {
+				scenegraph_id = "input_icon_pivot_no",
 				color = {
-					0,
+					255,
 					255,
 					255,
 					255
 				},
 				offset = {
-					-24,
-					-24,
-					2
+					0,
+					0,
+					1
 				}
 			},
 			option_text = {
 				font_size = 24,
+				scenegraph_id = "info_box",
 				localize = false,
-				horizontal_alignment = "left",
 				word_wrap = false,
-				pixel_perfect = true,
-				vertical_alignment = "center",
-				dynamic_font = true,
+				horizontal_alignment = "left",
+				vertical_alignment = "bottom",
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
-					35,
-					-2,
+					284.5,
+					3,
 					1
 				}
 			},
 			result_text = {
 				font_size = 24,
+				scenegraph_id = "info_box",
 				localize = false,
-				horizontal_alignment = "left",
 				word_wrap = false,
-				pixel_perfect = true,
-				vertical_alignment = "center",
-				dynamic_font = true,
+				horizontal_alignment = "left",
+				vertical_alignment = "bottom",
 				font_type = "hell_shark",
-				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
+				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
-					35,
-					-2,
+					284.5,
+					3,
+					1
+				}
+			},
+			input_text = {
+				font_size = 24,
+				scenegraph_id = "info_box",
+				localize = false,
+				word_wrap = false,
+				horizontal_alignment = "left",
+				vertical_alignment = "bottom",
+				font_type = "hell_shark",
+				text_color = Colors.get_color_table_with_alpha("white", 255),
+				offset = {
+					235,
+					-55,
 					1
 				}
 			}

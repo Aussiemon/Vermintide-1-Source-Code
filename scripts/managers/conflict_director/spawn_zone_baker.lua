@@ -17,6 +17,7 @@ SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 		local spawn_zone_path = level_settings.level_name .. "_spawn_zones"
 
 		if Application.can_get("lua", spawn_zone_path) then
+			self.last_loaded_zone_package = spawn_zone_path
 			local spawn_data = require(spawn_zone_path)
 			self.zones = spawn_data.zones
 			self.num_main_zones = spawn_data.num_main_zones
@@ -65,6 +66,13 @@ SpawnZoneBaker.init = function (self, world, nav_world, level_analyzer)
 
 			self.spawn_zones_available = true
 		end
+	end
+
+	return 
+end
+SpawnZoneBaker.reset = function (self)
+	if self.last_loaded_zone_package then
+		package.loaded[self.last_loaded_zone_package] = nil
 	end
 
 	return 

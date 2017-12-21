@@ -108,6 +108,8 @@ StatusSystem.rpc_status_change_bool = function (self, sender, status_id, status_
 		status_ext.set_respawned(status_ext, status_bool)
 	elseif status == "overchage_exploding" then
 		status_ext.set_overcharge_exploding(status_ext, status_bool)
+	elseif status == "dodging" then
+		status_ext.set_is_dodging(status_ext, status_bool)
 	else
 		assert("Unhandled status %s", tostring(status))
 	end

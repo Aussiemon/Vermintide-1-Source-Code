@@ -22,19 +22,6 @@ PlayerUnitLocomotionExtension.init = function (self, extension_init_context, uni
 	self.collides_down = true
 	self.time_since_last_down_collide = 0
 	self.rotate_along_direction = true
-	self.drawer = Managers.state.debug:drawer({
-		mode = "immediate",
-		name = "PlayerUnitLocomotionExtension"
-	})
-
-	GraphHelper.create("PlayerUnitLocomotionExtension", {
-		"move_speed"
-	}, {
-		"move_velocity"
-	})
-	GraphHelper.set_range("PlayerUnitLocomotionExtension", -10, 10)
-	GraphHelper.hide("PlayerUnitLocomotionExtension")
-
 	self.debugging_animations = false
 	self.telemetry_timer = 0
 	self.telemetry_log_interval = tonumber(GameSettingsDevelopment.telemetry_log_interval) or 1
@@ -58,6 +45,9 @@ PlayerUnitLocomotionExtension.init = function (self, extension_init_context, uni
 		self._nav_traverse_logic = GwNavTraverseLogic.create(self._nav_world)
 	end
 
+	self._system_data = extension_init_data.system_data
+	self._system_data.all_update_units[unit] = self
+
 	return 
 end
 local ALLOWED_MOVER_MOVE_DISTANCE = 1
@@ -77,6 +67,11 @@ PlayerUnitLocomotionExtension.destroy = function (self)
 	if self.is_server then
 		GwNavTraverseLogic.destroy(self._nav_traverse_logic)
 	end
+
+	local unit = self.unit
+	local system_data = self._system_data
+	system_data.all_disabled_units[unit] = nil
+	system_data.all_update_units[unit] = nil
 
 	return 
 end
@@ -157,37 +152,6 @@ PlayerUnitLocomotionExtension._stop = function (self, clear_average_velocity)
 
 	return 
 end
-local SAMPLE_UPDATE_RATE = 0.125
-PlayerUnitLocomotionExtension._update_average_velocity = function (self, t)
-	local last_sample = self._sample_velocity_time
-	local index = self._sample_velocity_index
-	local velocities = self._sample_velocities
-	local num_velocities = #velocities
-
-	while SAMPLE_UPDATE_RATE < t - last_sample do
-		last_sample = last_sample + SAMPLE_UPDATE_RATE
-		index = index%num_velocities + 1
-
-		velocities[index]:store(self.velocity_current:unbox())
-	end
-
-	self._sample_velocity_index = index
-	self._sample_velocity_time = last_sample
-	local total_velocity = Vector3(0, 0, 0)
-
-	for k, velocity in ipairs(velocities) do
-		total_velocity = total_velocity + velocity.unbox(velocity)
-	end
-
-	self._average_velocity:store(total_velocity/num_velocities)
-
-	if script_data.debug_player_velocity then
-		Debug.text("Player average speed: %s", Vector3.length(self._average_velocity:unbox()))
-		Debug.text("Player current speed: %s", Vector3.length(self.velocity_current:unbox()))
-	end
-
-	return 
-end
 PlayerUnitLocomotionExtension.average_velocity = function (self)
 	return self._average_velocity:unbox()
 end
@@ -200,17 +164,6 @@ PlayerUnitLocomotionExtension.last_position_on_navmesh = function (self)
 	assert(self.is_server, "last position on nav mesh is only saved on server")
 
 	return self._latest_position_on_navmesh:unbox()
-end
-PlayerUnitLocomotionExtension._update_last_position_on_navmesh = function (self, current_position)
-	if self.is_server then
-		local found_nav_mesh, z = GwNavQueries.triangle_from_position(self._nav_world, current_position, 0.1, 0.3, self._nav_traverse_logic)
-
-		if found_nav_mesh then
-			self._latest_position_on_navmesh:store(Vector3(current_position.x, current_position.y, current_position.z))
-		end
-	end
-
-	return 
 end
 PlayerUnitLocomotionExtension.reset = function (self)
 	self.state = "script_driven"
@@ -229,11 +182,17 @@ PlayerUnitLocomotionExtension.set_disabled = function (self, disabled, run_func,
 	self.disabled = disabled
 	self.run_func = run_func
 	self.master_unit = master_unit
+	local system_data = self._system_data
+	local unit = self.unit
 
 	if disabled then
+		system_data.all_update_units[unit] = nil
+		system_data.all_disabled_units[unit] = self
+
 		self._stop(self, true)
 	else
-		local unit = self.unit
+		system_data.all_update_units[unit] = self
+		system_data.all_disabled_units[unit] = nil
 		local pos = POSITION_LOOKUP[unit]
 		self._pos_lerp_time = 0
 
@@ -272,134 +231,6 @@ PlayerUnitLocomotionExtension.post_update = function (self, unit, input, dt, con
 
 	return 
 end
-PlayerUnitLocomotionExtension.update = function (self, unit, input, dt, context, t)
-	Profiler.start("colliding down")
-
-	IS_NEW_FRAME = false
-
-	self.update_is_colliding_down(self, unit, dt)
-	Profiler.stop()
-	Profiler.start("debug anims")
-
-	local unit_1p = self.first_person_extension:get_first_person_unit()
-
-	if script_data.debug_first_person_player_animations and not self.debugging_1p_animations then
-		self.debugging_1p_animations = true
-
-		Unit.set_animation_logging(unit_1p, true)
-	elseif self.debugging_1p_animations and not script_data.debug_first_person_player_animations then
-		self.debugging_1p_animations = false
-
-		Unit.set_animation_logging(unit_1p, false)
-	end
-
-	if script_data.debug_player_animations and not self.debugging_animations then
-		self.debugging_animations = true
-
-		Unit.set_animation_logging(unit, true)
-	elseif self.debugging_animations and not script_data.debug_player_animations then
-		self.debugging_animations = false
-
-		Unit.set_animation_logging(unit, false)
-	end
-
-	Profiler.stop()
-
-	if self.disabled then
-		self.run_func(unit, dt, self)
-
-		local game = Managers.state.network:game()
-		local go_id = Managers.state.unit_storage:go_id(unit)
-
-		if game and go_id then
-			self.sync_network_rotation(self, game, go_id)
-			self.sync_network_position(self, game, go_id)
-			self.sync_network_velocity(self, game, go_id, dt)
-		end
-
-		return 
-	end
-
-	if self.state_wanted then
-		self.state = self.state_wanted
-		self.state_wanted = nil
-	end
-
-	Profiler.start("update movement")
-
-	local state = self.state
-
-	if self.state ~= "script_driven" then
-		self.external_velocity = nil
-	end
-
-	if state == "script_driven" then
-		local calculate_fall_velocity = true
-
-		self.update_script_driven_movement(self, unit, input, dt, context, t, calculate_fall_velocity)
-	elseif state == "animation_driven" then
-		self.update_animation_driven_movement(self, unit, input, dt, context, t)
-	elseif state == "animation_driven_with_rotation_no_mover" then
-		self.update_animation_driven_movement_with_rotation_no_mover(self, unit, input, dt, context, t)
-	elseif state == "linked_movement" then
-		self.update_linked_movement(self, unit, input, dt, context, t)
-	elseif state == "script_driven_ladder" then
-		local calculate_fall_velocity = false
-
-		self.update_script_driven_movement(self, unit, input, dt, context, t, calculate_fall_velocity)
-	elseif state == "script_driven_ladder_transition_movement" then
-		self.update_script_driven_ladder_transition_movement(self, unit, input, dt, context, t)
-	elseif state == "script_driven_no_mover" then
-		self.update_script_driven_no_mover_movement(self, unit, input, dt, context, t)
-	end
-
-	Profiler.stop()
-	Profiler.start("rotation")
-
-	if not self.disable_rotation_update then
-		if self.rotate_along_direction then
-			self.update_rotation(self, unit, dt, t)
-		elseif self.target_rotation_data then
-			self.update_rotation_to_target(self, unit, dt, t)
-		end
-	end
-
-	Profiler.stop()
-	Profiler.start("network")
-
-	local game = Managers.state.network:game()
-	local go_id = Managers.state.unit_storage:go_id(unit)
-
-	if game and go_id then
-		self.sync_network_rotation(self, game, go_id)
-		self.sync_network_position(self, game, go_id)
-		self.sync_network_velocity(self, game, go_id, dt)
-	end
-
-	Profiler.stop()
-	Profiler.start("statistics")
-	GraphHelper.record_statistics("move_velocity", self.velocity_current:unbox())
-	GraphHelper.record_statistics("move_speed", Vector3.length(self.velocity_current:unbox()))
-	Profiler.stop()
-
-	if GameSettingsDevelopment.use_telemetry and self.telemetry_timer <= t then
-		self._add_player_position_telemetry(self, t)
-	end
-
-	Profiler.start("_update_average_velocity")
-	self._update_average_velocity(self, t)
-	Profiler.stop()
-
-	if script_data.debug_player_position then
-		Debug.text("Player position: %s", tostring(Unit.local_position(unit, 0)))
-	end
-
-	self._update_last_position_on_navmesh(self, Unit.world_position(unit, 0))
-
-	self.disable_rotation_update = false
-
-	return 
-end
 PlayerUnitLocomotionExtension.moving_on_slope = function (self, calculate_fall_velocity, unit, mover, final_position)
 	if self.is_bot then
 		self.allow_jump = true
@@ -429,7 +260,7 @@ PlayerUnitLocomotionExtension.moving_on_slope = function (self, calculate_fall_v
 	return on_slope and calculate_fall_velocity
 end
 local ai_units = {}
-PlayerUnitLocomotionExtension.update_script_driven_movement = function (self, unit, input, dt, context, t, calculate_fall_velocity)
+PlayerUnitLocomotionExtension.update_script_driven_movement = function (self, unit, dt, t, calculate_fall_velocity)
 	local external_velocity = self.external_velocity and self.external_velocity:unbox()
 	local velocity_current = self.velocity_current:unbox() + Vector3(0, 0, (external_velocity and external_velocity.z) or 0)
 	local velocity_wanted = self.velocity_wanted:unbox()
@@ -578,7 +409,7 @@ PlayerUnitLocomotionExtension.update_script_driven_movement = function (self, un
 
 	return 
 end
-PlayerUnitLocomotionExtension.update_animation_driven_movement = function (self, unit, input, dt, context, t)
+PlayerUnitLocomotionExtension.update_animation_driven_movement = function (self, unit, dt, t)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local wanted_position = Matrix4x4.translation(wanted_pose)
 	local current_position = POSITION_LOOKUP[unit]
@@ -610,7 +441,7 @@ PlayerUnitLocomotionExtension.update_animation_driven_movement = function (self,
 
 	return 
 end
-PlayerUnitLocomotionExtension.update_animation_driven_movement_no_mover = function (self, unit, input, dt, context, t)
+PlayerUnitLocomotionExtension.update_animation_driven_movement_no_mover = function (self, unit, dt, t)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local wanted_position = Matrix4x4.translation(wanted_pose)
 
@@ -624,8 +455,8 @@ PlayerUnitLocomotionExtension.update_animation_driven_movement_no_mover = functi
 
 	return 
 end
-PlayerUnitLocomotionExtension.update_animation_driven_movement_with_rotation_no_mover = function (self, unit, input, dt, context, t)
-	self.update_animation_driven_movement_no_mover(self, unit, input, dt, context, t)
+PlayerUnitLocomotionExtension.update_animation_driven_movement_with_rotation_no_mover = function (self, unit, dt, t)
+	self.update_animation_driven_movement_no_mover(self, unit, dt, t)
 
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local final_rotation = Matrix4x4.rotation(wanted_pose)
@@ -634,7 +465,7 @@ PlayerUnitLocomotionExtension.update_animation_driven_movement_with_rotation_no_
 
 	return 
 end
-PlayerUnitLocomotionExtension.update_script_driven_ladder_transition_movement = function (self, unit, input, dt, context, t, old_error)
+PlayerUnitLocomotionExtension.update_script_driven_ladder_transition_movement = function (self, unit, dt, t)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local animation_position = Matrix4x4.translation(wanted_pose)
 	local current_position = POSITION_LOOKUP[unit]
@@ -662,7 +493,7 @@ PlayerUnitLocomotionExtension.update_script_driven_ladder_transition_movement = 
 
 	return 
 end
-PlayerUnitLocomotionExtension.update_linked_movement = function (self, unit, input, dt, context, t)
+PlayerUnitLocomotionExtension.update_linked_movement = function (self, unit, dt, t)
 	local link_data = self.link_data
 	local link_unit = link_data.unit
 	local node = link_data.node
@@ -678,7 +509,7 @@ PlayerUnitLocomotionExtension.update_linked_movement = function (self, unit, inp
 
 	return 
 end
-PlayerUnitLocomotionExtension.update_script_driven_no_mover_movement = function (self, unit, input, dt, context, t)
+PlayerUnitLocomotionExtension.update_script_driven_no_mover_movement = function (self, unit, dt, t)
 	local velocity = self.velocity_wanted:unbox()
 	local current_position = POSITION_LOOKUP[unit]
 	local final_position = current_position + velocity*dt
@@ -686,64 +517,6 @@ PlayerUnitLocomotionExtension.update_script_driven_no_mover_movement = function 
 	Unit.set_local_position(unit, 0, final_position)
 	self.velocity_network:store(velocity)
 	self.velocity_current:store(velocity)
-
-	return 
-end
-local MAX_TIME_SINCE_LAST_DOWN_COLLIDE = 0.2
-PlayerUnitLocomotionExtension.update_is_colliding_down = function (self, unit, dt)
-	if CharacterStateHelper.is_colliding_down(unit) then
-		self.time_since_last_down_collide = 0
-		self.collides_down = true
-	else
-		self.time_since_last_down_collide = self.time_since_last_down_collide + dt
-		self.collides_down = self.time_since_last_down_collide < MAX_TIME_SINCE_LAST_DOWN_COLLIDE and self.collides_down
-	end
-
-	return 
-end
-PlayerUnitLocomotionExtension.update_rotation_to_target = function (self, unit, dt, t)
-	local target_rotation_data = self.target_rotation_data
-	local start_rotation = target_rotation_data.start_rotation:unbox()
-	local target_rotation = target_rotation_data.target_rotation:unbox()
-	local start_time = target_rotation_data.start_time
-	local end_time = target_rotation_data.end_time
-	local lerp_t = math.smoothstep(t, start_time, end_time)
-
-	Unit.set_local_rotation(unit, 0, Quaternion.lerp(start_rotation, target_rotation, lerp_t))
-
-	return 
-end
-PlayerUnitLocomotionExtension.update_rotation = function (self, unit, dt)
-	local first_person_extension = self.first_person_extension
-	local current_rotation = first_person_extension.current_rotation(first_person_extension)
-	local current_rotation_flat = Vector3.flat(Quaternion.forward(current_rotation))
-	local velocity_current = self.velocity_current:unbox()
-	velocity_current.z = 0
-	local velocity_dot = Vector3.dot(velocity_current, current_rotation_flat)
-
-	if velocity_dot == 0 then
-		local current_rotation_normalised = Vector3.normalize(current_rotation_flat)
-		local target_rotation = self.target_rotation:unbox()
-		local target_rotation_flat = Vector3.flat(Quaternion.forward(target_rotation))
-		local target_rotation_normalised = Vector3.normalize(target_rotation_flat)
-		local dot = Vector3.dot(current_rotation_normalised, target_rotation_normalised)
-
-		if dot < 0 then
-			self.target_rotation:store(current_rotation)
-		end
-
-		velocity_current = target_rotation_flat
-	else
-		self.target_rotation:store(current_rotation)
-	end
-
-	if velocity_dot < -0.1 then
-		velocity_current = -velocity_current
-	end
-
-	local final_rotation = Quaternion.look(velocity_current)
-
-	Unit.set_local_rotation(unit, 0, Quaternion.lerp(Unit.local_rotation(self.unit, 0), final_rotation, dt*5))
 
 	return 
 end
@@ -988,26 +761,6 @@ PlayerUnitLocomotionExtension.teleport_to = function (self, pos, rot)
 	if rot ~= nil then
 		self.first_person_extension:set_rotation(rot)
 	end
-
-	return 
-end
-local telemetry_data = {}
-PlayerUnitLocomotionExtension._add_player_position_telemetry = function (self, t)
-	local position = POSITION_LOOKUP[self.unit]
-	local player_manager = Managers.player
-	local player = player_manager.unit_owner(player_manager, self.unit)
-	local telemetry_id = player.telemetry_id(player)
-	local hero = player.profile_display_name(player)
-
-	table.clear(telemetry_data)
-
-	telemetry_data.position = position
-	telemetry_data.player_id = telemetry_id
-	telemetry_data.hero = hero
-
-	Managers.telemetry:register_event("player_position", telemetry_data)
-
-	self.telemetry_timer = t + self.telemetry_log_interval
 
 	return 
 end

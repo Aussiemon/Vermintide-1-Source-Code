@@ -25,6 +25,7 @@ AINavigationExtension.extensions_ready = function (self)
 		entrance_pos = Vector3Box(),
 		exit_pos = Vector3Box()
 	}
+	self._far_pathing_allowed = blackboard.breed.cannot_far_path ~= true
 
 	return 
 end
@@ -143,6 +144,12 @@ AINavigationExtension.set_navbot_position = function (self, position)
 end
 AINavigationExtension.move_to = function (self, pos)
 	if self._nav_bot == nil then
+		return 
+	end
+
+	if self._blackboard.far_path_target then
+		self._backup_destination:store(pos)
+
 		return 
 	end
 

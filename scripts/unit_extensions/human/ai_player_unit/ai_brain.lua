@@ -76,6 +76,15 @@ AIBrain.exit_last_action = function (self)
 	return 
 end
 AIBrain.update = function (self, unit, t, dt)
+	Profiler.start("unknown_node")
+
+	local result = self._bt:root():evaluate(unit, self._blackboard, t, dt)
+
+	Profiler.stop("unknown_node")
+
+	return 
+end
+AIBrain.update = function (self, unit, t, dt)
 	local blackboard = self._blackboard
 	local leaf_node = self._bt:root()
 

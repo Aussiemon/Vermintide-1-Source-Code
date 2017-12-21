@@ -84,13 +84,13 @@ InventoryView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.world_manager = ingame_ui_context.world_manager
 	self.input_manager = input_manager
+	self.ingame_ui = ingame_ui_context.ingame_ui
 
-	input_manager.create_input_service(input_manager, "inventory_menu", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "inventory_menu", self.ingame_ui:get_ingame_menu_keymap())
 	input_manager.map_device_to_service(input_manager, "inventory_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "inventory_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "inventory_menu", "gamepad")
 
-	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.player_manager = ingame_ui_context.player_manager
 	self.peer_id = ingame_ui_context.peer_id
@@ -386,6 +386,10 @@ InventoryView.post_update = function (self, dt)
 
 	for ui_name, ui_page in pairs(self.ui_pages) do
 		ui_page.update(ui_page, dt, is_transitioning)
+
+		if ui_page.draw_viewport then
+			ui_page.draw_viewport(ui_page, dt)
+		end
 	end
 
 	if not is_transitioning then
@@ -465,8 +469,11 @@ InventoryView.handle_index_changes = function (self)
 			self.play_sound(self, "Play_hud_select")
 		end
 
-		equipment_page.equip_inventory_item(equipment_page, item_to_equip, equipment_page.specific_equip_index)
-		items_page.refresh_items_status(items_page)
+		local success = equipment_page.equip_inventory_item(equipment_page, item_to_equip, equipment_page.specific_equip_index)
+
+		if success then
+			items_page.refresh_items_status(items_page)
+		end
 	elseif equip_button_hotspot.on_release then
 		equip_button_hotspot.on_release = nil
 
@@ -477,9 +484,13 @@ InventoryView.handle_index_changes = function (self)
 				self.play_sound(self, "Play_hud_select")
 				items_page.refresh_items_status(items_page)
 			elseif active and not is_equipped then
-				equipment_page.equip_inventory_item(equipment_page, selected_item, equipment_page.specific_equip_index)
+				local success = equipment_page.equip_inventory_item(equipment_page, selected_item, equipment_page.specific_equip_index)
+
+				if success then
+					items_page.refresh_items_status(items_page)
+				end
+
 				self.play_sound(self, "Play_hud_select")
-				items_page.refresh_items_status(items_page)
 			end
 		end
 	end
@@ -558,9 +569,12 @@ InventoryView.handle_index_changes = function (self)
 	return 
 end
 InventoryView.compare_item_with_loadout_item = function (self, item_backend_id)
+	if not item_backend_id then
+		return 
+	end
+
 	local pages = self.ui_pages
 	local items_page = pages.items
-	local equipment_page = pages.equipment
 	local compare_page = pages.compare
 	local loadout_item_backend_id = nil
 	local item = BackendUtils.get_item_from_masterlist(item_backend_id)

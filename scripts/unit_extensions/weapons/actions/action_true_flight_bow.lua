@@ -75,9 +75,10 @@ ActionTrueFlightBow.client_owner_post_update = function (self, dt, t, world, can
 		local fire_sound_event = self.current_action.fire_sound_event
 
 		if fire_sound_event then
+			local play_on_husk = self.current_action.fire_sound_on_husk
 			local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 
-			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event)
+			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event, nil, play_on_husk)
 		end
 	end
 

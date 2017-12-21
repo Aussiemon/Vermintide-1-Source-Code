@@ -21,6 +21,11 @@ local progression_unlocks = {
 		description = "unlock_trinket_slot_3",
 		icon = "trinket_slot_unlocked_icon",
 		level_requirement = 30
+	},
+	quests = {
+		description = "dlc1_3_1_quest_board_title",
+		icon = "quest_board_unlocked_icon",
+		disabled = GameSettingsDevelopment.backend_settings.quests_enabled
 	}
 }
 
@@ -86,6 +91,43 @@ ProgressionUnlocks = {
 
 		if template.level_requirement <= level then
 			return true
+		end
+
+		return 
+	end,
+	get_quests_unlocked = function (level_key)
+		local level_settings = LevelSettings[level_key]
+
+		if level_settings.dlc_name then
+			return 
+		end
+
+		local statistics_db = Managers.player:statistics_db()
+		local player = Managers.player:local_player()
+		local stats_id = player.stats_id(player)
+		local quests_unlocked = true
+
+		for _, act_levels in pairs(GameActs) do
+			local num_act_levels = #act_levels
+
+			for i = 1, num_act_levels, 1 do
+				local act_level_key = act_levels[i]
+				local completed_times = statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", act_level_key)
+
+				if completed_times == 0 or (level_key == act_level_key and 1 < completed_times) then
+					quests_unlocked = false
+
+					break
+				end
+			end
+
+			if not quests_unlocked then
+				break
+			end
+		end
+
+		if quests_unlocked then
+			return progression_unlocks.quests
 		end
 
 		return 

@@ -36,6 +36,8 @@ dofile("dialogues/generated/lookup_enemies")
 dofile("dialogues/generated/lookup_dlc_01")
 dofile("dialogues/generated/lookup_tutorial")
 dofile("dialogues/generated/lookup_drachenfels")
+dofile("dialogues/generated/lookup_dlc_enemies_01")
+dofile("dialogues/generated/lookup_dwarf_dlc")
 
 NetworkLookup = {
 	matchmaking_messages = {
@@ -169,7 +171,12 @@ NetworkLookup.husks = {
 	"units/beings/player/way_watcher/third_person_base/chr_third_person_husk_base",
 	"units/beings/player/empire_soldier/third_person_base/chr_third_person_husk_base",
 	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat",
+	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var1",
+	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var2",
+	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var3",
+	"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var4",
 	"units/beings/enemies/skaven_clan_rat/chr_skaven_slave",
+	"units/beings/enemies/skaven_clan_rat/chr_skaven_slave_baked",
 	"units/beings/enemies/skaven_loot_rat/chr_skaven_loot_rat",
 	"units/beings/enemies/skaven_pack_master/chr_skaven_pack_master",
 	"units/beings/enemies/skaven_ratlinggunner/chr_skaven_ratlinggunner",
@@ -204,6 +211,7 @@ NetworkLookup.husks = {
 	"units/weapons/player/pup_sacks/pup_sacks_01",
 	"units/weapons/player/pup_drachenfels_statue/pup_drachenfels_statue",
 	"units/weapons/player/pup_explosive_barrel/pup_explosive_barrel_01",
+	"units/weapons/player/pup_dwarf_barrel_01/pup_dwarf_barrel_01",
 	"units/weapons/player/pup_explosive_barrel/pup_gun_powder_barrel_01",
 	"units/weapons/player/pup_grenades/pup_grenade_01_t1",
 	"units/weapons/player/pup_grenades/pup_grenade_01_t2",
@@ -555,6 +563,8 @@ NetworkLookup.anims = {
 	"attack_throw_score",
 	"attack_pounce",
 	"attack_pounce_down",
+	"attack_pounce_down_2",
+	"attack_pounce_down_3",
 	"attack_pounce_up",
 	"attack_reach_down",
 	"attack_reach_down_2",
@@ -1187,7 +1197,8 @@ NetworkLookup.statuses = {
 	"respawned",
 	"ladder_climbing",
 	"ledge_hanging",
-	"overcharge_exploding"
+	"overcharge_exploding",
+	"dodging"
 }
 NetworkLookup.sound_events = {
 	"bullet_pass_by",
@@ -1225,7 +1236,16 @@ NetworkLookup.sound_events = {
 	"storm_vermin_patrol_player_spotted",
 	"storm_vermin_patrol_charge",
 	"Play_stormvemin_patrol_formated",
-	"Play_stormvermin_patrol_forming"
+	"Play_stormvermin_patrol_forming",
+	"weapon_staff_fire_cone",
+	"Play_clan_rat_attack_player_back_vce",
+	"Play_clan_rat_attack_player_vce",
+	"Play_clan_rat_attack_vce",
+	"Play_hud_enemy_attack_back_hit",
+	"player_combat_weapon_staff_charge_husk",
+	"stop_player_combat_weapon_staff_charge_husk",
+	"player_combat_weapon_staff_fire_beam_husk",
+	"stop_player_combat_weapon_staff_fire_beam_husk"
 }
 NetworkLookup.global_parameter_names = {
 	"occupied_slots_percentage"
@@ -1356,6 +1376,7 @@ NetworkLookup.dialogue_event_data_names = {
 	"explosive_barrel",
 	"explosive_barrel_objective",
 	"drachenfels_statue",
+	"dwarf_explosive_barrel",
 	"stance_type",
 	"offensive",
 	"defensive",

@@ -28,6 +28,7 @@ weapon_template.actions = {
 				collision_filter = "n/a",
 				projectile_unit_template_name = "pickup_torch_unit",
 				pickup_name = "torch",
+				drop_on_player_destroyed = true,
 				projectile_unit_name = "units/weapons/player/pup_torch/pup_torch"
 			}
 		}

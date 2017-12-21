@@ -142,7 +142,7 @@ Boot._init_package_manager = function (self)
 end
 Boot._require_scripts = function (self)
 	Profiler.start("Boot:_require_scripts()")
-	base_require("util", "verify_plugins", "clipboard", "error", "patches", "class", "callback", "rectangle", "state_machine", "misc_util", "stack", "table", "math", "vector3", "quaternion", "script_world", "script_viewport", "script_camera", "script_unit", "frame_table", "path")
+	base_require("util", "verify_plugins", "clipboard", "error", "patches", "class", "callback", "rectangle", "state_machine", "misc_util", "stack", "grow_queue", "table", "math", "vector3", "quaternion", "script_world", "script_viewport", "script_camera", "script_unit", "frame_table", "path")
 	base_require("managers", "world/world_manager", "player/player", "free_flight/free_flight_manager", "time/time_manager", "token/token_manager")
 	Profiler.stop("Boot:_require_scripts()")
 

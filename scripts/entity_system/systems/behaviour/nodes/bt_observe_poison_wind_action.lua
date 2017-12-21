@@ -36,13 +36,13 @@ BTObservePoisonWind.run = function (self, unit, blackboard, t, dt)
 		return "done"
 	end
 
-	if blackboard.target_dist < 15 then
+	if blackboard.target_dist < 5 then
 		return "done"
 	end
 
-	local last_throw_at = throw_globe_data.last_throw_at or -math.huge
+	local next_throw_at = throw_globe_data.next_throw_at or -math.huge
 
-	if last_throw_at + 5 < t then
+	if next_throw_at < t then
 		return "done"
 	end
 

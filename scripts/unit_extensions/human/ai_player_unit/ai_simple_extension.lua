@@ -28,24 +28,23 @@ AISimpleExtension.init = function (self, extension_init_context, unit, extension
 	local blackboard = nil
 
 	if LOLOLOL then
-		blackboard = {
-			attack_cooldown_at = 0,
-			is_in_attack_cooldown = false,
-			world = extension_init_context.world,
-			unit = unit,
-			level = LevelHelper:current_level(extension_init_context.world),
-			move_orders = {},
-			nav_world = self._nav_world,
-			node_data = {},
-			running_nodes = {},
-			is_passive = is_passive,
-			system_api = extension_init_context.system_api,
-			group_blackboard = ai_system.group_blackboard,
-			target_dist = math.huge,
-			spawn_type = spawn_type,
-			stuck_check_time = Managers.time:time("game") + RecycleSettings.ai_stuck_check_start_time,
-			override_targets = {}
-		}
+		blackboard = Script.new_map(breed.blackboard_allocation_size or 75)
+		blackboard.world = extension_init_context.world
+		blackboard.unit = unit
+		blackboard.level = LevelHelper:current_level(extension_init_context.world)
+		blackboard.move_orders = {}
+		blackboard.nav_world = self._nav_world
+		blackboard.node_data = {}
+		blackboard.running_nodes = {}
+		blackboard.is_passive = is_passive
+		blackboard.system_api = extension_init_context.system_api
+		blackboard.group_blackboard = ai_system.group_blackboard
+		blackboard.target_dist = math.huge
+		blackboard.spawn_type = spawn_type
+		blackboard.stuck_check_time = Managers.time:time("game") + RecycleSettings.ai_stuck_check_start_time
+		blackboard.is_in_attack_cooldown = false
+		blackboard.attack_cooldown_at = 0
+		blackboard.override_targets = {}
 	else
 		blackboard = POOL_blackboard_acquire()
 		blackboard.world = extension_init_context.world
@@ -342,7 +341,9 @@ AISimpleExtension.enemy_aggro = function (self, alerting_unit, enemy_unit)
 	end
 
 	blackboard.delayed_target_unit = enemy_unit
-	blackboard.confirmed_player_sighting = true
+
+	AiUtils.activate_unit(blackboard)
+
 	blackboard.no_hesitation = true
 	local self_unit = self._unit
 

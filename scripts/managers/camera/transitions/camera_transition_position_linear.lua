@@ -53,6 +53,8 @@ CameraTransitionPositionLinear.update = function (self, dt, position, update_tim
 		done = duration < time
 	end
 
+	assert(Vector3.is_valid(pos), "Interpolated position is not valid.")
+
 	return pos, done
 end
 

@@ -89,15 +89,16 @@ weapon_template.actions = {
 	},
 	action_two = {
 		default = {
-			minimum_hold_time = 0.3,
+			allow_hold_toggle = true,
 			anim_event = "to_zoom",
 			anim_end_event = "to_unzoom",
 			cooldown = 0.3,
 			kind = "aim",
-			keep_buffer = true,
+			minimum_hold_time = 0.3,
 			can_abort_reload = false,
 			hold_input = "action_two_hold",
 			ammo_requirement = 1,
+			keep_buffer = true,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
 			end,

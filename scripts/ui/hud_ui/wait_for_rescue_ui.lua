@@ -84,19 +84,9 @@ WaitForRescueUI.update = function (self, dt, t)
 		return 
 	end
 
-	local health_extension = ScriptUnit.extension(player_unit, "health_system")
-
-	if not health_extension.is_alive(health_extension) then
-		return 
-	end
-
 	local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-	if status_extension.is_dead(status_extension) then
-		return 
-	end
-
-	if not status_extension.is_disabled(status_extension) then
+	if not status_extension.is_ready_for_assisted_respawn(status_extension, player_unit) then
 		return 
 	end
 

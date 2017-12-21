@@ -40,7 +40,9 @@ ActionSweep.client_owner_start_action = function (self, new_action, t)
 	self.target_breed_unit = nil
 	self.number_of_hit_enemies = 0
 	self.down_offset = new_action.sweep_z_offset or 0.1
-	self.buff_extension = ScriptUnit.extension(self.owner_unit, "buff_system")
+	local owner_unit = self.owner_unit
+	local owner_player = Managers.player:owner(owner_unit)
+	self.buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
 
 	if global_is_inside_inn then
 		self.down_offset = 0
@@ -52,13 +54,13 @@ ActionSweep.client_owner_start_action = function (self, new_action, t)
 		self.hit_units[k] = nil
 	end
 
-	local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
+	local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 	local physics_world = World.get_data(self.world, "physics_world")
 	local pos = first_person_extension.current_position(first_person_extension)
 	local rot = first_person_extension.current_rotation(first_person_extension)
 	local direction = Quaternion.forward(rot)
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
-	local collision_filter = (difficulty_settings.friendly_fire_melee and "filter_melee_sweep") or "filter_melee_sweep_no_player"
+	local collision_filter = (DamageUtils.allow_friendly_fire_melee(difficulty_settings, owner_player) and "filter_melee_sweep") or "filter_melee_sweep_no_player"
 	local results = PhysicsWorld.immediate_raycast(physics_world, pos, direction, new_action.dedicated_target_range, "all", "collision_filter", collision_filter)
 
 	if results then
@@ -212,9 +214,10 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 	local position_end = (position_previous + current_rot_up*weapon_half_length*2) - Quaternion.up(rotation_previous)*weapon_half_length
 	local max_num_hits = 5
 	local attack_direction = calculate_attack_direction(current_action, weapon_rot)
+	local owner_player = Managers.player:owner(owner_unit)
 	local weapon_cross_section = Vector3(weapon_half_extents.x, weapon_half_extents.y, 0.0001)
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
-	local collision_filter = (difficulty_settings.friendly_fire_melee and "filter_melee_sweep") or "filter_melee_sweep_no_player"
+	local collision_filter = (DamageUtils.allow_friendly_fire_melee(difficulty_settings, owner_player) and "filter_melee_sweep") or "filter_melee_sweep_no_player"
 
 	if PhysicsWorld.start_reusing_sweep_tables then
 		PhysicsWorld.start_reusing_sweep_tables()
@@ -527,13 +530,14 @@ ActionSweep._play_environmental_effect = function (self, weapon_rotation, curren
 	local weapon_fwd = Quaternion.forward(weapon_rotation)
 	local weapon_right = Quaternion.right(weapon_rotation)
 	local weapon_up = Quaternion.up(weapon_rotation)
-	local owner_unit = self.owner_unit
 	local world = self.world
 	local weapon_impact_direction = (current_action.impact_axis and current_action.impact_axis:unbox()) or Vector3.forward()
 	local hit_effect = current_action.hit_effect
 	local impact_direction = weapon_right*weapon_impact_direction.x + weapon_fwd*weapon_impact_direction.y + weapon_up*weapon_impact_direction.z
 	local impact_rotation = Quaternion.look(impact_direction, -weapon_right)
-	local husk = Managers.player:owner(owner_unit).bot_player
+	local owner_unit = self.owner_unit
+	local owner_player = Managers.player:owner(owner_unit)
+	local husk = owner_player.bot_player
 
 	EffectHelper.play_surface_material_effects(hit_effect, world, hit_unit, hit_position, impact_rotation, hit_normal, nil, husk)
 
@@ -552,7 +556,8 @@ ActionSweep._play_environmental_effect = function (self, weapon_rotation, curren
 end
 ActionSweep._play_character_impact = function (self, is_server, owner_unit, current_action, attack_template, attack_template_damage_type_name, hit_unit, hit_position, breed, hit_zone_name, attack_direction, backstab_multiplier)
 	local sound_type = attack_template.sound_type
-	local husk = Managers.player:owner(owner_unit).bot_player
+	local owner_player = Managers.player:owner(owner_unit)
+	local husk = owner_player.bot_player
 	local breed_name = breed.name
 	local world = self.world
 	local predicted_damage = 0

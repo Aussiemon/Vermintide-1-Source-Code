@@ -76,9 +76,14 @@ local function profile_packages(profile_index, packages_list, is_first_person)
 
 				local ammo_data = item_template.ammo_data
 
-				if ammo_data and ammo_data.ammo_unit then
-					packages_list[ammo_data.ammo_unit] = first_person_value
-					packages_list[ammo_data.ammo_unit_3p] = false
+				if ammo_data then
+					if ammo_data.ammo_unit then
+						packages_list[ammo_data.ammo_unit] = first_person_value
+					end
+
+					if ammo_data.ammo_unit_3p then
+						packages_list[ammo_data.ammo_unit_3p] = false
+					end
 				end
 			elseif slot_category == "attachment" then
 				packages_list[item_units.unit] = false
@@ -182,7 +187,7 @@ InventoryPackageSynchronizerClient.rpc_server_set_inventory_packages = function 
 		return 
 	end
 
-	network_printf("[NETWORK] rpc_server_set_inventory_packages", sender, inventory_sync_id, inventory_package_list, "my_peer_id:", peer_id)
+	network_printf("[NETWORK] rpc_server_set_inventory_packages, sender:%s inventory_sync_id:%d my_peer_id:%s", sender, inventory_sync_id, peer_id)
 
 	self.inventory_sync_id = inventory_sync_id
 	local temp_package_map = temp_package_map
@@ -261,7 +266,7 @@ InventoryPackageSynchronizerClient.update = function (self, dt)
 
 		if all_loaded then
 			self.network_transmit:send_rpc_server("rpc_client_inventory_map_loaded", self.inventory_sync_id)
-			network_printf("[NETWORK] self.network_transmit:send_rpc_server(rpc_client_inventory_map_loaded)", self.inventory_sync_id)
+			network_printf("[NETWORK] sent rpc_client_inventory_map_loaded, inventory_sync_id: %d ", self.inventory_sync_id)
 		end
 	end
 

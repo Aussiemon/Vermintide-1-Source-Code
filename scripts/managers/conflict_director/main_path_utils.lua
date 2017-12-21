@@ -5,7 +5,7 @@ local Vector3_distance = Vector3.distance
 MainPathUtils.total_path_dist = function ()
 	return EngineOptimized.main_path_total_length()
 end
-MainPathUtils.closest_pos_at_main_path = function (main_paths, p)
+MainPathUtils.closest_pos_at_main_path = function (not_used, p)
 	return EngineOptimized.closest_pos_at_main_path(p)
 end
 MainPathUtils.closest_pos_at_main_path_lua = function (main_paths, p)

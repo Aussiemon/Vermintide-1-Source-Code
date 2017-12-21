@@ -325,7 +325,7 @@ MusicManager._update_game_state = function (self, dt, t)
 	if music_player and self._is_server then
 		local state = nil
 		local conflict_director = Managers.state.conflict
-		local horde = conflict_director.has_horde(conflict_director, t)
+		local horde_type = conflict_director.has_horde(conflict_director, t)
 		local lost = (Managers.state.game_mode:game_mode().about_to_lose and true) or false
 		local won = Managers.state.game_mode:game_won()
 		local old_state = self._game_state
@@ -333,7 +333,7 @@ MusicManager._update_game_state = function (self, dt, t)
 		local is_survival = current_level_settings.level_type == "survival"
 		local horde_size = conflict_director.horde_size(conflict_director)
 		local is_pre_horde = old_state == "pre_horde" or old_state == "pre_ambush"
-		local is_horde_alive = (is_survival and 1 <= horde_size) or 7 <= conflict_director.horde_size(conflict_director) or horde
+		local is_horde_alive = (is_survival and 1 <= horde_size) or 7 <= horde_size or horde_type
 
 		if lost then
 			if is_survival then
@@ -344,21 +344,27 @@ MusicManager._update_game_state = function (self, dt, t)
 		elseif won then
 			local level_settings = LevelHelper:current_level_settings()
 			state = (level_settings and level_settings.music_won_state) or "won"
-		elseif is_pre_horde and self._horde_has_engaged(self, horde) then
+		elseif is_pre_horde and self._scream_delay and self._scream_delay < t then
+			self._scream_delay = nil
 			state = "horde"
-
-			if horde == "ambush" then
+		elseif is_pre_horde and not self._scream_delay and self._horde_has_engaged(self, horde_type) then
+			if horde_type == "ambush" then
 				self.delay_trigger_horde_dialogue(self, t, t + DialogueSettings.ambush_delay, "ambush")
+
+				self._scream_delay = t + 1.5
+				state = old_state
+			else
+				state = "horde"
 			end
 		elseif is_pre_horde and is_horde_alive then
 			state = old_state
 		elseif old_state == "horde" and is_horde_alive then
 			state = "horde"
-		elseif horde == "vector" or horde == "event" then
+		elseif horde_type == "vector" or horde_type == "event" then
 			state = "pre_horde"
 
 			self.delay_trigger_horde_dialogue(self, t, t + DialogueSettings.vector_delay, "vector")
-		elseif horde == "ambush" then
+		elseif horde_type == "ambush" then
 			state = "pre_ambush"
 		else
 			state = "explore"
@@ -391,7 +397,7 @@ MusicManager._horde_has_engaged = function (self, horde)
 				local blackboard = ai_extension.blackboard(ai_extension)
 				local spawn_type = blackboard.spawn_type
 
-				if spawn_type == "horde_hidden" or spawn_type == "horde" then
+				if (spawn_type == "horde_hidden" or spawn_type == "horde") and AiUtils.unit_alive(unit) then
 					return true
 				end
 			end
@@ -488,18 +494,17 @@ end
 MusicManager.is_playing = function (self, wwise_playing_id)
 	return WwiseWorld.is_playing(self._wwise_world, wwise_playing_id)
 end
-local horde_delay, horde_type = nil
 MusicManager.delay_trigger_horde_dialogue = function (self, t, delay, horde_name)
 	if delay ~= nil then
-		horde_delay = delay
-		horde_type = horde_name
+		self._horde_delay = delay
+		self._horde_type = horde_name
 	end
 
-	if horde_delay ~= nil and horde_delay < t then
-		MusicManager:trigger_horde_dialogue(horde_type)
+	if self._horde_delay ~= nil and self._horde_delay < t then
+		MusicManager:trigger_horde_dialogue(self._horde_type)
 
-		horde_delay = nil
-		horde_type = nil
+		self._horde_delay = nil
+		self._horde_type = nil
 	end
 
 	return 

@@ -648,7 +648,7 @@ local function create_level_widget(index)
 		is_new = false,
 		locked_dlc = false,
 		text_background_left = "level_title_banner_left",
-		preview_tooltip = "test",
+		preview_tooltip = "n/a",
 		text_background_right = "level_title_banner_right",
 		text_background_center = "level_title_banner_middle",
 		preview_texture = "level_location_icon_03",
@@ -673,6 +673,10 @@ local function create_level_widget(index)
 			horizontal_alignment = "left",
 			font_size = 24,
 			max_width = 500,
+			cursor_offset = {
+				25,
+				15
+			},
 			text_color = Colors.get_color_table_with_alpha("white", 255),
 			offset = {
 				0,
@@ -1226,11 +1230,163 @@ local function create_ubersreik_widget(widget_name)
 	return widget
 end
 
+local function create_dwarfs_widget(widget_name)
+	local scenegraph_id = string.format("%s%s", "level_location_", widget_name)
+	local background_scenegraph_id = string.format("%s%s", "background_level_location_", widget_name)
+	local hover_scenegraph_id = string.format("%s%s", "hover_level_location_", widget_name)
+	local banner_scenegraph_id = string.format("%s%s", "banner_level_location_", widget_name)
+	local widget_scenegraph_definition = scenegraph_definition[scenegraph_id]
+
+	if not widget_scenegraph_definition then
+		scenegraph_definition[scenegraph_id] = {
+			vertical_alignment = "center",
+			parent = "menu_map",
+			horizontal_alignment = "center",
+			position = {
+				0,
+				0,
+				5
+			},
+			size = {
+				94,
+				116
+			}
+		}
+	end
+
+	if not scenegraph_definition[background_scenegraph_id] then
+		scenegraph_definition[background_scenegraph_id] = {
+			vertical_alignment = "center",
+			horizontal_alignment = "center",
+			size = {
+				94,
+				116
+			},
+			position = {
+				0,
+				0,
+				2
+			},
+			parent = scenegraph_id
+		}
+	end
+
+	if not scenegraph_definition[hover_scenegraph_id] then
+		scenegraph_definition[hover_scenegraph_id] = {
+			vertical_alignment = "center",
+			horizontal_alignment = "center",
+			size = {
+				115,
+				134
+			},
+			position = {
+				-1,
+				4,
+				5
+			},
+			parent = scenegraph_id
+		}
+	end
+
+	if not scenegraph_definition[banner_scenegraph_id] then
+		scenegraph_definition[banner_scenegraph_id] = {
+			vertical_alignment = "top",
+			horizontal_alignment = "center",
+			size = {
+				48,
+				148
+			},
+			position = {
+				0,
+				-80,
+				-1
+			},
+			parent = background_scenegraph_id
+		}
+	end
+
+	local element = table.clone(area_element_definition_ubersreik)
+	local passes = element.passes
+	local content = {
+		background = "karak_azgaraz_icon",
+		hover = "karak_azgaraz_icon_glow",
+		area_name = widget_name,
+		button_hotspot = {
+			is_preview = false
+		},
+		preview_hotspot = {},
+		banner = {
+			texture_id = "karak_azgaraz_location_icon_banner",
+			uvs = {
+				{
+					0,
+					0
+				},
+				{
+					1,
+					1
+				}
+			}
+		}
+	}
+	local style = {
+		background = {
+			color = {
+				255,
+				255,
+				255,
+				255
+			},
+			scenegraph_id = background_scenegraph_id
+		},
+		hover = {
+			color = {
+				0,
+				255,
+				255,
+				255
+			},
+			scenegraph_id = hover_scenegraph_id
+		},
+		banner = {
+			color = {
+				255,
+				255,
+				255,
+				255
+			},
+			scenegraph_id = banner_scenegraph_id
+		},
+		selected = {
+			color = {
+				0,
+				255,
+				255,
+				255
+			}
+		}
+	}
+
+	add_level_location_difficulty_definitions(passes, style, content, true, banner_scenegraph_id)
+
+	local widget_template = {
+		style = style,
+		content = content,
+		element = element,
+		scenegraph_id = scenegraph_id
+	}
+	local widget = UIWidget.init(widget_template)
+
+	return widget
+end
+
 local function create_area_widget(widget_name)
 	if widget_name == "ubersreik" then
 		return create_ubersreik_widget(widget_name)
-	else
+	elseif widget_name == "drachenfels" then
 		return create_drachenfels_widget(widget_name)
+	else
+		return create_dwarfs_widget(widget_name)
 	end
 
 	return 

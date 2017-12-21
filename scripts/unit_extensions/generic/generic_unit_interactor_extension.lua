@@ -16,7 +16,8 @@ GenericUnitInteractorExtension.init = function (self, extension_init_context, un
 			world = world,
 			dice_keeper = dice_keeper,
 			statistics_db = statistics_db,
-			ingame_ui = extension_init_context.ingame_ui
+			ingame_ui = extension_init_context.ingame_ui,
+			interactor_data = {}
 		}
 	}
 	local player = Managers.player:owner(unit)
@@ -121,8 +122,11 @@ GenericUnitInteractorExtension.update = function (self, unit, input, dt, context
 
 	if self.state == "waiting_to_interact" and not self.status_extension:is_disabled() then
 		local interaction_context = self.interaction_context
-		interaction_context.interactable_unit = nil
-		interaction_context.interaction_type = nil
+
+		if interaction_context.interactable_unit then
+			interaction_context.interactable_unit = nil
+			interaction_context.interaction_type = nil
+		end
 
 		if self.is_bot then
 			local exl_unit = self.exclusive_interaction_unit
@@ -406,9 +410,10 @@ GenericUnitInteractorExtension.start_interaction = function (self, hold_input, i
 	assert(self.can_interact(self, interaction_context.interactable_unit, interaction_type), "Attempted to start interaction even though the interaction wasn't allowed.")
 
 	interaction_context.interaction_type = InteractionHelper.player_modify_interaction_type(self.unit, interaction_context.interactable_unit, interaction_context.interaction_type)
+	local unit = self.unit
 	local interaction_type = interaction_context.interaction_type
 	local network_manager = Managers.state.network
-	local interactor_go_id = Managers.state.unit_storage:go_id(self.unit)
+	local interactor_go_id = Managers.state.unit_storage:go_id(unit)
 	local interactable_go_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, interaction_context.interactable_unit)
 
 	if interactor_go_id == nil or interactable_go_id == nil then
@@ -416,6 +421,17 @@ GenericUnitInteractorExtension.start_interaction = function (self, hold_input, i
 		assert(LEVEL_EDITOR_TEST)
 
 		return 
+	end
+
+	local interaction_data = interaction_context.data
+	local interactor_data = interaction_data.interactor_data
+	local interaction_template = InteractionDefinitions[interaction_type]
+	local client_functions = interaction_template.client
+
+	table.clear(interactor_data)
+
+	if client_functions.set_interactor_data then
+		client_functions.set_interactor_data(unit, interactable_unit, interactor_data)
 	end
 
 	self.state = "waiting_for_confirmation"

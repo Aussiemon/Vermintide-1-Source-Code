@@ -68,8 +68,6 @@ PlayerCharacterStateDodging.on_enter = function (self, unit, input, dt, context,
 	return 
 end
 PlayerCharacterStateDodging.on_exit = function (self, unit, input, dt, context, t, next_state)
-	self.status_extension:set_is_dodging(false)
-
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local cd = math.max(movement_settings_table.dodging.dodge_cd, movement_settings_table.dodging.dodge_jump_override_timer - self.time_in_dodge)
 
@@ -82,8 +80,17 @@ PlayerCharacterStateDodging.on_exit = function (self, unit, input, dt, context, 
 	self.locomotion_extension:enable_rotation_towards_velocity(true)
 	self.status_extension:start_dodge_cooldown(t)
 
-	if Managers.state.network:game() then
+	local network_manager = Managers.state.network
+
+	if network_manager.game(network_manager) then
 		CharacterStateHelper.play_animation_event(unit, "dodge_end")
+
+		if not LEVEL_EDITOR_TEST then
+			local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+
+			self.status_extension:set_is_dodging(false)
+			network_manager.network_transmit:send_rpc_server("rpc_status_change_bool", NetworkLookup.statuses.dodging, false, unit_id, 0)
+		end
 	end
 
 	return 
@@ -150,26 +157,7 @@ PlayerCharacterStateDodging.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	local move_input = input_extension.get(input_extension, "move")
-	local movement = Vector3(0, 0, 0)
-
-	if move_input then
-		movement = movement + move_input
-	end
-
-	local move_input_controller = input_extension.get(input_extension, "move_controller")
-
-	if move_input_controller then
-		movement = movement + move_input_controller
-	end
-
-	local move_input_dpad = input_extension.get(input_extension, "move_dpad")
-
-	if move_input_dpad then
-		movement = movement + move_input_dpad
-	end
-
-	if not self.update_dodge(self, unit, movement, dt, t) then
+	if not self.update_dodge(self, unit, dt, t) then
 		local params = self.temp_params
 
 		csm.change_state(csm, "walking", params)
@@ -190,7 +178,7 @@ PlayerCharacterStateDodging.update = function (self, unit, input, dt, context, t
 	return 
 end
 local params = {}
-PlayerCharacterStateDodging.update_dodge = function (self, unit, movement, dt, t)
+PlayerCharacterStateDodging.update_dodge = function (self, unit, dt, t)
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local last_distance_left = self.distance_left
 	local diminishing_return_factor = self.status_extension:get_dodge_cooldown()
@@ -252,8 +240,15 @@ PlayerCharacterStateDodging.get_is_dodging = function (self)
 end
 PlayerCharacterStateDodging.start_dodge = function (self, unit, t)
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
+	local network_manager = Managers.state.network
 
-	self.status_extension:set_is_dodging(true)
+	if network_manager.game(network_manager) and not LEVEL_EDITOR_TEST then
+		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+
+		self.status_extension:set_is_dodging(true)
+		network_manager.network_transmit:send_rpc_server("rpc_status_change_bool", NetworkLookup.statuses.dodging, true, unit_id, 0)
+	end
+
 	assert(1 < #movement_settings_table.dodging.speed_at_times, "not enough speed at times in movementsettings")
 
 	self.current_speed_setting_index = 1

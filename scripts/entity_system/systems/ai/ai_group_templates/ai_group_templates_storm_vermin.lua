@@ -1656,7 +1656,8 @@ function enter_state_combat(group)
 				local blackboard = Unit.get_data(unit, "blackboard")
 				blackboard.goal_destination = nil
 				blackboard.target_unit = target_unit
-				blackboard.confirmed_player_sighting = true
+
+				AiUtils.activate_unit(blackboard)
 			end
 		end
 

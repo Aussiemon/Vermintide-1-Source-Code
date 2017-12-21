@@ -4,7 +4,7 @@ StatisticsUtil = {
 		local damaging_unit = damage_data[DamageDataIndex.DAMAGING_UNIT]
 		attacker_unit = AiUtils.get_actual_attacker_unit(attacker_unit)
 		local player_manager = Managers.player
-		local player = player_manager.owner(player_manager, attacker_unit)
+		local attacker_player = player_manager.owner(player_manager, attacker_unit)
 
 		if damaging_unit and damaging_unit ~= "n/a" and ScriptUnit.has_extension(damaging_unit, "projectile_system") then
 			local projectile_ext = ScriptUnit.extension(damaging_unit, "projectile_system")
@@ -14,8 +14,8 @@ StatisticsUtil = {
 			end
 		end
 
-		if player then
-			local stats_id = player.stats_id(player)
+		if attacker_player then
+			local stats_id = attacker_player.stats_id(attacker_player)
 
 			statistics_db.increment_stat(statistics_db, stats_id, "kills_total")
 
@@ -27,9 +27,9 @@ StatisticsUtil = {
 
 				if print_message then
 					local predicate = "killed_special"
-					local local_human = not player.remote and not player.bot_player
+					local local_human = not attacker_player.remote and not attacker_player.bot_player
 
-					Managers.state.event:trigger("add_coop_feedback_kill", player.stats_id(player) .. breed_name, local_human, predicate, player.name(player), breed_name)
+					Managers.state.event:trigger("add_coop_feedback_kill", attacker_player.stats_id(attacker_player) .. breed_name, local_human, predicate, attacker_player.name(attacker_player), breed_name)
 				end
 
 				statistics_db.increment_stat(statistics_db, stats_id, "kills_per_breed", breed_name)
@@ -51,6 +51,21 @@ StatisticsUtil = {
 			end
 		elseif statistics_db.is_registered(statistics_db, attacker_unit) then
 			statistics_db.increment_stat(statistics_db, attacker_unit, "kills_total")
+		end
+
+		local human_and_bot_players = player_manager.human_and_bot_players(player_manager)
+
+		for _, player in pairs(human_and_bot_players) do
+			if player ~= attacker_player then
+				local stats_id = player.stats_id(player)
+				local breed = Unit.get_data(victim_unit, "breed")
+
+				if breed ~= nil then
+					local breed_name = breed.name
+
+					statistics_db.increment_stat(statistics_db, stats_id, "kill_assists_per_breed", breed_name)
+				end
+			end
 		end
 
 		return 
@@ -406,16 +421,27 @@ StatisticsUtil.register_complete_survival_level = function (statistics_db)
 			if 0 < completed_difficulty_index then
 				completed_difficulty = level_difficulties[completed_difficulty_index]
 			end
+
+			if completed_difficulty_index and completed_difficulty_index < 3 and 13 <= completed_waves then
+				ScriptApplication.send_to_crashify("StatisticsUtil", "Error in survival mode data. completed_difficulty_index = %s, completed_waves = %s, started_on_unlocked_difficulty = true", completed_difficulty_index, completed_waves)
+			end
 		else
+			local completed_difficulty_index = nil
+
 			for i = #level_difficulties, 1, -1 do
 				local difficulty = level_difficulties[i]
 				local difficulty_end_wave = SurvivalEndWaveByDifficulty[difficulty]
 
 				if difficulty_end_wave <= wave_completed then
+					completed_difficulty_index = i
 					completed_difficulty = difficulty
 
 					break
 				end
+			end
+
+			if completed_difficulty_index and completed_difficulty_index < 3 and 13 <= completed_waves then
+				ScriptApplication.send_to_crashify("StatisticsUtil", "Error in survival mode data. completed_difficulty_index = %s, completed_waves = %s, started_on_unlocked_difficulty = false", completed_difficulty_index, completed_waves)
 			end
 		end
 

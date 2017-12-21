@@ -20,9 +20,10 @@ EventManager.register = function (self, object, ...)
 	return 
 end
 EventManager.unregister = function (self, event_name, object)
-	if object then
-		self._events[event_name][object] = nil
-	else
+	local events = self._events[event_name]
+	events[object] = nil
+
+	if table.is_empty(events) then
 		self._events[event_name] = nil
 	end
 

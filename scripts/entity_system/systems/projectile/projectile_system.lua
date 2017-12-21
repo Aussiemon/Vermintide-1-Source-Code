@@ -326,7 +326,7 @@ ProjectileSystem.rpc_spawn_pickup_projectile_limited = function (self, sender, p
 
 	return 
 end
-ProjectileSystem.rpc_spawn_explosive_pickup_projectile = function (self, sender, projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, damage, explode_time, item_name_id, pickup_spawn_type_id)
+ProjectileSystem.rpc_spawn_explosive_pickup_projectile = function (self, sender, projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, damage, explode_time, fuse_time, item_name_id, pickup_spawn_type_id)
 	local projectile_unit_name = NetworkLookup.husks[projectile_unit_name_id]
 	local projectile_unit_template_name = NetworkLookup.go_types[projectile_unit_template_name_id]
 	local pickup_name = NetworkLookup.pickup_names[pickup_name_id]
@@ -336,7 +336,8 @@ ProjectileSystem.rpc_spawn_explosive_pickup_projectile = function (self, sender,
 
 	if explode_time ~= 0 then
 		death_data = {
-			explode_time = explode_time
+			explode_time = explode_time,
+			fuse_time = fuse_time
 		}
 	end
 
@@ -367,7 +368,7 @@ ProjectileSystem.rpc_spawn_explosive_pickup_projectile = function (self, sender,
 
 	return 
 end
-ProjectileSystem.rpc_spawn_explosive_pickup_projectile_limited = function (self, sender, projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, spawner_unit_id, limited_item_id, damage, explode_time, item_name_id, pickup_spawn_type_id)
+ProjectileSystem.rpc_spawn_explosive_pickup_projectile_limited = function (self, sender, projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, spawner_unit_id, limited_item_id, damage, explode_time, fuse_time, item_name_id, pickup_spawn_type_id)
 	local projectile_unit_name = NetworkLookup.husks[projectile_unit_name_id]
 	local projectile_unit_template_name = NetworkLookup.go_types[projectile_unit_template_name_id]
 	local pickup_name = NetworkLookup.pickup_names[pickup_name_id]
@@ -379,7 +380,8 @@ ProjectileSystem.rpc_spawn_explosive_pickup_projectile_limited = function (self,
 
 	if explode_time ~= 0 then
 		death_data = {
-			explode_time = explode_time
+			explode_time = explode_time,
+			fuse_time = fuse_time
 		}
 	end
 

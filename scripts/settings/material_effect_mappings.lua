@@ -14,6 +14,7 @@ MaterialEffectSettings = {
 			"glass",
 			"grass",
 			"hay",
+			"ice",
 			"metal_solid",
 			"metal_hollow",
 			"mud",
@@ -23,6 +24,7 @@ MaterialEffectSettings = {
 			"stone",
 			"stone_dirt",
 			"stone_wet",
+			"snow",
 			"water",
 			"wood_bridge",
 			"wood_solid",
@@ -44,6 +46,8 @@ MaterialEffectMappings.melee_hit_piercing = MaterialEffectMappings.melee_hit_pie
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -140,6 +144,13 @@ MaterialEffectMappings.melee_hit_piercing = MaterialEffectMappings.melee_hit_pie
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "melee_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "melee_hit_statics",
 			parameters = {
@@ -200,6 +211,13 @@ MaterialEffectMappings.melee_hit_piercing = MaterialEffectMappings.melee_hit_pie
 			event = "melee_hit_statics",
 			parameters = {
 				material = "stone_wet",
+				damage_type = "piercing"
+			}
+		},
+		snow = {
+			event = "melee_hit_statics",
+			parameters = {
+				material = "snow",
 				damage_type = "piercing"
 			}
 		},
@@ -237,7 +255,7 @@ MaterialEffectMappings.melee_hit_piercing = MaterialEffectMappings.melee_hit_pie
 		fruit = "fx/hit_fruit_pierce",
 		dirt = "fx/hit_dirt_pierce",
 		stone = "fx/hit_stone_pierce",
-		water = "fx/hit_water_pierce",
+		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
 		sand = "fx/hit_sand",
@@ -245,6 +263,8 @@ MaterialEffectMappings.melee_hit_piercing = MaterialEffectMappings.melee_hit_pie
 		flesh = "fx/hit_flesh_pierce",
 		stone_dirt = "fx/hit_stone_pierce",
 		cloth = "fx/hit_cloth_pierce",
+		snow = "fx/hit_snow_pierce",
+		ice = "fx/hit_ice_pierce",
 		forest_grass = "fx/hit_grass_pierce",
 		grass = "fx/hit_grass_pierce",
 		hay = "fx/hit_hay_pierce",
@@ -266,6 +286,8 @@ MaterialEffectMappings.melee_hit_slashing = MaterialEffectMappings.melee_hit_sla
 			glass = "hit_glass_slash_1",
 			sand = "hit_sand_slash_1",
 			stone_dirt = "hit_stone_slash_1",
+			snow = "hit_snow_slash_1",
+			ice = "hit_ice_slash_1",
 			forest_grass = "hit_grass_slash_1",
 			grass = "hit_grass_slash_1",
 			hay = "empty",
@@ -316,9 +338,9 @@ MaterialEffectMappings.melee_hit_slashing = MaterialEffectMappings.melee_hit_sla
 			}
 		},
 		settings = {
-			depth = 0.6,
-			height = 0.04,
-			width = 0.3,
+			depth = 2,
+			height = 2,
+			width = 1,
 			depth_offset = -0.2
 		}
 	},
@@ -377,6 +399,13 @@ MaterialEffectMappings.melee_hit_slashing = MaterialEffectMappings.melee_hit_sla
 			event = "melee_hit_statics",
 			parameters = {
 				material = "hay",
+				damage_type = "slashing"
+			}
+		},
+		ice = {
+			event = "melee_hit_statics",
+			parameters = {
+				material = "ice",
 				damage_type = "slashing"
 			}
 		},
@@ -443,6 +472,13 @@ MaterialEffectMappings.melee_hit_slashing = MaterialEffectMappings.melee_hit_sla
 				damage_type = "slashing"
 			}
 		},
+		snow = {
+			event = "melee_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "slashing"
+			}
+		},
 		water = {
 			event = "melee_hit_statics",
 			parameters = {
@@ -485,6 +521,8 @@ MaterialEffectMappings.melee_hit_slashing = MaterialEffectMappings.melee_hit_sla
 		flesh = "fx/hit_flesh_slash",
 		stone_dirt = "fx/hit_stone_slash",
 		cloth = "fx/hit_cloth_slash",
+		snow = "fx/hit_snow_slash",
+		ice = "fx/hit_ice_slash",
 		forest_grass = "fx/hit_grass_slash",
 		grass = "fx/hit_grass_slash",
 		hay = "fx/hit_hay_slash",
@@ -506,6 +544,8 @@ MaterialEffectMappings.melee_hit_sword_2h = MaterialEffectMappings.melee_hit_swo
 			glass = "hit_glass_slash_1",
 			sand = "hit_sand_slash_1",
 			stone_dirt = "hit_stone_slash_1",
+			snow = "hit_snow_slash_1",
+			ice = "hit_ice_slash_1",
 			forest_grass = "hit_grass_slash_1",
 			grass = "hit_grass_slash_1",
 			hay = "empty",
@@ -557,7 +597,7 @@ MaterialEffectMappings.melee_hit_sword_2h = MaterialEffectMappings.melee_hit_swo
 		},
 		settings = {
 			depth = 0.6,
-			height = 0.04,
+			height = 0.3,
 			width = 0.3,
 			depth_offset = -0.2
 		}
@@ -617,6 +657,13 @@ MaterialEffectMappings.melee_hit_sword_2h = MaterialEffectMappings.melee_hit_swo
 			event = "sword_2h_hit_statics",
 			parameters = {
 				material = "hay",
+				damage_type = "slashing"
+			}
+		},
+		ice = {
+			event = "sword_2h_hit_statics",
+			parameters = {
+				material = "ice",
 				damage_type = "slashing"
 			}
 		},
@@ -683,6 +730,13 @@ MaterialEffectMappings.melee_hit_sword_2h = MaterialEffectMappings.melee_hit_swo
 				damage_type = "slashing"
 			}
 		},
+		snow = {
+			event = "sword_2h_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "slashing"
+			}
+		},
 		water = {
 			event = "sword_2h_hit_statics",
 			parameters = {
@@ -725,6 +779,8 @@ MaterialEffectMappings.melee_hit_sword_2h = MaterialEffectMappings.melee_hit_swo
 		flesh = "fx/hit_flesh_slash",
 		stone_dirt = "fx/hit_stone_slash",
 		cloth = "fx/hit_cloth_slash",
+		snow = "fx/hit_snow_slash",
+		ice = "fx/hit_ice_slash",
 		forest_grass = "fx/hit_grass_slash",
 		grass = "fx/hit_grass_slash",
 		hay = "fx/hit_hay_slash",
@@ -746,6 +802,8 @@ MaterialEffectMappings.melee_hit_sword_1h = MaterialEffectMappings.melee_hit_swo
 			glass = "hit_glass_slash_1",
 			sand = "hit_sand_slash_1",
 			stone_dirt = "hit_stone_slash_1",
+			snow = "hit_snow_slash_1",
+			ice = "hit_ice_slash_1",
 			forest_grass = "hit_grass_slash_1",
 			grass = "hit_grass_slash_1",
 			hay = "empty",
@@ -797,8 +855,8 @@ MaterialEffectMappings.melee_hit_sword_1h = MaterialEffectMappings.melee_hit_swo
 		},
 		settings = {
 			depth = 0.6,
-			height = 0.04,
-			width = 0.3,
+			height = 0.1,
+			width = 0.5,
 			depth_offset = -0.2
 		}
 	},
@@ -857,6 +915,13 @@ MaterialEffectMappings.melee_hit_sword_1h = MaterialEffectMappings.melee_hit_swo
 			event = "sword_1h_hit_statics",
 			parameters = {
 				material = "hay",
+				damage_type = "slashing"
+			}
+		},
+		ice = {
+			event = "sword_1h_hit_statics",
+			parameters = {
+				material = "ice",
 				damage_type = "slashing"
 			}
 		},
@@ -923,6 +988,13 @@ MaterialEffectMappings.melee_hit_sword_1h = MaterialEffectMappings.melee_hit_swo
 				damage_type = "slashing"
 			}
 		},
+		snow = {
+			event = "sword_1h_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "slashing"
+			}
+		},
 		water = {
 			event = "sword_1h_hit_statics",
 			parameters = {
@@ -965,6 +1037,8 @@ MaterialEffectMappings.melee_hit_sword_1h = MaterialEffectMappings.melee_hit_swo
 		flesh = "fx/hit_flesh_slash",
 		stone_dirt = "fx/hit_stone_slash",
 		cloth = "fx/hit_cloth_slash",
+		snow = "fx/hit_snow_slash",
+		ice = "fx/hit_ice_slash",
 		forest_grass = "fx/hit_grass_slash",
 		grass = "fx/hit_grass_slash",
 		hay = "fx/hit_hay_slash",
@@ -986,6 +1060,8 @@ MaterialEffectMappings.melee_hit_dagger = MaterialEffectMappings.melee_hit_dagge
 			glass = "hit_glass_slash_1",
 			sand = "hit_sand_slash_1",
 			stone_dirt = "hit_stone_slash_1",
+			snow = "hit_snow_slash_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_slash_1",
 			grass = "hit_grass_slash_1",
 			hay = "empty",
@@ -1100,6 +1176,13 @@ MaterialEffectMappings.melee_hit_dagger = MaterialEffectMappings.melee_hit_dagge
 				damage_type = "slashing"
 			}
 		},
+		ice = {
+			event = "dagger_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "slashing"
+			}
+		},
 		metal_hollow = {
 			event = "dagger_hit_statics",
 			parameters = {
@@ -1163,6 +1246,13 @@ MaterialEffectMappings.melee_hit_dagger = MaterialEffectMappings.melee_hit_dagge
 				damage_type = "slashing"
 			}
 		},
+		snow = {
+			event = "dagger_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "slashing"
+			}
+		},
 		water = {
 			event = "dagger_hit_statics",
 			parameters = {
@@ -1205,6 +1295,8 @@ MaterialEffectMappings.melee_hit_dagger = MaterialEffectMappings.melee_hit_dagge
 		flesh = "fx/hit_flesh_slash",
 		stone_dirt = "fx/hit_stone_slash",
 		cloth = "fx/hit_cloth_slash",
+		snow = "fx/hit_snow_slash",
+		ice = "fx/hit_ice_slash",
 		forest_grass = "fx/hit_grass_slash",
 		grass = "fx/hit_grass_slash",
 		hay = "fx/hit_hay_slash",
@@ -1226,6 +1318,8 @@ MaterialEffectMappings.melee_hit_axes_2h = MaterialEffectMappings.melee_hit_axes
 			glass = "hit_glass_slash_1",
 			sand = "hit_sand_slash_1",
 			stone_dirt = "hit_stone_slash_1",
+			snow = "hit_snow_slash_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_slash_1",
 			grass = "hit_grass_slash_1",
 			hay = "empty",
@@ -1340,6 +1434,13 @@ MaterialEffectMappings.melee_hit_axes_2h = MaterialEffectMappings.melee_hit_axes
 				damage_type = "slashing"
 			}
 		},
+		ice = {
+			event = "axe_2h_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "slashing"
+			}
+		},
 		metal_hollow = {
 			event = "axe_2h_hit_statics",
 			parameters = {
@@ -1403,6 +1504,13 @@ MaterialEffectMappings.melee_hit_axes_2h = MaterialEffectMappings.melee_hit_axes
 				damage_type = "slashing"
 			}
 		},
+		snow = {
+			event = "axe_2h_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "slashing"
+			}
+		},
 		water = {
 			event = "axe_2h_hit_statics",
 			parameters = {
@@ -1445,6 +1553,8 @@ MaterialEffectMappings.melee_hit_axes_2h = MaterialEffectMappings.melee_hit_axes
 		flesh = "fx/hit_flesh_slash",
 		stone_dirt = "fx/hit_stone_slash",
 		cloth = "fx/hit_cloth_slash",
+		snow = "fx/hit_snow_slash",
+		ice = "fx/hit_ice_slash",
 		forest_grass = "fx/hit_grass_slash",
 		grass = "fx/hit_grass_slash",
 		hay = "fx/hit_hay_slash",
@@ -1466,6 +1576,8 @@ MaterialEffectMappings.melee_hit_axes_1h = MaterialEffectMappings.melee_hit_axes
 			glass = "hit_glass_slash_1",
 			sand = "hit_sand_slash_1",
 			stone_dirt = "hit_stone_slash_1",
+			snow = "hit_snow_slash_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_slash_1",
 			grass = "hit_grass_slash_1",
 			hay = "empty",
@@ -1580,6 +1692,13 @@ MaterialEffectMappings.melee_hit_axes_1h = MaterialEffectMappings.melee_hit_axes
 				damage_type = "slashing"
 			}
 		},
+		ice = {
+			event = "axe_1h_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "slashing"
+			}
+		},
 		metal_hollow = {
 			event = "axe_1h_hit_statics",
 			parameters = {
@@ -1643,6 +1762,13 @@ MaterialEffectMappings.melee_hit_axes_1h = MaterialEffectMappings.melee_hit_axes
 				damage_type = "slashing"
 			}
 		},
+		snow = {
+			event = "axe_1h_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "slashing"
+			}
+		},
 		water = {
 			event = "axe_1h_hit_statics",
 			parameters = {
@@ -1685,6 +1811,8 @@ MaterialEffectMappings.melee_hit_axes_1h = MaterialEffectMappings.melee_hit_axes
 		flesh = "fx/hit_flesh_slash",
 		stone_dirt = "fx/hit_stone_slash",
 		cloth = "fx/hit_cloth_slash",
+		snow = "fx/hit_snow_slash",
+		ice = "fx/hit_ice_slash",
 		forest_grass = "fx/hit_grass_slash",
 		grass = "fx/hit_grass_slash",
 		hay = "fx/hit_hay_slash",
@@ -1708,6 +1836,8 @@ MaterialEffectMappings.melee_hit_hammers_2h = MaterialEffectMappings.melee_hit_h
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -1804,6 +1934,13 @@ MaterialEffectMappings.melee_hit_hammers_2h = MaterialEffectMappings.melee_hit_h
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "hammer_2h_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "hammer_2h_hit_statics",
 			parameters = {
@@ -1867,6 +2004,13 @@ MaterialEffectMappings.melee_hit_hammers_2h = MaterialEffectMappings.melee_hit_h
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "hammer_2h_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "hammer_2h_hit_statics",
 			parameters = {
@@ -1909,6 +2053,8 @@ MaterialEffectMappings.melee_hit_hammers_2h = MaterialEffectMappings.melee_hit_h
 		flesh = "fx/hit_flesh_blunt",
 		stone_dirt = "fx/hit_stone_blunt",
 		cloth = "fx/hit_cloth_blunt",
+		snow = "fx/hit_snow_blunt",
+		ice = "fx/hit_ice_blunt",
 		forest_grass = "fx/hit_grass_blunt",
 		grass = "fx/hit_grass_blunt",
 		hay = "fx/hit_hay_blunt",
@@ -1932,6 +2078,8 @@ MaterialEffectMappings.melee_hit_hammers_1h = MaterialEffectMappings.melee_hit_h
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -2028,6 +2176,13 @@ MaterialEffectMappings.melee_hit_hammers_1h = MaterialEffectMappings.melee_hit_h
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "hammer_1h_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "hammer_1h_hit_statics",
 			parameters = {
@@ -2091,6 +2246,13 @@ MaterialEffectMappings.melee_hit_hammers_1h = MaterialEffectMappings.melee_hit_h
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "hammer_1h_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "hammer_1h_hit_statics",
 			parameters = {
@@ -2133,6 +2295,8 @@ MaterialEffectMappings.melee_hit_hammers_1h = MaterialEffectMappings.melee_hit_h
 		flesh = "fx/hit_flesh_blunt",
 		stone_dirt = "fx/hit_stone_blunt",
 		cloth = "fx/hit_cloth_blunt",
+		snow = "fx/hit_snow_blunt",
+		ice = "fx/hit_ice_blunt",
 		forest_grass = "fx/hit_grass_blunt",
 		grass = "fx/hit_grass_blunt",
 		hay = "fx/hit_hay_blunt",
@@ -2156,6 +2320,8 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -2249,6 +2415,13 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "bullet_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "slashing_hit_armour",
 			parameters = {
@@ -2309,6 +2482,13 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 			event = "bullet_hit_statics",
 			parameters = {
 				material = "stone_wet",
+				damage_type = "piercing"
+			}
+		},
+		snow = {
+			event = "bullet_hit_statics",
+			parameters = {
+				material = "snow",
 				damage_type = "piercing"
 			}
 		},
@@ -2346,7 +2526,7 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/hit_fruit_pierce",
 		stone = "fx/hit_stone_pierce",
-		water = "fx/hit_water_pierce",
+		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
 		sand = "fx/hit_sand",
@@ -2354,6 +2534,8 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 		flesh = "fx/hit_metal_hollow_pierce",
 		stone_dirt = "fx/hit_stone_pierce",
 		cloth = "fx/hit_cloth_pierce",
+		snow = "fx/hit_snow_pierce",
+		ice = "fx/hit_ice_pierce",
 		forest_grass = "fx/hit_grass_pierce",
 		grass = "fx/hit_grass_pierce",
 		dirt = "fx/hit_dirt_pierce",
@@ -2377,6 +2559,8 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -2470,6 +2654,13 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "bullet_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "slashing_hit_armour",
 			parameters = {
@@ -2530,6 +2721,13 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 			event = "bullet_hit_statics",
 			parameters = {
 				material = "stone_wet",
+				damage_type = "piercing"
+			}
+		},
+		snow = {
+			event = "bullet_hit_statics",
+			parameters = {
+				material = "snow",
 				damage_type = "piercing"
 			}
 		},
@@ -2567,7 +2765,7 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/arrow_hit_generic",
 		stone = "fx/arrow_hit_stone",
-		water = "fx/hit_water_pierce",
+		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/arrow_hit_wood_hollow",
 		glass = "fx/hit_glass",
 		sand = "fx/hit_sand",
@@ -2575,6 +2773,8 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 		flesh = "fx/arrow_hit_flesh",
 		stone_dirt = "fx/arrow_hit_stone",
 		cloth = "fx/hit_cloth_pierce",
+		snow = "fx/arrow_hit_snow",
+		ice = "fx/hit_ice_pierce",
 		forest_grass = "fx/arrow_hit_generic",
 		grass = "fx/arrow_hit_generic",
 		dirt = "fx/arrow_hit_dirt",
@@ -2642,6 +2842,13 @@ MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "enemy_bullet_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "enemy_bullet_hit_statics",
 			parameters = {
@@ -2705,6 +2912,13 @@ MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "enemy_bullet_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "enemy_bullet_hit_statics",
 			parameters = {
@@ -2739,7 +2953,7 @@ MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/hit_fruit_pierce",
 		stone = "fx/hit_stone_pierce",
-		water = "fx/hit_water_pierce",
+		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
 		sand = "fx/hit_sand",
@@ -2747,6 +2961,8 @@ MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
 		flesh = "fx/hit_metal_hollow_pierce",
 		stone_dirt = "fx/hit_stone_pierce",
 		cloth = "fx/hit_cloth_pierce",
+		snow = "fx/hit_snow_pierce",
+		ice = "fx/hit_ice_pierce",
 		forest_grass = "fx/hit_grass_pierce",
 		grass = "fx/hit_grass_pierce",
 		dirt = "fx/hit_dirt_pierce",
@@ -2770,6 +2986,8 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -2863,6 +3081,13 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "enemy_bullet_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "enemy_bullet_hit_statics",
 			parameters = {
@@ -2926,6 +3151,13 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "enemy_bullet_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "enemy_bullet_hit_statics",
 			parameters = {
@@ -2960,7 +3192,7 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/hit_fruit_pierce",
 		stone = "fx/hit_stone_pierce",
-		water = "fx/hit_water_pierce",
+		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
 		sand = "fx/hit_sand",
@@ -2968,6 +3200,8 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 		flesh = "fx/hit_metal_hollow_pierce",
 		stone_dirt = "fx/hit_stone_pierce",
 		cloth = "fx/hit_cloth_pierce",
+		snow = "fx/hit_snow_pierce",
+		ice = "fx/hit_ice_pierce",
 		forest_grass = "fx/hit_grass_pierce",
 		grass = "fx/hit_grass_pierce",
 		dirt = "fx/hit_dirt_pierce",
@@ -3042,6 +3276,13 @@ MaterialEffectMappings.drakefire_pistol = MaterialEffectMappings.drakefire_pisto
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "drakepistol_hit",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "drakepistol_hit",
 			parameters = {
@@ -3098,6 +3339,13 @@ MaterialEffectMappings.drakefire_pistol = MaterialEffectMappings.drakefire_pisto
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "drakepistol_hit",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "drakepistol_hit",
 			parameters = {
@@ -3140,6 +3388,8 @@ MaterialEffectMappings.drakefire_pistol = MaterialEffectMappings.drakefire_pisto
 		flesh = "fx/wpnfx_drake_pistols_projectile_impact",
 		stone_dirt = "fx/wpnfx_drake_pistols_projectile_impact",
 		cloth = "fx/wpnfx_drake_pistols_projectile_impact",
+		snow = "fx/wpnfx_drake_pistols_projectile_impact",
+		ice = "fx/wpnfx_drake_pistols_projectile_impact",
 		forest_grass = "fx/wpnfx_drake_pistols_projectile_impact",
 		grass = "fx/wpnfx_drake_pistols_projectile_impact",
 		dirt = "fx/wpnfx_drake_pistols_projectile_impact",
@@ -3214,6 +3464,13 @@ MaterialEffectMappings.staff_spark = MaterialEffectMappings.staff_spark or {
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "magic_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "magic_hit_statics",
 			parameters = {
@@ -3270,6 +3527,13 @@ MaterialEffectMappings.staff_spark = MaterialEffectMappings.staff_spark or {
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "magic_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "magic_hit_statics",
 			parameters = {
@@ -3312,6 +3576,8 @@ MaterialEffectMappings.staff_spark = MaterialEffectMappings.staff_spark or {
 		flesh = "fx/wpnfx_staff_spark_impact",
 		stone_dirt = "fx/wpnfx_staff_spark_impact",
 		cloth = "fx/wpnfx_staff_spark_impact",
+		snow = "fx/wpnfx_staff_spark_impact",
+		ice = "fx/wpnfx_staff_spark_impact",
 		forest_grass = "fx/wpnfx_staff_spark_impact",
 		grass = "fx/wpnfx_staff_spark_impact",
 		dirt = "fx/wpnfx_staff_spark_impact",
@@ -3386,6 +3652,13 @@ MaterialEffectMappings.staff_spear = MaterialEffectMappings.staff_spear or {
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "magic_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "magic_hit_statics",
 			parameters = {
@@ -3442,6 +3715,13 @@ MaterialEffectMappings.staff_spear = MaterialEffectMappings.staff_spear or {
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "magic_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "magic_hit_statics",
 			parameters = {
@@ -3484,6 +3764,8 @@ MaterialEffectMappings.staff_spear = MaterialEffectMappings.staff_spear or {
 		flesh = "fx/wpnfx_staff_spear_impact",
 		stone_dirt = "fx/wpnfx_staff_spear_impact",
 		cloth = "fx/wpnfx_staff_spear_impact",
+		snow = "fx/wpnfx_staff_spear_impact",
+		ice = "fx/wpnfx_staff_spear_impact",
 		forest_grass = "fx/wpnfx_staff_spear_impact",
 		grass = "fx/wpnfx_staff_spear_impact",
 		dirt = "fx/wpnfx_staff_spear_impact",
@@ -3551,6 +3833,13 @@ MaterialEffectMappings.fireball_impact = MaterialEffectMappings.fireball_impact 
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "fireball_small_hit",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "fireball_small_hit",
 			parameters = {
@@ -3614,6 +3903,13 @@ MaterialEffectMappings.fireball_impact = MaterialEffectMappings.fireball_impact 
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "fireball_small_hit",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "fireball_small_hit",
 			parameters = {
@@ -3656,6 +3952,8 @@ MaterialEffectMappings.fireball_impact = MaterialEffectMappings.fireball_impact 
 		flesh = "fx/wpnfx_staff_spark_impact",
 		stone_dirt = "fx/wpnfx_staff_spark_impact",
 		cloth = "fx/wpnfx_staff_spark_impact",
+		snow = "fx/wpnfx_staff_spark_impact",
+		ice = "fx/wpnfx_staff_spark_impact",
 		forest_grass = "fx/wpnfx_staff_spark_impact",
 		grass = "fx/wpnfx_staff_spark_impact",
 		dirt = "fx/wpnfx_staff_spark_impact",
@@ -3679,6 +3977,8 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -3772,6 +4072,13 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "arrow_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "slashing_hit_armour",
 			parameters = {
@@ -3835,6 +4142,13 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "arrow_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "arrow_hit_statics",
 			parameters = {
@@ -3869,7 +4183,7 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 		fruit = "fx/arrow_hit_generic",
 		dirt = "fx/arrow_hit_dirt",
 		stone = "fx/arrow_hit_stone",
-		water = "fx/hit_water_pierce",
+		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/arrow_hit_wood_hollow",
 		glass = "fx/hit_glass",
 		sand = "fx/hit_sand",
@@ -3877,6 +4191,8 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 		flesh = "fx/arrow_hit_flesh",
 		stone_dirt = "fx/arrow_hit_stone",
 		cloth = "fx/arrow_hit_cloth",
+		snow = "fx/arrow_hit_snow",
+		ice = "fx/arrow_hit_generic",
 		forest_grass = "fx/hit_grass_pierce",
 		grass = "fx/arrow_hit_generic",
 		hay = "fx/arrow_hit_generic",
@@ -3900,6 +4216,8 @@ MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow
 			armored = "hit_metal_hollow_pierce_1",
 			flesh = "hit_flesh_pierce_1",
 			stone_dirt = "hit_stone_pierce_1",
+			snow = "hit_snow_pierce_1",
+			ice = "hit_ice_pierce_1",
 			forest_grass = "hit_grass_pierce_1",
 			grass = "hit_grass_pierce_1",
 			hay = "empty",
@@ -3993,6 +4311,13 @@ MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow
 				damage_type = "piercing"
 			}
 		},
+		ice = {
+			event = "arrow_hit_statics",
+			parameters = {
+				material = "ice",
+				damage_type = "piercing"
+			}
+		},
 		metal_hollow = {
 			event = "arrow_hit_statics",
 			parameters = {
@@ -4056,6 +4381,13 @@ MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow
 				damage_type = "piercing"
 			}
 		},
+		snow = {
+			event = "arrow_hit_statics",
+			parameters = {
+				material = "snow",
+				damage_type = "piercing"
+			}
+		},
 		water = {
 			event = "arrow_hit_statics",
 			parameters = {
@@ -4098,6 +4430,8 @@ MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow
 		flesh = "fx/wpnfx_poison_arrow_impact",
 		stone_dirt = "fx/wpnfx_poison_arrow_impact",
 		cloth = "fx/wpnfx_poison_arrow_impact",
+		snow = "fx/wpnfx_poison_arrow_impact",
+		ice = "fx/hit_ice_pierce",
 		forest_grass = "fx/wpnfx_poison_arrow_impact",
 		grass = "fx/wpnfx_poison_arrow_impact",
 		hay = "fx/hit_hay_pierce",
@@ -4159,6 +4493,12 @@ MaterialEffectMappings.footstep_walk = MaterialEffectMappings.footstep_walk or {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "walk",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "walk",
 			parameters = {
@@ -4213,6 +4553,12 @@ MaterialEffectMappings.footstep_walk = MaterialEffectMappings.footstep_walk or {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "walk",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "walk",
 			parameters = {
@@ -4251,6 +4597,8 @@ MaterialEffectMappings.footstep_walk = MaterialEffectMappings.footstep_walk or {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/footstep_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -4312,6 +4660,12 @@ MaterialEffectMappings.footstep_sneak = MaterialEffectMappings.footstep_sneak or
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "sneak",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "sneak",
 			parameters = {
@@ -4366,6 +4720,12 @@ MaterialEffectMappings.footstep_sneak = MaterialEffectMappings.footstep_sneak or
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "sneak",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "sneak",
 			parameters = {
@@ -4404,6 +4764,8 @@ MaterialEffectMappings.footstep_sneak = MaterialEffectMappings.footstep_sneak or
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/footstep_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -4465,6 +4827,12 @@ MaterialEffectMappings.footstep_run = MaterialEffectMappings.footstep_run or {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "run",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "run",
 			parameters = {
@@ -4519,6 +4887,12 @@ MaterialEffectMappings.footstep_run = MaterialEffectMappings.footstep_run or {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "run",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "run",
 			parameters = {
@@ -4557,6 +4931,8 @@ MaterialEffectMappings.footstep_run = MaterialEffectMappings.footstep_run or {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/footstep_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -4618,6 +4994,12 @@ MaterialEffectMappings.footstep_jump = MaterialEffectMappings.footstep_jump or {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "jump",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "jump",
 			parameters = {
@@ -4672,6 +5054,12 @@ MaterialEffectMappings.footstep_jump = MaterialEffectMappings.footstep_jump or {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "jump",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "jump",
 			parameters = {
@@ -4710,6 +5098,8 @@ MaterialEffectMappings.footstep_jump = MaterialEffectMappings.footstep_jump or {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/footstep_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -4771,6 +5161,12 @@ MaterialEffectMappings.footstep_land = MaterialEffectMappings.footstep_land or {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "land",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "land",
 			parameters = {
@@ -4825,6 +5221,12 @@ MaterialEffectMappings.footstep_land = MaterialEffectMappings.footstep_land or {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "land",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "land",
 			parameters = {
@@ -4863,6 +5265,8 @@ MaterialEffectMappings.footstep_land = MaterialEffectMappings.footstep_land or {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/footstep_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -4924,6 +5328,12 @@ MaterialEffectMappings.enemy_footstep_walk = MaterialEffectMappings.enemy_footst
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_walk",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "enemy_walk",
 			parameters = {
@@ -4978,6 +5388,12 @@ MaterialEffectMappings.enemy_footstep_walk = MaterialEffectMappings.enemy_footst
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_walk",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "enemy_walk",
 			parameters = {
@@ -5016,6 +5432,8 @@ MaterialEffectMappings.enemy_footstep_walk = MaterialEffectMappings.enemy_footst
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -5077,6 +5495,12 @@ MaterialEffectMappings.enemy_footstep_run = MaterialEffectMappings.enemy_footste
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_run",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "enemy_run",
 			parameters = {
@@ -5131,6 +5555,12 @@ MaterialEffectMappings.enemy_footstep_run = MaterialEffectMappings.enemy_footste
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_run",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "enemy_run",
 			parameters = {
@@ -5169,6 +5599,8 @@ MaterialEffectMappings.enemy_footstep_run = MaterialEffectMappings.enemy_footste
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -5230,6 +5662,12 @@ MaterialEffectMappings.enemy_footstep_land = MaterialEffectMappings.enemy_footst
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_land",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "enemy_land",
 			parameters = {
@@ -5284,6 +5722,12 @@ MaterialEffectMappings.enemy_footstep_land = MaterialEffectMappings.enemy_footst
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_land",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "enemy_land",
 			parameters = {
@@ -5322,6 +5766,8 @@ MaterialEffectMappings.enemy_footstep_land = MaterialEffectMappings.enemy_footst
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -5383,6 +5829,12 @@ MaterialEffectMappings.enemy_ratogre_run = {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_ratogre_run",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "enemy_ratogre_run",
 			parameters = {
@@ -5437,6 +5889,12 @@ MaterialEffectMappings.enemy_ratogre_run = {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_ratogre_run",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "enemy_ratogre_run",
 			parameters = {
@@ -5475,6 +5933,8 @@ MaterialEffectMappings.enemy_ratogre_run = {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -5536,6 +5996,12 @@ MaterialEffectMappings.enemy_footstep_ratogre_land = MaterialEffectMappings.enem
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_ratogre_land",
+			parameters = {
+				material = "ice"
+			}
+		},
 		metal_solid = {
 			event = "enemy_ratogre_land",
 			parameters = {
@@ -5590,6 +6056,12 @@ MaterialEffectMappings.enemy_footstep_ratogre_land = MaterialEffectMappings.enem
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_ratogre_land",
+			parameters = {
+				material = "snow"
+			}
+		},
 		water = {
 			event = "enemy_ratogre_land",
 			parameters = {
@@ -5628,6 +6100,8 @@ MaterialEffectMappings.enemy_footstep_ratogre_land = MaterialEffectMappings.enem
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -5689,6 +6163,12 @@ MaterialEffectMappings.grenade_bounce = {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "grenade_hit_statics",
+			parameters = {
+				material = "glass"
+			}
+		},
 		metal_solid = {
 			event = "grenade_hit_statics",
 			parameters = {
@@ -5741,6 +6221,12 @@ MaterialEffectMappings.grenade_bounce = {
 			event = "grenade_hit_statics",
 			parameters = {
 				material = "stone_wet"
+			}
+		},
+		snow = {
+			event = "grenade_hit_statics",
+			parameters = {
+				material = "water"
 			}
 		},
 		water = {
@@ -5819,6 +6305,12 @@ MaterialEffectMappings.enemy_ratogre_slide = {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_ratogre_slide",
+			parameters = {
+				material = "glass"
+			}
+		},
 		metal_solid = {
 			event = "enemy_ratogre_slide",
 			parameters = {
@@ -5867,6 +6359,12 @@ MaterialEffectMappings.enemy_ratogre_slide = {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_ratogre_slide",
+			parameters = {
+				material = "water"
+			}
+		},
 		water = {
 			event = "enemy_ratogre_slide",
 			parameters = {
@@ -5905,6 +6403,8 @@ MaterialEffectMappings.enemy_ratogre_slide = {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -5966,6 +6466,12 @@ MaterialEffectMappings.grenade_bounce = {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "grenade_hit_statics",
+			parameters = {
+				material = "glass"
+			}
+		},
 		metal_solid = {
 			event = "grenade_hit_statics",
 			parameters = {
@@ -6012,6 +6518,12 @@ MaterialEffectMappings.grenade_bounce = {
 			event = "grenade_hit_statics",
 			parameters = {
 				material = "stone_wet"
+			}
+		},
+		snow = {
+			event = "grenade_hit_statics",
+			parameters = {
+				material = "water"
 			}
 		},
 		water = {
@@ -6090,6 +6602,12 @@ MaterialEffectMappings.enemy_ratogre_footstep_single = {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "enemy_ratogre_footstep_single",
+			parameters = {
+				material = "glass"
+			}
+		},
 		metal_solid = {
 			event = "enemy_ratogre_footstep_single",
 			parameters = {
@@ -6138,6 +6656,12 @@ MaterialEffectMappings.enemy_ratogre_footstep_single = {
 				material = "stone_wet"
 			}
 		},
+		snow = {
+			event = "enemy_ratogre_footstep_single",
+			parameters = {
+				material = "water"
+			}
+		},
 		water = {
 			event = "enemy_ratogre_footstep_single",
 			parameters = {
@@ -6176,6 +6700,8 @@ MaterialEffectMappings.enemy_ratogre_footstep_single = {
 		flesh = "fx/footstep_walk_dirt",
 		stone_dirt = "fx/footstep_walk_dirt",
 		cloth = "fx/footstep_walk_dirt",
+		snow = "fx/pawprint_walk_snow",
+		ice = "fx/footstep_walk_ice",
 		forest_grass = "fx/footstep_walk_dirt",
 		grass = "fx/footstep_walk_dirt",
 		hay = "fx/footstep_walk_dirt",
@@ -6237,6 +6763,12 @@ MaterialEffectMappings.grenade_bounce = {
 				material = "hay"
 			}
 		},
+		ice = {
+			event = "grenade_hit_statics",
+			parameters = {
+				material = "glass"
+			}
+		},
 		metal_solid = {
 			event = "grenade_hit_statics",
 			parameters = {
@@ -6283,6 +6815,12 @@ MaterialEffectMappings.grenade_bounce = {
 			event = "grenade_hit_statics",
 			parameters = {
 				material = "stone_wet"
+			}
+		},
+		snow = {
+			event = "grenade_hit_statics",
+			parameters = {
+				material = "water"
 			}
 		},
 		water = {

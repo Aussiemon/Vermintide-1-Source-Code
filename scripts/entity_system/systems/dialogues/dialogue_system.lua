@@ -1,5 +1,6 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
+require("scripts/utils/function_command_queue")
 require("scripts/entity_system/systems/dialogues/tag_query")
 require("scripts/entity_system/systems/dialogues/tag_query_database")
 require("scripts/entity_system/systems/dialogues/tag_query_loader")
@@ -1105,21 +1106,89 @@ DialogueSystem.TriggerTargetedByRatling = function (self, player_unit)
 
 	return 
 end
-DialogueSystem.TriggerBackstab = function (self, player_unit, enemy_unit)
+DialogueSystem.TriggerBackstab = function (self, player_unit, enemy_unit, should_backstab)
+	local player_manager = Managers.player
+	local owner = player_manager.unit_owner(player_manager, player_unit)
+	local event_data = FrameTable.alloc_table()
+	event_data.target_name = ScriptUnit.extension(player_unit, "dialogue_system").context.player_profile
+
+	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) then
+		local dialogue_input = ScriptUnit.extension_input(enemy_unit, "dialogue_system")
+
+		if not owner.bot_player then
+			local backstab_event = nil
+
+			if should_backstab then
+				local to_target_vec = Vector3.normalize(POSITION_LOOKUP[enemy_unit] - POSITION_LOOKUP[player_unit])
+				local unit_id = Managers.state.network.unit_storage:go_id(player_unit)
+				local game = Managers.state.network:game()
+				local player_rot = GameSession.game_object_field(game, unit_id, "aim_direction")
+				local unit_fwd_dir = Quaternion.forward(Quaternion.look(player_rot))
+
+				if Vector3.dot(to_target_vec, unit_fwd_dir) < 0.4 then
+					backstab_event = "Play_clan_rat_attack_player_back_vce"
+				else
+					backstab_event = "Play_clan_rat_attack_player_vce"
+				end
+			else
+				backstab_event = "Play_clan_rat_attack_vce"
+			end
+
+			local player_data = Managers.player:owner(player_unit)
+			local unit_id = NetworkUnit.game_object_id(enemy_unit)
+			local event_id = NetworkLookup.sound_events[backstab_event]
+
+			if Managers.player:local_player().player_unit == player_unit then
+				local audio_system_extension = Managers.state.entity:system("audio_system")
+
+				audio_system_extension._play_event(audio_system_extension, backstab_event, enemy_unit, 0)
+			else
+				RPC.rpc_server_audio_unit_event(player_data.peer_id, event_id, unit_id, 0)
+
+				local audio_system_extension = Managers.state.entity:system("audio_system")
+
+				audio_system_extension._play_event(audio_system_extension, "Play_clan_rat_attack_vce", enemy_unit, 0)
+			end
+
+			local general_event_id = NetworkLookup.sound_events.Play_clan_rat_attack_vce
+			local network_manager = Managers.state.network
+
+			network_manager.network_transmit:send_rpc_clients_except("rpc_server_audio_unit_event", player_data.peer_id, general_event_id, unit_id, 0)
+		end
+	end
+
+	return 
+end
+DialogueSystem.TriggerBackstabHit = function (self, player_unit, enemy_unit)
 	local player_manager = Managers.player
 	local owner = player_manager.unit_owner(player_manager, player_unit)
 
-	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) then
+	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) and not owner.bot_player then
+		local drawer = Managers.state.debug:drawer({
+			mode = "retained",
+			name = "Dialoge_debug"
+		})
 		local to_target_vec = Vector3.normalize(POSITION_LOOKUP[enemy_unit] - POSITION_LOOKUP[player_unit])
-		local player_rot = Unit.local_rotation(player_unit, 0)
-		local unit_fwd_dir = Quaternion.forward(player_rot)
+		local unit_id = Managers.state.network.unit_storage:go_id(player_unit)
+		local game = Managers.state.network:game()
+		local player_rot = GameSession.game_object_field(game, unit_id, "aim_direction")
+		local unit_fwd_dir = Quaternion.forward(Quaternion.look(player_rot))
 
-		if Vector3.dot(to_target_vec, unit_fwd_dir) < -0.4 then
-			local dialogue_input = ScriptUnit.extension_input(enemy_unit, "dialogue_system")
-			local event_data = FrameTable.alloc_table()
-			event_data.target_name = ScriptUnit.extension(player_unit, "dialogue_system").context.player_profile
+		if Vector3.dot(to_target_vec, unit_fwd_dir) < 0.4 then
+			local backstabhit_event = "Play_hud_enemy_attack_back_hit"
 
-			dialogue_input.trigger_dialogue_event(dialogue_input, "backstab", event_data)
+			if Managers.player:local_player().player_unit == player_unit then
+				local first_person_extension = ScriptUnit.extension(player_unit, "first_person_system")
+
+				first_person_extension.play_hud_sound_event(first_person_extension, backstabhit_event, nil, false)
+			else
+				local network_manager = Managers.state.network
+				local player_data = Managers.player:owner(player_unit)
+				local go_id = NetworkUnit.game_object_id(player_unit)
+				local event_id = NetworkLookup.sound_events[backstabhit_event]
+
+				RPC.rpc_play_first_person_sound(player_data.peer_id, go_id, event_id, POSITION_LOOKUP[player_unit])
+			end
 		end
 	end
 
@@ -1550,6 +1619,8 @@ function DebugVoByFile(file_name, quick)
 						profile_name = "grey_wizard"
 					elseif char_short == "nik" then
 						profile_name = "inn_keeper"
+					elseif char_short == "nde" then
+						profile_name = "dwarf_engineer"
 					elseif char_short == "egs" then
 						profile_name = "grey_seer"
 					end

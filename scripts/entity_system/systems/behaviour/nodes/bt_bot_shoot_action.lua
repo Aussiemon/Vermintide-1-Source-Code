@@ -24,7 +24,7 @@ local function dprint(...)
 end
 
 BTBotShootAction.enter = function (self, unit, blackboard, t)
-	local input_ext = ScriptUnit.extension(unit, "input_system")
+	local input_ext = blackboard.input_extension
 	local soft_aiming = false
 
 	input_ext.set_aiming(input_ext, true, soft_aiming, true)
@@ -32,8 +32,6 @@ BTBotShootAction.enter = function (self, unit, blackboard, t)
 	local action_data = self._tree_node.action_data
 	blackboard.next_evaluate = t + action_data.evaluation_duration
 	blackboard.next_evaluate_without_firing = t + action_data.evaluation_duration_without_firing
-	local min = action_data.minimum_obstruction_reevaluation_time
-	local max = action_data.maximum_obstruction_reevaluation_time
 	local inventory_ext = blackboard.inventory_extension
 	local wielded_slot_name = inventory_ext.get_wielded_slot_name(inventory_ext)
 	local slot_data = inventory_ext.get_slot_data(inventory_ext, wielded_slot_name)
@@ -74,12 +72,12 @@ BTBotShootAction.enter = function (self, unit, blackboard, t)
 	}
 	blackboard.ranged_obstruction_by_static = nil
 
-	self._set_new_aim_target(self, unit, t, blackboard.shoot, blackboard.target_unit)
+	self._set_new_aim_target(self, unit, t, blackboard.shoot, blackboard.target_unit, blackboard.first_person_extension)
 
 	return 
 end
 BTBotShootAction.leave = function (self, unit, blackboard, t)
-	local input_ext = ScriptUnit.extension(unit, "input_system")
+	local input_ext = blackboard.input_extension
 
 	input_ext.set_aiming(input_ext, false)
 
@@ -99,8 +97,7 @@ BTBotShootAction.run = function (self, unit, blackboard, t, dt)
 
 	return 
 end
-BTBotShootAction._set_new_aim_target = function (self, self_unit, t, shoot_blackboard, target_unit)
-	local first_person_ext = ScriptUnit.extension(self_unit, "first_person_system")
+BTBotShootAction._set_new_aim_target = function (self, self_unit, t, shoot_blackboard, target_unit, first_person_ext)
 	local camera_position = first_person_ext.current_position(first_person_ext)
 	local camera_rotation = first_person_ext.current_rotation(first_person_ext)
 	local projectile_info, projectile_speed, aim_at_node = nil
@@ -118,8 +115,6 @@ BTBotShootAction._set_new_aim_target = function (self, self_unit, t, shoot_black
 	local wanted_aim_rotation = self._wanted_aim_rotation(self, self_unit, target_unit, camera_position, projectile_info, projectile_speed, aim_at_node)
 	local diff_rotation = Quaternion.multiply(Quaternion.inverse(camera_rotation), wanted_aim_rotation)
 	local angle = Quaternion.angle(diff_rotation)
-	local minimum_interpolation_time = 0.01
-	local maximum_interpolation_time = 0.5
 	shoot_blackboard.target_unit = target_unit
 	shoot_blackboard.aim_start_time = t
 	shoot_blackboard.aim_speed_yaw = 0
@@ -273,12 +268,12 @@ BTBotShootAction._aim = function (self, unit, blackboard, dt, t)
 	end
 
 	local shoot_bb = blackboard.shoot
-	local first_person_ext = ScriptUnit.extension(unit, "first_person_system")
+	local first_person_ext = blackboard.first_person_extension
 	local camera_position = first_person_ext.current_position(first_person_ext)
 	local camera_rotation = first_person_ext.current_rotation(first_person_ext)
 
 	if target_unit ~= shoot_bb.target_unit then
-		self._set_new_aim_target(self, unit, t, shoot_bb, target_unit)
+		self._set_new_aim_target(self, unit, t, shoot_bb, target_unit, first_person_ext)
 	end
 
 	local action_data = self._tree_node.action_data
@@ -299,7 +294,7 @@ BTBotShootAction._aim = function (self, unit, blackboard, dt, t)
 		end
 	end
 
-	local input_ext = ScriptUnit.extension(unit, "input_system")
+	local input_ext = blackboard.input_extension
 	local range_squared = Vector3.distance_squared(camera_position, actual_aim_position)
 
 	if self._should_charge(self, shoot_bb, range_squared, target_unit) then

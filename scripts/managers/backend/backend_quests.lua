@@ -15,7 +15,7 @@ BackendQuests.init = function (self, boons_interface)
 	self._active_contracts = {}
 	self._available_contracts = {}
 	self._boons = boons_interface
-	self._expire_times = {}
+	self._expire_times = nil
 	self._reward_queue = {}
 
 	return 
@@ -24,7 +24,12 @@ BackendQuests.setup = function (self, data_server_queue)
 	self._register_executors(self, data_server_queue)
 
 	self._queue = data_server_queue
-	local token = self._queue:add_item("get_quest_state_1")
+	local param_config = {
+		reset_contracts = true,
+		reset_quests = true
+	}
+
+	self._queue:add_item("qnc_get_state_1")
 
 	return 
 end
@@ -40,11 +45,15 @@ BackendQuests._register_executors = function (self, queue)
 	queue.register_executor(queue, "quest_delete", callback(self, "_command_quest_delete"))
 	queue.register_executor(queue, "rewarded", callback(self, "_command_rewarded"))
 	queue.register_executor(queue, "expire_times", callback(self, "_command_expire_times"))
+	queue.register_executor(queue, "status", callback(self, "_command_status"))
 	queue.register_executor(queue, "boons", callback(self, "_command_boons"))
+	queue.register_executor(queue, "boons_add", callback(self, "_command_boons_add"))
 
 	return 
 end
 BackendQuests._command_quests = function (self, quests)
+	dprint("_command_quests")
+
 	self._initiated = true
 	self._quests = quests
 	self._quests_dirty = true
@@ -59,13 +68,11 @@ BackendQuests._command_quests = function (self, quests)
 		end
 	end
 
-	for _, quest in pairs(quests) do
-		quest.type = "main"
-	end
-
 	return 
 end
 BackendQuests._command_contracts = function (self, contracts)
+	dprint("_command_contracts")
+
 	self._contracts = contracts
 	self._contracts_dirty = true
 
@@ -78,11 +85,16 @@ BackendQuests._command_contracts = function (self, contracts)
 		else
 			self._available_contracts[contract_id] = contract
 		end
+
+		local backend_difficulty = contract.requirements.difficulty
+		contract.requirements.difficulty = Difficulties[backend_difficulty]
 	end
 
 	return 
 end
 BackendQuests._command_contract_update = function (self, contract_update)
+	dprint("_command_contract_update")
+
 	self._contracts_dirty = true
 	local id = contract_update.id
 	local contract = self._contracts[id]
@@ -99,20 +111,31 @@ BackendQuests._command_contract_update = function (self, contract_update)
 				self._available_contracts[id] = contract
 				self._active_contracts[id] = nil
 			end
+		elseif key == "requirements" then
+			local backend_difficulty = value.difficulty
+			contract.requirements.difficulty = Difficulties[backend_difficulty]
 		end
 	end
 
 	return 
 end
 BackendQuests._command_contract_delete = function (self, contract_delete)
+	dprint("_command_contract_delete")
+
 	self._contracts_dirty = true
 	local id = contract_delete.id
-	local contract = self._contracts[id]
-	contract.deleted = true
+	self._contracts[id] = nil
+	local active_contracts = self._active_contracts
+
+	if active_contracts[id] then
+		active_contracts[id] = nil
+	end
 
 	return 
 end
 BackendQuests._command_quest_update = function (self, quest_update)
+	dprint("_command_quest_update")
+
 	self._quests_dirty = true
 	local id = quest_update.id
 	local quest = self._quests[id]
@@ -135,14 +158,22 @@ BackendQuests._command_quest_update = function (self, quest_update)
 	return 
 end
 BackendQuests._command_quest_delete = function (self, quest_delete)
+	dprint("_command_quest_delete")
+
 	self._quests_dirty = true
 	local id = quest_delete.id
-	local quest = self._quests[id]
-	quest.deleted = true
+	self._quests[id] = nil
+	local active_quest = self._active_quest
+
+	if active_quest and active_quest.id == id then
+		self._active_quest = nil
+	end
 
 	return 
 end
 BackendQuests._command_rewarded = function (self, rewarded)
+	dprint("_command_rewarded")
+
 	for _, reward in ipairs(rewarded) do
 		if reward.type == "item" then
 			local gui_reward = {
@@ -169,13 +200,28 @@ BackendQuests._command_rewarded = function (self, rewarded)
 	return 
 end
 BackendQuests._command_expire_times = function (self, expire_times)
-	self._expire_times = expire_times
+	dprint("_command_expire_times")
+
 	self._expire_times_dirty = true
+	self._expire_times = expire_times
+
+	return 
+end
+BackendQuests._command_status = function (self, status)
+	dprint("_command_status", status)
+
+	self._status_dirty = true
+	self._status = status
 
 	return 
 end
 BackendQuests._command_boons = function (self, boons)
 	self._boons:set_boons(boons)
+
+	return 
+end
+BackendQuests._command_boons_add = function (self, boons)
+	self._boons:add_boons(boons)
 
 	return 
 end
@@ -195,13 +241,13 @@ BackendQuests.get_active_quest = function (self)
 	return self._active_quest
 end
 BackendQuests.set_active_quest = function (self, quest_id, active)
-	local token = self._queue:add_item("set_quest_active_1", "quest_id", cjson.encode(quest_id), "active", cjson.encode(active))
+	local token = self._queue:add_item("qnc_set_quest_active_1", "quest_id", cjson.encode(quest_id), "active", cjson.encode(active))
 	self._tokens[#self._tokens + 1] = token
 
 	return 
 end
 BackendQuests.complete_quest = function (self, quest_id)
-	local token = self._queue:add_item("turn_in_quest_1", "quest_id", cjson.encode(quest_id))
+	local token = self._queue:add_item("qnc_turn_in_quest_1", "quest_id", cjson.encode(quest_id))
 	self._tokens[#self._tokens + 1] = token
 
 	return 
@@ -213,18 +259,6 @@ BackendQuests.are_contracts_dirty = function (self)
 	return dirty
 end
 BackendQuests.get_contracts = function (self)
-	for _, contract in pairs(self._contracts) do
-		if not contract.requirements.task then
-			contract.requirements.task = {
-				type = "complete_level",
-				amount = {
-					required = (contract.requirements.levels.required and #contract.requirements.levels.required) or 0,
-					acquired = (contract.requirements.levels.acquired and #contract.requirements.levels.acquired) or 0
-				}
-			}
-		end
-	end
-
 	return self._contracts
 end
 BackendQuests.get_available_contracts = function (self)
@@ -234,13 +268,19 @@ BackendQuests.get_active_contracts = function (self)
 	return self._active_contracts
 end
 BackendQuests.set_contract_active = function (self, contract_id, active)
-	local token = self._queue:add_item("set_contract_active_1", "contract_id", cjson.encode(contract_id), "active", cjson.encode(active))
+	local token = self._queue:add_item("qnc_set_contract_active_1", "contract_id", cjson.encode(contract_id), "active", cjson.encode(active))
 	self._tokens[#self._tokens + 1] = token
 
 	return 
 end
-BackendQuests.add_contract_progress = function (self, contract_id, task_type, amount)
-	local token = self._queue:add_item("add_contract_progress_1", "contract_id", cjson.encode(contract_id), task_type, cjson.encode(amount))
+BackendQuests.add_contract_progress = function (self, contract_id, level, amount)
+	local token = self._queue:add_item("qnc_add_contract_progress_1", "contract_id", cjson.encode(contract_id), "level", cjson.encode(level), "task_amount", cjson.encode(amount))
+	self._tokens[#self._tokens + 1] = token
+
+	return 
+end
+BackendQuests.add_all_contract_progress = function (self, contract_id)
+	local token = self._queue:add_item("qnc_add_all_contract_progress_1", "contract_id", cjson.encode(contract_id))
 	self._tokens[#self._tokens + 1] = token
 
 	return 
@@ -255,13 +295,13 @@ BackendQuests.poll_reward = function (self)
 	return 
 end
 BackendQuests.complete_contract = function (self, contract_id)
-	local token = self._queue:add_item("turn_in_contract_1", "contract_id", cjson.encode(contract_id))
+	local token = self._queue:add_item("qnc_turn_in_contract_1", "contract_id", cjson.encode(contract_id))
 	self._tokens[#self._tokens + 1] = token
 
 	return 
 end
 BackendQuests.query_boons = function (self)
-	local token = self._queue:add_item("get_boons_1")
+	local token = self._queue:add_item("qnc_get_boons_1")
 	self._tokens[#self._tokens + 1] = token
 
 	return 
@@ -271,21 +311,44 @@ BackendQuests.reset_quests_and_contracts = function (self, reset_quests, reset_c
 		reset_quests = reset_quests,
 		reset_contracts = reset_contracts
 	})
-	local token = self._queue:add_item("reset_quests_and_contracts_1", "param_config", config)
+	local token = self._queue:add_item("qnc_reset_1", "param_config", config)
 	self._tokens[#self._tokens + 1] = token
-	local token2 = self._queue:add_item("get_quest_state_1")
+	local token2 = self._queue:add_item("qnc_get_state_1")
+	self._tokens[#self._tokens + 1] = token2
+
+	return 
+end
+local time_offset = 0
+BackendQuests.reset_quests_and_contracts_with_time_offset = function (self, reset_quests, reset_contracts, add_time_offset)
+	local config = cjson.encode({
+		reset_quests = reset_quests,
+		reset_contracts = reset_contracts
+	})
+	local token = self._queue:add_item("qnc_reset_1", "param_config", config)
+	self._tokens[#self._tokens + 1] = token
+
+	if add_time_offset then
+		time_offset = time_offset + add_time_offset
+	else
+		time_offset = 0
+	end
+
+	local debug_time = os.time() + time_offset
+	local token2 = self._queue:add_item("get_quest_state_debug_1", "debug_time", debug_time)
 	self._tokens[#self._tokens + 1] = token2
 
 	return 
 end
 BackendQuests.query_quests_and_contracts = function (self)
-	local token = self._queue:add_item("get_quest_state_1")
+	local token = self._queue:add_item("qnc_get_state_1")
 	self._tokens[#self._tokens + 1] = token
 
 	return 
 end
 BackendQuests.query_expire_times = function (self)
-	local token = self._queue:add_item("get_qnc_expire_times_1")
+	dprint("query_expire_times")
+
+	local token = self._queue:add_item("qnc_get_expire_times_1")
 	self._tokens[#self._tokens + 1] = token
 
 	return 
@@ -298,6 +361,15 @@ BackendQuests.are_expire_times_dirty = function (self)
 end
 BackendQuests.get_expire_times = function (self)
 	return self._expire_times
+end
+BackendQuests.are_status_dirty = function (self)
+	local dirty = self._status_dirty
+	self._status_dirty = false
+
+	return dirty
+end
+BackendQuests.get_status = function (self)
+	return self._status
 end
 
 return 

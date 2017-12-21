@@ -3,6 +3,7 @@ TelemetrySurveyView = class(TelemetrySurveyView)
 local SURVEY_TIMEOUT = 20
 TelemetrySurveyView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
+	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
 	self.world_manager = ingame_ui_context.world_manager
@@ -231,22 +232,22 @@ TelemetrySurveyView.handle_interaction = function (self, dt)
 	return 
 end
 TelemetrySurveyView.draw = function (self, dt)
-	local ui_renderer = self.ui_renderer
+	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("telemetry_survey")
 	local survey_ratings = self.survey_ratings
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
-	UIRenderer.draw_widget(ui_renderer, self.background_1)
-	UIRenderer.draw_widget(ui_renderer, self.background_2)
-	UIRenderer.draw_widget(ui_renderer, self.headers)
-	UIRenderer.draw_widget(ui_renderer, self.continue_button)
+	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.draw_widget(ui_top_renderer, self.background_1)
+	UIRenderer.draw_widget(ui_top_renderer, self.background_2)
+	UIRenderer.draw_widget(ui_top_renderer, self.headers)
+	UIRenderer.draw_widget(ui_top_renderer, self.continue_button)
 
 	for i = 1, #survey_ratings, 1 do
-		UIRenderer.draw_widget(ui_renderer, survey_ratings[i])
+		UIRenderer.draw_widget(ui_top_renderer, survey_ratings[i])
 	end
 
-	UIRenderer.end_pass(ui_renderer)
+	UIRenderer.end_pass(ui_top_renderer)
 
 	return 
 end

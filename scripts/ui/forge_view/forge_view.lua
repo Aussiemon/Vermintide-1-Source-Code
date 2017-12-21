@@ -279,7 +279,7 @@ ForgeView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "forge_view", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "forge_view", self.ingame_ui:get_ingame_menu_keymap())
 	input_manager.map_device_to_service(input_manager, "forge_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "forge_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "forge_view", "gamepad")
@@ -918,20 +918,17 @@ ForgeView.draw = function (self, dt)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 	local widgets_by_name = self.widgets_by_name
 
-	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	local forge_selection_bar = self.forge_selection_bar_widget
 
-	UIRenderer.draw_widget(ui_top_renderer, forge_selection_bar)
+	UIRenderer.draw_widget(ui_renderer, forge_selection_bar)
 
 	local token_widgets = self.token_widgets
 
 	for i = 1, #token_widgets, 1 do
-		UIRenderer.draw_widget(ui_top_renderer, token_widgets[i])
+		UIRenderer.draw_widget(ui_renderer, token_widgets[i])
 	end
-
-	UIRenderer.end_pass(ui_top_renderer)
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	for widget_name, widget in pairs(widgets_by_name) do
 		if widget_name ~= "exit_button_widget" and widget_name ~= "forge_selection_bar" then
@@ -1356,7 +1353,7 @@ ForgeView.set_input_blocked = function (self, blocked)
 		self.input_manager:block_device_except_service(nil, "keyboard", 1)
 		self.input_manager:block_device_except_service(nil, "mouse", 1)
 		self.input_manager:block_device_except_service(nil, "gamepad", 1)
-	elseif not Managers.backend:is_waiting_for_user_input() then
+	else
 		self.input_manager:block_device_except_service("forge_view", "keyboard", 1)
 		self.input_manager:block_device_except_service("forge_view", "mouse", 1)
 		self.input_manager:block_device_except_service("forge_view", "gamepad", 1)

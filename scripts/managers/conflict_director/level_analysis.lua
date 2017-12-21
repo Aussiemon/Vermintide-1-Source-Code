@@ -1020,7 +1020,7 @@ end
 LevelAnalysis.update = function (self, t)
 	Profiler.start("level_analysis")
 
-	if script_data.debug_ai_recycler then
+	if script_data.debug_ai_recycler and self.main_paths then
 		self.debug(self, t)
 	end
 

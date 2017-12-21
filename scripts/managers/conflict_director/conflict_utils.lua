@@ -469,6 +469,21 @@ ConflictUtils.find_center_tri = function (nav_world, pos)
 
 	return 
 end
+ConflictUtils.simulate_dummy_target = function (nav_world, center_pos, t)
+	local radius = 15
+	local add_vec = Vector3(radius, 0, 1)
+	local angle_in_radians = (t/3)%(math.pi*2)
+	local pos = center_pos + Quaternion.rotate(Quaternion(Vector3.up(), angle_in_radians), add_vec)
+	local success, altitude = GwNavQueries.triangle_from_position(nav_world, pos, 15, 15)
+
+	if success then
+		pos.z = altitude
+
+		return pos
+	end
+
+	return pos
+end
 ConflictUtils.check_spawn_pos = function (mesh, pos)
 	local poly = NavigationMesh.find_polygon(mesh, pos)
 

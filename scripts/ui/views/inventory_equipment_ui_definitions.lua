@@ -103,6 +103,34 @@ local scenegraph_definition = {
 			-1
 		}
 	},
+	preview_viewport_overlay = {
+		vertical_alignment = "center",
+		parent = "preview_viewport",
+		horizontal_alignment = "center",
+		size = {
+			421,
+			756
+		},
+		position = {
+			1,
+			0,
+			1
+		}
+	},
+	preview_viewport_loading = {
+		vertical_alignment = "center",
+		parent = "preview_viewport_overlay",
+		horizontal_alignment = "center",
+		size = {
+			50,
+			50
+		},
+		position = {
+			0,
+			0,
+			1
+		}
+	},
 	character_selection_bar = {
 		vertical_alignment = "top",
 		parent = "window_background",
@@ -147,6 +175,11 @@ local scenegraph_definition = {
 	}
 }
 local widget_definitions = {
+	preview_viewport_overlay = UIWidgets.create_simple_rect("preview_viewport_overlay", Colors.get_color_table_with_alpha("black", 0)),
+	preview_viewport_loading = UIWidgets.create_simple_rotated_texture("matchmaking_connecting_icon", 0, {
+		25,
+		25
+	}, "preview_viewport_loading"),
 	rotate_left_button = {
 		scenegraph_id = "character_selection_rotate_left_button",
 		element = UIElements.DoubleTextureHoldButton,

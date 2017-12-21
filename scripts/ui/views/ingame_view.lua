@@ -222,7 +222,7 @@ else
 				{
 					fade = true,
 					transition = "lobby_browser_view",
-					display_name = "lobby_browser_button_name "
+					display_name = "lobby_browser_button_name"
 				},
 				{
 					fade = true,
@@ -259,7 +259,7 @@ else
 				{
 					fade = true,
 					transition = "lobby_browser_view",
-					display_name = "lobby_browser_button_name "
+					display_name = "lobby_browser_button_name"
 				},
 				{
 					fade = true,
@@ -301,7 +301,7 @@ else
 				{
 					fade = true,
 					transition = "lobby_browser_view",
-					display_name = "lobby_browser_button_name "
+					display_name = "lobby_browser_button_name"
 				},
 				{
 					fade = true,
@@ -520,11 +520,6 @@ IngameView.update_menu_options = function (self)
 				},
 				{
 					fade = true,
-					transition = "altar_view",
-					display_name = "altar_view"
-				},
-				{
-					fade = true,
 					transition = "options_menu",
 					display_name = "options_menu_button_name"
 				},
@@ -582,7 +577,7 @@ IngameView.update_menu_options_enabled_states = function (self)
 		for index, menu_option in ipairs(active_button_data) do
 			local transition = menu_option.transition
 
-			if transition == "profile_view" or transition == "forge_view" or transition == "inventory_view" then
+			if transition == "profile_view" or transition == "forge_view" or transition == "inventory_view" or transition == "lobby_browser_view" or transition == "quest_view" then
 				local widget = menu_option.widget
 				local widget_button_hotspot = widget.content.button_hotspot
 

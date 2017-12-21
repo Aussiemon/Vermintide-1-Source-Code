@@ -51,8 +51,7 @@ return function ()
 			{
 				"faction_memory",
 				"last_cr_running",
-				OP.TIMESET,
-				1
+				OP.TIMESET
 			}
 		}
 	})
@@ -115,7 +114,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -153,7 +152,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -191,7 +190,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -229,7 +228,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -267,7 +266,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -305,7 +304,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -337,7 +336,7 @@ return function ()
 				"last_cr_said_hit",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -369,7 +368,7 @@ return function ()
 				"last_cr_killed_player",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -439,14 +438,20 @@ return function ()
 				"num_units",
 				OP.GT,
 				3
+			},
+			{
+				"faction_memory",
+				"last_cr_running",
+				OP.TIMEDIFF,
+				OP.GT,
+				2
 			}
 		},
 		on_done = {
 			{
 				"faction_memory",
 				"last_cr_running",
-				OP.TIMESET,
-				3
+				OP.TIMESET
 			}
 		}
 	})
@@ -547,7 +552,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -585,7 +590,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -623,7 +628,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -661,7 +666,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -699,7 +704,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -2853,7 +2858,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -2891,7 +2896,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -2929,7 +2934,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -2967,7 +2972,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3005,7 +3010,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3043,7 +3048,7 @@ return function ()
 				"last_cr_seen_knockdown",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3075,7 +3080,7 @@ return function ()
 				"last_cr_said_hit",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3113,7 +3118,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3151,7 +3156,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3189,7 +3194,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3227,7 +3232,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -3265,7 +3270,7 @@ return function ()
 				"last_backstabbing",
 				OP.TIMEDIFF,
 				OP.GT,
-				1
+				3
 			}
 		},
 		on_done = {
@@ -4469,12 +4474,12 @@ return function ()
 			randomize_indexes = {}
 		},
 		ecr_gameplay_startled = {
-			sound_events_n = 24,
+			sound_events_n = 16,
 			randomize_indexes_n = 0,
-			face_animations_n = 24,
+			face_animations_n = 16,
 			database = "enemies",
 			category = "default",
-			dialogue_animations_n = 24,
+			dialogue_animations_n = 16,
 			sound_events = {
 				"ecr_gameplay_startled_01",
 				"ecr_gameplay_startled_02",
@@ -4491,25 +4496,9 @@ return function ()
 				"ecr_gameplay_startled_13",
 				"ecr_gameplay_startled_14",
 				"ecr_gameplay_startled_15",
-				"ecr_gameplay_startled_16",
-				"ecr_gameplay_startled_17",
-				"ecr_gameplay_startled_18",
-				"ecr_gameplay_startled_19",
-				"ecr_gameplay_startled_20",
-				"ecr_gameplay_startled_21",
-				"ecr_gameplay_startled_22",
-				"ecr_gameplay_startled_23",
-				"ecr_gameplay_startled_24"
+				"ecr_gameplay_startled_16"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
 				"dialogue_shout",
 				"dialogue_shout",
 				"dialogue_shout",
@@ -4543,14 +4532,6 @@ return function ()
 				"face_angry",
 				"face_angry",
 				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
 				"face_angry"
 			},
 			localization_strings = {
@@ -4569,15 +4550,7 @@ return function ()
 				"ecr_gameplay_startled_13",
 				"ecr_gameplay_startled_14",
 				"ecr_gameplay_startled_15",
-				"ecr_gameplay_startled_16",
-				"ecr_gameplay_startled_17",
-				"ecr_gameplay_startled_18",
-				"ecr_gameplay_startled_19",
-				"ecr_gameplay_startled_20",
-				"ecr_gameplay_startled_21",
-				"ecr_gameplay_startled_22",
-				"ecr_gameplay_startled_23",
-				"ecr_gameplay_startled_24"
+				"ecr_gameplay_startled_16"
 			},
 			randomize_indexes = {}
 		},
@@ -4686,12 +4659,12 @@ return function ()
 			}
 		},
 		ecr_gameplay_running_towards_players = {
-			sound_events_n = 14,
+			sound_events_n = 8,
 			randomize_indexes_n = 0,
-			face_animations_n = 14,
+			face_animations_n = 8,
 			database = "enemies",
 			category = "enemy_basic_prio",
-			dialogue_animations_n = 14,
+			dialogue_animations_n = 8,
 			sound_events = {
 				"ecr_gameplay_running_towards_players_01",
 				"ecr_gameplay_running_towards_players_02",
@@ -4700,21 +4673,9 @@ return function ()
 				"ecr_gameplay_running_towards_players_05",
 				"ecr_gameplay_running_towards_players_06",
 				"ecr_gameplay_running_towards_players_07",
-				"ecr_gameplay_running_towards_players_08",
-				"ecr_gameplay_running_towards_players_09",
-				"ecr_gameplay_running_towards_players_10",
-				"ecr_gameplay_running_towards_players_11",
-				"ecr_gameplay_running_towards_players_12",
-				"ecr_gameplay_running_towards_players_13",
-				"ecr_gameplay_running_towards_players_14"
+				"ecr_gameplay_running_towards_players_08"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
 				"dialogue_shout",
 				"dialogue_shout",
 				"dialogue_shout",
@@ -4732,12 +4693,6 @@ return function ()
 				"face_angry",
 				"face_angry",
 				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry",
 				"face_angry"
 			},
 			localization_strings = {
@@ -4748,13 +4703,7 @@ return function ()
 				"ecr_gameplay_running_towards_players_05",
 				"ecr_gameplay_running_towards_players_06",
 				"ecr_gameplay_running_towards_players_07",
-				"ecr_gameplay_running_towards_players_08",
-				"ecr_gameplay_running_towards_players_09",
-				"ecr_gameplay_running_towards_players_10",
-				"ecr_gameplay_running_towards_players_11",
-				"ecr_gameplay_running_towards_players_12",
-				"ecr_gameplay_running_towards_players_13",
-				"ecr_gameplay_running_towards_players_14"
+				"ecr_gameplay_running_towards_players_08"
 			},
 			randomize_indexes = {}
 		},

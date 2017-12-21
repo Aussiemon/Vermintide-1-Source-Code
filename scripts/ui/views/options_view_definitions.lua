@@ -2681,6 +2681,13 @@ local gameplay_settings_definition = {
 		widget_type = "stepper"
 	},
 	{
+		setup = "cb_toggle_stationary_dodge_setup",
+		saved_value = "cb_toggle_stationary_dodge_saved_value",
+		callback = "cb_toggle_stationary_dodge",
+		tooltip_text = "tooltip_toggle_stationary_dodge",
+		widget_type = "stepper"
+	},
+	{
 		setting_name = "disable_intro_cinematic",
 		widget_type = "stepper",
 		options = {
@@ -2751,6 +2758,13 @@ local gameplay_settings_definition = {
 		widget_type = "slider"
 	},
 	{
+		setup = "cb_enabled_crosshairs_setup",
+		saved_value = "cb_enabled_crosshairs_saved_value",
+		callback = "cb_enabled_crosshairs",
+		tooltip_text = "tooltip_enabled_crosshairs",
+		widget_type = "drop_down"
+	},
+	{
 		setup = "cb_blood_enabled_setup",
 		saved_value = "cb_blood_enabled_saved_value",
 		callback = "cb_blood_enabled",
@@ -2779,6 +2793,20 @@ local gameplay_settings_definition = {
 		widget_type = "stepper"
 	},
 	{
+		setting_name = "toggle_alternate_attack",
+		widget_type = "stepper",
+		options = {
+			{
+				value = true,
+				text = Localize("menu_settings_on")
+			},
+			{
+				value = false,
+				text = Localize("menu_settings_off")
+			}
+		}
+	},
+	{
 		setup = "cb_overcharge_opacity_setup",
 		saved_value = "cb_overcharge_opacity_saved_value",
 		callback = "cb_overcharge_opacity",
@@ -2787,31 +2815,38 @@ local gameplay_settings_definition = {
 	}
 }
 
-for _, definition in pairs(gameplay_settings_definition) do
-	local setting_name = definition.setting_name
+function generate_settings(settings_definition)
+	for _, definition in pairs(settings_definition) do
+		local setting_name = definition.setting_name
 
-	if setting_name then
-		local prefix = "cb_" .. setting_name
-		local callback_name = prefix
-		definition.callback = prefix
-		OptionsView[callback_name] = function (self, content)
-			return set_function(self, setting_name, content, definition.value_set_function or function ()
-				return 
-			end)
+		if setting_name then
+			local prefix = "cb_" .. setting_name
+			local callback_name = prefix
+			definition.callback = prefix
+			OptionsView[callback_name] = function (self, content)
+				return set_function(self, setting_name, content, definition.value_set_function or function ()
+					return 
+				end)
+			end
+			local setup_function_name = prefix .. "_setup"
+			definition.setup = setup_function_name
+			OptionsView[setup_function_name] = function (self)
+				return setup_function(self, setting_name, definition.options)
+			end
+			local saved_value_function_name = prefix .. "_saved_value"
+			definition.saved_value = saved_value_function_name
+			OptionsView[saved_value_function_name] = function (self, widget)
+				return saved_value_function(self, setting_name, widget)
+			end
+			definition.tooltip_text = "tooltip_" .. setting_name
 		end
-		local setup_function_name = prefix .. "_setup"
-		definition.setup = setup_function_name
-		OptionsView[setup_function_name] = function (self)
-			return setup_function(self, setting_name, definition.options)
-		end
-		local saved_value_function_name = prefix .. "_saved_value"
-		definition.saved_value = saved_value_function_name
-		OptionsView[saved_value_function_name] = function (self, widget)
-			return saved_value_function(self, setting_name, widget)
-		end
-		definition.tooltip_text = "tooltip_" .. setting_name
 	end
+
+	return 
 end
+
+generate_settings(gameplay_settings_definition)
+generate_settings(video_settings_definition)
 
 if rawget(_G, "Steam") then
 	gameplay_settings_definition[#gameplay_settings_definition + 1] = {
@@ -3060,18 +3095,6 @@ local keybind_settings_definition = {
 	{
 		widget_type = "keybind",
 		keys = {
-			"ingame_vote_yes"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
-			"ingame_vote_no"
-		}
-	},
-	{
-		widget_type = "keybind",
-		keys = {
 			"action_instant_heal_self",
 			"action_instant_heal_self_hold"
 		}
@@ -3087,6 +3110,20 @@ local keybind_settings_definition = {
 	{
 		size_y = 50,
 		widget_type = "empty"
+	},
+	{
+		input_service_name = "ingame_menu",
+		widget_type = "keybind",
+		keys = {
+			"ingame_vote_yes"
+		}
+	},
+	{
+		input_service_name = "ingame_menu",
+		widget_type = "keybind",
+		keys = {
+			"ingame_vote_no"
+		}
 	},
 	{
 		input_service_name = "ingame_menu",
@@ -3121,6 +3158,13 @@ local keybind_settings_definition = {
 		widget_type = "keybind",
 		keys = {
 			"hotkey_altar"
+		}
+	},
+	{
+		input_service_name = "ingame_menu",
+		widget_type = "keybind",
+		keys = {
+			"hotkey_quests"
 		}
 	},
 	{
@@ -3208,6 +3252,18 @@ local ignore_keybind = {
 	wield_scroll = true,
 	look_raw = true,
 	cursor = true
+}
+local child_input_services = {
+	ingame_menu = {
+		"enchantment_view",
+		"forge_view",
+		"quest_view",
+		"friends_view",
+		"inventory_menu",
+		"lobby_browser",
+		"map_menu",
+		"lorebook_menu"
+	}
 }
 local gamepad_settings_definition = {
 	{
@@ -3310,6 +3366,7 @@ return {
 	needs_restart_settings = needs_restart_settings,
 	needs_reload_settings = needs_reload_settings,
 	ignore_keybind = ignore_keybind,
+	child_input_services = child_input_services,
 	create_checkbox_widget = create_checkbox_widget,
 	create_slider_widget = create_slider_widget,
 	create_drop_down_widget = create_drop_down_widget,

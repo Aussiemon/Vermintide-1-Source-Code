@@ -119,7 +119,8 @@ BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 	end
 
 	if blackboard.no_hesitation then
-		blackboard.confirmed_player_sighting = true
+		AiUtils.activate_unit(blackboard)
+
 		local ai_slot_system = Managers.state.entity:system("ai_slot_system")
 
 		ai_slot_system.do_slot_search(ai_slot_system, unit, true)

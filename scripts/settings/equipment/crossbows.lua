@@ -69,16 +69,17 @@ weapon_template.actions = {
 	},
 	action_two = {
 		default = {
-			minimum_hold_time = 0.15,
-			anim_event = "to_zoom",
 			anim_end_event = "to_unzoom",
-			cooldown = 0.3,
+			anim_event = "to_zoom",
 			kind = "aim",
-			weapon_action_hand = "left",
+			cooldown = 0.3,
 			aim_sound_delay = 0.2,
-			can_abort_reload = false,
-			hold_input = "action_two_hold",
 			ammo_requirement = 1,
+			minimum_hold_time = 0.15,
+			weapon_action_hand = "left",
+			hold_input = "action_two_hold",
+			can_abort_reload = false,
+			allow_hold_toggle = true,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
 			end,

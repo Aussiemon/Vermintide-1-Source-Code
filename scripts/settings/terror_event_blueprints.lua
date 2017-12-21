@@ -624,6 +624,18 @@ WeightedRandomTerrorEvents = {
 		1,
 		"survival_magnus_cataclysm_13_f",
 		1
+	},
+	dwarf_interior_brewery_random = {
+		"dwarf_interior_brewery_a",
+		1,
+		"dwarf_interior_brewery_b",
+		1,
+		"dwarf_interior_brewery_c",
+		1
+	},
+	survival_wave_boss_13 = {
+		"survival_13_a",
+		1
 	}
 }
 TerrorEventBlueprints = {
@@ -645,6 +657,18 @@ TerrorEventBlueprints = {
 				2
 			},
 			breed_name = "skaven_ratling_gunner"
+		}
+	},
+	generic_enable_pacing = {
+		{
+			"control_pacing",
+			enable = true
+		}
+	},
+	generic_disable_pacing = {
+		{
+			"control_pacing",
+			enable = false
 		}
 	},
 	roger_mayhem = {
@@ -3917,6 +3941,24 @@ TerrorEventBlueprints = {
 		{
 			"flow_event",
 			flow_event_name = "tunnels_end_event_loop_restart"
+		}
+	},
+	tunnels_skaven_bell = {
+		{
+			"spawn",
+			breed_name = "skaven_gutter_runner"
+		},
+		{
+			"spawn",
+			breed_name = "skaven_gutter_runner"
+		},
+		{
+			"spawn",
+			breed_name = "skaven_gutter_runner"
+		},
+		{
+			"spawn",
+			breed_name = "skaven_gutter_runner"
 		}
 	},
 	tunnels_end_room_stop_event = {
@@ -25959,6 +26001,1714 @@ TerrorEventBlueprints = {
 			"spawn_at_raw",
 			spawner_id = "stormverminhaxC2",
 			breed_name = "skaven_storm_vermin_commander"
+		}
+	},
+	dwarf_interior_brewery_start = {
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"enable_bots_in_carry_event"
+		}
+	},
+	dwarf_interior_brewery_a = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_small"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_small"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 3
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_restart"
+		}
+	},
+	dwarf_interior_brewery_b = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_restart"
+		}
+	},
+	dwarf_interior_brewery_c = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_small"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 3
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_restart"
+		}
+	},
+	dwarf_interior_brewery_hard_a = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"spawn",
+			breed_name = "skaven_rat_ogre"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			duration = 180,
+			condition = function (t)
+				return count_event_breed("skaven_rat_ogre") == 0
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_post_pause_start"
+		}
+	},
+	dwarf_interior_brewery_hard_b = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "brewery_event",
+			composition_type = "event_generic_long_level_stormvermin"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_storm_vermin_commander") < 2
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_post_pause_start"
+		}
+	},
+	dwarf_interior_brewery_hard_c = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 7
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_post_pause_start"
+		}
+	},
+	dwarf_interior_brewery_hard_d = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event",
+			composition_type = "event_large"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 90,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_post_pause_start"
+		}
+	},
+	dwarf_interior_brewery_pre_pause = {
+		{
+			"delay",
+			duration = {
+				10,
+				15
+			}
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_hard_start"
+		}
+	},
+	dwarf_interior_brewery_post_pause = {
+		{
+			"delay",
+			duration = {
+				10,
+				15
+			}
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_restart"
+		}
+	},
+	dwarf_interior_brewery_finale = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"disable_bots_in_carry_event"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "brewery_event_finale",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 60,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 3 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"control_pacing",
+			enable = true
+		},
+		{
+			"disable_bots_in_carry_event"
+		}
+	},
+	dwarf_interior_brewery_loop = {
+		{
+			"set_master_event_running",
+			name = "brewery_event"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "brewery_event",
+			composition_type = "event_generic_long_level_extra_spice"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"continue_when",
+			duration = 20,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_storm_vermin_commander") < 2
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				5
+			}
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_brewery_loop_restart"
+		}
+	},
+	dwarf_interior_brewery_stop = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_a"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_b"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_c"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_hard_a"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_hard_b"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_hard_c"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_hard_d"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_pre_pause"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_post_pause"
+		}
+	},
+	dwarf_interior_brewery_stop_chunk = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_a"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_b"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_brewery_c"
+		}
+	},
+	dwarf_interior_great_hall_start = {
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"disable_kick"
+		},
+		{
+			"enable_bots_in_carry_event"
+		}
+	},
+	dwarf_interior_great_hall_tunnels = {
+		{
+			"set_master_event_running",
+			name = "great_hall_spawn"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "tunnel_spawn",
+			composition_type = "event_small"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				10,
+				12
+			}
+		},
+		{
+			"event_horde",
+			spawner_id = "tunnel_spawn",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_great_hall_done"
+		}
+	},
+	dwarf_interior_great_hall_extra_spice_event = {
+		{
+			"set_master_event_running",
+			name = "great_hall_spawn"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "great_hall_extra_spice",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 40,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_storm_vermin_commander") < 2
+			end
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_great_hall_extra_spice_done"
+		}
+	},
+	dwarf_interior_great_hall_upstairs_tunnel_extra = {
+		{
+			"set_master_event_running",
+			name = "great_hall_spawn"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "upstairs_tunnel_spawn",
+			composition_type = "event_smaller"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_great_hall_upstairs_tunnel_extra_done"
+		}
+	},
+	dwarf_interior_great_hall_downstairs_tunnel_extra = {
+		{
+			"set_master_event_running",
+			name = "great_hall_spawn"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "downstairs_tunnel_spawn",
+			composition_type = "event_smaller"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_great_hall_downstairs_tunnel_extra_done"
+		}
+	},
+	dwarf_interior_great_hall_back_tunnel_extra = {
+		{
+			"set_master_event_running",
+			name = "great_hall_spawn"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "back_tunnel_spawn",
+			composition_type = "event_smaller"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_interior_great_hall_back_tunnel_extra_done"
+		}
+	},
+	dwarf_interior_great_hall_stop = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_great_hall_tunnels"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_great_hall_extra_spice_event"
+		}
+	},
+	dwarf_interior_great_hall_upstairs_tunnel_extra_stop = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_great_hall_upstairs_tunnel_extra"
+		}
+	},
+	dwarf_interior_great_hall_downstairs_tunnel_extra_stop = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_great_hall_downstairs_tunnel_extra"
+		}
+	},
+	dwarf_interior_great_hall_back_tunnel_extra_stop = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_interior_great_hall_back_tunnel_extra"
+		}
+	},
+	dwarf_exterior_chamber_guards = {
+		{
+			"spawn_at_raw",
+			spawner_id = "chamber_guards01",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "chamber_guards02",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "chamber_guards03",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "chamber_guards04",
+			breed_name = "skaven_storm_vermin_commander"
+		}
+	},
+	dwarf_exterior_escape_guards = {
+		{
+			"spawn_at_raw",
+			spawner_id = "escape_guards01",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "escape_guards02",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "escape_guards03",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "escape_guards04",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "escape_guards05",
+			breed_name = "skaven_storm_vermin_commander"
+		},
+		{
+			"spawn_at_raw",
+			spawner_id = "escape_guards06",
+			breed_name = "skaven_storm_vermin_commander"
+		}
+	},
+	dwarf_exterior_end_event_survival_globadiers = {
+		{
+			"set_master_event_running",
+			name = "dwarf_exterior_end_event_survival"
+		},
+		{
+			"spawn",
+			{
+				2,
+				3
+			},
+			breed_name = "skaven_poison_wind_globadier"
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_exterior_end_event_survival_globadiers_done"
+		}
+	},
+	dwarf_exterior_end_event_survival_01 = {
+		{
+			"set_master_event_running",
+			name = "dwarf_exterior_end_event_survival"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "end_event_survival",
+			composition_type = "event_large"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"event_horde",
+			spawner_id = "end_event_survival",
+			composition_type = "event_generic_long_level_stormvermin"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 7 and count_event_breed("skaven_slave") < 8 and count_event_breed("skaven_storm_vermin_commander") < 2
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_exterior_end_event_survival_01_done"
+		}
+	},
+	dwarf_exterior_end_event_survival_02 = {
+		{
+			"set_master_event_running",
+			name = "dwarf_exterior_end_event_survival"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "end_event_survival",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "end_event_survival",
+			composition_type = "event_dwarf_exterior_extra_spice"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 7 and count_event_breed("skaven_slave") < 8 and count_event_breed("skaven_storm_vermin_commander") < 2
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_exterior_end_event_survival_02_done"
+		}
+	},
+	dwarf_exterior_end_event_survival_end = {
+		{
+			"set_master_event_running",
+			name = "dwarf_exterior_end_event_survival"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			limit_spawners = 4,
+			spawner_id = "end_event_survival",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "end_event_survival",
+			composition_type = "event_dwarf_exterior_extra_spice"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 15,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 1 and count_event_breed("skaven_slave") < 1 and count_event_breed("skaven_storm_vermin_commander") < 1
+			end
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_exterior_end_event_survival_end_done"
+		}
+	},
+	dwarf_exterior_end_event_survival_stop = {
+		{
+			"stop_event",
+			stop_event_name = "dwarf_exterior_end_event_survival_01"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_exterior_end_event_survival_02"
+		},
+		{
+			"stop_event",
+			stop_event_name = "dwarf_exterior_end_event_survival_end"
+		}
+	},
+	dwarf_exterior_end_event_escape = {
+		{
+			"set_master_event_running",
+			name = "dwarf_exterior_end_event_escape"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "end_event_escape",
+			composition_type = "event_small"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "end_event_escape",
+			composition_type = "event_dwarf_exterior_extra_spice"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 4 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_exterior_end_event_escape_done"
+		}
+	},
+	dwarf_exterior_end_event_escape_02 = {
+		{
+			"set_master_event_running",
+			name = "dwarf_exterior_end_event_escape"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "end_event_escape",
+			composition_type = "event_small"
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "end_event_escape",
+			composition_type = "event_dwarf_exterior_extra_spice_02"
+		},
+		{
+			"delay",
+			duration = 10
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 4 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = 5
+		},
+		{
+			"flow_event",
+			flow_event_name = "dwarf_exterior_end_event_escape_02_done"
+		}
+	},
+	dwarf_exterior_end_event_sound = {
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		}
+	},
+	dwarf_exterior_end_event_start = {
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"disable_kick"
+		},
+		{
+			"enable_bots_in_carry_event"
+		}
+	},
+	dwarf_beacons_gate_part1 = {
+		{
+			"set_master_event_running",
+			name = "beacons_gate"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "gate_currentside",
+			composition_type = "event_medium"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"event_horde",
+			spawner_id = "gate_currentside",
+			composition_type = "event_small"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "gate_currentside",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = {
+				5,
+				6
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_otherside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_otherside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_otherside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		}
+	},
+	dwarf_beacons_gate_part2 = {
+		{
+			"set_master_event_running",
+			name = "beacons_gate"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "gate_otherside",
+			composition_type = "event_large"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_otherside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"event_horde",
+			spawner_id = "gate_currentside",
+			composition_type = "event_small"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "gate_otherside",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = {
+				5,
+				6
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "gate_currentside",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"control_pacing",
+			enable = true
+		}
+	},
+	dwarf_beacons_beacon = {
+		{
+			"set_master_event_running",
+			name = "beacons_beacon"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "beacon",
+			composition_type = "event_medium"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"spawn",
+			{
+				1,
+				2
+			},
+			breed_name = "skaven_poison_wind_globadier"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"event_horde",
+			spawner_id = "beacon",
+			composition_type = "event_small"
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"delay",
+			duration = {
+				3,
+				4
+			}
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"spawn",
+			{
+				1
+			},
+			breed_name = "skaven_ratling_gunner"
+		},
+		{
+			"play_stinger",
+			stinger_name = "enemy_horde_stinger"
+		},
+		{
+			"event_horde",
+			spawner_id = "beacon",
+			composition_type = "event_medium"
+		},
+		{
+			"delay",
+			duration = {
+				5,
+				6
+			}
+		},
+		{
+			"continue_when",
+			duration = 80,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"spawn",
+			{
+				1,
+				2
+			},
+			breed_name = "skaven_poison_wind_globadier"
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		},
+		{
+			"event_horde",
+			limit_spawners = 2,
+			spawner_id = "beacon",
+			composition_type = "event_docks_warehouse_extra_spice"
+		},
+		{
+			"delay",
+			duration = {
+				9,
+				11
+			}
+		},
+		{
+			"continue_when",
+			duration = 50,
+			condition = function (t)
+				return count_event_breed("skaven_clan_rat") < 5 and count_event_breed("skaven_slave") < 5
+			end
+		}
+	},
+	dwarf_beacons_barrier = {
+		{
+			"set_master_event_running",
+			name = "beacons_barrier"
+		},
+		{
+			"control_pacing",
+			enable = false
+		},
+		{
+			"event_horde",
+			spawner_id = "beacon_barrier",
+			composition_type = "event_small"
 		}
 	}
 }

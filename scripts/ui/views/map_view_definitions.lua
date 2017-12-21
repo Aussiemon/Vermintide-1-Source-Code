@@ -286,7 +286,7 @@ local scenegraph_definition = {
 			64
 		},
 		position = {
-			70,
+			0,
 			90,
 			1
 		}
@@ -300,7 +300,21 @@ local scenegraph_definition = {
 			64
 		},
 		position = {
-			-70,
+			-100,
+			90,
+			1
+		}
+	},
+	lobby_button = {
+		vertical_alignment = "bottom",
+		parent = "banner_party",
+		horizontal_alignment = "center",
+		size = {
+			64,
+			64
+		},
+		position = {
+			100,
 			90,
 			1
 		}
@@ -2489,6 +2503,13 @@ local widgets = {
 		"map_advanced_button_tooltip_1",
 		"map_advanced_button_tooltip_2"
 	}, "settings_button"),
+	lobby_button = UIWidgets.create_octagon_button({
+		"map_icon_browser_01",
+		"map_icon_browser_02"
+	}, {
+		"lobby_browser_button_name",
+		"lobby_browser_button_name"
+	}, "lobby_button"),
 	dead_space_filler = {
 		scenegraph_id = "dead_space_filler",
 		element = {

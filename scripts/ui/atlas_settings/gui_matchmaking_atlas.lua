@@ -41,7 +41,7 @@ matchmaking_atlas = {
 			0.49707
 		}
 	},
-	matchmaking_loading_icon_part_02 = {
+	matchmaking_loading_icon_part_03 = {
 		size = {
 			52,
 			52
@@ -55,7 +55,7 @@ matchmaking_atlas = {
 			0.499023
 		}
 	},
-	matchmaking_loading_icon_part_01 = {
+	matchmaking_loading_icon_part_02 = {
 		size = {
 			52,
 			52
@@ -69,7 +69,7 @@ matchmaking_atlas = {
 			0.499023
 		}
 	},
-	matchmaking_loading_icon_part_03 = {
+	matchmaking_loading_icon_part_01 = {
 		size = {
 			52,
 			52
@@ -83,7 +83,7 @@ matchmaking_atlas = {
 			0.43457
 		}
 	},
-	matchmaking_player_icon_lit = {
+	matchmaking_player_icon_normal = {
 		size = {
 			40,
 			60
@@ -97,7 +97,7 @@ matchmaking_atlas = {
 			0.442383
 		}
 	},
-	matchmaking_player_icon_normal = {
+	matchmaking_player_icon_lit = {
 		size = {
 			40,
 			60
@@ -111,18 +111,32 @@ matchmaking_atlas = {
 			0.442383
 		}
 	},
+	unit_frame_portrait_matchmaking_03 = {
+		size = {
+			66,
+			101
+		},
+		uv00 = {
+			0.193359,
+			0.758789
+		},
+		uv11 = {
+			0.225586,
+			0.857422
+		}
+	},
 	unit_frame_portrait_matchmaking_01 = {
 		size = {
 			66,
 			101
 		},
 		uv00 = {
-			0.094238,
-			0.867188
+			0.15918,
+			0.861328
 		},
 		uv11 = {
-			0.126465,
-			0.96582
+			0.191406,
+			0.959961
 		}
 	},
 	unit_frame_portrait_matchmaking_04 = {
@@ -131,26 +145,12 @@ matchmaking_atlas = {
 			101
 		},
 		uv00 = {
-			0.094238,
-			0.764648
+			0.15918,
+			0.758789
 		},
 		uv11 = {
-			0.126465,
-			0.863281
-		}
-	},
-	unit_frame_portrait_matchmaking_03 = {
-		size = {
-			66,
-			101
-		},
-		uv00 = {
-			0.035156,
-			0.878906
-		},
-		uv11 = {
-			0.067383,
-			0.977539
+			0.191406,
+			0.857422
 		}
 	},
 	unit_frame_portrait_matchmaking_02 = {
@@ -159,12 +159,12 @@ matchmaking_atlas = {
 			101
 		},
 		uv00 = {
-			0.000977,
-			0.878906
+			0.094238,
+			0.825195
 		},
 		uv11 = {
-			0.033203,
-			0.977539
+			0.126465,
+			0.923828
 		}
 	},
 	matchmaking_level_image_frame = {
@@ -174,11 +174,11 @@ matchmaking_atlas = {
 		},
 		uv00 = {
 			0.000977,
-			0.764648
+			0.825195
 		},
 		uv11 = {
 			0.092285,
-			0.875
+			0.935547
 		}
 	},
 	matchmaking_bg = {
@@ -188,11 +188,11 @@ matchmaking_atlas = {
 		},
 		uv00 = {
 			0.000977,
-			0.698242
+			0.758789
 		},
 		uv11 = {
 			0.157227,
-			0.760742
+			0.821289
 		}
 	},
 	matchmaking_title_bg = {
@@ -209,7 +209,21 @@ matchmaking_atlas = {
 			0.040039
 		}
 	},
-	matchmaking_button_bg = {
+	matchmaking_button_fg = {
+		size = {
+			631,
+			58
+		},
+		uv00 = {
+			0.000977,
+			0.698242
+		},
+		uv11 = {
+			0.309082,
+			0.754883
+		}
+	},
+	matchmaking_button_glow = {
 		size = {
 			631,
 			58
@@ -223,7 +237,7 @@ matchmaking_atlas = {
 			0.694336
 		}
 	},
-	matchmaking_button_fg = {
+	matchmaking_button_bg = {
 		size = {
 			631,
 			58
@@ -237,7 +251,7 @@ matchmaking_atlas = {
 			0.633789
 		}
 	},
-	matchmaking_button_02_bg_02 = {
+	matchmaking_button_02_bg = {
 		size = {
 			770,
 			62
@@ -251,7 +265,7 @@ matchmaking_atlas = {
 			0.573242
 		}
 	},
-	matchmaking_button_02_fg = {
+	matchmaking_button_02_bg_02 = {
 		size = {
 			770,
 			62
@@ -265,7 +279,7 @@ matchmaking_atlas = {
 			0.508789
 		}
 	},
-	matchmaking_button_02_bg = {
+	matchmaking_button_02_fg = {
 		size = {
 			770,
 			62
@@ -307,7 +321,7 @@ matchmaking_atlas = {
 			0.189453
 		}
 	},
-	lb_list_item_bg = {
+	lb_list_item_hover = {
 		size = {
 			1554,
 			45
@@ -321,7 +335,7 @@ matchmaking_atlas = {
 			0.141602
 		}
 	},
-	lb_list_item_clicked = {
+	lb_list_item_bg = {
 		size = {
 			1554,
 			45
@@ -335,7 +349,7 @@ matchmaking_atlas = {
 			0.09375
 		}
 	},
-	lb_list_item_hover = {
+	lb_list_item_clicked = {
 		size = {
 			1554,
 			45

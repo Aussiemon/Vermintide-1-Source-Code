@@ -1231,13 +1231,6 @@ JournalPageLayout = {
 												page_title = "dlc1_3_lb_vt_skaven_history_black_plague_4_title",
 												unlock_level = "merchant",
 												images = SkavenImages
-											},
-											{
-												page_text = "dlc1_3_lb_vt_skaven_history_black_plague_5",
-												category_name = "dlc1_3_lb_vt_skaven_history_black_plague_5_title",
-												page_title = "dlc1_3_lb_vt_skaven_history_black_plague_5_title",
-												unlock_level = "farm",
-												images = SkavenImages
 											}
 										}
 									},
@@ -1863,13 +1856,6 @@ JournalPageLayout = {
 												category_name = "dlc1_3_lb_vt_world_nations_empire_history_war_against_chaos_title",
 												page_title = "dlc1_3_lb_vt_world_nations_empire_history_war_against_chaos_title",
 												unlock_level = "forest_ambush",
-												images = EmpireImages
-											},
-											{
-												page_text = "dlc1_3_lb_vt_world_nations_empire_history_recent_events",
-												category_name = "dlc1_3_lb_vt_world_nations_empire_history_recent_events_title",
-												page_title = "dlc1_3_lb_vt_world_nations_empire_history_recent_events_title",
-												unlock_level = "sewers_short",
 												images = EmpireImages
 											}
 										}

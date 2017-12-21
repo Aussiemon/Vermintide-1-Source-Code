@@ -105,7 +105,10 @@ BTSuicideRunAction.StateInit.on_enter = function (self, params)
 
 	ai_navigation_extension.move_to(ai_navigation_extension, position)
 	Managers.state.network:anim_event(unit, "to_combat")
-	Managers.state.network:anim_event(unit, "suicide_run_start")
+
+	if not blackboard.explode_timer_started then
+		Managers.state.network:anim_event(unit, "suicide_run_start")
+	end
 
 	self.unit = unit
 	self.blackboard = blackboard
@@ -127,7 +130,7 @@ BTSuicideRunAction.StateInit.update = function (self, dt, t)
 		no_target = true
 	end
 
-	local init_done = blackboard.anim_cb_move
+	local init_done = blackboard.anim_cb_move or blackboard.explode_timer_started
 
 	if init_done then
 		return BTSuicideRunAction.StateMove
@@ -155,6 +158,7 @@ BTSuicideRunAction.StateMove.on_enter = function (self, params)
 
 	ai_navigation_extension.set_max_speed(ai_navigation_extension, run_speed)
 
+	blackboard.explode_timer_started = true
 	self.unit = unit
 	self.blackboard = blackboard
 	self.explode_timer = blackboard.suicide_run.action.suicide_explosion_timer

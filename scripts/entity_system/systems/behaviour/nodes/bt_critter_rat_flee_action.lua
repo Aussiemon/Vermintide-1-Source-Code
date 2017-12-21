@@ -172,7 +172,7 @@ BTCritterRatFleeAction._get_far_along_path_pos = function (self, unit, blackboar
 	local move_pos = nil
 	local target_unit = blackboard.target_unit
 
-	if target_unit then
+	if Unit.alive(target_unit) then
 		local conflict = Managers.state.conflict
 		local level_analysis = conflict.level_analysis
 		local current_path_index = conflict.main_path_info.current_path_index
@@ -207,7 +207,7 @@ BTCritterRatFleeAction._get_random_flee_pos_in_front_of_target = function (self,
 	local max_width = data.max_width
 	local target_unit = blackboard.target_unit
 
-	if target_unit then
+	if Unit.alive(target_unit) then
 		move_pos = LocomotionUtils.new_random_goal_in_front_of_unit(nav_world, target_unit, min_dist, max_dist, max_tries, nil, min_width, max_width, above, below)
 	end
 

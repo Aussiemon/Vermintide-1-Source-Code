@@ -1,8 +1,7 @@
 DebugTextManager = class(DebugTextManager)
-DebugTextManager.init = function (self, world, is_server, network_event_delegate)
+DebugTextManager.init = function (self, world, gui, is_server, network_event_delegate)
 	self._world = world
-	self._gui = World.create_screen_gui(world, "material", "materials/fonts/arial")
-	self._gui2 = World.create_screen_gui(world, "material", "materials/fonts/hell_shark_font", "material", "materials/fonts/gw_fonts", "immediate")
+	self._gui = gui
 	self._world_gui = World.create_world_gui(world, Matrix4x4.identity(), 1, 1, "material", "materials/fonts/arial", "immediate")
 	self._time = 0
 	self._screen_text_size = 50

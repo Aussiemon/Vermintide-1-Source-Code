@@ -26,9 +26,28 @@ Debug.create_line_object = function (name)
 
 	return Debug.line_objects[name]
 end
+Debug.test_popup = function ()
+	local header = Localize("popup_debug_header")
+	local message = Localize("popup_debug_message") .. "\nhost_name"
+	Debug.popup_id = Managers.popup:queue_popup(message, header, "cancel", Localize("popup_choice_cancel"))
+
+	Managers.popup:activate_timer(Debug.popup_id, 120, "cancel")
+
+	return 
+end
 Debug.update = function (t, dt)
 	if not Debug.active or (script_data and script_data.disable_debug_draw) then
 		return 
+	end
+
+	if Debug.popup_id then
+		local result = Managers.popup:query_result(Debug.popup_id)
+
+		if result == "cancel" then
+			Managers.popup:cancel_popup(Debug.popup_id)
+
+			Debug.popup_id = nil
+		end
 	end
 
 	local show_debug_text_background = not script_data.hide_debug_text_background
@@ -85,6 +104,29 @@ Debug.update = function (t, dt)
 
 	for lo_name, lo in pairs(Debug.line_objects) do
 		LineObject.dispatch(w, lo)
+	end
+
+	if script_data.debug_cycle_select_inventory_item then
+		local matchmaking_manager = Managers.matchmaking
+		local ingame_ui = matchmaking_manager and matchmaking_manager.ingame_ui
+		local inventory_view = ingame_ui and ingame_ui.current_view == "inventory_view"
+
+		if inventory_view then
+			local next_select_at = Debug.next_select_at or 0
+
+			if next_select_at < t then
+				local selected_item = Debug.previous_selected_item or 1
+				local next_select_item = selected_item + 1
+
+				if 7 < next_select_item then
+					next_select_item = 1
+				end
+
+				Debug.previous_selected_item = next_select_item
+				Debug.select_item = next_select_item
+				Debug.next_select_at = t + 1
+			end
+		end
 	end
 
 	return 
@@ -336,6 +378,29 @@ debug.level_loaded = function (level_name)
 	end
 
 	return true
+end
+Debug.visualize_level_unit = function (level_unit_id)
+	local level = Managers.state.networked_flow_state._level
+
+	if not level then
+		return 
+	end
+
+	local unit = Level.unit_by_index(level, level_unit_id)
+
+	if not unit then
+		return 
+	end
+
+	local position = Unit.world_position(unit, 0)
+
+	QuickDrawer:sphere(position, 1, Colors.get("medium_aqua_marine"))
+
+	for i = 1, 20, 1 do
+		QuickDrawer:sphere(position, i*10, Colors.get("medium_aqua_marine"))
+	end
+
+	return 
 end
 
 return 

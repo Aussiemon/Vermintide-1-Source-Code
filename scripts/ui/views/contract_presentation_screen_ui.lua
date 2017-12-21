@@ -170,7 +170,7 @@ ContractPresentationScreenUI._initialize_active_contracts = function (self)
 	local active_contract_ids = {}
 
 	for contract_id, contract_data in pairs(all_contracts) do
-		if contract_data.active and not contract_data.turned_in then
+		if self.quest_manager:get_session_progress_by_contract_id(contract_id) and contract_data.active and not contract_data.turned_in then
 			active_contract_ids[#active_contract_ids + 1] = contract_id
 		end
 	end
@@ -179,7 +179,7 @@ ContractPresentationScreenUI._initialize_active_contracts = function (self)
 	local contract_entries_by_index = {}
 	local widget_index = 0
 
-	if active_contract_ids then
+	if active_contract_ids and 0 < #active_contract_ids then
 		local widgets = self._widgets
 
 		for _, contract_id in pairs(active_contract_ids) do
@@ -246,12 +246,14 @@ ContractPresentationScreenUI._set_contract_start_info_by_contract_id = function 
 	end
 
 	tasks_total_progress = (0 < tasks_total_end_values and tasks_total_start_values/tasks_total_end_values) or 0
+	tasks_total_progress = math.max(math.min(tasks_total_progress, 1), 0)
 	local tasks_total_session_progress = (0 < tasks_total_end_values and tasks_total_session_values/tasks_total_end_values) or 0
+	tasks_total_session_progress = math.max(math.min(tasks_total_session_progress, 1), 0)
 
 	self._set_widget_task_amount(self, widget, index_count)
 	self._set_widget_contract_progress(self, widget, tasks_total_progress)
 
-	return task_data, math.min(tasks_total_progress, 1), math.min(tasks_total_session_progress, 1)
+	return task_data, tasks_total_progress, tasks_total_session_progress
 end
 ContractPresentationScreenUI._set_widget_task_amount = function (self, widget, amount)
 	widget.content.task_amount = amount
@@ -311,14 +313,14 @@ end
 ContractPresentationScreenUI._set_widget_contract_progress = function (self, widget, progress)
 	local widget_content = widget.content
 	local widget_style = widget.style
-	progress = math.floor(progress*100, 1)
-	local progress_text = tostring(progress) .. "%"
-	local text = Localize("dlc1_3_1_contract_presentation_progress_prefix")
-	widget_content.bar_text = text .. ": " .. progress_text
 	local progress_bar_style = widget_style.progress_bar
 	local progress_bar_content = widget_content.progress_bar
 	progress_bar_style.size[1] = progress_bar_style.uv_scale_pixels*progress
 	progress_bar_content.uvs[2][progress_bar_style.scale_axis] = progress
+	progress = math.floor(progress*100, 1)
+	local progress_text = tostring(progress) .. "%"
+	local text = Localize("dlc1_3_1_contract_presentation_progress_prefix")
+	widget_content.bar_text = text .. ": " .. progress_text
 
 	return 
 end

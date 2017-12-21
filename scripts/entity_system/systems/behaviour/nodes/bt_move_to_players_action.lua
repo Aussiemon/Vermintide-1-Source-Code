@@ -123,6 +123,12 @@ BTMoveToPlayersAction._evalute_targets = function (self, unit, blackboard, data,
 	return (target_found and "done") or "running"
 end
 BTMoveToPlayersAction._find_target_globadier = function (self, unit, blackboard, action, next_target_unit, t)
+	local throw_globe_data = blackboard.throw_globe_data
+
+	if throw_globe_data and throw_globe_data.next_throw_at and blackboard.target_dist < 4 then
+		throw_globe_data.next_throw_at = -math.huge
+	end
+
 	if self._valid_globadier_target(self, blackboard.target_dist, action) and self._has_line_of_sight(self, unit, next_target_unit, blackboard.world, t) then
 		local has_trajectory, angle, speed, throw_from_pos, target_vector = self._calculate_trajectory_to_target(self, unit, blackboard.world, next_target_unit, action.attack_throw_offset, blackboard.breed.max_globe_throw_speed)
 

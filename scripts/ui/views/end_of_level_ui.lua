@@ -27,7 +27,7 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 		input_manager.block_device_except_service(input_manager, "ingame_menu", "gamepad")
 	end
 
-	self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
+	self.ui_renderer = UIRenderer.create(ui_world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
 	end_of_level_ui_context.game_won = game_won
 	end_of_level_ui_context.ui_renderer = self.ui_renderer
 	local rewards = end_of_level_ui_context.rewards
@@ -137,14 +137,13 @@ EndOfLevelUI.destroy = function (self)
 	end
 
 	if self.world_name then
-		local max_shadow_casting_lights = Application.user_setting("render_settings", "max_shadow_casting_lights")
-
-		Application.set_render_setting("max_shadow_casting_lights", max_shadow_casting_lights)
 		Managers.world:destroy_world(self.world_name)
 	end
 
+	local max_shadow_casting_lights = Application.user_setting("render_settings", "max_shadow_casting_lights")
+
+	Application.set_render_setting("max_shadow_casting_lights", max_shadow_casting_lights)
 	self.play_sound(self, "unmute_all_world_sounds")
-	debug.animation_log_specific_profile("bright_wizard", false)
 	rawset(_G, "GLOBAL_EOLUI", nil)
 
 	return 

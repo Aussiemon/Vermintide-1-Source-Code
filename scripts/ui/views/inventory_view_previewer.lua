@@ -23,7 +23,9 @@ InventoryViewPreviewer.on_enter = function (self, viewport_widget)
 	self.world = preview_pass_data.world
 	self.viewport = preview_pass_data.viewport
 	self.camera = ScriptViewport.camera(self.viewport)
+	self.item_spawn_data = {}
 	self.loaded_packages = {}
+	self.packages_to_load = {}
 	self.time_to_auto_rotate = 0
 	self.time_to_auto_zoom = 0
 	self.character_look_timer = self.character_look_timer or 0
@@ -69,11 +71,19 @@ InventoryViewPreviewer.on_exit = function (self)
 	local loaded_packages = self.loaded_packages
 	local package_manager = Managers.package
 
+	for package_name, _ in pairs(self.packages_to_load) do
+		package_manager.unload(package_manager, package_name, "InventoryViewPreviewer")
+
+		self.packages_to_load[package_name] = nil
+	end
+
 	for package_name, _ in pairs(self.loaded_packages) do
 		package_manager.unload(package_manager, package_name, "InventoryViewPreviewer")
 
 		self.loaded_packages[package_name] = nil
 	end
+
+	self.items_loaded = nil
 
 	return 
 end
@@ -318,149 +328,256 @@ InventoryViewPreviewer.unequip_item_in_slot = function (self, item_slot_type, eq
 	return 
 end
 InventoryViewPreviewer.equip_item = function (self, item_name, item_slot_type, equipment_slot_index)
-	local scene_graph_links = {}
-	local world = self.world
-	local character_unit = self.character_unit
-	local item_template = ItemHelper.get_template_by_item_name(item_name)
+	self.items_loaded = nil
 	local item_data = ItemMasterList[item_name]
 	local item_units = BackendUtils.get_item_units(item_data)
-	local attachment_node_linking = item_template.attachment_node_linking
+	local item_template = ItemHelper.get_template_by_item_name(item_name)
+	local units_to_spawn_data = {}
+	self.item_spawn_data[item_name] = units_to_spawn_data
+	self.item_names[item_slot_type] = item_name
+	local package_names = {}
 
 	if item_slot_type == "melee" or item_slot_type == "ranged" then
-		local old_unit_right = self.equipment_units[equipment_slot_index].right
+		local left_hand_unit = item_units.left_hand_unit
+		local right_hand_unit = item_units.right_hand_unit
+		local despawn_both_hands_units = right_hand_unit == nil or left_hand_unit == nil
 
-		if old_unit_right ~= nil then
-			World.destroy_unit(world, old_unit_right)
-
-			self.equipment_units[equipment_slot_index].right = nil
+		if left_hand_unit then
+			local left_unit = left_hand_unit .. "_3p"
+			units_to_spawn_data[#units_to_spawn_data + 1] = {
+				left_hand = true,
+				despawn_both_hands_units = despawn_both_hands_units,
+				unit_name = left_unit,
+				item_slot_type = item_slot_type,
+				equipment_slot_index = equipment_slot_index,
+				unit_attachment_node_linking = item_template.left_hand_attachment_node_linking.third_person
+			}
+			package_names[#package_names + 1] = left_unit
 		end
 
-		local old_unit_left = self.equipment_units[equipment_slot_index].left
+		if right_hand_unit then
+			local right_unit = right_hand_unit .. "_3p"
+			units_to_spawn_data[#units_to_spawn_data + 1] = {
+				right_hand = true,
+				despawn_both_hands_units = despawn_both_hands_units,
+				unit_name = right_unit,
+				item_slot_type = item_slot_type,
+				equipment_slot_index = equipment_slot_index,
+				unit_attachment_node_linking = item_template.right_hand_attachment_node_linking.third_person
+			}
 
-		if old_unit_left ~= nil then
-			World.destroy_unit(world, old_unit_left)
-
-			self.equipment_units[equipment_slot_index].left = nil
-		end
-
-		if item_units.right_hand_unit then
-			local unit_name = item_units.right_hand_unit .. "_3p"
-
-			Managers.package:load(unit_name, "InventoryViewPreviewer")
-
-			self.loaded_packages[unit_name] = true
-			local unit = World.spawn_unit(world, unit_name)
-
-			if Unit.has_lod_object(unit, "lod") then
-				local lod_object = Unit.lod_object(unit, "lod")
-
-				LODObject.set_static_select(lod_object, 0)
+			if right_hand_unit ~= left_hand_unit then
+				package_names[#package_names + 1] = right_unit
 			end
-
-			local unit_attachment_node_linking = item_template.right_hand_attachment_node_linking.third_person
-
-			if self.wielded_slot_type == item_slot_type then
-				unit_attachment_node_linking = unit_attachment_node_linking.wielded
-
-				Unit.flow_event(unit, "lua_wield")
-
-				if item_template.wield_anim then
-					Unit.animation_event(character_unit, item_template.wield_anim)
-				end
-			else
-				Unit.set_unit_visibility(unit, false)
-
-				unit_attachment_node_linking = unit_attachment_node_linking.unwielded
-
-				Unit.flow_event(unit, "lua_unwield")
-			end
-
-			GearUtils.link(world, unit_attachment_node_linking, scene_graph_links, character_unit, unit)
-
-			self.equipment_units[equipment_slot_index].right = unit
-		end
-
-		if item_units.left_hand_unit then
-			local unit_name = item_units.left_hand_unit .. "_3p"
-
-			Managers.package:load(unit_name, "InventoryViewPreviewer")
-
-			self.loaded_packages[unit_name] = true
-			local unit = World.spawn_unit(world, unit_name)
-
-			if Unit.has_lod_object(unit, "lod") then
-				local lod_object = Unit.lod_object(unit, "lod")
-
-				LODObject.set_static_select(lod_object, 0)
-			end
-
-			local unit_attachment_node_linking = item_template.left_hand_attachment_node_linking.third_person
-
-			if self.wielded_slot_type == item_slot_type then
-				unit_attachment_node_linking = unit_attachment_node_linking.wielded
-
-				Unit.flow_event(unit, "lua_wield")
-
-				if item_template.wield_anim then
-					Unit.animation_event(character_unit, item_template.wield_anim)
-				end
-			else
-				Unit.set_unit_visibility(unit, false)
-
-				unit_attachment_node_linking = unit_attachment_node_linking.unwielded
-
-				Unit.flow_event(unit, "lua_unwield")
-			end
-
-			GearUtils.link(world, unit_attachment_node_linking, scene_graph_links, character_unit, unit)
-
-			self.equipment_units[equipment_slot_index].left = unit
 		end
 	else
-		local old_unit = self.equipment_units[equipment_slot_index]
+		local unit = item_units.unit
 
-		if old_unit ~= nil then
-			World.destroy_unit(world, old_unit)
+		if unit then
+			local attachment_slot_lookup_index = item_slot_type == "hat" and 1
 
-			self.equipment_units[equipment_slot_index] = nil
-		end
+			if equipment_slot_index == 3 then
+				attachment_slot_lookup_index = 1
+			elseif equipment_slot_index == 2 then
+				attachment_slot_lookup_index = 2
+			elseif equipment_slot_index == 1 then
+				attachment_slot_lookup_index = 3
+			end
 
-		local unit_name = item_units.unit
-
-		Managers.package:load(unit_name, "InventoryViewPreviewer")
-
-		self.loaded_packages[unit_name] = true
-		local attachment_slot_lookup_index = item_slot_type == "hat" and 1
-
-		if equipment_slot_index == 3 then
-			attachment_slot_lookup_index = 1
-		elseif equipment_slot_index == 2 then
-			attachment_slot_lookup_index = 2
-		elseif equipment_slot_index == 1 then
-			attachment_slot_lookup_index = 3
-		end
-
-		local attachment_slot_name = item_template.slots[attachment_slot_lookup_index]
-		attachment_node_linking = attachment_node_linking[attachment_slot_name]
-		local unit = World.spawn_unit(world, unit_name)
-
-		if Unit.has_lod_object(unit, "lod") then
-			local lod_object = Unit.lod_object(unit, "lod")
-
-			LODObject.set_static_select(lod_object, 0)
-		end
-
-		GearUtils.link(world, attachment_node_linking, scene_graph_links, character_unit, unit)
-
-		self.equipment_units[equipment_slot_index] = unit
-		local on_equip_flow_event = item_template.on_equip_flow_event
-
-		if on_equip_flow_event then
-			Unit.flow_event(character_unit, on_equip_flow_event)
+			local attachment_slot_name = item_template.slots[attachment_slot_lookup_index]
+			units_to_spawn_data[#units_to_spawn_data + 1] = {
+				unit_name = unit,
+				item_slot_type = item_slot_type,
+				equipment_slot_index = equipment_slot_index,
+				unit_attachment_node_linking = item_template.attachment_node_linking[attachment_slot_name]
+			}
+			package_names[#package_names + 1] = unit
 		end
 	end
 
-	self.item_names[item_slot_type] = item_name
+	self.load_package(self, package_names, item_name)
+
+	return 
+end
+InventoryViewPreviewer.load_package = function (self, package_names, item_name)
+	local package_names_to_load = {}
+
+	for index, package_name in ipairs(package_names) do
+		if not self.packages_to_load[package_name] then
+			self.packages_to_load[package_name] = true
+			package_names_to_load[#package_names_to_load + 1] = package_name
+		end
+	end
+
+	for index, package_name in ipairs(package_names_to_load) do
+		local package_manager = Managers.package
+		local cb = callback(self, "on_load_complete", package_name, item_name)
+
+		package_manager.load(package_manager, package_name, "InventoryViewPreviewer", cb, true)
+	end
+
+	return 
+end
+InventoryViewPreviewer.on_load_complete = function (self, package_name, item_name)
+	local loaded_packages = self.loaded_packages
+	loaded_packages[package_name] = true
+	self.packages_to_load[package_name] = nil
+	local item_names = self.item_names
+	local spawn_data = self.item_spawn_data[item_name]
+
+	for _, unit_spawn_data in ipairs(spawn_data) do
+		local item_slot_type = unit_spawn_data.item_slot_type
+
+		if item_names[item_slot_type] ~= item_name then
+			return 
+		end
+
+		local unit_name = unit_spawn_data.unit_name
+
+		if not loaded_packages[unit_name] then
+			return 
+		end
+	end
+
+	self._spawn_item(self, item_name)
+
+	self.items_loaded = self.update_package_loaded_status(self)
+
+	return 
+end
+InventoryViewPreviewer.update_package_loaded_status = function (self)
+	for package_name, _ in pairs(self.packages_to_load) do
+		return 
+	end
+
+	return true
+end
+InventoryViewPreviewer.items_spawned = function (self)
+	return self.items_loaded
+end
+InventoryViewPreviewer._spawn_items = function (self)
+	local item_spawn_data = self.item_spawn_data
+	local loaded_packages = self.loaded_packages
+
+	for slot_type, item_name in pairs(self.item_names) do
+		local spawn_data = item_spawn_data[item_name]
+
+		for _, unit_spawn_data in ipairs(spawn_data) do
+			local unit_name = unit_spawn_data.unit_name
+
+			if not loaded_packages[unit_name] then
+				return 
+			end
+		end
+	end
+
+	for slot_type, item_name in pairs(self.item_names) do
+		self._spawn_item(self, item_name)
+	end
+
+	return true
+end
+InventoryViewPreviewer._spawn_item = function (self, item_name)
+	local world = self.world
+	local character_unit = self.character_unit
+	local scene_graph_links = {}
+	local item_data = ItemMasterList[item_name]
+	local item_units = BackendUtils.get_item_units(item_data)
+	local item_template = ItemHelper.get_template_by_item_name(item_name)
+	local item_spawn_data = self.item_spawn_data
+	local spawn_data = item_spawn_data[item_name]
+
+	if spawn_data then
+		for _, unit_spawn_data in ipairs(spawn_data) do
+			local unit_name = unit_spawn_data.unit_name
+			local item_slot_type = unit_spawn_data.item_slot_type
+			local equipment_slot_index = unit_spawn_data.equipment_slot_index
+			local unit_attachment_node_linking = unit_spawn_data.unit_attachment_node_linking
+
+			if item_slot_type == "melee" or item_slot_type == "ranged" then
+				if unit_spawn_data.right_hand or unit_spawn_data.despawn_both_hands_units then
+					local old_unit_right = self.equipment_units[equipment_slot_index].right
+
+					if old_unit_right ~= nil then
+						World.destroy_unit(world, old_unit_right)
+
+						self.equipment_units[equipment_slot_index].right = nil
+					end
+				end
+
+				if unit_spawn_data.left_hand or unit_spawn_data.despawn_both_hands_units then
+					local old_unit_left = self.equipment_units[equipment_slot_index].left
+
+					if old_unit_left ~= nil then
+						World.destroy_unit(world, old_unit_left)
+
+						self.equipment_units[equipment_slot_index].left = nil
+					end
+				end
+
+				local unit = World.spawn_unit(world, unit_name)
+
+				self.equip_item_unit(self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
+
+				if unit_spawn_data.right_hand then
+					self.equipment_units[equipment_slot_index].right = unit
+				elseif unit_spawn_data.left_hand then
+					self.equipment_units[equipment_slot_index].left = unit
+				end
+			else
+				local old_unit = self.equipment_units[equipment_slot_index]
+
+				if old_unit ~= nil then
+					World.destroy_unit(world, old_unit)
+
+					self.equipment_units[equipment_slot_index] = nil
+				end
+
+				local unit = World.spawn_unit(world, unit_name)
+				self.equipment_units[equipment_slot_index] = unit
+
+				self.equip_item_unit(self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
+			end
+
+			local on_equip_flow_event = item_template.on_equip_flow_event
+
+			if on_equip_flow_event then
+				Unit.flow_event(character_unit, on_equip_flow_event)
+			end
+		end
+	end
+
+	return 
+end
+InventoryViewPreviewer.equip_item_unit = function (self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
+	local world = self.world
+	local character_unit = self.character_unit
+
+	if item_slot_type == "melee" or item_slot_type == "ranged" then
+		if self.wielded_slot_type == item_slot_type then
+			unit_attachment_node_linking = unit_attachment_node_linking.wielded
+
+			Unit.flow_event(unit, "lua_wield")
+
+			if item_template.wield_anim then
+				Unit.animation_event(character_unit, item_template.wield_anim)
+			end
+		else
+			Unit.set_unit_visibility(unit, false)
+
+			unit_attachment_node_linking = unit_attachment_node_linking.unwielded
+
+			Unit.flow_event(unit, "lua_unwield")
+		end
+	end
+
+	if Unit.has_lod_object(unit, "lod") then
+		local lod_object = Unit.lod_object(unit, "lod")
+
+		LODObject.set_static_select(lod_object, 0)
+	end
+
+	GearUtils.link(world, unit_attachment_node_linking, scene_graph_links, character_unit, unit)
 
 	return 
 end

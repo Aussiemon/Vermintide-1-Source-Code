@@ -381,7 +381,7 @@ QuestItemRewardUI.load_reward_units = function (self)
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
 				unit_name = left_unit,
-				unit_attachment_node_linking = item_template.left_hand_attachment_node_linking.third_person.wielded
+				unit_attachment_node_linking = item_template.left_hand_attachment_node_linking.third_person.display
 			}
 		end
 
@@ -394,7 +394,7 @@ QuestItemRewardUI.load_reward_units = function (self)
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
 				unit_name = right_unit,
-				unit_attachment_node_linking = item_template.right_hand_attachment_node_linking.third_person.wielded
+				unit_attachment_node_linking = item_template.right_hand_attachment_node_linking.third_person.display
 			}
 		end
 	else

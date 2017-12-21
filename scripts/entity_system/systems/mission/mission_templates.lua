@@ -60,7 +60,9 @@ MissionTemplates = {
 			local collect_amount = data.collect_amount
 			local current_amount = data.get_current_amount(data)
 			local text = string.format("%s/%s\n%s", tostring(current_amount), tostring(collect_amount), data.mission_text)
+			local center_text = string.format("%s/%s %s", tostring(current_amount), tostring(collect_amount), data.mission_text)
 			data.text = text
+			data.center_text = center_text
 
 			return 
 		end,

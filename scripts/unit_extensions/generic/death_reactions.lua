@@ -699,11 +699,13 @@ DeathReactions.templates = {
 		unit = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 				local network_time = Managers.state.network:network_time()
-				local explode_time = network_time + 6
+				local fuse_time = (Unit.has_data(unit, "fuse_time") and Unit.get_data(unit, "fuse_time")) or 6
+				local explode_time = network_time + fuse_time
 				local data = {
 					played_fuse_out = false,
 					explode_time = explode_time,
-					killer_unit = killing_blow[DamageDataIndex.ATTACKER]
+					killer_unit = killing_blow[DamageDataIndex.ATTACKER],
+					fuse_time = fuse_time
 				}
 
 				Unit.flow_event(unit, "exploding_barrel_fuse_init")
@@ -711,6 +713,12 @@ DeathReactions.templates = {
 				return data, DeathReactions.IS_NOT_DONE
 			end,
 			update = function (unit, dt, context, t, data)
+				local fuse_time_left = data.explode_time - t
+				local fuse_time = data.fuse_time
+				local fuse_time_percent = fuse_time_left/fuse_time
+
+				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
+
 				if not data.exploded then
 					if data.starting_pos then
 						local unit_pos = POSITION_LOOKUP[unit]
@@ -791,11 +799,13 @@ DeathReactions.templates = {
 		husk = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 				local network_time = Managers.state.network:network_time()
-				local explode_time = network_time + 6
+				local fuse_time = (Unit.has_data(unit, "fuse_time") and Unit.get_data(unit, "fuse_time")) or 6
+				local explode_time = network_time + fuse_time
 				local data = {
 					played_fuse_out = false,
 					explode_time = explode_time,
-					killer_unit = killing_blow[DamageDataIndex.ATTACKER]
+					killer_unit = killing_blow[DamageDataIndex.ATTACKER],
+					fuse_time = fuse_time
 				}
 
 				Unit.flow_event(unit, "exploding_barrel_fuse_init")
@@ -803,6 +813,12 @@ DeathReactions.templates = {
 				return data, DeathReactions.IS_NOT_DONE
 			end,
 			update = function (unit, dt, context, t, data)
+				local fuse_time_left = data.explode_time - t
+				local fuse_time = data.fuse_time
+				local fuse_time_percent = fuse_time_left/fuse_time
+
+				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
+
 				local network_time = Managers.state.network:network_time()
 				local explode_time = data.explode_time
 

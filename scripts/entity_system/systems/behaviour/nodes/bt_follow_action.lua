@@ -30,7 +30,11 @@ BTFollowAction.enter = function (self, unit, blackboard, t)
 
 	blackboard.remembered_threat_pos = nil
 	blackboard.chasing_timer = blackboard.unreachable_timer or 0
-	blackboard.fling_skaven_timer = t + 0.5
+
+	if blackboard.fling_skaven_timer < t then
+		blackboard.fling_skaven_timer = t + 0.5
+	end
+
 	local template_id = NetworkLookup.tutorials.elite_enemies
 	local message_id = NetworkLookup.tutorials[blackboard.breed.name]
 
@@ -85,9 +89,9 @@ BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
 	local destination = navigation_extension.destination(navigation_extension)
 
 	if blackboard.fling_skaven_timer < t then
-		self.check_fling_skaven(self, unit, blackboard, t)
-
 		blackboard.fling_skaven_timer = t + 0.5
+
+		self.check_fling_skaven(self, unit, blackboard, t)
 	end
 
 	local to_vec = destination - POSITION_LOOKUP[unit]
@@ -122,7 +126,21 @@ BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
 
 	return 
 end
+local broad_phase_fling_units = {}
 BTFollowAction.check_fling_skaven = function (self, unit, blackboard, t)
+	local forward = Quaternion.forward(Unit.local_rotation(unit, 0))
+	local check_pos = POSITION_LOOKUP[unit] + forward*2.6
+	local ai_system = Managers.state.entity:system("ai_system")
+	local num_units = Broadphase.query(ai_system.broadphase, check_pos, 1, broad_phase_fling_units)
+
+	if 0 < num_units then
+		blackboard.fling_skaven = true
+		blackboard.fling_skaven_timer = t + 5
+	end
+
+	return 
+end
+BTFollowAction.check_fling_skaven_expensive = function (self, unit, blackboard, t)
 	local forward = Quaternion.forward(Unit.local_rotation(unit, 0))
 	local check_pos = POSITION_LOOKUP[unit] + forward*2.6
 	local radius = 1

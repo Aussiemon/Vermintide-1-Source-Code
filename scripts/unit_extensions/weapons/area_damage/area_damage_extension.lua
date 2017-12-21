@@ -8,6 +8,7 @@ AreaDamageExtension.init = function (self, extension_init_context, unit, extensi
 	self.aoe_dot_damage_interval = extension_init_data.aoe_dot_damage_interval or Unit.get_data(unit, "aoe_dot_damage_interval")
 	self.damage_ramping_function = extension_init_data.damage_ramping_function
 	self.radius = extension_init_data.radius or Unit.get_data(unit, "radius")
+	self.initial_radius = extension_init_data.initial_radius or extension_init_data.radius or Unit.get_data(unit, "radius")
 	self.life_time = extension_init_data.life_time or Unit.get_data(unit, "life_time")
 	self.player_screen_effect_name = extension_init_data.player_screen_effect_name or Unit.get_data(unit, "player_screen_effect_name")
 	self.dot_effect_name = extension_init_data.dot_effect_name or Unit.get_data(unit, "dot_effect_name")
@@ -16,7 +17,7 @@ AreaDamageExtension.init = function (self, extension_init_context, unit, extensi
 	self.area_damage_template = extension_init_data.area_damage_template or Unit.get_data(unit, "area_damage_template")
 	self.area_ai_random_death_template = extension_init_data.area_ai_random_death_template or Unit.get_data(unit, "area_ai_random_death_template")
 	self.invisible_unit = extension_init_data.invisible_unit or Unit.get_data(unit, "invisible_unit")
-	self.damage_players = extension_init_data.damage_players or Unit.get_data(unit, "damage_players") or true
+	self.damage_players = T(extension_init_data.damage_players, T(Unit.get_data(unit, "damage_players"), true))
 	self.damage_source = extension_init_data.damage_source or "n/a"
 	self.create_nav_tag_volume = extension_init_data.create_nav_tag_volume or Unit.get_data(unit, "create_nav_tag_volume")
 	self.nav_tag_volume_layer = extension_init_data.nav_tag_volume_layer or Unit.get_data(unit, "nav_tag_volume_layer")
@@ -126,7 +127,7 @@ AreaDamageExtension.start = function (self)
 	local area_damage = AreaDamageTemplates.get_template(self.area_damage_template)
 
 	if self.is_server and self.aoe_init_damage then
-		area_damage.server.update(self.damage_source, self.unit, self.radius, self.aoe_init_damage, 0, 0, 0, 0, self.damage_players, self.explosion_template_name)
+		area_damage.server.update(self.damage_source, self.unit, self.initial_radius, self.aoe_init_damage, 0, 0, 0, 0, self.damage_players, self.explosion_template_name)
 	end
 
 	local particle_var_table = {

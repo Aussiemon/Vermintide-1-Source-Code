@@ -149,6 +149,11 @@ end
 VoteManager.is_ingame_vote = function (self)
 	return self.active_voting.template.ingame_vote
 end
+VoteManager.allow_vote_input = function (self, enable)
+	self._allow_vote_input = enable
+
+	return 
+end
 VoteManager.vote_time_left = function (self)
 	local network_time = Managers.state.network:network_time()
 	local active_voting = self.active_voting
@@ -168,18 +173,47 @@ VoteManager.update = function (self, dt)
 		self.client_update(self, dt, t)
 	end
 
-	local active_voting = self.active_voting
+	if self._allow_vote_input then
+		local active_voting = self.active_voting
 
-	if active_voting and active_voting.template.ingame_vote and not self.has_voted(self, Network.peer_id()) then
-		local input_source = self.input_manager:get_service("Player")
-		local vote_options = active_voting.template.vote_options
-		local vote_options_n = #vote_options
+		if active_voting and active_voting.template.ingame_vote and not self.has_voted(self, Network.peer_id()) then
+			local input_manager = self.input_manager
+			local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+			local input_source = input_manager.get_service(input_manager, "ingame_menu")
+			local vote_options = active_voting.template.vote_options
+			local vote_options_n = #vote_options
+			local input_hold_timer = active_voting.input_hold_timer or 0
 
-		for i = 1, vote_options_n, 1 do
-			local vote_option = vote_options[i]
+			for i = 1, vote_options_n, 1 do
+				local vote_option = vote_options[i]
 
-			if input_source.get(input_source, vote_option.input) then
-				self.vote(self, vote_option.vote)
+				if gamepad_active then
+					local input = vote_option.input
+
+					if input_source.get(input_source, input) then
+						if input ~= active_voting.current_hold_input then
+							active_voting.current_hold_input = input
+							input_hold_timer = 0
+						end
+
+						local input_hold_time = vote_option.input_hold_time
+
+						if input_hold_timer == input_hold_time then
+							active_voting.input_hold_timer = nil
+
+							self.vote(self, vote_option.vote)
+						else
+							active_voting.input_hold_timer = math.min(input_hold_timer + dt, input_hold_time)
+							active_voting.input_hold_progress = active_voting.input_hold_timer/input_hold_time
+						end
+					elseif input == active_voting.current_hold_input then
+						active_voting.current_hold_input = nil
+						active_voting.input_hold_timer = nil
+						active_voting.input_hold_progress = nil
+					end
+				elseif input_source.get(input_source, vote_option.input) then
+					self.vote(self, vote_option.vote)
+				end
 			end
 		end
 	end
@@ -402,7 +436,11 @@ VoteManager.rpc_client_start_vote_lookup = function (self, peer_id, vote_type_id
 	return 
 end
 VoteManager.rpc_client_add_vote = function (self, sender_id, peer_id, vote_option)
-	self.active_voting.votes[peer_id] = vote_option
+	local active_voting = self.active_voting
+
+	if active_voting then
+		active_voting.votes[peer_id] = vote_option
+	end
 
 	return 
 end

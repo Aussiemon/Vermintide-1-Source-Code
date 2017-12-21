@@ -1,42 +1,5 @@
 return function ()
 	define_rule({
-		response = "nik_map_brief_castle",
-		name = "nik_map_brief_castle",
-		criterias = {
-			{
-				"query_context",
-				"speaker_name",
-				OP.EQ,
-				"inn_keeper"
-			}
-		}
-	})
-	define_rule({
-		response = "nik_loading_screen_castle",
-		name = "nik_loading_screen_castle",
-		criterias = {}
-	})
-	define_rule({
-		response = "nik_map_brief_dungeon",
-		name = "nik_map_brief_dungeon",
-		criterias = {}
-	})
-	define_rule({
-		response = "nik_loading_screen_dungeon",
-		name = "nik_loading_screen_dungeon",
-		criterias = {}
-	})
-	define_rule({
-		response = "nik_map_brief_portals",
-		name = "nik_map_brief_portals",
-		criterias = {}
-	})
-	define_rule({
-		response = "nik_loading_screen_map",
-		name = "nik_loading_screen_map",
-		criterias = {}
-	})
-	define_rule({
 		name = "pes_objective_castle_view",
 		response = "pes_objective_castle_view",
 		criterias = {
@@ -13802,28 +13765,48 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_spotting_sf_gear = {
-			sound_events_n = 2,
+		dlc_scr_pdr_gameplay_seeing_a_scr = {
+			sound_events_n = 7,
 			randomize_indexes_n = 0,
-			face_animations_n = 2,
+			face_animations_n = 7,
 			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
+			category = "enemy_alerts",
+			dialogue_animations_n = 7,
 			sound_events = {
-				[1.0] = "pes_objective_spotting_sf_gear_01",
-				[2.0] = "pes_objective_spotting_sf_gear_02"
+				"dlc_scr_pdr_gameplay_seeing_a_scr_01",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_02",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_03",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_04",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_05",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_06",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_07"
 			},
 			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pes_objective_spotting_sf_gear_01",
-				[2.0] = "pes_objective_spotting_sf_gear_02"
+				"dlc_scr_pdr_gameplay_seeing_a_scr_01",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_02",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_03",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_04",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_05",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_06",
+				"dlc_scr_pdr_gameplay_seeing_a_scr_07"
 			},
 			randomize_indexes = {}
 		},
@@ -13897,40 +13880,56 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_castle_lever = {
-			sound_events_n = 4,
+		pdr_gameplay_healing_draught = {
+			sound_events_n = 8,
 			randomize_indexes_n = 0,
-			face_animations_n = 4,
+			face_animations_n = 8,
 			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
+			category = "seen_items",
+			dialogue_animations_n = 8,
 			sound_events = {
-				"pes_objective_castle_lever_01",
-				"pes_objective_castle_lever_02",
-				"pes_objective_castle_lever_03",
-				"pes_objective_castle_lever_04"
+				"pdr_gameplay_healing_draught_01",
+				"pdr_gameplay_healing_draught_02",
+				"pdr_gameplay_healing_draught_03",
+				"pdr_gameplay_healing_draught_04",
+				"pdr_gameplay_healing_draught_05",
+				"pdr_gameplay_healing_draught_06",
+				"pdr_gameplay_healing_draught_07",
+				"pdr_gameplay_healing_draught_08"
 			},
 			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
 			},
 			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_neutral",
+				"face_neutral",
+				"face_neutral"
 			},
 			localization_strings = {
-				"pes_objective_castle_lever_01",
-				"pes_objective_castle_lever_02",
-				"pes_objective_castle_lever_03",
-				"pes_objective_castle_lever_04"
+				"pdr_gameplay_healing_draught_01",
+				"pdr_gameplay_healing_draught_02",
+				"pdr_gameplay_healing_draught_03",
+				"pdr_gameplay_healing_draught_04",
+				"pdr_gameplay_healing_draught_05",
+				"pdr_gameplay_healing_draught_06",
+				"pdr_gameplay_healing_draught_07",
+				"pdr_gameplay_healing_draught_08"
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_castle_inner_sanctum = {
+		pwh_objective_castle_inner_sanctum = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -13938,10 +13937,10 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwe_objective_castle_inner_sanctum_01",
-				"pwe_objective_castle_inner_sanctum_02",
-				"pwe_objective_castle_inner_sanctum_03",
-				"pwe_objective_castle_inner_sanctum_04"
+				"pwh_objective_castle_inner_sanctum_01",
+				"pwh_objective_castle_inner_sanctum_02",
+				"pwh_objective_castle_inner_sanctum_03",
+				"pwh_objective_castle_inner_sanctum_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -13956,10 +13955,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwe_objective_castle_inner_sanctum_01",
-				"pwe_objective_castle_inner_sanctum_02",
-				"pwe_objective_castle_inner_sanctum_03",
-				"pwe_objective_castle_inner_sanctum_04"
+				"pwh_objective_castle_inner_sanctum_01",
+				"pwh_objective_castle_inner_sanctum_02",
+				"pwh_objective_castle_inner_sanctum_03",
+				"pwh_objective_castle_inner_sanctum_04"
 			},
 			randomize_indexes = {}
 		},
@@ -14392,32 +14391,32 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		nik_loading_screen_castle = {
+		pes_objective_dungeon_outdoors_vista1 = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
 			database = "drachenfels",
-			category = "npc_talk",
+			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "nik_loading_screen_castle_b_01",
-				[2.0] = "nik_loading_screen_castle_b_02"
+				[1.0] = "pes_objective_dungeon_outdoors_vista1_01",
+				[2.0] = "pes_objective_dungeon_outdoors_vista1_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
 				[2.0] = "dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "nik_loading_screen_castle_b_01",
-				[2.0] = "nik_loading_screen_castle_b_02"
+				[1.0] = "pes_objective_dungeon_outdoors_vista1_01",
+				[2.0] = "pes_objective_dungeon_outdoors_vista1_02"
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_portals_arrive_first_portal = {
+		pes_objective_portals_arrive_first_portal = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -14425,10 +14424,10 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_portals_arrive_first_portal_01",
-				"pdr_objective_portals_arrive_first_portal_02",
-				"pdr_objective_portals_arrive_first_portal_03",
-				"pdr_objective_portals_arrive_first_portal_04"
+				"pes_objective_portals_arrive_first_portal_01",
+				"pes_objective_portals_arrive_first_portal_02",
+				"pes_objective_portals_arrive_first_portal_03",
+				"pes_objective_portals_arrive_first_portal_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -14443,35 +14442,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pdr_objective_portals_arrive_first_portal_01",
-				"pdr_objective_portals_arrive_first_portal_02",
-				"pdr_objective_portals_arrive_first_portal_03",
-				"pdr_objective_portals_arrive_first_portal_04"
-			},
-			randomize_indexes = {}
-		},
-		pdr_objective_dungeon_outdoors_vista1 = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pdr_objective_dungeon_outdoors_vista1_01",
-				[2.0] = "pdr_objective_dungeon_outdoors_vista1_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pdr_objective_dungeon_outdoors_vista1_01",
-				[2.0] = "pdr_objective_dungeon_outdoors_vista1_02"
+				"pes_objective_portals_arrive_first_portal_01",
+				"pes_objective_portals_arrive_first_portal_02",
+				"pes_objective_portals_arrive_first_portal_03",
+				"pes_objective_portals_arrive_first_portal_04"
 			},
 			randomize_indexes = {}
 		},
@@ -14480,7 +14454,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
 				"pwe_objective_dungeon_darkness_entry_01",
@@ -14533,18 +14507,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pbw_objective_portals_arrive_first_portal = {
+		pes_objective_dungeon_traps_warning = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pbw_objective_portals_arrive_first_portal_01",
-				"pbw_objective_portals_arrive_first_portal_02",
-				"pbw_objective_portals_arrive_first_portal_03",
-				"pbw_objective_portals_arrive_first_portal_04"
+				"pes_objective_dungeon_traps_warning_01",
+				"pes_objective_dungeon_traps_warning_02",
+				"pes_objective_dungeon_traps_warning_03",
+				"pes_objective_dungeon_traps_warning_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -14559,10 +14533,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pbw_objective_portals_arrive_first_portal_01",
-				"pbw_objective_portals_arrive_first_portal_02",
-				"pbw_objective_portals_arrive_first_portal_03",
-				"pbw_objective_portals_arrive_first_portal_04"
+				"pes_objective_dungeon_traps_warning_01",
+				"pes_objective_dungeon_traps_warning_02",
+				"pes_objective_dungeon_traps_warning_03",
+				"pes_objective_dungeon_traps_warning_04"
 			},
 			randomize_indexes = {}
 		},
@@ -15647,31 +15621,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		nik_map_brief_dungeon = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "npc_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "nik_map_brief_dungeon_01",
-				[2.0] = "nik_map_brief_dungeon_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "nik_map_brief_dungeon_01",
-				[2.0] = "nik_map_brief_dungeon_02"
-			},
-			randomize_indexes = {}
-		},
 		pbw_gameplay_healing_draught = {
 			sound_events_n = 8,
 			randomize_indexes_n = 0,
@@ -16019,16 +15968,16 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		nik_loading_screen_map = {
+		pbw_dungeon_intro = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
 			database = "drachenfels",
-			category = "npc_talk",
+			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "nik_loading_screen_map_01",
-				[2.0] = "nik_loading_screen_map_02"
+				[1.0] = "pbw_dungeon_intro_a_01",
+				[2.0] = "pbw_dungeon_intro_a_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -16039,8 +15988,8 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "nik_loading_screen_map_01",
-				[2.0] = "nik_loading_screen_map_02"
+				[1.0] = "pbw_dungeon_intro_a_01",
+				[2.0] = "pbw_dungeon_intro_a_02"
 			},
 			randomize_indexes = {}
 		},
@@ -16936,7 +16885,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
 				"pes_objective_dungeon_darkness_entry_01",
@@ -16969,7 +16918,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
 				"pdr_objective_dungeon_darkness_entry_01",
@@ -17312,7 +17261,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
 				"pbw_objective_dungeon_darkness_entry_01",
@@ -18183,7 +18132,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_portals_first_portal_skaven_cooling = {
+		pdr_objective_castle_lever_2 = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -18191,10 +18140,10 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_portals_first_portal_skaven_cooling_01",
-				"pes_objective_portals_first_portal_skaven_cooling_02",
-				"pes_objective_portals_first_portal_skaven_cooling_03",
-				"pes_objective_portals_first_portal_skaven_cooling_04"
+				"pdr_objective_castle_lever_2_01",
+				"pdr_objective_castle_lever_2_02",
+				"pdr_objective_castle_lever_2_03",
+				"pdr_objective_castle_lever_2_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -18205,14 +18154,14 @@ return function ()
 			face_animations = {
 				"face_concerned",
 				"face_concerned",
-				"face_concerned",
-				"face_concerned"
+				"face_neutral",
+				"face_neutral"
 			},
 			localization_strings = {
-				"pes_objective_portals_first_portal_skaven_cooling_01",
-				"pes_objective_portals_first_portal_skaven_cooling_02",
-				"pes_objective_portals_first_portal_skaven_cooling_03",
-				"pes_objective_portals_first_portal_skaven_cooling_04"
+				"pdr_objective_castle_lever_2_01",
+				"pdr_objective_castle_lever_2_02",
+				"pdr_objective_castle_lever_2_03",
+				"pdr_objective_castle_lever_2_04"
 			},
 			randomize_indexes = {}
 		},
@@ -18315,36 +18264,48 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_castle_blood_pool = {
-			sound_events_n = 4,
+		dlc_pm_pwe_gameplay_tips_pm = {
+			sound_events_n = 7,
 			randomize_indexes_n = 0,
-			face_animations_n = 4,
+			face_animations_n = 7,
 			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 4,
+			category = "default",
+			dialogue_animations_n = 7,
 			sound_events = {
-				"pdr_objective_castle_blood_pool_01",
-				"pdr_objective_castle_blood_pool_02",
-				"pdr_objective_castle_blood_pool_03",
-				"pdr_objective_castle_blood_pool_04"
+				"dlc_pm_pwe_gameplay_tips_pm_01",
+				"dlc_pm_pwe_gameplay_tips_pm_02",
+				"dlc_pm_pwe_gameplay_tips_pm_03",
+				"dlc_pm_pwe_gameplay_tips_pm_04",
+				"dlc_pm_pwe_gameplay_tips_pm_05",
+				"dlc_pm_pwe_gameplay_tips_pm_06",
+				"dlc_pm_pwe_gameplay_tips_pm_07"
 			},
 			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk"
 			},
 			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
+				"face_contempt",
+				"face_fear",
+				"face_contempt",
+				"face_contempt",
+				"face_contempt",
+				"face_contempt",
+				"face_contempt"
 			},
 			localization_strings = {
-				"pdr_objective_castle_blood_pool_01",
-				"pdr_objective_castle_blood_pool_02",
-				"pdr_objective_castle_blood_pool_03",
-				"pdr_objective_castle_blood_pool_04"
+				"dlc_pm_pwe_gameplay_tips_pm_01",
+				"dlc_pm_pwe_gameplay_tips_pm_02",
+				"dlc_pm_pwe_gameplay_tips_pm_03",
+				"dlc_pm_pwe_gameplay_tips_pm_04",
+				"dlc_pm_pwe_gameplay_tips_pm_05",
+				"dlc_pm_pwe_gameplay_tips_pm_06",
+				"dlc_pm_pwe_gameplay_tips_pm_07"
 			},
 			randomize_indexes = {}
 		},
@@ -18381,31 +18342,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		nik_map_brief_portals = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "npc_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "nik_map_brief_portals_01",
-				[2.0] = "nik_map_brief_portals_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "nik_map_brief_portals_01",
-				[2.0] = "nik_map_brief_portals_02"
-			},
-			randomize_indexes = {}
-		},
 		pwe_castle_intro_b = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
@@ -18428,31 +18364,6 @@ return function ()
 			localization_strings = {
 				[1.0] = "pwe_castle_intro_b_01",
 				[2.0] = "pwe_castle_intro_b_02"
-			},
-			randomize_indexes = {}
-		},
-		nik_map_brief_castle = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "npc_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "nik_map_brief_castle_a_01",
-				[2.0] = "nik_map_brief_castle_a_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "nik_map_brief_castle_a_01",
-				[2.0] = "nik_map_brief_castle_a_02"
 			},
 			randomize_indexes = {}
 		},
@@ -18481,26 +18392,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pbw_objective_portals_village = {
-			sound_events_n = 1,
-			face_animations_n = 1,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 1,
-			sound_events = {
-				[1.0] = "pbw_objective_portals_village_01"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pbw_objective_portals_village_01"
-			}
-		},
-		pes_castle_intro_b = {
+		pwh_castle_intro_b = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -18508,8 +18400,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pes_castle_intro_b_01",
-				[2.0] = "pes_castle_intro_b_02"
+				[1.0] = "pwh_castle_intro_b_01",
+				[2.0] = "pwh_castle_intro_b_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -18520,8 +18412,41 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pes_castle_intro_b_01",
-				[2.0] = "pes_castle_intro_b_02"
+				[1.0] = "pwh_castle_intro_b_01",
+				[2.0] = "pwh_castle_intro_b_02"
+			},
+			randomize_indexes = {}
+		},
+		pdr_objective_castle_wood_door = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "guidance",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pdr_objective_castle_wood_door_01",
+				"pdr_objective_castle_wood_door_02",
+				"pdr_objective_castle_wood_door_03",
+				"pdr_objective_castle_wood_door_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pdr_objective_castle_wood_door_01",
+				"pdr_objective_castle_wood_door_02",
+				"pdr_objective_castle_wood_door_03",
+				"pdr_objective_castle_wood_door_04"
 			},
 			randomize_indexes = {}
 		},
@@ -19224,18 +19149,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_castle_broken_bridge = {
+		pwe_objective_castle_statue = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_castle_broken_bridge_01",
-				"pes_objective_castle_broken_bridge_02",
-				"pes_objective_castle_broken_bridge_03",
-				"pes_objective_castle_broken_bridge_04"
+				"pwe_objective_castle_statue_01",
+				"pwe_objective_castle_statue_02",
+				"pwe_objective_castle_statue_03",
+				"pwe_objective_castle_statue_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -19246,14 +19171,14 @@ return function ()
 			face_animations = {
 				"face_concerned",
 				"face_concerned",
-				"face_neutral",
-				"face_neutral"
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				"pes_objective_castle_broken_bridge_01",
-				"pes_objective_castle_broken_bridge_02",
-				"pes_objective_castle_broken_bridge_03",
-				"pes_objective_castle_broken_bridge_04"
+				"pwe_objective_castle_statue_01",
+				"pwe_objective_castle_statue_02",
+				"pwe_objective_castle_statue_03",
+				"pwe_objective_castle_statue_04"
 			},
 			randomize_indexes = {}
 		},
@@ -19348,7 +19273,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_dungeon_balance = {
+		pwe_objective_dungeon_spot_artifact_1 = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -19356,10 +19281,10 @@ return function ()
 			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_dungeon_balance_01",
-				"pdr_objective_dungeon_balance_02",
-				"pdr_objective_dungeon_balance_03",
-				"pdr_objective_dungeon_balance_04"
+				"pwe_objective_dungeon_spot_artifact_1_01",
+				"pwe_objective_dungeon_spot_artifact_1_02",
+				"pwe_objective_dungeon_spot_artifact_1_03",
+				"pwe_objective_dungeon_spot_artifact_1_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -19374,10 +19299,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pdr_objective_dungeon_balance_01",
-				"pdr_objective_dungeon_balance_02",
-				"pdr_objective_dungeon_balance_03",
-				"pdr_objective_dungeon_balance_04"
+				"pwe_objective_dungeon_spot_artifact_1_01",
+				"pwe_objective_dungeon_spot_artifact_1_02",
+				"pwe_objective_dungeon_spot_artifact_1_03",
+				"pwe_objective_dungeon_spot_artifact_1_04"
 			},
 			randomize_indexes = {}
 		},
@@ -19785,31 +19710,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_portals_intro = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pdr_portals_intro_a_01",
-				[2.0] = "pdr_portals_intro_a_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "pdr_portals_intro_a_01",
-				[2.0] = "pdr_portals_intro_a_02"
-			},
-			randomize_indexes = {}
-		},
 		pbw_objective_castle_lever = {
 			sound_events_n = 3,
 			randomize_indexes_n = 0,
@@ -19839,6 +19739,31 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pdr_portals_intro = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pdr_portals_intro_a_01",
+				[2.0] = "pdr_portals_intro_a_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_neutral",
+				[2.0] = "face_neutral"
+			},
+			localization_strings = {
+				[1.0] = "pdr_portals_intro_a_01",
+				[2.0] = "pdr_portals_intro_a_02"
+			},
+			randomize_indexes = {}
+		},
 		pdr_dungeon_intro_c = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
@@ -19864,7 +19789,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pbw_dungeon_intro = {
+		pbw_portals_intro = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -19872,8 +19797,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pbw_dungeon_intro_a_01",
-				[2.0] = "pbw_dungeon_intro_a_02"
+				[1.0] = "pbw_portals_intro_a_01",
+				[2.0] = "pbw_portals_intro_a_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -19884,8 +19809,8 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pbw_dungeon_intro_a_01",
-				[2.0] = "pbw_dungeon_intro_a_02"
+				[1.0] = "pbw_portals_intro_a_01",
+				[2.0] = "pbw_portals_intro_a_02"
 			},
 			randomize_indexes = {}
 		},
@@ -19936,64 +19861,6 @@ return function ()
 			localization_strings = {
 				[1.0] = "pdr_castle_intro_a_01",
 				[2.0] = "pdr_castle_intro_a_02"
-			},
-			randomize_indexes = {}
-		},
-		pbw_portals_intro_c = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pbw_portals_intro_c_01",
-				[2.0] = "pbw_portals_intro_c_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "pbw_portals_intro_c_01",
-				[2.0] = "pbw_portals_intro_c_02"
-			},
-			randomize_indexes = {}
-		},
-		pes_objective_castle_statue = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_objective_castle_statue_01",
-				"pes_objective_castle_statue_02",
-				"pes_objective_castle_statue_03",
-				"pes_objective_castle_statue_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pes_objective_castle_statue_01",
-				"pes_objective_castle_statue_02",
-				"pes_objective_castle_statue_03",
-				"pes_objective_castle_statue_04"
 			},
 			randomize_indexes = {}
 		},
@@ -20075,7 +19942,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pbw_portals_intro = {
+		pbw_portals_intro_c = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -20083,8 +19950,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pbw_portals_intro_a_01",
-				[2.0] = "pbw_portals_intro_a_02"
+				[1.0] = "pbw_portals_intro_c_01",
+				[2.0] = "pbw_portals_intro_c_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -20095,33 +19962,41 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pbw_portals_intro_a_01",
-				[2.0] = "pbw_portals_intro_a_02"
+				[1.0] = "pbw_portals_intro_c_01",
+				[2.0] = "pbw_portals_intro_c_02"
 			},
 			randomize_indexes = {}
 		},
-		pbw_dungeon_intro_c = {
-			sound_events_n = 2,
+		pdr_objective_portals_overheat_successful = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 2,
+			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
+			category = "player_feedback",
+			dialogue_animations_n = 4,
 			sound_events = {
-				[1.0] = "pbw_dungeon_intro_c_02",
-				[2.0] = "pbw_dungeon_intro_c_02"
+				"pdr_objective_portals_overheat_successful_01",
+				"pdr_objective_portals_overheat_successful_02",
+				"pdr_objective_portals_overheat_successful_03",
+				"pdr_objective_portals_overheat_successful_04"
 			},
 			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pbw_dungeon_intro_c_02",
-				[2.0] = "pbw_dungeon_intro_c_02"
+				"pdr_objective_portals_overheat_successful_01",
+				"pdr_objective_portals_overheat_successful_02",
+				"pdr_objective_portals_overheat_successful_03",
+				"pdr_objective_portals_overheat_successful_04"
 			},
 			randomize_indexes = {}
 		},
@@ -20183,7 +20058,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_portals_intro_b = {
+		pbw_dungeon_intro_c = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -20191,8 +20066,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pwe_portals_intro_b_01",
-				[2.0] = "pwe_portals_intro_b_02"
+				[1.0] = "pbw_dungeon_intro_c_02",
+				[2.0] = "pbw_dungeon_intro_c_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -20203,8 +20078,8 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pwe_portals_intro_b_01",
-				[2.0] = "pwe_portals_intro_b_02"
+				[1.0] = "pbw_dungeon_intro_c_02",
+				[2.0] = "pbw_dungeon_intro_c_02"
 			},
 			randomize_indexes = {}
 		},
@@ -20241,7 +20116,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_dungeon_intro_c = {
+		pwe_portals_intro_b = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -20249,8 +20124,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pwe_dungeon_intro_c_02",
-				[2.0] = "pwe_dungeon_intro_c_02"
+				[1.0] = "pwe_portals_intro_b_01",
+				[2.0] = "pwe_portals_intro_b_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -20261,8 +20136,8 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pwe_dungeon_intro_c_02",
-				[2.0] = "pwe_dungeon_intro_c_02"
+				[1.0] = "pwe_portals_intro_b_01",
+				[2.0] = "pwe_portals_intro_b_02"
 			},
 			randomize_indexes = {}
 		},
@@ -20299,19 +20174,21 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_portals_village = {
-			sound_events_n = 3,
+		pwe_objective_dungeon_torch_1 = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 3,
+			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 3,
+			category = "player_feedback",
+			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_portals_village_01",
-				"pes_objective_portals_village_02",
-				"pes_objective_portals_village_03"
+				"pwe_objective_dungeon_torch_1_01",
+				"pwe_objective_dungeon_torch_1_02",
+				"pwe_objective_dungeon_torch_1_03",
+				"pwe_objective_dungeon_torch_1_04"
 			},
 			dialogue_animations = {
+				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk"
@@ -20319,12 +20196,14 @@ return function ()
 			face_animations = {
 				"face_concerned",
 				"face_concerned",
+				"face_concerned",
 				"face_concerned"
 			},
 			localization_strings = {
-				"pes_objective_portals_village_01",
-				"pes_objective_portals_village_02",
-				"pes_objective_portals_village_03"
+				"pwe_objective_dungeon_torch_1_01",
+				"pwe_objective_dungeon_torch_1_02",
+				"pwe_objective_dungeon_torch_1_03",
+				"pwe_objective_dungeon_torch_1_04"
 			},
 			randomize_indexes = {}
 		},
@@ -20361,7 +20240,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_castle_intro = {
+		pwe_dungeon_intro_c = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -20369,8 +20248,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pwe_castle_intro_a_01",
-				[2.0] = "pwe_castle_intro_a_02"
+				[1.0] = "pwe_dungeon_intro_c_02",
+				[2.0] = "pwe_dungeon_intro_c_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -20381,8 +20260,8 @@ return function ()
 				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pwe_castle_intro_a_01",
-				[2.0] = "pwe_castle_intro_a_02"
+				[1.0] = "pwe_dungeon_intro_c_02",
+				[2.0] = "pwe_dungeon_intro_c_02"
 			},
 			randomize_indexes = {}
 		},
@@ -20431,52 +20310,28 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_gameplay_healing_draught = {
-			sound_events_n = 8,
+		pwe_castle_intro = {
+			sound_events_n = 2,
 			randomize_indexes_n = 0,
-			face_animations_n = 8,
+			face_animations_n = 2,
 			database = "drachenfels",
-			category = "seen_items",
-			dialogue_animations_n = 8,
+			category = "level_talk",
+			dialogue_animations_n = 2,
 			sound_events = {
-				"pwh_gameplay_healing_draught_01",
-				"pwh_gameplay_healing_draught_02",
-				"pwh_gameplay_healing_draught_03",
-				"pwh_gameplay_healing_draught_04",
-				"pwh_gameplay_healing_draught_05",
-				"pwh_gameplay_healing_draught_06",
-				"pwh_gameplay_healing_draught_07",
-				"pwh_gameplay_healing_draught_08"
+				[1.0] = "pwe_castle_intro_a_01",
+				[2.0] = "pwe_castle_intro_a_02"
 			},
 			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
 			},
 			face_animations = {
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy"
+				[1.0] = "face_neutral",
+				[2.0] = "face_neutral"
 			},
 			localization_strings = {
-				"pwh_gameplay_healing_draught_01",
-				"pwh_gameplay_healing_draught_02",
-				"pwh_gameplay_healing_draught_03",
-				"pwh_gameplay_healing_draught_04",
-				"pwh_gameplay_healing_draught_05",
-				"pwh_gameplay_healing_draught_06",
-				"pwh_gameplay_healing_draught_07",
-				"pwh_gameplay_healing_draught_08"
+				[1.0] = "pwe_castle_intro_a_01",
+				[2.0] = "pwe_castle_intro_a_02"
 			},
 			randomize_indexes = {}
 		},
@@ -20539,6 +20394,55 @@ return function ()
 				"pes_objective_skaven_exit_02",
 				"pes_objective_skaven_exit_03",
 				"pes_objective_skaven_exit_04"
+			},
+			randomize_indexes = {}
+		},
+		pwh_gameplay_healing_draught = {
+			sound_events_n = 8,
+			randomize_indexes_n = 0,
+			face_animations_n = 8,
+			database = "drachenfels",
+			category = "seen_items",
+			dialogue_animations_n = 8,
+			sound_events = {
+				"pwh_gameplay_healing_draught_01",
+				"pwh_gameplay_healing_draught_02",
+				"pwh_gameplay_healing_draught_03",
+				"pwh_gameplay_healing_draught_04",
+				"pwh_gameplay_healing_draught_05",
+				"pwh_gameplay_healing_draught_06",
+				"pwh_gameplay_healing_draught_07",
+				"pwh_gameplay_healing_draught_08"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy"
+			},
+			localization_strings = {
+				"pwh_gameplay_healing_draught_01",
+				"pwh_gameplay_healing_draught_02",
+				"pwh_gameplay_healing_draught_03",
+				"pwh_gameplay_healing_draught_04",
+				"pwh_gameplay_healing_draught_05",
+				"pwh_gameplay_healing_draught_06",
+				"pwh_gameplay_healing_draught_07",
+				"pwh_gameplay_healing_draught_08"
 			},
 			randomize_indexes = {}
 		},
@@ -20608,18 +20512,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_dungeon_upward_tunnel = {
+		pdr_objective_castle_ballroom = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "level_talk",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_dungeon_upward_tunnel_01",
-				"pes_objective_dungeon_upward_tunnel_02",
-				"pes_objective_dungeon_upward_tunnel_03",
-				"pes_objective_dungeon_upward_tunnel_04"
+				"pdr_objective_castle_ballroom_01",
+				"pdr_objective_castle_ballroom_02",
+				"pdr_objective_castle_ballroom_03",
+				"pdr_objective_castle_ballroom_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -20634,10 +20538,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pes_objective_dungeon_upward_tunnel_01",
-				"pes_objective_dungeon_upward_tunnel_02",
-				"pes_objective_dungeon_upward_tunnel_03",
-				"pes_objective_dungeon_upward_tunnel_04"
+				"pdr_objective_castle_ballroom_01",
+				"pdr_objective_castle_ballroom_02",
+				"pdr_objective_castle_ballroom_03",
+				"pdr_objective_castle_ballroom_04"
 			},
 			randomize_indexes = {}
 		},
@@ -20667,39 +20571,6 @@ return function ()
 				"pwh_objective_portals_village_01",
 				"pwh_objective_portals_village_02",
 				"pwh_objective_portals_village_03"
-			},
-			randomize_indexes = {}
-		},
-		pwh_objective_portals_mission_successful = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwh_objective_portals_mission_successful_01",
-				"pwh_objective_portals_mission_successful_02",
-				"pwh_objective_portals_mission_successful_03",
-				"pwh_objective_portals_mission_successful_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwh_objective_portals_mission_successful_01",
-				"pwh_objective_portals_mission_successful_02",
-				"pwh_objective_portals_mission_successful_03",
-				"pwh_objective_portals_mission_successful_04"
 			},
 			randomize_indexes = {}
 		},
@@ -20733,6 +20604,39 @@ return function ()
 				"pwe_objective_portals_third_portal_instruction_02",
 				"pwe_objective_portals_third_portal_instruction_03",
 				"pwe_objective_portals_third_portal_instruction_04"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_portals_mission_successful = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwh_objective_portals_mission_successful_01",
+				"pwh_objective_portals_mission_successful_02",
+				"pwh_objective_portals_mission_successful_03",
+				"pwh_objective_portals_mission_successful_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pwh_objective_portals_mission_successful_01",
+				"pwh_objective_portals_mission_successful_02",
+				"pwh_objective_portals_mission_successful_03",
+				"pwh_objective_portals_mission_successful_04"
 			},
 			randomize_indexes = {}
 		},
@@ -20835,31 +20739,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_portals_unmarked_grave = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pwh_objective_portals_unmarked_grave_01",
-				[2.0] = "pwh_objective_portals_unmarked_grave_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pwh_objective_portals_unmarked_grave_01",
-				[2.0] = "pwh_objective_portals_unmarked_grave_02"
-			},
-			randomize_indexes = {}
-		},
 		dlc_pm_pwe_gameplay_hearing_a_pm = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -20893,6 +20772,56 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pwh_objective_portals_unmarked_grave = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pwh_objective_portals_unmarked_grave_01",
+				[2.0] = "pwh_objective_portals_unmarked_grave_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pwh_objective_portals_unmarked_grave_01",
+				[2.0] = "pwh_objective_portals_unmarked_grave_02"
+			},
+			randomize_indexes = {}
+		},
+		pes_dungeon_intro_b = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pes_dungeon_intro_b_01",
+				[2.0] = "pes_dungeon_intro_b_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_neutral",
+				[2.0] = "face_neutral"
+			},
+			localization_strings = {
+				[1.0] = "pes_dungeon_intro_b_01",
+				[2.0] = "pes_dungeon_intro_b_02"
+			},
+			randomize_indexes = {}
+		},
 		pwh_objective_portals_overheat_failed = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -20923,31 +20852,6 @@ return function ()
 				"pwh_objective_portals_overheat_failed_02",
 				"pwh_objective_portals_overheat_failed_03",
 				"pwh_objective_portals_overheat_failed_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_dungeon_intro_b = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pes_dungeon_intro_b_01",
-				[2.0] = "pes_dungeon_intro_b_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "pes_dungeon_intro_b_01",
-				[2.0] = "pes_dungeon_intro_b_02"
 			},
 			randomize_indexes = {}
 		},
@@ -21050,39 +20954,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_castle_run = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwh_objective_castle_run_01",
-				"pwh_objective_castle_run_02",
-				"pwh_objective_castle_run_03",
-				"pwh_objective_castle_run_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwh_objective_castle_run_01",
-				"pwh_objective_castle_run_02",
-				"pwh_objective_castle_run_03",
-				"pwh_objective_castle_run_04"
-			},
-			randomize_indexes = {}
-		},
 		pdr_objective_castle_view = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -21141,18 +21012,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_castle_chalice_rising = {
+		pwh_objective_castle_run = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwh_objective_castle_chalice_rising_01",
-				"pwh_objective_castle_chalice_rising_02",
-				"pwh_objective_castle_chalice_rising_03",
-				"pwh_objective_castle_chalice_rising_04"
+				"pwh_objective_castle_run_01",
+				"pwh_objective_castle_run_02",
+				"pwh_objective_castle_run_03",
+				"pwh_objective_castle_run_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -21167,10 +21038,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwh_objective_castle_chalice_rising_01",
-				"pwh_objective_castle_chalice_rising_02",
-				"pwh_objective_castle_chalice_rising_03",
-				"pwh_objective_castle_chalice_rising_04"
+				"pwh_objective_castle_run_01",
+				"pwh_objective_castle_run_02",
+				"pwh_objective_castle_run_03",
+				"pwh_objective_castle_run_04"
 			},
 			randomize_indexes = {}
 		},
@@ -21248,28 +21119,36 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_dungeon_olesya = {
-			sound_events_n = 2,
+		pwh_objective_castle_chalice_rising = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 2,
+			face_animations_n = 4,
 			database = "drachenfels",
 			category = "guidance",
-			dialogue_animations_n = 2,
+			dialogue_animations_n = 4,
 			sound_events = {
-				[1.0] = "pwh_objective_dungeon_olesya_01",
-				[2.0] = "pwh_objective_dungeon_olesya_02"
+				"pwh_objective_castle_chalice_rising_01",
+				"pwh_objective_castle_chalice_rising_02",
+				"pwh_objective_castle_chalice_rising_03",
+				"pwh_objective_castle_chalice_rising_04"
 			},
 			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pwh_objective_dungeon_olesya_01",
-				[2.0] = "pwh_objective_dungeon_olesya_02"
+				"pwh_objective_castle_chalice_rising_01",
+				"pwh_objective_castle_chalice_rising_02",
+				"pwh_objective_castle_chalice_rising_03",
+				"pwh_objective_castle_chalice_rising_04"
 			},
 			randomize_indexes = {}
 		},
@@ -21295,6 +21174,31 @@ return function ()
 			localization_strings = {
 				[1.0] = "pwe_objective_dungeon_olesya_01",
 				[2.0] = "pwe_objective_dungeon_olesya_02"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_dungeon_olesya = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "guidance",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pwh_objective_dungeon_olesya_01",
+				[2.0] = "pwh_objective_dungeon_olesya_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pwh_objective_dungeon_olesya_01",
+				[2.0] = "pwh_objective_dungeon_olesya_02"
 			},
 			randomize_indexes = {}
 		},
@@ -21393,35 +21297,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_castle_catacombs_arrival = {
-			sound_events_n = 3,
-			randomize_indexes_n = 0,
-			face_animations_n = 3,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 3,
-			sound_events = {
-				"pwh_objective_castle_catacombs_arrival_01",
-				"pwh_objective_castle_catacombs_arrival_02",
-				"pwh_objective_castle_catacombs_arrival_03"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pwh_objective_castle_catacombs_arrival_01",
-				"pwh_objective_castle_catacombs_arrival_02",
-				"pwh_objective_castle_catacombs_arrival_03"
-			},
-			randomize_indexes = {}
-		},
 		pwe_objective_portals_second_portal_instruction = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -21452,6 +21327,39 @@ return function ()
 				"pwe_objective_portals_second_portal_instruction_02",
 				"pwe_objective_portals_second_portal_instruction_03",
 				"pwe_objective_portals_second_portal_instruction_04"
+			},
+			randomize_indexes = {}
+		},
+		pwe_objective_castle_inner_sanctum = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwe_objective_castle_inner_sanctum_01",
+				"pwe_objective_castle_inner_sanctum_02",
+				"pwe_objective_castle_inner_sanctum_03",
+				"pwe_objective_castle_inner_sanctum_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pwe_objective_castle_inner_sanctum_01",
+				"pwe_objective_castle_inner_sanctum_02",
+				"pwe_objective_castle_inner_sanctum_03",
+				"pwe_objective_castle_inner_sanctum_04"
 			},
 			randomize_indexes = {}
 		},
@@ -21513,39 +21421,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_dungeon_spot_artifact_1 = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "guidance",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwh_objective_dungeon_spot_artifact_1_01",
-				"pwh_objective_dungeon_spot_artifact_1_02",
-				"pwh_objective_dungeon_spot_artifact_1_03",
-				"pwh_objective_dungeon_spot_artifact_1_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwh_objective_dungeon_spot_artifact_1_01",
-				"pwh_objective_dungeon_spot_artifact_1_02",
-				"pwh_objective_dungeon_spot_artifact_1_03",
-				"pwh_objective_dungeon_spot_artifact_1_04"
-			},
-			randomize_indexes = {}
-		},
 		pbw_objective_castle_wood_door = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -21576,6 +21451,68 @@ return function ()
 				"pbw_objective_castle_wood_door_02",
 				"pbw_objective_castle_wood_door_03",
 				"pbw_objective_castle_wood_door_04"
+			},
+			randomize_indexes = {}
+		},
+		pwe_objective_dungeon_jump_challenge = {
+			sound_events_n = 3,
+			randomize_indexes_n = 0,
+			face_animations_n = 3,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 3,
+			sound_events = {
+				"pwe_objective_dungeon_jump_challenge_01",
+				"pwe_objective_dungeon_jump_challenge_02",
+				"pwe_objective_dungeon_jump_challenge_03"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pwe_objective_dungeon_jump_challenge_01",
+				"pwe_objective_dungeon_jump_challenge_02",
+				"pwe_objective_dungeon_jump_challenge_03"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_dungeon_spot_artifact_1 = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "guidance",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwh_objective_dungeon_spot_artifact_1_01",
+				"pwh_objective_dungeon_spot_artifact_1_02",
+				"pwh_objective_dungeon_spot_artifact_1_03",
+				"pwh_objective_dungeon_spot_artifact_1_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pwh_objective_dungeon_spot_artifact_1_01",
+				"pwh_objective_dungeon_spot_artifact_1_02",
+				"pwh_objective_dungeon_spot_artifact_1_03",
+				"pwh_objective_dungeon_spot_artifact_1_04"
 			},
 			randomize_indexes = {}
 		},
@@ -21633,18 +21570,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_dungeon_darkness_entry = {
+		pdr_objective_dungeon_balance = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwh_objective_dungeon_darkness_entry_01",
-				"pwh_objective_dungeon_darkness_entry_02",
-				"pwh_objective_dungeon_darkness_entry_03",
-				"pwh_objective_dungeon_darkness_entry_04"
+				"pdr_objective_dungeon_balance_01",
+				"pdr_objective_dungeon_balance_02",
+				"pdr_objective_dungeon_balance_03",
+				"pdr_objective_dungeon_balance_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -21659,72 +21596,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwh_objective_dungeon_darkness_entry_01",
-				"pwh_objective_dungeon_darkness_entry_02",
-				"pwh_objective_dungeon_darkness_entry_03",
-				"pwh_objective_dungeon_darkness_entry_04"
-			},
-			randomize_indexes = {}
-		},
-		pwe_objective_dungeon_jump_challenge = {
-			sound_events_n = 3,
-			randomize_indexes_n = 0,
-			face_animations_n = 3,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 3,
-			sound_events = {
-				"pwe_objective_dungeon_jump_challenge_01",
-				"pwe_objective_dungeon_jump_challenge_02",
-				"pwe_objective_dungeon_jump_challenge_03"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pwe_objective_dungeon_jump_challenge_01",
-				"pwe_objective_dungeon_jump_challenge_02",
-				"pwe_objective_dungeon_jump_challenge_03"
-			},
-			randomize_indexes = {}
-		},
-		pwe_objective_portals_second_portal_tips = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwe_objective_portals_second_portal_tips_01",
-				"pwe_objective_portals_second_portal_tips_02",
-				"pwe_objective_portals_second_portal_tips_03",
-				"pwe_objective_portals_second_portal_tips_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwe_objective_portals_second_portal_tips_01",
-				"pwe_objective_portals_second_portal_tips_02",
-				"pwe_objective_portals_second_portal_tips_03",
-				"pwe_objective_portals_second_portal_tips_04"
+				"pdr_objective_dungeon_balance_01",
+				"pdr_objective_dungeon_balance_02",
+				"pdr_objective_dungeon_balance_03",
+				"pdr_objective_dungeon_balance_04"
 			},
 			randomize_indexes = {}
 		},
@@ -21753,118 +21628,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		dlc_scr_pdr_gameplay_seeing_a_scr = {
-			sound_events_n = 7,
-			randomize_indexes_n = 0,
-			face_animations_n = 7,
-			database = "drachenfels",
-			category = "enemy_alerts",
-			dialogue_animations_n = 7,
-			sound_events = {
-				"dlc_scr_pdr_gameplay_seeing_a_scr_01",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_02",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_03",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_04",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_05",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_06",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_07"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"dlc_scr_pdr_gameplay_seeing_a_scr_01",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_02",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_03",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_04",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_05",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_06",
-				"dlc_scr_pdr_gameplay_seeing_a_scr_07"
-			},
-			randomize_indexes = {}
-		},
-		pwh_objective_castle_trap_door_activated = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "guidance",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwh_objective_castle_trap_door_activated_01",
-				"pwh_objective_castle_trap_door_activated_02",
-				"pwh_objective_castle_trap_door_activated_03",
-				"pwh_objective_castle_trap_door_activated_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwh_objective_castle_trap_door_activated_01",
-				"pwh_objective_castle_trap_door_activated_02",
-				"pwh_objective_castle_trap_door_activated_03",
-				"pwh_objective_castle_trap_door_activated_04"
-			},
-			randomize_indexes = {}
-		},
-		pbw_objective_castle_blood_pool = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pbw_objective_castle_blood_pool_01",
-				"pbw_objective_castle_blood_pool_02",
-				"pbw_objective_castle_blood_pool_03",
-				"pbw_objective_castle_blood_pool_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pbw_objective_castle_blood_pool_01",
-				"pbw_objective_castle_blood_pool_02",
-				"pbw_objective_castle_blood_pool_03",
-				"pbw_objective_castle_blood_pool_04"
-			},
-			randomize_indexes = {}
-		},
-		pwh_objective_castle_placing_statuette = {
+		pwh_objective_dungeon_darkness_entry = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -21872,10 +21636,10 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwh_objective_castle_placing_statuette_01",
-				"pwh_objective_castle_placing_statuette_02",
-				"pwh_objective_castle_placing_statuette_03",
-				"pwh_objective_castle_placing_statuette_04"
+				"pwh_objective_dungeon_darkness_entry_01",
+				"pwh_objective_dungeon_darkness_entry_02",
+				"pwh_objective_dungeon_darkness_entry_03",
+				"pwh_objective_dungeon_darkness_entry_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -21890,25 +21654,75 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwh_objective_castle_placing_statuette_01",
-				"pwh_objective_castle_placing_statuette_02",
-				"pwh_objective_castle_placing_statuette_03",
-				"pwh_objective_castle_placing_statuette_04"
+				"pwh_objective_dungeon_darkness_entry_01",
+				"pwh_objective_dungeon_darkness_entry_02",
+				"pwh_objective_dungeon_darkness_entry_03",
+				"pwh_objective_dungeon_darkness_entry_04"
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_castle_inner_sanctum = {
+		pes_objective_spotting_sf_gear = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pes_objective_spotting_sf_gear_01",
+				[2.0] = "pes_objective_spotting_sf_gear_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pes_objective_spotting_sf_gear_01",
+				[2.0] = "pes_objective_spotting_sf_gear_02"
+			},
+			randomize_indexes = {}
+		},
+		pbw_objective_spotting_pm_gear = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pbw_objective_spotting_pm_gear_01",
+				[2.0] = "pbw_objective_spotting_pm_gear_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pbw_objective_spotting_pm_gear_01",
+				[2.0] = "pbw_objective_spotting_pm_gear_02"
+			},
+			randomize_indexes = {}
+		},
+		pwe_objective_portals_overheat_failed = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwh_objective_castle_inner_sanctum_01",
-				"pwh_objective_castle_inner_sanctum_02",
-				"pwh_objective_castle_inner_sanctum_03",
-				"pwh_objective_castle_inner_sanctum_04"
+				"pwe_objective_portals_overheat_failed_01",
+				"pwe_objective_portals_overheat_failed_02",
+				"pwe_objective_portals_overheat_failed_03",
+				"pwe_objective_portals_overheat_failed_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -21923,10 +21737,43 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwh_objective_castle_inner_sanctum_01",
-				"pwh_objective_castle_inner_sanctum_02",
-				"pwh_objective_castle_inner_sanctum_03",
-				"pwh_objective_castle_inner_sanctum_04"
+				"pwe_objective_portals_overheat_failed_01",
+				"pwe_objective_portals_overheat_failed_02",
+				"pwe_objective_portals_overheat_failed_03",
+				"pwe_objective_portals_overheat_failed_04"
+			},
+			randomize_indexes = {}
+		},
+		pbw_objective_portals_first_portal_skaven_cooling = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pbw_objective_portals_first_portal_skaven_cooling_01",
+				"pbw_objective_portals_first_portal_skaven_cooling_02",
+				"pbw_objective_portals_first_portal_skaven_cooling_03",
+				"pbw_objective_portals_first_portal_skaven_cooling_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pbw_objective_portals_first_portal_skaven_cooling_01",
+				"pbw_objective_portals_first_portal_skaven_cooling_02",
+				"pbw_objective_portals_first_portal_skaven_cooling_03",
+				"pbw_objective_portals_first_portal_skaven_cooling_04"
 			},
 			randomize_indexes = {}
 		},
@@ -21963,18 +21810,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pbw_objective_portals_first_portal_skaven_cooling = {
+		pwe_objective_castle_skaven_entry = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "player_feedback",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pbw_objective_portals_first_portal_skaven_cooling_01",
-				"pbw_objective_portals_first_portal_skaven_cooling_02",
-				"pbw_objective_portals_first_portal_skaven_cooling_03",
-				"pbw_objective_portals_first_portal_skaven_cooling_04"
+				"pwe_objective_castle_skaven_entry_01",
+				"pwe_objective_castle_skaven_entry_02",
+				"pwe_objective_castle_skaven_entry_03",
+				"pwe_objective_castle_skaven_entry_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -21989,10 +21836,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pbw_objective_portals_first_portal_skaven_cooling_01",
-				"pbw_objective_portals_first_portal_skaven_cooling_02",
-				"pbw_objective_portals_first_portal_skaven_cooling_03",
-				"pbw_objective_portals_first_portal_skaven_cooling_04"
+				"pwe_objective_castle_skaven_entry_01",
+				"pwe_objective_castle_skaven_entry_02",
+				"pwe_objective_castle_skaven_entry_03",
+				"pwe_objective_castle_skaven_entry_04"
 			},
 			randomize_indexes = {}
 		},
@@ -22058,28 +21905,36 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		nik_loading_screen_dungeon = {
-			sound_events_n = 2,
+		pes_objective_castle_lever = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 2,
+			face_animations_n = 4,
 			database = "drachenfels",
-			category = "npc_talk",
-			dialogue_animations_n = 2,
+			category = "player_feedback",
+			dialogue_animations_n = 4,
 			sound_events = {
-				[1.0] = "nik_loading_screen_dungeon_01",
-				[2.0] = "nik_loading_screen_dungeon_02"
+				"pes_objective_castle_lever_01",
+				"pes_objective_castle_lever_02",
+				"pes_objective_castle_lever_03",
+				"pes_objective_castle_lever_04"
 			},
 			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "nik_loading_screen_dungeon_01",
-				[2.0] = "nik_loading_screen_dungeon_02"
+				"pes_objective_castle_lever_01",
+				"pes_objective_castle_lever_02",
+				"pes_objective_castle_lever_03",
+				"pes_objective_castle_lever_04"
 			},
 			randomize_indexes = {}
 		},
@@ -22116,18 +21971,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_objective_castle_broken_bridge = {
+		pwh_objective_castle_trap_door_activated = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwh_objective_castle_broken_bridge_01",
-				"pwh_objective_castle_broken_bridge_02",
-				"pwh_objective_castle_broken_bridge_03",
-				"pwh_objective_castle_broken_bridge_04"
+				"pwh_objective_castle_trap_door_activated_01",
+				"pwh_objective_castle_trap_door_activated_02",
+				"pwh_objective_castle_trap_door_activated_03",
+				"pwh_objective_castle_trap_door_activated_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -22137,44 +21992,81 @@ return function ()
 			},
 			face_animations = {
 				"face_concerned",
-				"face_concerned",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pwh_objective_castle_broken_bridge_01",
-				"pwh_objective_castle_broken_bridge_02",
-				"pwh_objective_castle_broken_bridge_03",
-				"pwh_objective_castle_broken_bridge_04"
-			},
-			randomize_indexes = {}
-		},
-		pwh_objective_castle_view = {
-			sound_events_n = 3,
-			randomize_indexes_n = 0,
-			face_animations_n = 3,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 3,
-			sound_events = {
-				"pwh_objective_castle_view_01",
-				"pwh_objective_castle_view_02",
-				"pwh_objective_castle_view_03"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
 				"face_concerned",
 				"face_concerned",
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwh_objective_castle_view_01",
-				"pwh_objective_castle_view_02",
-				"pwh_objective_castle_view_03"
+				"pwh_objective_castle_trap_door_activated_01",
+				"pwh_objective_castle_trap_door_activated_02",
+				"pwh_objective_castle_trap_door_activated_03",
+				"pwh_objective_castle_trap_door_activated_04"
+			},
+			randomize_indexes = {}
+		},
+		pes_objective_portals_first_portal_skaven_cooling = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pes_objective_portals_first_portal_skaven_cooling_01",
+				"pes_objective_portals_first_portal_skaven_cooling_02",
+				"pes_objective_portals_first_portal_skaven_cooling_03",
+				"pes_objective_portals_first_portal_skaven_cooling_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pes_objective_portals_first_portal_skaven_cooling_01",
+				"pes_objective_portals_first_portal_skaven_cooling_02",
+				"pes_objective_portals_first_portal_skaven_cooling_03",
+				"pes_objective_portals_first_portal_skaven_cooling_04"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_castle_placing_statuette = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwh_objective_castle_placing_statuette_01",
+				"pwh_objective_castle_placing_statuette_02",
+				"pwh_objective_castle_placing_statuette_03",
+				"pwh_objective_castle_placing_statuette_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pwh_objective_castle_placing_statuette_01",
+				"pwh_objective_castle_placing_statuette_02",
+				"pwh_objective_castle_placing_statuette_03",
+				"pwh_objective_castle_placing_statuette_04"
 			},
 			randomize_indexes = {}
 		},
@@ -22200,55 +22092,6 @@ return function ()
 			localization_strings = {
 				[1.0] = "pdr_objective_spotting_pm_gear_01",
 				[2.0] = "pdr_objective_spotting_pm_gear_02"
-			},
-			randomize_indexes = {}
-		},
-		pwe_gameplay_healing_draught = {
-			sound_events_n = 8,
-			randomize_indexes_n = 0,
-			face_animations_n = 8,
-			database = "drachenfels",
-			category = "seen_items",
-			dialogue_animations_n = 8,
-			sound_events = {
-				"pwe_gameplay_healing_draught_01",
-				"pwe_gameplay_healing_draught_02",
-				"pwe_gameplay_healing_draught_03",
-				"pwe_gameplay_healing_draught_04",
-				"pwe_gameplay_healing_draught_05",
-				"pwe_gameplay_healing_draught_06",
-				"pwe_gameplay_healing_draught_07",
-				"pwe_gameplay_healing_draught_08"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy"
-			},
-			localization_strings = {
-				"pwe_gameplay_healing_draught_01",
-				"pwe_gameplay_healing_draught_02",
-				"pwe_gameplay_healing_draught_03",
-				"pwe_gameplay_healing_draught_04",
-				"pwe_gameplay_healing_draught_05",
-				"pwe_gameplay_healing_draught_06",
-				"pwe_gameplay_healing_draught_07",
-				"pwe_gameplay_healing_draught_08"
 			},
 			randomize_indexes = {}
 		},
@@ -22314,48 +22157,32 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		dlc_pm_pwe_gameplay_tips_pm = {
-			sound_events_n = 7,
+		pes_objective_portals_village = {
+			sound_events_n = 3,
 			randomize_indexes_n = 0,
-			face_animations_n = 7,
+			face_animations_n = 3,
 			database = "drachenfels",
-			category = "default",
-			dialogue_animations_n = 7,
+			category = "level_talk",
+			dialogue_animations_n = 3,
 			sound_events = {
-				"dlc_pm_pwe_gameplay_tips_pm_01",
-				"dlc_pm_pwe_gameplay_tips_pm_02",
-				"dlc_pm_pwe_gameplay_tips_pm_03",
-				"dlc_pm_pwe_gameplay_tips_pm_04",
-				"dlc_pm_pwe_gameplay_tips_pm_05",
-				"dlc_pm_pwe_gameplay_tips_pm_06",
-				"dlc_pm_pwe_gameplay_tips_pm_07"
+				"pes_objective_portals_village_01",
+				"pes_objective_portals_village_02",
+				"pes_objective_portals_village_03"
 			},
 			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk",
 				"dialogue_talk"
 			},
 			face_animations = {
-				"face_contempt",
-				"face_fear",
-				"face_contempt",
-				"face_contempt",
-				"face_contempt",
-				"face_contempt",
-				"face_contempt"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				"dlc_pm_pwe_gameplay_tips_pm_01",
-				"dlc_pm_pwe_gameplay_tips_pm_02",
-				"dlc_pm_pwe_gameplay_tips_pm_03",
-				"dlc_pm_pwe_gameplay_tips_pm_04",
-				"dlc_pm_pwe_gameplay_tips_pm_05",
-				"dlc_pm_pwe_gameplay_tips_pm_06",
-				"dlc_pm_pwe_gameplay_tips_pm_07"
+				"pes_objective_portals_village_01",
+				"pes_objective_portals_village_02",
+				"pes_objective_portals_village_03"
 			},
 			randomize_indexes = {}
 		},
@@ -22433,43 +22260,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_dungeon_outdoors_vista1 = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pes_objective_dungeon_outdoors_vista1_01",
-				[2.0] = "pes_objective_dungeon_outdoors_vista1_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pes_objective_dungeon_outdoors_vista1_01",
-				[2.0] = "pes_objective_dungeon_outdoors_vista1_02"
-			},
-			randomize_indexes = {}
-		},
-		pbw_objective_dungeon_traps_warning = {
+		pdr_objective_castle_blood_pool = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "level_talk",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pbw_objective_dungeon_traps_warning_01",
-				"pbw_objective_dungeon_traps_warning_02",
-				"pbw_objective_dungeon_traps_warning_03",
-				"pbw_objective_dungeon_traps_warning_04"
+				"pdr_objective_castle_blood_pool_01",
+				"pdr_objective_castle_blood_pool_02",
+				"pdr_objective_castle_blood_pool_03",
+				"pdr_objective_castle_blood_pool_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -22484,10 +22286,39 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pbw_objective_dungeon_traps_warning_01",
-				"pbw_objective_dungeon_traps_warning_02",
-				"pbw_objective_dungeon_traps_warning_03",
-				"pbw_objective_dungeon_traps_warning_04"
+				"pdr_objective_castle_blood_pool_01",
+				"pdr_objective_castle_blood_pool_02",
+				"pdr_objective_castle_blood_pool_03",
+				"pdr_objective_castle_blood_pool_04"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_castle_catacombs_arrival = {
+			sound_events_n = 3,
+			randomize_indexes_n = 0,
+			face_animations_n = 3,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 3,
+			sound_events = {
+				"pwh_objective_castle_catacombs_arrival_01",
+				"pwh_objective_castle_catacombs_arrival_02",
+				"pwh_objective_castle_catacombs_arrival_03"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pwh_objective_castle_catacombs_arrival_01",
+				"pwh_objective_castle_catacombs_arrival_02",
+				"pwh_objective_castle_catacombs_arrival_03"
 			},
 			randomize_indexes = {}
 		},
@@ -22524,28 +22355,36 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_spotting_sf_gear = {
-			sound_events_n = 2,
+		pdr_objective_portals_arrive_first_portal = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 2,
+			face_animations_n = 4,
 			database = "drachenfels",
 			category = "level_talk",
-			dialogue_animations_n = 2,
+			dialogue_animations_n = 4,
 			sound_events = {
-				[1.0] = "pwe_objective_spotting_sf_gear_01",
-				[2.0] = "pwe_objective_spotting_sf_gear_02"
+				"pdr_objective_portals_arrive_first_portal_01",
+				"pdr_objective_portals_arrive_first_portal_02",
+				"pdr_objective_portals_arrive_first_portal_03",
+				"pdr_objective_portals_arrive_first_portal_04"
 			},
 			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pwe_objective_spotting_sf_gear_01",
-				[2.0] = "pwe_objective_spotting_sf_gear_02"
+				"pdr_objective_portals_arrive_first_portal_01",
+				"pdr_objective_portals_arrive_first_portal_02",
+				"pdr_objective_portals_arrive_first_portal_03",
+				"pdr_objective_portals_arrive_first_portal_04"
 			},
 			randomize_indexes = {}
 		},
@@ -22582,43 +22421,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwh_castle_intro_b = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pwh_castle_intro_b_01",
-				[2.0] = "pwh_castle_intro_b_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral",
-				[2.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "pwh_castle_intro_b_01",
-				[2.0] = "pwh_castle_intro_b_02"
-			},
-			randomize_indexes = {}
-		},
-		pwe_objective_portals_third_portal_tips = {
+		pwh_objective_castle_broken_bridge = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "player_feedback",
+			category = "level_talk",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwe_objective_portals_third_portal_tips_01",
-				"pwe_objective_portals_third_portal_tips_02",
-				"pwe_objective_portals_third_portal_tips_03",
-				"pwe_objective_portals_third_portal_tips_04"
+				"pwh_objective_castle_broken_bridge_01",
+				"pwh_objective_castle_broken_bridge_02",
+				"pwh_objective_castle_broken_bridge_03",
+				"pwh_objective_castle_broken_bridge_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -22629,14 +22443,43 @@ return function ()
 			face_animations = {
 				"face_concerned",
 				"face_concerned",
+				"face_neutral",
+				"face_neutral"
+			},
+			localization_strings = {
+				"pwh_objective_castle_broken_bridge_01",
+				"pwh_objective_castle_broken_bridge_02",
+				"pwh_objective_castle_broken_bridge_03",
+				"pwh_objective_castle_broken_bridge_04"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_castle_view = {
+			sound_events_n = 3,
+			randomize_indexes_n = 0,
+			face_animations_n = 3,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 3,
+			sound_events = {
+				"pwh_objective_castle_view_01",
+				"pwh_objective_castle_view_02",
+				"pwh_objective_castle_view_03"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
 				"face_concerned",
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwe_objective_portals_third_portal_tips_01",
-				"pwe_objective_portals_third_portal_tips_02",
-				"pwe_objective_portals_third_portal_tips_03",
-				"pwe_objective_portals_third_portal_tips_04"
+				"pwh_objective_castle_view_01",
+				"pwh_objective_castle_view_02",
+				"pwh_objective_castle_view_03"
 			},
 			randomize_indexes = {}
 		},
@@ -22706,40 +22549,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_portals_overheat_failed = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwe_objective_portals_overheat_failed_01",
-				"pwe_objective_portals_overheat_failed_02",
-				"pwe_objective_portals_overheat_failed_03",
-				"pwe_objective_portals_overheat_failed_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwe_objective_portals_overheat_failed_01",
-				"pwe_objective_portals_overheat_failed_02",
-				"pwe_objective_portals_overheat_failed_03",
-				"pwe_objective_portals_overheat_failed_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_objective_dungeon_traps_warning = {
+		pbw_objective_dungeon_traps_warning = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -22747,10 +22557,10 @@ return function ()
 			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_dungeon_traps_warning_01",
-				"pes_objective_dungeon_traps_warning_02",
-				"pes_objective_dungeon_traps_warning_03",
-				"pes_objective_dungeon_traps_warning_04"
+				"pbw_objective_dungeon_traps_warning_01",
+				"pbw_objective_dungeon_traps_warning_02",
+				"pbw_objective_dungeon_traps_warning_03",
+				"pbw_objective_dungeon_traps_warning_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -22765,10 +22575,59 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pes_objective_dungeon_traps_warning_01",
-				"pes_objective_dungeon_traps_warning_02",
-				"pes_objective_dungeon_traps_warning_03",
-				"pes_objective_dungeon_traps_warning_04"
+				"pbw_objective_dungeon_traps_warning_01",
+				"pbw_objective_dungeon_traps_warning_02",
+				"pbw_objective_dungeon_traps_warning_03",
+				"pbw_objective_dungeon_traps_warning_04"
+			},
+			randomize_indexes = {}
+		},
+		pwe_gameplay_healing_draught = {
+			sound_events_n = 8,
+			randomize_indexes_n = 0,
+			face_animations_n = 8,
+			database = "drachenfels",
+			category = "seen_items",
+			dialogue_animations_n = 8,
+			sound_events = {
+				"pwe_gameplay_healing_draught_01",
+				"pwe_gameplay_healing_draught_02",
+				"pwe_gameplay_healing_draught_03",
+				"pwe_gameplay_healing_draught_04",
+				"pwe_gameplay_healing_draught_05",
+				"pwe_gameplay_healing_draught_06",
+				"pwe_gameplay_healing_draught_07",
+				"pwe_gameplay_healing_draught_08"
+			},
+			dialogue_animations = {
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout",
+				"dialogue_shout"
+			},
+			face_animations = {
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy",
+				"face_happy"
+			},
+			localization_strings = {
+				"pwe_gameplay_healing_draught_01",
+				"pwe_gameplay_healing_draught_02",
+				"pwe_gameplay_healing_draught_03",
+				"pwe_gameplay_healing_draught_04",
+				"pwe_gameplay_healing_draught_05",
+				"pwe_gameplay_healing_draught_06",
+				"pwe_gameplay_healing_draught_07",
+				"pwe_gameplay_healing_draught_08"
 			},
 			randomize_indexes = {}
 		},
@@ -22794,6 +22653,122 @@ return function ()
 			localization_strings = {
 				[1.0] = "pwh_objective_spotting_pm_gear_01",
 				[2.0] = "pwh_objective_spotting_pm_gear_02"
+			},
+			randomize_indexes = {}
+		},
+		pwe_objective_spotting_sf_gear = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pwe_objective_spotting_sf_gear_01",
+				[2.0] = "pwe_objective_spotting_sf_gear_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pwe_objective_spotting_sf_gear_01",
+				[2.0] = "pwe_objective_spotting_sf_gear_02"
+			},
+			randomize_indexes = {}
+		},
+		pwe_objective_portals_third_portal_tips = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwe_objective_portals_third_portal_tips_01",
+				"pwe_objective_portals_third_portal_tips_02",
+				"pwe_objective_portals_third_portal_tips_03",
+				"pwe_objective_portals_third_portal_tips_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pwe_objective_portals_third_portal_tips_01",
+				"pwe_objective_portals_third_portal_tips_02",
+				"pwe_objective_portals_third_portal_tips_03",
+				"pwe_objective_portals_third_portal_tips_04"
+			},
+			randomize_indexes = {}
+		},
+		pwe_objective_portals_second_portal_tips = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwe_objective_portals_second_portal_tips_01",
+				"pwe_objective_portals_second_portal_tips_02",
+				"pwe_objective_portals_second_portal_tips_03",
+				"pwe_objective_portals_second_portal_tips_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pwe_objective_portals_second_portal_tips_01",
+				"pwe_objective_portals_second_portal_tips_02",
+				"pwe_objective_portals_second_portal_tips_03",
+				"pwe_objective_portals_second_portal_tips_04"
+			},
+			randomize_indexes = {}
+		},
+		pwh_objective_spotting_sf_gear = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pwh_objective_spotting_sf_gear_01",
+				[2.0] = "pwh_objective_spotting_sf_gear_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pwh_objective_spotting_sf_gear_01",
+				[2.0] = "pwh_objective_spotting_sf_gear_02"
 			},
 			randomize_indexes = {}
 		},
@@ -22830,130 +22805,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_castle_lever = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwe_objective_castle_lever_01",
-				"pwe_objective_castle_lever_02",
-				"pwe_objective_castle_lever_03",
-				"pwe_objective_castle_lever_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pwe_objective_castle_lever_01",
-				"pwe_objective_castle_lever_02",
-				"pwe_objective_castle_lever_03",
-				"pwe_objective_castle_lever_04"
-			},
-			randomize_indexes = {}
-		},
-		pwe_objective_dungeon_torch_1 = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pwe_objective_dungeon_torch_1_01",
-				"pwe_objective_dungeon_torch_1_02",
-				"pwe_objective_dungeon_torch_1_03",
-				"pwe_objective_dungeon_torch_1_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pwe_objective_dungeon_torch_1_01",
-				"pwe_objective_dungeon_torch_1_02",
-				"pwe_objective_dungeon_torch_1_03",
-				"pwe_objective_dungeon_torch_1_04"
-			},
-			randomize_indexes = {}
-		},
-		pwh_objective_spotting_sf_gear = {
-			sound_events_n = 2,
-			randomize_indexes_n = 0,
-			face_animations_n = 2,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pwh_objective_spotting_sf_gear_01",
-				[2.0] = "pwh_objective_spotting_sf_gear_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pwh_objective_spotting_sf_gear_01",
-				[2.0] = "pwh_objective_spotting_sf_gear_02"
-			},
-			randomize_indexes = {}
-		},
-		pes_objective_dungeon_spot_artifact_1 = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "guidance",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_objective_dungeon_spot_artifact_1_01",
-				"pes_objective_dungeon_spot_artifact_1_02",
-				"pes_objective_dungeon_spot_artifact_1_03",
-				"pes_objective_dungeon_spot_artifact_1_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pes_objective_dungeon_spot_artifact_1_01",
-				"pes_objective_dungeon_spot_artifact_1_02",
-				"pes_objective_dungeon_spot_artifact_1_03",
-				"pes_objective_dungeon_spot_artifact_1_04"
-			},
-			randomize_indexes = {}
-		},
 		pbw_objective_portals_third_portal_instruction = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
@@ -22987,7 +22838,7 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_dungeon_torch_2 = {
+		pwe_objective_castle_lever = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -22995,10 +22846,10 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwe_objective_dungeon_torch_2_01",
-				"pwe_objective_dungeon_torch_2_02",
-				"pwe_objective_dungeon_torch_2_03",
-				"pwe_objective_dungeon_torch_2_04"
+				"pwe_objective_castle_lever_01",
+				"pwe_objective_castle_lever_02",
+				"pwe_objective_castle_lever_03",
+				"pwe_objective_castle_lever_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23010,28 +22861,28 @@ return function ()
 				"face_concerned",
 				"face_concerned",
 				"face_concerned",
-				"face_concerned"
+				"face_neutral"
 			},
 			localization_strings = {
-				"pwe_objective_dungeon_torch_2_01",
-				"pwe_objective_dungeon_torch_2_02",
-				"pwe_objective_dungeon_torch_2_03",
-				"pwe_objective_dungeon_torch_2_04"
+				"pwe_objective_castle_lever_01",
+				"pwe_objective_castle_lever_02",
+				"pwe_objective_castle_lever_03",
+				"pwe_objective_castle_lever_04"
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_castle_lever_2 = {
+		pes_objective_castle_broken_bridge = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "player_feedback",
+			category = "level_talk",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_castle_lever_2_01",
-				"pes_objective_castle_lever_2_02",
-				"pes_objective_castle_lever_2_03",
-				"pes_objective_castle_lever_2_04"
+				"pes_objective_castle_broken_bridge_01",
+				"pes_objective_castle_broken_bridge_02",
+				"pes_objective_castle_broken_bridge_03",
+				"pes_objective_castle_broken_bridge_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23042,29 +22893,29 @@ return function ()
 			face_animations = {
 				"face_concerned",
 				"face_concerned",
-				"face_concerned",
-				"face_concerned"
+				"face_neutral",
+				"face_neutral"
 			},
 			localization_strings = {
-				"pes_objective_castle_lever_2_01",
-				"pes_objective_castle_lever_2_02",
-				"pes_objective_castle_lever_2_03",
-				"pes_objective_castle_lever_2_04"
+				"pes_objective_castle_broken_bridge_01",
+				"pes_objective_castle_broken_bridge_02",
+				"pes_objective_castle_broken_bridge_03",
+				"pes_objective_castle_broken_bridge_04"
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_portals_overheat_successful = {
+		pes_objective_dungeon_upward_tunnel = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "player_feedback",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_portals_overheat_successful_01",
-				"pdr_objective_portals_overheat_successful_02",
-				"pdr_objective_portals_overheat_successful_03",
-				"pdr_objective_portals_overheat_successful_04"
+				"pes_objective_dungeon_upward_tunnel_01",
+				"pes_objective_dungeon_upward_tunnel_02",
+				"pes_objective_dungeon_upward_tunnel_03",
+				"pes_objective_dungeon_upward_tunnel_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23079,10 +22930,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pdr_objective_portals_overheat_successful_01",
-				"pdr_objective_portals_overheat_successful_02",
-				"pdr_objective_portals_overheat_successful_03",
-				"pdr_objective_portals_overheat_successful_04"
+				"pes_objective_dungeon_upward_tunnel_01",
+				"pes_objective_dungeon_upward_tunnel_02",
+				"pes_objective_dungeon_upward_tunnel_03",
+				"pes_objective_dungeon_upward_tunnel_04"
 			},
 			randomize_indexes = {}
 		},
@@ -23144,18 +22995,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_castle_ballroom = {
+		pes_objective_dungeon_spot_artifact_1 = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "level_talk",
+			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_castle_ballroom_01",
-				"pdr_objective_castle_ballroom_02",
-				"pdr_objective_castle_ballroom_03",
-				"pdr_objective_castle_ballroom_04"
+				"pes_objective_dungeon_spot_artifact_1_01",
+				"pes_objective_dungeon_spot_artifact_1_02",
+				"pes_objective_dungeon_spot_artifact_1_03",
+				"pes_objective_dungeon_spot_artifact_1_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23170,10 +23021,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pdr_objective_castle_ballroom_01",
-				"pdr_objective_castle_ballroom_02",
-				"pdr_objective_castle_ballroom_03",
-				"pdr_objective_castle_ballroom_04"
+				"pes_objective_dungeon_spot_artifact_1_01",
+				"pes_objective_dungeon_spot_artifact_1_02",
+				"pes_objective_dungeon_spot_artifact_1_03",
+				"pes_objective_dungeon_spot_artifact_1_04"
 			},
 			randomize_indexes = {}
 		},
@@ -23202,18 +23053,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_dungeon_spot_artifact_1 = {
+		pes_objective_castle_lever_2 = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwe_objective_dungeon_spot_artifact_1_01",
-				"pwe_objective_dungeon_spot_artifact_1_02",
-				"pwe_objective_dungeon_spot_artifact_1_03",
-				"pwe_objective_dungeon_spot_artifact_1_04"
+				"pes_objective_castle_lever_2_01",
+				"pes_objective_castle_lever_2_02",
+				"pes_objective_castle_lever_2_03",
+				"pes_objective_castle_lever_2_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23228,10 +23079,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwe_objective_dungeon_spot_artifact_1_01",
-				"pwe_objective_dungeon_spot_artifact_1_02",
-				"pwe_objective_dungeon_spot_artifact_1_03",
-				"pwe_objective_dungeon_spot_artifact_1_04"
+				"pes_objective_castle_lever_2_01",
+				"pes_objective_castle_lever_2_02",
+				"pes_objective_castle_lever_2_03",
+				"pes_objective_castle_lever_2_04"
 			},
 			randomize_indexes = {}
 		},
@@ -23326,18 +23177,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_dungeon_traps_warning = {
+		pwe_objective_dungeon_torch_2 = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_dungeon_traps_warning_01",
-				"pdr_objective_dungeon_traps_warning_02",
-				"pdr_objective_dungeon_traps_warning_03",
-				"pdr_objective_dungeon_traps_warning_04"
+				"pwe_objective_dungeon_torch_2_01",
+				"pwe_objective_dungeon_torch_2_02",
+				"pwe_objective_dungeon_torch_2_03",
+				"pwe_objective_dungeon_torch_2_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23352,25 +23203,25 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pdr_objective_dungeon_traps_warning_01",
-				"pdr_objective_dungeon_traps_warning_02",
-				"pdr_objective_dungeon_traps_warning_03",
-				"pdr_objective_dungeon_traps_warning_04"
+				"pwe_objective_dungeon_torch_2_01",
+				"pwe_objective_dungeon_torch_2_02",
+				"pwe_objective_dungeon_torch_2_03",
+				"pwe_objective_dungeon_torch_2_04"
 			},
 			randomize_indexes = {}
 		},
-		pbw_objective_castle_placing_statuette = {
+		pes_objective_castle_statue = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pbw_objective_castle_placing_statuette_01",
-				"pbw_objective_castle_placing_statuette_02",
-				"pbw_objective_castle_placing_statuette_03",
-				"pbw_objective_castle_placing_statuette_04"
+				"pes_objective_castle_statue_01",
+				"pes_objective_castle_statue_02",
+				"pes_objective_castle_statue_03",
+				"pes_objective_castle_statue_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23385,10 +23236,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pbw_objective_castle_placing_statuette_01",
-				"pbw_objective_castle_placing_statuette_02",
-				"pbw_objective_castle_placing_statuette_03",
-				"pbw_objective_castle_placing_statuette_04"
+				"pes_objective_castle_statue_01",
+				"pes_objective_castle_statue_02",
+				"pes_objective_castle_statue_03",
+				"pes_objective_castle_statue_04"
 			},
 			randomize_indexes = {}
 		},
@@ -23425,7 +23276,32 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_castle_statue = {
+		pdr_objective_portals_unmarked_grave = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pdr_objective_portals_unmarked_grave_01",
+				[2.0] = "pdr_objective_portals_unmarked_grave_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pdr_objective_portals_unmarked_grave_01",
+				[2.0] = "pdr_objective_portals_unmarked_grave_02"
+			},
+			randomize_indexes = {}
+		},
+		pbw_objective_castle_placing_statuette = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -23433,10 +23309,10 @@ return function ()
 			category = "guidance",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwe_objective_castle_statue_01",
-				"pwe_objective_castle_statue_02",
-				"pwe_objective_castle_statue_03",
-				"pwe_objective_castle_statue_04"
+				"pbw_objective_castle_placing_statuette_01",
+				"pbw_objective_castle_placing_statuette_02",
+				"pbw_objective_castle_placing_statuette_03",
+				"pbw_objective_castle_placing_statuette_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23451,14 +23327,14 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwe_objective_castle_statue_01",
-				"pwe_objective_castle_statue_02",
-				"pwe_objective_castle_statue_03",
-				"pwe_objective_castle_statue_04"
+				"pbw_objective_castle_placing_statuette_01",
+				"pbw_objective_castle_placing_statuette_02",
+				"pbw_objective_castle_placing_statuette_03",
+				"pbw_objective_castle_placing_statuette_04"
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_portals_second_portal_tips = {
+		pdr_objective_portals_portal_overheat_near = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -23466,10 +23342,10 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_portals_second_portal_tips_01",
-				"pdr_objective_portals_second_portal_tips_02",
-				"pdr_objective_portals_second_portal_tips_03",
-				"pdr_objective_portals_second_portal_tips_04"
+				"pdr_objective_portals_portal_overheat_near_01",
+				"pdr_objective_portals_portal_overheat_near_02",
+				"pdr_objective_portals_portal_overheat_near_03",
+				"pdr_objective_portals_portal_overheat_near_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23484,25 +23360,25 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pdr_objective_portals_second_portal_tips_01",
-				"pdr_objective_portals_second_portal_tips_02",
-				"pdr_objective_portals_second_portal_tips_03",
-				"pdr_objective_portals_second_portal_tips_04"
+				"pdr_objective_portals_portal_overheat_near_01",
+				"pdr_objective_portals_portal_overheat_near_02",
+				"pdr_objective_portals_portal_overheat_near_03",
+				"pdr_objective_portals_portal_overheat_near_04"
 			},
 			randomize_indexes = {}
 		},
-		pwe_objective_castle_skaven_entry = {
+		pes_objective_portals_mission_successful = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "drachenfels",
-			category = "guidance",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pwe_objective_castle_skaven_entry_01",
-				"pwe_objective_castle_skaven_entry_02",
-				"pwe_objective_castle_skaven_entry_03",
-				"pwe_objective_castle_skaven_entry_04"
+				"pes_objective_portals_mission_successful_01",
+				"pes_objective_portals_mission_successful_02",
+				"pes_objective_portals_mission_successful_03",
+				"pes_objective_portals_mission_successful_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23517,59 +23393,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pwe_objective_castle_skaven_entry_01",
-				"pwe_objective_castle_skaven_entry_02",
-				"pwe_objective_castle_skaven_entry_03",
-				"pwe_objective_castle_skaven_entry_04"
-			},
-			randomize_indexes = {}
-		},
-		pdr_gameplay_healing_draught = {
-			sound_events_n = 8,
-			randomize_indexes_n = 0,
-			face_animations_n = 8,
-			database = "drachenfels",
-			category = "seen_items",
-			dialogue_animations_n = 8,
-			sound_events = {
-				"pdr_gameplay_healing_draught_01",
-				"pdr_gameplay_healing_draught_02",
-				"pdr_gameplay_healing_draught_03",
-				"pdr_gameplay_healing_draught_04",
-				"pdr_gameplay_healing_draught_05",
-				"pdr_gameplay_healing_draught_06",
-				"pdr_gameplay_healing_draught_07",
-				"pdr_gameplay_healing_draught_08"
-			},
-			dialogue_animations = {
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout",
-				"dialogue_shout"
-			},
-			face_animations = {
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_happy",
-				"face_neutral",
-				"face_neutral",
-				"face_neutral"
-			},
-			localization_strings = {
-				"pdr_gameplay_healing_draught_01",
-				"pdr_gameplay_healing_draught_02",
-				"pdr_gameplay_healing_draught_03",
-				"pdr_gameplay_healing_draught_04",
-				"pdr_gameplay_healing_draught_05",
-				"pdr_gameplay_healing_draught_06",
-				"pdr_gameplay_healing_draught_07",
-				"pdr_gameplay_healing_draught_08"
+				"pes_objective_portals_mission_successful_01",
+				"pes_objective_portals_mission_successful_02",
+				"pes_objective_portals_mission_successful_03",
+				"pes_objective_portals_mission_successful_04"
 			},
 			randomize_indexes = {}
 		},
@@ -23631,7 +23458,32 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pes_objective_portals_mission_successful = {
+		pes_castle_intro_b = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pes_castle_intro_b_01",
+				[2.0] = "pes_castle_intro_b_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_neutral",
+				[2.0] = "face_neutral"
+			},
+			localization_strings = {
+				[1.0] = "pes_castle_intro_b_01",
+				[2.0] = "pes_castle_intro_b_02"
+			},
+			randomize_indexes = {}
+		},
+		pdr_objective_portals_second_portal_tips = {
 			sound_events_n = 4,
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
@@ -23639,10 +23491,10 @@ return function ()
 			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pes_objective_portals_mission_successful_01",
-				"pes_objective_portals_mission_successful_02",
-				"pes_objective_portals_mission_successful_03",
-				"pes_objective_portals_mission_successful_04"
+				"pdr_objective_portals_second_portal_tips_01",
+				"pdr_objective_portals_second_portal_tips_02",
+				"pdr_objective_portals_second_portal_tips_03",
+				"pdr_objective_portals_second_portal_tips_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23657,43 +23509,10 @@ return function ()
 				"face_concerned"
 			},
 			localization_strings = {
-				"pes_objective_portals_mission_successful_01",
-				"pes_objective_portals_mission_successful_02",
-				"pes_objective_portals_mission_successful_03",
-				"pes_objective_portals_mission_successful_04"
-			},
-			randomize_indexes = {}
-		},
-		pes_objective_portals_arrive_first_portal = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "level_talk",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pes_objective_portals_arrive_first_portal_01",
-				"pes_objective_portals_arrive_first_portal_02",
-				"pes_objective_portals_arrive_first_portal_03",
-				"pes_objective_portals_arrive_first_portal_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pes_objective_portals_arrive_first_portal_01",
-				"pes_objective_portals_arrive_first_portal_02",
-				"pes_objective_portals_arrive_first_portal_03",
-				"pes_objective_portals_arrive_first_portal_04"
+				"pdr_objective_portals_second_portal_tips_01",
+				"pdr_objective_portals_second_portal_tips_02",
+				"pdr_objective_portals_second_portal_tips_03",
+				"pdr_objective_portals_second_portal_tips_04"
 			},
 			randomize_indexes = {}
 		},
@@ -23784,109 +23603,18 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_objective_portals_unmarked_grave = {
-			sound_events_n = 2,
+		pbw_objective_castle_blood_pool = {
+			sound_events_n = 4,
 			randomize_indexes_n = 0,
-			face_animations_n = 2,
+			face_animations_n = 4,
 			database = "drachenfels",
 			category = "level_talk",
-			dialogue_animations_n = 2,
-			sound_events = {
-				[1.0] = "pdr_objective_portals_unmarked_grave_01",
-				[2.0] = "pdr_objective_portals_unmarked_grave_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk",
-				[2.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned",
-				[2.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pdr_objective_portals_unmarked_grave_01",
-				[2.0] = "pdr_objective_portals_unmarked_grave_02"
-			},
-			randomize_indexes = {}
-		},
-		pdr_objective_portals_portal_overheat_near = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
-				"pdr_objective_portals_portal_overheat_near_01",
-				"pdr_objective_portals_portal_overheat_near_02",
-				"pdr_objective_portals_portal_overheat_near_03",
-				"pdr_objective_portals_portal_overheat_near_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pdr_objective_portals_portal_overheat_near_01",
-				"pdr_objective_portals_portal_overheat_near_02",
-				"pdr_objective_portals_portal_overheat_near_03",
-				"pdr_objective_portals_portal_overheat_near_04"
-			},
-			randomize_indexes = {}
-		},
-		pdr_objective_castle_wood_door = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "guidance",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pdr_objective_castle_wood_door_01",
-				"pdr_objective_castle_wood_door_02",
-				"pdr_objective_castle_wood_door_03",
-				"pdr_objective_castle_wood_door_04"
-			},
-			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
-			},
-			face_animations = {
-				"face_concerned",
-				"face_concerned",
-				"face_concerned",
-				"face_concerned"
-			},
-			localization_strings = {
-				"pdr_objective_castle_wood_door_01",
-				"pdr_objective_castle_wood_door_02",
-				"pdr_objective_castle_wood_door_03",
-				"pdr_objective_castle_wood_door_04"
-			},
-			randomize_indexes = {}
-		},
-		pdr_objective_castle_lever_2 = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
-			database = "drachenfels",
-			category = "player_feedback",
-			dialogue_animations_n = 4,
-			sound_events = {
-				"pdr_objective_castle_lever_2_01",
-				"pdr_objective_castle_lever_2_02",
-				"pdr_objective_castle_lever_2_03",
-				"pdr_objective_castle_lever_2_04"
+				"pbw_objective_castle_blood_pool_01",
+				"pbw_objective_castle_blood_pool_02",
+				"pbw_objective_castle_blood_pool_03",
+				"pbw_objective_castle_blood_pool_04"
 			},
 			dialogue_animations = {
 				"dialogue_talk",
@@ -23901,14 +23629,14 @@ return function ()
 				"face_neutral"
 			},
 			localization_strings = {
-				"pdr_objective_castle_lever_2_01",
-				"pdr_objective_castle_lever_2_02",
-				"pdr_objective_castle_lever_2_03",
-				"pdr_objective_castle_lever_2_04"
+				"pbw_objective_castle_blood_pool_01",
+				"pbw_objective_castle_blood_pool_02",
+				"pbw_objective_castle_blood_pool_03",
+				"pbw_objective_castle_blood_pool_04"
 			},
 			randomize_indexes = {}
 		},
-		pbw_objective_spotting_pm_gear = {
+		pdr_objective_dungeon_outdoors_vista1 = {
 			sound_events_n = 2,
 			randomize_indexes_n = 0,
 			face_animations_n = 2,
@@ -23916,8 +23644,8 @@ return function ()
 			category = "level_talk",
 			dialogue_animations_n = 2,
 			sound_events = {
-				[1.0] = "pbw_objective_spotting_pm_gear_01",
-				[2.0] = "pbw_objective_spotting_pm_gear_02"
+				[1.0] = "pdr_objective_dungeon_outdoors_vista1_01",
+				[2.0] = "pdr_objective_dungeon_outdoors_vista1_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk",
@@ -23928,8 +23656,93 @@ return function ()
 				[2.0] = "face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pbw_objective_spotting_pm_gear_01",
-				[2.0] = "pbw_objective_spotting_pm_gear_02"
+				[1.0] = "pdr_objective_dungeon_outdoors_vista1_01",
+				[2.0] = "pdr_objective_dungeon_outdoors_vista1_02"
+			},
+			randomize_indexes = {}
+		},
+		pdr_objective_dungeon_traps_warning = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "guidance",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pdr_objective_dungeon_traps_warning_01",
+				"pdr_objective_dungeon_traps_warning_02",
+				"pdr_objective_dungeon_traps_warning_03",
+				"pdr_objective_dungeon_traps_warning_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pdr_objective_dungeon_traps_warning_01",
+				"pdr_objective_dungeon_traps_warning_02",
+				"pdr_objective_dungeon_traps_warning_03",
+				"pdr_objective_dungeon_traps_warning_04"
+			},
+			randomize_indexes = {}
+		},
+		pbw_objective_portals_village = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pbw_objective_portals_village_01"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pbw_objective_portals_village_01"
+			}
+		},
+		pbw_objective_portals_arrive_first_portal = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "drachenfels",
+			category = "level_talk",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pbw_objective_portals_arrive_first_portal_01",
+				"pbw_objective_portals_arrive_first_portal_02",
+				"pbw_objective_portals_arrive_first_portal_03",
+				"pbw_objective_portals_arrive_first_portal_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_concerned",
+				"face_concerned",
+				"face_concerned",
+				"face_concerned"
+			},
+			localization_strings = {
+				"pbw_objective_portals_arrive_first_portal_01",
+				"pbw_objective_portals_arrive_first_portal_02",
+				"pbw_objective_portals_arrive_first_portal_03",
+				"pbw_objective_portals_arrive_first_portal_04"
 			},
 			randomize_indexes = {}
 		}

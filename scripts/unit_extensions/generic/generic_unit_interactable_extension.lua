@@ -11,12 +11,6 @@ end
 GenericUnitInteractableExtension.destroy = function (self)
 	return 
 end
-GenericUnitInteractableExtension.update = function (self, unit, input, dt, context, t)
-	if script_data.debug_interactions then
-	end
-
-	return 
-end
 GenericUnitInteractableExtension.interaction_type = function (self)
 	return self.interactable_type
 end

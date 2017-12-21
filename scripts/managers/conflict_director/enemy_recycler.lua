@@ -61,6 +61,20 @@ EnemyRecycler.setup_forbidden_zones = function (self, pos)
 		forbidden_zones[#forbidden_zones + 1] = checkpoint_data.no_spawn_volume
 	end
 
+	for layer_id = 20, 29, 1 do
+		local layer_name = LAYER_ID_MAPPING[layer_id]
+
+		if layer_name then
+			local cost = NAV_TAG_VOLUME_LAYER_COST_AI[layer_name]
+
+			if cost == 0 then
+				print("Layer named:", layer_name, ", id:", layer_id, " has cost 0 --> removed all roaming spawns found inside")
+
+				forbidden_zones[#forbidden_zones + 1] = layer_name
+			end
+		end
+	end
+
 	self.has_forbidden_zones = 0 < #forbidden_zones
 
 	return 
@@ -496,7 +510,9 @@ EnemyRecycler._update_roaming_spawning = function (self, t, player_positions, pl
 	local astar_checks = 0
 	local astar_cached_checks = 0
 	local wakeup_distance = roaming.despawn_distance
+	local wakeup_distance_z = roaming.despawn_distance_z or 30
 	local sleep_distance = wakeup_distance + 5
+	local math_abs = math.abs
 	local areas = self.areas
 	local shutdown_areas = self.shutdown_areas
 	local players = #player_positions
@@ -527,12 +543,13 @@ EnemyRecycler._update_roaming_spawning = function (self, t, player_positions, pl
 
 		for j = 1, players, 1 do
 			local to_dir = pos - player_positions[j]
+			local h = to_dir.z
 
 			Vector3.set_z(to_dir, 0)
 
 			local dist = Vector3.length(to_dir)
 
-			if dist < wakeup_distance then
+			if dist < wakeup_distance and math_abs(h) < wakeup_distance_z then
 				local zone = player_zones[j]
 
 				if self.group_manager.operational and zone and area[INDEX_ZONE] then
@@ -666,7 +683,15 @@ EnemyRecycler.draw_debug = function (self, player_positions)
 		return 
 	end
 
-	drawer.cylinder(drawer, pos + Vector3(0, 0, 0.2), pos + Vector3(0, 0, 7), roaming.despawn_distance, inside_color, 8)
+	local z_dist = roaming.despawn_distance_z
+	local r = roaming.despawn_distance
+
+	drawer.cylinder(drawer, pos + Vector3(0, 0, -z_dist), pos + Vector3(0, 0, z_dist), r, inside_color, 8)
+	drawer.cylinder(drawer, pos + Vector3(0, 0, -z_dist), pos + Vector3(0, 0, z_dist), r, inside_color, 8)
+	drawer.line(drawer, pos + Vector3(r, 0, -z_dist), pos + Vector3(-r, 0, -z_dist), inside_color, 8)
+	drawer.line(drawer, pos + Vector3(0, r, -z_dist), pos + Vector3(0, -r, -z_dist), inside_color, 8)
+	drawer.line(drawer, pos + Vector3(r, 0, z_dist), pos + Vector3(-r, 0, z_dist), inside_color, 8)
+	drawer.line(drawer, pos + Vector3(0, r, z_dist), pos + Vector3(0, -r, z_dist), inside_color, 8)
 
 	local areas = self.areas
 	local visible = self.visible
@@ -697,6 +722,15 @@ EnemyRecycler.draw_debug = function (self, player_positions)
 		local pos = shutdown[i][1]:unbox()
 
 		drawer.line(drawer, pos, pos + cone_height, shutdown_color)
+	end
+
+	local local_player_unit = Managers.player:local_player().player_unit
+
+	if Unit.alive(local_player_unit) then
+		local main_path_player_info = self.conflict_director.main_path_player_info
+		local info = main_path_player_info[local_player_unit]
+
+		Debug.text("travel-dist: %.1fm, move_percent: %.1f%%, path-index: %d, sub-index: %d", info.travel_dist, info.move_percent*100, info.path_index, info.sub_index)
 	end
 
 	Profiler.stop()

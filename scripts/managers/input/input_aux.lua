@@ -1,4 +1,5 @@
 InputAux = InputAux or {}
+local InputAux = InputAux
 
 local function synergy_wrapper(device_name)
 	local wrapper = {}
@@ -63,6 +64,17 @@ InputAux.input_device_mapping = InputAux.input_device_mapping or {
 		synergy_wrapper("SynergyKeyboard")
 	}
 }
+
+if not InputAux.input_device_type_lookup then
+	InputAux.input_device_type_lookup = {}
+
+	for device_type, device_list in pairs(InputAux.input_device_mapping) do
+		for _, device in ipairs(device_list) do
+			InputAux.input_device_type_lookup[device] = device_type
+		end
+	end
+end
+
 InputAux.input_map_types = {
 	soft_button = "number",
 	released = "boolean",
@@ -75,15 +87,9 @@ InputAux.get_device_type = function (device)
 		assert(false, "[InputAux.get_device_type] You need to pass a table")
 	end
 
-	for name, data in pairs(InputAux.input_device_mapping) do
-		if table.contains(data, device) then
-			return name
-		end
-	end
+	fassert(InputAux.input_device_type_lookup[device], "[InputAux.get_device_type] There is no mapping for device %s", (device and device.type and device.type(device)) or device)
 
-	fassert(false, "[InputAux.get_device_type] There is no mapping for device %s", (device and device.type and device.type(device)) or device)
-
-	return 
+	return InputAux.input_device_type_lookup[device]
 end
 InputAux.remove_device = function (input_device_type, input_device)
 	local index = table.find(InputAux.input_device_mapping[input_device_type], input_device)

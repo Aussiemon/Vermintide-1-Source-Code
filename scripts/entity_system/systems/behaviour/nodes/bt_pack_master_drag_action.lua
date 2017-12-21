@@ -535,6 +535,10 @@ BTPackMasterDragAction.find_nav_group_neighbour = function (self, blackboard, po
 			destinations[destination_index][DESTINATION_POS_I] = Vector3Box(nav_group_position)
 			destinations[destination_index][DESTINATION_SCORE_I] = score
 			destination_index = destination_index + 1
+
+			if DRAG_DESTINATIONS_N < destination_index then
+				break
+			end
 		end
 	end
 

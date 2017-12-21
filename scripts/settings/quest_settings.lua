@@ -1,11 +1,15 @@
 QuestSettings = {
 	MAX_NUMBER_OF_POPUP_QUEST_LINKS_PER_ROW = 10,
-	MAX_NUMBER_OF_BOARD_CONTRACTS = 8,
+	PREPARE_MENU_FOR_SYNC_DURATION = 8,
+	MAX_NUMBER_OF_BOARD_CONTRACTS = 2,
 	NUMBER_OF_SEAL_VARIATIONS_BG = 4,
+	EXPIRE_CHECK_MARGIN = 5,
 	MAX_NUMBER_OF_LOG_QUESTS = 1,
 	LOG_CONTRACTS_HEIGHT_SPACING = 3,
+	MAX_NUMBER_OF_BOARD_PAGES = 3,
+	EXPIRE_CHECK_COOLDOWN = 45,
 	MAX_NUMBER_OF_LOG_CONTRACTS = 3,
-	MAX_NUMBER_OF_BOARD_QUESTS = 3,
+	MAX_NUMBER_OF_BOARD_QUESTS = 1,
 	QUEST_LOG_WIDGET_SIZE = {
 		369,
 		191
@@ -26,52 +30,97 @@ QuestSettings = {
 		781,
 		904
 	},
+	STATUS_MESSAGES = {
+		not_found = "not_found",
+		requirements_not_met = "requirements_not_met",
+		already_turned_in = "already_turned_in",
+		success = "success",
+		requirements_already_met = "requirements_already_met",
+		not_active = "not_active"
+	},
 	level_icon_lookup = {
-		magnus = "quest_screen_level_image_magnus",
-		cemetery = "quest_screen_level_image_cemetery",
-		end_boss = "quest_screen_level_image_end_boss",
+		bridge = "quest_screen_level_image_bridge",
 		wizard = "quest_screen_level_image_wizard",
+		docks_short_level = "quest_screen_level_image_docks",
+		end_boss = "quest_screen_level_image_end_boss",
+		dlc_portals = "quest_screen_level_image_dlc_portals",
+		tunnels = "quest_screen_level_image_tunnels",
+		cemetery = "quest_screen_level_image_cemetery",
+		farm = "quest_screen_level_image_farm",
+		courtyard_level = "quest_screen_level_image_courtyard",
+		dlc_castle = "quest_screen_level_image_dlc_castle",
+		any = "quest_screen_level_image_any",
+		dlc_castle_dungeon = "quest_screen_level_image_dlc_castle_dungeon",
+		magnus = "quest_screen_level_image_magnus",
 		city_wall = "quest_screen_level_image_city_wall",
 		forest_ambush = "quest_screen_level_image_forest_ambush",
-		docks_short_level = "quest_screen_level_image_docks",
-		tunnels = "quest_screen_level_image_tunnels",
 		sewers_short = "quest_screen_level_image_sewers",
-		bridge = "quest_screen_level_image_bridge",
-		farm = "quest_screen_level_image_farm",
-		merchant = "quest_screen_level_image_merchant",
-		courtyard_level = "quest_screen_level_image_courtyard",
-		any = "quest_screen_level_image_any"
+		merchant = "quest_screen_level_image_merchant"
 	},
 	level_name_lookup = {
-		magnus = "level_long_1",
-		cemetery = "level_long_5",
-		end_boss = "level_long_7",
+		farm = "level_short_4",
 		wizard = "level_long_3",
+		docks_short_level = "level_short_6",
+		end_boss = "level_long_7",
+		dlc_portals = "dlc1_4_level_portals",
+		tunnels = "level_long_6",
+		cemetery = "level_long_5",
+		bridge = "level_short_2",
+		courtyard_level = "level_short_5",
+		dlc_castle = "dlc1_4_level_castle",
+		any = "any_level",
+		dlc_castle_dungeon = "dlc1_4_level_castle_dungeon",
+		magnus = "level_long_1",
 		city_wall = "level_short_3",
 		forest_ambush = "level_long_4",
-		farm = "level_short_4",
-		tunnels = "level_long_6",
 		sewers_short = "level_short_1",
-		bridge = "level_short_2",
-		docks_short_level = "level_short_6",
-		merchant = "level_long_2",
-		courtyard_level = "level_short_5",
-		any = "any_level"
+		merchant = "level_long_2"
+	},
+	task_type_titles = {
+		tome = {
+			"dlc1_3_1_task_title_tome_01"
+		},
+		grimoire = {
+			"dlc1_3_1_task_title_grim_01"
+		},
+		ogre = {
+			"dlc1_3_1_task_title_ogre_01"
+		},
+		level = {
+			"dlc1_3_1_task_title_level_01"
+		}
+	},
+	task_type_requirement_text = {
+		tome = {
+			"dlc1_3_1_task_requirement_tome_01"
+		},
+		grimoire = {
+			"dlc1_3_1_task_requirement_grim_01"
+		},
+		ogre = {
+			"dlc1_3_1_task_requirement_ogre_01"
+		},
+		level = {
+			"dlc1_3_1_task_requirement_level_01"
+		},
+		quest = {
+			"dlc1_3_1_task_requirement_key_01"
+		}
 	},
 	task_type_to_icon_lookup = {
-		complete_level = "quest_icon_map",
+		level = "quest_icon_map",
 		tome = "quest_icon_tome",
 		grimoire = "quest_icon_grimoire",
 		ogre = "quest_icon_rat_ogre"
 	},
 	task_type_to_name_lookup = {
-		complete_level = "dlc1_3_1_complete_level",
+		level = "dlc1_3_1_complete_level",
 		tome = "dlc1_3_1_tomes",
 		grimoire = "dlc1_3_1_grimoires",
 		ogre = "dlc1_3_1_rat_ogres"
 	},
 	task_type_to_task_description_lookup = {
-		complete_level = "dlc1_3_1_complete",
+		level = "dlc1_3_1_complete",
 		tome = "dlc1_3_1_collect",
 		grimoire = "dlc1_3_1_collect",
 		ogre = "dlc1_3_1_kill"
@@ -128,6 +177,39 @@ QuestSettings = {
 		"quest_screen_bg_contract_02",
 		"quest_screen_bg_contract_03",
 		"quest_screen_bg_contract_05"
+	}
+}
+QuestTextSettings = {
+	task_type_max_range = {
+		grim = 6,
+		tome = 6,
+		level = 10,
+		ogre = 8
+	},
+	quest_giver_max_range = {
+		borgun = 3,
+		alfred = 0,
+		gunter = 5,
+		grodni = 5,
+		heinrich = 3,
+		marianne = 0,
+		ulrike = 0,
+		lorith = 3,
+		rickard = 3,
+		andrea = 3,
+		manfred = 3,
+		bernhardt = 3
+	},
+	quest_givers = {
+		"andrea",
+		"bernhardt",
+		"borgun",
+		"grodni",
+		"gunter",
+		"heinrich",
+		"lorith",
+		"manfred",
+		"rickard"
 	}
 }
 

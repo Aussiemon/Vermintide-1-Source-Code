@@ -266,15 +266,15 @@ ForgeMergeUI.draw = function (self, dt)
 		UIRenderer.end_pass(ui_top_renderer)
 	end
 
-	UIRenderer.begin_pass(active_ui_renderer, ui_scenegraph, active_input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, active_input_service, dt)
 
 	for widget_name, widget in pairs(widgets_by_name) do
 		if (widget_name ~= "door_left_widget" and widget_name ~= "door_right_widget") or (not merging and not playing_door_animation) then
-			UIRenderer.draw_widget(active_ui_renderer, widget)
+			UIRenderer.draw_widget(ui_renderer, widget)
 		end
 	end
 
-	UIRenderer.end_pass(active_ui_renderer)
+	UIRenderer.end_pass(ui_renderer)
 
 	return 
 end

@@ -55,13 +55,14 @@ LoadingView.init = function (self, ui_context)
 	self.wwise_event = ui_context.wwise_event
 	local level_settings = LevelSettings[level_key]
 	local loading_image_material = level_settings.loading_bg_image
+	local has_multiple_loading_images = level_settings.has_multiple_loading_images
 	local game_mode = level_settings.game_mode or "adventure"
 
 	VisualAssertLog.setup(world)
 
 	local bg_material = "materials/ui/loading_screens/" .. loading_image_material
 
-	if act_progression_index and 1 <= act_progression_index then
+	if has_multiple_loading_images and act_progression_index and 1 <= act_progression_index then
 		bg_material = bg_material .. "_" .. act_progression_index
 	end
 

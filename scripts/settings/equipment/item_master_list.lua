@@ -1,6 +1,7 @@
 dofile("scripts/unit_extensions/default_player_unit/buffs/buff_templates")
 dofile("scripts/settings/equipment/weapons")
 dofile("scripts/settings/equipment/attachments")
+dofile("scripts/settings/equipment/item_master_list_local")
 dofile("scripts/settings/equipment/item_master_list_exported")
 
 ItemMasterList.drachenfels_statue = {

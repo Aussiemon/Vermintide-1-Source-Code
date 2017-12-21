@@ -18,6 +18,7 @@ AIMeleeLineOfSightSystem.init = function (self, context, system_name)
 
 	self._is_server = context.is_server
 	self._world = context.world
+	self._physics_world = World.physics_world(self._world)
 	self._extensions = {}
 	self._update_queue = {}
 	self._update_queue_index = 0
@@ -98,9 +99,10 @@ AIMeleeLineOfSightSystem.update = function (self, context, t)
 	offsets[2] = Vector3(0.5, 0, 1.5)
 	offsets[3] = Vector3(-0.5, 0, 1.5)
 	local ray_from_offset = Vector3(0, 0, 1.5)
-	local physics_world = World.physics_world(self._world)
+	local physics_world = self._physics_world
 	local up = Vector3.up()
 	local unit_alive = Unit.alive
+	local is_character = DamageUtils.is_character
 	local debug = script_data.debug_ai_melee_line_of_sight
 
 	while index <= max_index and raycasts < MAX_RAYCASTS do
@@ -108,7 +110,7 @@ AIMeleeLineOfSightSystem.update = function (self, context, t)
 		local bb = ext.blackboard
 		local target = bb.attacking_target or bb.special_attacking_target or bb.target_unit
 
-		if unit_alive(target) then
+		if unit_alive(target) and is_character(target) then
 			local unit = ext.unit
 			local self_pos = POSITION_LOOKUP[unit]
 			local target_pos = POSITION_LOOKUP[target]

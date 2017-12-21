@@ -8,6 +8,7 @@ AltarTraitRollUI.init = function (self, parent, position, animation_definitions,
 	self.parent = parent
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
+	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
@@ -49,7 +50,7 @@ AltarTraitRollUI._handle_gamepad_input = function (self, dt)
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad then
 		if self.active_item_id then
-			if input_service.get(input_service, "special_1") then
+			if input_service.get(input_service, "special_1") and self.can_remove_item(self) then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_item_remove_request = true
 			elseif input_service.get(input_service, "refresh") then
@@ -150,7 +151,7 @@ AltarTraitRollUI.create_ui_elements = function (self)
 	self.ui_scenegraph.expand_frame_background.size[1] = 0
 
 	self._set_option_buttons_visibility(self, false)
-	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
+	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 	self._setup_candle_animations(self)
 
 	return 
@@ -472,11 +473,12 @@ AltarTraitRollUI._clear_item_display_data = function (self)
 	return 
 end
 AltarTraitRollUI.draw = function (self, dt)
+	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.parent:page_input_service()
 
-	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	local widgets = self.widgets
 	local num_widgets = #widgets
@@ -484,7 +486,7 @@ AltarTraitRollUI.draw = function (self, dt)
 	for i = 1, num_widgets, 1 do
 		local widget = widgets[i]
 
-		UIRenderer.draw_widget(ui_top_renderer, widget)
+		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
 	local trait_preview_widgets = self.trait_preview_widgets
@@ -497,12 +499,12 @@ AltarTraitRollUI.draw = function (self, dt)
 			if current_traits_data[i] or new_traits_data[i] then
 				local widget = trait_preview_widgets[i]
 
-				UIRenderer.draw_widget(ui_top_renderer, widget)
+				UIRenderer.draw_widget(ui_renderer, widget)
 			end
 		end
 	end
 
-	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.end_pass(ui_renderer)
 
 	return 
 end

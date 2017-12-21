@@ -67,12 +67,6 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	if CharacterStateHelper.is_hammer_leaping(status_extension) then
-		csm.change_state(csm, "hammer_leap")
-
-		return 
-	end
-
 	if CharacterStateHelper.is_using_transport(status_extension) then
 		csm.change_state(csm, "using_transport")
 
@@ -201,9 +195,10 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 	CharacterStateHelper.crouch(unit, input_extension, status_extension, toggle_crouch, first_person_extension, t)
 
 	local player = Managers.player:owner(unit)
+	local move_input = CharacterStateHelper.get_movement_input(input_extension)
 
 	if is_moving then
-		self.movement_speed = math.min(1, self.movement_speed + movement_settings_table.move_acceleration_up*dt)
+		self.movement_speed = math.min(Vector3.length(move_input), self.movement_speed + movement_settings_table.move_acceleration_up*dt)
 	elseif player and player.bot_player then
 		self.movement_speed = 0
 	else
@@ -211,49 +206,15 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 	end
 
 	local walking = input_extension.get(input_extension, "walk")
-	local move_speed = (status_extension.is_crouching(status_extension) and movement_settings_table.crouch_move_speed) or (walking and movement_settings_table.walk_move_speed) or movement_settings_table.move_speed
+	local max_move_speed = (status_extension.is_crouching(status_extension) and movement_settings_table.crouch_move_speed) or (walking and movement_settings_table.walk_move_speed) or movement_settings_table.move_speed
 	local move_speed_multiplier = status_extension.current_move_speed_multiplier(status_extension)
 
 	if walking ~= self.walking then
 		status_extension.set_slowed(status_extension, walking)
 	end
 
-	move_speed = move_speed*move_speed_multiplier
-	move_speed = move_speed*movement_settings_table.player_speed_scale
-	move_speed = move_speed*self.movement_speed
-	local movement = Vector3(0, 0, 0)
-	local move_input = input_extension.get(input_extension, "move")
-
-	if move_input then
-		movement = movement + move_input
-	end
-
-	local move_input_controller = input_extension.get(input_extension, "move_controller")
-
-	if move_input_controller then
-		local controller_length = Vector3.length(move_input_controller)
-
-		if 0 < controller_length then
-			move_speed = move_speed*controller_length
-		end
-
-		movement = movement + move_input_controller
-	end
-
-	local move_input_dpad = input_extension.get(input_extension, "move_dpad")
-
-	if move_input_dpad then
-		local controller_length = Vector3.length(move_input_dpad)
-
-		if 0 < controller_length then
-			move_speed = move_speed*controller_length
-		end
-
-		movement = movement + move_input_dpad
-	end
-
-	local move_input_direction = nil
-	move_input_direction = Vector3.normalize(movement)
+	local move_speed = max_move_speed*move_speed_multiplier*movement_settings_table.player_speed_scale*self.movement_speed
+	local move_input_direction = Vector3.normalize(move_input)
 
 	if Vector3.length(move_input_direction) == 0 then
 		move_input_direction = self.last_input_direction:unbox()
@@ -268,10 +229,12 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 
 		interactor_extension.start_interaction(interactor_extension, "interacting")
 
-		local params = self.temp_params
-		params.swap_to_3p = config.swap_to_3p
+		if not config.allow_movement then
+			local params = self.temp_params
+			params.swap_to_3p = config.swap_to_3p
 
-		csm.change_state(csm, "interacting", params)
+			csm.change_state(csm, "interacting", params)
+		end
 
 		return 
 	end
@@ -283,10 +246,13 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 
 	if CharacterStateHelper.is_interacting(interactor_extension) then
 		local config = interactor_extension.interaction_config(interactor_extension)
-		local params = self.temp_params
-		params.swap_to_3p = config.swap_to_3p
 
-		csm.change_state(csm, "interacting", params)
+		if not config.allow_movement then
+			local params = self.temp_params
+			params.swap_to_3p = config.swap_to_3p
+
+			csm.change_state(csm, "interacting", params)
+		end
 
 		return 
 	end

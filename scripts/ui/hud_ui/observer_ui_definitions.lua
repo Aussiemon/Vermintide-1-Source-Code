@@ -348,10 +348,13 @@ local widget_definitions = {
 			hp_bar_divider = "player_hp_bar_divider",
 			hp_bar_fg = "player_hp_bar_fg",
 			hp_bar = {
+				low_health = false,
 				wounded_texture_id = "player_hp_bar",
 				texture_id = "player_hp_bar",
 				draw_health_bar = true,
 				bar_value = 1,
+				is_knocked_down = false,
+				is_wounded = false,
 				normal_texture_id = "player_hp_bar_color_tint"
 			},
 			hp_bar_grimoire_debuff = {

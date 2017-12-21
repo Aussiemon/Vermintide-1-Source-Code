@@ -177,16 +177,13 @@ PlayerCharacterStateClimbingLadder.update = function (self, unit, input, dt, con
 		self.movement_speed = math.max(0, self.movement_speed - movement_settings_table.ladder.climb_acceleration_down*dt)
 	end
 
-	local move_speed = movement_settings_table.ladder.climb_speed
 	local move_speed_multiplier = status_extension.current_move_speed_multiplier(status_extension)
-	move_speed = move_speed*move_speed_multiplier
-	move_speed = move_speed*movement_settings_table.ladder.player_ladder_speed_scale
-	move_speed = move_speed*self.movement_speed
+	local move_speed = movement_settings_table.ladder.climb_speed*move_speed_multiplier*movement_settings_table.ladder.player_ladder_speed_scale*self.movement_speed
 	local ladder_rotation = Unit.local_rotation(self.ladder_unit, 0)
 	local ladder_pos = Unit.world_position(self.ladder_unit, 0)
 	local ladder_offset = Vector3.dot(-Quaternion.forward(ladder_rotation), POSITION_LOOKUP[unit] - ladder_pos) + movement_settings_table.ladder.climb_attach_to_ladder_position_in_ladder_space_y
 
-	CharacterStateHelper.move_on_ladder(self.first_person_extension, ladder_rotation, input_extension, self.locomotion_extension, unit, move_speed, ladder_offset)
+	self._move_on_ladder(self, self.first_person_extension, ladder_rotation, input_extension, self.locomotion_extension, unit, move_speed, ladder_offset)
 
 	local time_in_move_animation = CharacterStateHelper.time_in_ladder_move_animation(unit, ladder_pos.z)
 	local variable_index = Unit.animation_find_variable(unit, "climb_time")
@@ -207,6 +204,66 @@ PlayerCharacterStateClimbingLadder.update = function (self, unit, input, dt, con
 
 		WwiseWorld.trigger_event(wwise_world, "player_footstep_ladder", wwise_source_id)
 	end
+
+	return 
+end
+PlayerCharacterStateClimbingLadder._move_on_ladder = function (self, first_person_extension, rotation, input_extension, locomotion_extension, unit, speed, ladder_offset)
+	local movement = CharacterStateHelper.get_square_movement_input(input_extension)
+	local x_input = Vector3.x(movement)
+	local y_input = Vector3.y(movement)
+
+	Debug.text("x:%f, y:%f", x_input, y_input)
+
+	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
+	local mover = Unit.mover(unit)
+	local direction = nil
+	local collides_down = Mover.collides_down(mover)
+
+	if collides_down and y_input <= 0 then
+		direction = Vector3(x_input, y_input, 0)
+	else
+		local first_person_unit = first_person_extension.get_first_person_unit(first_person_extension)
+		local player_rotation = Unit.local_rotation(first_person_unit, 0)
+		local player_pitch = Quaternion.pitch(player_rotation)
+		local pitch_value = player_pitch + movement_settings_table.ladder.climb_pitch_offset
+
+		if collides_down and pitch_value < 0 and 0 < y_input then
+			pitch_value = 0
+		end
+
+		local speed_lerp_interval = math.degrees_to_radians(movement_settings_table.ladder.climb_speed_lerp_interval)
+		local pitch_value = math.clamp(math.auto_lerp(-speed_lerp_interval, speed_lerp_interval, -1, 1, pitch_value), -1, 1)
+
+		if 0 < y_input or (y_input < 0 and not collides_down) then
+			local percentage_to_increase_input = nil
+
+			if 0 < pitch_value then
+				percentage_to_increase_input = (pitch_value - 1)*(pitch_value - 1) - 1
+			else
+				percentage_to_increase_input = (pitch_value - -1)*(pitch_value - -1) + -1
+			end
+
+			y_input = y_input*percentage_to_increase_input
+		end
+
+		if collides_down then
+			if 0 < y_input then
+				direction = Vector3(x_input*movement_settings_table.ladder.climb_horizontals_multiplier, 0, y_input)
+			else
+				direction = Vector3(x_input, y_input, 0)
+			end
+		else
+			if Vector3.dot(Quaternion.forward(player_rotation), Quaternion.forward(rotation)) < 0 then
+				x_input = -x_input
+			end
+
+			direction = Vector3(x_input*movement_settings_table.ladder.climb_horizontals_multiplier, 0, y_input)
+		end
+	end
+
+	local move_direction = Quaternion.rotate(rotation, direction)
+
+	locomotion_extension.set_wanted_velocity(locomotion_extension, move_direction*speed + ladder_offset*Quaternion.forward(rotation)*4)
 
 	return 
 end

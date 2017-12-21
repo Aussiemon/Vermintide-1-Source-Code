@@ -15,11 +15,13 @@ CameraStateObserver.on_enter = function (self, unit, input, dt, context, t, prev
 	self._observed_player_id = nil
 
 	self.follow_next_unit(self)
+	Managers.state.event:trigger("camera_teleported")
 
 	return 
 end
 CameraStateObserver.on_exit = function (self, unit, input, dt, context, t, next_state)
 	self.camera_extension:set_observed_player_id(nil)
+	Managers.state.event:trigger("camera_teleported")
 
 	return 
 end
@@ -80,6 +82,8 @@ CameraStateObserver.update = function (self, unit, input, dt, context, t)
 	if self._snap_camera then
 		new_position = position
 		self._snap_camera = false
+
+		Managers.state.event:trigger("camera_teleported")
 	end
 
 	Unit.set_local_position(unit, 0, new_position)
@@ -118,6 +122,9 @@ CameraStateObserver.follow_next_unit = function (self)
 		if 50 < distance then
 			snap_camera = true
 		end
+	end
+
+	if follow_unit then
 	end
 
 	self._follow_unit = follow_unit

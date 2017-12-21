@@ -29,21 +29,30 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 	blackboard.attack_aborted = false
 	local target_unit = blackboard.target_unit
 	local target_unit_status_extension = (ScriptUnit.has_extension(target_unit, "status_system") and ScriptUnit.extension(target_unit, "status_system")) or nil
-	local attack_anim = randomize(self._select_attack_anim(self, action, unit, target_unit, blackboard, target_unit_status_extension))
+	local attack = self._select_attack(self, action, unit, target_unit, blackboard, target_unit_status_extension)
+	local attack_anim = randomize(attack.anims)
 	blackboard.attack_anim = attack_anim
-	local box_range = action.use_box_range
+	local box_range = attack.damage_box_range
 
 	if box_range then
-		local range = box_range[attack_anim]
-		blackboard.attack_range_up = range.up
-		blackboard.attack_range_down = range.down
-		blackboard.attack_range_flat = range.flat
+		blackboard.attack_range_up = box_range.up
+		blackboard.attack_range_down = box_range.down
+		blackboard.attack_range_flat = box_range.flat
 	end
 
 	blackboard.attack_token = (target_unit_status_extension and target_unit_status_extension.want_an_attack(target_unit_status_extension)) or nil
 
 	if blackboard.attack_token then
 		target_unit_status_extension.add_attack_intensity(target_unit_status_extension, math.random()*0.5 + 0.75)
+
+		local breed = blackboard.breed
+		local should_backstab = breed.use_backstab_vo and blackboard.total_slots_count < 5
+
+		DialogueSystem:TriggerBackstab(blackboard.target_unit, unit, should_backstab)
+
+		if should_backstab then
+			blackboard.backstab_attack_trigger = true
+		end
 	end
 
 	blackboard.target_unit_status_extension = target_unit_status_extension
@@ -58,29 +67,35 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 	blackboard.attack_setup_delayed = true
 	blackboard.attacking_target = blackboard.target_unit
 
-	DialogueSystem:TriggerBackstab(target_unit, unit)
-
 	return 
 end
-BTAttackAction._select_attack_anim = function (self, action, unit, target_unit, blackboard, target_unit_status_extension)
+BTAttackAction._select_attack = function (self, action, unit, target_unit, blackboard, target_unit_status_extension)
 	local target_type = Unit.get_data(target_unit, "target_type")
-	local exceptions = target_type and action.target_type_exceptions and action.target_type_exceptions[target_type]
+	local target_exception_attack = target_type and action.target_type_exceptions and action.target_type_exceptions[target_type]
 
-	if exceptions and exceptions.attack_anim then
-		return exceptions.attack_anim
+	if target_exception_attack then
+		return target_exception_attack
 	else
 		local self_pos = POSITION_LOOKUP[unit]
 		local target_pos = POSITION_LOOKUP[target_unit] or Unit.world_position(unit, 0)
 		local z_offset = target_pos.z - self_pos.z
+		local flat_distance = Vector3.distance(Vector3.flat(self_pos), Vector3.flat(target_pos))
+		local default_attack = action.default_attack
+		local high_attack = action.high_attack
+		local mid_attack = action.mid_attack
+		local low_attack = action.low_attack
+		local knocked_down_attack = action.knocked_down_attack
 
-		if action.high_attack_anim and action.high_attack_threshold < z_offset then
-			return action.high_attack_anim
-		elseif action.low_attack_anim and z_offset < action.low_attack_threshold then
-			return action.low_attack_anim
-		elseif action.knocked_down_attack_anim and z_offset < action.knocked_down_attack_threshold and target_unit_status_extension and target_unit_status_extension.is_knocked_down(target_unit_status_extension) then
-			return action.knocked_down_attack_anim
+		if high_attack and high_attack.z_threshold < z_offset then
+			return high_attack
+		elseif mid_attack and z_offset < mid_attack.z_threshold and mid_attack.flat_threshold < flat_distance then
+			return mid_attack
+		elseif low_attack and z_offset < low_attack.z_threshold then
+			return low_attack
+		elseif knocked_down_attack and z_offset < knocked_down_attack.z_threshold and target_unit_status_extension and target_unit_status_extension.is_knocked_down(target_unit_status_extension) then
+			return knocked_down_attack
 		else
-			return action.attack_anim
+			return default_attack
 		end
 	end
 
@@ -177,6 +192,17 @@ BTAttackAction.attack_success = function (self, unit, blackboard)
 	blackboard.attack_cooldown_at = cooldown_at
 	blackboard.is_in_attack_cooldown = cooldown
 	blackboard.attack_success = true
+
+	if blackboard.target_unit_status_extension then
+		local target_unit_status_extension = blackboard.target_unit_status_extension
+		local breed = blackboard.breed
+
+		if breed.use_backstab_vo and blackboard.backstab_attack_trigger then
+			DialogueSystem:TriggerBackstabHit(blackboard.target_unit, unit)
+
+			blackboard.backstab_attack_trigger = false
+		end
+	end
 
 	return 
 end

@@ -1,26 +1,26 @@
 require("scripts/utils/colors")
 
-UISceneGraph = {
-	init_scenegraph_cached = function (scenegraph)
-		local hierarchical_scenegraph = scenegraph.hierarchical_scenegraph
+UISceneGraph = {}
+local UISceneGraph = UISceneGraph
+UISceneGraph.init_scenegraph_cached = function (scenegraph)
+	local hierarchical_scenegraph = scenegraph.hierarchical_scenegraph
 
-		for i = 1, scenegraph.n_hierarchical_scenegraph, 1 do
-			local scenegraph_object = hierarchical_scenegraph[i]
+	for i = 1, scenegraph.n_hierarchical_scenegraph, 1 do
+		local scenegraph_object = hierarchical_scenegraph[i]
 
-			EngineOptimized.scenegraph_cached_deinit(scenegraph_object.scene_graph_ref)
+		EngineOptimized.scenegraph_cached_deinit(scenegraph_object.scene_graph_ref)
 
-			scenegraph_object.scene_graph_ref = nil
-			local children = scenegraph_object.children
+		scenegraph_object.scene_graph_ref = nil
+		local children = scenegraph_object.children
 
-			if children then
-				local scene_graph_ref = EngineOptimized.scenegraph_cached_init(scenegraph_object.children)
-				scenegraph_object.scene_graph_ref = scene_graph_ref
-			end
+		if children then
+			local scene_graph_ref = EngineOptimized.scenegraph_cached_init(scenegraph_object.children)
+			scenegraph_object.scene_graph_ref = scene_graph_ref
 		end
-
-		return 
 	end
-}
+
+	return 
+end
 UISceneGraph.init_scenegraph = function (scenegraph)
 	scenegraph = table.clone(scenegraph)
 	local hierarchical_scenegraph = {}

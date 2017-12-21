@@ -104,48 +104,50 @@ MapViewAreaHandler._setup_level_lists = function (self)
 			local area = map_settings.area
 			local game_mode = level_data.game_mode
 
-			if not areas_level_list[game_mode] then
-				areas_level_list[game_mode] = {}
-			end
+			if game_mode then
+				if not areas_level_list[game_mode] then
+					areas_level_list[game_mode] = {}
+				end
 
-			local game_mode_level_list = areas_level_list[game_mode]
+				local game_mode_level_list = areas_level_list[game_mode]
 
-			if not game_mode_level_list[area] then
-				game_mode_level_list[area] = {}
-			end
+				if not game_mode_level_list[area] then
+					game_mode_level_list[area] = {}
+				end
 
-			local level_information = {}
-			local area_level_list = game_mode_level_list[area]
-			area_level_list[level_key] = level_information
-			level_information.level_key = level_key
-			level_information.area = map_settings.area
-			level_information.map_icon = map_settings.icon
-			level_information.dlc_name = level_data.dlc_name
-			level_information.level_image = level_data.level_image
-			level_information.display_name = level_data.display_name
-			level_information.wwise_events = map_settings.wwise_events
-			level_information.position = map_settings.area_position
-			local textures = table.clone(game_mode_level_area_textures[game_mode])
-			level_information.textures = textures
-			local map_icon = map_settings.icon
-			local map_background_texture = map_settings.background_texture
+				local level_information = {}
+				local area_level_list = game_mode_level_list[area]
+				area_level_list[level_key] = level_information
+				level_information.level_key = level_key
+				level_information.area = map_settings.area
+				level_information.map_icon = map_settings.icon
+				level_information.dlc_name = level_data.dlc_name
+				level_information.level_image = level_data.level_image
+				level_information.display_name = level_data.display_name
+				level_information.wwise_events = map_settings.wwise_events
+				level_information.position = map_settings.area_position
+				local textures = table.clone(game_mode_level_area_textures[game_mode])
+				level_information.textures = textures
+				local map_icon = map_settings.icon
+				local map_background_texture = map_settings.background_texture
 
-			if map_icon then
-				textures.icon = map_icon
-			end
+				if map_icon then
+					textures.icon = map_icon
+				end
 
-			if map_background_texture then
-				textures.background = map_background_texture
-				textures.hover = string.format("%s%s", map_background_texture, "_hover")
-			end
+				if map_background_texture then
+					textures.background = map_background_texture
+					textures.hover = string.format("%s%s", map_background_texture, "_hover")
+				end
 
-			local visibility, visibility_tooltip = map_view_helper.get_level_visibility(map_view_helper, level_key, level_data)
-			level_information.visibility = visibility
-			level_information.visibility_tooltip = visibility_tooltip
+				local visibility, visibility_tooltip = map_view_helper.get_level_visibility(map_view_helper, level_key, level_data)
+				level_information.visibility = visibility
+				level_information.visibility_tooltip = visibility_tooltip
 
-			if visibility ~= "hidden" then
-				local difficulty_data = map_view_helper.get_difficulty_data(map_view_helper, level_key, level_data)
-				level_information.difficulty_data = difficulty_data
+				if visibility ~= "hidden" then
+					local difficulty_data = map_view_helper.get_difficulty_data(map_view_helper, level_key, level_data)
+					level_information.difficulty_data = difficulty_data
+				end
 			end
 		end
 	end
@@ -410,6 +412,20 @@ MapViewAreaHandler._reset_widget_for_level = function (self, widget, level_key, 
 	widget_position[1] = position[1]
 	widget_position[2] = position[2]
 	widget_position[3] = 5
+	local preview_tooltip_style = widget_style.preview_tooltip
+
+	if preview_tooltip_style then
+		if 0 < position[1] then
+			preview_tooltip_style.cursor_side = "left"
+			preview_tooltip_style.cursor_offset[1] = -10
+			preview_tooltip_style.cursor_offset[2] = -27
+		else
+			preview_tooltip_style.cursor_side = nil
+			preview_tooltip_style.cursor_offset[1] = 25
+			preview_tooltip_style.cursor_offset[2] = 15
+		end
+	end
+
 	local alpha = 0
 	widget_style.hover.color[1] = alpha
 
@@ -808,6 +824,7 @@ MapViewAreaHandler._on_level_selected = function (self, index, play_sound, insta
 	end
 
 	self._selected_level_index = index
+	self._level_hover_index = nil
 
 	return 
 end

@@ -57,8 +57,8 @@ BTBotTeleportToAllyAction.run = function (self, unit, blackboard, t, dt)
 			tp_bb.state = "done"
 			blackboard.has_teleported = true
 
-			ScriptUnit.extension(unit, "ai_navigation_system"):teleport(destination)
-			ScriptUnit.extension(unit, "ai_system"):clear_failed_paths()
+			blackboard.navigation_extension:teleport(destination)
+			blackboard.ai_system_extension:clear_failed_paths()
 
 			blackboard.follow.needs_target_position_refresh = true
 

@@ -5,6 +5,11 @@ local CROSSHAIR_STYLE_FUNC_LOOKUP = {
 	circle = "draw_circle_style_crosshair",
 	dot = "draw_dot_style_crosshair"
 }
+local CROSSHAIR_ENABLED_STYLES_LOOKUP = {
+	default = true,
+	circle = true,
+	dot = true
+}
 CrosshairUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -12,6 +17,7 @@ CrosshairUI.init = function (self, ingame_ui_context)
 	self.local_player = Managers.player:local_player()
 
 	self.create_ui_elements(self)
+	self.set_enabled_crosshair_styles(self, Application.user_setting("enabled_crosshairs"))
 	rawset(_G, "crosshair_ui", self)
 
 	self.t = 0
@@ -54,6 +60,27 @@ CrosshairUI.update = function (self, dt)
 	self.update_hit_markers(self, dt)
 	self.update_spread(self, dt, equipment)
 	self.draw(self, dt)
+
+	return 
+end
+CrosshairUI.set_enabled_crosshair_styles = function (self, enabled_style)
+	if enabled_style == "melee" then
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.dot = true
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.default = false
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.circle = false
+	elseif enabled_style == "ranged" then
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.dot = false
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.default = true
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.circle = true
+	elseif enabled_style == "none" then
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.dot = false
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.default = false
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.circle = false
+	else
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.dot = true
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.default = true
+		CROSSHAIR_ENABLED_STYLES_LOOKUP.circle = true
+	end
 
 	return 
 end
@@ -159,9 +186,13 @@ CrosshairUI.draw = function (self, dt)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	local crosshair_style = self.crosshair_style
-	local draw_func_name = CROSSHAIR_STYLE_FUNC_LOOKUP[crosshair_style]
 
-	self[draw_func_name](self, ui_renderer)
+	if CROSSHAIR_ENABLED_STYLES_LOOKUP[crosshair_style] then
+		local draw_func_name = CROSSHAIR_STYLE_FUNC_LOOKUP[crosshair_style]
+
+		self[draw_func_name](self, ui_renderer)
+	end
+
 	Profiler.start("draw widgets")
 
 	local hit_markers = self.hit_markers

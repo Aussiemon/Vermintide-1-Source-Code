@@ -151,12 +151,16 @@ end
 GiftPopupUI._align_thumb_widgets = function (self)
 	local thumb_widgets = self.thumb_widgets
 	local num_thumb_widgets = #thumb_widgets
-	local distance_between = 100
-	local start_offset = -(distance_between*math.floor(num_thumb_widgets*0.5))
+	local max_display_width = 630
+	local thumb_width = 64
+	local total_thumb_width = num_thumb_widgets*thumb_width
+	local free_spacing_width = (max_display_width - total_thumb_width)/math.max(num_thumb_widgets - 1, 1)
+	local distance_between = (0 < free_spacing_width and math.min(free_spacing_width, 36)) or free_spacing_width
+	local start_offset = -((distance_between + thumb_width)*(num_thumb_widgets - 1))/2
 
 	for index, widget in ipairs(thumb_widgets) do
 		widget.offset[1] = start_offset
-		start_offset = start_offset + distance_between
+		start_offset = start_offset + distance_between + thumb_width
 	end
 
 	return 
@@ -647,7 +651,7 @@ GiftPopupUI.load_reward_units = function (self)
 
 				units_to_spawn_data[#units_to_spawn_data + 1] = {
 					unit_name = left_unit,
-					unit_attachment_node_linking = item_template.left_hand_attachment_node_linking.third_person.wielded
+					unit_attachment_node_linking = item_template.left_hand_attachment_node_linking.third_person.display
 				}
 			end
 
@@ -660,7 +664,7 @@ GiftPopupUI.load_reward_units = function (self)
 
 				units_to_spawn_data[#units_to_spawn_data + 1] = {
 					unit_name = right_unit,
-					unit_attachment_node_linking = item_template.right_hand_attachment_node_linking.third_person.wielded
+					unit_attachment_node_linking = item_template.right_hand_attachment_node_linking.third_person.display
 				}
 			end
 		else

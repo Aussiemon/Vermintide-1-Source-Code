@@ -51,9 +51,7 @@ end
 local buff_params = {}
 script_data.debug_legendary_traits = script_data.debug_legendary_traits or Development.parameter("debug_legendary_traits")
 
-local function trigger_assist_buffs(player1, player2)
-	local savior_unit = player1.player_unit
-	local saved_unit = player2.player_unit
+local function trigger_assist_buffs(savior_unit, saved_unit)
 	local status_ext = ScriptUnit.extension(saved_unit, "status_system")
 	local is_knocked_down = status_ext.is_knocked_down(status_ext)
 
@@ -171,10 +169,15 @@ PositiveReinforcementUI.add_event = function (self, hash, local_player, color_fr
 	return 
 end
 PositiveReinforcementUI.event_add_positive_enforcement = function (self, hash, local_player, event_type, player1, player2)
-	self.add_event(self, hash, local_player, event_colors.default, event_type, player1.name(player1), (player2 and player2.name(player2)) or nil)
+	self.add_event(self, hash, local_player, event_colors.default, event_type, player1 and player1.name(player1), player2 and player2.name(player2))
 
 	if event_type == "aid" and local_player then
-		trigger_assist_buffs(player1, player2)
+		local player_one_unit = player1 and player1.player_unit
+		local player_two_unit = player2 and player2.player_unit
+
+		if Unit.alive(player_one_unit) and Unit.alive(player_two_unit) then
+			trigger_assist_buffs(player_one_unit, player_two_unit)
+		end
 	end
 
 	return 

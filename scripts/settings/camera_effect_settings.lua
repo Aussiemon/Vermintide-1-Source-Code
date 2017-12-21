@@ -677,12 +677,44 @@ CameraEffectSettings = {
 			fade_in = 1,
 			octaves = 8
 		},
+		dwarf_exterior_ramp = {
+			persistance = 0.8,
+			fade_out = 3,
+			amplitude = 1,
+			duration = 7,
+			fade_in = 1,
+			octaves = 8
+		},
+		dwarf_exterior_pickup_artifact = {
+			persistance = 0.8,
+			fade_out = 3,
+			amplitude = 1,
+			duration = 7,
+			fade_in = 1,
+			octaves = 8
+		},
 		castle_laugh = {
 			persistance = 0.75,
 			fade_out = 1,
 			amplitude = 1,
 			duration = 2.5,
 			fade_in = 0.5,
+			octaves = 8
+		},
+		quarry_escape = {
+			persistance = 0.5,
+			fade_out = 2,
+			amplitude = 0.65,
+			duration = 1000,
+			fade_in = 2,
+			octaves = 6
+		},
+		quarry_random_shake = {
+			persistance = 0.7,
+			fade_out = 3,
+			amplitude = 0.9,
+			duration = 4,
+			fade_in = 1,
 			octaves = 8
 		},
 		castle_escape = {

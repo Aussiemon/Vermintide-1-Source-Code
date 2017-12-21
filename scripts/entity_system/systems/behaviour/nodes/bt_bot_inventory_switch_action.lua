@@ -10,20 +10,18 @@ BTBotInventorySwitchAction.name = "BTBotInventorySwitchAction"
 BTBotInventorySwitchAction.enter = function (self, unit, blackboard, t)
 	blackboard.node_timer = t
 	blackboard.wanted_slot = self._tree_node.action_data.wanted_slot
-	blackboard.started_wield = false
 
 	return 
 end
 BTBotInventorySwitchAction.leave = function (self, unit, blackboard, t)
 	blackboard.wanted_slot = nil
-	blackboard.started_wield = nil
 
 	return 
 end
 BTBotInventorySwitchAction.run = function (self, unit, blackboard, t, dt)
 	local wanted_slot = blackboard.wanted_slot
-	local inventory_ext = ScriptUnit.extension(unit, "inventory_system")
-	local input_extension = ScriptUnit.extension(unit, "input_system")
+	local inventory_ext = blackboard.inventory_extension
+	local input_extension = blackboard.input_extension
 
 	if inventory_ext.equipment(inventory_ext).wielded_slot == wanted_slot then
 		return "done"

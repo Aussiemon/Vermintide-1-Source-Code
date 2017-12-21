@@ -149,7 +149,7 @@ MapView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "map_menu", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "map_menu", self.ingame_ui:get_ingame_menu_keymap())
 	input_manager.map_device_to_service(input_manager, "map_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "map_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "map_menu", "gamepad")
@@ -216,6 +216,7 @@ MapView.create_ui_elements = function (self)
 	local selected_game_mode = game_mode_options[self.selected_game_mode_index]
 	local widgets = definitions.widgets
 	self.play_button_console_widget = UIWidget.init(widgets.play_button_console)
+	self.lobby_button_widget = UIWidget.init(widgets.lobby_button)
 	self.cancel_button_widget = UIWidget.init(widgets.cancel_button)
 	self.confirm_button_widget = UIWidget.init(widgets.confirm_button)
 	self.friends_button_widget = UIWidget.init(widgets.friends_button)
@@ -436,6 +437,8 @@ MapView.update = function (self, dt, t)
 
 		if selected_level_index and self.selected_level_index ~= selected_level_index then
 			self.on_level_index_changed(self, nil, selected_level_index)
+
+			self._preview_level_index = nil
 		end
 
 		local level_hover_index = map_view_area_handler.level_hover_index(map_view_area_handler)
@@ -492,8 +495,10 @@ MapView.update = function (self, dt, t)
 			local settings_button_hotspot = settings_button_widget.content.button_hotspot
 			local friends_button_widget = self.friends_button_widget
 			local friends_button_hotspot = friends_button_widget.content.button_hotspot
+			local lobby_button_widget = self.lobby_button_widget
+			local lobby_button_hotspot = lobby_button_widget.content.button_hotspot
 
-			if confirm_button_hotspot.on_hover_enter or cancel_button_hotspot.on_hover_enter or friends_button_hotspot.on_hover_enter or settings_button_hotspot.on_hover_enter then
+			if confirm_button_hotspot.on_hover_enter or cancel_button_hotspot.on_hover_enter or friends_button_hotspot.on_hover_enter or settings_button_hotspot.on_hover_enter or lobby_button_hotspot.on_hover_enter then
 				self.play_sound(self, "Play_hud_hover")
 			end
 
@@ -526,6 +531,8 @@ MapView.update = function (self, dt, t)
 				self.play_sound(self, "Play_hud_select")
 
 				settings_button_widget.content.toggled = not settings_button_widget.content.toggled
+			elseif lobby_button_hotspot.on_release then
+				self.open_lobby_browser(self)
 			end
 
 			for stepper_name, stepper_data in pairs(self.steppers) do
@@ -631,6 +638,7 @@ MapView.draw = function (self, input_service, gamepad_active, dt)
 		UIRenderer.draw_widget(ui_renderer, self.settings_button_widget)
 		UIRenderer.draw_widget(ui_renderer, self.confirm_button_widget)
 		UIRenderer.draw_widget(ui_renderer, self.cancel_button_widget)
+		UIRenderer.draw_widget(ui_renderer, self.lobby_button_widget)
 
 		if not self.confirm_button_widget.content.button_hotspot.disabled then
 			UIRenderer.draw_widget(ui_renderer, self.button_eye_glow_widget)
@@ -675,9 +683,12 @@ MapView.save_map_settings = function (self)
 		local selected_level_key = level_data.level_key
 		map_save_data.last_selected_level_key = selected_level_key
 		local difficulty_index = self.selected_difficulty_stepper_index
-		local difficulty_data = self.get_difficulty_data(self, selected_index)
-		local difficulty_order_name = difficulty_data[difficulty_index].key
-		map_save_data.difficulty_option = difficulty_order_name
+
+		if difficulty_index then
+			local difficulty_data = self.get_difficulty_data(self, selected_index)
+			local difficulty_order_name = difficulty_data[difficulty_index].key
+			map_save_data.difficulty_option = difficulty_order_name
+		end
 	end
 
 	local selected_game_mode_index = self.selected_game_mode_index
@@ -752,6 +763,12 @@ MapView.on_level_index_changed = function (self, index_change, specific_index, i
 	local level_list = self.active_level_list(self)
 	local number_of_levels = #level_list
 
+	if specific_index and number_of_levels < specific_index then
+		ScriptApplication.send_to_crashify("MapView", "Tried to select level with specific_index: %s, current level list has a maximum of %s levels.", specific_index, number_of_levels)
+
+		return 
+	end
+
 	if number_of_levels <= 0 then
 		return 
 	end
@@ -770,12 +787,6 @@ MapView.on_level_index_changed = function (self, index_change, specific_index, i
 
 			-- decompilation error in this vicinity
 			new_index = new_index + index_change
-		end
-
-		if new_index < 1 then
-			new_index = number_of_levels
-		elseif number_of_levels < new_index then
-			new_index = 1
 		end
 	elseif specific_index then
 		new_index = specific_index
@@ -1822,6 +1833,21 @@ MapView.exit = function (self, return_to_game)
 	end
 
 	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
+
+	self.ingame_ui:transition_with_fade(exit_transition)
+
+	self.exiting = true
+
+	return 
+end
+MapView.open_lobby_browser = function (self)
+	local friends_menu_active = self.friends:is_active()
+
+	if friends_menu_active then
+		self.deactivate_friends_menu(self)
+	end
+
+	local exit_transition = "lobby_browser_view"
 
 	self.ingame_ui:transition_with_fade(exit_transition)
 

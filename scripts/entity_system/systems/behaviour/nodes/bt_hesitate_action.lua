@@ -60,8 +60,8 @@ BTHesitateAction.leave = function (self, unit, blackboard, t, reason)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 	LocomotionUtils.set_animation_rotation_scale(unit, 1)
 	blackboard.navigation_extension:set_enabled(true)
+	AiUtils.activate_unit(blackboard)
 
-	blackboard.confirmed_player_sighting = true
 	blackboard.do_wall_check = nil
 	blackboard.hesitate_wall = nil
 	blackboard.hesitate_wall_rotation = nil

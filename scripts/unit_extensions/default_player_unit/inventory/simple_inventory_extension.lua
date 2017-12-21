@@ -1011,5 +1011,19 @@ SimpleInventoryExtension._get_traits = function (self, item_data)
 
 	return BackendUtils.get_traits(backend_id)
 end
+SimpleInventoryExtension.get_item_slot_extension = function (self, slot_name, system_name)
+	local slot_data = self.get_slot_data(self, slot_name)
+	local right_unit_1p = slot_data.right_unit_1p
+	local left_unit_1p = slot_data.left_unit_1p
+	local right_hand_extension = ScriptUnit.has_extension(right_unit_1p, system_name) and ScriptUnit.extension(right_unit_1p, system_name)
+	local left_hand_extension = ScriptUnit.has_extension(left_unit_1p, system_name) and ScriptUnit.extension(left_unit_1p, system_name)
+	local extension = right_hand_extension
+
+	if not extension and left_hand_extension then
+		extension = left_hand_extension
+	end
+
+	return extension
+end
 
 return 

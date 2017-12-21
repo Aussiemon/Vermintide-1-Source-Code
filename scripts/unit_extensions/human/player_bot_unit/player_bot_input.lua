@@ -1,12 +1,8 @@
 require("scripts/unit_extensions/generic/generic_state_machine")
 
-script_data.debug_csm = script_data.debug_csm or Development.parameter("debug_csm")
 PlayerBotInput = class(PlayerBotInput)
 local POSITION_LOOKUP = POSITION_LOOKUP
 PlayerBotInput.init = function (self, extension_init_context, unit, extension_init_data)
-	math.asin(1)
-	math.atan2(1, 1)
-
 	self.unit = unit
 	self.move = {
 		x = 0,
@@ -63,23 +59,6 @@ PlayerBotInput.pre_update = function (self, unit, input, dt, context, t)
 end
 PlayerBotInput.update = function (self, unit, input, dt, context, t)
 	table.clear(self._input)
-
-	local move_x = self.move.x
-	local move_y = self.move.y
-	local look_x = self.look.x
-	local look_y = self.look.y
-
-	if move_x ~= 0 then
-		move_x = self.lerp_toward_zero(self, move_x)
-	end
-
-	if move_y ~= 0 then
-		move_y = self.lerp_toward_zero(self, move_y)
-	end
-
-	self.move.x = move_x
-	self.move.y = move_y
-
 	self._update_movement(self, dt, t)
 	self._update_actions(self)
 
@@ -264,6 +243,9 @@ PlayerBotInput.wield = function (self, slot)
 end
 local Quaternion_look = Quaternion.look
 local Quaternion_multiply = Quaternion.multiply
+local MOVE_SCALE_START_DIST_SQ = 0.010000000000000002
+local MOVE_SCALE_FACTOR = 99.995
+local MOVE_SCALE_MIN = 5e-05
 PlayerBotInput._update_movement = function (self, dt, t)
 	local player_bot_navigation = self._navigation_extension
 	local current_goal = player_bot_navigation.current_goal(player_bot_navigation)
@@ -279,11 +261,11 @@ PlayerBotInput._update_movement = function (self, dt, t)
 
 	if self._aiming and self._aim_with_rotation then
 		wanted_rotation = self._aim_rotation:unbox()
-	elseif self._aiming then
-		wanted_rotation = Quaternion_look(self._aim_target:unbox() - camera_position, up)
 	elseif self._aiming and self._soft_aiming then
 		local direction = self._aim_target:unbox() - camera_position
 		wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(direction, up), math.min(dt*5, 1))
+	elseif self._aiming then
+		wanted_rotation = Quaternion_look(self._aim_target:unbox() - camera_position, up)
 	elseif current_goal and on_ladder then
 		local dir = current_goal - position
 		local ladder_up = Quaternion.up(Unit.local_rotation(ladder_unit, 0))
@@ -309,7 +291,7 @@ PlayerBotInput._update_movement = function (self, dt, t)
 	local needed_delta_rotation = Quaternion.multiply(Quaternion.inverse(rotation), wanted_rotation)
 	local needed_delta_rotation_forward = Quaternion.forward(needed_delta_rotation)
 	local look = self.look
-	look.x = math.pi*0.5 - math.atan2(needed_delta_rotation_forward.y, needed_delta_rotation_forward.x)
+	look.x = math.half_pi - math.atan2(needed_delta_rotation_forward.y, needed_delta_rotation_forward.x)
 	look.y = math.asin(math.clamp(needed_delta_rotation_forward.z, -1, 1))
 
 	if script_data.ai_bots_debug then
@@ -333,7 +315,8 @@ PlayerBotInput._update_movement = function (self, dt, t)
 	end
 
 	local goal_vector = current_goal - position
-	local goal_direction = Vector3.normalize(Vector3.flat(goal_vector))
+	local flat_goal_vector = Vector3.flat(goal_vector)
+	local goal_direction = Vector3.normalize(flat_goal_vector)
 
 	if 0.0001 < Vector3.length(goal_direction) and not on_ladder then
 		local physics_world = World.get_data(self._world, "physics_world")
@@ -354,7 +337,7 @@ PlayerBotInput._update_movement = function (self, dt, t)
 		local upper_extents = Vector3(half_width, half_upper_depth, half_upper_height)
 		local rotation = Quaternion_look(goal_direction, up)
 		local lower_hit = false
-		local upper_hit = false
+		local upper_hit = nil
 		local actors, num_actors = PhysicsWorld.immediate_overlap(physics_world, "shape", "oobb", "position", lower_check_pos, "rotation", rotation, "size", lower_extents, "types", "statics", "collision_filter", collision_filter, "use_global_table")
 
 		if 0 < num_actors then
@@ -362,7 +345,7 @@ PlayerBotInput._update_movement = function (self, dt, t)
 			local actors, num_actors = PhysicsWorld.immediate_overlap(physics_world, "shape", "oobb", "position", upper_check_pos, "rotation", rotation, "size", upper_extents, "types", "statics", "collision_filter", collision_filter, "use_global_table")
 
 			if num_actors == 0 then
-				upper_hit = true
+				upper_hit = false
 				self._input.jump = true
 			end
 		end
@@ -382,7 +365,7 @@ PlayerBotInput._update_movement = function (self, dt, t)
 			drawer.box(drawer, lower_pose, lower_extents, lower_color)
 
 			local upper_pose = Matrix4x4.from_quaternion_position(rotation, upper_check_pos)
-			local upper_color = (upper_hit and Color(255, 125, 125)) or Color(255, 0, 0)
+			local upper_color = (upper_hit and Color(255, 0, 0)) or (upper_hit == false and Color(255, 125, 125)) or Color(125, 125, 125)
 
 			drawer.box(drawer, upper_pose, upper_extents, upper_color)
 		end
@@ -394,26 +377,27 @@ PlayerBotInput._update_movement = function (self, dt, t)
 		move.x = 0
 		move.y = 1
 	else
-		move.x = Vector3.dot(Quaternion.right(wanted_rotation), goal_direction)
-		move.y = Vector3.dot(Quaternion.forward(wanted_rotation), goal_direction)
+		local is_last_goal = player_bot_navigation.is_following_last_goal(player_bot_navigation)
+		local move_scale = 1
+
+		if is_last_goal then
+			local goal_dist_sq = Vector3.length_squared(flat_goal_vector)
+
+			if goal_dist_sq < MOVE_SCALE_START_DIST_SQ then
+				move_scale = MOVE_SCALE_FACTOR*goal_dist_sq + MOVE_SCALE_MIN
+			end
+		end
+
+		move.x = move_scale*Vector3.dot(Quaternion.right(wanted_rotation), goal_direction)
+		move.y = move_scale*Vector3.dot(Quaternion.forward(wanted_rotation), goal_direction)
 	end
 
 	return 
 end
-PlayerBotInput.lerp_toward_zero = function (self, value)
-	value = math.lerp(value, 0, 0.1)
-	value = math.clamp(value, -1, 1)
-
-	if value < 0.1 and -0.1 < value then
-		value = 0
-	end
-
-	return value
-end
 PlayerBotInput.get = function (self, input_key)
 	if input_key == "look" then
 		return Vector3(self.look.x, self.look.y, 0)
-	elseif input_key == "move" then
+	elseif input_key == "move_controller" then
 		return Vector3(self.move.x, self.move.y, 0)
 	elseif self._input[input_key] ~= nil then
 		return self._input[input_key]

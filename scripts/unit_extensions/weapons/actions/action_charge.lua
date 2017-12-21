@@ -71,6 +71,12 @@ ActionCharge.client_owner_start_action = function (self, new_action, t)
 		end
 	end
 
+	local charge_sound_husk_name = self.current_action.charge_sound_husk_name
+
+	if charge_sound_husk_name then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_name, owner_unit)
+	end
+
 	local spread_template_override = new_action.spread_template_override
 
 	if spread_template_override then
@@ -204,9 +210,15 @@ ActionCharge.finish = function (self, reason)
 	end
 
 	if current_action.zoom then
-		local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
+		local status_extension = ScriptUnit.extension(owner_unit, "status_system")
 
 		status_extension.set_zooming(status_extension, false)
+	end
+
+	local charge_sound_husk_stop_event = current_action.charge_sound_husk_stop_event
+
+	if charge_sound_husk_stop_event then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_stop_event, owner_unit)
 	end
 
 	return {

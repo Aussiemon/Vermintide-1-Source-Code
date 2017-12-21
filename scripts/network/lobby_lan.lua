@@ -81,5 +81,8 @@ LobbyInternal.lobby_id_match = function (id1, id2)
 
 	return id1 == id2
 end
+LobbyInternal.user_name = function (user)
+	return Network.peer_id()
+end
 
 return 

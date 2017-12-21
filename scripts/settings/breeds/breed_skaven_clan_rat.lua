@@ -4,7 +4,6 @@ local breed_data = {
 	using_first_attack = true,
 	run_speed = 4.75,
 	death_reaction = "ai_default",
-	base_unit = "units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat",
 	has_inventory = true,
 	perception = "perception_regular",
 	horde_behavior = "horde_rat",
@@ -12,10 +11,10 @@ local breed_data = {
 	walk_speed = 2.75,
 	increase_incoming_damage_fx = "fx/chr_enemy_clanrat_damage_buff",
 	increase_incoming_damage_fx_node = "c_head",
-	allow_aoe_push = true,
 	hit_reaction = "ai_default",
-	has_running_attack = true,
+	allow_aoe_push = true,
 	bone_lod_level = 1,
+	has_running_attack = true,
 	default_inventory_template = "default",
 	hit_effect_template = "HitEffectsSkavenClanRat",
 	wwise_voice_switch_group = "clan_rat_vce",
@@ -31,9 +30,17 @@ local breed_data = {
 	death_sound_event = "Play_clan_rat_die_vce",
 	weapon_reach = 2,
 	horde_target_selection = "horde_pick_closest_target_with_spillover",
+	use_backstab_vo = true,
 	behavior = "pack_rat",
+	base_unit = "units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat",
 	aoe_height = 1.4,
 	during_horde_detection_radius = 15,
+	opt_base_unit = {
+		"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var1",
+		"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var2",
+		"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var3",
+		"units/beings/enemies/skaven_clan_rat/chr_skaven_clan_rat_baked_var4"
+	},
 	size_variation_range = {
 		0.95,
 		1.05
@@ -840,7 +847,9 @@ local action_data = {
 		fatigue_type = "blocked_running",
 		action_weight = 1,
 		moving_attack = true,
-		attack_anim = "attack_run",
+		default_attack = {
+			anims = "attack_run"
+		},
 		damage = {
 			3,
 			2,
@@ -894,7 +903,12 @@ local action_data = {
 		},
 		target_type_exceptions = {
 			poison_well = {
-				attack_anim = "poison_well"
+				anims = "poison_well",
+				damage_box_range = {
+					flat = 2,
+					up = 1.7,
+					down = -0.75
+				}
 			}
 		}
 	},
@@ -904,7 +918,9 @@ local action_data = {
 		fatigue_type = "blocked_running",
 		action_weight = 10,
 		moving_attack = true,
-		attack_anim = "attack_move",
+		default_attack = {
+			anims = "attack_move"
+		},
 		damage = {
 			3,
 			2,
@@ -956,26 +972,82 @@ local action_data = {
 		dimishing_damage = {}
 	},
 	normal_attack = {
-		fatigue_type = "blocked_attack",
 		player_push_speed = 3,
-		high_attack_threshold = 1.5,
-		damage_type = "cutting",
-		knocked_down_attack_anim = "attack_pounce_down",
-		attack_anim = "attack_pounce",
-		knocked_down_attack_threshold = 0.6,
+		fatigue_type = "blocked_attack",
 		action_weight = 1,
-		low_attack_threshold = -0.6,
 		move_anim = "move_fwd",
-		high_attack_anim = {
-			"attack_reach_up",
-			"attack_reach_up_2",
-			"attack_reach_up_3",
-			"attack_reach_up_4"
+		damage_type = "cutting",
+		default_attack = {
+			anims = "attack_pounce",
+			damage_box_range = {
+				flat = 2,
+				up = 1.7,
+				down = -0.75
+			}
 		},
-		low_attack_anim = {
-			"attack_reach_down",
-			"attack_reach_down_2",
-			"attack_reach_down_3"
+		high_attack = {
+			z_threshold = 1.5,
+			anims = {
+				"attack_reach_up",
+				"attack_reach_up_2",
+				"attack_reach_up_3",
+				"attack_reach_up_4"
+			},
+			damage_box_range = {
+				flat = 1.5,
+				up = 3.8,
+				down = 0
+			}
+		},
+		mid_attack = {
+			z_threshold = -0.6,
+			flat_threshold = 1.5,
+			anims = {
+				"attack_pounce_down",
+				"attack_pounce_down_2",
+				"attack_pounce_down_3"
+			},
+			damage_box_range = {
+				flat = 2,
+				up = 1.7,
+				down = -2
+			}
+		},
+		low_attack = {
+			z_threshold = -0.6,
+			anims = {
+				"attack_reach_down",
+				"attack_reach_down_2",
+				"attack_reach_down_3"
+			},
+			damage_box_range = {
+				flat = 1,
+				up = 1.7,
+				down = -3
+			}
+		},
+		knocked_down_attack = {
+			z_threshold = 0.6,
+			anims = {
+				"attack_pounce_down",
+				"attack_pounce_down_2",
+				"attack_pounce_down_3"
+			},
+			damage_box_range = {
+				flat = 1,
+				up = 1.7,
+				down = -3
+			}
+		},
+		target_type_exceptions = {
+			poison_well = {
+				anims = "poison_well",
+				damage_box_range = {
+					flat = 2,
+					up = 1.7,
+					down = -0.75
+				}
+			}
 		},
 		damage = {
 			3,
@@ -1025,64 +1097,7 @@ local action_data = {
 			}
 		},
 		considerations = UtilityConsiderations.clan_rat_attack,
-		dimishing_damage = {},
-		target_type_exceptions = {
-			poison_well = {
-				attack_anim = "poison_well"
-			}
-		},
-		use_box_range = {
-			attack_pounce = {
-				flat = 2,
-				up = 1.7,
-				down = -0.75
-			},
-			attack_reach_down = {
-				flat = 1,
-				up = 1.7,
-				down = -3
-			},
-			attack_reach_down_2 = {
-				flat = 1,
-				up = 1.7,
-				down = -3
-			},
-			attack_reach_down_3 = {
-				flat = 1,
-				up = 1.7,
-				down = -3
-			},
-			attack_pounce_down = {
-				flat = 1,
-				up = 1.7,
-				down = -3
-			},
-			poison_well = {
-				flat = 2,
-				up = 1.7,
-				down = -0.75
-			},
-			attack_reach_up = {
-				flat = 1.5,
-				up = 3.8,
-				down = 0
-			},
-			attack_reach_up_2 = {
-				flat = 1.5,
-				up = 3.8,
-				down = 0
-			},
-			attack_reach_up_3 = {
-				flat = 1.5,
-				up = 3.8,
-				down = 0
-			},
-			attack_reach_up_4 = {
-				flat = 1.5,
-				up = 33.8,
-				down = 0
-			}
-		}
+		dimishing_damage = {}
 	},
 	combat_shout = {
 		cooldown = -1,

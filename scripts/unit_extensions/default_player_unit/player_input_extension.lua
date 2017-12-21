@@ -1,6 +1,5 @@
 require("scripts/unit_extensions/generic/generic_state_machine")
 
-script_data.debug_csm = script_data.debug_csm or Development.parameter("debug_csm")
 local is_windows_platform = Application.platform() == "win32"
 PlayerInputExtension = class(PlayerInputExtension)
 PlayerInputExtension.get_window_is_in_focus = function ()
@@ -41,6 +40,7 @@ PlayerInputExtension.init = function (self, extension_init_context, unit, extens
 	self.dodge_on_forward_diagonal = Application.user_setting("dodge_on_forward_diagonal")
 	self.double_tap_dodge = Application.user_setting("double_tap_dodge")
 	self.toggle_crouch = Application.user_setting("toggle_crouch")
+	self.toggle_alternate_attack = Application.user_setting("toggle_alternate_attack")
 	self.priority_input = {
 		wield_2 = true,
 		wield_next = true,

@@ -708,10 +708,13 @@ local function create_player_portrait_widget_definition_small(index)
 			hp_bar_highlight = "teammate_hp_bar_highlight",
 			bar_value = 1,
 			hp_bar = {
+				low_health = false,
 				wounded_texture_id = "teammate_hp_bar",
 				texture_id = "teammate_hp_bar",
 				draw_health_bar = true,
 				bar_value = 1,
+				is_knocked_down = false,
+				is_wounded = false,
 				normal_texture_id = "teammate_hp_bar_color_tint_" .. index
 			},
 			hp_bar_grimoire_debuff = {
@@ -1207,10 +1210,13 @@ local player_portrait_widget_definition = {
 		player_level = "30",
 		hp_bar_bg = "player_hp_bar_bg",
 		hp_bar = {
+			low_health = false,
 			wounded_texture_id = "player_hp_bar",
 			texture_id = "player_hp_bar",
 			draw_health_bar = true,
 			bar_value = 1,
+			is_knocked_down = false,
+			is_wounded = false,
 			normal_texture_id = "player_hp_bar_color_tint"
 		},
 		hp_bar_grimoire_debuff = {

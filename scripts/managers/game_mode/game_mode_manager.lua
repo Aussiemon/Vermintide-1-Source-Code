@@ -32,6 +32,7 @@ GameModeManager.init = function (self, world, lobby_host, lobby_client, level_tr
 	event_manager.register(event_manager, self, "reload_application_settings", "event_reload_application_settings")
 	event_manager.register(event_manager, self, "gm_event_end_conditions_met", "gm_event_end_conditions_met")
 	event_manager.register(event_manager, self, "gm_event_round_started", "gm_event_round_started")
+	event_manager.register(event_manager, self, "camera_teleported", "event_camera_teleported")
 
 	self.network_event_delegate = network_event_delegate
 
@@ -41,6 +42,15 @@ GameModeManager.init = function (self, world, lobby_host, lobby_client, level_tr
 	self._object_set_names = nil
 	self._end_level_areas = {}
 	self._debug_end_level_areas = {}
+	local max_size = 8192
+	self._flow_set_data = {
+		units_per_frame = 150,
+		write_index = 1,
+		read_index = 1,
+		max_size = 0,
+		size = 0,
+		ring_buffer = Script.new_array(max_size)
+	}
 
 	return 
 end
@@ -76,59 +86,149 @@ end
 GameModeManager.is_game_mode_ended = function (self)
 	return self._gm_event_end_conditions_met
 end
-GameModeManager._set_flow_object_set_enabled = function (self, set, enable)
+GameModeManager._set_flow_object_set_enabled = function (self, set, enable, set_name)
 	if set.flow_set_enabled == enable then
 		return 
 	end
 
-	set.flow_set_enabled = enable
 	local level = LevelHelper:current_level(self._world)
+	set.flow_set_enabled = enable
+	local data = self._flow_set_data
+	local buffer = data.ring_buffer
+	local write_index = data.write_index
+	local read_index = data.read_index
+	local size = data.size
+	local max_size = data.max_size
+	local set_units = set.units
+	local new_units_size = #set_units
+	local new_size = size + new_units_size
+	local overflow = new_size - max_size
 
-	for _, index in ipairs(set.units) do
-		local unit = Level.unit_by_index(level, index)
-		local change_state = false
-		local refs = Unit.get_data(unit, "flow_object_set_references") or 0
+	if 0 < overflow then
+		local amount_to_remove = math.min(overflow, size)
 
-		if enable then
-			change_state = refs == 0
+		for i = 1, amount_to_remove, 1 do
+			local unit_index = buffer[read_index]
 
-			Unit.set_data(unit, "flow_object_set_references", refs + 1)
-		else
-			local refs = Unit.get_data(unit, "flow_object_set_references") or 1
-			change_state = refs == 1
+			self._set_flow_object_set_unit_enabled(self, level, unit_index)
 
-			Unit.set_data(unit, "flow_object_set_references", math.max(refs - 1, 0))
+			read_index = read_index%max_size + 1
+			size = size - 1
 		end
 
-		if change_state then
-			Unit.set_unit_visibility(unit, enable)
+		data.read_index = read_index
+	end
 
-			local actor_list = nil
+	local object_set_size_overflow = new_units_size - max_size
 
-			if enable then
-				actor_list = Unit.get_data(unit, "flow_object_set_actor_list")
-			else
-				actor_list = {}
+	for i, unit_index in ipairs(set_units) do
+		local unit = Level.unit_by_index(level, unit_index)
+		local refs = Unit.get_data(unit, "flow_object_set_references") or 1
+
+		if enable then
+			refs = refs + 1
+		else
+			refs = math.max(refs - 1, 0)
+		end
+
+		Unit.set_data(unit, "flow_object_set_references", refs)
+
+		if i <= object_set_size_overflow then
+			self._set_flow_object_set_unit_enabled(self, level, unit_index)
+		else
+			buffer[write_index] = unit_index
+			write_index = write_index%max_size + 1
+			size = size + 1
+		end
+	end
+
+	data.write_index = write_index
+	data.size = size
+
+	return 
+end
+GameModeManager.event_camera_teleported = function (self)
+	self._flush_object_set_enable = true
+
+	return 
+end
+GameModeManager.update_flow_object_set_enable = function (self, dt)
+	local data = self._flow_set_data
+	local size = data.size
+
+	if 0 < size then
+		local units_per_frame = (self._flush_object_set_enable and math.huge) or data.units_per_frame
+		local num_units = math.min(units_per_frame, size)
+		local read_index = data.read_index
+		local max_size = data.max_size
+		local buffer = data.ring_buffer
+		local level = LevelHelper:current_level(self._world)
+
+		for i = 1, num_units, 1 do
+			local unit_index = buffer[read_index]
+
+			self._set_flow_object_set_unit_enabled(self, level, unit_index)
+
+			read_index = read_index%max_size + 1
+			size = size - 1
+		end
+
+		data.size = size
+		data.read_index = read_index
+	end
+
+	self._flush_object_set_enable = false
+
+	return 
+end
+GameModeManager._set_flow_object_set_unit_enabled = function (self, level, index)
+	local unit = Level.unit_by_index(level, index)
+	local refs = Unit.get_data(unit, "flow_object_set_references")
+	local enabled = Unit.get_data(unit, "flow_object_set_enabled")
+
+	if enabled == nil then
+		enabled = true
+	end
+
+	local enable = not enabled and 0 < refs
+	local disable = enabled and refs == 0
+	local new_state = nil
+
+	if enable then
+		new_state = true
+	elseif disable then
+		new_state = false
+	end
+
+	if new_state ~= nil then
+		Unit.set_data(unit, "flow_object_set_enabled", new_state)
+		Unit.set_unit_visibility(unit, new_state)
+
+		local actor_list = nil
+
+		if new_state then
+			actor_list = Unit.get_data(unit, "flow_object_set_actor_list")
+		else
+			actor_list = {}
+		end
+
+		for i = 0, Unit.num_actors(unit) - 1, 1 do
+			if new_state and actor_list[i] then
+				Unit.create_actor(unit, i)
+			elseif not new_state and Unit.actor(unit, i) then
+				Unit.destroy_actor(unit, i)
+
+				actor_list[i] = true
 			end
+		end
 
-			for i = 0, Unit.num_actors(unit) - 1, 1 do
-				if enable and actor_list[i] then
-					Unit.create_actor(unit, i)
-				elseif not enable and Unit.actor(unit, i) then
-					Unit.destroy_actor(unit, i)
-
-					actor_list[i] = true
-				end
-			end
-
-			if enable then
-				Unit.set_data(unit, "flow_object_set_actor_list", nil)
-				Unit.flow_event(unit, "hide_helper_mesh")
-				Unit.flow_event(unit, "unit_object_set_enabled")
-			else
-				Unit.set_data(unit, "flow_object_set_actor_list", actor_list)
-				Unit.flow_event(unit, "unit_object_set_disabled")
-			end
+		if new_state then
+			Unit.set_data(unit, "flow_object_set_actor_list", nil)
+			Unit.flow_event(unit, "hide_helper_mesh")
+			Unit.flow_event(unit, "unit_object_set_enabled")
+		else
+			Unit.set_data(unit, "flow_object_set_actor_list", actor_list)
+			Unit.flow_event(unit, "unit_object_set_disabled")
 		end
 	end
 
@@ -138,7 +238,7 @@ GameModeManager.flow_cb_set_flow_object_set_enabled = function (self, set_name, 
 	local set = self._object_sets["flow_" .. set_name]
 
 	fassert(set, "[GameModeManager:flow_cb_set_flow_object_set_enabled()] Object set %s does not exist.", set_name)
-	self._set_flow_object_set_enabled(self, set, enabled)
+	self._set_flow_object_set_enabled(self, set, enabled, set_name)
 
 	return 
 end
@@ -153,11 +253,11 @@ GameModeManager.register_object_sets = function (self, object_sets)
 		self._object_set_names[set.key] = set_name
 
 		if set.type == "flow" then
-			self._set_flow_object_set_enabled(self, set, false)
+			self._set_flow_object_set_enabled(self, set, false, set_name)
 		end
 	end
 
-	Profiler.stop()
+	Profiler.stop("register_object_sets")
 
 	return 
 end

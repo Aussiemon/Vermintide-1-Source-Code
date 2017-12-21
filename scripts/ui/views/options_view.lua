@@ -13,6 +13,7 @@ local background_widget_definitions = definitions.background_widget_definitions
 local widget_definitions = definitions.widget_definitions
 local title_button_definitions = definitions.title_button_definitions
 local button_definitions = definitions.button_definitions
+local child_input_services = definitions.child_input_services
 local SettingsMenuNavigation = SettingsMenuNavigation
 local SettingsWidgetTypeTemplate = SettingsWidgetTypeTemplate
 
@@ -420,9 +421,11 @@ OptionsView.init = function (self, ingame_ui_context)
 				if not stop and button ~= nil then
 					local new_key = Keyboard.button_name(button)
 
-					content.callback(new_key, "keyboard", content)
+					if new_key and new_key ~= "" then
+						content.callback(new_key, "keyboard", content)
 
-					stop = true
+						stop = true
+					end
 				end
 
 				button = Mouse.any_released()
@@ -1138,6 +1141,12 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		camera_manager.set_fov_multiplier(camera_manager, fov_multiplier)
 	end
 
+	local enabled_crosshairs = user_settings.enabled_crosshairs
+
+	if enabled_crosshairs and self.ingame_ui and self.ingame_ui.ingame_hud and self.ingame_ui.ingame_hud.crosshair then
+		self.ingame_ui.ingame_hud.crosshair:set_enabled_crosshair_styles(enabled_crosshairs)
+	end
+
 	local mouse_look_sensitivity = user_settings.mouse_look_sensitivity
 
 	if mouse_look_sensitivity then
@@ -1241,6 +1250,21 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		end
 	end
 
+	local toggle_alternate_attack = user_settings.toggle_alternate_attack
+
+	if toggle_alternate_attack ~= nil then
+		local units = Managers.state.entity:get_entities("PlayerInputExtension")
+
+		for unit, extension in pairs(units) do
+			local player = Managers.player:owner(unit)
+
+			if player.local_player and not player.bot_player then
+				local input_extension = ScriptUnit.extension(unit, "input_system")
+				input_extension.toggle_alternate_attack = toggle_alternate_attack
+			end
+		end
+	end
+
 	local overcharge_opacity = user_settings.overcharge_opacity
 	local player_manager = Managers.player
 
@@ -1304,6 +1328,8 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		Renderer.bake_static_shadows()
 	end
 
+	ShowCursorStack.update_clip_cursor()
+
 	return 
 end
 OptionsView.apply_keymap_changes = function (self, keymaps)
@@ -1314,26 +1340,43 @@ OptionsView.apply_keymap_changes = function (self, keymaps)
 		PlayerData.controls[input_service_name].keymap = data.keymap
 		local input_service = Managers.input:get_service(input_service_name)
 
-		for key, map in pairs(data.keymap) do
-			if definitions.ignore_keybind[key] then
-			else
-				for i, inputs in ipairs(map.input_mappings) do
-					local num_inputs = #inputs/3
+		self._apply_keymap_changes_to_service(self, input_service, data)
 
-					for j = 1, num_inputs, 1 do
+		if child_input_services and child_input_services[input_service_name] then
+			for _, service_name in ipairs(child_input_services[input_service_name]) do
+				local service = Managers.input:get_service(service_name)
 
-						-- decompilation error in this vicinity
-						local ij = (j - 1)*3
-						local device = inputs[ij + 1]
-						local button_name = inputs[ij + 2]
-						local button_index = nil
-					end
-				end
+				self._apply_keymap_changes_to_service(self, service, data)
 			end
 		end
 	end
 
 	Managers.save:auto_save(SaveFileName, SaveData)
+
+	return 
+end
+OptionsView._apply_keymap_changes_to_service = function (self, input_service, data)
+	if not input_service then
+		return 
+	end
+
+	for key, map in pairs(data.keymap) do
+		if definitions.ignore_keybind[key] then
+		else
+			for i, inputs in ipairs(map.input_mappings) do
+				local num_inputs = #inputs/3
+
+				for j = 1, num_inputs, 1 do
+
+					-- decompilation error in this vicinity
+					local ij = (j - 1)*3
+					local device = inputs[ij + 1]
+					local button_name = inputs[ij + 2]
+					local button_index = nil
+				end
+			end
+		end
+	end
 
 	return 
 end
@@ -4533,6 +4576,37 @@ OptionsView.cb_toggle_crouch = function (self, content)
 
 	return 
 end
+OptionsView.cb_toggle_stationary_dodge_setup = function (self)
+	local options = {
+		{
+			value = true,
+			text = Localize("menu_settings_on")
+		},
+		{
+			value = false,
+			text = Localize("menu_settings_off")
+		}
+	}
+	local default_value = DefaultUserSettings.get("user_settings", "toggle_stationary_dodge")
+	local toggle_stationary_dodge = Application.user_setting("toggle_stationary_dodge")
+	local selection = (toggle_stationary_dodge and 1) or 2
+	local default_option = (default_value and 1) or 2
+
+	return selection, options, "menu_settings_toggle_stationary_dodge", default_option
+end
+OptionsView.cb_toggle_stationary_dodge_saved_value = function (self, widget)
+	local toggle_stationary_dodge = assigned(self.changed_user_settings.toggle_stationary_dodge, Application.user_setting("toggle_stationary_dodge"))
+	widget.content.current_selection = (toggle_stationary_dodge and 1) or 2
+
+	return 
+end
+OptionsView.cb_toggle_stationary_dodge = function (self, content)
+	local options_values = content.options_values
+	local current_selection = content.current_selection
+	self.changed_user_settings.toggle_stationary_dodge = options_values[current_selection]
+
+	return 
+end
 OptionsView.cb_overcharge_opacity_setup = function (self)
 	local min = 0
 	local max = 100
@@ -5349,6 +5423,67 @@ OptionsView.cb_fov_saved_value = function (self, widget)
 end
 OptionsView.cb_fov = function (self, content)
 	self.changed_render_settings.fov = content.value
+
+	return 
+end
+OptionsView.cb_enabled_crosshairs = function (self, content)
+	local options_values = content.options_values
+	local current_selection = content.current_selection
+	self.changed_user_settings.enabled_crosshairs = options_values[current_selection]
+
+	return 
+end
+OptionsView.cb_enabled_crosshairs_setup = function (self)
+	local options = {
+		{
+			value = "all",
+			text = Localize("menu_settings_crosshair_all")
+		},
+		{
+			value = "melee",
+			text = Localize("menu_settings_crosshair_melee")
+		},
+		{
+			value = "ranged",
+			text = Localize("menu_settings_crosshair_ranged")
+		},
+		{
+			value = "none",
+			text = Localize("menu_settings_crosshair_none")
+		}
+	}
+	local default_value = DefaultUserSettings.get("user_settings", "enabled_crosshairs")
+	local user_settings_value = Application.user_setting("enabled_crosshairs")
+	local default_option, selected_option = nil
+
+	for i, option in ipairs(options) do
+		if option.value == user_settings_value then
+			selected_option = i
+		end
+
+		if option.value == default_value then
+			default_option = i
+		end
+	end
+
+	fassert(default_option, "default option %i does not exist in cb_enabled_crosshairs_setup options table", default_value)
+
+	return selected_option or default_option, options, "menu_settings_enabled_crosshairs", default_option
+end
+OptionsView.cb_enabled_crosshairs_saved_value = function (self, widget)
+	local value = assigned(self.changed_user_settings.enabled_crosshairs, Application.user_setting("enabled_crosshairs")) or DefaultUserSettings.get("user_settings", "enabled_crosshairs")
+	local options_values = widget.content.options_values
+	local selected_option = 1
+
+	for i = 1, #options_values, 1 do
+		if value == options_values[i] then
+			selected_option = i
+
+			break
+		end
+	end
+
+	widget.content.current_selection = selected_option
 
 	return 
 end

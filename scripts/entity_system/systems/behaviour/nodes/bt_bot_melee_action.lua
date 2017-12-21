@@ -28,7 +28,6 @@ local function check_angle(nav_world, target_position, start_direction, angle, d
 end
 
 local function get_engage_pos(nav_world, target_unit_pos, engage_from, melee_distance)
-	local angle = 0
 	local subdivisions_per_side = 3
 	local angle_inc = math.pi/(subdivisions_per_side + 1)
 	local start_direction = Vector3.normalize(Vector3.flat(engage_from))
@@ -71,7 +70,7 @@ BTBotMeleeAction.enter = function (self, unit, blackboard, t)
 		engaging = false,
 		engage_position = Vector3Box(0, 0, 0)
 	}
-	local input_ext = ScriptUnit.extension(unit, "input_system")
+	local input_ext = blackboard.input_extension
 	local soft_aiming = true
 
 	input_ext.set_aiming(input_ext, true, soft_aiming)
@@ -106,7 +105,6 @@ BTBotMeleeAction.run = function (self, unit, blackboard, t, dt)
 	return 
 end
 BTBotMeleeAction._update_engage_position = function (self, unit, blackboard, dt, t)
-	local player_bot_navigation = blackboard.navigation_extension
 	local self_position = POSITION_LOOKUP[unit]
 	local target_unit = blackboard.target_unit
 	local target_unit_pos = POSITION_LOOKUP[target_unit]
@@ -235,7 +233,7 @@ BTBotMeleeAction._is_attacking_me = function (self, self_unit, enemy_unit)
 	return (bb.attacking_target == self_unit and not bb.attack_success and "attack") or (bb.special_attacking_target == self_unit and not bb.attack_success and "special_attack"), bb.breed
 end
 BTBotMeleeAction._allow_engage = function (self, self_unit, target_unit, blackboard)
-	local follow_unit = ScriptUnit.extension(self_unit, "ai_bot_group_system").data.follow_unit
+	local follow_unit = blackboard.ai_bot_group_extension.data.follow_unit
 
 	if follow_unit then
 		local conflict_director = Managers.state.conflict
@@ -387,12 +385,7 @@ BTBotMeleeAction._disengage = function (self, unit, t, blackboard, position)
 	bb.engage_change_time = t
 
 	if blackboard.follow then
-		local player_bot_navigation = blackboard.navigation_extension
-
-		if blackboard.follow then
-			local override_box = blackboard.navigation_destination_override
-			bb.engage_position_set = false
-		end
+		bb.engage_position_set = false
 	end
 
 	return 

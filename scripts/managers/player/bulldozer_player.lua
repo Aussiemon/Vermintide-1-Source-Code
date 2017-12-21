@@ -196,19 +196,15 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 	local is_player_unit = true
 
 	player_manager.assign_unit_ownership(player_manager, unit, self, is_player_unit)
-	LevelHelper:flow_event(world, "local_player_spawned")
-
-	if is_initial_spawn then
-		LevelHelper:flow_event(world, "level_start_local_player_spawned")
-	end
-
-	Managers.state.event:trigger("level_start_local_player_spawned")
+	Managers.state.event:trigger("level_start_local_player_spawned", is_initial_spawn)
 
 	if GameSettingsDevelopment.use_telemetry then
 		local peer_type = (self.is_server and "host") or "client"
 
 		self._add_spawn_telemetry(self, peer_type)
 	end
+
+	Managers.state.event:trigger("camera_teleported")
 
 	return unit
 end

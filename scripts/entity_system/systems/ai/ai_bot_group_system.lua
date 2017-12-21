@@ -77,6 +77,7 @@ AIBotGroupSystem.init = function (self, context, system_name)
 	self._last_key_in_available_pickups = nil
 	self._update_pickups_at = -math.huge
 	self._used_covers = {}
+	self._pathing_points = {}
 
 	return 
 end
@@ -453,6 +454,40 @@ local TEMP_UNITS = {}
 local TEMP_TESTED_POINTS = {}
 local TEMP_CURRENT_SOLUTION = {}
 local TEMP_BEST_SOLUTION = {}
+
+local function find_permutation(current_index, units, tested_points, current_solution, utility, data, best_utility, best_solution)
+	local num_units = #units
+
+	if num_units < current_index then
+		if best_utility < utility then
+			for i = 1, num_units, 1 do
+				best_solution[i] = current_solution[i]
+			end
+
+			return utility
+		else
+			return best_utility
+		end
+	else
+		local unit = units[current_index]
+
+		for i = 1, num_units, 1 do
+			if not tested_points[i] then
+				current_solution[current_index] = i
+				tested_points[i] = true
+				local point_utility = data[unit].nav_point_utility[i]
+				local new_utility = utility + point_utility
+				best_utility = find_permutation(current_index + 1, units, tested_points, current_solution, new_utility, data, best_utility, best_solution)
+				tested_points[i] = false
+			end
+		end
+
+		return best_utility
+	end
+
+	return 
+end
+
 AIBotGroupSystem._assign_destination_points = function (self, bot_ai_data, points, follow_unit, follow_unit_table)
 	local units = TEMP_UNITS
 
@@ -468,39 +503,6 @@ AIBotGroupSystem._assign_destination_points = function (self, bot_ai_data, point
 		end
 
 		units[#units + 1] = unit
-	end
-
-	local function find_permutation(current_index, units, tested_points, current_solution, utility, data, best_utility, best_solution)
-		local num_units = #units
-
-		if num_units < current_index then
-			if best_utility < utility then
-				for i = 1, num_units, 1 do
-					best_solution[i] = current_solution[i]
-				end
-
-				return utility
-			else
-				return best_utility
-			end
-		else
-			local unit = units[current_index]
-
-			for i = 1, num_units, 1 do
-				if not tested_points[i] then
-					current_solution[current_index] = i
-					tested_points[i] = true
-					local point_utility = data[unit].nav_point_utility[i]
-					local new_utility = utility + point_utility
-					best_utility = find_permutation(current_index + 1, units, tested_points, current_solution, new_utility, data, best_utility, best_solution)
-					tested_points[i] = false
-				end
-			end
-
-			return best_utility
-		end
-
-		return 
 	end
 
 	local solution = TEMP_BEST_SOLUTION
@@ -594,28 +596,29 @@ AIBotGroupSystem._find_destination_points = function (self, nav_world, origin_po
 
 	return points
 end
+
+local function add_points(points, from_pos, to_pos, amount)
+	if amount == 0 then
+		return 
+	end
+
+	for i = 1, amount, 1 do
+		local pos = Vector3.lerp(from_pos, to_pos, i/amount)
+		points[#points + 1] = pos
+	end
+
+	return 
+end
+
 AIBotGroupSystem._find_points = function (self, nav_world, origin_point, rotation, left_vectors, right_vectors, space_per_player, range, needed_points)
 	local found_points_left = 0
 	local found_points_right = 0
 	local left_index = 0
 	local right_index = 0
-	local points = self._pathing_points or {}
+	local points = self._pathing_points
 	self._pathing_points = points
 
 	table.clear(points)
-
-	local function add_points(points, from_pos, to_pos, amount)
-		if amount == 0 then
-			return 
-		end
-
-		for i = 1, amount, 1 do
-			local pos = Vector3.lerp(from_pos, to_pos, i/amount)
-			points[#points + 1] = pos
-		end
-
-		return 
-	end
 
 	while (left_index < #left_vectors or right_index < #right_vectors) and found_points_left + found_points_right < needed_points do
 
@@ -722,8 +725,15 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 
 		local ai_extension = ScriptUnit.extension(unit, "ai_system")
 		local bb = ai_extension.blackboard(ai_extension)
-		bb.priority_target_disabled_ally = data.current_priority_target_disabled_ally
-		bb.priority_target_enemy = data.current_priority_target
+
+		if bb.priority_target_disabled_ally or data.current_priority_target_disabled_ally then
+			bb.priority_target_disabled_ally = data.current_priority_target_disabled_ally
+		end
+
+		if bb.priority_target_enemy or data.current_priority_target then
+			bb.priority_target_enemy = data.current_priority_target
+		end
+
 		bb.priority_target_distance = data.priority_target_distance
 	end
 
@@ -891,7 +901,7 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 
 		if Unit.alive(ammo_pickup) then
 			data.ammo_dist = Vector3.distance(POSITION_LOOKUP[unit], POSITION_LOOKUP[ammo_pickup])
-		else
+		elseif blackboard.ammo_pickup then
 			blackboard.ammo_pickup = nil
 			data.ammo_dist = nil
 		end
@@ -955,6 +965,48 @@ local SOLUTION_TEMP = {}
 local BEST_SOLUTION_TEMP = {}
 local BOT_INDICES = {}
 local MAX_PICKUP_RANGE = 15
+local STICKINESS = 225
+local HP_DISTANCE_MODIFIER = 225
+
+local function find_permutation(current_bot_index, current_utility, solution, best_utility, best_solution, empties_left, health_item_lookup, health_item_list, num_valid_bots)
+	if num_valid_bots < current_bot_index then
+		if current_utility < best_utility then
+			for i = 1, num_valid_bots, 1 do
+				best_solution[i] = solution[i]
+			end
+
+			return current_utility
+		else
+			return best_utility
+		end
+	else
+		local bb = BOT_BBS[current_bot_index]
+		local bot_pos = BOT_POSES[current_bot_index]
+		local current_pickup = bb.health_pickup
+		local bot_hp = BOT_HEALTH[current_bot_index] or 0
+
+		for unit, pos in pairs(health_item_list) do
+			if health_item_lookup[unit] then
+				local stickiness_modifier = (current_pickup == unit and STICKINESS) or 0
+				local utility = (current_utility + Vector3.distance_squared(bot_pos, pos)) - stickiness_modifier - bot_hp*HP_DISTANCE_MODIFIER
+				health_item_lookup[unit] = nil
+				solution[current_bot_index] = unit
+				best_utility = find_permutation(current_bot_index + 1, utility, solution, best_utility, best_solution, empties_left, health_item_lookup, health_item_list, num_valid_bots)
+				solution[current_bot_index] = nil
+				health_item_lookup[unit] = pos
+			end
+		end
+
+		if 0 < empties_left then
+			best_utility = find_permutation(current_bot_index + 1, current_utility, solution, best_utility, best_solution, empties_left - 1, health_item_lookup, health_item_list, num_valid_bots)
+		end
+
+		return best_utility
+	end
+
+	return 
+end
+
 AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 	local available_pickups = self._available_health_pickups
 	local num_health_items = 0
@@ -1073,49 +1125,7 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 
 	table.merge(HEALTH_ITEMS_TEMP_TEMP, HEALTH_ITEMS_TEMP)
 
-	local stickiness = 225
-	local hp_distance_modifier = 225
 	local more_items_than_players = num_valid_bots < num_health_items
-
-	local function find_permutation(current_bot_index, current_utility, solution, best_utility, best_solution, empties_left, health_item_lookup, health_item_list, num_valid_bots)
-		if num_valid_bots < current_bot_index then
-			if current_utility < best_utility then
-				for i = 1, num_valid_bots, 1 do
-					best_solution[i] = solution[i]
-				end
-
-				return current_utility
-			else
-				return best_utility
-			end
-		else
-			local bb = BOT_BBS[current_bot_index]
-			local bot_pos = BOT_POSES[current_bot_index]
-			local current_pickup = bb.health_pickup
-			local bot_hp = BOT_HEALTH[current_bot_index] or 0
-
-			for unit, pos in pairs(health_item_list) do
-				if health_item_lookup[unit] then
-					local stickiness_modifier = (current_pickup == unit and stickiness) or 0
-					local utility = (current_utility + Vector3.distance_squared(bot_pos, pos)) - stickiness_modifier - bot_hp*hp_distance_modifier
-					health_item_lookup[unit] = nil
-					solution[current_bot_index] = unit
-					best_utility = find_permutation(current_bot_index + 1, utility, solution, best_utility, best_solution, empties_left, health_item_lookup, health_item_list, num_valid_bots)
-					solution[current_bot_index] = nil
-					health_item_lookup[unit] = pos
-				end
-			end
-
-			if 0 < empties_left then
-				best_utility = find_permutation(current_bot_index + 1, current_utility, solution, best_utility, best_solution, empties_left - 1, health_item_lookup, health_item_list, num_valid_bots)
-			end
-
-			return best_utility
-		end
-
-		return 
-	end
-
 	local allowed_empties = math.max(0, num_valid_bots - num_health_items)
 
 	find_permutation(1, 0, SOLUTION_TEMP, math.huge, BEST_SOLUTION_TEMP, allowed_empties, HEALTH_ITEMS_TEMP_TEMP, HEALTH_ITEMS_TEMP, num_valid_bots)
@@ -1149,10 +1159,14 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 			end
 		else
 			local bb = Unit.get_data(unit, "blackboard")
-			bb.health_pickup = nil
+
+			if bb.health_pickup then
+				bb.health_pickup = nil
+				bb.health_dist = nil
+				bb.health_pickup_valid_until = nil
+			end
+
 			bb.allowed_to_take_health_pickup = false
-			bb.health_dist = nil
-			bb.health_pickup_valid_until = nil
 		end
 	end
 

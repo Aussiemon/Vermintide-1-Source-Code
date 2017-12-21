@@ -89,7 +89,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 				local player_manager = Managers.player
 				local player = player_manager.local_player(player_manager, 1)
 				local started_matchmaking_t = self.matchmaking_manager.started_matchmaking_t
-				local time_taken = t - started_matchmaking_t
+				local time_taken = (started_matchmaking_t and t - started_matchmaking_t) or 0
 				local connection_state = "search_players_successful"
 				local telemetry_manager = Managers.telemetry
 

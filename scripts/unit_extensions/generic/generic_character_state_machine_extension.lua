@@ -1,6 +1,5 @@
 require("scripts/unit_extensions/generic/generic_state_machine")
 
-script_data.debug_csm = script_data.debug_csm or Development.parameter("debug_csm")
 GenericCharacterStateMachineExtension = class(GenericCharacterStateMachineExtension)
 GenericCharacterStateMachineExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world

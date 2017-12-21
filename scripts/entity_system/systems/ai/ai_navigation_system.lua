@@ -1,5 +1,6 @@
 local WAIT_TIMER_MAX = 5
 local WAIT_TIMER_INCREMENT = 1
+local Unit_alive = Unit.alive
 local extensions = {
 	"AINavigationExtension",
 	"PlayerBotNavigation"
@@ -10,6 +11,7 @@ AINavigationSystem.init = function (self, entity_system_creation_context, system
 
 	self.unit_extension_data = {}
 	self.enabled_units = {}
+	self.delayed_units = {}
 
 	return 
 end
@@ -36,6 +38,29 @@ end
 AINavigationSystem.on_freeze_extension = function (self, unit, extension_name)
 	self.unit_extension_data[unit] = nil
 	self.enabled_units[unit] = nil
+
+	return 
+end
+AINavigationSystem.simulate_dummy_target = function (self, t)
+	local local_player_unit = Managers.player:local_player().player_unit
+
+	if not local_player_unit then
+		return 
+	end
+
+	local player_position = POSITION_LOOKUP[local_player_unit]
+	local nav_world = Managers.state.entity:system("ai_system"):nav_world()
+	local dummy_pos_on_mesh = ConflictUtils.simulate_dummy_target(nav_world, player_position, t)
+
+	if dummy_pos_on_mesh then
+		QuickDrawer:sphere(dummy_pos_on_mesh, 1)
+
+		for unit, extension in pairs(self.unit_extension_data) do
+			extension._blackboard.goal_destination = Vector3Box(dummy_pos_on_mesh)
+
+			extension.move_to(extension, dummy_pos_on_mesh)
+		end
+	end
 
 	return 
 end
@@ -88,6 +113,11 @@ AINavigationSystem.update_enabled = function (self)
 		self.enabled_units[unit] = (enabled and extension) or nil
 	end
 
+	for unit, extension in pairs(self.delayed_units) do
+		local enabled = extension._nav_bot ~= nil and extension._enabled
+		self.enabled_units[unit] = (enabled and extension) or nil
+	end
+
 	Profiler.stop()
 
 	return 
@@ -119,17 +149,19 @@ AINavigationSystem.update_destination = function (self, t)
 			local position_current_destination = extension._destination:unbox()
 			local position_wanted_destination = extension._wanted_destination:unbox()
 			local blackboard = extension._blackboard
+			local repath_allowed = true
 			local did_pathfind_just_finish = extension._has_started_pathfind
 
 			if did_pathfind_just_finish then
 				extension._has_started_pathfind = nil
-				local already_at_current_destination = Vec3_dist_sq(position_unit, position_current_destination) < 0.010000000000000002
+				local already_at_current_destination = Vec3_dist_sq(position_unit, position_current_destination) < 0.01
 				local pathfind_was_successful = is_navbot_following_path or already_at_current_destination
 
 				if pathfind_was_successful then
 					blackboard.no_path_found = nil
 					extension._failed_move_attempts = 0
 				else
+					repath_allowed = false
 					blackboard.no_path_found = true
 					extension._failed_move_attempts = extension._failed_move_attempts + 1
 					extension._wait_timer = t + math.min(WAIT_TIMER_MAX, WAIT_TIMER_INCREMENT*extension._failed_move_attempts)
@@ -141,26 +173,61 @@ AINavigationSystem.update_destination = function (self, t)
 						QuickDrawerStay:line(debug_pos + Vector3.up()*10, position_current_destination, colorred)
 						QuickDrawerStay:sphere(position_current_destination, 0.1, colorred)
 					end
+
+					if extension._far_pathing_allowed and not self.setup_far_astar(self, position_unit, position_wanted_destination, extension, blackboard, nav_bot, t) then
+						extension._failed_move_attempts = extension._failed_move_attempts + 1
+
+						extension._wanted_destination:store(position_current_destination)
+
+						extension._blackboard.target_outside_navmesh = true
+
+						if RecycleSettings.destroy_no_path_found_time then
+							self.delayed_units[unit] = extension
+							self.unit_extension_data[unit] = nil
+							extension.delayed_check_time = t + 1.5
+
+							if not extension.delayed_max_time then
+								extension.delayed_max_time = t + RecycleSettings.destroy_no_path_found_time
+							end
+						end
+					end
 				end
 			end
 
-			destination_change_large = 0.010000000000000002 < Vec3_dist_sq(position_current_destination, position_wanted_destination)
-			local already_at_wanted_destination = Vec3_dist_sq(position_unit, position_wanted_destination) < 0.010000000000000002
-			local is_path_recomputation_needed = GwNavBot.is_path_recomputation_needed(nav_bot)
-			local should_start_new_pathfind = is_path_recomputation_needed or (not already_at_wanted_destination and (not is_navbot_following_path or destination_change_large))
+			if blackboard.far_path_target then
+				local reached_dest = Vec3_dist_sq(position_unit, position_current_destination) < 50
 
-			if should_start_new_pathfind then
-				GwNavBot.compute_new_path(nav_bot, position_wanted_destination)
-				extension._destination:store(position_wanted_destination)
-				extension._debug_position_when_starting_search:store(position_unit)
+				if reached_dest then
+					blackboard.far_path_target = nil
 
-				extension._is_computing_path = true
-				extension._has_started_pathfind = true
-				extension._wait_timer = 0
-				blackboard.next_smart_object_data.next_smart_object_id = nil
+					extension.move_to(extension, extension._backup_destination:unbox())
+				end
+			end
+
+			if repath_allowed then
+				local destination_change = Vec3_dist_sq(position_current_destination, position_wanted_destination)
+				local dist_to_destination = Vec3_dist_sq(position_unit, position_wanted_destination)
+				local destination_far_away = 36 < dist_to_destination
+				local change_large_enough = (destination_far_away and 9 < destination_change) or (not destination_far_away and 0.01 < destination_change)
+				local already_at_wanted_destination = dist_to_destination < 0.01
+				local is_path_recomputation_needed = GwNavBot.is_path_recomputation_needed(nav_bot)
+				local should_start_new_pathfind = is_path_recomputation_needed or (not already_at_wanted_destination and (not is_navbot_following_path or change_large_enough))
+
+				if should_start_new_pathfind then
+					GwNavBot.compute_new_path(nav_bot, position_wanted_destination)
+					extension._destination:store(position_wanted_destination)
+					extension._debug_position_when_starting_search:store(position_unit)
+
+					extension._is_computing_path = true
+					extension._has_started_pathfind = true
+					extension._wait_timer = 0
+					blackboard.next_smart_object_data.next_smart_object_id = nil
+				end
 			end
 		end
 	end
+
+	self.update_delayed_units(self, t)
 
 	if script_data.debug_ai_movement then
 		for unit, extension in pairs(self.unit_extension_data) do
@@ -176,6 +243,99 @@ AINavigationSystem.update_destination = function (self, t)
 	Profiler.stop()
 
 	return 
+end
+AINavigationSystem.update_delayed_units = function (self, t)
+	local delayed_units = self.delayed_units
+	local unit, extension = next(delayed_units, self.delayed_unit)
+	self.delayed_unit = unit
+
+	if Unit_alive(unit) then
+		local extension = delayed_units[unit]
+
+		if extension.delayed_check_time < t then
+			self.unit_extension_data[unit] = extension
+			self.delayed_unit = next(delayed_units, unit)
+			delayed_units[unit] = nil
+			local nav_bot = extension._nav_bot
+
+			if nav_bot and GwNavBot.is_following_path(nav_bot) then
+				extension.delayed_max_time = nil
+
+				return 
+			end
+
+			if extension.delayed_max_time < t then
+				if RecycleSettings.destroy_no_path_only_behind then
+					local conflict_director = Managers.state.conflict
+					local main_path_info = conflict_director.main_path_info
+
+					if Unit_alive(main_path_info.behind_unit) then
+						local info = conflict_director.main_path_player_info[main_path_info.behind_unit]
+						local _, _, _, _, my_path_index = MainPathUtils.closest_pos_at_main_path(nil, POSITION_LOOKUP[unit])
+						local behind_a_break = my_path_index < info.path_index
+
+						if behind_a_break then
+							Managers.state.conflict:destroy_unit(unit, extension._blackboard, "main_path_blocked")
+						end
+					end
+				else
+					Managers.state.conflict:destroy_unit(unit, extension._blackboard, "no_path_found")
+				end
+			end
+		end
+	end
+
+	return 
+end
+AINavigationSystem.setup_far_astar = function (self, p1, p2, extension, blackboard, nav_bot, t)
+	if blackboard.far_path_target then
+		blackboard.far_path_target = nil
+	end
+
+	local found_path, pos = self.far_astar(self, p1, p2)
+
+	if found_path then
+		extension.move_to(extension, pos)
+
+		extension._backup_destination = Vector3Box(p2)
+		blackboard.far_path_target = true
+
+		GwNavBot.compute_new_path(nav_bot, pos)
+		extension._destination:store(pos)
+		extension._debug_position_when_starting_search:store(p1)
+
+		extension._is_computing_path = true
+		extension._has_started_pathfind = true
+		extension._wait_timer = 0
+		blackboard.next_smart_object_data.next_smart_object_id = nil
+
+		return true
+	end
+
+	return 
+end
+AINavigationSystem.far_astar = function (self, p1, p2)
+	local navigation_group_manager = Managers.state.conflict.navigation_group_manager
+	local path, total_path_length = navigation_group_manager.a_star_cached_between_positions(navigation_group_manager, p1, p2)
+
+	if not path then
+		return false
+	end
+
+	local num_nodes = #path
+
+	if num_nodes <= 1 then
+		return false
+	end
+
+	if script_data.ai_debug_failed_pathing then
+		navigation_group_manager.draw_group_path(navigation_group_manager, path)
+	end
+
+	local nav_group = path[2]
+	local goal_pos = nav_group.get_group_center(nav_group):unbox()
+
+	return true, goal_pos
 end
 AINavigationSystem.update_desired_velocity = function (self, t, dt)
 	Profiler.start("update_desired_velocity")
@@ -363,19 +523,23 @@ AINavigationSystem.update_debug_draw = function (self, t)
 	local unit = script_data.debug_unit
 	local navigation_extension = self.unit_extension_data[unit]
 
-	if Unit.alive(unit) and navigation_extension then
+	if Unit_alive(unit) and navigation_extension then
+		local blackboard = navigation_extension._blackboard
+
 		Debug.text("AI NAVIGATION DEBUG")
 		Debug.text("  enabled = %s", tostring(self.enabled_units[unit] ~= nil))
+		Debug.text("  using far-path = %s %s", (blackboard.far_path_target and "YES") or "NO", (blackboard.far_target_unreachable and "(UNREACHABLE)") or "")
 		Debug.text("  has_reached = %s", tostring(navigation_extension.has_reached_destination(navigation_extension)))
+		Debug.text("  dist to dest = %.2f", tostring(navigation_extension.distance_to_destination(navigation_extension)))
 		Debug.text("  current_speed = %.2f", navigation_extension._current_speed)
 		Debug.text("  desired_velocity = %s", (navigation_extension._nav_bot and tostring(GwNavBot.output_velocity(navigation_extension._nav_bot))) or "?")
 		Debug.text("  failed_move_attempts = %d", navigation_extension._failed_move_attempts)
 		Debug.text("  is_path_found = %s", tostring(navigation_extension._is_path_found))
-		Debug.text("  no_path_found = %s", tostring(navigation_extension._blackboard.no_path_found))
+		Debug.text("  no_path_found = %s", tostring(blackboard.no_path_found))
 		Debug.text("  is_computing_path = %s", tostring(navigation_extension._is_computing_path))
 		Debug.text("  is_following_path = %s", (navigation_extension._nav_bot and tostring(GwNavBot.is_following_path(navigation_extension._nav_bot))) or "?")
 		Debug.text("  interpolating = %s", tostring(navigation_extension._interpolating))
-		Debug.text("  btnode = %s", tostring(navigation_extension._blackboard.btnode_name))
+		Debug.text("  btnode = %s", tostring(blackboard.btnode_name))
 		Debug.text("  wait_timer = %.1f", math.max(-1, navigation_extension._wait_timer - t))
 	end
 

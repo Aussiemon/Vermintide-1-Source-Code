@@ -147,6 +147,22 @@ NetworkServer.peer_despawned_player = function (self, peer_id)
 
 	return 
 end
+NetworkServer.peer_respawn_player = function (self, peer_id)
+	network_printf("Peer %s respawn player.", peer_id)
+
+	local peer_state_machine = self.peer_state_machines[peer_id]
+
+	if peer_state_machine.has_function(peer_state_machine, "respawn_player") then
+		peer_state_machine.respawn_player()
+	end
+
+	return 
+end
+NetworkServer.rpc_client_respawn_player = function (self, sender)
+	self.peer_respawn_player(self, sender)
+
+	return 
+end
 NetworkServer.destroy = function (self)
 	if self.network_event_delegate then
 		self.unregister_rpcs(self)
@@ -166,7 +182,7 @@ NetworkServer.destroy = function (self)
 	return 
 end
 NetworkServer.register_rpcs = function (self, network_event_delegate, network_transmit)
-	network_event_delegate.register(network_event_delegate, self, "rpc_client_connection_state", "rpc_notify_lobby_joined", "rpc_to_client_spawn_player", "rpc_want_to_spawn_player", "rpc_level_loaded", "rpc_game_started", "rpc_is_ingame", "game_object_sync_done", "rpc_notify_connected", "rpc_loading_synced", "rpc_clear_peer_state")
+	network_event_delegate.register(network_event_delegate, self, "rpc_client_connection_state", "rpc_notify_lobby_joined", "rpc_to_client_spawn_player", "rpc_want_to_spawn_player", "rpc_level_loaded", "rpc_game_started", "rpc_is_ingame", "game_object_sync_done", "rpc_notify_connected", "rpc_loading_synced", "rpc_clear_peer_state", "rpc_client_respawn_player")
 
 	self.network_event_delegate = network_event_delegate
 

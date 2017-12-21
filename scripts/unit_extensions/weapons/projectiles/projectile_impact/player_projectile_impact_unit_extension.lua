@@ -4,7 +4,9 @@ PlayerProjectileImpactUnitExtension.init = function (self, extension_init_contex
 
 	self.network_manager = Managers.state.network
 	self.is_server = Managers.player.is_server
-	self.owner_unit = extension_init_data.owner_unit
+	local owner_unit = extension_init_data.owner_unit
+	self.owner_unit = owner_unit
+	local owner_player = Managers.player:owner(owner_unit)
 	local item_name = extension_init_data.item_name
 	local item_data = ItemMasterList[item_name]
 	local item_template = BackendUtils.get_item_template(item_data)
@@ -21,7 +23,7 @@ PlayerProjectileImpactUnitExtension.init = function (self, extension_init_contex
 	local collision_filter = "filter_player_ray_projectile_no_player"
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 
-	if difficulty_settings.friendly_fire_ranged then
+	if DamageUtils.allow_friendly_fire_ranged(difficulty_settings, owner_player) then
 		collision_filter = "filter_player_ray_projectile"
 	end
 

@@ -54,6 +54,10 @@ local colors = {
 	title = Colors.color_definitions.credits_title,
 	normal = Colors.color_definitions.credits_normal
 }
+local font_sizes = {
+	legal = 15,
+	normal = 30
+}
 CreditsView = class(CreditsView)
 CreditsView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -163,12 +167,19 @@ CreditsView.update = function (self, dt)
 
 		if entry.type == "header" then
 			ui_style.text.text_color = colors.header
+			ui_style.text.font_size = font_sizes.normal
 			current_offset = current_offset - 84
 		elseif entry.type == "title" then
 			ui_style.text.text_color = colors.title
+			ui_style.text.font_size = font_sizes.normal
 			current_offset = current_offset - 64
+		elseif entry.type == "legal" then
+			ui_style.text.text_color = colors.normal
+			ui_style.text.font_size = font_sizes.legal
+			current_offset = current_offset - 15
 		else
 			ui_style.text.text_color = colors.normal
+			ui_style.text.font_size = font_sizes.normal
 			current_offset = current_offset - 30
 		end
 

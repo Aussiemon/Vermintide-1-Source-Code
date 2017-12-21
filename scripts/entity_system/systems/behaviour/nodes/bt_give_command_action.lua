@@ -38,7 +38,9 @@ BTGiveCommandAction.leave = function (self, unit, blackboard, t)
 	network_manager.anim_event(network_manager, unit, "to_combat")
 
 	blackboard.target_unit = blackboard.command_target
-	blackboard.confirmed_player_sighting = true
+
+	AiUtils.activate_unit(blackboard)
+
 	blackboard.command_target_previous = blackboard.command_target
 	blackboard.anim_cb_order_finished = nil
 	blackboard.give_command = nil

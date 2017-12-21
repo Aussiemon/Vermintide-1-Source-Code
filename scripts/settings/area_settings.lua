@@ -1,8 +1,10 @@
 AreaSettings = AreaSettings or {}
 AreaSettings.world = {}
 AreaSettings.ubersreik = {
-	sorting = 1,
+	area_icon_background_texture = "ubersreik_location_icon",
+	area_icon_hover_texture = "ubersreik_location_icon_glow",
 	display_name = "dlc1_4_area_ubersreik",
+	sorting = 1,
 	map_icon = "level_location_any_icon",
 	level_image = "level_image_location_ubersreik",
 	map_texture = "map_ubersreik",
@@ -20,6 +22,19 @@ AreaSettings.drachenfels = {
 	map_position = {
 		-370,
 		190
+	}
+}
+AreaSettings.dwarfs = {
+	area_icon_background_texture = "ubersreik_location_icon",
+	area_icon_hover_texture = "ubersreik_location_icon_glow",
+	display_name = "dlc1_4_area_drachenfels",
+	sorting = 2,
+	map_icon = "level_location_any_icon",
+	level_image = "level_image_location_karak_azgaraz",
+	map_texture = "map_karak_azgaraz",
+	map_position = {
+		535,
+		-170
 	}
 }
 

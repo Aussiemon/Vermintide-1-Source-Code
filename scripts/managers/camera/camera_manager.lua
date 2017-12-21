@@ -582,6 +582,8 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 	local cast_radius = smooth_radius
 
 	if len < cast_radius then
+		assert(Vector3.is_valid(cast_to), "Trying to set invalid camera position")
+
 		return cast_to
 	end
 
@@ -602,11 +604,15 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 			Application.warning("[CameraManager] Safe spot is intersecting with geometry")
 		end
 
+		assert(Vector3.is_valid(cast_from), "Trying to set invalid camera position")
+
 		return cast_from
 	end
 
 	while true do
 		if cast_distance < SWEEP_EPSILON then
+			assert(Vector3.is_valid(cast_from), "Trying to set invalid camera position")
+
 			return cast_from
 		end
 
@@ -634,7 +640,11 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 			local y = Vector3.length(hit.position - cast_from - x*dir)
 
 			if y == 0 then
-				return hit.position
+				local pos = hit.position
+
+				assert(Vector3.is_valid(pos), "Trying to set invalid camera position")
+
+				return pos
 			end
 
 			local cd = nil
@@ -658,6 +668,8 @@ CameraManager._smooth_camera_collision = function (self, camera_position, safe_p
 		elseif script_data.camera_debug then
 			drawer.sphere(drawer, cast_to, 0.2, Color(0, 0, 255))
 		end
+
+		assert(Vector3.is_valid(cast_to), "Trying to set invalid camera position")
 
 		return cast_to
 	end
@@ -976,6 +988,9 @@ CameraManager._update_camera_properties = function (self, camera, shadow_cull_ca
 		if root_unit and Unit.alive(root_unit) then
 			local safe_position_offset = current_node.safe_position_offset(current_node)
 			local safe_pos = Unit.world_position(root_unit, (root_object and Unit.node(root_unit, root_object)) or 0) + safe_position_offset.unbox(safe_position_offset)
+
+			assert(Vector3.is_valid(safe_pos), "Trying to use invalid safe position")
+
 			pos = self._smooth_camera_collision(self, camera_data.position, safe_pos, 0.35, 0.25)
 		end
 
@@ -1045,8 +1060,10 @@ CameraManager._update_camera_properties = function (self, camera, shadow_cull_ca
 	end
 
 	if camera_data.far_range then
-		Camera.set_far_range(camera, camera_data.far_range)
-		Camera.set_far_range(shadow_cull_camera, camera_data.far_range)
+		local far_range = Camera.get_data(camera, "far_range") or camera_data.far_range
+
+		Camera.set_far_range(camera, far_range)
+		Camera.set_far_range(shadow_cull_camera, far_range)
 	end
 
 	if camera_data.fade_to_black then

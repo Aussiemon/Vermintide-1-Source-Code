@@ -127,9 +127,11 @@ end
 InteractionHelper.complete_interaction = function (self, interactor_unit, interactable_unit, result)
 	InteractionHelper.printf("InteractionHelper:complete_interaction(%s, %s, %s)", tostring(interactor_unit), tostring(interactable_unit), InteractionResult[result])
 
-	local interactable_extension = ScriptUnit.extension(interactable_unit, "interactable_system")
+	if Unit.alive(interactable_unit) then
+		local interactable_extension = ScriptUnit.extension(interactable_unit, "interactable_system")
 
-	interactable_extension.set_is_being_interacted_with(interactable_extension, false)
+		interactable_extension.set_is_being_interacted_with(interactable_extension, false)
+	end
 
 	local interactor_go_id = Managers.state.unit_storage:go_id(interactor_unit)
 
@@ -144,9 +146,11 @@ InteractionHelper.interaction_completed = function (self, interactor_unit, inter
 
 	interactor_extension.interaction_completed(interactor_extension, result)
 
-	local interactable_extension = ScriptUnit.extension(interactable_unit, "interactable_system")
+	if Unit.alive(interactable_unit) then
+		local interactable_extension = ScriptUnit.extension(interactable_unit, "interactable_system")
 
-	interactable_extension.set_is_being_interacted_with(interactable_extension, false)
+		interactable_extension.set_is_being_interacted_with(interactable_extension, false)
+	end
 
 	return 
 end

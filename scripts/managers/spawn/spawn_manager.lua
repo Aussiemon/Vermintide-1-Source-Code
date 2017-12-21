@@ -97,6 +97,7 @@ SpawnManager.destroy = function (self)
 end
 SpawnManager._default_player_statuses = function (self)
 	local settings = Managers.state.difficulty:get_difficulty_settings()
+	local gamemode_settings = Managers.state.game_mode:settings()
 	local statuses = {}
 
 	for i = 1, NUM_PLAYERS, 1 do
@@ -111,10 +112,13 @@ SpawnManager._default_player_statuses = function (self)
 				slot_melee = 1
 			}
 		}
-		local consumables = status.consumables
 
-		for _, slot_name in ipairs(CONSUMABLE_SLOTS) do
-			consumables[slot_name] = settings[slot_name]
+		if not gamemode_settings.disable_difficulty_spawning_items then
+			local consumables = status.consumables
+
+			for _, slot_name in ipairs(CONSUMABLE_SLOTS) do
+				consumables[slot_name] = settings[slot_name]
+			end
 		end
 
 		statuses[i] = status
@@ -450,7 +454,10 @@ SpawnManager._update_player_status = function (self, dt, t)
 					for _, slot_name in ipairs(CONSUMABLE_SLOTS) do
 						local slot_data = inventory.get_slot_data(inventory, slot_name)
 						local item_key = slot_data and slot_data.item_data.key
-						consumables[slot_name] = item_key
+
+						if item_key ~= nil or consumables[slot_name] ~= nil then
+							consumables[slot_name] = item_key
+						end
 					end
 				end
 			else
@@ -852,6 +859,8 @@ SpawnManager._find_spawn_point = function (self, status)
 	if room_manager then
 		position, rotation = self._spawn_pos_rot_from_index(self, room_manager.get_spawn_point_by_peer(room_manager, status.peer_id))
 	else
+		fassert(status.position, "This level is missing spawn-points for the players.")
+
 		position = status.position:unbox()
 		rotation = status.rotation:unbox()
 	end

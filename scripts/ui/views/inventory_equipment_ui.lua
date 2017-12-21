@@ -132,9 +132,13 @@ InventoryEquipmentUI.create_ui_elements = function (self)
 	}
 	self.character_selection_bar_widget = UIWidget.init(definitions.character_selection_bar_widget)
 	self.equipment_selection_bar_widget = UIWidget.init(definitions.equipment_selection_bar_widget)
+	self.preview_viewport_overlay_widget = UIWidget.init(self.widgets_definitions.preview_viewport_overlay)
+	self.preview_viewport_loading_widget = UIWidget.init(self.widgets_definitions.preview_viewport_loading)
 	self.character_display_text_widget = UIWidget.init(self.widgets_definitions.character_display_text_widget)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
+
+	self.preview_viewport_loading_widget.style.texture_id.color[1] = 0
 
 	return 
 end
@@ -271,6 +275,12 @@ InventoryEquipmentUI.update = function (self, dt)
 	self.gamepad_changed_profile_index = nil
 	self.gamepad_changed_equipment_index = nil
 
+	if self.fade_out_on_items_loaded and self.inventory_previewer:items_spawned() then
+		self.preview_overlay_fade_out(self)
+
+		self.fade_out_on_items_loaded = nil
+	end
+
 	return 
 end
 InventoryEquipmentUI.draw = function (self, dt)
@@ -291,16 +301,43 @@ InventoryEquipmentUI.draw = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
+	UIRenderer.draw_widget(ui_renderer, self.character_display_text_widget)
+	UIRenderer.draw_widget(ui_renderer, self.equipment_selection_bar_widget)
+	UIRenderer.draw_widget(ui_renderer, self.character_selection_bar_widget)
+	UIRenderer.end_pass(ui_renderer)
+
+	return 
+end
+InventoryEquipmentUI.draw_viewport = function (self, dt)
+	local ui_renderer = self.ui_renderer
+	local ui_top_renderer = self.ui_top_renderer
+	local ui_scenegraph = self.ui_scenegraph
+	local input_manager = self.input_manager
+	local input_service = input_manager.get_service(input_manager, "inventory_menu")
+
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+
 	if self.preview_viewport_widget then
 		UIRenderer.draw_widget(ui_renderer, self.preview_viewport_widget)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
+	self.rotate_loading_icon(self, dt)
 	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
-	UIRenderer.draw_widget(ui_top_renderer, self.character_selection_bar_widget)
-	UIRenderer.draw_widget(ui_top_renderer, self.equipment_selection_bar_widget)
-	UIRenderer.draw_widget(ui_top_renderer, self.character_display_text_widget)
+	UIRenderer.draw_widget(ui_top_renderer, self.preview_viewport_loading_widget)
+	UIRenderer.draw_widget(ui_top_renderer, self.preview_viewport_overlay_widget)
 	UIRenderer.end_pass(ui_top_renderer)
+
+	return 
+end
+InventoryEquipmentUI.rotate_loading_icon = function (self, dt)
+	local loading_icon_style = self.preview_viewport_loading_widget.style.texture_id
+	local angle_fraction = loading_icon_style.fraction or 0
+	angle_fraction = (angle_fraction + dt)%1
+	local anim_fraction = math.easeOutCubic(angle_fraction)
+	local angle = anim_fraction*math.degrees_to_radians(360)
+	loading_icon_style.angle = angle
+	loading_icon_style.fraction = angle_fraction
 
 	return 
 end
@@ -425,6 +462,10 @@ InventoryEquipmentUI.on_character_profile_selected = function (self, profile_nam
 			self.equip_item(self, item_data, index)
 		end
 	end
+
+	self.preview_overlay_fade_in(self, 255)
+
+	self.fade_out_on_items_loaded = true
 
 	return 
 end
@@ -596,6 +637,11 @@ InventoryEquipmentUI.equip_inventory_item = function (self, item_data, specific_
 	local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
 	local player_profile_index = player.profile_index
 	local unit = player.player_unit
+
+	if not unit or not Unit.alive(unit) then
+		return 
+	end
+
 	local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
 	local resyncing_loadout = inventory_extension.resyncing_loadout(inventory_extension)
 
@@ -624,25 +670,30 @@ InventoryEquipmentUI.equip_inventory_item = function (self, item_data, specific_
 		if current_equipped_item_backend_id and current_equipped_item_backend_id == backend_id then
 			return 
 		else
-			local trinket_slot_index = 3
-			local new_slot_found = false
+			local is_same_unique_id = current_equipped_item_backend_id and self.trinkets_using_same_unique_id(self, current_equipped_item_backend_id, backend_id)
+			local _ = nil
 
-			while 0 < trinket_slot_index do
-				local trinket_slot = slots[trinket_slot_index]
-				local trinket_slot_name = trinket_slot.name
-				local trinket_slot_item_backend_id = equipment[trinket_slot_index]
+			if current_equipped_item_backend_id and not is_same_unique_id then
+				local trinket_slot_index = 3
+				local new_slot_found = false
 
-				if trinket_slot_item_backend_id then
-					if trinket_slot_item_backend_id == backend_id then
-						return 
+				while 0 < trinket_slot_index do
+					local trinket_slot = slots[trinket_slot_index]
+					local trinket_slot_name = trinket_slot.name
+					local trinket_slot_item_backend_id = equipment[trinket_slot_index]
+
+					if trinket_slot_item_backend_id then
+						if trinket_slot_item_backend_id == backend_id then
+							return 
+						end
+					elseif not new_slot_found and not self.is_slot_locked(self, trinket_slot_index) then
+						new_slot_found = true
+						selected_equipment_index = trinket_slot_index
+						slot_name = slots[trinket_slot_index].name
 					end
-				elseif not new_slot_found and not self.is_slot_locked(self, trinket_slot_index) then
-					new_slot_found = true
-					selected_equipment_index = trinket_slot_index
-					slot_name = slots[trinket_slot_index].name
-				end
 
-				trinket_slot_index = trinket_slot_index - 1
+					trinket_slot_index = trinket_slot_index - 1
+				end
 			end
 		end
 
@@ -709,7 +760,7 @@ InventoryEquipmentUI.equip_inventory_item = function (self, item_data, specific_
 	BackendUtils.set_loadout_item(item_data, profile_name, slot_name)
 	self.play_sound(self, "Play_hud_inventory_drop_item")
 
-	return 
+	return true
 end
 InventoryEquipmentUI.equip_item = function (self, item_data, specific_index)
 	local backend_id = item_data.backend_id
@@ -729,6 +780,9 @@ InventoryEquipmentUI.equip_item = function (self, item_data, specific_index)
 	equipment_bar_style[item_frame_content_id].color = Colors.get_table(item_data.rarity)
 
 	self.inventory_previewer:equip_item(item_name, item_slot_type, equipment_slot_index)
+	self.preview_overlay_fade_in(self, 180)
+
+	self.fade_out_on_items_loaded = true
 
 	return 
 end
@@ -755,6 +809,38 @@ InventoryEquipmentUI.reset_equipment_slots = function (self)
 		local item_content_id = string.format("%s_%d", "item", index)
 		equipment_bar_content[item_content_id] = nil
 	end
+
+	return 
+end
+InventoryEquipmentUI.preview_overlay_fade_in = function (self, alpha)
+	local widget = self.preview_viewport_loading_widget
+	local style = widget.style
+	local color = style.texture_id.color
+	local animation = UIAnimation.init(UIAnimation.function_by_time, color, 1, color[1], alpha, 0.15, math.easeOutCubic)
+
+	table.clear(widget.animations)
+
+	widget.animations[animation] = true
+
+	table.clear(self.preview_viewport_overlay_widget.animations)
+
+	self.preview_viewport_overlay_widget.style.rect.color[1] = alpha
+
+	return 
+end
+InventoryEquipmentUI.preview_overlay_fade_out = function (self)
+	local function fade(widget, color)
+		local animation = UIAnimation.init(UIAnimation.function_by_time, color, 1, color[1], 0, 0.2, math.easeOutCubic)
+
+		table.clear(widget.animations)
+
+		widget.animations[animation] = true
+
+		return 
+	end
+
+	fade(self.preview_viewport_overlay_widget, self.preview_viewport_overlay_widget.style.rect.color)
+	fade(self.preview_viewport_loading_widget, self.preview_viewport_loading_widget.style.texture_id.color)
 
 	return 
 end

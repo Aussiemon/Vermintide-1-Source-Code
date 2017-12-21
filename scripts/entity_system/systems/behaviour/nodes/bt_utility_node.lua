@@ -83,7 +83,6 @@ BTUtilityNode.run = function (self, unit, blackboard, t, dt)
 
 		local action_data = blackboard.utility_actions[action_name]
 		action_data.last_time = t
-		action_data.last_action = action_name
 
 		Profiler.start(node._identifier)
 

@@ -48,6 +48,12 @@ ActionTrueFlightBowAim.client_owner_start_action = function (self, new_action, t
 		end
 	end
 
+	local charge_sound_husk_name = self.current_action.charge_sound_husk_name
+
+	if charge_sound_husk_name then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_name, owner_unit)
+	end
+
 	return 
 end
 ActionTrueFlightBowAim.client_owner_post_update = function (self, dt, t, world, can_damage)
@@ -172,7 +178,6 @@ ActionTrueFlightBowAim.client_owner_post_update = function (self, dt, t, world, 
 		end
 
 		if self.charge_ready_sound_event and self.aimed_target then
-			print("MADDERFAKKING READY!!!!!")
 			self.first_person_extension:play_hud_sound_event(self.charge_ready_sound_event)
 
 			self.charge_ready_sound_event = nil
@@ -213,6 +218,12 @@ ActionTrueFlightBowAim.finish = function (self, reason, data)
 
 		self.wwise_source_id = nil
 		self.charging_sound_id = nil
+	end
+
+	local charge_sound_husk_stop_event = current_action.charge_sound_husk_stop_event
+
+	if charge_sound_husk_stop_event then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_stop_event, owner_unit)
 	end
 
 	if (not data or data.new_sub_action ~= "shoot_charged") and ScriptUnit.has_extension(self.target, "outline_system") then

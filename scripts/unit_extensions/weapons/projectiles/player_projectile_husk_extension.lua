@@ -1,8 +1,10 @@
 PlayerProjectileHuskExtension = class(PlayerProjectileHuskExtension)
 PlayerProjectileHuskExtension.init = function (self, extension_init_context, unit, extension_init_data)
+	local owner_unit = extension_init_data.owner_unit
 	self.world = extension_init_context.world
 	self.unit = unit
-	self.owner_unit = extension_init_data.owner_unit
+	self.owner_unit = owner_unit
+	self.owner_player = Managers.player:owner(owner_unit)
 	local item_name = extension_init_data.item_name
 	local item_data = ItemMasterList[item_name]
 	local item_template = BackendUtils.get_item_template(item_data)
@@ -28,7 +30,6 @@ PlayerProjectileHuskExtension.init = function (self, extension_init_context, uni
 	self.active = true
 	self.was_active = true
 	self.did_damage = false
-	self.is_server = Managers.player.is_server
 
 	self.initialize_projectile(self, projectile_info)
 
@@ -39,7 +40,7 @@ end
 PlayerProjectileHuskExtension.destroy = function (self)
 	if 0 < self._kills and self.projectile_info.is_grenade then
 		local player_manager = Managers.player
-		local player = player_manager.owner(player_manager, self.owner_unit)
+		local player = self.owner_player
 		local local_player = player_manager.local_player(player_manager)
 
 		if self.is_server then
@@ -210,7 +211,7 @@ PlayerProjectileHuskExtension.hit_enemy_damage = function (self, damage_data, hi
 	local enemy_impact_data = damage_data.enemy_unit_hit
 	local network_manager = Managers.state.network
 	local owner_unit = self.owner_unit
-	local owner = Managers.player:owner(owner_unit)
+	local owner = self.owner_player
 	local action = self.action
 	local node = Actor.node(hit_actor)
 	local hit_zone = breed.hit_zones_lookup[node]
@@ -270,9 +271,10 @@ PlayerProjectileHuskExtension.hit_player = function (self, impact_data, hit_unit
 
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 	local hit = false
+	local owner_player = self.owner_player
 	local damage_data = impact_data.damage
 
-	if damage_data and difficulty_settings.friendly_fire_ranged and hit_units[hit_unit] == nil then
+	if damage_data and DamageUtils.allow_friendly_fire_ranged(difficulty_settings, owner_player) and hit_units[hit_unit] == nil then
 		self.hit_player_damage(self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, hit_units)
 
 		hit = true
@@ -312,7 +314,7 @@ PlayerProjectileHuskExtension.hit_player_damage = function (self, damage_data, h
 	local action = self.action
 	local hit_effect = action.hit_effect
 	local owner_unit = self.owner_unit
-	local owner = Managers.player:owner(owner_unit)
+	local owner = self.owner_player
 	local is_husk = not owner.local_player
 	local damage_sound = attack_template.sound_type
 	local hit_rotation = Quaternion.look(hit_direction, Vector3.up())
@@ -335,7 +337,9 @@ PlayerProjectileHuskExtension.hit_player_damage = function (self, damage_data, h
 		self.did_damage = predicted_damage
 	end
 
-	EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk)
+	if hit_effect then
+		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk)
+	end
 
 	return 
 end
@@ -362,8 +366,7 @@ PlayerProjectileHuskExtension.hit_level_unit = function (self, impact_data, hit_
 	if hit_effect then
 		local world = self.world
 		local hit_rotation = Quaternion.look(hit_direction)
-		local owner_unit = self.owner_unit
-		local owner = Managers.player:owner(owner_unit)
+		local owner = self.owner_player
 		local is_husk = not owner.local_player
 
 		EffectHelper.play_surface_material_effects(hit_effect, world, hit_unit, hit_position, hit_rotation, hit_normal, nil, is_husk)
@@ -422,8 +425,7 @@ PlayerProjectileHuskExtension.hit_non_level_damagable_unit = function (self, dam
 	if hit_effect then
 		local world = self.world
 		local hit_rotation = Quaternion.look(hit_direction)
-		local owner_unit = self.owner_unit
-		local owner = Managers.player:owner(owner_unit)
+		local owner = self.owner_player
 		local is_husk = not owner.local_player
 
 		EffectHelper.play_surface_material_effects(hit_effect, world, hit_unit, hit_position, hit_rotation, hit_normal, nil, is_husk)
@@ -440,7 +442,7 @@ PlayerProjectileHuskExtension.link_projectile = function (self, hit_unit, hit_po
 	local broken_chance = math.random()
 	local impact_data = projectile_info.impact_data
 	local depth = impact_data.depth or 0.15
-	local depth_offset = 0.15
+	local depth_offset = impact_data.depth_offset or 0.15
 
 	if damage then
 		broken_chance = broken_chance*math.clamp(damage/2, 0.75, 1.25)
@@ -456,6 +458,8 @@ PlayerProjectileHuskExtension.link_projectile = function (self, hit_unit, hit_po
 		if random_pick == 1 then
 			depth = 0.05
 			depth_offset = 0.1
+		else
+			depth_offset = 0.15
 		end
 	elseif damage then
 		depth = depth*math.clamp(damage, 1, 3)
@@ -463,7 +467,7 @@ PlayerProjectileHuskExtension.link_projectile = function (self, hit_unit, hit_po
 
 	local normalized_direction = Vector3.normalize(hit_direction)
 	depth = depth + depth_offset
-	local random_bank = math.random()*2.64 - 0.5
+	local random_bank = math.random()*2.14 - 0.5
 	local link_position = hit_position + normalized_direction*depth
 	local link_rotation = Quaternion.look(normalized_direction)
 	local new_link_rotation = Quaternion.multiply(link_rotation, Quaternion(Vector3.forward(), random_bank))

@@ -4,7 +4,7 @@ dofile("foundation/scripts/boot/boot")
 
 GlobalResources = GlobalResources or {
 	"resource_packages/common_level_resources",
-	"resource_packages/menu_assets",
+	"resource_packages/menu_assets_common",
 	"resource_packages/ingame_sounds_one",
 	"resource_packages/ingame_sounds_two",
 	"resource_packages/ingame_sounds_three",
@@ -26,7 +26,7 @@ GlobalResources = GlobalResources or {
 
 if LEVEL_EDITOR_TEST then
 	GlobalResources = {
-		"resource_packages/menu_assets",
+		"resource_packages/menu_assets_common",
 		"resource_packages/ingame_light",
 		"resource_packages/inventory",
 		"resource_packages/pickups",
@@ -40,6 +40,7 @@ end
 
 Boot.foundation_update = Boot.foundation_update or Boot.update
 Boot.foundation_shutdown = Boot.foundation_shutdown or Boot.shutdown
+Boot.flow_return_table = Script.new_map(32)
 Boot.update = function (self, dt)
 	if PlayerUnitLocomotionExtension then
 		PlayerUnitLocomotionExtension.set_new_frame()
@@ -88,6 +89,7 @@ Boot.update = function (self, dt)
 	end
 
 	end_function_call_collection()
+	table.clear(Boot.flow_return_table)
 
 	return 
 end
@@ -555,13 +557,20 @@ Bulldozer.entrypoint = function (self)
 
 	Managers.package:load("resource_packages/levels/debug_levels", "boot")
 	Managers.package:load("resource_packages/levels/benchmark_levels", "boot")
+	Managers.package:load("resource_packages/levels/honduras_levels", "boot")
+
+	script_data.use_optimized_breed_units = false
+	local breed_package = (script_data.use_optimized_breed_units and "resource_packages/ingame_breeds_optimized") or "resource_packages/ingame_breeds"
+
+	print("use baked enemy meshes:", script_data.use_optimized_breed_units, " package: ", breed_package)
 
 	if GameSettingsDevelopment.start_state == "game" then
 		local ingame_package = (LEVEL_EDITOR_TEST and "resource_packages/ingame_light") or "resource_packages/ingame"
 
 		Managers.package:load("resource_packages/menu", "boot")
-		Managers.package:load("resource_packages/menu_assets", "global")
+		Managers.package:load("resource_packages/menu_assets_common", "global")
 		Managers.package:load(ingame_package, "global")
+		Managers.package:load(breed_package, "global")
 		Managers.package:load("resource_packages/inventory", "global")
 		Managers.package:load("resource_packages/pickups", "global")
 		Managers.package:load("resource_packages/decals", "global")
@@ -580,6 +589,7 @@ Bulldozer.entrypoint = function (self)
 			show_splash_screens = true
 		}
 
+		Managers.package:load(breed_package, "global")
 		require("scripts/game_state/state_splash_screen")
 
 		return StateSplashScreen

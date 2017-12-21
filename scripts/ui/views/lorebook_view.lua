@@ -6,7 +6,6 @@ local STATUS_TEXTURE_SPACING = -5
 local ELEMENT_SELECTED_ALPHA = 160
 local ELEMENT_NON_SELECTED_ALPHA = 100
 local definitions = local_require("scripts/ui/views/lorebook_view_definitions")
-local journal_menu_atlas = journal_menu_atlas
 local input_description_data = {
 	gamepad_support = true,
 	name = "lorebook_menu"
@@ -21,7 +20,7 @@ LorebookView.init = function (self, ingame_ui_context)
 	self.wwise_world = ingame_ui_context.dialogue_system.wwise_world
 	local input_manager = self.input_manager
 
-	input_manager.create_input_service(input_manager, "lorebook_menu", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "lorebook_menu", self.ingame_ui:get_ingame_menu_keymap())
 	input_manager.map_device_to_service(input_manager, "lorebook_menu", "keyboard")
 	input_manager.map_device_to_service(input_manager, "lorebook_menu", "mouse")
 	input_manager.map_device_to_service(input_manager, "lorebook_menu", "gamepad")
@@ -389,8 +388,8 @@ LorebookView.set_page_info = function (self, page_text, category_name, images, c
 
 						if image_name == page_image_1_content.texture_id then
 						else
-							local page_image_1_settings = journal_menu_atlas[page_image_1_image]
-							local page_image_2_settings = journal_menu_atlas[image_name]
+							local page_image_1_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(page_image_1_image)
+							local page_image_2_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(image_name)
 							local page_image_1_size = page_image_1_settings.size
 							local page_image_2_size = page_image_2_settings.size
 
@@ -478,7 +477,7 @@ local image_padding = {
 	}
 }
 LorebookView.setup_page_image_and_exclusion_zone = function (self, scenegraph_id, image_name, vertical_alignment, horizontal_alignment, exclusion_zones)
-	local image_settings = journal_menu_atlas[image_name]
+	local image_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(image_name)
 	local size = image_settings.size
 	local scenegraph = self.ui_scenegraph[scenegraph_id]
 	local scenegraph_size = scenegraph.size

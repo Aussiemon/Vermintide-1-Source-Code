@@ -179,7 +179,7 @@ MissionSystem.start_mission = function (self, mission_name, unit, sync_data)
 		data.entry_id = self.tutorial_ui:queue_info_slate_entry(info_slate_type, data.text, "hud_tutorial_icon_mission", true, data.update_sound)
 
 		if not data.mission_data.is_side_mission then
-			self.mission_objective_ui:add_mission_objective(mission_name, data.text)
+			self.mission_objective_ui:add_mission_objective(mission_name, data.center_text or data.text)
 		end
 	end
 
@@ -247,7 +247,7 @@ MissionSystem.update_mission = function (self, mission_name, positive, dt, sync)
 		local info_slate_type = (data.mission_data.is_side_mission and "side_mission") or data.info_slate_type
 
 		self.tutorial_ui:update_info_slate_entry_text(info_slate_type, data.entry_id, data.text)
-		self.mission_objective_ui:update_mission(mission_name, data.text)
+		self.mission_objective_ui:update_mission(mission_name, data.center_text or data.text)
 	end
 
 	if sync and self.is_server then
@@ -406,7 +406,7 @@ MissionSystem.rpc_update_mission = function (self, peer_id, mission_name_id, syn
 		local info_slate_type = (data.mission_data.is_side_mission and "side_mission") or data.info_slate_type
 
 		self.tutorial_ui:update_info_slate_entry_text(info_slate_type, data.entry_id, data.text)
-		self.mission_objective_ui:update_mission(mission_name, data.text)
+		self.mission_objective_ui:update_mission(mission_name, data.center_text or data.text)
 	end
 
 	return 

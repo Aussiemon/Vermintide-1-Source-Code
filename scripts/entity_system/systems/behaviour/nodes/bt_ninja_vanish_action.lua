@@ -82,6 +82,10 @@ BTNinjaVanishAction.vanish = function (unit, blackboard)
 	ai_navigation.move_to(ai_navigation, vanish_pos)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
 
+	local ping_system = Managers.state.entity:system("ping_system")
+
+	ping_system.remove_ping_from_unit(ping_system, unit)
+
 	return 
 end
 BTNinjaVanishAction.play_foff = function (unit, blackboard, network_manager, pos, pos2)

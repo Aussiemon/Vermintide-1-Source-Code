@@ -97,6 +97,16 @@ ProfileView.on_exit = function (self)
 	local wwise_world = Managers.world:wwise_world(self.parent_world)
 	local wwise_playing_id, wwise_source_id = WwiseWorld.trigger_event(wwise_world, "hud_in_inventory_state_off")
 
+	if self.respawn_player_unit then
+		if self.server then
+			Managers.state.network.network_server:peer_respawn_player(self.peer_id)
+		else
+			Managers.state.network.network_transmit:send_rpc_server("rpc_client_respawn_player")
+		end
+
+		self.respawn_player_unit = nil
+	end
+
 	return 
 end
 ProfileView.post_update_on_exit = function (self)
@@ -167,17 +177,19 @@ ProfileView.unsuspend = function (self)
 	self.input_manager:block_device_except_service("profile_menu", "mouse", 1)
 	self.input_manager:block_device_except_service("profile_menu", "gamepad", 1)
 
-	local viewport_name = "player_1"
-	local world = Managers.world:world("level_world")
-	local viewport = ScriptWorld.viewport(world, viewport_name)
+	if self.viewport_widget then
+		local viewport_name = "player_1"
+		local world = Managers.world:world("level_world")
+		local viewport = ScriptWorld.viewport(world, viewport_name)
 
-	ScriptWorld.deactivate_viewport(world, viewport)
+		ScriptWorld.deactivate_viewport(world, viewport)
 
-	local previewer_pass_data = self.viewport_widget.element.pass_data[1]
-	local viewport = previewer_pass_data.viewport
-	local world = previewer_pass_data.world
+		local previewer_pass_data = self.viewport_widget.element.pass_data[1]
+		local viewport = previewer_pass_data.viewport
+		local world = previewer_pass_data.world
 
-	ScriptWorld.activate_viewport(world, viewport)
+		ScriptWorld.activate_viewport(world, viewport)
+	end
 
 	self.suspended = nil
 
@@ -204,17 +216,17 @@ ProfileView.change_profile = function (self, index)
 		self.despawning_player_unit = player.player_unit
 
 		player.despawn(player)
-
-		self.requested_profile_index = index
 	else
 		self.profile_synchronizer:request_select_profile(index, self.local_player_id)
 	end
 
 	self.pending_profile_request = true
-
-	self.save_selected_profile(self, index)
+	self.requested_profile_index = index
 
 	return 
+end
+ProfileView.pending_profile_change = function (self)
+	return self.pending_profile_request
 end
 ProfileView.save_selected_profile = function (self, profile_index)
 	local save_manager = Managers.save
@@ -248,7 +260,7 @@ ProfileView.update = function (self, dt)
 
 	local input_service = self.input_manager:get_service("profile_menu")
 
-	self.handle_input(self, input_service)
+	self.handle_input(self, input_service, dt)
 	self.update_profile_request(self)
 
 	if self.viewport_widget then
@@ -272,14 +284,14 @@ ProfileView.post_update = function (self, dt, t)
 
 	return 
 end
-ProfileView.handle_input = function (self, input_service)
+ProfileView.handle_input = function (self, input_service, dt)
 	if next(self.ui_animations) ~= nil then
 		return 
 	end
 
 	local transitioning = self.transitioning(self)
 
-	if not self.cancel_input_disabled and not transitioning and not self.pending_profile_request and (input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back")) then
+	if not self.cancel_input_disabled and not transitioning and not self.pending_profile_change(self) and (input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back")) then
 		self.exit(self)
 	end
 
@@ -287,9 +299,9 @@ ProfileView.handle_input = function (self, input_service)
 
 	if not transitioning then
 		if input_manager.is_device_active(input_manager, "gamepad") then
-			self.profile_world_view:handle_controller_input(input_service)
+			self.profile_world_view:handle_controller_input(input_service, dt)
 		elseif Application.platform() == "win32" then
-			self.profile_world_view:handle_mouse_input(input_service)
+			self.profile_world_view:handle_mouse_input(input_service, dt)
 		end
 	end
 
@@ -301,7 +313,7 @@ ProfileView.handle_input = function (self, input_service)
 			local profile_index = self.profile_world_view.units[selected_unit]
 
 			self.change_profile(self, profile_index)
-		elseif not self.pending_profile_request then
+		elseif not self.pending_profile_change(self) then
 			self.exit(self)
 		end
 	end
@@ -347,17 +359,23 @@ ProfileView.update_profile_request = function (self)
 				local profile_index = synchronizer.profile_by_peer(synchronizer, peer_id, local_player_id)
 				local player = self.player_manager:player(peer_id, local_player_id)
 				player.profile_index = profile_index
+				self.respawn_player_unit = nil
 
 				self.exit(self)
 				synchronizer.clear_profile_request_result(synchronizer)
 
 				self.pending_profile_request = nil
+
+				self.save_selected_profile(self, profile_index)
 			elseif result then
+				local peer_id = self.peer_id
+				local profile_index = synchronizer.profile_by_peer(synchronizer, peer_id, local_player_id)
 				self.profile_world_view.state = "selecting_profile"
 
 				synchronizer.clear_profile_request_result(synchronizer)
 
 				self.pending_profile_request = nil
+				self.respawn_player_unit = true
 			end
 		end
 	end

@@ -130,6 +130,18 @@ math.cartesian_to_polar = function (x, y)
 
 	return radius, theta
 end
+math.circular_to_square_coordinates = function (v)
+	local u = v.x
+	local v = v.y
+	local uu = u*u
+	local vv = v*v
+	local sqrt = math.sqrt
+	local sqrt_2 = sqrt(2)
+	local x = (sqrt((u*2*sqrt_2 + 2 + uu) - vv) - sqrt((u*2*sqrt_2 - 2 + uu) - vv))*0.5
+	local y = (sqrt((v*2*sqrt_2 + 2) - uu + vv) - sqrt(v*2*sqrt_2 - 2 - uu + vv))*0.5
+
+	return Vector3(x, y, 0)
+end
 math.polar_to_cartesian = function (radius, theta)
 	local theta_rad = theta*math.pi/180
 	local x = radius*math.cos(theta_rad)

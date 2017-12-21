@@ -5,6 +5,14 @@ local scenegraph_definition = definitions.scenegraph_definition
 local MAX_NUM_CONTRACT_ENTRIES = 3
 local ENTRY_LENGTH = definitions.ENTRY_LENGTH
 local QuestSettings = QuestSettings
+local default_color = {
+	170,
+	255,
+	255,
+	255
+}
+local progress_color = Colors.get_color_table_with_alpha("sky_blue", 220)
+local complete_color = Colors.get_color_table_with_alpha("pale_green", 220)
 ContractLogUI = class(ContractLogUI)
 ContractLogUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -13,6 +21,8 @@ ContractLogUI.init = function (self, ingame_ui_context)
 	self.peer_id = ingame_ui_context.peer_id
 	self.player_manager = ingame_ui_context.player_manager
 	self.ui_animations = {}
+	local world = ingame_ui_context.world_manager:world("level_world")
+	self.wwise_world = Managers.world:wwise_world(world)
 	self.num_added_contracts = 0
 
 	self._create_ui_elements(self)
@@ -104,8 +114,9 @@ ContractLogUI._sync_active_contracts = function (self)
 
 				if entry_data then
 					local added_contract_id = entry_data.contract_id
+					local is_contract_able_to_progress = self.quest_manager:is_contract_able_to_progress(added_contract_id)
 
-					if not table.contains(active_contract_ids, added_contract_id) then
+					if not table.contains(active_contract_ids, added_contract_id) or not is_contract_able_to_progress then
 						self._remove_contract(self, added_contract_id)
 
 						dirty = true
@@ -128,15 +139,22 @@ end
 ContractLogUI._sync_contract_progression = function (self)
 	local log_entries = self._log_entries
 	local dirty = false
+	local any_task_completed = false
 
 	for _, entry_data in ipairs(log_entries) do
 		local contract_id = entry_data.contract_id
 
 		if self.quest_manager:has_contract_session_changes(contract_id) then
-			self._update_contract_goal(self, entry_data)
+			if self._update_contract_goal(self, entry_data) then
+				any_task_completed = true
+			end
 
 			dirty = true
 		end
+	end
+
+	if any_task_completed then
+		self.play_sound(self, "Play_hud_quest_menu_finish_quest_during_gameplay")
 	end
 
 	return dirty
@@ -148,6 +166,7 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 	local widget_content = widget.content
 	local widget_style = widget.style
 	local title_text_width = widget_content.title_text_width
+	local text_color = default_color
 	local task = entry_data.contract_goal
 	local contract_progress = entry_data.contract_goal_start_progress
 	local current_session_progress = entry_data.contract_goal_session_progress
@@ -162,9 +181,17 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 		local task_progress = task_start_progress + task_session_progress
 		local required = task.amount.required
 		local tasks_complete = required <= task_progress
+		local task_progress_made = task_progress ~= task_start_progress
+
+		if tasks_complete then
+			text_color = complete_color
+		elseif task_progress_made then
+			text_color = progress_color
+		end
+
 		local text = Localize(QuestSettings.task_type_to_name_lookup[task.type]) .. ": " .. tostring(task_progress) .. "/" .. tostring(required)
-		task_text = task_text .. text .. "\n"
-		one_lined_task_text = task_text .. text
+		task_text = task_text .. text
+		one_lined_task_text = task_text
 		local task_current_session_progress = current_session_progress
 		local new_value = task_current_session_progress ~= task_session_progress
 		local progress_increased = task_progress ~= task_start_progress
@@ -181,8 +208,6 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 			task_text = task_text .. "..."
 		end
 
-		local color_override = self.get_color_text_index_list(self, one_lined_task_text, texts_to_be_coloured, tasks_complete)
-		widget_style.task_text.color_override = color_override
 		local _, text_width = self._get_text_size(self, widget_style.task_text, task_text)
 
 		if text_width < title_text_width then
@@ -193,9 +218,28 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 		widget_content.text_width = text_width
 
 		self._set_widget_dirty(self, widget)
+
+		if not widget_content.tasks_complete and tasks_complete then
+			widget_content.tasks_complete = tasks_complete
+
+			return tasks_complete
+		else
+			widget_content.tasks_complete = tasks_complete
+		end
 	end
 
+	widget_style.task_text.text_color = text_color
+
 	return 
+end
+ContractLogUI._get_text_color = function (self, status)
+	if status == "complete" then
+		return complete_color
+	elseif status == "in_progress" then
+		return progress_color
+	end
+
+	return default_color
 end
 local temp_text_color_templates = {
 	in_progress = {
@@ -211,6 +255,8 @@ local temp_text_color_templates = {
 }
 ContractLogUI.get_color_text_index_list = function (self, text, texts_to_be_coloured, tasks_complete)
 	local color_override = {}
+	texts_to_be_coloured = 35
+	text = 106
 
 	for index, text_line in ipairs(texts_to_be_coloured) do
 		local start_index, end_index = string.find(text, text_line)
@@ -235,6 +281,7 @@ ContractLogUI._add_contract = function (self, contract_id)
 	local widget = table.remove(self._unused_widgets, 1)
 	local widget_content = widget.content
 	local widget_style = widget.style
+	widget_style.task_text.text_color = default_color
 
 	UIRenderer.set_element_visible(self.ui_renderer, widget.element, true)
 	self._set_widget_dirty(self, widget)
@@ -277,6 +324,7 @@ ContractLogUI._add_contract = function (self, contract_id)
 	widget_content.total_height = widget_style.texture_icon.size[2] + text_height
 	widget_content.text_width = text_width
 	widget_content.title_text_width = title_text_width
+	widget_content.tasks_complete = false
 	entry_data.widget = widget
 	entry_data.contract_goal = task
 	entry_data.contract_goal_start_progress = contract_progress
@@ -459,6 +507,11 @@ ContractLogUI.set_dirty = function (self)
 end
 ContractLogUI._set_widget_dirty = function (self, widget)
 	widget.element.dirty = true
+
+	return 
+end
+ContractLogUI.play_sound = function (self, event)
+	WwiseWorld.trigger_event(self.wwise_world, event)
 
 	return 
 end

@@ -3,6 +3,7 @@ require("scripts/managers/backend/statistics_database")
 require("scripts/managers/bot_nav_transition/bot_nav_transition_manager")
 require("scripts/managers/camera/camera_manager")
 require("scripts/managers/debug/debug_text_manager")
+require("scripts/managers/debug/debug_event_manager_rpc")
 require("scripts/managers/network/game_network_manager")
 require("scripts/managers/networked_flow_state/networked_flow_state_manager")
 require("scripts/managers/spawn/spawn_manager")
@@ -45,6 +46,7 @@ require("scripts/game_state/components/dice_keeper")
 require("foundation/scripts/util/datacounter")
 require("scripts/managers/blood/blood_manager")
 require("scripts/managers/quest/quest_manager")
+require("scripts/managers/performance/performance_manager")
 
 StateIngame = class(StateIngame)
 StateIngame.NAME = "StateIngame"
@@ -91,7 +93,7 @@ StateIngame.on_enter = function (self)
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "mouse")
 		input_manager.map_device_to_service(input_manager, "DebugMenu", "gamepad")
 
-		if Application.build() == "dev" or Application.build() == "debug" then
+		if Application.platform() == "win32" and (Application.build() == "dev" or Application.build() == "debug") then
 			input_manager.initialize_device(input_manager, "synergy_keyboard")
 			input_manager.initialize_device(input_manager, "synergy_mouse")
 			input_manager.map_device_to_service(input_manager, "Debug", "synergy_keyboard")
@@ -202,7 +204,6 @@ StateIngame.on_enter = function (self)
 	Managers.state.difficulty:set_difficulty(difficulty)
 
 	loading_context.difficulty = difficulty
-	Managers.state.quest = QuestManager:new(self.statistics_db, level_key)
 	local num_players = 1
 	self.num_local_human_players = num_players
 
@@ -228,6 +229,8 @@ StateIngame.on_enter = function (self)
 	Managers.matchmaking:set_statistics_db(self.statistics_db)
 	self._setup_state_context(self, world, is_server, network_event_delegate)
 	self.level_transition_handler:register_rpcs(network_event_delegate)
+
+	Managers.state.quest = QuestManager:new(self.statistics_db, level_key)
 
 	if GameSettingsDevelopment.use_telemetry then
 		local level_name = LevelSettings[level_key].level_name
@@ -565,6 +568,8 @@ StateIngame._teardown_world = function (self)
 		Debug.teardown()
 	end
 
+	World.destroy_gui(self.world, self._debug_gui)
+	World.destroy_gui(self.world, self._debug_gui_immediate)
 	Managers.world:destroy_world(self.world_name)
 
 	return 
@@ -701,7 +706,7 @@ StateIngame.update = function (self, dt, main_t)
 	local Managers = Managers
 
 	Managers.state.network:update(dt)
-	Profiler.start("backend")
+	Profiler.start("BackendManager update")
 	Managers.backend:update(dt)
 	Profiler.stop()
 	Profiler.start("input_manager")
@@ -751,29 +756,33 @@ StateIngame.update = function (self, dt, main_t)
 
 	Managers.state.blood:update(dt, t)
 
-	if is_server and self._lobby_host:is_joined() then
-		local lobby_members = self._lobby_host:members()
-		local members_joined = lobby_members.get_members_joined(lobby_members)
-		local members_joined_n = #members_joined
-		local members_left = lobby_members.get_members_left(lobby_members)
-		local members_left_n = #members_left
+	if is_server then
+		Managers.state.conflict:reset_data()
 
-		if members_joined_n ~= 0 or members_left_n ~= 0 then
-			local lobby_data = self._lobby_host:get_stored_lobby_data()
-			local members = lobby_members.get_members(lobby_members)
-			local members_n = #members
-			lobby_data.num_players = members_n
+		if self._lobby_host:is_joined() then
+			local lobby_members = self._lobby_host:members()
+			local members_joined = lobby_members.get_members_joined(lobby_members)
+			local members_joined_n = #members_joined
+			local members_left = lobby_members.get_members_left(lobby_members)
+			local members_left_n = #members_left
 
-			self._lobby_host:set_lobby_data(lobby_data)
+			if members_joined_n ~= 0 or members_left_n ~= 0 then
+				local lobby_data = self._lobby_host:get_stored_lobby_data()
+				local members = lobby_members.get_members(lobby_members)
+				local members_n = #members
+				lobby_data.num_players = members_n
+
+				self._lobby_host:set_lobby_data(lobby_data)
+			end
+
+			Profiler.start("Conflict Update")
+
+			if Managers.state.network:game() then
+				Managers.state.conflict:update(dt, t)
+			end
+
+			Profiler.stop("Conflict Update")
 		end
-
-		Profiler.start("Conflict Update")
-
-		if Managers.state.network:game() then
-			Managers.state.conflict:update(dt, t)
-		end
-
-		Profiler.stop()
 	end
 
 	for _, machine in pairs(self.machines) do
@@ -820,6 +829,7 @@ StateIngame.update = function (self, dt, main_t)
 	if script_data.debug_enabled then
 		Profiler.start("DebugUpdate")
 		Managers.state.debug:update(dt, t)
+		Managers.state.performance:update(dt, t)
 		Debug.update(t, dt)
 		VisualAssertLog.update(dt)
 		DebugScreen.update(dt, t, debug_input_service, self.input_manager)
@@ -1199,6 +1209,8 @@ StateIngame.post_update = function (self, dt)
 		end
 	end
 
+	Managers.state.game_mode:update_flow_object_set_enable(dt)
+
 	local network_manager = Managers.state.network
 
 	network_manager.network_transmit:transmit_local_rpcs()
@@ -1372,6 +1384,12 @@ StateIngame.on_exit = function (self, application_shutdown)
 	self.parent = nil
 
 	if rawget(_G, "Steam") then
+	end
+
+	if self._debug_event_manager_rpc then
+		self._debug_event_manager_rpc:delete()
+
+		self._debug_event_manager_rpc = nil
 	end
 
 	Managers.chat:unregister_network_event_delegate()
@@ -1742,6 +1760,12 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 
 	network_manager.register_event_delegate(network_manager, network_event_delegate)
 
+	local build = Application.build()
+
+	if build == "debug" or build == "dev" then
+		self._debug_event_manager_rpc = DebugEventManagerRPC:new(network_event_delegate)
+	end
+
 	self._ducking_handler = DuckingHandler:new()
 	Managers.state.event = EventManager:new()
 
@@ -1795,7 +1819,10 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 
 	Managers.state.entity:set_extension_extractor_function(extension_extractor_function)
 
-	Managers.state.debug_text = DebugTextManager:new(world, is_server, network_event_delegate)
+	self._debug_gui = World.create_screen_gui(world, "material", "materials/fonts/arial")
+	self._debug_gui_immediate = World.create_screen_gui(world, "material", "materials/fonts/arial", "immediate")
+	Managers.state.debug_text = DebugTextManager:new(world, self._debug_gui, is_server, network_event_delegate)
+	Managers.state.performance = PerformanceManager:new(self._debug_gui_immediate, is_server, level_key)
 	local voting_params = {
 		level_transition_handler = self.level_transition_handler,
 		network_event_delegate = network_event_delegate,

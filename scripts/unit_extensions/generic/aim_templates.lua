@@ -212,18 +212,27 @@ AimTemplates.innkeeper = {
 		init = function (unit, data)
 			data.constraint_target = Unit.animation_find_constraint_target(unit, "lookat")
 			data.current_target = nil
+			data.interpolation_origin_position = Vector3Box()
+			data.last_position = Vector3Box()
+			data.interpolation_time = -math.huge
 
 			return 
 		end,
 		update = function (unit, t, dt, data)
 			local inn_keeper_position = Unit.local_position(unit, 0)
 			local best_player = nil
-			local best_dist_sq = 6.25
+			local best_dist_sq = 9
 			local PLAYER_UNITS = PLAYER_UNITS
+			local old_target = data.current_target
+			local stickiness_multiplier = 0.9025
 
 			for i = 1, #PLAYER_UNITS, 1 do
 				local player_unit = PLAYER_UNITS[i]
 				local dist_sq = Vector3.distance_squared(POSITION_LOOKUP[player_unit], inn_keeper_position)
+
+				if player_unit == old_target then
+					dist_sq = dist_sq*stickiness_multiplier
+				end
 
 				if dist_sq < best_dist_sq then
 					best_dist_sq = dist_sq
@@ -231,23 +240,42 @@ AimTemplates.innkeeper = {
 				end
 			end
 
+			local interpolation_duration = 0.5
+
+			if best_player and not old_target then
+				Unit.animation_event(unit, "lookat_on")
+			elseif not best_player and old_target then
+				Unit.animation_event(unit, "lookat_off")
+
+				data.interpolation_time = -math.huge
+			elseif best_player ~= old_target then
+				data.interpolation_time = t + interpolation_duration
+
+				data.interpolation_origin_position:store(data.last_position:unbox())
+			end
+
+			local interpolation_time = data.interpolation_time
+
 			if best_player then
-				local head_index = Unit.node(unit, "j_head")
-				local aim_target = Unit.world_position(best_player, head_index)
+				local aim_target = nil
 
 				if ScriptUnit.has_extension(best_player, "first_person_system") then
 					aim_target = ScriptUnit.extension(best_player, "first_person_system"):current_position()
-				end
-
-				Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
-			end
-
-			if best_player ~= data.current_target then
-				if best_player then
-					Unit.animation_event(unit, "lookat_on")
 				else
-					Unit.animation_event(unit, "lookat_off")
+					local head_index = Unit.node(best_player, "j_head")
+					aim_target = Unit.world_position(best_player, head_index)
+
+					QuickDrawer:sphere(aim_target, 0.32, Color(255, 0, 0))
 				end
+
+				if t < interpolation_time then
+					local lerp_t = math.sin(((interpolation_time - t)/interpolation_duration - 1)*math.pi*0.5)
+					local from = data.interpolation_origin_position:unbox()
+					aim_target = Vector3.lerp(from, aim_target, lerp_t)
+				end
+
+				data.last_position:store(aim_target)
+				Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
 			end
 
 			data.current_target = best_player

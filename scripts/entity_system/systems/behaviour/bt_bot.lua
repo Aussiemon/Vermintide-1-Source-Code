@@ -1,5 +1,5 @@
 BotBehaviors = {
-	witch_hunter = {
+	default = {
 		"BTSelector",
 		{
 			"BTNilAction",
@@ -16,28 +16,59 @@ BotBehaviors = {
 			name = "transported"
 		},
 		{
-			"BTBotInteractAction",
-			name = "revive",
+			"BTSelector",
+			{
+				"BTBotInventorySwitchAction",
+				name = "switch_melee",
+				condition = "is_slot_1_not_wielded",
+				action_data = BotActions.default.switch_melee
+			},
+			{
+				"BTBotInteractAction",
+				name = "do_revive",
+				action_data = BotActions.default.revive
+			},
 			condition = "can_revive",
-			action_data = BotActions.default.revive
+			name = "revive"
 		},
 		{
-			"BTBotInteractAction",
-			name = "rescue_hanging_from_hook",
+			"BTSelector",
+			{
+				"BTBotInventorySwitchAction",
+				name = "switch_melee",
+				condition = "is_slot_1_not_wielded",
+				action_data = BotActions.default.switch_melee
+			},
+			{
+				"BTBotInteractAction",
+				name = "do_rescue_hanging_from_hook",
+				action_data = BotActions.default.rescue_hanging_from_hook
+			},
 			condition = "can_rescue_hanging_from_hook",
-			action_data = BotActions.default.rescue_from_hook
+			name = "rescue_hanging_from_hook"
 		},
 		{
-			"BTBotInteractAction",
-			name = "rescue_leadge_hanging",
+			"BTSelector",
+			{
+				"BTBotInventorySwitchAction",
+				name = "switch_melee",
+				condition = "is_slot_1_not_wielded",
+				action_data = BotActions.default.switch_melee
+			},
+			{
+				"BTBotInteractAction",
+				name = "do_rescue_leadge_hanging",
+				action_data = BotActions.default.rescue_ledge_hanging
+			},
 			condition = "can_rescue_ledge_hanging",
-			action_data = BotActions.default.rescue_ledge_hanging
+			name = "rescue_leadge_hanging"
 		},
 		{
-			"BTSequence",
+			"BTSelector",
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_healing_kit",
+				condition = "is_slot_healthkit_not_wielded",
 				action_data = BotActions.default.switch_heal
 			},
 			{
@@ -45,12 +76,8 @@ BotBehaviors = {
 				name = "use_other_heal",
 				action_data = BotActions.default.use_heal_on_player
 			},
-			name = "heal_other_sequence",
 			condition = "can_heal_player",
-			condition_args = {
-				heal_percentage = 0.25,
-				wounded_percentage = 0.5
-			}
+			name = "heal_other"
 		},
 		{
 			"BTBotInteractAction",
@@ -58,10 +85,11 @@ BotBehaviors = {
 			name = "loot_ammo"
 		},
 		{
-			"BTSequence",
+			"BTSelector",
 			{
 				"BTBotInventorySwitchAction",
 				name = "switch_healing_kit",
+				condition = "is_slot_healthkit_not_wielded",
 				action_data = BotActions.default.switch_heal
 			},
 			{
@@ -69,7 +97,7 @@ BotBehaviors = {
 				name = "use_heal"
 			},
 			condition = "bot_should_heal",
-			name = "heal_sequence"
+			name = "heal_self"
 		},
 		{
 			"BTBotInteractAction",
@@ -208,12 +236,10 @@ BotBehaviors = {
 			"BTNilAction",
 			name = "idle"
 		},
-		version = 3,
-		name = "witch_hunter"
+		name = "default"
 	},
 	dead = {
 		"BTNilAction",
-		version = 2,
 		name = "dead"
 	}
 }

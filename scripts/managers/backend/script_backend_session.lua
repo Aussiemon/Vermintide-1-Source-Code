@@ -192,7 +192,9 @@ ScriptBackendSession.init = function (network_event_delegate, disable_for_level)
 end
 ScriptBackendSession.update = function ()
 	if backend_session:enabled() then
+		Profiler.start("ScriptBackendSession update")
 		backend_session:update()
+		Profiler.stop()
 	end
 
 	return 

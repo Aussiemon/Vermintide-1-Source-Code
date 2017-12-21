@@ -326,6 +326,50 @@ UnitVariationSettings = {
 			}
 		}
 	},
+	skaven_clan_rat_baked = {
+		enabled_from_start = {
+			"upper_body"
+		},
+		body_parts = {
+			upper_body = {
+				{
+					weight = 1,
+					group = "body_hood"
+				},
+				{
+					weight = 1,
+					group = "body_tunic"
+				},
+				{
+					weight = 1,
+					group = "body_tunic_hood"
+				},
+				{
+					weight = 1,
+					group = "body_nothing"
+				}
+			}
+		},
+		material_variations = {
+			skin_tint = {
+				variable = "gradient_variation",
+				min = 0,
+				max = 28,
+				materials = {
+					"mtr_skin",
+					"mtr_fur"
+				}
+			},
+			cloth_tint = {
+				variable = "gradient_variation",
+				min = 0,
+				max = 31,
+				materials = {
+					"mtr_outfit"
+				}
+			}
+		}
+	},
 	skaven_slave = {
 		enabled_from_start = {
 			"lower_body",
@@ -448,6 +492,38 @@ UnitVariationSettings = {
 					"g_arm_right_straps_lod0",
 					"g_arm_right_straps_lod1",
 					"g_arm_right_straps_lod2"
+				}
+			}
+		}
+	},
+	skaven_slave_baked = {
+		enabled_from_start = {
+			"aux"
+		},
+		body_parts = {
+			aux = {
+				{
+					weight = 1,
+					group = "empty"
+				}
+			}
+		},
+		material_variations = {
+			skin_tint = {
+				variable = "gradient_variation",
+				min = 0,
+				max = 28,
+				materials = {
+					"mtr_skin",
+					"mtr_fur"
+				}
+			},
+			cloth_tint = {
+				variable = "gradient_variation",
+				min = 0,
+				max = 31,
+				materials = {
+					"mtr_outfit"
 				}
 			}
 		}

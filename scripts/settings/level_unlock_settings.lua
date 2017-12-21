@@ -91,24 +91,29 @@ GameActsDisplayNames = {
 }
 LengthTypeByLevel = {
 	docks_short_level = "short",
-	farm = "short",
+	bridge = "short",
 	dlc_survival_ruins = "short",
 	end_boss = "long",
 	magnus = "long",
+	dlc_castle = "long",
 	tunnels = "long",
 	cemetery = "long",
-	bridge = "short",
+	farm = "short",
 	courtyard_level = "short",
-	dlc_castle = "long",
+	dlc_dwarf_exterior = "long",
 	dlc_portals = "short",
 	dlc_castle_dungeon = "short",
 	wizard = "long",
 	city_wall = "short",
 	forest_ambush = "long",
+	dlc_dwarf_interior = "long",
 	sewers_short = "short",
 	dlc_survival_magnus = "short",
 	merchant = "long"
 }
+
+dofile("scripts/settings/level_unlock_settings_dlc_dwarf")
+
 LevelUnlockOrderCombined = {}
 
 for i, level_names in ipairs(LevelUnlockOrder) do

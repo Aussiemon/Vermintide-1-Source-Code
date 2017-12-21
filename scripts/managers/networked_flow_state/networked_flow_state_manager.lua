@@ -181,7 +181,8 @@ NetworkedFlowStateManager.flow_cb_play_networked_story = function (self, params)
 	fassert(self._story_lookup[client_call_event_name], "[NetworkedFlowStateManager] Trying to play networked story with client call event name %q that hasn't been created", client_call_event_name)
 	fassert(self._playing_stories[client_call_event_name] == nil or self._playing_stories[client_call_event_name].stopped, "Tried to play networked story with client call event name %q, but it is already playing.", client_call_event_name)
 
-	local start_time = params.start_time or 0
+	local story = self._playing_stories[client_call_event_name]
+	local start_time = params.start_time or (params.start_from_stop_time and story and story.stop_time) or 0
 
 	Managers.state.network.network_transmit:send_rpc_clients("rpc_flow_state_story_played", self._story_lookup[client_call_event_name], start_time, false)
 

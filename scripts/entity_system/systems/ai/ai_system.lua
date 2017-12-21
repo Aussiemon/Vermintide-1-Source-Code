@@ -25,7 +25,7 @@ local extensions = {
 AISystem.init = function (self, context, name)
 	AISystem.super.init(self, context, name, extensions)
 
-	self.broadphase = Broadphase(40, 128)
+	self.broadphase = Broadphase(50, 128)
 	self._behavior_trees = {}
 	self.group_blackboard = {
 		rats_currently_moving_to_ip = 0,
@@ -83,6 +83,7 @@ AISystem.init = function (self, context, name)
 	self.num_perception_units = 0
 	self.number_ordinary_aggroed_enemies = 0
 	self.number_special_aggored_enemies = 0
+	self.start_prio_index = 1
 	local network_event_delegate = context.network_event_delegate
 
 	network_event_delegate.register(network_event_delegate, self, "rpc_alert_enemies_within_range")
@@ -116,7 +117,10 @@ AISystem.on_add_extension = function (self, world, unit, extension_name, extensi
 	self.unit_extension_data[unit] = extension
 
 	if not extension.is_husk then
-		self.ai_blackboard_updates[#self.ai_blackboard_updates + 1] = unit
+		if not extension.is_bot then
+			self.ai_blackboard_updates[#self.ai_blackboard_updates + 1] = unit
+		end
+
 		self.blackboards[unit] = extension.blackboard(extension)
 
 		self.set_default_blackboard_values(self, unit, extension.blackboard(extension))
@@ -514,11 +518,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 
 	local health_extension = ScriptUnit.extension(unit, "health_system")
 	blackboard.current_health_percent = health_extension.current_health_percent(health_extension)
-	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
-
-	assert(navigation_extension)
-
-	local destination = navigation_extension.destination(navigation_extension)
+	local destination = blackboard.navigation_extension:destination()
 	local current_position = POSITION_LOOKUP[unit]
 	blackboard.destination_dist = Vector3_distance(current_position, destination)
 	local ai_slot_system = Managers.state.entity:system("ai_slot_system")
@@ -544,7 +544,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 	end
 
 	if target_alive and breed.has_running_attack then
-		local target_locomotion = ScriptUnit.has_extension(target_unit, "locomotion_system") and ScriptUnit.extension(target_unit, "locomotion_system")
+		local target_locomotion = ScriptUnit.has_extension(target_unit, "locomotion_system")
 
 		if target_locomotion and target_locomotion.average_velocity then
 			blackboard.target_speed_away = Vector3_dot(target_locomotion.average_velocity(target_locomotion), Vector3_normalize(POSITION_LOOKUP[target_unit] - current_position))
@@ -558,11 +558,6 @@ local function update_blackboard(unit, blackboard, t, dt)
 	local locomotion_extension = blackboard.locomotion_extension
 	blackboard.is_falling = locomotion_extension and locomotion_extension.is_falling(locomotion_extension)
 	blackboard.move_speed = locomotion_extension and locomotion_extension.move_speed
-
-	if ScriptUnit.has_extension(unit, "status_system") then
-		local status_extension = ScriptUnit.extension(unit, "status_system")
-		blackboard.is_transported = status_extension.is_using_transport(status_extension)
-	end
 
 	if blackboard.next_smart_object_data then
 		local smart_object_type = blackboard.next_smart_object_data.smart_object_type
@@ -579,11 +574,9 @@ local function update_blackboard(unit, blackboard, t, dt)
 		breed.run_on_update(unit, blackboard, t)
 	end
 
-	local target = blackboard.target_unit
-
-	if unit_alive(target) then
+	if target_alive then
 		local unit_position = POSITION_LOOKUP[unit]
-		local target_position = POSITION_LOOKUP[target]
+		local target_position = POSITION_LOOKUP[target_unit]
 		local offset = target_position - unit_position
 		local z = offset.z
 		local x = offset.x
@@ -609,31 +602,48 @@ local function update_blackboard(unit, blackboard, t, dt)
 	return false
 end
 
+local MAX_PRIO_UPDATES_PER_FRAME = (Application.platform() == "win32" and 40) or 20
 AISystem.update_ai_blackboards_prioritized = function (self, t, dt)
 	Profiler.start("prio")
 
 	local ai_blackboard_updates = self.ai_blackboard_updates
-	local ai_blackboard_updates_n = #ai_blackboard_updates
-	local ai_blackboard_prioritized_updates = self.ai_blackboard_prioritized_updates
-	local ai_blackboard_prioritized_updates_n = #ai_blackboard_prioritized_updates
+	local num_normal = #ai_blackboard_updates
+	local prio_updates = self.ai_blackboard_prioritized_updates
+	local num_prio = #prio_updates
 	local blackboards = self.blackboards
-	local index = 1
+	local index = self.start_prio_index
+	local loops = MAX_PRIO_UPDATES_PER_FRAME
 
-	while index <= ai_blackboard_prioritized_updates_n do
-		local unit = ai_blackboard_prioritized_updates[index]
+	if num_prio < loops then
+		loops = num_prio
+		index = 1
+	end
+
+	local i = 1
+
+	while i <= loops do
+		if num_prio < index then
+			index = 1
+		end
+
+		local unit = prio_updates[index]
 		local blackboard = blackboards[unit]
 		local inside_priority_distance = update_blackboard(unit, blackboard, t, dt)
 
 		if not inside_priority_distance then
-			ai_blackboard_prioritized_updates[index] = ai_blackboard_prioritized_updates[ai_blackboard_prioritized_updates_n]
-			ai_blackboard_prioritized_updates[ai_blackboard_prioritized_updates_n] = nil
-			ai_blackboard_updates[ai_blackboard_updates_n + 1] = unit
-			ai_blackboard_updates_n = #ai_blackboard_updates
-			ai_blackboard_prioritized_updates_n = #ai_blackboard_prioritized_updates
+			prio_updates[index] = prio_updates[num_prio]
+			prio_updates[num_prio] = nil
+			ai_blackboard_updates[num_normal + 1] = unit
+			num_normal = num_normal + 1
+			num_prio = num_prio - 1
 		else
 			index = index + 1
 		end
+
+		i = i + 1
 	end
+
+	self.start_prio_index = index
 
 	Profiler.stop("prio")
 

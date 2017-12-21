@@ -32,12 +32,14 @@ ScriptApplication.is_bundled = function ()
 	}
 
 	for i, arg in ipairs(args) do
-		if arg == "-bundle-dir" then
-			return false
+		local match_result = string.match(arg.gsub(arg, "[%-]", ""), "bundledir")
+
+		if match_result ~= nil then
+			return true
 		end
 	end
 
-	return true
+	return false
 end
 
 return 

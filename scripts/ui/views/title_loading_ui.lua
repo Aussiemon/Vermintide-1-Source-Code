@@ -904,7 +904,8 @@ TitleLoadingUI.init = function (self, world, force_done)
 	self._world = world
 	self._done = false
 	self._force_done = force_done
-	self._gamma_done = force_done or false
+	self._gamma_done = false
+	self._needs_cursor_pop = false
 	self._current_inputs = {}
 
 	Managers.input:create_input_service("title_loading_ui", TitleLoadingKeyMaps)
@@ -929,9 +930,10 @@ TitleLoadingUI._create_elements = function (self)
 	self._dead_space_filler_widget = UIWidget.init(dead_space_filler_widget)
 	self._done_button = UIWidget.init(done_button)
 
-	if not SaveData.gamma_corrected then
+	if not SaveData.gamma_corrected and not self._force_done then
 		ShowCursorStack.push()
 
+		self._needs_cursor_pop = true
 		local gamma_adjuster = UIWidget.init(gamma_adjuster)
 		self._gamma_adjuster = gamma_adjuster
 
@@ -1014,6 +1016,7 @@ TitleLoadingUI._update_gamma_adjuster = function (self, dt)
 		end
 
 		self._gamma_done = true
+		self._needs_cursor_pop = false
 
 		ShowCursorStack.pop()
 	end
@@ -1330,6 +1333,12 @@ TitleLoadingUI.destroy = function (self)
 	end
 
 	Managers.transition:hide_loading_icon()
+
+	if self._needs_cursor_pop then
+		ShowCursorStack.pop()
+
+		self._needs_cursor_pop = false
+	end
 
 	return 
 end

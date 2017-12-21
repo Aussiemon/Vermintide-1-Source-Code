@@ -241,7 +241,9 @@ SummaryScreenUI.on_enter = function (self, ignore_input_blocking)
 	end
 
 	if self.game_won and self.game_mode_key ~= "survival" then
+		local level_key = self.last_level_key
 		self.level_up_rewards = self.dice_roller:level_up_rewards()
+		self.quests_unlocked_reward = ProgressionUnlocks.get_quests_unlocked(level_key)
 	else
 		local level_up_rewards, failed_game_rewards = self.rewards:get_upgrades_failed_game()
 		self.level_up_rewards = level_up_rewards
@@ -333,6 +335,8 @@ SummaryScreenUI.update_bar_progress = function (self)
 		return 
 	end
 
+	local reward_added = false
+
 	for index, bar_data in ipairs(bar_progress_data) do
 		local name = bar_data.name
 		local progress = self.get_timer_progress(self, name)
@@ -367,6 +371,7 @@ SummaryScreenUI.update_bar_progress = function (self)
 
 					self.add_reward(self, reward_data)
 
+					reward_added = true
 					reward_backend_item = unlock_template.backend_item
 				elseif level_up_rewards then
 					reward_backend_item = true
@@ -383,6 +388,8 @@ SummaryScreenUI.update_bar_progress = function (self)
 						}
 
 						self.add_reward(self, reward_data)
+
+						reward_added = true
 					end
 				end
 			end
@@ -410,6 +417,25 @@ SummaryScreenUI.update_bar_progress = function (self)
 			end
 
 			if progress == 1 then
+				local quests_unlocked_reward = self.quests_unlocked_reward
+
+				if quests_unlocked_reward then
+					local icon_name = quests_unlocked_reward.icon
+					local description_text = quests_unlocked_reward.description
+					local reward_data = {
+						reward_type = "misc",
+						bar_name = name,
+						title_text = Localize("reward_popup_title"),
+						icon_name = icon_name,
+						description_text = Localize(description_text)
+					}
+
+					self.add_reward(self, reward_data)
+
+					reward_added = true
+					self.quests_unlocked_reward = nil
+				end
+
 				local failed_game_rewards = self.failed_game_rewards
 
 				if self._show_failed_game_popup and failed_game_rewards then
@@ -431,7 +457,9 @@ SummaryScreenUI.update_bar_progress = function (self)
 					}
 
 					self.add_reward(self, reward_data)
-				else
+
+					reward_added = true
+				elseif not reward_added then
 					self.bar_progress_data[index] = nil
 
 					if #self.bar_progress_data < 1 then
@@ -858,6 +886,8 @@ SummaryScreenUI.display_bar_progress = function (self)
 
 			self._add_experience_gain_telemetry(self, total_experience_gained, player_id, hero)
 		end
+	else
+		print("Failed initialized experience for experience bar")
 	end
 
 	self.add_bar_progress(self, "hero_bar", experience, self.experience_bar_hero_widget, total_experience_gained)

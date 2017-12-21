@@ -162,7 +162,7 @@ MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 	local difficulties, starting_difficulty = self.difficulty_manager:get_level_difficulties(level_key)
 	local difficulty_settings = DifficultySettings
 	local highest_completed_difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, player_stats_id, level_key)
-	local highest_completed_difficulty = highest_completed_difficulty_index and difficulties[highest_completed_difficulty_index]
+	local highest_completed_difficulty = 0 < highest_completed_difficulty_index and difficulties[highest_completed_difficulty_index]
 	local highest_completed_difficulty_rank = highest_completed_difficulty and difficulty_settings[highest_completed_difficulty].rank
 	local starting_difficulty_rank = difficulty_settings[starting_difficulty].rank
 	local num_difficulties = #difficulties
@@ -207,38 +207,42 @@ MapViewHelper.get_difficulty_data_summary = function (self, level_data_list)
 	}
 
 	for level_key, level_information in pairs(level_data_list) do
-		local difficulty_data = level_information.difficulty_data
+		local visibility = level_information.visibility
 
-		if difficulty_data then
-			for rank, layout in ipairs(difficulty_data) do
-				local summary_layout = summary_difficulty_data[rank]
+		if visibility == "visible" then
+			local difficulty_data = level_information.difficulty_data
 
-				if not summary_layout.key then
-					summary_layout.key = layout.key
-					summary_layout.rank = layout.rank
-					summary_layout.setting_text = layout.setting_text
-				end
+			if difficulty_data then
+				for rank, layout in ipairs(difficulty_data) do
+					local summary_layout = summary_difficulty_data[rank]
 
-				local unlocked = layout.unlocked
-				local summary_unlocked = summary_layout.unlocked
+					if not summary_layout.key then
+						summary_layout.key = layout.key
+						summary_layout.rank = layout.rank
+						summary_layout.setting_text = layout.setting_text
+					end
 
-				if summary_unlocked == nil or (not summary_layout.unlocked and unlocked) then
-					summary_layout.unlocked = unlocked
-					summary_layout.tooltip = layout.tooltip
-				end
+					local unlocked = layout.unlocked
+					local summary_unlocked = summary_layout.unlocked
 
-				local available = layout.available
-				local summary_available = summary_layout.available
+					if summary_unlocked == nil or (not summary_layout.unlocked and unlocked) then
+						summary_layout.unlocked = unlocked
+						summary_layout.tooltip = layout.tooltip
+					end
 
-				if summary_available == nil or (not summary_layout.available and available) then
-					summary_layout.available = available
-				end
+					local available = layout.available
+					local summary_available = summary_layout.available
 
-				local completed = layout.completed
-				local summary_completed = summary_layout.completed
+					if summary_available == nil or (not summary_layout.available and available) then
+						summary_layout.available = available
+					end
 
-				if summary_completed == nil or (summary_completed and not completed) then
-					summary_layout.completed = completed
+					local completed = layout.completed
+					local summary_completed = summary_layout.completed
+
+					if summary_completed == nil or (summary_completed and not completed) then
+						summary_layout.completed = completed
+					end
 				end
 			end
 		end

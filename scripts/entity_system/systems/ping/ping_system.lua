@@ -115,6 +115,17 @@ PingSystem.add_ping = function (self, pinger_unit, pinged_unit)
 
 	return 
 end
+PingSystem.remove_ping_from_unit = function (self, target_unit)
+	for pinger_unit, target in pairs(self._pinged_units) do
+		if target_unit == target.pinged_unit then
+			self.remove_ping(self, pinger_unit)
+
+			return 
+		end
+	end
+
+	return 
+end
 PingSystem.remove_ping = function (self, pinger_unit)
 	fassert(self.is_server, "only the server should remove pings")
 

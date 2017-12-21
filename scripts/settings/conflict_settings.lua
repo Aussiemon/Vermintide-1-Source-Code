@@ -827,6 +827,58 @@ HordeSettings = {
 					}
 				}
 			},
+			event_dwarf_exterior_extra_spice = {
+				{
+					name = "few_clanrats",
+					weight = 10,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							6,
+							7
+						},
+						"skaven_storm_vermin_commander",
+						1
+					}
+				},
+				{
+					name = "storm_clanrats",
+					weight = 3,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							3,
+							5
+						},
+						"skaven_storm_vermin_commander",
+						2
+					}
+				}
+			},
+			event_dwarf_exterior_extra_spice_02 = {
+				{
+					name = "few_clanrats",
+					weight = 10,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							8,
+							9
+						}
+					}
+				},
+				{
+					name = "storm_clanrats",
+					weight = 3,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							10,
+							12
+						}
+					}
+				}
+			},
 			event_survival_medium_intensity = {
 				{
 					name = "clanrats",
@@ -1374,16 +1426,19 @@ RoamingSettings = {
 	default = {
 		despawn_distance = 45,
 		despawn_path_distance = 90,
+		despawn_distance_z = 30,
 		disabled = false
 	},
 	disabled = {
 		despawn_distance = 45,
 		despawn_path_distance = 90,
+		despawn_distance_z = 30,
 		disabled = true
 	},
 	gdc_build = {
 		despawn_distance = 45,
-		despawn_path_distance = 90
+		despawn_path_distance = 90,
+		despawn_distance_z = 30
 	}
 }
 SpecialsSettings = {
@@ -1932,13 +1987,15 @@ ConflictDirectors = {
 	}
 }
 RecycleSettings = {
-	destroy_stuck_distance_squared = 625,
+	push_horde_if_num_alive_grunts_above = 60,
 	push_horde_in_time = false,
 	destroy_los_distance_squared = 8100,
-	ai_stuck_check_start_time = 10,
-	push_horde_if_num_alive_grunts_above = 60,
 	use_horde_composition_lists = false,
 	max_grunts = 70,
+	destroy_stuck_distance_squared = 625,
+	destroy_no_path_only_behind = true,
+	ai_stuck_check_start_time = 10,
+	destroy_no_path_found_time = 10,
 	composition_list = {
 		{
 			vector = "large",

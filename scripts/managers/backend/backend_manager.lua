@@ -77,6 +77,11 @@ BackendManager.init = function (self)
 		end
 	end
 
+	self._button_retry = "button_ok"
+	self._button_quit = "button_quit"
+	self._button_local_backend = "button_local_backend"
+	self._button_disconnected = "button_disconnected"
+
 	self.reset(self)
 
 	return 
@@ -192,6 +197,8 @@ BackendManager.make_tutorial = function (self)
 	return 
 end
 BackendManager._update_state = function (self)
+	Profiler.start("BackendManager update_state")
+
 	local settings = GameSettingsDevelopment.backend_settings
 
 	if self._need_signin then
@@ -216,9 +223,13 @@ BackendManager._update_state = function (self)
 		end
 	end
 
+	Profiler.stop()
+
 	return 
 end
 BackendManager._update_error_handling = function (self, dt)
+	Profiler.start("BackendManager update_error_handling")
+
 	if 0 < #self._errors and not self._error_dialog and not self._is_disconnected then
 		local error_data = table.remove(self._errors, 1)
 
@@ -245,6 +256,8 @@ BackendManager._update_error_handling = function (self, dt)
 		end
 	end
 
+	Profiler.stop()
+
 	return 
 end
 BackendManager.update = function (self, dt)
@@ -256,7 +269,12 @@ BackendManager.update = function (self, dt)
 
 	if self._backend then
 		local settings = GameSettingsDevelopment.backend_settings
+
+		Profiler.start("ScriptBackend update")
+
 		local error_data = self._backend:update()
+
+		Profiler.stop()
 
 		if error_data then
 			self._post_error(self, error_data)
@@ -309,43 +327,79 @@ BackendManager._post_error = function (self, error_data)
 
 	return 
 end
-BackendManager._show_signin_error_dialog = function (self, error_text)
-	local error_topic = Localize("backend_error_topic")
-	self._button_retry = "button_ok"
-	self._button_quit = "button_quit"
+BackendManager._format_error_message_console = function (self, reason, details_message)
+	local button = {
+		id = self._button_retry,
+		text = Localize("button_ok")
+	}
 
-	if GameSettingsDevelopment.backend_settings.allow_local then
-		self._button_local_backend = "button_local_backend"
-		self._error_dialog = Managers.popup:queue_popup(error_text, error_topic, self._button_quit, Localize("menu_quit"), self._button_local_backend, Localize("backend_button_local"))
+	if not self.profiles_loaded(self) then
+		if reason == Backend.ERR_AUTH then
+			if Application.platform() == "xb1" then
+				return "backend_err_auth_xb1", button
+			else
+				return "backend_err_auth_ps4", button
+			end
+		else
+			return "backend_err_connecting", button
+		end
 	else
-		self._error_dialog = Managers.popup:queue_popup(error_text, error_topic, self._button_quit, Localize("menu_quit"))
+		return "backend_err_network", button
 	end
 
 	return 
 end
-BackendManager._show_ingame_error_dialog = function (self, error_text)
-	local error_topic = Localize("backend_error_topic")
-	self._button_disconnected = "button_ok"
-	self._error_dialog = Managers.popup:queue_popup(error_text, error_topic, self._button_disconnected, Localize("button_ok"))
+BackendManager._format_error_message_windows = function (self, reason, details_message)
+	local error_text, button_1, button_2 = nil
 
-	return 
+	if not self.profiles_loaded(self) then
+		button_1 = {
+			id = self._button_quit,
+			text = Localize("menu_quit")
+		}
+
+		if GameSettingsDevelopment.backend_settings.allow_local then
+			button_2 = {
+				id = self._button_local_backend,
+				text = Localize("backend_button_local")
+			}
+		end
+
+		print("backend error", reason, ERROR_CODES[reason])
+
+		if reason == Backend.ERR_AUTH then
+			error_text = "backend_err_auth_steam"
+		else
+			error_text = "backend_err_connecting"
+		end
+	else
+		button_1 = {
+			id = self._button_disconnected,
+			text = Localize("button_ok")
+		}
+		error_text = "backend_err_network"
+	end
+
+	return error_text, button_1, button_2
 end
 BackendManager._show_error_dialog = function (self, reason, details_message)
 	print(string.format("[BackendManager] Showing error dialog: %q, %q", reason or "nil", details_message or "nil"))
 
-	local localization_string = ERROR_CODES[reason]
-	local error_text = Localize(localization_string)
+	local error_topic = Localize("backend_error_topic")
+	local error_text, button_1, button_2 = nil
 
-	if details_message and details_message ~= "" then
-		error_text = error_text .. ". '" .. details_message .. "'"
+	if Application.platform() == "xb1" or Application.platform() == "ps4" then
+		error_text, button_1 = self._format_error_message_console(self, reason, details_message)
+	else
+		error_text, button_1, button_2 = self._format_error_message_windows(self, reason, details_message)
 	end
 
-	ScriptApplication.send_to_crashify("Backend", error_text)
+	local localzed_error_text = Localize(error_text)
 
-	if not self.profiles_loaded(self) then
-		self._show_signin_error_dialog(self, error_text)
+	if button_2 then
+		self._error_dialog = Managers.popup:queue_popup(localzed_error_text, error_topic, button_1.id, button_1.text, button_2.id, button_2.text)
 	else
-		self._show_ingame_error_dialog(self, error_text)
+		self._error_dialog = Managers.popup:queue_popup(localzed_error_text, error_topic, button_1.id, button_1.text)
 	end
 
 	return 

@@ -72,7 +72,7 @@ BTAdvanceTowardsPlayersAction.run = function (self, unit, blackboard, t, dt)
 	local breed = blackboard.breed
 	local action = blackboard.action
 	local advance_towards_players = blackboard.advance_towards_players
-	advance_towards_players.evaluate_timer = advance_towards_players.evaluate_timer - dt
+	advance_towards_players.evaluate_timer = (blackboard.times_thrown == 0 or 0) and advance_towards_players.evaluate_timer - dt
 	advance_towards_players.timer = advance_towards_players.timer + dt
 	advance_towards_players.time_before_throw_timer = advance_towards_players.time_before_throw_timer + dt
 	local failed_attempts = ai_navigation.number_failed_move_attempts(ai_navigation)
@@ -188,10 +188,25 @@ BTAdvanceTowardsPlayersAction.want_to_throw = function (self, unit, blackboard, 
 	end
 
 	local throw_globe_data = blackboard.throw_globe_data
+
+	if throw_globe_data and throw_globe_data.next_throw_at and blackboard.target_dist < 4 then
+		throw_globe_data.next_throw_at = -math.huge
+
+		return true
+	end
+
 	local next_throw_at = throw_globe_data and throw_globe_data.next_throw_at
 
-	if next_throw_at and t < next_throw_at then
-		return false
+	if next_throw_at then
+		if next_throw_at < t then
+			local target_dist = blackboard.target_dist
+
+			if target_dist < action.range then
+				return true
+			end
+		else
+			return false
+		end
 	end
 
 	local time_before_throw_distance_modifier = action.time_before_throw_distance_modifier*advance_towards_players.time_before_throw_timer

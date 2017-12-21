@@ -11,7 +11,9 @@ DialogueSettings.auto_load_files = {
 	"dialogues/generated/enemies",
 	"dialogues/generated/dlc_01",
 	"dialogues/generated/tutorial",
-	"dialogues/generated/drachenfels"
+	"dialogues/generated/drachenfels",
+	"dialogues/generated/dlc_enemies_01",
+	"dialogues/generated/dwarf_dlc"
 }
 DialogueSettings.max_view_distance = 50
 DialogueSettings.default_view_distance = 10

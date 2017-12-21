@@ -193,11 +193,14 @@ PeerStates.WaitingForEnterGame = {
 				server.game_network_manager:set_peer_synchronizing(peer_id)
 
 				local game_session = server.game_session
+				local all_synced = server.profile_synchronizer:all_synced()
 
-				if game_session then
+				if game_session and all_synced then
 					GameSession.add_peer(game_session, peer_id)
 
 					server.peers_added_to_gamesession[peer_id] = true
+				else
+					return 
 				end
 			end
 
@@ -304,13 +307,24 @@ PeerStates.InGame = {
 	on_enter = function (self, previous_state)
 		return 
 	end,
+	respawn_player = function (self)
+		assert(self.despawned_player, "[PeerStates] - Trying to respawn player without having despawned the player.")
+
+		self.respawn_player = true
+
+		return 
+	end,
 	despawned_player = function (self)
 		self.despawned_player = true
 
 		return 
 	end,
 	update = function (self, dt)
-		if self.despawned_player then
+		if self.respawn_player then
+			self.respawn_player = nil
+
+			return PeerStates.SpawningPlayer
+		elseif self.despawned_player then
 			local profile_index = self.server.profile_synchronizer:profile_by_peer(self.peer_id, 1)
 
 			if profile_index ~= self.my_profile_index then
@@ -325,6 +339,7 @@ PeerStates.InGame = {
 	end,
 	on_exit = function (self, new_state)
 		self.despawned_player = nil
+		self.respawn_player = nil
 
 		return 
 	end

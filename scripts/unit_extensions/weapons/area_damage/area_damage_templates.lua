@@ -243,7 +243,7 @@ AreaDamageTemplates.templates = {
 
 					local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
 
-					if difficulty_settings.friendly_fire_ranged then
+					if aoe_dot_player_take_damage and difficulty_settings.friendly_fire_ranged then
 						for _, player in pairs(Managers.player:players()) do
 							local player_unit = player.player_unit
 

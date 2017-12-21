@@ -3390,6 +3390,40 @@ BuffTemplates = {
 		icon = "trait_icon_loot_trinket_empire_soldier",
 		roll_dice_as_hero = "empire_soldier",
 		buffs = {}
+	},
+	trinket_increase_luck_halloween = {
+		description = "trinket_increase_luck_tier1_description",
+		display_name = "trinket_increase_luck_tier1",
+		unique_id = "trinket_increase_luck",
+		icon = "trinket_increase_luck_halloween",
+		description_values = {
+			"multiplier"
+		},
+		buffs = {
+			{
+				multiplier = 0.91,
+				name = "increase_luck",
+				stat_buff = StatBuffIndex.INCREASE_LUCK
+			}
+		}
+	},
+	trinket_medpack_spread_halloween = {
+		description = "trinket_medpack_spread_area_tier2_description",
+		display_name = "trinket_medpack_spread_area_tier2",
+		unique_id = "trinket_medpack_spread_area",
+		icon = "trinket_garlic_tier1",
+		description_values = {
+			"distance",
+			"multiplier"
+		},
+		buffs = {
+			{
+				multiplier = 0.13,
+				name = "medpack_spread_area",
+				stat_buff = StatBuffIndex.MEDPACK_SPREAD_AREA,
+				distance = TrinketSpreadDistance
+			}
+		}
 	}
 }
 local override_descriptions = {

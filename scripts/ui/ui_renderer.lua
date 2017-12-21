@@ -677,13 +677,18 @@ UIRenderer.draw_gradient_mask_texture = function (self, material, lower_left_cor
 	return 
 end
 local tile_sizes_dummy = {}
-UIRenderer.draw_multi_texture = function (self, materials, lower_left_corner, texture_size, texture_sizes, tile_sizes, axis, spacing, direction, draw_count, texture_colors, color, masked, texture_saturation, saturated, retained_ids)
+UIRenderer.draw_multi_texture = function (self, materials, lower_left_corner, texture_size, texture_sizes, texture_offsets, tile_sizes, axis, spacing, direction, draw_count, texture_colors, color, masked, texture_saturation, saturated, retained_ids)
 	local UIRenderer_script_draw_bitmap = UIRenderer.script_draw_bitmap
 	local UIRenderer_draw_tiled_texture = UIRenderer.draw_tiled_texture
 	axis = axis or 1
 	direction = direction or 1
 	local position = UIScaleVectorToResolution(lower_left_corner)
-	local unscaled_position = Vector3(lower_left_corner[1], lower_left_corner[2], lower_left_corner[3])
+	local draw_position = Vector3(lower_left_corner[1], lower_left_corner[2], lower_left_corner[3])
+	local unscaled_position = {
+		lower_left_corner[1],
+		lower_left_corner[2],
+		lower_left_corner[3]
+	}
 	local spacing = spacing and UIScaleVectorToResolution(spacing)
 	local gui = self.gui
 	local gui_retained = self.gui_retained
@@ -728,16 +733,29 @@ UIRenderer.draw_multi_texture = function (self, materials, lower_left_corner, te
 				unscaled_position[axis] = unscaled_position[axis] - tile_size[axis]
 			end
 
+			local texture_offset = texture_offsets and texture_offsets[i]
+
+			if texture_offset then
+				local offset = UIScaleVectorToResolution(texture_offset)
+				draw_position[1] = unscaled_position[1] + offset[1]
+				draw_position[2] = unscaled_position[2] + offset[2]
+				draw_position[3] = unscaled_position[3] + offset[3]
+			else
+				draw_position[1] = unscaled_position[1]
+				draw_position[2] = unscaled_position[2]
+				draw_position[3] = unscaled_position[3]
+			end
+
 			local retained_id = nil
 
 			if retained_ids == true then
-				retained_id = UIRenderer_draw_tiled_texture(self, material, unscaled_position, tile_size, texture_size, draw_color, masked, retained_ids)
+				retained_id = UIRenderer_draw_tiled_texture(self, material, draw_position, tile_size, texture_size, draw_color, masked, retained_ids)
 			elseif retained_ids then
 				retained_id = retained_ids[i]
 
-				UIRenderer_draw_tiled_texture(self, material, unscaled_position, tile_size, texture_size, draw_color, masked, retained_id)
+				UIRenderer_draw_tiled_texture(self, material, draw_position, tile_size, texture_size, draw_color, masked, retained_id)
 			else
-				UIRenderer_draw_tiled_texture(self, material, unscaled_position, tile_size, texture_size, draw_color, masked)
+				UIRenderer_draw_tiled_texture(self, material, draw_position, tile_size, texture_size, draw_color, masked)
 			end
 
 			if new_retained_ids then
@@ -759,16 +777,29 @@ UIRenderer.draw_multi_texture = function (self, materials, lower_left_corner, te
 				unscaled_position[axis] = unscaled_position[axis] - texture_size[axis]
 			end
 
+			local texture_offset = texture_offsets and texture_offsets[i]
+
+			if texture_offset then
+				local offset = UIScaleVectorToResolution(texture_offset)
+				draw_position[1] = position[1] + offset[1]
+				draw_position[2] = position[2] + offset[2]
+				draw_position[3] = position[3] + offset[3]
+			else
+				draw_position[1] = position[1]
+				draw_position[2] = position[2]
+				draw_position[3] = position[3]
+			end
+
 			local retained_id = nil
 
 			if retained_ids == true then
-				retained_id = UIRenderer_script_draw_bitmap(gui_retained, material, position, scaled_texture_size, draw_color, masked, draw_saturated, nil)
+				retained_id = UIRenderer_script_draw_bitmap(gui_retained, material, draw_position, scaled_texture_size, draw_color, masked, draw_saturated, nil)
 			elseif retained_ids then
 				retained_id = retained_ids[i]
 
-				UIRenderer_script_draw_bitmap(gui_retained, material, position, scaled_texture_size, draw_color, masked, draw_saturated, retained_id)
+				UIRenderer_script_draw_bitmap(gui_retained, material, draw_position, scaled_texture_size, draw_color, masked, draw_saturated, retained_id)
 			else
-				UIRenderer_script_draw_bitmap(gui, material, position, scaled_texture_size, draw_color, masked, draw_saturated)
+				UIRenderer_script_draw_bitmap(gui, material, draw_position, scaled_texture_size, draw_color, masked, draw_saturated)
 			end
 
 			if new_retained_ids then
@@ -875,6 +906,27 @@ UIRenderer.draw_centered_texture_amount = function (self, material, lower_left_c
 
 	return 
 end
+UIRenderer.draw_centered_uv_texture_amount = function (self, material, lower_left_corner, size, default_texture_size, texture_sizes, texture_uvs, texture_amount, axis, spacing, color, masked)
+	local position = UIScaleVectorToResolution(lower_left_corner)
+	local area_size = UIScaleVectorToResolution(size)
+	default_texture_size = UIScaleVectorToResolution(default_texture_size)
+	local distance_spacing = spacing or 0
+	local distance_between_textures = area_size[axis]/(texture_amount + 1)
+	local is_material_table = type(material) == "table"
+	local gui = self.gui
+
+	for i = 1, texture_amount, 1 do
+		local texture_position = Vector3(position.x, position.y, position.z)
+		texture_position[axis] = texture_position[axis] + distance_between_textures*i - default_texture_size[axis]*0.5
+		local uvs = texture_uvs[i]
+		local texture_size_vector = UIScaleVectorToResolution(texture_sizes[i])
+		local draw_size = Vector2(texture_size_vector[1], texture_size_vector[2])
+
+		UIRenderer.script_draw_bitmap_uv(gui, (is_material_table and material[i]) or material, uvs, texture_position, draw_size, color, masked)
+	end
+
+	return 
+end
 UIRenderer.draw_texture_rotated = function (self, material, size, position, angle, pivot, color, masked, retained_id)
 	size = UIScaleVectorToResolution(size)
 	local scaled_pivot = UIScaleVectorToResolution(pivot)
@@ -954,17 +1006,11 @@ UIRenderer.draw_justified_text = function (self, text, font_material, font_size,
 	color = color and Color(unpack(color))
 
 	if retained_id == true then
-		return Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), unpack({
-			...
-		}))
+		return Gui.text(self.gui_retained, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), ...)
 	elseif retained_id then
-		Gui.update_text(self.gui_retained, retained_id, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), unpack({
-			...
-		}))
+		Gui.update_text(self.gui_retained, retained_id, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), ...)
 	else
-		Gui.text(self.gui, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), unpack({
-			...
-		}))
+		Gui.text(self.gui, text, font_material, font_size, font_name, ui_position, color, "justify", UIScaleScalarToResolution(justify_width), ...)
 	end
 
 	return 
@@ -975,16 +1021,12 @@ UIRenderer.word_wrap = function (self, text, font_material, size, width, ...)
 	local return_dividers = "\n"
 	local reuse_global_table = true
 	local scale = RESOLUTION_LOOKUP.scale
-	local rows, return_indices = Gui.word_wrap(self.gui, text, font_material, size, width*scale, whitespace, soft_dividers, return_dividers, reuse_global_table, unpack({
-		...
-	}))
+	local rows, return_indices = Gui.word_wrap(self.gui, text, font_material, size, width*scale, whitespace, soft_dividers, return_dividers, reuse_global_table, ...)
 
 	return rows, return_indices
 end
 UIRenderer.text_size = function (self, text, font_material, font_size, ...)
-	local min, max, caret = Gui.text_extents(self.gui, text, font_material, font_size, unpack({
-		...
-	}))
+	local min, max, caret = Gui.text_extents(self.gui, text, font_material, font_size, ...)
 	local inv_scaling = RESOLUTION_LOOKUP.inv_scale
 	local width = (max.x - min.x)*inv_scaling
 	local height = (max.y - min.y)*inv_scaling

@@ -1,3 +1,5 @@
+-- WARNING: Error occurred during decompilation.
+--   Code may be incomplete or incorrect.
 HordeSpawner = class(HordeSpawner)
 local player_and_bot_positions = PLAYER_AND_BOT_POSITIONS
 local horde_sectors = {
@@ -447,22 +449,22 @@ HordeSpawner.find_vector_horde_spawners = function (self, epicenter_pos, main_ta
 
 	return "success", horde_spawners, found_cover_points
 end
-HordeSpawner.find_good_vector_horde_pos = function (self, main_target_pos, distance)
+HordeSpawner.find_good_vector_horde_pos = function (self, main_target_pos, distance, check_reachable)
 	local success, horde_spawners, found_cover_points = nil
-	local epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance)
+	local epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance, check_reachable)
 
 	if epicenter_pos then
 		success, horde_spawners, found_cover_points = self.find_vector_horde_spawners(self, epicenter_pos, main_target_pos)
 
 		if not success then
-			epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance + 10)
+			epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance + 10, check_reachable)
 
 			if epicenter_pos then
 				success, horde_spawners, found_cover_points = self.find_vector_horde_spawners(self, epicenter_pos, main_target_pos)
 			end
 		end
 	else
-		epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance + 10)
+		epicenter_pos = self.get_point_on_main_path(self, main_target_pos, distance + 10, check_reachable)
 
 		if epicenter_pos then
 			success, horde_spawners, found_cover_points = self.find_vector_horde_spawners(self, epicenter_pos, main_target_pos)
@@ -496,6 +498,7 @@ HordeSpawner.execute_vector_horde = function (self, fallback)
 
 	local roll = math.random()
 	local spawn_horde_ahead = roll <= settings.main_path_chance_spawning_ahead
+	local check_reachable = true
 	local distance_from_players = settings.main_path_dist_from_players
 
 	if not spawn_horde_ahead then
@@ -504,14 +507,14 @@ HordeSpawner.execute_vector_horde = function (self, fallback)
 
 	print("--> horde wants to " .. ((spawn_horde_ahead and "spawn ahead of players") or "spawn behind players") .. " (" .. roll .. "/" .. settings.main_path_chance_spawning_ahead)
 
-	success, horde_spawners, found_cover_points, epicenter_pos = self.find_good_vector_horde_pos(self, main_target_pos, distance_from_players)
+	success, horde_spawners, found_cover_points, epicenter_pos = self.find_good_vector_horde_pos(self, main_target_pos, distance_from_players, check_reachable)
 
 	if not success then
 		spawn_horde_ahead = not spawn_horde_ahead
 
 		print("--> can't find spawners in this direction, switching to " .. ((spawn_horde_ahead and "ahead") or "behind"))
 
-		success, horde_spawners, found_cover_points, epicenter_pos = self.find_good_vector_horde_pos(self, main_target_pos, -distance_from_players)
+		success, horde_spawners, found_cover_points, epicenter_pos = self.find_good_vector_horde_pos(self, main_target_pos, -distance_from_players, check_reachable)
 	end
 
 	if not success then
@@ -1023,7 +1026,9 @@ HordeSpawner.filter_angle = function (self, center_pos, pos_list, dot_angle)
 
 	return 
 end
-HordeSpawner.get_point_on_main_path = function (self, pos, distance)
+HordeSpawner.get_point_on_main_path = function (self, pos, distance, confirm_with_far_astar)
+
+	-- decompilation error in this vicinity
 	local level_analysis = self.conflict_director.level_analysis
 	local main_paths = level_analysis.get_main_paths(level_analysis)
 	local path_pos, travel_dist = MainPathUtils.closest_pos_at_main_path(main_paths, pos)

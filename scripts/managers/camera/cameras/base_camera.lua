@@ -241,6 +241,7 @@ BaseCamera.set_root_far_range = function (self, far_range)
 	return 
 end
 BaseCamera.update = function (self, dt, position, rotation, data)
+	assert(Vector3.is_valid(position), "Trying to set invalid camera position")
 	self._position:store(position)
 	self._rotation:store(rotation)
 

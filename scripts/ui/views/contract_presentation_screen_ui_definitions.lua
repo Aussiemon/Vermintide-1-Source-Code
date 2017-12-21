@@ -324,9 +324,9 @@ local function create_entry(index)
 			}
 		},
 		content = {
-			texture_bg = "quest_endscreen_bg",
+			texture_bg = "contract_progress_bg",
 			title_text = "n/a",
-			texture_completed = "quest_completed",
+			texture_completed = "contract_progress_completed",
 			task_value_2 = "n/a",
 			task_amount = 1,
 			task_text_3 = "n/a",
@@ -335,7 +335,7 @@ local function create_entry(index)
 			visible = false,
 			overlay_mask = "contract_masked_overlay",
 			task_text_2 = "n/a",
-			texture_divider = "quest_divider",
+			texture_divider = "contract_progress_divider",
 			task_text_1 = "n/a",
 			bar_text = "Contract Progress: 80%",
 			task_value_3 = "n/a",
@@ -346,7 +346,7 @@ local function create_entry(index)
 			progress_bar = {
 				bar_value_position = 0,
 				bar_value_size = 0,
-				texture_id = "quest_bar",
+				texture_id = "contract_progress_bar",
 				internal_bar_value_position = 0,
 				bar_value = 0,
 				bar_value_offset = 0,

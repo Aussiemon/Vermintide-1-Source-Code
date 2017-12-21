@@ -8,6 +8,7 @@ AltarTraitProcUI.init = function (self, parent, position, animation_definitions,
 	self.parent = parent
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
+	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
@@ -50,7 +51,7 @@ AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 			if input_service.get(input_service, "special_1") then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_item_remove_request = true
-			elseif input_service.get(input_service, "refresh") then
+			elseif input_service.get(input_service, "refresh") and self.is_roll_possible(self) then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_roll_request = true
 			end
@@ -93,7 +94,7 @@ AltarTraitProcUI.create_ui_elements = function (self)
 	self.widgets_by_name.trait_button_3.content.use_trait_cover = true
 	self.widgets_by_name.trait_button_4.content.use_trait_cover = true
 
-	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
+	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 	self._setup_candle_animations(self)
 
 	return 
@@ -570,21 +571,21 @@ AltarTraitProcUI.clear_item_display_data = function (self)
 	return 
 end
 AltarTraitProcUI.draw = function (self, dt)
-	local ui_top_renderer = self.ui_top_renderer
+	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.parent:page_input_service()
 
-	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	local num_widgets = #self.widgets
 
 	for i = 1, num_widgets, 1 do
 		local widget = self.widgets[i]
 
-		UIRenderer.draw_widget(ui_top_renderer, widget)
+		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
-	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.end_pass(ui_renderer)
 
 	return 
 end

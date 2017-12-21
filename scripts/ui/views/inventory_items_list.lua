@@ -552,7 +552,7 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 	return 
 end
 
-local function create_inventory_item_template(is_room_item, item, item_color, equipped_item, is_new, is_active, is_locked, allow_equipped_drag, level_requirement)
+local function create_inventory_item_template(is_room_item, item, item_color, equipped_item, is_new, is_active, is_locked, allow_equipped_drag, level_requirement, ui_top_renderer)
 	local traits = item.traits
 	local trait_textures = {}
 	local traits_unlocked = {}
@@ -591,22 +591,23 @@ local function create_inventory_item_template(is_room_item, item, item_color, eq
 
 	local content = {
 		trait_slot_fg = "trait_icon_selected_frame",
-		locked_texture = "locked_icon_01",
 		trait_slot_locked = "trait_icon_selected_frame_locked",
 		background_selected = "list_item_selected",
 		background_normal_hover = "list_item_normal_hover",
 		visible = true,
 		background_selected_hover = "list_item_selected_hover",
+		locked_texture = "locked_icon_01",
 		background_normal = "list_item_normal",
 		hover_disabled = false,
 		background_disabled_hover = "list_item_disabled_hover",
-		background_disabled_selected = "list_item_disabled_selected",
 		text_equipped = "item_compare_window_title",
 		new_texture = "list_item_tag_new",
 		background_disabled_selected_hover = "list_item_disabled_selected_hover",
+		background_disabled_selected = "list_item_disabled_selected",
 		background_disabled = "list_item_disabled",
 		disabled_overlay = "list_item_disabled_overlay",
 		item_frame_texture_id = "frame_01",
+		ui_top_renderer = ui_top_renderer,
 		drag_texture_size = {
 			64,
 			64
@@ -1706,19 +1707,13 @@ local fake_input_service = {
 }
 InventoryItemsList = class(InventoryItemsList)
 InventoryItemsList.init = function (self, position, ingame_ui_context, settings)
-	self.ui_renderer = ingame_ui_context.ui_top_renderer
+	self.ui_renderer = ingame_ui_context.ui_renderer
+	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.input_manager = ingame_ui_context.input_manager
 	local num_list_items = settings.num_list_items
 	local columns = settings.columns
 	local column_offset = settings.column_offset
 	self.disabled_backend_ids = {}
-
-	if settings.use_top_renderer then
-		self.ui_renderer = ingame_ui_context.ui_top_renderer
-	else
-		self.ui_renderer = ingame_ui_context.ui_renderer
-	end
-
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
@@ -1946,6 +1941,22 @@ InventoryItemsList.update = function (self, dt, use_gamepad, disable_gamepad_pre
 
 			break
 		end
+	end
+
+	if Debug.select_item then
+		local i = Debug.select_item
+		local button_widget_content = list_content[i]
+		local is_equipped = button_widget_content.equipped
+		local is_active = button_widget_content.active
+		local is_fake = button_widget_content.fake
+
+		if is_active then
+			self.item_selected = button_widget_content.item
+			self.item_selected_is_equipped = is_equipped
+		end
+
+		self.item_selected_local = button_widget_content.item
+		Debug.select_item = nil
 	end
 
 	for i = 1, num_list_content, 1 do
@@ -2697,6 +2708,8 @@ InventoryItemsList.populate_inventory_list = function (self, ignore_scroll_reset
 
 	Profiler.start("InventoryItemsList: Create item templates")
 
+	local use_top_renderer = self.settings.use_top_renderer
+
 	for index, item in ipairs(items) do
 		local item_backend_id = item.backend_id
 		local item_rarity = item.rarity
@@ -2748,7 +2761,7 @@ InventoryItemsList.populate_inventory_list = function (self, ignore_scroll_reset
 			is_active = is_active and false
 		end
 
-		local content, style = create_inventory_item_template(true, item, item_color, equipped_item, is_new, is_active, is_locked, not disable_equipped_items, level_requirement)
+		local content, style = create_inventory_item_template(true, item, item_color, equipped_item, is_new, is_active, is_locked, not disable_equipped_items, level_requirement, use_top_renderer and self.ui_top_renderer)
 		sort_data[index] = {
 			content = content,
 			style = style

@@ -49,6 +49,8 @@ PlayerBotNavigation.update = function (self, unit, input, dt, context, t)
 end
 local SAME_DIRECTION_THRESHOLD = math.cos(math.pi/8)
 PlayerBotNavigation.move_to = function (self, target_position, callback)
+	fassert(not callback or type(callback) == "function", "Tried to pass invalid callback value to PlayerBotNavigation:move_to()")
+
 	if self._teleported then
 		print("Can't path, just teleported, need to wait for command queue to be flushed")
 
@@ -78,7 +80,7 @@ PlayerBotNavigation.move_to = function (self, target_position, callback)
 		position = Vector3(position.x, position.y, z)
 	end
 
-	GwNavAStar.start(self._astar, self._nav_world, position, target_position, self._traverse_data)
+	GwNavAStar.start_with_propagation_box(self._astar, self._nav_world, position, target_position, 30, self._traverse_data)
 
 	self._running_astar = true
 
@@ -127,7 +129,7 @@ PlayerBotNavigation._update_path = function (self, t)
 		return 
 	end
 
-	local position = Unit.local_position(self._unit, 0)
+	local position = POSITION_LOOKUP[self._unit]
 	local current_goal = path[self._path_index]:unbox()
 	local previous_goal = path[self._path_index - 1]:unbox()
 	local goal_reached = self._goal_reached(self, position, current_goal, previous_goal, t)
@@ -154,6 +156,11 @@ PlayerBotNavigation._update_path = function (self, t)
 
 	return 
 end
+local FLAT_THRESHOLD_DEFAULT = 0.05
+local TIME_UNTIL_RAMP_THRESHOLD = 0.25
+local MAX_FLAT_THRESHOLD = 0.2
+local RAMP_TIME = 0.25
+local RAMP_SPEED = (MAX_FLAT_THRESHOLD - FLAT_THRESHOLD_DEFAULT)/RAMP_TIME
 PlayerBotNavigation._goal_reached = function (self, position, goal, previous_goal, t)
 	local unit_to_goal_direction = goal - position
 	local previous_to_goal_direction = goal - previous_goal
@@ -162,14 +169,10 @@ PlayerBotNavigation._goal_reached = function (self, position, goal, previous_goa
 	local remaining = goal - position
 	local distance_z = remaining.z
 	local flat_distance = Vector3.length(Vector3.flat(remaining))
-	local flat_threshold = 0.05
-	local time_until_ramp_threshold = 0.25
-	local max_flat_threshold = 0.2
-	local ramp_time = 0.25
-	local ramp_speed = (max_flat_threshold - flat_threshold)/ramp_time
+	local flat_threshold = FLAT_THRESHOLD_DEFAULT
 
 	if self._close_to_goal_time then
-		flat_threshold = math.clamp(flat_threshold + (t - self._close_to_goal_time - time_until_ramp_threshold)*ramp_speed, flat_threshold, max_flat_threshold)
+		flat_threshold = math.clamp(flat_threshold + (t - self._close_to_goal_time - TIME_UNTIL_RAMP_THRESHOLD)*RAMP_SPEED, FLAT_THRESHOLD_DEFAULT, MAX_FLAT_THRESHOLD)
 	end
 
 	local at_goal = flat_distance < flat_threshold and -0.35 < distance_z and distance_z < 0.5
@@ -177,7 +180,7 @@ PlayerBotNavigation._goal_reached = function (self, position, goal, previous_goa
 
 	if goal_reached then
 		self._close_to_goal_time = nil
-	elseif flat_distance < max_flat_threshold and not self._close_to_goal_time then
+	elseif flat_distance < MAX_FLAT_THRESHOLD and not self._close_to_goal_time then
 		self._close_to_goal_time = t
 	end
 
@@ -196,6 +199,19 @@ PlayerBotNavigation.current_goal = function (self)
 
 	return 
 end
+PlayerBotNavigation.is_following_last_goal = function (self)
+	if self._final_goal_reached then
+		return false
+	elseif self._path then
+		return self._path_index == #self._path
+	elseif self._last_path then
+		return self._last_path_index == #self._last_path
+	else
+		return false
+	end
+
+	return 
+end
 PlayerBotNavigation.destination_reached = function (self)
 	return self._final_goal_reached
 end
@@ -209,11 +225,12 @@ PlayerBotNavigation._update_astar = function (self, t)
 
 			fassert(0 < num_nodes, "Number of nodes in returned path is not greater than 0.")
 
-			local last_node_pos = GwNavAStar.node_at_index(astar, num_nodes)
-			local found_nav_mesh, z = GwNavQueries.triangle_from_position(self._nav_world, last_node_pos, 0.3, 0.3, self._traverse_data)
+			local path_last_node_pos = GwNavAStar.node_at_index(astar, num_nodes)
+			local found_nav_mesh, z = GwNavQueries.triangle_from_position(self._nav_world, path_last_node_pos, 0.3, 0.3, self._traverse_data)
+			local last_node_pos = nil
 
 			if found_nav_mesh then
-				last_node_pos = Vector3Box(last_node_pos.x, last_node_pos.y, z)
+				last_node_pos = Vector3Box(path_last_node_pos.x, path_last_node_pos.y, z)
 			else
 				last_node_pos = nil
 			end
@@ -221,7 +238,7 @@ PlayerBotNavigation._update_astar = function (self, t)
 			if not found_nav_mesh and num_nodes <= 2 then
 				self._path_failed(self, t)
 			else
-				self._path = {}
+				self._path = Script.new_array(num_nodes)
 
 				self._path_successful(self, t)
 
@@ -259,9 +276,10 @@ PlayerBotNavigation._path_failed = function (self, t)
 	end
 
 	self._successive_failed_paths = self._successive_failed_paths + 1
+	local cb = self._path_callback
 
-	if self._path_callback then
-		self._path_callback(false, self._destination:unbox())
+	if cb then
+		cb(false, self._destination:unbox())
 	end
 
 	return 
@@ -273,9 +291,10 @@ PlayerBotNavigation._path_successful = function (self, t)
 
 	self._last_successful_path = t
 	self._successive_failed_paths = 0
+	local cb = self._path_callback
 
-	if self._path_callback then
-		self._path_callback(true, self._destination:unbox())
+	if cb then
+		cb(true, self._destination:unbox())
 	end
 
 	return 

@@ -12,9 +12,11 @@ LimitedItemTrackSpawnerTemplates = {
 			local network_rotation = AiAnimUtils.rotation_network_scale(rotation, true)
 			local network_velocity = AiAnimUtils.velocity_network_scale(Vector3(0, 0, 0), true)
 			local network_angular_velocity = network_velocity
-			local item_name = "explosive_barrel_objective"
-			local unit_name = "units/weapons/player/pup_explosive_barrel/pup_gun_powder_barrel_01"
-			local unit_template_name = "explosive_pickup_projectile_unit_limited"
+			local pickup_name = Unit.get_data(spawner_unit, "pickup_name")
+			pickup_name = (pickup_name ~= "" and pickup_name) or "explosive_barrel_objective"
+			local pickup_data = Pickups.level_events[pickup_name]
+			local unit_name = pickup_data.unit_name
+			local unit_template_name = pickup_data.unit_template_name
 			local extension_init_data = {
 				projectile_locomotion_system = {
 					network_position = network_position,
@@ -24,7 +26,7 @@ LimitedItemTrackSpawnerTemplates = {
 				},
 				pickup_system = {
 					spawn_type = "limited",
-					pickup_name = "explosive_barrel_objective"
+					pickup_name = pickup_name
 				},
 				limited_item_track_system = {
 					id = spawn_data.id,
@@ -32,7 +34,7 @@ LimitedItemTrackSpawnerTemplates = {
 				},
 				death_system = {
 					in_hand = false,
-					item_name = item_name
+					item_name = pickup_name
 				}
 			}
 			local modified_position = AiAnimUtils.position_network_scale(network_position)

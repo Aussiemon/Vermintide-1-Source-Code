@@ -10,6 +10,7 @@ local drag_colors = {
 ForgeMeltUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
+	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
@@ -69,7 +70,7 @@ ForgeMeltUI.create_ui_elements = function (self)
 	eye_glow_right_widget.style.texture_id.color[1] = 0
 	progress_bar_glow_widget.style.texture_id.color[1] = 0
 
-	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
+	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	return 
 end
@@ -151,22 +152,22 @@ ForgeMeltUI.toggle_melt_mode = function (self, enabled, force_shutdown)
 	return 
 end
 ForgeMeltUI.draw = function (self, dt)
-	local ui_top_renderer = self.ui_top_renderer
+	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("forge_view")
 	local gamepad_active = Managers.input:get_device("gamepad").active()
 
-	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	local num_widgets = #self.widgets
 
 	for i = 1, num_widgets, 1 do
 		local widget = self.widgets[i]
 
-		UIRenderer.draw_widget(ui_top_renderer, widget)
+		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
-	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.end_pass(ui_renderer)
 
 	return 
 end

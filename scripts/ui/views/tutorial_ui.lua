@@ -1,5 +1,6 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
+require("foundation/scripts/util/local_require")
 require("scripts/ui/ui_animator")
 
 local definitions = local_require("scripts/ui/views/tutorial_ui_definitions")
@@ -15,7 +16,7 @@ local INFO_SLATES = {
 	tutorial = 4,
 	mission_goal = 1
 }
-local RELOAD_TUTORIAL_UI = true
+local RELOAD_TUTORIAL_UI = false
 TutorialUI = class(TutorialUI)
 
 local function convert_current_screen_resolution_position_to_target_resolution(pos_width, pos_height, resolution_width, resolution_height)
@@ -47,6 +48,7 @@ TutorialUI.init = function (self, ingame_ui_context)
 	self.entry_id_count = 0
 	self.health_bars = {}
 	self.objective_tooltip_widget_holders = {}
+	self._objective_tooltip_position_lookup = {}
 	self.queued_info_slate_entries = {
 		mission_goal = {},
 		mission_objective = {},
@@ -198,7 +200,27 @@ TutorialUI.button_texture_data_by_input_action = function (self, input_action)
 
 	return 
 end
+TutorialUI.get_player_first_person_extension = function (self)
+	if self._first_person_extension then
+		return self._first_person_extension
+	else
+		local peer_id = self.peer_id
+		local my_player = self.player_manager:player_from_peer_id(peer_id)
+		local player_unit = my_player.player_unit
+
+		if player_unit and ScriptUnit.has_extension(player_unit, "first_person_system") then
+			local first_person_extension = ScriptUnit.extension(player_unit, "first_person_system")
+			self._first_person_extension = first_person_extension
+
+			return first_person_extension
+		end
+	end
+
+	return 
+end
 TutorialUI.update = function (self, dt, t)
+	self._first_person_extension = nil
+
 	Profiler.start("TutorialUI")
 
 	if RELOAD_TUTORIAL_UI then
@@ -304,27 +326,32 @@ TutorialUI.update = function (self, dt, t)
 		end
 
 		Profiler.stop()
-		Profiler.start("objective_tooltip_widgets")
 
-		local objective_tooltip_widget_holders = self.objective_tooltip_widget_holders
+		local first_person_extension = self.get_player_first_person_extension(self)
 
-		for i = 1, definitions.NUMBER_OF_OBJECTIVE_TOOLTIPS, 1 do
-			local widget_holder = objective_tooltip_widget_holders[i]
+		if first_person_extension.first_person_mode then
+			Profiler.start("objective_tooltip_widgets")
 
-			if widget_holder.updated then
-				UIRenderer.draw_widget(ui_renderer, widget_holder.widget)
+			local objective_tooltip_widget_holders = self.objective_tooltip_widget_holders
+
+			for i = 1, definitions.NUMBER_OF_OBJECTIVE_TOOLTIPS, 1 do
+				local widget_holder = objective_tooltip_widget_holders[i]
+
+				if widget_holder.updated then
+					UIRenderer.draw_widget(ui_renderer, widget_holder.widget)
+				end
 			end
-		end
 
-		Profiler.stop()
+			Profiler.stop()
 
-		local health_bars = self.health_bars
+			local health_bars = self.health_bars
 
-		for i = 1, definitions.NUMBER_OF_HEALTH_BARS, 1 do
-			local health_bar = health_bars[i]
+			for i = 1, definitions.NUMBER_OF_HEALTH_BARS, 1 do
+				local health_bar = health_bars[i]
 
-			if health_bar then
-				UIRenderer.draw_widget(ui_renderer, health_bar.widget)
+				if health_bar then
+					UIRenderer.draw_widget(ui_renderer, health_bar.widget)
+				end
 			end
 		end
 
@@ -486,7 +513,7 @@ TutorialUI.update_mission_tooltip = function (self, tooltip_tutorial, player_uni
 		end
 
 		local world_position = tooltip_tutorial.world_position:unbox()
-		local first_person_extension = ScriptUnit.extension(player_unit, "first_person_system")
+		local first_person_extension = self.get_player_first_person_extension(self)
 		local my_position = Vector3.copy(POSITION_LOOKUP[player_unit])
 		local my_rotation = first_person_extension.current_rotation(first_person_extension)
 		local my_direction = Quaternion.forward(my_rotation)
@@ -598,6 +625,8 @@ TutorialUI.update_objective_tooltip = function (self, objective_tooltips, player
 	local new_units_n = 0
 	local units_n = math.min(objective_units_n, NUMBER_OF_OBJECTIVE_TOOLTIPS)
 
+	table.clear(self._objective_tooltip_position_lookup)
+
 	for i = 1, units_n, 1 do
 		local objective_unit = objective_units[i]
 
@@ -681,6 +710,31 @@ TutorialUI.setup_objective_tooltip_widget = function (self, widget_holder, objec
 
 	return 
 end
+TutorialUI._floating_icon_overlap = function (self, widget_holder, x, y, scale)
+	local lookup = self._objective_tooltip_position_lookup
+	local overlap = nil
+
+	for _, pos in pairs(lookup) do
+		if ((pos[1] <= x and x <= pos[1] + scale*200) or (x <= pos[1] and pos[1] <= x + scale*200)) and ((pos[2] <= y and y <= pos[2] + definitions.FLOATING_ICON_SIZE[2]*scale) or (y <= pos[2] and pos[2] <= y + definitions.FLOATING_ICON_SIZE[2]*scale)) then
+			if y < pos[2] then
+				overlap = -definitions.FLOATING_ICON_SIZE[2]*0.75*scale
+
+				break
+			end
+
+			overlap = definitions.FLOATING_ICON_SIZE[2]*0.75*scale
+
+			break
+		end
+	end
+
+	lookup[widget_holder.scenegraph_id] = {
+		x,
+		y
+	}
+
+	return overlap
+end
 local objective_tooltip_settings = UISettings.tutorial.objective_tooltip
 TutorialUI.update_objective_tooltip_widget = function (self, widget_holder, player_unit, dt)
 	local viewport_name = "player_1"
@@ -700,7 +754,7 @@ TutorialUI.update_objective_tooltip_widget = function (self, widget_holder, play
 	local objective_unit = widget_holder.unit
 	local objective_unit_position = Unit.world_position(objective_unit, 0) + Vector3.up()
 	local player_position = Vector3.copy(POSITION_LOOKUP[player_unit])
-	local first_person_extension = ScriptUnit.extension(player_unit, "first_person_system")
+	local first_person_extension = self.get_player_first_person_extension(self)
 	local player_rotation = first_person_extension.current_rotation(first_person_extension)
 	local player_direction_forward = Quaternion.forward(player_rotation)
 	player_direction_forward = Vector3.normalize(Vector3.flat(player_direction_forward))
@@ -748,14 +802,32 @@ TutorialUI.update_objective_tooltip_widget = function (self, widget_holder, play
 	elseif use_screen_position then
 		local current_size = ui_scenegraph[widget_holder.scenegraph_icon].size[1]
 		local original_size = definitions.FLOATING_ICON_SIZE[1]
-		local new_icon_size = self.get_icon_size(self, objective_unit_position, player_position, current_size, original_size, objective_tooltip_settings)
+		local new_icon_size, new_icon_scale = self.get_icon_size(self, objective_unit_position, player_position, current_size, original_size, objective_tooltip_settings)
 		ui_scenegraph.tooltip_mission_icon.size[1] = new_icon_size
 		ui_scenegraph.tooltip_mission_icon.size[2] = new_icon_size
+		widget.style.texture_id.size[1] = new_icon_size
+		widget.style.texture_id.size[2] = new_icon_size
+		widget.style.texture_id.offset[2] = new_icon_size*(new_icon_scale - 1)
+		local font_size = math.lerp(widget_holder.current_font_size or 30, new_icon_scale*30, 0.2)
+		widget.style.text.font_size = font_size
+		ui_scenegraph[widget_holder.scenegraph_icon].size[1] = new_icon_size
+		widget_holder.current_font_size = font_size
+		local overlap = self._floating_icon_overlap(self, widget_holder, x, y, new_icon_scale)
+
+		if overlap then
+			y = y + overlap
+			widget_holder.lerp_speed = 0.6
+		end
 	else
 		local original_size = definitions.FLOATING_ICON_SIZE[1]
 		local size = ui_scenegraph[widget_holder.scenegraph_icon].size
 		size[1] = original_size
 		size[2] = original_size
+		widget.style.texture_id.size[1] = original_size
+		widget.style.texture_id.size[2] = original_size
+		widget.style.texture_id.offset[2] = 0
+		widget.style.text.font_size = 30
+		ui_scenegraph[widget_holder.scenegraph_icon].size[1] = original_size
 	end
 
 	local used_screen_position_last_frame = widget_holder.use_screen_position
@@ -892,22 +964,24 @@ end
 TutorialUI.get_icon_size = function (self, position, player_position, current_size, original_size, tooltip_settings)
 	local size = original_size
 	local start_scale_distance = tooltip_settings.start_scale_distance
-	local end_scale_distance = tooltip_settings.start_scale_distance
+	local end_scale_distance = tooltip_settings.end_scale_distance
 	local distance = Vector3.distance(position, player_position)
+	local icon_scale = 1
 
 	if start_scale_distance < distance then
-		local icon_scale = self.icon_scale_by_distance(self, distance - start_scale_distance, end_scale_distance)
+		icon_scale = self.icon_scale_by_distance(self, distance - start_scale_distance, end_scale_distance)
 		size = math.lerp(current_size, icon_scale*original_size, 0.2)
 	end
 
-	return size
+	return size, icon_scale
 end
 TutorialUI.icon_scale_by_distance = function (self, current_distance, max_distance)
 	local distance = math.min(max_distance, current_distance)
 	distance = math.max(0, distance)
 	local min_scale = UISettings.tutorial.mission_tooltip.minimum_icon_scale
+	local scale = math.max(min_scale, distance/max_distance - 1)
 
-	return math.max(min_scale, distance/max_distance - 1)
+	return scale
 end
 TutorialUI.distance_between_screen_positions = function (self, position_a, position_b)
 	local width = position_a[1] - position_b[1]
@@ -924,7 +998,7 @@ TutorialUI.distance_between_screen_positions = function (self, position_a, posit
 		height
 	}
 end
-TutorialUI.convert_world_to_screen_position = function (self, camera, world_position, camera_direction, camera_dot_product)
+TutorialUI.convert_world_to_screen_position = function (self, camera, world_position)
 	if camera then
 		local world_to_screen = Camera.world_to_screen(camera, world_position)
 		local dir = world_position - Camera.world_position(camera)
@@ -1380,18 +1454,23 @@ end
 TutorialUI.add_health_bar = function (self, unit)
 	for i = 1, definitions.NUMBER_OF_HEALTH_BARS, 1 do
 		if self.health_bars[i] == nil then
+			local color = (Unit.has_data(unit, "health_bar_color") and Unit.get_data(unit, "health_bar_color")) or "red"
 			local widget_definition = definitions.health_bar_definitions[i]
+			local widget = UIWidget.init(widget_definition)
+			widget.style.texture_fg.color = Colors.get_table(color)
 			self.health_bars[i] = {
-				visible = true,
-				health_percent = 1,
+				init_position = true,
 				visible_time = 0,
+				health_percent = 1,
+				visible = true,
 				damage_time = 0,
 				active = false,
 				unit = unit,
 				health_extension = ScriptUnit.extension(unit, "health_system"),
 				damage_extension = ScriptUnit.extension(unit, "damage_system"),
-				widget = UIWidget.init(widget_definition),
-				scenegraph_definition = self.ui_scenegraph[widget_definition.scenegraph_id]
+				widget = widget,
+				scenegraph_definition = self.ui_scenegraph[widget_definition.scenegraph_id],
+				previous_position = {}
 			}
 
 			break
@@ -1416,7 +1495,7 @@ end
 TutorialUI.update_health_bars = function (self, dt, player_unit)
 	Profiler.start("healthbars")
 
-	local first_person_extension = ScriptUnit.extension(player_unit, "first_person_system")
+	local first_person_extension = self.get_player_first_person_extension(self)
 	local camera_position = first_person_extension.current_position(first_person_extension)
 	local camera_rotation = first_person_extension.current_rotation(first_person_extension)
 	local camera_forward = Quaternion.forward(camera_rotation)
@@ -1475,11 +1554,34 @@ TutorialUI.update_health_bars = function (self, dt, player_unit)
 				local x_pos, y_pos = self.convert_world_to_screen_position(self, camera, world_position)
 				local scenegraph_definition = health_bar.scenegraph_definition
 				local ui_local_position = scenegraph_definition.local_position
-				ui_local_position[1] = math_floor(x_pos*inverse_scale)
-				ui_local_position[2] = math_floor(y_pos*inverse_scale)
+				local x_pos_scaled = math.round(x_pos*inverse_scale)
+				local y_pos_scaled = math.round(y_pos*inverse_scale)
+
+				if health_bar.init_position then
+					ui_local_position[1] = x_pos_scaled
+					ui_local_position[2] = y_pos_scaled
+					health_bar.init_position = false
+				else
+					local snap_range = 2
+					local previous_position = health_bar.previous_position
+
+					if math.abs(previous_position.x - x_pos_scaled) < snap_range then
+						x_pos_scaled = previous_position.x
+					end
+
+					if math.abs(previous_position.y - y_pos_scaled) < snap_range then
+						y_pos_scaled = previous_position.y
+					end
+
+					ui_local_position[1] = math.lerp(ui_local_position[1], x_pos_scaled, 0.9)
+					ui_local_position[2] = math.lerp(ui_local_position[2], y_pos_scaled, 0.9)
+				end
+
+				health_bar.previous_position.x = x_pos_scaled
+				health_bar.previous_position.y = y_pos_scaled
 				local size = scenegraph_definition.size
 				local style = health_bar.widget.style
-				style.texture_filler.size[1] = size[1]*health_percent_current
+				style.texture_fg.size[1] = size[1]*health_percent_current
 				health_bar.widget.content.visible = true
 			else
 				health_bar.widget.content.visible = false

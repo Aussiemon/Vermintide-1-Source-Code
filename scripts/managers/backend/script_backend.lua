@@ -115,7 +115,11 @@ ScriptBackend.update = function (self)
 		self._check_current_commit(self)
 	end
 
+	Profiler.start("Backend update")
+
 	local result = Backend.update()
+
+	Profiler.stop()
 
 	return result
 end
@@ -270,7 +274,7 @@ ScriptBackend._check_current_commit = function (self)
 	if status ~= Backend.COMMIT_WAITING then
 		local commit_data = self._commits[self._commit_current_id]
 
-		print(string.format("commit status %d:%d Result: %d", self._commit_current_id, commit_data.id, status))
+		print("commit status", status, commit_data.id)
 
 		self._commit_current_id = nil
 

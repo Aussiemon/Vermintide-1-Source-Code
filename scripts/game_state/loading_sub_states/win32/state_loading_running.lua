@@ -72,6 +72,10 @@ StateLoadingRunning.update = function (self, dt)
 			self.parent:setup_loading_view(level_key)
 		end
 
+		if not self.parent:menu_assets_setup_done() then
+			self.parent:setup_menu_assets()
+		end
+
 		self._level_transition_handler:load_next_level()
 	end
 

@@ -12,10 +12,11 @@ local CHASE_DEACCELERATION_DISTANCE = 1
 local MATCH_TARGET_SPEED_INTERPOLATION_FACTOR = 0.2
 local RUN_SPEED_INTERPOLATION_FACTOR = 0.15
 local POSITION_LOOKUP = POSITION_LOOKUP
+local Vector3_length = Vector3.length
 BTClanRatFollowAction.init = function (self, ...)
 	BTClanRatFollowAction.super.init(self, ...)
 
-	self.time_of_last_running_dialogue = 0
+	self.next_time_to_trigger_running_dialogue = 0
 	self.triggered_units = {}
 
 	return 
@@ -107,8 +108,11 @@ BTClanRatFollowAction.leave = function (self, unit, blackboard, t)
 
 	return 
 end
+local Unit_alive = Unit.alive
 BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
-	if not Unit.alive(blackboard.target_unit) then
+	Profiler.start("BTClanRatFollowAction")
+
+	if not Unit_alive(blackboard.target_unit) then
 		Profiler.stop()
 
 		return "done"
@@ -124,10 +128,14 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 	end
 
 	if blackboard.walking then
+		Profiler.start("follow-walk")
 		self._update_walking(self, unit, blackboard, dt, t)
+		Profiler.stop("follow-walk")
 	end
 
 	if not blackboard.walking and not blackboard.start_anim_done then
+		Profiler.start("follow-start-anim")
+
 		if not blackboard.start_anim_locked then
 			self.start_move_animation(self, unit, blackboard)
 
@@ -150,10 +158,14 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 
 			AiAnimUtils.set_move_animation_merge(unit, blackboard)
 		end
+
+		Profiler.stop("follow-start-anim")
 	else
 		self.follow(self, unit, blackboard, t, dt)
 		self.do_dialogue(self, unit, blackboard, t, dt)
 	end
+
+	Profiler.start("reach-dest")
 
 	local should_evaluate = nil
 	local navigation_extension = blackboard.navigation_extension
@@ -163,6 +175,9 @@ BTClanRatFollowAction.run = function (self, unit, blackboard, t, dt)
 		should_evaluate = "evaluate"
 		blackboard.time_to_next_evaluate = (prioritized_update and t + 0.1) or t + 0.5
 	end
+
+	Profiler.stop("reach-dest")
+	Profiler.stop()
 
 	return "running", should_evaluate
 end
@@ -174,7 +189,7 @@ BTClanRatFollowAction._update_walking = function (self, unit, blackboard, dt, t)
 	locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
 
 	local self_pos = POSITION_LOOKUP[unit]
-	local target_locomotion = ScriptUnit.has_extension(target, "locomotion_system") and ScriptUnit.extension(target, "locomotion_system")
+	local target_locomotion = ScriptUnit.has_extension(target, "locomotion_system")
 	local velocity_away = target_locomotion and target_locomotion.average_velocity and Vector3.dot(target_locomotion.average_velocity(target_locomotion), Vector3.normalize(POSITION_LOOKUP[target] - self_pos))
 
 	if not self._should_walk(self, blackboard.navigation_extension:destination(), self_pos, LEAVE_WALK_DISTANCE_SQ, rot) or blackboard.walk_timer < t or (velocity_away and WALK_MAX_TARGET_VELOCITY < velocity_away) then
@@ -215,22 +230,16 @@ BTClanRatFollowAction._calculate_walk_animation = function (self, right_vector, 
 	return anim
 end
 BTClanRatFollowAction.follow = function (self, unit, blackboard, t, dt)
+	Profiler.start("follow-follow")
+
 	local breed = blackboard.breed
 	local target_unit = blackboard.target_unit
 	local target_distance = blackboard.target_dist
 	local weapon_reach = breed.weapon_reach or 2
-	local interpolation_factor = 0
-	local wanted_speed = 0
-	local sign = 0
 	local new_speed = 0
-	local target_locomotion = ScriptUnit.has_extension(target_unit, "locomotion_system") and ScriptUnit.extension(target_unit, "locomotion_system")
-	local target_velocity = (target_locomotion and target_locomotion.average_velocity and target_locomotion.average_velocity(target_locomotion)) or Vector3.zero()
-	local target_position = POSITION_LOOKUP[target_unit]
+	local target_locomotion = ScriptUnit.has_extension(target_unit, "locomotion_system")
 	local locomotion_extension = blackboard.locomotion_extension
 	local current_speed = Vector3.length(locomotion_extension.current_velocity(locomotion_extension))
-	local current_position = POSITION_LOOKUP[unit]
-	local to_target_direction = Vector3.normalize(target_position - current_position)
-	local move_dot_away = Vector3.dot(Vector3.normalize(target_velocity), to_target_direction)
 
 	if blackboard.walking then
 		blackboard.deacceleration_factor = nil
@@ -238,6 +247,7 @@ BTClanRatFollowAction.follow = function (self, unit, blackboard, t, dt)
 	elseif target_distance < weapon_reach*2 then
 		blackboard.deacceleration_factor = nil
 		local lerp_value = math.max((target_distance - weapon_reach)/weapon_reach, 0)
+		local target_velocity = (target_locomotion and target_locomotion.average_velocity and target_locomotion.average_velocity(target_locomotion)) or Vector3.zero()
 		local target_speed = Vector3.length(target_velocity) or 0
 		local wanted_speed = (breed.walk_speed < target_speed and target_speed) or breed.walk_speed
 		new_speed = math.lerp(wanted_speed, breed.run_speed, lerp_value)
@@ -251,9 +261,9 @@ BTClanRatFollowAction.follow = function (self, unit, blackboard, t, dt)
 		new_speed = blackboard.deacceleration_factor*deaccelearation_distance_left + breed.run_speed
 	else
 		blackboard.deacceleration_factor = nil
-		interpolation_factor = RUN_SPEED_INTERPOLATION_FACTOR
-		wanted_speed = self._calculate_run_speed(self, unit, target_unit, blackboard, target_locomotion)
-		sign = math.sign(wanted_speed - current_speed)
+		local interpolation_factor = RUN_SPEED_INTERPOLATION_FACTOR
+		local wanted_speed = self._calculate_run_speed(self, unit, target_unit, blackboard, target_locomotion)
+		local sign = math.sign(wanted_speed - current_speed)
 
 		if 0 < sign and current_speed < breed.run_speed and weapon_reach + 0.5 < target_distance and not breed.run_speed then
 		end
@@ -270,6 +280,8 @@ BTClanRatFollowAction.follow = function (self, unit, blackboard, t, dt)
 
 		AiUtils.alert_nearby_friends_of_enemy(unit, blackboard.group_blackboard.broadphase, target_unit, 3)
 	end
+
+	Profiler.stop("follow-follow")
 
 	return 
 end
@@ -337,17 +349,15 @@ BTClanRatFollowAction.set_start_move_animation_lock = function (self, unit, shou
 
 	return 
 end
+local nearby_units = {}
 BTClanRatFollowAction.do_dialogue = function (self, unit, blackboard, t, dt)
-	local next_trigger_time = self.time_of_last_running_dialogue + 1
-
-	if next_trigger_time < t and self.triggered_units[unit] == nil then
+	if self.next_time_to_trigger_running_dialogue < t and self.triggered_units[unit] == nil then
 		local distance = math.ceil(Vector3.distance(POSITION_LOOKUP[unit], POSITION_LOOKUP[blackboard.target_unit]))
 
 		if distance < 15 then
 			local position = POSITION_LOOKUP[unit]
-			local nearby_units = {}
 			local num_nearby_units = AiUtils.broadphase_query(position, 10, nearby_units)
-			self.time_of_last_running_dialogue = t
+			self.next_time_to_trigger_running_dialogue = t + 1
 			self.triggered_units[unit] = true
 			local dialogue_input = ScriptUnit.extension_input(unit, "dialogue_system")
 			local event_data = FrameTable.alloc_table()

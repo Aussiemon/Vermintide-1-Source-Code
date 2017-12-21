@@ -1,4 +1,4 @@
-local ai_locomotion_name = (GameSettingsDevelopment.use_engine_optimized_ai_locomotion and "AILocomotionExtensionC") or "AILocomotionExtension"
+local ai_locomotion_name = (_G.GameSettingsDevelopment and GameSettingsDevelopment.use_engine_optimized_ai_locomotion and "AILocomotionExtensionC") or "AILocomotionExtension"
 local unit_templates = {
 	player_unit_3rd = {
 		go_type = "player_unit",

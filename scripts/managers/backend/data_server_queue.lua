@@ -27,7 +27,25 @@ BEQueueItem.poll_backend = function (self, caller)
 	local items, parameters, error_message = BackendSession.poll_item_server()
 
 	if items then
-		if error_message then
+		if error_message or parameters.queue_id ~= self._queue_id then
+			local error_string = "Backend data server error"
+			error_string = error_string .. "\n script: " .. self._script_name
+			error_string = error_string .. "\n error_message.details : " .. tostring(error_message.details)
+			error_string = error_string .. "\n error_message.reason : " .. tostring(error_message.reason)
+			error_string = error_string .. "\n queue_id: " .. tostring(self._queue_id) .. " (expected)"
+			error_string = error_string .. "\n queue_id: " .. tostring(parameters.queue_id) .. " (actual)"
+			error_string = error_string .. "\n parameters:"
+			local num_parameters = #self._data
+
+			if 0 < num_parameters then
+				for ii = 1, 2, num_parameters do
+					local key = self._data[ii]
+					local value = self._data[ii + 1]
+					error_string = error_string .. "\n  " .. tostring(key) .. ": " .. tostring(value)
+				end
+			end
+
+			ScriptApplication.send_to_crashify("DataServerQueue", error_string)
 		end
 
 		self._is_done = true
@@ -147,6 +165,8 @@ DataServerQueue.unregister_executor = function (self, executor_name)
 	return 
 end
 DataServerQueue.update = function (self)
+	Profiler.start("DataServerQueue update")
+
 	local current = self._queue[1]
 
 	if current then
@@ -168,6 +188,8 @@ DataServerQueue.update = function (self)
 			end
 		end
 	end
+
+	Profiler.stop()
 
 	return 
 end

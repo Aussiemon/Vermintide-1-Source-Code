@@ -805,7 +805,7 @@ MatchmakingManager.cancel_matchmaking = function (self)
 		local player = player_manager.local_player(player_manager, 1)
 		local started_matchmaking_t = self.started_matchmaking_t
 		local time_manager = Managers.time
-		local t = time_manager.time(time_manager, "game")
+		local t = time_manager.time(time_manager, "game") or started_matchmaking_t
 		local time_taken = t - started_matchmaking_t
 		local connection_state = "cancelled"
 		local telemetry_manager = Managers.telemetry
@@ -868,7 +868,7 @@ MatchmakingManager.rpc_set_matchmaking = function (self, sender, client_cookie, 
 			if MatchmakingSettings.restart_search_after_host_cancel and game_search_data then
 				local t = Managers.time:time("main")
 
-				self.find_game(self, game_search_data.level_key, game_search_data.difficulty, false, game_search_data.quick_game, t)
+				self.find_game(self, game_search_data.level_key, game_search_data.difficulty, false, game_search_data.quick_game, game_search_data.game_mode, game_search_data.area, t)
 			else
 				self._change_state(self, MatchmakingStateIdle, self.params, self.state_context)
 			end

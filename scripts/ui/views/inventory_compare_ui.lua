@@ -43,7 +43,7 @@ local fake_input_service = {
 }
 InventoryCompareUI.init = function (self, parent, window_position, animation_definitions, ingame_ui_context, input_service_name)
 	self.parent = parent
-	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
+	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
 	self.world_manager = ingame_ui_context.world_manager
 	self.input_service_name = input_service_name
@@ -122,7 +122,7 @@ InventoryCompareUI.create_ui_elements = function (self)
 	self.ammo_field_widget = UIWidget.init(self.widgets_definitions.ammo_field)
 	self.description_field_widget = UIWidget.init(self.widgets_definitions.item_description_field)
 
-	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
+	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	return 
 end
@@ -220,43 +220,43 @@ InventoryCompareUI.set_scroll_amount = function (self, value)
 	return 
 end
 InventoryCompareUI.draw = function (self, dt)
-	local ui_top_renderer = self.ui_top_renderer
+	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
 	local input_service_name = self.input_service_name
 	local input_service = (self.input_blocked and fake_input_service) or input_manager.get_service(input_manager, input_service_name)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
 
-	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
-	UIRenderer.draw_widget(ui_top_renderer, self.window_title_text_widget)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.draw_widget(ui_renderer, self.window_title_text_widget)
 
 	for _, widget in ipairs(self.background_widgets) do
-		UIRenderer.draw_widget(ui_top_renderer, widget)
+		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
 	if self.item then
-		UIRenderer.draw_widget(ui_top_renderer, self.scroll_field_widget)
+		UIRenderer.draw_widget(ui_renderer, self.scroll_field_widget)
 
 		if self.draw_scrollbar then
-			UIRenderer.draw_widget(ui_top_renderer, self.scrollbar_widget)
+			UIRenderer.draw_widget(ui_renderer, self.scrollbar_widget)
 		end
 
-		UIRenderer.draw_widget(ui_top_renderer, self.item_info_widget)
-		UIRenderer.draw_widget(ui_top_renderer, self.description_field_widget)
+		UIRenderer.draw_widget(ui_renderer, self.item_info_widget)
+		UIRenderer.draw_widget(ui_renderer, self.description_field_widget)
 
 		if self.draw_attack_info then
-			UIRenderer.draw_widget(ui_top_renderer, self.light_attack_info_widget)
+			UIRenderer.draw_widget(ui_renderer, self.light_attack_info_widget)
 
 			local heavy_attack_info_widget = self.heavy_attack_info_widget
 
-			UIRenderer.draw_widget(ui_top_renderer, self.heavy_attack_info_widget)
+			UIRenderer.draw_widget(ui_renderer, self.heavy_attack_info_widget)
 
 			if self.draw_stamina then
-				UIRenderer.draw_widget(ui_top_renderer, self.stamina_field_widget)
+				UIRenderer.draw_widget(ui_renderer, self.stamina_field_widget)
 			end
 
 			if self.draw_ammo then
-				UIRenderer.draw_widget(ui_top_renderer, self.ammo_field_widget)
+				UIRenderer.draw_widget(ui_renderer, self.ammo_field_widget)
 			end
 		end
 
@@ -266,16 +266,16 @@ InventoryCompareUI.draw = function (self, dt)
 		for i = 1, number_of_traits_on_item, 1 do
 			local widget = trait_icon_widgets[i]
 
-			UIRenderer.draw_widget(ui_top_renderer, widget)
+			UIRenderer.draw_widget(ui_renderer, widget)
 		end
 
 		if 0 < number_of_traits_on_item then
-			UIRenderer.draw_widget(ui_top_renderer, self.traits_title_widget)
-			UIRenderer.draw_widget(ui_top_renderer, self.trait_background_widget)
+			UIRenderer.draw_widget(ui_renderer, self.traits_title_widget)
+			UIRenderer.draw_widget(ui_renderer, self.trait_background_widget)
 		end
 	end
 
-	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.end_pass(ui_renderer)
 
 	return 
 end
@@ -477,13 +477,13 @@ InventoryCompareUI.calculate_attack_frame_height = function (self, widget, scene
 end
 InventoryCompareUI.get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
-	local text_width, text_height, min = UIRenderer.text_size(self.ui_top_renderer, localized_text, font[1], scaled_font_size)
+	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
 InventoryCompareUI.get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
-	local lines = UIRenderer.word_wrap(self.ui_top_renderer, localized_text, font[1], scaled_font_size, text_area_width)
+	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
 	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
 
 	return text_width, text_height*#lines

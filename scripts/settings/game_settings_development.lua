@@ -35,7 +35,7 @@ GameSettingsDevelopment.debug_outlines = false
 GameSettingsDevelopment.lowest_resolution = 600
 GameSettingsDevelopment.allow_ranged_attacks_to_damage_props = false
 GameSettingsDevelopment.release_levels_only = true
-GameSettingsDevelopment.use_engine_optimized_ai_locomotion = false
+GameSettingsDevelopment.use_engine_optimized_ai_locomotion = true
 local script_data = script_data
 script_data.debug_behaviour_trees = (script_data.debug_behaviour_trees ~= nil and script_data.debug_behaviour_trees) or false
 

@@ -6,8 +6,6 @@ local LOCOMOTION_GRAVITY = 20
 local ALLOWED_MOVER_MOVE_DISTANCE = 0.5
 AILocomotionExtensionC = class(AILocomotionExtensionC)
 AILocomotionExtensionC.init = function (self, extension_init_context, unit, extension_init_data)
-	print("AILocomotionExtensionC:init", unit)
-
 	self._unit = unit
 	local blackboard = Unit.get_data(unit, "blackboard")
 	local locomotion_gravity = 20
@@ -174,14 +172,16 @@ AILocomotionExtensionC.set_movement_type = function (self, movement_type, overri
 		MoverHelper.set_disable_reason(self._unit, self._mover_state, "constrained_by_mover", true)
 	elseif movement_type == "constrained_by_mover" then
 		MoverHelper.set_disable_reason(self._unit, self._mover_state, "constrained_by_mover", false)
-	else
+	end
+
+	local kill = EngineOptimizedExtensions.ai_locomotion_set_movement_type(self._engine_extension_id, movement_types[movement_type], override_mover_move_distance)
+
+	if kill then
 		local damage_type = "forced"
 		local damage_direction = Vector3(0, 0, -1)
 
 		AiUtils.kill_unit(self._unit, nil, nil, damage_type, damage_direction)
 	end
-
-	local result = EngineOptimizedExtensions.ai_locomotion_set_movement_type(self._engine_extension_id, movement_types[movement_type], override_mover_move_distance)
 
 	return 
 end

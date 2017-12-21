@@ -182,6 +182,11 @@ ObserverUI.update_follow_player_health_bar = function (self, peer_id)
 	local player_manager = Managers.player
 	local players = player_manager.players(player_manager)
 	local player = players[peer_id]
+
+	if not player then
+		return 
+	end
+
 	local local_player_id = player.local_player_id(player)
 	local player_unit = player.player_unit
 	local health_percent, is_knocked_down, is_dead, is_wounded, is_ready_for_assisted_respawn = nil

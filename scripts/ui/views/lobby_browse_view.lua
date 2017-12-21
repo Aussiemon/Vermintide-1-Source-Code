@@ -103,14 +103,14 @@ LobbyBrowseView.init = function (self, ingame_ui_context)
 	self.difficulty_manager = Managers.state.difficulty
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
+	self.ingame_ui = ingame_ui_context.ingame_ui
 
-	input_manager.create_input_service(input_manager, "lobby_browser", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "lobby_browser", self.ingame_ui:get_ingame_menu_keymap())
 	input_manager.map_device_to_service(input_manager, "lobby_browser", "keyboard")
 	input_manager.map_device_to_service(input_manager, "lobby_browser", "mouse")
 	input_manager.map_device_to_service(input_manager, "lobby_browser", "gamepad")
 	self.create_ui_elements(self)
 
-	self.ingame_ui = ingame_ui_context.ingame_ui
 	local settings = {
 		input_service_name = "lobby_browser",
 		use_top_renderer = false,

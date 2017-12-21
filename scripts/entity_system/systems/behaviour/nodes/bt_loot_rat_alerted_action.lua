@@ -86,8 +86,8 @@ BTLootRatAlertedAction.leave = function (self, unit, blackboard, t)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 	LocomotionUtils.set_animation_rotation_scale(unit, 1)
 	ScriptUnit.extension(unit, "ai_navigation_system"):set_enabled(true)
+	AiUtils.activate_unit(blackboard)
 
-	blackboard.confirmed_player_sighting = true
 	blackboard.detection_radius = math.huge
 	blackboard.spawn_to_running = true
 	blackboard.update_timer = 0

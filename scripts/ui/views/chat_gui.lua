@@ -460,7 +460,7 @@ ChatGui._update_input = function (self, input_service, menu_input_service, dt, n
 	local block_chat_activation = self.block_chat_activation_hack < 0.2
 
 	if chat_closed then
-		if tab_hotspot.on_pressed or (input_service.get(input_service, "activate_chat_input") and not block_chat_activation) then
+		if tab_hotspot.on_pressed or ((input_service.get(input_service, "activate_chat_input") or input_service.get(input_service, "execute_chat_input")) and not block_chat_activation) then
 			if chat_enabled then
 				chat_closed = false
 				chat_close_time = nil
@@ -566,7 +566,7 @@ ChatGui._update_input = function (self, input_service, menu_input_service, dt, n
 				local keystrokes = Keyboard.keystrokes()
 				self.chat_message, self.chat_index, self.chat_mode = KeystrokeHelper.parse_strokes(self.chat_message, self.chat_index, self.chat_mode, keystrokes)
 			end
-		elseif input_service.get(input_service, "activate_chat_input") then
+		elseif input_service.get(input_service, "activate_chat_input") or input_service.get(input_service, "execute_chat_input") then
 			if chat_enabled then
 				chat_closed = false
 				chat_close_time = nil

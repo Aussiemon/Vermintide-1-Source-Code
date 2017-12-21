@@ -87,6 +87,12 @@ local settings = {
 		category = "Allround useful stuff!"
 	},
 	{
+		description = "Will enable buttons for reloading the content and give progress for selected contracts",
+		is_boolean = true,
+		setting_name = "debug_quest_view",
+		category = "Allround useful stuff!"
+	},
+	{
 		description = "Use LAN instead of Steam",
 		is_boolean = true,
 		setting_name = "use_lan_backend",
@@ -248,6 +254,15 @@ local settings = {
 		}
 	},
 	{
+		description = "ctrl+F to cycle between graphs, ctrl+G to use special function in graph. (respawn level atm)",
+		setting_name = "Show Graphs",
+		category = "Presets",
+		preset = {
+			debug_ai_pacing = true,
+			debug_player_intensity = true
+		}
+	},
+	{
 		description = "Make the player unkillable (after next respawn).",
 		is_boolean = true,
 		setting_name = "player_invincible",
@@ -262,12 +277,6 @@ Features that make player mechanics nicer to work with.
  * (requests go here...)]],
 		is_boolean = true,
 		setting_name = "player_mechanics_goodness_debug",
-		category = "Player mechanics recommended"
-	},
-	{
-		description = "rebinds dodge key to shift and fixes jumping",
-		is_boolean = true,
-		setting_name = "allow_forward_dodge",
 		category = "Player mechanics recommended"
 	},
 	{
@@ -334,12 +343,6 @@ Features that make player mechanics nicer to work with.
 		description = "Enable state logging for all state machines",
 		is_boolean = true,
 		setting_name = "debug_state_machines",
-		category = "Player mechanics"
-	},
-	{
-		description = "Enable state logging for player character state machine",
-		is_boolean = true,
-		setting_name = "debug_csm",
 		category = "Player mechanics"
 	},
 	{
@@ -4566,6 +4569,18 @@ Features that make player mechanics nicer to work with.
 		category = "UI"
 	},
 	{
+		description = "Load all menu views and textures regardless of if you are in the inn or ingame. Not turning on this will make inn-menus (forge, altar, map, etc.) unavailable from inside a level. Needs restart.",
+		is_boolean = true,
+		setting_name = "always_load_all_views",
+		category = "UI"
+	},
+	{
+		description = "If inventory is open it will cycle select items automatically",
+		is_boolean = true,
+		setting_name = "debug_cycle_select_inventory_item",
+		category = "UI"
+	},
+	{
 		description = "Disables position lookup validation. Can turn this on for extra performance.",
 		is_boolean = true,
 		setting_name = "disable_debug_position_lookup",
@@ -5174,6 +5189,12 @@ Features that make player mechanics nicer to work with.
 				}
 			}
 		}
+	},
+	{
+		description = "Performance Manager Debug",
+		is_boolean = true,
+		setting_name = "performance_debug",
+		category = "Perfhud"
 	},
 	{
 		description = "Requires restart. Disables the backend and emulates it with a local save.",

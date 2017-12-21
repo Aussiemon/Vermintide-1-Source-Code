@@ -58,16 +58,19 @@ BotActions.default = {
 		action_weight = 1
 	},
 	revive = {
-		aim_node = "j_head"
+		aim_node = "j_head",
+		use_block_interaction = true
 	},
 	use_heal_on_player = {
 		aim_node = "j_head"
 	},
 	rescue_hanging_from_hook = {
-		aim_node = "j_hips"
+		aim_node = "j_hips",
+		use_block_interaction = true
 	},
 	rescue_ledge_hanging = {
-		aim_node = "j_head"
+		aim_node = "j_head",
+		use_block_interaction = true
 	}
 }
 
@@ -81,9 +84,10 @@ end
 PlayerBots.default = {
 	walk_speed = 1.9,
 	radius = 1,
-	behavior = "witch_hunter",
+	behavior = "default",
 	run_speed = 4,
-	perception = "regular"
+	perception = "regular",
+	blackboard_allocation_size = 128
 }
 local PerceptionTypes = {
 	regular = true,

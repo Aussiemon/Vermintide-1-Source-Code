@@ -8,7 +8,7 @@ BTBotHealAction.init = function (self, ...)
 end
 BTBotHealAction.name = "BTBotHealAction"
 BTBotHealAction.enter = function (self, unit, blackboard, t)
-	local health_extension = ScriptUnit.extension(unit, "health_system")
+	local health_extension = blackboard.health_extension
 	local health_percent = health_extension.current_health_percent(health_extension)
 	blackboard.starting_health_percent = health_percent
 	blackboard.is_healing_self = true
@@ -24,7 +24,7 @@ BTBotHealAction.leave = function (self, unit, blackboard, t)
 end
 BTBotHealAction.run = function (self, unit, blackboard, t, dt)
 	if blackboard.force_use_health_pickup then
-		local health_extension = ScriptUnit.extension(unit, "health_system")
+		local health_extension = blackboard.health_extension
 		local health_percent = health_extension.current_health_percent(health_extension)
 
 		if blackboard.starting_health_percent < health_percent then

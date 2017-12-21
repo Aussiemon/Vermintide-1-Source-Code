@@ -115,13 +115,13 @@ BTConditions.is_disabled = function (blackboard)
 	return blackboard.is_knocked_down or blackboard.is_grabbed_by_pack_master or blackboard.is_pounced_down or blackboard.is_hanging_from_hook or blackboard.is_ledge_hanging
 end
 BTConditions.can_teleport = function (blackboard)
-	local self_unit = blackboard.unit
-	local follow_unit = ScriptUnit.extension(self_unit, "ai_bot_group_system").data.follow_unit
+	local follow_unit = blackboard.ai_bot_group_extension.data.follow_unit
 
 	if not follow_unit then
 		return false
 	end
 
+	local self_unit = blackboard.unit
 	local conflict_director = Managers.state.conflict
 	local self_segment = conflict_director.get_player_unit_segment(conflict_director, self_unit) or 1
 	local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
@@ -133,13 +133,13 @@ BTConditions.can_teleport = function (blackboard)
 	return true
 end
 BTConditions.cant_reach_ally = function (blackboard)
-	local self_unit = blackboard.unit
-	local follow_unit = ScriptUnit.extension(self_unit, "ai_bot_group_system").data.follow_unit
+	local follow_unit = blackboard.ai_bot_group_extension.data.follow_unit
 
 	if not follow_unit then
 		return false
 	end
 
+	local self_unit = blackboard.unit
 	local conflict_director = Managers.state.conflict
 	local self_segment = conflict_director.get_player_unit_segment(conflict_director, self_unit)
 	local target_segment = conflict_director.get_player_unit_segment(conflict_director, follow_unit)
@@ -148,7 +148,7 @@ BTConditions.cant_reach_ally = function (blackboard)
 		return false
 	end
 
-	local nav_ext = ScriptUnit.extension(self_unit, "ai_navigation_system")
+	local nav_ext = blackboard.navigation_extension
 	local fails, last_success = nav_ext.successive_failed_paths(nav_ext)
 	local t = Managers.time:time("game")
 	local is_backwards = target_segment < self_segment
@@ -177,7 +177,7 @@ BTConditions.bot_in_melee_range = function (blackboard)
 	end
 
 	local self_unit = blackboard.unit
-	local wielded_slot = ScriptUnit.extension(self_unit, "inventory_system"):equipment().wielded_slot
+	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
 	local melee_range = nil
 
 	if blackboard.urgent_target_enemy == target_unit or blackboard.opportunity_target_enemy == target_unit or Vector3.is_valid(blackboard.taking_cover.cover_position:unbox()) then
@@ -214,19 +214,12 @@ BTConditions.has_priority_or_opportunity_target = function (blackboard)
 
 	return result
 end
-BTConditions.is_slot_1_not_wielded = function (blackboard)
-	local self_unit = blackboard.unit
-	local wielded_slot = ScriptUnit.extension(self_unit, "inventory_system"):equipment().wielded_slot
-
-	return wielded_slot ~= "slot_melee"
-end
 BTConditions.has_target_and_ammo_greater_than = function (blackboard, args)
 	if not unit_alive(blackboard.target_unit) then
 		return false
 	end
 
-	local self_unit = blackboard.unit
-	local inventory_ext = ScriptUnit.extension(self_unit, "inventory_system")
+	local inventory_ext = blackboard.inventory_extension
 	local current, max = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
 	local ammo_ok = not current or args.ammo_percentage < current/max
 	local current_oc, max_oc = inventory_ext.current_overcharge_status(inventory_ext, "slot_ranged")
@@ -237,12 +230,12 @@ BTConditions.has_target_and_ammo_greater_than = function (blackboard, args)
 
 	return ammo_ok and overcharge_ok and not obstructed
 end
-BTConditions.can_loot_ammo = function (blackboard, args)
+BTConditions.can_loot_ammo = function (blackboard)
 	return blackboard.ammo_pickup and blackboard.needs_ammo and blackboard.ammo_dist < 2.5 and blackboard.ammo_pickup == blackboard.interaction_unit
 end
 BTConditions.bot_should_heal = function (blackboard)
 	local self_unit = blackboard.unit
-	local inventory_ext = ScriptUnit.extension(self_unit, "inventory_system")
+	local inventory_ext = blackboard.inventory_extension
 	local health_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
 	local template = health_slot_data and inventory_ext.get_item_template(inventory_ext, health_slot_data)
 	local can_heal_self = template and template.can_heal_self
@@ -251,18 +244,18 @@ BTConditions.bot_should_heal = function (blackboard)
 		return false
 	end
 
-	local current_health_percent = ScriptUnit.extension(self_unit, "health_system"):current_health_percent()
+	local current_health_percent = blackboard.health_extension:current_health_percent()
 	local hurt = current_health_percent <= template.bot_heal_threshold
 	local target_unit = blackboard.target_unit
 	local is_safe = not target_unit or ((template.fast_heal or blackboard.is_healing_self) and #blackboard.proximite_enemies == 0) or (target_unit ~= blackboard.priority_target_enemy and target_unit ~= blackboard.urgent_target_enemy and target_unit ~= blackboard.proximity_target_enemy and target_unit ~= blackboard.slot_target_enemy)
-	local wounded = ScriptUnit.extension(self_unit, "status_system").wounded
+	local wounded = blackboard.status_extension.wounded
 
 	return is_safe and (hurt or blackboard.force_use_health_pickup or wounded)
 end
-BTConditions.can_loot_med = function (blackboard, args)
+BTConditions.can_loot_med = function (blackboard)
 	return blackboard.health_pickup and blackboard.allowed_to_take_health_pickup and blackboard.health_dist < 2.5 and blackboard.health_pickup == blackboard.interaction_unit
 end
-BTConditions.can_open_door = function (blackboard, args)
+BTConditions.can_open_door = function (blackboard)
 	local can_interact = false
 
 	if blackboard.interaction_type == "door" then
@@ -275,12 +268,38 @@ BTConditions.can_open_door = function (blackboard, args)
 
 	return can_interact
 end
-BTConditions.is_slot_2_not_wielded = function (blackboard)
+BTConditions.is_slot_1_not_wielded = function (blackboard)
 	local self_unit = blackboard.unit
-	local wielded_slot = ScriptUnit.extension(self_unit, "inventory_system"):equipment().wielded_slot
+	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
+
+	return wielded_slot ~= "slot_melee"
+end
+BTConditions.is_slot_2_not_wielded = function (blackboard)
+	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
 
 	return wielded_slot ~= "slot_ranged"
 end
+BTConditions.is_slot_healthkit_not_wielded = function (blackboard)
+	local wielded_slot = blackboard.inventory_extension:equipment().wielded_slot
+
+	return wielded_slot ~= "slot_healthkit"
+end
+
+local function is_there_threat_to_aid(self_unit, proximite_enemies, force_aid)
+	for _, enemy_unit in pairs(proximite_enemies) do
+		if unit_alive(enemy_unit) then
+			local enemy_blackboard = Unit.get_data(enemy_unit, "blackboard")
+			local enemy_breed = enemy_blackboard.breed
+
+			if enemy_blackboard.target_unit == self_unit and (not force_aid or enemy_breed.is_bot_aid_threat) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
 BTConditions.can_revive = function (blackboard)
 	if blackboard.target_ally_need_type == "knocked_down" then
 		local ally_distance = blackboard.ally_distance
@@ -292,12 +311,8 @@ BTConditions.can_revive = function (blackboard)
 		local self_unit = blackboard.unit
 		local health = ScriptUnit.extension(blackboard.target_ally_unit, "health_system"):current_health_percent()
 
-		if 0.2 < health then
-			for _, enemy_unit in pairs(blackboard.proximite_enemies) do
-				if unit_alive(enemy_unit) and Unit.get_data(enemy_unit, "blackboard").target_unit == self_unit then
-					return false
-				end
-			end
+		if 0.2 < health and is_there_threat_to_aid(self_unit, blackboard.proximite_enemies, blackboard.force_aid) then
+			return false
 		end
 
 		local destination_reached = blackboard.navigation_extension:destination_reached()
@@ -344,10 +359,8 @@ BTConditions.can_rescue_hanging_from_hook = function (blackboard)
 
 		local self_unit = blackboard.unit
 
-		for _, enemy_unit in pairs(blackboard.proximite_enemies) do
-			if unit_alive(enemy_unit) and Unit.get_data(enemy_unit, "blackboard").target_unit == self_unit then
-				return false
-			end
+		if is_there_threat_to_aid(self_unit, blackboard.proximite_enemies, blackboard.force_aid) then
+			return false
 		end
 
 		local destination_reached = blackboard.navigation_extension:destination_reached()
@@ -369,10 +382,8 @@ BTConditions.can_rescue_ledge_hanging = function (blackboard)
 
 		local self_unit = blackboard.unit
 
-		for _, enemy_unit in pairs(blackboard.proximite_enemies) do
-			if unit_alive(enemy_unit) and Unit.get_data(enemy_unit, "blackboard").target_unit == self_unit then
-				return false
-			end
+		if is_there_threat_to_aid(self_unit, blackboard.proximite_enemies, blackboard.force_aid) then
+			return false
 		end
 
 		local destination_reached = blackboard.navigation_extension:destination_reached()

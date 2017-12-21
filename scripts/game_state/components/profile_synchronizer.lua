@@ -406,7 +406,7 @@ ProfileSynchronizer._profile_select_inventory = function (self, profile_index, i
 		end
 
 		network_transmit.send_rpc(network_transmit, "rpc_server_set_inventory_packages", owned_peer_id, inventory_sync_id, temporary_inventory_array)
-		network_printf("[NETWORK] send_rpc(rpc_server_set_inventory_packages)", owned_peer_id, inventory_sync_id, temporary_inventory_array, "my_peer_id", my_peer_id)
+		network_printf("[NETWORK] send_rpc(rpc_server_set_inventory_packages) owned_peer_id:%s inventory_sync_id:%d my_peer_id:%s", owned_peer_id, inventory_sync_id, my_peer_id)
 	end
 
 	for peer_id, peer_table in pairs(self._loaded_peers) do
@@ -474,6 +474,9 @@ ProfileSynchronizer.rpc_client_request_mark_profile = function (self, sender, pr
 		local result = REQUEST_RESULTS.success
 
 		self._network_transmit:send_rpc("rpc_server_request_mark_profile_result", sender, profile_index, result, local_player_id)
+
+		self._reserved_profiles[profile_index] = nil
+
 		self.set_profile_peer_id(self, profile_index, sender, local_player_id)
 	end
 

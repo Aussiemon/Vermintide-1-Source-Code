@@ -30,19 +30,23 @@ SimpleHuskInventoryExtension.destroy = function (self)
 end
 SimpleHuskInventoryExtension.drop_level_event_item = function (self, slot_data)
 	local item_template = self.get_item_template(self, slot_data)
-	local weapon_unit = slot_data.right_unit_1p or slot_data.left_unit_1p
 	local action = item_template.actions.action_one.default
 	local projectile_info = action.projectile_info
-	local unit = self._unit
-	local position = Unit.world_position(unit, 0) + Vector3(0, 0, 2)
-	local proj_rotation = Quaternion.identity()
-	local velocity = Vector3(math.random(), math.random(), math.random())
-	local angular_velocity_transformed = Vector3(math.random(), math.random(), math.random())
-	local item_data = slot_data.item_data
-	local item_name = item_data.name
-	local spawn_type = "dropped"
 
-	ActionUtils.spawn_pickup_projectile(self._world, weapon_unit, projectile_info.projectile_unit_name, projectile_info.projectile_unit_template_name, action, unit, position, proj_rotation, velocity, angular_velocity_transformed, item_name, spawn_type)
+	if projectile_info.drop_on_player_destroyed then
+		local unit = self._unit
+		local weapon_unit = self._equipment.right_hand_wielded_unit_3p or self._equipment.left_hand_wielded_unit_3p
+		local position = Unit.world_position(unit, 0) + Vector3(0, 0, 2)
+		local proj_rotation = Quaternion.identity()
+		local velocity = Vector3(math.random(), math.random(), math.random())
+		local angular_velocity_transformed = Vector3(math.random(), math.random(), math.random())
+		local item_data = slot_data.item_data
+		local item_name = item_data.name
+		local spawn_type = "dropped"
+
+		ActionUtils.spawn_pickup_projectile(self._world, weapon_unit, projectile_info.projectile_unit_name, projectile_info.projectile_unit_template_name, action, unit, position, proj_rotation, velocity, angular_velocity_transformed, item_name, spawn_type)
+	end
+
 	self.destroy_slot(self, "slot_level_event")
 
 	return 

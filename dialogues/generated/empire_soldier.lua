@@ -6406,16 +6406,16 @@ return function ()
 			{
 				"faction_memory",
 				"time_since_forest_ambush_ring_bell",
-				OP.EQ,
-				0
+				OP.TIMEDIFF,
+				OP.GT,
+				20
 			}
 		},
 		on_done = {
 			{
 				"faction_memory",
 				"time_since_forest_ambush_ring_bell",
-				OP.ADD,
-				1
+				OP.TIMESET
 			}
 		}
 	})
@@ -22927,7 +22927,7 @@ return function ()
 			randomize_indexes_n = 0,
 			face_animations_n = 4,
 			database = "empire_soldier",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 4,
 			sound_events = {
 				"pes_objective_forest_ambush_ring_bell_01",

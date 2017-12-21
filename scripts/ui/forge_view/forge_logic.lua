@@ -37,7 +37,7 @@ ForgeLogic.merge_items = function (self, items_to_merge, token_type, num_tokens)
 		item_types[item_type] = true
 
 		if rarity and rarity ~= config.rarity then
-			table.dump(items, "items")
+			table.dump(items, "merge items")
 			error("Trying to fuse items of different rarity")
 		end
 
@@ -241,7 +241,7 @@ ForgeLogic.reroll_traits = function (self, backend_id, item_is_equipped)
 	local item_info = ScriptBackendItem.get_item_from_id(backend_id)
 	local item_data = ItemMasterList[item_info.key]
 
-	table.dump(item_data)
+	table.dump(item_data, "reroll traits item_data")
 
 	local rarity = item_data.rarity
 	local settings = AltarSettings.reroll_traits[rarity]
@@ -316,12 +316,16 @@ ForgeLogic.poll_select_rerolled_traits = function (self)
 
 	fassert(data, "Polling for select reroll traits when there is nothing to ask about")
 
+	local new_item_key = data.new_item_key
+
 	if data and data.state == 3 then
 		if data.accept_new then
 			local commit_returned = Managers.backend:commit_status(data.commit_id) == Backend.COMMIT_SUCCESS
 
 			if commit_returned then
-				local items = ScriptBackendItem.get_filtered_items("item_key == " .. data.new_item_key)
+				ScriptBackendItem.__dirtify()
+
+				local items = ScriptBackendItem.get_filtered_items("item_key == " .. new_item_key)
 
 				for _, item_data in ipairs(items) do
 					local traits = ScriptBackendItem.get_traits(item_data.backend_id)
@@ -331,6 +335,8 @@ ForgeLogic.poll_select_rerolled_traits = function (self)
 							ScriptBackendItem.set_loadout_item(item_data.backend_id, data.hero, data.slot)
 						end
 
+						self._reroll_trait_data = nil
+
 						return {
 							backend_id = item_data.backend_id,
 							hero = data.hero,
@@ -339,9 +345,8 @@ ForgeLogic.poll_select_rerolled_traits = function (self)
 					end
 				end
 
-				error("Found %d items with the name %q, none which had all traits unlocked", #items, data.new_item_key)
-
-				self._reroll_trait_data = nil
+				table.dump(items, "rerolled items", 2)
+				ferror("Found %d items with the name %q, all of which had traits unlocked", #items, new_item_key)
 			end
 		else
 			self._reroll_trait_data = nil

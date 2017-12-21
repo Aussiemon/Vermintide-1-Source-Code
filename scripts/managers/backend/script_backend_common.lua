@@ -99,6 +99,9 @@ local filter_macros = {
 	item_rarity = function (item_data, backend_id)
 		return item_data.rarity
 	end,
+	item_type = function (item_data, backend_id)
+		return item_data.item_type
+	end,
 	trinket_as_hero = function (item_data, backend_id)
 		if item_data.traits then
 			for _, trait_name in ipairs(item_data.traits) do
@@ -126,6 +129,17 @@ local filter_macros = {
 		local hero_name = hero_data.display_name
 
 		return hero_name
+	end,
+	player_owns_item_key = function (item_data, backend_id)
+		local all_items = ScriptBackendItem.get_all_backend_items()
+
+		for backend_id, config in pairs(all_items) do
+			if item_data.key == config.key then
+				return true
+			end
+		end
+
+		return false
 	end
 }
 ScriptBackendCommon.filter_postfix_cache = ScriptBackendCommon.filter_postfix_cache or {}

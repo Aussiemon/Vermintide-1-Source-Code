@@ -69,19 +69,13 @@ NavGraphSystem.destroy = function (self)
 
 	return 
 end
+local control_points = {}
 NavGraphSystem.init_nav_graphs = function (self, unit, smart_object_id, extension)
-	local drawer = Managers.state.debug:drawer({
-		mode = "retained",
-		name = "NavGraphConnectorExtension"
-	})
 	local nav_world = self.nav_world
 	local level = LevelHelper:current_level(self.world)
 	local unit_level_id = Level.unit_index(level, unit)
-	local IS_BIDIRECTIONAL = true
-	local control_points = {}
 	local smart_objects = self.smart_objects
 	local debug_color = Colors.get("orange")
-	local debug_color_fail = Colors.get("red")
 	local smart_object_unit_data = smart_objects[smart_object_id]
 
 	for smart_object, smart_object_data in pairs(smart_object_unit_data) do
@@ -89,7 +83,7 @@ NavGraphSystem.init_nav_graphs = function (self, unit, smart_object_id, extensio
 		local layer_id = LAYER_ID_MAPPING[smart_object_type]
 		control_points[1] = Vector3Aux.unbox(smart_object_data.pos1)
 		control_points[2] = Vector3Aux.unbox(smart_object_data.pos2)
-		local is_bidirectional = IS_BIDIRECTIONAL
+		local is_bidirectional = true
 
 		if smart_object_unit_data.is_one_way or (smart_object_type ~= "teleporter" and SmartObjectSettings.jump_up_max_height < math.abs(control_points[1].z - control_points[2].z)) then
 			is_bidirectional = false
@@ -110,6 +104,12 @@ NavGraphSystem.init_nav_graphs = function (self, unit, smart_object_id, extensio
 		extension.navgraphs[#extension.navgraphs + 1] = navgraph
 
 		if Development.parameter("visualize_ledges") then
+			local drawer = Managers.state.debug:drawer({
+				mode = "retained",
+				name = "NavGraphConnectorExtension"
+			})
+			local debug_color_fail = Colors.get("red")
+
 			if smart_object_type == "ledges" or smart_object_type == "ledges_with_fence" then
 				if smart_object_data.data.ledge_position1 then
 					drawer.line(drawer, control_points[1], Vector3Aux.unbox(smart_object_data.data.ledge_position1), debug_color)

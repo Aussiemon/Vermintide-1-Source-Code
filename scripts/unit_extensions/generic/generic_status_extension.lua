@@ -356,17 +356,8 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 
 			self.poison_time_to_cough = t + 2
 		end
-
-		if self.poison_wwise_source_id then
-			local poison_level = math.min(PlayerUnitStatusSettings.poison_level_max, self.poison_level)
-			local cough_intensity = poison_level/PlayerUnitStatusSettings.poison_level_max*100
-
-			WwiseWorld.set_source_parameter(wwise_world, self.poison_wwise_source_id, "cough_intensity", cough_intensity)
-		end
-	else
+	elseif self.poison_t then
 		self.poison_next_t = nil
-		self.poison_wwise_playing_id = nil
-		self.poison_wwise_source_id = nil
 		self.poison_time_to_cough = nil
 	end
 

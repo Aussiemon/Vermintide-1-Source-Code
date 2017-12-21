@@ -34,6 +34,7 @@ local breed_data = {
 	player_locomotion_constrain_radius = 0.7,
 	jump_gravity = 9.82,
 	jump_range = 20,
+	is_bot_aid_threat = true,
 	behavior = "gutter_runner",
 	size_variation_range = {
 		1,

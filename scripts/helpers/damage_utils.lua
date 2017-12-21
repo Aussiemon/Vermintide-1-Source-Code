@@ -92,20 +92,6 @@ DamageUtils.calculate_stagger = function (damage_table, duration_table, target_u
 		stagger = damage_table[target_unit_armor]
 	end
 
-	local upgraded_stagger = upgraded_staggers[stagger]
-
-	if DamageUtils.is_player_unit(attacker_unit) and upgraded_stagger then
-		local player = Managers.player:owner(attacker_unit)
-		local boon_handler = player.boon_handler
-
-		if boon_handler then
-			local has_increased_stagger_type_boon = boon_handler.has_boon(boon_handler, "increased_stagger_type")
-
-			if has_increased_stagger_type_boon and not upgraded_stagger then
-			end
-		end
-	end
-
 	if duration_table then
 		duration = duration_table[target_unit_armor]
 	end
@@ -115,6 +101,23 @@ DamageUtils.calculate_stagger = function (damage_table, duration_table, target_u
 	end
 
 	duration = (duration + math.random()) - 0.5
+
+	if DamageUtils.is_player_unit(attacker_unit) then
+		local player = Managers.player:owner(attacker_unit)
+		local boon_handler = player.boon_handler
+
+		if boon_handler then
+			local boon_name = "increased_stagger_type"
+			local has_increased_stagger_type_boon = boon_handler.has_boon(boon_handler, boon_name)
+
+			if has_increased_stagger_type_boon then
+				local num_increased_damage_boons = boon_handler.get_num_boons(boon_handler, boon_name)
+				local boon_template = BoonTemplates[boon_name]
+				local duration_multiplier = boon_template.duration_multiplier + 1
+				duration = duration*duration_multiplier
+			end
+		end
+	end
 
 	return stagger, duration
 end
@@ -270,8 +273,10 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 		local ignore_attacker_unit = explosion_template.ignore_attacker_unit
 		local collision_filter = "filter_explosion_overlap_no_player"
 		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
+		local attacker_player = Managers.player:owner(attacker_unit)
+		local attacker_is_player = attacker_player ~= nil
 
-		if difficulty_settings.friendly_fire_ranged or explosion_template.always_hurt_players then
+		if (attacker_is_player and DamageUtils.allow_friendly_fire_ranged(difficulty_settings, attacker_player)) or explosion_template.always_hurt_players then
 			collision_filter = "filter_explosion_overlap"
 		end
 
@@ -286,7 +291,6 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 		local impact_position = position
 		local DamageUtils = DamageUtils
 		local hit = 0
-		local attacker_is_player = DamageUtils.is_player_unit(attacker_unit)
 
 		for i = 1, num_actors, 1 do
 			local hit_actor = actors[i]
@@ -423,14 +427,22 @@ DamageUtils.create_aoe = function (world, attacker_unit, position, damage_source
 		radius = buff_extension.apply_buffs_to_value(buff_extension, radius, StatBuffIndex.GRENADE_RADIUS)
 	end
 
+	local attacker_player = Managers.player:owner(attacker_unit)
+	local damage_players = true
+
+	if attacker_player ~= nil then
+		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
+		damage_players = DamageUtils.allow_friendly_fire_ranged(difficulty_settings, attacker_player)
+	end
+
 	local extension_init_data = {
 		area_damage_system = {
 			invisible_unit = true,
 			aoe_dot_damage = 0,
-			damage_players = true,
 			aoe_dot_damage_interval = aoe_data.damage_interval,
 			radius = radius,
 			life_time = aoe_data.duration,
+			damage_players = damage_players,
 			player_screen_effect_name = aoe_data.player_screen_effect_name,
 			dot_effect_name = aoe_data.effect_name,
 			extra_dot_effect_name = aoe_data.extra_effect_name,
@@ -627,7 +639,7 @@ DamageUtils.add_damage_network = function (attacked_unit, attacker_unit, origina
 		table.clear(victim_units)
 
 		local networkified_value = DamageUtils.networkify_damage(original_damage_amount)
-		original_damage_amount = DamageUtils.apply_buffs_to_damage(networkified_value, attacked_unit, attacker_unit, damage_source, victim_units)
+		original_damage_amount = DamageUtils.apply_buffs_to_damage(networkified_value, attacked_unit, attacker_unit, damage_source, victim_units, damage_type)
 	end
 
 	local damage_amount = DamageUtils.networkify_damage(original_damage_amount)
@@ -865,7 +877,7 @@ local ignored_shared_damage_types = {
 	suicide = true,
 	knockdown_bleed = true
 }
-DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, attacker_unit, damage_source, victim_units)
+DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, attacker_unit, damage_source, victim_units, damage_type)
 	local damage = current_damage
 	victim_units[#victim_units + 1] = attacked_unit
 	local damage_ext = ScriptUnit.extension(attacked_unit, "damage_system")
@@ -939,11 +951,14 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 
 	if boon_handler then
 		local boon_name = "reduced_damage"
-		local num_reduced_damage_boons = boon_handler.get_num_boons(boon_handler, boon_name)
-		local boon_template = BoonTemplates[boon_name]
-		local reduced_damage_amount = boon_template.reduced_damage_amount
-		local reduced_damage_percent = math.max(reduced_damage_amount*num_reduced_damage_boons - 1, 0)
-		damage = damage*reduced_damage_percent
+
+		if damage_type ~= "overcharge" then
+			local num_reduced_damage_boons = boon_handler.get_num_boons(boon_handler, boon_name)
+			local boon_template = BoonTemplates[boon_name]
+			local reduced_damage_amount = boon_template.reduced_damage_amount
+			local reduced_damage_percent = math.max(reduced_damage_amount*num_reduced_damage_boons - 1, 0)
+			damage = damage*reduced_damage_percent
+		end
 	end
 
 	boon_handler = attacker_player and attacker_player.boon_handler
@@ -1006,6 +1021,7 @@ DamageUtils.heal_network = function (healed_unit, healer_unit, heal_amount, heal
 	table.clear(healed_units)
 
 	heal_amount = DamageUtils.apply_buffs_to_heal(healed_unit, healer_unit, heal_amount, heal_type, healed_units)
+	heal_amount = DamageUtils.networkify_damage(heal_amount)
 	local num_healed_units = #healed_units
 
 	for i = 1, num_healed_units, 1 do
@@ -1295,6 +1311,12 @@ DamageUtils.is_character = function (unit)
 
 	return has_breed or table.contains(PLAYER_AND_BOT_UNITS, unit), has_breed
 end
+DamageUtils.allow_friendly_fire_ranged = function (difficulty_settings, attacker_player)
+	return difficulty_settings.friendly_fire_ranged and not attacker_player.bot_player
+end
+DamageUtils.allow_friendly_fire_melee = function (difficulty_settings, attacker_player)
+	return difficulty_settings.friendly_fire_melee and not attacker_player.bot_player
+end
 DamageUtils.damage_level_unit = function (hit_unit, hit_normal, level_index, attack_template_name, attack_template_damage_type_name, damage_source, attacker_unit, attack_direction, is_server)
 	local attack_template = AttackTemplates[attack_template_name]
 
@@ -1331,7 +1353,6 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 	local owner_is_player = owner_unit and Managers.player:owner(owner_unit)
 	local damage_source_id = NetworkLookup.damage_sources[damage_source]
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
-	local friendly_fire_ranged = difficulty_settings.friendly_fire_ranged
 	local num_penetrations = 0
 	local max_penetrations = current_action.max_penetrations or 1
 
@@ -1454,7 +1475,7 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 						return hit_data
 					end
 				end
-			elseif not hit_units[hit_unit] and is_target and ((is_player and (friendly_fire_ranged or not owner_is_player)) or breed) then
+			elseif not hit_units[hit_unit] and is_target and ((is_player and (not owner_is_player or DamageUtils.allow_friendly_fire_ranged(difficulty_settings, owner_is_player))) or breed) then
 				local network_manager = Managers.state.network
 				local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
 				local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)

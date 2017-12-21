@@ -69,7 +69,7 @@ LocalContractTemplates = {
 				"wizard"
 			},
 			task = {
-				type = "complete_level",
+				type = "level",
 				amount = {
 					required = 1,
 					acquired = 0

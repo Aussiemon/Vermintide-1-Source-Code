@@ -92,6 +92,13 @@ Weapons.explosive_barrel_objective.actions.action_one.default.projectile_info = 
 	pickup_name = "explosive_barrel_objective",
 	projectile_unit_name = "units/weapons/player/pup_explosive_barrel/pup_gun_powder_barrel_01"
 }
+Weapons.dwarf_explosive_barrel = table.clone(Weapons.explosive_barrel)
+Weapons.dwarf_explosive_barrel.left_hand_unit = "units/weapons/player/wpn_dwarf_barrel_01/wpn_dwarf_barrel_01"
+Weapons.dwarf_explosive_barrel.actions.action_one.default.projectile_info = {
+	projectile_unit_template_name = "pickup_projectile_unit",
+	pickup_name = "dwarf_explosive_barrel",
+	projectile_unit_name = "units/weapons/player/pup_dwarf_barrel_01/pup_dwarf_barrel_01"
+}
 Weapons.beer_barrel = Weapons.beer_barrel or table.clone(weapon_template)
 Weapons.beer_barrel.left_hand_unit = "units/weapons/player/wpn_explosive_barrel/wpn_explosive_barrel_01"
 Weapons.beer_barrel.actions.action_one.default.speed = 8

@@ -17,7 +17,6 @@ BuffExtension.init = function (self, extension_init_context, unit, extension_ini
 		self._stat_buffs[i] = {}
 	end
 
-	self._recent_victims = {}
 	self.is_server = Managers.player.is_server
 	self.is_husk = extension_init_data.is_husk
 	self.id = 1
@@ -257,9 +256,6 @@ BuffExtension.update = function (self, unit, input, dt, context, t)
 	Profiler.start("BuffExtension:update :: buffs")
 	self._update_buffs(self, dt, t)
 	Profiler.stop()
-	Profiler.start("BuffExtension:update :: clear")
-	table.clear(self._recent_victims)
-	Profiler.stop()
 
 	return 
 end
@@ -379,12 +375,6 @@ BuffExtension._remove_stat_buff = function (self, buff)
 		local current_multiplier = stat_buffs[index].multiplier
 		stat_buffs[index].multiplier = 0
 	end
-
-	return 
-end
-BuffExtension.add_victim = function (self, unit)
-	local recent_victims = self._recent_victims
-	self._recent_victims[#recent_victims + 1] = unit
 
 	return 
 end

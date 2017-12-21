@@ -216,6 +216,9 @@ return {
 	__1reit_omma_latot_nopaew_degnar = {
 		{}
 	},
+	__neewollah_daerps_kcapdem_teknirt = {
+		{}
+	},
 	__2t_tod_W1_gninrub = {
 		{}
 	},
@@ -276,6 +279,9 @@ return {
 		}
 	},
 	__eviver_noitpurretni_on_teknirt = {
+		{}
+	},
+	__neewollah_kcul_esaercni_teknirt = {
 		{}
 	},
 	__1reit_noitartenep_desaercni_nopaew_degnar = {

@@ -9,6 +9,7 @@ end
 PlayerCharacterStateUsingTransport.on_enter = function (self, unit, input, dt, context, t, previous_state, params)
 	local first_person_extension = self.first_person_extension
 
+	table.clear(self.temp_params)
 	CharacterStateHelper.play_animation_event(unit, "idle")
 	CharacterStateHelper.play_animation_event_first_person(first_person_extension, "idle")
 
@@ -41,9 +42,13 @@ PlayerCharacterStateUsingTransport.update = function (self, unit, input, dt, con
 		local config = interactor_extension.interaction_config(interactor_extension)
 
 		interactor_extension.start_interaction(interactor_extension, "interacting")
-		csm.change_state(csm, "interacting", {
-			swap_to_3p = config.swap_to_3p
-		})
+
+		if not config.allow_movement then
+			local params = self.temp_params
+			params.swap_to_3p = config.swap_to_3p
+
+			csm.change_state(csm, "interacting", params)
+		end
 
 		return 
 	end
@@ -51,9 +56,12 @@ PlayerCharacterStateUsingTransport.update = function (self, unit, input, dt, con
 	if CharacterStateHelper.is_interacting(interactor_extension) then
 		local config = interactor_extension.interaction_config(interactor_extension)
 
-		csm.change_state(csm, "interacting", {
-			swap_to_3p = config.swap_to_3p
-		})
+		if not config.allow_movement then
+			local params = self.temp_params
+			params.swap_to_3p = config.swap_to_3p
+
+			csm.change_state(csm, "interacting", params)
+		end
 
 		return 
 	end

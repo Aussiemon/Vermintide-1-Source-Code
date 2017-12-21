@@ -1,18 +1,19 @@
 local breed_data = {
-	walk_speed = 2.75,
+	walk_speed = 2.5,
 	run_speed = 5,
 	awards_positive_reinforcement_message = true,
-	poison_resistance = 100,
-	armor_category = 1,
-	no_stagger_duration = true,
-	target_selection = "pick_closest_target",
-	animation_sync_rpc = "rpc_sync_anim_state_3",
-	detection_radius = 9999999,
 	smart_object_template = "special",
+	poison_resistance = 100,
+	is_bot_aid_threat = true,
+	bone_lod_level = 1,
+	no_stagger_duration = true,
+	animation_sync_rpc = "rpc_sync_anim_state_3",
+	target_selection = "pick_closest_target",
+	detection_radius = 9999999,
+	armor_category = 1,
 	headshot_coop_stamina_fatigue_type = "headshot_special",
 	max_globe_throw_speed = 16383,
 	hit_reaction = "ai_default",
-	bone_lod_level = 1,
 	special = true,
 	hit_effect_template = "HitEffectsPoisonWind",
 	debug_flag = "ai_globadier_behavior",
@@ -27,11 +28,11 @@ local breed_data = {
 	behavior = "skaven_poison_wind_globadier",
 	base_unit = "units/beings/enemies/skaven_wind_globadier/chr_skaven_wind_globadier",
 	max_health = {
+		8,
+		10,
 		12,
 		16,
-		20,
-		25,
-		30
+		20
 	},
 	num_push_anims = {
 		push_backward = 1
@@ -215,8 +216,9 @@ local action_data = {
 		radius = GLOBE_RADIUS
 	},
 	throw_poison_globe = {
-		duration = 9,
 		aoe_dot_damage_interval = 1,
+		duration = 8,
+		barrage_count = 3,
 		nav_tag_volume_layer = "bot_poison_wind",
 		create_nav_tag_volume = true,
 		damage_type = "poison",
@@ -278,9 +280,10 @@ local action_data = {
 			}
 		},
 		radius = GLOBE_RADIUS,
+		initial_radius = GLOBE_RADIUS*0.6,
 		time_between_throws = {
-			1,
-			3
+			10,
+			2
 		}
 	},
 	observe_poison_wind = {
@@ -299,7 +302,7 @@ local action_data = {
 		}
 	},
 	suicide_run = {
-		suicide_explosion_timer = 8,
+		suicide_explosion_timer = 6,
 		radius = 4,
 		action_weight = 10,
 		nav_tag_volume_layer = "bot_poison_wind",

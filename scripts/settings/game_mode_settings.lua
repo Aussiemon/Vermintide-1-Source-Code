@@ -30,6 +30,7 @@ GameModeSettings.survival.playable = true
 GameModeSettings.survival.difficulties = SurvivalDifficulties
 GameModeSettings.inn = table.clone(GameModeSettings.base)
 GameModeSettings.inn.key = "inn"
+GameModeSettings.inn.disable_difficulty_spawning_items = true
 GameModeSettings.inn.class_name = "GameModeInn"
 GameModeSettings.inn.display_name = "gm_bulldozer_inn"
 

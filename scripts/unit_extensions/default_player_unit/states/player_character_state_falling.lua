@@ -215,20 +215,25 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 
 		interactor_extension.start_interaction(interactor_extension, "interacting")
 
-		local params = self.temp_params
-		params.swap_to_3p = config.swap_to_3p
+		if not config.allow_movement then
+			local params = self.temp_params
+			params.swap_to_3p = config.swap_to_3p
 
-		csm.change_state(csm, "interacting", params)
+			csm.change_state(csm, "interacting", params)
+		end
 
 		return 
 	end
 
 	if CharacterStateHelper.is_interacting(interactor_extension) then
 		local config = interactor_extension.interaction_config(interactor_extension)
-		local params = self.temp_params
-		params.swap_to_3p = config.swap_to_3p
 
-		csm.change_state(csm, "interacting", params)
+		if not config.allow_movement then
+			local params = self.temp_params
+			params.swap_to_3p = config.swap_to_3p
+
+			csm.change_state(csm, "interacting", params)
+		end
 
 		return 
 	end

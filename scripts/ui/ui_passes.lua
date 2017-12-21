@@ -4,6 +4,71 @@ require("scripts/utils/colors")
 require("scripts/settings/ui_settings")
 require("scripts/utils/utf8_utils")
 
+local function get_line_color_override(line_index, line_length, line_global_start_index, ui_style)
+	local color_override = ui_style.color_override
+	local internal_color_overrides = ui_style.internal_color_overrides
+
+	if not internal_color_overrides then
+		internal_color_overrides = {}
+		ui_style.internal_color_overrides = internal_color_overrides
+	end
+
+	local line_color_override = internal_color_overrides[line_index]
+	local num_color_overrides = #color_override
+
+	if 0 < num_color_overrides then
+		if not line_color_override then
+			line_color_override = {}
+			internal_color_overrides[line_index] = line_color_override
+		end
+
+		local num_updates = math.max(num_color_overrides, #line_color_override)
+
+		for k = 1, num_updates, 1 do
+			local override = color_override[k]
+
+			if override then
+				local color = override.color
+				local start_index = override.start_index
+				local end_index = override.end_index
+				local vector_color = Color(color[1], color[2], color[3], color[4])
+
+				if line_global_start_index < start_index and start_index < line_global_start_index + line_length then
+					if not line_color_override[k] then
+						line_color_override[k] = {}
+					end
+
+					local line_color_values = line_color_override[k]
+					line_color_values.color = vector_color
+					line_color_values.start_index = start_index - line_global_start_index
+					line_color_values.end_index = end_index - line_global_start_index
+				elseif line_global_start_index < end_index and start_index < line_global_start_index then
+					if not line_color_override[k] then
+						line_color_override[k] = {}
+					end
+
+					local line_color_values = line_color_override[k]
+					line_color_values.color = vector_color
+					line_color_values.start_index = 1
+					line_color_values.end_index = end_index - line_global_start_index
+				else
+					line_color_override[k] = nil
+				end
+			else
+				line_color_override[k] = nil
+			end
+		end
+	else
+		return nil
+	end
+
+	if line_color_override and 0 < #line_color_override then
+		return line_color_override
+	end
+
+	return 
+end
+
 UIPasses = {}
 local UIRenderer = UIRenderer
 local UIRenderer_draw_texture = UIRenderer.draw_texture
@@ -415,16 +480,17 @@ UIPasses.multi_texture = {
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
 		local texture_size = ui_style.texture_size
 		local texture_sizes = ui_style.texture_sizes
+		local texture_offsets = ui_style.texture_offsets
 
 		assert(texture_size or texture_sizes, "Missing texture_sizes")
 
 		if pass_definition.retained_mode then
 			local retained_ids = pass_definition.retained_mode and ((pass_data.retained_ids and pass_data.retained_ids) or true)
-			retained_ids = UIRenderer.draw_multi_texture(ui_renderer, ui_content[pass_definition.texture_id], position, texture_size, texture_sizes, ui_style.tile_sizes, ui_style.axis, ui_style.spacing, ui_style.direction, ui_style.draw_count, ui_style.texture_colors, ui_style.color, ui_style.masked, ui_style and ui_style.texture_saturation, ui_style and ui_style.saturated, retained_ids)
+			retained_ids = UIRenderer.draw_multi_texture(ui_renderer, ui_content[pass_definition.texture_id], position, texture_size, texture_sizes, texture_offsets, ui_style.tile_sizes, ui_style.axis, ui_style.spacing, ui_style.direction, ui_style.draw_count, ui_style.texture_colors, ui_style.color, ui_style.masked, ui_style and ui_style.texture_saturation, ui_style and ui_style.saturated, retained_ids)
 			pass_data.retained_ids = (retained_ids and retained_ids) or pass_data.retained_ids
 			pass_data.dirty = false
 		else
-			return UIRenderer.draw_multi_texture(ui_renderer, ui_content[pass_definition.texture_id], position, texture_size, texture_sizes, ui_style.tile_sizes, ui_style.axis, ui_style.spacing, ui_style.direction, ui_style.draw_count, ui_style.texture_colors, ui_style.color, ui_style.masked, ui_style and ui_style.texture_saturation, ui_style and ui_style.saturated)
+			return UIRenderer.draw_multi_texture(ui_renderer, ui_content[pass_definition.texture_id], position, texture_size, texture_sizes, texture_offsets, ui_style.tile_sizes, ui_style.axis, ui_style.spacing, ui_style.direction, ui_style.draw_count, ui_style.texture_colors, ui_style.color, ui_style.masked, ui_style and ui_style.texture_saturation, ui_style and ui_style.saturated)
 		end
 
 		return 
@@ -448,6 +514,34 @@ UIPasses.centered_texture_amount = {
 		assert(num_of_textures, "Missing texture_amount")
 
 		return UIRenderer.draw_centered_texture_amount(ui_renderer, ui_content[pass_definition.texture_id], position, size, texture_size, num_of_textures, texture_axis, ui_style and ui_style.spacing, ui_style and ui_style.color, ui_style and ui_style.masked)
+	end
+}
+UIPasses.centered_uv_texture_amount = {
+	init = function (pass_definition, content, style)
+		return nil
+	end,
+	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
+		local texture_size = ui_style.texture_size
+
+		assert(texture_size, "Missing texture_size")
+
+		local texture_axis = ui_style.texture_axis
+
+		assert(texture_axis, "Missing texture_axis")
+
+		local num_of_textures = ui_style.texture_amount
+
+		assert(num_of_textures, "Missing texture_amount")
+
+		local texture_uvs = ui_style.texture_uvs
+
+		assert(texture_uvs, "Missing texture_uvs")
+
+		local texture_sizes = ui_style.texture_sizes
+
+		assert(texture_sizes, "Missing texture_sizes")
+
+		return UIRenderer.draw_centered_uv_texture_amount(ui_renderer, ui_content[pass_definition.texture_id], position, size, texture_size, texture_sizes, texture_uvs, num_of_textures, texture_axis, ui_style and ui_style.spacing, ui_style and ui_style.color, ui_style and ui_style.masked)
 	end
 }
 UIPasses.texture_uv = {
@@ -781,71 +875,6 @@ UIPasses.text = {
 		return 
 	end,
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt, ui_style_global)
-		local function get_line_color_override(line_index, line_length, line_global_start_index, ui_style)
-			local color_override = ui_style.color_override
-			local internal_color_overrides = ui_style.internal_color_overrides
-
-			if not internal_color_overrides then
-				internal_color_overrides = {}
-				ui_style.internal_color_overrides = internal_color_overrides
-			end
-
-			local line_color_override = internal_color_overrides[line_index]
-			local num_color_overrides = #color_override
-
-			if 0 < num_color_overrides then
-				if not line_color_override then
-					line_color_override = {}
-					internal_color_overrides[line_index] = line_color_override
-				end
-
-				local num_updates = math.max(num_color_overrides, #line_color_override)
-
-				for k = 1, num_updates, 1 do
-					local override = color_override[k]
-
-					if override then
-						local color = override.color
-						local start_index = override.start_index
-						local end_index = override.end_index
-						local vector_color = Color(color[1], color[2], color[3], color[4])
-
-						if line_global_start_index < start_index and start_index < line_global_start_index + line_length then
-							if not line_color_override[k] then
-								line_color_override[k] = {}
-							end
-
-							local line_color_values = line_color_override[k]
-							line_color_values.color = vector_color
-							line_color_values.start_index = start_index - line_global_start_index
-							line_color_values.end_index = end_index - line_global_start_index
-						elseif line_global_start_index < end_index and start_index < line_global_start_index then
-							if not line_color_override[k] then
-								line_color_override[k] = {}
-							end
-
-							local line_color_values = line_color_override[k]
-							line_color_values.color = vector_color
-							line_color_values.start_index = 1
-							line_color_values.end_index = end_index - line_global_start_index
-						else
-							line_color_override[k] = nil
-						end
-					else
-						line_color_override[k] = nil
-					end
-				end
-			else
-				return nil
-			end
-
-			if line_color_override and 0 < #line_color_override then
-				return line_color_override
-			end
-
-			return 
-		end
-
 		local retained_ids = nil
 
 		if pass_definition.retained_mode then
@@ -922,6 +951,12 @@ UIPasses.text = {
 					local text_length = (text and UTF8Utils.string_length(text)) or 0
 					local width, height, min = UIRenderer.text_size(ui_renderer, text, font_material, font_size, size[2])
 					local alignment_offset = Vector3(size[1]/2 - width/2, 0, 0)
+					local color = ui_style.text_color
+
+					if ui_style.line_colors and ui_style.line_colors[i] then
+						color = ui_style.line_colors[i]
+					end
+
 					local line_color_override = nil
 
 					if ui_style.color_override then
@@ -929,7 +964,7 @@ UIPasses.text = {
 					end
 
 					local retained_id = retained_ids and ((new_retained_ids and true) or retained_ids[i])
-					retained_id = UIRenderer.draw_text(ui_renderer, text, font_material, font_size, font_name, position + alignment_offset, ui_style.text_color, retained_id, line_color_override)
+					retained_id = UIRenderer.draw_text(ui_renderer, text, font_material, font_size, font_name, position + alignment_offset, color, retained_id, line_color_override)
 
 					if new_retained_ids then
 						new_retained_ids[i] = retained_id
@@ -947,6 +982,11 @@ UIPasses.text = {
 					local width, height, min = UIRenderer.text_size(ui_renderer, text, font_material, font_size, size[2])
 					local alignment_offset = Vector3(size[1] - width, 0, 0)
 					local color = ui_style.text_color
+
+					if ui_style.line_colors and ui_style.line_colors[i] then
+						color = ui_style.line_colors[i]
+					end
+
 					local line_color_override = nil
 
 					if ui_style.color_override then
@@ -1383,7 +1423,7 @@ UIPasses.viewport = {
 		local ui_renderer = nil
 
 		if style.enable_sub_gui then
-			ui_renderer = UIRenderer.create(world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
+			ui_renderer = UIRenderer.create(world, "material", "materials/fonts/arial", "material", "materials/fonts/hell_shark_font", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_popup", "material", "materials/fonts/gw_fonts")
 		end
 
 		return {
@@ -1492,6 +1532,10 @@ UIPasses.drag = {
 		return nil
 	end,
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
+		if ui_content.ui_top_renderer then
+			ui_renderer = ui_content.ui_top_renderer
+		end
+
 		if ui_content.on_drag_stopped then
 			ui_content.on_drag_stopped = nil
 			UIPasses.is_dragging_item = false
@@ -1692,9 +1736,17 @@ UIPasses.tooltip_text = {
 		local num_texts = math.min(#texts - text_start_index - 1, max_texts)
 		local full_font_height = (font_max + math.abs(font_min))*RESOLUTION_LOOKUP.inv_scale
 		local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
-		local cursor = input_service.get(input_service, "cursor") or NilCursor
-		temp_cursor_pos[1] = cursor[1]
-		temp_cursor_pos[2] = cursor[2]
+		local fixed_position = ui_style.fixed_position
+
+		if fixed_position and ui_style.use_fixed_position then
+			temp_cursor_pos[1] = position[1] + fixed_position[1]
+			temp_cursor_pos[2] = position[2] + fixed_position[2]
+		else
+			local cursor = input_service.get(input_service, "cursor") or NilCursor
+			temp_cursor_pos[1] = cursor[1]
+			temp_cursor_pos[2] = cursor[2]
+		end
+
 		local cursor_offset = ui_style.cursor_offset
 		temp_cursor_pos[1] = temp_cursor_pos[1] + ((cursor_offset and cursor_offset[1]) or 25)
 		temp_cursor_pos[2] = temp_cursor_pos[2] - ((cursor_offset and cursor_offset[2]) or 15)
@@ -1712,10 +1764,16 @@ UIPasses.tooltip_text = {
 		end
 
 		local cursor_side = ui_style.cursor_side
+		local draw_downwards = ui_style.draw_downwards
 
 		if cursor_side and cursor_side == "left" then
 			position[1] = cursor_position[1] - tooltip_size[1]
-			position[2] = cursor_position[2] + tooltip_size[2] - full_font_height
+
+			if draw_downwards then
+				position[2] = cursor_position[2] - full_font_height
+			else
+				position[2] = cursor_position[2] + tooltip_size[2] - full_font_height
+			end
 		else
 			position[1] = cursor_position[1]
 			position[2] = cursor_position[2] - full_font_height
@@ -1758,7 +1816,12 @@ UIPasses.hotspot = {
 		local cursor_position = UIInverseScaleVectorToResolution(cursor)
 		local pixel_pos = position
 		local pixel_size = size
-		is_hover = not ui_content.disable_button and math.point_is_inside_2d_box(cursor_position, pixel_pos, pixel_size)
+		is_hover = math.point_is_inside_2d_box(cursor_position, pixel_pos, pixel_size)
+		ui_content.cursor_hover = is_hover
+
+		if ui_content.disable_button then
+			is_hover = false
+		end
 
 		if script_data.ui_debug_hover then
 			UIRenderer.draw_rect(ui_renderer, position + Vector3(0, 0, 1), size, (ui_content.is_hover and {

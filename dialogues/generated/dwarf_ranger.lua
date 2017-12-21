@@ -6436,16 +6436,16 @@ return function ()
 			{
 				"faction_memory",
 				"time_since_forest_ambush_ring_bell",
-				OP.EQ,
-				0
+				OP.TIMEDIFF,
+				OP.GT,
+				20
 			}
 		},
 		on_done = {
 			{
 				"faction_memory",
 				"time_since_forest_ambush_ring_bell",
-				OP.ADD,
-				1
+				OP.TIMESET
 			}
 		}
 	})
@@ -22953,7 +22953,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "dwarf_ranger",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_objective_forest_ambush_ring_bell_01"

@@ -84,7 +84,7 @@ FriendsView.init = function (self, ingame_ui_context, sub_menu)
 	self.matchmaking_manager = ingame_ui_context.matchmaking_manager
 	local input_manager = ingame_ui_context.input_manager
 
-	input_manager.create_input_service(input_manager, "friends_view", IngameMenuKeymaps)
+	input_manager.create_input_service(input_manager, "friends_view", self.ingame_ui:get_ingame_menu_keymap())
 	input_manager.map_device_to_service(input_manager, "friends_view", "keyboard")
 	input_manager.map_device_to_service(input_manager, "friends_view", "mouse")
 	input_manager.map_device_to_service(input_manager, "friends_view", "gamepad")
@@ -545,7 +545,11 @@ FriendsView.cb_refresh_friends_done = function (self, friends_list, use_cached_f
 	local selected_id = self.selected_id
 
 	if selected_id then
-		self.setup_info_window(self, friends[selected_id], selected_id)
+		local friend_data = friends[selected_id]
+
+		if friend_data then
+			self.setup_info_window(self, friend_data, selected_id)
+		end
 	end
 
 	local overflowing_friends = friends_n - list_style.num_draws
@@ -588,7 +592,7 @@ FriendsView.refresh_psn_room_data = function (self, friends, playing_bulldozer_f
 	return 
 end
 FriendsView.setup_widget = function (self, friend_data, id, content, style)
-	local name = friend_data.name
+	local name = (friend_data and friend_data.name) or "n/a"
 	content.name = UIRenderer.crop_text(name, player_name_max_length)
 	content.id = id
 
@@ -602,9 +606,9 @@ FriendsView.setup_widget = function (self, friend_data, id, content, style)
 
 	if content.selected then
 		name_style.text_color = name_style.selected_color
-	elseif friend_data.playing_this_game then
+	elseif friend_data and friend_data.playing_this_game then
 		name_style.text_color = name_style.bulldozer_color
-	elseif friend_data.status == "offline" then
+	elseif not friend_data or friend_data.status == "offline" then
 		name_style.text_color = name_style.offline_color
 	else
 		name_style.text_color = name_style.online_color

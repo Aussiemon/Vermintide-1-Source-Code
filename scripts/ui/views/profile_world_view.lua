@@ -1,7 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/utils/function_command_queue")
 
 local attachments = {
@@ -152,12 +148,6 @@ local generic_map_actions = {
 	default = {
 		select_character = {
 			{
-				priority = 1,
-				input_action = "d_horizontal",
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				priority = 2,
 				input_action = "confirm",
 				description_text = "input_description_select_character"
@@ -170,16 +160,17 @@ local generic_map_actions = {
 		},
 		confirm_character = {
 			{
-				priority = 1,
-				input_action = "d_horizontal",
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				priority = 2,
 				input_action = "confirm",
 				description_text = "input_description_confirm"
 			},
+			{
+				priority = 3,
+				input_action = "back",
+				description_text = "input_description_close"
+			}
+		},
+		unavailable = {
 			{
 				priority = 3,
 				input_action = "back",
@@ -190,12 +181,6 @@ local generic_map_actions = {
 	close_disabled = {
 		select_character = {
 			{
-				priority = 1,
-				input_action = "d_horizontal",
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				priority = 2,
 				input_action = "confirm",
 				description_text = "input_description_select_character"
@@ -203,18 +188,17 @@ local generic_map_actions = {
 		},
 		confirm_character = {
 			{
-				priority = 1,
-				input_action = "d_horizontal",
-				description_text = "input_description_navigate",
-				ignore_keybinding = true
-			},
-			{
 				priority = 2,
 				input_action = "confirm",
 				description_text = "input_description_confirm"
 			}
-		}
+		},
+		unavailable = {}
 	}
+}
+local text_colors = {
+	available = Colors.get_table("white"),
+	unavailable = Colors.get_table("red")
 }
 local wait_before_return_times = {
 	witch_hunter = 1,
@@ -241,6 +225,7 @@ ProfileWorldView.init = function (self, ingame_ui_context)
 	self.sorted_units = {}
 	self.unit_states = {}
 	self.title_text_anim_t = 0
+	self._gamepad_select_delay = 0
 	local max_num_args = 3
 	self.function_command_queue = FunctionCommandQueue:new(max_num_args)
 	self.description_texts = {}
@@ -388,9 +373,16 @@ ProfileWorldView.on_enter = function (self, viewport_widget, input_service, char
 	return 
 end
 ProfileWorldView.on_exit = function (self)
+	local max_shadow_casting_lights = Application.user_setting("render_settings", "max_shadow_casting_lights")
+
+	Application.set_render_setting("max_shadow_casting_lights", max_shadow_casting_lights)
+	Application.set_render_setting("shadow_fade_in_speed", 4)
+	Application.set_render_setting("shadow_fade_out_speed", 2)
+
 	for i = 1, 5, 1 do
 		local unit = self.units[i]
 
+		self.function_command_queue:cleanup_destroyed_unit(unit)
 		World.destroy_unit(self.world, unit)
 	end
 
@@ -400,6 +392,7 @@ ProfileWorldView.on_exit = function (self)
 		local unit = self.attachment_units[ii]
 
 		Unit.flow_event(unit, "lua_attachment_hidden")
+		self.function_command_queue:cleanup_destroyed_unit(unit)
 		World.destroy_unit(self.world, unit)
 	end
 
@@ -435,11 +428,17 @@ ProfileWorldView.handle_mouse_input = function (self, input_service)
 	self.hover_unit(self, hover_unit)
 
 	if input_service.get(input_service, "left_release") and not is_hovering_button and hover_unit and self.state == "selecting_profile" then
-		self.select_unit(self, hover_unit)
+		local profile_index = self.units[hover_unit]
+		local available = self.available_units[profile_index]
+
+		if available then
+			self.select_unit(self, hover_unit)
+		end
 	end
 
 	if self.state == "selecting_profile" then
 		if self.selected_unit ~= nil and self.button_widgets.accept_button.content.button_hotspot.on_release and not self.blocked_accept then
+			self.button_widgets.accept_button.content.button_hotspot.on_release = false
 			self.done = true
 			local profile_index = self.units[self.selected_unit]
 			local player = Managers.player:local_player()
@@ -456,23 +455,29 @@ ProfileWorldView.handle_mouse_input = function (self, input_service)
 	return 
 end
 ProfileWorldView.handle_controller_input = function (self, input_service, dt)
+	local new_controller_index = nil
+
 	if self.hovered_unit == nil or self.controller_index == nil then
-		self.controller_index = 1
+		new_controller_index = 1
+	else
+		if input_service.get(input_service, "move_left") then
+			new_controller_index = math.max(1, self.controller_index - 1)
+		end
+
+		if input_service.get(input_service, "move_right") then
+			new_controller_index = math.min(5, self.controller_index + 1)
+		end
 	end
 
-	if input_service.get(input_service, "move_left") then
-		self.controller_index = math.max(1, self.controller_index - 1)
+	if new_controller_index and new_controller_index ~= self.controller_index then
+		self.controller_index = new_controller_index
+		local hover_unit = self.sorted_units[self.controller_index]
+
+		self.hover_unit(self, hover_unit)
+		self.select_unit_gamepad(self, hover_unit, 0.5)
 	end
 
-	if input_service.get(input_service, "move_right") then
-		self.controller_index = math.min(5, self.controller_index + 1)
-	end
-
-	local hover_unit = self.sorted_units[self.controller_index]
-
-	self.hover_unit(self, hover_unit)
-
-	if self.state == "selecting_profile" and self.selected_unit == hover_unit and input_service.get(input_service, "confirm") and not self.blocked_accept then
+	if self.state == "selecting_profile" and self.selected_unit == self.sorted_units[self.controller_index] and input_service.get(input_service, "confirm") and not self.blocked_accept then
 		self.done = true
 		local profile_index = self.units[self.selected_unit]
 		local player = Managers.player:local_player()
@@ -482,10 +487,7 @@ ProfileWorldView.handle_controller_input = function (self, input_service, dt)
 		end
 	end
 
-	if input_service.get(input_service, "confirm") and self.state == "selecting_profile" then
-		self.select_unit(self, hover_unit)
-	end
-
+	self.update_select_unit_gamepad(self, dt)
 	self.update_input_description(self)
 
 	return 
@@ -497,7 +499,7 @@ ProfileWorldView.update_input_description = function (self)
 	if self.selected_unit == hover_unit then
 		actions_name_to_use = "confirm_character"
 	else
-		actions_name_to_use = "select_character"
+		actions_name_to_use = "unavailable"
 	end
 
 	if not self.gamepad_active_generic_actions_name or self.gamepad_active_generic_actions_name ~= actions_name_to_use then
@@ -506,7 +508,6 @@ ProfileWorldView.update_input_description = function (self)
 		local generic_actions = generic_input_actions[actions_name_to_use]
 
 		self.menu_input_description:change_generic_actions(generic_actions)
-		print("change_generic_actions:", actions_name_to_use)
 	end
 
 	return 
@@ -558,11 +559,15 @@ ProfileWorldView.update = function (self, dt)
 	local profile_synchronizer = self.profile_synchronizer
 
 	for i = 1, 5, 1 do
-
-		-- decompilation error in this vicinity
 		local lol = math.random()
 		local unit = self.units[i]
 		local profile_index = self.units[unit]
+		local is_available = not profile_synchronizer.owner(profile_synchronizer, i)
+
+		if player ~= nil and player.profile_index == profile_index then
+			is_available = true
+		end
+
 		local was_available = self.available_units[i]
 
 		if is_available and not was_available then
@@ -574,7 +579,9 @@ ProfileWorldView.update = function (self, dt)
 
 			self.available_units[i] = true
 		elseif not is_available and was_available then
-			self.select_unit(self, nil)
+			if unit == self.selected_unit then
+			end
+
 			self.function_command_queue:queue_function_command(Unit.animation_event, unit, "select_hover_loop")
 
 			local profile_name = SPProfiles[profile_index].display_name
@@ -591,26 +598,34 @@ ProfileWorldView.update = function (self, dt)
 		if self.available_units[profile_index] then
 			local profile_name = SPProfiles[profile_index].character_name
 			self.character_info_widget.content.title_text = Localize(profile_name)
+			self.character_info_widget.style.title_text.text_color = text_colors.available
 			self.character_info_widget.content.description_text = Localize(self.description_texts[profile_index])
 		else
 			self.character_info_widget.content.title_text = Localize("profile_not_available")
-			self.character_info_widget.content.description_text = ""
+			self.character_info_widget.style.title_text.text_color = text_colors.unavailable
+			self.character_info_widget.content.description_text = Localize(self.description_texts[profile_index])
 		end
 	elseif self.selected_unit then
 		local profile_index = self.units[self.selected_unit]
 		local profile_name = SPProfiles[profile_index].character_name
 		self.character_info_widget.content.title_text = Localize(profile_name)
+		self.character_info_widget.style.title_text.text_color = text_colors.available
 		self.character_info_widget.content.description_text = Localize(self.description_texts[profile_index])
 	else
 		self.character_info_widget.content.title_text = Localize("profile_choose")
+		self.character_info_widget.style.title_text.text_color = text_colors.available
 		self.character_info_widget.content.description_text = ""
 	end
 
 	local accept_button = self.button_widgets.accept_button
 
 	if self.selected_unit == nil or self.state ~= "selecting_profile" or self.blocked_accept then
-		accept_button.content.button_hotspot.disabled = true
-	else
+		if not accept_button.content.button_hotspot.disabled then
+			table.clear(accept_button.content.button_hotspot)
+
+			accept_button.content.button_hotspot.disabled = true
+		end
+	elseif accept_button.content.button_hotspot.disabled then
 		accept_button.content.button_hotspot.disabled = false
 	end
 
@@ -667,8 +682,9 @@ ProfileWorldView.hover_unit = function (self, unit)
 
 			if self.available_units[profile_index] then
 				self.function_command_queue:queue_function_command(Level.trigger_event, self.level, flow_events[profile_name].unavailable)
-				self.function_command_queue:queue_function_command(Level.trigger_event, level, flow_events[profile_name].hovered)
 			end
+
+			self.function_command_queue:queue_function_command(Level.trigger_event, level, flow_events[profile_name].hovered)
 
 			local wwise_world = Managers.world:wwise_world(self.world)
 			local wwise_playing_id, wwise_source_id = WwiseWorld.trigger_event(wwise_world, "Play_hud_character_hover")
@@ -684,6 +700,21 @@ ProfileWorldView.hover_unit = function (self, unit)
 	end
 
 	self.hovered_unit = unit
+
+	return 
+end
+ProfileWorldView.select_unit_gamepad = function (self, unit, delay)
+	self._unit_to_select = unit
+	self._gamepad_select_delay = delay
+
+	return 
+end
+ProfileWorldView.update_select_unit_gamepad = function (self, dt)
+	self._gamepad_select_delay = self._gamepad_select_delay - dt
+
+	if self._gamepad_select_delay <= 0 and self._unit_to_select then
+		self.select_unit(self, self._unit_to_select)
+	end
 
 	return 
 end

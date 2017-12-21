@@ -189,6 +189,13 @@ PlayerBot.spawn = function (self, position, rotation, is_initial_spawn, ammo_mel
 		self._add_spawn_telemetry(self, "host")
 	end
 
+	local level_settings = LevelHelper:current_level_settings()
+
+	if level_settings.climate_type then
+		Unit.set_flow_variable(unit, "climate_type", level_settings.climate_type)
+		Unit.flow_event(unit, "climate_type_set")
+	end
+
 	return unit
 end
 local telemetry_data = {}

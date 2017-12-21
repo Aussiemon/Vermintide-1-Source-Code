@@ -1,3 +1,5 @@
+require("scripts/settings/difficulty_settings")
+
 local definitions = local_require("scripts/ui/hud_ui/difficulty_unlock_ui_definitions")
 local scenegraph_definition = definitions.scenegraph_definition
 local animation_definitions = definitions.animations

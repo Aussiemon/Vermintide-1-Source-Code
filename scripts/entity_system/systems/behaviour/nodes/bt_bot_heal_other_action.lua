@@ -8,7 +8,7 @@ BTBotHealOtherAction.init = function (self, ...)
 end
 BTBotHealOtherAction.name = "BTBotHealOtherAction"
 BTBotHealOtherAction.enter = function (self, unit, blackboard, t)
-	local input_ext = ScriptUnit.extension(unit, "input_system")
+	local input_ext = blackboard.input_extension
 	local soft_aiming = true
 	local use_rotation = false
 
@@ -16,7 +16,7 @@ BTBotHealOtherAction.enter = function (self, unit, blackboard, t)
 
 	local interaction_unit = blackboard.target_ally_unit
 	blackboard.current_interaction_unit = interaction_unit
-	local interaction_ext = ScriptUnit.extension(unit, "interactor_system")
+	local interaction_ext = blackboard.interaction_extension
 
 	interaction_ext.set_exclusive_interaction_unit(interaction_ext, interaction_unit)
 
@@ -26,13 +26,13 @@ BTBotHealOtherAction.enter = function (self, unit, blackboard, t)
 	return 
 end
 BTBotHealOtherAction.leave = function (self, unit, blackboard, t)
-	local input_ext = ScriptUnit.extension(unit, "input_system")
+	local input_ext = blackboard.input_extension
 
 	input_ext.set_aiming(input_ext, false)
 
 	blackboard.current_interaction_unit = nil
 	blackboard.is_healing_other = false
-	local interaction_ext = ScriptUnit.extension(unit, "interactor_system")
+	local interaction_ext = blackboard.interaction_extension
 
 	interaction_ext.set_exclusive_interaction_unit(interaction_ext, nil)
 
@@ -45,25 +45,24 @@ BTBotHealOtherAction.run = function (self, unit, blackboard, t, dt)
 		return "failed"
 	end
 
-	local input_ext = ScriptUnit.extension(unit, "input_system")
 	local action_data = self._tree_node.action_data
 	local aim_position = nil
 
-	if action_data then
+	if action_data and Unit.has_node(interaction_unit, action_data.aim_node) then
 		aim_position = Unit.world_position(interaction_unit, Unit.node(interaction_unit, action_data.aim_node))
 	else
 		aim_position = Unit.world_position(interaction_unit, 0)
 	end
 
+	local input_ext = blackboard.input_extension
+
 	input_ext.set_aim_position(input_ext, aim_position)
 
 	if self._initializing then
 		self._initializing = false
-
-		return "running"
+	else
+		input_ext.charge_shot(input_ext)
 	end
-
-	blackboard.input_extension:charge_shot()
 
 	return "running"
 end

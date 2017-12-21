@@ -113,6 +113,10 @@ DebugScreen.setup = function (world, settings, callbacks)
 			cs.is_boolean = true
 			cs.options[#cs.options + 1] = true
 			cs.options[#cs.options + 1] = false
+
+			if setting.func then
+				cs.func = setting.func
+			end
 		elseif setting.command_list then
 			cs.commands = {}
 

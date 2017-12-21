@@ -2375,9 +2375,13 @@ UIWidgets = {
 						style_id = "texture_token_type",
 						pass_type = "texture",
 						content_check_function = function (content)
-							local button_hotspot = content.button_hotspot
+							if content.texture_token_type then
+								local button_hotspot = content.button_hotspot
 
-							return not content.show_title and content.texture_token_type and (not button_hotspot.is_clicked or (button_hotspot.is_clicked and 0 < button_hotspot.is_clicked)) and not button_hotspot.is_selected
+								return not content.show_title and (not button_hotspot.is_clicked or (button_hotspot.is_clicked and 0 < button_hotspot.is_clicked)) and not button_hotspot.is_selected
+							end
+
+							return 
 						end
 					},
 					{
@@ -2385,9 +2389,13 @@ UIWidgets = {
 						style_id = "texture_token_type_selected",
 						pass_type = "texture",
 						content_check_function = function (content)
-							local button_hotspot = content.button_hotspot
+							if content.texture_token_type then
+								local button_hotspot = content.button_hotspot
 
-							return (not content.show_title and content.texture_token_type and button_hotspot.is_selected) or (button_hotspot.is_clicked and button_hotspot.is_clicked == 0)
+								return not content.show_title and (button_hotspot.is_selected or (button_hotspot.is_clicked and button_hotspot.is_clicked == 0))
+							end
+
+							return 
 						end
 					},
 					{
@@ -3069,6 +3077,67 @@ UIWidgets = {
 						0,
 						0
 					},
+					masked = masked
+				}
+			},
+			scenegraph_id = scenegraph_id
+		}
+	end,
+	create_simple_centered_uv_texture_amount = function (texture, texture_size, amount, axis, scenegraph_id, masked)
+		local texture_uvs = {}
+		local texture_sizes = {}
+
+		for i = 1, amount, 1 do
+			texture_uvs[i] = {
+				{
+					0,
+					0
+				},
+				{
+					1,
+					1
+				}
+			}
+			texture_sizes[i] = {
+				texture_size[1],
+				texture_size[2]
+			}
+		end
+
+		return {
+			element = {
+				passes = {
+					{
+						texture_id = "texture_id",
+						style_id = "texture_id",
+						pass_type = "centered_uv_texture_amount"
+					}
+				}
+			},
+			content = {
+				texture_id = texture
+			},
+			style = {
+				texture_id = {
+					color = {
+						255,
+						255,
+						255,
+						255
+					},
+					offset = {
+						0,
+						0,
+						0
+					},
+					texture_size = texture_size or {
+						10,
+						10
+					},
+					texture_axis = axis or 1,
+					texture_amount = amount or 3,
+					texture_uvs = texture_uvs,
+					texture_sizes = texture_sizes,
 					masked = masked
 				}
 			},

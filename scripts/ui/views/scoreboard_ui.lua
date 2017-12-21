@@ -555,34 +555,31 @@ ScoreboardUI.handle_interaction = function (self, dt)
 				self.controller_cooldown = controller_cooldown - dt
 			elseif not self.topic_animation_time then
 				local can_vote = self.is_voting_possible(self)
+				local vote_selection_index = self.vote_selection_index
 
-				if can_vote and input_service.get(input_service, "move_up") then
-					local current_vote_selection_index = self.vote_selection_index
-					local new_vote_selection_index = math.max(current_vote_selection_index - 1, 1)
+				if can_vote and vote_selection_index and input_service.get(input_service, "move_up") then
+					local new_vote_selection_index = math.max(vote_selection_index - 1, 1)
 
-					if new_vote_selection_index ~= current_vote_selection_index then
+					if new_vote_selection_index ~= vote_selection_index then
 						self.on_vote_selection_index_changed(self, new_vote_selection_index)
 
 						self.controller_cooldown = GamepadSettings.menu_cooldown
 
 						self.play_sound(self, "Play_hud_select")
 					end
-				elseif can_vote and input_service.get(input_service, "move_down") then
-					local current_vote_selection_index = self.vote_selection_index
+				elseif can_vote and vote_selection_index and input_service.get(input_service, "move_down") then
 					local active_vote_list = self.active_vote_list
-					local new_vote_selection_index = math.min(current_vote_selection_index + 1, #active_vote_list)
+					local new_vote_selection_index = math.min(vote_selection_index + 1, #active_vote_list)
 
-					if new_vote_selection_index ~= current_vote_selection_index then
+					if new_vote_selection_index ~= vote_selection_index then
 						self.on_vote_selection_index_changed(self, new_vote_selection_index)
 
 						self.controller_cooldown = GamepadSettings.menu_cooldown
 
 						self.play_sound(self, "Play_hud_select")
 					end
-				elseif input_service.get(input_service, "refresh") then
-					local current_vote_selection_index = self.vote_selection_index
-
-					self.on_vote_level_pressed(self, current_vote_selection_index)
+				elseif can_vote and vote_selection_index and input_service.get(input_service, "refresh") then
+					self.on_vote_level_pressed(self, vote_selection_index)
 
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 				elseif input_service.get(input_service, "cycle_previous") then

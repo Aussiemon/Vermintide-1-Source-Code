@@ -206,6 +206,7 @@ GenericHitReactionExtension.reset = function (self)
 end
 local biggest_hit = {}
 local conditions = {}
+local temp_effect_results = {}
 GenericHitReactionExtension.update = function (self, unit, input, dt, context, t)
 	local health_extension = self.health_extension
 
@@ -310,12 +311,12 @@ GenericHitReactionExtension.update = function (self, unit, input, dt, context, t
 		debug_printf("    Hit direction: %q", tostring(damage_direction))
 	end
 
-	local hit_effects = self._resolve_effects(self, conditions)
+	local hit_effects, num_effects = self._resolve_effects(self, conditions, temp_effect_results)
 	local parameters = conditions
 
 	Profiler.start("executing effects")
 
-	for i = 1, #hit_effects, 1 do
+	for i = 1, num_effects, 1 do
 		self._execute_effect(self, unit, hit_effects[i], biggest_hit, parameters)
 	end
 
@@ -323,26 +324,27 @@ GenericHitReactionExtension.update = function (self, unit, input, dt, context, t
 
 	return 
 end
-GenericHitReactionExtension._resolve_effects = function (self, conditions)
+GenericHitReactionExtension._resolve_effects = function (self, conditions, results)
 	local template_name = self.hit_effect_template
 	local templates = hit_templates[template_name]
 
 	assert(templates, "Hit effect template %q does not exist", template_name)
 
-	local results = {}
 	local num_conditions = 0
+	local num_results = 0
 
 	for i = 1, #templates, 1 do
 		local current_template = templates[i]
 
 		if check_conditions(conditions, current_template) then
-			results[#results + 1] = current_template
+			num_results = num_results + 1
+			results[num_results] = current_template
 
 			break
 		end
 	end
 
-	return results
+	return results, num_results
 end
 GenericHitReactionExtension._can_wall_nail = function (self, effect_template)
 	local do_dismember = effect_template.do_dismember

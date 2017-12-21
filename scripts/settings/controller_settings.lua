@@ -600,7 +600,13 @@ if Application.platform() == "win32" then
 			}
 		},
 		dodge_hold = {
+			combination_type = "or",
 			input_mappings = {
+				{
+					"gamepad",
+					"a",
+					"held"
+				},
 				{
 					"keyboard",
 					"space",
@@ -838,24 +844,6 @@ if Application.platform() == "win32" then
 				}
 			}
 		},
-		ingame_vote_yes = {
-			input_mappings = {
-				{
-					"keyboard",
-					"f5",
-					"pressed"
-				}
-			}
-		},
-		ingame_vote_no = {
-			input_mappings = {
-				{
-					"keyboard",
-					"f6",
-					"pressed"
-				}
-			}
-		},
 		cursor = {
 			combination_type = "add",
 			input_mappings = {
@@ -922,21 +910,10 @@ if Application.platform() == "win32" then
 	}
 	ChatControllerSettings = {
 		activate_chat_input = {
-			combination_type = "or",
 			input_mappings = {
 				{
 					"keyboard",
 					"y",
-					"pressed"
-				},
-				{
-					"keyboard",
-					"enter",
-					"pressed"
-				},
-				{
-					"keyboard",
-					"numpad enter",
 					"pressed"
 				}
 			}
@@ -1697,6 +1674,36 @@ if Application.platform() == "win32" then
 		}
 	}
 	IngameMenuKeymaps = {
+		ingame_vote_yes = {
+			combination_type = "or",
+			input_mappings = {
+				{
+					"gamepad",
+					"left_shoulder",
+					"held"
+				},
+				{
+					"keyboard",
+					"f5",
+					"pressed"
+				}
+			}
+		},
+		ingame_vote_no = {
+			combination_type = "or",
+			input_mappings = {
+				{
+					"gamepad",
+					"right_shoulder",
+					"held"
+				},
+				{
+					"keyboard",
+					"f6",
+					"pressed"
+				}
+			}
+		},
 		ui_reload_debug = {
 			combination_type = "or",
 			input_mappings = {
@@ -2706,7 +2713,13 @@ elseif Application.platform() == "ps4" then
 			}
 		},
 		dodge_hold = {
+			combination_type = "or",
 			input_mappings = {
+				{
+					"gamepad",
+					"a",
+					"held"
+				},
 				{
 					"keyboard",
 					"space",
@@ -2914,24 +2927,6 @@ elseif Application.platform() == "ps4" then
 				{
 					"keyboard",
 					"s",
-					"pressed"
-				}
-			}
-		},
-		ingame_vote_yes = {
-			input_mappings = {
-				{
-					"keyboard",
-					"f5",
-					"pressed"
-				}
-			}
-		},
-		ingame_vote_no = {
-			input_mappings = {
-				{
-					"keyboard",
-					"f6",
 					"pressed"
 				}
 			}
@@ -3616,6 +3611,36 @@ elseif Application.platform() == "ps4" then
 		}
 	}
 	IngameMenuKeymaps = {
+		ingame_vote_yes = {
+			combination_type = "or",
+			input_mappings = {
+				{
+					"gamepad",
+					"l1",
+					"held"
+				},
+				{
+					"keyboard",
+					"f5",
+					"pressed"
+				}
+			}
+		},
+		ingame_vote_no = {
+			combination_type = "or",
+			input_mappings = {
+				{
+					"gamepad",
+					"l2",
+					"held"
+				},
+				{
+					"keyboard",
+					"f6",
+					"pressed"
+				}
+			}
+		},
 		ui_reload_debug = {
 			input_mappings = {
 				{
@@ -4583,7 +4608,13 @@ elseif Application.platform() == "xb1" then
 			}
 		},
 		dodge_hold = {
+			combination_type = "or",
 			input_mappings = {
+				{
+					"gamepad",
+					"a",
+					"held"
+				},
 				{
 					"keyboard",
 					"space",
@@ -4821,24 +4852,6 @@ elseif Application.platform() == "xb1" then
 				}
 			}
 		},
-		ingame_vote_yes = {
-			input_mappings = {
-				{
-					"keyboard",
-					"f5",
-					"pressed"
-				}
-			}
-		},
-		ingame_vote_no = {
-			input_mappings = {
-				{
-					"keyboard",
-					"f6",
-					"pressed"
-				}
-			}
-		},
 		cursor = {
 			combination_type = "add",
 			input_mappings = {
@@ -4891,16 +4904,10 @@ elseif Application.platform() == "xb1" then
 	}
 	ChatControllerSettings = {
 		activate_chat_input = {
-			combination_type = "or",
 			input_mappings = {
 				{
 					"keyboard",
 					"y",
-					"pressed"
-				},
-				{
-					"keyboard",
-					"enter",
 					"pressed"
 				}
 			}
@@ -5589,6 +5596,36 @@ elseif Application.platform() == "xb1" then
 		}
 	}
 	IngameMenuKeymaps = {
+		ingame_vote_yes = {
+			combination_type = "or",
+			input_mappings = {
+				{
+					"gamepad",
+					"left_shoulder",
+					"held"
+				},
+				{
+					"keyboard",
+					"f5",
+					"pressed"
+				}
+			}
+		},
+		ingame_vote_no = {
+			combination_type = "or",
+			input_mappings = {
+				{
+					"gamepad",
+					"right_shoulder",
+					"held"
+				},
+				{
+					"keyboard",
+					"f6",
+					"pressed"
+				}
+			}
+		},
 		ui_reload_debug = {
 			input_mappings = {
 				{
@@ -5959,7 +5996,8 @@ elseif Application.platform() == "xb1" then
 end
 
 GamepadSettings = {
-	menu_cooldown = 0.1
+	menu_cooldown = 0.1,
+	quest_menu_navigation_cooldown = 0.15
 }
 
 return 

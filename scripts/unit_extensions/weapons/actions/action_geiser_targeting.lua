@@ -21,6 +21,7 @@ ActionGeiserTargeting.init = function (self, world, item_name, is_server, owner_
 end
 ActionGeiserTargeting.client_owner_start_action = function (self, new_action, t)
 	local world = self.world
+	local network_transmit = self.network_transmit
 	self.overcharge_timer = 0
 	self.current_action = new_action
 	local effect_name = new_action.particle_effect
@@ -32,9 +33,9 @@ ActionGeiserTargeting.client_owner_start_action = function (self, new_action, t)
 	local go_id = self.unit_id
 
 	if self.is_server or LEVEL_EDITOR_TEST then
-		self.network_transmit:send_rpc_clients("rpc_start_geiser", go_id, effect_id, new_action.min_radius, new_action.max_radius, new_action.charge_time, self.angle)
+		network_transmit.send_rpc_clients(network_transmit, "rpc_start_geiser", go_id, effect_id, new_action.min_radius, new_action.max_radius, new_action.charge_time, self.angle)
 	else
-		self.network_transmit:send_rpc_server("rpc_start_geiser", go_id, effect_id, new_action.min_radius, new_action.max_radius, new_action.charge_time, self.angle)
+		network_transmit.send_rpc_server(network_transmit, "rpc_start_geiser", go_id, effect_id, new_action.min_radius, new_action.max_radius, new_action.charge_time, self.angle)
 	end
 
 	self.min_radius = new_action.min_radius
@@ -58,6 +59,12 @@ ActionGeiserTargeting.client_owner_start_action = function (self, new_action, t)
 			self.charging_sound_id = wwise_playing_id
 			self.wwise_source_id = wwise_source_id
 		end
+	end
+
+	local charge_sound_husk_name = self.current_action.charge_sound_husk_name
+
+	if charge_sound_husk_name then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_name, owner_unit)
 	end
 
 	self.charge_value = 0
@@ -175,22 +182,30 @@ ActionGeiserTargeting.client_owner_post_update = function (self, dt, t, world, c
 end
 ActionGeiserTargeting.finish = function (self, reason, data)
 	local world = self.world
+	local network_transmit = self.network_transmit
+	local current_action = self.current_action
 	self.targeting_decal = nil
 	local go_id = self.unit_id
 
 	if self.is_server or LEVEL_EDITOR_TEST then
-		self.network_transmit:send_rpc_clients("rpc_end_geiser", go_id)
+		network_transmit.send_rpc_clients(network_transmit, "rpc_end_geiser", go_id)
 	else
-		self.network_transmit:send_rpc_server("rpc_end_geiser", go_id)
+		network_transmit.send_rpc_server(network_transmit, "rpc_end_geiser", go_id)
 	end
 
 	local charging_sound_id = self.charging_sound_id
 
 	if charging_sound_id then
-		ActionUtils.stop_charge_sound(self.wwise_world, charging_sound_id, self.wwise_source_id, self.current_action)
+		ActionUtils.stop_charge_sound(self.wwise_world, charging_sound_id, self.wwise_source_id, current_action)
 
 		self.wwise_source_id = nil
 		self.charging_sound_id = nil
+	end
+
+	local charge_sound_husk_stop_event = current_action.charge_sound_husk_stop_event
+
+	if charge_sound_husk_stop_event then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_stop_event, self.owner_unit)
 	end
 
 	local chain_action_data = {

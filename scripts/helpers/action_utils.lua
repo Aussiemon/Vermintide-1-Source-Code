@@ -44,12 +44,14 @@ ActionUtils.spawn_pickup_projectile = function (world, weapon_unit, projectile_u
 		local death_extension = ScriptUnit.extension(weapon_unit, "death_system")
 		death_extension.thrown = true
 		local has_death_started = death_extension.has_death_started(death_extension)
+		local death_reaction_data = death_extension.death_reaction_data
 		local explode_time = 0
 
 		if has_death_started then
-			explode_time = death_extension.death_reaction_data.explode_time
+			explode_time = death_reaction_data.explode_time
 		end
 
+		local fuse_time = (death_reaction_data and death_reaction_data.fuse_time) or 6
 		local item_name_id = NetworkLookup.item_names[item_name]
 
 		if ScriptUnit.has_extension(weapon_unit, "limited_item_track_system") then
@@ -61,9 +63,9 @@ ActionUtils.spawn_pickup_projectile = function (world, weapon_unit, projectile_u
 			local spawner_unit_id = Level.unit_index(level, spawner_unit)
 			projectile_unit_template_name_id = NetworkLookup.go_types.explosive_pickup_projectile_unit_limited
 
-			Managers.state.network.network_transmit:send_rpc_server("rpc_spawn_explosive_pickup_projectile_limited", projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, spawner_unit_id, limited_item_id, damage, explode_time, item_name_id, spawn_type_id)
+			Managers.state.network.network_transmit:send_rpc_server("rpc_spawn_explosive_pickup_projectile_limited", projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, spawner_unit_id, limited_item_id, damage, explode_time, fuse_time, item_name_id, spawn_type_id)
 		else
-			Managers.state.network.network_transmit:send_rpc_server("rpc_spawn_explosive_pickup_projectile", projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, damage, explode_time, item_name_id, spawn_type_id)
+			Managers.state.network.network_transmit:send_rpc_server("rpc_spawn_explosive_pickup_projectile", projectile_unit_name_id, projectile_unit_template_name_id, network_position, network_rotation, network_velocity, network_angular_velocity, pickup_name_id, damage, explode_time, fuse_time, item_name_id, spawn_type_id)
 		end
 	elseif ScriptUnit.has_extension(weapon_unit, "limited_item_track_system") then
 		local limited_item_extension = ScriptUnit.extension(weapon_unit, "limited_item_track_system")
@@ -200,6 +202,20 @@ ActionUtils.stop_charge_sound = function (wwise_world, wwise_playing_id, wwise_s
 
 	if charge_sound_stop_event then
 		WwiseWorld.trigger_event(wwise_world, charge_sound_stop_event, wwise_source_id)
+	end
+
+	return 
+end
+ActionUtils.play_husk_sound_event = function (sound_event, player_unit)
+	local network_manager = Managers.state.network
+	local network_transmit = network_manager.network_transmit
+	local go_id = network_manager.unit_game_object_id(network_manager, player_unit)
+	local event_id = NetworkLookup.sound_events[sound_event]
+
+	if Managers.player.is_server then
+		network_transmit.send_rpc_clients(network_transmit, "rpc_play_husk_sound_event", go_id, event_id)
+	else
+		network_transmit.send_rpc_server(network_transmit, "rpc_play_husk_sound_event", go_id, event_id)
 	end
 
 	return 

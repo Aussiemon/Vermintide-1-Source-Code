@@ -15,10 +15,42 @@ InteractableSystem.init = function (self, entity_system_creation_context, system
 
 	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
 
+	self.unit_extensions = {}
+
 	return 
 end
 InteractableSystem.destroy = function (self)
 	self.network_event_delegate:unregister(self)
+
+	return 
+end
+InteractableSystem.update = function (self, context, t)
+	Profiler.start("InteractableSystem")
+
+	local dt = context.dt
+
+	if script_data.debug_interactions then
+		for unit, extension in pairs(self.unit_extensions) do
+			local pose, half_extents = Unit.box(unit)
+
+			QuickDrawer:box(pose, half_extents)
+		end
+	end
+
+	Profiler.stop("InteractableSystem")
+
+	return 
+end
+InteractableSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
+	local extension = InteractableSystem.super.on_add_extension(self, world, unit, extension_name, extension_init_data)
+	self.unit_extensions[unit] = extension
+
+	return extension
+end
+InteractableSystem.on_remove_extension = function (self, unit, extension_name)
+	self.unit_extensions[unit] = nil
+
+	InteractableSystem.super.on_remove_extension(self, unit, extension_name)
 
 	return 
 end

@@ -149,12 +149,6 @@ DamageSystem.rpc_add_damage = function (self, sender, victim_unit_go_id, attacke
 			end
 		end
 
-		if ScriptUnit.has_extension(attacker_unit, "buff_system") then
-			local buff_extension = ScriptUnit.extension(attacker_unit, "buff_system")
-
-			buff_extension.add_victim(buff_extension, victim_unit)
-		end
-
 		if ScriptUnit.has_extension(attacker_unit, "hud_system") then
 			local health_extension = ScriptUnit.extension(victim_unit, "health_system")
 
@@ -191,10 +185,6 @@ DamageSystem.rpc_add_damage_multiple = function (self, sender, victim_units, att
 		if victim_unit then
 			if not Unit.alive(victim_unit) then
 			else
-				if buff_extension then
-					buff_extension.add_victim(buff_extension, victim_unit)
-				end
-
 				local victim_position = Unit.local_position(victim_unit, 0)
 				local damage_direction = Vector3.normalize(victim_position - attacker_position)
 

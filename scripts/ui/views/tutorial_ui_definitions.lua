@@ -5,7 +5,7 @@ local INFO_SLATE_SIZE = {
 	500
 }
 local INFO_SLATE_ENTRY_SIZE = {
-	450,
+	550,
 	66
 }
 local INFO_SLATE_ENTRY_SPACING = 30
@@ -20,14 +20,18 @@ local INFO_SLATE_GLOW_UV_SIZE = {
 local INFO_SLATE_ENTRY_HEIGHT_SPACING = 20
 local NUMBER_OF_INFO_SLATE_ENTRIES = 4
 local NUMBER_OF_HEALTH_BARS = 10
-local NUMBER_OF_OBJECTIVE_TOOLTIPS = 5
-local HEALTH_BAR_SIZE = {
-	72,
-	8
-}
+local NUMBER_OF_OBJECTIVE_TOOLTIPS = 6
 local FLOATING_ICON_SIZE = {
 	64,
 	64
+}
+local HEALTH_BAR_SIZE_FG = {
+	137,
+	7
+}
+local HEALTH_BAR_SIZE_BG = {
+	147,
+	17
 }
 local scenegraph_definition = {
 	root = {
@@ -502,7 +506,7 @@ local function create_health_bar_definitions(num_health_bars)
 				0,
 				1
 			},
-			size = HEALTH_BAR_SIZE
+			size = HEALTH_BAR_SIZE_FG
 		}
 		local health_bar_definition = {
 			element = {
@@ -516,24 +520,18 @@ local function create_health_bar_definitions(num_health_bars)
 						texture_id = "texture_fg",
 						style_id = "texture_fg",
 						pass_type = "texture"
-					},
-					{
-						texture_id = "texture_filler",
-						style_id = "texture_filler",
-						pass_type = "texture"
 					}
 				}
 			},
 			content = {
-				texture_fg = "objective_hp_bar_fg",
-				texture_bg = "objective_hp_bar_bg",
-				texture_filler = "objective_hp_bar_filler_red"
+				texture_fg = "objective_hp_bar_fg_2",
+				texture_bg = "objective_hp_bar_bg_2"
 			},
 			style = {
 				texture_bg = {
-					size = HEALTH_BAR_SIZE,
+					size = HEALTH_BAR_SIZE_BG,
 					offset = {
-						-HEALTH_BAR_SIZE[1]/2,
+						-HEALTH_BAR_SIZE_BG[1]/2,
 						0,
 						1
 					},
@@ -546,25 +544,10 @@ local function create_health_bar_definitions(num_health_bars)
 					scenegraph_id = scenegraph_id
 				},
 				texture_fg = {
-					size = HEALTH_BAR_SIZE,
+					size = HEALTH_BAR_SIZE_FG,
 					offset = {
-						-HEALTH_BAR_SIZE[1]/2,
-						0,
-						1
-					},
-					color = {
-						255,
-						255,
-						255,
-						255
-					},
-					scenegraph_id = scenegraph_id
-				},
-				texture_filler = {
-					size = HEALTH_BAR_SIZE,
-					offset = {
-						-HEALTH_BAR_SIZE[1]/2,
-						0,
+						-HEALTH_BAR_SIZE_FG[1]/2,
+						5,
 						1
 					},
 					color = {
@@ -1087,10 +1070,11 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 			style = {
 				text = {
 					font_size = 30,
-					pixel_perfect = true,
+					pixel_perfect = false,
 					horizontal_alignment = "left",
 					vertical_alignment = "center",
-					dynamic_font = true,
+					dynamic_font = false,
+					allow_fractions = true,
 					font_type = "hell_shark",
 					text_color = Colors.get_color_table_with_alpha("white", 255),
 					offset = {
@@ -1112,7 +1096,8 @@ local function create_objective_tooltip_definitions(num_objective_tooltips)
 						255,
 						255
 					},
-					scenegraph_id = scenegraph_icon
+					scenegraph_id = scenegraph_icon,
+					size = FLOATING_ICON_SIZE
 				},
 				arrow = {
 					angle = 0,

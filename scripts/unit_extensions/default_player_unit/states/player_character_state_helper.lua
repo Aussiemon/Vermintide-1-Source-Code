@@ -1,41 +1,27 @@
 CharacterStateHelper = CharacterStateHelper or {}
 local CharacterStateHelper = CharacterStateHelper
-local is_windows_platform = Application.platform() == "win32"
 CharacterStateHelper.get_movement_input = function (input_extension)
-	local move_input = input_extension.get(input_extension, "move")
-	local move_input_xbox = input_extension.get(input_extension, "move_controller")
-	local movement = Vector3(0, 0, 0)
+	local move_input = input_extension.get(input_extension, "move") or Vector3(0, 0, 0)
+	local move_input_controller = input_extension.get(input_extension, "move_controller") or Vector3(0, 0, 0)
+	local movement = nil
 
-	if move_input then
-		movement = movement + move_input
+	if Vector3.length(move_input_controller) < Vector3.length(move_input) then
+		movement = Vector3.normalize(move_input)
+	else
+		movement = move_input_controller
 	end
 
-	if is_windows_platform then
-		local move_input_dpad = input_extension.get(input_extension, "move_dpad")
+	return movement
+end
+CharacterStateHelper.get_square_movement_input = function (input_extension)
+	local move_input = input_extension.get(input_extension, "move") or Vector3(0, 0, 0)
+	local move_input_controller = input_extension.get(input_extension, "move_controller") or Vector3(0, 0, 0)
+	local movement = nil
 
-		if move_input_dpad then
-			if math.abs(Vector3.x(move_input_dpad)) < 0.1 then
-				Vector3.set_x(move_input_dpad, 0)
-			end
-
-			if math.abs(Vector3.y(move_input_dpad)) < 0.1 then
-				Vector3.set_y(move_input_dpad, 0)
-			end
-
-			movement = movement + move_input_dpad
-		end
-	end
-
-	if move_input_xbox then
-		if math.abs(Vector3.x(move_input_xbox)) < 0.1 then
-			Vector3.set_x(move_input_xbox, 0)
-		end
-
-		if math.abs(Vector3.y(move_input_xbox)) < 0.1 then
-			Vector3.set_y(move_input_xbox, 0)
-		end
-
-		movement = movement + move_input_xbox
+	if Vector3.length(move_input_controller) < Vector3.length(move_input) then
+		movement = move_input
+	else
+		movement = math.circular_to_square_coordinates(move_input_controller)
 	end
 
 	return movement
@@ -75,7 +61,6 @@ CharacterStateHelper.update_dodge_lock = function (unit, input_extension, status
 
 	return 
 end
-local START_DODGE_Y_INPUT_LOWER_THAN_VALUE = 0.2
 local DOUBLE_TAP_DODGES = {
 	move_left_pressed = Vector3Box(-Vector3.right()),
 	move_right_pressed = Vector3Box(Vector3.right()),
@@ -94,39 +79,34 @@ CharacterStateHelper.check_to_start_dodge = function (unit, input_extension, sta
 	local dodge_direction = Vector3(0, 0, 0)
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local input = CharacterStateHelper.get_movement_input(input_extension)
-	local dodge_input = input_extension.get(input_extension, "dodge")
-	local dodge_hold = input_extension.get(input_extension, "dodge_hold")
 	local dodge_on_jump_key = input_extension.dodge_on_jump_key
 	local dodge_on_forward_diagonal = input_extension.dodge_on_forward_diagonal
 	local double_tap_dodge = input_extension.double_tap_dodge
-	local y_input = Vector3.y(input)
-	local dodge_forward_threshold = y_input <= START_DODGE_Y_INPUT_LOWER_THAN_VALUE or (dodge_on_forward_diagonal and 0.707 < math.abs(Vector3.x(input)))
+	local dodge_hold = input_extension.get(input_extension, "dodge_hold")
+	local dodge_input = input_extension.get(input_extension, "dodge") or (dodge_on_jump_key and dodge_hold)
+	local input_length = Vector3.length(input)
+	local using_keyboard = not Managers.input:is_device_active("gamepad")
+	local stationary_dodge = Application.user_setting("toggle_stationary_dodge")
 
-	if dodge_on_jump_key and dodge_hold and dodge_forward_threshold and 0 < Vector3.length(input) then
+	if 0 < input_length then
+		local normalized_input = input/input_length
+		local x = normalized_input.x
+		local y = normalized_input.y
+		local abs_x = math.abs(x)
+		local forward_ok = y <= 0 or (not using_keyboard and 0.9239 < abs_x) or (dodge_on_forward_diagonal and 0.707 < abs_x)
+
+		if forward_ok and dodge_input then
+			start_dodge = true
+
+			if 0 < y then
+				dodge_direction = Vector3(math.sign(x), 0, 0)
+			else
+				dodge_direction = normalized_input
+			end
+		end
+	elseif dodge_input and stationary_dodge then
 		start_dodge = true
-
-		Vector3.set_y(input, math.min(0, y_input))
-
-		dodge_direction = Vector3.normalize(input)
-	elseif dodge_input then
-		if Vector3.length(input) == 0 then
-			local platform = Application.platform()
-			start_dodge = platform ~= "xb1" and platform ~= "ps4"
-			dodge_direction = -Vector3.forward()
-		elseif dodge_forward_threshold then
-			start_dodge = true
-
-			Vector3.set_y(input, math.min(0, y_input))
-
-			dodge_direction = Vector3.normalize(input)
-		elseif script_data.allow_forward_dodge then
-			start_dodge = true
-			dodge_direction = Vector3.normalize(input)
-		end
-
-		if start_dodge then
-			input_extension.get(input_extension, "dodge", true)
-		end
+		dodge_direction = -Vector3.forward()
 	elseif double_tap_dodge then
 		for input, dir in pairs(DOUBLE_TAP_DODGES) do
 			if input_extension.get(input_extension, input) then
@@ -156,7 +136,7 @@ CharacterStateHelper.check_to_start_dodge = function (unit, input_extension, sta
 		status_extension.set_dodge_locked(status_extension, true)
 		status_extension.add_dodge_cooldown(status_extension)
 
-		slot15 = ScriptUnit.extension(unit, "first_person_system")
+		slot16 = ScriptUnit.extension(unit, "first_person_system")
 	end
 
 	return start_dodge, dodge_direction
@@ -172,69 +152,6 @@ CharacterStateHelper.move_on_ground = function (first_person_extension, input_ex
 	end
 
 	locomotion_extension.set_wanted_velocity(locomotion_extension, move_direction*speed)
-
-	return 
-end
-CharacterStateHelper.move_on_ladder = function (first_person_extension, rotation, input_extension, locomotion_extension, unit, speed, ladder_offset)
-	local movement = CharacterStateHelper.get_movement_input(input_extension)
-	local x_input = Vector3.x(movement)
-	local y_input = Vector3.y(movement)
-	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
-	local mover = Unit.mover(unit)
-	local direction = nil
-	local collides_down = Mover.collides_down(mover)
-
-	if collides_down and y_input <= 0 then
-		direction = Vector3(x_input, y_input, 0)
-	else
-		local first_person_unit = first_person_extension.get_first_person_unit(first_person_extension)
-		local player_rotation = Unit.local_rotation(first_person_unit, 0)
-		local player_pitch = Quaternion.pitch(player_rotation)
-		local pitch_value = player_pitch + math.degrees_to_radians(movement_settings_table.ladder.climb_pitch_offset)
-
-		if collides_down and pitch_value < 0 and 0 < y_input then
-			pitch_value = 0
-		end
-
-		local speed_lerp_interval = math.degrees_to_radians(movement_settings_table.ladder.climb_speed_lerp_interval)
-		local pitch_value = math.clamp(math.auto_lerp(-speed_lerp_interval, speed_lerp_interval, -1, 1, pitch_value), -1, 1)
-
-		if 0 < y_input or (y_input < 0 and not collides_down) then
-			local percentage_to_increase_input = nil
-
-			if 0 < pitch_value then
-				percentage_to_increase_input = (pitch_value - 1)*(pitch_value - 1) - 1
-			else
-				percentage_to_increase_input = (pitch_value - -1)*(pitch_value - -1) + -1
-			end
-
-			y_input = y_input*percentage_to_increase_input
-		end
-
-		if collides_down then
-			if 0 < y_input then
-				direction = Vector3(x_input*movement_settings_table.ladder.climb_horizontals_multiplier, 0, y_input)
-			else
-				direction = Vector3(x_input, y_input, 0)
-			end
-		else
-			if Vector3.dot(Quaternion.forward(player_rotation), Quaternion.forward(rotation)) < 0 then
-				x_input = -x_input
-			end
-
-			direction = Vector3(x_input*movement_settings_table.ladder.climb_horizontals_multiplier, 0, y_input)
-		end
-	end
-
-	local move_direction = Quaternion.rotate(rotation, direction)
-	local current_velocity = locomotion_extension.current_velocity(locomotion_extension)
-	local no_movement = Vector3.length(movement) == 0
-
-	if no_movement and 0 < Vector3.length(current_velocity) then
-		move_direction = Vector3.normalize(current_velocity)
-	end
-
-	locomotion_extension.set_wanted_velocity(locomotion_extension, move_direction*speed + ladder_offset*Quaternion.forward(rotation)*4)
 
 	return 
 end
@@ -919,8 +836,11 @@ local function validate_action(unit, action_name, sub_action_name, action_settin
 	local wield_input = CharacterStateHelper.wield_input(input_extension, inventory_extension, action_name)
 	local buffered_input = input_extension.get_buffer(input_extension, action_name)
 	local action_input = input_extension.get(input_extension, action_name)
+	local action_hold_input = hold_input and input_extension.get(input_extension, hold_input)
+	local allow_toggle = action_settings.allow_hold_toggle
+	local hold_or_toggle_input = (allow_toggle and action_input) or (not allow_toggle and (action_input or action_hold_input))
 
-	if auto_validate_on_gamepad or action_input or wield_input or buffered_input or (hold_input and input_extension.get(input_extension, hold_input)) then
+	if auto_validate_on_gamepad or wield_input or buffered_input or hold_or_toggle_input then
 		local condition_func = action_settings.condition_func
 		local condition_passed = nil
 
@@ -964,10 +884,22 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 	local item_template = BackendUtils.get_item_template(item_data)
 	local recent_damage_type = damage_extension.recently_damaged(damage_extension)
 	local status_extension = ScriptUnit.extension(unit, "status_system")
-	local can_interrupt = nil
+	local can_interrupt, reloading = nil
 
 	if recent_damage_type and weapon_action_interrupt_damage_types[recent_damage_type] then
-		if (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible then
+		local ammo_extension = (left_hand_weapon_extension and left_hand_weapon_extension.ammo_extension) or (right_hand_weapon_extension and right_hand_weapon_extension.ammo_extension)
+
+		if ammo_extension then
+			if left_hand_weapon_extension and left_hand_weapon_extension.ammo_extension then
+				reloading = left_hand_weapon_extension.ammo_extension:is_reloading()
+			end
+
+			if right_hand_weapon_extension and right_hand_weapon_extension.ammo_extension then
+				reloading = right_hand_weapon_extension.ammo_extension:is_reloading()
+			end
+		end
+
+		if (current_action_settings and current_action_settings.uninterruptible) or script_data.uninterruptible or reloading then
 			can_interrupt = false
 		else
 			can_interrupt = status_extension.hitreact_interrupt(status_extension)
@@ -996,10 +928,20 @@ CharacterStateHelper.update_weapon_actions = function (t, unit, input_extension,
 		end
 
 		if not new_action then
-			local input_id = current_action_settings.hold_input
+			if current_action_settings.allow_hold_toggle and input_extension.toggle_alternate_attack then
+				local input_id = current_action_settings.lookup_data.action_name
 
-			if input_id and not input_extension.get(input_extension, input_id) and current_action_extension.can_stop_hold_action(current_action_extension, t) then
-				current_action_extension.stop_action(current_action_extension, "hold_input_released")
+				if input_id and input_extension.get(input_extension, input_id, true) and current_action_extension.can_stop_hold_action(current_action_extension, t) then
+					current_action_extension.stop_action(current_action_extension, "hold_input_released")
+					print("toggled hold", current_action_settings.lookup_data.action_name)
+				end
+			else
+				local input_id = current_action_settings.hold_input
+
+				if input_id and not input_extension.get(input_extension, input_id) and current_action_extension.can_stop_hold_action(current_action_extension, t) then
+					current_action_extension.stop_action(current_action_extension, "hold_input_released")
+					print("released hold", current_action_settings.lookup_data.action_name)
+				end
 			end
 		end
 	elseif item_template.next_action then
@@ -1197,8 +1139,7 @@ end
 local EPSILON_MOVEMENT_SPEED_TO_IDLE_ANIM = 0.05
 local SLOW_MOVEMENT_SPEED = 2.1
 CharacterStateHelper.get_move_animation = function (locomotion_extension, input_extension, status_extension)
-	local movement = CharacterStateHelper.get_movement_input(input_extension)
-	local move_direction = Vector3.normalize(movement)
+	local move_direction = CharacterStateHelper.get_movement_input(input_extension)
 	local slowed = Vector3.length(Vector3.flat(locomotion_extension.current_velocity(locomotion_extension))) < SLOW_MOVEMENT_SPEED
 
 	if Vector3.length(locomotion_extension.current_velocity(locomotion_extension)) < EPSILON_MOVEMENT_SPEED_TO_IDLE_ANIM then

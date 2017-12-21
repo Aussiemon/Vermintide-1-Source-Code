@@ -3,6 +3,8 @@ require("core/wwise/lua/wwise_flow_callbacks")
 require("scripts/helpers/nav_tag_volume_utils")
 require("scripts/settings/difficulty_settings")
 
+local flow_return_table = Boot.flow_return_table
+
 function flow_callback_define_spawn(params)
 	return 
 end
@@ -100,20 +102,18 @@ end
 
 function flow_callback_query_server_seeded_random_int(params)
 	local rnd = server_seeded_random(params.min or 0, params.max or 1, params.debug_name)
+	flow_return_table.value = rnd
 
-	return {
-		value = rnd
-	}
+	return flow_return_table
 end
 
 function flow_callback_query_server_seeded_random_float(params)
 	local min = params.min or 0
 	local max = params.max or 1
 	local rnd = server_seeded_random(nil, nil, params.debug_name)
+	flow_return_table.value = min + rnd*(max - min)
 
-	return {
-		value = min + rnd*(max - min)
-	}
+	return flow_return_table
 end
 
 function flow_callback_server_seeded_randomize(params)
@@ -121,6 +121,40 @@ function flow_callback_server_seeded_randomize(params)
 	local rnd = server_seeded_random(1, max, params.debug_name)
 	local ret = {
 		[tostring(rnd)] = true
+	}
+
+	return ret
+end
+
+function flow_callback_randomize_sequential_numbers(params)
+	local max = params.max
+	local numbers = {}
+
+	for j = 1, max, 1 do
+		numbers[j] = j
+	end
+
+	for i = 1, 10, 1 do
+		local random1 = server_seeded_random(1, max, params.debug_name)
+		local random2 = server_seeded_random(1, max, params.debug_name)
+		numbers[random2] = numbers[random1]
+		numbers[random1] = numbers[random2]
+	end
+
+	local ret = {}
+
+	for k = 1, max, 1 do
+		ret[tostring(k)] = numbers[k]
+	end
+
+	return ret
+end
+
+function flow_callback_select_output_by_number(params)
+	local num = params.num
+	local output = params[tostring(num)]
+	local ret = {
+		["out_" .. tostring(output)] = true
 	}
 
 	return ret
@@ -143,11 +177,9 @@ function flow_query_number_of_active_players(params)
 
 	print("flow_query_number_of_active_players:", output_value)
 
-	local returns = {
-		value = output_value
-	}
+	flow_return_table.value = output_value
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_play_music(params)
@@ -199,11 +231,9 @@ function flow_callback_activate_triggered_pickup_spawners(params)
 		spawned_unit = pickup_system.activate_triggered_pickup_spawners(pickup_system, params.triggered_spawn_id)
 	end
 
-	local returns = {
-		spawned_pickup_unit = spawned_unit
-	}
+	flow_return_table.spawned_pickup_unit = spawned_unit
 
-	return returns
+	return flow_return_table
 end
 
 function flow_query_wielded_weapon(params)
@@ -225,18 +255,16 @@ function flow_query_wielded_weapon(params)
 	local left_hand_ammo_unit_3p = equipment.left_hand_ammo_unit_3p
 	local left_hand_wielded_unit = equipment.left_hand_wielded_unit
 	local left_hand_ammo_unit_1p = equipment.left_hand_ammo_unit_1p
-	local returns = {
-		righthandweapon3p = right_hand_wielded_unit_3p,
-		righthandammo3p = right_hand_ammo_unit_3p,
-		righthandweapon = right_hand_wielded_unit,
-		righthandammo1p = right_hand_ammo_unit_1p,
-		lefthandweapon3p = left_hand_wielded_unit_3p,
-		lefthandammo3p = left_hand_ammo_unit_3p,
-		lefthandweapon = left_hand_wielded_unit,
-		lefthandammo1p = left_hand_ammo_unit_1p
-	}
+	flow_return_table.righthandweapon3p = right_hand_wielded_unit_3p
+	flow_return_table.righthandammo3p = right_hand_ammo_unit_3p
+	flow_return_table.righthandweapon = right_hand_wielded_unit
+	flow_return_table.righthandammo1p = right_hand_ammo_unit_1p
+	flow_return_table.lefthandweapon3p = left_hand_wielded_unit_3p
+	flow_return_table.lefthandammo3p = left_hand_ammo_unit_3p
+	flow_return_table.lefthandweapon = left_hand_wielded_unit
+	flow_return_table.lefthandammo1p = left_hand_ammo_unit_1p
 
-	return returns
+	return flow_return_table
 end
 
 function flow_camera_shake(params)
@@ -570,28 +598,21 @@ function flow_callback_is_local_player(params)
 	local unit = params.unit
 	local player = Managers.player:players()[1]
 	local player_unit = player.player_unit
-	local returns = nil
 
 	if Unit.alive(player_unit) then
 		if unit == player_unit then
-			returns = {
-				is_not_player = false,
-				is_player = true
-			}
+			flow_return_table.is_player = true
+			flow_return_table.is_not_player = false
 		else
-			returns = {
-				is_not_player = true,
-				is_player = false
-			}
+			flow_return_table.is_player = false
+			flow_return_table.is_not_player = true
 		end
 	else
-		returns = {
-			is_not_player = true,
-			is_player = false
-		}
+		flow_return_table.is_player = false
+		flow_return_table.is_not_player = true
 	end
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_get_unit_type(params)
@@ -600,42 +621,34 @@ function flow_callback_get_unit_type(params)
 	local bot = Unit.get_data(unit, "bot")
 
 	if breed or bot then
-		return {
-			is_local_player = false,
-			is_environment = false,
-			is_remote_player = false,
-			is_ai = true
-		}
+		flow_return_table.is_local_player = false
+		flow_return_table.is_remote_player = false
+		flow_return_table.is_ai = true
+		flow_return_table.is_environment = false
 	else
 		local player_unit = Managers.player:owner(unit)
 
 		if player_unit ~= nil then
 			if player_unit.remote then
-				return {
-					is_local_player = true,
-					is_environment = false,
-					is_remote_player = false,
-					is_ai = false
-				}
+				flow_return_table.is_local_player = true
+				flow_return_table.is_remote_player = false
+				flow_return_table.is_ai = false
+				flow_return_table.is_environment = false
 			else
-				return {
-					is_local_player = false,
-					is_environment = false,
-					is_remote_player = true,
-					is_ai = false
-				}
+				flow_return_table.is_local_player = false
+				flow_return_table.is_remote_player = true
+				flow_return_table.is_ai = false
+				flow_return_table.is_environment = false
 			end
+		else
+			flow_return_table.is_local_player = false
+			flow_return_table.is_remote_player = false
+			flow_return_table.is_ai = false
+			flow_return_table.is_environment = true
 		end
-
-		return {
-			is_local_player = false,
-			is_environment = true,
-			is_remote_player = false,
-			is_ai = false
-		}
 	end
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_trigger_sound(params)
@@ -748,10 +761,10 @@ function flow_callback_create_networked_flow_state(params)
 	local created, out_value = Managers.state.networked_flow_state:flow_cb_create_state(params.unit, params.state_name, params.in_value, params.client_state_changed_event, params.client_hot_join_event)
 
 	if created then
-		return {
-			created = created,
-			out_value = out_value
-		}
+		flow_return_table.created = created
+		flow_return_table.out_value = out_value
+
+		return flow_return_table
 	end
 
 	return 
@@ -761,10 +774,10 @@ function flow_callback_change_networked_flow_state(params)
 	local changed, out_value = Managers.state.networked_flow_state:flow_cb_change_state(params.unit, params.state_name, params.in_value)
 
 	if changed then
-		return {
-			changed = changed,
-			out_value = out_value
-		}
+		flow_return_table.changed = changed
+		flow_return_table.out_value = out_value
+
+		return flow_return_table
 	end
 
 	return 
@@ -772,28 +785,25 @@ end
 
 function flow_callback_get_networked_flow_state(params)
 	local out_value = Managers.state.networked_flow_state:flow_cb_get_state(params.unit, params.state_name)
+	flow_return_table.out_value = out_value
 
-	return {
-		out_value = out_value
-	}
+	return flow_return_table
 end
 
 function flow_callback_client_networked_flow_state_changed(params)
 	local out_value = Managers.state.networked_flow_state:flow_cb_get_state(params.unit, params.state_name)
+	flow_return_table.changed = true
+	flow_return_table.out_value = out_value
 
-	return {
-		changed = true,
-		out_value = out_value
-	}
+	return flow_return_table
 end
 
 function flow_callback_client_networked_flow_state_set(params)
 	local out_value = Managers.state.networked_flow_state:flow_cb_get_state(params.unit, params.state_name)
+	flow_return_table.set = true
+	flow_return_table.out_value = out_value
 
-	return {
-		set = true,
-		out_value = out_value
-	}
+	return flow_return_table
 end
 
 function flow_callback_create_networked_story(params)
@@ -821,10 +831,10 @@ function flow_callback_stop_networked_story(params)
 end
 
 function flow_callback_invert_bool(params)
-	return {
-		out = true,
-		out_value = not params.in_value
-	}
+	flow_return_table.out = true
+	flow_return_table.out_value = not params.in_value
+
+	return flow_return_table
 end
 
 function flow_callback_projectile_bounce(params)
@@ -841,9 +851,11 @@ function flow_callback_projectile_bounce(params)
 	return 
 end
 
+local temp = {}
+
 function flow_callback_get_random_player(params)
 	local players = Managers.player:human_and_bot_players()
-	local unit_list = {}
+	local unit_list = temp
 	local unit_list_n = 0
 
 	for index, player in pairs(players) do
@@ -857,10 +869,9 @@ function flow_callback_get_random_player(params)
 
 	if 0 < unit_list_n then
 		local unit = unit_list[math.random(1, unit_list_n)]
+		flow_return_table.playerunit = unit
 
-		return {
-			playerunit = unit
-		}
+		return flow_return_table
 	end
 
 	return nil
@@ -983,10 +994,9 @@ function flow_callback_occupied_sockets_query(params)
 	local socket_unit = params.socket_unit
 	local objective_socket_extension = ScriptUnit.extension(socket_unit, "objective_socket_system")
 	local num_closed_sockets = objective_socket_extension.num_closed_sockets
+	flow_return_table.sockets = num_closed_sockets
 
-	return {
-		sockets = num_closed_sockets
-	}
+	return flow_return_table
 end
 
 function flow_callback_register_environment_volume(params)
@@ -1181,11 +1191,10 @@ function flow_callback_wwise_trigger_event_with_environment(params)
 	sound_environment_system.set_source_environment(sound_environment_system, source, position)
 
 	local id = WwiseWorld.trigger_event(wwise_world, event, use_occlusion, source)
+	flow_return_table.playing_id = id
+	flow_return_table.source_id = source
 
-	return {
-		playing_id = id,
-		source_id = source
-	}
+	return flow_return_table
 end
 
 function flow_callback_wwise_create_environment_sampled_source(params)
@@ -1214,9 +1223,9 @@ function flow_callback_wwise_create_environment_sampled_source(params)
 
 	sound_environment_system.set_source_environment(sound_environment_system, source, pos)
 
-	return {
-		source_id = source
-	}
+	flow_return_table.source_id = source
+
+	return flow_return_table
 end
 
 function flow_callback_wwise_register_source_environment_update(params)
@@ -1374,13 +1383,11 @@ function flow_query_slots_status(params)
 	local slot_healthkit = equipment.slots.slot_healthkit
 	local slot_grenade = equipment.slots.slot_grenade
 	local slot_potion = equipment.slots.slot_potion
-	local returns = {
-		healthkit = slot_healthkit ~= nil,
-		grenade = slot_grenade ~= nil,
-		potion = slot_potion ~= nil
-	}
+	flow_return_table.healthkit = slot_healthkit ~= nil
+	flow_return_table.grenade = slot_grenade ~= nil
+	flow_return_table.potion = slot_potion ~= nil
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_damage_player_bot_ai(params)
@@ -1423,9 +1430,9 @@ function flow_callback_get_health_player_bot_ai(params)
 		end
 	end
 
-	return {
-		currenthealth = current_health
-	}
+	flow_return_table.currenthealth = current_health
+
+	return flow_return_table
 end
 
 function flow_callback_clear_slot(params)
@@ -1490,9 +1497,24 @@ function flow_callback_overcharge_heal_unit(params)
 
 		Managers.state.network.network_transmit:send_rpc_clients("rpc_level_object_heal", level_index, health_added)
 
-		return {
-			current_health = unit_health
-		}
+		flow_return_table.current_health = unit_health
+
+		return flow_return_table
+	end
+
+	return 
+end
+
+function flow_callback_overcharge_init_unit(params)
+	local unit = params.unit
+	local damage = params.damage
+
+	if Unit.alive(unit) then
+		fassert(ScriptUnit.has_extension(unit, "health_system"), "Tried to damage overcharge unit %s from flow but the unit has no health extension", unit)
+
+		local health_extension = ScriptUnit.extension(unit, "health_system")
+
+		health_extension.add_damage(health_extension, damage)
 	end
 
 	return 
@@ -1685,21 +1707,16 @@ function flow_callback_check_progression_unlocked(params)
 	local level = ExperienceSettings.get_level(experience)
 	local prestige = ScriptBackendProfileAttribute.get("prestige")
 	local can_use = ProgressionUnlocks.is_unlocked(name, level, prestige)
-	local returns = nil
 
 	if can_use then
-		returns = {
-			is_locked = false,
-			is_unlocked = true
-		}
+		flow_return_table.is_unlocked = true
+		flow_return_table.is_locked = false
 	else
-		returns = {
-			is_locked = true,
-			is_unlocked = false
-		}
+		flow_return_table.is_unlocked = false
+		flow_return_table.is_locked = true
 	end
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_trigger_dialogue_story(params)
@@ -1720,6 +1737,32 @@ function flow_callback_trigger_cutscene_subtitles(params)
 	return 
 end
 
+function flow_callback_damage_unit(params)
+	if not Managers.player.is_server then
+		return 
+	end
+
+	local unit = params.unit
+	local damage = params.damage
+
+	if Unit.alive(unit) then
+		fassert(ScriptUnit.has_extension(unit, "health_system"), "Tried to damage unit %s from flow but the unit has no health extension", unit)
+
+		local health_extension = ScriptUnit.extension(unit, "health_system")
+
+		health_extension.add_damage(health_extension, damage)
+
+		local unit_health = health_extension.current_health(health_extension)
+		local level_index, is_level_unit = Managers.state.network:game_object_or_level_id(unit)
+		local hit_normal = Vector3(0, 0, 0)
+		local damage_source_id = NetworkLookup.damage_sources.wounded_degen
+
+		Managers.state.network.network_transmit:send_rpc_clients("rpc_level_object_damage", level_index, damage, hit_normal, damage_source_id)
+	end
+
+	return 
+end
+
 function flow_callback_get_current_inn_level_progression(params)
 	local player_manager = Managers.player
 	local statistics_db = player_manager.statistics_db(player_manager)
@@ -1728,15 +1771,12 @@ function flow_callback_get_current_inn_level_progression(params)
 	if server_player then
 		local stats_id = server_player.stats_id(server_player)
 		local result = LevelUnlockUtils.current_act_progression_index(statistics_db, stats_id)
-
-		return {
-			progression_step = result
-		}
+		flow_return_table.progression_step = result
+	else
+		flow_return_table.progression_step = 0
 	end
 
-	return {
-		progression_step = 0
-	}
+	return flow_return_table
 end
 
 function flow_callback_get_completed_drachenfels_difficulty(params)
@@ -1755,6 +1795,38 @@ function flow_callback_get_completed_drachenfels_difficulty(params)
 
 		for _, level_key in ipairs(levels) do
 			local difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_key)
+
+			if not result or difficulty_index < result then
+				result = difficulty_index
+			end
+		end
+
+		return {
+			completed_difficulty = result
+		}
+	end
+
+	return {
+		completed_difficulty = 0
+	}
+end
+
+function flow_callback_get_completed_dwarf_levels_difficulty(params)
+	local player_manager = Managers.player
+	local statistics_db = player_manager.statistics_db(player_manager)
+	local server_player = Managers.player:server_player()
+
+	if server_player then
+		local levels = {
+			"dlc_dwarf_exterior",
+			"dlc_dwarf_interior",
+			"dlc_dwarf_beacons"
+		}
+		local result = nil
+		local stats_id = server_player.stats_id(server_player)
+
+		for _, level_key in ipairs(levels) do
+			local difficulty_index = LevelUnlockUtils.completed_level_difficulty(statistics_db, stats_id, level_key)
 
 			if not result or difficulty_index < result then
 				result = difficulty_index
@@ -2023,11 +2095,9 @@ function flow_query_settings_data(params)
 	end
 
 	local output_value = GameSettingsDevelopment[setting]
-	local returns = {
-		value = output_value
-	}
+	flow_return_table.value = output_value
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_survival_handler(params)
@@ -2184,19 +2254,17 @@ function flow_callback_get_difficulty(params)
 		difficulty_survival_hardest = true
 	end
 
-	local returns = {
-		easy = difficulty_easy,
-		normal = difficulty_normal,
-		hard = difficulty_hard,
-		survival_hard = difficulty_survival_hard,
-		harder = difficulty_harder,
-		survival_harder = difficulty_survival_harder,
-		hardest = difficulty_hardest,
-		survival_hardest = difficulty_survival_hardest,
-		difficulty = getdifficulty
-	}
+	flow_return_table.easy = difficulty_easy
+	flow_return_table.normal = difficulty_normal
+	flow_return_table.hard = difficulty_hard
+	flow_return_table.survival_hard = difficulty_survival_hard
+	flow_return_table.harder = difficulty_harder
+	flow_return_table.survival_harder = difficulty_survival_harder
+	flow_return_table.hardest = difficulty_hardest
+	flow_return_table.survival_hardest = difficulty_survival_hardest
+	flow_return_table.difficulty = getdifficulty
 
-	return returns
+	return flow_return_table
 end
 
 function flow_callback_enable_end_level_area(params)
@@ -2330,6 +2398,43 @@ function flow_callback_set_particles_light_intensity_exponent(params)
 	local world = Application.flow_callback_context_world()
 
 	World.set_particles_light_intensity_exponent(world, id, exp)
+
+	return 
+end
+
+function flow_callback_set_camera_far_range(params)
+	if Application.platform() == "win32" then
+		Application.warning("[flow_callback_set_camera_far_range] This flow callback is not allowed on win32 - early out")
+
+		return 
+	end
+
+	local world_name = params.world_name
+	local viewport_name = params.viewport_name
+	local far_range = params.far_range
+	local world = Managers.world:world(world_name)
+
+	fassert(world, "[flow_callback_set_camera_far_range] There is currently no world called %s", world_name)
+
+	local viewport = World.get_data(world, "viewports")[viewport_name]
+
+	fassert(world, "[flow_callback_set_camera_far_range] There is currently no viewport called %s in world %s", viewport_name, world_name)
+	fassert(far_range, "[flow_callback_set_camera_far_range] No far range provided", far_range)
+
+	local camera = ScriptViewport.camera(viewport)
+
+	Camera.set_data(camera, "far_range", far_range)
+
+	return 
+end
+
+function flow_callback_barrel_explode(params)
+	local unit = params.unit
+	local health_extension = ScriptUnit.extension(unit, "health_system")
+	local damage_extension = ScriptUnit.extension(unit, "damage_system")
+
+	health_extension.set_max_health(health_extension, 1)
+	damage_extension.add_damage(damage_extension, unit, 1, "full", "grenade", Vector3(1, 0, 0))
 
 	return 
 end

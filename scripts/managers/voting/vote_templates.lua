@@ -95,7 +95,7 @@ VoteTemplates = {
 		priority = 10,
 		ingame_vote = true,
 		min_required_voters = 3,
-		text = "vote_kick_player",
+		text = "input_description_vote_kick_player",
 		minimum_voter_percent = 1,
 		success_percent = 0.51,
 		server_start_vote_rpc = "rpc_client_start_vote_peer_id",
@@ -103,11 +103,13 @@ VoteTemplates = {
 		vote_options = {
 			{
 				text = "vote_kick_player_yes",
+				input_hold_time = 1,
 				vote = 1,
 				input = "ingame_vote_yes"
 			},
 			{
 				text = "vote_kick_player_no",
+				input_hold_time = 1,
 				vote = 2,
 				input = "ingame_vote_no"
 			}
@@ -141,7 +143,7 @@ VoteTemplates = {
 		end,
 		modify_title_text = function (text, data)
 			local player = Managers.player:player_from_peer_id(data.kick_peer_id)
-			local name = player.name(player)
+			local name = (player and player.name(player)) or "n/a"
 
 			return sprintf("%s\n%s", text, tostring(name))
 		end,
@@ -152,6 +154,15 @@ VoteTemplates = {
 			}
 
 			return votes
+		end,
+		can_start_vote = function (data)
+			local player = Managers.player:player_from_peer_id(data.kick_peer_id)
+
+			if player then
+				return true
+			end
+
+			return false
 		end
 	},
 	afk_kick = {

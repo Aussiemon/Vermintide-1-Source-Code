@@ -2,7 +2,7 @@ local scenegraph_definition = {
 	root = {
 		horizontal_alignment = "center",
 		size = {
-			600,
+			850,
 			300
 		}
 	},
@@ -15,8 +15,8 @@ local scenegraph_definition = {
 			1
 		},
 		size = {
-			600,
-			100
+			850,
+			140
 		}
 	}
 }
@@ -28,7 +28,7 @@ local subtitle_widget_definition = {
 	},
 	style = {
 		text = {
-			vertical_alignment = "top",
+			vertical_alignment = "bottom",
 			horizontal_alignment = "left",
 			word_wrap = true,
 			font_size = 20,
@@ -112,6 +112,18 @@ SubtitleGui._remove_subtitle = function (self, unit)
 
 	return 
 end
+SubtitleGui._has_subtitle_for_unit = function (self, unit)
+	local subtitle_list = self.subtitle_list
+	local num_subtitles = #self.subtitle_list
+
+	for i = 1, num_subtitles, 1 do
+		if unit == subtitle_list[i].unit then
+			return true
+		end
+	end
+
+	return 
+end
 SubtitleGui.update = function (self, dt)
 	if not UISettings.use_subtitles then
 		return 
@@ -145,6 +157,10 @@ SubtitleGui.update = function (self, dt)
 					local dialogue_text = Localizer.lookup(localizer, currently_playing_dialogue.currently_playing_subtitle)
 
 					if dialogue_text ~= nil and dialogue_text ~= "" then
+						if self._has_subtitle_for_unit(self, unit) then
+							self._remove_subtitle(self, unit)
+						end
+
 						local speaker_name = Localize("subtitle_name_" .. currently_playing_dialogue.speaker_name)
 
 						self._add_subtitle(self, unit, speaker_name, dialogue_text)
@@ -160,7 +176,9 @@ SubtitleGui.update = function (self, dt)
 				remake_text = true
 			end
 
-			playing_dialogues[unit] = nil
+			if playing_dialogues[unit] then
+				playing_dialogues[unit] = nil
+			end
 		end
 	end
 
@@ -174,7 +192,12 @@ SubtitleGui.update = function (self, dt)
 			local entry = subtitle_list[i]
 			local entry_speaker = entry.speaker
 			local entry_text = entry.text
-			text = text .. entry_speaker .. ": " .. entry_text .. "\n"
+
+			if entry_speaker == "" then
+				text = text .. entry_text .. "\n"
+			else
+				text = text .. entry_speaker .. ": " .. entry_text .. "\n"
+			end
 		end
 
 		for speaker_name, subtitle in pairs(self.subtitles_to_display) do

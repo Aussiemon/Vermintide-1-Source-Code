@@ -26,18 +26,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -49,13 +37,13 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"heard_speak"
+				"seen_item"
 			},
 			{
 				"query_context",
-				"sound_event",
+				"item_tag",
 				OP.EQ,
-				"pdr_tutorial_dialogue_meeting_01"
+				"pwe_tutorial_dialogue_meeting_01"
 			},
 			{
 				"query_context",
@@ -68,18 +56,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -95,7 +71,7 @@ return function ()
 			},
 			{
 				"query_context",
-				"item_tag",
+				"sound_event",
 				OP.EQ,
 				"pwe_tutorial_dialogue_meeting_01"
 			},
@@ -110,18 +86,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -152,18 +116,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -175,13 +127,13 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"heard_speak"
+				"seen_item"
 			},
 			{
 				"query_context",
-				"sound_event",
+				"item_tag",
 				OP.EQ,
-				"pwe_tutorial_dialogue_revive_01"
+				"pdr_tutorial_dialogue_revive_01"
 			},
 			{
 				"query_context",
@@ -194,18 +146,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -236,18 +176,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -278,18 +206,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -320,36 +236,24 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
 	define_rule({
-		response = "pdr_tutorial_dialogue_weather_01",
-		name = "pdr_tutorial_dialogue_weather_01",
+		response = "pdr_tutorial_battle_01",
+		name = "pdr_tutorial_battle_01",
 		criterias = {
 			{
 				"query_context",
 				"concept",
 				OP.EQ,
-				"heard_speak"
+				"seen_item"
 			},
 			{
 				"query_context",
-				"sound_event",
+				"item_tag",
 				OP.EQ,
-				"pdr_tutorial_dialogue_loot_01"
+				"pdr_tutorial_battle_01"
 			},
 			{
 				"query_context",
@@ -362,18 +266,66 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
+			}
+		}
+	})
+	define_rule({
+		response = "pwe_tutorial_battle_01",
+		name = "pwe_tutorial_battle_01",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"heard_speak"
 			},
 			{
-				"global_context",
-				"dwarf_ranger",
+				"query_context",
+				"sound_event",
 				OP.EQ,
-				1
+				"pdr_tutorial_battle_01"
 			},
 			{
-				"global_context",
-				"current_level",
+				"query_context",
+				"source_name",
 				OP.EQ,
-				"tutorial"
+				"wood_elf"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"wood_elf"
+			}
+		}
+	})
+	define_rule({
+		response = "pdr_tutorial_dialogue_weather_01",
+		name = "pdr_tutorial_dialogue_weather_01",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"seen_item"
+			},
+			{
+				"query_context",
+				"item_tag",
+				OP.EQ,
+				"pdr_tutorial_dialogue_weather_01"
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"dwarf_ranger"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"dwarf_ranger"
 			}
 		}
 	})
@@ -404,12 +356,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
 			},
 			{
 				"global_context",
@@ -446,18 +392,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -488,12 +422,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
 			},
 			{
 				"global_context",
@@ -533,12 +461,6 @@ return function ()
 			},
 			{
 				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
 				"current_level",
 				OP.EQ,
 				"tutorial"
@@ -575,12 +497,6 @@ return function ()
 			},
 			{
 				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
 				"current_level",
 				OP.EQ,
 				"tutorial"
@@ -614,18 +530,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -656,12 +560,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
 			},
 			{
 				"global_context",
@@ -701,12 +599,6 @@ return function ()
 			},
 			{
 				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
 				"current_level",
 				OP.EQ,
 				"tutorial"
@@ -743,12 +635,6 @@ return function ()
 			},
 			{
 				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
 				"current_level",
 				OP.EQ,
 				"tutorial"
@@ -782,102 +668,6 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
-			}
-		}
-	})
-	define_rule({
-		response = "pdr_tutorial_battle_01",
-		name = "pdr_tutorial_battle_01",
-		criterias = {
-			{
-				"query_context",
-				"concept",
-				OP.EQ,
-				"seen_item"
-			},
-			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"pdr_tutorial_battle_01"
-			},
-			{
-				"query_context",
-				"source_name",
-				OP.EQ,
-				"dwarf_ranger"
-			},
-			{
-				"user_context",
-				"player_profile",
-				OP.EQ,
-				"dwarf_ranger"
-			},
-			{
-				"global_context",
-				"dwarf_ranger",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
-			}
-		}
-	})
-	define_rule({
-		response = "pwe_tutorial_battle_01",
-		name = "pwe_tutorial_battle_01",
-		criterias = {
-			{
-				"query_context",
-				"concept",
-				OP.EQ,
-				"heard_speak"
-			},
-			{
-				"query_context",
-				"sound_event",
-				OP.EQ,
-				"pdr_tutorial_battle_01"
-			},
-			{
-				"query_context",
-				"source_name",
-				OP.EQ,
-				"wood_elf"
-			},
-			{
-				"user_context",
-				"player_profile",
-				OP.EQ,
-				"wood_elf"
-			},
-			{
-				"global_context",
-				"wood_elf",
-				OP.EQ,
-				1
-			},
-			{
-				"global_context",
-				"current_level",
-				OP.EQ,
-				"tutorial"
 			}
 		}
 	})
@@ -908,18 +698,36 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"dwarf_ranger"
+			}
+		}
+	})
+	define_rule({
+		response = "pdr_tutorial_after_battle_02",
+		name = "pdr_tutorial_after_battle_02",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"heard_speak"
 			},
 			{
-				"global_context",
-				"dwarf_ranger",
+				"query_context",
+				"sound_event",
 				OP.EQ,
-				1
+				"pdr_tutorial_after_battle_01"
 			},
 			{
-				"global_context",
-				"current_level",
+				"query_context",
+				"source_name",
 				OP.EQ,
-				"tutorial"
+				"wood_elf"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"wood_elf"
 			}
 		}
 	})
@@ -950,6 +758,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
@@ -980,6 +794,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
@@ -1010,12 +830,18 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_ascending_jump",
 		name = "pwe_mono_tutorial_ascending_jump",
+		response = "pwe_mono_tutorial_ascending_jump",
 		criterias = {
 			{
 				"query_context",
@@ -1040,12 +866,32 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
+				"user_memory",
+				"time_since_tutorial_ascending_jump",
+				OP.TIMEDIFF,
+				OP.GT,
+				20
+			}
+		},
+		on_done = {
+			{
+				"user_memory",
+				"time_since_tutorial_ascending_jump",
+				OP.TIMESET
 			}
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_ascending_jump_reminder",
 		name = "pwe_mono_tutorial_ascending_jump_reminder",
+		response = "pwe_mono_tutorial_ascending_jump_reminder",
 		criterias = {
 			{
 				"query_context",
@@ -1070,6 +916,26 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
+				"user_memory",
+				"time_since_tutorial_ascending_jump_reminder",
+				OP.TIMEDIFF,
+				OP.GT,
+				10
+			}
+		},
+		on_done = {
+			{
+				"user_memory",
+				"time_since_tutorial_ascending_jump_reminder",
+				OP.TIMESET
 			}
 		}
 	})
@@ -1100,6 +966,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
@@ -1130,6 +1002,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
@@ -1162,6 +1040,12 @@ return function ()
 				"wood_elf"
 			},
 			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
 				"faction_memory",
 				"time_since_last_tutorial_armour_hit",
 				OP.TIMEDIFF,
@@ -1185,17 +1069,17 @@ return function ()
 				"query_context",
 				"concept",
 				OP.EQ,
-				"seen_item"
-			},
-			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"tutorial_armour_attack"
+				"armor_hit"
 			},
 			{
 				"query_context",
 				"source_name",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"query_context",
+				"profile_name",
 				OP.EQ,
 				"wood_elf"
 			},
@@ -1206,11 +1090,17 @@ return function ()
 				"wood_elf"
 			},
 			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
 				"user_memory",
 				"time_since_tutorial_armour_attack",
 				OP.TIMEDIFF,
 				OP.GT,
-				5
+				30
 			}
 		},
 		on_done = {
@@ -1248,6 +1138,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
@@ -1278,6 +1174,12 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
 			}
 		}
 	})
@@ -1310,16 +1212,22 @@ return function ()
 				"wood_elf"
 			},
 			{
-				"faction_memory",
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
+				"user_memory",
 				"time_since_last_tutorial_parry",
 				OP.TIMEDIFF,
 				OP.GT,
-				5
+				30
 			}
 		},
 		on_done = {
 			{
-				"faction_memory",
+				"user_memory",
 				"time_since_last_tutorial_parry",
 				OP.TIMESET
 			}
@@ -1331,13 +1239,31 @@ return function ()
 		criterias = {
 			{
 				"query_context",
-				"source_name",
+				"concept",
 				OP.EQ,
-				"wood_elf"
+				"health_trigger"
 			},
 			{
 				"query_context",
-				"target_name",
+				"current_amount",
+				OP.LTEQ,
+				0.8
+			},
+			{
+				"query_context",
+				"current_amount",
+				OP.GTEQ,
+				0.1
+			},
+			{
+				"query_context",
+				"trigger_type",
+				OP.EQ,
+				"decreasing"
+			},
+			{
+				"query_context",
+				"source_name",
 				OP.EQ,
 				"wood_elf"
 			},
@@ -1348,17 +1274,23 @@ return function ()
 				"wood_elf"
 			},
 			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
 				"user_memory",
-				"time_since_tutorial_geting_hit",
+				"low_health",
 				OP.TIMEDIFF,
 				OP.GT,
-				5
+				1
 			}
 		},
 		on_done = {
 			{
 				"user_memory",
-				"time_since_tutorial_geting_hit",
+				"low_health",
 				OP.TIMESET
 			}
 		}
@@ -1392,18 +1324,24 @@ return function ()
 				"wood_elf"
 			},
 			{
-				"faction_memory",
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
+				"user_memory",
 				"time_since_last_tutorial_pushing",
 				OP.TIMEDIFF,
 				OP.GT,
-				5
+				30
 			}
 		},
 		on_done = {
 			{
-				"faction_memory",
+				"user_memory",
 				"time_since_last_tutorial_pushing",
-				OP.TIMEDIFF
+				OP.TIMESET
 			}
 		}
 	})
@@ -1411,6 +1349,18 @@ return function ()
 		response = "pwe_mono_tutorial_kill_remaining",
 		name = "pwe_mono_tutorial_kill_remaining",
 		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"seen_item"
+			},
+			{
+				"query_context",
+				"item_tag",
+				OP.EQ,
+				"tutorial_kill_remaining"
+			},
 			{
 				"query_context",
 				"source_name",
@@ -1424,16 +1374,10 @@ return function ()
 				"wood_elf"
 			},
 			{
-				"query_context",
-				"concept",
+				"global_context",
+				"current_level",
 				OP.EQ,
-				"seen_item"
-			},
-			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"tutorial_kill_remaining"
+				"tutorial"
 			}
 		}
 	})
@@ -1466,34 +1410,22 @@ return function ()
 				"wood_elf"
 			},
 			{
-				"query_context",
-				"concept",
+				"global_context",
+				"current_level",
 				OP.EQ,
-				"seen_item"
-			},
-			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"tutorial_spotting_camp"
+				"tutorial"
 			}
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_spotting_grenade",
 		name = "pwe_mono_tutorial_spotting_grenade",
+		response = "pwe_mono_tutorial_spotting_grenade",
 		criterias = {
 			{
 				"query_context",
 				"concept",
 				OP.EQ,
 				"seen_item"
-			},
-			{
-				"query_context",
-				"is_ping",
-				OP.EQ,
-				1
 			},
 			{
 				"query_context",
@@ -1508,40 +1440,60 @@ return function ()
 				"wood_elf"
 			},
 			{
+				"query_context",
+				"enemies_close",
+				OP.EQ,
+				0
+			},
+			{
+				"query_context",
+				"distance",
+				OP.GT,
+				1
+			},
+			{
+				"query_context",
+				"distance",
+				OP.LT,
+				25
+			},
+			{
 				"user_context",
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
 			},
 			{
-				"query_context",
-				"concept",
+				"global_context",
+				"current_level",
 				OP.EQ,
-				"seen_item"
+				"tutorial"
 			},
 			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"tutorial_spotting_grenade"
+				"user_memory",
+				"last_saw_bomb",
+				OP.TIMEDIFF,
+				OP.GT,
+				60
+			}
+		},
+		on_done = {
+			{
+				"user_memory",
+				"last_saw_bomb",
+				OP.TIMESET
 			}
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_speed_potion",
 		name = "pwe_mono_tutorial_speed_potion",
+		response = "pwe_mono_tutorial_speed_potion",
 		criterias = {
 			{
 				"query_context",
 				"concept",
 				OP.EQ,
 				"seen_item"
-			},
-			{
-				"query_context",
-				"is_ping",
-				OP.EQ,
-				1
 			},
 			{
 				"query_context",
@@ -1556,22 +1508,48 @@ return function ()
 				"wood_elf"
 			},
 			{
+				"query_context",
+				"enemies_close",
+				OP.EQ,
+				0
+			},
+			{
+				"query_context",
+				"distance",
+				OP.GT,
+				1
+			},
+			{
+				"query_context",
+				"distance",
+				OP.LT,
+				25
+			},
+			{
 				"user_context",
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
 			},
 			{
-				"query_context",
-				"concept",
+				"global_context",
+				"current_level",
 				OP.EQ,
-				"seen_item"
+				"tutorial"
 			},
 			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"tutorial_speed_potion"
+				"faction_memory",
+				"last_saw_potion",
+				OP.TIMEDIFF,
+				OP.GT,
+				60
+			}
+		},
+		on_done = {
+			{
+				"faction_memory",
+				"last_saw_potion",
+				OP.TIMESET
 			}
 		}
 	})
@@ -1587,12 +1565,6 @@ return function ()
 			},
 			{
 				"query_context",
-				"is_ping",
-				OP.EQ,
-				1
-			},
-			{
-				"query_context",
 				"item_tag",
 				OP.EQ,
 				"potion"
@@ -1610,22 +1582,16 @@ return function ()
 				"wood_elf"
 			},
 			{
-				"query_context",
-				"concept",
+				"global_context",
+				"current_level",
 				OP.EQ,
-				"seen_item"
-			},
-			{
-				"query_context",
-				"item_tag",
-				OP.EQ,
-				"tutorial_strength_potion"
+				"tutorial"
 			}
 		}
 	})
 	define_rule({
-		response = "pwe_mono_tutorial_healing_draught",
 		name = "pwe_mono_tutorial_healing_draught",
+		response = "pwe_mono_tutorial_healing_draught",
 		criterias = {
 			{
 				"query_context",
@@ -1635,10 +1601,66 @@ return function ()
 			},
 			{
 				"query_context",
-				"is_ping",
+				"item_tag",
 				OP.EQ,
+				"health_flask"
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"query_context",
+				"enemies_close",
+				OP.EQ,
+				0
+			},
+			{
+				"query_context",
+				"distance",
+				OP.GT,
 				1
 			},
+			{
+				"query_context",
+				"distance",
+				OP.LT,
+				25
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
+				"faction_memory",
+				"last_saw_health",
+				OP.TIMEDIFF,
+				OP.GT,
+				60
+			}
+		},
+		on_done = {
+			{
+				"faction_memory",
+				"last_saw_health",
+				OP.TIMESET
+			}
+		}
+	})
+	define_rule({
+		response = "pwe_mono_tutorial_use_grenade_not_bow",
+		name = "pwe_mono_tutorial_use_grenade_not_bow",
+		criterias = {
 			{
 				"query_context",
 				"concept",
@@ -1649,7 +1671,7 @@ return function ()
 				"query_context",
 				"item_tag",
 				OP.EQ,
-				"tutorial_healing_draught"
+				"pwe_mono_tutorial_use_grenade_not_bow"
 			},
 			{
 				"query_context",
@@ -1662,42 +1684,120 @@ return function ()
 				"player_profile",
 				OP.EQ,
 				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			}
+		}
+	})
+	define_rule({
+		response = "pwe_mono_tutorial_goal_01",
+		name = "pwe_mono_tutorial_goal_01",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"seen_item"
+			},
+			{
+				"query_context",
+				"item_tag",
+				OP.EQ,
+				"pwe_mono_tutorial_goal_01"
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			}
+		}
+	})
+	define_rule({
+		name = "pwe_mono_tutorial_rat_ogre_01",
+		response = "pwe_mono_tutorial_rat_ogre_01",
+		criterias = {
+			{
+				"query_context",
+				"concept",
+				OP.EQ,
+				"seen_item"
+			},
+			{
+				"query_context",
+				"item_tag",
+				OP.EQ,
+				"pwe_mono_tutorial_rat_ogre_01"
+			},
+			{
+				"query_context",
+				"source_name",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"user_context",
+				"player_profile",
+				OP.EQ,
+				"wood_elf"
+			},
+			{
+				"global_context",
+				"current_level",
+				OP.EQ,
+				"tutorial"
+			},
+			{
+				"user_memory",
+				"once_mono_tutorial_rat_ogre_01",
+				OP.EQ,
+				0
+			}
+		},
+		on_done = {
+			{
+				"user_memory",
+				"once_mono_tutorial_rat_ogre_02",
+				OP.ADD,
+				1
 			}
 		}
 	})
 	add_dialogues({
-		pwe_mono_tutorial_armour_hit = {
-			sound_events_n = 4,
-			randomize_indexes_n = 0,
-			face_animations_n = 4,
+		pwe_tutorial_dialogue_revive_01 = {
+			sound_events_n = 1,
+			face_animations_n = 1,
 			database = "tutorial",
 			category = "player_feedback",
-			dialogue_animations_n = 4,
+			dialogue_animations_n = 1,
 			sound_events = {
-				"pwe_mono_tutorial_armour_hit_01",
-				"pwe_mono_tutorial_armour_hit_02",
-				"pwe_mono_tutorial_armour_hit_03",
-				"pwe_mono_tutorial_armour_hit_04"
+				[1.0] = "pwe_tutorial_dialogue_revive_01"
 			},
 			dialogue_animations = {
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk",
-				"dialogue_talk"
+				[1.0] = "dialogue_talk"
 			},
 			face_animations = {
-				"face_angry",
-				"face_angry",
-				"face_angry",
-				"face_angry"
+				[1.0] = "face_neutral"
 			},
 			localization_strings = {
-				"pwe_mono_tutorial_armour_hit_01",
-				"pwe_mono_tutorial_armour_hit_02",
-				"pwe_mono_tutorial_armour_hit_03",
-				"pwe_mono_tutorial_armour_hit_04"
-			},
-			randomize_indexes = {}
+				[1.0] = "pwe_tutorial_dialogue_revive_01"
+			}
 		},
 		pdr_tutorial_dialogue_weather_01 = {
 			sound_events_n = 1,
@@ -1810,7 +1910,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_tutorial_dialogue_meeting_01"
@@ -1939,23 +2039,67 @@ return function ()
 				[1.0] = "pwe_mono_tutorial_healing_draught"
 			}
 		},
-		pwe_mono_tutorial_strength_potion = {
+		pwe_mono_tutorial_goal_01 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "seen_items",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pwe_mono_tutorial_strength_potion"
+				[1.0] = "pwe_mono_tutorial_goal_01"
 			},
 			dialogue_animations = {
-				[1.0] = "dialogue_shout"
+				[1.0] = "dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_happy"
+				[1.0] = "face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pwe_mono_tutorial_strength_potion"
+				[1.0] = "pwe_mono_tutorial_goal_01"
+			}
+		},
+		pwe_mono_tutorial_use_grenade_not_bow = {
+			sound_events_n = 2,
+			randomize_indexes_n = 0,
+			face_animations_n = 2,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 2,
+			sound_events = {
+				[1.0] = "pwe_mono_tutorial_use_grenade_not_bow_01",
+				[2.0] = "pwe_mono_tutorial_use_grenade_not_bow_02"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk",
+				[2.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned",
+				[2.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pwe_mono_tutorial_use_grenade_not_bow_01",
+				[2.0] = "pwe_mono_tutorial_use_grenade_not_bow_02"
+			},
+			randomize_indexes = {}
+		},
+		pwe_mono_tutorial_rat_ogre_01 = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pwe_mono_tutorial_rat_ogre_01"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_concerned"
+			},
+			localization_strings = {
+				[1.0] = "pwe_mono_tutorial_rat_ogre_01"
 			}
 		},
 		pwe_mono_tutorial_spotting_grenade = {
@@ -1983,11 +2127,49 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pwe_mono_tutorial_strength_potion = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "seen_items",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pwe_mono_tutorial_strength_potion"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_shout"
+			},
+			face_animations = {
+				[1.0] = "face_happy"
+			},
+			localization_strings = {
+				[1.0] = "pwe_mono_tutorial_strength_potion"
+			}
+		},
+		pdr_tutorial_battle_01 = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pdr_tutorial_battle_01"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_neutral"
+			},
+			localization_strings = {
+				[1.0] = "pdr_tutorial_battle_01"
+			}
+		},
 		pdr_tutorial_dialogue_meeting_01 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "knocked_down_override",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_meeting_01"
@@ -2006,7 +2188,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "knocked_down_override",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_meeting_02"
@@ -2040,14 +2222,14 @@ return function ()
 				[1.0] = "pwe_tutorial_dialogue_weather_04"
 			}
 		},
-		pwe_tutorial_dialogue_weather_03 = {
+		pdr_tutorial_after_battle_02 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
 			category = "story_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pwe_tutorial_dialogue_weather_03"
+				[1.0] = "pdr_tutorial_after_battle_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk"
@@ -2056,26 +2238,7 @@ return function ()
 				[1.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pwe_tutorial_dialogue_weather_03"
-			}
-		},
-		pwe_tutorial_dialogue_revive_02 = {
-			sound_events_n = 1,
-			face_animations_n = 1,
-			database = "tutorial",
-			category = "story_talk",
-			dialogue_animations_n = 1,
-			sound_events = {
-				[1.0] = "pwe_tutorial_dialogue_revive_02"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "pwe_tutorial_dialogue_revive_02"
+				[1.0] = "pdr_tutorial_after_battle_02"
 			}
 		},
 		pwe_mono_tutorial_pushing = {
@@ -2111,14 +2274,14 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_tutorial_dialogue_weather_02 = {
+		pwe_tutorial_dialogue_weather_03 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
 			category = "story_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pdr_tutorial_dialogue_weather_02"
+				[1.0] = "pwe_tutorial_dialogue_weather_03"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk"
@@ -2127,26 +2290,7 @@ return function ()
 				[1.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pdr_tutorial_dialogue_weather_02"
-			}
-		},
-		pwe_mono_tutorial_path = {
-			sound_events_n = 1,
-			face_animations_n = 1,
-			database = "tutorial",
-			category = "level_talk",
-			dialogue_animations_n = 1,
-			sound_events = {
-				[1.0] = "pwe_mono_tutorial_path_01"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pwe_mono_tutorial_path_01"
+				[1.0] = "pwe_tutorial_dialogue_weather_03"
 			}
 		},
 		pwe_mono_tutorial_parry = {
@@ -2182,23 +2326,42 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_tutorial_battle_01 = {
+		pwe_mono_tutorial_path = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "level_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pdr_tutorial_battle_01"
+				[1.0] = "pwe_mono_tutorial_path_01"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_happy"
+				[1.0] = "face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pdr_tutorial_battle_01"
+				[1.0] = "pwe_mono_tutorial_path_01"
+			}
+		},
+		pwe_mono_tutorial_skaven_stink = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pwe_mono_tutorial_skaven_stink"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_angry"
+			},
+			localization_strings = {
+				[1.0] = "pwe_mono_tutorial_skaven_stink"
 			}
 		},
 		pwe_mono_tutorial_armour_attack = {
@@ -2234,6 +2397,39 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
+		pwe_mono_tutorial_armour_hit = {
+			sound_events_n = 4,
+			randomize_indexes_n = 0,
+			face_animations_n = 4,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 4,
+			sound_events = {
+				"pwe_mono_tutorial_armour_hit_01",
+				"pwe_mono_tutorial_armour_hit_02",
+				"pwe_mono_tutorial_armour_hit_03",
+				"pwe_mono_tutorial_armour_hit_04"
+			},
+			dialogue_animations = {
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk",
+				"dialogue_talk"
+			},
+			face_animations = {
+				"face_angry",
+				"face_angry",
+				"face_angry",
+				"face_angry"
+			},
+			localization_strings = {
+				"pwe_mono_tutorial_armour_hit_01",
+				"pwe_mono_tutorial_armour_hit_02",
+				"pwe_mono_tutorial_armour_hit_03",
+				"pwe_mono_tutorial_armour_hit_04"
+			},
+			randomize_indexes = {}
+		},
 		pwe_tutorial_dialogue_weather_01 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
@@ -2253,14 +2449,14 @@ return function ()
 				[1.0] = "pwe_tutorial_dialogue_weather_01"
 			}
 		},
-		pwe_tutorial_dialogue_revive_01 = {
+		pdr_tutorial_dialogue_weather_02 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
 			category = "story_talk",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pwe_tutorial_dialogue_revive_01"
+				[1.0] = "pdr_tutorial_dialogue_weather_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk"
@@ -2269,7 +2465,7 @@ return function ()
 				[1.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pwe_tutorial_dialogue_revive_01"
+				[1.0] = "pdr_tutorial_dialogue_weather_02"
 			}
 		},
 		pwe_mono_tutorial_geting_hit = {
@@ -2305,44 +2501,6 @@ return function ()
 			},
 			randomize_indexes = {}
 		},
-		pdr_tutorial_dialogue_weather_04 = {
-			sound_events_n = 1,
-			face_animations_n = 1,
-			database = "tutorial",
-			category = "story_talk",
-			dialogue_animations_n = 1,
-			sound_events = {
-				[1.0] = "pdr_tutorial_dialogue_weather_04"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_neutral"
-			},
-			localization_strings = {
-				[1.0] = "pdr_tutorial_dialogue_weather_04"
-			}
-		},
-		pwe_mono_tutorial_ascending_jump = {
-			sound_events_n = 1,
-			face_animations_n = 1,
-			database = "tutorial",
-			category = "level_talk",
-			dialogue_animations_n = 1,
-			sound_events = {
-				[1.0] = "pwe_mono_tutorial_ascending_jump"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_calm"
-			},
-			localization_strings = {
-				[1.0] = "pwe_mono_tutorial_ascending_jump"
-			}
-		},
 		pwe_mono_tutorial_general_battle = {
 			sound_events_n = 1,
 			face_animations_n = 1,
@@ -2360,6 +2518,44 @@ return function ()
 			},
 			localization_strings = {
 				[1.0] = "pwe_mono_tutorial_general_battle"
+			}
+		},
+		pwe_mono_tutorial_ascending_jump = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pwe_mono_tutorial_ascending_jump"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_calm"
+			},
+			localization_strings = {
+				[1.0] = "pwe_mono_tutorial_ascending_jump"
+			}
+		},
+		pdr_tutorial_dialogue_weather_04 = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "story_talk",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pdr_tutorial_dialogue_weather_04"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_neutral"
+			},
+			localization_strings = {
+				[1.0] = "pdr_tutorial_dialogue_weather_04"
 			}
 		},
 		pdr_tutorial_dialogue_loot_01 = {
@@ -2385,7 +2581,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pwe_mono_tutorial_spotting_skaven"
@@ -2404,7 +2600,7 @@ return function ()
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
 				[1.0] = "pdr_tutorial_dialogue_revive_01"
@@ -2419,23 +2615,23 @@ return function ()
 				[1.0] = "pdr_tutorial_dialogue_revive_01"
 			}
 		},
-		pwe_tutorial_battle_01 = {
+		pwe_mono_tutorial_ascending_jump_reminder = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "story_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pwe_tutorial_battle_01"
+				[1.0] = "pwe_mono_tutorial_ascending_jump_reminder"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_neutral"
+				[1.0] = "face_concerned"
 			},
 			localization_strings = {
-				[1.0] = "pwe_tutorial_battle_01"
+				[1.0] = "pwe_mono_tutorial_ascending_jump_reminder"
 			}
 		},
 		pwe_mono_tutorial_swap_to_bow = {
@@ -2482,25 +2678,6 @@ return function ()
 				[1.0] = "pdr_tutorial_dialogue_weather_03"
 			}
 		},
-		pwe_mono_tutorial_ascending_jump_reminder = {
-			sound_events_n = 1,
-			face_animations_n = 1,
-			database = "tutorial",
-			category = "level_talk",
-			dialogue_animations_n = 1,
-			sound_events = {
-				[1.0] = "pwe_mono_tutorial_ascending_jump_reminder"
-			},
-			dialogue_animations = {
-				[1.0] = "dialogue_talk"
-			},
-			face_animations = {
-				[1.0] = "face_concerned"
-			},
-			localization_strings = {
-				[1.0] = "pwe_mono_tutorial_ascending_jump_reminder"
-			}
-		},
 		pwe_mono_tutorial_intro = {
 			sound_events_n = 1,
 			face_animations_n = 1,
@@ -2520,23 +2697,42 @@ return function ()
 				[1.0] = "pwe_mono_tutorial_intro_01"
 			}
 		},
-		pwe_mono_tutorial_skaven_stink = {
+		pwe_tutorial_dialogue_revive_02 = {
 			sound_events_n = 1,
 			face_animations_n = 1,
 			database = "tutorial",
-			category = "level_talk",
+			category = "player_feedback",
 			dialogue_animations_n = 1,
 			sound_events = {
-				[1.0] = "pwe_mono_tutorial_skaven_stink"
+				[1.0] = "pwe_tutorial_dialogue_revive_02"
 			},
 			dialogue_animations = {
 				[1.0] = "dialogue_talk"
 			},
 			face_animations = {
-				[1.0] = "face_angry"
+				[1.0] = "face_neutral"
 			},
 			localization_strings = {
-				[1.0] = "pwe_mono_tutorial_skaven_stink"
+				[1.0] = "pwe_tutorial_dialogue_revive_02"
+			}
+		},
+		pwe_tutorial_battle_01 = {
+			sound_events_n = 1,
+			face_animations_n = 1,
+			database = "tutorial",
+			category = "player_feedback",
+			dialogue_animations_n = 1,
+			sound_events = {
+				[1.0] = "pwe_tutorial_battle_01"
+			},
+			dialogue_animations = {
+				[1.0] = "dialogue_talk"
+			},
+			face_animations = {
+				[1.0] = "face_neutral"
+			},
+			localization_strings = {
+				[1.0] = "pwe_tutorial_battle_01"
 			}
 		},
 		pwe_mono_tutorial_spotting_camp = {

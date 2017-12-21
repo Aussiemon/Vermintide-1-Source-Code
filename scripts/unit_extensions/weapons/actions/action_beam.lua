@@ -7,6 +7,7 @@ ActionBeam.init = function (self, world, item_name, is_server, owner_unit, damag
 	self.world = world
 	self.item_name = item_name
 	self.wwise_world = Managers.world:wwise_world(world)
+	self.owner_player = Managers.player:owner(owner_unit)
 	self.inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
 	if ScriptUnit.has_extension(weapon_unit, "ammo_system") then
@@ -70,6 +71,12 @@ ActionBeam.client_owner_start_action = function (self, new_action, t)
 		self.wwise_source_id = wwise_source_id
 	end
 
+	local charge_sound_husk_name = current_action.charge_sound_husk_name
+
+	if charge_sound_husk_name then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_name, self.owner_unit)
+	end
+
 	return 
 end
 local INDEX_POSITION = 1
@@ -115,7 +122,9 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 		local hit_unit, hit_position = nil
 
 		if result then
-			local friendly_fire = Managers.state.difficulty:get_difficulty_settings().friendly_fire_ranged
+			local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
+			local owner_player = self.owner_player
+			local friendly_fire = DamageUtils.allow_friendly_fire_ranged(difficulty_settings, owner_player)
 
 			for index, hit in pairs(result) do
 				local potential_hit_position = hit[INDEX_POSITION]
@@ -197,6 +206,8 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 end
 ActionBeam.finish = function (self, reason)
 	local owner_unit = self.owner_unit
+	local go_id = self.unit_id
+	local current_action = self.current_action
 	local status_extension = ScriptUnit.extension(owner_unit, "status_system")
 	local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 
@@ -207,16 +218,21 @@ ActionBeam.finish = function (self, reason)
 	local charging_sound_id = self.charging_sound_id
 
 	if charging_sound_id then
-		ActionUtils.stop_charge_sound(self.wwise_world, charging_sound_id, self.wwise_source_id, self.current_action)
+		ActionUtils.stop_charge_sound(self.wwise_world, charging_sound_id, self.wwise_source_id, current_action)
 
 		self.wwise_source_id = nil
 		self.charging_sound_id = nil
 	end
 
+	local charge_sound_husk_stop_event = current_action.charge_sound_husk_stop_event
+
+	if charge_sound_husk_stop_event then
+		ActionUtils.play_husk_sound_event(charge_sound_husk_stop_event, owner_unit)
+	end
+
 	World.destroy_particles(self.world, self.beam_effect)
 
 	self.beam_effect = nil
-	local go_id = self.unit_id
 
 	if self.is_server or LEVEL_EDITOR_TEST then
 		self.network_transmit:send_rpc_clients("rpc_end_beam", go_id)

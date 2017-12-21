@@ -7,6 +7,7 @@ local drag_colors = {
 ForgeUpgradeUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
+	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ui_top_renderer = ingame_ui_context.ui_top_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.input_manager = ingame_ui_context.input_manager
@@ -88,7 +89,7 @@ ForgeUpgradeUI.create_ui_elements = function (self)
 	local button_eye_glow_widget = self.widgets_by_name.button_eye_glow_widget
 	button_eye_glow_widget.style.texture_id.color[1] = 0
 
-	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
+	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	return 
 end
@@ -159,7 +160,7 @@ ForgeUpgradeUI.update = function (self, dt)
 		self.play_sound(self, "Play_hud_hover")
 	end
 
-	if not self.upgrading and (upgrade_button_hotspot.on_release or self.gamepad_upgrade_request) then
+	if not self.upgrading and self.is_upgrade_possible(self) and (upgrade_button_hotspot.on_release or self.gamepad_upgrade_request) then
 		if self.can_afford_upgrade_cost(self) then
 			self.upgrading_trait_index = self.selected_trait_index
 			self.upgrade_request = true
@@ -349,22 +350,23 @@ ForgeUpgradeUI.clear_item_display_data = function (self)
 	return 
 end
 ForgeUpgradeUI.draw = function (self, dt)
+	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("forge_view")
 	local gamepad_active = Managers.input:get_device("gamepad").active()
 
-	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
+	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
 	local num_widgets = #self.widgets
 
 	for i = 1, num_widgets, 1 do
 		local widget = self.widgets[i]
 
-		UIRenderer.draw_widget(ui_top_renderer, widget)
+		UIRenderer.draw_widget(ui_renderer, widget)
 	end
 
-	UIRenderer.end_pass(ui_top_renderer)
+	UIRenderer.end_pass(ui_renderer)
 
 	return 
 end

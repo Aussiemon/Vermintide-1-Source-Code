@@ -246,9 +246,6 @@ end
 BackendUtils.remove_item = function (item_id)
 	return ScriptBackendItem.remove_item(item_id)
 end
-BackendUtils.add_item = function (item_key)
-	return ScriptBackendItem.award_item(item_key)
-end
 BackendUtils.get_tokens = function (token_type)
 	return Vault.withdraw_single(token_type, ScriptBackendProfileAttribute.get(token_type) or 0)
 end

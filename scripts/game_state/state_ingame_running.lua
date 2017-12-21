@@ -87,8 +87,9 @@ StateInGameRunning.on_enter = function (self, params)
 
 	event_manager.register(event_manager, self, "game_started", "event_game_started")
 	event_manager.register(event_manager, self, "gm_event_end_conditions_met", "gm_event_end_conditions_met")
-	event_manager.register(event_manager, self, "level_start_local_player_spawned", "event_game_actually_starts")
+	event_manager.register(event_manager, self, "level_start_local_player_spawned", "event_local_player_spawned")
 	event_manager.register(event_manager, self, "checkpoint_vote_cancelled", "on_checkpoint_vote_cancelled")
+	event_manager.register(event_manager, self, "conflict_director_setup_done", "event_conflict_director_setup_done")
 
 	if self.is_server then
 		Managers.state.event:trigger("game_started")
@@ -518,6 +519,8 @@ StateInGameRunning.update = function (self, dt, t)
 		end
 	end
 
+	self.check_for_new_quests_or_contracts(self, dt)
+
 	if DebugKeyHandler.key_pressed("f5", "reload_ui", "ui") then
 		self.create_ingame_ui(self, self.ingame_ui_context)
 	end
@@ -529,6 +532,21 @@ StateInGameRunning.update = function (self, dt, t)
 	self.update_player_afk_check(self, dt, main_t)
 	Profiler.stop()
 	Profiler.stop()
+
+	return 
+end
+StateInGameRunning.check_for_new_quests_or_contracts = function (self, dt)
+	self._quest_expire_check_cooldown = (self._quest_expire_check_cooldown and self._quest_expire_check_cooldown - dt) or 0
+
+	if self._quest_expire_check_cooldown <= 0 then
+		local quest_manager = Managers.state.quest
+
+		if quest_manager.has_quests_expired(quest_manager) or quest_manager.has_contracts_expired(quest_manager) then
+			Managers.chat:add_local_system_message(1, Localize("dlc1_3_1_new_quests_and_contracts_available_text"), true)
+
+			self._quest_expire_check_cooldown = QuestSettings.EXPIRE_CHECK_COOLDOWN
+		end
+	end
 
 	return 
 end
@@ -682,13 +700,29 @@ StateInGameRunning.event_game_started = function (self)
 
 	return 
 end
-StateInGameRunning.event_game_actually_starts = function (self)
-	if not self._spawn_initialized then
+StateInGameRunning.event_conflict_director_setup_done = function (self)
+	self._conflict_directory_is_ready = true
+
+	self.game_actually_starts(self)
+
+	return 
+end
+StateInGameRunning.event_local_player_spawned = function (self, is_initial_spawn)
+	self._player_has_spawned = true
+	self._is_initial_spawn = is_initial_spawn
+
+	self.game_actually_starts(self)
+
+	return 
+end
+StateInGameRunning.game_actually_starts = function (self)
+	if not self._spawn_initialized and self._player_has_spawned and (not self.is_server or self._conflict_directory_is_ready) then
+		local platform = Application.platform()
 		local loading_context = self.parent.parent.loading_context
 		local first_hero_selection_made = SaveData.first_hero_selection_made
 		local show_profile_on_startup = loading_context.show_profile_on_startup
 		local backend_waiting_for_input = Managers.backend:is_waiting_for_user_input()
-		local show_hero_selection = show_profile_on_startup and not first_hero_selection_made and not backend_waiting_for_input
+		local show_hero_selection = not backend_waiting_for_input and show_profile_on_startup and (platform == "ps4" or platform == "xb1" or not first_hero_selection_made)
 
 		if show_hero_selection and not LEVEL_EDITOR_TEST then
 			self.ingame_ui:transition_with_fade("initial_profile_view_force")
@@ -698,10 +732,30 @@ StateInGameRunning.event_game_actually_starts = function (self)
 			Managers.transition:fade_out(GameSettings.transition_fade_in_speed)
 		end
 
-		self._spawn_initialized = true
-	end
+		LevelHelper:flow_event(self.world, "local_player_spawned")
 
-	Managers.transition:hide_loading_icon()
+		if self._is_initial_spawn then
+			LevelHelper:flow_event(self.world, "level_start_local_player_spawned")
+		end
+
+		self._spawn_initialized = true
+		self._conflict_directory_is_ready = nil
+		self._player_has_spawned = nil
+
+		Managers.transition:hide_loading_icon()
+
+		if Application.platform() == "ps4" then
+			Managers.account:set_realtime_multiplay_state("pre_game", false)
+		end
+
+		if self.is_in_inn or self.is_in_tutorial then
+			return 
+		end
+
+		if Application.platform() == "xb1" then
+			Managers.state.achievement:initialize_hero_stats()
+		end
+	end
 
 	return 
 end

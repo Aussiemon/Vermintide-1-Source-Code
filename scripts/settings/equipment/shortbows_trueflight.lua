@@ -91,6 +91,7 @@ weapon_template.actions = {
 	},
 	action_two = {
 		default = {
+			allow_hold_toggle = true,
 			ammo_usage = 1,
 			anim_end_event = "draw_cancel",
 			kind = "charge",
@@ -128,12 +129,13 @@ weapon_template.actions = {
 			}
 		},
 		aim = {
-			weapon_action_hand = "left",
+			allow_hold_toggle = true,
 			anim_end_event = "draw_cancel",
 			kind = "true_flight_bow_aim",
 			sphere_sweep_dot_threshold = 0.7,
-			sphere_sweep_max_nr_of_results = 100,
 			sphere_sweep_length = 50,
+			sphere_sweep_max_nr_of_results = 100,
+			weapon_action_hand = "left",
 			hold_input = "action_two_hold",
 			max_targets = 1,
 			sphere_sweep_radius = 1.5,

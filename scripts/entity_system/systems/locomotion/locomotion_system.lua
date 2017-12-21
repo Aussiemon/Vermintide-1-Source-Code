@@ -7,6 +7,7 @@ require("scripts/unit_extensions/default_player_unit/player_husk_locomotion_exte
 require("scripts/entity_system/systems/locomotion/locomotion_templates_ai")
 require("scripts/entity_system/systems/locomotion/locomotion_templates_ai_c")
 require("scripts/entity_system/systems/locomotion/locomotion_templates_ai_husk")
+require("scripts/entity_system/systems/locomotion/locomotion_templates_player")
 
 local LocomotionTemplates = LocomotionTemplates
 local RPCS = {
@@ -51,6 +52,12 @@ LocomotionSystem.init = function (self, entity_system_creation_context, system_n
 
 	for template_name, template in pairs(LocomotionTemplates) do
 		if template_name ~= "AILocomotionExtensionC" then
+			local data = {}
+
+			template.init(data, GLOBAL_AI_NAVWORLD)
+
+			self.template_data[template_name] = data
+		elseif template_name == "PlayerUnitLocomotionExtension" then
 			local data = {}
 
 			template.init(data, GLOBAL_AI_NAVWORLD)
@@ -170,6 +177,10 @@ LocomotionSystem.update_extensions = function (self, context, t)
 		local data = self.template_data.AiHuskLocomotionExtension
 
 		LocomotionTemplates.AiHuskLocomotionExtension.update(data, t, dt)
+
+		local data = self.template_data.PlayerUnitLocomotionExtension
+
+		LocomotionTemplates.PlayerUnitLocomotionExtension.update(data, t, dt)
 	else
 		for template_name, data in pairs(self.template_data) do
 			Profiler.start(template_name)

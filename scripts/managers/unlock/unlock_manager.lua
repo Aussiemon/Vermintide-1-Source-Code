@@ -1,65 +1,9 @@
 require("scripts/managers/unlock/unlock_clan")
 require("scripts/managers/unlock/unlock_dlc")
+require("scripts/managers/unlock/always_unlocked")
+require("scripts/settings/unlock_settings")
 
 UnlockManager = class(UnlockManager)
-local UNLOCK_SETTINGS = {
-	{
-		unlock_script_param = "param_dlcs",
-		profile_attribute = "dlcs_unlocked",
-		unlocks = {
-			pre_order = {
-				class = "UnlockDlc",
-				id = "373540"
-			},
-			alienware = {
-				class = "UnlockDlc",
-				id = "410400"
-			},
-			drkn = {
-				class = "UnlockDlc",
-				id = "412500"
-			},
-			logitech = {
-				class = "UnlockDlc",
-				id = "412501"
-			},
-			humble_bundle = {
-				class = "UnlockDlc",
-				id = "412502"
-			},
-			razer = {
-				class = "UnlockDlc",
-				id = "412503"
-			},
-			hero_trinkets = {
-				class = "UnlockDlc",
-				id = "419070"
-			},
-			survival_ruins = {
-				id = "437070",
-				local_only = true,
-				class = "UnlockDlc"
-			},
-			drachenfels = {
-				id = "453280",
-				local_only = true,
-				class = "UnlockDlc"
-			}
-		},
-		unlock_script = GameSettingsDevelopment.backend_settings.dlcs_unlock_script
-	},
-	{
-		unlock_script_param = "param_clans",
-		profile_attribute = "clans_unlocked",
-		unlocks = {
-			official_vermintide_group = {
-				class = "UnlockClan",
-				id = "1700000004637f6"
-			}
-		},
-		unlock_script = GameSettingsDevelopment.backend_settings.clan_unlock_script
-	}
-}
 UnlockManager.init = function (self)
 	self._init_unlocks(self)
 
@@ -72,15 +16,15 @@ UnlockManager._init_unlocks = function (self)
 	local unlocks = {}
 	local unlocks_indexed = {}
 
-	for i, settings in ipairs(UNLOCK_SETTINGS) do
+	for i, settings in ipairs(UnlockSettings) do
 		unlocks_indexed[i] = {}
 
 		for unlock_name, unlock_config in pairs(settings.unlocks) do
 			local class_name = unlock_config.class
 			local id = unlock_config.id
-			local local_only = unlock_config.local_only
+			local backend_required = unlock_config.backend_required
 			local class = rawget(_G, class_name)
-			local instance = class.new(class, unlock_name, id, local_only)
+			local instance = class.new(class, unlock_name, id, backend_required)
 			unlocks[unlock_name] = instance
 			unlocks_indexed[i][unlock_name] = instance
 		end
@@ -125,7 +69,7 @@ UnlockManager._update_backend_unlocks = function (self)
 			end
 
 			self._query_unlocked_index = index
-			local settings = UNLOCK_SETTINGS[index]
+			local settings = UnlockSettings[index]
 			local unlock_script = settings.unlock_script
 
 			if unlock_script then
@@ -144,7 +88,7 @@ UnlockManager._update_backend_unlocks = function (self)
 				local all_unlocked = ""
 
 				for _, unlock in pairs(unlocks) do
-					if not unlock.local_only(unlock) and unlock.unlocked(unlock) then
+					if unlock.backend_required(unlock) and unlock.unlocked(unlock) then
 						local id = unlock.id(unlock)
 						all_unlocked = string.format("%s%s,", all_unlocked, id)
 

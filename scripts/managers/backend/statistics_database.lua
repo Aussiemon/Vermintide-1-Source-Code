@@ -15,6 +15,7 @@ StatisticsDefinitions = {
 			sync_on_hot_join = true
 		},
 		kills_per_breed = {},
+		kill_assists_per_breed = {},
 		headshots = {
 			value = 0,
 			sync_on_hot_join = true
@@ -233,6 +234,11 @@ StatisticsDefinitions = {
 
 for breed_name, breed in pairs(Breeds) do
 	StatisticsDefinitions.player.kills_per_breed[breed_name] = {
+		value = 0,
+		sync_on_hot_join = true,
+		name = breed_name
+	}
+	StatisticsDefinitions.player.kill_assists_per_breed[breed_name] = {
 		value = 0,
 		sync_on_hot_join = true,
 		name = breed_name

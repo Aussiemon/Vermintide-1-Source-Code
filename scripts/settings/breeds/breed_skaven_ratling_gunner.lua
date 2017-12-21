@@ -4,14 +4,15 @@ local breed_data = {
 	poison_resistance = 100,
 	run_speed = 4,
 	awards_positive_reinforcement_message = true,
-	target_selection = "pick_closest_target",
+	perception = "perception_all_seeing",
+	perception_continuous = "perception_continuous_keep_target",
 	aim_template = "ratling_gunner",
 	animation_sync_rpc = "rpc_sync_anim_state_4",
 	walk_speed = 1.9,
 	no_stagger_duration = true,
-	perception = "perception_all_seeing",
-	bots_flank_while_targeted = true,
+	target_selection = "pick_closest_target",
 	hit_reaction = "ai_default",
+	bots_flank_while_targeted = true,
 	headshot_coop_stamina_fatigue_type = "headshot_special",
 	bone_lod_level = 1,
 	wield_inventory_on_spawn = true,
@@ -27,7 +28,7 @@ local breed_data = {
 	player_locomotion_constrain_radius = 0.7,
 	death_sound_event = "Play_enemy_vo_ratling_gunner_die",
 	weapon_reach = 2,
-	perception_continuous = "perception_continuous_keep_target",
+	is_bot_aid_threat = true,
 	behavior = "skaven_ratling_gunner",
 	base_unit = "units/beings/enemies/skaven_ratlinggunner/chr_skaven_ratlinggunner",
 	bots_should_flank = true,
@@ -308,10 +309,10 @@ local action_data = {
 					"stagger_bwd"
 				},
 				left = {
-					"stagger_left_heavy"
+					"stagger_left"
 				},
 				right = {
-					"stagger_right_heavy"
+					"stagger_right"
 				}
 			},
 			{

@@ -189,18 +189,6 @@ PLayerCharacterStateOverchargeExploding.update = function (self, unit, input, dt
 		movement = movement + move_input_controller
 	end
 
-	local move_input_dpad = input_extension.get(input_extension, "move_dpad")
-
-	if move_input_dpad then
-		local controller_length = Vector3.length(move_input_dpad)
-
-		if 0 < controller_length then
-			move_speed = move_speed*controller_length
-		end
-
-		movement = movement + move_input_dpad
-	end
-
 	local move_input_direction = nil
 	move_input_direction = Vector3.normalize(movement)
 
