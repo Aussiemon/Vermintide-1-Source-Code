@@ -1095,7 +1095,7 @@ PopupJoinLobbyHandler.update_controller_timer = function (self, dt)
 	return 
 end
 PopupJoinLobbyHandler.update_lobby = function (self, dt)
-	if not self.profiles_data then
+	if not self.lobby_data then
 		return 
 	end
 
@@ -1105,22 +1105,34 @@ PopupJoinLobbyHandler.update_lobby = function (self, dt)
 		return 
 	end
 
-	local profiles_data = self.profiles_data
+	local lobby_data = self.lobby_data
 	local num_heroes = #SPProfiles
 
 	for i = 1, num_heroes, 1 do
 		local hero = SPProfiles[i]
 		local hero_name = hero.display_name
-		local hero_available = Managers.matchmaking:hero_available_in_lobby_data(i, profiles_data)
+		local hero_available = Managers.matchmaking:hero_available_in_lobby_data(i, lobby_data)
 		local widget = self.button_hero_widgets[hero_name]
 		widget.content.button_hotspot.disable_button = not hero_available
+	end
+
+	local level_key = lobby_data.selected_level_key
+
+	if level_key ~= self.current_level then
+		self.set_selected_level(self, level_key)
+	end
+
+	local difficulty = lobby_data.difficulty
+
+	if difficulty ~= self.current_difficulty then
+		self.set_selected_difficulty(self, difficulty)
 	end
 
 	self.lobby_update_timer = 0.5
 
 	return 
 end
-PopupJoinLobbyHandler.show = function (self, profile_name, difficulty, level, lobby_data, time_until_cancel, join_by_lobby_browser)
+PopupJoinLobbyHandler.show = function (self, profile_name, lobby_data, time_until_cancel, join_by_lobby_browser)
 	fassert(self.visible == false, "trying to show PopupJoinLobbyHandler when its already visible")
 
 	local is_host = lobby_data.host == Network.peer_id()
@@ -1136,15 +1148,15 @@ PopupJoinLobbyHandler.show = function (self, profile_name, difficulty, level, lo
 	ShowCursorStack.push()
 
 	local wanted_hero_name = profile_name
-	self.profiles_data = lobby_data
+	self.lobby_data = lobby_data
 	self.swap_hero_active = true
 
 	if not self.swap_hero_active then
 		self.set_selected_hero(self, wanted_hero_name)
 	end
 
-	self.set_selected_level(self, level)
-	self.set_selected_difficulty(self, difficulty)
+	self.set_selected_level(self, lobby_data.selected_level_key)
+	self.set_selected_difficulty(self, lobby_data.difficulty)
 
 	self.join_lobby_result = nil
 	self.lobby_update_timer = 0
@@ -1168,7 +1180,7 @@ PopupJoinLobbyHandler.hide = function (self)
 	ShowCursorStack.pop()
 
 	self.selected_hero_name = nil
-	self.profiles_data = nil
+	self.lobby_data = nil
 	self.visible = false
 
 	return 
@@ -1182,8 +1194,8 @@ PopupJoinLobbyHandler.unblock_all_services = function (self)
 
 	return 
 end
-PopupJoinLobbyHandler.update_profiles_data = function (self, profiles_data)
-	self.profiles_data = profiles_data
+PopupJoinLobbyHandler.update_lobby_data = function (self, lobby_data)
+	self.lobby_data = lobby_data
 
 	if Application.platform() == "win32" and not Managers.input:is_device_active("gamepad") then
 		self.set_selected_hero(self, self.selected_hero_name)
@@ -1229,7 +1241,7 @@ PopupJoinLobbyHandler._hero_available_by_controller = function (self, controller
 		end
 	end
 
-	return self.profiles_data[profile_slot] == "available", hero_name
+	return self.lobby_data[profile_slot] == "available", hero_name
 end
 PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 
@@ -1413,9 +1425,9 @@ PopupJoinLobbyHandler.controller_select_button_index = function (self, index, ig
 end
 PopupJoinLobbyHandler.set_selected_hero = function (self, selected_hero_name)
 	self.swap_hero_active = false
-	local profiles_data = self.profiles_data
+	local lobby_data = self.lobby_data
 	local hero_index = FindProfileIndex(selected_hero_name)
-	local hero_available = Managers.matchmaking:hero_available_in_lobby_data(hero_index, profiles_data)
+	local hero_available = Managers.matchmaking:hero_available_in_lobby_data(hero_index, lobby_data)
 	local hero_not_available = not hero_available
 
 	if hero_not_available then
@@ -1448,14 +1460,20 @@ PopupJoinLobbyHandler.set_selected_level = function (self, level_key)
 	-- decompilation error in this vicinity
 	local display_image, display_name = nil
 	self.background_widget.content.level_texture = display_image
+	self.current_level = level_key
 
 	return 
 end
 PopupJoinLobbyHandler.set_selected_difficulty = function (self, difficulty)
-	local difficulty_settings = DifficultySettings[difficulty]
-	local localization_key = difficulty_settings.display_name
-	local display_text = Localize(localization_key)
-	self.background_widget.content.text_difficulty = Localize("lorebook_difficulty") .. ": " .. display_text
+	local display_text = "lorebook_difficulty_text"
+
+	if difficulty then
+		local difficulty_settings = DifficultySettings[difficulty]
+		display_text = difficulty_settings.display_name
+	end
+
+	self.background_widget.content.text_difficulty = Localize("lorebook_difficulty") .. ": " .. Localize(display_text)
+	self.current_difficulty = difficulty
 
 	return 
 end

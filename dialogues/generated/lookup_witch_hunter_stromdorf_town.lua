@@ -23,7 +23,6 @@ assert(DialogueLookup[DialogueLookup_n + 22] == nil)
 assert(DialogueLookup[DialogueLookup_n + 23] == nil)
 assert(DialogueLookup[DialogueLookup_n + 24] == nil)
 assert(DialogueLookup[DialogueLookup_n + 25] == nil)
-assert(DialogueLookup[DialogueLookup_n + 26] == nil)
 
 DialogueLookup[DialogueLookup_n + 1] = "pwh_objective_stromdorf_town_enter_stromdorf"
 DialogueLookup[DialogueLookup_n + 2] = "pwh_objective_stromdorf_town_seeing_field_of_verena"
@@ -32,25 +31,24 @@ DialogueLookup[DialogueLookup_n + 4] = "pwh_objective_stromdorf_town_find_tanner
 DialogueLookup[DialogueLookup_n + 5] = "pwh_objective_stromdorf_town_seeing_stewpot_hostelry"
 DialogueLookup[DialogueLookup_n + 6] = "pwh_objective_stromdorf_town_seeing_thunderwater"
 DialogueLookup[DialogueLookup_n + 7] = "pwh_objective_stromdorf_town_seeing_well"
-DialogueLookup[DialogueLookup_n + 8] = "pwh_objective_stromdorf_town_seeing_temple_of_sigmar"
-DialogueLookup[DialogueLookup_n + 9] = "pwh_objective_stromdorf_town_seeing_barber_surgeon"
-DialogueLookup[DialogueLookup_n + 10] = "pwh_objective_stromdorf_town_seeing_tannery"
-DialogueLookup[DialogueLookup_n + 11] = "pwh_objective_stromdorf_town_kill_emissary"
-DialogueLookup[DialogueLookup_n + 12] = "pwh_objective_stromdorf_town_emissary_dead"
-DialogueLookup[DialogueLookup_n + 13] = "pwh_objective_stromdorf_town_go_to_olesya"
-DialogueLookup[DialogueLookup_n + 14] = "pwh_objective_stromdorf_town_fleeing"
-DialogueLookup[DialogueLookup_n + 15] = "pwh_objective_stromdorf_town_emissary_anticipation"
-DialogueLookup[DialogueLookup_n + 16] = "pwh_gameplay_chieftain_charge_attack_taunt"
-DialogueLookup[DialogueLookup_n + 17] = "pwh_gameplay_chieftain_cleave_attack_taunt"
-DialogueLookup[DialogueLookup_n + 18] = "pwh_objective_stromdorf_town_intro_a"
-DialogueLookup[DialogueLookup_n + 19] = "pwh_objective_stromdorf_town_intro_b"
-DialogueLookup[DialogueLookup_n + 20] = "pwh_objective_stromdorf_town_intro_c"
-DialogueLookup[DialogueLookup_n + 21] = "pwh_gameplay_chieftain_tips_special_attack_cleave"
-DialogueLookup[DialogueLookup_n + 22] = "pwh_gameplay_chieftain_tips_special_lunge_attack_2"
-DialogueLookup[DialogueLookup_n + 23] = "pwh_gameplay_chieftain_banter_reply"
-DialogueLookup[DialogueLookup_n + 24] = "pwh_objective_stromdorf_town_intro_a_gt"
-DialogueLookup[DialogueLookup_n + 25] = "pwh_objective_stromdorf_town_intro_b_gt"
-DialogueLookup[DialogueLookup_n + 26] = "pwh_objective_stromdorf_town_intro_c_gt"
-DialogueLookup_n = DialogueLookup_n + 26
+DialogueLookup[DialogueLookup_n + 8] = "pwh_objective_stromdorf_town_seeing_barber_surgeon"
+DialogueLookup[DialogueLookup_n + 9] = "pwh_objective_stromdorf_town_seeing_tannery"
+DialogueLookup[DialogueLookup_n + 10] = "pwh_objective_stromdorf_town_kill_emissary"
+DialogueLookup[DialogueLookup_n + 11] = "pwh_objective_stromdorf_town_emissary_dead"
+DialogueLookup[DialogueLookup_n + 12] = "pwh_objective_stromdorf_town_go_to_olesya"
+DialogueLookup[DialogueLookup_n + 13] = "pwh_objective_stromdorf_town_fleeing"
+DialogueLookup[DialogueLookup_n + 14] = "pwh_objective_stromdorf_town_emissary_anticipation"
+DialogueLookup[DialogueLookup_n + 15] = "pwh_gameplay_chieftain_charge_attack_taunt"
+DialogueLookup[DialogueLookup_n + 16] = "pwh_gameplay_chieftain_cleave_attack_taunt"
+DialogueLookup[DialogueLookup_n + 17] = "pwh_objective_stromdorf_town_intro_a"
+DialogueLookup[DialogueLookup_n + 18] = "pwh_objective_stromdorf_town_intro_b"
+DialogueLookup[DialogueLookup_n + 19] = "pwh_objective_stromdorf_town_intro_c"
+DialogueLookup[DialogueLookup_n + 20] = "pwh_gameplay_chieftain_tips_special_attack_cleave"
+DialogueLookup[DialogueLookup_n + 21] = "pwh_gameplay_chieftain_tips_special_lunge_attack_2"
+DialogueLookup[DialogueLookup_n + 22] = "pwh_gameplay_chieftain_banter_reply"
+DialogueLookup[DialogueLookup_n + 23] = "pwh_objective_stromdorf_town_intro_a_gt"
+DialogueLookup[DialogueLookup_n + 24] = "pwh_objective_stromdorf_town_intro_b_gt"
+DialogueLookup[DialogueLookup_n + 25] = "pwh_objective_stromdorf_town_intro_c_gt"
+DialogueLookup_n = DialogueLookup_n + 25
 
 return 

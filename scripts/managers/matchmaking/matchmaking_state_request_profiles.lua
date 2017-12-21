@@ -23,6 +23,8 @@ MatchmakingStateRequestProfiles.on_enter = function (self, state_context)
 
 	self.matchmaking_manager:set_status_message("matchmaking_status_joining_game")
 
+	self.profiles_data = {}
+
 	return 
 end
 MatchmakingStateRequestProfiles.on_exit = function (self)
@@ -80,13 +82,12 @@ MatchmakingStateRequestProfiles.rpc_matchmaking_update_profiles_data = function 
 	self._update_profiles_data(self, profiles_data)
 
 	if self.popup_id then
-		self.popup_join_lobby_handler:update_profiles_data(self.profiles_data)
+		self.popup_join_lobby_handler:update_lobby_data(self.profiles_data)
 	end
 
 	return 
 end
 MatchmakingStateRequestProfiles._update_profiles_data = function (self, profiles_data)
-	self.profiles_data = {}
 	local num_profiles = #SPProfiles
 
 	for i = 1, num_profiles, 1 do

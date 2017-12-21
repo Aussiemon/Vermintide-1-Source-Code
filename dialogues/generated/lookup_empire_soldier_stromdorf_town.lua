@@ -24,7 +24,6 @@ assert(DialogueLookup[DialogueLookup_n + 23] == nil)
 assert(DialogueLookup[DialogueLookup_n + 24] == nil)
 assert(DialogueLookup[DialogueLookup_n + 25] == nil)
 assert(DialogueLookup[DialogueLookup_n + 26] == nil)
-assert(DialogueLookup[DialogueLookup_n + 27] == nil)
 
 DialogueLookup[DialogueLookup_n + 1] = "pes_objective_stromdorf_town_enter_stromdorf"
 DialogueLookup[DialogueLookup_n + 2] = "pes_objective_stromdorf_town_walking_coffin_road"
@@ -35,24 +34,23 @@ DialogueLookup[DialogueLookup_n + 6] = "pes_objective_stromdorf_town_seeing_barr
 DialogueLookup[DialogueLookup_n + 7] = "pes_objective_stromdorf_town_seeing_kesslers_office"
 DialogueLookup[DialogueLookup_n + 8] = "pes_objective_stromdorf_town_seeing_brenner_brewery"
 DialogueLookup[DialogueLookup_n + 9] = "pes_objective_stromdorf_town_seeing_thunderwater_inn"
-DialogueLookup[DialogueLookup_n + 10] = "pes_objective_stromdorf_town_seeing_temple_of_sigmar"
-DialogueLookup[DialogueLookup_n + 11] = "pes_objective_stromdorf_town_seeing_tannery"
-DialogueLookup[DialogueLookup_n + 12] = "pes_objective_stromdorf_town_kill_emissary"
-DialogueLookup[DialogueLookup_n + 13] = "pes_objective_stromdorf_town_emissary_dead"
-DialogueLookup[DialogueLookup_n + 14] = "pes_objective_stromdorf_town_go_to_olesya"
-DialogueLookup[DialogueLookup_n + 15] = "pes_objective_stromdorf_town_fleeing"
-DialogueLookup[DialogueLookup_n + 16] = "pes_gameplay_chieftain_cleave_attack_taunt"
-DialogueLookup[DialogueLookup_n + 17] = "pes_gameplay_chieftain_charge_attack_taunt"
-DialogueLookup[DialogueLookup_n + 18] = "pes_objective_stromdorf_town_intro_a"
-DialogueLookup[DialogueLookup_n + 19] = "pes_objective_stromdorf_town_intro_b"
-DialogueLookup[DialogueLookup_n + 20] = "pes_objective_stromdorf_town_intro_c"
-DialogueLookup[DialogueLookup_n + 21] = "pes_objective_stromdorf_town_emissary_anticipation"
-DialogueLookup[DialogueLookup_n + 22] = "pes_gameplay_chieftain_tips_special_attack_cleave"
-DialogueLookup[DialogueLookup_n + 23] = "pes_gameplay_chieftain_tips_special_lunge_attack_2"
-DialogueLookup[DialogueLookup_n + 24] = "pes_gameplay_chieftain_banter_reply"
-DialogueLookup[DialogueLookup_n + 25] = "pes_objective_stromdorf_town_intro_a_gt"
-DialogueLookup[DialogueLookup_n + 26] = "pes_objective_stromdorf_town_intro_b_gt"
-DialogueLookup[DialogueLookup_n + 27] = "pes_objective_stromdorf_town_intro_c_gt"
-DialogueLookup_n = DialogueLookup_n + 27
+DialogueLookup[DialogueLookup_n + 10] = "pes_objective_stromdorf_town_seeing_tannery"
+DialogueLookup[DialogueLookup_n + 11] = "pes_objective_stromdorf_town_kill_emissary"
+DialogueLookup[DialogueLookup_n + 12] = "pes_objective_stromdorf_town_emissary_dead"
+DialogueLookup[DialogueLookup_n + 13] = "pes_objective_stromdorf_town_go_to_olesya"
+DialogueLookup[DialogueLookup_n + 14] = "pes_objective_stromdorf_town_fleeing"
+DialogueLookup[DialogueLookup_n + 15] = "pes_gameplay_chieftain_cleave_attack_taunt"
+DialogueLookup[DialogueLookup_n + 16] = "pes_gameplay_chieftain_charge_attack_taunt"
+DialogueLookup[DialogueLookup_n + 17] = "pes_objective_stromdorf_town_intro_a"
+DialogueLookup[DialogueLookup_n + 18] = "pes_objective_stromdorf_town_intro_b"
+DialogueLookup[DialogueLookup_n + 19] = "pes_objective_stromdorf_town_intro_c"
+DialogueLookup[DialogueLookup_n + 20] = "pes_objective_stromdorf_town_emissary_anticipation"
+DialogueLookup[DialogueLookup_n + 21] = "pes_gameplay_chieftain_tips_special_attack_cleave"
+DialogueLookup[DialogueLookup_n + 22] = "pes_gameplay_chieftain_tips_special_lunge_attack_2"
+DialogueLookup[DialogueLookup_n + 23] = "pes_gameplay_chieftain_banter_reply"
+DialogueLookup[DialogueLookup_n + 24] = "pes_objective_stromdorf_town_intro_a_gt"
+DialogueLookup[DialogueLookup_n + 25] = "pes_objective_stromdorf_town_intro_b_gt"
+DialogueLookup[DialogueLookup_n + 26] = "pes_objective_stromdorf_town_intro_c_gt"
+DialogueLookup_n = DialogueLookup_n + 26
 
 return 

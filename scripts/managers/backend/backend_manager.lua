@@ -51,7 +51,7 @@ ERROR_CODES[BACKEND_LUA_ERRORS.ERR_LOADING_PLUGIN] = "backend_err_loading_plugin
 BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED = 256
 ERROR_CODES[BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED] = "backend_err_use_local_backend_not_allowed"
 BackendManager = class(BackendManager)
-local TIMEOUT_SIGNIN = 20
+local TIMEOUT_SIGNIN = 40
 BackendManager.init = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 

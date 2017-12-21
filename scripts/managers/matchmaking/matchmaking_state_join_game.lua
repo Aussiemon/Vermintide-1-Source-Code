@@ -27,10 +27,12 @@ MatchmakingStateJoinGame.destroy = function (self)
 	return 
 end
 MatchmakingStateJoinGame.on_enter = function (self, state_context)
-	self.profiles_data = state_context.profiles_data
+	self.lobby_data = state_context.profiles_data
 	self.state_context = state_context
 	self.lobby_client = state_context.lobby_client
 	self.join_lobby_data = state_context.join_lobby_data
+	self.lobby_data.selected_level_key = self.join_lobby_data.selected_level_key
+	self.lobby_data.difficulty = self.join_lobby_data.difficulty
 	local matchmaking_manager = self.matchmaking_manager
 	local hero_index, hero_name = self._current_hero(self)
 
@@ -49,6 +51,8 @@ MatchmakingStateJoinGame.on_enter = function (self, state_context)
 
 	self.matchmaking_manager:set_status_message("matchmaking_status_joining_game")
 
+	self._update_lobby_data_timer = 0
+
 	return 
 end
 MatchmakingStateJoinGame.on_exit = function (self)
@@ -65,6 +69,8 @@ MatchmakingStateJoinGame.update = function (self, dt, t)
 
 			self.handle_popup_result(self, popup_result, t)
 		end
+
+		self._update_lobby_data(self, dt, t)
 	end
 
 	if self.handshaker_client:is_timed_out_from_server(t) then
@@ -122,6 +128,28 @@ MatchmakingStateJoinGame.update = function (self, dt, t)
 
 	return nil
 end
+MatchmakingStateJoinGame._update_lobby_data = function (self, dt, t)
+	self._update_lobby_data_timer = self._update_lobby_data_timer - dt
+
+	if self._update_lobby_data_timer < 0 then
+		self._update_lobby_data_timer = 0.5
+		local lobby_data = self.lobby_data
+		local lobby_client = self.lobby_client
+		local selected_level_key = lobby_client.lobby_data(lobby_client, "selected_level_key")
+
+		if lobby_data.selected_level_key ~= selected_level_key then
+			lobby_data.selected_level_key = selected_level_key
+		end
+
+		local difficulty = lobby_client.lobby_data(lobby_client, "difficulty")
+
+		if lobby_data.difficulty ~= difficulty then
+			lobby_data.difficulty = difficulty
+		end
+	end
+
+	return 
+end
 MatchmakingStateJoinGame.handle_popup_result = function (self, result, t)
 	self.popup_id = nil
 	local selected_hero_name = nil
@@ -162,21 +190,20 @@ MatchmakingStateJoinGame.rpc_matchmaking_update_profiles_data = function (self, 
 	self._update_profiles_data(self, profiles_data)
 
 	if self.popup_id then
-		self.popup_join_lobby_handler:update_profiles_data(self.profiles_data)
+		self.popup_join_lobby_handler:update_lobby_data(self.lobby_data)
 	end
 
 	return 
 end
 MatchmakingStateJoinGame._update_profiles_data = function (self, profiles_data)
-	self.profiles_data = {}
 	local num_profiles = #SPProfiles
 
 	for i = 1, num_profiles, 1 do
 		local profile_data = (profiles_data[i] == "0" and "available") or profiles_data[i]
-		self.profiles_data["player_slot_" .. i] = profile_data
+		self.lobby_data["player_slot_" .. i] = profile_data
 	end
 
-	self.matchmaking_manager.debug.profiles_data = self.profiles_data
+	self.matchmaking_manager.debug.profiles_data = self.lobby_data
 
 	return 
 end
@@ -192,19 +219,16 @@ MatchmakingStateJoinGame.get_transition = function (self)
 	return 
 end
 MatchmakingStateJoinGame.spawn_join_popup = function (self)
-	local lobby_data = self.join_lobby_data
 	local state_context = self.state_context
-	local level = lobby_data.selected_level_key
-	local difficulty = lobby_data.difficulty
 	local peer_id = Network.peer_id()
 	local player = Managers.player:player_from_peer_id(peer_id)
 	local hero_index = player.profile_index
 	local hero_data = SPProfiles[hero_index]
 	local hero_name = hero_data.display_name
 	local auto_cancel_time = MatchmakingSettings.JOIN_LOBBY_TIME_UNTIL_AUTO_CANCEL
-	local profiles_data = self.profiles_data
+	local lobby_data = self.lobby_data
 	local join_by_lobby_browser = self.state_context.join_by_lobby_browser
-	self.popup_id = self.popup_join_lobby_handler:show(hero_name, difficulty, level, profiles_data, auto_cancel_time, join_by_lobby_browser)
+	self.popup_id = self.popup_join_lobby_handler:show(hero_name, lobby_data, auto_cancel_time, join_by_lobby_browser)
 	local time_manager = Managers.time
 	self.hero_popup_at_t = time_manager.time(time_manager, "game")
 
