@@ -114,7 +114,7 @@ SkinSettings = {
 				first_person = "units/beings/player/first_person_base/chr_first_person_base"
 			}
 		},
-		first_person_attachment = FirstPersonAttachments.witch_hunter,
+		first_person_attachment = FirstPersonAttachments.witch_hunter_variation_1,
 		wwise_dep = {
 			"wwise/player_foley_witch_hunter",
 			"wwise/player_witch_hunter_vo"
@@ -177,7 +177,7 @@ SkinSettings = {
 				first_person = "units/beings/player/first_person_base/chr_first_person_base"
 			}
 		},
-		first_person_attachment = FirstPersonAttachments.wood_elf,
+		first_person_attachment = FirstPersonAttachments.wood_elf_variation_1,
 		wwise_dep = {
 			"wwise/player_foley_way_watcher",
 			"wwise/player_wood_elf_vo"
@@ -198,7 +198,7 @@ SkinSettings = {
 				first_person = "units/beings/player/first_person_base/chr_first_person_base"
 			}
 		},
-		first_person_attachment = FirstPersonAttachments.empire_soldier,
+		first_person_attachment = FirstPersonAttachments.empire_soldier_variation_1,
 		wwise_dep = {
 			"wwise/player_foley_imperial",
 			"wwise/player_mercenary_vo"

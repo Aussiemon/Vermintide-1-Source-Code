@@ -3,7 +3,7 @@ FirstPersonAttachments = {
 		unit = "units/beings/player/witch_hunter/first_person_base/chr_first_person_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
-	witch_hunter = {
+	witch_hunter_variation_1 = {
 		unit = "units/beings/player/witch_hunter/first_person_base/chr_first_person_variation_1_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
@@ -19,7 +19,7 @@ FirstPersonAttachments = {
 		unit = "units/beings/player/way_watcher/first_person_base/chr_first_person_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
-	wood_elf = {
+	wood_elf_variation_1 = {
 		unit = "units/beings/player/way_watcher/first_person_base/chr_first_person_variation_1_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
@@ -35,7 +35,7 @@ FirstPersonAttachments = {
 		unit = "units/beings/player/empire_soldier/first_person_base/chr_first_person_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	},
-	empire_soldier = {
+	empire_soldier_variation_1 = {
 		unit = "units/beings/player/empire_soldier/first_person_base/chr_first_person_variation_1_mesh",
 		attachment_node_linking = AttachmentNodeLinking.first_person_attachment
 	}

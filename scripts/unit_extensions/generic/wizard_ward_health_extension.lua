@@ -14,9 +14,6 @@ WizardWardHealthExtension.update = function (self, dt, context, t)
 
 		if health_percent < 0.5 and not self._mission_updated then
 			local mission_system = Managers.state.entity:system("mission_system")
-
-			mission_system.increment_goal_mission_counter(mission_system, "wizards_tower_protect_wards", 1, true)
-
 			self._mission_updated = true
 		end
 	end

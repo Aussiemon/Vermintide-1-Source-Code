@@ -2606,18 +2606,13 @@ end
 function flow_callback_teleporter(params)
 	local teleporter_unit = params.unit
 	local unit = params.touching_unit
+	local entrance_node = params.entrance_node
 	local exit_node = params.exit_node
 	local exit_node_index = Unit.node(teleporter_unit, exit_node)
+	local entrance_node_index = Unit.node(teleporter_unit, entrance_node)
 	local exit_position = Unit.world_position(teleporter_unit, exit_node_index)
-	local exit_rotation = Unit.world_rotation(teleporter_unit, exit_node_index)
-	local eul_x, eul_y, eul_z = Quaternion.to_euler_angles_xyz(exit_rotation)
-	local wanted_exit_rotation = Quaternion.from_euler_angles_xyz(eul_x, eul_y, eul_z + 90)
-
-	if exit_node_index == 1 then
-		wanted_exit_rotation = Quaternion.from_euler_angles_xyz(eul_x, eul_y, eul_z - 90)
-	end
-
-	local unit_entry_position = Unit.world_position(unit, 0)
+	local entrance_node_rotation = Unit.world_rotation(teleporter_unit, entrance_node_index)
+	local exit_node_rotation = Unit.world_rotation(teleporter_unit, exit_node_index)
 	local network_manager = Managers.state.network
 
 	if Unit.alive(unit) then
@@ -2629,8 +2624,10 @@ function flow_callback_teleporter(params)
 		if unit == player_unit then
 			if ScriptUnit.has_extension(unit, "locomotion_system") then
 				local locomotion = ScriptUnit.extension(unit, "locomotion_system")
+				local player_direction = Vector3.normalize(Quaternion.forward(locomotion.current_rotation(locomotion)))
+				local exit_rotation = Quaternion.inverse(Quaternion.look(Quaternion.rotate(entrance_node_rotation, player_direction)))
 
-				locomotion.teleport_to(locomotion, exit_position, wanted_exit_rotation)
+				locomotion.teleport_to(locomotion, exit_position, exit_node_rotation)
 			end
 
 			flow_return_table.player_ported = true
@@ -2647,10 +2644,12 @@ function flow_callback_teleporter(params)
 			navigation_extension.teleport(navigation_extension, exit_position)
 		end
 
-		if DamageUtils.is_enemy(unit) and ScriptUnit.has_extension(unit, "ai_navigation_system") then
+		if DamageUtils.is_enemy(unit) and ScriptUnit.has_extension(unit, "ai_navigation_system") and ScriptUnit.has_extension(unit, "locomotion_system") then
 			local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
+			local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
 			navigation_extension.set_navbot_position(navigation_extension, exit_position)
+			locomotion_extension.teleport_to(locomotion_extension, exit_position)
 		end
 
 		if not ScriptUnit.has_extension(unit, "projectile_system") and not ScriptUnit.has_extension(unit, "locomotion_system") and not DamageUtils.is_enemy(unit) then

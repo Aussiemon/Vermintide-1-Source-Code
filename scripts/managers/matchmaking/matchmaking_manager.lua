@@ -681,8 +681,9 @@ MatchmakingManager.get_random_adventure_level = function (self, level_area, diff
 		if game_mode == "adventure" then
 			local random_map_settings = random_level_settings.map_settings
 			local approved_location = (level_area and level_area == random_map_settings.area) or level_area == nil
+			local dlc_stat_dependency_func = random_level_settings.dlc_stat_dependency_func
 
-			if approved_location and self.level_unlocked_at_difficulty(self, random_level_key, difficulty_rank, statistics_db, player_stats_id) then
+			if approved_location and self.level_unlocked_at_difficulty(self, random_level_key, difficulty_rank, statistics_db, player_stats_id) and not dlc_stat_dependency_func then
 				random_level_list[#random_level_list + 1] = random_level_key
 			end
 		end
@@ -701,8 +702,9 @@ MatchmakingManager.get_random_survival_level = function (self, level_area, diffi
 		local random_level_settings = LevelSettings[random_level_key]
 		local random_map_settings = random_level_settings.map_settings
 		local approved_location = (level_area and level_area == random_map_settings.area) or level_area == nil
+		local dlc_stat_dependency_func = random_level_settings.dlc_stat_dependency_func
 
-		if approved_location and self.level_unlocked_at_difficulty(self, random_level_key, difficulty_rank, statistics_db, player_stats_id) then
+		if approved_location and self.level_unlocked_at_difficulty(self, random_level_key, difficulty_rank, statistics_db, player_stats_id) and not dlc_stat_dependency_func then
 			random_level_list[#random_level_list + 1] = random_level_key
 		end
 	end
