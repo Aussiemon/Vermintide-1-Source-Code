@@ -280,6 +280,14 @@ local settings = {
 		}
 	},
 	{
+		description = "Prints the players current movementspeed when moving.",
+		setting_name = "Show player movementspeed",
+		category = "Presets",
+		preset = {
+			debug_player_movementspeed = true
+		}
+	},
+	{
 		description = "Make the player unkillable (after next respawn).",
 		is_boolean = true,
 		setting_name = "player_invincible",
@@ -508,6 +516,12 @@ Features that make player mechanics nicer to work with.
 		description = "Show the player's position on the screen",
 		is_boolean = true,
 		setting_name = "debug_player_position",
+		category = "Player mechanics"
+	},
+	{
+		description = "Shows players movementspeed",
+		is_boolean = true,
+		setting_name = "debug_player_movementspeed",
 		category = "Player mechanics"
 	},
 	{

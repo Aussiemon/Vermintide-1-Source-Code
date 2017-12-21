@@ -95,5 +95,9 @@ for name, breed in pairs(Breeds) do
 end
 
 NetworkConstants.teleports = Network.type_info("teleports")
+NetworkConstants.marker_lookup = Network.type_info("marker_lookup")
+local num_markers = #NetworkLookup.markers
+
+fassert(num_markers <= NetworkConstants.marker_lookup.max, "Too many dialogue system markers, raise global.network_config value for marker_lookup by a factor 2")
 
 return 

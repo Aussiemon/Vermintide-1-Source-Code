@@ -1528,7 +1528,11 @@ NetworkLookup.statistics_path_names = create_lookup({}, path_names)
 NetworkLookup.mission_names = create_lookup({}, Missions)
 NetworkLookup.projectile_gravity_settings = create_lookup({}, ProjectileGravitySettings)
 NetworkLookup.voting_types = create_lookup({}, VoteTemplates)
-NetworkLookup.session_stats = create_lookup({}, StatisticsDefinitions.session)
+local session_stats = create_lookup({}, StatisticsDefinitions.session)
+
+table.append(session_stats, breeds)
+
+NetworkLookup.session_stats = session_stats
 local lookup_table = {}
 local flow_events = {}
 

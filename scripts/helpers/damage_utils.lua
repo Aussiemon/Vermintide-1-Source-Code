@@ -73,7 +73,7 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 		damage = damage_table[target_unit_armor]
 	end
 
-	if hit_zone_name == "head" or (hit_zone_name == "neck" and not headshot_multiplier == -1) then
+	if (hit_zone_name == "head" or hit_zone_name == "neck") and headshot_multiplier ~= -1 then
 		if headshot_multiplier and 0 < damage then
 			damage = damage*headshot_multiplier
 		elseif target_unit_armor == 2 and damage == 0 then

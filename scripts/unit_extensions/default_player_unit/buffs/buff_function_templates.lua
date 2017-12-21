@@ -70,13 +70,9 @@ BuffFunctionTemplates.functions = {
 
 		if bonus then
 			local new_value = math.lerp(0, bonus, percentage_in_lerp)
-			local difference = new_value - buff.current_lerped_value
-
-			if 0.001 < math.abs(difference) then
-				old_value_to_update_movement_setting = buff.current_lerped_value
-				buff.current_lerped_value = new_value
-				value_to_update_movement_setting = new_value
-			end
+			old_value_to_update_movement_setting = buff.current_lerped_value
+			buff.current_lerped_value = new_value
+			value_to_update_movement_setting = new_value
 		end
 
 		if multiplier then
@@ -93,13 +89,9 @@ BuffFunctionTemplates.functions = {
 			end
 
 			local new_multiplier = math.lerp(1, multiplier, percentage_in_lerp)
-			local difference = new_multiplier - buff.current_lerped_multiplier
-
-			if 0.001 < math.abs(difference) then
-				old_multiplier_to_update_movement_setting = buff.current_lerped_multiplier
-				buff.current_lerped_multiplier = new_multiplier
-				multiplier_to_update_movement_setting = new_multiplier
-			end
+			old_multiplier_to_update_movement_setting = buff.current_lerped_multiplier
+			buff.current_lerped_multiplier = new_multiplier
+			multiplier_to_update_movement_setting = new_multiplier
 		end
 
 		if value_to_update_movement_setting or multiplier_to_update_movement_setting then
@@ -161,24 +153,16 @@ BuffFunctionTemplates.functions = {
 
 		if bonus then
 			local new_value = math.lerp(0, bonus, percentage_in_lerp)
-			local difference = new_value - buff.current_lerped_value
-
-			if 0.001 < math.abs(difference) then
-				old_value_to_update_movement_setting = buff.current_lerped_value
-				buff.current_lerped_value = new_value
-				value_to_update_movement_setting = new_value
-			end
+			old_value_to_update_movement_setting = buff.current_lerped_value
+			buff.current_lerped_value = new_value
+			value_to_update_movement_setting = new_value
 		end
 
 		if multiplier then
 			local new_multiplier = math.lerp(1, multiplier, percentage_in_lerp)
-			local difference = new_multiplier - buff.current_lerped_multiplier
-
-			if 0.001 < math.abs(difference) then
-				old_multiplier_to_update_movement_setting = buff.current_lerped_multiplier
-				buff.current_lerped_multiplier = new_multiplier
-				multiplier_to_update_movement_setting = new_multiplier
-			end
+			old_multiplier_to_update_movement_setting = buff.current_lerped_multiplier
+			buff.current_lerped_multiplier = new_multiplier
+			multiplier_to_update_movement_setting = new_multiplier
 		end
 
 		if value_to_update_movement_setting or multiplier_to_update_movement_setting then
@@ -340,11 +324,15 @@ BuffFunctionTemplates.functions = {
 	end,
 	knock_down_bleed_update = function (unit, buff, params)
 		if buff.next_damage_time < params.t then
-			local buff_template = buff.template
-			buff.next_damage_time = buff.next_damage_time + buff_template.time_between_damage
-			local damage = DamageUtils.calculate_damage(AttackDamageValues[buff_template.attack_damage_template], unit, unit, "full", 1)
+			local status_extension = ScriptUnit.extension(unit, "status_system")
 
-			DamageUtils.add_damage_network(unit, unit, damage, "full", buff_template.damage_type, Vector3(1, 0, 0), "knockdown_bleed")
+			if status_extension.is_knocked_down(status_extension) then
+				local buff_template = buff.template
+				buff.next_damage_time = buff.next_damage_time + buff_template.time_between_damage
+				local damage = DamageUtils.calculate_damage(AttackDamageValues[buff_template.attack_damage_template], unit, unit, "full", 1)
+
+				DamageUtils.add_damage_network(unit, unit, damage, "full", buff_template.damage_type, Vector3(1, 0, 0), "knockdown_bleed")
+			end
 		end
 
 		return 

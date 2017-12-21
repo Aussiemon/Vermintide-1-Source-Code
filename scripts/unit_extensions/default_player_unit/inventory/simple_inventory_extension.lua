@@ -978,6 +978,14 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 	local inventory_slots = equipment.slots
 	local slot_settings = InventorySettings.slots_by_name
 	local current_wielded_slot = self.get_wielded_slot_name(self)
+	local self_pos = POSITION_LOOKUP[unit]
+	local epsilon = 1
+	local min = NetworkConstants.position.min + epsilon
+	local max = NetworkConstants.position.max + epsilon
+	local x = self_pos.x
+	local y = self_pos.y
+	local z = self_pos.z
+	local is_within_level = min < x and x < max and min < y and y < max and min < z and z < max
 	local i = 0
 
 	for slot_name, slot_data in pairs(inventory_slots) do
@@ -993,7 +1001,7 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 					local random_vector = Vector3(math.random(-1, 1) + i*2, math.random(-1, 1) + i, math.random(0, 1))
 					local random_angle = math.random(-math.half_pi, math.half_pi)
 					local random_direction = Vector3.normalize(random_vector)
-					local position = POSITION_LOOKUP[unit] + random_vector*0.2
+					local position = self_pos + random_vector*0.2
 					local rotation = Quaternion.axis_angle(random_direction, random_angle)
 					local pickup_name = pickup_data.pickup_name
 					local pickup_name_id = NetworkLookup.pickup_names[pickup_name]
@@ -1001,7 +1009,9 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 					local pickup_spawn_type_id = NetworkLookup.pickup_spawn_types[pickup_spawn_type]
 					local network_manager = Managers.state.network
 
-					network_manager.network_transmit:send_rpc_server("rpc_spawn_pickup_with_physics", pickup_name_id, position, rotation, pickup_spawn_type_id)
+					if is_within_level then
+						network_manager.network_transmit:send_rpc_server("rpc_spawn_pickup_with_physics", pickup_name_id, position, rotation, pickup_spawn_type_id)
+					end
 
 					i = i + 1
 				elseif slot_name == "slot_level_event" then

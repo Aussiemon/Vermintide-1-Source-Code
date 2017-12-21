@@ -410,7 +410,7 @@ for breed_name, breed in pairs(Breeds) do
 	}
 	StatisticsDefinitions.session.damage_taken_per_breed[breed_name] = {
 		value = 0,
-		sync_on_hot_join = "rpc_set_unsigned_number_session_stat"
+		hot_join_sync_rpc = "rpc_set_unsigned_number_session_stat"
 	}
 end
 
@@ -718,7 +718,6 @@ StatisticsDatabase.hot_join_sync = function (self, peer_id)
 			local stats = self.statistics[stat_id]
 
 			sync_stat(peer_id, player.network_id(player), player.local_player_id(player), {}, 1, stats)
-		elseif category == "session" then
 		end
 	end
 

@@ -85,7 +85,9 @@ StatisticsSystem.update = function (self, context, t)
 
 			local stat_id = NetworkLookup.session_stats[stat_name]
 
-			self.network_transmit:send_rpc_clients("rpc_set_unsigned_number_session_stat", stat_id, actual_progress)
+			self.network_transmit:send_rpc_clients("rpc_set_unsigned_number_session_stat", {
+				stat_id
+			}, actual_progress)
 		end
 
 		local stat_name = "level_progress_distance"
@@ -97,33 +99,65 @@ StatisticsSystem.update = function (self, context, t)
 
 			local stat_id = NetworkLookup.session_stats[stat_name]
 
-			self.network_transmit:send_rpc_clients("rpc_set_unsigned_number_session_stat", stat_id, actual_distance)
+			self.network_transmit:send_rpc_clients("rpc_set_unsigned_number_session_stat", {
+				stat_id
+			}, actual_distance)
 		end
 	end
 
 	return 
 end
+
+function sync_session_stat(sender, db, transmit, data, stat_name, path)
+	local stat_id = NetworkLookup.session_stats[stat_name]
+	local index = #path.ids + 1
+	path.ids[index] = stat_id
+	path.names[index] = stat_name
+
+	if data.hot_join_sync_rpc then
+		local sync_rpc = data.hot_join_sync_rpc
+		local value = db.get_stat(db, "session", unpack(path.names))
+
+		transmit.send_rpc(transmit, sync_rpc, sender, path.ids, value)
+	elseif not data.value then
+		for child_stat_name, child_data in pairs(data) do
+			sync_session_stat(sender, db, transmit, child_data, child_stat_name, path)
+		end
+	end
+
+	path.names[index] = nil
+	path.ids[index] = nil
+
+	return 
+end
+
 StatisticsSystem.hot_join_sync = function (self, sender)
 	local db = self.extension_init_context.statistics_db
 
 	for stat_name, data in pairs(StatisticsDefinitions.session) do
-		local sync_rpc = data.hot_join_sync_rpc
-
-		if sync_rpc then
-			local stat_id = NetworkLookup.session_stats[stat_name]
-			local value = db.get_stat(db, "session", stat_name)
-
-			self.network_transmit:send_rpc(sync_rpc, sender, stat_id, value)
-		end
+		sync_session_stat(sender, db, self.network_transmit, data, stat_name, {
+			ids = {},
+			names = {}
+		})
 	end
 
 	return 
 end
-StatisticsSystem.rpc_set_unsigned_number_session_stat = function (self, sender, stat_id, value)
-	local stat = NetworkLookup.session_stats[stat_id]
+local TEMP_ARGS = {}
+StatisticsSystem.rpc_set_unsigned_number_session_stat = function (self, sender, stat_id_table, value)
 	local statistics_db = self.extension_init_context.statistics_db
 
-	statistics_db.set_stat(statistics_db, "session", stat, value)
+	table.clear(TEMP_ARGS)
+
+	local num_indices = #stat_id_table
+
+	for i = 1, num_indices, 1 do
+		TEMP_ARGS[i] = NetworkLookup.session_stats[stat_id_table[i]]
+	end
+
+	TEMP_ARGS[num_indices + 1] = value
+
+	statistics_db.set_stat(statistics_db, "session", unpack(TEMP_ARGS))
 
 	return 
 end

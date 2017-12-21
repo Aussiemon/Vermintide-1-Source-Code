@@ -1,4 +1,5 @@
 PlayerCharacterStateWalking = class(PlayerCharacterStateWalking, PlayerCharacterState)
+script_data.debug_player_movementspeed = script_data.debug_player_movementspeed or Development.parameter("debug_player_movementspeed")
 PlayerCharacterStateWalking.init = function (self, character_state_init_context)
 	PlayerCharacterState.init(self, character_state_init_context, "walking")
 
@@ -218,6 +219,11 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 	end
 
 	local move_speed = max_move_speed*move_speed_multiplier*movement_settings_table.player_speed_scale*self.movement_speed
+
+	if script_data.debug_player_movementspeed then
+		Debug.text("Movement Speed: " .. move_speed)
+	end
+
 	local move_input_direction = Vector3.normalize(move_input)
 
 	if Vector3.length(move_input_direction) == 0 then

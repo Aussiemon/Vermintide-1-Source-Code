@@ -334,6 +334,32 @@ QuestManager._commit_contract_progress = function (self, contract_id, contract, 
 
 	local task_amount = self._calculate_contract_session_progress(self, contract, params, true)
 
+	if GameSettingsDevelopment.use_telemetry then
+		local local_player = Managers.player:local_player(1)
+		local requirements = contract.requirements
+		local task = requirements.task
+
+		if task and local_player then
+			local telemetry_data = {}
+			local amount = task.amount
+			local acquired = amount.acquired
+			local required = amount.required
+			local telemetry_id = local_player.telemetry_id(local_player)
+			local progress = acquired + task_amount
+			telemetry_data.complete = required <= progress
+			telemetry_data.old_progress = acquired
+			telemetry_data.new_progress = task_amount
+			telemetry_data.goal_progress = required
+			telemetry_data.contract = task.type
+			telemetry_data.player_id = telemetry_id
+			telemetry_data.level_key = params.level_key
+			telemetry_data.requirement_difficulty = requirements
+			telemetry_data.played_difficulty = Managers.state.difficulty:get_difficulty()
+
+			Managers.telemetry:register_event("contract_progress", telemetry_data)
+		end
+	end
+
 	if 0 < task_amount then
 		local level_key = params.level_key
 
