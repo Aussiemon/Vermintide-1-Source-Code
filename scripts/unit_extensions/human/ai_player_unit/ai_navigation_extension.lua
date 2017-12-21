@@ -164,7 +164,6 @@ AINavigationExtension.move_to = function (self, pos)
 	self._wanted_destination:store(pos)
 
 	self._failed_move_attempts = 0
-	self._is_path_found = false
 
 	return 
 end
@@ -172,7 +171,12 @@ AINavigationExtension.stop = function (self)
 	local unit = self._unit
 	local position = POSITION_LOOKUP[unit]
 
-	self.move_to(self, position)
+	self._wanted_destination:store(position)
+	self._destination:store(position)
+
+	self._failed_move_attempts = 0
+
+	GwNavBot.clear_followed_path(self._nav_bot)
 
 	return 
 end
@@ -197,7 +201,6 @@ AINavigationExtension.reset_destination = function (self)
 	self._destination:store(position)
 
 	self._failed_move_attempts = 0
-	self._is_path_found = false
 
 	GwNavBot.compute_new_path(self._nav_bot, position)
 

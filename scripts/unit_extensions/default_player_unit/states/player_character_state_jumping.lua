@@ -17,7 +17,7 @@ PlayerCharacterStateJumping.on_enter = function (self, unit, input, dt, context,
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local jump_speed = movement_settings_table.jump.stationary_jump.initial_vertical_velocity
 
-	if script_data.player_mechanics_goodness_debug then
+	if script_data.use_super_jumps then
 		jump_speed = jump_speed*2
 	end
 

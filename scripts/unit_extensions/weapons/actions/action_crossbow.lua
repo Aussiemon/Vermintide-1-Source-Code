@@ -53,8 +53,6 @@ ActionCrossbow.client_owner_post_update = function (self, dt, t, world, can_dama
 
 		if self.num_projectiles then
 			for i = 1, self.num_projectiles, 1 do
-				print(i, self.num_projectiles)
-
 				local fire_rotation = rotation
 
 				if spread_extension then

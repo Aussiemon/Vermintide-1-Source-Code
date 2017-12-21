@@ -287,11 +287,6 @@ EntitySystem._add_system = function (self, name, class, context, extension_list,
 
 	return 
 end
-EntitySystem.finalize_setup = function (self)
-	self.entity_manager:finalize_setup()
-
-	return 
-end
 EntitySystem.pre_update = function (self, dt)
 	Profiler.start("EntitySystem:pre_update")
 	self.system_update(self, "pre_update", dt)

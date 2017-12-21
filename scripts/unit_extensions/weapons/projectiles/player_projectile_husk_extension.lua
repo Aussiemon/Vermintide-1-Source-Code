@@ -181,9 +181,10 @@ PlayerProjectileHuskExtension.hit_enemy = function (self, impact_data, hit_unit,
 	end
 
 	local damage_data = impact_data.damage
+	local allow_link = true
 
 	if damage_data and hit_units[hit_unit] == nil then
-		self.hit_enemy_damage(self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed, hit_units)
+		allow_link = self.hit_enemy_damage(self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed, hit_units)
 
 		if not impact_data.aoe then
 			DamageUtils.buff_on_attack(self.owner_unit, hit_unit, "projectile")
@@ -199,7 +200,7 @@ PlayerProjectileHuskExtension.hit_enemy = function (self, impact_data, hit_unit,
 	end
 
 	if self.hit_targets == self.num_targets then
-		if impact_data.link and self.did_damage then
+		if allow_link and impact_data.link and self.did_damage then
 			self.link_projectile(self, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, self.did_damage)
 		end
 
@@ -260,10 +261,10 @@ PlayerProjectileHuskExtension.hit_enemy_damage = function (self, damage_data, hi
 	end
 
 	if hit_effect then
-		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk, enemy_type, damage_sound, no_damage, hit_zone_name)
+		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_unit, hit_position, hit_rotation, hit_normal, is_husk, enemy_type, damage_sound, no_damage, hit_zone_name)
 	end
 
-	return 
+	return hit_zone_name ~= "ward"
 end
 PlayerProjectileHuskExtension.hit_player = function (self, impact_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, hit_units)
 	if hit_actor == nil then
@@ -332,7 +333,7 @@ PlayerProjectileHuskExtension.hit_player_damage = function (self, damage_data, h
 	end
 
 	if hit_effect then
-		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk)
+		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_unit, hit_position, hit_rotation, hit_normal, is_husk)
 	end
 
 	return 

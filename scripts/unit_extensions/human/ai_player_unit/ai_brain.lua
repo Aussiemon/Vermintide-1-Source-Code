@@ -38,7 +38,7 @@ AIBrain.init_utility_actions = function (self, blackboard, breed)
 
 	for action_name, data in pairs(actions) do
 		utility_actions[action_name] = {
-			last_time = 0,
+			last_time = -math.huge,
 			time_since_last = math.huge
 		}
 

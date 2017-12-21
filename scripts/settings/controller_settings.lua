@@ -3196,7 +3196,7 @@ IngameMenuKeymaps = {
 		},
 		ingame_vote_no = {
 			"gamepad",
-			"l2",
+			"r1",
 			"held"
 		},
 		ui_reload_debug = {

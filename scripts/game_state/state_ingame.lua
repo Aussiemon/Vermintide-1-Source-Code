@@ -1230,7 +1230,20 @@ StateIngame._check_exit = function (self, t)
 
 			return StateLoading
 		elseif exit_type == "perform_host_migration" then
-			self.parent.loading_context.host_to_migrate_to = self.network_client.host_to_migrate_to
+			local host_migration_info = {
+				host_to_migrate_to = self.network_client.host_to_migrate_to
+			}
+
+			if Managers.state.game_mode:is_game_mode_ended() then
+				local level_key = self.level_transition_handler:default_level_key()
+				host_migration_info.level_to_load = level_key
+			end
+
+			local is_private = self._lobby_client:lobby_data("is_private")
+			host_migration_info.lobby_data = {
+				is_private = is_private
+			}
+			self.parent.loading_context.host_migration_info = host_migration_info
 			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
 			self.leave_lobby = true
 

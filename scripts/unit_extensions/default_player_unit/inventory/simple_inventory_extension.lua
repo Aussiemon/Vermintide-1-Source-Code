@@ -451,6 +451,18 @@ SimpleInventoryExtension.add_equipment = function (self, slot_name, item_data, u
 		self.apply_buffs(self, empty_trait_table, "equip", item_data.name, slot_name)
 	end
 
+	if not is_bot then
+		local item_template = BackendUtils.get_item_template(item_data)
+		local stat = item_template.increment_stat_on_equip
+
+		if stat then
+			local pm = Managers.player
+			local statistics_db = pm.statistics_db(pm)
+
+			statistics_db.increment_stat(statistics_db, self.player:stats_id(), stat)
+		end
+	end
+
 	local slot_equipment_data = GearUtils.create_equipment(world, slot_name, item_data, unit_1p, unit_3p, is_bot, unit_template, extra_extension_data, ammo_percent)
 	slot_equipment_data.master_item = item_data
 	equipment.slots[slot_name] = slot_equipment_data

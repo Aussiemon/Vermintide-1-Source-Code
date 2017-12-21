@@ -921,12 +921,28 @@ TitleLoadingUI.init = function (self, world, params, force_done)
 	Managers.input:map_device_to_service("title_loading_ui", "keyboard")
 	Managers.input:map_device_to_service("title_loading_ui", "mouse")
 	Managers.input:map_device_to_service("title_loading_ui", "gamepad")
-	self._setup_gui(self)
+	self._setup_gui(self, self._gamma)
 
 	return 
 end
-TitleLoadingUI._setup_gui = function (self)
-	self._ui_renderer = UIRenderer.create(self._world, "material", "materials/ui/ui_1080p_title_screen_gamma", "material", "video/trailer", "material", "materials/fonts/gw_fonts")
+TitleLoadingUI._setup_gui = function (self, gamma)
+	local materials = {
+		"material",
+		"video/trailer",
+		"material",
+		"materials/fonts/gw_fonts",
+		"material",
+		"materials/ui/ui_1080p_ingame_common"
+	}
+
+	if gamma then
+		table.append(materials, {
+			"material",
+			"materials/ui/ui_1080p_title_screen_gamma"
+		})
+	end
+
+	self._ui_renderer = UIRenderer.create(self._world, unpack(materials))
 
 	self._create_elements(self)
 

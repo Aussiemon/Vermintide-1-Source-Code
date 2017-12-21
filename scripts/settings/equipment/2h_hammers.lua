@@ -248,11 +248,11 @@ weapon_template.actions = {
 			},
 			targets = {
 				{
-					attack_template_damage_type = "two_h_tank_H",
+					attack_template_damage_type = "two_h_tank_H_1",
 					attack_template = "heavy_blunt_tank"
 				},
 				{
-					attack_template_damage_type = "one_h_linesman_L",
+					attack_template_damage_type = "two_h_tank_H",
 					attack_template = "heavy_blunt_tank"
 				}
 			}

@@ -220,6 +220,153 @@ HordeSettings = {
 					}
 				}
 			},
+			slave_trickle = {
+				{
+					name = "few_slaves",
+					weight = 10,
+					breeds = {
+						"skaven_slave",
+						{
+							4,
+							5
+						}
+					}
+				}
+			},
+			stormdorf_boss_event_defensive_easy = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							3,
+							5
+						},
+						"skaven_clan_rat",
+						{
+							3,
+							5
+						}
+					}
+				}
+			},
+			stormdorf_boss_event_defensive_normal = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							3,
+							5
+						},
+						"skaven_clan_rat",
+						{
+							3,
+							5
+						}
+					}
+				},
+				{
+					name = "somevermin",
+					weight = 2,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							5,
+							7
+						}
+					}
+				}
+			},
+			stormdorf_boss_event_defensive_hard = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							4,
+							6
+						},
+						"skaven_clan_rat",
+						{
+							5,
+							7
+						}
+					}
+				},
+				{
+					name = "somevermin",
+					weight = 2,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							8,
+							10
+						}
+					}
+				}
+			},
+			stormdorf_boss_event_defensive_harder = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							6,
+							8
+						},
+						"skaven_clan_rat",
+						{
+							6,
+							8
+						}
+					}
+				},
+				{
+					name = "somevermin",
+					weight = 2,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							12,
+							14
+						}
+					}
+				}
+			},
+			stormdorf_boss_event_defensive_hardest = {
+				{
+					name = "plain",
+					weight = 6,
+					breeds = {
+						"skaven_slave",
+						{
+							8,
+							12
+						},
+						"skaven_clan_rat",
+						{
+							10,
+							14
+						}
+					}
+				},
+				{
+					name = "somevermin",
+					weight = 2,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							16,
+							20
+						}
+					}
+				}
+			},
 			event_courtyard_extra_spice = {
 				{
 					name = "plain",

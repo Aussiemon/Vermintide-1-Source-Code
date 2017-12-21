@@ -172,7 +172,8 @@ local settings = {
 			disable_gamemode_end = true,
 			disable_fatigue_system = true,
 			player_invincible = true,
-			ledge_hanging_turned_off = true
+			ledge_hanging_turned_off = true,
+			use_super_jumps = true
 		}
 	},
 	{
@@ -288,7 +289,7 @@ local settings = {
 		}
 	},
 	{
-		description = "Make the player unkillable (after next respawn).",
+		description = "Make the player unkillable.",
 		is_boolean = true,
 		setting_name = "player_invincible",
 		category = "Player mechanics recommended"
@@ -296,12 +297,19 @@ local settings = {
 	{
 		description = [[
 Features that make player mechanics nicer to work with.
- * Makes you jump high! Also allows you to jump in the air.
  * Enables incresing/decreasing the player run speed via ALT+MouseScroll.
  * Allows you to press 'B' to take debug damage.
+ * Kill yourself on 'CTRL' + 'V'
+ * Revive yourself on 'CTRL' + 'B'
  * (requests go here...)]],
 		is_boolean = true,
 		setting_name = "player_mechanics_goodness_debug",
+		category = "Player mechanics recommended"
+	},
+	{
+		description = "Increases jump height and allows you to jump multiple times whilst in the air.",
+		is_boolean = true,
+		setting_name = "use_super_jumps",
 		category = "Player mechanics recommended"
 	},
 	{
@@ -645,6 +653,12 @@ Features that make player mechanics nicer to work with.
 		end
 	},
 	{
+		description = "Shows the reward animation/ui when accepting a contract, without giving the reward",
+		is_boolean = true,
+		setting_name = "show_contract_reward_on_accept",
+		category = "Quests"
+	},
+	{
 		description = "Will show debug lines for projectiles when true",
 		is_boolean = true,
 		setting_name = "debug_projectiles",
@@ -655,6 +669,12 @@ Features that make player mechanics nicer to work with.
 		is_boolean = true,
 		setting_name = "attachment_debug",
 		category = "Attachments"
+	},
+	{
+		description = "Turns on chieftain spawn debug",
+		is_boolean = true,
+		setting_name = "ai_champion_spawn_debug",
+		category = "AI recommended"
 	},
 	{
 		description = "Disables AI spawning due to pacing.",
@@ -961,6 +981,12 @@ Features that make player mechanics nicer to work with.
 		category = "AI"
 	},
 	{
+		description = "Visual debugging for ai attacks",
+		is_boolean = true,
+		setting_name = "debug_ai_attack",
+		category = "AI"
+	},
+	{
 		description = "Visual debugging for ai targeting.",
 		is_boolean = true,
 		setting_name = "debug_ai_targets",
@@ -1199,6 +1225,12 @@ Features that make player mechanics nicer to work with.
 		description = "Debug for darkness in drachenfells castle dungeon level.",
 		is_boolean = true,
 		setting_name = "debug_darkness",
+		category = "Gamemode/level"
+	},
+	{
+		description = "Debug number of chests and their positions",
+		is_boolean = true,
+		setting_name = "debug_chests",
 		category = "Gamemode/level"
 	},
 	{

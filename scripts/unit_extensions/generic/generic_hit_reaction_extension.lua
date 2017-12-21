@@ -116,43 +116,18 @@ local function map_function(event, func, ...)
 	return 
 end
 
-local function play_effect(hit_effect_name, unit, world, actors, hit_direction_flat, damage_type)
-	local node_name = actors[1]
-	local node_id = node_name and Unit.node(unit, node_name)
-	local node = (node_id and Unit.scene_graph_parent(unit, node_id)) or 0
-	local hit_rotation = Quaternion.look(hit_direction_flat)
+local function play_effect(hit_effect_name, unit, world, actors, hit_direction, damage_type, position)
+	local hit_rotation = Quaternion.look(hit_direction)
 
-	if hit_effect_name then
-		debug_printf("Playing effect %q", tostring(hit_effect_name))
-		World.create_particles(world, hit_effect_name, Unit.world_position(unit, node), hit_rotation)
-	end
-
-	local breed = Unit.get_data(unit, "breed")
-	local show_blood = not breed.no_blood_splatter_on_damage
-
-	if not show_blood then
-		return 
-	end
-
-	Managers.state.blood:spawn_blood_ball(Unit.world_position(unit, node), hit_direction_flat, damage_type, unit)
+	World.create_particles(world, hit_effect_name, position, hit_rotation)
 
 	return 
 end
 
-local function play_sound(event_id, wwise_world, unit, node, is_husk, wwise_parameters)
+local function play_sound(event_id, wwise_world, wwise_source_id, position, is_husk)
 	assert(sound_event_table[event_id], "Could not find sound event %q in any template", event_id)
 
 	local event_name = sound_event_table[event_id][tostring(is_husk)]
-
-	debug_printf("Playing sound %q. damage_type = %q, enemy_type = %q, weapon_type = %q, hit_zone = %q, husk = %q", event_name, wwise_parameters.damage_type, wwise_parameters.enemy_type, wwise_parameters.weapon_type, wwise_parameters.hit_zone, tostring(wwise_parameters.husk))
-
-	local wwise_source_id = WwiseWorld.make_auto_source(wwise_world, unit, node)
-
-	Managers.state.entity:system("sound_environment_system"):set_source_environment(wwise_source_id, Unit.world_position(unit, node))
-
-	for param_name, param_value in pairs(wwise_parameters) do
-		WwiseWorld.set_switch(wwise_world, wwise_source_id, param_name, param_value)
-	end
 
 	WwiseWorld.trigger_event(wwise_world, event_name, wwise_source_id)
 
@@ -362,6 +337,10 @@ GenericHitReactionExtension._resolve_effects = function (self, conditions, resul
 	return results, num_results
 end
 GenericHitReactionExtension._can_wall_nail = function (self, effect_template)
+	if effect_template.disable_wall_nail then
+		return false
+	end
+
 	local do_dismember = effect_template.do_dismember
 
 	if do_dismember or self._delayed_flow then
@@ -390,6 +369,7 @@ GenericHitReactionExtension._can_wall_nail = function (self, effect_template)
 
 	return true
 end
+local WWISE_PARAMETERS = {}
 GenericHitReactionExtension._execute_effect = function (self, unit, effect_template, biggest_hit, parameters)
 	debug_printf("executing effect %s", effect_template.template_name)
 
@@ -506,8 +486,10 @@ GenericHitReactionExtension._execute_effect = function (self, unit, effect_templ
 		local random_animation = math.random(#animations)
 		local animation_event = animations[random_animation]
 
-		if self.death_extension:has_death_started() then
+		if self.death_extension:has_death_started() and self.death_extension:second_hit_ragdoll_allowed() then
 			animation_event = "ragdoll"
+		elseif self.death_extension:has_death_started() then
+			animation_event = nil
 		end
 
 		if flow_event or parameters.death then
@@ -534,7 +516,30 @@ GenericHitReactionExtension._execute_effect = function (self, unit, effect_templ
 		hit_effect = hit_effect_name
 	end
 
-	map_function(hit_effect, play_effect, unit, world, actors, hit_direction, damage_type)
+	local should_spawn_blood = not breed_data.no_blood_splatter_on_damage and not effect_template.disable_blood
+	local sound_event = effect_template.sound_event
+	local impact_position = nil
+
+	if hit_effect or should_spawn_blood or sound_event then
+		local actor_name = actors[1]
+
+		if not actor_name then
+			impact_position = Unit.world_position(unit, 0)
+		elseif not Unit.has_node(unit, actor_name) then
+			impact_position = Actor.center_of_mass(Unit.actor(unit, actor_name))
+		else
+			local node = Unit.node(unit, actor_name)
+			impact_position = Unit.world_position(unit, node)
+		end
+	end
+
+	if should_spawn_blood then
+		Managers.state.blood:spawn_blood_ball(impact_position, hit_direction, damage_type, unit)
+	end
+
+	if hit_effect then
+		map_function(hit_effect, play_effect, unit, world, actors, hit_direction, damage_type, impact_position)
+	end
 
 	if effect_template.push then
 		local push_actors = breed_data.hit_zones[hit_zone] and breed_data.hit_zones[hit_zone].push_actors
@@ -555,25 +560,30 @@ GenericHitReactionExtension._execute_effect = function (self, unit, effect_templ
 		end
 	end
 
-	if effect_template.sound_event then
+	if sound_event then
 		local wwise_world = Managers.world:wwise_world(world)
-		local node_name = actors[1]
-		local node_id = node_name and Unit.node(unit, node_name)
-		local node = (node_id and Unit.scene_graph_parent(unit, node_id)) or 0
-		local wwise_parameters = {
-			damage_type = parameters.damage_type,
-			enemy_type = breed_data.name,
-			weapon_type = parameters.weapon_type,
-			hit_zone = hit_zone,
-			husk = NetworkUnit.is_husk_unit(unit)
-		}
+		local wwise_source_id = WwiseWorld.make_auto_source(wwise_world, impact_position)
+
+		table.clear(WWISE_PARAMETERS)
+
+		WWISE_PARAMETERS.damage_type = parameters.damage_type
+		WWISE_PARAMETERS.enemy_type = breed_data.name
+		WWISE_PARAMETERS.weapon_type = parameters.weapon_type
+		WWISE_PARAMETERS.hit_zone = hit_zone
+		WWISE_PARAMETERS.husk = NetworkUnit.is_husk_unit(unit)
 		local dialogue_extension = self.dialogue_extension
 
 		if dialogue_extension and dialogue_extension.wwise_voice_switch_group then
-			wwise_parameters[dialogue_extension.wwise_voice_switch_group] = dialogue_extension.wwise_voice_switch_value
+			WWISE_PARAMETERS[dialogue_extension.wwise_voice_switch_group] = dialogue_extension.wwise_voice_switch_value
 		end
 
-		map_function(effect_template.sound_event, play_sound, wwise_world, unit, node, parameters.is_husk, wwise_parameters)
+		Managers.state.entity:system("sound_environment_system"):set_source_environment(wwise_source_id, position)
+
+		for param_name, param_value in pairs(WWISE_PARAMETERS) do
+			WwiseWorld.set_switch(wwise_world, wwise_source_id, param_name, param_value)
+		end
+
+		map_function(effect_template.sound_event, play_sound, wwise_world, wwise_source_id, position, parameters.is_husk)
 	end
 
 	if parameters.death and self.death_extension and not self.death_extension:has_death_started() then

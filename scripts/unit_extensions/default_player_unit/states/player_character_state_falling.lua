@@ -176,7 +176,7 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 		return 
 	end
 
-	if script_data.player_mechanics_goodness_debug and input_extension.get(input_extension, "jump") then
+	if script_data.use_super_jumps and input_extension.get(input_extension, "jump") then
 		self.times_jumped_in_air = math.min(#fix, self.times_jumped_in_air + 1)
 		local text = string.format("%sjump!", fix[self.times_jumped_in_air])
 

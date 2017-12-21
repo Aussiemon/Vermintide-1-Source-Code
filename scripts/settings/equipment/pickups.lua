@@ -312,7 +312,7 @@ Pickups.special.endurance_badge_05 = table.clone(Pickups.special.endurance_badge
 Pickups.special.endurance_badge_05.unit_name = "units/props/endurance_badges/prop_endurance_badge_05"
 Pickups.special.endurance_badge_05.mission_name = "endurance_badge_05_mission"
 
-local function lorebook_pages_unlocked(pages, statistics_db, stats_id)
+local function lorebook_all_pages_unlocked(pages, statistics_db, stats_id)
 	local num_pages = #pages
 
 	for i = 1, num_pages, 1 do
@@ -328,22 +328,57 @@ local function lorebook_pages_unlocked(pages, statistics_db, stats_id)
 	return true
 end
 
-local function lorebook_pages_unlocked_sesssion(level_key)
+local function num_lorebook_pages_collected_sesssion(level_key)
 	local mission_system = Managers.state.entity:system("mission_system")
 	local active_missions, completed_missions = mission_system.get_missions(mission_system)
 	local mission_data = active_missions.lorebook_page_hidden_mission
 	local difficulty_manager = Managers.state.difficulty
 	local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
-	local level_settings = LevelSettings[level_key]
-	local pickup_settings = (level_settings.pickup_settings and level_settings.pickup_settings[difficulty_rank]) or nil
-	local n_collected = 0
-	local n_pages_in_level = (pickup_settings and pickup_settings.lorebook_pages) or math.huge
+	local n_collected_session = 0
 
 	if mission_data then
-		n_collected = mission_data.get_current_amount(mission_data)
+		n_collected_session = mission_data.get_current_amount(mission_data)
 	end
 
-	return n_pages_in_level <= n_collected
+	return n_collected_session
+end
+
+local function lorebook_pages_in_level(level_key)
+	local difficulty_manager = Managers.state.difficulty
+	local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
+	local level_settings = LevelSettings[level_key]
+	local pickup_settings = (level_settings.pickup_settings and level_settings.pickup_settings[difficulty_rank]) or nil
+	local n_pages_in_level = (pickup_settings and pickup_settings.lorebook_pages) or math.huge
+
+	return n_pages_in_level
+end
+
+local function lorebook_all_pages_unlocked_sesssion(level_key)
+	local n_collected_session = num_lorebook_pages_collected_sesssion(level_key)
+	local n_pages_in_level = lorebook_pages_in_level(level_key)
+
+	return n_pages_in_level <= n_collected_session
+end
+
+local function lorebook_unlocked_pages(statistics_db)
+	local level_key = Managers.state.game_mode:level_key()
+	local level_pages = LorebookCollectablePages[level_key]
+	local any_level_pages = LorebookCollectablePages.any
+	local local_player = Managers.player:local_player()
+	local stats_id = local_player.stats_id(local_player)
+	local unlocked_all = true
+
+	if 0 < #level_pages then
+		unlocked_all = lorebook_all_pages_unlocked(level_pages, statistics_db, stats_id)
+	end
+
+	if unlocked_all and 0 < #any_level_pages then
+		unlocked_all = lorebook_all_pages_unlocked(any_level_pages, statistics_db, stats_id)
+	end
+
+	local unlocked_all_session = lorebook_all_pages_unlocked_sesssion(level_key)
+
+	return unlocked_all, unlocked_all_session
 end
 
 Pickups.lorebook_pages = {
@@ -356,27 +391,16 @@ Pickups.lorebook_pages = {
 		unit_name = "units/weapons/player/pup_lore_page/pup_lore_page_01",
 		hud_description = "pickup_lorebook_page",
 		hide_func = function (statistics_db)
-			local level_key = Managers.state.game_mode:level_key()
-			local level_pages = LorebookCollectablePages[level_key]
-			local any_level_pages = LorebookCollectablePages.any
-			local local_player = Managers.player:local_player()
-			local stats_id = local_player.stats_id(local_player)
-			local unlocked_all = true
-
-			if 0 < #level_pages then
-				unlocked_all = lorebook_pages_unlocked(level_pages, statistics_db, stats_id)
-			end
-
-			if unlocked_all and 0 < #any_level_pages then
-				unlocked_all = lorebook_pages_unlocked(any_level_pages, statistics_db, stats_id)
-			end
-
-			local unlocked_all_session = lorebook_pages_unlocked_sesssion(level_key)
+			local unlocked_all, unlocked_all_session = lorebook_unlocked_pages(statistics_db)
 
 			return unlocked_all or unlocked_all_session
 		end,
-		can_spawn_func = function ()
-			return GameSettingsDevelopment.lorebook_enabled
+		can_spawn_func = function (params, is_debug_spawn)
+			if params and params.num_spawned_lorebook_pages and 1 <= params.num_spawned_lorebook_pages then
+				return false
+			end
+
+			return GameSettingsDevelopment.lorebook_enabled or is_debug_spawn
 		end
 	}
 }

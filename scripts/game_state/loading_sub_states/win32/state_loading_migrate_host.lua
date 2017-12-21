@@ -18,6 +18,7 @@ end
 StateLoadingMigrateHost._init_params = function (self, params)
 	self._loading_view = params.loading_view
 	self._lobby_client = params.lobby_client
+	self._level_transition_handler = params.level_transition_handler
 	self._lobby_joined = false
 	self._server_created = false
 
@@ -31,11 +32,21 @@ StateLoadingMigrateHost._init_network = function (self)
 	end
 
 	local loading_context = self.parent.parent.loading_context
-	local host_to_migrate_to = loading_context.host_to_migrate_to
+	local host_migration_info = loading_context.host_migration_info
+	local host_to_migrate_to = host_migration_info.host_to_migrate_to
 	local host_peer_id = host_to_migrate_to and host_to_migrate_to.peer_id
 
 	if host_peer_id == Network.peer_id() then
 		network_printf("creating host for people to migrate to")
+
+		local level_to_load = host_migration_info.level_to_load
+
+		if level_to_load then
+			self._level_transition_handler:set_next_level(level_to_load)
+
+			loading_context.host_migration_level_to_load = nil
+		end
+
 		self.parent:setup_lobby_host(callback(self, "cb_server_created"))
 		self.parent:start_matchmaking()
 	else
@@ -67,10 +78,22 @@ StateLoadingMigrateHost.update = function (self, dt, t)
 	return 
 end
 StateLoadingMigrateHost.on_exit = function (self, application_shutdown)
+	self.parent.parent.loading_context.host_migration_info = nil
+
 	return 
 end
 StateLoadingMigrateHost.cb_server_created = function (self)
 	network_printf("cb_server_created")
+
+	local lobby_host = self.parent:get_lobby()
+	local stored_lobby_data = lobby_host.get_stored_lobby_data(lobby_host) or {}
+	local lobby_data = self.parent.parent.loading_context.host_migration_info.lobby_data
+
+	for key, value in pairs(lobby_data) do
+		stored_lobby_data[key] = value
+	end
+
+	lobby_host.set_lobby_data(lobby_host, stored_lobby_data)
 
 	self._server_created = true
 

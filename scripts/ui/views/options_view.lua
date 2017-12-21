@@ -6947,7 +6947,7 @@ local function get_button_locale_name(controller_type, button_name)
 		button_locale_name = Pad1.button_locale_name(button_index) ~= "" or button_name
 	end
 
-	return button_locale_name
+	return (button_locale_name ~= "" and button_locale_name) or string.upper(button_name)
 end
 
 OptionsView.cb_keybind_setup = function (self, keymappings_key, keymappings_table_key, actions)
@@ -7000,21 +7000,22 @@ OptionsView.cb_keybind_saved_value = function (self, widget)
 	local controller_type = actions_info[1].keybind[1]
 	local mapped_key = actions_info[1].keybind[2]
 	widget.content.selected_key = get_button_locale_name(controller_type, mapped_key)
+	widget.content.mapped_key = mapped_key
 	widget.content.actions_info = actions_info
 
 	return 
 end
-OptionsView.cleanup_duplicates = function (self, key, device)
+OptionsView.cleanup_duplicates = function (self, new_key)
 	local selected_settings_list = self.selected_settings_list
 	local widgets = selected_settings_list.widgets
 	local widgets_n = selected_settings_list.widgets_n
-	local button_locale_name = get_button_locale_name(device, key)
 
 	for i = 1, widgets_n, 1 do
 		local widget = widgets[i]
 		local content = widget.content
+		local mapped_key = content.mapped_key
 
-		if content.selected_key == button_locale_name then
+		if mapped_key == new_key then
 			content.callback("delete", "keyboard", content)
 		end
 	end
@@ -7035,7 +7036,7 @@ OptionsView.cb_keybind_changed = function (self, new_key, device, content)
 	if new_key == "delete" and device == "keyboard" then
 		new_key = "left button **"
 	else
-		self.cleanup_duplicates(self, new_key, device)
+		self.cleanup_duplicates(self, new_key)
 	end
 
 	local input_manager = Managers.input

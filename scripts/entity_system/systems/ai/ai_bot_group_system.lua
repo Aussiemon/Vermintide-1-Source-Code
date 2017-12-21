@@ -95,7 +95,11 @@ AIBotGroupSystem.on_add_extension = function (self, world, unit, extension_name,
 			priority_target_distance = math.huge,
 			priority_targets = {},
 			nav_point_utility = {},
-			blackboard = Unit.get_data(unit, "blackboard")
+			blackboard = Unit.get_data(unit, "blackboard"),
+			aoe_threat = {
+				expires = -math.huge,
+				escape_direction = Vector3Box()
+			}
 		}
 		self._bot_ai_data[unit] = data
 
@@ -140,6 +144,9 @@ AIBotGroupSystem.update = function (self, context, t)
 	Profiler.start("_update_urgent_targets")
 	self._update_urgent_targets(self, dt, t)
 	Profiler.stop("_update_urgent_targets")
+	Profiler.start("_update_opportunity_targets")
+	self._update_opportunity_targets(self, dt, t)
+	Profiler.stop()
 	Profiler.start("_update_move_targets")
 	self._update_move_targets(self, dt, t)
 	Profiler.stop("_update_move_targets")
@@ -750,18 +757,16 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 
 	return 
 end
-local FALLBACK_OPPORTUNITY_DISTANCE = 15
-local RAT_OGRE_ENGAGE_DISTANCE = 15
+local BOSS_ENGAGE_DISTANCE = 15
 AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 	local conflict_director = Managers.state.conflict
-	local alive_specials = conflict_director.alive_specials(conflict_director)
-	local spawned_rat_ogres = conflict_director.spawned_units_by_breed(conflict_director, "skaven_rat_ogre")
+	local alive_bosses = conflict_director.alive_bosses(conflict_director)
 
 	for bot_unit, data in pairs(self._bot_ai_data) do
 		local best_utility = -math.huge
 		local best_target = nil
 		local best_distance = math.huge
-		local blackboard = Unit.get_data(bot_unit, "blackboard")
+		local blackboard = data.blackboard
 		local self_pos = POSITION_LOOKUP[bot_unit]
 		local old_target = blackboard.urgent_target_enemy
 		local revive_during_urgent = false
@@ -785,10 +790,10 @@ AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 		end
 
 		if not best_target then
-			for _, target_unit in pairs(spawned_rat_ogres) do
+			for _, target_unit in pairs(alive_bosses) do
 				local pos = POSITION_LOOKUP[target_unit]
 
-				if AiUtils.unit_alive(target_unit) and Vector3.distance(pos, self_pos) < RAT_OGRE_ENGAGE_DISTANCE then
+				if AiUtils.unit_alive(target_unit) and Vector3.distance(pos, self_pos) < BOSS_ENGAGE_DISTANCE and not Unit.get_data(target_unit, "blackboard").defensive_mode_duration then
 					local utility, distance = self._calculate_opportunity_utility(self, bot_unit, self_pos, old_target, target_unit, t, false)
 
 					if best_utility < utility then
@@ -804,15 +809,27 @@ AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 		blackboard.revive_with_urgent_target = revive_during_urgent
 		blackboard.urgent_target_enemy = best_target
 		blackboard.urgent_target_distance = best_distance
-		best_utility = -math.huge
-		best_target = nil
-		best_distance = math.huge
-		old_target = blackboard.opportunity_target_enemy
+	end
+
+	return 
+end
+local FALLBACK_OPPORTUNITY_DISTANCE = 15
+AIBotGroupSystem._update_opportunity_targets = function (self, dt, t)
+	local conflict_director = Managers.state.conflict
+	local alive_specials = conflict_director.alive_specials(conflict_director)
+
+	for bot_unit, data in pairs(self._bot_ai_data) do
+		local best_utility = -math.huge
+		local best_target = nil
+		local best_distance = math.huge
+		local blackboard = data.blackboard
+		local self_pos = POSITION_LOOKUP[bot_unit]
+		local old_target = blackboard.opportunity_target_enemy
 
 		for _, target_unit in ipairs(alive_specials) do
-			local pos = POSITION_LOOKUP[target_unit]
+			local target_pos = POSITION_LOOKUP[target_unit]
 
-			if AiUtils.unit_alive(target_unit) and Vector3.distance(pos, self_pos) < FALLBACK_OPPORTUNITY_DISTANCE then
+			if AiUtils.unit_alive(target_unit) and Vector3.distance(target_pos, self_pos) < FALLBACK_OPPORTUNITY_DISTANCE then
 				local utility, distance = self._calculate_opportunity_utility(self, bot_unit, self_pos, old_target, target_unit, t, false)
 
 				if best_utility < utility then
@@ -1496,6 +1513,167 @@ AIBotGroupSystem.in_cover = function (self, cover_unit)
 	end
 
 	return nil
+end
+local EPSILON = 0.01
+
+local function detect_cylinder(nav_world, traverse_logic, bot_position, bot_height, bot_radius, x, y, z, rotation, size)
+	local bot_x = bot_position.x
+	local bot_y = bot_position.y
+	local bot_z = bot_position.z
+	local offset_x = bot_x - x
+	local offset_y = bot_y - y
+	local flat_dist_from_center = math.sqrt(offset_x*offset_x + offset_y*offset_y)
+	local radius = math.max(size.x, size.y)
+	local half_height = size.z
+
+	if radius + bot_radius < flat_dist_from_center then
+		return 
+	elseif bot_z < z + half_height and z - bot_height - half_height < bot_z then
+		local escape_dist = radius - flat_dist_from_center
+		local escape_dir = nil
+
+		if flat_dist_from_center < EPSILON then
+			escape_dir = Vector3(0, 1, 0)
+		else
+			escape_dir = Vector3(offset_x/flat_dist_from_center, offset_y/flat_dist_from_center, 0)
+		end
+
+		local to = bot_position + escape_dir*escape_dist
+		local above = 2
+		local below = 2
+		local success, z = GwNavQueries.triangle_from_position(nav_world, to, above, below)
+
+		if not success then
+			return 
+		end
+
+		to.z = z
+		success = GwNavQueries.raycango(nav_world, bot_position, to, traverse_logic)
+
+		if success then
+			return escape_dir
+		end
+	end
+
+	return 
+end
+
+local function detect_sphere(nav_world, traverse_logic, bot_position, bot_height, bot_radius, sphere_x, sphere_y, sphere_z, rotation, sphere_radius)
+	local box_x = bot_position.x
+	local bot_y = bot_position.y
+	local bot_z = bot_position.z
+	local offset_x = bot_x - sphere_x
+	local offset_y = bot_y - sphere_y
+	local flat_dist_from_center = math.sqrt(offset_x*offset_x + offset_y*offset_y)
+
+	if sphere_radius + bot_radius < flat_dist_from_center then
+		return 
+	elseif bot_z < sphere_z + sphere_radius and sphere_z - bot_height - sphere_radius < bot_z then
+		local escape_dist = radius - flat_dist_from_center
+		local escape_dir = nil
+
+		if flat_dist_from_center < EPSILON then
+			escape_dir = Vector3(0, 1, 0)
+		else
+			escape_dir = Vector3(offset_x/flat_dist_from_center, offset_y/flat_dist_from_center, 0)
+		end
+
+		local to = bot_position + escape_dir*escape_dist
+		local above = 2
+		local below = 2
+		local success, z = GwNavQueries.triangle_from_position(nav_world, to, above, below)
+
+		if not success then
+			return 
+		end
+
+		to.z = z
+		success = GwNavQueries.raycango(nav_world, bot_position, to, traverse_logic)
+
+		if success then
+			return escape_dir
+		end
+	end
+
+	return 
+end
+
+local function detect_oobb(nav_world, traverse_logic, bot_position, bot_height, bot_radius, x, y, z, rotation, extents)
+	local half_bot_height = bot_height*0.5
+	local offset = bot_position - Vector3(x, y, z - half_bot_height)
+	local right_vector = Quaternion.right(rotation)
+	local x_offset = Vector3.dot(right_vector, offset)
+	local y_offset = Vector3.dot(Quaternion.forward(rotation), offset)
+	local z_offset = Vector3.dot(Quaternion.up(rotation), offset)
+	local extents_x = extents.x + bot_radius
+	local extents_y = extents.y + bot_radius
+	local extents_z = extents.z + half_bot_height
+
+	if extents_x < x_offset or x_offset < -extents_x or extents_y < y_offset or y_offset < -extents_y or extents_z < z_offset or z_offset < -extents_z then
+		return 
+	end
+
+	local sign = math.sign(x_offset)
+
+	for i = 1, 2, 1 do
+		local to = bot_position - x_offset*right_vector + sign*(bot_radius + extents_x)*right_vector
+		local above = 2
+		local below = 2
+		local success, z = GwNavQueries.triangle_from_position(nav_world, to, above, below)
+
+		if not success then
+			return 
+		end
+
+		to.z = z
+		success = GwNavQueries.raycango(nav_world, bot_position, to, traverse_logic)
+
+		if success then
+			return Vector3.normalize(to - bot_position)
+		else
+			sign = -sign
+		end
+	end
+
+	return 
+end
+
+AIBotGroupSystem.aoe_thread_created = function (self, position, shape, size, rotation, duration)
+	local bot_radius = 0.5
+	local bot_height = 1.8
+	local detect_func = nil
+	local t = Managers.time:time("game")
+	local nav_world = Managers.state.entity:system("ai_system"):nav_world()
+	local traverse_logic = Managers.state.bot_nav_transition:traverse_logic()
+
+	if shape == "oobb" then
+		detect_func = detect_oobb
+	elseif shape == "cylinder" then
+		detect_func = detect_cylinder
+	elseif shape == "sphere" then
+		detect_func = detect_sphere
+	end
+
+	local pos_x = position.x
+	local pos_y = position.y
+	local pos_z = position.z
+
+	for unit, data in pairs(self._bot_ai_data) do
+		local threat_data = data.aoe_threat
+		local expires = t + duration
+
+		if threat_data.expires < expires then
+			local escape_dir = detect_func(nav_world, traverse_logic, POSITION_LOOKUP[unit], bot_height, bot_radius, pos_x, pos_y, pos_z, rotation, size)
+
+			if escape_dir then
+				threat_data.expires = expires
+
+				threat_data.escape_direction:store(escape_dir)
+			end
+		end
+	end
+
+	return 
 end
 
 return 

@@ -135,10 +135,6 @@ DrawAiBehaviour.tree_width = function (gui, node)
 end
 DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, y, draw_utility, extra_info)
 	local nodes = nodes
-
-	if row == 1 then
-	end
-
 	local identifier = node._identifier
 	local last_identifier = DrawAiBehaviour.last_running_node
 	local running = nil
@@ -258,7 +254,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 		local yellow = Color(255, 240, 200, 10)
 		local cons = node._tree_node.action_data.considerations
 		local size = Vector2(140, 100)
-		local step_y = size.y + 20
+		local step_y = size.y + 40
 		local pos_y = -205
 		local pos = Vector3(x1*res_x, ((y1 - 1 + node_height) - extra_height)*res_y, layer + 10)
 		local num = 0

@@ -5,12 +5,12 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.643555,
-			0.511719
+			0.816406,
+			0.681641
 		},
 		uv11 = {
-			0.790039,
-			0.677734
+			0.962891,
+			0.847656
 		}
 	},
 	level_image_city_wall = {
@@ -19,54 +19,12 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.791992,
-			0.341797
+			0.816406,
+			0.511719
 		},
 		uv11 = {
-			0.938477,
-			0.507813
-		}
-	},
-	level_image_survival_01 = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.643555,
-			0.341797
-		},
-		uv11 = {
-			0.790039,
-			0.507813
-		}
-	},
-	level_image_end_boss = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.791992,
-			0.171875
-		},
-		uv11 = {
-			0.938477,
-			0.337891
-		}
-	},
-	level_image_tunnels = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.643555,
-			0.171875
-		},
-		uv11 = {
-			0.790039,
-			0.337891
+			0.962891,
+			0.677734
 		}
 	},
 	level_image_survival_02 = {
@@ -75,40 +33,12 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.495117,
+			0.667969,
 			0.681641
 		},
 		uv11 = {
-			0.641602,
+			0.814453,
 			0.847656
-		}
-	},
-	level_image_sewers = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.495117,
-			0.511719
-		},
-		uv11 = {
-			0.641602,
-			0.677734
-		}
-	},
-	level_image_red_moon_inn = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.495117,
-			0.341797
-		},
-		uv11 = {
-			0.641602,
-			0.507813
 		}
 	},
 	level_image_docks = {
@@ -117,12 +47,12 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.495117,
-			0.171875
+			0.667969,
+			0.511719
 		},
 		uv11 = {
-			0.641602,
-			0.337891
+			0.814453,
+			0.677734
 		}
 	},
 	level_image_forest_ambush = {
@@ -131,26 +61,12 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.791992,
-			0.001953
+			0.816406,
+			0.341797
 		},
 		uv11 = {
-			0.938477,
-			0.167969
-		}
-	},
-	level_image_bridge = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.643555,
-			0.001953
-		},
-		uv11 = {
-			0.790039,
-			0.167969
+			0.962891,
+			0.507813
 		}
 	},
 	level_image_courtyard = {
@@ -159,11 +75,109 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.495117,
+			0.667969,
+			0.341797
+		},
+		uv11 = {
+			0.814453,
+			0.507813
+		}
+	},
+	level_image_farm = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.816406,
+			0.171875
+		},
+		uv11 = {
+			0.962891,
+			0.337891
+		}
+	},
+	level_image_sewers = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.667969,
+			0.171875
+		},
+		uv11 = {
+			0.814453,
+			0.337891
+		}
+	},
+	level_image_red_moon_inn = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.519531,
+			0.681641
+		},
+		uv11 = {
+			0.666016,
+			0.847656
+		}
+	},
+	level_image_merchant = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.519531,
+			0.511719
+		},
+		uv11 = {
+			0.666016,
+			0.677734
+		}
+	},
+	level_image_tunnels = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.519531,
+			0.341797
+		},
+		uv11 = {
+			0.666016,
+			0.507813
+		}
+	},
+	level_image_bridge = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.519531,
+			0.171875
+		},
+		uv11 = {
+			0.666016,
+			0.337891
+		}
+	},
+	level_image_survival_01 = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.816406,
 			0.001953
 		},
 		uv11 = {
-			0.641602,
+			0.962891,
 			0.167969
 		}
 	},
@@ -173,26 +187,40 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
-			0.34668,
-			0.681641
+			0.667969,
+			0.001953
 		},
 		uv11 = {
-			0.493164,
-			0.847656
+			0.814453,
+			0.167969
 		}
 	},
-	level_image_farm = {
+	level_image_wizard = {
+		size = {
+			300,
+			170
+		},
+		uv00 = {
+			0.519531,
+			0.001953
+		},
+		uv11 = {
+			0.666016,
+			0.167969
+		}
+	},
+	level_image_end_boss = {
 		size = {
 			300,
 			170
 		},
 		uv00 = {
 			0.34668,
-			0.511719
+			0.736328
 		},
 		uv11 = {
 			0.493164,
-			0.677734
+			0.902344
 		}
 	},
 	level_image_magnus = {
@@ -202,39 +230,11 @@ level_images_atlas = {
 		},
 		uv00 = {
 			0.34668,
-			0.341797
+			0.566406
 		},
 		uv11 = {
 			0.493164,
-			0.507813
-		}
-	},
-	level_image_merchant = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.34668,
-			0.171875
-		},
-		uv11 = {
-			0.493164,
-			0.337891
-		}
-	},
-	level_image_wizard = {
-		size = {
-			300,
-			170
-		},
-		uv00 = {
-			0.34668,
-			0.001953
-		},
-		uv11 = {
-			0.493164,
-			0.167969
+			0.732422
 		}
 	},
 	level_image_locked_overlay = {
@@ -243,15 +243,57 @@ level_images_atlas = {
 			170
 		},
 		uv00 = {
+			0.34668,
+			0.396484
+		},
+		uv11 = {
+			0.493164,
+			0.5625
+		}
+	},
+	level_image_dlc_castle = {
+		size = {
+			350,
+			198
+		},
+		uv00 = {
+			0.34668,
+			0.199219
+		},
+		uv11 = {
+			0.517578,
+			0.392578
+		}
+	},
+	level_image_location_stromdorf = {
+		size = {
+			350,
+			198
+		},
+		uv00 = {
+			0.34668,
+			0.001953
+		},
+		uv11 = {
+			0.517578,
+			0.195313
+		}
+	},
+	level_image_dlc_location_drachenfels = {
+		size = {
+			350,
+			198
+		},
+		uv00 = {
 			0.173828,
 			0.791016
 		},
 		uv11 = {
-			0.320313,
-			0.957031
+			0.344727,
+			0.984375
 		}
 	},
-	level_image_dlc_dwarf_exterior = {
+	level_image_location_karak_azgaraz = {
 		size = {
 			350,
 			198
@@ -265,7 +307,7 @@ level_images_atlas = {
 			0.787109
 		}
 	},
-	level_image_location_karak_azgaraz = {
+	level_image_location_ubersreik = {
 		size = {
 			350,
 			198
@@ -293,7 +335,7 @@ level_images_atlas = {
 			0.392578
 		}
 	},
-	level_image_dlc_castle = {
+	level_image_dlc_dwarf_exterior = {
 		size = {
 			350,
 			198
@@ -321,7 +363,7 @@ level_images_atlas = {
 			0.984375
 		}
 	},
-	level_image_dlc_portals = {
+	level_image_dlc_stromdorf_town = {
 		size = {
 			350,
 			198
@@ -349,7 +391,7 @@ level_images_atlas = {
 			0.589844
 		}
 	},
-	level_image_location_ubersreik = {
+	level_image_dlc_stromdorf_hills = {
 		size = {
 			350,
 			198
@@ -363,7 +405,7 @@ level_images_atlas = {
 			0.392578
 		}
 	},
-	level_image_dlc_location_drachenfels = {
+	level_image_dlc_portals = {
 		size = {
 			350,
 			198

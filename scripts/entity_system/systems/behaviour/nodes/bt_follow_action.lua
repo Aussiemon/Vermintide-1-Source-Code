@@ -18,23 +18,29 @@ BTFollowAction.enter = function (self, unit, blackboard, t)
 	local start_anim, anim_locked = LocomotionUtils.get_start_anim(unit, blackboard, action.start_anims)
 
 	if anim_locked then
-		blackboard.start_anim_locked_time = 0.2
-
 		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
+		blackboard.locomotion_extension:use_lerp_rotation(false)
+
+		blackboard.follow_animation_locked = anim_locked
+		blackboard.anim_cb_rotation_start = nil
+		blackboard.move_animation_name = start_anim
+		local rot_scale = AiAnimUtils.get_animation_rotation_scale(unit, blackboard, blackboard.action)
+
+		LocomotionUtils.set_animation_rotation_scale(unit, rot_scale)
+
+		blackboard.move_animation_name = nil
 	else
 		LocomotionUtils.set_animation_driven_movement(unit, false)
 	end
 
 	network_manager.anim_event(network_manager, unit, start_anim or action.move_anim)
-
-	blackboard.anim_locked = blackboard.anim_locked or t
-
 	blackboard.locomotion_extension:set_rotation_speed(10)
 
+	blackboard.move_state = "moving"
 	blackboard.remembered_threat_pos = nil
 	blackboard.chasing_timer = blackboard.unreachable_timer or 0
 
-	if blackboard.fling_skaven_timer < t then
+	if blackboard.fling_skaven_timer and blackboard.fling_skaven_timer < t then
 		blackboard.fling_skaven_timer = t + 0.5
 	end
 
@@ -42,11 +48,18 @@ BTFollowAction.enter = function (self, unit, blackboard, t)
 	local message_id = NetworkLookup.tutorials[breed.name]
 
 	network_manager.network_transmit:send_rpc_all("rpc_tutorial_message", template_id, message_id)
+	AiUtils.stormvermin_champion_hack_check_ward(unit, blackboard)
 
 	return 
 end
 BTFollowAction.leave = function (self, unit, blackboard, t)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
+
+	if blackboard.follow_animation_locked then
+		blackboard.follow_animation_locked = nil
+
+		blackboard.locomotion_extension:use_lerp_rotation(true)
+	end
 
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
@@ -73,6 +86,12 @@ BTFollowAction._go_idle = function (self, unit, blackboard, locomotion)
 
 	locomotion.set_wanted_rotation(locomotion, rot)
 
+	if blackboard.follow_animation_locked then
+		blackboard.follow_animation_locked = nil
+
+		LocomotionUtils.set_animation_driven_movement(unit, false)
+	end
+
 	return 
 end
 BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
@@ -90,7 +109,7 @@ BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
 
 	local destination = navigation_extension.destination(navigation_extension)
 
-	if blackboard.fling_skaven_timer < t then
+	if blackboard.fling_skaven_timer and blackboard.fling_skaven_timer < t then
 		blackboard.fling_skaven_timer = t + 0.5
 
 		self.check_fling_skaven(self, unit, blackboard, t)
@@ -108,7 +127,12 @@ BTFollowAction.follow = function (self, unit, t, dt, blackboard, locomotion)
 		navigation_extension.set_max_speed(navigation_extension, blackboard.breed.run_speed)
 	end
 
-	if navigation_extension.is_following_path(navigation_extension) and not blackboard.no_path_found and blackboard.move_state ~= "moving" and 0.5 < distance then
+	if blackboard.follow_animation_locked and blackboard.anim_cb_rotation_start then
+		blackboard.follow_animation_locked = nil
+
+		LocomotionUtils.set_animation_driven_movement(unit, false)
+		blackboard.locomotion_extension:use_lerp_rotation(true)
+	elseif navigation_extension.is_following_path(navigation_extension) and not blackboard.no_path_found and blackboard.move_state ~= "moving" and 0.5 < distance then
 		blackboard.move_state = "moving"
 		local action = blackboard.action
 		local start_anim, anim_driven = LocomotionUtils.get_start_anim(unit, blackboard, action.start_anims)
@@ -136,8 +160,18 @@ BTFollowAction.check_fling_skaven = function (self, unit, blackboard, t)
 	local num_units = Broadphase.query(ai_system.broadphase, check_pos, 1, broad_phase_fling_units)
 
 	if 0 < num_units then
-		blackboard.fling_skaven = true
-		blackboard.fling_skaven_timer = t + 5
+		for i = 1, num_units, 1 do
+			local hit_unit = broad_phase_fling_units[i]
+			local hit_unit_bb = Unit.get_data(hit_unit, "blackboard")
+			local hit_unit_breed = hit_unit_bb and hit_unit_bb.breed
+
+			if hit_unit_breed and hit_unit_breed.flingable and AiUtils.unit_alive(hit_unit) then
+				blackboard.fling_skaven = true
+				blackboard.fling_skaven_timer = t + 5
+
+				break
+			end
+		end
 	end
 
 	return 

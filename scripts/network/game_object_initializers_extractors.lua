@@ -929,7 +929,8 @@ go_type_table = {
 				},
 				death_system = {
 					is_husk = true,
-					death_reaction_template = breed.death_reaction
+					death_reaction_template = breed.death_reaction,
+					disable_second_hit_ragdoll = breed.disable_second_hit_ragdoll
 				},
 				hit_reaction_system = {
 					is_husk = true,
@@ -964,7 +965,8 @@ go_type_table = {
 				},
 				death_system = {
 					is_husk = true,
-					death_reaction_template = breed.death_reaction
+					death_reaction_template = breed.death_reaction,
+					disable_second_hit_ragdoll = breed.disable_second_hit_ragdoll
 				},
 				hit_reaction_system = {
 					is_husk = true,
@@ -1002,7 +1004,8 @@ go_type_table = {
 				},
 				death_system = {
 					is_husk = true,
-					death_reaction_template = breed.death_reaction
+					death_reaction_template = breed.death_reaction,
+					disable_second_hit_ragdoll = breed.disable_second_hit_ragdoll
 				},
 				hit_reaction_system = {
 					is_husk = true,
@@ -1040,7 +1043,8 @@ go_type_table = {
 				},
 				death_system = {
 					is_husk = true,
-					death_reaction_template = breed.death_reaction
+					death_reaction_template = breed.death_reaction,
+					disable_second_hit_ragdoll = breed.disable_second_hit_ragdoll
 				},
 				hit_reaction_system = {
 					is_husk = true,

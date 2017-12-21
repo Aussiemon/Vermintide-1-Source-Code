@@ -23,7 +23,6 @@ setmetatable(UtilityConsiderations, {
 dofile("scripts/settings/breeds/breed_skaven_clan_rat")
 dofile("scripts/settings/breeds/breed_skaven_slave")
 dofile("scripts/settings/breeds/breed_skaven_storm_vermin")
-dofile("scripts/settings/breeds/breed_skaven_grey_seer")
 dofile("scripts/settings/breeds/breed_skaven_loot_rat")
 dofile("scripts/settings/breeds/breed_skaven_gutter_runner")
 dofile("scripts/settings/breeds/breed_skaven_pack_master")

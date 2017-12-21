@@ -53,9 +53,10 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 		end
 	end
 
+	hit_ward = hit_zone_name == "ward"
 	local damage = nil
 
-	if has_damage_boost then
+	if has_damage_boost and not hit_ward then
 		if target_unit_armor == 1 then
 			damage = damage_table[target_unit_armor]*3
 		elseif target_unit_armor == 2 then
@@ -89,6 +90,10 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 
 	if backstab_multiplier then
 		damage = damage*backstab_multiplier
+	end
+
+	if hit_ward then
+		damage = damage*0.5
 	end
 
 	return damage
@@ -881,7 +886,11 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type)
 	local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.ADDED_PUSH)
 
 	if procced then
-		DamageUtils.buff_attack_hit(inventory_extension, unit, hit_unit, "added_push")
+		local breed = Unit.get_data(hit_unit, "breed")
+
+		if not breed or not breed.boss then
+			DamageUtils.buff_attack_hit(inventory_extension, unit, hit_unit, "added_push")
+		end
 	end
 
 	local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.KILLING_BLOW_PROC)
@@ -1619,7 +1628,7 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 					if breed then
 						local enemy_type = breed.name
 
-						EffectHelper.play_skinned_surface_material_effects(hit_effect, world, hit_position, hit_rotation, hit_normal, is_husk, enemy_type, damage_sound, no_damage, hit_zone_name)
+						EffectHelper.play_skinned_surface_material_effects(hit_effect, world, hit_unit, hit_position, hit_rotation, hit_normal, is_husk, enemy_type, damage_sound, no_damage, hit_zone_name)
 
 						if Managers.state.network:game() then
 							EffectHelper.remote_play_skinned_surface_material_effects(hit_effect, world, hit_position, hit_rotation, hit_normal, enemy_type, damage_sound, no_damage, hit_zone_name, is_server)

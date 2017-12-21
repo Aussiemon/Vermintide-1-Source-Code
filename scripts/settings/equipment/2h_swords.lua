@@ -7,7 +7,7 @@ weapon_template.actions = {
 			kind = "dummy",
 			aim_assist_max_ramp_multiplier = 0.3,
 			aim_assist_ramp_multiplier = 0.1,
-			anim_event = "attack_swing_charge_diagonal",
+			anim_event = "attack_swing_charge",
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action" and end_reason ~= "action_complete"
 			end,

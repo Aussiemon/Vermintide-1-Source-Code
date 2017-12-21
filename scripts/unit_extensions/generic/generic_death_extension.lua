@@ -17,6 +17,7 @@ GenericDeathExtension.init = function (self, extension_init_context, unit, exten
 	self.is_alive = true
 	self.unit = unit
 	self.death_reaction_template = extension_init_data.death_reaction_template or Unit.get_data(unit, "death_reaction")
+	self.second_hit_ragdoll = not extension_init_data.disable_second_hit_ragdoll
 
 	assert(self.death_reaction_template)
 
@@ -75,6 +76,14 @@ GenericDeathExtension.nailing_hit = function (self, hit_ragdoll_actor, attack_di
 	end
 
 	return 
+end
+GenericDeathExtension.enable_second_hit_ragdoll = function (self)
+	self.second_hit_ragdoll = true
+
+	return 
+end
+GenericDeathExtension.second_hit_ragdoll_allowed = function (self)
+	return self.second_hit_ragdoll
 end
 GenericDeathExtension.has_death_started = function (self)
 	return self.death_reaction ~= nil

@@ -209,17 +209,9 @@ StateLoading._unmute_all_world_sounds = function (self)
 	return 
 end
 StateLoading._get_game_difficulty = function (self)
-	local stored_lobby_data = nil
+	local stored_lobby_data = (self._lobby_host and self._lobby_host:get_stored_lobby_data()) or (self._lobby_client and self._lobby_client:get_stored_lobby_data()) or nil
 
-	if self._lobby_host then
-		stored_lobby_data = self._lobby_host:get_stored_lobby_data()
-	end
-
-	if self._lobby_client then
-		stored_lobby_data = self._lobby_client:get_stored_lobby_data()
-	end
-
-	return (stored_lobby_data and stored_lobby_data.difficulty) or self.parent.loading_context.difficulty or nil
+	return (stored_lobby_data and stored_lobby_data.difficulty) or nil
 end
 StateLoading._create_loading_view = function (self, level_key, act_progression_index)
 	local game_difficulty = self._get_game_difficulty(self)
@@ -414,7 +406,7 @@ StateLoading._setup_state_machine = function (self)
 
 	if self.parent.loading_context.restart_network then
 		self._machine = StateMachine:new(self, StateLoadingRestartNetwork, params, true)
-	elseif self.parent.loading_context.host_to_migrate_to then
+	elseif self.parent.loading_context.host_migration_info then
 		self._machine = StateMachine:new(self, StateLoadingMigrateHost, params, true)
 	else
 		self._machine = StateMachine:new(self, StateLoadingRunning, params, true)
@@ -1564,6 +1556,11 @@ StateLoading.start_matchmaking = function (self)
 	lobby_host.set_lobby_data(lobby_host, stored_lobby_host_data)
 
 	return 
+end
+StateLoading.get_lobby = function (self)
+	local lobby = self._lobby_host or self._lobby_client
+
+	return lobby
 end
 
 return 

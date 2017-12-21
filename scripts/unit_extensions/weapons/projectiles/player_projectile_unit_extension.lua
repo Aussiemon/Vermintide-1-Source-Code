@@ -255,7 +255,7 @@ PlayerProjectileUnitExtension.handle_impacts = function (self, impacts, num_impa
 					local node = Actor.node(hit_actor)
 					local hit_zone = breed.hit_zones_lookup[node]
 
-					if procced and breed.hit_zones.head and hit_zone.name ~= "head" then
+					if procced and breed.hit_zones.head and hit_zone.name ~= "head" and hit_zone.name ~= "ward" then
 						local head_hit_zone = breed.hit_zones.head
 						local actors = head_hit_zone.actors
 						local num_actors = #actors
@@ -320,9 +320,10 @@ end
 PlayerProjectileUnitExtension.hit_enemy = function (self, impact_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed)
 	local owner_unit = self.owner_unit
 	local damage_data = impact_data.damage
+	local allow_link = true
 
 	if damage_data then
-		self.hit_enemy_damage(self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed)
+		allow_link = self.hit_enemy_damage(self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed)
 
 		if not impact_data.aoe then
 			DamageUtils.buff_on_attack(self.owner_unit, hit_unit, "projectile")
@@ -340,7 +341,7 @@ PlayerProjectileUnitExtension.hit_enemy = function (self, impact_data, hit_unit,
 	end
 
 	if self.hit_targets == self.num_targets then
-		if impact_data.link and self.did_damage then
+		if impact_data.link and self.did_damage and allow_link then
 			self.link_projectile(self, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, self.did_damage)
 		end
 
@@ -357,7 +358,7 @@ PlayerProjectileUnitExtension.hit_enemy = function (self, impact_data, hit_unit,
 
 	return 
 end
-PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed)
+PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor, breed, hit_zone)
 	local enemy_impact_data = damage_data.enemy_unit_hit
 	local network_manager = Managers.state.network
 	local owner_unit = self.owner_unit
@@ -365,7 +366,12 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	local action = self.action
 	local node = Actor.node(hit_actor)
 	local hit_zone = breed.hit_zones_lookup[node]
-	local hit_zone_name = action.projectile_info.forced_hitzone or hit_zone.name
+	local hit_zone_name = hit_zone.name
+
+	if action.projectile_info.forced_hitzone and hit_zone_name ~= "ward" then
+		hit_zone_name = action.projectile_info.forced_hitzone
+	end
+
 	local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 	local attack_direction = hit_direction
 	local hit_targets = self.hit_targets
@@ -439,7 +445,7 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 	end
 
 	if hit_effect then
-		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk, enemy_type, damage_sound, no_damage, hit_zone_name)
+		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_unit, hit_position, hit_rotation, hit_normal, is_husk, enemy_type, damage_sound, no_damage, hit_zone_name)
 	end
 
 	if hit_zone_name == "head" then
@@ -464,7 +470,7 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 		end
 	end
 
-	return 
+	return hit_zone.name ~= "ward"
 end
 PlayerProjectileUnitExtension.hit_player = function (self, impact_data, hit_unit, hit_position, hit_direction, hit_normal, hit_actor)
 	local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
@@ -607,7 +613,7 @@ PlayerProjectileUnitExtension.hit_player_damage = function (self, damage_data, h
 	end
 
 	if hit_effect then
-		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_position, hit_rotation, hit_normal, is_husk)
+		EffectHelper.play_skinned_surface_material_effects(hit_effect, self.world, hit_unit, hit_position, hit_rotation, hit_normal, is_husk)
 	end
 
 	return 

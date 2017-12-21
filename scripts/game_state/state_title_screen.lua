@@ -40,22 +40,7 @@ StateTitleScreen.on_enter = function (self, params)
 	self._setup_world(self)
 	self._setup_leak_prevention(self)
 	self._init_input(self)
-	self._init_ui(self)
-	self._setup_state_machine(self)
-	self._init_popup_manager(self)
-	self._init_chat_manager(self)
-
-	if Development.parameter("use_beta_overlay") then
-		self._init_beta_overlay(self)
-	end
-
-	self._platform = Application.platform()
-
-	if self._platform == "ps4" and PS4.signed_in() then
-		Managers.account:set_presence("title_screen")
-	end
-
-	self._fade_out(self)
+	self._load_ui_packages(self)
 
 	if rawget(_G, "ControllerFeaturesManager") then
 		Managers.state.controller_features = ControllerFeaturesManager:new()
@@ -121,6 +106,47 @@ StateTitleScreen._init_input = function (self)
 	return 
 end
 local DO_RELOAD = true
+StateTitleScreen._load_ui_packages = function (self)
+	local has_loaded = Managers.package:has_loaded("resource_packages/menu_assets_start_screen", "state_splash_screen")
+
+	if not has_loaded then
+		print("start screen menu assets not loaded, loading...")
+		Managers.package:load("resource_packages/menu_assets_start_screen", "state_splash_screen", callback(self, "cb_ui_packages_loaded"), true, true)
+	else
+		print("start screen menu assets already loaded, skipping...")
+		self.cb_ui_packages_loaded(self)
+	end
+
+	return 
+end
+StateTitleScreen._unload_ui_packages = function (self)
+	Managers.package:unload("resource_packages/menu_assets_start_screen", "state_splash_screen")
+
+	return 
+end
+StateTitleScreen.cb_ui_packages_loaded = function (self)
+	print("start screen menu assets loaded, setting up ui and state machine")
+	self._init_ui(self)
+	self._setup_state_machine(self)
+	self._init_popup_manager(self)
+	self._init_chat_manager(self)
+
+	if Development.parameter("use_beta_overlay") then
+		self._init_beta_overlay(self)
+	end
+
+	self._platform = Application.platform()
+
+	if self._platform == "ps4" and PS4.signed_in() then
+		Managers.account:set_presence("title_screen")
+	end
+
+	self._fade_out(self)
+
+	self._ui_packages_loaded = true
+
+	return 
+end
 StateTitleScreen._init_ui = function (self)
 	if not GameSettingsDevelopment.skip_start_screen then
 		self._title_start_ui = TitleMainUI:new(self._world)
@@ -169,6 +195,10 @@ StateTitleScreen._init_beta_overlay = function (self)
 	return 
 end
 StateTitleScreen.update = function (self, dt, t)
+	if not self._ui_packages_loaded then
+		return 
+	end
+
 	self._handle_delayed_fade_in(self)
 	Managers.input:update(dt, t)
 	self._machine:update(dt, t)
@@ -288,6 +318,7 @@ StateTitleScreen.on_exit = function (self, application_shutdown)
 
 	Managers.state:destroy()
 	Managers.music:trigger_event("Stop_menu_screen_music")
+	self._unload_ui_packages(self)
 
 	return 
 end

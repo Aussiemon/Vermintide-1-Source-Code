@@ -215,7 +215,7 @@ Staggers = {
 			attack_direction.z = -1
 		end
 
-		if 0 < stagger_type and not breed_data.stagger_immune then
+		if 0 < stagger_type and (not breed_data.stagger_immune or stagger_type == 6) then
 			local stagger_length = DamageUtils.modify_push_distance_with_buff(attacker_unit, attack_template.stagger_length)
 			local blackboard = Unit.get_data(hit_unit, "blackboard")
 
@@ -344,33 +344,33 @@ AttackDamageValues = {
 		2
 	},
 	two_h_smiter_L = {
+		4,
 		5,
-		2.5,
 		16,
 		2,
 		1
 	},
 	two_h_smiter_L_t2 = {
-		6,
-		3.5,
-		18,
+		5,
+		6.5,
+		20,
 		2
 	},
 	two_h_smiter_L_t3 = {
-		7,
-		4.5,
-		20,
+		9,
+		8,
+		24,
 		2
 	},
 	two_h_smiter_L_1 = {
 		5,
-		5,
+		4.5,
 		20,
 		2
 	},
 	two_h_smiter_L_1_t2 = {
-		7.5,
 		6,
+		5.5,
 		25,
 		2
 	},
@@ -417,19 +417,19 @@ AttackDamageValues = {
 		2
 	},
 	two_h_smiter_H_2 = {
-		10,
-		10,
+		15,
+		11,
 		28,
 		2
 	},
 	two_h_smiter_H_2_t2 = {
 		20,
-		12,
+		14,
 		34,
 		2
 	},
 	two_h_smiter_H_2_t3 = {
-		30,
+		25,
 		20,
 		40,
 		2
@@ -898,7 +898,7 @@ AttackDamageValues = {
 	},
 	two_h_tank_H_1_t3 = {
 		5,
-		3.5,
+		4,
 		16,
 		2
 	},
@@ -1267,7 +1267,7 @@ AttackTemplates = {
 		stagger_impact = {
 			6,
 			6,
-			0,
+			6,
 			0
 		},
 		stagger_duration = {
@@ -1632,6 +1632,28 @@ AttackTemplates = {
 			0
 		}
 	},
+	heavy_slashing_smiter_hs = {
+		headshot_sound = "executioner_sword_critical",
+		sound_type = "heavy",
+		stagger_type = "ai_stagger",
+		headshot_multiplier = 2,
+		attack_type = "damage_headshot",
+		damage_type = "heavy_slashing_smiter",
+		stagger_angle = "smiter",
+		stagger_length = 1,
+		stagger_impact = {
+			2,
+			2,
+			0,
+			0
+		},
+		stagger_duration = {
+			1,
+			2,
+			0,
+			0
+		}
+	},
 	light_slashing_fencer = {
 		sound_type = "light",
 		damage_type = "light_slashing_fencer",
@@ -1741,11 +1763,12 @@ AttackTemplates = {
 		}
 	},
 	slashing_tank_hs = {
-		stagger_type = "ai_stagger",
+		headshot_sound = "executioner_sword_critical",
 		sound_type = "heavy",
-		damage_type = "slashing_tank",
+		stagger_type = "ai_stagger",
 		headshot_multiplier = 5,
 		attack_type = "damage_headshot",
+		damage_type = "slashing_tank",
 		stagger_length = 0.8,
 		stagger_impact = {
 			2,
@@ -2567,6 +2590,27 @@ AttackTemplates = {
 		stagger_duration = {
 			2.25,
 			0,
+			0,
+			0
+		}
+	},
+	shot_repeating_handgun = {
+		stagger_type = "ai_stagger",
+		sound_type = "heavy",
+		headshot_multiplier = 1.5,
+		attack_type = "damage_headshot",
+		damage_type = "shot_sniper",
+		stagger_angle = "stab",
+		stagger_length = 1,
+		stagger_impact = {
+			3,
+			1,
+			0,
+			0
+		},
+		stagger_duration = {
+			2.25,
+			1.25,
 			0,
 			0
 		}

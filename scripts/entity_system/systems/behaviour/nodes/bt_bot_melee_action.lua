@@ -214,9 +214,11 @@ BTBotMeleeAction._is_in_engage_range = function (self, self_unit, blackboard, ai
 end
 BTBotMeleeAction._aim_position = function (self, target_unit, blackboard)
 	local node = 0
+	local target_breed = Unit.get_data(target_unit, "breed")
+	local aim_node = (target_breed and target_breed.bot_melee_aim_node) or "j_spine"
 
-	if Unit.has_node(target_unit, "j_spine") then
-		node = Unit.node(target_unit, "j_spine")
+	if Unit.has_node(target_unit, aim_node) then
+		node = Unit.node(target_unit, aim_node)
 	end
 
 	return Unit.world_position(target_unit, node)

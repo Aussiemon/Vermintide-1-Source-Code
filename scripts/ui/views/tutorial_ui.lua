@@ -682,7 +682,7 @@ TutorialUI.update_objective_tooltip_widget = function (self, widget_holder, play
 
 	local objective_unit = widget_holder.unit
 
-	if not objective_unit or not Unit.alive(objective_unit) then
+	if not objective_unit or not Unit.alive(objective_unit) or not Unit.alive(player_unit) then
 		return 
 	end
 

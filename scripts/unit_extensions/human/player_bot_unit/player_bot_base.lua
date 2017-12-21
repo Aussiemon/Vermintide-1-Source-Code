@@ -238,11 +238,7 @@ PlayerBotBase._update_blackboard = function (self, dt, t)
 	end
 
 	for _, action_data in pairs(bb.utility_actions) do
-		if action_data.last_time then
-			action_data.time_since_last = t - action_data.last_time
-		else
-			action_data.time_since_last = math.huge
-		end
+		action_data.time_since_last = t - action_data.last_time
 	end
 
 	return 

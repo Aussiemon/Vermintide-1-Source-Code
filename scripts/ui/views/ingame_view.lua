@@ -903,11 +903,16 @@ IngameView.update_menu_options_enabled_states = function (self)
 				local widget = menu_option.widget
 				local widget_button_hotspot = widget.content.button_hotspot
 				local transition_not_allowed_in_matchmaking = not is_server and is_game_matchmaking and transition == "lobby_browser_view"
+				local local_player = Managers.player:local_player()
+				local transition_not_allowed_without_player_unit = not local_player.player_unit and transition == "profile_view"
 
 				if (player_ready_for_game or transition_not_allowed_in_matchmaking) and not widget_button_hotspot.disabled then
 					widget_button_hotspot.disabled = true
 					widget_button_hotspot.on_release = nil
-				elseif not player_ready_for_game and not transition_not_allowed_in_matchmaking and widget_button_hotspot.disabled then
+				elseif not player_ready_for_game and transition_not_allowed_without_player_unit and not widget_button_hotspot.disabled then
+					widget_button_hotspot.disabled = true
+					widget_button_hotspot.on_release = nil
+				elseif not player_ready_for_game and not transition_not_allowed_in_matchmaking and not transition_not_allowed_without_player_unit and widget_button_hotspot.disabled then
 					widget_button_hotspot.disabled = false
 				end
 			end

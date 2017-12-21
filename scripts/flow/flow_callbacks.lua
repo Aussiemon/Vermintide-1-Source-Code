@@ -1900,6 +1900,38 @@ function flow_callback_get_completed_dwarf_levels_difficulty(params)
 	}
 end
 
+function flow_callback_get_completed_dlc_levels_difficulty(params)
+	local dlc = params.dlc
+	local player_manager = Managers.player
+	local statistics_db = player_manager.statistics_db(player_manager)
+	local server_player = Managers.player:server_player()
+
+	if server_player then
+		local levels = DLCProgressionOrder[dlc]
+
+		if levels then
+			local result = nil
+			local stats_id = server_player.stats_id(server_player)
+
+			for _, level_key in ipairs(levels) do
+				local difficulty_index = LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_key)
+
+				if not result or difficulty_index < result then
+					result = difficulty_index
+				end
+			end
+
+			return {
+				completed_difficulty = result
+			}
+		end
+	end
+
+	return {
+		completed_difficulty = 0
+	}
+end
+
 function flow_callback_get_completed_game_difficulty(params)
 	local player_manager = Managers.player
 	local statistics_db = player_manager.statistics_db(player_manager)
@@ -2518,6 +2550,39 @@ function flow_callback_increment_goal_mission_data_counter(params)
 	local value = params.value
 
 	Managers.state.entity:system("mission_system"):flow_callback_increment_goal_mission_data_counter(mission_name, value)
+
+	return 
+end
+
+function flow_callback_get_grey_seer_unit(params)
+	local spawned_grey_seers = Managers.state.conflict:spawned_units_by_breed("skaven_grey_seer")
+	local num_spawned_grey_seers = table.size(spawned_grey_seers)
+
+	assert(num_spawned_grey_seers <= 1)
+
+	local grey_seer_unit = next(spawned_grey_seers)
+	flow_return_table.grey_seer_unit = grey_seer_unit
+
+	return flow_return_table
+end
+
+function flow_callback_register_level_effects_volume(params)
+	local volume_name = params.volume_name
+	local prio = params.prio
+	local particles_action = params.particles_action
+	local screen_particles_action = params.screen_particles_action
+	local camera_manager = Managers.state.camera
+
+	camera_manager.register_level_effects_volume(camera_manager, volume_name, prio, particles_action, screen_particles_action)
+
+	return 
+end
+
+function flow_callback_unregister_level_effects_volume(params)
+	local volume_name = params.volume_name
+	local camera_manager = Managers.state.camera
+
+	camera_manager.unregister_level_effects_volume(camera_manager, volume_name)
 
 	return 
 end

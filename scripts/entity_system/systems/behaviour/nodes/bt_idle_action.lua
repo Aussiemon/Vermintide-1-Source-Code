@@ -11,9 +11,9 @@ BTIdleAction.init = function (self, ...)
 end
 BTIdleAction.enter = function (self, unit, blackboard, t)
 	local network_manager = Managers.state.network
-	local animation = blackboard.idle_animation or "idle"
 	local action = self._tree_node.action_data
 	blackboard.action = action
+	local animation = (action and action.idle_animation) or blackboard.idle_animation or "idle"
 	blackboard.spawn_to_running = nil
 
 	AiAnimUtils.set_idle_animation_merge(unit, blackboard)
@@ -22,7 +22,7 @@ BTIdleAction.enter = function (self, unit, blackboard, t)
 		network_manager.anim_event(network_manager, unit, "to_passive")
 	end
 
-	if blackboard.move_state ~= "idle" then
+	if blackboard.move_state ~= "idle" or (action and action.force_idle_animation) then
 		network_manager.anim_event(network_manager, unit, animation)
 
 		blackboard.move_state = "idle"

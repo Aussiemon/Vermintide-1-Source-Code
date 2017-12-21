@@ -1,59 +1,67 @@
 AnimationCallbackTemplates = {
-	client = {},
-	server = {}
+	client = {}
 }
-AnimationCallbackTemplates.server.anim_cb_spawn_finished = function (unit, param)
-	local blackboard = Unit.get_data(unit, "blackboard")
-	blackboard.spawning_finished = true
+AnimationCallbackTemplates.client.anim_cb_enable_second_hit_ragdoll = function (unit, param)
+	local death_ext = ScriptUnit.extension(unit, "death_system")
+
+	death_ext.enable_second_hit_ragdoll(death_ext)
 
 	return 
 end
-AnimationCallbackTemplates.server.anim_cb_push_finished = function (unit, param)
-	local blackboard = Unit.get_data(unit, "blackboard")
-	blackboard.stagger_anim_done = true
-
-	return 
-end
-AnimationCallbackTemplates.server.anim_cb_stunned_finished = function (unit, param)
-	local blackboard = Unit.get_data(unit, "blackboard")
-	blackboard.blocked = nil
-
-	return 
-end
-AnimationCallbackTemplates.server.anim_cb_hesitate_finished = function (unit, param)
-	local blackboard = Unit.get_data(unit, "blackboard")
-
-	if blackboard.active_node and blackboard.active_node.anim_cb_hesitate_finished then
-		blackboard.active_node:anim_cb_hesitate_finished(unit, blackboard)
-	end
-
-	return 
-end
-AnimationCallbackTemplates.server.anim_cb_direct_damage = function (unit, param)
-	local blackboard = Unit.get_data(unit, "blackboard")
-
-	if not Unit.alive(blackboard.target_unit) then
-		return 
-	end
-
-	local action = blackboard.action
-
-	if not action then
-		print("Missing blackboard.action in anim_cb_direct_damage() callback")
+AnimationCallbackTemplates.server = {
+	anim_cb_spawn_finished = function (unit, param)
+		local blackboard = Unit.get_data(unit, "blackboard")
+		blackboard.spawning_finished = true
 
 		return 
+	end,
+	anim_cb_push_finished = function (unit, param)
+		local blackboard = Unit.get_data(unit, "blackboard")
+		blackboard.stagger_anim_done = true
+
+		return 
+	end,
+	anim_cb_stunned_finished = function (unit, param)
+		local blackboard = Unit.get_data(unit, "blackboard")
+		blackboard.blocked = nil
+
+		return 
+	end,
+	anim_cb_hesitate_finished = function (unit, param)
+		local blackboard = Unit.get_data(unit, "blackboard")
+
+		if blackboard.active_node and blackboard.active_node.anim_cb_hesitate_finished then
+			blackboard.active_node:anim_cb_hesitate_finished(unit, blackboard)
+		end
+
+		return 
+	end,
+	anim_cb_direct_damage = function (unit, param)
+		local blackboard = Unit.get_data(unit, "blackboard")
+
+		if not Unit.alive(blackboard.target_unit) then
+			return 
+		end
+
+		local action = blackboard.action
+
+		if not action then
+			print("Missing blackboard.action in anim_cb_direct_damage() callback")
+
+			return 
+		end
+
+		local active_behavior_node = blackboard.active_node
+
+		if active_behavior_node and active_behavior_node.direct_damage then
+			active_behavior_node.direct_damage(unit, blackboard)
+		end
+
+		blackboard.attacks_done = blackboard.attacks_done + 1
+
+		return 
 	end
-
-	local active_behavior_node = blackboard.active_node
-
-	if active_behavior_node and active_behavior_node.direct_damage then
-		active_behavior_node.direct_damage(unit, blackboard)
-	end
-
-	blackboard.attacks_done = blackboard.attacks_done + 1
-
-	return 
-end
+}
 local DEFAULT_SPEED_MODIFIER_ON_TARGET_DODGE_DAMAGE_DONE = 0
 local DEFAULT_ROTATION_STUN_TIME_ON_DODGE_DAMAGE_DONE = 0.6
 local DEFAULT_SPEED_LERP_TIME_ON_TARGET_DODGE_DAMAGE_DONE = 0.3

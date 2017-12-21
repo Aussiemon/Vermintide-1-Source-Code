@@ -27,6 +27,7 @@ PlayerBotInput.init = function (self, extension_init_context, unit, extension_in
 	self._tap_attack_released = true
 	self._interact = false
 	self._interact_held = false
+	self._dodge = false
 	self.dodge_on_jump_key = DefaultUserSettings.get("user_settings", "dodge_on_jump_key")
 	self.dodge_on_forward_diagonal = DefaultUserSettings.get("user_settings", "dodge_on_forward_diagonal")
 	self.double_tap_dodge = DefaultUserSettings.get("user_settings", "double_tap_dodge")
@@ -42,6 +43,7 @@ PlayerBotInput.extensions_ready = function (self, world, unit)
 	self._navigation_extension = ext(unit, "ai_navigation_system")
 	self._status_extension = ext(unit, "status_system")
 	self._first_person_extension = ext(unit, "first_person_system")
+	self._ai_bot_group_extension = ext(unit, "ai_bot_group_system")
 
 	return 
 end
@@ -160,6 +162,12 @@ PlayerBotInput._update_actions = function (self)
 		input[wield_input] = true
 	end
 
+	if self._dodge then
+		input.dodge = true
+		input.dodge_hold = true
+		self._dodge = false
+	end
+
 	return 
 end
 PlayerBotInput._debug_aim_target_sine_curve = function (self, dt, t)
@@ -234,6 +242,11 @@ PlayerBotInput.fire = function (self)
 end
 PlayerBotInput.interact = function (self)
 	self._interact = true
+
+	return 
+end
+PlayerBotInput.dodge = function (self)
+	self._dodge = true
 
 	return 
 end
@@ -372,11 +385,19 @@ PlayerBotInput._update_movement = function (self, dt, t)
 		end
 	end
 
+	local threat_data = self._ai_bot_group_extension.data.aoe_threat
 	local move = self.move
 
 	if on_ladder then
 		move.x = 0
 		move.y = 1
+	elseif t < threat_data.expires then
+		local dir = threat_data.escape_direction:unbox()
+
+		self.dodge(self)
+
+		move.x = Vector3.dot(Quaternion.right(wanted_rotation), dir)
+		move.y = Vector3.dot(Quaternion.forward(wanted_rotation), dir)
 	else
 		local is_last_goal = player_bot_navigation.is_following_last_goal(player_bot_navigation)
 		local move_scale = 1

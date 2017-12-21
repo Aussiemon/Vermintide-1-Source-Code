@@ -356,11 +356,17 @@ IngameUI.handle_menu_hotkeys = function (self, dt, input_service, menu_active)
 				local active_input_service = active_view.input_service(active_view)
 
 				if not active_view.transitioning(active_view) and active_input_service.get(active_input_service, input) then
-					local return_to_game = not menu_active
+					local local_player = self.player_manager:local_player()
+					local player_unit = local_player and local_player.player_unit
+					local player_alive = player_unit and Unit.alive(player_unit)
 
-					views[current_view]:exit(return_to_game)
+					if player_alive then
+						local return_to_game = not menu_active
 
-					break
+						views[current_view]:exit(return_to_game)
+
+						break
+					end
 				end
 			else
 				local new_view = views[mapping_data.view]
@@ -379,25 +385,31 @@ IngameUI.handle_menu_hotkeys = function (self, dt, input_service, menu_active)
 					end
 
 					if can_interact then
-						if not player_ready_for_game then
-							if menu_active then
-								self.transition_with_fade(self, mapping_data.in_transition_menu)
+						local local_player = self.player_manager:local_player()
+						local player_unit = local_player and local_player.player_unit
+						local player_alive = player_unit and Unit.alive(player_unit)
+
+						if player_alive then
+							if not player_ready_for_game then
+								if menu_active then
+									self.transition_with_fade(self, mapping_data.in_transition_menu)
+
+									break
+								end
+
+								self.transition_with_fade(self, mapping_data.in_transition)
 
 								break
 							end
 
-							self.transition_with_fade(self, mapping_data.in_transition)
+							local error_message = mapping_data.error_message
+
+							if error_message then
+								self.add_local_system_message(self, error_message)
+							end
 
 							break
 						end
-
-						local error_message = mapping_data.error_message
-
-						if error_message then
-							self.add_local_system_message(self, error_message)
-						end
-
-						break
 					end
 				end
 			end
@@ -492,13 +504,7 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 			Profiler.start("hotkeys")
 
 			if not self.pending_transition(self) then
-				local local_player = self.player_manager:local_player()
-				local player_unit = local_player and local_player.player_unit
-				local player_alive = player_unit and Unit.alive(player_unit)
-
-				if player_alive then
-					self.handle_menu_hotkeys(self, dt, input_service, self.menu_active)
-				end
+				self.handle_menu_hotkeys(self, dt, input_service, self.menu_active)
 			end
 
 			Profiler.stop("hotkeys")
@@ -643,6 +649,7 @@ IngameUI._update_chat_ui = function (self, dt, t, input_service, end_of_level_ui
 	local cutscene_system = self.cutscene_system
 	local in_view = self.menu_active or (end_of_level_ui and end_of_level_ui.enable_chat(end_of_level_ui)) or self.current_view ~= nil
 	local active_cutscene = (cutscene_system.active_camera or self.popup_join_lobby_handler.visible) and not cutscene_system.ingame_hud_enabled
+	local join_popup_visible = self.popup_join_lobby_handler.visible
 
 	if self.current_view then
 		local active_view = self.views[self.current_view]
@@ -657,6 +664,10 @@ IngameUI._update_chat_ui = function (self, dt, t, input_service, end_of_level_ui
 		local gift_popup_input_service = gift_popup_ui.active_input_service(gift_popup_ui)
 
 		Managers.chat:update(dt, t, in_view, gift_popup_input_service)
+	elseif join_popup_visible then
+		local join_popup_input_service = self.popup_join_lobby_handler:input_service()
+
+		Managers.chat:update(dt, t, in_view, join_popup_input_service)
 	elseif player_list_focused then
 		local ingame_player_list_input_service = ingame_player_list_ui.input_service(ingame_player_list_ui)
 
@@ -785,6 +796,12 @@ IngameUI.is_transition_allowed = function (self, transition)
 			transition_allowed = false
 		elseif transition == "altar_view_force" then
 			error_message = "dlc1_1_matchmaking_ready_interaction_message_altar"
+			transition_allowed = false
+		elseif transition == "quest_view_force" then
+			error_message = "dlc1_3_1_matchmaking_ready_interaction_message_quests"
+			transition_allowed = false
+		elseif transition == "lorebook_view_force" then
+			error_message = "dlc1_3_matchmaking_ready_interaction_message_lorebook"
 			transition_allowed = false
 		end
 	end

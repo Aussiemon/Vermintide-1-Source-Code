@@ -460,6 +460,51 @@ DeathReactions.templates = {
 			end
 		}
 	},
+	storm_vermin_champion = {
+		unit = {
+			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+				local data, result = ai_default_unit_start(unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+
+				StatisticsUtil.register_kill(unit, killing_blow, context.statistics_db, true)
+				trigger_unit_dialogue_death_event(unit, killing_blow[DamageDataIndex.ATTACKER], killing_blow[DamageDataIndex.HIT_ZONE], killing_blow[DamageDataIndex.DAMAGE_TYPE])
+				trigger_player_killing_blow_ai_buffs(unit, killing_blow[DamageDataIndex.ATTACKER], true)
+
+				if unit ~= killing_blow[DamageDataIndex.ATTACKER] and ScriptUnit.has_extension(unit, "ai_system") then
+					ScriptUnit.extension(unit, "ai_system"):attacked(killing_blow[DamageDataIndex.ATTACKER], t, killing_blow)
+				end
+
+				local blackboard = Unit.get_data(unit, "blackboard")
+
+				if blackboard.ward_active then
+					AiUtils.stormvermin_champion_set_ward_state(unit, false, true)
+
+					blackboard.ward_active = false
+				end
+
+				return data, result
+			end,
+			update = function (unit, dt, context, t, data)
+				local result = ai_default_unit_update(unit, dt, context, t, data)
+
+				return result
+			end
+		},
+		husk = {
+			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+				local data, result = ai_default_husk_start(unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
+
+				StatisticsUtil.register_kill(unit, killing_blow, context.statistics_db)
+				trigger_player_killing_blow_ai_buffs(unit, killing_blow[DamageDataIndex.ATTACKER], false)
+
+				return data, result
+			end,
+			update = function (unit, dt, context, t, data)
+				local result = ai_default_husk_update(unit, dt, context, t, data)
+
+				return result
+			end
+		}
+	},
 	gutter_runner = {
 		unit = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
@@ -575,6 +620,7 @@ DeathReactions.templates = {
 				trigger_player_killing_blow_ai_buffs(unit, killing_blow[DamageDataIndex.ATTACKER], true)
 
 				local amount_of_loot_drops = math.random(2, 4)
+				local num_spawned_lorebook_pages = 0
 
 				for i = 1, amount_of_loot_drops, 1 do
 					local spawn_value = math.random()
@@ -589,9 +635,14 @@ DeathReactions.templates = {
 						local pickup_settings = AllPickups[pickup_name]
 						local can_spawn_func = pickup_settings.can_spawn_func
 						pickup_params.dice_keeper = dice_keeper
+						pickup_params.num_spawned_lorebook_pages = num_spawned_lorebook_pages
 
 						if can_spawn_func and not can_spawn_func(pickup_params) then
 							can_spawn_pickup_type = false
+						end
+
+						if can_spawn_pickup_type and pickup_name == "lorebook_page" then
+							num_spawned_lorebook_pages = num_spawned_lorebook_pages + 1
 						end
 
 						spawn_weighting_total = spawn_weighting_total + spawn_weighting

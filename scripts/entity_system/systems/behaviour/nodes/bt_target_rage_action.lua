@@ -19,37 +19,43 @@ BTTargetRageAction.enter = function (self, unit, blackboard, t)
 	blackboard.move_state = "attacking"
 	local locomotion_extension = blackboard.locomotion_extension
 	local rage_anim = AiAnimUtils.get_start_move_animation(unit, blackboard, action)
-	local anim_driven = rage_anim ~= action.start_anims_name.fwd
-	blackboard.attack_anim_driven = anim_driven
 
-	locomotion_extension.use_lerp_rotation(locomotion_extension, not anim_driven)
-	LocomotionUtils.set_animation_driven_movement(unit, anim_driven, false, false)
+	if rage_anim then
+		local anim_driven = rage_anim ~= action.start_anims_name.fwd
+		blackboard.attack_anim_driven = anim_driven
 
-	if anim_driven then
-		blackboard.move_animation_name = rage_anim
-	else
-		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
-		blackboard.navigation_extension:move_to(POSITION_LOOKUP[unit])
+		locomotion_extension.use_lerp_rotation(locomotion_extension, not anim_driven)
+		LocomotionUtils.set_animation_driven_movement(unit, anim_driven, false, false)
 
-		if blackboard.target_dist < action.change_target_fwd_close_dist then
-			rage_anim = AiAnimUtils.cycle_anims(blackboard, action.change_target_fwd_close_anims, "cycle_rage_anim_index")
+		if anim_driven then
+			blackboard.move_animation_name = rage_anim
+		else
+			locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+			blackboard.navigation_extension:move_to(POSITION_LOOKUP[unit])
+
+			if blackboard.target_dist < action.change_target_fwd_close_dist then
+				rage_anim = AiAnimUtils.cycle_anims(blackboard, action.change_target_fwd_close_anims, "cycle_rage_anim_index")
+			end
 		end
-	end
 
-	Managers.state.network:anim_event(unit, rage_anim)
+		Managers.state.network:anim_event(unit, rage_anim)
 
-	if script_data.debug_ai_movement then
-		Debug.world_sticky_text(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), rage_anim .. " " .. ((anim_driven and "(ANIM DRIVEN)") or ""), Color(140, 0, 220))
-		QuickDrawerStay:vector(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), Quaternion.forward(Unit.local_rotation(unit, 0))*3, Color(140, 0, 220))
-	end
+		if script_data.debug_ai_movement then
+			Debug.world_sticky_text(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), rage_anim .. " " .. ((anim_driven and "(ANIM DRIVEN)") or ""), Color(140, 0, 220))
+			QuickDrawerStay:vector(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), Quaternion.forward(Unit.local_rotation(unit, 0))*3, Color(140, 0, 220))
+		end
 
-	if 7 < blackboard.target_dist then
-		blackboard.chasing_timer = 25
+		if 7 < blackboard.target_dist then
+			blackboard.chasing_timer = 25
+		end
+	else
+		blackboard.abort_rage = true
 	end
 
 	return 
 end
 BTTargetRageAction.leave = function (self, unit, blackboard, t, reason)
+	blackboard.abort_rage = nil
 	blackboard.action = nil
 	blackboard.target_changed = nil
 
@@ -59,6 +65,10 @@ BTTargetRageAction.leave = function (self, unit, blackboard, t, reason)
 	return 
 end
 BTTargetRageAction.run = function (self, unit, blackboard, t, dt)
+	if blackboard.abort_rage then
+		return "failed"
+	end
+
 	if t < blackboard.anim_locked then
 		if blackboard.attack_anim_driven then
 			if blackboard.anim_cb_rotation_start then

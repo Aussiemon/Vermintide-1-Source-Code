@@ -266,6 +266,16 @@ StatisticsDefinitions = {
 		},
 		stormvermin_pick_instakills = {
 			value = 0
+		},
+		dodged_storm_vermin_champion = {
+			value = 0
+		},
+		equipped_executioners_sword = {
+			value = 0
+		},
+		executor_headshot = {
+			value = 0,
+			database_name = "executor_headshot"
 		}
 	}
 }

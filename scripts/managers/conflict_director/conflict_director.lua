@@ -71,6 +71,7 @@ ConflictDirector.init = function (self, world, level_key, network_event_delegate
 	self.specials_pacing = nil
 	self.navigation_group_manager = NavigationGroupManager:new()
 	self._alive_specials = {}
+	self._alive_bosses = {}
 	self._next_pacing_update = math.random()
 	self._living_horde = 0
 	self._num_spawned_during_event = 0
@@ -157,6 +158,9 @@ end
 
 ConflictDirector.alive_specials = function (self)
 	return self._alive_specials
+end
+ConflictDirector.alive_bosses = function (self)
+	return self._alive_bosses
 end
 ConflictDirector.reset_spawned_by_breed = function (self)
 	for name, breed in pairs(Breeds) do
@@ -1615,7 +1619,8 @@ ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn
 		},
 		death_system = {
 			is_husk = false,
-			death_reaction_template = breed.death_reaction
+			death_reaction_template = breed.death_reaction,
+			disable_second_hit_ragdoll = breed.disable_second_hit_ragdoll
 		},
 		hit_reaction_system = {
 			is_husk = false,
@@ -1732,6 +1737,16 @@ end
 ConflictDirector.count_units_by_breed_during_event = function (self, breed_name)
 	return self._num_spawned_by_breed_during_event[breed_name]
 end
+ConflictDirector.add_unit_to_bosses = function (self, unit)
+	self._alive_bosses[#self._alive_bosses + 1] = unit
+
+	return 
+end
+ConflictDirector.remove_unit_from_bosses = function (self, unit)
+	remove_element_from_array(self._alive_bosses, unit)
+
+	return 
+end
 ConflictDirector._remove_unit_from_spawned = function (self, unit, blackboard)
 	local spawned_lookup = self._spawned_lookup
 	local index = spawned_lookup[unit]
@@ -1837,6 +1852,7 @@ ConflictDirector.destroy_all_units = function (self)
 	table.clear(self._spawned)
 	table.clear(self._spawned_lookup)
 	table.clear(self._alive_specials)
+	table.clear(self._alive_bosses)
 
 	self._living_horde = 0
 

@@ -6,6 +6,7 @@ require("scripts/ui/reward_ui/reward_popup_handler")
 require("scripts/settings/quest_settings")
 require("scripts/ui/quest_view/quest_reward_presentation_ui")
 
+script_data.show_contract_reward_on_accept = script_data.show_contract_reward_on_accept or Development.parameter("show_contract_reward_on_accept")
 local widget_definitions = definitions.widgets_definitions
 local scenegraph_definition = definitions.scenegraph_definition
 local create_quest_widget = definitions.create_quest_widget
@@ -162,6 +163,7 @@ QuestView.init = function (self, ingame_ui_context)
 	self.menu_input_description:set_input_description(nil)
 
 	DO_RELOAD = false
+	self._gamepad_select_table_index = 1
 
 	return 
 end
@@ -198,6 +200,7 @@ QuestView.create_ui_elements = function (self)
 	local board_widgets = {}
 	local gamepad_widget_navigation_table = {
 		{},
+		{},
 		{}
 	}
 
@@ -213,7 +216,11 @@ QuestView.create_ui_elements = function (self)
 				contract_widgets[k] = UIWidget.init(create_board_contract_widget(parent_scenegraph_id))
 			end
 
-			gamepad_widget_navigation_table[1][#gamepad_widget_navigation_table[1] + 1] = contract_widgets[k]
+			if parent_scenegraph_id == "contract_list_event" then
+				gamepad_widget_navigation_table[2][#gamepad_widget_navigation_table[2] + 1] = contract_widgets[k]
+			else
+				gamepad_widget_navigation_table[1][#gamepad_widget_navigation_table[1] + 1] = contract_widgets[k]
+			end
 		end
 
 		board_widgets[i] = contract_widgets
@@ -238,7 +245,7 @@ QuestView.create_ui_elements = function (self)
 			log_widgets[i] = UIWidget.init(create_log_contract_widget(contract_log_scenegraph_id))
 		end
 
-		gamepad_widget_navigation_table[2][#gamepad_widget_navigation_table[2] + 1] = log_widgets[i]
+		gamepad_widget_navigation_table[3][#gamepad_widget_navigation_table[3] + 1] = log_widgets[i]
 	end
 
 	self._log_widgets = log_widgets
@@ -872,7 +879,7 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 	local closest_index = nil
 
 	if direction == "down" then
-		for index = current_selection_index, (num_widgets + current_selection_index) - 2, 1 do
+		for index = current_selection_index, num_widgets, 1 do
 			local read_index = index%num_widgets + 1
 			local widget = widgets[read_index]
 
@@ -901,24 +908,35 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 
 	return 
 end
-QuestView._gamepad_navigate_selection = function (self, direction)
+QuestView._get_next_select_table_index = function (self, current_index, direction)
 	local new_select_table_index = nil
 
 	if direction == "left" then
-		new_select_table_index = 1
+		new_select_table_index = math.max(current_index - 1, 1)
 	elseif direction == "right" then
-		new_select_table_index = 2
+		new_select_table_index = math.min(current_index + 1, 3)
 	end
+
+	return new_select_table_index
+end
+QuestView._gamepad_navigate_selection = function (self, direction)
+	local new_select_table_index = self._get_next_select_table_index(self, self._gamepad_select_table_index, direction)
 
 	if new_select_table_index then
 		if new_select_table_index ~= self._gamepad_select_table_index then
-			local widget, index = self._get_closest_widget_by_direction(self, new_select_table_index, 0, "down")
+			while 1 <= new_select_table_index and new_select_table_index <= 3 do
+				local widget, index = self._get_closest_widget_by_direction(self, new_select_table_index, 0, "down")
 
-			if widget then
-				self._gamepad_select_table_index = new_select_table_index
-				self._gamepad_select_widget_index = index
+				if widget then
+					self._gamepad_select_table_index = new_select_table_index
+					self._gamepad_select_widget_index = index
 
-				self._select_entry_widget(self, widget)
+					self._select_entry_widget(self, widget)
+
+					break
+				else
+					new_select_table_index = new_select_table_index + ((direction == "left" and -1) or 1)
+				end
 			end
 		end
 	else
@@ -1143,6 +1161,24 @@ QuestView._on_accept_pressed = function (self)
 					self._accept_contract(self, id, self._is_event_contract(self, data))
 				end
 
+				if script_data.show_contract_reward_on_accept then
+					local reward = {}
+
+					if widget_content.has_boon then
+						reward.type = "boon"
+						reward.data = widget_content.reward.boons
+					elseif widget_content.has_item then
+						reward.type = "item"
+						reward.data = widget_content.reward.items
+					elseif widget_content.has_tokens then
+						reward.type = "token"
+						reward.token_type = widget_content.reward.tokens.type
+						reward.amount = widget_content.reward.tokens.amount
+					end
+
+					self._show_reward(self, reward)
+				end
+
 				return true
 			end
 		end
@@ -1292,6 +1328,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 	local task = requirements.task
 	content.is_quest = is_quest
 	content.completed = requirements_met
+	content.reward = rewards
 
 	if not is_quest then
 		local has_key = data_type == "main"

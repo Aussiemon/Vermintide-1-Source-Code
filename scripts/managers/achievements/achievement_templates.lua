@@ -716,6 +716,35 @@ if Application.platform() == "win32" then
 			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
 		end
 	}
+
+	local function add_level_complete_achievement(AchievementTemplates, level_name)
+		AchievementTemplates["complete_" .. level_name] = {
+			evaluate = function (statistics_db, stats_id)
+				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_name)
+			end
+		}
+
+		return 
+	end
+
+	add_level_complete_achievement(AchievementTemplates, "dlc_stromdorf_hills")
+	add_level_complete_achievement(AchievementTemplates, "dlc_stromdorf_town")
+
+	AchievementTemplates.dodged_krench = {
+		evaluate = function (statistics_db, stats_id)
+			return 3 <= statistics_db.get_stat(statistics_db, stats_id, "dodged_storm_vermin_champion")
+		end
+	}
+	AchievementTemplates.equipped_executioners_sword = {
+		evaluate = function (statistics_db, stats_id)
+			return 0 < statistics_db.get_stat(statistics_db, stats_id, "equipped_executioners_sword")
+		end
+	}
+	AchievementTemplates.executor_headshots = {
+		evaluate = function (statistics_db, stats_id)
+			return 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "executor_headshot")
+		end
+	}
 end
 
 if Application.platform() ~= "win32" then

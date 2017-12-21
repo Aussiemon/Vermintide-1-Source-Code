@@ -448,7 +448,8 @@ NetworkLookup.hit_zones = {
 	"neck",
 	"n/a",
 	"full",
-	"aux"
+	"aux",
+	"ward"
 }
 NetworkLookup.anims = {
 	"attack_charge",
@@ -660,7 +661,6 @@ NetworkLookup.anims = {
 	"attack_reach_up_4",
 	"attack_run_2",
 	"attack_spin_charge",
-	"attack_spin_charge_loop",
 	"attack_spin",
 	"charge_attack_step",
 	"charge_attack_loop",
@@ -834,7 +834,14 @@ NetworkLookup.anims = {
 	"packmaster_hang_release_ko",
 	"hanging",
 	"hanging_loop",
-	"hanging_exit"
+	"hanging_exit",
+	"call_allies",
+	"turn_bwd",
+	"turn_left",
+	"turn_right",
+	"defensive_idle",
+	"attack_sweep_left",
+	"attack_sweep_right"
 }
 NetworkLookup.lobby_data = {
 	"level_key",
@@ -968,6 +975,7 @@ NetworkLookup.damage_types = {
 	"light_slashing_smiter",
 	"slashing_smiter",
 	"heavy_slashing_smiter",
+	"heavy_slashing_smiter_hs",
 	"light_slashing_fencer",
 	"slashing_fencer",
 	"heavy_slashing_fencer",
@@ -1144,8 +1152,6 @@ NetworkLookup.effects = {
 	"fx/chr_player_fak_healed",
 	"fx/wpnfx_poison_wind_globe_impact",
 	"fx/chr_gutter_death",
-	"fx/scroll_push_back",
-	"fx/scroll_magic_darts",
 	"fx/screenspace_poison_globe_impact",
 	"fx/wpnfx_fire_grenade_impact_remains",
 	"fx/wpnfx_poison_arrow_impact",
@@ -1160,6 +1166,8 @@ NetworkLookup.effects = {
 	"fx/wpnfx_staff_geiser_fire_small",
 	"fx/wpnfx_staff_geiser_fire_medium",
 	"fx/wpnfx_staff_geiser_fire_large",
+	"fx/chr_stormvermin_champion_beam_impact_dot",
+	"fx/chr_stormvermin_champion_beam_anticipation_dot",
 	"fx/chr_gutter_foff",
 	"spawn_cylinder"
 }
@@ -1268,7 +1276,9 @@ NetworkLookup.sound_events = {
 	"player_combat_weapon_staff_charge_husk",
 	"stop_player_combat_weapon_staff_charge_husk",
 	"player_combat_weapon_staff_fire_beam_husk",
-	"stop_player_combat_weapon_staff_fire_beam_husk"
+	"stop_player_combat_weapon_staff_fire_beam_husk",
+	"executioner_sword_critical",
+	"Play_enemy_stormvermin_champion_electric_floor"
 }
 NetworkLookup.global_parameter_names = {
 	"occupied_slots_percentage"
@@ -1375,9 +1385,11 @@ NetworkLookup.dialogue_event_data_names = {
 	"rat_ogre_change_target",
 	"pwg_projectile",
 	"pwg_suicide_run",
+	"spawn_allies",
 	"current_amount",
 	"thrower_name",
 	"bomb_miss",
+	"attack_hit",
 	"target_name",
 	"has_shield",
 	"witch_hunter",
@@ -1430,6 +1442,7 @@ NetworkLookup.locations = {
 	"test2"
 }
 NetworkLookup.statistics = {
+	"dodged_storm_vermin_champion",
 	"killed_patrols",
 	"best_projectile_multikill"
 }

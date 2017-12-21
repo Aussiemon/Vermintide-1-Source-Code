@@ -100,6 +100,10 @@ ScoreboardHelper.scoreboard_topic_stats = {
 			{
 				"damage_dealt_per_breed",
 				"skaven_rat_ogre"
+			},
+			{
+				"damage_dealt_per_breed",
+				"skaven_storm_vermin_champion"
 			}
 		},
 		sort_function = function (a, b)

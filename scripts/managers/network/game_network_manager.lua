@@ -769,7 +769,7 @@ GameNetworkManager.rpc_skinned_surface_mtr_fx = function (self, sender, effect_n
 
 	local effect_name = NetworkLookup.surface_material_effects[effect_name_id]
 
-	EffectHelper.play_skinned_surface_material_effects(effect_name, self._world, position, rotation, normal, true)
+	EffectHelper.play_skinned_surface_material_effects(effect_name, self._world, nil, position, rotation, normal, true)
 
 	return 
 end

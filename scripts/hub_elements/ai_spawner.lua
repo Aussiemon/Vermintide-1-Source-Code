@@ -169,6 +169,16 @@ AISpawner.spawn_unit = function (self)
 
 	return 
 end
+AISpawner.spawn_rotation = function (self)
+	local unit = self._unit
+
+	return Unit.world_rotation(unit, Unit.node(unit, self._config.node))
+end
+AISpawner.spawn_position = function (self)
+	local unit = self._unit
+
+	return Unit.world_position(unit, Unit.node(unit, self._config.node))
+end
 AISpawner.get_spawner_name = function (self)
 	return self._config.name
 end

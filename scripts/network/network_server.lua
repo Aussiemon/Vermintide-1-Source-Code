@@ -102,7 +102,6 @@ NetworkServer.is_in_post_game = function (self)
 end
 NetworkServer.rpc_to_client_spawn_player = function (self, sender, ...)
 	if sender == self.my_peer_id then
-		self.peer_state_machines[sender].rpc_to_client_spawn_player(...)
 	end
 
 	return 

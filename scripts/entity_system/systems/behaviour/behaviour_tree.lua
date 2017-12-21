@@ -73,7 +73,6 @@ require("scripts/entity_system/systems/behaviour/nodes/skaven_ratling_gunner/bt_
 require("scripts/entity_system/systems/behaviour/nodes/skaven_ratling_gunner/bt_ratling_gunner_move_to_shoot_action")
 require("scripts/entity_system/systems/behaviour/nodes/skaven_ratling_gunner/bt_ratling_gunner_shoot_action")
 require("scripts/entity_system/systems/behaviour/nodes/skaven_ratling_gunner/bt_ratling_gunner_windup_action")
-require("scripts/entity_system/systems/behaviour/nodes/skaven_grey_seer/bt_teleport_to_portal_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_bot_transported_idle_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_bot_follow_action")
 require("scripts/entity_system/systems/behaviour/nodes/bt_bot_shoot_action")
@@ -97,7 +96,6 @@ require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_ska
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_skaven_ratling_gunner")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin")
 require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_storm_vermin_commander")
-require("scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_grey_seer")
 
 for _, dlc in pairs(DLCSettings) do
 	local nodes = dlc.behaviour_tree_nodes

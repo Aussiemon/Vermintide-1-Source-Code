@@ -1042,8 +1042,7 @@ PopupJoinLobbyHandler.update = function (self, dt)
 	end
 
 	local ui_renderer = self.ui_renderer
-	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "popup_join_lobby_handler")
+	local input_service = self.input_service(self)
 
 	if self.cancel_timer then
 		self.cancel_timer = self.cancel_timer - dt
@@ -1193,6 +1192,9 @@ PopupJoinLobbyHandler.update_profiles_data = function (self, profiles_data)
 	end
 
 	return 
+end
+PopupJoinLobbyHandler.input_service = function (self)
+	return self.input_manager:get_service("popup_join_lobby_handler")
 end
 PopupJoinLobbyHandler._update_controller_input_description = function (self)
 	self.controller_selection_index = self.controller_selection_index or 1

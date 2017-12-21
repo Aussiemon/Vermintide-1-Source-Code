@@ -139,12 +139,16 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 
 	return 
 end
-EffectHelper.play_skinned_surface_material_effects = function (effect_name, world, position, rotation, normal, husk, enemy_type, damage_sound, no_damage, hit_zone_name)
+EffectHelper.play_skinned_surface_material_effects = function (effect_name, world, hit_unit, position, rotation, normal, husk, enemy_type, damage_sound, no_damage, hit_zone_name)
 	local effect_settings = MaterialEffectMappings[effect_name]
-	local material = "flesh"
+	local material = nil
 
-	if no_damage then
+	if hit_zone_name == "ward" then
+		material = "ward"
+	elseif no_damage then
 		material = "armored"
+	else
+		material = "flesh"
 	end
 
 	local sound = effect_settings.sound and effect_settings.sound[material]
@@ -200,6 +204,12 @@ EffectHelper.play_skinned_surface_material_effects = function (effect_name, worl
 		local normal_rotation = Quaternion.look(normal, Vector3.up())
 
 		World.create_particles(world, particles, position, normal_rotation)
+	end
+
+	flow_event = effect_settings.flow_event and effect_settings.flow_event[material]
+
+	if flow_event and hit_unit then
+		Unit.flow_event(hit_unit, flow_event)
 	end
 
 	return 

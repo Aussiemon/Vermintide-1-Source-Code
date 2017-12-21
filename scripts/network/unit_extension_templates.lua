@@ -244,6 +244,52 @@ local unit_templates = {
 			}
 		}
 	},
+	ai_unit_critter = {
+		go_type = "ai_unit",
+		self_owned_extensions = {
+			"AISimpleExtension",
+			ai_locomotion_name,
+			"AINavigationExtension",
+			"GenericUnitDamageExtension",
+			"GenericHitReactionExtension",
+			"GenericHealthExtension",
+			"GenericDeathExtension",
+			"AIProximityExtension",
+			"BuffExtension",
+			"ProjectileLinkerExtension",
+			"DialogueActorExtension",
+			"AIVolumeExtension"
+		},
+		husk_extensions = {
+			"AiHuskBaseExtension",
+			"AiHuskLocomotionExtension",
+			"GenericUnitDamageExtension",
+			"GenericHitReactionExtension",
+			"GenericHealthExtension",
+			"GenericDeathExtension",
+			"AIProximityExtension",
+			"BuffExtension",
+			"ProjectileLinkerExtension",
+			"DialogueActorExtension"
+		},
+		remove_when_killed = {
+			self_owned_extensions = {
+				"AISimpleExtension",
+				"AINavigationExtension",
+				"AIProximityExtension",
+				"BuffExtension",
+				"DialogueActorExtension",
+				"AIVolumeExtension"
+			},
+			husk_extensions = {
+				"AiHuskBaseExtension",
+				"AiHuskLocomotionExtension",
+				"AIProximityExtension",
+				"BuffExtension",
+				"DialogueActorExtension"
+			}
+		}
+	},
 	ai_unit = {
 		base_template = "ai_unit_base",
 		go_type = "ai_unit",
@@ -596,6 +642,7 @@ local unit_templates = {
 			"ExplosiveBarrelDeathExtension",
 			"PickupUnitExtension",
 			"GenericUnitInteractableExtension",
+			"PickupOutlineExtension",
 			"LookatTargetExtension",
 			"ProjectileLinkerExtension",
 			"PickupProjectileVolumeExtension",
@@ -608,6 +655,7 @@ local unit_templates = {
 			"ExplosiveBarrelDeathExtension",
 			"PickupUnitExtension",
 			"GenericUnitInteractableExtension",
+			"PickupOutlineExtension",
 			"LookatTargetExtension",
 			"ProjectileLinkerExtension",
 			"PingTargetExtension"

@@ -27,7 +27,7 @@ quest_atlas = {
 			0.888672
 		}
 	},
-	quest_reward_boon_frame_04 = {
+	quest_reward_boon_frame_05 = {
 		size = {
 			33,
 			33
@@ -41,7 +41,7 @@ quest_atlas = {
 			0.364258
 		}
 	},
-	quest_reward_boon_frame_02 = {
+	quest_reward_boon_frame_01 = {
 		size = {
 			33,
 			33
@@ -55,7 +55,7 @@ quest_atlas = {
 			0.364258
 		}
 	},
-	quest_reward_boon_frame_08 = {
+	quest_reward_boon_frame_03 = {
 		size = {
 			33,
 			33
@@ -69,7 +69,7 @@ quest_atlas = {
 			0.994141
 		}
 	},
-	quest_reward_boon_frame_07 = {
+	quest_progress_bar_bg = {
 		size = {
 			33,
 			33
@@ -83,7 +83,7 @@ quest_atlas = {
 			0.741699
 		}
 	},
-	quest_reward_boon_frame_05 = {
+	quest_reward_boon_frame_04 = {
 		size = {
 			33,
 			33
@@ -97,7 +97,7 @@ quest_atlas = {
 			0.723633
 		}
 	},
-	quest_reward_boon_frame_01 = {
+	quest_progress_bar_bg_prick = {
 		size = {
 			33,
 			33
@@ -111,7 +111,7 @@ quest_atlas = {
 			0.997559
 		}
 	},
-	quest_reward_boon_frame_06 = {
+	quest_reward_boon_frame_02 = {
 		size = {
 			33,
 			33
@@ -125,7 +125,7 @@ quest_atlas = {
 			0.997559
 		}
 	},
-	quest_progress_bar_bg = {
+	quest_reward_boon_frame_08 = {
 		size = {
 			33,
 			33
@@ -139,7 +139,7 @@ quest_atlas = {
 			0.997559
 		}
 	},
-	quest_progress_bar_bg_prick = {
+	quest_reward_boon_frame_06 = {
 		size = {
 			33,
 			33
@@ -153,7 +153,7 @@ quest_atlas = {
 			0.979492
 		}
 	},
-	quest_reward_boon_frame_03 = {
+	quest_reward_boon_frame_07 = {
 		size = {
 			33,
 			33
@@ -181,7 +181,35 @@ quest_atlas = {
 			0.999023
 		}
 	},
-	level_location_short_icon_05_quest_screen = {
+	level_location_dlc_icon_castle_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.616699,
+			0.457031
+		},
+		uv11 = {
+			0.626953,
+			0.479004
+		}
+	},
+	level_location_long_icon_05_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.605469,
+			0.457031
+		},
+		uv11 = {
+			0.615723,
+			0.479004
+		}
+	},
+	level_location_long_icon_06_quest_screen = {
 		size = {
 			42,
 			45
@@ -195,7 +223,7 @@ quest_atlas = {
 			0.448242
 		}
 	},
-	level_location_long_icon_06_quest_screen = {
+	level_location_long_icon_02_quest_screen = {
 		size = {
 			42,
 			45
@@ -209,7 +237,7 @@ quest_atlas = {
 			0.424316
 		}
 	},
-	level_location_short_icon_03_quest_screen = {
+	level_location_dlc_icon_02_quest_screen = {
 		size = {
 			42,
 			45
@@ -223,7 +251,7 @@ quest_atlas = {
 			0.346191
 		}
 	},
-	level_location_short_icon_04_quest_screen = {
+	level_location_long_icon_07_quest_screen = {
 		size = {
 			42,
 			45
@@ -237,7 +265,7 @@ quest_atlas = {
 			0.346191
 		}
 	},
-	level_location_long_icon_07_quest_screen = {
+	level_location_long_icon_04_quest_screen = {
 		size = {
 			42,
 			45
@@ -251,88 +279,32 @@ quest_atlas = {
 			0.346191
 		}
 	},
-	level_location_short_icon_06_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.612793,
-			0.290039
-		},
-		uv11 = {
-			0.623047,
-			0.312012
-		}
-	},
-	level_location_short_icon_01_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.601563,
-			0.290039
-		},
-		uv11 = {
-			0.611816,
-			0.312012
-		}
-	},
-	level_location_short_icon_02_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.612793,
-			0.266113
-		},
-		uv11 = {
-			0.623047,
-			0.288086
-		}
-	},
-	level_location_long_icon_05_quest_screen = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.601563,
-			0.266113
-		},
-		uv11 = {
-			0.611816,
-			0.288086
-		}
-	},
 	level_location_long_icon_03_quest_screen = {
 		size = {
 			42,
 			45
 		},
 		uv00 = {
-			0.590332,
+			0.612793,
 			0.290039
 		},
 		uv11 = {
-			0.600586,
+			0.623047,
 			0.312012
 		}
 	},
-	level_location_long_icon_01_quest_screen = {
+	level_location_dlc_icon_portals_quest_screen = {
 		size = {
 			42,
 			45
 		},
 		uv00 = {
-			0.590332,
-			0.266113
+			0.601563,
+			0.290039
 		},
 		uv11 = {
-			0.600586,
-			0.288086
+			0.611816,
+			0.312012
 		}
 	},
 	level_location_dlc_icon_dwarf_interior_quest_screen = {
@@ -341,6 +313,62 @@ quest_atlas = {
 			45
 		},
 		uv00 = {
+			0.612793,
+			0.266113
+		},
+		uv11 = {
+			0.623047,
+			0.288086
+		}
+	},
+	level_location_dlc_icon_dwarf_exterior_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.601563,
+			0.266113
+		},
+		uv11 = {
+			0.611816,
+			0.288086
+		}
+	},
+	level_location_dlc_icon_dwarf_beacon_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.590332,
+			0.290039
+		},
+		uv11 = {
+			0.600586,
+			0.312012
+		}
+	},
+	level_location_dlc_icon_dungeon_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.590332,
+			0.266113
+		},
+		uv11 = {
+			0.600586,
+			0.288086
+		}
+	},
+	level_location_short_icon_06_quest_screen = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
 			0.450439,
 			0.954102
 		},
@@ -349,7 +377,7 @@ quest_atlas = {
 			0.976074
 		}
 	},
-	level_location_long_icon_04_quest_screen = {
+	level_location_short_icon_05_quest_screen = {
 		size = {
 			42,
 			45
@@ -363,7 +391,7 @@ quest_atlas = {
 			0.976074
 		}
 	},
-	level_location_dlc_icon_02_quest_screen = {
+	level_location_long_icon_01_quest_screen = {
 		size = {
 			42,
 			45
@@ -377,7 +405,7 @@ quest_atlas = {
 			0.952148
 		}
 	},
-	level_location_dlc_icon_01_quest_screen = {
+	level_location_short_icon_04_quest_screen = {
 		size = {
 			42,
 			45
@@ -391,7 +419,7 @@ quest_atlas = {
 			0.952148
 		}
 	},
-	level_location_long_icon_02_quest_screen = {
+	level_location_dlc_icon_stromdorf_02_quest_screen = {
 		size = {
 			42,
 			45
@@ -405,7 +433,7 @@ quest_atlas = {
 			0.921875
 		}
 	},
-	level_location_dlc_icon_portals_quest_screen = {
+	level_location_short_icon_02_quest_screen = {
 		size = {
 			42,
 			45
@@ -419,7 +447,7 @@ quest_atlas = {
 			0.995605
 		}
 	},
-	level_location_dlc_icon_dwarf_exterior_quest_screen = {
+	level_location_short_icon_01_quest_screen = {
 		size = {
 			42,
 			45
@@ -433,7 +461,7 @@ quest_atlas = {
 			0.995605
 		}
 	},
-	level_location_dlc_icon_castle_quest_screen = {
+	level_location_dlc_icon_01_quest_screen = {
 		size = {
 			42,
 			45
@@ -447,7 +475,7 @@ quest_atlas = {
 			0.813477
 		}
 	},
-	level_location_dlc_icon_dwarf_beacon_quest_screen = {
+	level_location_dlc_icon_stromdorf_01_quest_screen = {
 		size = {
 			42,
 			45
@@ -461,7 +489,7 @@ quest_atlas = {
 			0.586426
 		}
 	},
-	level_location_dlc_icon_dungeon_quest_screen = {
+	level_location_short_icon_03_quest_screen = {
 		size = {
 			42,
 			45
@@ -503,7 +531,7 @@ quest_atlas = {
 			0.994629
 		}
 	},
-	quest_class_icon_bright_wizard = {
+	quest_class_icon_empire_soldier = {
 		size = {
 			58,
 			58
@@ -517,7 +545,7 @@ quest_atlas = {
 			0.928223
 		}
 	},
-	quest_class_icon_empire_soldier = {
+	quest_class_icon_wood_elf = {
 		size = {
 			58,
 			58
@@ -545,7 +573,7 @@ quest_atlas = {
 			0.884766
 		}
 	},
-	quest_class_icon_dwarf_ranger = {
+	quest_class_icon_bright_wizard = {
 		size = {
 			58,
 			58
@@ -559,7 +587,7 @@ quest_atlas = {
 			0.854492
 		}
 	},
-	quest_class_icon_wood_elf = {
+	quest_class_icon_dwarf_ranger = {
 		size = {
 			58,
 			58
@@ -587,7 +615,7 @@ quest_atlas = {
 			0.820801
 		}
 	},
-	quest_board_arrow_hover = {
+	quest_board_arrow_normal = {
 		size = {
 			42,
 			64
@@ -601,7 +629,7 @@ quest_atlas = {
 			0.789551
 		}
 	},
-	quest_board_arrow_normal = {
+	quest_board_arrow_hover = {
 		size = {
 			42,
 			64

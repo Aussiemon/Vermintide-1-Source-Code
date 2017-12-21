@@ -79,6 +79,35 @@ AiUtils.activate_unit = function (blackboard)
 
 	return 
 end
+AiUtils.stormvermin_champion_hack_check_ward = function (unit, blackboard)
+	if blackboard.ward_active and not blackboard.defensive_mode_duration then
+		blackboard.ward_active = false
+
+		AiUtils.stormvermin_champion_set_ward_state(unit, false, true)
+	end
+
+	return 
+end
+AiUtils.stormvermin_champion_set_ward_state = function (unit, state, is_server)
+	local actor = Unit.actor(unit, "c_trophy_rack_ward")
+
+	Actor.set_scene_query_enabled(actor, state)
+
+	if state then
+		Unit.flow_event(unit, "skulls_glow_on")
+	else
+		Unit.flow_event(unit, "skulls_glow_off")
+	end
+
+	if is_server then
+		local network_manager = Managers.state.network
+		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+
+		network_manager.network_transmit:send_rpc_clients("rpc_set_ward_state", unit_id, state)
+	end
+
+	return 
+end
 AiUtils.alert_unit_of_enemy = function (unit, enemy_unit)
 	enemy_unit = AiUtils.get_actual_attacker_unit(enemy_unit)
 
@@ -573,6 +602,11 @@ AiUtils.kill_unit = function (victim_unit, attacker_unit, hit_zone_name, damage_
 
 	return 
 end
+local DEFAULT_AGGRO_MULTIPLIERS = {
+	ranged = 1,
+	melee = 1,
+	grenade = 1
+}
 AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 	local aggro_list = blackboard.aggro_list
 	local damage_extension = ScriptUnit.extension(unit, "damage_system")
@@ -583,6 +617,8 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 		aggro_list[enemy_unit] = math.clamp(aggro - aggro_decay, 0, 100)
 	end
 
+	local aggro_multipliers = breed.perception_weights.aggro_multipliers or DEFAULT_AGGRO_MULTIPLIERS
+
 	if 0 < array_length then
 		local stride = DamageDataIndex.STRIDE
 		local index = 0
@@ -590,6 +626,15 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 		for i = 1, array_length/stride, 1 do
 			local attacker_unit = strided_array[index + DamageDataIndex.ATTACKER]
 			local damage_amount = strided_array[index + DamageDataIndex.DAMAGE_AMOUNT]
+			local damage_source = strided_array[DamageDataIndex.DAMAGE_SOURCE_NAME]
+			local master_list_item = rawget(ItemMasterList, damage_source)
+
+			if master_list_item then
+				local slot_type = master_list_item.slot_type
+				local multiplier = aggro_multipliers[slot_type] or 1
+				damage_amount = damage_amount*multiplier
+			end
+
 			local aggro = aggro_list[attacker_unit]
 
 			if aggro then

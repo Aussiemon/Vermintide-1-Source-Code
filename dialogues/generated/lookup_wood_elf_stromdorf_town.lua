@@ -9,6 +9,18 @@ assert(DialogueLookup[DialogueLookup_n + 8] == nil)
 assert(DialogueLookup[DialogueLookup_n + 9] == nil)
 assert(DialogueLookup[DialogueLookup_n + 10] == nil)
 assert(DialogueLookup[DialogueLookup_n + 11] == nil)
+assert(DialogueLookup[DialogueLookup_n + 12] == nil)
+assert(DialogueLookup[DialogueLookup_n + 13] == nil)
+assert(DialogueLookup[DialogueLookup_n + 14] == nil)
+assert(DialogueLookup[DialogueLookup_n + 15] == nil)
+assert(DialogueLookup[DialogueLookup_n + 16] == nil)
+assert(DialogueLookup[DialogueLookup_n + 17] == nil)
+assert(DialogueLookup[DialogueLookup_n + 18] == nil)
+assert(DialogueLookup[DialogueLookup_n + 19] == nil)
+assert(DialogueLookup[DialogueLookup_n + 20] == nil)
+assert(DialogueLookup[DialogueLookup_n + 21] == nil)
+assert(DialogueLookup[DialogueLookup_n + 22] == nil)
+assert(DialogueLookup[DialogueLookup_n + 23] == nil)
 
 DialogueLookup[DialogueLookup_n + 1] = "pwe_objective_stromdorf_town_enter_stromdorf"
 DialogueLookup[DialogueLookup_n + 2] = "pwe_objective_stromdorf_town_entering_reikland_gate"
@@ -21,6 +33,18 @@ DialogueLookup[DialogueLookup_n + 8] = "pwe_objective_stromdorf_town_emissary_de
 DialogueLookup[DialogueLookup_n + 9] = "pwe_objective_stromdorf_town_go_to_olesya"
 DialogueLookup[DialogueLookup_n + 10] = "pwe_objective_stromdorf_town_suspicions"
 DialogueLookup[DialogueLookup_n + 11] = "pwe_objective_stromdorf_town_more_suspicions"
-DialogueLookup_n = DialogueLookup_n + 11
+DialogueLookup[DialogueLookup_n + 12] = "pwe_objective_stromdorf_town_fleeing"
+DialogueLookup[DialogueLookup_n + 13] = "pwe_gameplay_chieftain_charge_attack_taunt"
+DialogueLookup[DialogueLookup_n + 14] = "pwe_gameplay_chieftain_cleave_attack_taunt"
+DialogueLookup[DialogueLookup_n + 15] = "pwe_objective_stromdorf_town_intro_a"
+DialogueLookup[DialogueLookup_n + 16] = "pwe_objective_stromdorf_town_intro_b"
+DialogueLookup[DialogueLookup_n + 17] = "pwe_objective_stromdorf_town_intro_c"
+DialogueLookup[DialogueLookup_n + 18] = "pwe_gameplay_chieftain_banter_reply"
+DialogueLookup[DialogueLookup_n + 19] = "pwe_gameplay_chieftain_tips_special_attack_cleave"
+DialogueLookup[DialogueLookup_n + 20] = "pwe_gameplay_chieftain_tips_special_lunge_attack_2"
+DialogueLookup[DialogueLookup_n + 21] = "pwe_objective_stromdorf_town_intro_a_gt"
+DialogueLookup[DialogueLookup_n + 22] = "pwe_objective_stromdorf_town_intro_b_gt"
+DialogueLookup[DialogueLookup_n + 23] = "pwe_objective_stromdorf_town_intro_c_gt"
+DialogueLookup_n = DialogueLookup_n + 23
 
 return 

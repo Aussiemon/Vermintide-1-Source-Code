@@ -12,7 +12,8 @@ StateSplashScreen.packages_to_load = {
 	"resource_packages/title_screen_gamma",
 	"resource_packages/menu",
 	"resource_packages/platform_specific/platform_specific",
-	"resource_packages/loading_screens/loading_bg_default"
+	"resource_packages/loading_screens/loading_bg_default",
+	"resource_packages/menu_assets_start_screen"
 }
 
 if Application.platform() == "xb1" or Application.platform() == "ps4" then

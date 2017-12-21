@@ -19,7 +19,8 @@ script_data.disable_ai_perception = script_data.disable_ai_perception or Develop
 local ai_trees_created = false
 local RPCS = {
 	"rpc_alert_enemies_within_range",
-	"rpc_set_allowed_nav_layer"
+	"rpc_set_allowed_nav_layer",
+	"rpc_set_ward_state"
 }
 local extensions = {
 	"AISimpleExtension",
@@ -102,6 +103,8 @@ AISystem.init = function (self, context, name)
 		self._initialize_client_traverse_logic(self, nav_world)
 	end
 
+	self._hot_join_sync_units = {}
+
 	return 
 end
 AISystem._initialize_client_traverse_logic = function (self, nav_world)
@@ -171,6 +174,12 @@ AISystem.on_add_extension = function (self, world, unit, extension_name, extensi
 			self.ai_units_perception[unit] = extension
 		end
 
+		local sync_func = breed.hot_join_sync
+
+		if sync_func then
+			self._hot_join_sync_units[unit] = sync_func
+		end
+
 		self.num_perception_units = self.num_perception_units + 1
 	end
 
@@ -194,6 +203,11 @@ AISystem.set_default_blackboard_values = function (self, unit, blackboard)
 end
 AISystem.on_remove_extension = function (self, unit, extension_name)
 	self.on_freeze_extension(self, unit, extension_name)
+
+	if self._hot_join_sync_units[unit] then
+		self._hot_join_sync_units[unit] = nil
+	end
+
 	AISystem.super.on_remove_extension(self, unit, extension_name)
 
 	return 
@@ -536,11 +550,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 	local POSITION_LOOKUP = POSITION_LOOKUP
 
 	for _, action_data in pairs(blackboard.utility_actions) do
-		if action_data.last_time then
-			action_data.time_since_last = t - action_data.last_time
-		else
-			action_data.time_since_last = math.huge
-		end
+		action_data.time_since_last = t - action_data.last_time
 	end
 
 	if blackboard.is_in_attack_cooldown then
@@ -602,7 +612,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 	end
 
 	if breed.run_on_update then
-		breed.run_on_update(unit, blackboard, t)
+		breed.run_on_update(unit, blackboard, t, dt)
 	end
 
 	if target_alive then
@@ -798,6 +808,13 @@ AISystem.rpc_alert_enemies_within_range = function (self, peer_id, unit_id, posi
 
 	return 
 end
+AISystem.rpc_set_ward_state = function (self, peer_id, unit_id, state)
+	local unit = Managers.state.unit_storage:unit(unit_id)
+
+	AiUtils.stormvermin_champion_set_ward_state(unit, state, false)
+
+	return 
+end
 AISystem.rpc_set_allowed_nav_layer = function (self, peer_id, layer_id, allowed)
 	local layer_name = LAYER_ID_MAPPING[layer_id]
 	NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] = (allowed and 1) or 0
@@ -819,6 +836,10 @@ AISystem.hot_join_sync = function (self, sender)
 		local allowed = 0 < NAV_TAG_VOLUME_LAYER_COST_AI[layer_name]
 
 		self.network_transmit:send_rpc("rpc_set_allowed_nav_layer", sender, i, allowed)
+	end
+
+	for unit, func in pairs(self._hot_join_sync_units) do
+		func(sender, unit)
 	end
 
 	return 

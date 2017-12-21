@@ -43,13 +43,24 @@ StatisticsUtil.register_kill = function (victim_unit, damage_data, statistics_db
 
 			statistics_db.increment_stat(statistics_db, stats_id, "kills_per_breed", breed_name)
 
+			local damage_source = damage_data[DamageDataIndex.DAMAGE_SOURCE_NAME]
 			local hit_zone = damage_data[DamageDataIndex.HIT_ZONE]
 
-			if hit_zone == "head" then
+			if hit_zone == "head" or hit_zone == "neck" then
 				statistics_db.increment_stat(statistics_db, stats_id, "headshots")
+
+				local item = rawget(ItemMasterList, damage_source)
+
+				if item then
+					local weapon_template = Weapons[item.template]
+					local stat = weapon_template and weapon_template.increment_stat_on_headshot_kill
+
+					if stat then
+						statistics_db.increment_stat(statistics_db, stats_id, stat)
+					end
+				end
 			end
 
-			local damage_source = damage_data[DamageDataIndex.DAMAGE_SOURCE_NAME]
 			local master_list_item = rawget(ItemMasterList, damage_source)
 
 			if master_list_item then

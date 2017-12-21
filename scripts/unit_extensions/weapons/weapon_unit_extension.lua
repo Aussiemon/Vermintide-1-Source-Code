@@ -432,6 +432,7 @@ WeaponUnitExtension.update = function (self, unit, input, dt, context, t)
 			Debug.text("Action time:   %.2f", current_time_in_action)
 			Debug.text("Can chain:     %s", tostring(is_within_a_chain_window(current_time_in_action, self.current_action_settings, owner_unit)))
 			Debug.text("Can do damage: %s", tostring(is_within_damage_window(current_time_in_action, self.current_action_settings, owner_unit)))
+			Debug.text("Action kind: %s", tostring(current_action_settings.kind))
 		end
 
 		local wwise_world = Managers.world:wwise_world(self.world)

@@ -17,6 +17,10 @@ InteractableSystem.init = function (self, entity_system_creation_context, system
 
 	self.unit_extensions = {}
 
+	if script_data.debug_chests then
+		self.debug_num_chests = 0
+	end
+
 	return 
 end
 InteractableSystem.destroy = function (self)
@@ -37,6 +41,10 @@ InteractableSystem.update = function (self, context, t)
 		end
 	end
 
+	if script_data.debug_chests then
+		Debug.text("Opened chests: %i/%i", Managers.player:statistics_db():get_stat("session", "chests_opened"), self.debug_num_chests)
+	end
+
 	Profiler.stop("InteractableSystem")
 
 	return 
@@ -44,6 +52,14 @@ end
 InteractableSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local extension = InteractableSystem.super.on_add_extension(self, world, unit, extension_name, extension_init_data)
 	self.unit_extensions[unit] = extension
+
+	if script_data.debug_chests and extension.interaction_type(extension) == "chest" then
+		self.debug_num_chests = self.debug_num_chests + 1
+		local pos = Unit.world_position(unit, 0)
+
+		print("CHEST", self.debug_num_chests, pos)
+		QuickDrawerStay:sphere(pos, 5, Color(255, 0, 0))
+	end
 
 	return extension
 end

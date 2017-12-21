@@ -2526,6 +2526,7 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/hit_fruit_pierce",
 		stone = "fx/hit_stone_pierce",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
@@ -2545,6 +2546,9 @@ MaterialEffectMappings.bullet_impact = MaterialEffectMappings.bullet_impact or {
 		wood_solid = "fx/hit_wood_solid_pierce",
 		metal_solid = "fx/hit_metal_solid_pierce",
 		metal_hollow = "fx/hit_metal_hollow_pierce"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bullet_impact or {
@@ -2765,6 +2769,7 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/arrow_hit_generic",
 		stone = "fx/arrow_hit_stone",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/arrow_hit_wood_hollow",
 		glass = "fx/hit_glass",
@@ -2784,6 +2789,9 @@ MaterialEffectMappings.shotgun_bullet_impact = MaterialEffectMappings.shotgun_bu
 		wood_solid = "fx/arrow_hit_wood_solid",
 		metal_solid = "fx/arrow_hit_metal_solid",
 		metal_hollow = "fx/arrow_hit_metal_hollow"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
@@ -2953,6 +2961,7 @@ MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/hit_fruit_pierce",
 		stone = "fx/hit_stone_pierce",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
@@ -2972,6 +2981,9 @@ MaterialEffectMappings.nodecals = MaterialEffectMappings.nodecals or {
 		wood_solid = "fx/hit_wood_solid_pierce",
 		metal_solid = "fx/hit_metal_solid_pierce",
 		metal_hollow = "fx/hit_metal_hollow_pierce"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet_impact or {
@@ -3192,6 +3204,7 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 		hay = "fx/hit_hay_pierce",
 		fruit = "fx/hit_fruit_pierce",
 		stone = "fx/hit_stone_pierce",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/hit_wood_hollow_pierce",
 		glass = "fx/hit_glass",
@@ -3211,6 +3224,9 @@ MaterialEffectMappings.enemy_bullet_impact = MaterialEffectMappings.enemy_bullet
 		wood_solid = "fx/hit_wood_solid_pierce",
 		metal_solid = "fx/hit_metal_solid_pierce",
 		metal_hollow = "fx/hit_metal_hollow_pierce"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.drakefire_pistol = MaterialEffectMappings.drakefire_pistol or {
@@ -3380,6 +3396,7 @@ MaterialEffectMappings.drakefire_pistol = MaterialEffectMappings.drakefire_pisto
 		hay = "fx/wpnfx_drake_pistols_projectile_impact",
 		fruit = "fx/wpnfx_drake_pistols_projectile_impact",
 		stone = "fx/wpnfx_drake_pistols_projectile_impact",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_water_with_fire_projectile",
 		wood_bridge = "fx/wpnfx_drake_pistols_projectile_impact",
 		glass = "fx/wpnfx_drake_pistols_projectile_impact",
@@ -3399,6 +3416,9 @@ MaterialEffectMappings.drakefire_pistol = MaterialEffectMappings.drakefire_pisto
 		wood_solid = "fx/wpnfx_drake_pistols_projectile_impact",
 		metal_solid = "fx/wpnfx_drake_pistols_projectile_impact",
 		metal_hollow = "fx/wpnfx_drake_pistols_projectile_impact"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.staff_spark = MaterialEffectMappings.staff_spark or {
@@ -3568,6 +3588,7 @@ MaterialEffectMappings.staff_spark = MaterialEffectMappings.staff_spark or {
 		hay = "fx/wpnfx_staff_spark_impact",
 		fruit = "fx/wpnfx_staff_spark_impact",
 		stone = "fx/wpnfx_staff_spark_impact",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_water_with_fire_projectile",
 		wood_bridge = "fx/wpnfx_staff_spark_impact",
 		glass = "fx/wpnfx_staff_spark_impact",
@@ -3587,6 +3608,9 @@ MaterialEffectMappings.staff_spark = MaterialEffectMappings.staff_spark or {
 		wood_solid = "fx/wpnfx_staff_spark_impact",
 		metal_solid = "fx/wpnfx_staff_spark_impact",
 		metal_hollow = "fx/wpnfx_staff_spark_impact"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.staff_spear = MaterialEffectMappings.staff_spear or {
@@ -3756,6 +3780,7 @@ MaterialEffectMappings.staff_spear = MaterialEffectMappings.staff_spear or {
 		hay = "fx/wpnfx_staff_spear_impact",
 		fruit = "fx/wpnfx_staff_spear_impact",
 		stone = "fx/wpnfx_staff_spear_impact",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_water_with_fire_projectile",
 		wood_bridge = "fx/wpnfx_staff_spear_impact",
 		glass = "fx/wpnfx_staff_spear_impact",
@@ -3775,6 +3800,9 @@ MaterialEffectMappings.staff_spear = MaterialEffectMappings.staff_spear or {
 		wood_solid = "fx/wpnfx_staff_spear_impact",
 		metal_solid = "fx/wpnfx_staff_spear_impact",
 		metal_hollow = "fx/wpnfx_staff_spear_impact"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.fireball_impact = MaterialEffectMappings.fireball_impact or {
@@ -3944,6 +3972,7 @@ MaterialEffectMappings.fireball_impact = MaterialEffectMappings.fireball_impact 
 		hay = "fx/wpnfx_staff_spark_impact",
 		fruit = "fx/wpnfx_staff_spark_impact",
 		stone = "fx/wpnfx_staff_spark_impact",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/wpnfx_staff_spark_impact",
 		wood_bridge = "fx/wpnfx_staff_spark_impact",
 		glass = "fx/wpnfx_staff_spark_impact",
@@ -3963,6 +3992,9 @@ MaterialEffectMappings.fireball_impact = MaterialEffectMappings.fireball_impact 
 		wood_solid = "fx/wpnfx_staff_spark_impact",
 		metal_solid = "fx/wpnfx_staff_spark_impact",
 		metal_hollow = "fx/wpnfx_staff_spark_impact"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
@@ -4183,6 +4215,7 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 		fruit = "fx/arrow_hit_generic",
 		dirt = "fx/arrow_hit_dirt",
 		stone = "fx/arrow_hit_stone",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/hit_snow_pierce",
 		wood_bridge = "fx/arrow_hit_wood_hollow",
 		glass = "fx/hit_glass",
@@ -4202,6 +4235,9 @@ MaterialEffectMappings.arrow_impact = MaterialEffectMappings.arrow_impact or {
 		wood_solid = "fx/arrow_hit_wood_solid",
 		metal_solid = "fx/arrow_hit_metal_solid",
 		metal_hollow = "fx/arrow_hit_metal_hollow"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow_impact or {
@@ -4422,6 +4458,7 @@ MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow
 		fruit = "fx/wpnfx_poison_arrow_impact",
 		dirt = "fx/wpnfx_poison_arrow_impact",
 		stone = "fx/wpnfx_poison_arrow_impact",
+		ward = "fx/chr_stormvermin_champion_shield_dot",
 		water = "fx/wpnfx_poison_arrow_impact",
 		wood_bridge = "fx/wpnfx_poison_arrow_impact",
 		glass = "fx/wpnfx_poison_arrow_impact",
@@ -4441,6 +4478,9 @@ MaterialEffectMappings.poison_arrow_impact = MaterialEffectMappings.poison_arrow
 		wood_solid = "fx/wpnfx_poison_arrow_impact",
 		metal_solid = "fx/wpnfx_poison_arrow_impact",
 		metal_hollow = "fx/wpnfx_poison_arrow_impact"
+	},
+	flow_event = {
+		ward = "ward_impact"
 	}
 }
 MaterialEffectMappings.footstep_walk = MaterialEffectMappings.footstep_walk or {

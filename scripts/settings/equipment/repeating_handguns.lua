@@ -3,13 +3,13 @@ local weapon_template = weapon_template or {}
 weapon_template.actions = {
 	action_one = {
 		default = {
-			attack_template_damage_type = "carbine_AP",
+			attack_template_damage_type = "sniper",
 			fire_at_gaze_setting = "tobii_fire_at_gaze_repeating_handgun",
 			damage_window_start = 0.1,
 			kind = "handgun",
 			total_time_secondary = 1.75,
 			max_penetrations = 2,
-			attack_template = "shot_carbine",
+			attack_template = "shot_repeating_handgun",
 			charge_value = "bullet_hit",
 			alert_sound_range_fire = 10,
 			alert_sound_range_hit = 1.5,
@@ -31,7 +31,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default",
-					start_time = 0.4,
+					start_time = 0.5,
 					action = "action_one",
 					release_required = "action_one_hold",
 					input = "action_one"
@@ -57,29 +57,30 @@ weapon_template.actions = {
 		},
 		bullet_spray = {
 			damage_window_start = 0.1,
-			total_time_secondary = 2,
+			uninterruptible = true,
 			fire_at_gaze_setting = "tobii_fire_at_gaze_repeating_handgun",
-			attack_template_damage_type = "carbine_AP",
+			total_time_secondary = 2,
 			kind = "handgun",
-			recoil_factor = 0.6,
+			recoil_factor = 0.5,
+			max_penetrations = 2,
+			attack_template = "shot_repeating_handgun",
 			charge_value = "bullet_hit",
-			attack_template = "shot_carbine",
 			alert_sound_range_fire = 10,
 			alert_sound_range_hit = 1.5,
 			reload_when_out_of_ammo = true,
-			apply_recoil = true,
 			hit_effect = "bullet_impact",
 			anim_event_last_ammo = "attack_shoot_last",
-			aim_assist_ramp_multiplier = 0.1,
+			apply_recoil = true,
 			damage_window_end = 0,
-			aim_assist_max_ramp_multiplier = 0.3,
+			aim_assist_ramp_multiplier = 0.1,
 			ammo_usage = 1,
 			fire_time = 0,
+			aim_assist_max_ramp_multiplier = 0.3,
 			aim_assist_auto_hit_chance = 0.5,
-			aim_assist_ramp_decay_delay = 0.2,
 			anim_event_secondary = "reload",
-			max_penetrations = 2,
-			hold_input = "action_two_hold",
+			aim_assist_ramp_decay_delay = 0.2,
+			attack_template_damage_type = "sniper",
+			hold_input = "action_one_hold",
 			anim_event = "attack_shoot",
 			reload_time = 0.5,
 			total_time = 0.66,
@@ -90,19 +91,19 @@ weapon_template.actions = {
 				{
 					start_time = 0,
 					external_multiplier = 0.4,
-					buff_name = "planted_charging_decrease_movement"
+					buff_name = "planted_fast_decrease_movement"
 				}
 			},
 			allowed_chain_actions = {
 				{
 					sub_action = "bullet_spray",
-					start_time = 0.2,
+					start_time = 0.15,
 					action = "action_one",
 					auto_chain = true
 				},
 				{
 					sub_action = "bullet_spray",
-					start_time = 0.2,
+					start_time = 0.15,
 					action = "action_one",
 					input = "action_one_hold"
 				},
@@ -117,10 +118,11 @@ weapon_template.actions = {
 	},
 	action_two = {
 		default = {
-			can_abort_reload = true,
+			uninterruptible = true,
 			fire_at_gaze_setting = "tobii_fire_at_gaze_repeating_handgun",
-			anim_end_event = "attack_finished",
+			can_abort_reload = true,
 			kind = "aim",
+			anim_end_event = "attack_finished",
 			aim_sound_delay = 0.6,
 			ammo_requirement = 1,
 			aim_sound_event = "weapon_repeating_handgun_special_cylinder",
@@ -128,10 +130,10 @@ weapon_template.actions = {
 			unaim_sound_event = "stop_weapon_repeating_handgun_special_cylinder",
 			hold_input = "action_two_hold",
 			anim_event = "lock_target",
+			total_time = 4,
 			anim_end_event_condition_func = function (unit, end_reason)
 				return end_reason ~= "new_interupting_action"
 			end,
-			total_time = math.huge,
 			buff_data = {
 				{
 					start_time = 0,
@@ -142,7 +144,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "bullet_spray",
-					start_time = 0.6,
+					start_time = 0.4,
 					action = "action_one",
 					input = "action_one"
 				},
@@ -250,13 +252,13 @@ Weapons.repeating_handgun_template_1_co = table.clone(weapon_template)
 Weapons.repeating_handgun_template_1_co.compare_statistics.attacks.light_attack.damage = 0.55
 Weapons.repeating_handgun_template_1_co.compare_statistics.attacks.heavy_attack.damage = 0.55
 Weapons.repeating_handgun_template_1_t2 = table.clone(weapon_template)
-Weapons.repeating_handgun_template_1_t2.actions.action_one.default.attack_template_damage_type = "carbine_AP_t2"
-Weapons.repeating_handgun_template_1_t2.actions.action_one.bullet_spray.attack_template_damage_type = "carbine_AP_t2"
+Weapons.repeating_handgun_template_1_t2.actions.action_one.default.attack_template_damage_type = "sniper_t2"
+Weapons.repeating_handgun_template_1_t2.actions.action_one.bullet_spray.attack_template_damage_type = "sniper_t2"
 Weapons.repeating_handgun_template_1_t2.compare_statistics.attacks.light_attack.damage = 0.625
 Weapons.repeating_handgun_template_1_t2.compare_statistics.attacks.heavy_attack.damage = 0.625
 Weapons.repeating_handgun_template_1_t3 = table.clone(weapon_template)
-Weapons.repeating_handgun_template_1_t3.actions.action_one.default.attack_template_damage_type = "carbine_AP_t3"
-Weapons.repeating_handgun_template_1_t3.actions.action_one.bullet_spray.attack_template_damage_type = "carbine_AP_t3"
+Weapons.repeating_handgun_template_1_t3.actions.action_one.default.attack_template_damage_type = "sniper_t3"
+Weapons.repeating_handgun_template_1_t3.actions.action_one.bullet_spray.attack_template_damage_type = "sniper_t3"
 Weapons.repeating_handgun_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.repeating_handgun_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.75
 

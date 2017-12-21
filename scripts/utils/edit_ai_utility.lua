@@ -554,10 +554,12 @@ EditAiUtility.draw_utility_info = function (gui, consideration_data, temp_max_va
 	end
 
 	local scale_text = temp_max_value or consideration_data.max_value or ""
-	local min, max, caret = Gui.text_extents(gui, scale_text, font_mtrl, font_size)
-	local extents = Vector2(max.x - min.x, max.y - min.y)
-	local axis_y = -extents.y*1.5
-	local scale_text_pos = pos + ((tiny and Vector3(size.x - extents.x, axis_y, 10)) or Vector3(size.x - extents.x - half_row_height*1.5, axis_y, 10))
+	local scale_min, scale_max, caret = Gui.text_extents(gui, scale_text, font_mtrl, font_size)
+	local scale_extents = Vector2(scale_max.x - scale_min.x, scale_max.y - scale_min.y)
+	local axis_y = -font_size
+	local min, max, caret = Gui.text_extents(gui, name, font_mtrl, font_size)
+	local offset_x = math.min(0, size.x - (max.x + scale_extents.x))
+	local scale_text_pos = pos + ((tiny and Vector3(size.x - scale_max.x, axis_y, 10)) or Vector3(size.x - scale_max.x - half_row_height*1.5, axis_y, 10))
 
 	if temp_max_value then
 		local scale_text_pos2 = scale_text_pos + Vector3(2, -1, -1)
@@ -566,7 +568,7 @@ EditAiUtility.draw_utility_info = function (gui, consideration_data, temp_max_va
 	end
 
 	ScriptGUI.text(gui, scale_text, font_mtrl, font_size, font, scale_text_pos, (temp_max_value and Color(fade_factor*255, 240, 200, 10)) or Color(fade_factor*255, 255, 255, 255))
-	ScriptGUI.text(gui, name, font_mtrl, font_size, font, pos + Vector3(0, axis_y, 10), Color(fade_factor*255, 255, 255, 255))
+	ScriptGUI.text(gui, name, font_mtrl, font_size, font, pos + Vector3(offset_x, axis_y, 10), Color(fade_factor*255, 255, 255, 255))
 
 	return 
 end

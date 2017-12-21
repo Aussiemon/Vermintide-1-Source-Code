@@ -325,6 +325,10 @@ UnitSpawner.spawn_local_unit_with_extensions = function (self, unit_name, unit_t
 	return unit, unit_template_name
 end
 UnitSpawner.spawn_network_unit = function (self, unit_name, unit_template_name, extension_init_data, position, rotation, material)
+	if not self.game_session then
+		return 
+	end
+
 	local unit, final_unit_template_name = self.spawn_local_unit_with_extensions(self, unit_name, unit_template_name, extension_init_data, position, rotation, material)
 	local unit_template = self.unit_template_lut[final_unit_template_name]
 

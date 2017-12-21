@@ -17,6 +17,7 @@ require("scripts/managers/camera/cameras/object_link_camera")
 require("scripts/managers/camera/cameras/offset_camera")
 require("scripts/managers/camera/mood_handler/mood_handler")
 require("scripts/level/environment/environment_blender")
+require("scripts/managers/camera/level_effects_volume/level_effects_volume")
 
 if Development.parameter("camera_debug") then
 	script_data.camera_debug = true
@@ -63,6 +64,7 @@ CameraManager.init = function (self, world)
 	self._shadow_lights_max_active = 1
 	self._shadow_lights_viewport = nil
 	self._property_temp_table = {}
+	self._level_effect_volumes = {}
 	self.mood_handler = MoodHandler:new(world)
 	self._environment_blenders = {}
 	self._shading_environment = {}
@@ -362,7 +364,7 @@ CameraManager.set_fog_depth_override = function (self, start_dist, full_dist)
 	return 
 end
 CameraManager._update_level_particle_effects = function (self, viewport_name)
-	for id, _ in pairs(self._level_particle_effect_ids) do
+	for id, _ in ipairs(self._level_particle_effect_ids) do
 		World.move_particles(self._world, id, self.camera_position(self, viewport_name))
 	end
 
@@ -1088,8 +1090,38 @@ CameraManager.apply_level_particle_effects = function (self, effects, viewport_n
 	for _, effect in ipairs(effects) do
 		local world = self._world
 		local effect_id = World.create_particles(world, effect, self.camera_position(self, viewport_name))
-		self._level_particle_effect_ids[effect_id] = true
+		self._level_particle_effect_ids[effect_id] = effect
+		self._level_particle_effect_ids[effect] = effect_id
 	end
+
+	return 
+end
+CameraManager.stop_level_particles = function (self, effects, viewport_name)
+	for _, effect in ipairs(effects) do
+		local effect_id = self._level_particle_effect_ids[effect]
+
+		World.stop_spawning_particles(self._world, effect_id)
+
+		self._level_particle_effect_ids[effect_id] = nil
+		self._level_particle_effect_ids[effect] = nil
+	end
+
+	return 
+end
+CameraManager.destroy_level_particles = function (self, effects, viewport_name)
+	for _, effect in ipairs(effects) do
+		local effect_id = self._level_particle_effect_ids[effect]
+
+		World.destroy_particles(self._world, effect_id)
+
+		self._level_particle_effect_ids[effect_id] = nil
+		self._level_particle_effect_ids[effect] = nil
+	end
+
+	return 
+end
+CameraManager.reset_level_particles = function (self, effects, viewport_name)
+	self.apply_level_particle_effects(self, effects, viewport_name)
 
 	return 
 end
@@ -1097,7 +1129,60 @@ CameraManager.apply_level_screen_effects = function (self, effects, viewport_nam
 	for _, effect in ipairs(effects) do
 		local world = self._world
 		local effect_id = World.create_particles(world, effect, Vector3(0, 0, 0))
-		self._level_screen_effect_ids[effect_id] = true
+		self._level_screen_effect_ids[effect_id] = effect
+		self._level_screen_effect_ids[effect] = effect_id
+	end
+
+	return 
+end
+CameraManager.stop_level_screen_particles = function (self, effects, viewport_name)
+	for _, effect in pairs(effects) do
+		local effect_id = self._level_screen_effect_ids[effect]
+
+		World.stop_spawning_particles(self._world, effect_id)
+
+		self._level_screen_effect_ids[effect_id] = nil
+		self._level_screen_effect_ids[effect] = nil
+	end
+
+	return 
+end
+CameraManager.destroy_level_screen_particles = function (self, effects, viewport_name)
+	for _, effect in pairs(effects) do
+		local effect_id = self._level_screen_effect_ids[effect]
+
+		World.destroy_particles(self._world, effect_id)
+
+		self._level_screen_effect_ids[effect_id] = nil
+		self._level_screen_effect_ids[effect] = nil
+	end
+
+	return 
+end
+CameraManager.reset_level_screen_particles = function (self, effects, viewport_name)
+	self.apply_level_screen_effects(self, effects, viewport_name)
+
+	return 
+end
+CameraManager._update_level_effects_volumes = function (self, position)
+	if self._current_active_volume and not self._current_active_volume:is_inside() then
+		self._current_active_volume:on_exit()
+
+		self._current_active_volume = nil
+	end
+
+	for _, volume in ipairs(self._level_effect_volumes) do
+		if volume.update(volume, position) then
+			if self._current_active_volume then
+				self._current_active_volume:on_exit()
+			end
+
+			self._current_active_volume = volume
+
+			self._current_active_volume:on_enter()
+
+			break
+		end
 	end
 
 	return 
@@ -1137,6 +1222,8 @@ CameraManager._update_camera_properties = function (self, camera, shadow_cull_ca
 		if physics_world and PhysicsWorld.set_observer then
 			PhysicsWorld.set_observer(physics_world, Matrix4x4.from_quaternion_position(camera_data.rotation, pos))
 		end
+
+		self._update_level_effects_volumes(self, pos)
 	end
 
 	if camera_data.yaw_speed then
@@ -1295,6 +1382,35 @@ CameraManager._update_transition = function (self, viewport_name, nodes, dt)
 	end
 
 	return values
+end
+CameraManager.register_level_effects_volume = function (self, volume_name, prio, particles_action, screen_particles_action)
+	self._level_effect_volumes[#self._level_effect_volumes + 1] = LevelEffectsVolume:new(self._world, self, volume_name, prio, particles_action, screen_particles_action)
+
+	local function sort_func(volume_a, volume_b)
+		return volume_a.prio(volume_a) < volume_b.prio(volume_b)
+	end
+
+	table.sort(self._level_effect_volumes, sort_func)
+
+	return 
+end
+CameraManager.unregister_level_effects_volume = function (self, volume_name)
+	local index = nil
+
+	for idx, level_effect_volume in ipairs(self._level_effect_volumes) do
+		if level_effect_volume.volume_name(level_effect_volume) == volume_name then
+			index = idx
+
+			break
+		end
+	end
+
+	fassert(index, "[CameraManager] The volume %q has not been registered in camera manager", volume_name)
+	self._level_effect_volumes[index]:destroy()
+
+	self._level_effect_volumes[index] = nil
+
+	return 
 end
 
 return 

@@ -2,6 +2,7 @@ require("scripts/settings/script_input_settings")
 require("scripts/settings/equipment/weapons")
 require("scripts/settings/profiles/room_profiles")
 require("scripts/settings/equipment/attachments")
+require("scripts/settings/profiles/unit_wwise_profiles")
 
 ProfilePriority = {
 	3,
@@ -34,13 +35,7 @@ SPProfiles = {
 			slot_healthkit = ItemMasterList.healthkit_first_aid_kit_01
 		},
 		room_profile = RoomProfiles.witch_hunter,
-		base_units = {
-			first_person_bot = "units/beings/player/first_person_base/chr_first_person_bot_base",
-			third_person_bot = "units/beings/player/witch_hunter/third_person_base/chr_third_person_base",
-			third_person = "units/beings/player/witch_hunter/third_person_base/chr_third_person_base",
-			first_person = "units/beings/player/first_person_base/chr_first_person_base",
-			third_person_husk = "units/beings/player/witch_hunter/third_person_base/chr_third_person_husk_base"
-		},
+		base_units = UnitWwiseProfiles.base_units.witch_hunter,
 		first_person_attachment = FirstPersonAttachments.witch_hunter,
 		first_person_heights = {
 			knocked_down = 1,
@@ -65,13 +60,7 @@ SPProfiles = {
 			slot_healthkit = ItemMasterList.healthkit_first_aid_kit_01
 		},
 		room_profile = RoomProfiles.bright_wizard,
-		base_units = {
-			first_person_bot = "units/beings/player/first_person_base/chr_first_person_bot_base",
-			third_person_bot = "units/beings/player/bright_wizard/third_person_base/chr_third_person_base",
-			third_person = "units/beings/player/bright_wizard/third_person_base/chr_third_person_base",
-			first_person = "units/beings/player/first_person_base/chr_first_person_base",
-			third_person_husk = "units/beings/player/bright_wizard/third_person_base/chr_third_person_husk_base"
-		},
+		base_units = UnitWwiseProfiles.base_units.bright_wizard,
 		first_person_attachment = FirstPersonAttachments.bright_wizard,
 		first_person_heights = {
 			knocked_down = 0.95,
@@ -96,13 +85,7 @@ SPProfiles = {
 			slot_healthkit = ItemMasterList.healthkit_first_aid_kit_01
 		},
 		room_profile = RoomProfiles.dwarf_ranger,
-		base_units = {
-			first_person_bot = "units/beings/player/first_person_base/chr_first_person_bot_base",
-			third_person_bot = "units/beings/player/dwarf_ranger/third_person_base/chr_third_person_base",
-			third_person = "units/beings/player/dwarf_ranger/third_person_base/chr_third_person_base",
-			first_person = "units/beings/player/first_person_base/chr_first_person_base",
-			third_person_husk = "units/beings/player/dwarf_ranger/third_person_base/chr_third_person_husk_base"
-		},
+		base_units = UnitWwiseProfiles.base_units.dwarf_ranger,
 		first_person_attachment = FirstPersonAttachments.dwarf_ranger,
 		first_person_heights = {
 			knocked_down = 0.7,
@@ -127,13 +110,7 @@ SPProfiles = {
 			slot_healthkit = ItemMasterList.healthkit_first_aid_kit_01
 		},
 		room_profile = RoomProfiles.wood_elf,
-		base_units = {
-			first_person_bot = "units/beings/player/first_person_base/chr_first_person_bot_base",
-			third_person_bot = "units/beings/player/way_watcher/third_person_base/chr_third_person_base",
-			third_person = "units/beings/player/way_watcher/third_person_base/chr_third_person_base",
-			first_person = "units/beings/player/first_person_base/chr_first_person_base",
-			third_person_husk = "units/beings/player/way_watcher/third_person_base/chr_third_person_husk_base"
-		},
+		base_units = UnitWwiseProfiles.base_units.wood_elf,
 		first_person_attachment = FirstPersonAttachments.wood_elf,
 		first_person_heights = {
 			knocked_down = 1,
@@ -158,13 +135,7 @@ SPProfiles = {
 			slot_healthkit = ItemMasterList.healthkit_first_aid_kit_01
 		},
 		room_profile = RoomProfiles.empire_soldier,
-		base_units = {
-			first_person_bot = "units/beings/player/first_person_base/chr_first_person_bot_base",
-			third_person_bot = "units/beings/player/empire_soldier/third_person_base/chr_third_person_base",
-			third_person = "units/beings/player/empire_soldier/third_person_base/chr_third_person_base",
-			first_person = "units/beings/player/first_person_base/chr_first_person_base",
-			third_person_husk = "units/beings/player/empire_soldier/third_person_base/chr_third_person_husk_base"
-		},
+		base_units = UnitWwiseProfiles.base_units.empire_soldier,
 		first_person_attachment = FirstPersonAttachments.empire_soldier,
 		first_person_heights = {
 			knocked_down = 1,

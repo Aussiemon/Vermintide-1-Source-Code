@@ -693,8 +693,12 @@ PickupSystem._spawn_pickup = function (self, pickup_settings, pickup_name, posit
 	end
 
 	local can_spawn_func = pickup_settings.can_spawn_func
+	local pickup_params = {
+		level_spawn = true,
+		statistics_db = self.statistics_db
+	}
 
-	if can_spawn_func and not can_spawn_func(nil, spawn_type == "debug") then
+	if can_spawn_func and not can_spawn_func(pickup_params, spawn_type == "debug") then
 		return 
 	end
 

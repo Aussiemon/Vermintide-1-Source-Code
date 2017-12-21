@@ -659,6 +659,10 @@ ActionSweep._play_character_impact = function (self, is_server, owner_unit, curr
 		EffectHelper.player_melee_hit_particles(world, hit_effect, hit_position, attack_direction, attack_template_damage_type_name, hit_unit)
 	end
 
+	if (hit_zone_name == "head" or hit_zone_name == "neck") and attack_template.headshot_sound then
+		sound_event = attack_template.headshot_sound
+	end
+
 	if sound_event then
 		EffectHelper.play_melee_hit_effects(sound_event, world, hit_position, sound_type, husk, breed_name)
 

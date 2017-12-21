@@ -114,8 +114,9 @@ weapon_template.actions = {
 			allowed_chain_actions = {},
 			condition_func = function (attacker_unit)
 				local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
+				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "heal")
+				return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "heal") and not status_extension.get_is_dodging(status_extension)
 			end
 		}
 	},

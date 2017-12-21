@@ -306,33 +306,15 @@ PeerStates.SpawningPlayer = {
 	on_enter = function (self, previous_state)
 		return 
 	end,
-	spawned_player = function (self)
-		self.has_spawned_player = true
-
-		return 
-	end,
-	rpc_to_client_spawn_player = function (self, local_player_id, spawn_index, profile_index)
-		assert(self.peer_id == self.server.my_peer_id, "Received rpc_to_client_spawn_player from someone other than the server. This is illegal.")
-
-		self.has_spawned_player = true
-
-		return 
-	end,
 	update = function (self, dt)
 		local server = self.server
 
-		if server.profile_synchronizer:all_synced() and not self.sent_spawn_peer_player then
+		if server.profile_synchronizer:all_synced() then
 			local peer_id = self.peer_id
-			self.sent_spawn_peer_player = true
 
 			for i = 1, self.num_players, 1 do
 				self.server.game_network_manager:spawn_peer_player(peer_id, i, self.clan_tag)
 			end
-		end
-
-		if self.has_spawned_player then
-			self.has_spawned_player = nil
-			self.sent_spawn_peer_player = nil
 
 			return PeerStates.InGame
 		end
@@ -340,9 +322,6 @@ PeerStates.SpawningPlayer = {
 		return 
 	end,
 	on_exit = function (self, new_state)
-		self.sent_spawn_peer_player = nil
-		self.has_spawned_player = nil
-
 		return 
 	end
 }

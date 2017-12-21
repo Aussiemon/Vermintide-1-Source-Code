@@ -110,6 +110,23 @@ DialogueSettings.level_specific_load_files = {
 		"dialogues/generated/witch_hunter_wizard_tower",
 		"dialogues/generated/wood_elf_wizard_tower",
 		"dialogues/generated/dwarf_ranger_wizard_tower"
+	},
+	dlc_stromdorf_town = {
+		"dialogues/generated/bright_wizard_stromdorf_town",
+		"dialogues/generated/dwarf_ranger_stromdorf_town",
+		"dialogues/generated/witch_hunter_stromdorf_town",
+		"dialogues/generated/wood_elf_stromdorf_town",
+		"dialogues/generated/dwarf_ranger_stromdorf_town",
+		"dialogues/generated/enemy_champion_chieftain_stromdorf_town",
+		"dialogues/generated/hero_conversations_stromdorf"
+	},
+	dlc_stromdorf_hills = {
+		"dialogues/generated/bright_wizard_stromdorf_hill",
+		"dialogues/generated/dwarf_ranger_stromdorf_hill",
+		"dialogues/generated/witch_hunter_stromdorf_hill",
+		"dialogues/generated/wood_elf_stromdorf_hill",
+		"dialogues/generated/dwarf_ranger_stromdorf_hill",
+		"dialogues/generated/hero_conversations_stromdorf"
 	}
 }
 
@@ -133,6 +150,8 @@ DialogueSettings.friends_close_distance = 20
 DialogueSettings.friends_distant_distance = 50
 DialogueSettings.enemies_close_distance = 10
 DialogueSettings.enemies_distant_distance = 40
+DialogueSettings.enemy_attack_distance = 40
+DialogueSettings.enemy_spawn_allies = 10
 DialogueSettings.knocked_down_broadcast_range = 40
 DialogueSettings.pounced_down_broadcast_range = 40
 DialogueSettings.suicide_run_broadcast_range = 40
@@ -146,7 +165,10 @@ DialogueSettings.max_hear_distance = math.max(10, DialogueSettings.knocked_down_
 DialogueSettings.dialogue_category_config = {
 	default = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {}
 	},
 	help_talk = {
@@ -165,8 +187,29 @@ DialogueSettings.dialogue_category_config = {
 			knocked_down_override = true
 		}
 	},
-	player_alerts = {
+	player_alerts_boss = {
 		interrupted_by = {},
+		playable_during_category = {
+			default = true,
+			enemy_high_prio = true,
+			guidance = true,
+			enemy_alerts = true,
+			player_feedback = true,
+			player_alerts = true,
+			seen_items = true,
+			casual_talk = true,
+			help_talk = true,
+			story_talk = true,
+			level_talk = true,
+			enemy_basic_prio = true,
+			boss_talk = true
+		}
+	},
+	player_alerts = {
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			default = true,
 			enemy_high_prio = true,
@@ -181,7 +224,10 @@ DialogueSettings.dialogue_category_config = {
 		}
 	},
 	player_feedback = {
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			default = true,
 			enemy_high_prio = true,
@@ -237,7 +283,10 @@ DialogueSettings.dialogue_category_config = {
 	},
 	guidance = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			default = true,
 			story_talk = true,
@@ -251,7 +300,10 @@ DialogueSettings.dialogue_category_config = {
 	},
 	enemy_alerts = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			default = true,
 			story_talk = true,
@@ -265,7 +317,10 @@ DialogueSettings.dialogue_category_config = {
 	},
 	seen_items = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			default = true,
 			story_talk = true,
@@ -277,7 +332,10 @@ DialogueSettings.dialogue_category_config = {
 	},
 	level_talk = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			default = true,
 			enemy_high_prio = true,
@@ -287,7 +345,10 @@ DialogueSettings.dialogue_category_config = {
 	},
 	casual_talk = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			enemy_high_prio = true,
 			enemy_basic_prio = true
@@ -295,7 +356,10 @@ DialogueSettings.dialogue_category_config = {
 	},
 	story_talk = {
 		mutually_exclusive = true,
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk = true,
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			enemy_high_prio = true,
 			enemy_basic_prio = true
@@ -361,6 +425,29 @@ DialogueSettings.dialogue_category_config = {
 	},
 	boss_talk = {
 		mutually_exclusive = true,
+		interrupted_by = {
+			boss_talk_2 = true
+		},
+		playable_during_category = {
+			enemy_alerts = true,
+			enemy_high_prio = true,
+			help_talk = true,
+			player_feedback = true,
+			default = true,
+			player_alerts = true,
+			seen_items = true,
+			casual_talk = true,
+			enemy_basic_prio = true,
+			story_talk = true,
+			level_talk = true,
+			boss_reaction_talk = true,
+			guidance = true,
+			knocked_down_override = true,
+			player_alerts_boss = true
+		}
+	},
+	boss_talk_2 = {
+		mutually_exclusive = true,
 		interrupted_by = {},
 		playable_during_category = {
 			enemy_alerts = true,
@@ -376,13 +463,16 @@ DialogueSettings.dialogue_category_config = {
 			level_talk = true,
 			boss_reaction_talk = true,
 			guidance = true,
-			knocked_down_override = true
+			knocked_down_override = true,
+			player_alerts_boss = true,
+			boss_talk = true
 		}
 	},
 	boss_reaction_talk = {
 		mutually_exclusive = true,
 		interrupted_by = {
-			boss_talk = true
+			boss_talk = true,
+			boss_talk_2 = true
 		},
 		playable_during_category = {
 			enemy_alerts = true,
@@ -402,7 +492,9 @@ DialogueSettings.dialogue_category_config = {
 	},
 	enemy_basic_prio = {
 		interrupted_by = {
-			enemy_high_prio = true
+			boss_talk_2 = true,
+			enemy_high_prio = true,
+			boss_talk = true
 		},
 		playable_during_category = {
 			enemy_alerts = true,
@@ -422,7 +514,9 @@ DialogueSettings.dialogue_category_config = {
 		}
 	},
 	enemy_high_prio = {
-		interrupted_by = {},
+		interrupted_by = {
+			boss_talk_2 = true
+		},
 		playable_during_category = {
 			enemy_alerts = true,
 			guidance = true,

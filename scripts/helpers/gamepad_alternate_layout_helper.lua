@@ -355,14 +355,19 @@ if platform == "win32" then
 		"a",
 		"pressed"
 	}
+	keymap_override_left.jump_2 = {
+		"gamepad",
+		"a",
+		"pressed"
+	}
 	keymap_override_left.dodge_hold_1 = {
 		"gamepad",
-		"left_trigger",
+		"a",
 		"held"
 	}
 	keymap_override_left.dodge_hold_2 = {
 		"gamepad",
-		"right_trigger",
+		"a",
 		"held"
 	}
 	keymap_override_left.ping = {

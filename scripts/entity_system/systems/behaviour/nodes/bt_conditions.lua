@@ -623,5 +623,14 @@ BTConditions.health_lost_percent = function (blackboard, args)
 
 	return min <= lost_percent and lost_percent <= max
 end
+BTConditions.less_than = function (blackboard, args)
+	return blackboard[args[1]] < args[2]
+end
+BTConditions.should_defensive_idle = function (blackboard)
+	local t = Managers.time:time("game")
+	local time_since_surrounding_players = t - blackboard.surrounding_players_last
+
+	return blackboard.defensive_mode_duration and 3 <= time_since_surrounding_players
+end
 
 return 

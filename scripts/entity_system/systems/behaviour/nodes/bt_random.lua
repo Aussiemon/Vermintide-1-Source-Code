@@ -34,7 +34,7 @@ BTRandom.leave = function (self, unit, blackboard, t)
 
 	return 
 end
-BTRandom.run = function (self, unit, blackboard, t)
+BTRandom.run = function (self, unit, blackboard, t, dt)
 	local running_child = self.current_running_child(self, blackboard)
 
 	if running_child then
@@ -42,7 +42,7 @@ BTRandom.run = function (self, unit, blackboard, t)
 			return "failed"
 		end
 
-		local result = running_child.run(running_child, unit, blackboard, t)
+		local result = running_child.run(running_child, unit, blackboard, t, dt)
 
 		return result
 	end
@@ -58,7 +58,7 @@ BTRandom.run = function (self, unit, blackboard, t)
 		if child.condition(child, blackboard) then
 			self.set_running_child(self, unit, blackboard, t, child)
 
-			local result = child.run(child, unit, blackboard, t)
+			local result = child.run(child, unit, blackboard, t, dt)
 
 			return result
 		end

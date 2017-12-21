@@ -421,13 +421,16 @@ LoadingView.setup_level_text = function (self, level_key)
 	return 
 end
 LoadingView.setup_difficulty_text = function (self, game_difficulty)
+	local difficulty_text = ""
+
 	if game_difficulty then
 		local difficulty_settings = DifficultySettings[game_difficulty]
 		local difficulty_display_name = difficulty_settings.display_name
-		local difficulty_text = Localize(difficulty_display_name)
-		self.game_difficulty_widget.content.text = difficulty_text
-		self.game_difficulty_bg_widget.content.text = difficulty_text
+		difficulty_text = Localize(difficulty_display_name)
 	end
+
+	self.game_difficulty_widget.content.text = difficulty_text
+	self.game_difficulty_bg_widget.content.text = difficulty_text
 
 	return 
 end

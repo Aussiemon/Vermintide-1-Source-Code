@@ -18,6 +18,9 @@ assert(DialogueLookup[DialogueLookup_n + 17] == nil)
 assert(DialogueLookup[DialogueLookup_n + 18] == nil)
 assert(DialogueLookup[DialogueLookup_n + 19] == nil)
 assert(DialogueLookup[DialogueLookup_n + 20] == nil)
+assert(DialogueLookup[DialogueLookup_n + 21] == nil)
+assert(DialogueLookup[DialogueLookup_n + 22] == nil)
+assert(DialogueLookup[DialogueLookup_n + 23] == nil)
 
 DialogueLookup[DialogueLookup_n + 1] = "pwe_objective_stromdorf_hills_find_the_courier"
 DialogueLookup[DialogueLookup_n + 2] = "pwe_objective_stromdorf_hills_tower_sighted"
@@ -31,7 +34,7 @@ DialogueLookup[DialogueLookup_n + 9] = "pwe_objective_stromdorf_hills_horrible_s
 DialogueLookup[DialogueLookup_n + 10] = "pwe_objective_stromdorf_hills_seeing_garden_of_morr"
 DialogueLookup[DialogueLookup_n + 11] = "pwe_objective_stromdorf_hills_passing_garden_of_morr"
 DialogueLookup[DialogueLookup_n + 12] = "pwe_objective_stromdorf_hills_entering_garden_of_morr"
-DialogueLookup[DialogueLookup_n + 13] = "pwe_objective_stromdorf_hills_grave_winch"
+DialogueLookup[DialogueLookup_n + 13] = "pwe_objective_stromdorf_hills_grave_tomb"
 DialogueLookup[DialogueLookup_n + 14] = "pwe_objective_stromdorf_hills_exiting_garden_of_morr"
 DialogueLookup[DialogueLookup_n + 15] = "pwe_objective_stromdorf_hills_dark_tunnel_garden_of_morr"
 DialogueLookup[DialogueLookup_n + 16] = "pwe_objective_stromdorf_hills_seeing_stromdorf"
@@ -39,6 +42,9 @@ DialogueLookup[DialogueLookup_n + 17] = "pwe_objective_stromdorf_hills_weather_d
 DialogueLookup[DialogueLookup_n + 18] = "pwe_objective_stromdorf_hills_weather_fog"
 DialogueLookup[DialogueLookup_n + 19] = "pwe_objective_stromdorf_hills_weather_rain"
 DialogueLookup[DialogueLookup_n + 20] = "pwe_objective_stromdorf_hills_seeing_ferry"
-DialogueLookup_n = DialogueLookup_n + 20
+DialogueLookup[DialogueLookup_n + 21] = "pwe_objective_stromdorf_hills_intro_a"
+DialogueLookup[DialogueLookup_n + 22] = "pwe_objective_stromdorf_hills_intro_b"
+DialogueLookup[DialogueLookup_n + 23] = "pwe_objective_stromdorf_hills_intro_c"
+DialogueLookup_n = DialogueLookup_n + 23
 
 return 

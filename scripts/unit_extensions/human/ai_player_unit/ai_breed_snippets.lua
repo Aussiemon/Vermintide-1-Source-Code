@@ -26,11 +26,15 @@ AiBreedSnippets.on_rat_ogre_spawn = function (unit, blackboard)
 	end
 
 	conflict_director.freeze_intensity_decay(conflict_director, 10)
+	conflict_director.add_unit_to_bosses(conflict_director, unit)
 
 	return 
 end
 AiBreedSnippets.on_rat_ogre_death = function (unit, blackboard)
-	Managers.state.conflict:freeze_intensity_decay(1)
+	local conflict_director = Managers.state.conflict
+
+	conflict_director.freeze_intensity_decay(conflict_director, 1)
+	conflict_director.remove_unit_from_bosses(conflict_director, unit)
 	print("rat ogre died!")
 
 	return 

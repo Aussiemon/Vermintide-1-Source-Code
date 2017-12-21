@@ -176,7 +176,7 @@ AIDebugger.update = function (self, t, dt)
 				DrawAiBehaviour.tree_width(self.screen_gui, root_node)
 
 				local extra_info = nil
-				local group_extension = ScriptUnit.extension(self.active_unit, "ai_group_system")
+				local group_extension = ScriptUnit.has_extension(self.active_unit, "ai_group_system")
 
 				if group_extension and group_extension.template then
 					local group_template = AIGroupTemplates[group_extension.template]

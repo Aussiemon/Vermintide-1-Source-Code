@@ -276,16 +276,18 @@ weapon_template.actions = {
 		},
 		heavy_attack_left = {
 			damage_window_start = 0.35,
-			range_mod = 1.4,
+			range_mod = 1.5,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
-			no_damage_impact_sound_event = "slashing_hit_armour",
-			sweep_z_offset = 0.1,
-			use_target = false,
-			max_targets = 1,
-			hit_effect = "melee_hit_sword_2h",
-			damage_window_end = 0.45,
 			impact_sound_event = "slashing_hit",
+			sweep_z_offset = 0.1,
+			width_mod = 10,
+			no_damage_impact_sound_event = "slashing_hit_armour",
+			use_target = false,
+			hit_effect = "melee_hit_sword_2h",
+			max_targets = 1,
+			damage_window_end = 0.45,
+			forced_interpolation = 0.1,
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
 			dedicated_target_range = 2.5,
@@ -327,13 +329,13 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.7,
 					action = "action_two",
 					input = "action_two_hold"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.65,
+					start_time = 0.7,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -348,22 +350,24 @@ weapon_template.actions = {
 			targets = {
 				{
 					attack_template_damage_type = "two_h_smiter_L_1",
-					attack_template = "heavy_slashing_smiter"
+					attack_template = "heavy_slashing_smiter_hs"
 				}
 			}
 		},
 		heavy_attack_right = {
 			damage_window_start = 0.4,
-			range_mod = 1.4,
+			range_mod = 1.5,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
-			no_damage_impact_sound_event = "slashing_hit_armour",
-			sweep_z_offset = 0.1,
-			use_target = false,
-			max_targets = 1,
-			hit_effect = "melee_hit_sword_2h",
-			damage_window_end = 0.5,
 			impact_sound_event = "slashing_hit",
+			sweep_z_offset = 0.1,
+			width_mod = 10,
+			no_damage_impact_sound_event = "slashing_hit_armour",
+			use_target = false,
+			hit_effect = "melee_hit_sword_2h",
+			max_targets = 1,
+			damage_window_end = 0.5,
+			forced_interpolation = 0.1,
 			charge_value = "heavy_attack",
 			anim_end_event = "attack_finished",
 			dedicated_target_range = 2.5,
@@ -405,13 +409,13 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default",
-					start_time = 0.5,
+					start_time = 0.7,
 					action = "action_two",
 					input = "action_two_hold"
 				},
 				{
 					sub_action = "default",
-					start_time = 0.85,
+					start_time = 0.7,
 					action = "action_wield",
 					input = "action_wield"
 				}
@@ -426,25 +430,27 @@ weapon_template.actions = {
 			targets = {
 				{
 					attack_template_damage_type = "two_h_smiter_L_1",
-					attack_template = "heavy_slashing_smiter"
+					attack_template = "heavy_slashing_smiter_hs"
 				}
 			}
 		},
 		light_attack_left = {
-			damage_window_start = 0.5,
-			anim_time_scale = 1.3,
+			damage_window_start = 0.58,
+			hit_armor_anim = "attack_hit_shield",
+			anim_time_scale = 1.2,
 			range_mod = 1.4,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
-			no_damage_impact_sound_event = "slashing_hit_armour",
-			sweep_z_offset = 0.1,
-			width_mod = 35,
-			use_target = false,
-			hit_effect = "melee_hit_sword_2h",
-			damage_window_end = 0.875,
-			impact_sound_event = "slashing_hit",
-			charge_value = "light_attack",
 			anim_end_event = "attack_finished",
+			sweep_z_offset = 0.175,
+			width_mod = 35,
+			impact_sound_event = "slashing_hit",
+			no_damage_impact_sound_event = "slashing_hit_armour",
+			hit_effect = "melee_hit_sword_2h",
+			use_target = false,
+			damage_window_end = 0.75,
+			forced_interpolation = 0.1,
+			charge_value = "light_attack",
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_left",
@@ -524,20 +530,22 @@ weapon_template.actions = {
 			}
 		},
 		light_attack_right = {
-			damage_window_start = 0.5,
-			anim_time_scale = 1.3,
+			damage_window_start = 0.52,
+			hit_armor_anim = "attack_hit_shield",
+			anim_time_scale = 1.2,
 			range_mod = 1.4,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
-			no_damage_impact_sound_event = "slashing_hit_armour",
-			sweep_z_offset = 0.1,
-			width_mod = 35,
-			use_target = false,
-			hit_effect = "melee_hit_sword_2h",
-			damage_window_end = 0.875,
-			impact_sound_event = "slashing_hit",
-			charge_value = "light_attack",
 			anim_end_event = "attack_finished",
+			sweep_z_offset = 0.175,
+			width_mod = 35,
+			impact_sound_event = "slashing_hit",
+			no_damage_impact_sound_event = "slashing_hit_armour",
+			hit_effect = "melee_hit_sword_2h",
+			use_target = false,
+			damage_window_end = 0.8,
+			forced_interpolation = 0.1,
+			charge_value = "light_attack",
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_right",
@@ -618,19 +626,21 @@ weapon_template.actions = {
 		},
 		light_attack_left_diagonal = {
 			damage_window_start = 0.2,
-			anim_time_scale = 1.1,
+			hit_armor_anim = "attack_hit_shield",
+			anim_time_scale = 0.8,
 			range_mod = 1.3,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
-			no_damage_impact_sound_event = "slashing_hit_armour",
+			anim_end_event = "attack_finished",
 			sweep_z_offset = 0.1,
 			width_mod = 25,
-			use_target = false,
-			hit_effect = "melee_hit_sword_2h",
-			damage_window_end = 0.45,
 			impact_sound_event = "slashing_hit",
+			no_damage_impact_sound_event = "slashing_hit_armour",
+			hit_effect = "melee_hit_sword_2h",
+			use_target = false,
+			damage_window_end = 0.45,
+			forced_interpolation = 0.1,
 			charge_value = "light_attack",
-			anim_end_event = "attack_finished",
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_left_diagonal_last",
@@ -711,19 +721,21 @@ weapon_template.actions = {
 		},
 		light_attack_right_diagonal = {
 			damage_window_start = 0.5,
-			anim_time_scale = 1.2,
-			range_mod = 1.3,
+			hit_armor_anim = "attack_hit_shield",
+			anim_time_scale = 1,
+			range_mod = 1.4,
 			kind = "sweep",
 			first_person_hit_anim = "shake_hit",
-			no_damage_impact_sound_event = "slashing_hit_armour",
-			sweep_z_offset = 0.1,
-			width_mod = 25,
-			use_target = false,
-			hit_effect = "melee_hit_sword_2h",
-			damage_window_end = 0.875,
-			impact_sound_event = "slashing_hit",
-			charge_value = "light_attack",
 			anim_end_event = "attack_finished",
+			sweep_z_offset = 0.1,
+			width_mod = 35,
+			impact_sound_event = "slashing_hit",
+			no_damage_impact_sound_event = "slashing_hit_armour",
+			hit_effect = "melee_hit_sword_2h",
+			use_target = false,
+			damage_window_end = 0.875,
+			forced_interpolation = 0.1,
+			charge_value = "light_attack",
 			dedicated_target_range = 3,
 			uninterruptible = true,
 			anim_event = "attack_swing_right_diagonal",
@@ -825,7 +837,7 @@ weapon_template.actions = {
 			allowed_chain_actions = {
 				{
 					sub_action = "default_left_diagonal",
-					start_time = 0.3,
+					start_time = 0.35,
 					action = "action_one",
 					release_required = "action_two_hold",
 					doubleclick_window = 0,
@@ -833,7 +845,7 @@ weapon_template.actions = {
 				},
 				{
 					sub_action = "default_left_diagonal",
-					start_time = 0.3,
+					start_time = 0.35,
 					action = "action_one",
 					release_required = "action_two_hold",
 					doubleclick_window = 0,
@@ -930,6 +942,8 @@ weapon_template.max_fatigue_points = 6
 weapon_template.dodge_distance = 1
 weapon_template.dodge_speed = 1
 weapon_template.dodge_count = 2
+weapon_template.increment_stat_on_equip = "equipped_executioners_sword"
+weapon_template.increment_stat_on_headshot_kill = "executor_headshot"
 weapon_template.attack_meta_data = {
 	tap_attack = {
 		penetrating = false,

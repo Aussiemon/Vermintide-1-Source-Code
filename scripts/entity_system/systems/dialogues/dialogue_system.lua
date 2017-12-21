@@ -114,6 +114,7 @@ DialogueSystem.init = function (self, entity_system_creation_context, system_nam
 		enemy = {}
 	}
 	local current_level = entity_system_creation_context.startup_data.level_key
+	self.statistics_db = entity_system_creation_context.statistics_db
 	self.global_context = {
 		current_level = current_level,
 		current_act = LevelSettings[current_level].act or "no_act"
@@ -300,6 +301,12 @@ DialogueSystem.extensions_ready = function (self, world, unit)
 	if ScriptUnit.has_extension(unit, "status_system") then
 		extension.status_extension = ScriptUnit.extension(unit, "status_system")
 		self.global_context[player_profile] = true
+		local player = Managers.player:local_player()
+
+		if player then
+			local stats_id = player.stats_id(player)
+			self.global_context.completed_times = self.statistics_db:get_persistent_stat(stats_id, "completed_levels", self.global_context.current_level) or 0
+		end
 	elseif player_profile == nil then
 		context.player_profile = Unit.get_data(unit, "dialogue_profile")
 	end
@@ -1265,57 +1272,53 @@ DialogueSystem.TriggerTargetedByRatling = function (self, player_unit)
 
 	return 
 end
-DialogueSystem.TriggerBackstab = function (self, player_unit, enemy_unit, should_backstab)
+DialogueSystem.TriggerBackstab = function (self, player_unit, enemy_unit, should_backstab, blackboard)
 	local player_manager = Managers.player
 	local owner = player_manager.unit_owner(player_manager, player_unit)
 	local event_data = FrameTable.alloc_table()
 	event_data.target_name = ScriptUnit.extension(player_unit, "dialogue_system").context.player_profile
 
-	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) then
-		local dialogue_input = ScriptUnit.extension_input(enemy_unit, "dialogue_system")
+	if Unit.alive(player_unit) and owner and Unit.alive(enemy_unit) and blackboard and not owner.bot_player then
+		local breed = blackboard.breed
+		local network_manager = Managers.state.network
+		local backstab_event = nil
 
-		if not owner.bot_player then
-			local backstab_event = nil
+		if should_backstab then
+			local to_target_vec = Vector3.normalize(POSITION_LOOKUP[enemy_unit] - POSITION_LOOKUP[player_unit])
+			local unit_id = network_manager.unit_storage:go_id(player_unit)
+			local game = network_manager.game(network_manager)
+			local player_rot = GameSession.game_object_field(game, unit_id, "aim_direction")
+			local unit_fwd_dir = Quaternion.forward(Quaternion.look(player_rot))
 
-			if should_backstab then
-				local to_target_vec = Vector3.normalize(POSITION_LOOKUP[enemy_unit] - POSITION_LOOKUP[player_unit])
-				local unit_id = Managers.state.network.unit_storage:go_id(player_unit)
-				local game = Managers.state.network:game()
-				local player_rot = GameSession.game_object_field(game, unit_id, "aim_direction")
-				local unit_fwd_dir = Quaternion.forward(Quaternion.look(player_rot))
-
-				if Vector3.dot(to_target_vec, unit_fwd_dir) < 0.4 then
-					backstab_event = "Play_clan_rat_attack_player_back_vce"
-
-					dialogue_input.trigger_dialogue_event(dialogue_input, "backstab", event_data)
-				else
-					backstab_event = "Play_clan_rat_attack_player_vce"
-				end
+			if Vector3.dot(to_target_vec, unit_fwd_dir) < 0.4 then
+				backstab_event = breed.backstab_player_sound_event
 			else
-				backstab_event = "Play_clan_rat_attack_player_vce"
+				backstab_event = breed.attack_player_sound_event
 			end
-
-			local player_data = Managers.player:owner(player_unit)
-			local unit_id = NetworkUnit.game_object_id(enemy_unit)
-			local event_id = NetworkLookup.sound_events[backstab_event]
-
-			if Managers.player:local_player().player_unit == player_unit then
-				local audio_system_extension = Managers.state.entity:system("audio_system")
-
-				audio_system_extension._play_event(audio_system_extension, backstab_event, enemy_unit, 0)
-			else
-				RPC.rpc_server_audio_unit_event(player_data.peer_id, event_id, unit_id, 0)
-
-				local audio_system_extension = Managers.state.entity:system("audio_system")
-
-				audio_system_extension._play_event(audio_system_extension, "Play_clan_rat_attack_vce", enemy_unit, 0)
-			end
-
-			local general_event_id = NetworkLookup.sound_events.Play_clan_rat_attack_vce
-			local network_manager = Managers.state.network
-
-			network_manager.network_transmit:send_rpc_clients_except("rpc_server_audio_unit_event", player_data.peer_id, general_event_id, unit_id, 0)
+		else
+			backstab_event = breed.attack_player_sound_event
 		end
+
+		local unit_id = NetworkUnit.game_object_id(enemy_unit)
+		local general_event = breed.attack_general_sound_event
+
+		if Managers.player:local_player().player_unit == player_unit then
+			local audio_system_extension = Managers.state.entity:system("audio_system")
+
+			audio_system_extension._play_event(audio_system_extension, backstab_event, enemy_unit, 0)
+		else
+			local backstab_event_id = NetworkLookup.sound_events[backstab_event]
+
+			RPC.rpc_server_audio_unit_event(owner.peer_id, backstab_event_id, unit_id, 0)
+
+			local audio_system_extension = Managers.state.entity:system("audio_system")
+
+			audio_system_extension._play_event(audio_system_extension, general_event, enemy_unit, 0)
+		end
+
+		local general_event_id = NetworkLookup.sound_events[general_event]
+
+		network_manager.network_transmit:send_rpc_clients_except("rpc_server_audio_unit_event", owner.peer_id, general_event_id, unit_id, 0)
 	end
 
 	return 
@@ -1784,6 +1787,8 @@ function DebugVoByFile(file_name, quick)
 						profile_name = "dwarf_engineer"
 					elseif char_short == "egs" then
 						profile_name = "grey_seer"
+					elseif char_short == "ect" then
+						profile_name = "skaven_storm_vermin_champion"
 					end
 
 					for i = 1, sound_events_n, 1 do

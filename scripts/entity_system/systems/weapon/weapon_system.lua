@@ -14,7 +14,8 @@ local RPCS = {
 	"rpc_end_beam",
 	"rpc_start_geiser",
 	"rpc_end_geiser",
-	"rpc_weapon_blood"
+	"rpc_weapon_blood",
+	"rpc_play_fx"
 }
 local extensions = {
 	"WeaponUnitExtension",
@@ -455,6 +456,41 @@ WeaponSystem.rpc_weapon_blood = function (self, sender, attacker_unit_id, attack
 
 	if self.is_server then
 		self.network_transmit:send_rpc_clients_except("rpc_weapon_blood", sender, attacker_unit_id, attack_template_damage_type_id)
+	end
+
+	return 
+end
+WeaponSystem.rpc_play_fx = function (self, sender, vfx_array, sfx_array, position_array)
+	local world = self.world
+	local World_create_particles = World.create_particles
+	local vfx_lookup = NetworkLookup.effects
+	local sfx_lookup = NetworkLookup.sound_events
+
+	if 0 < #sfx_array then
+		local wwise_world = Managers.world:wwise_world(world)
+		local wwise_trigger_event = WwiseWorld.trigger_event
+		local wwise_make_source = WwiseWorld.make_auto_source
+		local sound_env_system = Managers.state.entity:system("sound_environment_system")
+		local set_source_env = sound_env_system.set_source_environment
+
+		for i = 1, #vfx_array, 1 do
+			local vfx = vfx_lookup[vfx_array[i]]
+			local sfx = sfx_lookup[sfx_array[i]]
+			local pos = position_array[i]
+
+			World_create_particles(world, vfx, pos)
+
+			local source = wwise_make_source(wwise_world, pos)
+
+			wwise_trigger_event(wwise_world, sfx, source)
+			set_source_env(sound_env_system, source, pos)
+		end
+	else
+		for i = 1, #vfx_array, 1 do
+			local vfx = vfx_lookup[vfx_array[i]]
+
+			World_create_particles(world, vfx, position_array[i])
+		end
 	end
 
 	return 

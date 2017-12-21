@@ -272,8 +272,8 @@ SpreadTemplates = {
 				max_pitch = 0.6
 			},
 			moving = {
-				max_yaw = 1.5,
-				max_pitch = 1.5
+				max_yaw = 1.25,
+				max_pitch = 1.25
 			},
 			crouch_still = {
 				max_yaw = 0.5,
@@ -298,8 +298,8 @@ SpreadTemplates = {
 				immediate_yaw = 1.4
 			},
 			shooting = {
-				immediate_pitch = 1,
-				immediate_yaw = 1
+				immediate_pitch = 1.5,
+				immediate_yaw = 1.5
 			}
 		}
 	},
