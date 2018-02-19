@@ -371,7 +371,7 @@ local function lorebook_all_pages_unlocked(pages, statistics_db, stats_id)
 	for i = 1, num_pages, 1 do
 		local category_name = pages[i]
 		local id = LorebookCategoryLookup[category_name]
-		local unlocked = statistics_db.get_persistent_array_stat(statistics_db, stats_id, "lorebook_unlocks", id)
+		local unlocked = statistics_db.get_persistent_lorebook_stat(statistics_db, stats_id, "lorebook_unlocks", id)
 
 		if not unlocked then
 			return false

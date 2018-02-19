@@ -23,6 +23,20 @@ local scenegraph_definition = {
 			0
 		}
 	},
+	fullscreen_background = {
+		vertical_alignment = "center",
+		parent = "root",
+		horizontal_alignment = "center",
+		size = {
+			4148,
+			2160
+		},
+		position = {
+			0,
+			0,
+			99
+		}
+	},
 	background = {
 		vertical_alignment = "center",
 		parent = "root",
@@ -595,7 +609,7 @@ local attract_mode_video = {
 	sound_stop = "Stop_intro"
 }
 local background_widget_definitions = {
-	background = UIWidgets.create_simple_texture("start_screen_bg", "background"),
+	background = UIWidgets.create_simple_texture("large_start_screen_bg", "fullscreen_background"),
 	fog_front_1 = UIWidgets.create_simple_texture("start_screen_bg_fog_01", "fog_parent_front_1"),
 	fog_front_2 = UIWidgets.create_simple_texture("start_screen_bg_fog_02", "fog_parent_front_2"),
 	fog_front_3 = UIWidgets.create_simple_texture("start_screen_bg_fog_02", "fog_parent_front_1"),

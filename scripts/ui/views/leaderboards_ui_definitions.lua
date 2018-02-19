@@ -770,7 +770,8 @@ local widgets = {
 				{
 					pass_type = "texture",
 					style_id = "background_mask",
-					texture_id = "background_mask"
+					texture_id = "background_mask",
+					scenegraph_id = "player_list_window"
 				},
 				{
 					texture_id = "player_list_window",

@@ -924,6 +924,16 @@ StatisticsDatabase.get_persistent_array_stat = function (self, id, ...)
 
 	return false
 end
+StatisticsDatabase.get_persistent_lorebook_stat = function (self, stats_id, category, id)
+	local array_stat = self.statistics[stats_id]
+	local category_stats = array_stat[category]
+
+	if category_stats and category_stats.persistent_value then
+		return category_stats.persistent_value[id]
+	end
+
+	return false
+end
 StatisticsDatabase.set_array_stat = function (self, id, ...)
 	local array_stat = self.statistics[id]
 	local arg_n = select("#", ...)

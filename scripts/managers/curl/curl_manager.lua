@@ -178,5 +178,15 @@ CurlManager.upload = function (self, url, data, cb)
 
 	return 
 end
+MockCurlManager = class(MockCurlManager)
+MockCurlManager.init = function (self)
+	return 
+end
+MockCurlManager.update = function (self)
+	return 
+end
+MockCurlManager.destroy = function (self)
+	return 
+end
 
 return 

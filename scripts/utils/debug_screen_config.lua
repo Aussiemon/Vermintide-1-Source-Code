@@ -4541,6 +4541,35 @@ Features that make player mechanics nicer to work with.
 		category = "Dialogue"
 	},
 	{
+		setting_name = "debug_dialogue_files",
+		description = "Used to debug dialog files, facial expressions and missing vo/subtitles. To skip use: DebugVo_jump_to('line_number/line_id')",
+		category = "Dialogue",
+		item_source = {},
+		load_items_source_func = function (options)
+			table.clear(options)
+
+			local dialogue_files = DialogueSettings.auto_load_files
+
+			for key, file in pairs(dialogue_files) do
+				options[#options + 1] = string.match(file, "^.+/(.+)$")
+			end
+
+			local level_key = Managers.state.game_mode:level_key()
+			local level_dialogue_files = DialogueSettings.level_specific_load_files[level_key]
+
+			for key, file in pairs(level_dialogue_files) do
+				options[#options + 1] = string.match(file, "^.+/(.+)$")
+			end
+
+			return 
+		end,
+		func = function (options, index)
+			DebugVoByFile(options[index], false)
+
+			return 
+		end
+	},
+	{
 		description = "Debug print input device statuses",
 		is_boolean = true,
 		setting_name = "input_debug_device_state",
@@ -5333,6 +5362,16 @@ Features that make player mechanics nicer to work with.
 		},
 		func = function ()
 			Managers.backend:refresh_log_level()
+
+			return 
+		end
+	},
+	{
+		description = "You have to reload the inn for the setting to take effect",
+		category = "Progression",
+		setting_name = "Reset Progression",
+		func = function ()
+			LevelUnlockUtils.reset_progression()
 
 			return 
 		end

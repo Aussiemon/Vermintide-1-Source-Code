@@ -557,6 +557,7 @@ OptionsView.create_ui_elements = function (self)
 	self.settings_lists = settings_lists
 	self.selected_widget = nil
 	self.selected_title = nil
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.ui_calibration_view = UICalibrationView:new()
 	RELOAD_OPTIONS_VIEW = false
@@ -1234,8 +1235,6 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		local voip_bus_volume = user_settings.voip_bus_volume
 
 		if voip_bus_volume then
-			self.voip:set_volume(voip_bus_volume)
-
 			if PLATFORM == "xb1" then
 				Managers.voice_chat:set_chat_volume(voip_bus_volume)
 			else
@@ -1246,8 +1245,6 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 		local voip_enabled = user_settings.voip_is_enabled
 
 		if voip_enabled ~= nil then
-			self.voip:set_enabled(voip_enabled)
-
 			if PLATFORM == "xb1" then
 				Managers.voice_chat:set_enabled(voip_enabled)
 			else
@@ -2318,6 +2315,7 @@ OptionsView.draw_widgets = function (self, dt, disable_all_input)
 		UIRenderer.draw_widget(ui_renderer, self.gamepad_reset_text_widget)
 	end
 
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 
 	local selected_title_name = SettingsMenuNavigation[self.selected_title]
@@ -4776,7 +4774,16 @@ end
 OptionsView.cb_ui_scale_setup = function (self)
 	local min = 70
 	local max = 100
-	local ui_scale = Application.user_setting("ui_scale") or 100
+
+	if PLATFORM == "xb1" then
+		local console_type = XboxOne.console_type()
+
+		if console_type == XboxOne.CONSOLE_TYPE_XBOX_ONE_X_DEVKIT or console_type == XboxOne.CONSOLE_TYPE_XBOX_ONE_X then
+			max = 200
+		end
+	end
+
+	ui_scale = Application.user_setting("ui_scale") or 100
 	local value = get_slider_value(min, max, ui_scale)
 	local default_value = math.clamp(DefaultUserSettings.get("user_settings", "ui_scale"), min, max)
 
@@ -5933,7 +5940,9 @@ OptionsView.cb_voip_push_to_talk_setup = function (self)
 		voip_push_to_talk = default_value
 	end
 
-	self.voip:set_push_to_talk(voip_push_to_talk)
+	if self.voip then
+		self.voip:set_push_to_talk(voip_push_to_talk)
+	end
 
 	local selected_option = 1
 

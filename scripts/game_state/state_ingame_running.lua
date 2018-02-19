@@ -893,7 +893,7 @@ if PLATFORM == "xb1" then
 			local session_id = Managers.state.network:lobby().lobby:session_id()
 			local multiplayer_round_start_table = {
 				Managers.account:xbox_user_id(),
-				Managers.account:round_id(),
+				Managers.account:round_id() or Application.guid(),
 				0,
 				Managers.account:player_session_id(),
 				MultiplayerSession.multiplayer_correlation_id(session_id),
@@ -918,7 +918,7 @@ if PLATFORM == "xb1" then
 		return 
 	end
 	StateInGameRunning._xbone_end_of_round_events = function (self, statistics_db)
-		if self.is_in_inn or self.is_in_tutorial or Development.parameter("auto-host-level") ~= nil then
+		if self.is_in_inn or self.is_in_tutorial or Development.parameter("auto-host-level") ~= nil or not self._xbox_event_init_triggered then
 			return 
 		end
 
@@ -927,7 +927,7 @@ if PLATFORM == "xb1" then
 			local session_id = Managers.state.network:lobby().lobby:session_id()
 			local multiplayer_round_end_table = {
 				Managers.account:xbox_user_id(),
-				Managers.account:round_id(),
+				Managers.account:round_id() or Application.guid(),
 				0,
 				Managers.account:player_session_id(),
 				MultiplayerSession.multiplayer_correlation_id(session_id),

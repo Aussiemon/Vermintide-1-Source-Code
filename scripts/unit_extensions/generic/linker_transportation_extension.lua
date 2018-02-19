@@ -182,11 +182,15 @@ LinkerTransportationExtension._link_all_transported_units = function (self, inte
 		Managers.state.spawn:disable_spawning(true, self.unit)
 	end
 
-	local num_transported_units = 1
+	local num_transported_units = 0
 	local transported_units = self.transported_units
-	transported_units[1] = interactor_unit
 
-	self._link_transported_unit(self, interactor_unit)
+	if Unit.alive(interactor_unit) then
+		num_transported_units = 1
+		transported_units[1] = interactor_unit
+
+		self._link_transported_unit(self, interactor_unit)
+	end
 
 	if self.takes_party then
 		local players = Managers.player:players()

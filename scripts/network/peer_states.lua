@@ -206,8 +206,12 @@ PeerStates.LoadingProfilePackages = {
 			local peer_id = self.peer_id
 			local local_player_id = 1
 			local profile_index = self.my_profile_index
+			local server = self.server
+			local synchronizer = server and server.profile_synchronizer
 
-			synchronizer:unreserve_profile(profile_index, peer_id, local_player_id)
+			if synchronizer then
+				synchronizer.unreserve_profile(synchronizer, profile_index, peer_id, local_player_id)
+			end
 		end
 
 		return 

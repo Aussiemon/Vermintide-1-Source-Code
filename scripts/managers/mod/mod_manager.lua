@@ -1,31 +1,98 @@
 ModManager = class(ModManager)
 
-local function mod_print(level, str, ...)
-	printf("[MOD MANAGER] [" .. level .. "] " .. str, ...)
-
-	return 
-end
-
-function mod_name(mod)
+local function mod_name(mod)
 	return mod.name
 end
 
+local LOG_LEVELS = {
+	[0] = {},
+	{
+		error = true
+	},
+	{
+		warning = true,
+		error = true
+	},
+	{
+		warning = true,
+		info = true,
+		error = true
+	},
+	{
+		spew = true,
+		info = true,
+		warning = true,
+		error = true
+	}
+}
+ModManager.print = function (self, level, str, ...)
+	if LOG_LEVELS[self._settings.log_level][level] then
+		local concat_str = sprintf("[MOD MANAGER] [" .. level .. "] " .. str, ...)
+
+		print(concat_str)
+
+		if Managers.chat then
+			Managers.chat:add_local_system_message(1, concat_str, true)
+		else
+			self._print_cache[#self._print_cache + 1] = concat_str
+		end
+	end
+
+	return 
+end
 ModManager.init = function (self)
 	self._mods = {}
 	self._num_mods = nil
-	self._developer_mode = Application.user_setting("mod_developer_mode") or false
+	self._state = "not_loaded"
+	local settings = Application.user_setting("mod_settings") or {
+		developer_mode = false,
+		log_level = 1
+	}
+	self._settings = settings
+	self._print_cache = {}
 
-	self._start_scan(self)
+	if (settings.developer_mode or self._has_enabled_mods(self)) and ScriptApplication.is_bundled() then
+		self._start_scan(self)
+	else
+		self._state = "done"
+		self._num_mods = 0
+	end
 
 	return 
+end
+ModManager._has_enabled_mods = function (self)
+	local mod_settings = Application.user_setting("mods")
+
+	if not mod_settings then
+		return 
+	end
+
+	for i, mod_data in ipairs(mod_settings) do
+		if mod_data.enabled then
+			return true
+		end
+	end
+
+	return false
 end
 ModManager.state = function (self)
 	return self._state
 end
 ModManager.update = function (self, dt)
+	local print_cache = self._print_cache
+	local num_delayed_prints = #print_cache
+
+	if 0 < num_delayed_prints and Managers.chat then
+		for i = 1, num_delayed_prints, 1 do
+			Managers.chat:add_local_system_message(1, print_cache[i], true)
+		end
+
+		table.clear(print_cache)
+	end
+
 	local old_state = self._state
 
-	if self._developer_mode and Keyboard.pressed(Keyboard.button_index("r")) and Keyboard.button(Keyboard.button_index("left shift")) + Keyboard.button(Keyboard.button_index("left ctrl")) == 2 then
+	if self._settings.developer_mode and Keyboard.pressed(Keyboard.button_index("r")) and Keyboard.button(Keyboard.button_index("left shift")) + Keyboard.button(Keyboard.button_index("left ctrl")) == 2 then
 		self._reload_requested = true
 	end
 
@@ -34,11 +101,10 @@ ModManager.update = function (self, dt)
 	end
 
 	if self._state == "scanning" and not Mod.is_scanning() then
-		local num_mods = #Mod.mods()
-		self._num_mods = num_mods
+		local mod_handles = Mod.mods()
 
-		mod_print("info", "found %i mods", num_mods)
-		table.dump(Mod.mods(), "Mods", 1)
+		self._build_mod_table(self, mod_handles)
+		table.dump(mod_handles, "Mods", 1)
 
 		self._state = self._load_mod(self, 1)
 	elseif self._state == "loading" then
@@ -66,10 +132,10 @@ ModManager.update = function (self, dt)
 				else
 					mod.object = {}
 
-					mod_print("warning", "Mod %s does not return callback table from run function", name)
+					self.print(self, "warning", "Mod %s does not return callback table from run function", name)
 				end
 
-				mod_print("info", "%s loaded.", name)
+				self.print(self, "info", "%s loaded.", name)
 
 				self._state = self._load_mod(self, self._mod_load_index + 1)
 			else
@@ -80,7 +146,7 @@ ModManager.update = function (self, dt)
 		for i = 1, self._num_mods, 1 do
 			local mod = self._mods[i]
 
-			if mod then
+			if mod and mod.enabled then
 				local object = mod.object
 				local update_func = object.update
 
@@ -92,7 +158,7 @@ ModManager.update = function (self, dt)
 	end
 
 	if old_state ~= self._state then
-		mod_print("info", "%s -> %s", old_state, self._state)
+		self.print(self, "info", "%s -> %s", old_state, self._state)
 	end
 
 	return 
@@ -110,38 +176,41 @@ ModManager._start_scan = function (self)
 
 	self._state = "scanning"
 
-	mod_print("info", "scanning")
+	self.print(self, "info", "scanning")
 
 	return 
 end
 ModManager._load_mod = function (self, index)
-	local mods = Mod.mods()
-	local handle = mods[index]
+	local mods = self._mods
+	local mod = mods[index]
 
-	if handle then
-		mod_print("info", "loading mod %s", handle)
+	while mod and not mod.enabled do
+		index = index + 1
+		mod = mods[index]
+	end
+
+	if mod then
+		local id = mod.id
+		local handle = mod.handle
+
+		self.print(self, "info", "loading mod %s", id)
 
 		local info = Mod.info(handle)
 
-		mod_print("spew", "<mod info> \n%s\n<\\mod info>", info)
+		self.print(self, "spew", "<mod info> \n%s\n<\\mod info>", info)
 
 		local data_file = loadstring(info)
 
 		if not data_file then
-			mod_print("error", "Syntax error in .mod file. Aborted loading mods.")
+			self.print(self, "error", "Syntax error in .mod file. Aborted loading mods.")
 
 			return "done"
 		end
 
 		local data = data_file()
-		local mod = {
-			state = "loading",
-			loaded_packages = {},
-			handle = handle,
-			data = data,
-			name = data.NAME or "Mod #" .. index
-		}
-		self._mods[index] = mod
+		mod.data = data
+		mod.name = mod.name or data.NAME or "Mod " .. id
+		mod.state = "loading"
 		self._mod_load_index = index
 
 		self._load_package(self, mod, 1)
@@ -153,11 +222,77 @@ ModManager._load_mod = function (self, index)
 
 	return 
 end
+ModManager._build_mod_table = function (self, mod_handles)
+	fassert(table.is_empty(self._mods), "Trying to add mods to non-empty mod table")
+
+	local index = 0
+	local parsed_mods = {}
+
+	local function add_mod(handle, id, enabled, name, version)
+		index = index + 1
+		self._mods[index] = {
+			state = "not_loaded",
+			name = name,
+			version = version,
+			id = id,
+			handle = handle,
+			enabled = enabled,
+			loaded_packages = {}
+		}
+
+		return 
+	end
+
+	local mod_settings = Application.user_setting("mods") or {}
+
+	table.dump(mod_settings, "mod settings", 3)
+	table.dump(mod_handles, "mod_handles", 3)
+
+	for i, mod_data in ipairs(mod_settings) do
+		local id = mod_data.id
+		local handle = mod_handles[id]
+
+		if handle then
+			add_mod(handle, id, mod_data.enabled, mod_data.name, mod_data.version)
+
+			parsed_mods[handle] = true
+		else
+			self.print(self, "error", "Trying to load mod with steam id %s, not in downloaded list", id)
+		end
+	end
+
+	for id, handle in pairs(mod_handles) do
+		if not parsed_mods[handle] then
+			add_mod(handle, id, true, "unnamed", "unversioned")
+		end
+	end
+
+	self._num_mods = index
+
+	self.print(self, "info", "Found %i mods", index)
+
+	local new_settings_table = {}
+
+	for i = 1, self._num_mods, 1 do
+		local mod = self._mods[i]
+		new_settings_table[i] = {
+			name = mod.name,
+			id = mod.id,
+			version = mod.version,
+			enabled = mod.enabled or false
+		}
+	end
+
+	Application.set_user_setting("mods", new_settings_table)
+	Application.save_user_settings()
+
+	return 
+end
 ModManager._load_package = function (self, mod, index)
 	mod.package_index = index
 	local package_name = mod.data.packages[index]
 
-	mod_print("info", "\tloading package %q", package_name)
+	self.print(self, "info", "\tloading package %q", package_name)
 
 	local resource_handle = Mod.resource_package(mod.handle, package_name)
 	self._loading_resource_handle = resource_handle
@@ -170,20 +305,23 @@ ModManager._load_package = function (self, mod, index)
 end
 ModManager.unload_all_mods = function (self)
 	if self._state == "done" then
-		mod_print("info", "unload all mod packages")
+		self.print(self, "info", "Unload all mod packages")
 
-		for i = 1, self._num_mods, 1 do
+		for i = self._num_mods, 1, -1 do
 			local mod = self._mods[i]
 
-			if mod then
-				mod_print("info", "\t unloading %q", mod_name(mod))
+			if mod and mod.enabled then
+				self.print(self, "info", "\t unloading %q", mod_name(mod))
 				self.unload_mod(self, i)
 			end
 		end
 
 		table.clear(self._mods)
+
+		self._num_mods = nil
+		self._state = "unloaded"
 	else
-		mod_print("error", "Mods can't be unloaded, mod state is not \"done\". current: %q", self._state)
+		self.print(self, "error", "Mods can't be unloaded, mod state is not \"done\". current: %q", self._state)
 	end
 
 	return 
@@ -192,6 +330,8 @@ ModManager.unload_mod = function (self, index)
 	local mod = self._mods[index]
 
 	if mod then
+		self.print(self, "info", "Unloading %s.", mod_name(mod))
+
 		local object = mod.object
 		local unload_func = object.on_unload
 
@@ -202,20 +342,22 @@ ModManager.unload_mod = function (self, index)
 		for _, handle in ipairs(mod.loaded_packages) do
 			Mod.release_resource_package(handle)
 		end
+
+		mod.state = "not_loaded"
 	else
-		mod_print("error", "Mod index %i can't be unloaded, has not been loaded", index)
+		self.print(self, "error", "Mod index %i can't be unloaded, has not been loaded", index)
 	end
 
 	return 
 end
 ModManager._reload_mods = function (self)
-	mod_print("info", "reloading mods")
+	self.print(self, "info", "reloading mods")
 
 	for i = 1, self._num_mods, 1 do
 		local mod = self._mods[i]
 
-		if mod then
-			mod_print("info", "reloading %s", mod_name(mod))
+		if mod and mod.state == "running" then
+			self.print(self, "info", "reloading %s", mod_name(mod))
 
 			local object = mod.object
 			local reload_func = object.on_reload
@@ -234,17 +376,21 @@ ModManager._reload_mods = function (self)
 	return 
 end
 ModManager.on_game_state_changed = function (self, status, state)
-	for i = 1, self._num_mods, 1 do
-		local mod = self._mods[i]
+	if self._state == "done" then
+		for i = 1, self._num_mods, 1 do
+			local mod = self._mods[i]
 
-		if mod then
-			local object = mod.object
-			local state_changed_func = object.on_game_state_changed
+			if mod and mod.enabled then
+				local object = mod.object
+				local state_changed_func = object.on_game_state_changed
 
-			if state_changed_func then
-				state_changed_func(object, status, state)
+				if state_changed_func then
+					state_changed_func(object, status, state)
+				end
 			end
 		end
+	else
+		self.print(self, "warning", "Ignored on_game_state_changed call due to being in state %q", self._state)
 	end
 
 	return 

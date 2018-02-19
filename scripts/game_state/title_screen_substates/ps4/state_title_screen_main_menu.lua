@@ -1,3 +1,5 @@
+require("scripts/ui/views/console_dlc_view")
+
 StateTitleScreenMainMenu = class(StateTitleScreenMainMenu)
 StateTitleScreenMainMenu.NAME = "StateTitleScreenMainMenu"
 local menu_functions = {
@@ -22,15 +24,15 @@ local menu_functions = {
 		return 
 	end,
 	function (this)
-		local input_manager = Managers.input
-
-		input_manager.block_device_except_service(input_manager, "options_menu", "gamepad")
-		this.activate_view(this, "options_view")
+		this.activate_view(this, "console_dlc_view")
 
 		return 
 	end,
 	function (this)
-		this.activate_view(this, "credits_view")
+		local input_manager = Managers.input
+
+		input_manager.block_device_except_service(input_manager, "options_menu", "gamepad")
+		this.activate_view(this, "options_view")
 
 		return 
 	end,
@@ -120,7 +122,8 @@ StateTitleScreenMainMenu._init_menu_views = function (self)
 	}
 	self._views = {
 		credits_view = CreditsView:new(view_context),
-		options_view = OptionsView:new(view_context)
+		options_view = OptionsView:new(view_context),
+		console_dlc_view = ConsoleDLCView:new(view_context)
 	}
 
 	for name, view in pairs(self._views) do

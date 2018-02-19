@@ -207,6 +207,15 @@ IngameUI.is_local_player_ready_for_game = function (self)
 
 	return 
 end
+IngameUI.is_searching_for_game = function (self)
+	local matchmaking = Managers.matchmaking
+
+	if matchmaking == nil then
+		return false
+	end
+
+	return matchmaking.is_searching_for_game(matchmaking)
+end
 IngameUI.can_view_lobby_browser = function (self)
 	local is_server = self.is_server
 	local is_game_matchmaking = Managers.matchmaking:is_game_matchmaking()
@@ -754,8 +763,9 @@ IngameUI.is_transition_allowed = function (self, transition)
 	local error_message = nil
 	local transition_allowed = true
 	local player_ready_for_game = self.is_local_player_ready_for_game(self)
+	local is_searching_for_game = self.is_searching_for_game(self)
 
-	if player_ready_for_game then
+	if player_ready_for_game or is_searching_for_game then
 		if transition == "forge_view_force" then
 			error_message = "matchmaking_ready_interaction_message_forge"
 			transition_allowed = false
@@ -771,7 +781,7 @@ IngameUI.is_transition_allowed = function (self, transition)
 		elseif transition == "quest_view_force" then
 			error_message = "dlc1_3_1_matchmaking_ready_interaction_message_quests"
 			transition_allowed = false
-		elseif transition == "lorebook_view_force" then
+		elseif transition == "lorebook_view_force" or transition == "lorebook_menu" then
 			error_message = "dlc1_3_matchmaking_ready_interaction_message_lorebook"
 			transition_allowed = false
 		end

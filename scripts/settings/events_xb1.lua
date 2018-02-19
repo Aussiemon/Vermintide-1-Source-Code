@@ -197,6 +197,37 @@ return {
 			}
 		},
 		{
+			name = "BargeAtLarge",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
 			name = "BeaconOfHope",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
@@ -260,6 +291,37 @@ return {
 		},
 		{
 			name = "BlackHunger",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "BladesOfAqshy",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",
@@ -388,6 +450,37 @@ return {
 		},
 		{
 			name = "ByValaya",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "Cauterizer",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",
@@ -4586,6 +4679,37 @@ return {
 		},
 		{
 			name = "Reikwald",
+			priority = "ProviderDefault",
+			population_sample_rate = "ProviderDefault",
+			upload_enabled = "ProviderDefault",
+			latency = "ProviderDefault",
+			part_b = {
+				version = "2",
+				abbreviation = "IGB",
+				fields = {
+					{
+						type = "UnicodeString",
+						name = "UserId"
+					},
+					{
+						type = "GUID",
+						name = "PlayerSessionId"
+					}
+				}
+			},
+			part_c = {
+				version = "1",
+				abbreviation = "",
+				fields = {
+					{
+						type = "Int32",
+						name = "Amount"
+					}
+				}
+			}
+		},
+		{
+			name = "ReikwaldRomp",
 			priority = "ProviderDefault",
 			population_sample_rate = "ProviderDefault",
 			upload_enabled = "ProviderDefault",

@@ -289,7 +289,7 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 		local target_index = 2
 
 		if open then
-			local from = 1200
+			local from = (UISettings.ui_scale*1200)/100
 			local to = 0
 			local time = UISettings.scoreboard.open_duration
 			self.opening_leaderboards = false
@@ -297,6 +297,7 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 
 			self._play_sound(self, "Play_hud_button_close")
 			self._leaderboards_ui:close()
+			self.parent:animate_mask(to, time)
 		else
 			if not level_key then
 				return 
@@ -306,13 +307,14 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 
 			self.open = false
 			local from = 0
-			local to = 1200
+			local to = (UISettings.ui_scale*1200)/100
 			local time = UISettings.scoreboard.close_duration
 			self.opening_leaderboards = true
 			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
 
 			self._play_sound(self, "Play_hud_button_open")
 			self._leaderboards_ui:open(level_key)
+			self.parent:animate_mask(to, time)
 		end
 	end
 
@@ -855,12 +857,16 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 	local level_information = self._active_level_list[level_read_index]
 	local level_key = level_information.level_key
 	local level_settings = level_key ~= "any" and LevelSettings[level_key]
+	local console_area = level_settings and level_settings.console_area
 	local act_key = level_settings and level_settings.act
 	local area_key = level_settings and level_settings.map_settings.area
 	local game_mode = level_settings and level_settings.game_mode
 	local draw_act_title = false
 
-	if act_key then
+	if console_area then
+		self._act_title_text_widget.content.text = console_area
+		draw_act_title = true
+	elseif act_key then
 		local act_title_text = act_key .. "_ls"
 		self._act_title_text_widget.content.text = act_title_text
 		draw_act_title = true

@@ -16,6 +16,14 @@ StateSplashScreen.packages_to_load = {
 	"resource_packages/menu_assets_start_screen"
 }
 
+for _, dlc in pairs(DLCSettings) do
+	local package_name = dlc.package_name
+
+	if package_name then
+		table.insert(StateSplashScreen.packages_to_load, 1, package_name)
+	end
+end
+
 if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	StateSplashScreen.delayed_global_packages = {
 		"resource_packages/game_scripts",

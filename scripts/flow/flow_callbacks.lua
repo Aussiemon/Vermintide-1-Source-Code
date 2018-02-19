@@ -2346,6 +2346,18 @@ function flow_callback_pub_brawl_enter_inn(params)
 	return 
 end
 
+function flow_callback_set_fall_height(params)
+	local unit = params.unit
+
+	if ScriptUnit.has_extension(unit, "status_system") then
+		local status_extension = ScriptUnit.extension(unit, "status_system")
+
+		status_extension.set_falling_height(status_extension, true)
+	end
+
+	return 
+end
+
 function flow_query_settings_data(params)
 	local setting = params.setting
 
@@ -2730,6 +2742,16 @@ function flow_callback_get_grey_seer_unit(params)
 	flow_return_table.grey_seer_unit = grey_seer_unit
 
 	return flow_return_table
+end
+
+function flow_callback_disable_facial_anim(params)
+	local unit = params.unit
+
+	if Unit.has_data(unit, "enemy_dialogue_face_anim") then
+		Unit.set_data(unit, "enemy_dialogue_face_anim", nil)
+	end
+
+	return 
 end
 
 function flow_callback_teleporter(params)

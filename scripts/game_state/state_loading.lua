@@ -613,9 +613,10 @@ StateLoading._update_lobbies = function (self, dt, t)
 			local host = self._lobby_client:lobby_host()
 			local lobby_data = self._lobby_client.stored_lobby_data
 			local lobby_id = lobby_data.id
-			local lobby_network_hash = lobby_data.network_hash or LobbyInternal.get_lobby_data_from_id_by_key(lobby_id, "network_hash") or self._lobby_client.network_hash
+			local lobby_network_hash = lobby_data.network_hash or self._lobby_client.lobby:data("network_hash") or LobbyInternal.get_lobby_data_from_id_by_key(lobby_id, "network_hash")
+			local ready_to_compare_hashes = host ~= "0" and lobby_network_hash and self._popup_id == nil
 
-			if host ~= "0" and lobby_network_hash and self._popup_id == nil then
+			if ready_to_compare_hashes then
 				local client_network_hash = self._lobby_client.network_hash
 
 				if client_network_hash == lobby_network_hash then

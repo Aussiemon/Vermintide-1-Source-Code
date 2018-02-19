@@ -286,7 +286,7 @@ IngameHud.update = function (self, dt, t, menu_active)
 	Profiler.start("Access Player Extensions")
 
 	local my_inventory_extension = nil
-	local player_unit = my_player.player_unit
+	local player_unit = my_player and my_player.player_unit
 
 	if player_unit then
 		my_inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")

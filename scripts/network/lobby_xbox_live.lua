@@ -39,8 +39,10 @@ LobbyInternal.create_lobby = function (network_options)
 	local session_id = Network.create_multiplayer_session_host(Managers.account:user_id(), name, session_template_name, {
 		"server_name:" .. name
 	})
+	local enable_chat = true
+	local is_hosting = true
 
-	return XboxLiveLobby:new(session_id, name, session_template_name)
+	return XboxLiveLobby:new(session_id, name, session_template_name, enable_chat, is_hosting)
 end
 LobbyInternal.network_initialized = function ()
 	return not not LobbyInternal.client
@@ -63,17 +65,10 @@ LobbyInternal.join_lobby = function (lobby_data, skip_voice_chat)
 	local name = lobby_data.name or Application.guid()
 	local session_template_name = lobby_data.session_template_name or LobbyInternal.SESSION_TEMPLATE_NAME
 	local session_id = Network.create_multiplayer_session_client(Managers.account:user_id(), name, session_template_name)
+	local enable_chat = not skip_voice_chat
+	local is_hosting = false
 
-	return XboxLiveLobby:new(session_id, name, session_template_name, skip_voice_chat)
-end
-LobbyInternal.create_keywords = function (data)
-	local push_table = {}
-
-	for key, value in pairs(data) do
-		push_table[#push_table + 1] = tostring(key) .. ":" .. tostring(value)
-	end
-
-	return push_table
+	return XboxLiveLobby:new(session_id, name, session_template_name, enable_chat, is_hosting)
 end
 LobbyInternal.shutdown_client = function ()
 	if LobbyInternal.xbox_live_lobby_browser then
@@ -170,8 +165,9 @@ local HOPPER_PARAM_TYPE_LUT = {
 	difficulty = "number",
 	level = "collection"
 }
+local SECONDS_BETWEEN_LOBBY_DATA_READS = 30
 XboxLiveLobby = class(XboxLiveLobby)
-XboxLiveLobby.init = function (self, session_id, unique_server_name, session_template_name, skip_voice_chat)
+XboxLiveLobby.init = function (self, session_id, unique_server_name, session_template_name, enable_voice_chat, is_hosting)
 	self._user_id = Managers.account:user_id()
 	self._session_id = session_id
 	self._data = {
@@ -182,10 +178,14 @@ XboxLiveLobby.init = function (self, session_id, unique_server_name, session_tem
 	self._hopper_name = LobbyInternal.HOPPER_NAME
 	self._smartmatch_ticket_params = {}
 	self._activity_set = false
+	self._data_needs_update = false
+	self._data_update_status_id = nil
+	self._data_update_time_left = 0
+	self._is_hosting = is_hosting
 
 	dprintf("Lobby created Session ID: %s - Name: %s - Template: %s", tostring(session_id), tostring(unique_server_name), tostring(session_template_name))
 
-	if not skip_voice_chat and Managers.account:has_privilege(UserPrivilege.COMMUNICATION_VOICE_INGAME) then
+	if enable_voice_chat and Managers.account:has_privilege(UserPrivilege.COMMUNICATION_VOICE_INGAME) then
 		if not Managers.voice_chat then
 			Managers.voice_chat = VoiceChatXboxOneManager:new()
 		elseif Managers.voice_chat then
@@ -251,14 +251,6 @@ end
 XboxLiveLobby.state = function (self)
 	local state = MultiplayerSession.status(self._session_id)
 
-	if self._set_keywords and state == MultiplayerSession.READY and not Managers.account:user_detached() then
-		self.push_data_table(self)
-
-		local state = MultiplayerSession.status(self._session_id)
-
-		return state
-	end
-
 	if self._friends_to_invite and state == MultiplayerSession.READY and not Managers.account:user_detached() then
 		MultiplayerSession.invite_friends_list(Managers.account:user_id(), self._session_id, self._friends_to_invite)
 
@@ -283,6 +275,56 @@ XboxLiveLobby.ready = function (self)
 end
 XboxLiveLobby.invite_friends_list = function (self, friends_to_invite)
 	self._friends_to_invite = friends_to_invite
+
+	return 
+end
+XboxLiveLobby.update_data = function (self, dt)
+	if Managers.account:user_detached() then
+		return 
+	end
+
+	if self._is_hosting then
+		if self._data_needs_update and MultiplayerSession.status(self._session_id) == MultiplayerSession.READY then
+			MultiplayerSession.set_custom_property_json(self._session_id, "data", cjson.encode(self._data))
+
+			self._data_needs_update = false
+		end
+	else
+		if self._data_update_status_id ~= nil then
+			local status = MultiplayerSession.custom_property_json_status(self._data_update_status_id)
+
+			if status == SessionJobStatus.COMPLETE then
+				local result = MultiplayerSession.custom_property_json_result(self._data_update_status_id)
+
+				if result ~= nil then
+					local data = cjson.decode(result)
+
+					for k, v in pairs(data) do
+						self._data[k] = v
+					end
+				end
+
+				MultiplayerSession.free_custom_property_json(self._data_update_status_id)
+
+				self._data_update_status_id = nil
+				self._data_update_time_left = SECONDS_BETWEEN_LOBBY_DATA_READS
+			elseif status == SessionJobStatus.FAILED then
+				dprintf("Failed to get data from session")
+				MultiplayerSession.free_custom_property_json(self._data_update_status_id)
+
+				self._data_update_status_id = nil
+				self._data_update_time_left = SECONDS_BETWEEN_LOBBY_DATA_READS
+			end
+		end
+
+		if 0 <= self._data_update_time_left then
+			self._data_update_time_left = self._data_update_time_left - dt
+
+			if self._data_update_time_left < 0 then
+				self._data_update_status_id = MultiplayerSession.custom_property_json(self._session_id, "data")
+			end
+		end
+	end
 
 	return 
 end
@@ -517,6 +559,16 @@ XboxLiveLobby.leave = function (self, skip_voice_chat)
 
 	Managers.account:add_session_to_cleanup(session_data)
 
+	if self._data_update_status_id ~= nil then
+		local status = MultiplayerSession.custom_property_json_status(self._data_update_status_id)
+
+		if status == SessionJobStatus.COMPLETE or status == SessionJobStatus.FAILED then
+			MultiplayerSession.free_custom_property_json(self._data_update_status_id)
+
+			self._data_update_status_id = nil
+		end
+	end
+
 	return 
 end
 XboxLiveLobby.free = function (self)
@@ -524,18 +576,9 @@ XboxLiveLobby.free = function (self)
 
 	return 
 end
-XboxLiveLobby.push_data_table = function (self)
-	local push_table = LobbyInternal.create_keywords(self._data)
-
-	Application.warning(string.format("[XboxLiveLobby] Setting keywords for session --> session_id: %s", self._session_id))
-	MultiplayerSession.set_keywords(self._user_id, self._session_id, push_table)
-
-	self._set_keywords = nil
-
-	return 
-end
 XboxLiveLobby.set_data = function (self, key, value)
 	self._data[key] = value
+	self._data_needs_update = true
 
 	return 
 end
@@ -543,6 +586,8 @@ XboxLiveLobby.set_data_table = function (self, data_table)
 	for key, value in pairs(data_table) do
 		self._data[key] = value
 	end
+
+	self._data_needs_update = true
 
 	return 
 end

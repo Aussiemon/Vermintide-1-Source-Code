@@ -130,6 +130,7 @@ LorebookView.create_ui_elements = function (self)
 	self.page_image_2 = UIWidget.init(widget_definitions.page_image_2)
 	self.next_page = UIWidget.init(widget_definitions.next_page_button)
 	self.previous_page = UIWidget.init(widget_definitions.previous_page_button)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 	local contents_list = UIWidget.init(definitions.contents_list_definition)
 	local list_content = contents_list.content.list_content
 	local list_style = contents_list.style.list_style
@@ -777,7 +778,7 @@ LorebookView.is_page_unlocked = function (self, category_name)
 		local id = LorebookCategoryLookup[category_name]
 		local local_player = Managers.player:local_player()
 		local stats_id = local_player.stats_id(local_player)
-		unlocked = self.statistics_db:get_persistent_array_stat(stats_id, "lorebook_unlocks", id)
+		unlocked = self.statistics_db:get_persistent_lorebook_stat(stats_id, "lorebook_unlocks", id)
 	end
 
 	return unlocked
@@ -1333,7 +1334,7 @@ LorebookView._collected_lorebook_page_amount = function (self)
 		for i = 1, num_pages, 1 do
 			local category_name = pages[i]
 			local id = LorebookCategoryLookup[category_name]
-			local unlocked = statistics_db.get_persistent_array_stat(statistics_db, stats_id, "lorebook_unlocks", id)
+			local unlocked = statistics_db.get_persistent_lorebook_stat(statistics_db, stats_id, "lorebook_unlocks", id)
 
 			if unlocked then
 				total_collected = total_collected + 1
@@ -1629,6 +1630,7 @@ LorebookView.draw_widgets = function (self, dt, gamepad_active)
 	UIRenderer.draw_widget(ui_renderer, self.paragraph_divider_large)
 	UIRenderer.draw_widget(ui_renderer, self.paragraph_divider_medium)
 	UIRenderer.draw_widget(ui_renderer, self.paragraph_divider_small)
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 
 	if self.current_page == 1 then
 		UIRenderer.draw_widget(ui_renderer, self.page_image_1)

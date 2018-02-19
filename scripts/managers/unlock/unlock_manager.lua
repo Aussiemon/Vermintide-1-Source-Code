@@ -38,7 +38,7 @@ UnlockManager.done = function (self)
 		return true
 	end
 
-	return self._state == "done"
+	return self._state == "done" or self._state == "backend_not_available"
 end
 UnlockManager._load_vr_progress_save = function (self)
 	local vr_unlocks = {
@@ -83,7 +83,7 @@ UnlockManager._init_grant_dlcs = function (self)
 	local grant_dlcs_indexed = self._grant_dlcs_indexed
 	local index = 1
 
-	if not rawget(_G, "Steam") then
+	if not rawget(_G, "Steam") and rawget(_G, "lcurl") then
 		return 
 	end
 
@@ -248,6 +248,8 @@ UnlockManager._update_backend_unlocks = function (self)
 			if not Managers.backend:available() then
 				self._state = "backend_not_available"
 
+				Profiler.stop("UnlockManager:_update_backend_unlocks()")
+
 				return 
 			end
 
@@ -295,7 +297,7 @@ UnlockManager._update_backend_unlocks = function (self)
 			local index = self._query_unlocked_index + 1
 
 			if #self._unlocks_indexed < index then
-				if PLATFORM ~= "win32" then
+				if PLATFORM == "win32" then
 					self._state = "done"
 				else
 					self._state = "query_grant_dlc"
@@ -503,16 +505,24 @@ UnlockManager.get_skin_settings = function (self, profile_name)
 				local dlc_name = skin_settings.dlc_name
 
 				if self.is_dlc_unlocked(self, dlc_name) then
-					profile_dlc_skins[#profile_dlc_skins + 1] = skin_settings
+					if PLATFORM ~= "win32" then
+						profile_dlc_skins[skin_settings.name] = skin_settings
+					else
+						profile_dlc_skins[#profile_dlc_skins + 1] = skin_settings
+					end
 				end
 			end
 		end
 	end
 
-	if #profile_dlc_skins == 0 then
+	if table.is_empty(profile_dlc_skins) then
 		return base_skin
-	else
+	elseif PLATFORM == "win32" then
 		return profile_dlc_skins[math.random(1, #profile_dlc_skins)]
+	else
+		local current_skin_name = PlayerData.skins_activated_data[profile_name]
+
+		return (current_skin_name and profile_dlc_skins[current_skin_name] and profile_dlc_skins[current_skin_name]) or base_skin
 	end
 
 	return 

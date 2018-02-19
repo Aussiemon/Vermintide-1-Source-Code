@@ -2,7 +2,7 @@ local element_size = {
 	565,
 	318
 }
-local spacing = 100
+local spacing = 50
 local scenegraph_definition = {
 	root = {
 		is_root = true,
@@ -121,7 +121,7 @@ local scenegraph_definition = {
 			56
 		},
 		position = {
-			-336.5,
+			-(spacing + 573)*0.5*2,
 			325,
 			4
 		}
@@ -177,7 +177,7 @@ local scenegraph_definition = {
 			58
 		},
 		position = {
-			-(spacing*0.5 + element_size[1]*0.5) - 20,
+			-(spacing*0.5 + element_size[1]*0.5*2) - 20,
 			-300,
 			10
 		}
@@ -674,6 +674,15 @@ local options = {
 		textures = {
 			selected = "quickplay_image_02",
 			normal = "quickplay_image_02"
+		}
+	},
+	{
+		description_text = "",
+		name = "additional_content",
+		display_name = Localize("console_dlc_view_title"),
+		textures = {
+			selected = "additionalcontent_image_02",
+			normal = "additionalcontent_image_02"
 		}
 	}
 }

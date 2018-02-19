@@ -44,21 +44,21 @@ BackendSettings.beta = {
 	environment = rawget(_G, "Backend") and Backend.ENV_DEV
 }
 BackendSettings.beta2 = {
-	qnc_get_state_script = "qnc_get_state_2",
+	qnc_get_state_script = "qnc_get_state_3",
 	allow_tutorial = false,
-	pray_for_loot_script = "pray_for_loot_script_2",
+	pray_for_loot_script = "pray_for_loot_script_3",
 	startup_script = "script_startup_2",
 	dlcs_unlock_script = "dlc_unlock_script_2",
 	upgrades_failed_script = "levelling_script_4",
 	real_quests = true,
 	title_id = 1004,
 	clan_unlock_script = "clan_unlock_script_2",
+	allow_local = true,
 	quests_enabled = true,
 	enable_sessions = false,
-	forge_script = "fuse_script_4",
-	dice_script = "dice_script_5",
-	environment = rawget(_G, "Backend") and Backend.ENV_STAGE,
-	allow_local = not ScriptApplication.is_bundled() and allow_local
+	forge_script = "fuse_script_5",
+	dice_script = "dice_script_6",
+	environment = rawget(_G, "Backend") and Backend.ENV_STAGE
 }
 BackendSettings.ps4 = {
 	qnc_get_state_script = "qnc_get_state_2",

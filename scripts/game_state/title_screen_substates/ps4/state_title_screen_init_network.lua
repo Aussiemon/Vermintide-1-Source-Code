@@ -17,7 +17,7 @@ StateTitleScreenInitNetwork = class(StateTitleScreenInitNetwork)
 StateTitleScreenInitNetwork.NAME = "StateTitleScreenInitNetwork"
 StateTitleScreenInitNetwork.lobby_port_increment = 0
 StateTitleScreenInitNetwork.on_enter = function (self, params)
-	print("[Gamestate] Enter Substate StateTitleScreenInitNetwork")
+	print("- Enter Substate StateTitleScreenInitNetwork")
 
 	self._params = params
 	self._world = params.world
@@ -48,16 +48,12 @@ StateTitleScreenInitNetwork.on_exit = function (self, application_shutdown)
 			self._lobby_client:destroy()
 
 			self._lobby_client = nil
-
-			Managers.account:set_current_lobby(nil)
 		end
 
 		if self._lobby_host then
 			self._lobby_host:destroy()
 
 			self._lobby_host = nil
-
-			Managers.account:set_current_lobby(nil)
 		end
 
 		if self._network_server then
@@ -134,11 +130,9 @@ StateTitleScreenInitNetwork.on_exit = function (self, application_shutdown)
 end
 StateTitleScreenInitNetwork._check_errors = function (self)
 	local error_message = ""
-	local error_state = "restart_as_server"
 
 	if LobbyInternal.client_lost_context() then
 		error_message = error_message .. "- PSN Client lost the network context.\n"
-		error_state = "reinitialize_network"
 	end
 
 	if self._lobby_host and self._lobby_host.state == LobbyState.FAILED then
@@ -155,7 +149,7 @@ StateTitleScreenInitNetwork._check_errors = function (self)
 
 	if error_message ~= "" then
 		error_message = "Error(s) while in network state \"" .. self._network_state .. "\":\n" .. error_message
-		self._error_popup = Managers.popup:queue_popup(error_message, Localize("popup_error_topic"), error_state, Localize("menu_accept"))
+		self._error_popup = Managers.popup:queue_popup(error_message, Localize("popup_error_topic"), "restart_as_server", Localize("menu_accept"))
 		self._network_state = "_state_error"
 	end
 
@@ -181,6 +175,10 @@ StateTitleScreenInitNetwork._state_setup_network = function (self)
 
 	if not rawget(_G, "LobbyInternal") or not LobbyInternal.network_initialized() then
 		LobbyInternal.init_client(network_options)
+
+		for i = 1, #GameSettingsDevelopment.ignored_rpc_logs, 1 do
+			Network.ignore_rpc_log(GameSettingsDevelopment.ignored_rpc_logs[i])
+		end
 	end
 
 	local loading_context = self.parent.parent.loading_context
@@ -224,7 +222,6 @@ StateTitleScreenInitNetwork._state_create_lobby_host = function (self)
 	if LobbyInternal.client_ready() then
 		self._lobby_host = LobbyHost:new(self._network_options)
 
-		Managers.account:set_current_lobby(self._lobby_host.lobby)
 		self._information_view:set_information_text("Creating PSN Room")
 
 		self._network_state = "_state_create_psn_room"
@@ -241,7 +238,6 @@ StateTitleScreenInitNetwork._state_create_lobby_client = function (self)
 		if lobby_data then
 			self._lobby_client = LobbyClient:new(self._network_options, lobby_data)
 
-			Managers.account:set_current_lobby(self._lobby_client.lobby)
 			self._information_view:set_information_text("Joining PSN Room")
 
 			self._network_state = "_state_join_psn_room"
@@ -275,7 +271,7 @@ StateTitleScreenInitNetwork._state_create_psn_room = function (self, dt)
 	if lobby_state == LobbyState.JOINED then
 		local loading_context = self.parent.parent.loading_context
 		local initial_level = self._level_transition_handler:get_current_level_keys()
-		self._network_server = NetworkServer:new(Managers.player, lobby_host, initial_level, nil, self._level_transition_handler)
+		self._network_server = NetworkServer:new(Managers.player, lobby_host, initial_level)
 		self._network_transmit = loading_context.network_transmit or NetworkTransmit:new(true, self._network_server.connection_handler)
 
 		self._network_transmit:set_network_event_delegate(self._network_event_delegate)
@@ -334,7 +330,6 @@ StateTitleScreenInitNetwork._state_find_psn_room = function (self, dt)
 			self._lobby_client = LobbyClient:new(self._network_options, lobby)
 			self._lobby_finder = nil
 
-			Managers.account:set_current_lobby(self._lobby_client.lobby)
 			self._information_view:set_information_text("Joining PSN Room")
 
 			self._network_state = "_state_join_psn_room"
@@ -365,16 +360,6 @@ StateTitleScreenInitNetwork._state_enter_game = function (self, dt)
 	local package_manager = Managers.package
 
 	if not self._global_resources_loaded then
-		if not GlobalResources.loaded then
-			for i, name in ipairs(GlobalResources) do
-				if not package_manager.has_loaded(package_manager, name) then
-					package_manager.load(package_manager, name, "global", nil, true)
-				end
-			end
-
-			GlobalResources.loaded = true
-		end
-
 		for i, name in ipairs(GlobalResources) do
 			if not package_manager.has_loaded(package_manager, name) then
 				self._information_view:set_information_text("Loading " .. name)
@@ -430,7 +415,7 @@ StateTitleScreenInitNetwork._state_error = function (self)
 	if self._error_popup then
 		local result = Managers.popup:query_result(self._error_popup)
 
-		if result == "restart_as_server" or result == "reinitialize_network" then
+		if result == "restart_as_server" then
 			self._error_popup = nil
 
 			if self._lobby_finder then
@@ -443,16 +428,12 @@ StateTitleScreenInitNetwork._state_error = function (self)
 				self._lobby_client:destroy()
 
 				self._lobby_client = nil
-
-				Managers.account:set_current_lobby(nil)
 			end
 
 			if self._lobby_host then
 				self._lobby_host:destroy()
 
 				self._lobby_host = nil
-
-				Managers.account:set_current_lobby(nil)
 			end
 
 			if self._network_server then
@@ -486,16 +467,9 @@ StateTitleScreenInitNetwork._state_error = function (self)
 				self._level_transition_handler:load_level(default_level_key)
 			end
 
-			print("Result:", result)
 			self._information_view:set_information_text("Creating Lobby Host")
 
-			if result == "reinitialize_network" then
-				LobbyInternal.shutdown_client()
-
-				self._network_state = "_state_setup_network"
-			else
-				self._network_state = "_state_create_lobby_host"
-			end
+			self._network_state = "_state_create_lobby_host"
 		end
 	end
 

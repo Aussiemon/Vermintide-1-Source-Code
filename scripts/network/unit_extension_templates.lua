@@ -324,11 +324,13 @@ local unit_templates = {
 			"AIMeleeLineOfSightExtension",
 			"AIInventoryExtension",
 			"AIEnemySlotExtension",
-			"PingTargetExtension"
+			"PingTargetExtension",
+			"DialogueActorExtension"
 		},
 		husk_extensions = {
 			"AIInventoryExtension",
-			"PingTargetExtension"
+			"PingTargetExtension",
+			"DialogueActorExtension"
 		},
 		remove_when_killed = {
 			self_owned_extensions = {

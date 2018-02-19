@@ -1,3 +1,4 @@
+require("scripts/ui/views/console_dlc_view")
 require("scripts/settings/experience_settings")
 require("scripts/settings/area_settings")
 require("scripts/ui/views/menu_input_description_ui")
@@ -93,14 +94,17 @@ ConsoleMapView.init = function (self, ingame_ui_context)
 
 	self.map_view_area_handler:set_active_area("ubersreik")
 
+	local is_sub_menu = true
 	self.level_filter = LevelFilterUI:new(ingame_ui_context, map_save_data)
+	self.console_dlc_view = ConsoleDLCView:new(ingame_ui_context, is_sub_menu, self)
 	local state_machine_params = {
 		game_info = self.map_save_data,
 		ingame_ui_context = ingame_ui_context,
 		map_view_area_handler = self.map_view_area_handler,
 		map_view_helper = self.map_view_helper,
 		map_view = self,
-		level_filter = self.level_filter
+		level_filter = self.level_filter,
+		console_dlc_view = self.console_dlc_view
 	}
 	self._state_machine_params = state_machine_params
 
@@ -124,6 +128,7 @@ ConsoleMapView.create_ui_elements = function (self)
 		UIWidget.init(widgets.time_line_slot_3),
 		UIWidget.init(widgets.time_line_slot_4)
 	}
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -178,8 +183,31 @@ ConsoleMapView.update = function (self, dt, t)
 	end
 
 	if self.active then
+		self._update_animations(self, dt, t)
 		self.draw(self, dt)
 		self._machine:update(dt, t)
+	end
+
+	return 
+end
+ConsoleMapView.animate_mask = function (self, to, time)
+	local ui_scenegraph = self.ui_scenegraph
+	local scenegraph_entry = ui_scenegraph.mask_root
+	local target = scenegraph_entry.local_position
+	local target_index = 2
+	self._mask_animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, target[2], to, time, math.ease_out_quad)
+
+	return 
+end
+ConsoleMapView._update_animations = function (self, dt, t)
+	local mask_animation = self._mask_animation
+
+	if mask_animation then
+		UIAnimation.update(mask_animation, dt)
+
+		if UIAnimation.completed(mask_animation) then
+			self._mask_animation = nil
+		end
 	end
 
 	return 
@@ -270,6 +298,7 @@ ConsoleMapView.draw = function (self, dt)
 		end
 	end
 
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 
 	return 

@@ -328,6 +328,7 @@ GameModeManager.gm_event_round_started = function (self)
 	local round_started_string = self._game_mode_key .. "_round_started"
 
 	Level.trigger_event(level, round_started_string)
+	Managers.telemetry.events:round_started()
 	Level.trigger_event(level, "coop_round_started")
 
 	return 

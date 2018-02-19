@@ -12,6 +12,7 @@ require("scripts/ui/forge_view/forge_melt_ui")
 require("scripts/ui/forge_view/forge_upgrade_ui")
 require("scripts/ui/forge_view/forge_logic")
 
+local DO_RELOAD = true
 local generic_input_actions = {
 	{
 		input_action = "l2_r2",
@@ -221,6 +222,7 @@ ForgeView.init = function (self, ingame_ui_context)
 	self.on_forge_selection_bar_index_changed(self, 1, true)
 
 	self.ingame_ui_context = ingame_ui_context
+	DO_RELOAD = false
 
 	return 
 end
@@ -285,6 +287,7 @@ ForgeView.create_ui_elements = function (self)
 	self.popup_close_widget = self.widgets_by_name.popup_close_widget
 	self.page_left_glow_widget = UIWidget.init(definitions.gamepad_widgets_definitions.page_left_glow)
 	self.page_center_glow_widget = UIWidget.init(definitions.gamepad_widgets_definitions.page_center_glow)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -421,6 +424,12 @@ ForgeView.update = function (self, dt)
 	return 
 end
 ForgeView.post_update = function (self, dt)
+	if DO_RELOAD then
+		self.create_ui_elements(self)
+
+		DO_RELOAD = false
+	end
+
 	local can_display_item_popup = self.can_display_item_popup
 
 	if can_display_item_popup and self.merged_item_key then
@@ -889,6 +898,7 @@ ForgeView.draw = function (self, dt)
 	local input_manager = self.input_manager
 	local input_service = self.page_input_service(self)
 	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	script_data.wtf = ui_scenegraph
 	local widgets_by_name = self.widgets_by_name
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
@@ -905,6 +915,7 @@ ForgeView.draw = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, token_widgets[i])
 	end
 
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 

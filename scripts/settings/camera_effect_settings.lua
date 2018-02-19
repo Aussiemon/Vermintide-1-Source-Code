@@ -789,6 +789,12 @@ CameraEffectSettings = {
 			duration = 0.5,
 			fade_in = 0.1,
 			octaves = 6
+		},
+		chamber_landed_hard = {
+			persistance = 1,
+			duration = 0.25,
+			amplitude = 2,
+			octaves = 6
 		}
 	}
 }

@@ -49,7 +49,7 @@ NewsTickerManager._load = function (self, url, callback)
 		local message = Http.get_uri(self._server_name, 80, url)
 
 		if message then
-			local is_ok = string.find(message, "HTTP/1.1 200 OK")
+			local is_ok = string.find(message, "HTTP/1.1 200 OK") or string.find(message, "HTTP/1.0 200 OK")
 
 			if is_ok then
 				local start_idx, end_idx = string.find(message, "\r\n\r\n")
@@ -71,7 +71,6 @@ NewsTickerManager._load = function (self, url, callback)
 		}
 
 		callback(info)
-		Application.warning(string.format("[NewsTickerManager] Could not retrieve news ticker text. INFO: %s", tostring(message)))
 	end
 
 	return 

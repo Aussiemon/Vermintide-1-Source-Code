@@ -108,7 +108,7 @@ RoomHandler._debug_print = function (self)
 		end
 	end
 
-	Managers.state.debug_text:output_screen_text("Occupied: " .. occupied .. "\n" .. "Available: " .. available, 22, 5)
+	Managers.state.debug_text:output_screen_text("Occupied: " .. occupied .. " - " .. "Available: " .. available, 22, 5)
 
 	return 
 end

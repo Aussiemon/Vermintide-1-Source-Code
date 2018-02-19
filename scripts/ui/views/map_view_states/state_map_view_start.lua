@@ -29,6 +29,7 @@ StateMapViewStart.on_enter = function (self, params)
 	}
 	self._map_view = params.map_view
 	self.difficulty_manager = Managers.state.difficulty
+	self._console_dlc_view = params.console_dlc_view
 	self.platform = PLATFORM
 	self.ui_animations = {}
 	local player_manager = Managers.player
@@ -56,11 +57,17 @@ StateMapViewStart.on_enter = function (self, params)
 	self._map_view:set_mask_enabled(true)
 
 	if PLATFORM == "ps4" then
-		local region = Managers.account:region()
+		local area = nil
+		local country = Managers.account:region()
+
+		if country ~= nil then
+			area = MatchmakingRegionLookup.primary[country]
+		end
+
 		local matchmaking_region = Application.user_setting("matchmaking_region")
 		local matchmaking_region_not_set = matchmaking_region == nil or matchmaking_region == "auto"
 
-		if region == nil and matchmaking_region_not_set then
+		if area == nil and matchmaking_region_not_set then
 			self.matchmaking_popup_id = Managers.popup:queue_popup(Localize("popup_matchmaking_region_not_fetched"), Localize("popup_discard_changes_topic"), "ok", Localize("button_ok"))
 		end
 	end
@@ -201,6 +208,8 @@ StateMapViewStart.create_ui_elements = function (self, params)
 
 	self.start_open_animation(self)
 
+	self._params = params
+
 	return 
 end
 StateMapViewStart._wanted_state = function (self)
@@ -338,7 +347,7 @@ StateMapViewStart.update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self.create_ui_elements(self, self._params)
 	end
 
 	if self.matchmaking_popup_id then
@@ -358,7 +367,7 @@ StateMapViewStart.update = function (self, dt, t)
 	end
 
 	self._update_elements(self, dt)
-	self.draw(self, dt)
+	self.draw(self, dt, t)
 	self._update_transition_timer(self, dt)
 
 	local wanted_state = self._wanted_state(self)
@@ -384,12 +393,12 @@ StateMapViewStart._handle_input = function (self, dt, t)
 	if controller_cooldown and 0 < controller_cooldown then
 		self.controller_cooldown = controller_cooldown - dt
 	else
-		local new_selection_index = nil
+		local new_selection_index = self._selection_index
 
 		if input_service.get(input_service, "move_left") or input_service.get(input_service, "move_left_hold") then
-			new_selection_index = 1
+			new_selection_index = math.max(self._selection_index - 1, 1)
 		elseif input_service.get(input_service, "move_right") or input_service.get(input_service, "move_right_hold") then
-			new_selection_index = 2
+			new_selection_index = math.min(self._selection_index + 1, #self._elements)
 		end
 
 		if new_selection_index and new_selection_index ~= self._selection_index then
@@ -419,10 +428,15 @@ StateMapViewStart._handle_input = function (self, dt, t)
 					self._play_sound(self, "Play_hud_select")
 				end
 			end
-		elseif self._selection_index and self._selection_index == 2 and input_service.get(input_service, "confirm") then
-			self._play_sound(self, "Play_hud_main_menu_open")
+		elseif self._selection_index and self._selection_index == 2 then
+			if input_service.get(input_service, "confirm") then
+				self._play_sound(self, "Play_hud_main_menu_open")
 
-			self._new_state = StateMapViewGameMode
+				self._new_state = StateMapViewGameMode
+			end
+		elseif self._selection_index and self._selection_index == 3 and input_service.get(input_service, "confirm") then
+			self._play_sound(self, "Play_hud_main_menu_open")
+			self._console_dlc_view:on_enter()
 		end
 	end
 
@@ -432,35 +446,39 @@ StateMapViewStart._handle_input = function (self, dt, t)
 
 	return 
 end
-StateMapViewStart.draw = function (self, dt)
+StateMapViewStart.draw = function (self, dt, t)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
 	local input_service = input_manager.get_service(input_manager, "map_menu")
 
-	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
-	UIRenderer.draw_widget(ui_renderer, self._title_text_widget)
-	UIRenderer.draw_widget(ui_renderer, self._background_widget)
-	UIRenderer.draw_widget(ui_renderer, self._dead_space_filler_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_icons_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_lock_icons_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_slots_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_bg_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_arrow_up_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_arrow_down_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_text_widget)
-	UIRenderer.draw_widget(ui_renderer, self._difficulty_text_bg_widget)
-	UIRenderer.draw_widget(ui_renderer, self._frame_left_widget)
-	UIRenderer.draw_widget(ui_renderer, self._frame_right_widget)
+	if self._console_dlc_view:active() then
+		self._console_dlc_view:update(dt, t)
+	else
+		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
+		UIRenderer.draw_widget(ui_renderer, self._title_text_widget)
+		UIRenderer.draw_widget(ui_renderer, self._background_widget)
+		UIRenderer.draw_widget(ui_renderer, self._dead_space_filler_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_icons_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_lock_icons_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_slots_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_bg_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_arrow_up_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_arrow_down_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_text_widget)
+		UIRenderer.draw_widget(ui_renderer, self._difficulty_text_bg_widget)
+		UIRenderer.draw_widget(ui_renderer, self._frame_left_widget)
+		UIRenderer.draw_widget(ui_renderer, self._frame_right_widget)
 
-	for _, widget in ipairs(self._elements) do
-		UIRenderer.draw_widget(ui_renderer, widget)
-	end
+		for _, widget in ipairs(self._elements) do
+			UIRenderer.draw_widget(ui_renderer, widget)
+		end
 
-	UIRenderer.end_pass(ui_renderer)
+		UIRenderer.end_pass(ui_renderer)
 
-	if not self._transition_timer and not self.matchmaking_popup_id then
-		self.menu_input_description:draw(ui_renderer, dt)
+		if not self._transition_timer and not self.matchmaking_popup_id then
+			self.menu_input_description:draw(ui_renderer, dt)
+		end
 	end
 
 	return 
@@ -516,10 +534,10 @@ StateMapViewStart._change_difficulty = function (self, value, ignore_animations)
 end
 StateMapViewStart._align_elements = function (self)
 	local num_elements = #self._elements
-	local spacing = 100
+	local spacing = 50
 	local element_width = element_size[1]
 	local distance = element_width + spacing
-	local start_offset = -distance*0.5
+	local start_offset = -distance*2*0.5
 
 	for index, widget in ipairs(self._elements) do
 		widget.offset[1] = start_offset + distance*(index - 1)
@@ -537,6 +555,7 @@ StateMapViewStart._set_selection = function (self, index, ignore_sound)
 		self._update_elements(self, 0, instant)
 	end
 
+	self._old_selection_index = self._selection_index
 	self._selection_timer = 0
 	self._selection_index = index
 	local input_descriptions = (index == 1 and generic_input_actions.quick_play) or generic_input_actions.default
@@ -585,13 +604,19 @@ StateMapViewStart._update_elements = function (self, dt, instant)
 	end
 
 	for index, widget in ipairs(self._elements) do
-		self._animate_element(self, widget, index, selection_progress)
+		self._animate_element(self, widget, index, selection_progress, instant)
 	end
 
 	return 
 end
-StateMapViewStart._animate_element = function (self, widget, index, progress)
+StateMapViewStart._animate_element = function (self, widget, index, progress, instant)
 	local is_selection_widget = self._selection_index == index
+	local is_old_selection_widget = self._old_selection_index == index
+
+	if not is_selection_widget and not is_old_selection_widget and not instant then
+		return 
+	end
+
 	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(progress - 1)
 	local widget_style = widget.style
 	local rect_style = widget_style.rect

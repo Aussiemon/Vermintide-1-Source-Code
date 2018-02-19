@@ -232,7 +232,7 @@ PlayerManager.remove_all_players_from_peer = function (self, peer_id)
 	return 
 end
 PlayerManager.set_stats_backend = function (self, player)
-	if player.local_player then
+	if player and player.local_player then
 		local backend_stats = {}
 
 		self._statistics_db:generate_backend_stats(player.stats_id(player), backend_stats)
@@ -241,6 +241,7 @@ PlayerManager.set_stats_backend = function (self, player)
 
 	return 
 end
+local EMPTY_TABLE = {}
 PlayerManager.remove_player = function (self, peer_id, local_player_id)
 	if script_data.network_debug_connections then
 		printf("PlayerManager:remove_player peer_id=%s %i", tostring(peer_id), local_player_id or -1)
@@ -248,7 +249,7 @@ PlayerManager.remove_player = function (self, peer_id, local_player_id)
 
 	local unique_id = self._unique_id(self, peer_id, local_player_id)
 	local player = self._players[unique_id]
-	local owned_units = player.owned_units
+	local owned_units = (player and player.owned_units) or EMPTY_TABLE
 
 	for unit, _ in pairs(owned_units) do
 		self.relinquish_unit_ownership(self, unit)
@@ -258,19 +259,21 @@ PlayerManager.remove_player = function (self, peer_id, local_player_id)
 
 	self._players[unique_id] = nil
 	self._human_players[unique_id] = nil
-	local peer_table = self._players_by_peer[peer_id]
+	local peer_table = self._players_by_peer[peer_id] or EMPTY_TABLE
 	peer_table[local_player_id] = nil
 
 	if table.is_empty(peer_table) then
 		self._players_by_peer[peer_id] = nil
 	end
 
-	if player.is_player_controlled(player) then
+	if player and player.is_player_controlled(player) then
 		self._num_human_players = self._num_human_players - 1
 	end
 
-	self._statistics_db:unregister(player.stats_id(player))
-	player.destroy(player)
+	if player then
+		self._statistics_db:unregister(player.stats_id(player))
+		player.destroy(player)
+	end
 
 	return 
 end

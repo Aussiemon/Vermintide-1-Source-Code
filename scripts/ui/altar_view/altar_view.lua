@@ -16,6 +16,7 @@ require("scripts/ui/forge_view/forge_logic")
 require("scripts/ui/altar_view/altar_craft_ui")
 require("scripts/ui/altar_view/altar_craft_ui_definitions")
 
+local DO_RELOAD = true
 local generic_input_actions = {
 	{
 		input_action = "l2_r2",
@@ -93,6 +94,8 @@ AltarView.init = function (self, ingame_ui_context)
 	self.confirmation_popup = self.create_confirmation_popup(self)
 
 	self.fit_title(self)
+
+	DO_RELOAD = false
 
 	return 
 end
@@ -212,6 +215,7 @@ AltarView.create_ui_elements = function (self)
 	self.popup_close_widget = self.widgets_by_name.popup_close_widget
 	self.page_left_glow_widget = UIWidget.init(definitions.gamepad_widgets_definitions.page_left_glow)
 	self.page_center_glow_widget = UIWidget.init(definitions.gamepad_widgets_definitions.page_center_glow)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -339,6 +343,12 @@ AltarView.update = function (self, dt)
 	return 
 end
 AltarView.post_update = function (self, dt)
+	if DO_RELOAD then
+		self.create_ui_elements(self)
+
+		DO_RELOAD = false
+	end
+
 	if self.popup_id then
 		local popup_result = Managers.popup:query_result(self.popup_id)
 
@@ -768,6 +778,7 @@ AltarView.draw = function (self, dt)
 		end
 	end
 
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 
 	for ui_name, ui_page in pairs(self.ui_pages) do

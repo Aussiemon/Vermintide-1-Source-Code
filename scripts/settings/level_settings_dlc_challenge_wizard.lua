@@ -13,9 +13,12 @@ LevelSettings.dlc_challenge_wizard = {
 	level_image = "level_image_dlc_challenge_wizard",
 	act = "prologue",
 	boss_spawning_method = "hand_placed",
+	console_area = "location_wizard_wasteland",
+	console_level_filter_image = "area_image_chamber_01",
 	conflict_settings = "challenge",
 	default_surface_material = "stone",
 	knocked_down_setting = "knocked_down",
+	required_act_completed = "act_4",
 	level_name = "levels/dlc_challenge_wizard/world",
 	source_aux_bus_name = "environment_reverb_outside_source",
 	level_particle_effects = {},
@@ -79,9 +82,11 @@ LevelSettings.dlc_challenge_wizard = {
 			local title_properties = Managers.backend:get_interface("title_properties")
 			local dlc_challenge_wizard_enabled = title_properties.get_value(title_properties, "dlc_challenge_wizard_enabled")
 
-			return dlc_challenge_wizard_enabled, Localize("map_level_community_tooltip")
+			return (dlc_challenge_wizard_enabled and "visible") or "locked", dlc_challenge_wizard_enabled, Localize("map_level_community_tooltip")
 		else
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_challenge_wizard")
+			unlocked = 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_challenge_wizard")
+
+			return (unlocked and "visible") or "hidden", unlocked
 		end
 
 		return 
@@ -90,20 +95,16 @@ LevelSettings.dlc_challenge_wizard = {
 		sorting = 4,
 		icon = "level_location_long_icon_03",
 		area = "ubersreik",
-		console_sorting = 1,
+		console_sorting = 100,
 		wwise_events = {
 			"nik_map_brief_wizard_tower_01",
 			"nik_map_brief_wizard_tower_02"
 		},
 		area_position = {
-			310,
-			0
+			295,
+			-185
 		}
 	}
 }
-
-if PLATFORM == "ps4" then
-	LevelSettings.dlc_challenge_wizard.level_image = "level_image_any"
-end
 
 return 

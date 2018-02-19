@@ -405,5 +405,11 @@ AnimationCallbackTemplates.server.anim_cb_dodge_finished = function (unit, param
 
 	return 
 end
+AnimationCallbackTemplates.server.anim_cb_teleport_finished = function (unit, param)
+	local blackboard = Unit.get_data(unit, "blackboard")
+	blackboard.anim_cb_teleport_finished = true
+
+	return 
+end
 
 return 

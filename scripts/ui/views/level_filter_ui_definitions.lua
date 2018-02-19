@@ -1,6 +1,6 @@
 local element_size = {
-	112,
-	62
+	89.60000000000001,
+	49.6
 }
 local element_spacing = {
 	5,
@@ -19,9 +19,18 @@ local scenegraph_definition = {
 			UILayer.default
 		}
 	},
-	background = {
-		vertical_alignment = "top",
+	menu_root = {
+		vertical_alignment = "center",
 		parent = "root",
+		horizontal_alignment = "center",
+		size = {
+			1920,
+			1080
+		}
+	},
+	background = {
+		vertical_alignment = "center",
+		parent = "menu_root",
 		horizontal_alignment = "left",
 		size = {
 			500,
@@ -469,7 +478,7 @@ local function create_element(scenegraph_id)
 			title = {
 				vertical_alignment = "top",
 				horizontal_alignment = "left",
-				font_size = 26,
+				font_size = 24,
 				font_type = "hell_shark",
 				text_color = Colors.get_color_table_with_alpha("white", 255),
 				offset = {
@@ -675,8 +684,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					41,
-					-element_size[2] + 12,
+					element_size[1]*0.5 - 15,
+					-element_size[2]*0.5 - 19,
 					4
 				}
 			},
@@ -692,8 +701,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*1 + element_spacing[1]*1 + 41,
-					-element_size[2] + 12,
+					(element_size[1]*1 + element_size[1]*0.5) - 15 + element_spacing[1]*1,
+					-element_size[2]*0.5 - 19,
 					4
 				}
 			},
@@ -709,8 +718,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*2 + element_spacing[1]*2 + 41,
-					-element_size[2] + 12,
+					(element_size[1]*2 + element_size[1]*0.5) - 15 + element_spacing[1]*2,
+					-element_size[2]*0.5 - 19,
 					4
 				}
 			},
@@ -727,7 +736,7 @@ local function create_element(scenegraph_id)
 				},
 				offset = {
 					element_size[1]*3 + element_spacing[1]*3 + 41,
-					-element_size[2] + 12,
+					-element_size[2]*0.5 - 19,
 					4
 				}
 			},
@@ -789,8 +798,8 @@ local function create_element(scenegraph_id)
 			},
 			selection_1 = {
 				size = {
-					210,
-					150
+					168,
+					120
 				},
 				color = {
 					255,
@@ -799,15 +808,15 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					-46,
-					-(element_size[2]*0.5 + 75),
+					-36.800000000000004,
+					-(element_size[2]*0.5 + 60),
 					1
 				}
 			},
 			selection_2 = {
 				size = {
-					210,
-					150
+					168,
+					120
 				},
 				color = {
 					255,
@@ -816,15 +825,15 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*1 + element_spacing[1]*1) - 46,
-					-(element_size[2]*0.5 + 75),
+					(element_size[1]*1 + element_spacing[1]*1) - 36.800000000000004,
+					-(element_size[2]*0.5 + 60),
 					1
 				}
 			},
 			selection_3 = {
 				size = {
-					210,
-					150
+					168,
+					120
 				},
 				color = {
 					255,
@@ -833,15 +842,15 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*2 + element_spacing[1]*2) - 46,
-					-(element_size[2]*0.5 + 75),
+					(element_size[1]*2 + element_spacing[1]*2) - 36.800000000000004,
+					-(element_size[2]*0.5 + 60),
 					1
 				}
 			},
 			selection_4 = {
 				size = {
-					210,
-					150
+					168,
+					120
 				},
 				color = {
 					255,
@@ -850,8 +859,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*3 + element_spacing[1]*3) - 46,
-					-(element_size[2]*0.5 + 75),
+					(element_size[1]*3 + element_spacing[1]*3) - 36.800000000000004,
+					-(element_size[2]*0.5 + 60),
 					1
 				}
 			}

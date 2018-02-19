@@ -26,13 +26,16 @@ local DLC_STRINGS = {
 	reikwald = "igs_death_on_the_reik_desc"
 }
 ConsoleDLCView = class(ConsoleDLCView)
-ConsoleDLCView.init = function (self, ui_context)
+ConsoleDLCView.init = function (self, ui_context, is_sub_menu, parent)
 	self._ui_renderer = ui_context.ui_renderer
 	self._input_manager = ui_context.input_manager
 	self._render_settings = {
 		snap_pixel_positions = false
 	}
 	self._ui_context = ui_context
+	self._skins_changed = false
+	self._is_sub_menu = is_sub_menu
+	self._parent = parent
 
 	self._setup_input(self)
 	self._create_ui_elements(self)
@@ -92,7 +95,7 @@ ConsoleDLCView._create_ui_elements = function (self)
 	end
 
 	table.sort(self._dlcs, function (a, b)
-		return a.index < b.index
+		return b.index < a.index
 	end)
 	table.sort(self._skin_dlcs, function (a, b)
 		return a.index < b.index
@@ -125,7 +128,7 @@ ConsoleDLCView._create_dlc_widgets = function (self)
 
 	for idx, dlc_data in ipairs(self._dlcs) do
 		local name = dlc_data.name
-		local has_trailer = name ~= "reikwald" and true
+		local has_trailer = true
 		local entry = definitions.create_dlc_entry("dlc_image_entry", offset_y, name .. "_dlc_image", name, has_trailer and name .. "_trailer", name .. "_bg", dlc_data.id)
 		self._dlc_widgets["dlc_entry_" .. idx] = UIWidget.init(entry)
 		offset_y = offset_y - self._entry_offset[2] - spacing
@@ -145,6 +148,15 @@ ConsoleDLCView._create_dlc_widgets = function (self)
 
 		return 
 	end
+	local tab_widget = self._widgets.tab_widget
+	local tab_widget_style = tab_widget.style
+	local tab_widget_content = tab_widget.content
+	local ui_scenegraph = self._ui_scenegraph
+	local scenegraph_size = ui_scenegraph[tab_widget.scenegraph_id].size
+	local style_left = tab_widget_style.dlc_left_text
+	local style_right = tab_widget_style.dlc_right_text
+	self._ui_animations.selection_offset = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.offset, 1, tab_widget_style.selection.offset[1], scenegraph_size[1]*0.5 - tab_widget_content.spacing*0.5 - style_left.width, 0.5, math.easeOutCubic)
+	self._ui_animations.selection_size = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.rect_size, 1, tab_widget_style.selection.rect_size[1], style_left.width, 0.5, math.easeOutCubic)
 
 	return 
 end
@@ -182,26 +194,43 @@ ConsoleDLCView._create_skins_widgets = function (self)
 
 		return 
 	end
+	local tab_widget = self._widgets.tab_widget
+	local tab_widget_style = tab_widget.style
+	local tab_widget_content = tab_widget.content
+	local ui_scenegraph = self._ui_scenegraph
+	local scenegraph_size = ui_scenegraph[tab_widget.scenegraph_id].size
+	local style_left = tab_widget_style.dlc_left_text
+	local style_right = tab_widget_style.dlc_right_text
+	self._ui_animations.selection_offset = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.offset, 1, tab_widget_style.selection.offset[1], scenegraph_size[1]*0.5 + tab_widget_content.spacing*0.5, 0.5, math.easeOutCubic)
+	self._ui_animations.selection_size = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.rect_size, 1, tab_widget_style.selection.rect_size[1], style_right.width, 0.5, math.easeOutCubic)
 
 	return 
 end
 ConsoleDLCView._setup_tabs = function (self, widget)
+	local ui_scenegraph = self._ui_scenegraph
 	local tab_widget_content = widget.content
 	local tab_widget_style = widget.style
 	local style_left = tab_widget_style.dlc_left_text
 	local style_right = tab_widget_style.dlc_right_text
 	local text_left = Localize(tab_widget_content.dlc_left_id)
 	local text_right = Localize(tab_widget_content.dlc_right_id)
+	local scengraph_size = ui_scenegraph[widget.scenegraph_id].size
 	local font, size = UIFontByResolution(style_left)
 	local font_material, font_size, font_name = unpack(font)
 	font_size = size
 	local left_width = UIRenderer.text_size(self._ui_renderer, text_left, font_material, font_size)
-	style_left.offset[1] = -left_width*0.5 - tab_widget_content.spacing*0.5
+	style_left.offset[1] = -scengraph_size[1]*0.5 - tab_widget_content.spacing*0.5
+	style_left.width = left_width
 	local font, size = UIFontByResolution(style_right)
 	local font_material, font_size, font_name = unpack(font)
 	font_size = size
 	local right_width = UIRenderer.text_size(self._ui_renderer, text_right, font_material, font_size)
-	style_right.offset[1] = right_width*0.5 + tab_widget_content.spacing*0.5
+	style_right.offset[1] = scengraph_size[1]*0.5 + tab_widget_content.spacing*0.5
+	style_right.width = right_width
+	tab_widget_style.selection.offset[1] = scengraph_size[1]*0.5 - tab_widget_content.spacing*0.5 - style_left.width
+	tab_widget_style.selection.rect_size[1] = style_left.width
+	tab_widget_style.selection.offset[1] = scengraph_size[1]*0.5 + tab_widget_content.spacing*0.5
+	tab_widget_style.selection.rect_size[1] = style_right.width
 
 	return 
 end
@@ -241,7 +270,19 @@ ConsoleDLCView.on_enter = function (self)
 
 	self._active = true
 
+	Managers.transition:force_fade_in()
+	Managers.transition:fade_out(3)
+
+	if self._parent and self._parent.set_mask_enabled then
+		self._parent:set_mask_enabled(false)
+	end
+
+	self._skip_input = true
+
 	return 
+end
+ConsoleDLCView.active = function (self)
+	return self._active
 end
 ConsoleDLCView.on_exit = function (self)
 	self._reset(self)
@@ -254,7 +295,25 @@ ConsoleDLCView.on_exit = function (self)
 		self._popup_id = nil
 	end
 
+	if self._skins_changed then
+		Managers.save:auto_save(SaveFileName, SaveData)
+
+		self._skins_changed = false
+	end
+
 	Managers.music:trigger_event("Play_hud_button_close")
+
+	local input_manager = Managers.input
+
+	input_manager.block_device_except_service(input_manager, "map_menu", "keyboard", 1)
+	input_manager.block_device_except_service(input_manager, "map_menu", "mouse", 1)
+	input_manager.block_device_except_service(input_manager, "map_menu", "gamepad", 1)
+	Managers.transition:force_fade_in()
+	Managers.transition:fade_out(3)
+
+	if self._parent and self._parent.set_mask_enabled then
+		self._parent:set_mask_enabled(true)
+	end
 
 	return 
 end
@@ -322,6 +381,12 @@ ConsoleDLCView._play_sound = function (self, event_name)
 	return 
 end
 ConsoleDLCView._update_input = function (self, dt, t)
+	if self._skip_input then
+		self._skip_input = nil
+
+		return 
+	end
+
 	local input_service = Managers.input:get_service("console_dlc")
 
 	if input_service.get(input_service, "move_up") and 1 < self._dlc_index then
@@ -351,16 +416,52 @@ ConsoleDLCView._update_input = function (self, dt, t)
 			self._play_sound(self, "Play_hud_next_tab")
 		end
 	elseif input_service.get(input_service, "special_1") then
-		local widget = self._dlc_widgets["dlc_entry_" .. self._dlc_index]
-		local widget_content = widget.content
-		local video_content = widget_content.video_content
+		local content = self._widgets.tab_widget.content
 
-		if video_content.material_name then
-			widget_content.video_active = not widget_content.video_active
-			video_content.video_completed = false
-			self._video_delay = nil
+		if content.selected == "dlc" then
+			local widget = self._dlc_widgets["dlc_entry_" .. self._dlc_index]
 
-			self._play_sound(self, "Play_hud_select")
+			if not widget then
+				return 
+			end
+
+			local widget_content = widget.content
+			local video_content = widget_content.video_content
+
+			if video_content.material_name then
+				widget_content.video_active = not widget_content.video_active
+				video_content.video_completed = false
+				self._video_delay = nil
+
+				self._play_sound(self, "Play_hud_select")
+			end
+		else
+			local widget = self._skin_widgets["dlc_entry_" .. self._dlc_index]
+
+			if not widget then
+				return 
+			end
+
+			local widget_content = widget.content
+
+			if Managers.unlock:is_dlc_unlocked(widget_content.dlc_name) and widget_content.skin_settings then
+				local skin_settings = SkinSettings[widget_content.skin_settings.name]
+
+				if skin_settings then
+					local profile_name = skin_settings.profile_name
+					local current_skin = PlayerData.skins_activated_data[profile_name]
+
+					if current_skin == widget_content.skin_settings.name then
+						PlayerData.skins_activated_data[profile_name] = nil
+					else
+						PlayerData.skins_activated_data[profile_name] = widget_content.skin_settings.name
+					end
+
+					self._play_sound(self, "Play_hud_select")
+
+					self._skins_changed = true
+				end
+			end
 		end
 	elseif input_service.get(input_service, "back") then
 		self.exit(self)
@@ -417,6 +518,16 @@ ConsoleDLCView._update_menu_description = function (self)
 				self._menu_description = "owned_video_stop"
 			else
 				self._menu_description = "owned_video_play"
+			end
+		elseif widget_content.skin_settings and widget_content.skin_settings.name then
+			local skin_settings = widget_content.skin_settings
+
+			if skin_settings and PlayerData.skins_activated_data[skin_settings.profile_name] == widget_content.skin_settings.name then
+				self._menu_description = "owned_unequip_skin"
+			elseif skin_settings then
+				self._menu_description = "owned_equip_skin"
+			else
+				self._menu_description = "owned"
 			end
 		else
 			self._menu_description = "owned"
@@ -477,7 +588,11 @@ ConsoleDLCView._update_selection = function (self, index)
 	return 
 end
 ConsoleDLCView.exit = function (self)
-	self._ui_context.ingame_ui:handle_transition("exit_menu")
+	if self._is_sub_menu then
+		self.on_exit(self)
+	else
+		self._ui_context.ingame_ui:handle_transition("exit_menu")
+	end
 
 	return 
 end

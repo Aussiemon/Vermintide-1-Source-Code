@@ -26,6 +26,11 @@ if rawget(_G, "Backend") then
 	ERROR_CODES[Backend.ERR_OK] = "backend_err_ok"
 	ERROR_CODES[Backend.ERR_UNKNOWN] = "backend_err_unknown"
 	ERROR_CODES[Backend.ERR_AUTH] = "backend_err_auth"
+
+	if Backend.ERR_MAX_CLIENTS_REACHED then
+		ERROR_CODES[Backend.ERR_MAX_CLIENTS_REACHED] = "backend_error_server_full"
+	end
+
 	ERROR_CODES[Backend.ERR_LOADING_PROFILE] = "backend_err_loading_profile"
 	ERROR_CODES[Backend.ERR_TITLE_ID_DISABLED] = "backend_err_title_id_disabled"
 	ERROR_CODES[Backend.ERR_COMMIT] = "backend_err_commit"
@@ -95,6 +100,7 @@ end
 BackendManager.reset = function (self)
 	self._errors = {}
 	self._is_disconnected = false
+	self._prevent_update = nil
 
 	self._destroy_backend(self)
 
@@ -285,7 +291,7 @@ BackendManager.update = function (self, dt)
 		return 
 	end
 
-	if self._backend then
+	if self._backend and not self._prevent_update then
 		local settings = GameSettingsDevelopment.backend_settings
 
 		Profiler.start("ScriptBackend update")
@@ -361,6 +367,10 @@ BackendManager._format_error_message_console = function (self, reason, details_m
 			else
 				return "backend_err_auth_ps4", button
 			end
+		elseif Backend.ERR_MAX_CLIENTS_REACHED and reason == Backend.ERR_MAX_CLIENTS_REACHED then
+			self._prevent_update = true
+
+			return "backend_error_server_full", button
 		else
 			return "backend_err_connecting", button
 		end
@@ -388,7 +398,9 @@ BackendManager._format_error_message_windows = function (self, reason, details_m
 
 		print("backend error", reason, ERROR_CODES[reason])
 
-		if reason == Backend.ERR_AUTH then
+		if not rawget(_G, "Backend") then
+			error_text = "backend_err_backend_missing"
+		elseif reason == Backend.ERR_AUTH then
 			error_text = "backend_err_auth_steam"
 		elseif reason == BACKEND_LUA_ERRORS.ERR_SIGNIN_TIMEOUT then
 			error_text = "backend_err_signin_timeout"

@@ -9842,5 +9842,24 @@ UIWidgets.create_gamepad_selection = function (scenegraph_id, retained, masked, 
 		scenegraph_id = scenegraph_id
 	}
 end
+UIWidgets.create_4k_filler = function ()
+	return {
+		scenegraph_id = "root_filler",
+		element = {
+			passes = {
+				{
+					pass_type = "rect_screen_filler"
+				}
+			}
+		},
+		content = {},
+		style = {},
+		offset = {
+			0,
+			0,
+			0
+		}
+	}
+end
 
 return 

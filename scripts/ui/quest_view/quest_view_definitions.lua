@@ -43,6 +43,15 @@ local scenegraph_definition = {
 			UILayer.default
 		}
 	},
+	root_filler = {
+		vertical_alignment = "center",
+		parent = "root",
+		horizontal_alignment = "center",
+		size = {
+			1920,
+			1080
+		}
+	},
 	dead_space_filler = {
 		scale = "fit",
 		size = {
@@ -888,6 +897,20 @@ local presentation_text_style = {
 		2
 	}
 }
+local task_presentation_text_style = {
+	vertical_alignment = "center",
+	font_size = 18,
+	localize = false,
+	horizontal_alignment = "left",
+	word_wrap = true,
+	font_type = "hell_shark_no_outline",
+	text_color = presentation_text_color,
+	offset = {
+		0,
+		0,
+		2
+	}
+}
 local presentation_title_text_style = {
 	vertical_alignment = "center",
 	font_size = 24,
@@ -977,7 +1000,7 @@ local widgets_definitions = {
 	presentation_difficulty = UIWidgets.create_simple_text("n/a", "presentation_difficulty", 18, presentation_text_color, nil, "hell_shark_no_outline"),
 	presentation_text = UIWidgets.create_simple_text("n/a", "presentation_text", nil, nil, presentation_text_style),
 	presentation_objective_icon = UIWidgets.create_simple_texture("quest_icon_rat_ogre", "presentation_objective_icon"),
-	presentation_objective_counter = UIWidgets.create_simple_text("n/a", "presentation_objective_counter", nil, nil, presentation_text_style),
+	presentation_objective_counter = UIWidgets.create_simple_text("n/a", "presentation_objective_counter", nil, nil, task_presentation_text_style),
 	presentation_objective_title = UIWidgets.create_simple_text("dlc1_2_summary_screen_entry_title", "presentation_objective_title", nil, nil, presentation_title_text_style),
 	presentation_reward_title = UIWidgets.create_simple_text("dlc1_2_summary_screen_entry_reward_title", "presentation_reward_title", nil, nil, presentation_title_text_style),
 	presentation_reward_item = UIWidgets.create_simple_texture("icon_dw_shield_01_axe_01", "presentation_reward_item"),

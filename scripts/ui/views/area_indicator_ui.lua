@@ -28,7 +28,7 @@ end
 AreaIndicatorUI.update = function (self, dt)
 	local player_manager = Managers.player
 	local local_player = player_manager.local_player(player_manager)
-	local player_unit = local_player.player_unit
+	local player_unit = local_player and local_player.player_unit
 
 	if Unit.alive(player_unit) then
 		local player_hud_extension = ScriptUnit.extension(player_unit, "hud_system")

@@ -759,6 +759,368 @@ local friend_info_widget_definitions = {
 LEVEL_TRANSLATIONS = {
 	merchant = {
 		"Supply and Demand",
-		"PodaÅ¼ i popyt",
+		"Poda\u017c i popyt",
 		"Oferta y demanda",
-		
+		"\u0421\u043f\u0440\u043e\u0441 \u0438 \u043f\u0440\u0435\u0434\u043b\u043e\u0436\u0435\u043d\u0438\u0435",
+		"Oferta e Procura",
+		"L'offre et la demande",
+		"Angebot und Nachfrage",
+		"Domanda e offerta"
+	},
+	dlc_survival_magnus = {
+		"Town Meeting",
+		"Spotkanie",
+		"Reunión de la ciudad",
+		"\u0412\u0441\u0442\u0440\u0435\u0447\u0430 \u0432 \u0433\u043e\u0440\u043e\u0434\u0435",
+		"Reunião do burgo",
+		"Réunion municipale",
+		"Bürgerversammlung",
+		"Consiglio cittadino"
+	},
+	sewers_short = {
+		"Smuggler's Run",
+		"Ucieczka przemytnika",
+		"La carrera del contrabandista",
+		"\u041a\u043e\u043d\u0442\u0440\u0430\u0431\u0430\u043d\u0434\u0430",
+		"Fuga do contrabandista",
+		"La course du contrebandier",
+		"Hineingeschmuggelt",
+		"Contrabbando"
+	},
+	inn_level = {
+		"Wartet im Gasthaus Roter Mond",
+		"Esperando en la Posada Luna Roja",
+		"En attente à la Lune rouge",
+		"In attesa alla Locanda della Luna Rossa",
+		"Czekam w karczmie Pod Czerwonym Ksi\u0119\u017cycem",
+		"Aguardando na Estalagem Lua Vermelha",
+		"\u0424\u043e\u0440\u043c\u0430\u0442 \u0441\u0442\u0440\u043e\u043a\u0438 \u0441 \u0440\u0430\u0441\u0448\u0438\u0440\u0435\u043d\u043d\u044b\u043c\u0438 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e\u0441\u0442\u044f\u043c\u0438 \u043f\u0440\u0438\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u044f",
+		"Waiting at the Red Moon Inn",
+		"Red Moon Inn",
+		"Karczma Pod Czerwonym Ksi\u0119\u017cycem",
+		"Posada Luna Roja",
+		"«\u041a\u0440\u0430\u0441\u043d\u0430\u044f \u043b\u0443\u043d\u0430»",
+		"Estalagem Lua Vermelha",
+		"Auberge de la Lune rouge",
+		"Zum Roten Mond",
+		"Locanda della Luna Rossa"
+	},
+	forest_ambush = {
+		"Engines of War",
+		"Machiny wojny",
+		"Máquinas de guerra",
+		"\u041c\u0430\u0448\u0438\u043d\u044b \u0432\u043e\u0439\u043d\u044b",
+		"Mecanismos da Guerra",
+		"Machines de guerre",
+		"Kriegsmaschinen",
+		"Macchine da guerra"
+	},
+	city_wall = {
+		"Man the Ramparts",
+		"\u017bo\u0142nierze na sza\u0144cach",
+		"Defended las murallas",
+		"\u041a \u043a\u0440\u0435\u043f\u043e\u0441\u0442\u043d\u043e\u043c\u0443 \u0432\u0430\u043b\u0443",
+		"Defenda as muralhas",
+		"Aux remparts",
+		"Bemannt die Schutzwälle",
+		"Ai bastioni"
+	},
+	wizard = {
+		"The Wizard's Tower",
+		"Wie\u017ca czarodzieja",
+		"La torre del Hechicero",
+		"\u0411\u0430\u0448\u043d\u044f \u041c\u0430\u0433\u0430",
+		"A Torre dos Magos",
+		"Tour de sorcier",
+		"Der Magierturm",
+		"La Torre del Mago"
+	},
+	dlc_castle_dungeon = {
+		"The Dungeons",
+		"Lochy",
+		"Las mazmorras",
+		"\u041f\u043e\u0434\u0437\u0435\u043c\u0435\u043b\u044c\u044f",
+		"As masmorras",
+		"Les Donjons",
+		"Das Verlies",
+		"I Dungeon"
+	},
+	dlc_portals = {
+		"Summoner's Peak",
+		"Szczyt Przywo\u0142ywacza",
+		"Pico del Invocador",
+		"\u041f\u0438\u043a \u041f\u0440\u0438\u0437\u044b\u0432\u0430\u0442\u0435\u043b\u044f",
+		"Pico do Invocador",
+		"Pic de l'invocateur",
+		"Gipfel des Beschwörers",
+		"Picco dell'Evocatore"
+	},
+	dlc_castle = {
+		"Castle Drachenfels",
+		"Zamek Drachenfels",
+		"Castillo Drachenfels",
+		"\u0417\u0430\u043c\u043e\u043a \u0414\u0440\u0430\u0445\u0435\u043d\u0444\u0435\u043b\u044c\u0441",
+		"Castelo Drachenfels",
+		"Château Drachenfels",
+		"Burg Drachenfels",
+		"Castel Drachenfels"
+	},
+	courtyard_level = {
+		"Well Watch",
+		"W obronie studni",
+		"Protección de pozos",
+		"\u0421\u0442\u0440\u0430\u0436\u0430 \u043a\u043e\u043b\u043e\u0434\u0446\u0435\u0432",
+		"Vigia dos poços",
+		"Surveillance de puits",
+		"Brunnenwache",
+		"Guardia ai pozzi"
+	},
+	bridge = {
+		"Black Powder",
+		"Czarny proch",
+		"Pólvora",
+		"\u0427\u0435\u0440\u043d\u044b\u0439 \u043f\u043e\u0440\u043e\u0445",
+		"Pólvora",
+		"La poudre noire",
+		"Schwarzpulver",
+		"Polvere nera"
+	},
+	cemetery = {
+		"Garden of Morr",
+		"Ogród Morra",
+		"Jardín de Morr",
+		"\u0421\u0430\u0434 \u041c\u043e\u0440\u0440\u0430",
+		"Jardins de Morr",
+		"Jardin de Morr",
+		"Morrs Garten",
+		"Giardino di Morr"
+	},
+	tunnels = {
+		"The Enemy Below",
+		"Wróg spod ziemi",
+		"Enemigo enterrado",
+		"\u0412\u0440\u0430\u0433 \u0438\u0437 \u0433\u043b\u0443\u0431\u0438\u043d",
+		"O Inimigo Profundo",
+		"L'ennemi souterrain",
+		"Den Feind zu Füßen",
+		"Il nemico sottoterra"
+	},
+	magnus = {
+		"The Horn of Magnus",
+		"Róg Magnusa",
+		"El Cuerno de Magnus",
+		"\u0420\u043e\u0433 \u041c\u0430\u0433\u043d\u0430",
+		"A Trompa de Magnus",
+		"La corne de Magnus",
+		"Das Horn des Magnus",
+		"Il Corno di Magnus"
+	},
+	end_boss = {
+		"The White Rat",
+		"Bia\u0142y szczur",
+		"La rata blanca",
+		"\u0411\u0435\u043b\u0430\u044f \u041a\u0440\u044b\u0441\u0430",
+		"O Rato Branco",
+		"Le rat blanc",
+		"Die Weiße Ratte",
+		"Il ratto bianco"
+	},
+	dlc_survival_ruins = {
+		"The Fall",
+		"Upadek",
+		"La caída",
+		"\u041f\u0430\u0434\u0435\u043d\u0438\u0435",
+		"A queda",
+		"La Chute",
+		"Der Fall",
+		"La Caduta"
+	},
+	farm = {
+		"Wheat and Chaff",
+		"Ziarna i plewy",
+		"Trigo y pienso",
+		"\u0417\u0435\u0440\u043d\u0430 \u0438 \u043f\u043b\u0435\u0432\u0435\u043b\u0430",
+		"Joio e trigo",
+		"Blé et paille",
+		"Spreu und Weizen",
+		"Grano e pula"
+	},
+	docks_short_level = {
+		"Waterfront",
+		"Na nabrze\u017cu",
+		"Ribera",
+		"\u041d\u0430\u0431\u0435\u0440\u0435\u0436\u043d\u0430\u044f",
+		"Orla",
+		"Quais",
+		"Das Ufer",
+		"Riva"
+	},
+	dlc_dwarf_beacons = {
+		"Chain of Fire",
+		"Chaîne ardente",
+		"\u0141a\u0144cuch ognia",
+		"Cadena de fuego",
+		"Kette aus Feuer",
+		"Corrente de fogo",
+		"\u0426\u0435\u043f\u044c \u043e\u0433\u043d\u044f",
+		"Catena di fuoco"
+	},
+	dlc_dwarf_exterior = {
+		"The Cursed Rune",
+		"La rune maudite",
+		"Przekl\u0119ta runa",
+		"La runa maldita",
+		"Die verfluchte Rune",
+		"A runa amaldiçoada",
+		"\u041f\u0440\u043e\u043a\u043b\u044f\u0442\u0430\u044f \u0440\u0443\u043d\u0430",
+		"La runa maledetta"
+	},
+	dlc_dwarf_interior = {
+		"\u0425\u0430\u0437\u0438\u0434 \u041a\u0440\u043e",
+		"Khazid Kro"
+	},
+	dlc_stromdorf_town = {
+		"Reaching Out",
+		"Traversée",
+		"Estendendo a Mão",
+		"Hinausgehen",
+		"Contacto",
+		"Una mano",
+		"\u0420\u0443\u043a\u0430 \u043f\u043e\u043c\u043e\u0449\u0438",
+		"W poszukiwaniu sojuszników"
+	},
+	dlc_stromdorf_hills = {
+		"The Courier",
+		"Le courrier",
+		"O Mensageiro",
+		"Der Kurier",
+		"El mensajero",
+		"Il corriere",
+		"\u041f\u043e\u0441\u044b\u043b\u044c\u043d\u044b\u0439",
+		"Pos\u0142aniec"
+	},
+	dlc_challenge_wizard = {
+		"Trial of the Foolhardy",
+		"L’épreuve de l’imprudent",
+		"Prova do Destemido",
+		"Test der Toren",
+		"Prueba del Imprudente",
+		"Prova dell’Imprudente",
+		"\u0418\u0441\u043f\u044b\u0442\u0430\u043d\u0438\u0435 \u0431\u0435\u0437\u0440\u0430\u0441\u0441\u0443\u0434\u0441\u0442\u0432\u0430",
+		"Próba g\u0142upców"
+	},
+	dlc_reikwald_forest = {
+		"Reikwald Forest",
+		"Floresta de Reikwald",
+		"Reikwald",
+		"Bosque Reikwald",
+		"Forêt de Reikwald",
+		"Foresta del Reikwald",
+		"\ub808\uc774\ud06c\ubc1c\ud2b8 \uc232",
+		"Las Reikwald",
+		"\u0420\u0435\u0439\u043a\u0432\u0430\u043b\u044c\u0434\u0441\u043a\u0438\u0439 \u043b\u0435\u0441"
+	},
+	dlc_reikwald_river = {
+		"Rio Reik",
+		"Fluss Reik",
+		"Río Reik",
+		"Fleuve Reik",
+		"Fiume Reik",
+		"Rzeka Reik",
+		"\u0420\u0435\u043a\u0430 \u0420\u0435\u0439\u043a",
+		"River Reik"
+	},
+	chamber = {
+		"Waylaid"
+	}
+}
+DIFFICULTY_TRANSLATIONS = {
+	easy = {
+		"Easy",
+		"Facile",
+		"\u0141atwy",
+		"Einfach",
+		"Fácil",
+		"Facile",
+		"\u041f\u0440\u043e\u0441\u0442\u043e\u0439",
+		"Fácil"
+	},
+	normal = {
+		"Normal",
+		"Normale",
+		"Normalny",
+		"Normal",
+		"Normal",
+		"Normale",
+		"\u0421\u0440\u0435\u0434\u043d\u0438\u0439",
+		"Normal"
+	},
+	hard = {
+		"Hard",
+		"Difficile",
+		"Trudny",
+		"Schwer",
+		"Difícil",
+		"Difficile",
+		"\u0421\u043b\u043e\u0436\u043d\u044b\u0439",
+		"Difícil"
+	},
+	harder = {
+		"Nightmare",
+		"Cauchemardesque",
+		"Koszmar",
+		"Albtraum",
+		"Pesadilla",
+		"Incubo",
+		"\u041a\u043e\u0448\u043c\u0430\u0440",
+		"Pesadelo"
+	},
+	hardest = {
+		"Cataclysm",
+		"Cataclysmique",
+		"Kataklizm",
+		"Kataklysmus",
+		"Cataclismo",
+		"Cataclisma",
+		"\u041a\u0430\u0442\u0430\u043a\u043b\u0438\u0437\u043c",
+		"Cataclismo"
+	},
+	survival_hard = {
+		"Veteran",
+		"Vétéran",
+		"Weteran",
+		"Veteran",
+		"Veterano",
+		"Veterano",
+		"\u0412\u0435\u0442\u0435\u0440\u0430\u043d",
+		"Veterano"
+	},
+	survival_harder = {
+		"Champion",
+		"Champion",
+		"Czempion",
+		"Champion",
+		"Campeón",
+		"Campione",
+		"\u0412\u043e\u0438\u0442\u0435\u043b\u044c",
+		"Campeão"
+	},
+	survival_hardest = {
+		"Héros",
+		"Heroic",
+		"Heroiczny",
+		"Heldenhaft",
+		"Héroe",
+		"Eroica",
+		"\u0413\u0435\u0440\u043e\u0439",
+		"Heroico"
+	}
+}
+
+return {
+	scenegraph_definition = scenegraph_definition,
+	widget_definitions = widget_definitions,
+	button_widgets = button_widgets,
+	friend_list_definition = friend_list_definition,
+	friend_info_widget_definitions = friend_info_widget_definitions
+}

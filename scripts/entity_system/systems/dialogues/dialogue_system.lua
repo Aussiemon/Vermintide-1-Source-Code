@@ -224,12 +224,10 @@ DialogueSystem.on_add_extension = function (self, world, unit, extension_name, e
 			local switch_value = extension.wwise_voice_switch_value
 
 			if switch_name and switch_value then
-				WwiseWorld.set_switch(dialogue_system.wwise_world, switch_name, switch_value, wwise_source_id)
 				WwiseWorld.set_source_parameter(dialogue_system.wwise_world, wwise_source_id, "vo_center_percent", extension.vo_center_percent)
 			end
 
 			if extension.faction == "player" then
-				WwiseWorld.set_switch(dialogue_system.wwise_world, "husk", NetworkUnit.is_husk_unit(unit), wwise_source_id)
 			end
 
 			return WwiseWorld.trigger_event(dialogue_system.wwise_world, sound_event, wwise_source_id)
@@ -1138,21 +1136,31 @@ DialogueSystem.update_debug = function (self, t)
 
 		if debug_tick_time + tick_add < t then
 			debug_tick_time = t
-			debug_text.cl, debug_text.total, debug_text.current_face, debug_text.curret_event, debug_text.speaker, debug_text.missing_vo, debug_text.fast_play = DebugVo.play()
+			debug_text.cl, debug_text.total, debug_text.current_face, debug_text.curret_event, debug_text.speaker, debug_text.missing_vo, debug_text.fast_play, debug_text.subtitle = DebugVo.play()
 		end
 	end
 
 	if debug_vo_by_file_gui then
 		local start_x = res_x - 800
-		local start_y = 100
+		local start_y = 120
 		local start_x2 = 100
 		local start_y2 = res_y - 100
 		local context_height = 0
 
 		Gui.text(gui, tostring("Line: " .. debug_text.cl .. "/" .. debug_text.total), font_mtrl, font_size, font, Vector3(start_x, start_y, 250), data_color)
 		Gui.text(gui, tostring("Sound Event: " .. debug_text.curret_event), font_mtrl, font_size, font, Vector3(start_x, start_y + 20, 250), data_color)
-		Gui.text(gui, tostring("Speaker: " .. debug_text.speaker), font_mtrl, font_size, font, Vector3(start_x, start_y + 40, 250), data_color)
+
+		if debug_text.speaker then
+			Gui.text(gui, tostring("Speaker: " .. debug_text.speaker), font_mtrl, font_size, font, Vector3(start_x, start_y + 40, 250), data_color)
+		end
+
 		Gui.text(gui, tostring("Face Animation: " .. debug_text.current_face), font_mtrl, font_size, font, Vector3(start_x, start_y + 60, 250), data_color)
+
+		if Managers.localizer:exists(debug_text.subtitle) then
+			local dialogue_text = Localize(debug_text.subtitle)
+
+			Gui.text(gui, tostring("Subtitle: " .. dialogue_text), font_mtrl, tonumber(font_size - 1), font, Vector3(start_x, start_y + 80, 250), Color(250, 255, 250, 0))
+		end
 
 		for i, missing in ipairs(debug_text.missing_vo) do
 			context_height = i
@@ -1181,17 +1189,17 @@ DialogueSystem.update_debug = function (self, t)
 		end
 
 		if debug_text.pause_state then
-			Gui.text(gui, tostring("Press 'E' to unpause"), font_mtrl, font_size, font, Vector3(start_x + 200, start_y + 60, 250), Color(255, 100, 100, 0))
-			Gui.text(gui, tostring("PAUSED"), font_mtrl, font_size, font, Vector3(start_x + 320, start_y + 60, 250), Color(255, 255, 255, 0))
+			Gui.text(gui, tostring("Press 'E' to unpause"), font_mtrl, font_size, font, Vector3(start_x + 300, start_y + 60, 250), Color(255, 100, 100, 0))
+			Gui.text(gui, tostring("PAUSED"), font_mtrl, font_size, font, Vector3(start_x + 420, start_y + 60, 250), Color(255, 255, 255, 0))
 		else
-			Gui.text(gui, tostring("Press 'E' to pause"), font_mtrl, font_size, font, Vector3(start_x + 200, start_y + 60, 250), Color(255, 120, 120, 0))
+			Gui.text(gui, tostring("Press 'E' to pause"), font_mtrl, font_size, font, Vector3(start_x + 300, start_y + 60, 250), Color(255, 120, 120, 0))
 		end
 
 		if debug_text.fast_play then
-			Gui.text(gui, tostring("Fast play active"), font_mtrl, font_size, font, Vector3(start_x + 200, start_y + 40, 250), Color(120, 120, 255, 0))
+			Gui.text(gui, tostring("Fast play active"), font_mtrl, font_size, font, Vector3(start_x + 300, start_y + 40, 250), Color(120, 120, 255, 0))
 		end
 
-		Gui.rect(gui, Vector3(start_x - 15, start_y - 15, 249), Vector2(400, start_y), Color(200, 20, 20, 20))
+		Gui.rect(gui, Vector3(start_x - 15, start_y - 15, 249), Vector2(500, start_y), Color(200, 20, 20, 20))
 	end
 
 	return 
@@ -1703,7 +1711,7 @@ function DebugVoByFile(file_name, quick)
 
 				if profile.display_name == current_file.profile_names[cl] and Unit.alive(player.player_unit) then
 					actor_unit = player.player_unit
-					local world = Unit.world(player.player_unit)
+					local world = Managers.world:world("level_world")
 					wwise_world = Managers.world:wwise_world(world)
 					is_npc = false
 				end
@@ -1712,7 +1720,7 @@ function DebugVoByFile(file_name, quick)
 			if is_npc then
 				local dummy_unit = DialogueSystem:GetRandomPlayer()
 				actor_unit = dummy_unit
-				local world = Unit.world(dummy_unit)
+				local world = Managers.world:world("level_world")
 				wwise_world = Managers.world:wwise_world(world)
 			end
 
@@ -1762,7 +1770,7 @@ function DebugVoByFile(file_name, quick)
 			printf("Missing Sounds END")
 		end
 
-		return cl, #current_file.sound_events, current_file.face_animations[cl], current_file.sound_events[cl], current_file.profile_names[cl], missing_vo, fast_play
+		return cl, #current_file.sound_events, current_file.face_animations[cl], current_file.sound_events[cl], current_file.profile_names[cl], missing_vo, fast_play, current_file.localization_strings[cl]
 	end
 	DebugVo.pause = function ()
 		debug_vo_by_file = false
@@ -1772,7 +1780,15 @@ function DebugVoByFile(file_name, quick)
 		return 
 	end
 	DebugVo.jump_to = function (line_number)
-		cl = line_number
+		if type(line_number) == "number" then
+			cl = line_number
+		else
+			for i = 1, #current_file.sound_events, 1 do
+				if current_file.sound_events[i] == line_number then
+					cl = i
+				end
+			end
+		end
 
 		return 
 	end

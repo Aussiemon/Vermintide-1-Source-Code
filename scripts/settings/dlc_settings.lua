@@ -1,3 +1,5 @@
+require("scripts/settings/dlc_terror_event_blueprints")
+
 local function count_event_breed(breed_name)
 	return Managers.state.conflict:count_units_by_breed_during_event(breed_name)
 end
@@ -914,7 +916,405 @@ DLCSettings = {
 			}
 		}
 	},
+	chamber = {
+		product_label = "",
+		unit_extension_templates = "scripts/network/unit_extension_templates_chamber",
+		level_settings = "scripts/settings/level_settings_dlc_chamber",
+		package_name = "resource_packages/dlcs/chamber/chamber",
+		level_unlock_settings = "scripts/settings/level_unlock_settings_dlc_chamber",
+		area_settings = {},
+		unlock_settings = {
+			chamber = {
+				class = "AlwaysUnlocked"
+			}
+		},
+		unlock_settings_xb1 = {
+			chamber = {
+				class = "AlwaysUnlocked"
+			}
+		},
+		unlock_settings_ps4 = {
+			chamber = {
+				class = "AlwaysUnlocked"
+			}
+		},
+		breeds = {
+			"scripts/settings/breeds/breed_skaven_grey_seer"
+		},
+		behaviour_trees_precompiled = {
+			"scripts/entity_system/systems/behaviour/nodes/generated/bt_selector_grey_seer"
+		},
+		behaviour_tree_nodes = {
+			"scripts/entity_system/systems/behaviour/nodes/skaven_grey_seer/bt_teleport_to_portal_action"
+		},
+		behaviour_trees = {
+			"scripts/entity_system/systems/behaviour/bt_skaven_grey_seer"
+		},
+		weapons = {},
+		terror_event_blueprints = DLCTerrorEventBlueprints.get_terror_event_blueprints("chamber"),
+		weighted_random_terror_events = {
+			chamber_inn = {
+				"chamber_inn_setup_a",
+				1,
+				"chamber_inn_setup_b",
+				1,
+				"chamber_inn_setup_c",
+				1
+			}
+		},
+		missions = {
+			chamber_inn = {
+				mission_template_name = "goal",
+				text = "mission_chamber_defend"
+			},
+			chamber_cellar = {
+				mission_template_name = "goal",
+				text = "mission_chamber_cellar"
+			},
+			chamber_sewer = {
+				mission_template_name = "goal",
+				text = "mission_chamber_sewer_hunt"
+			},
+			chamber_machine = {
+				mission_template_name = "goal",
+				text = "mission_chamber_stop_machine"
+			}
+		},
+		dialogue_lookup = {
+			"dialogues/generated/lookup_wood_elf_chamber",
+			"dialogues/generated/lookup_witch_hunter_chamber",
+			"dialogues/generated/lookup_empire_soldier_chamber",
+			"dialogues/generated/lookup_dwarf_ranger_chamber",
+			"dialogues/generated/lookup_bright_wizard_chamber",
+			"dialogues/generated/lookup_grey_seer_chamber"
+		},
+		dialogue_settings = {
+			chamber = {
+				"dialogues/generated/bright_wizard_chamber",
+				"dialogues/generated/empire_soldier_chamber",
+				"dialogues/generated/dwarf_ranger_chamber",
+				"dialogues/generated/witch_hunter_chamber",
+				"dialogues/generated/wood_elf_chamber",
+				"dialogues/generated/dwarf_ranger_chamber",
+				"dialogues/generated/grey_seer_chamber"
+			}
+		},
+		horde_settings_compositions = {
+			event_chamber_slaves_small = {
+				{
+					name = "slaves_small",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							8,
+							10
+						}
+					}
+				}
+			},
+			event_chamber_slaves_large = {
+				{
+					name = "slaves_large",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							22,
+							28
+						}
+					}
+				}
+			},
+			event_chamber_clanrats = {
+				{
+					name = "clanrats",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							8,
+							12
+						}
+					}
+				}
+			},
+			event_chamber_mixed_a = {
+				{
+					name = "mixed_a",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							5,
+							7
+						},
+						"skaven_slave",
+						{
+							7,
+							10
+						}
+					}
+				}
+			},
+			event_chamber_mixed_b = {
+				{
+					name = "mixed_b",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							4,
+							5
+						},
+						"skaven_slave",
+						{
+							10,
+							20
+						},
+						"skaven_storm_vermin_commander",
+						1
+					}
+				}
+			},
+			event_chamber_mixed_c = {
+				{
+					name = "mixed_c",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						6,
+						"skaven_storm_vermin_commander",
+						2
+					}
+				}
+			},
+			event_chamber_stormvermin = {
+				{
+					name = "stormvermin",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							2,
+							3
+						}
+					}
+				}
+			}
+		},
+		horde_settings_compositions_xb1 = {
+			event_chamber_slaves_small = {
+				{
+					name = "slaves_small",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							10,
+							12
+						}
+					}
+				}
+			},
+			event_chamber_slaves_large = {
+				{
+					name = "slaves_large",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							28,
+							32
+						}
+					}
+				}
+			},
+			event_chamber_clanrats = {
+				{
+					name = "clanrats",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							10,
+							14
+						}
+					}
+				}
+			},
+			event_chamber_mixed_a = {
+				{
+					name = "mixed_a",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							8,
+							10
+						},
+						"skaven_slave",
+						{
+							10,
+							15
+						}
+					}
+				}
+			},
+			event_chamber_mixed_b = {
+				{
+					name = "mixed_b",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							7,
+							8
+						},
+						"skaven_slave",
+						{
+							20,
+							30
+						},
+						"skaven_storm_vermin_commander",
+						1
+					}
+				}
+			},
+			event_chamber_mixed_c = {
+				{
+					name = "mixed_c",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						8,
+						"skaven_storm_vermin_commander",
+						2
+					}
+				}
+			},
+			event_chamber_stormvermin = {
+				{
+					name = "stormvermin",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							3,
+							4
+						}
+					}
+				}
+			}
+		},
+		horde_settings_compositions_ps4 = {
+			event_chamber_slaves_small = {
+				{
+					name = "slaves_small",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							10,
+							12
+						}
+					}
+				}
+			},
+			event_chamber_slaves_large = {
+				{
+					name = "slaves_large",
+					weight = 1,
+					breeds = {
+						"skaven_slave",
+						{
+							28,
+							32
+						}
+					}
+				}
+			},
+			event_chamber_clanrats = {
+				{
+					name = "clanrats",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							10,
+							14
+						}
+					}
+				}
+			},
+			event_chamber_mixed_a = {
+				{
+					name = "mixed_a",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							8,
+							10
+						},
+						"skaven_slave",
+						{
+							10,
+							15
+						}
+					}
+				}
+			},
+			event_chamber_mixed_b = {
+				{
+					name = "mixed_b",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						{
+							7,
+							8
+						},
+						"skaven_slave",
+						{
+							20,
+							30
+						},
+						"skaven_storm_vermin_commander",
+						1
+					}
+				}
+			},
+			event_chamber_mixed_c = {
+				{
+					name = "mixed_c",
+					weight = 1,
+					breeds = {
+						"skaven_clan_rat",
+						8,
+						"skaven_storm_vermin_commander",
+						2
+					}
+				}
+			},
+			event_chamber_stormvermin = {
+				{
+					name = "stormvermin",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							3,
+							4
+						}
+					}
+				}
+			}
+		},
+		lorebook_pages = {}
+	},
 	reikwald = {
+		product_label = "VTMAPPACK0000003",
 		level_settings = "scripts/settings/level_settings_dlc_reikwald",
 		package_name = "resource_packages/dlcs/reikwald/reikwald",
 		level_unlock_settings = "scripts/settings/level_unlock_settings_dlc_reikwald",
@@ -935,8 +1335,8 @@ DLCSettings = {
 					140
 				},
 				console_map_textures = {
-					selected = "area_image_karak_azgaraz_01",
-					normal = "area_image_karak_azgaraz_02"
+					selected = "area_image_reikwald_01",
+					normal = "area_image_reikwald_01"
 				},
 				banner_texture_size = {
 					48,
@@ -954,16 +1354,18 @@ DLCSettings = {
 		},
 		unlock_settings_xb1 = {
 			reikwald = {
+				id = "995B0A5D-FA90-4A80-8F98-5A34D1713F3E",
 				index = 5,
-				purchase_type = "dlc",
-				class = "UnlockDlc"
+				class = "UnlockDlc",
+				purchase_type = "dlc"
 			}
 		},
 		unlock_settings_ps4 = {
 			reikwald = {
+				id = "6c4fa61ec654d8b64e6febcd126acd6c",
 				index = 5,
-				purchase_type = "dlc",
-				class = "UnlockDlc"
+				class = "UnlockDlc",
+				purchase_type = "dlc"
 			}
 		},
 		weapons = {},
@@ -1975,14 +2377,9 @@ DLCSettings = {
 			},
 			reikwald_river_sea_battle_right_02 = {
 				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_right_02_storm",
-					breed_name = "skaven_storm_vermin_commander"
-				},
-				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_right_02_storm",
-					breed_name = "skaven_storm_vermin_commander"
+					"event_horde",
+					spawner_id = "sea_battle_right_02",
+					composition_type = "event_reikwald_sea_battle_stormvermins"
 				},
 				{
 					"event_horde",
@@ -1997,7 +2394,7 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2013,7 +2410,7 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2023,14 +2420,9 @@ DLCSettings = {
 			},
 			reikwald_river_sea_battle_left_02 = {
 				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_left_02_storm",
-					breed_name = "skaven_storm_vermin_commander"
-				},
-				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_left_02_storm",
-					breed_name = "skaven_storm_vermin_commander"
+					"event_horde",
+					spawner_id = "sea_battle_left_02",
+					composition_type = "event_reikwald_sea_battle_stormvermins"
 				},
 				{
 					"event_horde",
@@ -2045,7 +2437,7 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2060,14 +2452,9 @@ DLCSettings = {
 			},
 			reikwald_river_sea_battle_right_03 = {
 				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_right_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
-				},
-				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_right_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
+					"event_horde",
+					spawner_id = "sea_battle_right_03",
+					composition_type = "event_reikwald_sea_battle_stormvermins"
 				},
 				{
 					"event_horde",
@@ -2082,24 +2469,19 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_right_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
-				},
-				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_right_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
+					"event_horde",
+					spawner_id = "sea_battle_right_03",
+					composition_type = "event_reikwald_sea_battle_stormvermins"
 				},
 				{
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2115,7 +2497,7 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2125,14 +2507,9 @@ DLCSettings = {
 			},
 			reikwald_river_sea_battle_left_03 = {
 				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_left_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
-				},
-				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_left_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
+					"event_horde",
+					spawner_id = "sea_battle_left_03",
+					composition_type = "event_reikwald_sea_battle_stormvermins"
 				},
 				{
 					"event_horde",
@@ -2147,19 +2524,19 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
-					"spawn_at_raw",
-					spawner_id = "sea_battle_left_03_storm",
-					breed_name = "skaven_storm_vermin_commander"
+					"event_horde",
+					spawner_id = "sea_battle_left_03",
+					composition_type = "event_reikwald_sea_battle_stormvermins"
 				},
 				{
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2175,7 +2552,7 @@ DLCSettings = {
 					"continue_when",
 					duration = 80,
 					condition = function (t)
-						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 4
+						return count_breed("skaven_clan_rat") < 4 and count_breed("skaven_slave") < 4 and count_breed("skaven_storm_vermin_commander") < 10
 					end
 				},
 				{
@@ -2623,6 +3000,19 @@ DLCSettings = {
 						{
 							3,
 							4
+						}
+					}
+				}
+			},
+			event_reikwald_sea_battle_stormvermins = {
+				{
+					name = "few_stormvermins",
+					weight = 1,
+					breeds = {
+						"skaven_storm_vermin_commander",
+						{
+							2,
+							2
 						}
 					}
 				}

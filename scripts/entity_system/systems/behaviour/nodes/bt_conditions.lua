@@ -29,8 +29,10 @@ BTConditions.stagger = function (blackboard)
 end
 BTConditions.teleport_immune_stagger = function (blackboard)
 	if blackboard.stagger then
-		if blackboard.is_climbing or blackboard.is_teleporting then
+		if blackboard.is_teleporting then
 			blackboard.stagger = false
+
+			return false
 		else
 			return true
 		end
@@ -596,6 +598,10 @@ BTConditions.grey_seer_teleport = function (blackboard, index)
 
 	if teleport_done then
 		return false
+	end
+
+	if blackboard.is_teleporting then
+		return true
 	end
 
 	local next_auto_teleport_at = blackboard.next_auto_teleport_at

@@ -758,29 +758,69 @@ UIPasses.rect = {
 		return nil
 	end,
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
+		local in_size = size
+		local in_position = position
+
 		if ui_style then
+			in_position = Vector3(position[1], position[2], position[3])
 			local rect_size = ui_style.rect_size
 
 			if rect_size then
 				if ui_style.horizontal_alignment == "right" then
-					position[1] = (position[1] + size[1]) - rect_size[1]
+					in_position[1] = (in_position[1] + size[1]) - rect_size[1]
 				elseif ui_style.horizontal_alignment == "center" then
-					position[1] = position[1] + (size[1] - rect_size[1])/2
+					in_position[1] = in_position[1] + (size[1] - rect_size[1])/2
 				end
 
 				local inv_scale = RESOLUTION_LOOKUP.inv_scale
 
 				if ui_style.vertical_alignment == "center" then
-					position[2] = position[2] + (size[2] - rect_size[2])/2
+					in_position[2] = in_position[2] + (size[2] - rect_size[2])/2
 				elseif ui_style.vertical_alignment == "top" then
-					position[2] = (position[2] + size[2]) - rect_size[2]
+					in_position[2] = (in_position[2] + size[2]) - rect_size[2]
 				end
 
-				size = rect_size
+				in_size = rect_size
 			end
 		end
 
-		return UIRenderer.draw_rect(ui_renderer, position, size, ui_style.color)
+		return UIRenderer.draw_rect(ui_renderer, in_position, in_size, ui_style.color)
+	end
+}
+UIPasses.rect_screen_filler = {
+	init = function (pass_definition)
+		return nil
+	end,
+	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
+		if ui_style and ui_style.is_top_layer then
+			position[3] = 1000
+		end
+
+		local w = RESOLUTION_LOOKUP.res_w
+		local h = RESOLUTION_LOOKUP.res_h
+		local ui_pos = UIScaleVectorToResolution(position)
+		local ui_size = UIScaleVectorToResolution(size)
+		local left_pos = Vector3(0, 0, 1000)
+		local left_size = Vector2(ui_pos[1], h)
+
+		Gui.rect(ui_renderer.gui, left_pos, left_size, Color(255, 0, 0, 0))
+
+		local right_pos = Vector3(ui_pos[1] + ui_size[1], 0, 1000)
+		local right_size = Vector2(ui_pos[1], h)
+
+		Gui.rect(ui_renderer.gui, right_pos, right_size, Color(255, 0, 0, 0))
+
+		local bottom_pos = Vector3(0, 0, 1000)
+		local bottom_size = Vector2(w, ui_pos[2])
+
+		Gui.rect(ui_renderer.gui, bottom_pos, bottom_size, Color(255, 0, 0, 0))
+
+		local top_pos = Vector3(0, ui_pos[2] + ui_size[2], 1000)
+		local top_size = Vector2(w, ui_pos[2])
+
+		Gui.rect(ui_renderer.gui, top_pos, top_size, Color(255, 0, 0, 0))
+
+		return 
 	end
 }
 local border_fill_rect_color = {
@@ -1873,6 +1913,7 @@ local tooltip_background_color = {
 	3
 }
 local temp_text_lines = {}
+local platform_offset = Vector3Box(0, 0, 0)
 UIPasses.tooltip_text = {
 	init = function (pass_definition)
 		assert(pass_definition.text_id, "no text id in pass definition. YOU NEEDS IT.")
@@ -1929,7 +1970,7 @@ UIPasses.tooltip_text = {
 		local cursor_offset = ui_style.cursor_offset
 		temp_cursor_pos[1] = temp_cursor_pos[1] + ((cursor_offset and cursor_offset[1]) or 25)
 		temp_cursor_pos[2] = temp_cursor_pos[2] - ((cursor_offset and cursor_offset[2]) or 15)
-		local cursor_position = UIInverseScaleVectorToResolution(temp_cursor_pos)
+		local cursor_position = temp_cursor_pos
 		tooltip_size[2] = full_font_height*num_texts
 		tooltip_size[1] = 0
 
@@ -1958,13 +1999,17 @@ UIPasses.tooltip_text = {
 			position[2] = cursor_position[2] - full_font_height
 		end
 
+		if PLATFORM == "xb1" then
+			platform_offset[2] = ((ui_style.grow_downward and 1) or -1)*10*UserSettings.ui_scale/200
+		end
+
 		position[3] = UILayer.tooltip + 1
 
 		for i = 1, num_texts, 1 do
 			local text_line = texts[i - 1 + text_start_index]
 			local color = (ui_style.last_line_color and i == num_texts and ui_style.last_line_color) or (ui_style.line_colors and ui_style.line_colors[i]) or ui_style.text_color
 
-			UIRenderer.draw_text(ui_renderer, text_line, font_material, font_size, font_name, position, color)
+			UIRenderer.draw_text(ui_renderer, text_line, font_material, font_size, font_name, position + platform_offset:unbox(), color)
 
 			position = position + text_offset
 		end

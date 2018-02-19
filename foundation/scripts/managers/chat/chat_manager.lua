@@ -269,8 +269,6 @@ ChatManager.send_system_chat_message = function (self, channel_id, message_id, l
 	return 
 end
 ChatManager.add_local_system_message = function (self, channel_id, message, pop_chat)
-	fassert(self.has_channel(self, channel_id), "Haven't registered channel: %s", tostring(channel_id))
-
 	local message_sender = "SYSTEM"
 	local is_system_message = true
 	local is_dev = false

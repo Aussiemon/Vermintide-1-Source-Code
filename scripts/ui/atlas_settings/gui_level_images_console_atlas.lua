@@ -1,61 +1,75 @@
 level_images_console_atlas = {
-	level_image_red_moon_inn = {
+	level_image_any = {
 		size = {
-			300,
-			170
+			560,
+			310
+		},
+		uv00 = {
+			0.82666,
+			0.154297
+		},
+		uv11 = {
+			0.963379,
+			0.305664
+		}
+	},
+	level_image_dlc_dwarf_exterior = {
+		size = {
+			560,
+			310
+		},
+		uv00 = {
+			0.688965,
+			0.154297
+		},
+		uv11 = {
+			0.825684,
+			0.305664
+		}
+	},
+	level_image_dlc_reikwald_river = {
+		size = {
+			560,
+			310
 		},
 		uv00 = {
 			0.55127,
 			0.154297
 		},
 		uv11 = {
-			0.624512,
-			0.237305
+			0.687988,
+			0.305664
 		}
 	},
-	level_image_dlc_dwarf_exterior = {
+	level_image_level_list = {
 		size = {
-			350,
-			198
+			560,
+			310
 		},
 		uv00 = {
-			0.861816,
+			0.82666,
 			0.000977
 		},
 		uv11 = {
-			0.947266,
-			0.097656
+			0.963379,
+			0.152344
 		}
 	},
-	level_image_dlc_dwarf_interior = {
+	level_image_sewers = {
 		size = {
-			350,
-			198
-		},
-		uv00 = {
-			0.775391,
-			0.000977
-		},
-		uv11 = {
-			0.86084,
-			0.097656
-		}
-	},
-	level_image_dlc_beacons = {
-		size = {
-			350,
-			198
+			560,
+			310
 		},
 		uv00 = {
 			0.688965,
 			0.000977
 		},
 		uv11 = {
-			0.774414,
-			0.097656
+			0.825684,
+			0.152344
 		}
 	},
-	level_image_farm = {
+	level_image_wizard = {
 		size = {
 			560,
 			310
@@ -83,7 +97,7 @@ level_images_console_atlas = {
 			0.918945
 		}
 	},
-	level_image_dlc_portals = {
+	level_image_forest_ambush = {
 		size = {
 			560,
 			310
@@ -97,7 +111,7 @@ level_images_console_atlas = {
 			0.765625
 		}
 	},
-	level_image_dlc_reikwald_forest = {
+	level_image_dlc_dwarf_interior = {
 		size = {
 			560,
 			310
@@ -111,7 +125,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_level_list = {
+	level_image_red_moon_inn = {
 		size = {
 			560,
 			310
@@ -125,7 +139,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_end_boss = {
+	level_image_survival_02 = {
 		size = {
 			560,
 			310
@@ -139,7 +153,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_dlc_reikwald_river = {
+	level_image_tunnels = {
 		size = {
 			560,
 			310
@@ -153,7 +167,7 @@ level_images_console_atlas = {
 			0.152344
 		}
 	},
-	level_image_dlc_stromdorf_hills = {
+	level_image_city_wall = {
 		size = {
 			560,
 			310
@@ -167,7 +181,7 @@ level_images_console_atlas = {
 			0.918945
 		}
 	},
-	level_image_magnus = {
+	level_image_docks = {
 		size = {
 			560,
 			310
@@ -181,7 +195,7 @@ level_images_console_atlas = {
 			0.765625
 		}
 	},
-	level_image_merchant = {
+	level_image_dlc_chamber = {
 		size = {
 			560,
 			310
@@ -195,7 +209,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_city_wall = {
+	level_image_courtyard = {
 		size = {
 			560,
 			310
@@ -209,7 +223,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_survival_01 = {
+	level_image_magnus = {
 		size = {
 			560,
 			310
@@ -223,7 +237,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_dlc_stromdorf_town = {
+	level_image_merchant = {
 		size = {
 			560,
 			310
@@ -237,7 +251,7 @@ level_images_console_atlas = {
 			0.152344
 		}
 	},
-	level_image_forest_ambush = {
+	level_image_dlc_beacons = {
 		size = {
 			560,
 			310
@@ -265,7 +279,7 @@ level_images_console_atlas = {
 			0.765625
 		}
 	},
-	level_image_courtyard = {
+	level_image_dlc_portals = {
 		size = {
 			560,
 			310
@@ -279,7 +293,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_dlc_castle_dungeon = {
+	level_image_survival_01 = {
 		size = {
 			560,
 			310
@@ -293,7 +307,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_tunnels = {
+	level_image_dlc_reikwald_forest = {
 		size = {
 			560,
 			310
@@ -307,7 +321,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_wizard = {
+	level_image_dlc_castle = {
 		size = {
 			560,
 			310
@@ -321,7 +335,7 @@ level_images_console_atlas = {
 			0.152344
 		}
 	},
-	level_image_bridge = {
+	level_image_dlc_stromdorf_hills = {
 		size = {
 			560,
 			310
@@ -335,7 +349,7 @@ level_images_console_atlas = {
 			0.918945
 		}
 	},
-	level_image_docks = {
+	level_image_dlc_castle_dungeon = {
 		size = {
 			560,
 			310
@@ -349,7 +363,7 @@ level_images_console_atlas = {
 			0.765625
 		}
 	},
-	level_image_survival_02 = {
+	level_image_bridge = {
 		size = {
 			560,
 			310
@@ -363,7 +377,7 @@ level_images_console_atlas = {
 			0.612305
 		}
 	},
-	level_image_any = {
+	level_image_dlc_stromdorf_town = {
 		size = {
 			560,
 			310
@@ -377,7 +391,7 @@ level_images_console_atlas = {
 			0.458984
 		}
 	},
-	level_image_dlc_castle = {
+	level_image_end_boss = {
 		size = {
 			560,
 			310
@@ -391,7 +405,7 @@ level_images_console_atlas = {
 			0.305664
 		}
 	},
-	level_image_sewers = {
+	level_image_farm = {
 		size = {
 			560,
 			310

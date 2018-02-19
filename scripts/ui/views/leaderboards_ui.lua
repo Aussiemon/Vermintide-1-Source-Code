@@ -88,7 +88,7 @@ LeaderboardsUI.open = function (self, level_key)
 		local ui_scenegraph = self._ui_scenegraph
 		local target = ui_scenegraph.root.local_position
 		local target_index = 2
-		self._open_window_animation = self.animate_element_by_time(self, target, target_index, -1200, 0, UISettings.scoreboard.open_duration)
+		self._open_window_animation = self.animate_element_by_time(self, target, target_index, (UISettings.ui_scale*-1200)/100, 0, UISettings.scoreboard.open_duration)
 	end
 
 	return 
@@ -143,7 +143,7 @@ LeaderboardsUI.close = function (self)
 		local ui_scenegraph = self._ui_scenegraph
 		local target = ui_scenegraph.root.local_position
 		local target_index = 2
-		self._close_window_animation = self.animate_element_by_time(self, target, target_index, 0, -1200, UISettings.scoreboard.close_duration)
+		self._close_window_animation = self.animate_element_by_time(self, target, target_index, 0, (UISettings.ui_scale*-1200)/100, UISettings.scoreboard.close_duration)
 		self._open = false
 	end
 

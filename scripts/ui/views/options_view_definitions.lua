@@ -24,6 +24,15 @@ local scenegraph_definition = {
 			1080
 		}
 	},
+	root_filler = {
+		vertical_alignment = "center",
+		parent = "root",
+		horizontal_alignment = "center",
+		size = {
+			1920,
+			1080
+		}
+	},
 	dead_space_filler = {
 		scale = "fit",
 		position = {
@@ -1130,7 +1139,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 				dynamic_font = true,
 				font_type = "hell_shark_masked",
 				offset = {
-					base_offset[1] + 523 + 255 + 520,
+					base_offset[1] + 10 + 523 + 255 + 520,
 					base_offset[2] + 6,
 					base_offset[3]
 				},
@@ -2427,15 +2436,20 @@ SettingsWidgetTypeTemplate = {
 			local diff = max - min
 			local total_step = diff*10^num_decimals
 			local step = total_step/1
+			content.input_hold_time = content.input_hold_time or {}
 			local input_been_made = false
 
 			if input_service.get(input_service, "move_left_hold") then
 				if not input_cooldown then
-					content.internal_value = math.clamp(internal_value - step, 0, 1)
+					content.input_hold_time.left = (content.input_hold_time.left and content.input_hold_time.left + dt) or 0
+					local num_step = math.floor(math.lerp(1, 10, math.clamp(content.input_hold_time.left, 0, 1)))
+					content.internal_value = math.clamp(internal_value - step*num_step, 0, 1)
 					input_been_made = true
 				end
 			elseif input_service.get(input_service, "move_right_hold") and not input_cooldown then
-				content.internal_value = math.clamp(internal_value + step, 0, 1)
+				content.input_hold_time.right = (content.input_hold_time.right and content.input_hold_time.right + dt) or 0
+				local num_step = math.floor(math.lerp(1, 10, math.clamp(content.input_hold_time.right, 0, 1)))
+				content.internal_value = math.clamp(internal_value + step*num_step, 0, 1)
 				input_been_made = true
 			end
 
@@ -2453,6 +2467,9 @@ SettingsWidgetTypeTemplate = {
 				end
 
 				return true
+			else
+				content.input_hold_time.left = nil
+				content.input_hold_time.right = nil
 			end
 
 			return 

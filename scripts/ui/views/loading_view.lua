@@ -121,6 +121,7 @@ LoadingView.create_ui_elements = function (self)
 	self.level_name_bg_widget = UIWidget.init(definitions.level_name_bg_widget)
 	self.game_difficulty_widget = UIWidget.init(definitions.game_difficulty_widget)
 	self.game_difficulty_bg_widget = UIWidget.init(definitions.game_difficulty_bg_widget)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	if not script_data.disable_news_ticker then
 		self.news_ticker_text_widget = UIWidget.init(definitions.news_ticker_text_widget)
@@ -500,6 +501,7 @@ LoadingView.draw = function (self, dt)
 		UIRenderer.draw_widget(ui_renderer, self.widgets[i])
 	end
 
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 
 	return 

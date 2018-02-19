@@ -414,11 +414,13 @@ AccountManager.user_exists = function (self, user_id)
 	return false
 end
 AccountManager._update_bandwidth_query = function (self, dt)
-	if self._query_bandwidth_timer <= 0 then
-		self.query_bandwidth(self)
-	end
+	if GameSettingsDevelopment.bandwidth_queries_enabled then
+		if self._query_bandwidth_timer <= 0 then
+			self.query_bandwidth(self)
+		end
 
-	self._query_bandwidth_timer = self._query_bandwidth_timer - dt
+		self._query_bandwidth_timer = self._query_bandwidth_timer - dt
+	end
 
 	return 
 end
@@ -467,7 +469,7 @@ end
 local function show_wrong_profile_popup(account_manager)
 	local wanted_profile_id = account_manager._user_info.xbox_user_id
 	local wanted_profile = account_manager._gamertags[wanted_profile_id]
-	local cropped_profile = Managers.popup:fit_text_width_to_popup(wanted_profile)
+	local cropped_profile = Managers.popup:fit_text_width_to_popup(wanted_profile or "???")
 	local wrong_profile_str = string.format(Localize("wrong_profile"), cropped_profile)
 
 	account_manager._create_popup(account_manager, wrong_profile_str, "wrong_profile_header", "verify_profile", "menu_retry", "restart", "menu_return_to_title_screen", "show_profile_picker", "menu_select_profile", true)
@@ -712,7 +714,9 @@ end
 AccountManager.initiate_leave_game = function (self)
 	self._leave_game = true
 
-	Presence.set(self._user_id, "")
+	if self._user_id then
+		Presence.set(self._user_id, "")
+	end
 
 	return 
 end
@@ -749,6 +753,12 @@ AccountManager.reset = function (self)
 	self._unlocked_achievements = {}
 
 	return 
+end
+AccountManager.lost_connection_to_xbox_live = function (self)
+	return self._fatal_error or Network.fatal_error()
+end
+AccountManager.is_signed_in = function (self)
+	return self._initiated
 end
 AccountManager.destroy = function (self)
 	self.close_storage(self)

@@ -859,7 +859,10 @@ NetworkLookup.anims = {
 	"attack_sweep_left",
 	"attack_sweep_right",
 	"charge_attack_lunge_miss",
-	"bring_beer"
+	"bring_beer",
+	"disappear",
+	"reappear",
+	"idle_loading_battery"
 }
 NetworkLookup.lobby_data = {
 	"level_key",

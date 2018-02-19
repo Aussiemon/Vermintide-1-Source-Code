@@ -466,7 +466,7 @@ view_settings = {
 			if PLATFORM == "win32" then
 				return UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn", "material", "materials/ui/ui_1080p_level_images", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 			else
-				return UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
+				return UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts", "material", "video/dwarfs_trailer", "material", "video/stromdorf_trailer", "material", "video/survival_ruins_trailer", "material", "video/reikwald_trailer", "material", "video/drachenfels_trailer")
 			end
 
 			return 

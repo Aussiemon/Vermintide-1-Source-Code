@@ -1193,7 +1193,7 @@ TutorialTemplates.elite_tutorial_cage_respawn = {
 }
 TutorialTemplates.elite_player_dead = {
 	needed_points = 3,
-	text = "tutorial_infoslare_elite_death",
+	text = "tutorial_infoslate_elite_death",
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	get_text = function (data)

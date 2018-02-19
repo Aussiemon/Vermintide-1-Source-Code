@@ -48,6 +48,20 @@ map_atlas = {
 		},
 		uv00 = {
 			0.497559,
+			0.918945
+		},
+		uv11 = {
+			0.518066,
+			0.940918
+		}
+	},
+	level_location_long_icon_05 = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.497559,
 			0.89502
 		},
 		uv11 = {
@@ -55,7 +69,7 @@ map_atlas = {
 			0.916992
 		}
 	},
-	level_location_dlc_icon_stromdorf_02 = {
+	level_location_dlc_icon_stromdorf_01 = {
 		size = {
 			42,
 			45
@@ -83,7 +97,7 @@ map_atlas = {
 			0.869141
 		}
 	},
-	level_location_dlc_icon_dwarf_interior = {
+	level_location_short_icon_01 = {
 		size = {
 			42,
 			45
@@ -97,7 +111,7 @@ map_atlas = {
 			0.845215
 		}
 	},
-	level_location_short_icon_01 = {
+	level_location_dlc_icon_dwarf_beacon = {
 		size = {
 			42,
 			45
@@ -111,7 +125,7 @@ map_atlas = {
 			0.821289
 		}
 	},
-	level_location_dlc_icon_reikwald_02 = {
+	level_location_short_icon_04 = {
 		size = {
 			42,
 			45
@@ -125,7 +139,7 @@ map_atlas = {
 			0.797363
 		}
 	},
-	level_location_short_icon_04 = {
+	level_location_short_icon_06 = {
 		size = {
 			42,
 			45
@@ -139,7 +153,7 @@ map_atlas = {
 			0.773438
 		}
 	},
-	level_location_dlc_icon_dungeon = {
+	level_location_short_icon_03 = {
 		size = {
 			42,
 			45
@@ -153,7 +167,7 @@ map_atlas = {
 			0.749512
 		}
 	},
-	level_location_short_icon_03 = {
+	level_location_short_icon_02 = {
 		size = {
 			42,
 			45
@@ -167,7 +181,7 @@ map_atlas = {
 			0.725586
 		}
 	},
-	level_location_dlc_icon_portals = {
+	level_location_dlc_icon_chamber = {
 		size = {
 			42,
 			45
@@ -181,7 +195,7 @@ map_atlas = {
 			0.70166
 		}
 	},
-	level_location_short_icon_02 = {
+	level_location_dlc_icon_portals = {
 		size = {
 			42,
 			45
@@ -195,7 +209,7 @@ map_atlas = {
 			0.677734
 		}
 	},
-	level_location_dlc_icon_dwarf_exterior = {
+	level_location_long_icon_02 = {
 		size = {
 			42,
 			45
@@ -207,20 +221,6 @@ map_atlas = {
 		uv11 = {
 			0.495605,
 			0.98877
-		}
-	},
-	level_location_long_icon_02 = {
-		size = {
-			42,
-			45
-		},
-		uv00 = {
-			0.475098,
-			0.942871
-		},
-		uv11 = {
-			0.495605,
-			0.964844
 		}
 	},
 	drachenfels_location_icon_part_06 = {
@@ -244,6 +244,20 @@ map_atlas = {
 		},
 		uv00 = {
 			0.475098,
+			0.942871
+		},
+		uv11 = {
+			0.495605,
+			0.964844
+		}
+	},
+	level_location_dlc_icon_stromdorf_02 = {
+		size = {
+			42,
+			45
+		},
+		uv00 = {
+			0.475098,
 			0.918945
 		},
 		uv11 = {
@@ -251,7 +265,7 @@ map_atlas = {
 			0.940918
 		}
 	},
-	level_location_dlc_icon_dwarf_beacon = {
+	level_location_long_icon_01 = {
 		size = {
 			42,
 			45
@@ -265,7 +279,7 @@ map_atlas = {
 			0.916992
 		}
 	},
-	level_location_short_icon_06 = {
+	level_location_dlc_icon_dwarf_exterior = {
 		size = {
 			42,
 			45
@@ -279,7 +293,7 @@ map_atlas = {
 			0.893066
 		}
 	},
-	level_location_any_icon = {
+	level_location_long_icon_07 = {
 		size = {
 			42,
 			45
@@ -293,7 +307,7 @@ map_atlas = {
 			0.869141
 		}
 	},
-	level_location_long_icon_01 = {
+	level_location_long_icon_06 = {
 		size = {
 			42,
 			45
@@ -307,7 +321,7 @@ map_atlas = {
 			0.845215
 		}
 	},
-	level_location_dlc_icon_stromdorf_01 = {
+	level_location_long_icon_03 = {
 		size = {
 			42,
 			45
@@ -321,7 +335,7 @@ map_atlas = {
 			0.821289
 		}
 	},
-	level_location_long_icon_03 = {
+	level_location_dlc_icon_reikwald_02 = {
 		size = {
 			42,
 			45
@@ -335,7 +349,7 @@ map_atlas = {
 			0.797363
 		}
 	},
-	level_location_long_icon_05 = {
+	level_location_any_icon = {
 		size = {
 			42,
 			45
@@ -349,7 +363,7 @@ map_atlas = {
 			0.773438
 		}
 	},
-	level_location_long_icon_07 = {
+	level_location_dlc_icon_dwarf_interior = {
 		size = {
 			42,
 			45
@@ -363,7 +377,7 @@ map_atlas = {
 			0.749512
 		}
 	},
-	level_location_long_icon_06 = {
+	level_location_dlc_icon_01 = {
 		size = {
 			42,
 			45
@@ -377,7 +391,7 @@ map_atlas = {
 			0.725586
 		}
 	},
-	level_location_dlc_icon_01 = {
+	level_location_dlc_icon_02 = {
 		size = {
 			42,
 			45
@@ -391,7 +405,7 @@ map_atlas = {
 			0.70166
 		}
 	},
-	level_location_dlc_icon_02 = {
+	level_location_dlc_icon_castle = {
 		size = {
 			42,
 			45
@@ -405,7 +419,7 @@ map_atlas = {
 			0.677734
 		}
 	},
-	level_location_dlc_icon_castle = {
+	level_location_dlc_icon_dungeon = {
 		size = {
 			42,
 			45
@@ -419,7 +433,7 @@ map_atlas = {
 			0.998535
 		}
 	},
-	difficulty_icon_small_locked = {
+	difficulty_icon_small_02 = {
 		size = {
 			21,
 			50
@@ -447,7 +461,7 @@ map_atlas = {
 			0.680176
 		}
 	},
-	difficulty_icon_small_04 = {
+	difficulty_icon_small_03 = {
 		size = {
 			21,
 			50
@@ -461,7 +475,7 @@ map_atlas = {
 			0.79541
 		}
 	},
-	difficulty_icon_small_03 = {
+	difficulty_icon_small_01 = {
 		size = {
 			21,
 			50
@@ -475,7 +489,7 @@ map_atlas = {
 			0.744629
 		}
 	},
-	difficulty_icon_small_02 = {
+	difficulty_icon_small_04 = {
 		size = {
 			21,
 			50
@@ -489,7 +503,7 @@ map_atlas = {
 			0.429688
 		}
 	},
-	difficulty_icon_small_01 = {
+	difficulty_icon_small_locked = {
 		size = {
 			21,
 			50
@@ -503,7 +517,7 @@ map_atlas = {
 			0.40332
 		}
 	},
-	level_title_banner_right = {
+	level_title_banner_left = {
 		size = {
 			58,
 			43
@@ -517,7 +531,7 @@ map_atlas = {
 			0.998535
 		}
 	},
-	level_title_banner_left = {
+	level_title_banner_right = {
 		size = {
 			58,
 			43
@@ -531,7 +545,7 @@ map_atlas = {
 			0.998535
 		}
 	},
-	difficulty_icon_disabled_selected = {
+	difficulty_icon_large_glow_effect = {
 		size = {
 			59,
 			59
@@ -545,7 +559,7 @@ map_atlas = {
 			0.976074
 		}
 	},
-	difficulty_icon_disabled = {
+	difficulty_icon_disabled_selected = {
 		size = {
 			59,
 			59
@@ -559,7 +573,7 @@ map_atlas = {
 			0.945313
 		}
 	},
-	difficulty_icon_large_glow_effect = {
+	difficulty_icon_disabled = {
 		size = {
 			59,
 			59
@@ -573,7 +587,7 @@ map_atlas = {
 			0.914551
 		}
 	},
-	difficulty_icon_large_04 = {
+	difficulty_icon_large_02_selected = {
 		size = {
 			59,
 			59
@@ -587,7 +601,7 @@ map_atlas = {
 			0.883789
 		}
 	},
-	difficulty_icon_large_03 = {
+	difficulty_icon_large_04 = {
 		size = {
 			59,
 			59
@@ -601,7 +615,7 @@ map_atlas = {
 			0.975586
 		}
 	},
-	difficulty_icon_large_02_selected = {
+	difficulty_icon_large_03 = {
 		size = {
 			59,
 			59
@@ -615,7 +629,7 @@ map_atlas = {
 			0.942383
 		}
 	},
-	difficulty_icon_large_02 = {
+	difficulty_icon_large_01_selected = {
 		size = {
 			59,
 			59
@@ -629,7 +643,7 @@ map_atlas = {
 			0.90918
 		}
 	},
-	difficulty_icon_large_01 = {
+	difficulty_icon_large_02 = {
 		size = {
 			59,
 			59
@@ -643,7 +657,7 @@ map_atlas = {
 			0.875977
 		}
 	},
-	difficulty_icon_large_01_selected = {
+	difficulty_icon_large_01 = {
 		size = {
 			59,
 			59
@@ -685,7 +699,7 @@ map_atlas = {
 			0.819824
 		}
 	},
-	octagon_button_toggled_hover = {
+	map_icon_browser_01 = {
 		size = {
 			64,
 			64
@@ -699,7 +713,7 @@ map_atlas = {
 			0.786621
 		}
 	},
-	map_icon_reset_02 = {
+	map_icon_reset_01 = {
 		size = {
 			64,
 			64
@@ -713,7 +727,7 @@ map_atlas = {
 			0.753418
 		}
 	},
-	octagon_button_hover = {
+	octagon_button_toggled_hover = {
 		size = {
 			64,
 			64
@@ -741,7 +755,7 @@ map_atlas = {
 			0.687012
 		}
 	},
-	map_icon_browser_01 = {
+	octagon_button_toggled = {
 		size = {
 			64,
 			64
@@ -755,7 +769,7 @@ map_atlas = {
 			0.978027
 		}
 	},
-	map_icon_search_02 = {
+	octagon_button_hover = {
 		size = {
 			64,
 			64
@@ -769,7 +783,7 @@ map_atlas = {
 			0.944824
 		}
 	},
-	octagon_button_clicked = {
+	map_icon_friends_02 = {
 		size = {
 			64,
 			64
@@ -783,7 +797,7 @@ map_atlas = {
 			0.911621
 		}
 	},
-	map_icon_friends_02 = {
+	map_icon_friends_01 = {
 		size = {
 			64,
 			64
@@ -797,7 +811,7 @@ map_atlas = {
 			0.878418
 		}
 	},
-	map_icon_friends_01 = {
+	octagon_button_clicked = {
 		size = {
 			64,
 			64
@@ -811,7 +825,7 @@ map_atlas = {
 			0.845215
 		}
 	},
-	map_icon_reset_01 = {
+	map_icon_search_02 = {
 		size = {
 			64,
 			64
@@ -825,7 +839,7 @@ map_atlas = {
 			0.875488
 		}
 	},
-	octagon_button_toggled = {
+	octagon_button_normal = {
 		size = {
 			64,
 			64
@@ -839,7 +853,7 @@ map_atlas = {
 			0.842285
 		}
 	},
-	octagon_button_normal = {
+	map_icon_reset_02 = {
 		size = {
 			64,
 			64
@@ -881,7 +895,7 @@ map_atlas = {
 			0.653809
 		}
 	},
-	zoom_button_hover = {
+	zoom_button_selected = {
 		size = {
 			82,
 			27
@@ -909,7 +923,7 @@ map_atlas = {
 			0.524414
 		}
 	},
-	zoom_button_selected = {
+	zoom_button_hover = {
 		size = {
 			82,
 			27
@@ -923,7 +937,7 @@ map_atlas = {
 			0.509277
 		}
 	},
-	last_stand_back_button_hover = {
+	last_stand_back_button_normal = {
 		size = {
 			84,
 			84
@@ -937,7 +951,7 @@ map_atlas = {
 			0.812012
 		}
 	},
-	last_stand_back_button_normal = {
+	last_stand_back_button_hover = {
 		size = {
 			84,
 			84
@@ -965,7 +979,7 @@ map_atlas = {
 			0.782227
 		}
 	},
-	level_location_bg_01 = {
+	level_location_icon_01_unlocked = {
 		size = {
 			90,
 			100
@@ -979,7 +993,7 @@ map_atlas = {
 			0.769043
 		}
 	},
-	level_location_bg_03 = {
+	level_location_bg_01 = {
 		size = {
 			90,
 			100
@@ -993,7 +1007,7 @@ map_atlas = {
 			0.991211
 		}
 	},
-	level_location_icon_03 = {
+	level_location_bg_02 = {
 		size = {
 			90,
 			100
@@ -1007,7 +1021,7 @@ map_atlas = {
 			0.991211
 		}
 	},
-	level_location_icon_01_unlocked = {
+	level_location_icon_05 = {
 		size = {
 			90,
 			100
@@ -1021,7 +1035,7 @@ map_atlas = {
 			0.991211
 		}
 	},
-	level_location_bg_02 = {
+	level_location_bg_03 = {
 		size = {
 			90,
 			100
@@ -1035,7 +1049,7 @@ map_atlas = {
 			0.833496
 		}
 	},
-	level_location_icon_05 = {
+	level_location_icon_03 = {
 		size = {
 			90,
 			100
@@ -1105,7 +1119,7 @@ map_atlas = {
 			0.435547
 		}
 	},
-	level_location_bg_03_hover = {
+	level_location_bg_02_hover = {
 		size = {
 			110,
 			120
@@ -1119,7 +1133,7 @@ map_atlas = {
 			0.376953
 		}
 	},
-	level_location_bg_01_hover = {
+	level_location_bg_03_hover = {
 		size = {
 			110,
 			120
@@ -1133,7 +1147,7 @@ map_atlas = {
 			0.316406
 		}
 	},
-	level_location_bg_02_hover = {
+	level_location_bg_01_hover = {
 		size = {
 			110,
 			120
@@ -1273,7 +1287,7 @@ map_atlas = {
 			0.92627
 		}
 	},
-	survival_button_hover = {
+	survival_button_disabled = {
 		size = {
 			209,
 			25
@@ -1287,7 +1301,7 @@ map_atlas = {
 			0.912109
 		}
 	},
-	survival_button_disabled = {
+	survival_button_hover = {
 		size = {
 			209,
 			25
@@ -1343,7 +1357,7 @@ map_atlas = {
 			0.809082
 		}
 	},
-	map_level_preview_frame_02 = {
+	map_level_preview_frame = {
 		size = {
 			325,
 			197
@@ -1357,7 +1371,7 @@ map_atlas = {
 			0.880859
 		}
 	},
-	map_level_preview_frame = {
+	map_level_preview_frame_02 = {
 		size = {
 			325,
 			197

@@ -863,6 +863,16 @@ MatchmakingManager.is_game_matchmaking = function (self)
 
 	return is_matchmaking, private_game
 end
+MatchmakingManager.is_searching_for_game = function (self)
+	if self._state == nil then
+		return false
+	end
+
+	local name = self._state.NAME
+	local is_searching = name == "MatchmakingStateSearchGame" or name == "MatchmakingStateRequestJoinGame" or name == "MatchmakingStateRequestProfiles" or name == "MatchmakingStateJoinGame"
+
+	return is_searching
+end
 MatchmakingManager.rpc_set_matchmaking = function (self, sender, client_cookie, host_cookie, is_matchmaking, private_game)
 	if not self.handshaker_client:validate_cookies(client_cookie, host_cookie) then
 		return 

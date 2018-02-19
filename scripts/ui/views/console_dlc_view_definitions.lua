@@ -243,12 +243,12 @@ local scenegraph_definition = {
 		horizontal_alignment = "right",
 		position = {
 			0,
-			50,
+			25,
 			2
 		},
 		size = {
 			IMAGE_SIZE[1],
-			50
+			25
 		}
 	},
 	list_edge_fade_bottom = {
@@ -429,6 +429,16 @@ local background_widget_definitions = {
 	}
 }
 
+local function find_skin_settings(dlc_name)
+	for name, skin_settings in pairs(SkinSettings) do
+		if skin_settings.dlc_name == dlc_name then
+			return skin_settings
+		end
+	end
+
+	return nil
+end
+
 local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, video_material_name, bg_overlay_id, id, is_dlc_unlocked)
 	local widget = {}
 	local widget_color = {
@@ -605,6 +615,22 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 				end
 			},
 			{
+				style_id = "equipped_text",
+				pass_type = "text",
+				text_id = "equipped_text_id",
+				content_check_function = function (content)
+					return content.skin_settings and Managers.unlock:is_dlc_unlocked(content.dlc_name) and PlayerData.skins_activated_data[content.skin_settings.profile_name] == content.skin_settings.name
+				end
+			},
+			{
+				style_id = "equipped_text_shade",
+				pass_type = "text",
+				text_id = "equipped_text_id",
+				content_check_function = function (content)
+					return content.skin_settings and Managers.unlock:is_dlc_unlocked(content.dlc_name) and PlayerData.skins_activated_data[content.skin_settings.profile_name] == content.skin_settings.name
+				end
+			},
+			{
 				style_id = "coming_soon_text",
 				pass_type = "text",
 				text_id = "coming_soon_id",
@@ -618,8 +644,10 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 		video_active = false,
 		owned_id = "dlc_checkmark",
 		text_id = "owned",
+		equipped_text_id = "item_compare_window_title",
 		coming_soon_id = "igs_coming_soon",
 		dlc_name = dlc_name,
+		skin_settings = find_skin_settings(dlc_name),
 		texture_id = texture_id,
 		bg_overlay_id = bg_overlay_id or "karak_bg",
 		id = id,
@@ -802,13 +830,13 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 			font_type = "hell_shark_masked",
 			text_color = {
 				255,
-				140,
-				140,
-				140
+				189,
+				170,
+				143
 			},
 			offset = {
-				-10,
-				0,
+				-86,
+				33,
 				4
 			}
 		},
@@ -822,13 +850,55 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 			dynamic_font = true,
 			font_type = "hell_shark_masked",
 			text_color = {
-				128,
+				255,
 				0,
 				0,
 				0
 			},
 			offset = {
-				-8,
+				-84,
+				31,
+				3
+			}
+		},
+		equipped_text = {
+			word_wrap = true,
+			localize = true,
+			font_size = 36,
+			pixel_perfect = false,
+			horizontal_alignment = "right",
+			vertical_alignment = "bottom",
+			dynamic_font = true,
+			font_type = "hell_shark_masked",
+			text_color = {
+				255,
+				0,
+				140,
+				0
+			},
+			offset = {
+				-86,
+				0,
+				4
+			}
+		},
+		equipped_text_shade = {
+			font_size = 36,
+			localize = true,
+			word_wrap = true,
+			pixel_perfect = false,
+			horizontal_alignment = "right",
+			vertical_alignment = "bottom",
+			dynamic_font = true,
+			font_type = "hell_shark_masked",
+			text_color = {
+				255,
+				0,
+				0,
+				0
+			},
+			offset = {
+				-84,
 				-2,
 				3
 			}
@@ -838,17 +908,17 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 			horizontal_alignment = "right",
 			texture_size = {
 				96,
-				96
+				128
 			},
 			color = {
 				255,
-				140,
-				140,
-				140
+				255,
+				255,
+				255
 			},
 			offset = {
-				-18.75,
-				52.5,
+				0,
+				-30,
 				10
 			}
 		},
@@ -857,7 +927,7 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 			horizontal_alignment = "right",
 			texture_size = {
 				96,
-				96
+				128
 			},
 			color = {
 				128,
@@ -866,8 +936,8 @@ local function create_dlc_entry(scenegraph_id, offset_y, texture_id, dlc_name, v
 				0
 			},
 			offset = {
-				-15,
-				48.75,
+				4,
+				-34,
 				9
 			}
 		},
@@ -1072,9 +1142,9 @@ local generic_input_actions = {
 	},
 	{
 		priority = 2,
-		input_action = "y",
 		description_text = "input_description_information",
-		ignore_keybinding = true
+		ignore_keybinding = true,
+		input_action = (PLATFORM == "ps4" and "triangle") or "y"
 	},
 	{
 		input_action = "l1_r1",
@@ -1095,15 +1165,10 @@ local menu_descriptions_input_actions = {
 		actions = {
 			{
 				input_action = "confirm",
-				priority = 3,
+				priority = 4,
 				description_text = "dlc1_4_input_description_storepage_xb1"
 			}
 		}
-	},
-	owned = {
-		name = "not_owned",
-		gamepad_support = true,
-		actions = {}
 	},
 	not_owned_video_play = {
 		name = "not_owned_video_play",
@@ -1111,12 +1176,12 @@ local menu_descriptions_input_actions = {
 		actions = {
 			{
 				input_action = "confirm",
-				priority = 3,
+				priority = 4,
 				description_text = "dlc1_4_input_description_storepage_xb1"
 			},
 			{
 				input_action = "special_1",
-				priority = 4,
+				priority = 5,
 				ignore_localization = true,
 				description_text = Localize("input_description_play") .. " video"
 			}
@@ -1128,16 +1193,21 @@ local menu_descriptions_input_actions = {
 		actions = {
 			{
 				input_action = "confirm",
-				priority = 3,
+				priority = 4,
 				description_text = "dlc1_4_input_description_storepage_xb1"
 			},
 			{
 				input_action = "special_1",
-				priority = 4,
+				priority = 5,
 				ignore_localization = true,
 				description_text = "Stop video"
 			}
 		}
+	},
+	owned = {
+		name = "owned",
+		gamepad_support = true,
+		actions = {}
 	},
 	owned_video_play = {
 		name = "owned_video_play",
@@ -1145,7 +1215,7 @@ local menu_descriptions_input_actions = {
 		actions = {
 			{
 				input_action = "special_1",
-				priority = 3,
+				priority = 4,
 				ignore_localization = true,
 				description_text = Localize("input_description_play") .. " video"
 			}
@@ -1157,9 +1227,33 @@ local menu_descriptions_input_actions = {
 		actions = {
 			{
 				input_action = "special_1",
-				priority = 3,
+				priority = 4,
 				ignore_localization = true,
 				description_text = "Stop video"
+			}
+		}
+	},
+	owned_equip_skin = {
+		name = "owned_equip",
+		gamepad_support = true,
+		actions = {
+			{
+				input_action = "special_1",
+				priority = 4,
+				ignore_localization = true,
+				description_text = Localize("input_description_equip")
+			}
+		}
+	},
+	owned_unequip_skin = {
+		name = "owned_unequip",
+		gamepad_support = true,
+		actions = {
+			{
+				input_action = "special_1",
+				priority = 4,
+				ignore_localization = true,
+				description_text = Localize("input_description_unequip")
 			}
 		}
 	}
@@ -1184,6 +1278,10 @@ local tab_widget = {
 			{
 				pass_type = "rect",
 				style_id = "rect"
+			},
+			{
+				pass_type = "rect",
+				style_id = "selection"
 			},
 			{
 				style_id = "dlc_left_text",
@@ -1329,23 +1427,51 @@ local tab_widget = {
 				60
 			}
 		},
+		divider = {
+			vertical_alignment = "top",
+			horizontal_alignment = "center",
+			color = {
+				255,
+				60,
+				60,
+				60
+			},
+			rect_size = {
+				2,
+				60
+			},
+			offset = {
+				0,
+				100,
+				10
+			}
+		},
+		selection = {
+			vertical_alignment = "top",
+			horizontal_alignment = "left",
+			color = Colors.get_color_table_with_alpha("cheeseburger", 255),
+			rect_size = {
+				100,
+				2
+			},
+			offset = {
+				0,
+				48,
+				12
+			}
+		},
 		dlc_left_text = {
-			word_wrap = true,
+			word_wrap = false,
 			localize = true,
 			pixel_perfect = false,
-			font_size = 46,
-			horizontal_alignment = "center",
+			font_size = 56,
+			horizontal_alignment = "right",
 			font_type = "hell_shark",
-			vertical_alignment = "top",
+			vertical_alignment = "center",
 			dynamic_font = true,
 			font_size_large = 56,
 			font_size_small = 46,
-			selected_color = {
-				255,
-				255,
-				255,
-				255
-			},
+			selected_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 			unselected_color = {
 				255,
 				140,
@@ -1360,27 +1486,22 @@ local tab_widget = {
 			},
 			offset = {
 				0,
-				100,
+				335,
 				4
 			}
 		},
 		dlc_right_text = {
-			word_wrap = true,
+			word_wrap = false,
 			localize = true,
 			pixel_perfect = false,
-			font_size = 46,
-			horizontal_alignment = "center",
+			font_size = 56,
+			horizontal_alignment = "left",
 			font_type = "hell_shark",
-			vertical_alignment = "top",
+			vertical_alignment = "center",
 			dynamic_font = true,
 			font_size_large = 56,
 			font_size_small = 46,
-			selected_color = {
-				255,
-				255,
-				255,
-				255
-			},
+			selected_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 			unselected_color = {
 				255,
 				140,
@@ -1395,7 +1516,7 @@ local tab_widget = {
 			},
 			offset = {
 				-0,
-				100,
+				335,
 				4
 			}
 		}

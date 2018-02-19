@@ -35,6 +35,10 @@ ProfileView.input_service = function (self)
 end
 ProfileView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(profile_view_definitions.scenegraph)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
+
+	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
+	UIRenderer.clear_scenegraph_queue(self.top_renderer)
 
 	return 
 end
@@ -389,6 +393,7 @@ ProfileView.draw_widgets = function (self, dt, input_service)
 	end
 
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_filler_widget)
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 
 	local top_renderer = self.top_renderer

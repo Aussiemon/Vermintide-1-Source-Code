@@ -53,15 +53,6 @@ local Credits = {
 			type = "person"
 		},
 		{
-			text = "Producer",
-			localized = false,
-			type = "title"
-		},
-		{
-			text = "Liam O'Neill",
-			type = "person"
-		},
-		{
 			text = "Head of Production",
 			localized = false,
 			type = "title"
@@ -575,6 +566,10 @@ local Credits = {
 			text = "QA Lead",
 			localized = false,
 			type = "title"
+		},
+		{
+			text = "Liam O'Neill",
+			type = "person"
 		},
 		{
 			text = "Otto Elggren",
@@ -1567,6 +1562,16 @@ local Credits = {
 		{
 			text = " ",
 			type = "person"
+		},
+		{
+			text = "MoGi Group",
+			localized = false,
+			type = "header"
+		},
+		{
+			text = "allcorrect group",
+			localized = false,
+			type = "header"
 		},
 		{
 			text = "Playtesters",

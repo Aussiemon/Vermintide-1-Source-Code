@@ -34,7 +34,7 @@ LobbyMembers.update = function (self)
 
 			printf("[LobbyMembers] Member joined %s", tostring(peer_id))
 
-			if PLATFORM == "xb1" then
+			if PLATFORM == "xb1" and GameSettingsDevelopment.bandwidth_queries_enabled then
 				Managers.account:query_bandwidth()
 			end
 		end
@@ -51,7 +51,7 @@ LobbyMembers.update = function (self)
 			members_left[#members_left + 1] = peer_id
 			members[peer_id] = nil
 
-			if PLATFORM == "xb1" and table.size(members) <= 1 then
+			if PLATFORM == "xb1" and GameSettingsDevelopment.bandwidth_queries_enabled and table.size(members) <= 1 then
 				Managers.voice_chat:initate_voice_chat()
 				Managers.account:reset_bandwidth_query()
 			end

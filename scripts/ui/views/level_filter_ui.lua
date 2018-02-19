@@ -86,15 +86,18 @@ LevelFilterUI.create_ui_elements = function (self, levels)
 		local level_image = level_settings.level_image
 		local act = level_settings.act
 		local area = map_settings.area
-		local key = act or area
+		local console_area = level_settings.console_area
+		local key = console_area or act or area
 		local marked = marked_levels[level_key]
 		local display_name = nil
 
-		if not act then
+		if console_area then
+			display_name = console_area
+		elseif act then
+			display_name = act .. "_ls"
+		else
 			local area_settings = AreaSettings[area]
 			display_name = area_settings.display_name
-		else
-			display_name = act .. "_ls"
 		end
 
 		if not elements_by_key[key] then
@@ -107,10 +110,6 @@ LevelFilterUI.create_ui_elements = function (self, levels)
 		local element = elements_by_key[key]
 		local content = element.content
 		content.title = (display_name and Localize(display_name)) or "n/a"
-
-		if not act then
-			content.use_divider = true
-		end
 
 		for i = 1, 4, 1 do
 			local slot_key = "slot_" .. i
@@ -275,17 +274,22 @@ LevelFilterUI.set_selected_level = function (self, level_key)
 
 		if map_settings then
 			local area = map_settings.area
+			local texture = nil
 
-			if area ~= self.selected_area then
+			if level_settings.console_level_filter_image then
+				texture = level_settings.console_level_filter_image
+
+				self._set_background_texture(self, texture)
+			else
 				local area_settings = AreaSettings[area]
 				local console_map_textures = area_settings.console_map_textures
-				local texture = console_map_textures.selected
+				texture = console_map_textures.selected
 
 				self._set_background_texture(self, texture)
 			end
 
 			self.previous_area = self.selected_area
-			self.selected_area = area
+			self.selected_area = texture
 		end
 	end
 

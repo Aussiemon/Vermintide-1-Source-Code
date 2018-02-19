@@ -310,6 +310,7 @@ InventoryView.create_ui_elements = function (self)
 	self.cancel_button_widget = UIWidget.init(widget_definitions.cancel_button)
 	self.equip_button_widget = UIWidget.init(widget_definitions.equip_button)
 	self.dead_space_filler = UIWidget.init(widget_definitions.dead_space_filler)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -330,6 +331,7 @@ InventoryView.draw = function (self, dt)
 
 	UIRenderer.draw_widget(ui_renderer, self.title_widget)
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_filler)
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 
 	if not gamepad_active then
 		UIRenderer.draw_widget(ui_renderer, self.equip_button_widget)

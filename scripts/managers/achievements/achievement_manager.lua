@@ -477,6 +477,8 @@ if PLATFORM == "xb1" then
 			end
 		end
 
+		self._hero_stats_initialized = true
+
 		Application.warning("[AchievementManager] Hero stats initialized!")
 
 		return 
@@ -496,6 +498,12 @@ if PLATFORM == "xb1" then
 
 		if not stats_id then
 			Application.warning("[AchievementManager] Hero stats update --> FAILED! due to missing stats_id")
+
+			return 
+		end
+
+		if not self._hero_stats_initialized then
+			Application.warning("[AchievementManager] Hero stats update --> FAILED! Stats were not initialized!")
 
 			return 
 		end

@@ -35,6 +35,12 @@ TelemetryEvents.game_started = function (self, is_server, level_key, difficulty)
 
 	return 
 end
+TelemetryEvents.round_started = function (self)
+	table.clear(params)
+	self.manager:register_event("round_started", params)
+
+	return 
+end
 TelemetryEvents.game_ended = function (self, player, is_server, level_key, difficulty, reason)
 	table.clear(params)
 

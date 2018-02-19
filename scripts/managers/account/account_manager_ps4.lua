@@ -44,9 +44,6 @@ AccountManager.init = function (self)
 		offset = 0
 	}
 	self._fetch_friends_timer = FETCH_FRIEND_TIME
-	self._fetching_region = false
-	self._region_fetch_status = "Uninitialized"
-	self._next_region_fetch = 0
 	self._fetching_matchmaking_data = false
 	self._next_matchmaking_data_fetch = 0
 
@@ -130,7 +127,6 @@ AccountManager.update = function (self, dt)
 	self._update_psn(self)
 	self._notify_plus(self)
 	self._update_friends(self, dt)
-	self._update_region_fetch(self, dt)
 	self._update_matchmaking_data(self, dt)
 	self._web_api:update(dt)
 	self._update_profile_dialog(self)
@@ -292,56 +288,7 @@ AccountManager._update_friends = function (self, dt)
 	return 
 end
 AccountManager.region = function (self)
-	return self._region
-end
-AccountManager.region_fetch_status = function (self)
-	return self._region_fetch_status
-end
-AccountManager._update_region_fetch = function (self, dt)
-	local t = Managers.time:time("main")
-
-	if not self._region and not self._fetching_region and self._next_region_fetch <= t then
-		self._fetch_region(self, t)
-	end
-
-	return 
-end
-AccountManager._fetch_region = function (self, t)
-	print("FETCHING REGION")
-
-	local np_id = self._np_id
-	local api_group = "userProfile"
-	local path = string.format("/v1/users/%s/profile?fields=region", tostring(np_id))
-	local method = WebApi.GET
-	local content = nil
-	local response_callback = callback(self, "cb_fetch_region")
-
-	self._web_api:send_request(np_id, api_group, path, method, content, response_callback)
-
-	self._fetching_region = true
-	self._region_fetch_status = "Fetching"
-	self._next_region_fetch = t + 3
-
-	return 
-end
-AccountManager.cb_fetch_region = function (self, data)
-	self._fetching_region = false
-
-	if data == nil then
-		self._region_fetch_status = "Failed"
-
-		print("FAILED FETCH REGION")
-
-		return 
-	end
-
-	self._region_fetch_status = "Successful"
-
-	print("REGION FETCHED", data.region)
-
-	self._region = data.region
-
-	return 
+	return PS4.user_country(self._initial_user_id)
 end
 AccountManager._update_matchmaking_data = function (self, dt)
 	local t = Managers.time:time("main")

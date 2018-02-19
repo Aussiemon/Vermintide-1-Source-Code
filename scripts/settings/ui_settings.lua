@@ -1,3 +1,17 @@
+local function get_ui_scale()
+	local default_value = 100
+
+	if PLATFORM == "xb1" then
+		local console_type = XboxOne.console_type()
+
+		if console_type == XboxOne.CONSOLE_TYPE_XBOX_ONE_X_DEVKIT or console_type == XboxOne.CONSOLE_TYPE_XBOX_ONE_X then
+			default_value = 150
+		end
+	end
+
+	return Application.user_setting("ui_scale") or default_value
+end
+
 UISettings = {
 	start_drag_threshold = 0.15,
 	use_subtitles = true,
@@ -12,7 +26,7 @@ UISettings = {
 		Application.user_setting("root_scale_x") or 1,
 		Application.user_setting("root_scale_y") or 1
 	},
-	ui_scale = Application.user_setting("ui_scale") or 100,
+	ui_scale = get_ui_scale(),
 	use_hud_screen_fit = Application.user_setting("use_hud_screen_fit") or false,
 	interaction = {
 		bar = {

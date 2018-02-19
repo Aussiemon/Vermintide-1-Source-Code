@@ -11,6 +11,15 @@ local scenegraph_definition = {
 			1080
 		}
 	},
+	root_filler = {
+		vertical_alignment = "center",
+		parent = "root",
+		horizontal_alignment = "center",
+		size = {
+			1920,
+			1080
+		}
+	},
 	screen = {
 		scale = "fit",
 		position = {

@@ -518,6 +518,24 @@ LevelUnlockUtils.all_acts_completed = function (statistics_db, player_stats_id)
 
 	return true
 end
+LevelUnlockUtils.reset_progression = function ()
+	local statistics_db = Managers.player:statistics_db()
+	local player = Managers.player:local_player()
+	local stats_id = player.stats_id(player)
+
+	for level_key, level_difficulty_key in pairs(LevelDifficultyDBNames) do
+		statistics_db.set_stat(statistics_db, stats_id, "completed_levels_difficulty", level_difficulty_key, 0)
+		statistics_db.set_stat(statistics_db, stats_id, "completed_levels", level_key, 0)
+	end
+
+	local backend_stats = {}
+
+	statistics_db.generate_backend_stats(statistics_db, stats_id, backend_stats)
+	Managers.backend:set_stats(backend_stats)
+	Managers.backend:commit()
+
+	return 
+end
 LevelUnlockUtils.debug_set_completed_game_difficulty = function (difficulty)
 	local statistics_db = Managers.player:statistics_db()
 	local player = Managers.player:local_player()

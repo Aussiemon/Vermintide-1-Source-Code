@@ -55,10 +55,12 @@ end
 GameNetworkManager.set_max_upload_speed = function (self, max_speed)
 	if self.is_server then
 		local max_num_peers = 3
-		local max_per_peer = max_speed/max_num_peers
+		local min_per_peer = max_speed/max_num_peers
 
-		Network.enable_qos(max_per_peer, max_per_peer, max_per_peer)
+		debug_print("Network caps: min/peer %d kbps, total %d kbps", min_per_peer, max_speed)
+		Network.enable_qos(min_per_peer, min_per_peer, max_speed)
 	else
+		debug_print("Network caps: min/peer %d kbps, total %d kbps", max_speed, max_speed)
 		Network.enable_qos(max_speed, max_speed, max_speed)
 	end
 

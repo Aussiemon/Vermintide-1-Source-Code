@@ -206,13 +206,15 @@ UISceneGraph.update_scenegraph = function (scenegraph, parent_scenegraph, sceneg
 	local hierarchical_scenegraph = scenegraph.hierarchical_scenegraph
 	local scale = RESOLUTION_LOOKUP.scale
 	local inverse_scale = RESOLUTION_LOOKUP.inv_scale
-	local root_scale_x = UISettings.root_scale[1]*UISettings.ui_scale/100
-	local root_scale_y = UISettings.root_scale[2]*UISettings.ui_scale/100
+	local root_scale_x = UISettings.root_scale[1]*math.clamp(UISettings.ui_scale/100, 0, 1)
+	local root_scale_y = UISettings.root_scale[2]*math.clamp(UISettings.ui_scale/100, 0, 1)
 
 	if UISettings.use_hud_screen_fit then
 		root_scale_x = w/(UIResolutionWidthFragments()*scale)
+		root_scale_y = h/(UIResolutionHeightFragments()*scale)
 	else
 		root_scale_x = UISettings.root_scale[1]
+		root_scale_y = UISettings.root_scale[2]
 	end
 
 	local w_inverse_scale = w*inverse_scale
@@ -235,7 +237,6 @@ UISceneGraph.update_scenegraph = function (scenegraph, parent_scenegraph, sceneg
 		local size_y = size and size[2]
 
 		if scenegraph_object.is_root then
-			size_y = size_y*h/(size_y*scale)
 			size_x = size_x*root_scale_x
 			size_y = size_y*root_scale_y
 			local scaled_x = size_x*scale
@@ -304,13 +305,14 @@ UISceneGraph.get_size_scaled = function (scenegraph, scenegraph_object_name, opt
 
 		if UISettings.use_hud_screen_fit then
 			root_scale_x = w/(UIResolutionWidthFragments()*scale)
+			root_scale_y = h/(UIResolutionHeightFragments()*scale)
 		else
 			root_scale_x = UISettings.root_scale[1]
+			root_scale_y = UISettings.root_scale[2]
 		end
 
 		local size_x = size[1]
 		local size_y = size[2]
-		size_y = size_y*h/(size_y*scale)
 		size_x = size_x*root_scale_x
 		size_y = size_y*root_scale_y
 

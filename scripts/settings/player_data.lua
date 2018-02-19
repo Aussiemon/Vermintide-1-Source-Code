@@ -1,12 +1,20 @@
 DefaultPlayerData = {
-	controls_version = 9,
-	new_lorebook_data_version = 1,
 	new_item_data_version = 1,
-	additional_content_version = 1,
+	controls_version = 9,
+	skins_activated_version = 1,
+	new_lorebook_data_version = 1,
+	additional_content_version = 2,
 	new_item_ids = {},
 	controls = {},
 	new_lorebook_ids = {},
-	additional_content_data = {}
+	additional_content_data = {},
+	skins_activated_data = {
+		witch_hunter = "witch_hunter_arrogance_lost",
+		empire_soldier = "empire_soldier_arrogance_lost",
+		dwarf_ranger = "dwarf_ranger_arrogance_lost",
+		wood_elf = "wood_elf_arrogance_lost",
+		bright_wizard = "bright_wizard_arrogance_lost"
+	}
 }
 PlayerData = PlayerData or table.clone(DefaultPlayerData)
 
@@ -66,6 +74,13 @@ function populate_player_data_from_save(save_data, id, version_match)
 
 			player_save_data.additional_content_data = {}
 			player_save_data.additional_content_version = PlayerData.additional_content_version
+		end
+
+		if PlayerData.skins_activated_version ~= player_save_data.skins_activated_version then
+			print("Wrong skins_activated_version for save file, saved: ", player_save_data.skins_activated_version, " current: ", PlayerData.skins_activated_version)
+
+			player_save_data.skins_activated_data = table.clone(PlayerData.skins_activated_data)
+			player_save_data.skins_activated_version = PlayerData.skins_activated_version
 		end
 	end
 

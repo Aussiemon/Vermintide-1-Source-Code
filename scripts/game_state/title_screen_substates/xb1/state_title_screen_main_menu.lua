@@ -50,6 +50,7 @@ StateTitleScreenMainMenu.on_enter = function (self, params)
 	self._setup_sound()
 	self._setup_input(self)
 	self._init_menu_views(self)
+	self._update_ui_settings(self)
 	self.parent:show_menu(true)
 
 	if params.skip_signin then
@@ -74,6 +75,30 @@ StateTitleScreenMainMenu.on_enter = function (self, params)
 	else
 		self._title_start_ui:set_menu_item_enable_state_by_index("start_game", true)
 	end
+
+	return 
+end
+StateTitleScreenMainMenu._update_ui_settings = function (self)
+	local ui_scale = Application.user_setting("ui_scale") or 100
+
+	if PLATFORM == "xb1" then
+		local console_type = XboxOne.console_type()
+
+		if console_type ~= XboxOne.CONSOLE_TYPE_XBOX_ONE_X_DEVKIT and console_type ~= XboxOne.CONSOLE_TYPE_XBOX_ONE_X then
+			ui_scale = math.clamp(ui_scale, 0, 100)
+			UserSettings.ui_scale = ui_scale
+		end
+	end
+
+	UISettings.ui_scale = ui_scale
+	UISettings.use_hud_screen_fit = Application.user_setting("use_hud_screen_fit") or false
+	UISettings.root_scale = {
+		Application.user_setting("root_scale_x") or 1,
+		Application.user_setting("root_scale_y") or 1
+	}
+	local force_update = true
+
+	UPDATE_RESOLUTION_LOOKUP(force_update)
 
 	return 
 end

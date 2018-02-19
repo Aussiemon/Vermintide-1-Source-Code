@@ -854,7 +854,7 @@ IngameView.update_menu_options = function (self)
 			local backend_settings = GameSettingsDevelopment.backend_settings
 
 			if backend_settings.quests_enabled then
-				full_access_layout[6] = {
+				full_access_layout[9] = {
 					transition = "quest_view",
 					display_name = "quest_view"
 				}
@@ -894,15 +894,16 @@ IngameView.update_menu_options_enabled_states = function (self)
 	if active_button_data then
 		local player_ready_for_game = self.ingame_ui:is_local_player_ready_for_game()
 		local is_game_matchmaking = Managers.matchmaking:is_game_matchmaking()
+		local is_searching_for_game = Managers.matchmaking:is_searching_for_game()
 		local is_server = self.is_server
 
 		for index, menu_option in ipairs(active_button_data) do
 			local transition = menu_option.transition
 
-			if transition == "profile_view" or transition == "forge_view" or transition == "inventory_view" or transition == "lobby_browser_view" or transition == "quest_view" then
+			if transition == "lorebook_menu" or transition == "profile_view" or transition == "forge_view" or transition == "inventory_view" or transition == "lobby_browser_view" or transition == "quest_view" then
 				local widget = menu_option.widget
 				local widget_button_hotspot = widget.content.button_hotspot
-				local transition_not_allowed_in_matchmaking = not is_server and is_game_matchmaking and transition == "lobby_browser_view"
+				local transition_not_allowed_in_matchmaking = (not is_server and is_game_matchmaking and transition == "lobby_browser_view") or (is_searching_for_game and (transition == "lorebook_menu" or transition == "profile_view"))
 				local local_player = Managers.player:local_player()
 				local transition_not_allowed_without_player_unit = not local_player.player_unit and transition == "profile_view"
 

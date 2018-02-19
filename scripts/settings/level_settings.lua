@@ -598,7 +598,7 @@ LevelSettings.merchant = {
 		},
 		area_position = {
 			115,
-			-180
+			-280
 		}
 	}
 }
@@ -958,8 +958,8 @@ LevelSettings.city_wall = {
 			"nik_map_brief_city_wall_02"
 		},
 		area_position = {
-			-200,
-			295
+			-245,
+			250
 		}
 	}
 }
@@ -1348,8 +1348,8 @@ LevelSettings.wizard = {
 			"nik_map_brief_wizard_tower_02"
 		},
 		area_position = {
-			310,
-			-100
+			265,
+			-80
 		}
 	}
 }
@@ -1449,7 +1449,7 @@ LevelSettings.magnus = {
 		},
 		area_position = {
 			-25,
-			205
+			220
 		}
 	}
 }
@@ -1713,8 +1713,8 @@ LevelSettings.docks_short_level = {
 			"nik_map_brief_docks_02"
 		},
 		area_position = {
-			-250,
-			-45
+			-266,
+			-76
 		}
 	}
 }

@@ -750,16 +750,24 @@ LobbyBrowseView._create_filter_requirements = function (self)
 	if platform == "ps4" then
 		local user_region = Managers.account:region()
 
-		if distance_filter == LobbyDistanceFilter.CLOSE then
-			requirements.filters.primary_region = {
-				value = MatchmakingRegionLookup.primary[user_region],
-				comparison = LobbyComparison.EQUAL
-			}
-		elseif distance_filter == LobbyDistanceFilter.MEDIUM then
-			requirements.filters.secondary_region = {
-				value = MatchmakingRegionLookup.secondary[user_region],
-				comparison = LobbyComparison.EQUAL
-			}
+		if user_region ~= nil and distance_filter == LobbyDistanceFilter.CLOSE then
+			local primary = MatchmakingRegionLookup.primary[user_region]
+
+			if primary ~= nil then
+				requirements.filters.primary_region = {
+					value = primary,
+					comparison = LobbyComparison.EQUAL
+				}
+			end
+		elseif user_region ~= nil and distance_filter == LobbyDistanceFilter.MEDIUM then
+			local secondary = MatchmakingRegionLookup.secondary[user_region]
+
+			if secondary ~= nil then
+				requirements.filters.secondary_region = {
+					value = secondary,
+					comparison = LobbyComparison.EQUAL
+				}
+			end
 		end
 	end
 

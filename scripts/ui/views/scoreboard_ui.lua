@@ -359,7 +359,7 @@ ScoreboardUI.animate_window = function (self, open)
 		local target_index = 2
 
 		if open then
-			local from = 1200
+			local from = (UISettings.ui_scale*1200)/100
 			local to = 0
 			local time = UISettings.scoreboard.open_duration
 			self.opening_leaderboards = false
@@ -370,7 +370,7 @@ ScoreboardUI.animate_window = function (self, open)
 		else
 			self.open = false
 			local from = 0
-			local to = 1200
+			local to = (UISettings.ui_scale*1200)/100
 			local time = UISettings.scoreboard.close_duration
 			self.opening_leaderboards = true
 			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)

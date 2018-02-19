@@ -28,7 +28,7 @@ TitleMainUI.init = function (self, world)
 	self.render_settings = {
 		snap_pixel_positions = true
 	}
-	self._ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_title_screen", "material", "materials/ui/ui_1080p_start_screen", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_ingame_common", "material", "video/dwarfs_trailer", "material", "video/stromdorf_trailer", "material", "video/survival_ruins_trailer", "material", "video/drachenfels_trailer", "material", attract_mode_video.video_name)
+	self._ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_title_screen", "material", "materials/ui/ui_1080p_start_screen", "material", "materials/fonts/gw_fonts", "material", "materials/ui/ui_1080p_ingame_common", "material", "video/dwarfs_trailer", "material", "video/stromdorf_trailer", "material", "video/survival_ruins_trailer", "material", "video/reikwald_trailer", "material", "video/drachenfels_trailer", "material", attract_mode_video.video_name)
 
 	UISetupFontHeights(self._ui_renderer.gui)
 

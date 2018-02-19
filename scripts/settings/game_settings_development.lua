@@ -292,6 +292,7 @@ GameSettingsDevelopment.ignored_rpc_logs = {
 	"rpc_sync_anim_state_4",
 	"rpc_sync_anim_state_5",
 	"rpc_sync_anim_state_7",
+	"rpc_sync_anim_state_8",
 	"rpc_create_bot_nav_transition",
 	"rpc_pacing_changed",
 	"rpc_play_dialogue_event",

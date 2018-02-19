@@ -37,5 +37,8 @@ end
 MockInputManager.get_service = function (self)
 	return self._mock_input_service
 end
+MockInputManager.is_device_active = function (self)
+	return true
+end
 
 return 

@@ -1,6 +1,6 @@
 # Vermintide Source Code
 
-Patch List from Versions 1.3.3 to 1.10 and Associated Bundles
+Patch List from Versions 1.3.3 to 1.11 and Associated Bundles
 -------------------------------------------------------------
 
 Date      |  Patch  | Notes
@@ -34,4 +34,5 @@ Date      |  Patch  | Notes
 8-02-17   |  1.9.9  | Patch .025   
 8-07-17   |  1.9.10 | Patch .026   
 9-01-17   |  1.9.11 | Patch .027   
-12-13-17  |  1.10   | Patch .028   
+12-13-17  |  1.10   | Patch .028
+2-19-18   |  1.11   | Patch .029

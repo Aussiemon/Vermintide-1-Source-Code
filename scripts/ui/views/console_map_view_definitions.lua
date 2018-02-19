@@ -11,6 +11,15 @@ local scenegraph_definition = {
 			UILayer.default
 		}
 	},
+	root_filler = {
+		vertical_alignment = "center",
+		parent = "root",
+		horizontal_alignment = "center",
+		size = {
+			1920,
+			1080
+		}
+	},
 	frame = {
 		vertical_alignment = "center",
 		parent = "root",
@@ -23,6 +32,20 @@ local scenegraph_definition = {
 			0,
 			0,
 			1
+		}
+	},
+	mask_root = {
+		vertical_alignment = "center",
+		parent = "frame",
+		horizontal_alignment = "center",
+		size = {
+			1920,
+			1080
+		},
+		position = {
+			0,
+			0,
+			0
 		}
 	},
 	time_line = {
@@ -97,7 +120,7 @@ local scenegraph_definition = {
 	},
 	mask_layer = {
 		vertical_alignment = "center",
-		parent = "frame",
+		parent = "mask_root",
 		horizontal_alignment = "center",
 		size = {
 			1920,

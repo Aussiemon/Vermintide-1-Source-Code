@@ -63,6 +63,10 @@ StateTitleScreenMain.on_enter = function (self, params)
 		self._params.menu_screen_music_playing = true
 	end
 
+	if PLATFORM == "xb1" and Managers.invite:has_signed_out_invitation() then
+		self._start_pressed = true
+	end
+
 	return 
 end
 StateTitleScreenMain._queue_popup = function (self, ...)

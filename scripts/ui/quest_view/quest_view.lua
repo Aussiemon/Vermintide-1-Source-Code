@@ -253,6 +253,7 @@ QuestView.create_ui_elements = function (self)
 	self._exit_button_widget = UIWidget.init(widget_definitions.exit_button)
 	self._accept_button_widget = UIWidget.init(widget_definitions.accept_button)
 	self._progress_button_widget = UIWidget.init(widget_definitions.progress_button)
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 	local presentation_widgets = {
 		background = UIWidget.init(widget_definitions.presentation_bg),
 		title = UIWidget.init(widget_definitions.presentation_title),
@@ -372,6 +373,7 @@ QuestView.draw = function (self, dt, input_service)
 
 	UIRenderer.draw_widget(ui_renderer, self._exit_button_widget)
 	UIRenderer.draw_widget(ui_renderer, self._background_hotspot)
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 
 	if self._selected_widget or self._hovered_widget then
 		UIRenderer.draw_widget(ui_renderer, self._accept_button_widget)

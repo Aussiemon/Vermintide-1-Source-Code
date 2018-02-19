@@ -340,6 +340,7 @@ EndOfLevelUI.create_ui_elements = function (self)
 	local input_manager = self.input_manager
 	local ui_renderer = self.ui_renderer
 	dies_enabled = false
+	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	if self.current_curtain_fraction then
 		self.set_curtain_progress(self, self.current_curtain_fraction)
@@ -396,6 +397,7 @@ EndOfLevelUI.update = function (self, dt)
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_filler_widget)
 	UIRenderer.draw_widget(ui_renderer, self.background_rect_widget)
 	UIRenderer.draw_widget(ui_renderer, self.overlay_widget)
+	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
 
 	local has_dice_results = nil

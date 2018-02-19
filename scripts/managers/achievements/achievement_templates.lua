@@ -902,13 +902,25 @@ AchievementTemplates = {
 			local mission_system = Managers.state.entity:system("mission_system")
 			local active_missions, completed_missions = mission_system.get_missions(mission_system)
 
-			if not active_missions then
-				return 
+			if PLATFORM ~= "win32" then
+				if not completed_missions then
+					return 
+				end
+
+				local mission = completed_missions.wizards_tower_protect_wards
+
+				return mission and mission.generic_counter == 0
+			else
+				if not active_missions then
+					return 
+				end
+
+				local mission = active_missions.wizards_tower_protect_wards
+
+				return mission and 0 < mission.generic_counter
 			end
 
-			local mission = active_missions.wizards_tower_protect_wards
-
-			return mission and 0 < mission.generic_counter
+			return 
 		end
 	},
 	magnus_hard_mode_cataclysm = {

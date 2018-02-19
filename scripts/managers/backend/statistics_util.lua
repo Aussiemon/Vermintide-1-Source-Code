@@ -551,6 +551,9 @@ StatisticsUtil.register_online_leaderboards_data = function (statistics_db, scor
 	local skaven_rat_ogre = statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
 	local skaven_storm_vermins = skaven_storm_vermin + skaven_storm_vermin_commander
 	local skaven_specials = skaven_pack_master + skaven_poison_wind_globadier + skaven_gutter_runner + skaven_ratling_gunner
+
+	table.dump(wave_times, "WAVE TIMES", 2)
+
 	local total_score = score
 
 	if Managers.state.network.is_server then
@@ -566,8 +569,13 @@ StatisticsUtil.register_online_leaderboards_data = function (statistics_db, scor
 		print("Start time: " .. mission_data.start_time)
 
 		for wave = 1, waves, 1 do
-			local time_in_sec = wave_times[wave] - total_time
-			total_time = total_time + time_in_sec
+			local time_in_sec = MAX_TIME_IN_SEC
+
+			if wave_times[wave] then
+				time_in_sec = wave_times[wave] - total_time
+				total_time = total_time + time_in_sec
+			end
+
 			local time_score = math.max(BASE_SCORE*math.max(MAX_TIME_IN_SEC - time_in_sec, 0)/MAX_TIME_IN_SEC, 1)
 			local wave_score = math.floor(wave*BASE_SCORE + time_score)
 			total_score = total_score + wave_score
@@ -742,7 +750,7 @@ StatisticsUtil.register_matchmaking_unix_timestamp = function (statistics_db)
 end
 StatisticsUtil.register_matchmaking_region_fetch_status = function (statistics_db)
 	local account_manager = Managers.account
-	local region_fetch_status = account_manager.region_fetch_status(account_manager)
+	local region_fetch_status = account_manager.region(account_manager) or "nil"
 	local local_player = Managers.player:local_player()
 	local stats_id = local_player.stats_id(local_player)
 
