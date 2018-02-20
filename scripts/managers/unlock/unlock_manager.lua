@@ -297,7 +297,7 @@ UnlockManager._update_backend_unlocks = function (self)
 			local index = self._query_unlocked_index + 1
 
 			if #self._unlocks_indexed < index then
-				if PLATFORM == "win32" then
+				if PLATFORM ~= "win32" then
 					self._state = "done"
 				else
 					self._state = "query_grant_dlc"
