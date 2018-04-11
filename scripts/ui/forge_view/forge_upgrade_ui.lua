@@ -520,8 +520,8 @@ ForgeUpgradeUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
 	local spacing = 80
-	local half_trait_amount = (number_of_traits - 1)*0.5
-	local start_x_position = -((width + spacing)*half_trait_amount)
+	local half_trait_amount = (number_of_traits - 1) * 0.5
+	local start_x_position = -((width + spacing) * half_trait_amount)
 
 	for i = 1, number_of_traits, 1 do
 		local widget_name = "trait_button_" .. i

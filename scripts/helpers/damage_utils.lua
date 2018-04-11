@@ -65,11 +65,11 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 
 	if has_damage_boost and not hit_ward then
 		if target_unit_armor == 1 then
-			damage = damage_table[target_unit_armor]*3
+			damage = damage_table[target_unit_armor] * 3
 		elseif target_unit_armor == 2 then
 			damage = damage_table[1]
 		elseif target_unit_armor == 3 then
-			damage = damage_table[target_unit_armor]*2
+			damage = damage_table[target_unit_armor] * 2
 		end
 	elseif attacker_unit and table.contains(PLAYER_AND_BOT_UNITS, target_unit) and table.contains(PLAYER_AND_BOT_UNITS, attacker_unit) then
 		if 3 < #damage_table then
@@ -87,11 +87,11 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 
 	if (hit_zone_name == "head" or hit_zone_name == "neck") and headshot_multiplier ~= -1 then
 		if headshot_multiplier and 0 < damage then
-			damage = damage*headshot_multiplier
+			damage = damage * headshot_multiplier
 		elseif target_unit_armor == 2 and damage == 0 then
 			damage = headshot_multiplier or 1
 		elseif target_unit_armor == 3 then
-			damage = damage*1.5
+			damage = damage * 1.5
 		elseif target_unit_armor == 2 then
 			damage = damage + 0.5
 		else
@@ -100,11 +100,11 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 	end
 
 	if backstab_multiplier then
-		damage = damage*backstab_multiplier
+		damage = damage * backstab_multiplier
 	end
 
 	if hit_ward then
-		damage = damage*0.5
+		damage = damage * 0.5
 	end
 
 	return damage
@@ -168,8 +168,8 @@ DamageUtils.calculate_stagger = function (damage_table, duration_table, target_u
 			if has_increased_stagger_type_boon then
 				local num_increased_damage_boons = boon_handler.get_num_boons(boon_handler, boon_name)
 				local boon_template = BoonTemplates[boon_name]
-				local duration_multiplier = boon_template.duration_multiplier + 1
-				duration = duration*duration_multiplier
+				local duration_multiplier = 1 + boon_template.duration_multiplier
+				duration = duration * duration_multiplier
 			end
 		end
 	end
@@ -216,8 +216,8 @@ end
 DamageUtils.draw_aoe_size = function (target_unit)
 	local radius, height = DamageUtils.calculate_aoe_size(target_unit)
 	local unit_position = POSITION_LOOKUP[target_unit]
-	local unit_top_position = unit_position + Vector3(0, 0, math.max(height - radius*0.5, height*0.5))
-	local unit_bottom_position = unit_position + Vector3(0, 0, math.min(radius*0.5, height*0.5))
+	local unit_top_position = unit_position + Vector3(0, 0, math.max(height - radius * 0.5, height * 0.5))
+	local unit_bottom_position = unit_position + Vector3(0, 0, math.min(radius * 0.5, height * 0.5))
 
 	QuickDrawer:capsule(unit_bottom_position, unit_top_position, radius, Color(255, 255, 0, 255))
 
@@ -352,8 +352,8 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 						hit = 1
 						local target_radius, target_height = DamageUtils.calculate_aoe_size(hit_unit)
 						local unit_position = POSITION_LOOKUP[hit_unit] or Unit.local_position(hit_unit, 0)
-						local unit_top_position = unit_position + Vector3(0, 0, math.max(target_height - target_radius*0.5, target_height*0.5))
-						local unit_bottom_position = unit_position + Vector3(0, 0, math.min(target_radius*0.5, target_height*0.5))
+						local unit_top_position = unit_position + Vector3(0, 0, math.max(target_height - target_radius * 0.5, target_height * 0.5))
+						local unit_bottom_position = unit_position + Vector3(0, 0, math.min(target_radius * 0.5, target_height * 0.5))
 						local closest_point = Geometry.closest_point_on_line(impact_position, unit_bottom_position, unit_top_position)
 						local hit_direction = closest_point - impact_position
 						local hit_distance = math.max(Vector3.length(hit_direction) - target_radius, 0)
@@ -444,7 +444,7 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 								local status_extension = ScriptUnit.extension(hit_unit, "status_system")
 
 								if not status_extension.is_disabled(status_extension) then
-									ScriptUnit.extension(hit_unit, "locomotion_system"):add_external_velocity(hit_direction_normalized*push_speed)
+									ScriptUnit.extension(hit_unit, "locomotion_system"):add_external_velocity(hit_direction_normalized * push_speed)
 								end
 							end
 						end
@@ -529,7 +529,7 @@ DamageUtils.calculate_damage_range_dropoff = function (damage_near_table, damage
 	local dropoff_scale = dropoff_end - dropoff_start
 	local distance = Vector3.distance(target_position, attacker_position)
 	local new_distance = math.clamp(distance - dropoff_start, 0, dropoff_scale)
-	local scalar = new_distance/dropoff_scale
+	local scalar = new_distance / dropoff_scale
 	local damage = math.lerp(near_damage, far_damage, scalar)
 
 	return damage
@@ -537,8 +537,8 @@ end
 DamageUtils.networkify_damage = function (damage_amount)
 	local damage = NetworkConstants.damage
 	damage_amount = math.clamp(damage_amount, damage.min, damage.max)
-	local decimal = damage_amount%1
-	local rounded_decimal = math.round(decimal*4)*0.25
+	local decimal = damage_amount % 1
+	local rounded_decimal = math.round(decimal * 4) * 0.25
 
 	return math.floor(damage_amount) + rounded_decimal
 end
@@ -560,7 +560,7 @@ DamageUtils.debug_swing = function (drawer, data)
 	local extents = Vector3(0.5, 0.8, 0.1)
 	local pos = data.camera_position:unbox()
 	local rot = data.camera_rotation:unbox()
-	local pos = pos + Vector3.normalize(Quaternion.forward(rot))*(extents[2]*0.5 + 0.44)
+	local pos = pos + Vector3.normalize(Quaternion.forward(rot)) * (extents[2] * 0.5 + 0.44)
 	local pose = Matrix4x4.from_quaternion_position(rot, pos)
 
 	drawer.box(drawer, pose, extents)
@@ -594,14 +594,14 @@ DamageUtils.create_hit_zone_lookup = function (unit, breed)
 	return 
 end
 DamageUtils.setup_single_frame_sweep = function (physics_world, pos, rot, extents, half_width)
-	local right = Vector3.normalize(Quaternion.right(rot))*half_width
-	local height = Vector3.normalize(Quaternion.up(rot))*0.2
-	local forward = Vector3.normalize(Quaternion.forward(rot))*(extents[2]*0.5 + 0.4) - height
+	local right = Vector3.normalize(Quaternion.right(rot)) * half_width
+	local height = Vector3.normalize(Quaternion.up(rot)) * 0.2
+	local forward = Vector3.normalize(Quaternion.forward(rot)) * (extents[2] * 0.5 + 0.4) - height
 	local pos1 = pos + forward + right
 	local pos2 = (pos + forward) - right
 	local hits = PhysicsWorld.linear_obb_sweep(physics_world, pos1, pos2, extents, rot, 3, "types", "dynamics", "collision_filter", "filter_melee_trigger")
 
-	if hits and 0 < #hits and DamageUtils.handle_single_frame_sweep_per_units(hits, pos1, pos2, half_width*2) then
+	if hits and 0 < #hits and DamageUtils.handle_single_frame_sweep_per_units(hits, pos1, pos2, half_width * 2) then
 		return hits
 	end
 
@@ -627,7 +627,7 @@ DamageUtils.handle_single_frame_sweep = function (hits, p1, p2, width)
 
 			local point = Geometry.closest_point_on_line(data.position, p1, p2)
 			local d = Vector3.distance(p1, point)
-			local time = d/width*0.3
+			local time = d / width * 0.3
 			data.when = time
 			data.position = Vector3Box(data.position)
 		end
@@ -664,7 +664,7 @@ DamageUtils.handle_single_frame_sweep_per_units = function (hits, p1, p2, width)
 
 				local point = Geometry.closest_point_on_line(data.position, p1, p2)
 				local d = Vector3.distance(p1, point)
-				local time = d/width*0.2
+				local time = d / width * 0.2
 				data.when = time
 				data.position = Vector3Box(data.position)
 			else
@@ -879,7 +879,7 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type, predicted_da
 
 		if ammo_extension then
 			local max_ammo = ammo_extension.max_ammo_count(ammo_extension)
-			local restore_amount = math.clamp(math.floor(max_ammo*0.1), 1, math.huge)
+			local restore_amount = math.clamp(math.floor(max_ammo * 0.1), 1, math.huge)
 
 			ammo_extension.add_ammo_to_reserve(ammo_extension, restore_amount)
 		end
@@ -946,7 +946,7 @@ DamageUtils.buff_on_attack = function (unit, hit_unit, attack_type, predicted_da
 		if procced then
 			local health_extension = ScriptUnit.extension(hit_unit, "health_system")
 			local health = health_extension.current_health(health_extension)
-			local calls = math.ceil(health/255)
+			local calls = math.ceil(health / 255)
 
 			for i = 1, calls, 1 do
 				DamageUtils.buff_attack_hit(inventory_extension, unit, hit_unit, "heroic_killing_blow_proc")
@@ -1022,7 +1022,7 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 				end
 			end
 
-			damage = damage/num_players_with_shared_health_pool
+			damage = damage / num_players_with_shared_health_pool
 		end
 
 		local is_invulnerable = buff_extension.has_buff_type(buff_extension, "invulnerable")
@@ -1048,8 +1048,8 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 			local num_reduced_damage_boons = boon_handler.get_num_boons(boon_handler, boon_name)
 			local boon_template = BoonTemplates[boon_name]
 			local reduced_damage_amount = boon_template.reduced_damage_amount
-			local reduced_damage_percent = math.max(reduced_damage_amount*num_reduced_damage_boons - 1, 0)
-			damage = damage*reduced_damage_percent
+			local reduced_damage_percent = math.max(1 - reduced_damage_amount * num_reduced_damage_boons, 0)
+			damage = damage * reduced_damage_percent
 		end
 	end
 
@@ -1060,8 +1060,8 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 		local num_increased_damage_boons = boon_handler.get_num_boons(boon_handler, boon_name)
 		local boon_template = BoonTemplates[boon_name]
 		local increased_damage_amount = boon_template.increased_damage_amount
-		local increased_damage_percent = increased_damage_amount*num_increased_damage_boons + 1
-		damage = damage*increased_damage_percent
+		local increased_damage_percent = 1 + increased_damage_amount * num_increased_damage_boons
+		damage = damage * increased_damage_percent
 	end
 
 	return damage
@@ -1201,7 +1201,7 @@ DamageUtils.apply_buffs_to_heal = function (healed_unit, healer_unit, heal_amoun
 				end
 			end
 
-			heal_amount = heal_amount/num_players_with_shared_health_pool
+			heal_amount = heal_amount / num_players_with_shared_health_pool
 
 			if heal_type == "bandage" or heal_type == "healing_draught" then
 				shared_medpack = true
@@ -1268,7 +1268,7 @@ DamageUtils.check_distance = function (action, blackboard, attacking_unit, targe
 		local z = to_target.z
 		local flat_range = blackboard.attack_range_flat + player_radius
 
-		if z < blackboard.attack_range_up and blackboard.attack_range_down < z and x*x + y*y < flat_range*flat_range then
+		if z < blackboard.attack_range_up and blackboard.attack_range_down < z and x * x + y * y < flat_range * flat_range then
 			return true
 		end
 	else
@@ -1399,8 +1399,8 @@ DamageUtils.camera_shake_by_distance = function (shake_name, start_time, player_
 
 	if source_unit then
 		local d = Vector3.distance(Unit.local_position(source_unit, 0), Unit.local_position(player_unit_to_shake, 0))
-		scale = math.clamp((d - near_dist)/(far_dist - near_dist), 0, 1) - 1
-		scale = far_value + scale*(near_value - far_value)
+		scale = 1 - math.clamp((d - near_dist) / (far_dist - near_dist), 0, 1)
+		scale = far_value + scale * (near_value - far_value)
 	end
 
 	Managers.state.camera:camera_effect_shake_event(shake_name, start_time, scale)
@@ -1763,13 +1763,13 @@ DamageUtils.modify_damage_taken = function (unit, multiplier, bonus_reduction_da
 	local damage_extension = ScriptUnit.extension(unit, "damage_system")
 	local recent_damages, num_damages = damage_extension.recent_damages(damage_extension)
 
-	for j = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-		local damage_type = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
+	for j = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+		local damage_type = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
 
 		if damage_type ~= "heal" then
-			local damage_index = (j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
+			local damage_index = (j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
 			local damage = math.max(recent_damages[damage_index] - bonus_reduction_damage, 0)
-			local reduced_damage = damage*multiplier
+			local reduced_damage = damage * multiplier
 			recent_damages[damage_index] = reduced_damage
 		end
 	end
@@ -1784,14 +1784,14 @@ DamageUtils.modify_damage = function (unit, victims, multiplier, bonus_damage)
 		local damage_extension = ScriptUnit.extension(victim, "damage_system")
 		local recent_damages, num_damages = damage_extension.recent_damages(damage_extension)
 
-		for j = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-			local attacker = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER]
-			local damage_type = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
+		for j = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+			local attacker = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER]
+			local damage_type = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
 
 			if attacker == unit and victim ~= attacker and damage_type ~= "heal" then
-				local damage_index = (j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
+				local damage_index = (j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
 				local damage = recent_damages[damage_index] + bonus_damage
-				local boosted_damage = damage*multiplier
+				local boosted_damage = damage * multiplier
 				recent_damages[damage_index] = boosted_damage
 			end
 		end
@@ -1803,14 +1803,14 @@ DamageUtils.modify_healing_taken_from_self = function (unit, multiplier, bonus_h
 	local damage_extension = ScriptUnit.extension(unit, "damage_system")
 	local recent_damages, num_damages = damage_extension.recent_damages(damage_extension)
 
-	for j = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-		local attacker = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER]
-		local damage_type = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
+	for j = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+		local attacker = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER]
+		local damage_type = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
 
 		if attacker == unit and damage_type == "heal" then
-			local damage_index = (j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
+			local damage_index = (j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
 			local healing = recent_damages[damage_index] + bonus_healing
-			local modified_healing = healing*multiplier
+			local modified_healing = healing * multiplier
 			recent_damages[damage_index] = modified_healing
 		end
 	end
@@ -1821,14 +1821,14 @@ DamageUtils.modify_healing_taken_from_other = function (unit, multiplier, bonus_
 	local damage_extension = ScriptUnit.extension(unit, "damage_system")
 	local recent_damages, num_damages = damage_extension.recent_damages(damage_extension)
 
-	for j = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-		local attacker = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER]
-		local damage_type = recent_damages[(j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
+	for j = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+		local attacker = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER]
+		local damage_type = recent_damages[(j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
 
 		if attacker ~= unit and damage_type == "heal" then
-			local damage_index = (j - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
+			local damage_index = (j - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
 			local healing = recent_damages[damage_index] + bonus_healing
-			local modified_healing = healing*multiplier
+			local modified_healing = healing * multiplier
 			recent_damages[damage_index] = modified_healing
 		end
 	end

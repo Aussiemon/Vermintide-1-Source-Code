@@ -57,8 +57,8 @@ BTMeleeSlamAction.init_attack = function (self, unit, blackboard, action, t)
 	local self_pos = POSITION_LOOKUP[unit]
 	local fwd = Vector3.normalize(POSITION_LOOKUP[target] - self_pos)
 	local pos, rotation, size = self._calculate_collision(self, action, self_pos, fwd)
-	size.x = size.x*1.2
-	size.z = size.z*1.2
+	size.x = size.x * 1.2
+	size.z = size.z * 1.2
 
 	Managers.state.entity:system("ai_bot_group_system"):aoe_threat_created(pos, "cylinder", size, nil, action.bot_threat_duration)
 
@@ -85,7 +85,7 @@ end
 local temp_hit_units = {}
 BTMeleeSlamAction._calculate_collision = function (self, action, self_pos, forward_direction)
 	local height = action.height
-	local pos = self_pos + forward_direction*action.forward_offset + Vector3(0, 0, height*0.5)
+	local pos = self_pos + forward_direction * action.forward_offset + Vector3(0, 0, height * 0.5)
 	local radius = action.radius
 	local size = Vector3(action.radius, height, action.radius)
 	local rotation = Quaternion.look(Vector3.up(), Vector3.up())
@@ -135,7 +135,7 @@ BTMeleeSlamAction.anim_cb_ratogre_slam = function (self, unit, blackboard)
 				if target_status_extension.is_disabled(target_status_extension) then
 					damage = action.damage
 				elseif DamageUtils.check_block(unit, hit_unit, action.fatigue_type) then
-					local blocked_velocity = action.player_push_speed_blocked*Vector3.normalize(POSITION_LOOKUP[hit_unit] - self_pos)
+					local blocked_velocity = action.player_push_speed_blocked * Vector3.normalize(POSITION_LOOKUP[hit_unit] - self_pos)
 					local locomotion_extension = ScriptUnit.extension(hit_unit, "locomotion_system")
 
 					locomotion_extension.add_external_velocity(locomotion_extension, blocked_velocity)

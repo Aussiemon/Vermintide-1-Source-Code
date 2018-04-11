@@ -350,7 +350,7 @@ local scenegraph_definition = {
 			1
 		},
 		size = {
-			COMPACT_PREVIEW_SPACING[1]*3 + 912,
+			912 + COMPACT_PREVIEW_SPACING[1] * 3,
 			260
 		}
 	},
@@ -364,7 +364,7 @@ local scenegraph_definition = {
 			1
 		},
 		size = {
-			COMPACT_PREVIEW_SPACING[1]*3 + 912,
+			912 + COMPACT_PREVIEW_SPACING[1] * 3,
 			260
 		}
 	},
@@ -378,7 +378,7 @@ local scenegraph_definition = {
 			1
 		},
 		size = {
-			COMPACT_PREVIEW_SPACING[1]*3 + 912,
+			912 + COMPACT_PREVIEW_SPACING[1] * 3,
 			260
 		}
 	},
@@ -392,7 +392,7 @@ local scenegraph_definition = {
 			1
 		},
 		size = {
-			COMPACT_PREVIEW_SPACING[1]*3 + 912,
+			912 + COMPACT_PREVIEW_SPACING[1] * 3,
 			260
 		}
 	},
@@ -401,7 +401,7 @@ local scenegraph_definition = {
 		parent = "topic_root",
 		horizontal_alignment = "left",
 		position = {
-			COMPACT_PREVIEW_SPACING[1] + -90,
+			-90 + COMPACT_PREVIEW_SPACING[1],
 			0,
 			10
 		},
@@ -429,7 +429,7 @@ local scenegraph_definition = {
 		parent = "topic_root",
 		horizontal_alignment = "right",
 		position = {
-			COMPACT_PREVIEW_SPACING[1] + 90,
+			90 + COMPACT_PREVIEW_SPACING[1],
 			0,
 			10
 		},
@@ -462,7 +462,7 @@ local scenegraph_definition = {
 			10
 		},
 		size = {
-			COMPACT_PREVIEW_SPACING[1] + 716,
+			716 + COMPACT_PREVIEW_SPACING[1],
 			14
 		}
 	}
@@ -1211,7 +1211,7 @@ local function create_compact_topic_widgets(number_of_elements)
 				1
 			},
 			size = {
-				COMPACT_PREVIEW_SPACING[1] + 304,
+				304 + COMPACT_PREVIEW_SPACING[1],
 				214
 			}
 		}
@@ -1265,18 +1265,18 @@ local function create_compact_topic_widgets(number_of_elements)
 							local color = style.color
 							local uv_start_pixels = style.uv_start_pixels
 							local uv_scale_pixels = style.uv_scale_pixels
-							local uv_pixels = uv_start_pixels + uv_scale_pixels*fraction
+							local uv_pixels = uv_start_pixels + uv_scale_pixels * fraction
 							local uvs = style.uvs
 							local uv_scale_axis = style.scale_axis
 
 							if direction == 1 then
 								uvs[1][uv_scale_axis] = 0
-								uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+								uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 								size[uv_scale_axis] = uv_pixels
 								compact_topic_offset[uv_scale_axis] = 0
 							else
 								uvs[2][uv_scale_axis] = 1
-								uvs[1][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels) - 1
+								uvs[1][uv_scale_axis] = 1 - uv_pixels / (uv_start_pixels + uv_scale_pixels)
 								size[uv_scale_axis] = uv_pixels
 								compact_topic_offset[uv_scale_axis] = -(uv_pixels - (uv_start_pixels + uv_scale_pixels))
 							end

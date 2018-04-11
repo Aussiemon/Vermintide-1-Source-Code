@@ -227,7 +227,7 @@ TutorialTemplates = {
 				local remaining_ammo = ammo_extension.remaining_ammo(ammo_extension)
 				local max_ammo = ammo_extension.max_ammo
 
-				if current_ammo_count + remaining_ammo == 0 or max_ammo*0.25 < current_ammo_count + remaining_ammo then
+				if current_ammo_count + remaining_ammo == 0 or max_ammo * 0.25 < current_ammo_count + remaining_ammo then
 					return false
 				end
 

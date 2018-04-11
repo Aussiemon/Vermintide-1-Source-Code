@@ -425,8 +425,8 @@ local interest_points_result = {}
 local function _get_best_interest_point(broadphase, request, claim_unit_position, current_request_point_unit, reachable_interest_points)
 	local ScriptUnit_Extension = ScriptUnit.extension
 	local path_found, perform_astar, best_unit, best_point, best_point_extension = nil
-	local min_range_sq = request.min_range*request.min_range
-	local max_range_sq = request.max_range*request.max_range
+	local min_range_sq = request.min_range * request.min_range
+	local max_range_sq = request.max_range * request.max_range
 	local request_position = Vector3Aux.unbox(request.position)
 	local min_dist_sq = math.huge
 	local interest_points_result_n = Broadphase.query(broadphase, request_position, request.max_range, interest_points_result)
@@ -501,7 +501,7 @@ local function _check_and_update_request_result(request, best_unit, best_point, 
 		request.point_extension = best_point_extension
 		request.result = "success"
 		request.current_request = nil
-		local chatter_number = best_point_extension.num_claimed_points/best_point_extension.points_n
+		local chatter_number = best_point_extension.num_claimed_points / best_point_extension.points_n
 
 		if best_point_extension.num_claimed_points < best_point_extension.wwise_minimum_needed then
 			chatter_number = 0
@@ -594,16 +594,16 @@ AIInterestPointSystem.debug_draw = function (self, t, dt)
 
 			if not point.is_position_on_navmesh then
 				QuickDrawer.cylinder(QuickDrawer, position, position + Vector3.up(), 0.25, Colors.get("dark_red"), 5)
-				QuickDrawer.cone(QuickDrawer, position + Vector3.up()*1.3 + forward*0.25, (position + Vector3.up()*1.3) - forward*0.25, 0.1, Colors.get("dark_red"), 8, 8)
+				QuickDrawer.cone(QuickDrawer, position + Vector3.up() * 1.3 + forward * 0.25, (position + Vector3.up() * 1.3) - forward * 0.25, 0.1, Colors.get("dark_red"), 8, 8)
 			elseif point.claimed then
-				local offset = Vector3.up()*self.debug_anim_t*0.2
+				local offset = Vector3.up() * self.debug_anim_t * 0.2
 
-				QuickDrawer.circle(QuickDrawer, position + Vector3.up()*0.8, 0.25, Vector3.up(), Colors.get("lime_green"))
-				QuickDrawer.cylinder(QuickDrawer, position - offset, (position + Vector3.up()*1) - offset, 0.25, Colors.get("lime_green"), 5)
-				QuickDrawer.cone(QuickDrawer, position + Vector3.up()*1.3 + forward*0.25, (position + Vector3.up()*1.3) - forward*0.25, 0.1, Colors.get("lime_green"), 8, 8)
+				QuickDrawer.circle(QuickDrawer, position + Vector3.up() * 0.8, 0.25, Vector3.up(), Colors.get("lime_green"))
+				QuickDrawer.cylinder(QuickDrawer, position - offset, (position + Vector3.up() * 1) - offset, 0.25, Colors.get("lime_green"), 5)
+				QuickDrawer.cone(QuickDrawer, position + Vector3.up() * 1.3 + forward * 0.25, (position + Vector3.up() * 1.3) - forward * 0.25, 0.1, Colors.get("lime_green"), 8, 8)
 			else
 				QuickDrawer.cylinder(QuickDrawer, position, position + Vector3.up(), 0.25, Colors.get("dark_green"), 5)
-				QuickDrawer.cone(QuickDrawer, position + Vector3.up()*1.3 + forward*0.25, (position + Vector3.up()*1.3) - forward*0.25, 0.1, Colors.get("dark_green"), 8, 8)
+				QuickDrawer.cone(QuickDrawer, position + Vector3.up() * 1.3 + forward * 0.25, (position + Vector3.up() * 1.3) - forward * 0.25, 0.1, Colors.get("dark_green"), 8, 8)
 			end
 
 			Script.set_temp_count(a, b, c)
@@ -617,7 +617,7 @@ AIInterestPointSystem.debug_draw = function (self, t, dt)
 			local ip_end_time = ScriptUnit.extension(claim_unit, "ai_system")._blackboard.ip_end_time
 
 			if ip_end_time then
-				local end_position = POSITION_LOOKUP[claim_unit] + Vector3.up()*(ip_end_time - t) + Vector3.up()
+				local end_position = POSITION_LOOKUP[claim_unit] + Vector3.up() * (ip_end_time - t) + Vector3.up()
 
 				QuickDrawer.cylinder(QuickDrawer, POSITION_LOOKUP[claim_unit], end_position, 0.25, Colors.get("dark_red"), 5)
 			end
@@ -661,7 +661,7 @@ AIInterestPointSystem.api_release_claim = function (self, request_id)
 		extension.num_claimed_points = extension.num_claimed_points - 1
 		request.point.claimed = nil
 		request.point.claim_unit = nil
-		local chatter_number = extension.num_claimed_points/extension.points_n
+		local chatter_number = extension.num_claimed_points / extension.points_n
 
 		if extension.num_claimed_points < extension.wwise_minimum_needed then
 			chatter_number = 0

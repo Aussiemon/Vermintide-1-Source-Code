@@ -155,11 +155,11 @@ ForgeLogic._randomize_trait_variable = function (self, item_data, trait_name, va
 				end
 
 				local diff = variable_base[2] - variable_base[1]
-				local scaled = value/steps*diff
+				local scaled = value / steps * diff
 				variable = variable_base[1] + scaled
 			end
 
-			variable = math.floor(variable*1000 + 0.5)/1000
+			variable = math.floor(variable * 1000 + 0.5) / 1000
 		elseif type(variable_base) == "number" then
 			variable = variable_base
 		end

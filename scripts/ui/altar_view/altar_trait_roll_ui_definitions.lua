@@ -1137,11 +1137,11 @@ local animations = {
 				local expand_frame_default_size = scenegraph_definition.expand_frame.size
 				local expand_frame_background_default_size = scenegraph_definition.expand_frame_background.size
 				local progress = math.easeOutCubic(local_progress)
-				local width_increase = progress*1236
+				local width_increase = progress * 1236
 				ui_scenegraph.expand_frame.size[1] = expand_frame_default_size[1] + width_increase
-				ui_scenegraph.expand_frame_background.size[1] = progress*expand_frame_background_default_size[1]
+				ui_scenegraph.expand_frame_background.size[1] = progress * expand_frame_background_default_size[1]
 				local background_uvs = widgets.expand_frame_background.content.texture_id.uvs
-				background_uvs[1][1] = progress - 1
+				background_uvs[1][1] = 1 - progress
 
 				return 
 			end,
@@ -1164,7 +1164,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
 				local widget_style_global = widget.style_global
-				local alpha = math.easeCubic(local_progress)*255
+				local alpha = math.easeCubic(local_progress) * 255
 				widget_style_global.texture_color[1] = alpha
 
 				return 
@@ -1188,7 +1188,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
 				local widget_style_global = widget.style_global
-				local alpha = math.easeCubic(local_progress)*255
+				local alpha = math.easeCubic(local_progress) * 255
 				widget_style_global.texture_color[1] = alpha
 
 				return 
@@ -1224,7 +1224,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = math.easeInCubic(local_progress)*255
+				local alpha = math.easeInCubic(local_progress) * 255
 
 				for i = 1, 4, 1 do
 					local widget = widgets["trait_preview_" .. i]
@@ -1278,7 +1278,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = math.easeInCubic(local_progress)*255
+				local alpha = math.easeInCubic(local_progress) * 255
 
 				for i = 5, 8, 1 do
 					local widget = widgets["trait_preview_" .. i]
@@ -1317,7 +1317,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = math.easeInCubic(local_progress)*255
+				local alpha = math.easeInCubic(local_progress) * 255
 				local widget = widgets.preview_window_1_title
 				widget.style.text.text_color[1] = alpha
 
@@ -1339,7 +1339,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = math.easeInCubic(local_progress)*255
+				local alpha = math.easeInCubic(local_progress) * 255
 				local widget = widgets.preview_window_2_title
 				widget.style.text.text_color[1] = alpha
 
@@ -1374,7 +1374,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = progress*255
+				local alpha = progress * 255
 
 				for i = 5, 8, 1 do
 					local widget = widgets["trait_preview_" .. i]
@@ -1411,7 +1411,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 
 				for i = 5, 8, 1 do
 					local widget = widgets["trait_preview_" .. i]
@@ -1451,7 +1451,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
 				local widget_style_global = widget.style_global
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				if widget_style_global.glow_corner_color[1] < alpha then
 					widget_style_global.glow_corner_color[1] = alpha
@@ -1473,7 +1473,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_button
 				local widget_style = widget.style
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				if widget_style.button_frame_glow_texture.color[1] < alpha then
 					widget_style.button_frame_glow_texture.color[1] = alpha
@@ -1493,7 +1493,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				for i = 1, 4, 1 do
 					local widget_name = "trait_button_" .. i
@@ -1527,7 +1527,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
 				local widget_style_global = widget.style_global
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				if widget_style_global.glow_skull_color[1] < alpha then
 					widget_style_global.glow_skull_color[1] = alpha
@@ -1551,7 +1551,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
 				local widget_style_global = widget.style_global
-				local alpha = local_progress*255 - 255
+				local alpha = 255 - local_progress * 255
 
 				if alpha < widget_style_global.glow_corner_color[1] then
 					widget_style_global.glow_corner_color[1] = alpha
@@ -1573,7 +1573,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_button
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 
 				if alpha < widget_style.button_frame_glow_texture.color[1] then
 					widget_style.button_frame_glow_texture.color[1] = alpha
@@ -1593,7 +1593,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 
 				for i = 1, 4, 1 do
 					local widget_name = "trait_button_" .. i
@@ -1622,7 +1622,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
 				local widget_style_global = widget.style_global
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 
 				if alpha < widget_style_global.glow_skull_color[1] then
 					widget_style_global.glow_skull_color[1] = alpha
@@ -1648,7 +1648,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
 				local widget_style_global = widget.style_global
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				if widget_style_global.glow_corner_color[1] < alpha then
 					widget_style_global.glow_corner_color[1] = alpha
@@ -1670,7 +1670,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_button
 				local widget_style = widget.style
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				if widget_style.button_frame_glow_texture.color[1] < alpha then
 					widget_style.button_frame_glow_texture.color[1] = alpha
@@ -1690,7 +1690,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				for i = 5, 8, 1 do
 					local widget_name = "trait_button_" .. i
@@ -1724,7 +1724,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
 				local widget_style_global = widget.style_global
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 
 				if widget_style_global.glow_skull_color[1] < alpha then
 					widget_style_global.glow_skull_color[1] = alpha
@@ -1748,7 +1748,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
 				local widget_style_global = widget.style_global
-				local alpha = local_progress*255 - 255
+				local alpha = 255 - local_progress * 255
 
 				if alpha < widget_style_global.glow_corner_color[1] then
 					widget_style_global.glow_corner_color[1] = alpha
@@ -1770,7 +1770,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_button
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 
 				if alpha < widget_style.button_frame_glow_texture.color[1] then
 					widget_style.button_frame_glow_texture.color[1] = alpha
@@ -1790,7 +1790,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 
 				for i = 5, 8, 1 do
 					local widget_name = "trait_button_" .. i
@@ -1819,7 +1819,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
 				local widget_style_global = widget.style_global
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 
 				if alpha < widget_style_global.glow_skull_color[1] then
 					widget_style_global.glow_skull_color[1] = alpha
@@ -1846,7 +1846,7 @@ local animations = {
 				local glow_skull_color = widget_style_global.glow_skull_color
 				local glow_corner_color = widget_style_global.glow_corner_color
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 
 				if alpha < glow_skull_color[1] then
 					glow_skull_color[1] = alpha
@@ -1875,7 +1875,7 @@ local animations = {
 				local glow_skull_color = widget_style_global.glow_skull_color
 				local glow_corner_color = widget_style_global.glow_corner_color
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 
 				if alpha < glow_skull_color[1] then
 					glow_skull_color[1] = alpha
@@ -1900,7 +1900,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 
 				for i = 1, 8, 1 do
 					local widget = widgets["trait_preview_" .. i]
@@ -1947,7 +1947,7 @@ local animations = {
 				local widget_style_global = widget.style_global
 				local texture_color = widget_style_global.texture_color
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 
 				if alpha < texture_color[1] then
 					texture_color[1] = alpha
@@ -1988,7 +1988,7 @@ local animations = {
 				local widget_style_global = widget.style_global
 				local texture_color = widget_style_global.texture_color
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 
 				if alpha < texture_color[1] then
 					texture_color[1] = alpha
@@ -2026,7 +2026,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 				local widget = widgets.preview_window_1_title
 				widget.style.text.text_color[1] = alpha
 
@@ -2045,7 +2045,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
-				local alpha = (progress - 1)*255
+				local alpha = (1 - progress) * 255
 				local widget = widgets.preview_window_2_title
 				widget.style.text.text_color[1] = alpha
 
@@ -2072,13 +2072,13 @@ local animations = {
 				local expand_frame_default_size = scenegraph_definition.expand_frame.size
 				local expand_frame_background_default_size = scenegraph_definition.expand_frame_background.size
 				local progress = math.easeOutCubic(local_progress)
-				local width_increase = (progress - 1)*1236
+				local width_increase = (1 - progress) * 1236
 				local current_size = ui_scenegraph.expand_frame.size
 				local new_width = expand_frame_default_size[1] + width_increase
 
 				if new_width < current_size[1] then
 					current_size[1] = new_width
-					ui_scenegraph.expand_frame_background.size[1] = (progress - 1)*expand_frame_background_default_size[1]
+					ui_scenegraph.expand_frame_background.size[1] = (1 - progress) * expand_frame_background_default_size[1]
 					local background_uvs = widgets.expand_frame_background.content.texture_id.uvs
 					background_uvs[1][1] = progress
 				end

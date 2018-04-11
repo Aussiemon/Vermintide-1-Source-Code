@@ -41,7 +41,7 @@ BTBotInteractAction.leave = function (self, unit, blackboard, t)
 		if unit_alive(interaction_unit) then
 			local rotation = Unit.local_rotation(interaction_unit, 0)
 			local forward_vector_flat = Vector3.normalize(Vector3.flat(Quaternion.forward(rotation)))
-			local wanted_position = POSITION_LOOKUP[unit] - forward_vector_flat*1
+			local wanted_position = POSITION_LOOKUP[unit] - forward_vector_flat * 1
 			local nav_world = blackboard.nav_world
 			local pos_on_nav_mesh, z = GwNavQueries.triangle_from_position(nav_world, wanted_position, 1, 1)
 

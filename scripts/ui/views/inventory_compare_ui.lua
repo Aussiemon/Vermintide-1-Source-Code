@@ -143,7 +143,7 @@ InventoryCompareUI.update = function (self, dt)
 		if scroll_axis and 0 < Vector3.length(scroll_axis) then
 			local current_scroll_value = self.scroll_value
 			local scroll_step = self.scroll_field_widget.content.scroll_step or 0.1
-			gamepad_scroll_value = current_scroll_value + scroll_step*-scroll_axis.y
+			gamepad_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 			gamepad_scroll_value = math.clamp(gamepad_scroll_value, 0, 1)
 		end
 	end
@@ -176,7 +176,7 @@ InventoryCompareUI.set_scrollbar_length = function (self, total_height, start_sc
 	if total_height <= default_height then
 		bar_fraction = 1
 	else
-		local height_fraction = default_height/total_height
+		local height_fraction = default_height / total_height
 		bar_fraction = height_fraction
 		step_fraction = 0.15
 		draw_scrollbar = true
@@ -214,7 +214,7 @@ InventoryCompareUI.set_scroll_amount = function (self, value)
 		local ui_scenegraph = self.ui_scenegraph
 		local start_position = 22
 		local size = self.total_widgets_height or 0
-		ui_scenegraph.compare_window.local_position[2] = math.ceil(start_position + size*value)
+		ui_scenegraph.compare_window.local_position[2] = math.ceil(start_position + size * value)
 		local widget_scroll_bar_info = self.scrollbar_widget.content.scroll_bar_info
 		widget_scroll_bar_info.value = value
 		self.scroll_field_widget.content.internal_scroll_value = value
@@ -518,7 +518,7 @@ InventoryCompareUI.get_word_wrap_size = function (self, localized_text, text_sty
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
 	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
 
-	return text_width, text_height*#lines
+	return text_width, text_height * #lines
 end
 InventoryCompareUI.clear_item_selected = function (self)
 	self.item = nil
@@ -599,24 +599,24 @@ InventoryCompareUI.set_bar_value = function (self, widget, scenegraph_id, index,
 	local edge_marker_position_value = 0
 
 	if compare_value < value then
-		normal_bar_value = math.clamp(compare_value*STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
-		compare_bar_value = math.clamp(value*STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
+		normal_bar_value = math.clamp(compare_value * STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
+		compare_bar_value = math.clamp(value * STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
 		normal_bar_fraction = compare_value
 		compare_bar_fraction = value
 		normal_bar_color = compare_bar_colors.none
 		compare_bar_color = compare_bar_colors.positive
 		edge_marker_position_value = compare_bar_value
 	elseif value < compare_value then
-		normal_bar_value = math.clamp(value*STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
-		compare_bar_value = math.clamp(compare_value*STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
+		normal_bar_value = math.clamp(value * STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
+		compare_bar_value = math.clamp(compare_value * STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
 		normal_bar_fraction = value
 		compare_bar_fraction = compare_value
 		normal_bar_color = compare_bar_colors.none
 		compare_bar_color = compare_bar_colors.negative
 		edge_marker_position_value = normal_bar_value
 	else
-		normal_bar_value = math.clamp(value*STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
-		compare_bar_value = math.clamp(value*STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
+		normal_bar_value = math.clamp(value * STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
+		compare_bar_value = math.clamp(value * STATS_BAR_LENGTH, 0, STATS_BAR_LENGTH)
 		normal_bar_fraction = value
 		compare_bar_fraction = value
 		normal_bar_color = compare_bar_colors.none

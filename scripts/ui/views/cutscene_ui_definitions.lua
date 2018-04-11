@@ -149,7 +149,7 @@ local widget_definitions = {
 							return 
 						end
 
-						local alpha = content.fx_fade_alpha*255
+						local alpha = content.fx_fade_alpha * 255
 						style_data.color[1] = alpha
 
 						return 0 < alpha
@@ -185,7 +185,7 @@ local widget_definitions = {
 							return 
 						end
 
-						local alpha = content.fx_text_popup_alpha*255
+						local alpha = content.fx_text_popup_alpha * 255
 						style_data.text_color[1] = alpha
 
 						return 0 < alpha

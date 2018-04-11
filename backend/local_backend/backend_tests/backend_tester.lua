@@ -17,7 +17,7 @@ BackendTester.start = function (self, max_iterations, sleep_duration)
 
 	Managers.debug_updator:remove_updator_by_name(self._name)
 	Managers.debug_updator:add_updator(update, self._name)
-	print(string.format("Base time %ss", self._duration(self, sleep_duration*max_iterations)))
+	print(string.format("Base time %ss", self._duration(self, sleep_duration * max_iterations)))
 
 	return 
 end
@@ -46,7 +46,7 @@ BackendTester._progress_bar = function (self, percent_done)
 	local char = "*"
 
 	for ii = 0, length, 1 do
-		local percent = ii/length
+		local percent = ii / length
 
 		if percent_done <= percent then
 			if char == "*" then
@@ -66,7 +66,7 @@ end
 BackendTester._time_left = function (self, percent)
 	local time_spent = os.time() - self._start_time
 
-	return time_spent/percent*(percent - 1)
+	return time_spent / percent * (1 - percent)
 end
 BackendTester.update = function (self, dt)
 	local rarity = self._rarity
@@ -81,10 +81,10 @@ BackendTester.update = function (self, dt)
 		if result then
 			local num_iter = self._num_iterations
 			local max_iter = self._max_iterations
-			local percent = (num_iter + 1)/max_iter
+			local percent = (num_iter + 1) / max_iter
 			local time_left = self._time_left(self, percent)
 			local bar = self._progress_bar(self, percent)
-			local progress = string.format("Iteration %d/%d %.1f%% %s %ds left", num_iter + 1, max_iter, (num_iter + 1)/max_iter*100, bar, time_left)
+			local progress = string.format("Iteration %d/%d %.1f%% %s %ds left", num_iter + 1, max_iter, (num_iter + 1) / max_iter * 100, bar, time_left)
 
 			print(progress)
 

@@ -68,7 +68,7 @@ LevelCountdownUI.draw = function (self, dt)
 	local h = RESOLUTION_LOOKUP.res_h
 	local inverse_scale = RESOLUTION_LOOKUP.inv_scale
 
-	UIRenderer.draw_texture(ui_renderer, "gradient_dice_game_reward", Vector3(0, 0, UILayer.controller_description), Vector2(w*inverse_scale, h*inverse_scale))
+	UIRenderer.draw_texture(ui_renderer, "gradient_dice_game_reward", Vector3(0, 0, UILayer.controller_description), Vector2(w * inverse_scale, h * inverse_scale))
 	UIRenderer.end_pass(ui_renderer)
 
 	return 
@@ -157,7 +157,7 @@ LevelCountdownUI.update_enter_game_counter = function (self, dt)
 			if color_timer then
 				local total_color_time = 0.5
 				color_timer = math.min(color_timer + dt, total_color_time)
-				local color_progress = color_timer/total_color_time
+				local color_progress = color_timer / total_color_time
 				self.color_timer = color_timer
 
 				Colors.lerp_color_tables(colors.white, colors.cheeseburger, color_progress, widget_style.timer_text.text_color)

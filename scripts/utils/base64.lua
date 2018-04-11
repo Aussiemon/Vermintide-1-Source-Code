@@ -50,7 +50,7 @@ function to_base64(to_encode)
 		encoded = encoded .. string.sub(index_table, offset + 1, offset + 1)
 	end
 
-	return string.sub(encoded, 1, string.len(trailing) - -1) .. trailing
+	return string.sub(encoded, 1, -1 - string.len(trailing)) .. trailing
 end
 
 function from_base64(to_decode)

@@ -70,8 +70,8 @@ LevelSelectView.update = function (self, dt)
 	for i, name in ipairs(level_array) do
 		local level_data = LevelSettings[name]
 		local width, height = UIRenderer.text_size(ui_renderer, level_data.display_name, font_mtrl, font_size)
-		local x_pos = screen_width/2 - width/2
-		local y_pos = screen_height - 50 - i*font_size
+		local x_pos = screen_width / 2 - width / 2
+		local y_pos = screen_height - 50 - i * font_size
 
 		UIRenderer.draw_text(ui_renderer, level_data.display_name, font_mtrl, font_size, font, {
 			x_pos,

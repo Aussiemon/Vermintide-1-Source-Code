@@ -3123,18 +3123,18 @@ local temp_pos = {
 }
 
 local function animate_style_on_select(style, size, progress, catmullrom_value, default_style, ignore_color)
-	local offset_fraction = (progress < 1 and catmullrom_value - 1) or 0
+	local offset_fraction = (progress < 1 and 1 - catmullrom_value) or 0
 	local original_size = (default_style and default_style.size) or size
 	local original_position = (default_style and default_style.position) or temp_pos
-	local x_offset = (offset_fraction*original_size[1])/2
-	local y_offset = offset_fraction*original_size[2]/2
-	style.size[1] = catmullrom_value*original_size[1]
-	style.size[2] = catmullrom_value*original_size[2]
+	local x_offset = (offset_fraction * original_size[1]) / 2
+	local y_offset = offset_fraction * original_size[2] / 2
+	style.size[1] = catmullrom_value * original_size[1]
+	style.size[2] = catmullrom_value * original_size[2]
 	style.offset[1] = original_position[1] + x_offset
 	style.offset[2] = original_position[2] + y_offset
 
 	if not ignore_color then
-		style.color[1] = math.min(progress*4, 1)*255
+		style.color[1] = math.min(progress * 4, 1) * 255
 	end
 
 	return 
@@ -3158,7 +3158,7 @@ local animations = {
 				local button_click_style = widget_style[string.format("button_click_style_%d", selected_index)]
 				local title_text_style = widget_style[string.format("title_text_%d", selected_index)]
 				local default_font_size = 20
-				title_text_style.font_size = default_font_size*catmullrom_value
+				title_text_style.font_size = default_font_size * catmullrom_value
 				local button_size = scenegraph_definition[scenegraph_id].size
 
 				animate_style_on_select(button_click_style, button_size, progress, catmullrom_value)
@@ -3188,7 +3188,7 @@ local animations = {
 				local title_text_style = widget_style[string.format("title_text_%d", selected_index)]
 				local default_font_size = 20
 				title_text_style.font_size = default_font_size
-				button_click_style.color[1] = math.max(button_click_style.color[1] - progress*255, 0)
+				button_click_style.color[1] = math.max(button_click_style.color[1] - progress * 255, 0)
 
 				return 
 			end,

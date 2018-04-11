@@ -8,7 +8,7 @@ PlayerUnitStatusSettings.move_speed_reduction_on_hit_recover_time = 0.5
 PlayerUnitStatusSettings.poison_dot_time = 1
 PlayerUnitStatusSettings.poison_level_max = 5
 PlayerUnitStatusSettings.poison_dot_function = function (poison_level)
-	return poison_level*poison_level*0.3
+	return poison_level * poison_level * 0.3
 end
 PlayerUnitStatusSettings.fatigue_point_costs = {
 	blocked_slam = 10,

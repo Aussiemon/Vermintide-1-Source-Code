@@ -296,7 +296,7 @@ local action_data = {
 			}
 		},
 		radius = GLOBE_RADIUS,
-		initial_radius = GLOBE_RADIUS*0.6,
+		initial_radius = GLOBE_RADIUS * 0.6,
 		time_between_throws = {
 			12,
 			2

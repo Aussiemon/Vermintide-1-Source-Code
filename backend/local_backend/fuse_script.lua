@@ -138,7 +138,7 @@ local function check_cost(num_items, num_tokens, params_token_type, rarity)
 		return 
 	end
 
-	local cost = config.cost[num_items - 5]
+	local cost = config.cost[5 - num_items]
 
 	if cost ~= num_tokens then
 		echo(string.format("Not the correct number of tokens, expected: %d, got: %d", cost, num_tokens))

@@ -69,7 +69,7 @@ IngameVotingUI.setup_option_input = function (self, option_widget, option, gamep
 
 	local left_side = option_widget.content.left_side
 	local scenegraph_id = option_widget.scenegraph_id
-	local horizontal_offset = total_width/2 + 10
+	local horizontal_offset = total_width / 2 + 10
 	self.ui_scenegraph[scenegraph_id].local_position[1] = (left_side and -horizontal_offset) or horizontal_offset
 
 	return 
@@ -103,11 +103,11 @@ IngameVotingUI.start_vote = function (self, active_voting)
 	self.background.content.info_text = title_text
 	local info_text_style = self.background.style.info_text
 	local font = UIFontByResolution(info_text_style)
-	local width = self.ui_scenegraph.info_text.size[1]*RESOLUTION_LOOKUP.inv_scale
+	local width = self.ui_scenegraph.info_text.size[1] * RESOLUTION_LOOKUP.inv_scale
 	local lines = UIRenderer.word_wrap(self.ui_renderer, title_text, font[1], info_text_style.font_size, width)
 	local text_width, text_height = UIRenderer.text_size(self.ui_renderer, title_text, font[1], info_text_style.font_size)
-	text_height = text_height*RESOLUTION_LOOKUP.scale
-	local size_y = math.max(text_height*#lines, 53)
+	text_height = text_height * RESOLUTION_LOOKUP.scale
+	local size_y = math.max(text_height * #lines, 53)
 	self.voters = {}
 	self.vote_results = {
 		[1.0] = 0,
@@ -174,7 +174,7 @@ IngameVotingUI.update_vote = function (self, votes)
 
 	local voting_manager = self.voting_manager
 	local vote_time_left = voting_manager.vote_time_left(voting_manager)
-	local time_text = (vote_time_left and string.format(" %02d:%02d", math.floor(vote_time_left/60), vote_time_left%60)) or "00:00"
+	local time_text = (vote_time_left and string.format(" %02d:%02d", math.floor(vote_time_left / 60), vote_time_left % 60)) or "00:00"
 	self.background.content.title_text = time_text
 
 	return 
@@ -218,7 +218,7 @@ IngameVotingUI.update_finish = function (self, dt, t)
 	if self.finish_time <= t then
 		self.stop_finish(self)
 	else
-		self.finish_anim_t = self.finish_anim_t + dt*8
+		self.finish_anim_t = self.finish_anim_t + dt * 8
 		local value = math.sirp(0, 1, self.finish_anim_t)
 
 		if 0.5 < value then
@@ -380,14 +380,14 @@ IngameVotingUI.update_pulse_animations = function (self, dt, hold_input_pressed)
 	local menu_active = self.menu_active
 	local speed_multiplier = (menu_active and 5) or 8
 	local time_since_launch = Application.time_since_launch()
-	local progress = (not menu_active or not hold_input_pressed or 0) and math.sin(time_since_launch*speed_multiplier)*0.5 + 0.5
+	local progress = (not menu_active or not hold_input_pressed or 0) and 0.5 + math.sin(time_since_launch * speed_multiplier) * 0.5
 
 	if menu_active then
-		local alpha = progress*50 + 50
+		local alpha = 50 + progress * 50
 		self.option_no.style.bar_bg.color[1] = alpha
 		self.option_yes.style.bar_bg.color[1] = alpha
 	else
-		local alpha = progress*155 + 100
+		local alpha = 100 + progress * 155
 		self.background.style.input_text.text_color[1] = alpha
 	end
 
@@ -407,14 +407,14 @@ IngameVotingUI.animate_option_get_vote = function (self, option)
 	local fade_in_time = 0.1
 	local fade_out_time = 0.1
 	local anim_time = fade_in_time + fade_out_time
-	fade_in_time = fade_in_time/anim_time
-	fade_out_time = fade_out_time/anim_time
+	fade_in_time = fade_in_time / anim_time
+	fade_out_time = fade_out_time / anim_time
 
 	local function anim_func(t)
 		if t < fade_in_time then
-			return math_ease_cubic(t/fade_in_time)
+			return math_ease_cubic(t / fade_in_time)
 		elseif 0 < fade_out_time then
-			return math_ease_cubic((t - 1)/fade_out_time)
+			return math_ease_cubic((1 - t) / fade_out_time)
 		else
 			return 0
 		end
@@ -460,11 +460,11 @@ IngameVotingUI.update_input_progress = function (self, active_voting)
 		local uvs = content.uvs
 
 		if direction == "left" then
-			size[1] = anim_progress*default_width
-			uvs[1][1] = anim_progress - 1
+			size[1] = anim_progress * default_width
+			uvs[1][1] = 1 - anim_progress
 			offset[1] = default_offset[1] + default_width - size[1]
 		else
-			size[1] = anim_progress*default_width
+			size[1] = anim_progress * default_width
 			uvs[2][1] = anim_progress
 		end
 

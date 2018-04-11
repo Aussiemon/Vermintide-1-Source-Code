@@ -60,19 +60,19 @@ local function codepoint_to_utf8(code)
 		return s_char(code)
 	end
 
-	local bits0_6 = code%64
+	local bits0_6 = code % 64
 
 	if code < 2048 then
-		local bits6_5 = (code - bits0_6)/64
+		local bits6_5 = (code - bits0_6) / 64
 
-		return s_char(bits6_5 + 192, bits0_6 + 128)
+		return s_char(192 + bits6_5, 128 + bits0_6)
 	end
 
-	local bits0_12 = code%4096
-	local bits6_6 = (bits0_12 - bits0_6)/64
-	local bits12_4 = (code - bits0_12)/4096
+	local bits0_12 = code % 4096
+	local bits6_6 = (bits0_12 - bits0_6) / 64
+	local bits12_4 = (code - bits0_12) / 4096
 
-	return s_char(bits12_4 + 224, bits6_6 + 128, bits0_6 + 128)
+	return s_char(224 + bits12_4, 128 + bits6_6, 128 + bits0_6)
 end
 
 local valid_types = {
@@ -377,15 +377,15 @@ local _unescape_error = nil
 local function _unescape_surrogate_func(x)
 	local lead = tonumber(x.sub(x, 3, 6), 16)
 	local trail = tonumber(x.sub(x, 9, 12), 16)
-	local codepoint = (lead*1024 + trail) - 56613888
-	local a = codepoint%64
-	codepoint = (codepoint - a)/64
-	local b = codepoint%64
-	codepoint = (codepoint - b)/64
-	local c = codepoint%64
-	codepoint = (codepoint - c)/64
+	local codepoint = (lead * 1024 + trail) - 56613888
+	local a = codepoint % 64
+	codepoint = (codepoint - a) / 64
+	local b = codepoint % 64
+	codepoint = (codepoint - b) / 64
+	local c = codepoint % 64
+	codepoint = (codepoint - c) / 64
 
-	return s_char(codepoint + 240, c + 128, b + 128, a + 128)
+	return s_char(240 + codepoint, 128 + c, 128 + b, 128 + a)
 end
 
 local function _unescape_func(x)

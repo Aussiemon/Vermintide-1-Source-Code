@@ -138,7 +138,7 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 				local total_time = 1
 				local cancel_timer = self.cancel_timer
 				cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-				local progress = math.min(cancel_timer/total_time, 1)
+				local progress = math.min(cancel_timer / total_time, 1)
 
 				if progress == 1 then
 					self.ready = not self.ready
@@ -222,7 +222,7 @@ MatchmakingStateSearchGame.search_for_game = function (self, dt)
 	local level_filter = search_data.level_filter
 	local game_mode = search_data.game_mode
 	local player = Managers.player:player_from_peer_id(self.peer_id)
-	local wanted_profile = (self.total_search_timer < MatchmakingSettings.TOTAL_GAME_SEARCH_TIME/2 and player.profile_index) or nil
+	local wanted_profile = (self.total_search_timer < MatchmakingSettings.TOTAL_GAME_SEARCH_TIME / 2 and player.profile_index) or nil
 
 	if wanted_profile == 0 then
 		wanted_profile = nil

@@ -414,8 +414,8 @@ RewardUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
 	local spacing = 80
-	local half_trait_amount = (number_of_traits - 1)*0.5
-	local start_x_position = -((width + spacing)*half_trait_amount)
+	local half_trait_amount = (number_of_traits - 1) * 0.5
+	local start_x_position = -((width + spacing) * half_trait_amount)
 
 	for i = 1, number_of_traits, 1 do
 		local trait_scenegraph_name = "trait_button_" .. i
@@ -737,7 +737,7 @@ RewardUI.animate_door_close = function (self)
 	self.ui_dice_animations[animation_name .. "_left_uvs"] = UIAnimation.init(UIAnimation.function_by_time, right_uvs[2], 1, 0, 1, animation_time, math.easeInCubic)
 	self.ui_dice_animations[animation_name .. "_left"] = UIAnimation.init(UIAnimation.function_by_time, left_widget_size, 1, 0, 1080, animation_time, math.easeInCubic)
 	self.ui_dice_animations[animation_name .. "_right_uvs"] = UIAnimation.init(UIAnimation.function_by_time, left_uvs[1], 1, 1, 0, animation_time, math.easeInCubic)
-	self.ui_dice_animations.show_fake_lock = UIAnimation.init(UIAnimation.wait, animation_time*0.7)
+	self.ui_dice_animations.show_fake_lock = UIAnimation.init(UIAnimation.wait, animation_time * 0.7)
 
 	return 
 end
@@ -766,7 +766,7 @@ RewardUI.animate_door_open = function (self)
 	self.ui_dice_animations[animation_name .. "_left_uvs"] = UIAnimation.init(UIAnimation.function_by_time, left_uvs[1], 1, 0, 1, animation_time, math.easeInCubic)
 	self.ui_dice_animations[animation_name .. "_right"] = UIAnimation.init(UIAnimation.function_by_time, right_widget_size, 1, 960, 0, animation_time, math.easeInCubic)
 	self.ui_dice_animations[animation_name .. "_right_uvs"] = UIAnimation.init(UIAnimation.function_by_time, right_uvs[2], 1, 1, 0, animation_time, math.easeInCubic)
-	self.ui_dice_animations.hide_fake_lock = UIAnimation.init(UIAnimation.wait, animation_time*0.8)
+	self.ui_dice_animations.hide_fake_lock = UIAnimation.init(UIAnimation.wait, animation_time * 0.8)
 
 	return 
 end
@@ -1220,7 +1220,7 @@ RewardUI.spawn_link_unit = function (self)
 	local camera_rotation = self.get_camera_rotation(self)
 	local camera_forward_vector = Quaternion.forward(camera_rotation)
 	local camera_look_rotation = Quaternion.look(camera_forward_vector, Vector3.up())
-	local horizontal_rotation = Quaternion.axis_angle(Vector3.up(), math.pi*1)
+	local horizontal_rotation = Quaternion.axis_angle(Vector3.up(), math.pi * 1)
 	local unit_spawn_rotation = Quaternion.multiply(camera_look_rotation, horizontal_rotation)
 	local camera_position = self.get_camera_position(self)
 	local unit_spawn_position = camera_position + camera_forward_vector
@@ -1249,12 +1249,12 @@ RewardUI.spawn_link_unit = function (self)
 
 		if max_value < largest_value then
 			local diff = largest_value - max_value
-			local scale_fraction = diff/largest_value - 1
+			local scale_fraction = 1 - diff / largest_value
 			local scale = Vector3(scale_fraction, scale_fraction, scale_fraction)
 
 			Unit.set_local_scale(link_unit, 0, scale)
 
-			offset = offset*scale_fraction
+			offset = offset * scale_fraction
 		end
 
 		local display_position = unit_spawn_position - offset
@@ -1323,7 +1323,7 @@ RewardUI.auto_rotate = function (self, dt)
 	if link_unit and Unit.alive(link_unit) then
 		local speed_multiplier = self.unit_auto_rotate_speed_multiplier or 0.5
 		local current_value = self.unit_auto_rotate_value or 0
-		local value = (current_value + dt*speed_multiplier)%(math.pi*2)
+		local value = (current_value + dt * speed_multiplier) % (math.pi * 2)
 		local unit_rotation = Quaternion.axis_angle(Vector3(0, 0, 1), -value)
 
 		Unit.set_local_rotation(link_unit, 0, unit_rotation)
@@ -1452,11 +1452,11 @@ RewardUI.set_preview_traits_info = function (self, traits_data, start_index, end
 	end
 
 	total_traits_height = total_traits_height + 120
-	local height_percentage = total_traits_height/819
+	local height_percentage = total_traits_height / 819
 	local new_uvs = {
 		{
 			0,
-			height_percentage - 1
+			1 - height_percentage
 		},
 		{
 			1,
@@ -1481,7 +1481,7 @@ RewardUI.get_word_wrap_size = function (self, localized_text, text_style, text_a
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
 	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
 
-	return text_width, text_height*#lines
+	return text_width, text_height * #lines
 end
 
 return 

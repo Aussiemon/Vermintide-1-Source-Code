@@ -52,7 +52,7 @@ Rewards._add_rewards_from_completed_missions = function (self, completed_mission
 				mission_rewards_n = mission_rewards_n + 1
 				mission_rewards[mission_rewards_n] = {
 					text = "dlc1_2_experience",
-					experience = experience*difficulty_rank*level_length_modifier*self._multiplier
+					experience = experience * difficulty_rank * level_length_modifier * self._multiplier
 				}
 			end
 
@@ -117,15 +117,15 @@ Rewards._add_rewards_from_active_missions = function (self, active_missions, mis
 			local line_break = false
 
 			if data.evaluation_type == "percent" then
-				local percent_completed = amount*100
+				local percent_completed = amount * 100
 				local experience_per_percent = data.experience_per_percent or 0
 				local dice_per_percent = data.dice_per_percent or 0
 				local tokens_per_percent = data.tokens_per_percent or 0
 				local lorebook_pages_per_percent = data.lorebook_pages_per_percent or 0
-				experience = math.ceil(percent_completed*experience_per_percent)
-				bonus_dice = math.floor(percent_completed*dice_per_percent)
-				bonus_tokens = math.floor(percent_completed*tokens_per_percent)
-				lorebook_pages = math.floor(percent_completed*lorebook_pages_per_percent)
+				experience = math.ceil(percent_completed * experience_per_percent)
+				bonus_dice = math.floor(percent_completed * dice_per_percent)
+				bonus_tokens = math.floor(percent_completed * tokens_per_percent)
+				lorebook_pages = math.floor(percent_completed * lorebook_pages_per_percent)
 
 				if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens or 0 < lorebook_pages then
 					mission_rewards_n = mission_rewards_n + 1
@@ -140,10 +140,10 @@ Rewards._add_rewards_from_active_missions = function (self, active_missions, mis
 				local dice_per_amount = data.dice_per_amount or 0
 				local tokens_per_amount = data.tokens_per_amount or 0
 				local lorebook_pages_per_amount = data.lorebook_pages_per_amount or 0
-				experience = collected_amount*experience_per_amount
-				bonus_dice = collected_amount*dice_per_amount
-				bonus_tokens = collected_amount*tokens_per_amount
-				lorebook_pages = collected_amount*lorebook_pages_per_amount
+				experience = collected_amount * experience_per_amount
+				bonus_dice = collected_amount * dice_per_amount
+				bonus_tokens = collected_amount * tokens_per_amount
+				lorebook_pages = collected_amount * lorebook_pages_per_amount
 
 				if 0 < experience or 0 < bonus_dice or 0 < bonus_tokens or 0 < lorebook_pages then
 					mission_rewards_n = mission_rewards_n + 1
@@ -165,7 +165,7 @@ Rewards._add_rewards_from_active_missions = function (self, active_missions, mis
 				mission_rewards_n = mission_rewards_n + 1
 				mission_rewards[mission_rewards_n] = {
 					text = "dlc1_2_experience",
-					experience = experience*difficulty_rank*level_length_modifier*self._multiplier
+					experience = experience * difficulty_rank * level_length_modifier * self._multiplier
 				}
 			end
 
@@ -235,7 +235,7 @@ Rewards.get_mission_results = function (self, completed_level, game_mode_key)
 
 		local mission_complete_reward = {
 			text = "mission_completed_" .. difficulty,
-			experience = difficulty_rank*100*level_length_modifier*self._multiplier
+			experience = 100 * difficulty_rank * level_length_modifier * self._multiplier
 		}
 
 		table.insert(mission_rewards, 1, mission_complete_reward)
@@ -245,7 +245,7 @@ Rewards.get_mission_results = function (self, completed_level, game_mode_key)
 		local completed_distance = mission_system.percentage_completed(mission_system) or 0
 		local mission_failed_reward = {
 			text = "mission_failed_" .. difficulty,
-			experience = difficulty_rank*100*level_length_modifier*completed_distance*self._multiplier
+			experience = 100 * difficulty_rank * level_length_modifier * completed_distance * self._multiplier
 		}
 
 		table.insert(mission_rewards, 1, mission_failed_reward)

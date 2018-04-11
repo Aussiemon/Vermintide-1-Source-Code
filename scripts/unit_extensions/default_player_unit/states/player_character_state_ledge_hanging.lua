@@ -104,10 +104,10 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 
 	if self.position_lerp_timer then
 		self.position_lerp_timer = self.position_lerp_timer + dt
-		local percentage_in_lerp = math.clamp(self.position_lerp_timer/self.time_for_position_lerp, 0, 1)
+		local percentage_in_lerp = math.clamp(self.position_lerp_timer / self.time_for_position_lerp, 0, 1)
 		local start_position = self.lerp_start_position:unbox()
 		local target_position = self.lerp_target_position:unbox()
-		local new_position = start_position + (target_position - start_position)*percentage_in_lerp
+		local new_position = start_position + (target_position - start_position) * percentage_in_lerp
 
 		locomotion_extension.teleport_to(locomotion_extension, new_position)
 
@@ -142,13 +142,13 @@ PlayerCharacterStateLedgeHanging.calculate_start_position = function (self)
 	local finger_box_position = Unit.world_position(ledge_unit, node)
 	local finger_box_rotation = Unit.world_rotation(ledge_unit, node)
 	local finger_box_right_vector = Quaternion.right(finger_box_rotation)
-	local new_position = finger_box_position + finger_box_right_vector*position_offset_amount
+	local new_position = finger_box_position + finger_box_right_vector * position_offset_amount
 	local distance = Vector3.distance(current_position, new_position)
 
 	self.lerp_start_position:store(current_position)
 	self.lerp_target_position:store(new_position)
 
-	self.time_for_position_lerp = distance*movement_settings_table.ledge_hanging.attach_position_lerp_time_per_meter
+	self.time_for_position_lerp = distance * movement_settings_table.ledge_hanging.attach_position_lerp_time_per_meter
 	self.position_lerp_timer = 0
 
 	return 

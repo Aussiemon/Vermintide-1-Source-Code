@@ -61,7 +61,7 @@ TimeManager.update = function (self, dt)
 end
 TimeManager._update_mean_dt = function (self, dt)
 	local dt_stack = self._dt_stack
-	self._dt_stack_index = self._dt_stack_index%self._dt_stack_max_size + 1
+	self._dt_stack_index = self._dt_stack_index % self._dt_stack_max_size + 1
 	dt_stack[self._dt_stack_index] = dt
 	local dt_sum = 0
 
@@ -69,7 +69,7 @@ TimeManager._update_mean_dt = function (self, dt)
 		dt_sum = dt_sum + dt
 	end
 
-	self._mean_dt = dt_sum/#dt_stack
+	self._mean_dt = dt_sum / #dt_stack
 
 	return 
 end

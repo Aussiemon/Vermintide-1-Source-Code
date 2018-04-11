@@ -90,9 +90,9 @@ local function is_within_damage_window(current_time_in_action, action, owner_uni
 
 	local anim_time_scale = action.anim_time_scale or 1
 	anim_time_scale = ActionUtils.apply_attack_speed_buff(anim_time_scale, owner_unit)
-	damage_window_start = damage_window_start/anim_time_scale
+	damage_window_start = damage_window_start / anim_time_scale
 	damage_window_end = damage_window_end or action.total_time or math.huge
-	damage_window_end = damage_window_end/anim_time_scale
+	damage_window_end = damage_window_end / anim_time_scale
 	local after_start = damage_window_start < current_time_in_action
 	local before_end = current_time_in_action < damage_window_end
 
@@ -106,7 +106,7 @@ local function is_within_a_chain_window(current_time_in_action, action, owner_un
 	for action, chain_info in pairs(action.allowed_chain_actions) do
 		local start_time = chain_info.start_time or 0
 		local end_time = chain_info.end_time or math.huge
-		local modified_start_time = start_time/attack_speed_modifier
+		local modified_start_time = start_time / attack_speed_modifier
 		local after_start = modified_start_time < current_time_in_action
 		local before_end = current_time_in_action < end_time
 
@@ -344,7 +344,7 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 			end
 
 			if PLATFORM ~= "win32" and event == "attack_shoot" then
-				anim_time_scale = anim_time_scale*1.2
+				anim_time_scale = anim_time_scale * 1.2
 			end
 
 			local first_person_variable_id = Unit.animation_find_variable(first_person_unit, "attack_speed")
@@ -503,11 +503,11 @@ WeaponUnitExtension.is_chain_action_available = function (self, next_chain_actio
 	attack_speed_modifier = ActionUtils.apply_attack_speed_buff(attack_speed_modifier, self.owner_unit)
 
 	if next_chain_action.auto_chain then
-		return ((next_chain_action.start_time and next_chain_action.start_time/attack_speed_modifier) or max_time) + time_offset <= current_time_in_action
+		return ((next_chain_action.start_time and next_chain_action.start_time / attack_speed_modifier) or max_time) + time_offset <= current_time_in_action
 	else
 		local end_time = next_chain_action.end_time or max_time
 
-		return next_chain_action.start_time/attack_speed_modifier + time_offset <= current_time_in_action and current_time_in_action <= end_time
+		return next_chain_action.start_time / attack_speed_modifier + time_offset <= current_time_in_action and current_time_in_action <= end_time
 	end
 
 	return 

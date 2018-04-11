@@ -698,7 +698,7 @@ local animation_definitions = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				local alpha = math.easeOutCubic(progress)*255
+				local alpha = 255 * math.easeOutCubic(progress)
 
 				for i = 1, 4, 1 do
 					local prefix_name = "part_" .. i
@@ -743,8 +743,8 @@ local animation_definitions = {
 				local position = ui_scenegraph.boon_bg.local_position
 				local default_position = scenegraph_definition.boon_bg.position
 				local amount = 7
-				position[1] = (default_position[1] + amount) - amount*math.catmullrom(math.bounce(eased_progress), 2, 1, 1, -1)
-				position[2] = (default_position[2] + amount) - amount*math.catmullrom(math.bounce(eased_progress), -1, 1, 1, 2)
+				position[1] = (default_position[1] + amount) - amount * math.catmullrom(math.bounce(eased_progress), 2, 1, 1, -1)
+				position[2] = (default_position[2] + amount) - amount * math.catmullrom(math.bounce(eased_progress), -1, 1, 1, 2)
 
 				return 
 			end,
@@ -785,7 +785,7 @@ local animation_definitions = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				local eased_progress = math.easeInCubic(progress - 1)
+				local eased_progress = math.easeInCubic(1 - progress)
 				local gradient_threshold = eased_progress
 				widgets.boon_glow_01.style.texture_id.gradient_threshold = gradient_threshold
 				widgets.boon_glow_02.style.texture_id.gradient_threshold = gradient_threshold
@@ -811,15 +811,15 @@ local animation_definitions = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local pulse_progress = math.ease_pulse(progress)
-				local alpha = pulse_progress*255
+				local alpha = 255 * pulse_progress
 				local widget = widgets.glow_background
 				widget.style.texture_id.color[1] = alpha
 				local eased_progress = math.ease_in_exp(progress)
 				local scale_progress = math.catmullrom(eased_progress, 1, 1, 6, -1)
 				local glow_background_size = ui_scenegraph.glow_background.size
 				local glow_background_default_size = scenegraph_definition.glow_background.size
-				glow_background_size[1] = glow_background_default_size[1]*scale_progress
-				glow_background_size[2] = glow_background_default_size[2]*scale_progress
+				glow_background_size[1] = glow_background_default_size[1] * scale_progress
+				glow_background_size[2] = glow_background_default_size[2] * scale_progress
 
 				return 
 			end,
@@ -836,7 +836,7 @@ local animation_definitions = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
-				local distance = eased_progress*33
+				local distance = 33 * eased_progress
 				local position = ui_scenegraph.part_1.local_position
 				local default_position = scenegraph_definition.part_1.position
 				position[1] = default_position[1] - distance
@@ -857,7 +857,7 @@ local animation_definitions = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
-				local distance = eased_progress*33
+				local distance = 33 * eased_progress
 				local position = ui_scenegraph.part_2.local_position
 				local default_position = scenegraph_definition.part_2.position
 				position[1] = default_position[1] + distance
@@ -878,7 +878,7 @@ local animation_definitions = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
-				local distance = eased_progress*33
+				local distance = 33 * eased_progress
 				local position = ui_scenegraph.part_3.local_position
 				local default_position = scenegraph_definition.part_3.position
 				position[1] = default_position[1] - distance
@@ -899,7 +899,7 @@ local animation_definitions = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
-				local distance = eased_progress*33
+				local distance = 33 * eased_progress
 				local position = ui_scenegraph.part_4.local_position
 				local default_position = scenegraph_definition.part_4.position
 				position[1] = default_position[1] + distance
@@ -923,7 +923,7 @@ local animation_definitions = {
 				local part_1 = widgets.part_1_1
 				local part_2 = widgets.part_1_2
 				local angle = math.degrees_to_radians(90)
-				local progress_angle = angle*eased_progress
+				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = -progress_angle
 				part_2.style.texture_id.angle = progress_angle
 
@@ -945,7 +945,7 @@ local animation_definitions = {
 				local part_1 = widgets.part_2_1
 				local part_2 = widgets.part_2_2
 				local angle = math.degrees_to_radians(90)
-				local progress_angle = angle*eased_progress
+				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = -progress_angle
 				part_2.style.texture_id.angle = progress_angle
 
@@ -967,7 +967,7 @@ local animation_definitions = {
 				local part_1 = widgets.part_3_1
 				local part_2 = widgets.part_3_2
 				local angle = math.degrees_to_radians(90)
-				local progress_angle = angle*eased_progress
+				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = progress_angle
 				part_2.style.texture_id.angle = -progress_angle
 
@@ -989,7 +989,7 @@ local animation_definitions = {
 				local part_1 = widgets.part_4_1
 				local part_2 = widgets.part_4_2
 				local angle = math.degrees_to_radians(90)
-				local progress_angle = angle*eased_progress
+				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = progress_angle
 				part_2.style.texture_id.angle = -progress_angle
 
@@ -1019,8 +1019,8 @@ local animation_definitions = {
 						local part_name = prefix_name .. "_" .. k
 						local part_size = ui_scenegraph[part_name].size
 						local part_default_size = scenegraph_definition[part_name].size
-						part_size[1] = part_default_size[1]*scale_progress
-						part_size[2] = part_default_size[2]*scale_progress
+						part_size[1] = part_default_size[1] * scale_progress
+						part_size[2] = part_default_size[2] * scale_progress
 						local widget = widgets[part_name]
 						local texture_style = widget.style.texture_id
 						local pivot = texture_style.pivot
@@ -1031,8 +1031,8 @@ local animation_definitions = {
 						end
 
 						local default_pivot = texture_style.default_pivot
-						pivot[2] = default_pivot[2]*scale_progress
-						pivot[1] = default_pivot[1]*scale_progress
+						pivot[2] = default_pivot[2] * scale_progress
+						pivot[1] = default_pivot[1] * scale_progress
 
 						if 2 < i then
 							offset[2] = part_default_size[2] - part_size[2]
@@ -1042,18 +1042,18 @@ local animation_definitions = {
 					local corner_name = prefix_name .. "_corner"
 					local corner_size = ui_scenegraph[corner_name].size
 					local corner_default_size = scenegraph_definition[corner_name].size
-					corner_size[1] = corner_default_size[1]*scale_progress
-					corner_size[2] = corner_default_size[2]*scale_progress
+					corner_size[1] = corner_default_size[1] * scale_progress
+					corner_size[2] = corner_default_size[2] * scale_progress
 				end
 
 				local boon_bg_size = ui_scenegraph.boon_bg.size
 				local boon_bg_default_size = scenegraph_definition.boon_bg.size
-				boon_bg_size[1] = boon_bg_default_size[1]*scale_progress
-				boon_bg_size[2] = boon_bg_default_size[2]*scale_progress
+				boon_bg_size[1] = boon_bg_default_size[1] * scale_progress
+				boon_bg_size[2] = boon_bg_default_size[2] * scale_progress
 				local boon_icon_size = ui_scenegraph.boon_icon.size
 				local boon_icon_default_size = scenegraph_definition.boon_icon.size
-				boon_icon_size[1] = boon_icon_default_size[1]*scale_progress
-				boon_icon_size[2] = boon_icon_default_size[2]*scale_progress
+				boon_icon_size[1] = boon_icon_default_size[1] * scale_progress
+				boon_icon_size[2] = boon_icon_default_size[2] * scale_progress
 
 				return 
 			end,
@@ -1069,7 +1069,7 @@ local animation_definitions = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				local alpha = math.easeCubic(progress)*255
+				local alpha = 255 * math.easeCubic(progress)
 				local widget = widgets.banner_top
 				widget.style.texture_id.color[1] = alpha
 
@@ -1096,7 +1096,7 @@ local animation_definitions = {
 				local anim_progress = math.catmullrom(math.easeInCubic(progress), 0, 0, 1, 1)
 				local banner_bg_size = ui_scenegraph.banner_bg.size
 				local banner_bg_default_size = scenegraph_definition.banner_bg.size
-				banner_bg_size[2] = anim_progress*banner_bg_default_size[2]
+				banner_bg_size[2] = anim_progress * banner_bg_default_size[2]
 				uvs[2][2] = math.min(anim_progress, 1)
 
 				return 
@@ -1113,7 +1113,7 @@ local animation_definitions = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				local alpha = math.easeOutCubic(progress)*255
+				local alpha = 255 * math.easeOutCubic(progress)
 				widgets.title_text.style.text.text_color[1] = alpha
 				widgets.name_text.style.text.text_color[1] = alpha
 				widgets.type_text.style.text.text_color[1] = alpha

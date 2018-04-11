@@ -10,7 +10,7 @@ OverChargeExtension.init = function (self, extension_init_context, unit, extensi
 	local overcharge_data = extension_init_data.overcharge_data
 	local ammo_percent = extension_init_data.ammo_percent
 	self.max_value = overcharge_data.max_value or 40
-	self.overcharge_value = (ammo_percent and (ammo_percent - 1)*self.max_value) or 0
+	self.overcharge_value = (ammo_percent and (1 - ammo_percent) * self.max_value) or 0
 	self.time_when_overcharge_start_decreasing = 0
 	self.above_threshold = false
 	self.overcharge_crit_time = 0
@@ -19,8 +19,8 @@ OverChargeExtension.init = function (self, extension_init_context, unit, extensi
 	self.venting_overcharge = false
 	self.vent_damage_pool = 0
 	self.no_damage = is_inside_inn
-	self.overcharge_limit = self.max_value*0.65
-	self.overcharge_critical_limit = self.max_value*0.8
+	self.overcharge_limit = self.max_value * 0.65
+	self.overcharge_critical_limit = self.max_value * 0.8
 	self.overcharge_threshold = overcharge_data.overcharge_threshold or 0
 	self.overcharge_value_decrease_rate = overcharge_data.overcharge_value_decrease_rate or 0
 	self.time_until_overcharge_decreases = overcharge_data.time_until_overcharge_decreases or 0
@@ -51,7 +51,7 @@ OverChargeExtension.init = function (self, extension_init_context, unit, extensi
 	return 
 end
 OverChargeExtension.set_screen_particle_opacity_modifier = function (self, value)
-	self._screen_particle_opacity_modifier = value/100
+	self._screen_particle_opacity_modifier = value / 100
 
 	return 
 end
@@ -143,17 +143,17 @@ OverChargeExtension.update = function (self, unit, input, dt, context, t)
 		if not self.is_exploding and self.venting_overcharge and 0 <= self.overcharge_value then
 			local buff_extension = self.buff_extension
 			local wielder = self.owner_unit
-			local vent_amount = self.overcharge_value*self.max_value/80*dt
+			local vent_amount = self.overcharge_value * self.max_value / 80 * dt
 
 			if buff_extension and buff_extension.has_buff_type(buff_extension, "reduced_vent_damage") then
-				vent_amount = self.overcharge_value*self.max_value/80*1.25*dt
+				vent_amount = self.overcharge_value * self.max_value / 80 * 1.25 * dt
 			end
 
-			self.vent_damage_pool = self.vent_damage_pool + vent_amount*2
+			self.vent_damage_pool = self.vent_damage_pool + vent_amount * 2
 			self.overcharge_value = self.overcharge_value - vent_amount
 
 			if 20 <= self.vent_damage_pool and not self.no_damage and self.overcharge_threshold < self.overcharge_value then
-				local damage_amount = self.overcharge_value/8 + 2
+				local damage_amount = 2 + self.overcharge_value / 8
 				damage_amount = buff_extension.apply_buffs_to_value(buff_extension, damage_amount, StatBuffIndex.REDUCED_VENT_DAMAGE)
 
 				DamageUtils.add_damage_network(wielder, wielder, damage_amount, "torso", "overcharge", Vector3(0, 1, 0), "overcharge")
@@ -194,10 +194,10 @@ OverChargeExtension.update = function (self, unit, input, dt, context, t)
 				local decay = 1
 
 				if self.above_threshold then
-					decay = decay*0.6
+					decay = decay * 0.6
 				end
 
-				self.overcharge_value = math.max(0, self.overcharge_value - decay*self.overcharge_value_decrease_rate*dt)
+				self.overcharge_value = math.max(0, self.overcharge_value - decay * self.overcharge_value_decrease_rate * dt)
 				local overcharged_critical_buff_id = self.overcharged_critical_buff_id
 				local overcharged_buff_id = self.overcharged_buff_id
 
@@ -266,7 +266,7 @@ OverChargeExtension.update = function (self, unit, input, dt, context, t)
 
 		local owner_player = Managers.player:owner(self.owner_unit)
 		local is_bot = owner_player and owner_player.bot_player
-		local overcharge_scalar = self.overcharge_value/self.max_value
+		local overcharge_scalar = self.overcharge_value / self.max_value
 
 		if not is_bot then
 			local wwise_world = Managers.world:wwise_world(world)
@@ -290,14 +290,14 @@ OverChargeExtension.update = function (self, unit, input, dt, context, t)
 			local charge_effect_material_name = "overlay"
 			local charge_effect_material_variable_name = "intensity"
 
-			World.set_particles_material_scalar(world, onscreen_particles_id, charge_effect_material_name, charge_effect_material_variable_name, overcharge_scalar*self._screen_particle_opacity_modifier)
+			World.set_particles_material_scalar(world, onscreen_particles_id, charge_effect_material_name, charge_effect_material_variable_name, overcharge_scalar * self._screen_particle_opacity_modifier)
 
 			local critical_onscreen_particles_id = self.critical_onscreen_particles_id
 
 			if self.is_above_critical_limit(self) then
-				local critical_scalar = math.min(1, (self.overcharge_value - self.overcharge_critical_limit)/(self.max_value - self.overcharge_critical_limit)*2)
+				local critical_scalar = math.min(1, (self.overcharge_value - self.overcharge_critical_limit) / (self.max_value - self.overcharge_critical_limit) * 2)
 
-				World.set_particles_material_scalar(world, critical_onscreen_particles_id, charge_effect_material_name, charge_effect_material_variable_name, critical_scalar*self._screen_particle_opacity_modifier)
+				World.set_particles_material_scalar(world, critical_onscreen_particles_id, charge_effect_material_name, charge_effect_material_variable_name, critical_scalar * self._screen_particle_opacity_modifier)
 			else
 				World.set_particles_material_scalar(world, critical_onscreen_particles_id, charge_effect_material_name, charge_effect_material_variable_name, 0)
 			end
@@ -320,7 +320,7 @@ OverChargeExtension.add_charge = function (self, overcharge_type, charge_level)
 	local overcharge_amount = PlayerUnitStatusSettings.overcharge_values[overcharge_type]
 
 	if charge_level then
-		overcharge_amount = overcharge_amount*0.4 + overcharge_amount*0.6*charge_level
+		overcharge_amount = 0.4 * overcharge_amount + 0.6 * overcharge_amount * charge_level
 	end
 
 	overcharge_amount = self.buff_extension:apply_buffs_to_value(overcharge_amount, StatBuffIndex.REDUCED_OVERCHARGE)
@@ -329,7 +329,7 @@ OverChargeExtension.add_charge = function (self, overcharge_type, charge_level)
 		overcharge_amount = 0
 	end
 
-	if current_overcharge_value <= self.max_value*0.97 and self.max_value < current_overcharge_value + overcharge_amount then
+	if current_overcharge_value <= self.max_value * 0.97 and self.max_value < current_overcharge_value + overcharge_amount then
 		OverChargeExtension:hud_sound(self.overcharge_warning_critical_sound_event or "staff_overcharge_warning_critical", self.first_person_extension)
 
 		current_overcharge_value = self.max_value - 0.1
@@ -490,10 +490,10 @@ OverChargeExtension.are_you_exploding = function (self)
 	return self.is_exploding
 end
 OverChargeExtension.overcharge_fraction = function (self)
-	return self.overcharge_value/self.max_value
+	return self.overcharge_value / self.max_value
 end
 OverChargeExtension.threshold_fraction = function (self)
-	return self.overcharge_threshold/self.max_value
+	return self.overcharge_threshold / self.max_value
 end
 OverChargeExtension.vent_overcharge = function (self)
 	self.venting_overcharge = true
@@ -515,7 +515,7 @@ OverChargeExtension.vent_overcharge_done = function (self)
 	return 
 end
 OverChargeExtension.get_anim_blend_overcharge = function (self)
-	return math.clamp((self.overcharge_value - self.overcharge_threshold)/(self.max_value - self.overcharge_threshold), 0, 1)
+	return math.clamp((self.overcharge_value - self.overcharge_threshold) / (self.max_value - self.overcharge_threshold), 0, 1)
 end
 
 return 

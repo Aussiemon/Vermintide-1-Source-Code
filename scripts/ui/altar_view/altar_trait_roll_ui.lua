@@ -379,7 +379,7 @@ AltarTraitRollUI.update = function (self, dt)
 	local new_traits_data = self.new_traits_data
 
 	if current_traits_data then
-		for i = 1, num_traits*2, 1 do
+		for i = 1, num_traits * 2, 1 do
 			local widget_name = "trait_button_" .. i
 			local widget = widgets_by_name[widget_name]
 			local button_hotspot = widget.content.button_hotspot
@@ -391,7 +391,7 @@ AltarTraitRollUI.update = function (self, dt)
 		end
 	end
 
-	for i = 1, num_traits*2, 1 do
+	for i = 1, num_traits * 2, 1 do
 		local widget_name = "trait_button_" .. i
 		local widget = widgets_by_name[widget_name]
 		local button_hotspot = widget.content.button_hotspot
@@ -422,7 +422,7 @@ AltarTraitRollUI._set_selected_trait = function (self, selected_index)
 	local num_traits = AltarSettings.num_traits
 	local widgets_by_name = self.widgets_by_name
 
-	for i = 1, num_traits*2, 1 do
+	for i = 1, num_traits * 2, 1 do
 		local widget_name = "trait_button_" .. i
 		local widget = widgets_by_name[widget_name]
 		widget.content.button_hotspot.is_selected = i == selected_index
@@ -735,7 +735,7 @@ AltarTraitRollUI._set_new_traits = function (self, traits, rarity)
 
 	self.new_traits_data = new_traits_data
 
-	self.set_traits_info(self, self.new_traits_data, num_traits + 1, num_traits*2)
+	self.set_traits_info(self, self.new_traits_data, num_traits + 1, num_traits * 2)
 
 	return 
 end
@@ -743,7 +743,7 @@ AltarTraitRollUI._clear_new_trait_slots = function (self, use_unknown_texture)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = AltarSettings.num_traits
 
-	for i = num_traits + 1, num_traits*2, 1 do
+	for i = num_traits + 1, num_traits * 2, 1 do
 		local widget_name = "trait_button_" .. i
 		local trait_widget = widgets_by_name[widget_name]
 		local trait_widget_style = trait_widget.style
@@ -761,16 +761,16 @@ end
 AltarTraitRollUI._update_trait_alignment = function (self, number_of_traits, rotate_background)
 	local ui_scenegraph = self.ui_scenegraph
 	local num_total_traits = AltarSettings.num_traits
-	local max_angle_between = number_of_traits/180
+	local max_angle_between = 180 / number_of_traits
 	local actual_angle_between = (number_of_traits ~= 1 or 0) and max_angle_between
 	local start_angle = 90
-	local trait_start_angle = start_angle + actual_angle_between*(number_of_traits - 1)*0.5
+	local trait_start_angle = start_angle + actual_angle_between * (number_of_traits - 1) * 0.5
 	local r = 105
 
 	for i = 1, number_of_traits, 1 do
-		local angle = (trait_start_angle*math.pi)/180
-		local pos_x = r*math.cos(angle)
-		local pos_y = r*math.sin(angle)
+		local angle = (trait_start_angle * math.pi) / 180
+		local pos_x = r * math.cos(angle)
+		local pos_y = r * math.sin(angle)
 		local widget_name = "trait_button_" .. i
 		local position = ui_scenegraph[widget_name].local_position
 		position[1] = pos_x
@@ -779,12 +779,12 @@ AltarTraitRollUI._update_trait_alignment = function (self, number_of_traits, rot
 	end
 
 	start_angle = 270
-	trait_start_angle = start_angle - actual_angle_between*(number_of_traits - 1)*0.5
+	trait_start_angle = start_angle - actual_angle_between * (number_of_traits - 1) * 0.5
 
 	for i = num_total_traits + 1, num_total_traits + number_of_traits, 1 do
-		local angle = (trait_start_angle*math.pi)/180
-		local pos_x = r*math.cos(angle)
-		local pos_y = r*math.sin(angle)
+		local angle = (trait_start_angle * math.pi) / 180
+		local pos_x = r * math.cos(angle)
+		local pos_y = r * math.sin(angle)
 		local widget_name = "trait_button_" .. i
 		local position = ui_scenegraph[widget_name].local_position
 		position[1] = pos_x
@@ -819,18 +819,18 @@ AltarTraitRollUI.set_disk_rotation = function (self, progress)
 	local ui_scenegraph = self.ui_scenegraph
 	local num_total_traits = AltarSettings.num_traits
 	local rotating_disk_widget = self.widgets_by_name.rotating_disk_widget
-	local progress_angle = progress*360
-	local start_angle = progress_angle%360 + 90
-	local max_angle_between = number_of_traits_on_item/180
+	local progress_angle = progress * 360
+	local start_angle = 90 + progress_angle % 360
+	local max_angle_between = 180 / number_of_traits_on_item
 	local actual_angle_between = (number_of_traits_on_item ~= 1 or 0) and max_angle_between
-	local trait_start_angle = start_angle + actual_angle_between*(number_of_traits_on_item - 1)*0.5
+	local trait_start_angle = start_angle + actual_angle_between * (number_of_traits_on_item - 1) * 0.5
 	rotating_disk_widget.style.texture_id.angle = -math.degrees_to_radians(progress_angle)
 	local r = 105
 
 	for i = 1, number_of_traits_on_item, 1 do
-		local angle = (trait_start_angle*math.pi)/180
-		local pos_x = r*math.cos(angle)
-		local pos_y = r*math.sin(angle)
+		local angle = (trait_start_angle * math.pi) / 180
+		local pos_x = r * math.cos(angle)
+		local pos_y = r * math.sin(angle)
 		local widget_name = "trait_button_" .. i
 		local position = ui_scenegraph[widget_name].local_position
 		position[1] = pos_x
@@ -838,13 +838,13 @@ AltarTraitRollUI.set_disk_rotation = function (self, progress)
 		trait_start_angle = trait_start_angle - actual_angle_between
 	end
 
-	start_angle = progress_angle%360 + 270
-	trait_start_angle = start_angle - actual_angle_between*(number_of_traits_on_item - 1)*0.5
+	start_angle = 270 + progress_angle % 360
+	trait_start_angle = start_angle - actual_angle_between * (number_of_traits_on_item - 1) * 0.5
 
 	for i = num_total_traits + 1, num_total_traits + number_of_traits_on_item, 1 do
-		local angle = (trait_start_angle*math.pi)/180
-		local pos_x = r*math.cos(angle)
-		local pos_y = r*math.sin(angle)
+		local angle = (trait_start_angle * math.pi) / 180
+		local pos_x = r * math.cos(angle)
+		local pos_y = r * math.sin(angle)
 		local widget_name = "trait_button_" .. i
 		local position = ui_scenegraph[widget_name].local_position
 		position[1] = pos_x
@@ -860,10 +860,10 @@ AltarTraitRollUI._update_rotation_animation = function (self, dt)
 	if animation_time then
 		local total_rotation_animation_time = self.total_rotation_animation_time
 		animation_time = animation_time + dt
-		local progress = math.min(animation_time/total_rotation_animation_time, 1)
+		local progress = math.min(animation_time / total_rotation_animation_time, 1)
 		local fraction = math.easeCubic(progress)
 
-		self.set_disk_rotation(self, fraction*0.5)
+		self.set_disk_rotation(self, fraction * 0.5)
 
 		if progress == 1 then
 			local rotating_disk_glow_widget = self.widgets_by_name.rotating_disk_glow_widget
@@ -1024,7 +1024,7 @@ AltarTraitRollUI.reroll = function (self, new_item_key)
 		local widgets_by_name = self.widgets_by_name
 		local num_traits = AltarSettings.num_traits
 
-		for i = 1, num_traits*2, 1 do
+		for i = 1, num_traits * 2, 1 do
 			local widget_name = "trait_button_" .. i
 			local trait_widget = widgets_by_name[widget_name]
 			local trait_widget_content = trait_widget.content
@@ -1558,7 +1558,7 @@ AltarTraitRollUI.get_word_wrap_size = function (self, localized_text, text_style
 	local lines = UIRenderer.word_wrap(self.ui_top_renderer, localized_text, font[1], scaled_font_size, text_area_width)
 	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
 
-	return text_width, text_height*#lines
+	return text_width, text_height * #lines
 end
 AltarTraitRollUI.start_charge_progress = function (self)
 	self.charging = true

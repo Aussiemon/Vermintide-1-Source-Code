@@ -47,7 +47,7 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 	end
 
 	if blackboard.attack_token and target_unit_status_extension then
-		target_unit_status_extension.add_attack_intensity(target_unit_status_extension, math.random()*0.5 + 0.75)
+		target_unit_status_extension.add_attack_intensity(target_unit_status_extension, 0.75 + 0.5 * math.random())
 
 		local breed = blackboard.breed
 		local should_backstab = breed.use_backstab_vo and blackboard.total_slots_count < 5

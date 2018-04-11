@@ -18,7 +18,7 @@ local function get_slider_value(min, max, value)
 	local range = max - min
 	local norm_value = math.clamp(value, min, max) - min
 
-	return norm_value/range
+	return norm_value / range
 end
 
 local function assigned(a, b)
@@ -1288,7 +1288,7 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 
 		if fov then
 			local base_fov = CameraSettings.first_person._node.vertical_fov
-			local fov_multiplier = fov/base_fov
+			local fov_multiplier = fov / base_fov
 			local camera_manager = Managers.state.camera
 
 			if camera_manager then
@@ -1312,7 +1312,7 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 			local look_filter = input_filters.look
 			local function_data = look_filter.function_data
-			function_data.multiplier = base_look_multiplier*0.85^(-mouse_look_sensitivity)
+			function_data.multiplier = base_look_multiplier * 0.85^(-mouse_look_sensitivity)
 		end
 
 		local mouse_look_invert_y = user_settings.mouse_look_invert_y
@@ -1336,16 +1336,16 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 			local look_filter = input_filters.look_controller
 			local function_data = look_filter.function_data
-			function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_look_sensitivity)
-			function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+			function_data.multiplier_x = base_look_multiplier * 0.85^(-gamepad_look_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x * 0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x * 0.25
 			local melee_look_filter = input_filters.look_controller_melee
 			local function_data = melee_look_filter.function_data
-			function_data.multiplier_x = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity)
-			function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+			function_data.multiplier_x = base_melee_look_multiplier * 0.85^(-gamepad_look_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x * 0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x * 0.25
 			local ranged_look_filter = input_filters.look_controller_ranged
 			local function_data = ranged_look_filter.function_data
-			function_data.multiplier_x = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity)
-			function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x*0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x*0.25
+			function_data.multiplier_x = base_ranged_look_multiplier * 0.85^(-gamepad_look_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x * 0.85^(-gamepad_look_sensitivity)) or function_data.multiplier_x * 0.25
 		end
 
 		local gamepad_look_sensitivity_y = user_settings.gamepad_look_sensitivity_y
@@ -1359,13 +1359,13 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 			local look_filter = input_filters.look_controller
 			local function_data = look_filter.function_data
-			function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+			function_data.multiplier_y = base_look_multiplier * 0.85^(-gamepad_look_sensitivity_y)
 			local melee_look_filter = input_filters.look_controller_melee
 			local function_data = melee_look_filter.function_data
-			function_data.multiplier_y = base_melee_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+			function_data.multiplier_y = base_melee_look_multiplier * 0.85^(-gamepad_look_sensitivity_y)
 			local ranged_look_filter = input_filters.look_controller_ranged
 			local function_data = ranged_look_filter.function_data
-			function_data.multiplier_y = base_ranged_look_multiplier*0.85^(-gamepad_look_sensitivity_y)
+			function_data.multiplier_y = base_ranged_look_multiplier * 0.85^(-gamepad_look_sensitivity_y)
 		end
 
 		local gamepad_zoom_sensitivity = user_settings.gamepad_zoom_sensitivity
@@ -1377,8 +1377,8 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 			local look_filter = input_filters.look_controller_zoom
 			local function_data = look_filter.function_data
-			function_data.multiplier_x = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity)
-			function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x*0.85^(-gamepad_zoom_sensitivity)) or function_data.multiplier_x*0.25
+			function_data.multiplier_x = base_look_multiplier * 0.85^(-gamepad_zoom_sensitivity)
+			function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x * 0.85^(-gamepad_zoom_sensitivity)) or function_data.multiplier_x * 0.25
 		end
 
 		local gamepad_zoom_sensitivity_y = user_settings.gamepad_zoom_sensitivity_y
@@ -1390,7 +1390,7 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 			local input_filters = player_input_service.get_active_filters(player_input_service, platform_key)
 			local look_filter = input_filters.look_controller_zoom
 			local function_data = look_filter.function_data
-			function_data.multiplier_y = base_look_multiplier*0.85^(-gamepad_zoom_sensitivity_y)
+			function_data.multiplier_y = base_look_multiplier * 0.85^(-gamepad_zoom_sensitivity_y)
 		end
 
 		local gamepad_look_invert_y = user_settings.gamepad_look_invert_y
@@ -2368,9 +2368,9 @@ OptionsView.update_settings_list = function (self, settings_list, ui_renderer, u
 		temp_pos_table.x = list_position[1] + offset[1]
 		temp_pos_table.y = list_position[2] + offset[2]
 		local lower_visible = math.point_is_inside_2d_box(temp_pos_table, mask_pos, mask_size)
-		temp_pos_table.y = temp_pos_table.y + size[2]/2
+		temp_pos_table.y = temp_pos_table.y + size[2] / 2
 		local middle_visible = math.point_is_inside_2d_box(temp_pos_table, mask_pos, mask_size)
-		temp_pos_table.y = temp_pos_table.y + size[2]/2
+		temp_pos_table.y = temp_pos_table.y + size[2] / 2
 		local top_visible = math.point_is_inside_2d_box(temp_pos_table, mask_pos, mask_size)
 		local visible = lower_visible or top_visible
 		widget.content.visible = visible
@@ -2437,7 +2437,7 @@ OptionsView.update_scrollbar = function (self, settings_list, ui_scenegraph)
 	local scrollbar = self.scrollbar
 	local value = scrollbar.content.scroll_bar_info.value
 	local max_offset_y = settings_list.max_offset_y
-	local offset_y = max_offset_y*value
+	local offset_y = max_offset_y * value
 	local scenegraph = ui_scenegraph[settings_list.scenegraph_id]
 	scenegraph.offset[2] = offset_y
 
@@ -2698,7 +2698,7 @@ OptionsView.setup_scrollbar = function (self, settings_list)
 	local scenegraph_id = settings_list.scenegraph_id
 	local settings_list_size_y = self.ui_scenegraph[scenegraph_id].size[2]
 	local mask_size_y = self.ui_scenegraph.list_mask.size[2]
-	local percentage = mask_size_y/settings_list_size_y
+	local percentage = mask_size_y / settings_list_size_y
 	scrollbar.content.scroll_bar_info.bar_height_percentage = percentage
 
 	self.set_scrollbar_value(self, 0)
@@ -2847,7 +2847,7 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 			local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 			if move_up or move_up_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
 				self.set_console_setting_list_selection(self, selected_list_index - 1, false)
 
@@ -2858,7 +2858,7 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 			local move_down_hold = input_service.get(input_service, "move_down_hold")
 
 			if move_down or move_down_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
 				self.set_console_setting_list_selection(self, selected_list_index + 1, true)
 
@@ -2871,7 +2871,7 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 			local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 			if move_up or move_up_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
 				self.set_console_title_selection(self, selected_title_index - 1)
 
@@ -2882,7 +2882,7 @@ OptionsView.handle_controller_navigation_input = function (self, dt, input_servi
 			local move_down_hold = input_service.get(input_service, "move_down_hold")
 
 			if move_down or move_down_hold then
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
 				self.set_console_title_selection(self, selected_title_index + 1)
 
@@ -3060,12 +3060,12 @@ OptionsView.move_scrollbar_based_on_selection = function (self, index)
 				local mask_pos_y = mask_pos[2]
 				local widget_pos_y = list_position[2] + base_widget_offset[2]
 				local diff = math.abs(mask_pos_y - widget_pos_y)
-				step = diff/max_offset_y
+				step = diff / max_offset_y
 			else
 				local mask_upper_pos_y = mask_pos[2] + mask_size[2]
 				local widget_upper_pos_y = temp_pos_table.y
 				local diff = math.abs(mask_upper_pos_y - widget_upper_pos_y)
-				step = -(diff/max_offset_y)
+				step = -(diff / max_offset_y)
 			end
 
 			local scrollbar = self.scrollbar
@@ -3151,7 +3151,7 @@ OptionsView.on_stepper_arrow_hover = function (self, widget, style_id)
 	local current_alpha = pass_style.color[1]
 	local target_alpha = 255
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = (current_alpha/target_alpha - 1)*total_time
+	local animation_duration = (1 - current_alpha / target_alpha) * total_time
 
 	if 0 < animation_duration then
 		local animation_name_hover = "stepper_widget_arrow_hover_" .. style_id
@@ -3169,7 +3169,7 @@ OptionsView.on_stepper_arrow_dehover = function (self, widget, style_id)
 	local current_alpha = pass_style.color[1]
 	local target_alpha = 0
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = current_alpha/255*total_time
+	local animation_duration = current_alpha / 255 * total_time
 
 	if 0 < animation_duration then
 		local animation_name_hover = "stepper_widget_arrow_hover_" .. style_id
@@ -4751,7 +4751,7 @@ OptionsView.cb_mouse_look_sensitivity_setup = function (self)
 	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look
 	local function_data = look_filter.function_data
-	function_data.multiplier = base_look_multiplier*0.85^(-sensitivity)
+	function_data.multiplier = base_look_multiplier * 0.85^(-sensitivity)
 
 	return value, min, max, 1, "menu_settings_mouse_look_sensitivity", default_value
 end
@@ -4826,16 +4826,16 @@ OptionsView.cb_gamepad_look_sensitivity_setup = function (self)
 	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller
 	local function_data = look_filter.function_data
-	function_data.multiplier_x = base_look_multiplier*0.85^(-sensitivity)
-	function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
+	function_data.multiplier_x = base_look_multiplier * 0.85^(-sensitivity)
+	function_data.min_multiplier_x = (base_filter.look_controller.multiplier_min_x and base_filter.look_controller.multiplier_min_x * 0.85^(-sensitivity)) or function_data.multiplier_x * 0.25
 	local melee_look_filter = input_filters.look_controller_melee
 	local function_data = melee_look_filter.function_data
-	function_data.multiplier_x = base_melee_look_multiplier*0.85^(-sensitivity)
-	function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
+	function_data.multiplier_x = base_melee_look_multiplier * 0.85^(-sensitivity)
+	function_data.min_multiplier_x = (base_filter.look_controller_melee.multiplier_min_x and base_filter.look_controller_melee.multiplier_min_x * 0.85^(-sensitivity)) or function_data.multiplier_x * 0.25
 	local ranged_look_filter = input_filters.look_controller_ranged
 	local function_data = ranged_look_filter.function_data
-	function_data.multiplier_x = base_ranged_look_multiplier*0.85^(-sensitivity)
-	function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
+	function_data.multiplier_x = base_ranged_look_multiplier * 0.85^(-sensitivity)
+	function_data.min_multiplier_x = (base_filter.look_controller_ranged.multiplier_min_x and base_filter.look_controller_ranged.multiplier_min_x * 0.85^(-sensitivity)) or function_data.multiplier_x * 0.25
 
 	return value, min, max, 1, "menu_settings_gamepad_look_sensitivity", default_value
 end
@@ -4871,13 +4871,13 @@ OptionsView.cb_gamepad_look_sensitivity_y_setup = function (self)
 	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller
 	local function_data = look_filter.function_data
-	function_data.multiplier_y = base_look_multiplier*0.85^(-sensitivity)
+	function_data.multiplier_y = base_look_multiplier * 0.85^(-sensitivity)
 	local melee_look_filter = input_filters.look_controller_melee
 	local function_data = melee_look_filter.function_data
-	function_data.multiplier_y = base_melee_look_multiplier*0.85^(-sensitivity)
+	function_data.multiplier_y = base_melee_look_multiplier * 0.85^(-sensitivity)
 	local ranged_look_filter = input_filters.look_controller_ranged
 	local function_data = ranged_look_filter.function_data
-	function_data.multiplier_y = base_ranged_look_multiplier*0.85^(-sensitivity)
+	function_data.multiplier_y = base_ranged_look_multiplier * 0.85^(-sensitivity)
 
 	return value, min, max, 1, "menu_settings_gamepad_look_sensitivity_y", default_value
 end
@@ -4911,8 +4911,8 @@ OptionsView.cb_gamepad_zoom_sensitivity_setup = function (self)
 	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller_zoom
 	local function_data = look_filter.function_data
-	function_data.multiplier_x = base_look_multiplier*0.85^(-sensitivity)
-	function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x*0.85^(-sensitivity)) or function_data.multiplier_x*0.25
+	function_data.multiplier_x = base_look_multiplier * 0.85^(-sensitivity)
+	function_data.min_multiplier_x = (base_filter.look_controller_zoom.multiplier_min_x and base_filter.look_controller_zoom.multiplier_min_x * 0.85^(-sensitivity)) or function_data.multiplier_x * 0.25
 
 	return value, min, max, 1, "menu_settings_gamepad_zoom_sensitivity", default_value
 end
@@ -4946,7 +4946,7 @@ OptionsView.cb_gamepad_zoom_sensitivity_y_setup = function (self)
 	local input_filters = input_service.get_active_filters(input_service, platform_key)
 	local look_filter = input_filters.look_controller_zoom
 	local function_data = look_filter.function_data
-	function_data.multiplier_y = base_look_multiplier*0.85^(-sensitivity)
+	function_data.multiplier_y = base_look_multiplier * 0.85^(-sensitivity)
 
 	return value, min, max, 1, "menu_settings_gamepad_zoom_sensitivity_y", default_value
 end
@@ -6267,7 +6267,7 @@ OptionsView.cb_fov_setup = function (self)
 	local fov = Application.user_setting("render_settings", "fov") or base_fov
 	local value = get_slider_value(min, max, fov)
 	fov = math.clamp(fov, min, max)
-	local fov_multiplier = fov/base_fov
+	local fov_multiplier = fov / base_fov
 	local camera_manager = Managers.state.camera
 
 	if camera_manager then

@@ -46,7 +46,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			GAP + 5,
+			5 + GAP,
 			1
 		},
 		size = {
@@ -60,7 +60,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			0,
-			GAP - -5,
+			-5 - GAP,
 			1
 		},
 		size = {
@@ -73,7 +73,7 @@ local scenegraph_definition = {
 		parent = "crosshair_root",
 		horizontal_alignment = "center",
 		position = {
-			GAP - -5,
+			-5 - GAP,
 			0,
 			1
 		},
@@ -87,7 +87,7 @@ local scenegraph_definition = {
 		parent = "crosshair_root",
 		horizontal_alignment = "center",
 		position = {
-			GAP + 5,
+			5 + GAP,
 			0,
 			1
 		},
@@ -115,8 +115,8 @@ local scenegraph_definition = {
 		parent = "crosshair_root",
 		horizontal_alignment = "center",
 		position = {
-			HIT_GAP + 4,
-			HIT_GAP + 4,
+			4 + HIT_GAP,
+			4 + HIT_GAP,
 			1
 		},
 		size = {
@@ -129,8 +129,8 @@ local scenegraph_definition = {
 		parent = "crosshair_root",
 		horizontal_alignment = "center",
 		position = {
-			HIT_GAP - 4,
-			HIT_GAP + 4,
+			4 - HIT_GAP,
+			4 + HIT_GAP,
 			1
 		},
 		size = {
@@ -143,8 +143,8 @@ local scenegraph_definition = {
 		parent = "crosshair_root",
 		horizontal_alignment = "center",
 		position = {
-			HIT_GAP - 4,
-			HIT_GAP - 4,
+			4 - HIT_GAP,
+			4 - HIT_GAP,
 			1
 		},
 		size = {
@@ -157,8 +157,8 @@ local scenegraph_definition = {
 		parent = "crosshair_root",
 		horizontal_alignment = "center",
 		position = {
-			HIT_GAP + 4,
-			HIT_GAP - 4,
+			4 + HIT_GAP,
+			4 - HIT_GAP,
 			1
 		},
 		size = {
@@ -246,7 +246,7 @@ local widget_definitions = {
 		},
 		style = {
 			rotating_texture = {
-				angle = math.pi*2,
+				angle = 2 * math.pi,
 				pivot = {
 					0,
 					0
@@ -273,7 +273,7 @@ local widget_definitions = {
 		},
 		style = {
 			rotating_texture = {
-				angle = math.pi*1.5,
+				angle = 1.5 * math.pi,
 				pivot = {
 					0,
 					0
@@ -300,7 +300,7 @@ local widget_definitions = {
 		},
 		style = {
 			rotating_texture = {
-				angle = math.pi*1,
+				angle = 1 * math.pi,
 				pivot = {
 					0,
 					0
@@ -327,7 +327,7 @@ local widget_definitions = {
 		},
 		style = {
 			rotating_texture = {
-				angle = math.pi*0.5,
+				angle = 0.5 * math.pi,
 				pivot = {
 					0,
 					0

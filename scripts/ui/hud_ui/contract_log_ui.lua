@@ -219,7 +219,7 @@ ContractLogUI._sync_contract_progression = function (self)
 					text_element.text_color[3] = text_element.real_text_color[3]
 					text_element.text_color[4] = text_element.real_text_color[4]
 				else
-					local blend_t = math.smoothstep((((t - flash_start)*2)/flash_duration)%1, 0, 1)
+					local blend_t = math.smoothstep(((2 * (t - flash_start)) / flash_duration) % 1, 0, 1)
 					text_element.text_color[1] = text_element.real_text_color[1]
 					text_element.text_color[2] = math.lerp(text_element.flash_color[1], text_element.real_text_color[2], blend_t)
 					text_element.text_color[3] = math.lerp(text_element.flash_color[2], text_element.real_text_color[3], blend_t)
@@ -249,7 +249,7 @@ ContractLogUI._sync_contract_progression = function (self)
 					text_element.text_color[3] = text_element.real_text_color[3]
 					text_element.text_color[4] = text_element.real_text_color[4]
 				else
-					local blend_t = math.smoothstep((((t - flash_start)*2)/flash_duration)%1, 0, 1)
+					local blend_t = math.smoothstep(((2 * (t - flash_start)) / flash_duration) % 1, 0, 1)
 					text_element.text_color[1] = text_element.real_text_color[1]
 					text_element.text_color[2] = math.lerp(text_element.flash_color[1], text_element.real_text_color[2], blend_t)
 					text_element.text_color[3] = math.lerp(text_element.flash_color[2], text_element.real_text_color[3], blend_t)
@@ -306,7 +306,7 @@ ContractLogUI._update_contract_goal = function (self, entry_data)
 		local has_made_progress = false
 
 		if progress_increment then
-			has_made_progress = math.floor(old_progress/progress_increment) < math.floor(task_progress/progress_increment)
+			has_made_progress = math.floor(old_progress / progress_increment) < math.floor(task_progress / progress_increment)
 		end
 
 		widget_content.task_progress = task_progress
@@ -504,7 +504,7 @@ ContractLogUI._get_text_size = function (self, text_style, text)
 	local texts = UIRenderer.word_wrap(ui_renderer, text, font_material, font_size, size[1])
 	local num_texts = #texts
 	local inv_scale = RESOLUTION_LOOKUP.inv_scale
-	local full_font_height = (font_max + math.abs(font_min))*inv_scale
+	local full_font_height = (font_max + math.abs(font_min)) * inv_scale
 	local longest_width = 0
 
 	for i = 1, num_texts, 1 do
@@ -516,7 +516,7 @@ ContractLogUI._get_text_size = function (self, text_style, text)
 		end
 	end
 
-	return num_texts*full_font_height, longest_width
+	return num_texts * full_font_height, longest_width
 end
 ContractLogUI.update = function (self, dt, t)
 	local dirty = false

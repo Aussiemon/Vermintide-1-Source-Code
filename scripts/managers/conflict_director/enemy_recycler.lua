@@ -731,7 +731,7 @@ EnemyRecycler.draw_debug = function (self, player_positions)
 		local info = main_path_player_info[local_player_unit]
 
 		if info then
-			Debug.text("travel-dist: %.1fm, move_percent: %.1f%%, path-index: %d, sub-index: %d", info.travel_dist, info.move_percent*100, info.path_index, info.sub_index)
+			Debug.text("travel-dist: %.1fm, move_percent: %.1f%%, path-index: %d, sub-index: %d", info.travel_dist, info.move_percent * 100, info.path_index, info.sub_index)
 		end
 	end
 
@@ -790,7 +790,7 @@ EnemyRecycler.far_off_despawn = function (self, t, dt, player_positions, spawned
 				end
 			end
 
-			blackboard.stuck_check_time = t + 3 + i*dt
+			blackboard.stuck_check_time = t + 3 + i * dt
 		end
 
 		local num_players_far_away = 0

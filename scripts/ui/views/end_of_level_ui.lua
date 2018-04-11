@@ -232,18 +232,18 @@ EndOfLevelUI.award_mission_rewards = function (self, level_dice_keeper)
 			if evaluation_type == "percent" then
 				local dice_per_percent = data.dice_per_percent or 0
 				local tokens_per_percent = data.dice_per_percent or 0
-				local percent_completed = amount*100
-				bonus_dice = math.floor(percent_completed*dice_per_percent)
-				bonus_tokens = math.floor(percent_completed*tokens_per_percent)
+				local percent_completed = amount * 100
+				bonus_dice = math.floor(percent_completed * dice_per_percent)
+				bonus_tokens = math.floor(percent_completed * tokens_per_percent)
 			elseif evaluation_type == "amount" then
 				if data.dice_per_amount then
 					local dice_per_amount = data.dice_per_amount
 					local collected_amount = amount
-					bonus_dice = collected_amount*dice_per_amount
+					bonus_dice = collected_amount * dice_per_amount
 				elseif data.tokens_per_amount then
 					local tokens_per_amount = data.tokens_per_amount
 					local collected_amount = amount
-					bonus_tokens = collected_amount*tokens_per_amount
+					bonus_tokens = collected_amount * tokens_per_amount
 				end
 			end
 
@@ -531,7 +531,7 @@ EndOfLevelUI.shading_callback = function (self, world, shading_env, viewport)
 
 	for name, settings in pairs(OutlineSettings.colors) do
 		local c = settings.color
-		local color = Vector3(c[2]/255, c[3]/255, c[4]/255)
+		local color = Vector3(c[2] / 255, c[3] / 255, c[4] / 255)
 
 		ShadingEnvironment.set_vector3(shading_env, settings.variable, color)
 		ShadingEnvironment.set_scalar(shading_env, settings.outline_multiplier_variable, settings.outline_multiplier)
@@ -550,8 +550,8 @@ EndOfLevelUI.update_fade_in = function (self, dt)
 	if time then
 		local total_time = 0.7
 		time = time - dt
-		local progress = math.max(time/total_time, 0)
-		self.background_rect_widget.style.rect.color[1] = progress*255
+		local progress = math.max(time / total_time, 0)
+		self.background_rect_widget.style.rect.color[1] = progress * 255
 
 		if time <= 0 then
 			self.fade_in_timer = nil
@@ -574,11 +574,11 @@ EndOfLevelUI.set_curtain_progress = function (self, value)
 	local right_widget = curtain_widgets.right
 	local right_default_definition = scenegraph_definition.curtain_right
 	local right_scenegraph = ui_scenegraph.curtain_right
-	right_scenegraph.size[1] = right_default_definition.size[1]*value
+	right_scenegraph.size[1] = right_default_definition.size[1] * value
 	local left_widget = curtain_widgets.left
 	local left_default_definition = scenegraph_definition.curtain_left
 	local left_scenegraph = ui_scenegraph.curtain_left
-	left_scenegraph.size[1] = left_default_definition.size[1]*value
+	left_scenegraph.size[1] = left_default_definition.size[1] * value
 
 	return 
 end
@@ -615,17 +615,17 @@ EndOfLevelUI.update_curtains_animation = function (self, dt)
 		local fraction_diff = current_curtain_fraction - new_curtain_fraction
 		local fraction_diff_abs = math.abs(new_curtain_fraction - current_curtain_fraction)
 		local total_time = 2.5
-		local scaled_opening_time = fraction_diff_abs*total_time
+		local scaled_opening_time = fraction_diff_abs * total_time
 		local time = curtain_anim_data.time
 		time = math.min(time + dt, scaled_opening_time)
-		local progress = (scaled_opening_time ~= 0 and time/scaled_opening_time) or 1
+		local progress = (scaled_opening_time ~= 0 and time / scaled_opening_time) or 1
 		local curtain_progress = math.catmullrom(progress, 0, 0, 1, -1.5)
 		local curtain_fraction = 0
 
 		if opening then
-			curtain_fraction = current_curtain_fraction - curtain_progress*fraction_diff_abs
+			curtain_fraction = current_curtain_fraction - curtain_progress * fraction_diff_abs
 		else
-			curtain_fraction = current_curtain_fraction + curtain_progress*fraction_diff_abs
+			curtain_fraction = current_curtain_fraction + curtain_progress * fraction_diff_abs
 		end
 
 		self.set_curtain_progress(self, curtain_fraction)

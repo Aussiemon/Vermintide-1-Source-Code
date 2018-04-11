@@ -85,7 +85,7 @@ BTMeleeShoveAction.leave = function (self, unit, blackboard, t)
 
 	return 
 end
-local MAX_SHOVE_ANGLE = math.pi/6
+local MAX_SHOVE_ANGLE = math.pi / 6
 local MAX_SHOVE_X = math.cos(MAX_SHOVE_ANGLE)
 local MAX_SHOVE_Y = math.sin(MAX_SHOVE_ANGLE)
 BTMeleeShoveAction.run = function (self, unit, blackboard, t, dt)
@@ -104,12 +104,12 @@ BTMeleeShoveAction.run = function (self, unit, blackboard, t, dt)
 			local to_old_frame_hand_pos = old_hand_pos - hand_pos
 			local frame_dist = Vector3.length(to_old_frame_hand_pos)
 			local arm_vec = hand_pos - elbow_pos
-			local mid_pos = elbow_pos + arm_vec*0.5
+			local mid_pos = elbow_pos + arm_vec * 0.5
 			local arm_rot = Quaternion.look(arm_vec, Vector3.up())
-			local oobb_pos = mid_pos + to_old_frame_hand_pos*0.5
+			local oobb_pos = mid_pos + to_old_frame_hand_pos * 0.5
 			local half_length = 1
 			local half_height = 1
-			local half_width = frame_dist*0.5 + 0.2
+			local half_width = 0.2 + frame_dist * 0.5
 			local box_size = Vector3(half_width, half_length, half_height)
 
 			PhysicsWorld.prepare_actors_for_overlap(data.physics_world, oobb_pos, 1.2)
@@ -153,11 +153,11 @@ BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_act
 						local blocked = false
 
 						if DamageUtils.check_block(unit, hit_unit, action.fatigue_type) and action.shove_blocked_speed_mul then
-							shove_speed = shove_speed*action.shove_blocked_speed_mul
+							shove_speed = shove_speed * action.shove_blocked_speed_mul
 							blocked = true
 						end
 
-						local push_velocity = shove_dir*shove_speed
+						local push_velocity = shove_dir * shove_speed
 
 						Vector3.set_z(push_velocity, action.shove_z_speed)
 						self.hit_player(self, unit, blackboard, hit_unit, push_velocity, shove_dir, blocked)

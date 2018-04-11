@@ -652,7 +652,7 @@ ProfileWorldView.update = function (self, dt)
 
 	if 0.5 < self.title_text_anim_t then
 		local title_text_color = self.character_info_widget.style.title_text.text_color
-		title_text_color[1] = math.min(255, title_text_color[1] + dt*400)
+		title_text_color[1] = math.min(255, title_text_color[1] + dt * 400)
 	end
 
 	return 

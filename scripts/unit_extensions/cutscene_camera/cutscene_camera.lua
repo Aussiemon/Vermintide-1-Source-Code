@@ -111,8 +111,8 @@ CutsceneCamera.transition_progress = function (self, start_time, end_time, time)
 	if interpolation_time <= 0.001 then
 		progress = 1
 	else
-		progress = math.clamp((time - start_time)/interpolation_time, 0, 1)
-		progress = (progress*2 - 3)*progress^2
+		progress = math.clamp((time - start_time) / interpolation_time, 0, 1)
+		progress = (3 - 2 * progress) * progress^2
 	end
 
 	return progress

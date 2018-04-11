@@ -1027,7 +1027,7 @@ LobbyBrowseView.on_stepper_arrow_hover = function (self, widget, name, style_id)
 	local current_alpha = pass_style.color[1]
 	local target_alpha = 255
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = (current_alpha/target_alpha - 1)*total_time
+	local animation_duration = (1 - current_alpha / target_alpha) * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_hover"] = self.animate_element_by_time(self, pass_style.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1047,7 +1047,7 @@ LobbyBrowseView.on_stepper_arrow_dehover = function (self, widget, name, style_i
 	local current_alpha = pass_style.color[1]
 	local target_alpha = 0
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = current_alpha/255*total_time
+	local animation_duration = current_alpha / 255 * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_hover"] = self.animate_element_by_time(self, pass_style.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1161,7 +1161,7 @@ LobbyBrowseView.handle_gamepad_navigation_input = function (self, dt)
 		if move_up or move_up_hold then
 			self._cycle_previous_gamepad_widget(self)
 
-			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+			self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 		else
 			local move_down = input_service.get(input_service, "move_down")
 			local move_down_hold = input_service.get(input_service, "move_down_hold")
@@ -1169,7 +1169,7 @@ LobbyBrowseView.handle_gamepad_navigation_input = function (self, dt)
 			if move_down or move_down_hold then
 				self._cycle_next_gamepad_widget(self)
 
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 			end
 		end
 	end

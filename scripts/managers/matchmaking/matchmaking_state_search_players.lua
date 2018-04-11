@@ -205,7 +205,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 					local total_time = 1
 					local cancel_timer = self.start_cancel_timer
 					cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-					local progress = math.min(cancel_timer/total_time, 1)
+					local progress = math.min(cancel_timer / total_time, 1)
 
 					if progress == 1 then
 						if current_number_of_members < MatchmakingSettings.MAX_NUMBER_OF_PLAYERS then
@@ -271,7 +271,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 				local total_time = 1
 				local cancel_timer = self.cancel_timer
 				cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-				local progress = math.min(cancel_timer/total_time, 1)
+				local progress = math.min(cancel_timer / total_time, 1)
 
 				if progress == 1 then
 					self.ready = not self.matchmaking_manager.ready_peers[peer_id]

@@ -152,11 +152,11 @@ SpawnZoneBaker.periodical = function (self, hi, dist_data)
 
 	if hi then
 		len = math.random(dist_data.min_low_dist, dist_data.max_low_dist)
-		density = dist_data.min_low_density + math.random()*(dist_data.max_low_density - dist_data.min_low_density)
+		density = dist_data.min_low_density + math.random() * (dist_data.max_low_density - dist_data.min_low_density)
 		hi = false
 	else
 		len = math.random(dist_data.min_hi_dist, dist_data.max_hi_dist)
-		density = dist_data.min_hi_density + math.random()*(dist_data.max_hi_density - dist_data.min_hi_density)
+		density = dist_data.min_hi_density + math.random() * (dist_data.max_hi_density - dist_data.min_hi_density)
 		hi = true
 	end
 
@@ -281,9 +281,9 @@ SpawnZoneBaker.generate_spawns = function (self, spawn_cycle_length, goal_densit
 					zone.period_length = len
 				elseif dist_data.random_dist then
 					if hi then
-						density = dist_data.min_hi_density + math.random()*(dist_data.max_hi_density - dist_data.min_hi_density)
+						density = dist_data.min_hi_density + math.random() * (dist_data.max_hi_density - dist_data.min_hi_density)
 					else
-						density = dist_data.min_low_density + math.random()*(dist_data.max_low_density - dist_data.min_low_density)
+						density = dist_data.min_low_density + math.random() * (dist_data.max_low_density - dist_data.min_low_density)
 					end
 				end
 
@@ -313,24 +313,24 @@ SpawnZoneBaker.generate_spawns = function (self, spawn_cycle_length, goal_densit
 				end
 			until sum_density ~= 0
 		elseif distribution == "uphill" then
-			local z = num_cycle_zones/1
+			local z = 1 / num_cycle_zones
 
 			for j = 1, num_cycle_zones, 1 do
 				local zone = cycle_zones[j]
-				zone.density = j*z
+				zone.density = j * z
 				sum_density = sum_density + zone.density
 			end
 		end
 
-		local wanted_average_density = goal_density*num_cycle_zones
+		local wanted_average_density = goal_density * num_cycle_zones
 
 		if 0 < sum_density then
-			local normalizer = wanted_average_density/sum_density
+			local normalizer = wanted_average_density / sum_density
 			local remainder = 0
 
 			for j = 1, num_cycle_zones, 1 do
 				local zone = cycle_zones[j]
-				zone.density = zone.density*normalizer
+				zone.density = zone.density * normalizer
 
 				if 0 < remainder then
 					zone.density = zone.density + remainder
@@ -353,7 +353,7 @@ SpawnZoneBaker.generate_spawns = function (self, spawn_cycle_length, goal_densit
 
 				for k = 1, #outer, 1 do
 					local zone = outer[k]
-					local density = math.clamp(density*kept + (kept - 1)*(math.random()*2 - 1), 0, 1)
+					local density = math.clamp(density * kept + (1 - kept) * (2 * math.random() - 1), 0, 1)
 					zone.density = density
 				end
 			end
@@ -408,7 +408,7 @@ SpawnZoneBaker.generate_spawns = function (self, spawn_cycle_length, goal_densit
 			local nodes = sub_zones[j]
 			local area = sub_areas[j]
 			local density = math.random()
-			local num_wanted_rats = math.floor(area*density*area_density_coefficient)
+			local num_wanted_rats = math.floor(area * density * area_density_coefficient)
 
 			if 0 < num_wanted_rats then
 				self.spawn_amount_rats(self, spawns, pack_sizes, pack_rotations, nodes, num_wanted_rats, area)
@@ -420,7 +420,7 @@ SpawnZoneBaker.generate_spawns = function (self, spawn_cycle_length, goal_densit
 			local triangle_index = sub_zones[1][1]
 			local p = spawn_pos_lookup[triangle_index]
 			local best_point, best_travel_dist, move_percent = MainPathUtils.closest_pos_at_main_path(self.main_paths, Vector3(p[1], p[2], p[3]))
-			local main_zone_index = math.floor((best_travel_dist + 5)/10)
+			local main_zone_index = math.floor((best_travel_dist + 5) / 10)
 
 			if main_zone_index == 0 then
 				main_zone_index = 1
@@ -455,10 +455,10 @@ SpawnZoneBaker.populate_spawns_by_rats = function (self, spawns, pack_sizes, pac
 
 		if nodes then
 			local area = (is_main_zone and zone.area < clamp_area and clamp_area) or zone.area
-			local num_area_spawns_f = area*zone.density*area_density_coefficient + area_bucket
+			local num_area_spawns_f = area * zone.density * area_density_coefficient + area_bucket
 			local num_area_spawns = math.floor(num_area_spawns_f)
 			area_bucket = num_area_spawns_f - num_area_spawns
-			local num_dist_spawns_f = zone_length*zone.density*length_density_coefficient + dist_bucket
+			local num_dist_spawns_f = zone_length * zone.density * length_density_coefficient + dist_bucket
 			local num_dist_spawns = math.floor(num_dist_spawns_f)
 			dist_bucket = num_dist_spawns_f - num_dist_spawns
 			local num_wanted_rats = num_area_spawns + num_dist_spawns
@@ -496,7 +496,7 @@ SpawnZoneBaker.populate_spawns_by_rats_squeezed = function (self, spawns, pack_s
 			local period_length = zone.period_length
 
 			if period_length then
-				rats_in_period = rats_per_10m*period_length
+				rats_in_period = rats_per_10m * period_length
 				period_area = 0
 
 				for k = j, (j + period_length) - 1, 1 do
@@ -526,8 +526,8 @@ SpawnZoneBaker.squeezed_populate = function (self, spawns, pack_sizes, pack_rota
 	end
 
 	local nodes = zone.nodes
-	local density_fraction = zone.area/period_area
-	local num_dist_spawns_f = density_fraction*zone.density*rats_in_period + dist_bucket
+	local density_fraction = zone.area / period_area
+	local num_dist_spawns_f = density_fraction * zone.density * rats_in_period + dist_bucket
 	local num_dist_spawns = math.floor(num_dist_spawns_f)
 	dist_bucket = num_dist_spawns_f - num_dist_spawns
 	local num_wanted_rats = num_dist_spawns
@@ -572,14 +572,14 @@ SpawnZoneBaker.spawn_amount_rats = function (self, spawns, pack_sizes, pack_rota
 			if not lookup[tri_index] then
 				local p = spawn_pos_lookup[nodes[node_index]]
 				local pos = Vector3(p[1], p[2], p[3])
-				local angle = math.random()*2*math.pi
+				local angle = math.random() * 2 * math.pi
 				local rot = Quaternion(Vector3.up(), angle)
 				local outside_navmesh_pos = ConflictUtils.interest_point_outside_nav_mesh(nav_world, unit_name, pos, rot)
 				local move_tries = 0
 
 				while outside_navmesh_pos and move_tries < 3 do
 					move_tries = move_tries + 1
-					local move_vec = vector3_normalize(pos - outside_navmesh_pos)*1
+					local move_vec = vector3_normalize(pos - outside_navmesh_pos) * 1
 					pos = pos + move_vec
 					outside_navmesh_pos = ConflictUtils.interest_point_outside_nav_mesh(nav_world, unit_name, pos, rot)
 				end
@@ -619,9 +619,9 @@ local heatmap_colors_lookup = {}
 
 for i = 1, 16, 1 do
 	heatmap_colors_lookup[i] = {
-		math.floor((i/16 - 1)*255),
+		math.floor((1 - i / 16) * 255),
 		0,
-		math.floor(i/16*255)
+		math.floor(i / 16 * 255)
 	}
 end
 
@@ -660,10 +660,10 @@ SpawnZoneBaker.draw_zones = function (self, nav_world, draw_only_one_zone_index)
 		local colors, density = nil
 
 		if show_spawn_density then
-			density = math.floor(((zone_convert[i] and zone_convert[i].density) or 1)*16)
+			density = math.floor(((zone_convert[i] and zone_convert[i].density) or 1) * 16)
 		else
-			local f = i%3*63 + 92
-			local g = f/2
+			local f = 92 + 63 * i % 3
+			local g = f / 2
 			colors = {
 				Color(alpha, 0, f, 0),
 				Color(alpha, 0, 0, f),
@@ -696,7 +696,7 @@ SpawnZoneBaker.draw_zones = function (self, nav_world, draw_only_one_zone_index)
 						if show_spawn_density then
 							Gui.triangle(gui, p1 + h, p2 + h, p3 + h, 2, heatmap_colors[density])
 						else
-							local col = colors[j] or Colors.get_indexed((i*7 + j + 5)%32 + 1)
+							local col = colors[j] or Colors.get_indexed((i * 7 + j + 5) % 32 + 1)
 
 							Gui.triangle(gui, p1 + h, p2 + h, p3 + h, 2, col)
 						end
@@ -782,19 +782,19 @@ SpawnZoneBaker.draw_pack_density_graph = function (self)
 		for j = 1, #cycle_zones, 1 do
 			local zone = cycle_zones[j]
 			local density = zone.density
-			local area = math.clamp(zone.area*0.5, 0, 100)
+			local area = math.clamp(zone.area * 0.5, 0, 100)
 
-			g.add_point(g, dist, density*100, "density")
+			g.add_point(g, dist, density * 100, "density")
 
 			dist = dist + sub_zone_length
 			local p = self.spawn_pos_lookup[zone.nodes[1]]
 			local pos = Vector3(p[1], p[2], p[3])
-			local width = math.sqrt(zone.total_area)/5
+			local width = math.sqrt(zone.total_area) / 5
 			local box_extents = Vector3(width, width, width)
 			local pose = Matrix4x4.from_quaternion_position(Quaternion.look(Vector3.up()), pos)
 
 			QuickDrawerStay:box(pose, box_extents, Color(255, 0, 200, 0))
-			QuickDrawerStay:sphere(pos, density*7)
+			QuickDrawerStay:sphere(pos, 7 * density)
 		end
 	end
 

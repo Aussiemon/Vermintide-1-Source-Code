@@ -104,7 +104,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "center",
 		position = {
 			25,
-			element_settings.height*0.5 - 32,
+			element_settings.height * 0.5 - 32,
 			5
 		},
 		size = {
@@ -793,7 +793,7 @@ local function create_empty_inventory_item_template()
 			},
 			offset = {
 				25,
-				element_settings.height*0.5 - 32,
+				element_settings.height * 0.5 - 32,
 				5
 			},
 			color = {
@@ -810,7 +810,7 @@ local function create_empty_inventory_item_template()
 			},
 			offset = {
 				25,
-				element_settings.height*0.5 - 32,
+				element_settings.height * 0.5 - 32,
 				6
 			},
 			color = {
@@ -903,7 +903,7 @@ local function create_empty_inventory_item_template()
 			text_color = table.clone(Colors.color_definitions.white),
 			offset = {
 				105,
-				element_settings.height*0.5,
+				element_settings.height * 0.5,
 				6
 			},
 			size = {
@@ -921,7 +921,7 @@ local function create_empty_inventory_item_template()
 			text_color = table.clone(Colors.color_definitions.cheeseburger),
 			offset = {
 				105,
-				element_settings.height*0.5 - 40,
+				element_settings.height * 0.5 - 40,
 				6
 			},
 			size = {
@@ -1225,7 +1225,7 @@ local function create_inventory_item_template()
 			},
 			offset = {
 				25,
-				element_settings.height*0.5 - 32,
+				element_settings.height * 0.5 - 32,
 				5
 			},
 			color = {
@@ -1242,7 +1242,7 @@ local function create_inventory_item_template()
 			},
 			offset = {
 				25,
-				element_settings.height*0.5 - 32,
+				element_settings.height * 0.5 - 32,
 				6
 			},
 			color = {
@@ -1428,7 +1428,7 @@ local function create_inventory_item_template()
 			},
 			offset = {
 				105,
-				element_settings.height*0.5 - 5,
+				element_settings.height * 0.5 - 5,
 				6
 			},
 			size = {
@@ -1446,7 +1446,7 @@ local function create_inventory_item_template()
 			text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 			offset = {
 				105,
-				element_settings.height*0.5 - 43,
+				element_settings.height * 0.5 - 43,
 				6
 			},
 			size = {
@@ -1576,7 +1576,7 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 					scroll_function = function (ui_scenegraph, ui_style, ui_content, input_service, scroll_axis)
 						local scroll_step = ui_content.scroll_step or 0.1
 						local current_scroll_value = ui_content.internal_scroll_value
-						current_scroll_value = current_scroll_value + scroll_step*-scroll_axis.y
+						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
 
 						return 

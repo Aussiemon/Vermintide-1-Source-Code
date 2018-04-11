@@ -234,7 +234,7 @@ local widget_definitions = {
 						local bar_value = content.bar_value
 						local uv_start_pixels = style.uv_start_pixels
 						local uv_scale_pixels = style.uv_scale_pixels
-						local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+						local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 						local uvs = style.uvs
 						local uv_scale_axis = style.scale_axis
 						local offset_scale = style.offset_scale
@@ -243,7 +243,7 @@ local widget_definitions = {
 							0,
 							0
 						}
-						uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+						uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 						size[uv_scale_axis] = uv_pixels
 
 						return content.color, uvs, size, offset
@@ -549,9 +549,9 @@ InteractionUI.update = function (self, dt, t, my_player)
 			local text_style = widget_style.text
 			local font, scaled_font_size = UIFontByResolution(text_style)
 			local width, height, min = UIRenderer.text_size(ui_renderer, text, font[1], scaled_font_size)
-			local text_width = width*0.5
+			local text_width = width * 0.5
 			widget_content.text = text
-			ui_scenegraph.tooltip.position[1] = -((width + texture_size_x)*0.5)
+			ui_scenegraph.tooltip.position[1] = -((width + texture_size_x) * 0.5)
 
 			if not self.draw_interaction_tooltip then
 				local icon_style = widget_style.icon_styles
@@ -600,9 +600,9 @@ InteractionUI.update = function (self, dt, t, my_player)
 				local interactable_world_pos = Matrix4x4.translation(orientation_mat)
 				local eyetracking_extension = ScriptUnit.extension(player_unit, "eyetracking_system")
 				local pos_in_screen = eyetracking_extension.world_position_in_screen(eyetracking_extension, interactable_world_pos)
-				local x_scale = RESOLUTION_LOOKUP.res_w/1920
-				local y_scale = RESOLUTION_LOOKUP.res_h/1080
-				local new_position = Vector3(pos_in_screen[1]*x_scale - 960, pos_in_screen[2]*y_scale - 540, 0)
+				local x_scale = 1920 / RESOLUTION_LOOKUP.res_w
+				local y_scale = 1080 / RESOLUTION_LOOKUP.res_h
+				local new_position = Vector3(pos_in_screen[1] * x_scale - 960, pos_in_screen[2] * y_scale - 540, 0)
 
 				UISceneGraph.set_local_position(ui_scenegraph, "tooltip_root", new_position)
 			end

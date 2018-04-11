@@ -21,8 +21,8 @@ local scenegraph_definition = {
 		parent = "root",
 		horizontal_alignment = "center",
 		position = {
-			ICON_SIZE[1]*0.5,
-			SIZE_Y/2 - 150,
+			ICON_SIZE[1] * 0.5,
+			SIZE_Y / 2 - 150,
 			100
 		},
 		size = {
@@ -40,7 +40,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			ICON_SIZE[2]*0.3,
+			ICON_SIZE[2] * 0.3,
 			1
 		}
 	},
@@ -54,7 +54,7 @@ local scenegraph_definition = {
 		},
 		position = {
 			0,
-			ICON_SIZE[2]*0.3,
+			ICON_SIZE[2] * 0.3,
 			1
 		}
 	}

@@ -119,7 +119,7 @@ PlayerCharacterStateLeaveLedgeHangingPullUp.calculate_end_position = function (s
 	local respawn_box_position = Unit.world_position(ledge_unit, node)
 	local respawn_box_rotation = Unit.world_rotation(ledge_unit, node)
 	local respawn_box_right_vector = Quaternion.right(respawn_box_rotation)
-	local new_position = respawn_box_position + respawn_box_right_vector*position_offset_amount
+	local new_position = respawn_box_position + respawn_box_right_vector * position_offset_amount
 
 	self.end_position:store(new_position)
 

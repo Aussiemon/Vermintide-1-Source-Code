@@ -614,7 +614,7 @@ MatchmakingManager.update_cancel_input = function (self, dt)
 					local total_time = 1
 					local cancel_timer = self.cancel_timer
 					cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-					local progress = math.min(cancel_timer/total_time, 1)
+					local progress = math.min(cancel_timer / total_time, 1)
 
 					if progress == 1 then
 						self.cancel_matchmaking(self)

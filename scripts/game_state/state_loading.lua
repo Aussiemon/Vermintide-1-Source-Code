@@ -510,7 +510,7 @@ StateLoading._update_network = function (self, dt)
 			self._in_post_game_popup_shown = true
 
 			Managers.popup:activate_timer(self._in_post_game_popup_id, 200, "timeout", "center", false, function (timer)
-				return string.format(Localize("timer_max_time") .. ": %.2d:%.2d", (timer/60)%60, timer%60)
+				return string.format(Localize("timer_max_time") .. ": %.2d:%.2d", (timer / 60) % 60, timer % 60)
 			end, 28)
 		elseif not self._network_client:is_in_post_game() and self._in_post_game_popup_id then
 			Managers.popup:cancel_popup(self._in_post_game_popup_id)

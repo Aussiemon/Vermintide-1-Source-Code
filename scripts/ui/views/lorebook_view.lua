@@ -250,7 +250,7 @@ LorebookView.set_page_title = function (self, title)
 	return 
 end
 LorebookView.fill_page_content = function (self, page_text, category_name, images, image)
-	local seed = LorebookCategoryLookup[category_name]*5208943
+	local seed = LorebookCategoryLookup[category_name] * 5208943
 	local page_title = self.page_title
 	local page_title_content = page_title.content
 	local page_widget = self.page_content
@@ -476,8 +476,8 @@ LorebookView.setup_page_image_and_exclusion_zone = function (self, scenegraph_id
 	local exclusion_zone = exclusion_zones[vertical_alignment]
 	exclusion_zone.alignment = horizontal_alignment
 	local padding = image_padding[vertical_alignment][horizontal_alignment]
-	local x_padding = padding[1]*inv_scale
-	local y_padding = padding[2]*inv_scale
+	local x_padding = padding[1] * inv_scale
+	local y_padding = padding[2] * inv_scale
 	exclusion_zone.width = size[1] + x_padding
 	exclusion_zone.height = size[2] + y_padding
 	exclusion_zone.active = true
@@ -596,8 +596,8 @@ LorebookView.on_element_hover_enter = function (self, index, element_style, play
 
 	if element_style then
 		local current_hover_alpha = element_style.hover_texture_left.color[1]
-		local progress = current_hover_alpha/255
-		speed = progress - 1 + 1
+		local progress = current_hover_alpha / 255
+		speed = 1 + 1 - progress
 	end
 
 	hover_widgets[1] = self.contents_list
@@ -623,8 +623,8 @@ LorebookView.on_index_element_hover_enter = function (self, index, element_style
 
 	if element_style then
 		local current_hover_alpha = element_style.hover_texture.color[1]
-		local progress = current_hover_alpha/255
-		speed = progress - 1 + 1
+		local progress = current_hover_alpha / 255
+		speed = 1 + 1 - progress
 	end
 
 	index_hover_widgets[1] = self.index_list
@@ -868,7 +868,7 @@ LorebookView.create_list_element = function (self, category)
 	local category_name = category.category_name
 	local font_size = 28
 	local default_height_offest = 50
-	local offset = (index - 1)*default_height_offest
+	local offset = (index - 1) * default_height_offest
 	local list_member_height_offset = -offset
 	local page_text = category.page_text
 	local is_category_unlocked = self.is_category_unlocked(self, category)
@@ -1100,7 +1100,7 @@ LorebookView.create_index_list_element = function (self, category)
 	local index_name = category.index_name
 	local category_name = category.category_name
 	local default_height_offest = 18
-	local offset = (index - 1)*default_height_offest
+	local offset = (index - 1) * default_height_offest
 	local list_member_height_offset = -offset
 	local content = {
 		selected_texture = "index_selection_marker_selected",
@@ -1129,7 +1129,7 @@ LorebookView.create_index_list_element = function (self, category)
 			},
 			size = {
 				0,
-				default_height_offest*1.35,
+				default_height_offest * 1.35,
 				0
 			}
 		},
@@ -1219,8 +1219,8 @@ LorebookView.create_index_list_element = function (self, category)
 	style.name.offset[1] = previous_element_offset
 	style.hotspot.offset[1] = previous_element_offset
 	style.divider.offset[1] = text_width + previous_element_offset
-	style.hover_texture.offset[1] = (text_width*0.5 + previous_element_offset) - 16
-	style.selected_texture.offset[1] = (text_width*0.5 + previous_element_offset) - 16
+	style.hover_texture.offset[1] = (text_width * 0.5 + previous_element_offset) - 16
+	style.selected_texture.offset[1] = (text_width * 0.5 + previous_element_offset) - 16
 	content.total_width = text_width + divider_offset + previous_element_offset
 	self.index_list_elements[index + 1] = {
 		content = content,
@@ -1278,8 +1278,8 @@ LorebookView.set_index_list_element_data = function (self, list_element, categor
 	style.name.offset[1] = previous_element_offset
 	style.hotspot.offset[1] = previous_element_offset
 	style.divider.offset[1] = text_width + previous_element_offset
-	style.hover_texture.offset[1] = (text_width*0.5 + previous_element_offset) - 16
-	style.selected_texture.offset[1] = (text_width*0.5 + previous_element_offset) - 16
+	style.hover_texture.offset[1] = (text_width * 0.5 + previous_element_offset) - 16
+	style.selected_texture.offset[1] = (text_width * 0.5 + previous_element_offset) - 16
 	content.total_width = text_width + divider_offset + previous_element_offset
 	content.selected = false
 	content.gamepad_hover = false
@@ -1291,7 +1291,7 @@ LorebookView.set_index_list_element_data = function (self, list_element, categor
 end
 LorebookView.align_element_icons_by_text_length = function (self, text_length, element_style)
 	local name_style = element_style.name
-	local hotspot_x_offset = name_style.size[1]*0.5 - text_length*0.5
+	local hotspot_x_offset = name_style.size[1] * 0.5 - text_length * 0.5
 	element_style.hotspot.size[1] = text_length
 	element_style.hotspot.offset[1] = hotspot_x_offset
 	local hover_texture_left_style = element_style.hover_texture_left
@@ -1927,7 +1927,7 @@ end
 local divider_position_offset = 10
 local divider_size_offset = -20
 LorebookView._add_eventual_paragraph_divider = function (self, texts, return_indices, line_index, total_potential_lines, text_pos, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
-	local seed = line_index*40147
+	local seed = line_index * 40147
 	local paragraph_divider_offsets = self.paragraph_divider_offsets[page_index]
 	local scenegraph_large = self.ui_scenegraph.paragraph_divider_large
 	local scenegraph_large_size = scenegraph_large.size
@@ -2026,7 +2026,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 
 	local font_height, font_min, font_max = UIGetFontHeight(ui_renderer.gui, font_name, font_size)
 	local inv_scale = RESOLUTION_LOOKUP.inv_scale
-	local full_font_height = (font_max + math.abs(font_min))*inv_scale
+	local full_font_height = (font_max + math.abs(font_min)) * inv_scale
 	local text_offset = Vector3(0, -full_font_height, 0)
 	local text_exclusion_zones = content.text_exclusion_zones
 	local top_exclusion_zone = text_exclusion_zones and text_exclusion_zones.top.active and text_exclusion_zones.top
@@ -2082,8 +2082,8 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			local inv_scale = RESOLUTION_LOOKUP.inv_scale
 			local x_padding = image_padding.top[top_exclusion_alignment][1]
 			local y_padding = image_padding.top[top_exclusion_alignment][2]
-			top_exclusion_width = top_exclusion_zone.width + x_padding*inv_scale
-			top_exclusion_height = top_exclusion_zone.height + y_padding*inv_scale
+			top_exclusion_width = top_exclusion_zone.width + x_padding * inv_scale
+			top_exclusion_height = top_exclusion_zone.height + y_padding * inv_scale
 		end
 
 		local bottom_exclusion_alignment, bottom_exclusion_width, bottom_exclusion_height = nil
@@ -2093,8 +2093,8 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			local inv_scale = RESOLUTION_LOOKUP.inv_scale
 			local x_padding = image_padding.bottom[bottom_exclusion_alignment][1]
 			local y_padding = image_padding.bottom[bottom_exclusion_alignment][2]
-			bottom_exclusion_width = bottom_exclusion_zone.width + x_padding*inv_scale
-			bottom_exclusion_height = bottom_exclusion_zone.height + y_padding*inv_scale
+			bottom_exclusion_width = bottom_exclusion_zone.width + x_padding * inv_scale
+			bottom_exclusion_height = bottom_exclusion_zone.height + y_padding * inv_scale
 		end
 
 		if top_exclusion_zone and not bottom_exclusion_zone then
@@ -2185,21 +2185,21 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			end
 		end
 
-		local minimum_text_width = area_width*0.2
+		local minimum_text_width = area_width * 0.2
 		local top_text_amount, center_text_amount, bottom_text_amount = nil
-		local total_potential_lines = math.floor(area_height/full_font_height) + 1
+		local total_potential_lines = math.floor(area_height / full_font_height) + 1
 
 		if not top_exclusion_zone and not bottom_exclusion_zone then
 			top_text_amount = total_potential_lines
 		elseif top_exclusion_zone and not bottom_exclusion_zone then
-			top_text_amount = math.ceil(top_height/full_font_height)
+			top_text_amount = math.ceil(top_height / full_font_height)
 			bottom_text_amount = total_potential_lines - top_text_amount
 		elseif bottom_exclusion_zone and not top_exclusion_zone then
-			top_text_amount = math.ceil(top_height/full_font_height)
+			top_text_amount = math.ceil(top_height / full_font_height)
 			bottom_text_amount = total_potential_lines - top_text_amount
 		elseif area_height <= top_exclusion_height + bottom_exclusion_height then
-			top_text_amount = math.ceil(top_height/full_font_height)
-			bottom_text_amount = math.floor(bottom_height/full_font_height)
+			top_text_amount = math.ceil(top_height / full_font_height)
+			bottom_text_amount = math.floor(bottom_height / full_font_height)
 			local total = 0
 
 			if 0 < top_text_amount and bottom_text_amount < 0 then
@@ -2220,8 +2220,8 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				end
 			end
 		else
-			top_text_amount = math.ceil(top_height/full_font_height)
-			bottom_text_amount = math.ceil(bottom_height/full_font_height)
+			top_text_amount = math.ceil(top_height / full_font_height)
+			bottom_text_amount = math.ceil(bottom_height / full_font_height)
 			local total = top_text_amount + bottom_text_amount
 			center_text_amount = total < total_potential_lines and total_potential_lines - total
 		end
@@ -2272,9 +2272,9 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 					string_offset = string_offset + 1
 				end
 
-				page_texts[i*3 - 2] = line_text
-				page_texts[i*3 - 1] = justified
-				page_texts[i*3] = Vector3Box(position)
+				page_texts[i * 3 - 2] = line_text
+				page_texts[i * 3 - 1] = justified
+				page_texts[i * 3] = Vector3Box(position)
 
 				if not justified or i == num_texts then
 					string_offset = string_offset + 1
@@ -2284,7 +2284,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				string_offset = string_offset + string.len(line_text)
 
 				if string_length <= string_offset then
-					page_texts[i*3 - 1] = false
+					page_texts[i * 3 - 1] = false
 				end
 			end
 
@@ -2300,7 +2300,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				n_linebreaks_at_end_of_block = n_linebreaks_at_end_of_block + 1
 			end
 		else
-			position = position + text_offset*(top_text_amount or 0)
+			position = position + text_offset * (top_text_amount or 0)
 		end
 
 		page.center.width = center_width
@@ -2345,9 +2345,9 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 					string_offset = string_offset + 1
 				end
 
-				page_texts[i*3 - 2] = line_text
-				page_texts[i*3 - 1] = justified
-				page_texts[i*3] = Vector3Box(position)
+				page_texts[i * 3 - 2] = line_text
+				page_texts[i * 3 - 1] = justified
+				page_texts[i * 3] = Vector3Box(position)
 
 				if not justified then
 					string_offset = string_offset + 1
@@ -2357,7 +2357,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				string_offset = string_offset + string.len(line_text)
 
 				if string_length <= string_offset then
-					page_texts[i*3 - 1] = false
+					page_texts[i * 3 - 1] = false
 				end
 			end
 
@@ -2373,7 +2373,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				n_linebreaks_at_end_of_block = n_linebreaks_at_end_of_block + 1
 			end
 		else
-			position = position + text_offset*(center_text_amount or 0)
+			position = position + text_offset * (center_text_amount or 0)
 		end
 
 		page.bottom.width = bottom_width
@@ -2418,9 +2418,9 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 					string_offset = string_offset + 1
 				end
 
-				page_texts[i*3 - 2] = line_text
-				page_texts[i*3 - 1] = justified
-				page_texts[i*3] = Vector3Box(position)
+				page_texts[i * 3 - 2] = line_text
+				page_texts[i * 3 - 1] = justified
+				page_texts[i * 3] = Vector3Box(position)
 
 				if not justified then
 					string_offset = string_offset + 1
@@ -2430,7 +2430,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				string_offset = string_offset + string.len(line_text)
 
 				if string_length <= string_offset then
-					page_texts[i*3 - 1] = false
+					page_texts[i * 3 - 1] = false
 				end
 			end
 		end

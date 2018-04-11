@@ -637,9 +637,9 @@ MapViewAreaHandler._set_area_widget_difficulty_icons = function (self, widget, d
 	end
 
 	difficulty_read_index = difficulty_read_index or 1
-	local even_amount_of_difficulties = num_available_difficulties%2 == 0
-	local center_index = math.ceil(max_num_difficulties/2)
-	local index = center_index - math.floor(num_available_difficulties/2)
+	local even_amount_of_difficulties = num_available_difficulties % 2 == 0
+	local center_index = math.ceil(max_num_difficulties / 2)
+	local index = center_index - math.floor(num_available_difficulties / 2)
 	local num_difficulties_diff = max_num_difficulties - num_available_difficulties
 
 	for i = 1, num_available_difficulties, 1 do
@@ -683,7 +683,7 @@ MapViewAreaHandler._set_area_widget_title_text = function (self, widget, display
 	local widget_style = widget.style
 	local font, scaled_font_size = UIFontByResolution(widget_style.title_text)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, area_display_text, font[1], scaled_font_size)
-	text_width = math.ceil(text_width*0.8)
+	text_width = math.ceil(text_width * 0.8)
 	local text_background_center = widget_style.text_background_center
 	local scenegraph_id = text_background_center.scenegraph_id
 	self.ui_scenegraph[scenegraph_id].size[1] = text_width
@@ -1005,7 +1005,7 @@ MapViewAreaHandler._on_level_widget_select = function (self, widget, widget_inde
 	local current_alpha = widget_style.selected.color[1]
 	local target_alpha = 255
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = (not instant or 0) and (current_alpha/target_alpha - 1)*total_time
+	local animation_duration = (not instant or 0) and (1 - current_alpha / target_alpha) * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 	local selected_scenegraph_id = widget_style.selected.scenegraph_id
 	local selected_background_scenegraph = not is_area_widget and ui_scenegraph[selected_scenegraph_id]
@@ -1057,7 +1057,7 @@ MapViewAreaHandler._on_level_widget_deselect = function (self, widget, widget_in
 	local target_alpha = 0
 	local hover_alpha = 190
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = ((current_alpha - 255)/255 - 1)*total_time
+	local animation_duration = (1 - (255 - current_alpha) / 255) * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 
 	if 0 < animation_duration then
@@ -1086,7 +1086,7 @@ MapViewAreaHandler._on_level_widget_hover = function (self, widget, widget_index
 	local target_alpha = 255
 	local hover_alpha = 255
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = (current_alpha/target_alpha - 1)*total_time
+	local animation_duration = (1 - current_alpha / target_alpha) * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 
 	self._on_level_widget_new_cancel(self, widget, widget_index)
@@ -1115,7 +1115,7 @@ MapViewAreaHandler._on_level_widget_dehover = function (self, widget, widget_ind
 	local current_alpha = widget_style.hover.color[1]
 	local target_alpha = 0
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = current_alpha/255*total_time
+	local animation_duration = current_alpha / 255 * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 
 	if 0 < animation_duration then
@@ -1146,7 +1146,7 @@ MapViewAreaHandler._on_level_widget_new = function (self, widget, widget_index)
 	local current_alpha = 170
 	local target_alpha = 255
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = current_alpha/target_alpha*total_time
+	local animation_duration = current_alpha / target_alpha * total_time
 	widget.content.is_new = true
 
 	if 0 < animation_duration then

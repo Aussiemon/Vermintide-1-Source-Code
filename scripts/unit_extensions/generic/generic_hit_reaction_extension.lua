@@ -465,7 +465,7 @@ GenericHitReactionExtension._execute_effect = function (self, unit, effect_templ
 			local fwd = Quaternion.forward(Unit.local_rotation(unit, 0))
 			local flat_fwd = Vector3.normalize(Vector3.flat(fwd))
 			local found = false
-			local angle = (math.atan2(hit_direction_flat.y, hit_direction_flat.x) - math.atan2(flat_fwd.y, flat_fwd.x))%(math.pi*2)
+			local angle = (math.atan2(hit_direction_flat.y, hit_direction_flat.x) - math.atan2(flat_fwd.y, flat_fwd.x)) % (math.pi * 2)
 
 			for i = 1, #angles, 1 do
 				local angle_data = angles[i]
@@ -630,14 +630,14 @@ GenericHitReactionExtension._do_push = function (self, unit, dt)
 	local distal_force = modify_push_distance_with_buff(attacker_unit, push_parameters.distal_force) or 0
 	local lateral_force = modify_push_distance_with_buff(attacker_unit, push_parameters.lateral_force) or 0
 	local vertical_force = modify_push_distance_with_buff(attacker_unit, push_parameters.vertical_force) or 0
-	local distal_vector = distal_direction*distal_force
-	local lateral_vector = lateral_direction*lateral_force
+	local distal_vector = distal_direction * distal_force
+	local lateral_vector = lateral_direction * lateral_force
 	local vertical_vector = Vector3(0, 0, vertical_force)
-	local push_force = (distal_vector + lateral_vector + vertical_vector)/(num_actors*0.75)
+	local push_force = (distal_vector + lateral_vector + vertical_vector) / (0.75 * num_actors)
 	local breed = Unit.get_data(unit, "breed")
 
 	if breed.scale_death_push then
-		push_force = push_force*breed.scale_death_push
+		push_force = push_force * breed.scale_death_push
 	end
 
 	for i = 1, num_actors, 1 do

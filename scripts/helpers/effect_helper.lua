@@ -14,7 +14,7 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 
 	if decal_settings then
 		local projector_rotation = Quaternion.look(-normal, Quaternion.up(rotation))
-		local projector_depth_offset = (decal_settings.depth_offset and Quaternion.forward(rotation)*decal_settings.depth_offset) or Vector3(0, 0, 0)
+		local projector_depth_offset = (decal_settings.depth_offset and Quaternion.forward(rotation) * decal_settings.depth_offset) or Vector3(0, 0, 0)
 		local projection_position = position + projector_depth_offset
 		local projector_space = Matrix4x4.from_quaternion_position(projector_rotation, projection_position)
 		local projector_extents = Vector3(decal_settings.width, decal_settings.depth, decal_settings.height)
@@ -32,8 +32,8 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 				mode = "retained",
 				name = "DEBUG_DRAW_IMPACT_DECAL_HIT"
 			})
-			local drawer_space = Matrix4x4.from_quaternion_position(projector_rotation, projection_position + (Quaternion.forward(projector_rotation)*decal_settings.depth)/2)
-			local drawer_extents = Vector3(decal_settings.width/2, decal_settings.depth/2, decal_settings.height/2)
+			local drawer_space = Matrix4x4.from_quaternion_position(projector_rotation, projection_position + (Quaternion.forward(projector_rotation) * decal_settings.depth) / 2)
+			local drawer_extents = Vector3(decal_settings.width / 2, decal_settings.depth / 2, decal_settings.height / 2)
 
 			drawer.box(drawer, drawer_space, drawer_extents, Color(150, 0, 255, 0))
 		end
@@ -62,8 +62,8 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 				mode = "retained",
 				name = "DEBUG_DRAW_IMPACT_DECAL_HIT"
 			})
-			local fwd = Quaternion.forward(rotation)*MaterialEffectSettings.material_query_depth
-			local draw_pos = position - fwd*0.5
+			local fwd = Quaternion.forward(rotation) * MaterialEffectSettings.material_query_depth
+			local draw_pos = position - fwd * 0.5
 
 			drawer.vector(drawer, draw_pos, fwd, Color(255, 255, 0, 0))
 		elseif script_data.debug_material_effects then
@@ -76,8 +76,8 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 			mode = "retained",
 			name = "DEBUG_DRAW_IMPACT_DECAL_HIT"
 		})
-		local fwd = Quaternion.forward(rotation)*MaterialEffectSettings.material_query_depth
-		local draw_pos = position - fwd*0.5
+		local fwd = Quaternion.forward(rotation) * MaterialEffectSettings.material_query_depth
+		local draw_pos = position - fwd * 0.5
 
 		drawer.vector(drawer, draw_pos, fwd, Color(255, 0, 255, 0))
 		Managers.state.debug_text:output_world_text(material, 0.1, draw_pos, 30, "material_text", Vector3(0, 255, 0))
@@ -348,7 +348,7 @@ EffectHelper.flow_cb_play_footstep_surface_material_effects = function (effect_n
 				name = "DEBUG_DRAW_IMPACT_DECAL_HIT"
 			})
 
-			drawer.vector(drawer, raycast_position, raycast_direction*raycast_range, Color(255, 255, 0, 0))
+			drawer.vector(drawer, raycast_position, raycast_direction * raycast_range, Color(255, 255, 0, 0))
 			Managers.state.debug_text:output_world_text("MISS", 0.1, raycast_position, 30, "material_text", Vector3(0, 255, 0))
 		end
 
@@ -358,7 +358,7 @@ EffectHelper.flow_cb_play_footstep_surface_material_effects = function (effect_n
 		local sound = effect_settings.sound and effect_settings.sound[material]
 
 		if sound then
-			local wwise_source_id, wwise_world = WwiseUtils.make_position_auto_source(world, raycast_position + raycast_direction*raycast_range)
+			local wwise_source_id, wwise_world = WwiseUtils.make_position_auto_source(world, raycast_position + raycast_direction * raycast_range)
 
 			if debug then
 				printf("[EffectHelper:play_surface_material_effects()] playing sound %s", sound.event)
@@ -396,9 +396,9 @@ local material = {
 }
 EffectHelper.query_material_surface = function (hit_unit, position, rotation)
 	local query_forward = Quaternion.up(rotation)
-	local query_vector = query_forward*MaterialEffectSettings.material_query_depth
-	local query_start_position = position - query_vector/2
-	local query_end_position = position + query_vector/2
+	local query_vector = query_forward * MaterialEffectSettings.material_query_depth
+	local query_start_position = position - query_vector / 2
+	local query_end_position = position + query_vector / 2
 
 	return Unit.query_material(hit_unit, query_start_position, query_end_position, material)
 end

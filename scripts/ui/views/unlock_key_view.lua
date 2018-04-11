@@ -191,8 +191,8 @@ UnlockKeyView.draw_widgets = function (self, dt, t)
 	local text_input_widget = self.text_input_widget
 	text_input_widget.content.text_field = self.key_text
 	text_input_widget.content.caret_index = self.key_text_index
-	local value = (math.sin((t*3)%math.pi) + 1)/2
-	text_input_widget.style.text.caret_color[1] = value*255
+	local value = (1 + math.sin((t * 3) % math.pi)) / 2
+	text_input_widget.style.text.caret_color[1] = value * 255
 
 	UIRenderer.draw_widget(ui_renderer, text_input_widget)
 	UIRenderer.draw_widget(ui_renderer, self.processing_icon_widget)

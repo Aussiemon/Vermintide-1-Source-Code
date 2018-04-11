@@ -378,7 +378,7 @@ AISystem.update_perception = function (self, t, dt)
 	current_perception_unit = (self.ai_units_perception[current_perception_unit] ~= nil and current_perception_unit) or nil
 	local TIME_BETWEEN_UPDATE = 1
 	local num_perception_units = self.num_perception_units
-	local num_to_update = math.ceil((num_perception_units*dt)/TIME_BETWEEN_UPDATE)
+	local num_to_update = math.ceil((num_perception_units * dt) / TIME_BETWEEN_UPDATE)
 
 	for i = 1, num_to_update, 1 do
 		current_perception_unit = next(ai_units_perception, current_perception_unit)
@@ -534,7 +534,7 @@ AISystem.update_debug_draw = function (self)
 			local enemy = blackboard.target_unit
 
 			if unit_alive(enemy) then
-				local ai_pos = Unit.local_position(unit, 0) + Vector3.up()*2
+				local ai_pos = Unit.local_position(unit, 0) + Vector3.up() * 2
 
 				QuickDrawer:line(ai_pos, Unit.world_position(enemy, 0) + Vector3(0, 0, 1.5), Color(125, 255, 0, 0))
 				QuickDrawer:box(Unit.world_pose(enemy, 0), Vector3(0.5, 0.5, 1.5), Color(125, 255, 0, 0))
@@ -628,10 +628,10 @@ local function update_blackboard(unit, blackboard, t, dt)
 		local z = offset.z
 		local x = offset.x
 		local y = offset.y
-		local flat_sq = x*x + y*y
+		local flat_sq = x * x + y * y
 		blackboard.target_dist_z = z
 		blackboard.target_dist_xy_sq = flat_sq
-		local target_dist = sqrt(flat_sq + z*z)
+		local target_dist = sqrt(flat_sq + z * z)
 		local inside_priority_distance = target_dist < PRIORITIZED_DISTANCE
 		blackboard.target_dist = target_dist
 		local slot_pos = ai_slot_system.ai_unit_slot_position(ai_slot_system, unit) or current_position

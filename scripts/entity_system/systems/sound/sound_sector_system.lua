@@ -125,7 +125,7 @@ SoundSectorSystem.update = function (self, context, t, dt)
 	local number_of_sectors_to_process = (script_data.sound_sector_system_debug and #self._sectors) or 1
 
 	for i = 1, number_of_sectors_to_process, 1 do
-		self._sector_process_index = self._sector_process_index%#self._sectors + 1
+		self._sector_process_index = self._sector_process_index % #self._sectors + 1
 		local sector_index = self._sector_process_index
 		local sector = self._sectors[sector_index]
 		local units_center = Vector3_zero()
@@ -148,7 +148,7 @@ SoundSectorSystem.update = function (self, context, t, dt)
 		local horde_is_active = Managers.state.conflict:has_horde(t)
 
 		if has_enough_units and horde_is_active then
-			units_center = units_center/num_of_units_in_sector
+			units_center = units_center / num_of_units_in_sector
 			local sound_source_unit = sector_sound_source_units[sector_index]
 
 			Unit_set_local_position(sound_source_unit, 0, units_center)
@@ -233,7 +233,7 @@ SoundSectorSystem.calc_unit_sector = function (self, camera_position, unit)
 	local direction_camera_to_unit = Vector3.normalize(unit_position - camera_position)
 	local angle = math.atan2(direction_camera_to_unit.y, direction_camera_to_unit.x)
 	local num_of_sectors = NUM_OF_SECTORS
-	local sector_index = math.max(1, math.ceil((angle + pi)/(pi*2)*num_of_sectors))
+	local sector_index = math.max(1, math.ceil((angle + pi) / (2 * pi) * num_of_sectors))
 
 	return angle, sector_index
 end
@@ -267,7 +267,7 @@ SoundSectorSystem.debug_draw_hud = function (self, camera_position)
 
 	Gui.rect(self.debug_gui_screen, debug_center - Vector3(150, 150, 1), Vector2(300, 300), Color(100, 100, 100, 100))
 	Gui.rect(self.debug_gui_screen, debug_center, Vector2(10, 10), Color(100, 100, 255, 100))
-	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3.flat(camera_fwd_vec)*150, 3, 2, Color(255, 0, 255, 0))
+	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3.flat(camera_fwd_vec) * 150, 3, 2, Color(255, 0, 255, 0))
 	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3(150, 0, 0), 3, 2, Color(255, 0, 100, 0))
 	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3(-150, 0, 0), 3, 2, Color(255, 0, 100, 0))
 	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3(0, 150, 0), 3, 2, Color(255, 0, 100, 0))
@@ -283,7 +283,7 @@ SoundSectorSystem.debug_draw = function (self, sector_center, sector_index, came
 	local debug_center = Vector3(200, 200, 2)
 	local distance = Vector3.distance(camera_position, sector_center)
 	local direction_camera_to_center = Vector3.normalize(sector_center - camera_position)
-	local debug_pos_center = debug_center + Vector3.flat(direction_camera_to_center*distance*5)
+	local debug_pos_center = debug_center + Vector3.flat(direction_camera_to_center * distance * 5)
 
 	Gui.text(self.debug_gui_screen, tostring(sector_index), font_mtrl, font_size + 30, font, debug_pos_center, Color(255, 255, 255, 0))
 
@@ -292,7 +292,7 @@ SoundSectorSystem.debug_draw = function (self, sector_center, sector_index, came
 		local unit_center = Matrix4x4.translation(pose)
 		local distance = Vector3.distance(camera_position, unit_center)
 		local direction_camera_to_unit = Vector3.normalize(unit_center - camera_position)
-		local debug_pos = debug_center + Vector3.flat(direction_camera_to_unit*distance*5)
+		local debug_pos = debug_center + Vector3.flat(direction_camera_to_unit * distance * 5)
 
 		Gui.text(self.debug_gui_screen, tostring(sector_index), font_mtrl, font_size, font, debug_pos, Color(255, 255, 0, 0))
 	end

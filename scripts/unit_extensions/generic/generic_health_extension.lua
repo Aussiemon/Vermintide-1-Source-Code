@@ -47,7 +47,7 @@ GenericHealthExtension.is_alive = function (self)
 	return self.damage < self.health
 end
 GenericHealthExtension.current_health_percent = function (self)
-	return self.damage/self.health - 1
+	return 1 - self.damage / self.health
 end
 GenericHealthExtension.current_health = function (self)
 	return self.health - self.damage

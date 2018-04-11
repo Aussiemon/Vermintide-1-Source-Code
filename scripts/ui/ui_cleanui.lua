@@ -43,13 +43,13 @@ UICleanUI.update = function (self, dt)
 
 	local min_alpha_value = Application.user_setting(min_alpha_value_name) or DefaultUserSettings[min_alpha_value_name]
 	local gaze_x, gaze_y = Tobii.get_gaze_point()
-	gaze_x = gaze_x - 1
+	gaze_x = 1 - gaze_x
 
 	if not UISettings.use_hud_screen_fit then
-		local root_scale_x = RESOLUTION_LOOKUP.res_w/(UIResolutionWidthFragments()*RESOLUTION_LOOKUP.scale)
-		gaze_x = gaze_x*2 - 1
-		gaze_x = gaze_x*root_scale_x
-		gaze_x = (gaze_x + 1)/2
+		local root_scale_x = RESOLUTION_LOOKUP.res_w / (UIResolutionWidthFragments() * RESOLUTION_LOOKUP.scale)
+		gaze_x = gaze_x * 2 - 1
+		gaze_x = gaze_x * root_scale_x
+		gaze_x = (gaze_x + 1) / 2
 	end
 
 	local areas = self.areas
@@ -69,7 +69,7 @@ UICleanUI.update = function (self, dt)
 			area.timer = timer
 
 			if 0.5 < timer then
-				local alpha_scale = math.max(area.alpha_scale - dt*2, min_alpha_value)
+				local alpha_scale = math.max(area.alpha_scale - dt * 2, min_alpha_value)
 
 				if area.alpha_scale ~= alpha_scale then
 					area.alpha_scale = alpha_scale
@@ -96,13 +96,13 @@ UICleanUI.debug_draw = function (self, ui_renderer)
 	for i = 1, n_areas, 1 do
 		local area = areas[i]
 		local llc = {
-			area.position[1]*SCREEN_MAX_X,
-			area.position[2]*SCREEN_MAX_Y,
+			area.position[1] * SCREEN_MAX_X,
+			area.position[2] * SCREEN_MAX_Y,
 			100
 		}
 		local size = {
-			area.size[1]*SCREEN_MAX_X,
-			area.size[2]*SCREEN_MAX_Y,
+			area.size[1] * SCREEN_MAX_X,
+			area.size[2] * SCREEN_MAX_Y,
 			0
 		}
 		local color = {
@@ -134,12 +134,12 @@ local SCREEN_MAX_X = 1920
 local SCREEN_MAX_Y = 1080
 UICleanUI.register_area = function (self, name, widget, position, size, aligns_x)
 	local center = {
-		center[1]/SCREEN_MAX_X,
-		center[2]/SCREEN_MAX_Y
+		center[1] / SCREEN_MAX_X,
+		center[2] / SCREEN_MAX_Y
 	}
 	local extents = {
-		size[1]/2/SCREEN_MAX_X,
-		size[2]/2/SCREEN_MAX_Y
+		size[1] / 2 / SCREEN_MAX_X,
+		size[2] / 2 / SCREEN_MAX_Y
 	}
 	local has_area_by_name, area_list_index = UICleanUI.has_registered_area(self, name)
 	local area_index = (has_area_by_name and area_list_index) or #self.areas + 1
@@ -152,12 +152,12 @@ UICleanUI.register_area = function (self, name, widget, position, size, aligns_x
 	area.name = name
 	area.widget = widget
 	area.position = {
-		position[1]/SCREEN_MAX_X,
-		position[2]/SCREEN_MAX_Y
+		position[1] / SCREEN_MAX_X,
+		position[2] / SCREEN_MAX_Y
 	}
 	area.size = {
-		size[1]/SCREEN_MAX_X,
-		size[2]/SCREEN_MAX_Y
+		size[1] / SCREEN_MAX_X,
+		size[2] / SCREEN_MAX_Y
 	}
 	area.center = center
 	area.extents = extents

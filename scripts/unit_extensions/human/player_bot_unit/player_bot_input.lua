@@ -173,9 +173,9 @@ PlayerBotInput._update_actions = function (self)
 end
 PlayerBotInput._debug_aim_target_sine_curve = function (self, dt, t)
 	local pos = Vector3(-70.1625, -90.9497, -7.42347)
-	local z = math.sin(t)*3 - 6
-	local x = math.sin(t*0.3)*5 - 10
-	local y = math.sin(t*2)*5 - 10
+	local z = 6 - 3 * math.sin(t)
+	local x = 10 - 5 * math.sin(t * 0.3)
+	local y = 10 - 5 * math.sin(t * 2)
 	pos = pos + Vector3(x, y, z)
 
 	self._aim_target:store(pos)
@@ -290,7 +290,7 @@ PlayerBotInput._update_movement = function (self, dt, t)
 		wanted_rotation = self._aim_rotation:unbox()
 	elseif self._aiming and self._soft_aiming then
 		local direction = self._aim_target:unbox() - camera_position
-		wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(direction, up), math.min(dt*5, 1))
+		wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(direction, up), math.min(dt * 5, 1))
 	elseif self._aiming then
 		wanted_rotation = Quaternion_look(self._aim_target:unbox() - camera_position, up)
 	elseif current_goal then
@@ -300,10 +300,10 @@ PlayerBotInput._update_movement = function (self, dt, t)
 			transition_jump = player_bot_navigation.transition_requires_jump(player_bot_navigation, position, Vector3.normalize(dir))
 			wanted_rotation = Quaternion_look(dir, up)
 		else
-			wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(dir, up), math.min(dt*2, 1))
+			wanted_rotation = Quaternion.lerp(rotation, Quaternion_look(dir, up), math.min(dt * 2, 1))
 		end
 	else
-		wanted_rotation = Quaternion.lerp(rotation, Unit.local_rotation(self.unit, 0), math.min(dt*2, 1))
+		wanted_rotation = Quaternion.lerp(rotation, Unit.local_rotation(self.unit, 0), math.min(dt * 2, 1))
 	end
 
 	local needed_delta_rotation = Quaternion.multiply(Quaternion.inverse(rotation), wanted_rotation)
@@ -344,13 +344,13 @@ PlayerBotInput._update_movement = function (self, dt, t)
 		local width = 0.4
 		local depth = math.min(0.5, Vector3.length(goal_vector) - jump_range_check_epsilon)
 		local height = 0.8
-		local half_width = width*0.5
-		local half_depth = depth*0.5
-		local half_height = height*0.5
+		local half_width = width * 0.5
+		local half_depth = depth * 0.5
+		local half_height = height * 0.5
 		local half_upper_height = 0.25
 		local half_upper_depth = half_depth + 0.1
-		local lower_check_pos = position + goal_direction*(half_depth + forward_offset) + Vector3(0, 0, half_height + 0.4)
-		local upper_check_pos = lower_check_pos + goal_direction*(half_upper_depth - half_depth) + Vector3(0, 0, half_upper_height + half_height)
+		local lower_check_pos = position + goal_direction * (half_depth + forward_offset) + Vector3(0, 0, 0.4 + half_height)
+		local upper_check_pos = lower_check_pos + goal_direction * (half_upper_depth - half_depth) + Vector3(0, 0, half_upper_height + half_height)
 		local lower_extents = Vector3(half_width, half_depth, half_height)
 		local upper_extents = Vector3(half_width, half_upper_depth, half_upper_height)
 		local rotation = Quaternion_look(goal_direction, up)
@@ -410,12 +410,12 @@ PlayerBotInput._update_movement = function (self, dt, t)
 			local goal_dist_sq = Vector3.length_squared(flat_goal_vector)
 
 			if goal_dist_sq < MOVE_SCALE_START_DIST_SQ then
-				move_scale = MOVE_SCALE_FACTOR*goal_dist_sq + MOVE_SCALE_MIN
+				move_scale = MOVE_SCALE_FACTOR * goal_dist_sq + MOVE_SCALE_MIN
 			end
 		end
 
-		move.x = move_scale*Vector3.dot(Quaternion.right(wanted_rotation), goal_direction)
-		move.y = move_scale*Vector3.dot(Quaternion.forward(wanted_rotation), goal_direction)
+		move.x = move_scale * Vector3.dot(Quaternion.right(wanted_rotation), goal_direction)
+		move.y = move_scale * Vector3.dot(Quaternion.forward(wanted_rotation), goal_direction)
 	end
 
 	return 

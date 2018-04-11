@@ -105,7 +105,7 @@ local scenegraph_definition = {
 		parent = "menu_root",
 		horizontal_alignment = "center",
 		position = {
-			-(PAGE_SPACING + 592),
+			-(592 + PAGE_SPACING),
 			20,
 			1
 		},
@@ -133,7 +133,7 @@ local scenegraph_definition = {
 		parent = "menu_root",
 		horizontal_alignment = "center",
 		position = {
-			PAGE_SPACING + 592,
+			592 + PAGE_SPACING,
 			20,
 			1
 		},

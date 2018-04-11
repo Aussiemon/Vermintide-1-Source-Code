@@ -66,8 +66,8 @@ PlayerEyeTrackingExtension.calc_gaze_forward = function (self)
 	local gaze_point_x, gaze_point_y = Tobii.get_gaze_point()
 	local screen_width = RESOLUTION_LOOKUP.res_w
 	local screen_height = RESOLUTION_LOOKUP.res_h
-	local gaze_x = screen_width*(gaze_point_x - 1)
-	local gaze_y = screen_height*gaze_point_y
+	local gaze_x = screen_width * (1 - gaze_point_x)
+	local gaze_y = screen_height * gaze_point_y
 	local player = Managers.player:owner(self.unit)
 	local viewport_name = player.viewport_name
 	local viewport = ScriptWorld.viewport(self.world, viewport_name)
@@ -111,8 +111,8 @@ PlayerEyeTrackingExtension.calc_smooth_gaze_forward = function (self)
 	local gaze_point_y = self.smooth_gaze[2]
 	local screen_width = RESOLUTION_LOOKUP.res_w
 	local screen_height = RESOLUTION_LOOKUP.res_h
-	local gaze_x = screen_width*(gaze_point_x - 1)
-	local gaze_y = screen_height*gaze_point_y
+	local gaze_x = screen_width * (1 - gaze_point_x)
+	local gaze_y = screen_height * gaze_point_y
 	local player = Managers.player:owner(self.unit)
 	local viewport_name = player.viewport_name
 	local viewport = ScriptWorld.viewport(self.world, viewport_name)
@@ -134,7 +134,7 @@ PlayerEyeTrackingExtension.set_smoothed_gaze = function (self, gaze_x, gaze_y)
 
 	return 
 end
-local deg_to_rad = math.pi/180
+local deg_to_rad = math.pi / 180
 PlayerEyeTrackingExtension.update_gaze_aim = function (self, dt)
 	local user_setting = Application.user_setting
 	local inventory_extension = ScriptUnit.extension(self.unit, "inventory_system")
@@ -183,8 +183,8 @@ PlayerEyeTrackingExtension.update_gaze_aim = function (self, dt)
 		self.fire_at_gaze_enabled = false
 	elseif self.fire_at_gaze_enabled then
 		local gaze_x, gaze_y = Tobii.get_gaze_point()
-		gaze_x = (gaze_x - 0.5)*2
-		gaze_y = (gaze_y - 0.5)*2
+		gaze_x = (gaze_x - 0.5) * 2
+		gaze_y = (gaze_y - 0.5) * 2
 		local curve_deadzone = 0.2
 		local curve_slope = 2.5
 		local curve_shoulder = 0.4
@@ -193,7 +193,7 @@ PlayerEyeTrackingExtension.update_gaze_aim = function (self, dt)
 		local speed = 5
 		local base_fov = CameraSettings.first_person._node.vertical_fov
 		local fov = Application.user_setting("render_settings", "fov") or base_fov
-		local maxYaw = fov/3
+		local maxYaw = fov / 3
 		local maxPitch = nil
 
 		if 0 < gaze_y then
@@ -205,20 +205,20 @@ PlayerEyeTrackingExtension.update_gaze_aim = function (self, dt)
 		local is_enabled = user_setting("tobii_extended_view")
 
 		if is_enabled then
-			maxYaw = maxYaw + user_setting("tobii_extended_view_max_yaw")/2
-			maxPitch = maxPitch + ((0 < gaze_y and user_setting("tobii_extended_view_max_pitch_up")) or user_setting("tobii_extended_view_max_pitch_down"))*0.5
+			maxYaw = maxYaw + user_setting("tobii_extended_view_max_yaw") / 2
+			maxPitch = maxPitch + ((0 < gaze_y and user_setting("tobii_extended_view_max_pitch_up")) or user_setting("tobii_extended_view_max_pitch_down")) * 0.5
 		end
 
 		local data = self.aim_gaze_data
-		local deltaX = transformedX*maxYaw - data.yaw_offset
-		local deltaY = transformedY*maxPitch - data.pitch_offset
-		data.yaw_offset = data.yaw_offset + deltaX*dt*speed
-		data.pitch_offset = data.pitch_offset + deltaY*dt*speed
-		local yaw_offset = Quaternion(Vector3.up(), data.yaw_offset*deg_to_rad)
+		local deltaX = transformedX * maxYaw - data.yaw_offset
+		local deltaY = transformedY * maxPitch - data.pitch_offset
+		data.yaw_offset = data.yaw_offset + deltaX * dt * speed
+		data.pitch_offset = data.pitch_offset + deltaY * dt * speed
+		local yaw_offset = Quaternion(Vector3.up(), data.yaw_offset * deg_to_rad)
 		local rotation = first_person_extension.current_rotation(first_person_extension)
 		yaw_offset = Quaternion.multiply(Quaternion.inverse(rotation), yaw_offset)
 		yaw_offset = Quaternion.multiply(yaw_offset, rotation)
-		local pitch_offset = Quaternion(Vector3.right(), data.pitch_offset*deg_to_rad)
+		local pitch_offset = Quaternion(Vector3.right(), data.pitch_offset * deg_to_rad)
 		local total_offset = Quaternion.multiply(yaw_offset, pitch_offset)
 		local new_rotation = Quaternion.multiply(rotation, total_offset)
 		local new_target = first_person_extension.current_position(first_person_extension) + Quaternion.forward(new_rotation)

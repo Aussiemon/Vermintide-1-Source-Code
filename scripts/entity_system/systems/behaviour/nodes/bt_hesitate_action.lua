@@ -18,7 +18,7 @@ local HESITATION_SCALING_MINIMUM_RANGE_SQ = 4
 local BROADPHASE_QUERY_RADIUS = 10
 local HESITATION_EXIT_LOWER_BOUND = 0.3
 local HESITATION_EXIT_UPPER_BOUND = 1.4
-local RE_RAYCAST_DOT = math.sin(math.pi/3)
+local RE_RAYCAST_DOT = math.sin(math.pi / 3)
 local DO_DOT_CHECK_FOR_RE_RAYCAST = false
 local WALL_ROTATION_FACTOR = 1
 BTHesitateAction.enter = function (self, unit, blackboard, t)
@@ -38,7 +38,7 @@ BTHesitateAction.enter = function (self, unit, blackboard, t)
 
 	blackboard.hesitate_wall = false
 	blackboard.outnumber_multiplier = 1
-	blackboard.outnumber_timer = t + 0.2 + Math.random()*0.2
+	blackboard.outnumber_timer = t + 0.2 + Math.random() * 0.2
 	blackboard.hesitating = true
 	blackboard.hesitate_timer = nil
 	blackboard.do_wall_check = true
@@ -101,10 +101,10 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 		local diff = Vector3.flat(pos - current_pos)
 
 		if 0.05 <= Vector3.dot(diff, Quaternion.forward(hesitate_wall_rotation)) then
-			locomotion_extension.set_wanted_velocity_flat(locomotion_extension, diff*2)
+			locomotion_extension.set_wanted_velocity_flat(locomotion_extension, diff * 2)
 
 			if debug then
-				Debug.text("hesitate lerp wanted velocity: " .. tostring(diff*2))
+				Debug.text("hesitate lerp wanted velocity: " .. tostring(diff * 2))
 			end
 		else
 			if debug then
@@ -140,11 +140,11 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 
 	local target_pos = POSITION_LOOKUP[blackboard.target_unit]
 	local target_dist_sq = Vector3.distance_squared(target_pos, current_pos)
-	local hesitation_delta = HESITATION_PROXIMITY_SCALING/math.max(target_dist_sq - HESITATION_SCALING_MINIMUM_RANGE_SQ, 1)*dt + dt
+	local hesitation_delta = HESITATION_PROXIMITY_SCALING / math.max(target_dist_sq - HESITATION_SCALING_MINIMUM_RANGE_SQ, 1) * dt + dt
 	local outnumber_multiplier = nil
 
 	if t < blackboard.outnumber_timer then
-		blackboard.outnumber_timer = t + 0.2 + Math.random()*0.2
+		blackboard.outnumber_timer = t + 0.2 + Math.random() * 0.2
 		local broadphase = blackboard.group_blackboard.broadphase
 
 		table.clear(BROADPHASE_QUERY_RESULT)
@@ -183,7 +183,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 			print("NO ENEMIES NEARBY??", target_pos, blackboard.target_unit, POSITION_LOOKUP[blackboard.target_unit], blackboard.target_unit)
 		end
 
-		outnumber_multiplier = allies_nearby/math.max(enemies_nearby, 1)*1.25
+		outnumber_multiplier = 1.25 * allies_nearby / math.max(enemies_nearby, 1)
 		blackboard.outnumber_multiplier = outnumber_multiplier
 
 		if enemies_nearby < allies_nearby then
@@ -193,7 +193,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 		outnumber_multiplier = blackboard.outnumber_multiplier
 	end
 
-	local hesitation = blackboard.hesitation + hesitation_delta*outnumber_multiplier
+	local hesitation = blackboard.hesitation + hesitation_delta * outnumber_multiplier
 
 	if debug then
 		Debug.text("outnumber " .. tostring(outnumber_multiplier) .. " " .. hesitation)
@@ -210,7 +210,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 		local nav_world = blackboard.nav_world
 		local direction = -Quaternion.forward(rot)
 
-		if blackboard.do_wall_check and not GwNavQueries.raycango(nav_world, current_pos, current_pos + direction*0.5) then
+		if blackboard.do_wall_check and not GwNavQueries.raycango(nav_world, current_pos, current_pos + 0.5 * direction) then
 			local physics_world = World.get_data(blackboard.world, "physics_world")
 			local raycast_pos = current_pos + Vector3(0, 0, 1)
 			local distance = 1.5
@@ -218,7 +218,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 			blackboard.do_wall_check = false
 
 			if debug then
-				QuickDrawerStay:vector(raycast_pos, direction*distance, Color(255, 255, 0))
+				QuickDrawerStay:vector(raycast_pos, direction * distance, Color(255, 255, 0))
 			end
 
 			if result and (not DO_DOT_CHECK_FOR_RE_RAYCAST or Vector3.dot(normal, -direction) < RE_RAYCAST_DOT) then
@@ -250,7 +250,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 				local OPTIMAL_DISTANCE = 1.2
 
 				if hit_distance < OPTIMAL_DISTANCE then
-					blackboard.hesitate_wall_position = Vector3Box(hit_pos + normal*OPTIMAL_DISTANCE)
+					blackboard.hesitate_wall_position = Vector3Box(hit_pos + normal * OPTIMAL_DISTANCE)
 
 					LocomotionUtils.set_animation_driven_movement(unit, false)
 

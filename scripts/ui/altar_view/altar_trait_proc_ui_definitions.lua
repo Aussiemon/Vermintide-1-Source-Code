@@ -742,7 +742,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 				widget_style.min_text.text_color[1] = alpha
 				widget_style.max_text.text_color[1] = alpha
 
@@ -781,7 +781,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 				widget_style.min_text.text_color[1] = alpha
 				widget_style.max_text.text_color[1] = alpha
 
@@ -803,7 +803,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 				widget_style.current_proc_text.text_color[1] = alpha
 				widget_style.new_proc_text.text_color[1] = 0
 
@@ -836,16 +836,16 @@ local animations = {
 				local default_position = scenegraph_definition.proc_slider_current_box.position
 				local start_x_position = params.start_x_position
 				local bar_default_length = scenegraph_definition.proc_slider_bar.size[1]
-				local pos_diff = math.abs(start_x_position - bar_default_length*line_end_progress)
-				local fraction_diff = pos_diff/bar_default_length
+				local pos_diff = math.abs(start_x_position - bar_default_length * line_end_progress)
+				local fraction_diff = pos_diff / bar_default_length
 				local eased_progress = math.easeCubic(local_progress)
-				local current_bar_length = bar_default_length*line_end_progress
-				local new_box_x_position = current_bar_length*eased_progress
+				local current_bar_length = bar_default_length * line_end_progress
+				local new_box_x_position = current_bar_length * eased_progress
 
 				if new_box_x_position < start_x_position then
-					current_box_position[1] = start_x_position - (start_x_position - current_bar_length)*eased_progress
+					current_box_position[1] = start_x_position - (start_x_position - current_bar_length) * eased_progress
 				elseif start_x_position < new_box_x_position then
-					current_box_position[1] = start_x_position + (current_bar_length - start_x_position)*eased_progress
+					current_box_position[1] = start_x_position + (current_bar_length - start_x_position) * eased_progress
 				else
 					current_box_position[1] = new_box_x_position
 				end
@@ -876,11 +876,11 @@ local animations = {
 				local widget_style = widget.style
 				local formatting = params.formatting
 				local multiplier = params.multiplier
-				local current_value = params.current_value*multiplier
-				local min_value = params.min_value*multiplier
+				local current_value = params.current_value * multiplier
+				local min_value = params.min_value * multiplier
 				widget_content.current_proc_text = string.format(formatting, current_value)
 				widget_content.new_proc_text = string.format(formatting, min_value)
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 				widget_style.current_proc_text.text_color[1] = alpha
 
 				return 
@@ -901,7 +901,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 				widget_style.current_proc_text.text_color[1] = alpha
 				widget_style.new_proc_text.text_color[1] = 0
 
@@ -929,8 +929,8 @@ local animations = {
 				local widget_content = widget.content
 				local formatting = params.formatting
 				local multiplier = params.multiplier
-				local current_value = params.current_value*multiplier
-				local min_value = params.min_value*multiplier
+				local current_value = params.current_value * multiplier
+				local min_value = params.min_value * multiplier
 				widget_content.current_proc_text = string.format(formatting, current_value)
 				widget_content.new_proc_text = string.format(formatting, min_value)
 
@@ -950,7 +950,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = local_progress*255
+				local alpha = local_progress * 255
 				widget_style.current_proc_text.text_color[1] = alpha
 
 				return 
@@ -981,11 +981,11 @@ local animations = {
 				local bar_default_length = scenegraph_definition.proc_slider_bar.size[1]
 				local line_end_progress = params.end_progress
 				local eased_progress = math.easeOutCubic(local_progress)
-				local new_bar_length = bar_default_length*line_end_progress*eased_progress
+				local new_bar_length = bar_default_length * line_end_progress * eased_progress
 				bar_size[1] = new_bar_length
 				new_box_position[1] = new_bar_length
 				local bar_uvs = widget_content.bar_content.uvs
-				bar_uvs[2][1] = line_end_progress*eased_progress
+				bar_uvs[2][1] = line_end_progress * eased_progress
 
 				if current_box_position[1] < new_box_position[1] then
 					current_box_position[1] = new_bar_length
@@ -1018,11 +1018,11 @@ local animations = {
 				local eased_progress = math.easeCubic(local_progress)
 				local formatting = params.formatting
 				local multiplier = params.multiplier
-				local min_value = params.min_value*multiplier
-				local max_value = params.max_value*multiplier
-				local new_value = params.new_value*multiplier
-				local current_value = params.current_value*multiplier
-				local progress_value = min_value + math.max(new_value - min_value, 0)*eased_progress
+				local min_value = params.min_value * multiplier
+				local max_value = params.max_value * multiplier
+				local new_value = params.new_value * multiplier
+				local current_value = params.current_value * multiplier
+				local progress_value = min_value + math.max(new_value - min_value, 0) * eased_progress
 				local text = string.format(formatting, progress_value)
 
 				if current_value < progress_value then
@@ -1048,7 +1048,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				widget_style.new_box_glow.color[1] = math.ease_pulse(local_progress)*255
+				widget_style.new_box_glow.color[1] = math.ease_pulse(local_progress) * 255
 
 				return 
 			end,
@@ -1084,11 +1084,11 @@ local animations = {
 				local bar_default_length = scenegraph_definition.proc_slider_bar.size[1]
 				local line_end_progress = params.end_progress
 				local eased_progress = math.easeCubic(local_progress)
-				local new_bar_length = start_x_position - start_x_position*eased_progress
+				local new_bar_length = start_x_position - start_x_position * eased_progress
 				bar_size[1] = new_bar_length
 				new_box_position[1] = new_bar_length
 				local bar_uvs = widget_content.bar_content.uvs
-				bar_uvs[2][1] = eased_progress - 1
+				bar_uvs[2][1] = 1 - eased_progress
 
 				return 
 			end,
@@ -1108,13 +1108,13 @@ local animations = {
 				local widget = widgets.slider_widget
 				local widget_content = widget.content
 				local line_end_progress = params.end_progress
-				local eased_progress = math.easeCubic(local_progress - 1)
+				local eased_progress = math.easeCubic(1 - local_progress)
 				local formatting = params.formatting
 				local multiplier = params.multiplier
-				local min_value = params.min_value*multiplier
-				local max_value = params.max_value*multiplier
-				local new_value = params.new_value*multiplier
-				local progress_value = min_value + math.max(new_value - min_value, 0)*eased_progress
+				local min_value = params.min_value * multiplier
+				local max_value = params.max_value * multiplier
+				local new_value = params.new_value * multiplier
+				local progress_value = min_value + math.max(new_value - min_value, 0) * eased_progress
 				local text = string.format(formatting, progress_value)
 				widget_content.new_proc_text = text
 
@@ -1135,7 +1135,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 				widget_style.new_proc_text.text_color[1] = alpha
 
 				return 
@@ -1166,11 +1166,11 @@ local animations = {
 				local bar_default_length = scenegraph_definition.proc_slider_bar.size[1]
 				local line_end_progress = params.end_progress
 				local eased_progress = math.easeInCubic(local_progress)
-				local new_bar_length = bar_default_length*line_end_progress*eased_progress
+				local new_bar_length = bar_default_length * line_end_progress * eased_progress
 				bar_size[1] = new_bar_length
 				new_box_position[1] = new_bar_length
 				local bar_uvs = widget_content.bar_content.uvs
-				bar_uvs[2][1] = line_end_progress*eased_progress
+				bar_uvs[2][1] = line_end_progress * eased_progress
 
 				if current_box_position[1] < new_box_position[1] then
 					current_box_position[1] = new_bar_length
@@ -1203,11 +1203,11 @@ local animations = {
 				local eased_progress = math.easeCubic(local_progress)
 				local formatting = params.formatting
 				local multiplier = params.multiplier
-				local min_value = params.min_value*multiplier
-				local max_value = params.max_value*multiplier
-				local new_value = params.new_value*multiplier
-				local current_value = params.current_value*multiplier
-				local progress_value = min_value + math.max(new_value - min_value, 0)*eased_progress
+				local min_value = params.min_value * multiplier
+				local max_value = params.max_value * multiplier
+				local new_value = params.new_value * multiplier
+				local current_value = params.current_value * multiplier
+				local progress_value = min_value + math.max(new_value - min_value, 0) * eased_progress
 				local text = string.format(formatting, progress_value)
 
 				if current_value < progress_value then
@@ -1240,7 +1240,7 @@ local animations = {
 					params.glow_sound_played = true
 				end
 
-				widget_style.current_box_glow.color[1] = math.ease_pulse(local_progress)*255
+				widget_style.current_box_glow.color[1] = math.ease_pulse(local_progress) * 255
 
 				return 
 			end,
@@ -1276,11 +1276,11 @@ local animations = {
 				local bar_default_length = scenegraph_definition.proc_slider_bar.size[1]
 				local line_end_progress = params.end_progress
 				local eased_progress = math.easeCubic(local_progress)
-				local new_bar_length = start_x_position - start_x_position*eased_progress
+				local new_bar_length = start_x_position - start_x_position * eased_progress
 				bar_size[1] = new_bar_length
 				new_box_position[1] = new_bar_length
 				local bar_uvs = widget_content.bar_content.uvs
-				bar_uvs[2][1] = eased_progress - 1
+				bar_uvs[2][1] = 1 - eased_progress
 
 				return 
 			end,
@@ -1300,13 +1300,13 @@ local animations = {
 				local widget = widgets.slider_widget
 				local widget_content = widget.content
 				local line_end_progress = params.end_progress
-				local eased_progress = math.easeCubic(local_progress - 1)
+				local eased_progress = math.easeCubic(1 - local_progress)
 				local formatting = params.formatting
 				local multiplier = params.multiplier
-				local min_value = params.min_value*multiplier
-				local max_value = params.max_value*multiplier
-				local new_value = params.new_value*multiplier
-				local progress_value = min_value + math.max(new_value - min_value, 0)*eased_progress
+				local min_value = params.min_value * multiplier
+				local max_value = params.max_value * multiplier
+				local new_value = params.new_value * multiplier
+				local progress_value = min_value + math.max(new_value - min_value, 0) * eased_progress
 				local text = string.format(formatting, progress_value)
 				widget_content.new_proc_text = text
 
@@ -1327,7 +1327,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
-				local alpha = (local_progress - 1)*255
+				local alpha = (1 - local_progress) * 255
 				widget_style.new_proc_text.text_color[1] = alpha
 
 				return 

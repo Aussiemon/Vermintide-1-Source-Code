@@ -13,7 +13,7 @@ local PATROL_PASSIVE_RANGE = 50
 
 local function check_angle(nav_world, target_position, start_direction, angle, distance)
 	local direction = Quaternion.rotate(Quaternion(Vector3.up(), angle), start_direction)
-	local check_pos = target_position - direction*distance
+	local check_pos = target_position - direction * distance
 	local success, altitude = GwNavQueries.triangle_from_position(nav_world, check_pos, 0.5, 0.5)
 
 	if success then
@@ -29,7 +29,7 @@ end
 
 local function get_engage_pos(nav_world, target_unit_pos, engage_from, melee_distance)
 	local subdivisions_per_side = 3
-	local angle_inc = math.pi/(subdivisions_per_side + 1)
+	local angle_inc = math.pi / (subdivisions_per_side + 1)
 	local start_direction = Vector3.normalize(Vector3.flat(engage_from))
 	local success, pos = check_angle(nav_world, target_unit_pos, start_direction, 0, melee_distance)
 
@@ -38,7 +38,7 @@ local function get_engage_pos(nav_world, target_unit_pos, engage_from, melee_dis
 	end
 
 	for i = 1, subdivisions_per_side, 1 do
-		local angle = angle_inc*i
+		local angle = angle_inc * i
 		success, pos = check_angle(nav_world, target_unit_pos, start_direction, angle, melee_distance)
 
 		if success then
@@ -133,9 +133,9 @@ BTBotMeleeAction._update_engage_position = function (self, unit, blackboard, dt,
 			local new_angle = nil
 
 			if 0 < offset_angle then
-				new_angle = offset_angle + math.pi/8
+				new_angle = offset_angle + math.pi / 8
 			else
-				new_angle = offset_angle - math.pi/8
+				new_angle = offset_angle - math.pi / 8
 			end
 
 			local new_rot = Quaternion.multiply(Quaternion(Vector3.up(), -new_angle), enemy_rot)
@@ -213,7 +213,7 @@ BTBotMeleeAction._allow_engage = function (self, self_unit, target_unit, blackbo
 	local horde_override_range = action_data.override_engage_range_to_follow_pos_horde
 	local START_HORDE = 10
 	local MAX_HORDE = 30
-	local lerp_t = (num_enemies - START_HORDE)/(MAX_HORDE - START_HORDE)
+	local lerp_t = (num_enemies - START_HORDE) / (MAX_HORDE - START_HORDE)
 	local override_range = nil
 
 	if lerp_t <= 0 then
@@ -221,7 +221,7 @@ BTBotMeleeAction._allow_engage = function (self, self_unit, target_unit, blackbo
 	elseif 1 <= lerp_t then
 		override_range = horde_override_range
 	else
-		override_range = math.lerp(override_range_default, horde_override_range, lerp_t*lerp_t)
+		override_range = math.lerp(override_range_default, horde_override_range, lerp_t * lerp_t)
 	end
 
 	local distance_to_follow_pos = Vector3.distance(aim_position, follow_pos)

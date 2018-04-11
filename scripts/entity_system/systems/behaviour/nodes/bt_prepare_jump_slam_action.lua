@@ -95,7 +95,7 @@ BTPrepareJumpSlamAction.try_position = function (nav_world, pos, to_target_norma
 			break
 		end
 
-		angle = angle + math.pi*0.5
+		angle = angle + math.pi * 0.5
 	end
 
 	return found_impact_pos
@@ -109,7 +109,7 @@ BTPrepareJumpSlamAction.prepare_jump_old = function (blackboard, unit, data, t)
 	local to_target_normalized = Vector3.normalize(Vector3.flat(to_target))
 
 	if distance < 9 then
-		local test_pos = p2 + to_target_normalized*3.5
+		local test_pos = p2 + to_target_normalized * 3.5
 		found_impact_pos = BTPrepareJumpSlamAction.try_position(blackboard.nav_world, test_pos, to_target_normalized)
 	end
 
@@ -160,7 +160,7 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 	local physics_world = World.physics_world(blackboard.world)
 	local gravity = -blackboard.breed.jump_slam_gravity
 	local jump_speed = nil
-	local jump_angle = math.pi/4
+	local jump_angle = math.pi / 4
 	local wedge = Vector3(0, 0, 0.05)
 	local in_los, velocity, time_of_flight = nil
 	local target_locomotion = ScriptUnit.extension(blackboard.target_unit, "locomotion_system")
@@ -168,7 +168,7 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 	local target_speed_squared = Vector3.length_squared(target_velocity)
 
 	if target_speed_squared < 0.2 then
-		p2 = p2 - to_target_normalized*2
+		p2 = p2 - to_target_normalized * 2
 	end
 
 	local hit_pos = nil
@@ -218,7 +218,7 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 				return 
 			end
 
-			local right = Vector3.cross(Vector3.normalize(p2 - p1), Vector3.up())*1
+			local right = Vector3.cross(Vector3.normalize(p2 - p1), Vector3.up()) * 1
 			in_los = WeaponHelper.ray_segmented_test(physics_world, segment_list, Vector3(0, 0, 1.5) + right)
 
 			if not in_los then

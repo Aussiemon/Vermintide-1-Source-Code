@@ -506,12 +506,12 @@ local widget_popup = {
 					local bar_value = content.bar_value
 					local uv_start_pixels = style.uv_start_pixels
 					local uv_scale_pixels = style.uv_scale_pixels
-					local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+					local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 					local uvs = style.uvs
 					local uv_scale_axis = style.scale_axis
 					local offset_scale = style.offset_scale
 					banner_offset_table[uv_scale_axis] = size[uv_scale_axis] - uv_pixels
-					uvs[1][uv_scale_axis] = math.max(uv_pixels/(uv_start_pixels + uv_scale_pixels) - 1, 0)
+					uvs[1][uv_scale_axis] = math.max(1 - uv_pixels / (uv_start_pixels + uv_scale_pixels), 0)
 					size[uv_scale_axis] = uv_pixels
 
 					return content.color, uvs, size, banner_offset_table
@@ -525,12 +525,12 @@ local widget_popup = {
 					local bar_value = content.bar_value
 					local uv_start_pixels = style.uv_start_pixels
 					local uv_scale_pixels = style.uv_scale_pixels
-					local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+					local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 					local uvs = style.uvs
 					local uv_scale_axis = style.scale_axis
 					local offset_scale = style.offset_scale
 					banner_offset_table[uv_scale_axis] = size[uv_scale_axis] - uv_pixels
-					uvs[1][uv_scale_axis] = math.max(uv_pixels/(uv_start_pixels + uv_scale_pixels) - 1, 0)
+					uvs[1][uv_scale_axis] = math.max(1 - uv_pixels / (uv_start_pixels + uv_scale_pixels), 0)
 					size[uv_scale_axis] = uv_pixels
 
 					return content.color, uvs, size, banner_offset_table
@@ -846,9 +846,9 @@ local animation_sequence = {
 			local cross_definition = scenegraph_definition.cross
 			local cross_default_size = cross_definition.size
 			local cross_style = widget.style.cross
-			cross_scenegraph.size[1] = catmullrom_value*cross_default_size[1]
-			cross_scenegraph.size[2] = catmullrom_value*cross_default_size[2]
-			cross_style.color[1] = local_progress*255
+			cross_scenegraph.size[1] = catmullrom_value * cross_default_size[1]
+			cross_scenegraph.size[2] = catmullrom_value * cross_default_size[2]
+			cross_style.color[1] = local_progress * 255
 
 			return 
 		end,
@@ -869,8 +869,8 @@ local animation_sequence = {
 			local cross_scenegraph = ui_scenegraph.cross
 			local cross_definition = scenegraph_definition.cross
 			local cross_default_size = cross_definition.size
-			cross_scenegraph.size[1] = catmullrom_value*cross_default_size[1]
-			cross_scenegraph.size[2] = catmullrom_value*cross_default_size[2]
+			cross_scenegraph.size[1] = catmullrom_value * cross_default_size[1]
+			cross_scenegraph.size[2] = catmullrom_value * cross_default_size[2]
 
 			return 
 		end,
@@ -892,9 +892,9 @@ local animation_sequence = {
 			local top_scenegraph = ui_scenegraph.top
 			local top_definition = scenegraph_definition.top
 			local top_default_position = top_definition.position
-			top_scenegraph.local_position[2] = top_default_position[2] + (local_progress - 1)*500
+			top_scenegraph.local_position[2] = top_default_position[2] + (1 - local_progress) * 500
 			local degree_amount = 5
-			local rotation_angle = local_progress*degree_amount - degree_amount*0.5
+			local rotation_angle = local_progress * degree_amount - degree_amount * 0.5
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -915,7 +915,7 @@ local animation_sequence = {
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local style = widget.style.top
 			local degree_amount = 5
-			local rotation_angle = (local_progress - 1)*degree_amount
+			local rotation_angle = (local_progress - 1) * degree_amount
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -940,10 +940,10 @@ local animation_sequence = {
 			local sun_default_position = sun_definition.position
 			local sun_default_size = sun_definition.size
 			local sun_style = widget.style.sun
-			sun_scenegraph.size[1] = catmullrom_value*sun_default_size[1]
-			sun_scenegraph.size[2] = catmullrom_value*sun_default_size[2]
-			sun_scenegraph.local_position[2] = sun_default_position[2] - (catmullrom_value - 1)*-50
-			sun_style.color[1] = local_progress*255
+			sun_scenegraph.size[1] = catmullrom_value * sun_default_size[1]
+			sun_scenegraph.size[2] = catmullrom_value * sun_default_size[2]
+			sun_scenegraph.local_position[2] = sun_default_position[2] - (1 - catmullrom_value) * -50
+			sun_style.color[1] = local_progress * 255
 
 			return 
 		end,
@@ -965,9 +965,9 @@ local animation_sequence = {
 			local definition = scenegraph_definition.sun
 			local default_position = definition.position
 			local default_size = definition.size
-			scenegraph.size[1] = catmullrom_value*default_size[1]
-			scenegraph.size[2] = catmullrom_value*default_size[2]
-			scenegraph.local_position[2] = default_position[2] - (catmullrom_value - 1)*-50
+			scenegraph.size[1] = catmullrom_value * default_size[1]
+			scenegraph.size[2] = catmullrom_value * default_size[2]
+			scenegraph.local_position[2] = default_position[2] - (1 - catmullrom_value) * -50
 
 			return 
 		end,
@@ -991,9 +991,9 @@ local animation_sequence = {
 			local default_position = definition.position
 			local default_size = definition.size
 			local style = widget.style.hammer_left
-			scenegraph.local_position[1] = default_position[1] - (local_progress - 1)*700
-			scenegraph.local_position[2] = default_position[2] - (local_progress - 1)*500
-			local rotation_angle = (local_progress*720)%360
+			scenegraph.local_position[1] = default_position[1] - (1 - local_progress) * 700
+			scenegraph.local_position[2] = default_position[2] - (1 - local_progress) * 500
+			local rotation_angle = (local_progress * 720) % 360
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -1019,9 +1019,9 @@ local animation_sequence = {
 			local default_position = definition.position
 			local default_size = definition.size
 			local style = widget.style.hammer_right
-			scenegraph.local_position[1] = default_position[1] + (local_progress - 1)*700
-			scenegraph.local_position[2] = default_position[2] - (local_progress - 1)*500
-			local rotation_angle = (local_progress*720)%360
+			scenegraph.local_position[1] = default_position[1] + (1 - local_progress) * 700
+			scenegraph.local_position[2] = default_position[2] - (1 - local_progress) * 500
+			local rotation_angle = (local_progress * 720) % 360
 			local radians = math.degrees_to_radians(-rotation_angle)
 			style.angle = radians
 
@@ -1042,7 +1042,7 @@ local animation_sequence = {
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_left
-			local rotation_angle = catmullrom_value*-35
+			local rotation_angle = catmullrom_value * -35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -1063,7 +1063,7 @@ local animation_sequence = {
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_right
-			local rotation_angle = catmullrom_value*35
+			local rotation_angle = catmullrom_value * 35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -1088,7 +1088,7 @@ local animation_sequence = {
 			local definition = scenegraph_definition.banner_holder_left
 			local default_position = definition.position
 			local default_size = definition.size
-			scenegraph.local_position[1] = default_position[1] + catmullrom_value*default_size[1]
+			scenegraph.local_position[1] = default_position[1] + catmullrom_value * default_size[1]
 
 			return 
 		end,
@@ -1111,7 +1111,7 @@ local animation_sequence = {
 			local definition = scenegraph_definition.banner_holder_right
 			local default_position = definition.position
 			local default_size = definition.size
-			scenegraph.local_position[1] = default_position[1] - catmullrom_value*default_size[1]
+			scenegraph.local_position[1] = default_position[1] - catmullrom_value * default_size[1]
 
 			return 
 		end,
@@ -1130,7 +1130,7 @@ local animation_sequence = {
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_left
-			local rotation_angle = catmullrom_value*35
+			local rotation_angle = catmullrom_value * 35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -1151,7 +1151,7 @@ local animation_sequence = {
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_right
-			local rotation_angle = catmullrom_value*-35
+			local rotation_angle = catmullrom_value * -35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
 
@@ -1212,9 +1212,9 @@ local animation_sequence = {
 			local style = widget.style.icon
 			local definition = scenegraph_definition.icon
 			local scenegraph = ui_scenegraph.icon
-			scenegraph.size[1] = catmullrom_value*definition.size[1]
-			scenegraph.size[2] = catmullrom_value*definition.size[2]
-			style.color[1] = local_progress*255
+			scenegraph.size[1] = catmullrom_value * definition.size[1]
+			scenegraph.size[2] = catmullrom_value * definition.size[2]
+			style.color[1] = local_progress * 255
 			widget.style.icon_frame.color[1] = style.color[1]
 
 			return 
@@ -1262,15 +1262,15 @@ local animation_sequence = {
 			local widget_scenegraph_cross = ui_scenegraph.cross
 			local widget_definition_cross = scenegraph_definition.cross
 			local cross_default_size = widget_definition_cross.size
-			widget_scenegraph_cross.size[1] = catmullrom_value*cross_default_size[1]
-			widget_scenegraph_cross.size[2] = catmullrom_value*cross_default_size[2]
-			local cross_half_height_diff = (cross_default_size[2] - widget_scenegraph_cross.size[2])*0.5
-			widget_scenegraph_top.size[1] = catmullrom_value*top_default_size[1]
-			widget_scenegraph_top.size[2] = catmullrom_value*top_default_size[2]
-			local top_half_height_diff = (top_default_size[2] - widget_scenegraph_top.size[2])*0.5
+			widget_scenegraph_cross.size[1] = catmullrom_value * cross_default_size[1]
+			widget_scenegraph_cross.size[2] = catmullrom_value * cross_default_size[2]
+			local cross_half_height_diff = (cross_default_size[2] - widget_scenegraph_cross.size[2]) * 0.5
+			widget_scenegraph_top.size[1] = catmullrom_value * top_default_size[1]
+			widget_scenegraph_top.size[2] = catmullrom_value * top_default_size[2]
+			local top_half_height_diff = (top_default_size[2] - widget_scenegraph_top.size[2]) * 0.5
 			widget_scenegraph_top.local_position[2] = top_default_position[2] - (cross_half_height_diff + top_half_height_diff)
-			widget_scenegraph_sun.size[1] = catmullrom_value*sun_default_size[1]
-			widget_scenegraph_sun.size[2] = catmullrom_value*sun_default_size[2]
+			widget_scenegraph_sun.size[1] = catmullrom_value * sun_default_size[1]
+			widget_scenegraph_sun.size[2] = catmullrom_value * sun_default_size[2]
 			widget_scenegraph_sun.local_position[2] = sun_default_position[2] + cross_half_height_diff
 
 			return 
@@ -1293,9 +1293,9 @@ local animation_sequence = {
 			local glow_background_default_size = widget_definition_glow_background.size
 			local fraction = math.easeOutCubic(local_progress)
 			local style = widget.style.glow_background
-			style.color[1] = fraction*150
-			widget_scenegraph_glow_background.size[1] = fraction*glow_background_default_size[1]
-			widget_scenegraph_glow_background.size[2] = fraction*glow_background_default_size[2]
+			style.color[1] = 150 * fraction
+			widget_scenegraph_glow_background.size[1] = fraction * glow_background_default_size[1]
+			widget_scenegraph_glow_background.size[2] = fraction * glow_background_default_size[2]
 
 			return 
 		end,

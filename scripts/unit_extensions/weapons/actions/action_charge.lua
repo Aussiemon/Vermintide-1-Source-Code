@@ -106,7 +106,7 @@ ActionCharge.client_owner_post_update = function (self, dt, t, world, can_damage
 	local current_action = self.current_action
 	local charge_time = current_action.charge_time
 	local full_charge_time = self.full_charge_time
-	local current_charge_time = (full_charge_time - t)/charge_time - 1
+	local current_charge_time = 1 - (full_charge_time - t) / charge_time
 	local charge_level = math.min(current_charge_time, 1)
 	local overcharge_extension = self.overcharge_extension
 

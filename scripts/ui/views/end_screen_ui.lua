@@ -222,7 +222,7 @@ EndScreenUI.show_text_screen = function (self, is_victory)
 		local completed_waves_time = mission_data.wave_completed_time
 		local start_time = mission_data.start_time
 		local time = completed_waves_time - start_time
-		widget.content.time = string.format("%.2d:%.2d:%.2d", time/3600, (time/60)%60, time%60)
+		widget.content.time = string.format("%.2d:%.2d:%.2d", time / 3600, (time / 60) % 60, time % 60)
 		widget.style.banner_effect_texture.offset[2] = 50
 	else
 		widget.style.banner_effect_texture.offset[2] = 0

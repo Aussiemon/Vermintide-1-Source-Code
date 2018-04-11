@@ -519,10 +519,10 @@ QuestView.post_update = function (self, dt, t)
 end
 QuestView._update_event_contract_countdown = function (self, t, main_time_expire)
 	local ttl = math.max(main_time_expire - t, 0)
-	local h = math.floor(ttl/3600)
-	local rem = ttl%3600
-	local m = math.floor(rem/60)
-	local s = rem%60
+	local h = math.floor(ttl / 3600)
+	local rem = ttl % 3600
+	local m = math.floor(rem / 60)
+	local s = rem % 60
 	local str = nil
 
 	if 0 < h then
@@ -882,7 +882,7 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 
 	if direction == "down" then
 		for index = current_selection_index, num_widgets, 1 do
-			local read_index = index%num_widgets + 1
+			local read_index = index % num_widgets + 1
 			local widget = widgets[read_index]
 
 			if self._is_widget_selectable(self, widget) then
@@ -893,7 +893,7 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 		end
 	else
 		for index = (num_widgets + current_selection_index) - 2, current_selection_index, -1 do
-			local read_index = index%num_widgets + 1
+			local read_index = index % num_widgets + 1
 			local widget = widgets[read_index]
 
 			if self._is_widget_selectable(self, widget) then
@@ -1808,9 +1808,9 @@ QuestView._get_readable_boon_duration = function (self, duration)
 	local text = ""
 
 	if duration and 0 < duration then
-		local days = math.floor(duration/86400)
-		local hours = math.floor(duration/3600)
-		local minutes = math.floor(duration/60)
+		local days = math.floor(duration / 86400)
+		local hours = math.floor(duration / 3600)
+		local minutes = math.floor(duration / 60)
 		local seconds = math.floor(duration)
 
 		if 0 < days then
@@ -2176,7 +2176,7 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 
 						self._set_number_of_progress_steps_for_active_quest(self, required - 1)
 
-						local progress = acquired/required
+						local progress = acquired / required
 
 						self._set_quest_bar_progress(self, progress)
 					end
@@ -2214,7 +2214,7 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 
 					self._set_number_of_progress_steps_for_active_quest(self, required - 1)
 
-					local progress = acquired/required
+					local progress = acquired / required
 
 					self._set_quest_bar_progress(self, progress)
 				end
@@ -2273,9 +2273,9 @@ QuestView._rotate_loading_icon = function (self, dt)
 	local widgets = self._loading_widgets
 	local loading_icon_style = widgets.icon.style.texture_id
 	local angle_fraction = loading_icon_style.fraction or 0
-	angle_fraction = (angle_fraction + dt)%1
+	angle_fraction = (angle_fraction + dt) % 1
 	local anim_fraction = math.easeOutCubic(angle_fraction)
-	local angle = anim_fraction*math.degrees_to_radians(360)
+	local angle = anim_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
 
@@ -2353,22 +2353,22 @@ QuestView._set_quest_bar_progress = function (self, progress)
 	local bar_size_default = scenegraph_definition[bar_scenegraph_id].size
 	local bar_uvs = bar_widget.content.texture_id.uvs
 	bar_uvs[2][1] = progress
-	bar_size[1] = bar_size_default[1]*progress
+	bar_size[1] = bar_size_default[1] * progress
 	local dots_uvs = dots_widget.style.texture_id.texture_uvs
 	local dots_sizes = dots_widget.style.texture_id.texture_sizes
 	local default_texture_size = dots_widget.style.texture_id.texture_size
 	local dots_amount = dots_widget.style.texture_id.texture_amount
 	local total_steps = dots_amount + 1
-	local progress_per_dot = total_steps/1
-	local dot_size_fraction = default_texture_size[1]/bar_size_default[1]
+	local progress_per_dot = 1 / total_steps
+	local dot_size_fraction = default_texture_size[1] / bar_size_default[1]
 
 	for i = 1, dots_amount, 1 do
-		local progress_required = progress_per_dot*i - dot_size_fraction*0.5
-		local dot_progress = (progress - progress_required)/dot_size_fraction
-		dot_progress = math.clamp(dot_progress*2, 0, 1)
+		local progress_required = progress_per_dot * i - dot_size_fraction * 0.5
+		local dot_progress = (progress - progress_required) / dot_size_fraction
+		dot_progress = math.clamp(dot_progress * 2, 0, 1)
 		local uvs = dots_uvs[i]
 		local size = dots_sizes[i]
-		size[1] = default_texture_size[1]*dot_progress
+		size[1] = default_texture_size[1] * dot_progress
 		uvs[2][1] = dot_progress
 	end
 

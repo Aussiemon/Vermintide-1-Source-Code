@@ -102,7 +102,7 @@ MatchmakingStateFriendClient.update = function (self, dt, t)
 						local total_time = 1
 						local cancel_timer = self.cancel_timer
 						cancel_timer = (cancel_timer and cancel_timer + dt) or dt
-						local progress = math.min(cancel_timer/total_time, 1)
+						local progress = math.min(cancel_timer / total_time, 1)
 
 						if progress == 1 then
 							self.ready = not self.ready

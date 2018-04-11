@@ -117,7 +117,7 @@ end
 table.reverse = function (t)
 	local size = #t
 
-	for i = 1, math.floor(size/2), 1 do
+	for i = 1, math.floor(size / 2), 1 do
 		t[size - i + 1] = t[i]
 		t[i] = t[size - i + 1]
 	end

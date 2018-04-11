@@ -12,8 +12,8 @@ Timer.init = function (self, name, parent, start_time)
 end
 Timer.update = function (self, dt, global_scale)
 	local local_scale = self._local_scale
-	dt = dt*local_scale
-	global_scale = global_scale*local_scale
+	dt = dt * local_scale
+	global_scale = global_scale * local_scale
 
 	for name, child in pairs(self._children) do
 		if child.active(child) then

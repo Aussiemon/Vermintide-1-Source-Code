@@ -174,7 +174,7 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 			above_align_cube = true
 		else
 			local epsilon = 0.02
-			close_enough = distance < epsilon + 0.7 and 0 < distance
+			close_enough = distance < 0.7 + epsilon and 0 < distance
 			facing_correctly = looking_up and not facing_ladder and 0 < movement_in_ladder_direction
 		end
 
@@ -203,11 +203,11 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 	local move_input = CharacterStateHelper.get_movement_input(input_extension)
 
 	if is_moving then
-		self.movement_speed = math.min(Vector3.length(move_input), self.movement_speed + movement_settings_table.move_acceleration_up*dt)
+		self.movement_speed = math.min(Vector3.length(move_input), self.movement_speed + movement_settings_table.move_acceleration_up * dt)
 	elseif player and player.bot_player then
 		self.movement_speed = 0
 	else
-		self.movement_speed = math.max(0, self.movement_speed - movement_settings_table.move_acceleration_down*dt)
+		self.movement_speed = math.max(0, self.movement_speed - movement_settings_table.move_acceleration_down * dt)
 	end
 
 	local walking = input_extension.get(input_extension, "walk")
@@ -218,7 +218,7 @@ PlayerCharacterStateWalking.update = function (self, unit, input, dt, context, t
 		status_extension.set_slowed(status_extension, walking)
 	end
 
-	local move_speed = max_move_speed*move_speed_multiplier*movement_settings_table.player_speed_scale*self.movement_speed
+	local move_speed = max_move_speed * move_speed_multiplier * movement_settings_table.player_speed_scale * self.movement_speed
 
 	if script_data.debug_player_movementspeed then
 		Debug.text("Movement Speed: " .. move_speed)

@@ -175,8 +175,8 @@ MissionObjectiveUI.update_icon_position = function (self, dt)
 	local font, font_size, font_material = unpack(font)
 	local width, height = UIRenderer.text_size(ui_renderer, content.area_text_content, font, scaled_font_size)
 	local ui_scenegraph = self.ui_scenegraph
-	ui_scenegraph.mission_icon_left.position[1] = -width*0.5 - ui_scenegraph.mission_icon_left.size[1]*0.5
-	ui_scenegraph.mission_icon_right.position[1] = width*0.5 + ui_scenegraph.mission_icon_right.size[1]*0.5
+	ui_scenegraph.mission_icon_left.position[1] = -width * 0.5 - ui_scenegraph.mission_icon_left.size[1] * 0.5
+	ui_scenegraph.mission_icon_right.position[1] = width * 0.5 + ui_scenegraph.mission_icon_right.size[1] * 0.5
 
 	return 
 end

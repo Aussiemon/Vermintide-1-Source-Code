@@ -252,8 +252,8 @@ ScoreboardUI.init_topic_index_counter = function (self, number_of_entries)
 	local topic_index_counter_widget = self.topic_index_counter_widget
 	local member_x_offset = 45
 	local member_width = 30
-	local offset_diff = (number_of_entries - 1)*math.max(member_x_offset - member_width, 0)
-	local list_width = member_width*number_of_entries + offset_diff
+	local offset_diff = (number_of_entries - 1) * math.max(member_x_offset - member_width, 0)
+	local list_width = member_width * number_of_entries + offset_diff
 	local list_content = {}
 	local list_style = {
 		vertical_alignment = "center",
@@ -320,7 +320,7 @@ ScoreboardUI.on_enter = function (self, ignore_input_blocking)
 	local to = 0
 	local time = UISettings.scoreboard.open_duration
 	self.open_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
-	self.number_of_topic_pages = math.ceil(self.number_of_topics/TOPICS_PER_PAGE)
+	self.number_of_topic_pages = math.ceil(self.number_of_topics / TOPICS_PER_PAGE)
 
 	self.init_topic_index_counter(self, self.number_of_topic_pages)
 	self.move_topic_list(self, 1, true)
@@ -359,7 +359,7 @@ ScoreboardUI.animate_window = function (self, open)
 		local target_index = 2
 
 		if open then
-			local from = (UISettings.ui_scale*1200)/100
+			local from = (1200 * UISettings.ui_scale) / 100
 			local to = 0
 			local time = UISettings.scoreboard.open_duration
 			self.opening_leaderboards = false
@@ -370,7 +370,7 @@ ScoreboardUI.animate_window = function (self, open)
 		else
 			self.open = false
 			local from = 0
-			local to = (UISettings.ui_scale*1200)/100
+			local to = (1200 * UISettings.ui_scale) / 100
 			local time = UISettings.scoreboard.close_duration
 			self.opening_leaderboards = true
 			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
@@ -934,7 +934,7 @@ ScoreboardUI.on_topic_widget_select = function (self, widget, widget_index, upda
 	local widget_start_draw_index = self.widget_start_draw_index or 1
 	local widget_draw_index = widget_index - self.widget_start_draw_index + 1
 	local previous_topic_selected_data_index = self.topic_selected_data_index
-	self.topic_selected_data_index = (self.selected_topic_counter_index - 1)*TOPICS_PER_PAGE + widget_draw_index
+	self.topic_selected_data_index = (self.selected_topic_counter_index - 1) * TOPICS_PER_PAGE + widget_draw_index
 	local ui_animations = self.ui_animations
 	local animation_name = "topic_widget_select_" .. widget_index
 	local hover_animation_name = "topic_widget_hover_" .. widget_index
@@ -942,7 +942,7 @@ ScoreboardUI.on_topic_widget_select = function (self, widget, widget_index, upda
 	local target_alpha = UISettings.scoreboard.topic_hover_alpha
 	local background_target_alpha = UISettings.scoreboard.topic_hover_alpha
 	local total_time = UISettings.scoreboard.topic_select_duration
-	local animation_duration = (target_alpha - current_alpha)/target_alpha*total_time
+	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name] = self.animate_element_by_time(self, widget.style.background_select.color, 1, current_alpha, target_alpha, animation_duration)
@@ -976,7 +976,7 @@ ScoreboardUI.on_topic_widget_deselect = function (self, widget, widget_index, in
 	local target_alpha = 0
 	local background_target_alpha = UISettings.scoreboard.topic_normal_alpha
 	local total_time = UISettings.scoreboard.topic_deselect_duration
-	local animation_duration = ((hover_alpha - current_alpha)/hover_alpha - 1)*total_time
+	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
 	if not instant_update and 0 < animation_duration then
 		ui_animations[animation_name] = self.animate_element_by_time(self, widget_style.background_select.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1001,7 +1001,7 @@ ScoreboardUI.on_topic_widget_hover = function (self, widget, widget_index)
 	local target_alpha = UISettings.scoreboard.topic_hover_alpha
 	local background_target_alpha = target_alpha
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = (target_alpha - current_alpha)/target_alpha*total_time
+	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_background_hover"] = self.animate_element_by_time(self, widget_style.background_hover.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1029,7 +1029,7 @@ ScoreboardUI.on_topic_widget_dehover = function (self, widget, widget_index)
 	local target_alpha = 0
 	local background_target_alpha = UISettings.scoreboard.topic_normal_alpha
 	local total_time = UISettings.scoreboard.topic_dehover_duration
-	local animation_duration = ((hover_alpha - current_alpha)/hover_alpha - 1)*total_time
+	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_background_hover"] = self.animate_element_by_time(self, widget_style.background_hover.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1072,7 +1072,7 @@ ScoreboardUI.on_arrow_widget_hover = function (self, widget, name)
 	local target_alpha = UISettings.scoreboard.topic_hover_alpha
 	local glow_alpha = 125
 	local total_time = UISettings.scoreboard.arrow_hover_duration
-	local animation_duration = (target_alpha - current_alpha)/target_alpha*total_time
+	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_background"] = self.animate_element_by_time(self, widget.style.normal.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1092,7 +1092,7 @@ ScoreboardUI.on_arrow_widget_dehover = function (self, widget, name)
 	local current_alpha = widget.style.normal.color[1]
 	local target_alpha = UISettings.scoreboard.topic_normal_alpha
 	local total_time = UISettings.scoreboard.arrow_dehover_duration
-	local animation_duration = ((hover_alpha - current_alpha)/hover_alpha - 1)*total_time
+	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_background"] = self.animate_element_by_time(self, widget.style.normal.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1112,7 +1112,7 @@ ScoreboardUI.on_arrow_widget_select = function (self, widget, name)
 	local current_alpha = widget.style.selected.color[1]
 	local target_alpha = UISettings.scoreboard.topic_hover_alpha
 	local total_time = UISettings.scoreboard.arrow_select_duration
-	local animation_duration = (target_alpha - current_alpha)/target_alpha*total_time
+	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_selected"] = self.animate_element_by_time(self, widget.style.selected.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1131,7 +1131,7 @@ ScoreboardUI.on_arrow_widget_deselect = function (self, widget, name)
 	local current_alpha = widget.style.selected.color[1]
 	local target_alpha = 0
 	local total_time = UISettings.scoreboard.arrow_deselect_duration
-	local animation_duration = ((hover_alpha - current_alpha)/hover_alpha - 1)*total_time
+	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_selected"] = self.animate_element_by_time(self, widget.style.selected.color, 1, current_alpha, target_alpha, animation_duration)
@@ -1262,10 +1262,10 @@ ScoreboardUI.update_player_widgets_animations = function (self, dt)
 	if time then
 		time = time + dt
 		local total_time = UISettings.scoreboard.player_list_pluse_duration
-		local progress = math.min(time/total_time, 1)
+		local progress = math.min(time / total_time, 1)
 		local pulse_progress = math.ease_pulse(progress)
 		local color_channel = 1
-		local color_value = math.max((pulse_progress - 1)*255, 0)
+		local color_value = math.max(255 * (1 - pulse_progress), 0)
 		local player_entry_widgets = self.player_entry_widgets
 
 		for i = 1, #player_entry_widgets, 1 do
@@ -1503,7 +1503,7 @@ ScoreboardUI.update_vote_timer_text = function (self, time_left)
 	local vote_manager = self.vote_manager
 	local vote_time_left = (time_left and time_left) or vote_manager.vote_time_left(vote_manager) or 0
 	local widget = self.level_vote_texts
-	local time_text = string.format(" %02d:%02d", math.floor(vote_time_left/60), vote_time_left%60)
+	local time_text = string.format(" %02d:%02d", math.floor(vote_time_left / 60), vote_time_left % 60)
 	widget.content.timer_text = time_text
 
 	return 
@@ -1553,9 +1553,9 @@ ScoreboardUI.update_vote_options_fade_out = function (self, dt)
 		local successful_vote_index = self.successful_vote_index
 		time = time - dt
 		local total_time = 0.5
-		local progress = (0 < time and time/total_time) or 0
+		local progress = (0 < time and time / total_time) or 0
 		self.failed_vote_fade_timer = (0 < time and time) or nil
-		local fade_alpha = math.min(progress*75 + 180, 255)
+		local fade_alpha = math.min(180 + progress * 75, 255)
 		local active_vote_list = self.active_vote_list
 
 		for i = 1, 3, 1 do
@@ -1649,7 +1649,7 @@ ScoreboardUI.move_topic_list = function (self, new_topic_index, instant_update)
 		local scenegraph_id = "compact_preview_" .. i
 		local topic_scenegraph = ui_scenegraph[scenegraph_id]
 		local topic_scenegraph_width = topic_scenegraph.size[1]
-		topic_scenegraph.position[1] = topic_position_index_offset*topic_scenegraph_width + topic_spacing[1]
+		topic_scenegraph.position[1] = topic_position_index_offset * topic_scenegraph_width + topic_spacing[1]
 
 		self.clear_compact_topic_data(self, i)
 		self.clear_topic_widget_animations(self, topic_widgets[i], i)
@@ -1689,9 +1689,9 @@ ScoreboardUI.update_topic_data = function (self, direction)
 	local start_read_index = 1
 
 	if direction == "left" then
-		start_read_index = (scroll_index - 2)*3 + 1
+		start_read_index = 1 + (scroll_index - 2) * 3
 	elseif direction == "right" then
-		start_read_index = (scroll_index - 1)*3 + 1
+		start_read_index = 1 + (scroll_index - 1) * 3
 	end
 
 	local end_read_index = (number_of_topics <= start_read_index + 3 and start_read_index + 4) or number_of_topics
@@ -1796,7 +1796,7 @@ ScoreboardUI.update_topic_scroll_animation = function (self, dt)
 	if time then
 		local total_time = UISettings.scoreboard.topic_scroll_duration
 		time = time + dt
-		local progress = math.min(time/total_time, 1)
+		local progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -6, 0, 1, 0)
 
 		self.animate_scenegraph_to_position(self, "topic_widget_root", self.topic_widgets, catmullrom_value, true)
@@ -1888,7 +1888,7 @@ ScoreboardUI.update_topic_widgets_mouse_input = function (self)
 	if hover_enter_topic_index then
 		local widget_start_draw_index = self.widget_start_draw_index or 1
 		local widget_hover_index = hover_enter_topic_index - widget_start_draw_index + 1
-		local topic_hover_data_index = (self.selected_topic_counter_index - 1)*TOPICS_PER_PAGE + widget_hover_index
+		local topic_hover_data_index = (self.selected_topic_counter_index - 1) * TOPICS_PER_PAGE + widget_hover_index
 
 		self.set_player_list_data_by_index(self, topic_hover_data_index)
 	elseif hover_exit_topic_index then

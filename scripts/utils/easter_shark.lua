@@ -72,7 +72,7 @@ EasterShark.update_unit = function (self, dt)
 	local shark_position = Unit.local_position(shark, 0)
 	local shark_rotation = Vector3.normalize(player_position - shark_position)
 	local rot = shark_rotation
-	shark_position = shark_position + dt*14*(shark_rotation + Vector3(0, 0, 0.15))
+	shark_position = shark_position + 14 * dt * (shark_rotation + Vector3(0, 0, 0.15))
 	shark_rotation = Quaternion.look(-shark_rotation)
 
 	Unit.set_local_position(shark, 0, shark_position)
@@ -81,7 +81,7 @@ EasterShark.update_unit = function (self, dt)
 	if Vector3.distance(shark_position, player_position) <= 3 and not self._clouds_spawned then
 		self._clouds_spawned = true
 
-		World.create_particles(self.world, "fx/easter_shark", shark_position + rot*1.8 + Vector3(0, 0, 1.2))
+		World.create_particles(self.world, "fx/easter_shark", shark_position + 1.8 * rot + Vector3(0, 0, 1.2))
 	end
 
 	if Vector3.distance(shark_position, player_position) <= 2.6 then
@@ -101,7 +101,7 @@ EasterShark.spawn_shark = function (self)
 	local player_rotation = Quaternion.forward(Unit.local_rotation(first_person_unit, 0))
 	player_rotation.z = -0.09
 	local rotation = Quaternion.look(player_rotation)
-	local position = player_position + player_rotation*20
+	local position = player_position + 20 * player_rotation
 	local shark = World.spawn_unit(self.world, "units/trophies/fatshark/fatshark", position, rotation)
 	self._clouds_spawned = false
 

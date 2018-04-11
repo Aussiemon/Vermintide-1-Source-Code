@@ -61,7 +61,7 @@ AreaDamageTemplates.templates = {
 						local unit_position = POSITION_LOOKUP[player_unit]
 						local area_damage_position = Unit.local_position(aoe_unit, 0)
 						local distance_sq = Vector3.distance_squared(unit_position, area_damage_position)
-						local is_inside_radius = distance_sq < radius*radius
+						local is_inside_radius = distance_sq < radius * radius
 						local t = Managers.time:time("game")
 
 						if is_inside_radius and not player_unit_particles[player_unit] then
@@ -170,7 +170,7 @@ AreaDamageTemplates.templates = {
 						local unit_position = POSITION_LOOKUP[player_unit]
 						local area_damage_position = Unit.local_position(aoe_unit, 0)
 						local distance_sq = Vector3.distance_squared(unit_position, area_damage_position)
-						local is_inside_radius = distance_sq < radius*radius
+						local is_inside_radius = distance_sq < radius * radius
 						local t = Managers.time:time("game")
 
 						if is_inside_radius and not player_unit_particles[player_unit] then
@@ -363,7 +363,7 @@ AreaDamageTemplates.templates = {
 				for i = 1, ai_units_n, 1 do
 					local ai_unit = ai_units[i]
 					local breed = Unit.get_data(ai_unit, "breed")
-					local chance_to_die = breed.poison_resistance - 100
+					local chance_to_die = 100 - breed.poison_resistance
 					local health_extension = ScriptUnit.extension(ai_unit, "health_system")
 
 					assert(health_extension)

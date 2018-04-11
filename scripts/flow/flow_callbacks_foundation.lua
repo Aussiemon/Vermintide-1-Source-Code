@@ -232,7 +232,7 @@ function flow_callback_math_multiplication(params)
 	local factor_two = params.factor_two
 
 	return {
-		value = factor_one*factor_two
+		value = factor_one * factor_two
 	}
 end
 
@@ -241,7 +241,7 @@ function flow_callback_math_multiplication_vector3(params)
 	local float = params.float
 
 	return {
-		value = vector*float
+		value = vector * float
 	}
 end
 
@@ -252,7 +252,7 @@ function flow_callback_math_division(params)
 	fassert(divisor ~= 0, "Trying to divide by 0 in division flow node.")
 
 	return {
-		value = dividend/divisor
+		value = dividend / divisor
 	}
 end
 

@@ -32,7 +32,7 @@ PlayerUnitMovementSettings.FWD_MOVE_SPEED_SCALE = 1
 PlayerUnitMovementSettings.BWD_MOVE_SPEED_SCALE = 0.65
 PlayerUnitMovementSettings.STRAFE_MOVE_SPEED_SCALE = 1
 PlayerUnitMovementSettings.slope_traversion = PlayerUnitMovementSettings.slope_traversion or {}
-PlayerUnitMovementSettings.slope_traversion.max_angle = math.pi*0.27
+PlayerUnitMovementSettings.slope_traversion.max_angle = math.pi * 0.27
 PlayerUnitMovementSettings.slope_traversion.standing_frames = 1
 PlayerUnitMovementSettings.slope_traversion.jump_disallowed_frames = 10
 PlayerUnitMovementSettings.slope_traversion.crouch_step_up = 0.15
@@ -50,7 +50,7 @@ PlayerUnitMovementSettings.ladder.player_ladder_speed_scale = 1
 PlayerUnitMovementSettings.ladder.climb_speed = 3
 PlayerUnitMovementSettings.ladder.climb_move_acceleration_up = 4
 PlayerUnitMovementSettings.ladder.climb_acceleration_down = 5
-PlayerUnitMovementSettings.ladder.climb_pitch_offset = math.pi/8
+PlayerUnitMovementSettings.ladder.climb_pitch_offset = math.pi / 8
 PlayerUnitMovementSettings.ladder.climb_speed_lerp_interval = 22.5
 PlayerUnitMovementSettings.ladder.climb_horizontals_multiplier = 0.25
 PlayerUnitMovementSettings.ladder.climb_attach_to_ladder_position_lerp_time_per_meter = 0.5
@@ -232,7 +232,7 @@ PlayerUnitMovementSettings.block.consecutive_block_impact_time = 3
 PlayerUnitMovementSettings.block.consecutive_block_impact_multiplier = 1
 PlayerUnitMovementSettings.block.override_recharge_rate = 0.025
 PlayerUnitMovementSettings.block.aim_direction_pitch_function = function (z)
-	return (z - 0.2)*1.25
+	return 1.25 * (z - 0.2)
 end
 PlayerUnitMovementSettings.parry = PlayerUnitMovementSettings.parry or {}
 PlayerUnitMovementSettings.parry.REQUIRED_MOVEMENT_TO_POSE = 0.003

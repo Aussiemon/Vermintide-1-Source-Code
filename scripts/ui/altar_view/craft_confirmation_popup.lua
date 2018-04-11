@@ -542,8 +542,8 @@ CraftConfirmationPopup.update = function (self, dt)
 
 		if current_popup.timer then
 			frame_widget.content.timer_field = string.format("%d", math.floor(current_popup.timer))
-			frame_widget.style.timer.font_size = math.smoothstep(current_popup.timer%1, 0, 1)*20 + 40
-			frame_widget.style.timer.text_color = Colors.lerp_color_tables(Colors.get_color_table_with_alpha("white", 255), Colors.get_color_table_with_alpha("cheeseburger", 255), current_popup.timer%15%1)
+			frame_widget.style.timer.font_size = 40 + 20 * math.smoothstep(current_popup.timer % 1, 0, 1)
+			frame_widget.style.timer.text_color = Colors.lerp_color_tables(Colors.get_color_table_with_alpha("white", 255), Colors.get_color_table_with_alpha("cheeseburger", 255), current_popup.timer % 15 % 1)
 			current_popup.timer = current_popup.timer - dt
 
 			if current_popup.timer <= 0 then
@@ -562,7 +562,7 @@ CraftConfirmationPopup.update = function (self, dt)
 		local gamepad_buttons = self.gamepad_button_widgets[n_args]
 
 		for i = 1, n_args, 1 do
-			local button_text = " " .. args[i*2]
+			local button_text = " " .. args[i * 2]
 			local button_enabled = current_popup.button_enabled_state[i] == true
 
 			if gamepad_active then
@@ -581,12 +581,12 @@ CraftConfirmationPopup.update = function (self, dt)
 				text_style.text_color = (button_enabled and self.gamepad_button_colors.enabled) or self.gamepad_button_colors.disabled
 				local font, scaled_font_size = UIFontByResolution(text_style)
 				local text_width, text_height, min = UIRenderer.text_size(ui_top_renderer, button_text, font[1], scaled_font_size)
-				button_style.icon.offset[1] = text_width*0.5 - 84
+				button_style.icon.offset[1] = 84 - text_width * 0.5
 
 				UIRenderer.draw_widget(ui_top_renderer, gamepad_button)
 
 				if input_service.get(input_service, input_action, true) then
-					result = args[i*2 - 1]
+					result = args[i * 2 - 1]
 
 					self.play_sound(self, "Play_hud_select")
 				end
@@ -605,7 +605,7 @@ CraftConfirmationPopup.update = function (self, dt)
 				if button_hotspot.on_release then
 					table.clear(button.content.button_hotspot)
 
-					result = args[i*2 - 1]
+					result = args[i * 2 - 1]
 
 					self.play_sound(self, "Play_hud_select")
 				end
@@ -688,10 +688,10 @@ CraftConfirmationPopup.queue_popup = function (self, text, return_data, ...)
 	new_popup.return_data = return_data
 	local n_args = select("#", ...)
 
-	assert(math.floor(n_args/2)*2 == n_args, "Need one action for each button text")
+	assert(math.floor(n_args / 2) * 2 == n_args, "Need one action for each button text")
 	assert(0 < n_args, "Need at least one button...")
 
-	new_popup.n_args = n_args/2
+	new_popup.n_args = n_args / 2
 	new_popup.button_enabled_state = {}
 
 	for i = 1, new_popup.n_args, 1 do
@@ -737,7 +737,7 @@ CraftConfirmationPopup.activate_timer = function (self, popup_id, time, default_
 	end
 
 	assert(index, string.format("[CraftConfirmationPopup:activate_timer] There is no result named %s in popup declaration %s", default_result, popup.text))
-	assert(index%2 == 1, string.format("[CraftConfirmationPopup:activate_timer] You need to pass the result - not the text %s in popup declaration %s", default_result, popup.text))
+	assert(index % 2 == 1, string.format("[CraftConfirmationPopup:activate_timer] You need to pass the result - not the text %s in popup declaration %s", default_result, popup.text))
 
 	popup.timer = time
 	popup.default_result = default_result
@@ -812,7 +812,7 @@ CraftConfirmationPopup.get_word_wrap_size = function (self, localized_text, text
 	local lines = UIRenderer.word_wrap(self.ui_top_renderer, localized_text, font[1], scaled_font_size, text_area_width)
 	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
 
-	return text_width, text_height*#lines
+	return text_width, text_height * #lines
 end
 
 return 

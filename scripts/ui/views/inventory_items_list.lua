@@ -259,14 +259,14 @@ InventoryItemsList.init = function (self, position, ingame_ui_context, settings)
 	local scroll_field_height = 0
 
 	if columns then
-		item_list_definitions.size[1] = element_settings.width*columns + column_offset
-		local list_items_per_column = num_list_items/columns
-		item_list_definitions.size[2] = element_settings.height*list_items_per_column + element_settings.height_spacing*(list_items_per_column - 1)
+		item_list_definitions.size[1] = element_settings.width * columns + column_offset
+		local list_items_per_column = num_list_items / columns
+		item_list_definitions.size[2] = element_settings.height * list_items_per_column + element_settings.height_spacing * (list_items_per_column - 1)
 		scroll_field_width = item_list_definitions.size[1] + scrollbar_width
 		scroll_field_height = item_list_definitions.size[2]
 	else
 		item_list_definitions.size[1] = element_settings.width
-		item_list_definitions.size[2] = element_settings.height*num_list_items + element_settings.height_spacing*(num_list_items - 1)
+		item_list_definitions.size[2] = element_settings.height * num_list_items + element_settings.height_spacing * (num_list_items - 1)
 		scroll_field_width = item_list_definitions.size[1]
 		scroll_field_height = item_list_definitions.size[2]
 	end
@@ -360,13 +360,13 @@ InventoryItemsList.handle_gamepad_input = function (self, dt, num_elements)
 
 			if move_up or move_up_hold then
 				new_list_index = math.max(selected_absolute_list_index - 1, 1)
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 			else
 				local move_down = input_service.get(input_service, "move_down")
 				local move_down_hold = input_service.get(input_service, "move_down_hold")
 
 				if move_down or move_down_hold then
-					self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+					self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 					new_list_index = math.min(selected_absolute_list_index + 1, num_elements)
 				end
 			end
@@ -1160,7 +1160,7 @@ InventoryItemsList.populate_widget_list = function (self, list_start_index, sort
 		self.number_of_real_items = num_items_in_list
 
 		if list_content_n < num_draws then
-			local padding_n = num_draws - #list_content%num_draws
+			local padding_n = num_draws - #list_content % num_draws
 
 			if padding_n < num_draws then
 				for i = 1, padding_n, 1 do
@@ -1300,11 +1300,11 @@ InventoryItemsList.set_scrollbar_length = function (self, start_scroll_value, ig
 
 	if 0 < item_diff_count then
 		local number_of_elements_per_step = (columns and columns) or 1
-		local number_of_steps_possible = math.ceil(item_diff_count/number_of_elements_per_step)
-		local number_of_steps_total = math.ceil(number_of_items_in_list/number_of_elements_per_step)
-		local list_fraction = number_of_steps_total/1
-		bar_fraction = list_fraction*number_of_steps_possible - 1
-		step_fraction = number_of_steps_possible/1
+		local number_of_steps_possible = math.ceil(item_diff_count / number_of_elements_per_step)
+		local number_of_steps_total = math.ceil(number_of_items_in_list / number_of_elements_per_step)
+		local list_fraction = 1 / number_of_steps_total
+		bar_fraction = 1 - list_fraction * number_of_steps_possible
+		step_fraction = 1 / number_of_steps_possible
 	else
 		bar_fraction = 1
 		step_fraction = 1
@@ -1340,9 +1340,9 @@ InventoryItemsList.scroll_inventory_list = function (self, value)
 
 		if max_visible_elements and max_visible_elements < total_elements then
 			local elements_to_scroll = total_elements - max_visible_elements
-			local new_start_index = math.max(0, math.round(value*elements_to_scroll)) + 1
+			local new_start_index = math.max(0, math.round(value * elements_to_scroll)) + 1
 
-			if column_count and new_start_index%column_count == 0 then
+			if column_count and new_start_index % column_count == 0 then
 				new_start_index = (new_start_index + column_count) - 1
 			end
 
@@ -1430,7 +1430,7 @@ InventoryItemsList.on_inventory_item_selected = function (self, absolute_index, 
 		local height_spacing = element_settings.height_spacing
 		local height = element_settings.height
 		local index_from_bottom = num_draws - relative_index
-		local y_position = index_from_bottom*height + index_from_bottom*height_spacing
+		local y_position = index_from_bottom * height + index_from_bottom * height_spacing
 		local selection_default_position = self.scenegraph_definition.gamepad_slot_selection.position
 		self.ui_scenegraph[selection_scenegraph_id].local_position[2] = selection_default_position[2] + y_position
 	end
@@ -1552,7 +1552,7 @@ InventoryItemsList.update_inventory_list_animations = function (self, dt)
 			local total_time = 0.2
 			element_content.tweened_click = true
 			select_anim_time = select_anim_time + dt
-			local progress = math.min(select_anim_time/total_time, 1)
+			local progress = math.min(select_anim_time / total_time, 1)
 			local catmullrom_value = math.catmullrom(progress, 0.97, 1, 1, 0.57)
 			local background_hover_default_style = definitions.scenegraph_definition.inventory_selection_item_background_hover
 			local background_default_size = definitions.scenegraph_definition.inventory_selection_item_background.size
@@ -1623,7 +1623,7 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 	local background_default_style = scenegraph_definition.inventory_selection_item_background
 	local item_default_style = scenegraph_definition.inventory_selection_item_icon
 	time = time + dt
-	local progress = math.min(time/total_time, 1)
+	local progress = math.min(time / total_time, 1)
 
 	for i = 1, #content.list_content, 1 do
 		local element_content = content.list_content[i]
@@ -1636,15 +1636,15 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 
 		if item_fade_in_start_fraction <= progress then
 			local item_progress = progress - item_fade_in_start_fraction
-			local item_tween_progress = (0 < item_progress and math.min(item_progress/(item_fade_in_end_fraction - item_fade_in_start_fraction), 1)) or 0
+			local item_tween_progress = (0 < item_progress and math.min(item_progress / (item_fade_in_end_fraction - item_fade_in_start_fraction), 1)) or 0
 			local catmullrom_value = math.catmullrom(item_tween_progress, -0.5, 1, 1, -0.5)
-			item_style.color[1] = math.max(122.5, item_tween_progress*255)
-			local offset_fraction = (item_tween_progress < 1 and catmullrom_value - 1) or 0
-			local x_offset = (offset_fraction*item_default_style.size[1])/2
-			local y_offset = offset_fraction*item_default_style.size[2]/2
+			item_style.color[1] = math.max(122.5, item_tween_progress * 255)
+			local offset_fraction = (item_tween_progress < 1 and 1 - catmullrom_value) or 0
+			local x_offset = (offset_fraction * item_default_style.size[1]) / 2
+			local y_offset = offset_fraction * item_default_style.size[2] / 2
 			item_style.size = {
-				catmullrom_value*item_default_style.size[1],
-				catmullrom_value*item_default_style.size[2]
+				catmullrom_value * item_default_style.size[1],
+				catmullrom_value * item_default_style.size[2]
 			}
 			item_style.offset = {
 				item_default_style.position[1] + x_offset,
@@ -1657,14 +1657,14 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 
 		if background_fade_in_start_fraction <= progress then
 			local background_progress = progress - background_fade_in_start_fraction
-			local background_tween_progress = (0 < background_progress and math.min(background_progress/(background_fade_in_end_fraction - background_fade_in_start_fraction), 1)) or 0
+			local background_tween_progress = (0 < background_progress and math.min(background_progress / (background_fade_in_end_fraction - background_fade_in_start_fraction), 1)) or 0
 			local catmullrom_value = math.catmullrom(background_tween_progress, 1.2, 1, 1, 1.2)
-			background_style.color[1] = math.max(122.5, background_tween_progress*255)
-			background_style.size[1] = catmullrom_value*background_default_style.size[1]
-			background_style.size[2] = catmullrom_value*background_default_style.size[2]
-			local offset_fraction = (background_tween_progress < 1 and catmullrom_value - 1) or 0
-			local x_offset = (offset_fraction*background_default_style.size[1])/2
-			local y_offset = offset_fraction*background_default_style.size[2]/2
+			background_style.color[1] = math.max(122.5, background_tween_progress * 255)
+			background_style.size[1] = catmullrom_value * background_default_style.size[1]
+			background_style.size[2] = catmullrom_value * background_default_style.size[2]
+			local offset_fraction = (background_tween_progress < 1 and 1 - catmullrom_value) or 0
+			local x_offset = (offset_fraction * background_default_style.size[1]) / 2
+			local y_offset = offset_fraction * background_default_style.size[2] / 2
 			background_style.offset[1] = x_offset
 			background_style.offset[2] = y_offset
 			background_style.offset[3] = background_style.offset[3]
@@ -1674,8 +1674,8 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 
 		if text_fade_in_start_fraction <= progress then
 			local text_progress = progress - text_fade_in_start_fraction
-			local text_tween_progress = (0 < text_progress and math.min(text_progress/text_fade_in_end_fraction, 1)) or 0
-			local text_color = progress*255
+			local text_tween_progress = (0 < text_progress and math.min(text_progress / text_fade_in_end_fraction, 1)) or 0
+			local text_color = progress * 255
 			text_style.text_color[1] = text_color
 			sub_text_style.text_color[1] = text_color
 			text_equipped_style.text_color[1] = text_color
@@ -1690,7 +1690,7 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 			end
 
 			if not element_content.room_item then
-				background_style.color[1] = progress*(non_room_item_alpha_value - 255) - 255
+				background_style.color[1] = 255 - progress * (255 - non_room_item_alpha_value)
 			end
 		else
 			local text_color = 0

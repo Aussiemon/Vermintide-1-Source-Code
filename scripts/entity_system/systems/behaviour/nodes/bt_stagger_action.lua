@@ -104,10 +104,10 @@ BTStaggerAction._select_animation = function (self, unit, blackboard, impact_vec
 	else
 		impact_dir.z = 0
 
-		if math.pi*0.75 < angle then
+		if math.pi * 0.75 < angle then
 			impact_rot = Quaternion.look(-impact_dir)
 			anim_table = stagger_anims.bwd
-		elseif angle < math.pi*0.25 then
+		elseif angle < math.pi * 0.25 then
 			impact_rot = Quaternion.look(impact_dir)
 			anim_table = stagger_anims.fwd
 		elseif 0 < Vector3.cross(my_fwd, impact_dir).z then
@@ -126,7 +126,7 @@ BTStaggerAction._select_animation = function (self, unit, blackboard, impact_vec
 	local anim = anim_table[index]
 
 	if anim == blackboard.last_stagger_anim then
-		anim = anim_table[index%num_anims + 1]
+		anim = anim_table[index % num_anims + 1]
 	end
 
 	blackboard.last_stagger_anim = anim

@@ -971,11 +971,11 @@ IngameView.set_background_height = function (self, num_buttons)
 	local max = min + 630
 	local dead_area = 50
 	local button_height = 84
-	local total_button_height = num_buttons*button_height
+	local total_button_height = num_buttons * button_height
 	local background_height = math.ceil(math.max(math.min(total_button_height, max), min))
-	local background_fraction = (dead_area + background_height)/background_bottom_default_size[2]
-	self.ui_scenegraph.background_bottom.size[2] = math.ceil(background_bottom_default_size[2]*background_fraction)
-	self.background_bottom_widget.content.texture_id.uvs[1][2] = background_fraction - 1
+	local background_fraction = (dead_area + background_height) / background_bottom_default_size[2]
+	self.ui_scenegraph.background_bottom.size[2] = math.ceil(background_bottom_default_size[2] * background_fraction)
+	self.background_bottom_widget.content.texture_id.uvs[1][2] = 1 - background_fraction
 
 	return 
 end
@@ -1098,7 +1098,7 @@ IngameView.controller_select_button_index = function (self, index, ignore_sound)
 		if is_selected then
 			local widget_scenegraph_id = widget.scenegraph_id
 			local widget_current_position = self.ui_scenegraph[widget_scenegraph_id].local_position
-			gamepad_selection_current_position[2] = gamepad_selection_default_position[2] - i*84
+			gamepad_selection_current_position[2] = gamepad_selection_default_position[2] - i * 84
 		end
 	end
 
@@ -1147,7 +1147,7 @@ IngameView.update_controller_input = function (self, input_service, dt)
 				selection_accepted = self.controller_select_button_index(self, new_index)
 			end
 
-			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+			self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
 			return 
 		end
@@ -1164,7 +1164,7 @@ IngameView.update_controller_input = function (self, input_service, dt)
 				selection_accepted = self.controller_select_button_index(self, new_index)
 			end
 
-			self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+			self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
 			return 
 		end

@@ -240,10 +240,10 @@ local function anim_func(t)
 	local b = 0
 	local c = 1
 	local d = 1
-	local ts = t/d*t
-	local tc = ts*t
+	local ts = t / d * t
+	local tc = ts * t
 
-	return b + c*(tc*2.7*ts + ts*-14.2975*ts + tc*26.095 + ts*-21.195 + t*7.6975)
+	return b + c * (2.7 * tc * ts + -14.2975 * ts * ts + 26.095 * tc + -21.195 * ts + 7.6975 * t)
 end
 
 StateMapViewStart.start_open_animation = function (self)
@@ -537,10 +537,10 @@ StateMapViewStart._align_elements = function (self)
 	local spacing = 50
 	local element_width = element_size[1]
 	local distance = element_width + spacing
-	local start_offset = -distance*2*0.5
+	local start_offset = -distance * 2 * 0.5
 
 	for index, widget in ipairs(self._elements) do
-		widget.offset[1] = start_offset + distance*(index - 1)
+		widget.offset[1] = start_offset + distance * (index - 1)
 		widget.content.position_offset = widget.offset[1]
 	end
 
@@ -568,7 +568,7 @@ StateMapViewStart._set_selection = function (self, index, ignore_sound)
 	local width = widget.style.description_text.size[1]
 	local lines = UIRenderer.word_wrap(self.ui_renderer, widget.content.description_text, font[1], text_style.font_size, width)
 	local _, text_height = UIRenderer.text_size(self.ui_renderer, widget.content.description_text, font[1], text_style.font_size)
-	widget.style.description_rect.size[2] = text_height*#lines + text_style.font_size
+	widget.style.description_rect.size[2] = text_height * #lines + text_style.font_size
 
 	if not ignore_sound then
 		self._play_sound(self, "Play_hud_hover")
@@ -590,7 +590,7 @@ StateMapViewStart.update_selection_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -617,7 +617,7 @@ StateMapViewStart._animate_element = function (self, widget, index, progress, in
 		return 
 	end
 
-	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(progress - 1)
+	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
 	local widget_style = widget.style
 	local rect_style = widget_style.rect
 	local background_texture_selected_style = widget_style.background_texture_selected
@@ -627,9 +627,9 @@ StateMapViewStart._animate_element = function (self, widget, index, progress, in
 	local overlay_style = widget_style.overlay
 	local glow_left_texture_style = widget_style.glow_left_texture
 	local glow_right_texture_style = widget_style.glow_right_texture
-	local alpha = anim_progress*255
-	local rect_alpha = anim_progress*120
-	overlay_style.color[1] = (anim_progress - 1)*170
+	local alpha = anim_progress * 255
+	local rect_alpha = anim_progress * 120
+	overlay_style.color[1] = (1 - anim_progress) * 170
 	background_texture_selected_style.color[1] = alpha
 	description_rect_style.color[1] = rect_alpha
 	description_text_style.text_color[1] = alpha
@@ -648,7 +648,7 @@ StateMapViewStart._animate_element = function (self, widget, index, progress, in
 	return 
 end
 StateMapViewStart._animate_difficulty_selection = function (self, progress)
-	local alpha = progress*255
+	local alpha = 255 * progress
 	self._difficulty_text_widget.style.text.text_color[1] = alpha
 	self._difficulty_arrow_up_widget.style.texture_id.color[1] = alpha
 	self._difficulty_arrow_down_widget.style.texture_id.color[1] = alpha

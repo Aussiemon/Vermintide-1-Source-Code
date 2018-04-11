@@ -61,7 +61,7 @@ LevelAnalysis._random = function (self, ...)
 end
 LevelAnalysis._random_float_interval = function (self, a, b)
 	local seed, value = Math.next_random(self.seed)
-	local value = a + (b - a)*value
+	local value = a + (b - a) * value
 	self.seed = seed
 
 	return value
@@ -411,7 +411,7 @@ LevelAnalysis.boss_gizmo_spawned = function (self, unit)
 	end
 
 	if script_data.debug_ai_recycler then
-		QuickDrawerStay:sphere(Unit.local_position(unit, 0), 2, Color(map_section_index*64, map_section_index%4*64, map_section_index%8*32))
+		QuickDrawerStay:sphere(Unit.local_position(unit, 0), 2, Color(map_section_index * 64, map_section_index % 4 * 64, map_section_index % 8 * 32))
 		QuickDrawerStay:sphere(Unit.local_position(unit, 0), 0.25, Color(200, 200, 200))
 	end
 
@@ -517,7 +517,7 @@ LevelAnalysis.give_events = function (self, main_paths, terror_spawners, num_sec
 			local level_sections = data.level_sections
 			start_index = level_sections[i]
 			end_index = level_sections[i + 1] - 1
-			local index = math.floor((start_index + end_index)/2)
+			local index = math.floor((start_index + end_index) / 2)
 			local spawners = data.spawners
 			local spawner = spawners[index]
 			boxed_pos = Vector3Box(Unit.local_position(spawner[1], 0))
@@ -651,9 +651,9 @@ LevelAnalysis.automatic_terror_creation = function (self, main_paths, total_main
 	}
 	local level_path_dist = total_main_path_dist
 	local adjusted_path_distance = level_path_dist - safe_distance
-	local num_event_places_f = adjusted_path_distance/event_every_x_meter
+	local num_event_places_f = adjusted_path_distance / event_every_x_meter
 	local num_event_places = math.floor(num_event_places_f)
-	local trailing_event_fraction = num_event_places_f%1
+	local trailing_event_fraction = num_event_places_f % 1
 	local trailing_event = (self._random(self) <= trailing_event_fraction and 1) or 0
 	local num_events = num_event_places + trailing_event
 	local padding = (level_overrides and level_overrides.padding_dist) or event_settings.padding_dist
@@ -960,7 +960,7 @@ LevelAnalysis.main_path = function (self, index)
 end
 LevelAnalysis.get_path_point = function (path_list, path_length, move_percent)
 	local travel_dist = 0
-	local goal_dist = move_percent*path_length
+	local goal_dist = move_percent * path_length
 
 	for i = 1, #path_list - 1, 1 do
 		local p1 = path_list[i]:unbox()
@@ -972,8 +972,8 @@ LevelAnalysis.get_path_point = function (path_list, path_length, move_percent)
 		if goal_dist < travel_dist then
 			local missing = travel_dist - goal_dist
 			local left_over = p1p2_dist - missing
-			local part = left_over/p1p2_dist
-			local part_vec = vec*part
+			local part = left_over / p1p2_dist
+			local part_vec = vec * part
 			local move_vec = p1 + part_vec
 
 			return move_vec, i
@@ -993,9 +993,9 @@ local cols = {}
 
 for i = 1, 16, 1 do
 	cols[i] = {
-		math.floor((i/16 - 1)*255),
+		math.floor((1 - i / 16) * 255),
 		0,
-		math.floor(i/16*255)
+		math.floor(i / 16 * 255)
 	}
 end
 
@@ -1058,7 +1058,7 @@ LevelAnalysis.debug = function (self, t)
 				end
 			end
 
-			local p = t%5/5
+			local p = t % 5 / 5
 			local point = LevelAnalysis.get_path_point(nodes, path_length, p)
 
 			QuickDrawer:sphere(point + Vector3(0, 0, 1.5), 1.366, Color(255, 244, 183, 7))

@@ -20,7 +20,7 @@ PlayerCharacterStateStunned.on_enter = function (self, unit, input, dt, context,
 	end
 
 	if buff_extension and buff_extension.has_buff_type(buff_extension, "full_fatigue_on_block_broken") then
-		self.end_time = t + params.duration*0.5
+		self.end_time = t + params.duration * 0.5
 	else
 		self.end_time = t + params.duration
 	end

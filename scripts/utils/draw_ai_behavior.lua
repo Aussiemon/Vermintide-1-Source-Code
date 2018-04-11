@@ -10,10 +10,10 @@ local layer = 100
 local res_x, res_y = Application.resolution()
 local small_font_size = 16
 local node_height = 0.04
-local min_node_width = res_x/140
-local node_spacing = res_x*1e-05
-local text_spacing = res_x/2
-local thin_border = res_x/5
+local min_node_width = 140 / res_x
+local node_spacing = res_x * 1e-05
+local text_spacing = 2 / res_x
+local thin_border = 5 / res_x
 
 local function rshoot_action_debug(blackboard)
 	local attack_pattern_data = blackboard.attack_pattern_data
@@ -101,7 +101,7 @@ local nodes = {}
 DrawAiBehaviour.tree_width = function (gui, node)
 	local id = node._identifier
 	local min, max = Gui.text_extents(gui, id, font_mtrl, font_size)
-	local text_width = (max.x - min.x)/res_x + res_x*5e-06
+	local text_width = (max.x - min.x) / res_x + res_x * 5e-06
 
 	if text_width < min_node_width and not min_node_width then
 	end
@@ -162,7 +162,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 
 		if draw_timers[node] ~= time_to_fade then
 			for id, timer in pairs(draw_timers) do
-				draw_timers[id] = timer*0.9
+				draw_timers[id] = timer * 0.9
 			end
 
 			draw_timers[node] = time_to_fade
@@ -177,7 +177,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 			if timer <= 0 then
 				draw_timers[node] = nil
 			else
-				green = math.lerp(60, 255, timer/time_to_fade)
+				green = math.lerp(60, 255, timer / time_to_fade)
 				draw_timers[node] = timer
 			end
 		end
@@ -194,13 +194,13 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 	local ecolor = Color(240, 255, 55, 100)
 	local node_width = nodes[node._identifier].w
 	local total_width = nodes[node._identifier].total_w
-	local y1 = row*(node_height + node_height) + y
+	local y1 = row * (node_height + node_height) + y
 	local x1 = x
 	local text = node._identifier
 	local extra_height = 0
 	local node_type = node.name
 
-	ScriptGUI.itext(gui, res_x, res_y, node_type, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.28, layer + 1, tcolor)
+	ScriptGUI.itext(gui, res_x, res_y, node_type, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height * 0.28, layer + 1, tcolor)
 
 	if not running then
 	end
@@ -211,40 +211,40 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 	if bb_items then
 		for k, key in ipairs(bb_items) do
 			if type(blackboard[key]) == "table" then
-				extra_height = extra_height + res_y/11
+				extra_height = extra_height + 11 / res_y
 				local bb_text = "[" .. key .. "]"
 
-				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
+				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height * 0.8 + extra_height, layer + 1, bb_color)
 
 				local sub_table = blackboard[key]
 
 				for t2, v in pairs(sub_table) do
-					extra_height = extra_height + res_y/11
+					extra_height = extra_height + 11 / res_y
 					local bb_text = " > " .. t2 .. "=" .. tostring(v)
 
-					ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
+					ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height * 0.8 + extra_height, layer + 1, bb_color)
 				end
 			elseif type(key) == "function" then
 				local s = key(blackboard)
-				extra_height = extra_height + res_y/11
+				extra_height = extra_height + 11 / res_y
 				local bb_text = s
 
-				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
+				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height * 0.8 + extra_height, layer + 1, bb_color)
 			else
-				extra_height = extra_height + res_y/11
+				extra_height = extra_height + 11 / res_y
 				local bb_text = key .. "=" .. tostring(blackboard[key])
 
-				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, bb_color)
+				ScriptGUI.itext(gui, res_x, res_y, bb_text, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height * 0.8 + extra_height, layer + 1, bb_color)
 			end
 		end
 	elseif extra_info then
-		node_width = node_width*2
-		extra_height = extra_height + res_y/5
+		node_width = node_width * 2
+		extra_height = extra_height + 5 / res_y
 
 		for k, string in ipairs(extra_info) do
-			extra_height = extra_height + res_y/12
+			extra_height = extra_height + 12 / res_y
 
-			ScriptGUI.itext(gui, res_x, res_y, string, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height*0.8 + extra_height, layer + 1, ecolor)
+			ScriptGUI.itext(gui, res_x, res_y, string, font_mtrl, small_font_size, font, x1 + text_spacing, y1 + node_height * 0.8 + extra_height, layer + 1, ecolor)
 		end
 	end
 
@@ -256,7 +256,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 		local size = Vector2(140, 100)
 		local step_y = size.y + 40
 		local pos_y = -205
-		local pos = Vector3(x1*res_x, ((y1 - 1 + node_height) - extra_height)*res_y, layer + 10)
+		local pos = Vector3(x1 * res_x, ((1 - y1 + node_height) - extra_height) * res_y, layer + 10)
 		local num = 0
 
 		for name, consideration_data in pairs(cons) do
@@ -277,11 +277,11 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 
 		local action = bt.action_data(bt)
 		local breed_action = action[text]
-		local utility = math.floor(Utility.get_action_utility(breed_action, text, blackboard, t)*10)/10
+		local utility = math.floor(Utility.get_action_utility(breed_action, text, blackboard, t) * 10) / 10
 
 		ScriptGUI.text(gui, "sum: " .. utility, tiny_font_mtrl, tiny_font_size, tiny_font, pos + Vector3(3, -102, 0), yellow)
 
-		extra_utility_height = num*0.1
+		extra_utility_height = num * 0.1
 	end
 
 	if last_identifier == identifier then
@@ -289,7 +289,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 	end
 
 	ScriptGUI.irect(gui, res_x, res_y, x1, y1, x1 + node_width, y1 + node_height + extra_height, layer, color)
-	ScriptGUI.itext(gui, res_x, res_y, text, font_mtrl, font_size, font, x1 + text_spacing, y1 + node_height*0.7, layer + 1, tcolor)
+	ScriptGUI.itext(gui, res_x, res_y, text, font_mtrl, font_size, font, x1 + text_spacing, y1 + node_height * 0.7, layer + 1, tcolor)
 
 	local running_outside_offset = nil
 
@@ -302,7 +302,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 			start_x = x1
 			cy = extra_utility_height
 		else
-			start_x = x1 - total_width*0.5 + node_width*0.5
+			start_x = x1 - total_width * 0.5 + node_width * 0.5
 		end
 
 		local cx = start_x
@@ -311,7 +311,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 		for k, child in pairs(node._children) do
 			child_width = nodes[child._identifier].w
 			local child_total_width = nodes[child._identifier].total_w or 0
-			cx = cx + child_total_width*0.5
+			cx = cx + child_total_width * 0.5
 			local draw_utility = node.name == "BTUtilityNode"
 			local node_running_outside_offset, temp_extra_height = DrawAiBehaviour.draw_tree(bt, gui, child, blackboard, row + 1, t, dt, cx, cy, draw_utility)
 
@@ -320,26 +320,26 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 			end
 
 			if node.name == "BTSequence" then
-				local p1 = Vector2(x1 + node_width*0.5, y1 + node_height)
-				local p2 = Vector2(cx + child_width*0.5, child_y + cy)
+				local p1 = Vector2(x1 + node_width * 0.5, y1 + node_height)
+				local p2 = Vector2(cx + child_width * 0.5, child_y + cy)
 
 				ScriptGUI.hud_iline(gui, res_x, res_y, p1, p2, layer - 1, 2, lcolor)
 
-				cy = cy + node_height*1.5 + temp_extra_height
+				cy = cy + node_height * 1.5 + temp_extra_height
 			else
-				local p1 = Vector2(x1 + node_width*0.5, y1 + node_height)
-				local p2 = Vector2(cx + child_width*0.5, child_y)
+				local p1 = Vector2(x1 + node_width * 0.5, y1 + node_height)
+				local p2 = Vector2(cx + child_width * 0.5, child_y)
 
 				ScriptGUI.hud_iline(gui, res_x, res_y, p1, p2, layer - 1, 2, lcolor)
 
 				cx = cx + child_width + node_spacing
-				cx = cx + child_total_width*0.5
+				cx = cx + child_total_width * 0.5
 			end
 		end
 
 		local ocolor = Color(70, 55, 155, 255)
-		local xb = res_x/5
-		local yb = res_y/5
+		local xb = 5 / res_x
+		local yb = 5 / res_y
 
 		ScriptGUI.irect(gui, res_x, res_y, start_x - xb, child_y - yb, (cx + xb) - node_spacing, child_y + node_height + yb, layer - 1, ocolor)
 	end

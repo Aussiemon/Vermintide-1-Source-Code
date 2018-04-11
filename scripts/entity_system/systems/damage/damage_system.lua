@@ -70,7 +70,7 @@ end
 local debug_found_units = {}
 DamageSystem.update = function (self, context, t)
 	local pdArray_set_empty = pdArray.set_empty
-	self.active_damage_buffer_index = self.active_damage_buffer_index - 3
+	self.active_damage_buffer_index = 3 - self.active_damage_buffer_index
 	local active_damage_buffer_index = self.active_damage_buffer_index
 
 	for unit, extension in pairs(self.extension_unit_data) do
@@ -295,7 +295,7 @@ DamageSystem.rpc_take_falling_damage = function (self, sender, go_id, fall_heigh
 		return 
 	end
 
-	fall_height = fall_height*0.25
+	fall_height = fall_height * 0.25
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	local FALL_DAMAGE_MULTIPLIER = movement_settings_table.fall.heights.FALL_DAMAGE_MULTIPLIER
 	local MIN_FALL_DAMAGE_HEIGHT = movement_settings_table.fall.heights.MIN_FALL_DAMAGE_HEIGHT
@@ -305,7 +305,7 @@ DamageSystem.rpc_take_falling_damage = function (self, sender, go_id, fall_heigh
 
 	if MIN_FALL_DAMAGE_HEIGHT < fall_height then
 		local delta = fall_height - MIN_FALL_DAMAGE_HEIGHT
-		local fall_damage = math.clamp(delta*FALL_DAMAGE_MULTIPLIER, MIN_FALL_DAMAGE, MAX_FALL_DAMAGE)
+		local fall_damage = math.clamp(delta * FALL_DAMAGE_MULTIPLIER, MIN_FALL_DAMAGE, MAX_FALL_DAMAGE)
 		local damage_direction = Vector3(0, 0, 1)
 		local hit_zone_name = "full"
 		local damage_type = "kinetic"
@@ -396,7 +396,7 @@ DamageSystem.rpc_create_explosion = function (self, sender, attacker_unit_id, at
 
 	local explosion_template_name = NetworkLookup.explosion_templates[explosion_template_name_id]
 	local explosion_template = ExplosionTemplates[explosion_template_name]
-	scale = scale/100
+	scale = scale / 100
 	local damage_source = NetworkLookup.damage_sources[damage_source_id]
 	local is_husk = true
 
@@ -418,7 +418,7 @@ DamageSystem.create_explosion = function (self, attacker_unit, position, rotatio
 	local attacker_unit_id, attacker_is_level_unit = network_manager.game_object_or_level_id(network_manager, attacker_unit)
 	local explosion_template_id = NetworkLookup.explosion_templates[explosion_template_name]
 	local damage_source_id = NetworkLookup.damage_sources[damage_source]
-	scale = scale*100
+	scale = scale * 100
 
 	if self.is_server then
 		network_manager.network_transmit:send_rpc_clients("rpc_create_explosion", attacker_unit_id, attacker_is_level_unit, position, rotation, explosion_template_id, 1, damage_source_id)

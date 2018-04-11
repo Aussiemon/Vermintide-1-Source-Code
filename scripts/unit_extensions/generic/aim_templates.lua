@@ -40,9 +40,9 @@ local function look_at_target_unit(unit, data, dt, unit_position, target_unit, t
 		local rotation_right = Vector3.flat(Quaternion.right(rotation))
 
 		if 0 < Vector3.cross(rotation_forward_normalized, to_target_normalized).z then
-			look_target = unit_position + (rotation_forward - rotation_right)*target_distance
+			look_target = unit_position + (rotation_forward - rotation_right) * target_distance
 		else
-			look_target = unit_position + (rotation_forward + rotation_right)*target_distance
+			look_target = unit_position + (rotation_forward + rotation_right) * target_distance
 		end
 
 		look_target.z = old_z
@@ -50,7 +50,7 @@ local function look_at_target_unit(unit, data, dt, unit_position, target_unit, t
 
 	if previously_used_head_constraint then
 		local previous_look_target = data.previous_look_target:unbox()
-		local lerp_t = math.min(dt*5, 1)
+		local lerp_t = math.min(dt * 5, 1)
 		look_target = Vector3.lerp(previous_look_target, look_target, lerp_t)
 	end
 
@@ -95,7 +95,7 @@ AimTemplates.player = {
 
 			Unit.animation_set_variable(unit, data.aim_direction_pitch_var, block_anim_variable)
 
-			local aim_direction_scaled = aim_direction*3
+			local aim_direction_scaled = aim_direction * 3
 			local aim_from_pos = Unit.world_position(unit, Unit.node(unit, "camera_attach"))
 			local aim_target = aim_from_pos + aim_direction_scaled
 
@@ -104,7 +104,7 @@ AimTemplates.player = {
 			local aim_dir_flat = Vector3.normalize(Vector3.flat(aim_direction))
 			local fwd_flat = Vector3.normalize(Vector3.flat(unit_fwd))
 			local aim_angle = math.atan2(aim_dir_flat.y, aim_dir_flat.x) - math.atan2(fwd_flat.y, fwd_flat.x)
-			local aim_direction_scaled = -((aim_angle/math.pi + 1)%2 - 1)*2
+			local aim_direction_scaled = -((aim_angle / math.pi + 1) % 2 - 1) * 2
 
 			Unit.animation_set_variable(unit, data.look_direction_anim_var, math.clamp(aim_direction_scaled, -AIM_DIRECTION_MAX, AIM_DIRECTION_MAX))
 
@@ -150,7 +150,7 @@ AimTemplates.player = {
 			local pitch_rotation = Quaternion(Vector3.right(), pitch)
 			local look_rotation = Quaternion.multiply(yaw_rotation, pitch_rotation)
 			aim_direction = Vector3.normalize(Quaternion.forward(look_rotation))
-			local aim_direction_scaled = aim_direction*3
+			local aim_direction_scaled = aim_direction * 3
 			local from_pos = Unit.world_position(unit, data.camera_attach_node)
 
 			if script_data.lerp_debug or script_data.extrapolation_debug then
@@ -179,7 +179,7 @@ AimTemplates.player = {
 			local fwd_flat = Vector3.normalize(fwd_dir)
 			local aim_dir_flat = Vector3.normalize(aim_direction_scaled)
 			local aim_angle = math.atan2(aim_dir_flat.y, aim_dir_flat.x) - math.atan2(fwd_flat.y, fwd_flat.x)
-			local aim_direction_scaled = -((aim_angle/math.pi + 1)%2 - 1)*2
+			local aim_direction_scaled = -((aim_angle / math.pi + 1) % 2 - 1) * 2
 
 			Unit.animation_set_variable(unit, data.look_direction_anim_var, math.clamp(aim_direction_scaled, -AIM_DIRECTION_MAX, AIM_DIRECTION_MAX))
 
@@ -223,10 +223,10 @@ AimTemplates.ratling_gunner = {
 
 			if attack_pattern_data and attack_pattern_data.shoot_direction_box then
 				local shoot_direction = attack_pattern_data.shoot_direction_box:unbox()
-				aim_target = unit_position + Vector3.normalize(shoot_direction)*5
+				aim_target = unit_position + Vector3.normalize(shoot_direction) * 5
 			else
 				local look_direction = Quaternion.forward(Unit.local_rotation(unit, 0))
-				aim_target = unit_position + look_direction*5
+				aim_target = unit_position + look_direction * 5
 			end
 
 			Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
@@ -257,7 +257,7 @@ AimTemplates.ratling_gunner = {
 				Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
 			else
 				local look_direction = Quaternion.forward(Unit.local_rotation(unit, 0))
-				local aim_target = POSITION_LOOKUP[unit] + look_direction*5
+				local aim_target = POSITION_LOOKUP[unit] + look_direction * 5
 
 				Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
 			end
@@ -298,7 +298,7 @@ AimTemplates.innkeeper = {
 					local dist_sq = Vector3.distance_squared(POSITION_LOOKUP[player_unit], inn_keeper_position)
 
 					if player_unit == old_target then
-						dist_sq = dist_sq*stickiness_multiplier
+						dist_sq = dist_sq * stickiness_multiplier
 					end
 
 					if dist_sq < best_dist_sq then

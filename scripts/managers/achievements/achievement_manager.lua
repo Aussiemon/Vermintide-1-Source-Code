@@ -6,7 +6,7 @@ require("scripts/managers/achievements/achievement_templates")
 local platform_functions = {
 	debug_platform = {
 		check_version_number = function ()
-			local token = Application.time_since_launch() + 1 + math.random()*2
+			local token = Application.time_since_launch() + 1 + math.random() * 2
 
 			return false, token
 		end,
@@ -21,7 +21,7 @@ local platform_functions = {
 		unlock = function (platform_id, template)
 			print("[AchivementDebug] Unlocked:", template.name)
 
-			local token = Application.time_since_launch() + 1 + math.random()*2
+			local token = Application.time_since_launch() + 1 + math.random() * 2
 
 			return token
 		end,
@@ -347,7 +347,7 @@ AchievementManager.update = function (self, dt, t)
 
 		while 0 < to_process do
 			to_process = to_process - 1
-			self.next_achievement_to_process_index = self.next_achievement_to_process_index%achievements_n + 1
+			self.next_achievement_to_process_index = self.next_achievement_to_process_index % achievements_n + 1
 			local template = achievements[self.next_achievement_to_process_index]
 			local name = template.name
 
@@ -435,7 +435,7 @@ AchievementManager.debug_draw = function (self)
 		local key_color = Color(250, 255, 120, 0)
 		local description_color = Color(255, 255, 255, 100)
 		local strikethrough_color = Color(100, 255, 255, 0)
-		local start_pos = Vector3(res_x/2, res_y - 100, 200)
+		local start_pos = Vector3(res_x / 2, res_y - 100, 200)
 		local pos = Vector3.copy(start_pos)
 		local header_text = string.format("Achievements [%s]", self.platform)
 

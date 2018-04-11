@@ -155,7 +155,7 @@ end
 local broad_phase_fling_units = {}
 BTFollowAction.check_fling_skaven = function (self, unit, blackboard, t)
 	local forward = Quaternion.forward(Unit.local_rotation(unit, 0))
-	local check_pos = POSITION_LOOKUP[unit] + forward*2.6
+	local check_pos = POSITION_LOOKUP[unit] + forward * 2.6
 	local ai_system = Managers.state.entity:system("ai_system")
 	local num_units = Broadphase.query(ai_system.broadphase, check_pos, 1, broad_phase_fling_units)
 
@@ -179,7 +179,7 @@ end
 local hit_units = {}
 BTFollowAction.check_fling_skaven_expensive = function (self, unit, blackboard, t)
 	local forward = Quaternion.forward(Unit.local_rotation(unit, 0))
-	local check_pos = POSITION_LOOKUP[unit] + forward*2.6
+	local check_pos = POSITION_LOOKUP[unit] + forward * 2.6
 	local radius = 1
 	local pw = World.get_data(blackboard.world, "physics_world")
 

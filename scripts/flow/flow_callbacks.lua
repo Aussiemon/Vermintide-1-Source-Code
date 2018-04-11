@@ -111,7 +111,7 @@ function flow_callback_query_server_seeded_random_float(params)
 	local min = params.min or 0
 	local max = params.max or 1
 	local rnd = server_seeded_random(nil, nil, params.debug_name)
-	flow_return_table.value = min + rnd*(max - min)
+	flow_return_table.value = min + rnd * (max - min)
 
 	return flow_return_table
 end
@@ -1100,7 +1100,7 @@ function flow_callback_set_ai_aggro_modifier(params)
 	local unit = params.unit
 	local aggro_modifier = params.aggro_modifier
 	local aggro_extension = ScriptUnit.extension(unit, "aggro_system")
-	aggro_extension.aggro_modifier = aggro_modifier*-1
+	aggro_extension.aggro_modifier = aggro_modifier * -1
 
 	return 
 end
@@ -2602,7 +2602,7 @@ function flow_callback_broadphase_deal_damage(params)
 	if Unit.alive(attacker_unit) then
 		local rot = Unit.world_rotation(attacker_unit, 0)
 		local params_dir = params.direction
-		direction = Quaternion.right(rot)*params_dir.x + Quaternion.forward(rot)*params_dir.y + Quaternion.up(rot)*params_dir.z
+		direction = Quaternion.right(rot) * params_dir.x + Quaternion.forward(rot) * params_dir.y + Quaternion.up(rot) * params_dir.z
 	else
 		direction = params.direction
 	end

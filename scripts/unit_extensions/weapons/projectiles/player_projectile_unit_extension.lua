@@ -193,12 +193,12 @@ PlayerProjectileUnitExtension.handle_impacts = function (self, impacts, num_impa
 	local pos_min = NetworkConstants.position.min
 	local pos_max = NetworkConstants.position.max
 
-	for i = 1, num_impacts/ProjectileImpactDataIndex.STRIDE, 1 do
+	for i = 1, num_impacts / ProjectileImpactDataIndex.STRIDE, 1 do
 		if self.stop_impacts then
 			break
 		end
 
-		local j = (i - 1)*ProjectileImpactDataIndex.STRIDE
+		local j = (i - 1) * ProjectileImpactDataIndex.STRIDE
 		local hit_unit = impacts[j + UNIT_INDEX]
 		local hit_position = impacts[j + POSITION_INDEX]:unbox()
 		local hit_direction = impacts[j + DIRECTION_INDEX]:unbox()
@@ -538,12 +538,12 @@ ProjectileSpawners = {
 		local item_template_name = action_lookup_data.item_template_name
 		local action_name = action_lookup_data.action_name
 		local sub_action_name = projectile_data.sub_action_name
-		local bounce_dir = hit_direction - Vector3.dot(hit_direction, hit_normal)*2*hit_normal
-		local spread = Math.random()*math.pi*2
-		local angle = math.pi/16
+		local bounce_dir = hit_direction - 2 * Vector3.dot(hit_direction, hit_normal) * hit_normal
+		local spread = Math.random() * math.pi * 2
+		local angle = math.pi / 16
 
 		for i = 1, 2, 1 do
-			local spread_angle = (i*2 - 3)*spread
+			local spread_angle = (2 * i - 3) * spread
 			local pitch = Quaternion(Vector3.right(), spread_angle)
 			local roll = Quaternion(Vector3.forward(), spread)
 			local spread_rot = Quaternion.multiply(roll, pitch)
@@ -552,8 +552,8 @@ ProjectileSpawners = {
 			local scale = self.scale
 			local angle = math.asin(new_dir.z)
 			local target_vector = new_dir
-			local speed = ScriptUnit.extension(self.unit, "projectile_locomotion_system").speed*0.5
-			local position = hit_position + new_dir*0.5
+			local speed = ScriptUnit.extension(self.unit, "projectile_locomotion_system").speed * 0.5
+			local position = hit_position + new_dir * 0.5
 
 			Managers.state.entity:system("projectile_system"):spawn_player_projectile(owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name)
 		end
@@ -643,7 +643,7 @@ PlayerProjectileUnitExtension.hit_level_unit = function (self, impact_data, hit_
 	end
 
 	if script_data.debug_arrow_impacts then
-		QuickDrawerStay:cylinder(hit_position + hit_direction*0.3, hit_position - hit_direction*0.3, 0.02, Color(0, 0, 255))
+		QuickDrawerStay:cylinder(hit_position + hit_direction * 0.3, hit_position - hit_direction * 0.3, 0.02, Color(0, 0, 255))
 	end
 
 	local action = self.action
@@ -765,9 +765,9 @@ PlayerProjectileUnitExtension.link_projectile = function (self, hit_unit, hit_po
 	local depth_offset = impact_data.depth_offset or 0.15
 
 	if damage then
-		broken_chance = broken_chance*math.clamp(damage/2, 0.75, 1.25)
+		broken_chance = broken_chance * math.clamp(damage / 2, 0.75, 1.25)
 	else
-		broken_chance = broken_chance*2
+		broken_chance = broken_chance * 2
 	end
 
 	if broken_chance <= 0.5 and projectile_info.dummy_linker_broken_units then
@@ -782,13 +782,13 @@ PlayerProjectileUnitExtension.link_projectile = function (self, hit_unit, hit_po
 			depth_offset = 0.15
 		end
 	elseif damage then
-		depth = depth*math.clamp(damage, 1, 3)
+		depth = depth * math.clamp(damage, 1, 3)
 	end
 
 	local normalized_direction = Vector3.normalize(hit_direction)
 	depth = depth + depth_offset
-	local random_bank = math.random()*2.14 - 0.5
-	local link_position = hit_position + normalized_direction*depth
+	local random_bank = math.random() * 2.14 - 0.5
+	local link_position = hit_position + normalized_direction * depth
 	local link_rotation = Quaternion.look(normalized_direction)
 	local new_link_rotation = Quaternion.multiply(link_rotation, Quaternion(Vector3.forward(), random_bank))
 	local node_index = Actor.node(hit_actor)

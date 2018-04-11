@@ -103,14 +103,14 @@ DarknessSystem._update_light_sources = function (self, dt, t)
 			local intensity = data.intensity
 
 			for i = 1, 10, 1 do
-				local dist = math.max(i*0.5, 1)
-				local brightness = math.min(255, (intensity*255)/(dist*dist))
+				local dist = math.max(i * 0.5, 1)
+				local brightness = math.min(255, (255 * intensity) / (dist * dist))
 				local color = Color(brightness, brightness, brightness)
 
 				QuickDrawer:circle(source_pos + Vector3(0, 0, 0.05), dist, Vector3.up(), color, 16)
 			end
 
-			QuickDrawer:circle(source_pos + Vector3(0, 0, 0.05), math.sqrt(intensity/DarknessSystem.DARKNESS_THRESHOLD), Vector3.up(), Color(255, 0, 0), 16)
+			QuickDrawer:circle(source_pos + Vector3(0, 0, 0.05), math.sqrt(intensity / DarknessSystem.DARKNESS_THRESHOLD), Vector3.up(), Color(255, 0, 0), 16)
 		end
 	end
 
@@ -122,9 +122,9 @@ local IN_TWILIGHT_LIGHT_VALUE = 0.015
 local TWILIGHT_MAX_INTENSITY = 0.15
 
 local function LIGHT_TO_DARKNESS_INTENSITY_CONVERSION_FUNCTION(light_value)
-	local darkness = (light_value/IN_TWILIGHT_LIGHT_VALUE - 1)^2
+	local darkness = (1 - light_value / IN_TWILIGHT_LIGHT_VALUE)^2
 
-	return darkness/15
+	return darkness / 15
 end
 
 DarknessSystem._update_player_unit_darkness = function (self, dt, t)
@@ -143,7 +143,7 @@ DarknessSystem._update_player_unit_darkness = function (self, dt, t)
 				data.intensity = math.auto_lerp(LIGHT_LIGHT_VALUE, IN_TWILIGHT_LIGHT_VALUE, 0, TWILIGHT_MAX_INTENSITY, light_value)
 				data.in_darkness = true
 			else
-				data.intensity = math.min(math.max(data.intensity, TWILIGHT_MAX_INTENSITY) + dt*LIGHT_TO_DARKNESS_INTENSITY_CONVERSION_FUNCTION(light_value), 1)
+				data.intensity = math.min(math.max(data.intensity, TWILIGHT_MAX_INTENSITY) + dt * LIGHT_TO_DARKNESS_INTENSITY_CONVERSION_FUNCTION(light_value), 1)
 				data.in_darkness = true
 			end
 		else
@@ -199,7 +199,7 @@ DarknessSystem._update_darkness_fx = function (self, dt, t)
 
 			self._in_darkness = true
 
-			WwiseWorld.set_source_parameter(wwise_world, SOURCE_ID, "darkness_intensity", intensity*100)
+			WwiseWorld.set_source_parameter(wwise_world, SOURCE_ID, "darkness_intensity", intensity * 100)
 
 			local fx = self._screen_fx_name
 
@@ -213,7 +213,7 @@ DarknessSystem._update_darkness_fx = function (self, dt, t)
 				self._screen_fx_id = id
 			end
 		elseif in_darkness then
-			WwiseWorld.set_source_parameter(wwise_world, SOURCE_ID, "darkness_intensity", intensity*100)
+			WwiseWorld.set_source_parameter(wwise_world, SOURCE_ID, "darkness_intensity", intensity * 100)
 
 			local id = self._screen_fx_id
 
@@ -257,7 +257,7 @@ DarknessSystem.calculate_light_value = function (self, position)
 		local pos = POSITION_LOOKUP[unit]
 		local dist_sq = math.max(Vector3.distance_squared(position, pos), 1)
 		local intensity = data.intensity
-		light_value = light_value + intensity*dist_sq/1
+		light_value = light_value + intensity * 1 / dist_sq
 	end
 
 	local local_player_intensity = self._local_players_light_intensity
@@ -270,7 +270,7 @@ DarknessSystem.calculate_light_value = function (self, position)
 		if Unit.alive(player_unit) then
 			local pos = POSITION_LOOKUP[player_unit]
 			local dist_sq = math.max(Vector3.distance_squared(position, pos), 1)
-			light_value = light_value + local_player_intensity*dist_sq/1
+			light_value = light_value + local_player_intensity * 1 / dist_sq
 		end
 	end
 

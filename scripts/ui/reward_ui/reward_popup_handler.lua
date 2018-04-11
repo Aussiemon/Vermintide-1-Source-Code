@@ -350,8 +350,8 @@ RewardPopupHandler.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
 	local spacing = 80
-	local half_trait_amount = (number_of_traits - 1)*0.5
-	local start_x_position = -((width + spacing)*half_trait_amount)
+	local half_trait_amount = (number_of_traits - 1) * 0.5
+	local start_x_position = -((width + spacing) * half_trait_amount)
 
 	for i = 1, number_of_traits, 1 do
 		local trait_scenegraph_name = "trait_button_" .. i
@@ -398,7 +398,7 @@ RewardPopupHandler.update_animation = function (self, dt)
 	if time then
 		time = time + dt
 		local total_time = 2
-		local progress = math.min(time/total_time, 1)
+		local progress = math.min(time / total_time, 1)
 
 		self.update_animation_sequence(self, dt, progress)
 
@@ -434,7 +434,7 @@ RewardPopupHandler.update_animation_sequence = function (self, dt, progress)
 			if update then
 				end_progress = end_progress - start_progress
 				start_progress = progress - start_progress
-				local local_progress = math.min(start_progress/end_progress, 1)
+				local local_progress = math.min(start_progress / end_progress, 1)
 
 				animation.update(ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 

@@ -113,16 +113,16 @@ ExperienceSettings = {
 				if experience < exp_total then
 					level = i - 1
 					experience_into_level = experience - previous_exp_total
-					progress = experience_into_level/experience_levels_main[i]
+					progress = experience_into_level / experience_levels_main[i]
 
 					break
 				end
 			end
 		else
 			local after_main_level_experience = experience - total_experience_for_main_levels
-			experience_into_level = after_main_level_experience%experience_for_levels_after_main
-			level = num_defined_experience_levels + math.floor(after_main_level_experience/experience_for_levels_after_main)
-			progress = experience_into_level/experience_for_levels_after_main
+			experience_into_level = after_main_level_experience % experience_for_levels_after_main
+			level = num_defined_experience_levels + math.floor(after_main_level_experience / experience_for_levels_after_main)
+			progress = experience_into_level / experience_for_levels_after_main
 		end
 
 		return level, progress, experience_into_level

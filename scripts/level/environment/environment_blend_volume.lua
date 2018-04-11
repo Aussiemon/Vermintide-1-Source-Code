@@ -77,7 +77,7 @@ EnvironmentBlendVolume.update = function (self, dt)
 		self._current_timer = (self._is_inside and 1) or 0
 		self._force_blend = false
 	else
-		self._current_timer = math.clamp(self._current_timer + self._blend_time/1*dt*target, 0, 1)
+		self._current_timer = math.clamp(self._current_timer + 1 / self._blend_time * dt * target, 0, 1)
 	end
 
 	self._value = math.smoothstep(self._current_timer, 0, 1)

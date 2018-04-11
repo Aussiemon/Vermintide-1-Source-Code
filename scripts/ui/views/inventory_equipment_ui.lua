@@ -191,14 +191,14 @@ InventoryEquipmentUI.handle_gamepad_input = function (self, dt)
 
 			if move_down or move_down_hold then
 				new_equipment_index = math.max(selected_equipment_index - 1, 1)
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 			else
 				local move_up = input_service.get(input_service, "move_up")
 				local move_up_hold = input_service.get(input_service, "move_up_hold")
 
 				if move_up or move_up_hold then
 					new_equipment_index = math.min(selected_equipment_index + 1, NUM_EQUIPMENT_SLOT_BUTTONS)
-					self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+					self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 				end
 			end
 
@@ -349,9 +349,9 @@ end
 InventoryEquipmentUI.rotate_loading_icon = function (self, dt)
 	local loading_icon_style = self.preview_viewport_loading_widget.style.texture_id
 	local angle_fraction = loading_icon_style.fraction or 0
-	angle_fraction = (angle_fraction + dt)%1
+	angle_fraction = (angle_fraction + dt) % 1
 	local anim_fraction = math.easeOutCubic(angle_fraction)
-	local angle = anim_fraction*math.degrees_to_radians(360)
+	local angle = anim_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
 

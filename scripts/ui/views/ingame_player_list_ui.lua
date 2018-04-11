@@ -295,9 +295,9 @@ IngamePlayerListUI.get_ping_by_peer_id = function (self, peer_id)
 				total_value = total_value + ping_data[i]
 			end
 
-			local avrage_value = (0 < total_value and total_value/number_of_ping_values) or 0
+			local avrage_value = (0 < total_value and total_value / number_of_ping_values) or 0
 
-			return avrage_value*1000
+			return avrage_value * 1000
 		end
 	end
 
@@ -476,7 +476,7 @@ IngamePlayerListUI._update_gamepad_private_text_animation_timer = function (self
 			timer = math.min(timer + dt, total_time)
 			self._private_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -491,7 +491,7 @@ IngamePlayerListUI._update_gamepad_private_text_animation = function (self, dt, 
 
 	local anim_progress = math.ease_pulse(progress)
 	local text_style = self.private_text_gamepad_widget.style.text
-	text_style.font_size = anim_progress*10 + 22
+	text_style.font_size = 22 + 10 * anim_progress
 
 	return 
 end

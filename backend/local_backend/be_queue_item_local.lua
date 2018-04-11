@@ -1,6 +1,6 @@
 BEQueueItemLocal = class(BEQueueItemLocal)
 BEQueueItemLocal.init = function (self, parameters, items)
-	self._complete_time = Application.time_since_launch() + Math.random()*1
+	self._complete_time = Application.time_since_launch() + Math.random() * 1
 	self._parameters = parameters
 	self._items = items
 

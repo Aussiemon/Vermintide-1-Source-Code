@@ -3706,9 +3706,9 @@ for buff_name, buff_template in pairs(BuffTemplates) do
 							value = value - 1
 						end
 
-						value = math.abs(value*100)
+						value = math.abs(value * 100)
 					elseif key == "bonus" and value < 0 then
-						value = value*-1
+						value = value * -1
 					end
 
 					description_values[i] = value

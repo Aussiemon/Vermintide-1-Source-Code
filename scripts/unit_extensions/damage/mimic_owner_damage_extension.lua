@@ -20,8 +20,8 @@ MimicOwnerDamageExtension.update = function (self, unit, input, dt, context, t)
 
 	local ignore_heals = self.ignore_heals
 
-	for i = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-		local j = (i - 1)*DamageDataIndex.STRIDE
+	for i = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+		local j = (i - 1) * DamageDataIndex.STRIDE
 		local attacker_unit = recent_damages[j + DamageDataIndex.ATTACKER]
 		local damage_amount = recent_damages[j + DamageDataIndex.DAMAGE_AMOUNT]
 		local damage_type = recent_damages[j + DamageDataIndex.DAMAGE_TYPE]

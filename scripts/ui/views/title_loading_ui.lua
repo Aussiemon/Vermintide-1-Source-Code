@@ -580,7 +580,7 @@ local gamma_adjuster_definition = {
 					local pos_start = world_position[1] + ui_style.offset[1]
 					local old_value = ui_content.internal_value
 					local cursor_x_norm = cursor_x - pos_start
-					local value = math.clamp(cursor_x_norm/size_x, 0, 1)
+					local value = math.clamp(cursor_x_norm / size_x, 0, 1)
 					ui_content.internal_value = value
 
 					if old_value ~= value then
@@ -596,18 +596,18 @@ local gamma_adjuster_definition = {
 					local internal_value = ui_content.internal_value
 					local min = ui_content.min
 					local max = ui_content.max
-					local real_value = math.round_with_precision(min + (max - min)*internal_value, ui_content.num_decimals or 0)
+					local real_value = math.round_with_precision(min + (max - min) * internal_value, ui_content.num_decimals or 0)
 					ui_content.value = real_value
 					ui_content.value_text = real_value
 					local slider_box_style = ui_style.slider_box
 					local slider_style = ui_style.slider
-					local size_x = slider_box_style.size[1]*internal_value
+					local size_x = slider_box_style.size[1] * internal_value
 					slider_style.size[1] = size_x
 					local slider_content = ui_content.slider
 					slider_content.uvs[2][1] = internal_value
 					local base_offset_x = slider_style.offset[1]
 					local slider_icon_style = ui_style.slider_icon
-					slider_icon_style.offset[1] = (base_offset_x + size_x) - slider_icon_style.size[1]/2
+					slider_icon_style.offset[1] = (base_offset_x + size_x) - slider_icon_style.size[1] / 2
 
 					if ui_content.hotspot.is_hover or ui_content.altering_value then
 						ui_style.value_text.text_color = ui_style.value_text.hover_color
@@ -892,7 +892,7 @@ local function get_slider_value(min, max, value)
 	local range = max - min
 	local norm_value = math.clamp(value, min, max) - min
 
-	return norm_value/range
+	return norm_value / range
 end
 
 TitleLoadingUI = class(TitleLoadingUI)
@@ -1078,8 +1078,8 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 		local min = gamma_adjuster_content.min
 		local max = gamma_adjuster_content.max
 		local diff = max - min
-		local total_step = diff*10^num_decimals
-		local step = total_step/1
+		local total_step = diff * 10^num_decimals
+		local step = 1 / total_step
 		local move = input_service.get(input_service, "analog_input")
 		local analog_speed = 0.01
 		local current_time = Managers.time:time("main")
@@ -1099,7 +1099,7 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 			end
 		elseif 0 < math.abs(move.x) then
 			gamma_adjuster_content.changed = true
-			gamma_adjuster_content.internal_value = math.clamp(internal_value + math.sign(move.x)*math.pow(move.x, 2)*total_step*dt*analog_speed, 0, 1)
+			gamma_adjuster_content.internal_value = math.clamp(internal_value + math.sign(move.x) * math.pow(move.x, 2) * total_step * dt * analog_speed, 0, 1)
 		end
 
 		if input_been_made then
@@ -1107,11 +1107,11 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 
 			if on_cooldown_last_frame then
 				input_cooldown_multiplier = math.max(input_cooldown_multiplier - 0.1, 0.1)
-				gamma_adjuster_content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+				gamma_adjuster_content.input_cooldown = 0.2 * math.ease_in_exp(input_cooldown_multiplier)
 				gamma_adjuster_content.input_cooldown_multiplier = input_cooldown_multiplier
 			else
 				input_cooldown_multiplier = 1
-				gamma_adjuster_content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+				gamma_adjuster_content.input_cooldown = 0.2 * math.ease_in_exp(input_cooldown_multiplier)
 				gamma_adjuster_content.input_cooldown_multiplier = input_cooldown_multiplier
 			end
 
@@ -1165,7 +1165,7 @@ TitleLoadingUI._update_input_text = function (self, dt)
 	local font, scaled_font_size = UIFontByResolution(widget_style.input_text_1)
 	local text_width, text_height, min = UIRenderer.text_size(self._ui_renderer, widget_content.input_text_1, font[1], scaled_font_size)
 	ui_scenegraph.skip_input_text_1.size[1] = text_width
-	ui_scenegraph.skip_input_icon.position[1] = ui_scenegraph.skip_input_text_1.position[1] + text_width + ui_scenegraph.skip_input_icon.size[1]*0.25
+	ui_scenegraph.skip_input_icon.position[1] = ui_scenegraph.skip_input_text_1.position[1] + text_width + ui_scenegraph.skip_input_icon.size[1] * 0.25
 
 	if texture_data then
 		ui_scenegraph.skip_input.position[1] = 0
@@ -1174,7 +1174,7 @@ TitleLoadingUI._update_input_text = function (self, dt)
 	widget_content.using_keyboard = (not texture_data and true) or false
 
 	if texture_data then
-		ui_scenegraph.skip_input_text_2.position[1] = ui_scenegraph.skip_input_text_1.position[1] + text_width + ui_scenegraph.skip_input_icon.size[1]*1.75
+		ui_scenegraph.skip_input_text_2.position[1] = ui_scenegraph.skip_input_text_1.position[1] + text_width + ui_scenegraph.skip_input_icon.size[1] * 1.75
 	else
 		local offset = 30
 		local font, scaled_font_size = UIFontByResolution(widget_style.input_text_3)
@@ -1245,13 +1245,13 @@ TitleLoadingUI._update_input = function (self, dt)
 		self._fade_timer = total_fade_time
 		self._cancel_timer = (self._cancel_timer or 0) + dt
 	else
-		self._cancel_timer = (self._cancel_timer or 0) - dt*3
+		self._cancel_timer = (self._cancel_timer or 0) - dt * 3
 	end
 
-	self._handle_skip_fade(self, self._fade_timer/total_fade_time*255)
+	self._handle_skip_fade(self, self._fade_timer / total_fade_time * 255)
 
 	self._cancel_timer = math.clamp(self._cancel_timer, 0, total_hold_time)
-	local progress = self._cancel_timer/total_hold_time
+	local progress = self._cancel_timer / total_hold_time
 
 	if 1 <= progress or (cancel_video and self._cancel_video) then
 		self._cancel_timer = nil
@@ -1269,7 +1269,7 @@ TitleLoadingUI._update_input = function (self, dt)
 		local hold_bar_max_length = self.hold_bar_max_length
 
 		if hold_bar_max_length then
-			self._skip_widget.style.hold_bar.size[1] = hold_bar_max_length*fraction
+			self._skip_widget.style.hold_bar.size[1] = hold_bar_max_length * fraction
 		end
 	end
 

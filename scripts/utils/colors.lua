@@ -1035,8 +1035,8 @@ end
 
 if not Colors.distinct_colors_lookup then
 	local i = 1
-	local f = i%3*63 + 92
-	local g = f/2
+	local f = 92 + 63 * i % 3
+	local g = f / 2
 	colors = {
 		{
 			0,

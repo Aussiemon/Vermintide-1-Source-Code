@@ -145,15 +145,15 @@ BuffExtension.add_buff = function (self, template_name, params)
 				local bpc_p = bpc[str] and bpc[str][i] and (bpc[str][i][2] or bpc[str][i][1])
 
 				if not bpc_p then
-					ScriptApplication.send_to_crashify("SimpleInventoryExtension", "hippo %s %f", Application.make_hash(template_name), math.pi*proc_chance)
+					ScriptApplication.send_to_crashify("SimpleInventoryExtension", "hippo %s %f", Application.make_hash(template_name), math.pi * proc_chance)
 
 					MODE.hippo = true
-				elseif bpc_p/8 + E < proc_chance then
-					ScriptApplication.send_to_crashify("SimpleInventoryExtension", "gnu %s %f %f", Application.make_hash(template_name), math.pi*bpc_p, math.pi*proc_chance)
+				elseif bpc_p / 8 + E < proc_chance then
+					ScriptApplication.send_to_crashify("SimpleInventoryExtension", "gnu %s %f %f", Application.make_hash(template_name), math.pi * bpc_p, math.pi * proc_chance)
 
 					MODE.gnu = true
 				elseif 1 < proc_chance then
-					ScriptApplication.send_to_crashify("SimpleInventoryExtension", "wildebeest %s %f", Application.make_hash(template_name), math.pi*proc_chance)
+					ScriptApplication.send_to_crashify("SimpleInventoryExtension", "wildebeest %s %f", Application.make_hash(template_name), math.pi * proc_chance)
 
 					MODE.wildebeest = true
 				end
@@ -452,8 +452,8 @@ BuffExtension.apply_buffs_to_value = function (self, value, stat_buff)
 
 		if math.random() <= proc_chance then
 			local bonus = stat_buff_data.bonus
-			local multiplier = stat_buff_data.multiplier + 1
-			final_value = (final_value + bonus)*multiplier
+			local multiplier = 1 + stat_buff_data.multiplier
+			final_value = (final_value + bonus) * multiplier
 
 			if is_proc then
 				procced = true

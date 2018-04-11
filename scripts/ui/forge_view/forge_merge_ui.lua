@@ -593,7 +593,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 
 		if slot_visible then
 			local current_gradient_threshold = slot_texture_widget.style.texture_id.gradient_threshold
-			local animation_time = (current_gradient_threshold - 1)*default_animation_time
+			local animation_time = (1 - current_gradient_threshold) * default_animation_time
 
 			if 0 < animation_time then
 				local animation_name = "trail_" .. slot_texture
@@ -610,7 +610,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 
 		if trail_visible then
 			local current_gradient_threshold = slot_trail_texture_widget.style.texture_id.gradient_threshold
-			local animation_time = (current_gradient_threshold - 1)*default_animation_time
+			local animation_time = (1 - current_gradient_threshold) * default_animation_time
 
 			if 0 < animation_time then
 				local animation_name = "trail_" .. slot_trail_texture
@@ -676,7 +676,7 @@ ForgeMergeUI.update_description_text = function (self)
 	self.set_merge_button_disabled(self, disable_button, not all_items_added and not no_items_added)
 
 	if not all_items_added then
-		local num_missing_items = num_items_to_merge - 5
+		local num_missing_items = 5 - num_items_to_merge
 		local text = ""
 
 		if enough_tokens and not no_items_added and not all_items_added then

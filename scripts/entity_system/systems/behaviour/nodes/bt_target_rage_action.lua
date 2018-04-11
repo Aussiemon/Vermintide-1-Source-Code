@@ -42,7 +42,7 @@ BTTargetRageAction.enter = function (self, unit, blackboard, t)
 
 		if script_data.debug_ai_movement then
 			Debug.world_sticky_text(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), rage_anim .. " " .. ((anim_driven and "(ANIM DRIVEN)") or ""), Color(140, 0, 220))
-			QuickDrawerStay:vector(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), Quaternion.forward(Unit.local_rotation(unit, 0))*3, Color(140, 0, 220))
+			QuickDrawerStay:vector(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), Quaternion.forward(Unit.local_rotation(unit, 0)) * 3, Color(140, 0, 220))
 		end
 
 		if 7 < blackboard.target_dist then

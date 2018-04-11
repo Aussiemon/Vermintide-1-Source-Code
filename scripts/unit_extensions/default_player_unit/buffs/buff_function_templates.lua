@@ -66,7 +66,7 @@ BuffFunctionTemplates.functions = {
 		local multiplier = params.multiplier
 		local time_into_buff = params.time_into_buff
 		local old_value_to_update_movement_setting, value_to_update_movement_setting, old_multiplier_to_update_movement_setting, multiplier_to_update_movement_setting = nil
-		local percentage_in_lerp = math.min(1, time_into_buff/buff.template.lerp_time)
+		local percentage_in_lerp = math.min(1, time_into_buff / buff.template.lerp_time)
 
 		if bonus then
 			local new_value = math.lerp(0, bonus, percentage_in_lerp)
@@ -84,7 +84,7 @@ BuffFunctionTemplates.functions = {
 				local boon_template = BoonTemplates.increased_combat_movement
 
 				if 0 < num_increased_combat_movement_boons then
-					multiplier = multiplier + (multiplier - 1)*num_increased_combat_movement_boons*boon_template.multiplier
+					multiplier = multiplier + (1 - multiplier) * num_increased_combat_movement_boons * boon_template.multiplier
 				end
 			end
 
@@ -147,8 +147,8 @@ BuffFunctionTemplates.functions = {
 			return 
 		end
 
-		local percentage_in_lerp = math.min(1, time_into_buff/buff.template.lerp_time)
-		percentage_in_lerp = percentage_in_lerp - 1
+		local percentage_in_lerp = math.min(1, time_into_buff / buff.template.lerp_time)
+		percentage_in_lerp = 1 - percentage_in_lerp
 		buff.last_frame_percentage = percentage_in_lerp
 
 		if bonus then
@@ -193,12 +193,12 @@ BuffFunctionTemplates.functions = {
 			return 
 		end
 
-		local max_health = current_max_health - new_multiplier*unmodified_max_health
+		local max_health = current_max_health - new_multiplier * unmodified_max_health
 
 		health_extension.set_max_health(health_extension, max_health, false)
 
 		local damage = health_extension.damage
-		local new_damage = damage - new_multiplier*damage
+		local new_damage = damage - new_multiplier * damage
 
 		if max_health <= new_damage then
 			new_damage = max_health - 1
@@ -223,12 +223,12 @@ BuffFunctionTemplates.functions = {
 				return 
 			end
 
-			local max_health = current_max_health - new_multiplier*unmodified_max_health
+			local max_health = current_max_health - new_multiplier * unmodified_max_health
 
 			health_extension.set_max_health(health_extension, max_health, false)
 
 			local damage = health_extension.damage
-			local new_damage = damage - new_multiplier*damage
+			local new_damage = damage - new_multiplier * damage
 
 			if max_health <= new_damage then
 				new_damage = max_health - 1
@@ -255,7 +255,7 @@ BuffFunctionTemplates.functions = {
 		local multiplier = params.multiplier
 		local new_multiplier = buff_extension.apply_buffs_to_value(buff_extension, multiplier, StatBuffIndex.CURSE_PROTECTION)
 		local damage = health_extension.damage
-		local new_damage = damage/(new_multiplier - 1)
+		local new_damage = damage / (1 - new_multiplier)
 
 		if unmodified_max_health <= new_damage then
 			new_damage = unmodified_max_health - 1
@@ -292,7 +292,7 @@ BuffFunctionTemplates.functions = {
 		end
 
 		if multiplier then
-			movement_setting_value = movement_setting_value*multiplier
+			movement_setting_value = movement_setting_value * multiplier
 		end
 
 		set_variable(path_to_movement_setting_to_modify, unit, movement_setting_value)
@@ -306,7 +306,7 @@ BuffFunctionTemplates.functions = {
 		local movement_setting_value = get_variable(path_to_movement_setting_to_modify, unit)
 
 		if multiplier then
-			movement_setting_value = movement_setting_value/multiplier
+			movement_setting_value = movement_setting_value / multiplier
 		end
 
 		if bonus then
@@ -421,7 +421,7 @@ BuffFunctionTemplates.functions = {
 		return 
 	end,
 	start_dot_damage = function (unit, buff, params)
-		local random_mod_next_dot_time = buff.template.time_between_dot_damages*0.75 + math.random()*0.5*buff.template.time_between_dot_damages
+		local random_mod_next_dot_time = 0.75 * buff.template.time_between_dot_damages + math.random() * 0.5 * buff.template.time_between_dot_damages
 		buff.next_poison_damage_time = params.t + random_mod_next_dot_time
 
 		if buff.template.start_flow_event then
@@ -436,7 +436,7 @@ BuffFunctionTemplates.functions = {
 
 			if health_extension.is_alive(health_extension) then
 				local buff_template = buff.template
-				local random_mod_next_dot_time = buff.template.time_between_dot_damages*0.75 + math.random()*0.5*buff.template.time_between_dot_damages
+				local random_mod_next_dot_time = 0.75 * buff.template.time_between_dot_damages + math.random() * 0.5 * buff.template.time_between_dot_damages
 				buff.next_poison_damage_time = buff.next_poison_damage_time + random_mod_next_dot_time
 
 				if Unit.alive(params.attacker_unit) then
@@ -545,13 +545,13 @@ BuffFunctionTemplates.functions = {
 	end,
 	apply_volume_movement_buff = function (unit, buff, params)
 		local movement_settings = PlayerUnitMovementSettings.get_movement_settings_table(unit)
-		movement_settings.move_speed = movement_settings.move_speed*params.multiplier
+		movement_settings.move_speed = movement_settings.move_speed * params.multiplier
 
 		return 
 	end,
 	remove_volume_movement_buff = function (unit, buff, params)
 		local movement_settings = PlayerUnitMovementSettings.get_movement_settings_table(unit)
-		movement_settings.move_speed = movement_settings.move_speed/params.multiplier
+		movement_settings.move_speed = movement_settings.move_speed / params.multiplier
 
 		return 
 	end
@@ -561,8 +561,8 @@ BuffFunctionTemplates.functions.update_charging_action_lerp_movement_buff = func
 	local time_into_buff = params.time_into_buff
 	local old_value_to_update_movement_setting, old_multiplier_to_update_movement_setting, multiplier_to_update_movement_setting = nil
 	local buff_extension = ScriptUnit.extension(unit, "buff_system")
-	multiplier = multiplier and buff_extension.apply_buffs_to_value(buff_extension, multiplier - 1, StatBuffIndex.INCREASED_MOVE_SPEED_WHILE_AIMING) - 1
-	local percentage_in_lerp = math.min(1, time_into_buff/buff.template.lerp_time)
+	multiplier = multiplier and 1 - buff_extension.apply_buffs_to_value(buff_extension, 1 - multiplier, StatBuffIndex.INCREASED_MOVE_SPEED_WHILE_AIMING)
+	local percentage_in_lerp = math.min(1, time_into_buff / buff.template.lerp_time)
 
 	if multiplier then
 		local player = Managers.player:owner(unit)
@@ -573,7 +573,7 @@ BuffFunctionTemplates.functions.update_charging_action_lerp_movement_buff = func
 			local boon_template = BoonTemplates.increased_combat_movement
 
 			if 0 < num_increased_combat_movement_boons then
-				multiplier = multiplier + (multiplier - 1)*num_increased_combat_movement_boons*boon_template.multiplier
+				multiplier = multiplier + (1 - multiplier) * num_increased_combat_movement_boons * boon_template.multiplier
 			end
 		end
 

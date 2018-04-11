@@ -213,7 +213,7 @@ LevelFilterUI._align_elements = function (self)
 		total_height = total_height + entry_height + height_offset + height_spacing
 	end
 
-	self.ui_scenegraph.element_pivot.local_position[2] = total_height*0.5 - 50
+	self.ui_scenegraph.element_pivot.local_position[2] = total_height * 0.5 - 50
 	self.ui_scenegraph.bg_rect.size[2] = total_height + 10
 
 	return 
@@ -303,11 +303,11 @@ LevelFilterUI._set_background_texture = function (self, texture)
 	return 
 end
 LevelFilterUI._update_button_pulse = function (self, dt, t)
-	local fraction = (self._position_fraction or 0) - 1
-	local time = t*5
-	local anim_progress = math.sin(time)*0.5 + 0.5
+	local fraction = 1 - (self._position_fraction or 0)
+	local time = t * 5
+	local anim_progress = 0.5 + math.sin(time) * 0.5
 	local widget = self._edge_button_glow_widget
-	widget.style.texture_id.color[1] = fraction*(anim_progress*155 + 100)
+	widget.style.texture_id.color[1] = fraction * (100 + 155 * anim_progress)
 
 	return 
 end
@@ -356,10 +356,10 @@ LevelFilterUI.set_background_animation_fraction = function (self, fraction, dire
 
 	if direction < 0 then
 		self.set_widget_horizontal_fraction(self, self._background_2_widget, fraction, 2)
-		self.set_widget_horizontal_fraction(self, self._background_widget, fraction - 1, 1)
+		self.set_widget_horizontal_fraction(self, self._background_widget, 1 - fraction, 1)
 	else
 		self.set_widget_horizontal_fraction(self, self._background_2_widget, fraction, 1)
-		self.set_widget_horizontal_fraction(self, self._background_widget, fraction - 1, 2)
+		self.set_widget_horizontal_fraction(self, self._background_widget, 1 - fraction, 2)
 	end
 
 	return 
@@ -371,11 +371,11 @@ LevelFilterUI.set_widget_horizontal_fraction = function (self, widget, fraction,
 	local uvs = content.texture_id.uvs
 	local offset = style.texture_id.offset
 	local default_width = scenegraph_definition[scenegraph_id].size[1]
-	local new_width = default_width*fraction
+	local new_width = default_width * fraction
 	self.ui_scenegraph[scenegraph_id].size[1] = new_width
 
 	if direction == 1 then
-		uvs[1][1] = fraction - 1
+		uvs[1][1] = 1 - fraction
 		uvs[2][1] = 1
 		offset[1] = 0
 	else
@@ -401,7 +401,7 @@ LevelFilterUI._update_animation = function (self, dt, t)
 		return 
 	end
 
-	local fraction = math.clamp(self._position_fraction + self._animation_speed*math.min(dt, 0.03333333333333333), 0, 1)
+	local fraction = math.clamp(self._position_fraction + self._animation_speed * math.min(dt, 0.03333333333333333), 0, 1)
 
 	self.set_position_fraction(self, fraction)
 
@@ -416,9 +416,9 @@ end
 LevelFilterUI.set_position_fraction = function (self, fraction)
 	self._position_fraction = fraction
 	local anim_fraction = math.easeCubic(fraction)
-	local value = anim_fraction*500 + -500
+	local value = -500 + 500 * anim_fraction
 	self.ui_scenegraph.background.local_position[1] = value
-	self._edge_button_mg_widget.style.texture_id.color[1] = fraction*255
+	self._edge_button_mg_widget.style.texture_id.color[1] = fraction * 255
 
 	return 
 end

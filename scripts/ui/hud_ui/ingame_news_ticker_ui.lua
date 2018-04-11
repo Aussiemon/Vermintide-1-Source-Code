@@ -115,7 +115,7 @@ IngameNewsTickerUI.update = function (self, dt, t)
 			self.delay = 5
 		end
 
-		news_ticker_widget_position[1] = news_ticker_widget_position[1] - dt*self.news_ticker_speed
+		news_ticker_widget_position[1] = news_ticker_widget_position[1] - dt * self.news_ticker_speed
 
 		self.draw(self, dt, t)
 	end

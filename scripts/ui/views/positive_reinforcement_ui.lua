@@ -277,7 +277,7 @@ PositiveReinforcementUI.update = function (self, dt, t)
 
 		local time_left = event.remove_time - t
 		local fade_duration = UISettings.positive_reinforcement.fade_duration
-		local alpha = math.clamp(time_left/fade_duration, 0, 1)*255
+		local alpha = 255 * math.clamp(time_left / fade_duration, 0, 1)
 		self._hash_widget_lookup[full_hash].content.text = event.text
 		self._hash_widget_lookup[full_hash].content.icon_texture = event.icon_texture
 		self._hash_widget_lookup[full_hash].style.icon.color[1] = alpha

@@ -4,7 +4,7 @@ NetworkConstants.damage_hotjoin_sync = Network.type_info("damage_hotjoin_sync")
 NetworkConstants.health = Network.type_info("health")
 NetworkConstants.velocity = Network.type_info("velocity")
 NetworkConstants.enemy_velocity = Network.type_info("enemy_velocity")
-NetworkConstants.VELOCITY_EPSILON = Vector3.length(Vector3(NetworkConstants.velocity.tolerance, NetworkConstants.velocity.tolerance, NetworkConstants.velocity.tolerance))*1.1
+NetworkConstants.VELOCITY_EPSILON = Vector3.length(Vector3(NetworkConstants.velocity.tolerance, NetworkConstants.velocity.tolerance, NetworkConstants.velocity.tolerance)) * 1.1
 NetworkConstants.position = Network.type_info("position")
 NetworkConstants.rotation = Network.type_info("rotation")
 NetworkConstants.enemy_rotation = Network.type_info("enemy_rotation")
@@ -24,7 +24,7 @@ NetworkConstants.attack_damage_value = Network.type_info("attack_damage_value")
 local num_attack_damage_values = #NetworkLookup.attack_damage_values
 local max_attack_damage_values = NetworkConstants.attack_damage_value.max
 
-fassert(num_attack_damage_values <= max_attack_damage_values, "Too many attack damage values (%i), global config max value (%i) needs to be upped to %i", num_attack_damage_values, max_attack_damage_values, max_attack_damage_values*2)
+fassert(num_attack_damage_values <= max_attack_damage_values, "Too many attack damage values (%i), global config max value (%i) needs to be upped to %i", num_attack_damage_values, max_attack_damage_values, max_attack_damage_values * 2)
 
 NetworkConstants.statistics_path_max_size = Network.type_info("statistics_path").max_size
 NetworkConstants.anim_event = Network.type_info("anim_event")

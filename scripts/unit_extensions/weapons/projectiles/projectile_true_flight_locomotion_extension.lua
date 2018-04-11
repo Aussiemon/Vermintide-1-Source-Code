@@ -184,20 +184,20 @@ ProjectileTrueFlightLocomotionExtension.update_towards_target = function (self, 
 	local dot_value = Vector3.dot(current_direction, wanted_direction)
 	local current_rotation = Quaternion.look(current_direction)
 	local wanted_rotation = Quaternion.look(wanted_direction)
-	local lerp_modifier = (distance < 5 and 1) or distance/5
-	lerp_modifier = lerp_modifier*lerp_modifier*math.min(self.on_target_time, 0.25)/0.25
-	local lerp_value = math.min(dt*lerp_modifier*100, 0.75)
+	local lerp_modifier = (distance < 5 and 1) or 5 / distance
+	lerp_modifier = lerp_modifier * lerp_modifier * math.min(self.on_target_time, 0.25) / 0.25
+	local lerp_value = math.min(dt * lerp_modifier * 100, 0.75)
 	local new_rotation = Quaternion.lerp(current_rotation, wanted_rotation, lerp_value)
 	local new_direction = Quaternion.forward(new_rotation)
-	local speed = self.speed*speed_multiplier
-	local new_position = position + new_direction*speed*dt
+	local speed = self.speed * speed_multiplier
+	local new_position = position + new_direction * speed * dt
 
 	return new_position
 end
 ProjectileTrueFlightLocomotionExtension.update_seeking_target = function (self, position, dt, t, seeking)
 	local speed_multiplier = TrueFlightTemplates[self.true_flight_template].speed_multiplier
 	local dt = self.dt
-	local speed = self.speed*speed_multiplier
+	local speed = self.speed * speed_multiplier
 	local angle = self.angle
 	local gravity = self.gravity
 	local target_vector = Vector3Box.unbox(self.target_vector_boxed)
@@ -234,10 +234,10 @@ ProjectileTrueFlightLocomotionExtension.find_broadphase_target = function (self,
 		ai_units_n = AiUtils.broadphase_query(self.target_position:unbox(), 5, ai_units)
 	else
 		local current_direction = self.current_direction:unbox()
-		ai_units_n = AiUtils.broadphase_query(position + current_direction*10, 4, ai_units)
+		ai_units_n = AiUtils.broadphase_query(position + current_direction * 10, 4, ai_units)
 
 		if ai_units_n <= 0 then
-			ai_units_n = AiUtils.broadphase_query(position + current_direction*20, 10, ai_units)
+			ai_units_n = AiUtils.broadphase_query(position + current_direction * 20, 10, ai_units)
 		end
 	end
 
@@ -326,14 +326,14 @@ ProjectileTrueFlightLocomotionExtension.use_this_later = function (self, unit, p
 		local right_vector = Vector3.right()
 		local current_rotation = Quaternion.look(current_direction)
 		local wanted_rotation = Quaternion.look(wanted_direction)
-		local lerp_modifier = math.max(lerp_squared_distance_threshold - distance*distance, 1)/lerp_squared_distance_threshold
-		lerp_modifier = lerp_modifier*lerp_modifier
-		local new_rotation = Quaternion.lerp(current_rotation, wanted_rotation, dt*lerp_modifier*lerp_constant)
+		local lerp_modifier = math.max(lerp_squared_distance_threshold - distance * distance, 1) / lerp_squared_distance_threshold
+		lerp_modifier = lerp_modifier * lerp_modifier
+		local new_rotation = Quaternion.lerp(current_rotation, wanted_rotation, dt * lerp_modifier * lerp_constant)
 		new_direction = Quaternion.forward(new_rotation)
 	end
 
-	local speed = self.speed*speed_multiplier
-	local new_position = position + direction*speed*dt
+	local speed = self.speed * speed_multiplier
+	local new_position = position + direction * speed * dt
 
 	return new_position
 end

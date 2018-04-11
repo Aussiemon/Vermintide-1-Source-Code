@@ -97,9 +97,9 @@ InventoryViewPreviewer.update = function (self, dt)
 	local unit_pose, unit_extents = Unit.box(character_unit)
 	self.camera_height_target = self.camera_lookat_height_target
 
-	if math.pi*2 < self.camera_xy_angle_target then
-		self.camera_xy_angle_current = self.camera_xy_angle_current - math.pi*2
-		self.camera_xy_angle_target = self.camera_xy_angle_target - math.pi*2
+	if math.pi * 2 < self.camera_xy_angle_target then
+		self.camera_xy_angle_current = self.camera_xy_angle_current - math.pi * 2
+		self.camera_xy_angle_target = self.camera_xy_angle_target - math.pi * 2
 	end
 
 	local character_xy_angle_new = math.lerp(self.camera_xy_angle_current, self.camera_xy_angle_target, 0.1)
@@ -111,8 +111,8 @@ InventoryViewPreviewer.update = function (self, dt)
 	self.camera_lookat_height_current = camera_lookat_height_new
 	self.camera_distance_current = camera_distance_new
 	local camera_position_new = Vector3.zero()
-	camera_position_new.x = math.cos(1.57)*camera_distance_new
-	camera_position_new.y = math.sin(1.57)*camera_distance_new
+	camera_position_new.x = math.cos(1.57) * camera_distance_new
+	camera_position_new.y = math.sin(1.57) * camera_distance_new
 	camera_position_new.z = camera_height_new
 
 	ScriptCamera.set_local_position(self.camera, camera_position_new)
@@ -169,8 +169,8 @@ InventoryViewPreviewer.handle_input = function (self, input_service)
 		local mouse_scroll = input_service.get(input_service, "scroll_axis")
 
 		if self.last_mouse_position and (mouse_hold or 0 < Vector3.length(mouse_scroll)) then
-			self.camera_xy_angle_target = self.camera_xy_angle_target - (mouse.x - self.last_mouse_position[1])*0.01
-			local new_camera_look_height = self.camera_lookat_height_target - (mouse.y - self.last_mouse_position[2])*0.005
+			self.camera_xy_angle_target = self.camera_xy_angle_target - (mouse.x - self.last_mouse_position[1]) * 0.01
+			local new_camera_look_height = self.camera_lookat_height_target - (mouse.y - self.last_mouse_position[2]) * 0.005
 			self.camera_lookat_height_target = math.min(math.max(new_camera_look_height, 0.3), self.unit_max_look_height)
 			self.camera_zoom_lerp_t = self.camera_zoom_lerp_t + mouse_scroll.y
 			self.camera_distance_target = self.camera_distance_target - mouse_scroll.y
@@ -196,7 +196,7 @@ InventoryViewPreviewer.handle_controller_input = function (self, input_service, 
 
 	local move_left = input_service.get(input_service, "trigger_left_soft")
 	local move_right = input_service.get(input_service, "trigger_right_soft")
-	self.camera_xy_angle_target = self.camera_xy_angle_target + (move_left - move_right)*dt*5
+	self.camera_xy_angle_target = self.camera_xy_angle_target + (move_left - move_right) * dt * 5
 
 	return 
 end

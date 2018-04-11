@@ -247,17 +247,17 @@ UIPasses.list_pass = {
 
 		if ui_style.scenegraph_id then
 			local parent_size = ui_scenegraph[ui_style.scenegraph_id].size
-			local total_width = ui_style.total_width or num_draws*list_member_offset[1] + size[1]
-			local total_height = ui_style.total_height or num_draws*list_member_offset[2] + size[2]
+			local total_width = ui_style.total_width or num_draws * list_member_offset[1] + size[1]
+			local total_height = ui_style.total_height or num_draws * list_member_offset[2] + size[2]
 
 			if ui_style.horizontal_alignment == "center" then
-				element_alignment_position[1] = (position[1] + parent_size[1]/2) - total_width/2
+				element_alignment_position[1] = (position[1] + parent_size[1] / 2) - total_width / 2
 			elseif ui_style.horizontal_alignment == "right" then
 				element_alignment_position[1] = (position[1] + parent_size[1]) - total_width
 			end
 
 			if ui_style.vertical_alignment == "center" then
-				element_alignment_position[2] = (position[2] + parent_size[2]/2) - total_height/2
+				element_alignment_position[2] = (position[2] + parent_size[2] / 2) - total_height / 2
 			elseif ui_style.vertical_alignment == "top" then
 				element_alignment_position[2] = (position[2] + parent_size[2]) - math.abs(list_member_offset[2])
 			end
@@ -278,7 +278,7 @@ UIPasses.list_pass = {
 			local column_index = nil
 
 			if columns then
-				column_index = index%columns
+				column_index = index % columns
 
 				if column_index == 0 then
 					column_index = columns - 1
@@ -293,21 +293,21 @@ UIPasses.list_pass = {
 
 			if element_list_member_offset then
 				if column_index then
-					element_position[1] = element_alignment_position[1] + column_offset*column_index
-					element_position[2] = element_alignment_position[2] + element_list_member_offset[2]*row_count
+					element_position[1] = element_alignment_position[1] + column_offset * column_index
+					element_position[2] = element_alignment_position[2] + element_list_member_offset[2] * row_count
 					element_position[3] = element_alignment_position[3] + element_list_member_offset[3]
 				else
-					element_position[1] = element_alignment_position[1] + element_list_member_offset[1]*row_count
-					element_position[2] = element_alignment_position[2] + element_list_member_offset[2]*row_count
+					element_position[1] = element_alignment_position[1] + element_list_member_offset[1] * row_count
+					element_position[2] = element_alignment_position[2] + element_list_member_offset[2] * row_count
 					element_position[3] = element_alignment_position[3] + element_list_member_offset[3]
 				end
 			elseif column_index then
-				element_position[1] = element_alignment_position[1] + column_offset*column_index
-				element_position[2] = element_alignment_position[2] + list_member_offset[2]*row_count
+				element_position[1] = element_alignment_position[1] + column_offset * column_index
+				element_position[2] = element_alignment_position[2] + list_member_offset[2] * row_count
 				element_position[3] = element_alignment_position[3] + list_member_offset[3]
 			else
-				element_position[1] = element_alignment_position[1] + list_member_offset[1]*row_count
-				element_position[2] = element_alignment_position[2] + list_member_offset[2]*row_count
+				element_position[1] = element_alignment_position[1] + list_member_offset[1] * row_count
+				element_position[2] = element_alignment_position[2] + list_member_offset[2] * row_count
 				element_position[3] = element_alignment_position[3] + list_member_offset[3]
 			end
 
@@ -437,13 +437,13 @@ UIPasses.texture = {
 				if ui_style.horizontal_alignment == "right" then
 					position[1] = (position[1] + size[1]) - texture_size[1]
 				elseif ui_style.horizontal_alignment == "center" then
-					position[1] = position[1] + (size[1] - texture_size[1])/2
+					position[1] = position[1] + (size[1] - texture_size[1]) / 2
 				end
 
 				local inv_scale = RESOLUTION_LOOKUP.inv_scale
 
 				if ui_style.vertical_alignment == "center" then
-					position[2] = position[2] + (size[2] - texture_size[2])/2
+					position[2] = position[2] + (size[2] - texture_size[2]) / 2
 				elseif ui_style.vertical_alignment == "top" then
 					position[2] = (position[2] + size[2]) - texture_size[2]
 				end
@@ -651,13 +651,13 @@ UIPasses.texture_uv = {
 				if ui_style.horizontal_alignment == "right" then
 					position[1] = (position[1] + size[1]) - texture_size[1]
 				elseif ui_style.horizontal_alignment == "center" then
-					position[1] = position[1] + (size[1] - texture_size[1])/2
+					position[1] = position[1] + (size[1] - texture_size[1]) / 2
 				end
 
 				local inv_scale = RESOLUTION_LOOKUP.inv_scale
 
 				if ui_style.vertical_alignment == "center" then
-					position[2] = position[2] + (size[2] - texture_size[2])/2
+					position[2] = position[2] + (size[2] - texture_size[2]) / 2
 				elseif ui_style.vertical_alignment == "top" then
 					position[2] = (position[2] + size[2]) - texture_size[2]
 				end
@@ -769,13 +769,13 @@ UIPasses.rect = {
 				if ui_style.horizontal_alignment == "right" then
 					in_position[1] = (in_position[1] + size[1]) - rect_size[1]
 				elseif ui_style.horizontal_alignment == "center" then
-					in_position[1] = in_position[1] + (size[1] - rect_size[1])/2
+					in_position[1] = in_position[1] + (size[1] - rect_size[1]) / 2
 				end
 
 				local inv_scale = RESOLUTION_LOOKUP.inv_scale
 
 				if ui_style.vertical_alignment == "center" then
-					in_position[2] = in_position[2] + (size[2] - rect_size[2])/2
+					in_position[2] = in_position[2] + (size[2] - rect_size[2]) / 2
 				elseif ui_style.vertical_alignment == "top" then
 					in_position[2] = (in_position[2] + size[2]) - rect_size[2]
 				end
@@ -882,20 +882,20 @@ local function get_position_offset(text_width, font_height, font_min, font_max, 
 	if data.horizontal_alignment == "right" then
 		offset = Vector3(size[1] - text_width, 0, 0)
 	elseif data.horizontal_alignment == "center" then
-		local x_offset = (size[1] - text_width)/2
+		local x_offset = (size[1] - text_width) / 2
 		offset = Vector3(x_offset - origin.x, 0, 0)
 	end
 
 	local inv_scale = RESOLUTION_LOOKUP.inv_scale
 
 	if data.vertical_alignment == "center" then
-		local y_offset = (size[2] - font_height*inv_scale*0.5)/2
+		local y_offset = (size[2] - font_height * inv_scale * 0.5) / 2
 		offset = offset + Vector3(0, y_offset, 0)
 	elseif data.vertical_alignment == "top" then
-		local y_offset = size[2] - font_max*inv_scale
+		local y_offset = size[2] - font_max * inv_scale
 		offset = offset + Vector3(0, y_offset, 0)
 	else
-		offset.y = offset.y + math.abs(font_min)*inv_scale
+		offset.y = offset.y + math.abs(font_min) * inv_scale
 	end
 
 	return offset
@@ -980,18 +980,18 @@ UIPasses.text_area_chat = {
 		if vertical_alignment == "top" then
 			position = position + Vector3(0, size[2] - font_size, 0)
 		else
-			position = position + Vector3(0, num_texts*font_size, 0)
+			position = position + Vector3(0, num_texts * font_size, 0)
 		end
 
 		local _, num_texts_to_draw = nil
 
 		if PLATFORM == "xb1" then
-			num_texts_to_draw = math.floor(size[2]/ui_style.font_size) + 1
+			num_texts_to_draw = math.floor(size[2] / ui_style.font_size) + 1
 		else
-			num_texts_to_draw = math.floor(size[2]/ui_style.font_size) + 1
+			num_texts_to_draw = math.floor(size[2] / ui_style.font_size) + 1
 		end
 
-		local text_height = num_texts_to_draw*ui_style.font_size
+		local text_height = num_texts_to_draw * ui_style.font_size
 		local allowed_overlap = 12
 
 		if size[2] + allowed_overlap < text_height then
@@ -999,15 +999,15 @@ UIPasses.text_area_chat = {
 		end
 
 		num_texts_to_draw = math.min(num_texts_to_draw, num_texts)
-		local percent_num_texts_to_draw = num_texts_to_draw/num_texts
+		local percent_num_texts_to_draw = num_texts_to_draw / num_texts
 		local text_start_offset = ui_content.text_start_offset
-		local num_texts_to_scale_on = (percent_num_texts_to_draw - 1)*num_texts
+		local num_texts_to_scale_on = (1 - percent_num_texts_to_draw) * num_texts
 		local start_index, discrepancy, _ = nil
 
 		if PLATFORM == "xb1" then
-			_, start_index = math.modf((num_texts_to_scale_on + 1)*text_start_offset)
+			_, start_index = math.modf((1 + num_texts_to_scale_on) * text_start_offset)
 		else
-			start_index, discrepancy = math.modf((num_texts_to_scale_on + 1)*text_start_offset)
+			start_index, discrepancy = math.modf((1 + num_texts_to_scale_on) * text_start_offset)
 		end
 
 		local stop_index = math.min(num_texts, start_index + num_texts_to_draw)
@@ -1115,23 +1115,23 @@ UIPasses.text = {
 			local max_texts = ui_content.max_texts or #texts
 			local num_texts = math.min(#texts - text_start_index - 1, max_texts)
 			local inv_scale = RESOLUTION_LOOKUP.inv_scale
-			local full_font_height = (font_max + math.abs(font_min))*inv_scale
+			local full_font_height = (font_max + math.abs(font_min)) * inv_scale
 			local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
 
 			if ui_style.dynamic_height then
-				size[2] = num_texts*full_font_height
+				size[2] = num_texts * full_font_height
 				position.y = position.y - size[2]
 			end
 
 			local last_line_color = ui_style.last_line_color
 
 			if ui_style.vertical_alignment == "top" then
-				position = position + Vector3(0, size[2] - font_max*inv_scale, 0)
+				position = position + Vector3(0, size[2] - font_max * inv_scale, 0)
 			elseif ui_style.vertical_alignment == "center" then
-				position[2] = position[2] + (size[2] - full_font_height*0.5)/2
-				position[2] = position[2] + math.max(num_texts - 1, 0)*0.5*full_font_height
+				position[2] = position[2] + (size[2] - full_font_height * 0.5) / 2
+				position[2] = position[2] + math.max(num_texts - 1, 0) * 0.5 * full_font_height
 			else
-				position = position + Vector3(0, (num_texts - 1)*full_font_height + math.abs(font_min)*inv_scale, 0)
+				position = position + Vector3(0, (num_texts - 1) * full_font_height + math.abs(font_min) * inv_scale, 0)
 			end
 
 			if ui_style.horizontal_alignment == "center" then
@@ -1141,7 +1141,7 @@ UIPasses.text = {
 					text = texts[i - 1 + text_start_index]
 					local text_length = (text and UTF8Utils.string_length(text)) or 0
 					local width, height, min = UIRenderer.text_size(ui_renderer, text, font_material, font_size, size[2])
-					local alignment_offset = Vector3(size[1]/2 - width/2, 0, 0)
+					local alignment_offset = Vector3(size[1] / 2 - width / 2, 0, 0)
 					local color = ui_style.text_color
 
 					if ui_style.line_colors and ui_style.line_colors[i] then
@@ -1234,8 +1234,8 @@ UIPasses.text = {
 				position[3] = position[3] - 1
 				position[2] = (position[2] + full_font_height + font_min) - padding_y
 				position[1] = position[1] - 2 - padding_x
-				size[1] = size[1] + padding_x*2
-				size[2] = num_texts*full_font_height + padding_y*2
+				size[1] = size[1] + padding_x * 2
+				size[2] = num_texts * full_font_height + padding_y * 2
 
 				if ui_style.masked then
 					UIRenderer_draw_texture(ui_renderer, "rect_masked", position, size, ui_style.rect_color, ui_style.masked, ui_style and ui_style.saturated)
@@ -1325,13 +1325,13 @@ UIPasses.text = {
 local function draw_lorebook_texts(initial_retained_id, section, ui_renderer, position, font_material, font_size, font_name, text_color)
 	local width = section.width
 	local texts = section.texts
-	local num_texts = #texts/3
+	local num_texts = #texts / 3
 	local retained_id = initial_retained_id
 
 	for i = 1, num_texts, 1 do
-		local text = texts[i*3 - 2]
-		local justified = texts[i*3 - 1]
-		local new_position = position + texts[i*3]:unbox()
+		local text = texts[i * 3 - 2]
+		local justified = texts[i * 3 - 1]
+		local new_position = position + texts[i * 3]:unbox()
 
 		if justified then
 			retained_id = UIRenderer.draw_justified_text(ui_renderer, text, font_material, font_size, font_name, new_position, text_color, retained_id, width)
@@ -1485,14 +1485,14 @@ UIPasses.text_positive_reinforcement = {
 
 		local inv_scale = RESOLUTION_LOOKUP.inv_scale
 		local font_height, font_min, font_max = UIGetFontHeight(ui_renderer.gui, font_name, font_size)
-		local full_font_height = (font_max + math.abs(font_min))*inv_scale
+		local full_font_height = (font_max + math.abs(font_min)) * inv_scale
 
 		if ui_style.vertical_alignment == "top" then
-			position = position + Vector3(0, size[2] - font_max*inv_scale, 0)
+			position = position + Vector3(0, size[2] - font_max * inv_scale, 0)
 		elseif ui_style.vertical_alignment == "center" then
-			position[2] = position[2] + (size[2] - full_font_height*0.5)/2
+			position[2] = position[2] + (size[2] - full_font_height * 0.5) / 2
 		else
-			position = position + Vector3(0, math.abs(font_min)*inv_scale, 0)
+			position = position + Vector3(0, math.abs(font_min) * inv_scale, 0)
 		end
 
 		local color_text = ui_style.text_color
@@ -1549,13 +1549,13 @@ UIPasses.multiple_texts = {
 
 			if axis == 2 then
 				if ui_style.horizontal_alignment == "center" then
-					alignment_offset[1] = size[1]*0.5 - width*0.5
+					alignment_offset[1] = size[1] * 0.5 - width * 0.5
 				elseif ui_style.horizontal_alignment == "right" then
 					alignment_offset[1] = size[1] - width
 				end
 
 				if ui_style.vertical_alignment == "center" then
-					alignment_offset[2] = size[2]*0.5 - height*0.5
+					alignment_offset[2] = size[2] * 0.5 - height * 0.5
 				elseif ui_style.vertical_alignment == "top" then
 					alignment_offset[2] = size[2] - height
 				end
@@ -1565,13 +1565,13 @@ UIPasses.multiple_texts = {
 				end
 
 				if ui_style.horizontal_alignment == "center" then
-					alignment_offset[1] = size[1]*0.5 - width*0.5
+					alignment_offset[1] = size[1] * 0.5 - width * 0.5
 				elseif ui_style.horizontal_alignment == "right" then
 					alignment_offset[1] = size[1] - width
 				end
 
 				if ui_style.vertical_alignment == "center" then
-					alignment_offset[2] = size[2]*0.5 - height*0.5
+					alignment_offset[2] = size[2] * 0.5 - height * 0.5
 				elseif ui_style.vertical_alignment == "top" then
 					alignment_offset[2] = size[2] - height
 				end
@@ -1666,11 +1666,11 @@ UIPasses.viewport = {
 		local resx = RESOLUTION_LOOKUP.res_w
 		local resy = RESOLUTION_LOOKUP.res_h
 		local viewport_size = Vector3.zero()
-		viewport_size.x = scaled_size.x/resx
-		viewport_size.y = scaled_size.y/resy
+		viewport_size.x = scaled_size.x / resx
+		viewport_size.y = scaled_size.y / resy
 		local viewport_position = Vector3.zero()
-		viewport_position.x = scaled_position.x/resx
-		viewport_position.y = scaled_position.y/resy - 1 - viewport_size.y
+		viewport_position.x = scaled_position.x / resx
+		viewport_position.y = 1 - scaled_position.y / resy - viewport_size.y
 
 		if Viewport.get_data(pass_data.viewport, "initialize") then
 			Viewport.set_data(pass_data.viewport, "initialize", false)
@@ -1684,7 +1684,7 @@ UIPasses.viewport = {
 
 			local multiplier = (splitscreen and 0.5) or 1
 
-			Viewport.set_rect(pass_data.viewport, viewport_position.x*multiplier, viewport_position.y*multiplier, viewport_size.x*multiplier, viewport_size.y*multiplier)
+			Viewport.set_rect(pass_data.viewport, viewport_position.x * multiplier, viewport_position.y * multiplier, viewport_size.x * multiplier, viewport_size.y * multiplier)
 
 			pass_data.viewport_rect_pos_x = viewport_position.x
 			pass_data.viewport_rect_pos_y = viewport_position.y
@@ -1704,20 +1704,20 @@ UIPasses.viewport = {
 		local resx = RESOLUTION_LOOKUP.res_w
 		local resy = RESOLUTION_LOOKUP.res_h
 		local camera_space_position = Vector3.zero()
-		local aspect_ratio = resx/resy
+		local aspect_ratio = resx / resy
 		local default_aspect = 1.7777777777777777
 
 		if aspect_ratio < default_aspect then
-			local scale_x = screen_position.x/resx
-			local width = resy/9*16
-			camera_space_position.x = resx*0.5 - width*0.5 + width*scale_x
-			local scale_y = screen_position.y/resy
-			local height = pass_data.size_scale_x*resy
-			camera_space_position.y = resy*0.5 - height*0.5 + height*scale_y
+			local scale_x = screen_position.x / resx
+			local width = resy / 9 * 16
+			camera_space_position.x = resx * 0.5 - width * 0.5 + width * scale_x
+			local scale_y = screen_position.y / resy
+			local height = pass_data.size_scale_x * resy
+			camera_space_position.y = resy * 0.5 - height * 0.5 + height * scale_y
 		elseif default_aspect < aspect_ratio then
-			local scale_x = screen_position.x/resx
-			local width = pass_data.size_scale_y*resx
-			camera_space_position.x = resx*0.5 - width*0.5 + width*scale_x
+			local scale_x = screen_position.x / resx
+			local width = pass_data.size_scale_y * resx
+			camera_space_position.x = resx * 0.5 - width * 0.5 + width * scale_x
 			camera_space_position.y = screen_position.y
 		else
 			camera_space_position.x = screen_position.x
@@ -1807,8 +1807,8 @@ UIPasses.drag = {
 
 			assert(drag_texture_size, "Missing texture_size")
 
-			drag_position_table[1] = scaled_cursor.x - drag_texture_size[1]*0.5
-			drag_position_table[2] = scaled_cursor.y - drag_texture_size[2]*0.5
+			drag_position_table[1] = scaled_cursor.x - drag_texture_size[1] * 0.5
+			drag_position_table[2] = scaled_cursor.y - drag_texture_size[2] * 0.5
 			drag_position_table[3] = 999
 
 			UIRenderer_draw_texture(ui_renderer, ui_content[pass_definition.texture_id], drag_position_table, drag_texture_size, nil, nil, false)
@@ -1844,7 +1844,7 @@ UIPasses.hover = {
 		local cursor = (input_service and input_service.has(input_service, "cursor") and input_service.get(input_service, "cursor")) or NilCursor
 
 		if ui_content.hover_type == "circle" then
-			local half_size = (ui_renderer.get_scaling(ui_renderer)*size)/2
+			local half_size = (ui_renderer.get_scaling(ui_renderer) * size) / 2
 			local pos_center = Vector3Aux.flat(ScaleVectorToResolution(position)) + half_size
 			local square_distance = Vector3.distance_squared(Vector3Aux.unbox(cursor), pos_center)
 		else
@@ -1954,7 +1954,7 @@ UIPasses.tooltip_text = {
 		local text_start_index = ui_content.text_start_index or 1
 		local max_texts = ui_content.max_texts or #texts
 		local num_texts = math.min(#texts - text_start_index - 1, max_texts)
-		local full_font_height = (font_max + math.abs(font_min))*RESOLUTION_LOOKUP.inv_scale
+		local full_font_height = (font_max + math.abs(font_min)) * RESOLUTION_LOOKUP.inv_scale
 		local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
 		local fixed_position = ui_style.fixed_position
 
@@ -1971,7 +1971,7 @@ UIPasses.tooltip_text = {
 		temp_cursor_pos[1] = temp_cursor_pos[1] + ((cursor_offset and cursor_offset[1]) or 25)
 		temp_cursor_pos[2] = temp_cursor_pos[2] - ((cursor_offset and cursor_offset[2]) or 15)
 		local cursor_position = temp_cursor_pos
-		tooltip_size[2] = full_font_height*num_texts
+		tooltip_size[2] = full_font_height * num_texts
 		tooltip_size[1] = 0
 
 		for i = 1, num_texts, 1 do
@@ -2000,7 +2000,7 @@ UIPasses.tooltip_text = {
 		end
 
 		if PLATFORM == "xb1" then
-			platform_offset[2] = ((ui_style.grow_downward and 1) or -1)*10*UserSettings.ui_scale/200
+			platform_offset[2] = 10 * ((ui_style.grow_downward and 1) or -1) * UserSettings.ui_scale / 200
 		end
 
 		position[3] = UILayer.tooltip + 1
@@ -2019,8 +2019,8 @@ UIPasses.tooltip_text = {
 		position[3] = position[3] - 1
 		position[2] = (position[2] + full_font_height + font_min) - padding_y
 		position[1] = position[1] - 2 - padding_x
-		tooltip_size[1] = tooltip_size[1] + padding_x*2
-		tooltip_size[2] = tooltip_size[2] + padding_y*2
+		tooltip_size[1] = tooltip_size[1] + padding_x * 2
+		tooltip_size[2] = tooltip_size[2] + padding_y * 2
 
 		UIRenderer.draw_rounded_rect(ui_renderer, position, tooltip_size, 5, tooltip_background_color)
 
@@ -2070,9 +2070,9 @@ UIPasses.rect_text = {
 		local text_start_index = ui_content.text_start_index or 1
 		local max_texts = ui_content.max_texts or #texts
 		local num_texts = math.min(#texts - text_start_index - 1, max_texts)
-		local full_font_height = (font_max + math.abs(font_min))*RESOLUTION_LOOKUP.inv_scale
+		local full_font_height = (font_max + math.abs(font_min)) * RESOLUTION_LOOKUP.inv_scale
 		local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
-		rect_text_size[2] = full_font_height*num_texts
+		rect_text_size[2] = full_font_height * num_texts
 		rect_text_size[1] = 0
 
 		if ui_style.static_rect_width then
@@ -2095,7 +2095,7 @@ UIPasses.rect_text = {
 				text = texts[i - 1 + text_start_index]
 				local text_length = (text and UTF8Utils.string_length(text)) or 0
 				local width, height, min = UIRenderer.text_size(ui_renderer, text, font_material, font_size, size[2])
-				local alignment_offset = Vector3(size[1]/2 - width/2, 0, 0)
+				local alignment_offset = Vector3(size[1] / 2 - width / 2, 0, 0)
 				local line_color_override = nil
 
 				if ui_style.color_override then
@@ -2108,7 +2108,7 @@ UIPasses.rect_text = {
 				line_start_index = line_start_index + text_length + 1
 			end
 
-			position[1] = position[1] - rect_text_size[1]*0.5
+			position[1] = position[1] - rect_text_size[1] * 0.5
 		else
 			for i = 1, num_texts, 1 do
 				local text_line = texts[i - 1 + text_start_index]
@@ -2125,8 +2125,8 @@ UIPasses.rect_text = {
 		position[3] = position[3] - 1
 		position[2] = (position[2] + full_font_height + font_min) - padding_y
 		position[1] = position[1] - 2 - padding_x
-		rect_text_size[1] = rect_text_size[1] + padding_x*2
-		rect_text_size[2] = rect_text_size[2] + padding_y*2
+		rect_text_size[1] = rect_text_size[1] + padding_x * 2
+		rect_text_size[2] = rect_text_size[2] + padding_y * 2
 
 		if ui_style.masked then
 			UIRenderer_draw_texture(ui_renderer, "rect_masked", position, rect_text_size, ui_style.rect_color, ui_style.masked, ui_style and ui_style.saturated)

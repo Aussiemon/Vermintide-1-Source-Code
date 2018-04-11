@@ -135,11 +135,11 @@ AnimationSystem.update_anim_variables = function (self, t)
 
 				local distance = vector3_length(to_target)
 				local scale = data.scale
-				anim_value = math.clamp(scale - (scale*distance)/data.initial_distance, 0, scale)
+				anim_value = math.clamp(scale - (scale * distance) / data.initial_distance, 0, scale)
 			else
 				local jump_time = t - data.start_time
 				local scale = data.scale
-				anim_value = math.clamp((scale*jump_time)/data.duration, 0, scale)
+				anim_value = math.clamp((scale * jump_time) / data.duration, 0, scale)
 			end
 
 			Unit.animation_set_variable(unit, data.anim_variable_index, anim_value)
@@ -304,9 +304,9 @@ AnimationSystem.get_pos_diff_threshold = function (self, start_t, t, min_thresho
 
 	if POS_DIFF_RAMP_START_TIME < diff_t then
 		local x = diff_t - POS_DIFF_RAMP_START_TIME
-		local c = (max_threshold - min_threshold*1024)*POS_DIFF_DENOMINATOR
+		local c = (max_threshold - min_threshold * 1024) * POS_DIFF_DENOMINATOR
 		local b = min_threshold - c
-		local pos_diff_threshold = math.clamp(b*math.pow(2, x) + c, min_threshold, max_threshold)
+		local pos_diff_threshold = math.clamp(b * math.pow(2, x) + c, min_threshold, max_threshold)
 
 		return pos_diff_threshold
 	else
@@ -540,7 +540,7 @@ AnimationSystem._set_variable_by_distance = function (self, unit, anim_variable_
 end
 AnimationSystem.rpc_anim_set_variable_by_time = function (self, sender, unit_id, anim_variable_index, int_16bit_duration, scale)
 	local unit = self.unit_storage:unit(unit_id)
-	local duration = int_16bit_duration*0.00390625
+	local duration = int_16bit_duration * 0.00390625
 
 	self._set_variable_by_time(self, unit, anim_variable_index, duration, scale)
 
@@ -596,7 +596,7 @@ AnimationSystem.start_anim_variable_update_by_distance = function (self, unit, a
 	return 
 end
 AnimationSystem.start_anim_variable_update_by_time = function (self, unit, anim_variable_index, duration, scale)
-	local int_16bit_duration = math.clamp(duration*256, 0, 65535)
+	local int_16bit_duration = math.clamp(duration * 256, 0, 65535)
 	local network_manager = Managers.state.network
 	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
 

@@ -181,7 +181,7 @@ AiUtils.damage_target = function (target_unit, attacker_unit, action, damage_tri
 			if 0 < slots_n then
 				local dimishing_damage = dimishing_damage_data[math.min(slots_n, 9)]
 				local damage_modifier = dimishing_damage.damage
-				damage = damage*damage_modifier
+				damage = damage * damage_modifier
 			end
 		end
 
@@ -196,7 +196,7 @@ AiUtils.damage_target = function (target_unit, attacker_unit, action, damage_tri
 			if not target_status_extension.is_disabled(target_status_extension) then
 				local player_locomotion = ScriptUnit.extension(target_unit, "locomotion_system")
 
-				player_locomotion.add_external_velocity(player_locomotion, push_speed*damage_direction, action.max_player_push_speed)
+				player_locomotion.add_external_velocity(player_locomotion, push_speed * damage_direction, action.max_player_push_speed)
 			end
 		end
 	end
@@ -280,7 +280,7 @@ AiUtils.rotate_vector = function (vector, radians)
 	local x = math.cos(l_radians)
 	local y = math.sin(l_radians)
 	local return_vector = Vector3(x, y, 0)
-	return_vector = return_vector*length
+	return_vector = return_vector * length
 
 	return return_vector
 end
@@ -419,7 +419,7 @@ AiUtils.stagger = function (unit, blackboard, attacker_unit, stagger_direction, 
 	blackboard.pushing_unit = attacker_unit
 	blackboard.stagger_direction = Vector3Box(stagger_direction)
 	blackboard.stagger_length = stagger_length
-	blackboard.stagger_time = stagger_duration*difficulty_modifier + t
+	blackboard.stagger_time = stagger_duration * difficulty_modifier + t
 	blackboard.stagger = (blackboard.stagger and blackboard.stagger + 1) or 1
 	blackboard.stagger_type = stagger_type
 	blackboard.stagger_animation_scale = stagger_animation_scale
@@ -435,7 +435,7 @@ AiUtils.stagger = function (unit, blackboard, attacker_unit, stagger_direction, 
 	return 
 end
 AiUtils.random = function (value1, value2)
-	return value1 + Math.random()*(value2 - value1)
+	return value1 + Math.random() * (value2 - value1)
 end
 local MAX_TRIES = 10
 local MIN_ANGLE_STEP = 4
@@ -453,11 +453,11 @@ AiUtils.advance_towards_target = function (unit, blackboard, min_distance, max_d
 	local max_angle_step = max_angle_step or MAX_ANGLE_STEP
 	local min_angle = min_angle or MIN_ANGLE
 	local advance_towards_players = blackboard.advance_towards_players
-	direction = direction or math.random(0, 1)*2 - 1
+	direction = direction or 1 - math.random(0, 1) * 2
 
 	for j = 1, 2, 1 do
 		for i = 1, max_tries, 1 do
-			local angle = min_angle + math.random(min_angle_step*i, max_angle_step*i)*direction
+			local angle = min_angle + math.random(min_angle_step * i, max_angle_step * i) * direction
 			local position, wanted_distance = LocomotionUtils.outside_goal(blackboard.nav_world, unit, blackboard, min_distance, max_distance, angle, 3, above, below)
 
 			if position then
@@ -527,7 +527,7 @@ AiUtils.set_default_anim_constraint = function (unit, constraint_target)
 	local position = POSITION_LOOKUP[unit]
 	local rotation = Unit.world_rotation(unit, 0)
 	local rotation_forward = Quaternion.forward(rotation)
-	local aim_target = position + rotation_forward*5 + Vector3.up()*1.25
+	local aim_target = position + rotation_forward * 5 + Vector3.up() * 1.25
 
 	Unit.animation_set_constraint_target(unit, constraint_target, aim_target)
 
@@ -571,7 +571,7 @@ AiUtils.kill_unit = function (victim_unit, attacker_unit, hit_zone_name, damage_
 	local damage_direction = damage_direction or Vector3(0, 0, 1)
 	local health = ScriptUnit.extension(victim_unit, "health_system"):current_health()
 
-	for i = 1, math.ceil(health/damage_amount), 1 do
+	for i = 1, math.ceil(health / damage_amount), 1 do
 		DamageUtils.add_damage_network(victim_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, "suicide")
 	end
 
@@ -586,7 +586,7 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 	local aggro_list = blackboard.aggro_list
 	local damage_extension = ScriptUnit.extension(unit, "damage_system")
 	local strided_array, array_length = damage_extension.recent_damages(damage_extension)
-	local aggro_decay = dt*breed.perception_weights.aggro_decay_per_sec
+	local aggro_decay = dt * breed.perception_weights.aggro_decay_per_sec
 
 	for enemy_unit, aggro in pairs(aggro_list) do
 		aggro_list[enemy_unit] = math.clamp(aggro - aggro_decay, 0, 100)
@@ -598,7 +598,7 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 		local stride = DamageDataIndex.STRIDE
 		local index = 0
 
-		for i = 1, array_length/stride, 1 do
+		for i = 1, array_length / stride, 1 do
 			local attacker_unit = strided_array[index + DamageDataIndex.ATTACKER]
 			local damage_amount = strided_array[index + DamageDataIndex.DAMAGE_AMOUNT]
 			local damage_source = strided_array[index + DamageDataIndex.DAMAGE_SOURCE_NAME]
@@ -607,7 +607,7 @@ AiUtils.update_aggro = function (unit, blackboard, breed, t, dt)
 			if master_list_item then
 				local slot_type = master_list_item.slot_type
 				local multiplier = aggro_multipliers[slot_type] or 1
-				damage_amount = damage_amount*multiplier
+				damage_amount = damage_amount * multiplier
 			end
 
 			local aggro = aggro_list[attacker_unit]

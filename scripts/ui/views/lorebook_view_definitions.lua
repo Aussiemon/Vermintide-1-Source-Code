@@ -1371,7 +1371,7 @@ local animations = {
 				local contents_list = widgets[1]
 				local contents_list_style = contents_list.style.list_style
 				local item_styles = contents_list_style.item_styles
-				local select_alpha = local_progress*255
+				local select_alpha = local_progress * 255
 				local select_index = params.select_index
 				local selected_item_style = item_styles[select_index]
 				local left_texture_color = selected_item_style.selected_texture_left.color
@@ -1407,7 +1407,7 @@ local animations = {
 				local start_index = contents_list_style.start_index
 				local num_draws = contents_list_style.num_draws - 1
 				local stop_index = math.min(start_index + num_draws, #contents_list_content)
-				local hover_alpha = local_progress*255
+				local hover_alpha = local_progress * 255
 				local hover_index = params.hover_index
 
 				for i = start_index, stop_index, 1 do
@@ -1423,7 +1423,7 @@ local animations = {
 							right_texture_color[1] = alpha
 						end
 					else
-						local alpha = hover_alpha - 255
+						local alpha = 255 - hover_alpha
 
 						if alpha < left_texture_color[1] then
 							left_texture_color[1] = alpha
@@ -1456,7 +1456,7 @@ local animations = {
 				local start_index = contents_list_style.start_index
 				local num_draws = contents_list_style.num_draws - 1
 				local stop_index = math.min(start_index + num_draws, #contents_list_content)
-				local hover_alpha = local_progress*255
+				local hover_alpha = local_progress * 255
 				local hover_index = params.hover_index
 
 				for i = start_index, stop_index, 1 do
@@ -1470,7 +1470,7 @@ local animations = {
 							texture_color[1] = alpha
 						end
 					else
-						local alpha = hover_alpha - 255
+						local alpha = 255 - hover_alpha
 
 						if alpha < texture_color[1] then
 							texture_color[1] = alpha
@@ -1535,12 +1535,12 @@ local animations = {
 					local random_texture = page_reveal_mask_textures[i]
 					widget_content[style_id] = random_texture
 					local size_speed_multiplier = widget_texture_value.size_speed_multiplier
-					local size_progress = math.min(1, local_progress*size_speed_multiplier)
-					texture_size[1] = local_progress*widget_texture_value.width_value
-					texture_size[2] = local_progress*widget_texture_value.height_value
+					local size_progress = math.min(1, local_progress * size_speed_multiplier)
+					texture_size[1] = local_progress * widget_texture_value.width_value
+					texture_size[2] = local_progress * widget_texture_value.height_value
 					local alpha_speed_multiplier = widget_texture_value.alpha_speed_multiplier
-					local alpha_progress = math.min(1, local_progress*size_speed_multiplier)
-					texture_style.color[1] = alpha_progress*255
+					local alpha_progress = math.min(1, local_progress * size_speed_multiplier)
+					texture_style.color[1] = alpha_progress * 255
 				end
 
 				return 
@@ -1559,7 +1559,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				local widget_style = widget.style
-				widget_style.cover_rect.color[1] = local_progress*255
+				widget_style.cover_rect.color[1] = 255 * local_progress
 
 				return 
 			end,

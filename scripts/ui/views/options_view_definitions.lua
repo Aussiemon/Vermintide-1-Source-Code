@@ -465,7 +465,7 @@ local background_widget_definitions = {
 					scroll_function = function (ui_scenegraph, ui_style, ui_content, input_service, scroll_axis)
 						local scroll_step = ui_content.scroll_step or 0.1
 						local current_scroll_value = ui_content.internal_scroll_value
-						current_scroll_value = current_scroll_value + scroll_step*-scroll_axis.y
+						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
 
 						return 
@@ -755,7 +755,7 @@ local function create_checkbox_widget(text, scenegraph_id, base_offset)
 			debug_middle_line = {
 				offset = {
 					base_offset[1],
-					(base_offset[2] + CHECKBOX_WIDGET_SIZE[2]/2) - 1,
+					(base_offset[2] + CHECKBOX_WIDGET_SIZE[2] / 2) - 1,
 					base_offset[3] + 10
 				},
 				size = {
@@ -904,7 +904,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 						local pos_start = world_position[1] + ui_style.offset[1]
 						local old_value = ui_content.internal_value
 						local cursor_x_norm = cursor_x - pos_start
-						local value = math.clamp(cursor_x_norm/size_x, 0, 1)
+						local value = math.clamp(cursor_x_norm / size_x, 0, 1)
 						ui_content.internal_value = value
 
 						if old_value ~= value then
@@ -920,18 +920,18 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 						local internal_value = ui_content.internal_value
 						local min = ui_content.min
 						local max = ui_content.max
-						local real_value = math.round_with_precision(min + (max - min)*internal_value, ui_content.num_decimals or 0)
+						local real_value = math.round_with_precision(min + (max - min) * internal_value, ui_content.num_decimals or 0)
 						ui_content.value = real_value
 						ui_content.value_text = real_value
 						local slider_box_style = ui_style.slider_box
 						local slider_style = ui_style.slider
-						local size_x = slider_box_style.size[1]*internal_value
+						local size_x = slider_box_style.size[1] * internal_value
 						slider_style.size[1] = size_x
 						local slider_content = ui_content.slider
 						slider_content.uvs[2][1] = internal_value
 						local base_offset_x = slider_style.offset[1]
 						local slider_icon_style = ui_style.slider_icon
-						slider_icon_style.offset[1] = (base_offset_x + size_x) - slider_icon_style.size[1]/2
+						slider_icon_style.offset[1] = (base_offset_x + size_x) - slider_icon_style.size[1] / 2
 
 						if ui_content.hotspot.is_hover or ui_content.altering_value then
 							ui_style.value_text.text_color = ui_style.value_text.hover_color
@@ -1139,7 +1139,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 				dynamic_font = true,
 				font_type = "hell_shark_masked",
 				offset = {
-					base_offset[1] + 10 + 523 + 255 + 520,
+					10 + base_offset[1] + 523 + 255 + 520,
 					base_offset[2] + 6,
 					base_offset[3]
 				},
@@ -1180,7 +1180,7 @@ local function create_slider_widget(text, tooltip_text, scenegraph_id, base_offs
 			debug_middle_line = {
 				offset = {
 					base_offset[1],
-					(base_offset[2] + SLIDER_WIDGET_SIZE[2]/2) - 1,
+					(base_offset[2] + SLIDER_WIDGET_SIZE[2] / 2) - 1,
 					base_offset[3] + 10
 				},
 				size = {
@@ -1269,7 +1269,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 		item_contents[i] = content
 	end
 
-	local selected_bg_y = item_size[2]*options_n
+	local selected_bg_y = item_size[2] * options_n
 	local pi = math.pi
 	local definition = {
 		element = {
@@ -1600,7 +1600,7 @@ local function create_drop_down_widget(text, options, selected_option, tooltip_t
 			debug_middle_line = {
 				offset = {
 					base_offset[1],
-					(base_offset[2] + DROP_DOWN_WIDGET_SIZE[2]/2) - 1,
+					(base_offset[2] + DROP_DOWN_WIDGET_SIZE[2] / 2) - 1,
 					base_offset[3] + 10
 				},
 				size = {
@@ -1982,7 +1982,7 @@ local function create_stepper_widget(text, options, selected_option, tooltip_tex
 			debug_middle_line = {
 				offset = {
 					base_offset[1],
-					(base_offset[2] + STEPPER_WIDGET_SIZE[2]/2) - 1,
+					(base_offset[2] + STEPPER_WIDGET_SIZE[2] / 2) - 1,
 					base_offset[3] + 10
 				},
 				size = {
@@ -2052,9 +2052,9 @@ local function create_keybind_widget(selected_key, actions, actions_info, sceneg
 						end
 
 						if ui_content.active then
-							ui_content.active_t = ui_content.active_t + ui_renderer.dt*2.5
+							ui_content.active_t = ui_content.active_t + ui_renderer.dt * 2.5
 							local i = math.sirp(0, 1, ui_content.active_t)
-							ui_style.selected_rect.color[1] = i*255
+							ui_style.selected_rect.color[1] = i * 255
 						else
 							ui_style.selected_rect.color[1] = 255
 						end
@@ -2171,7 +2171,7 @@ local function create_keybind_widget(selected_key, actions, actions_info, sceneg
 			debug_middle_line = {
 				offset = {
 					base_offset[1],
-					(base_offset[2] + KEYBIND_WIDGET_SIZE[2]/2) - 1,
+					(base_offset[2] + KEYBIND_WIDGET_SIZE[2] / 2) - 1,
 					base_offset[3] + 10
 				},
 				size = {
@@ -2434,8 +2434,8 @@ SettingsWidgetTypeTemplate = {
 			local min = content.min
 			local max = content.max
 			local diff = max - min
-			local total_step = diff*10^num_decimals
-			local step = total_step/1
+			local total_step = diff * 10^num_decimals
+			local step = 1 / total_step
 			content.input_hold_time = content.input_hold_time or {}
 			local input_been_made = false
 
@@ -2443,13 +2443,13 @@ SettingsWidgetTypeTemplate = {
 				if not input_cooldown then
 					content.input_hold_time.left = (content.input_hold_time.left and content.input_hold_time.left + dt) or 0
 					local num_step = math.floor(math.lerp(1, 10, math.clamp(content.input_hold_time.left, 0, 1)))
-					content.internal_value = math.clamp(internal_value - step*num_step, 0, 1)
+					content.internal_value = math.clamp(internal_value - step * num_step, 0, 1)
 					input_been_made = true
 				end
 			elseif input_service.get(input_service, "move_right_hold") and not input_cooldown then
 				content.input_hold_time.right = (content.input_hold_time.right and content.input_hold_time.right + dt) or 0
 				local num_step = math.floor(math.lerp(1, 10, math.clamp(content.input_hold_time.right, 0, 1)))
-				content.internal_value = math.clamp(internal_value + step*num_step, 0, 1)
+				content.internal_value = math.clamp(internal_value + step * num_step, 0, 1)
 				input_been_made = true
 			end
 
@@ -2458,11 +2458,11 @@ SettingsWidgetTypeTemplate = {
 
 				if on_cooldown_last_frame then
 					input_cooldown_multiplier = math.max(input_cooldown_multiplier - 0.1, 0.1)
-					content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+					content.input_cooldown = 0.2 * math.ease_in_exp(input_cooldown_multiplier)
 					content.input_cooldown_multiplier = input_cooldown_multiplier
 				else
 					input_cooldown_multiplier = 1
-					content.input_cooldown = math.ease_in_exp(input_cooldown_multiplier)*0.2
+					content.input_cooldown = 0.2 * math.ease_in_exp(input_cooldown_multiplier)
 					content.input_cooldown_multiplier = input_cooldown_multiplier
 				end
 

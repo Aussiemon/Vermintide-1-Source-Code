@@ -318,7 +318,7 @@ StateMapViewSummary._change_privacy_setting = function (self, value, ignore_anim
 	if value < 0 then
 		self._current_privacy_index = (self._current_privacy_index == 1 and num_privacy_settings) or self._current_privacy_index + value
 	else
-		self._current_privacy_index = self._current_privacy_index%num_privacy_settings + value
+		self._current_privacy_index = self._current_privacy_index % num_privacy_settings + value
 	end
 
 	if not ignore_animations then
@@ -359,10 +359,10 @@ local function anim_func(t)
 	local b = 0
 	local c = 1
 	local d = 1
-	local ts = t/d*t
-	local tc = ts*t
+	local ts = t / d * t
+	local tc = ts * t
 
-	return b + c*(tc*2.7*ts + ts*-14.2975*ts + tc*26.095 + ts*-21.195 + t*7.6975)
+	return b + c * (2.7 * tc * ts + -14.2975 * ts * ts + 26.095 * tc + -21.195 * ts + 7.6975 * t)
 end
 
 StateMapViewSummary.start_open_animation = function (self)

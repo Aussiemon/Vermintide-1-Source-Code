@@ -121,7 +121,7 @@ local scenegraph_definition = {
 			56
 		},
 		position = {
-			-(spacing + 573)*0.5*2,
+			-(573 + spacing) * 0.5 * 2,
 			325,
 			4
 		}
@@ -177,7 +177,7 @@ local scenegraph_definition = {
 			58
 		},
 		position = {
-			-(spacing*0.5 + element_size[1]*0.5*2) - 20,
+			-(spacing * 0.5 + element_size[1] * 0.5 * 2) - 20,
 			-300,
 			10
 		}
@@ -364,8 +364,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					255
 				},
 				offset = {
-					-element_size[1]*0.5 - 8,
-					-element_size[2]*0.5 - 8,
+					-element_size[1] * 0.5 - 8,
+					-element_size[2] * 0.5 - 8,
 					5
 				}
 			},
@@ -383,8 +383,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					0
 				},
 				offset = {
-					-element_size[1]*0.5,
-					-element_size[2]*0.5,
+					-element_size[1] * 0.5,
+					-element_size[2] * 0.5,
 					3
 				}
 			},
@@ -395,8 +395,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					element_size[2]
 				},
 				offset = {
-					-element_size[1]*0.5 - 60,
-					-element_size[2]*0.5,
+					-element_size[1] * 0.5 - 60,
+					-element_size[2] * 0.5,
 					3
 				},
 				color = {
@@ -413,8 +413,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					element_size[2]
 				},
 				offset = {
-					element_size[1]*0.5,
-					-element_size[2]*0.5,
+					element_size[1] * 0.5,
+					-element_size[2] * 0.5,
 					3
 				},
 				color = {
@@ -429,11 +429,11 @@ local function create_element(scenegraph_id, title, textures, description_text)
 				color = Colors.get_table("black"),
 				size = {
 					element_size[1],
-					element_size[2]*0.33
+					element_size[2] * 0.33
 				},
 				offset = {
-					-element_size[1]*0.5,
-					-element_size[2]*0.5,
+					-element_size[1] * 0.5,
+					-element_size[2] * 0.5,
 					4
 				}
 			},
@@ -451,8 +451,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					255
 				},
 				offset = {
-					-element_size[1]*0.5,
-					-element_size[2]*0.5,
+					-element_size[1] * 0.5,
+					-element_size[2] * 0.5,
 					1
 				}
 			},
@@ -469,8 +469,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					255
 				},
 				offset = {
-					-element_size[1]*0.5,
-					-element_size[2]*0.5,
+					-element_size[1] * 0.5,
+					-element_size[2] * 0.5,
 					2
 				}
 			},
@@ -491,8 +491,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					13
 				},
 				offset = {
-					-element_size[1]*0.5 + 5,
-					-element_size[2]*0.5 + 5,
+					-element_size[1] * 0.5 + 5,
+					-element_size[2] * 0.5 + 5,
 					5
 				}
 			},
@@ -508,8 +508,8 @@ local function create_element(scenegraph_id, title, textures, description_text)
 					-element_size[2]
 				},
 				offset = {
-					-(element_size[1]*0.5 - 15),
-					-element_size[2]*0.5 + 12,
+					-(element_size[1] * 0.5 - 15),
+					-element_size[2] * 0.5 + 12,
 					5
 				}
 			}

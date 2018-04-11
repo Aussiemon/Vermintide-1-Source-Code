@@ -22,7 +22,7 @@ LocomotionUtils.follow_target = function (unit, blackboard, t, dt)
 	if goal_has_moved then
 		Vector3Box.store(blackboard.remembered_threat_pos, threat_position)
 
-		local goal_pos = Unit.local_position(blackboard.target_unit, 0) - Vector3.normalize(threat_position - pos)*breed.radius
+		local goal_pos = Unit.local_position(blackboard.target_unit, 0) - Vector3.normalize(threat_position - pos) * breed.radius
 		local is_position_on_navmesh, altitude = GwNavQueries.triangle_from_position(blackboard.nav_world, goal_pos)
 
 		if is_position_on_navmesh then
@@ -80,7 +80,7 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 		local to_target = threat_position - pos
 		local breed = blackboard.breed
 		local nav_world = blackboard.nav_world
-		goal_pos = goal_pos or Unit.local_position(blackboard.target_unit, 0) - Vector3.normalize(to_target)*breed.radius
+		goal_pos = goal_pos or Unit.local_position(blackboard.target_unit, 0) - Vector3.normalize(to_target) * breed.radius
 		local diff_height, is_position_on_navmesh, z_height = nil
 		is_position_on_navmesh, z_height = GwNavQueries.triangle_from_position(nav_world, goal_pos, 30, 30)
 
@@ -151,7 +151,7 @@ LocomotionUtils.update_combat_rotation = function (unit, blackboard, t, dt)
 	local current_rot = Unit.local_rotation(unit, 0)
 	local look_at = Unit.local_position(blackboard.target_unit, 0)
 	local wanted_rot = quaternion_look(look_at - pos, Vector3.up())
-	local lerp_value = math.smoothstep(dt*SteeringTweakData.ROTATION_LERP_LOOK_AT, 0, 1)
+	local lerp_value = math.smoothstep(dt * SteeringTweakData.ROTATION_LERP_LOOK_AT, 0, 1)
 	local new_rot = Quaternion.lerp(current_rot, wanted_rot, lerp_value)
 
 	unit_set_local_rotation(unit, 0, new_rot)
@@ -163,7 +163,7 @@ LocomotionUtils.look_at_target_rotation = function (unit, blackboard, t, dt)
 	local current_rot = Unit.local_rotation(unit, 0)
 	local look_at = Unit.local_position(blackboard.target_unit, 0)
 	local wanted_rot = quaternion_look(look_at - pos, Vector3.up())
-	local lerp_value = math.smoothstep(dt*SteeringTweakData.ROTATION_LERP_LOOK_AT, 0, 1)
+	local lerp_value = math.smoothstep(dt * SteeringTweakData.ROTATION_LERP_LOOK_AT, 0, 1)
 	local new_rot = Quaternion.lerp(current_rot, wanted_rot, lerp_value)
 
 	return new_rot
@@ -177,7 +177,7 @@ LocomotionUtils.look_at_target_rotation_flat = function (unit, blackboard, t, dt
 	Vector3.set_z(to_dir, 0)
 
 	local wanted_rot = quaternion_look(to_dir, Vector3.up())
-	local lerp_value = math.smoothstep(dt*SteeringTweakData.ROTATION_LERP_LOOK_AT, 0, 1)
+	local lerp_value = math.smoothstep(dt * SteeringTweakData.ROTATION_LERP_LOOK_AT, 0, 1)
 	local new_rot = Quaternion.lerp(current_rot, wanted_rot, lerp_value)
 
 	return new_rot
@@ -252,11 +252,11 @@ LocomotionUtils.get_attack_anim = function (unit, blackboard, attack_anims)
 		dot = math.clamp(dot, -1, 1)
 		local angle = math.acos(dot)
 
-		if math.pi*0.95 < angle then
+		if math.pi * 0.95 < angle then
 			return attack_anims.directly_fwd[1], attack_anims.directly_fwd[2]
-		elseif math.pi*0.75 < angle then
+		elseif math.pi * 0.75 < angle then
 			return attack_anims.fwd[1], attack_anims.fwd[2]
-		elseif angle < math.pi*0.25 then
+		elseif angle < math.pi * 0.25 then
 			return attack_anims.bwd[1], attack_anims.bwd[2]
 		elseif 0 < Vector3.cross(my_fwd, to_enemy).z then
 			return attack_anims.right[1], attack_anims.right[2]
@@ -278,9 +278,9 @@ LocomotionUtils.get_start_anim = function (unit, blackboard, start_anims)
 		dot = math.clamp(dot, -1, 1)
 		local angle = math.acos(dot)
 
-		if math.pi*0.75 < angle then
+		if math.pi * 0.75 < angle then
 			return start_anims.fwd
-		elseif angle < math.pi*0.25 then
+		elseif angle < math.pi * 0.25 then
 			return start_anims.bwd, true
 		elseif 0 < Vector3.cross(my_fwd, to_enemy).z then
 			return start_anims.right
@@ -422,7 +422,7 @@ LocomotionUtils.new_random_goal = function (nav_world, blackboard, start_pos, mi
 	local tries = 0
 
 	while tries < max_tries do
-		local dist = min_dist + math.random()*(max_dist - min_dist)
+		local dist = min_dist + math.random() * (max_dist - min_dist)
 		local add_vec = Vector3(dist, 0, 1.5)
 		local pos = start_pos + Quaternion.rotate(Quaternion(Vector3.up(), math.degrees_to_radians(Math.random(1, 360))), add_vec)
 
@@ -449,13 +449,13 @@ LocomotionUtils.new_random_goal_uniformly_distributed = function (nav_world, bla
 	local tries = 0
 
 	while tries < max_tries do
-		local min_dist_proportion = (min_dist/max_dist)^2
+		local min_dist_proportion = (min_dist / max_dist)^2
 		local random_value = Math.random()
-		local normalized_dist = min_dist_proportion + random_value*(min_dist_proportion - 1)
+		local normalized_dist = min_dist_proportion + random_value * (1 - min_dist_proportion)
 		local uniformly_scaled_dist = math.sqrt(normalized_dist)
-		local dist = uniformly_scaled_dist*max_dist
+		local dist = uniformly_scaled_dist * max_dist
 		local add_vec = Vector3(dist, 0, 1.5)
-		local pos = start_pos + Quaternion.rotate(Quaternion(Vector3.up(), Math.random()*math.pi*2), add_vec)
+		local pos = start_pos + Quaternion.rotate(Quaternion(Vector3.up(), Math.random() * math.pi * 2), add_vec)
 
 		if test_points then
 			test_points[#test_points + 1] = Vector3Box(pos)
@@ -482,13 +482,13 @@ LocomotionUtils.new_random_goal_uniformly_distributed_with_inside_from_outside_o
 	local tries = 0
 
 	while tries < max_tries do
-		local min_dist_proportion = (min_dist/max_dist)^2
+		local min_dist_proportion = (min_dist / max_dist)^2
 		local random_value = Math.random()
-		local normalized_dist = min_dist_proportion + random_value*(min_dist_proportion - 1)
+		local normalized_dist = min_dist_proportion + random_value * (1 - min_dist_proportion)
 		local uniformly_scaled_dist = math.sqrt(normalized_dist)
-		local dist = uniformly_scaled_dist*max_dist
+		local dist = uniformly_scaled_dist * max_dist
 		local add_vec = Vector3(dist, 0, 1.5)
-		local pos = start_pos + Quaternion.rotate(Quaternion(Vector3.up(), Math.random()*math.pi*2), add_vec)
+		local pos = start_pos + Quaternion.rotate(Quaternion(Vector3.up(), Math.random() * math.pi * 2), add_vec)
 
 		if test_points then
 			test_points[#test_points + 1] = Vector3Box(pos)
@@ -550,7 +550,7 @@ LocomotionUtils.new_random_goal_in_front_of_unit = function (nav_world, unit, mi
 
 		local direction_vector = Vector3.normalize(direction)
 		local right_vector = Vector3.cross(direction_vector, Vector3.up())
-		local pos = start_pos + direction_vector*distance + right_vector*random_width
+		local pos = start_pos + direction_vector * distance + right_vector * random_width
 
 		if test_points then
 			test_points[#test_points + 1] = Vector3Box(pos)
@@ -600,14 +600,14 @@ LocomotionUtils.outside_goal = function (nav_world, unit, blackboard, min_dist, 
 	end
 
 	local span = max_dist - min_dist
-	local median = (min_dist + max_dist)*0.5
-	local increment = span/max_tries
+	local median = (min_dist + max_dist) * 0.5
+	local increment = span / max_tries
 	local to_dir = Vector3.normalize(to_vec)
 
 	while tries < max_tries do
-		local dir = (tries%2 - 0.5)*2
-		local wanted_dist = median + (math.floor(tries*0.5) + Math.random())*dir*increment
-		local rotate_vec = to_dir*wanted_dist
+		local dir = (tries % 2 - 0.5) * 2
+		local wanted_dist = median + (math.floor(tries * 0.5) + Math.random()) * dir * increment
+		local rotate_vec = to_dir * wanted_dist
 		local new_pos = target_pos + Quaternion.rotate(Quaternion(Vector3.up(), math.degrees_to_radians(angle)), rotate_vec)
 		local success, altitude = GwNavQueries.triangle_from_position(nav_world, new_pos, above or 30, below or 30)
 
@@ -641,7 +641,7 @@ LocomotionUtils.test_pos = function (nav_world, pos)
 		end
 	end
 
-	Debug.text("Points ok %.2f fail: %d", success/(success + fail), fail)
+	Debug.text("Points ok %.2f fail: %d", success / (success + fail), fail)
 
 	return 
 end
@@ -664,7 +664,7 @@ LocomotionUtils.get_close_pos_on_mesh = function (nav_world, pos, searches)
 		for x = -1, 1, 1 do
 			for y = -1, 1, 1 do
 				if x ~= 0 or y ~= 0 then
-					local new_pos = pos + Vector3(x*k, y*k, 0)
+					local new_pos = pos + Vector3(x * k, y * k, 0)
 					local success, altitude, p1, p2, p3 = GwNavQueries.triangle_from_position(nav_world, new_pos, 30, 30)
 
 					if success then
@@ -705,7 +705,7 @@ LocomotionUtils.mesh_positions_closest_to_outside_pos = function (nav_world, out
 	local num_points = #circle_points
 
 	for i = 1, num_points, 2 do
-		local test_pos = outside_pos + Vector3(circle_points[i]*radius, circle_points[i + 1]*radius, 0)
+		local test_pos = outside_pos + Vector3(circle_points[i] * radius, circle_points[i + 1] * radius, 0)
 		local success, altitude, p1, p2, p3 = GwNavQueries.triangle_from_position(nav_world, test_pos, 30, 30)
 
 		if success then
@@ -717,7 +717,7 @@ LocomotionUtils.mesh_positions_closest_to_outside_pos = function (nav_world, out
 end
 LocomotionUtils.closest_mesh_positions_outward = function (nav_world, outside_pos, radius, point_list)
 	local step_dist = 3
-	local steps = math.ceil(radius/step_dist)
+	local steps = math.ceil(radius / step_dist)
 	local num_points = #circle_points
 
 	for i = 1, num_points, 2 do
@@ -725,7 +725,7 @@ LocomotionUtils.closest_mesh_positions_outward = function (nav_world, outside_po
 		local y = circle_points[i + 1]
 
 		for r = 1, steps, 1 do
-			local test_pos = outside_pos + Vector3(x*r*step_dist, y*r*step_dist, 0)
+			local test_pos = outside_pos + Vector3(x * r * step_dist, y * r * step_dist, 0)
 			local p = GwNavQueries.inside_position_from_outside_position(nav_world, test_pos, 30, 30)
 
 			if p then
@@ -766,7 +766,7 @@ LocomotionUtils.ray_can_go_on_mesh = function (nav_world, position_start, positi
 end
 local FLAT_GROUND_UP_DOT_THRESHOLD = 0.9
 LocomotionUtils.is_on_flat_ground_raycast = function (physics_world, unit_position)
-	local ray_source = unit_position + Vector3.up()*0.1
+	local ray_source = unit_position + Vector3.up() * 0.1
 	local hit_ground, _, _, ground_normal = PhysicsWorld.immediate_raycast(physics_world, ray_source, Vector3.down(), 0.15, "closest", "collision_filter", "filter_ai_mover")
 	local is_standing_on_flat_ground = nil
 
@@ -786,7 +786,7 @@ local WALL_CHECK_RAYCAST_LOW_HEIGHT = 0.4
 LocomotionUtils.navmesh_movement_check = function (unit_position, unit_velocity, nav_world, physics_world, traverse_logic)
 	local is_moving = EPSILON_SQ < Vector3.length_squared(unit_velocity)
 	local direction = (is_moving and Vector3.normalize(unit_velocity)) or Vector3.zero()
-	local target_position = unit_position + direction*NAV_CHECK_DISTANCE
+	local target_position = unit_position + direction * NAV_CHECK_DISTANCE
 	local raycango, projected_unit_pos, projected_target_pos = LocomotionUtils.ray_can_go_on_mesh(nav_world, unit_position, target_position, traverse_logic, NAV_CHECK_ABOVE, NAV_CHECK_BELOW)
 	local result = "navmesh_ok"
 
@@ -795,7 +795,7 @@ LocomotionUtils.navmesh_movement_check = function (unit_position, unit_velocity,
 		local hit_wall, ray_source, hit_position = nil
 
 		if allowed_to_do_wall_check then
-			ray_source = unit_position + Vector3.up()*WALL_CHECK_RAYCAST_LOW_HEIGHT
+			ray_source = unit_position + Vector3.up() * WALL_CHECK_RAYCAST_LOW_HEIGHT
 			hit_wall, hit_position = PhysicsWorld.immediate_raycast(physics_world, ray_source, direction, WALL_CHECK_RAYCAST_LENGTH, "closest", "collision_filter", "filter_ai_mover")
 		end
 
@@ -806,8 +806,8 @@ LocomotionUtils.navmesh_movement_check = function (unit_position, unit_velocity,
 
 			if allowed_to_do_wall_check then
 				QuickDrawerStay:sphere(ray_source, 0.25, Colors.get("green"))
-				QuickDrawerStay:line(ray_source, ray_source + direction*WALL_CHECK_RAYCAST_LENGTH, Colors.get("yellow"))
-				QuickDrawerStay:sphere(hit_position or ray_source + direction*WALL_CHECK_RAYCAST_LENGTH, 0.25, (hit_wall and Colors.get("red")) or Colors.get("green"))
+				QuickDrawerStay:line(ray_source, ray_source + direction * WALL_CHECK_RAYCAST_LENGTH, Colors.get("yellow"))
+				QuickDrawerStay:sphere(hit_position or ray_source + direction * WALL_CHECK_RAYCAST_LENGTH, 0.25, (hit_wall and Colors.get("red")) or Colors.get("green"))
 			end
 		end
 
@@ -920,10 +920,10 @@ LocomotionUtils.disable_linked_movement = function (unit)
 	return 
 end
 LocomotionUtils.calculate_wanted_lerp_velocity = function (position_current, position_start, position_end, start_time, end_time, dt, t)
-	local lerp_t = math.min(1, (t - start_time)/(end_time - start_time))
+	local lerp_t = math.min(1, (t - start_time) / (end_time - start_time))
 	local position = Vector3.lerp(position_start, position_end, lerp_t)
 	local distance = Vector3.distance(position_current, position)
-	local wanted_velocity = distance/dt
+	local wanted_velocity = distance / dt
 
 	return 
 end
@@ -953,7 +953,7 @@ LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_
 			local rotation = player_locomotion.current_rotation(player_locomotion)
 			local aim_direction = Quaternion.forward(rotation)
 			local dist = Vector3.length(to_rat)
-			local miss_vec = to_rat - aim_direction*dist
+			local miss_vec = to_rat - aim_direction * dist
 			local aim_distance = Vector3.length(miss_vec)
 			local bulls_eye = nil
 
@@ -1025,7 +1025,7 @@ LocomotionUtils.on_alerted_dodge = function (unit, blackboard, alerting_unit, en
 	local to_rat = pos - enemy_pos
 	local aim_direction = Quaternion.forward(rotation)
 	local dist = Vector3.length(to_rat)
-	local miss_vec = to_rat - aim_direction*dist
+	local miss_vec = to_rat - aim_direction * dist
 
 	return miss_vec, aim_direction
 end

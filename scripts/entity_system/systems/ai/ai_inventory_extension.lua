@@ -158,8 +158,8 @@ AIInventoryExtension.drop_single_item = function (self, item_inventory_index)
 
 	local actor = Unit.create_actor(new_item_unit, "rp_dropped")
 
-	Actor.add_angular_velocity(actor, Vector3(math.random(), math.random(), math.random())*2)
-	Actor.add_velocity(actor, Vector3.up()*2)
+	Actor.add_angular_velocity(actor, Vector3(math.random(), math.random(), math.random()) * 2)
+	Actor.add_velocity(actor, Vector3.up() * 2)
 
 	self.dropped_items[item_inventory_index] = new_item_unit
 

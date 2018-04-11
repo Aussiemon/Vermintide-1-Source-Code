@@ -82,7 +82,7 @@ T.update_average_velocity = function (data, t, dt)
 
 		while SAMPLE_UPDATE_RATE < t - last_sample do
 			last_sample = last_sample + SAMPLE_UPDATE_RATE
-			index = index%num_velocities + 1
+			index = index % num_velocities + 1
 
 			velocities[index]:store(extension.velocity_current:unbox())
 
@@ -98,7 +98,7 @@ T.update_average_velocity = function (data, t, dt)
 				total_velocity = total_velocity + velocity.unbox(velocity)
 			end
 
-			extension._average_velocity:store(total_velocity/num_velocities)
+			extension._average_velocity:store(total_velocity / num_velocities)
 		end
 
 		Profiler.stop("update_average_velocity")
@@ -201,7 +201,7 @@ T.update_network = function (data, dt)
 		if extension._platform_unit then
 			local platform_pos = Unit.local_position(extension._platform_unit, 0)
 			position = position - platform_pos
-			velocity = velocity + extension._platform_extension:movement_delta()/dt
+			velocity = velocity + extension._platform_extension:movement_delta() / dt
 		end
 
 		GameSession_set_game_object_field(game, go_id, "position", Vector3.clamp(position, min, max))
@@ -271,7 +271,7 @@ T.update_rotation = function (data, t, dt)
 
 				local final_rotation = Quaternion_look(velocity_current)
 
-				Unit.set_local_rotation(unit, 0, Quaternion_lerp(Unit.local_rotation(unit, 0), final_rotation, dt*5))
+				Unit.set_local_rotation(unit, 0, Quaternion_lerp(Unit.local_rotation(unit, 0), final_rotation, dt * 5))
 			elseif extension.target_rotation_data then
 				local target_rotation_data = extension.target_rotation_data
 				local start_rotation = target_rotation_data.start_rotation:unbox()

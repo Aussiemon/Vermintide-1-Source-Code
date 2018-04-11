@@ -202,7 +202,7 @@ local function create_player_portrait_widget_scenegraph_small(index)
 		vertical_alignment = "bottom",
 		parent = "root",
 		position = {
-			(index - 1)*340,
+			(index - 1) * 340,
 			0,
 			1
 		},
@@ -491,7 +491,7 @@ UIElements.TeamPlayerPortrait = {
 			dynamic_function = function (content, style, size, dt, ui_renderer)
 				local bar_value = content.bar_value
 				local is_wounded = content.is_wounded
-				local inverted_bar_value = bar_value - 1
+				local inverted_bar_value = 1 - bar_value
 
 				if is_wounded then
 					content.texture_id = content.wounded_texture_id
@@ -509,11 +509,11 @@ UIElements.TeamPlayerPortrait = {
 
 				local uv_start_pixels = style.uv_start_pixels
 				local uv_scale_pixels = style.uv_scale_pixels
-				local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+				local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 				local uvs = style.uvs
 				local uv_scale_axis = style.scale_axis
 				local offset_scale = style.offset_scale
-				uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+				uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 				size[uv_scale_axis] = uv_pixels
 
 				return style.color, uvs, size
@@ -532,7 +532,7 @@ UIElements.TeamPlayerPortrait = {
 				color[4] = 255
 				local uv_start_pixels = style.uv_start_pixels
 				local uv_scale_pixels = style.uv_scale_pixels
-				local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+				local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 				local uvs = style.uvs
 				local uv_scale_axis = style.scale_axis
 				local offset_scale = style.offset_scale
@@ -540,9 +540,9 @@ UIElements.TeamPlayerPortrait = {
 				offset[1] = 0
 				offset[2] = 0
 				offset[3] = 0
-				uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+				uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 				size[uv_scale_axis] = uv_pixels
-				offset[uv_scale_axis] = ((uv_start_pixels + uv_scale_pixels) - uv_pixels)*offset_scale
+				offset[uv_scale_axis] = ((uv_start_pixels + uv_scale_pixels) - uv_pixels) * offset_scale
 
 				return color, uvs, size, offset
 			end
@@ -934,7 +934,7 @@ UIElements.PlayerPortrait = {
 			dynamic_function = function (content, style, size, dt, ui_renderer)
 				local bar_value = content.bar_value
 				local is_wounded = content.is_wounded
-				local inverted_bar_value = bar_value - 1
+				local inverted_bar_value = 1 - bar_value
 
 				if is_wounded then
 					content.texture_id = content.wounded_texture_id
@@ -952,7 +952,7 @@ UIElements.PlayerPortrait = {
 
 				local uv_start_pixels = style.uv_start_pixels
 				local uv_scale_pixels = style.uv_scale_pixels
-				local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+				local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 				local uvs = style.uvs
 				local uv_scale_axis = style.scale_axis
 				local offset_scale = style.offset_scale
@@ -960,9 +960,9 @@ UIElements.PlayerPortrait = {
 				offset[1] = 0
 				offset[2] = 0
 				offset[3] = 0
-				uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+				uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 				size[uv_scale_axis] = uv_pixels
-				offset[uv_scale_axis] = ((uv_start_pixels + uv_scale_pixels) - uv_pixels)*offset_scale
+				offset[uv_scale_axis] = ((uv_start_pixels + uv_scale_pixels) - uv_pixels) * offset_scale
 
 				return style.color, uvs, size, offset
 			end
@@ -980,11 +980,11 @@ UIElements.PlayerPortrait = {
 				color[4] = 255
 				local uv_start_pixels = style.uv_start_pixels
 				local uv_scale_pixels = style.uv_scale_pixels
-				local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+				local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 				local uvs = style.uvs
 				local uv_scale_axis = style.scale_axis
 				local offset_scale = style.offset_scale
-				uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+				uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 				size[uv_scale_axis] = uv_pixels
 
 				return color, uvs, size

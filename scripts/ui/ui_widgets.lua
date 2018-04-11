@@ -1524,7 +1524,7 @@ UIWidgets.create_scrollbar = function (height, scenegraph_id)
 						local scroll_bar_box = ui_style.scroll_bar_box
 						local scroll_size_y = scroll_bar_box.scroll_size_y
 						local percentage = math.max(scroll_bar_info.bar_height_percentage, 0.05)
-						scroll_bar_box.size[2] = scroll_size_y*percentage
+						scroll_bar_box.size[2] = scroll_size_y * percentage
 						local button_up_hotspot = ui_content.button_up_hotspot
 
 						if button_up_hotspot.is_hover and button_up_hotspot.is_clicked == 0 then
@@ -1548,14 +1548,14 @@ UIWidgets.create_scrollbar = function (height, scenegraph_id)
 							local scroll_size_y = scroll_bar_box.scroll_size_y
 							local start_y = scroll_bar_box.start_offset[2]
 							local end_y = (start_y + scroll_size_y) - size_y
-							local step = size_y/(start_y + end_y)
+							local step = size_y / (start_y + end_y)
 							scroll_bar_info.value = math.max(scroll_bar_info.value - button_scroll_step, 0)
 						elseif button_down_hotspot.on_release then
 							local size_y = scroll_bar_box.size[2]
 							local scroll_size_y = scroll_bar_box.scroll_size_y
 							local start_y = scroll_bar_box.start_offset[2]
 							local end_y = (start_y + scroll_size_y) - size_y
-							local step = size_y/(start_y + end_y)
+							local step = size_y / (start_y + end_y)
 							scroll_bar_info.value = math.min(scroll_bar_info.value + button_scroll_step, 1)
 						end
 
@@ -1601,7 +1601,7 @@ UIWidgets.create_scrollbar = function (height, scenegraph_id)
 						local offset_y = math.clamp(offset[2] + delta, start_y, end_y)
 						local scroll_size = end_y - start_y
 						local scroll = end_y - offset_y
-						ui_content.value = (scroll ~= 0 and scroll/scroll_size) or 0
+						ui_content.value = (scroll ~= 0 and scroll / scroll_size) or 0
 
 						return 
 					end,
@@ -1621,7 +1621,7 @@ UIWidgets.create_scrollbar = function (height, scenegraph_id)
 						local end_y = (start_y + box_style.scroll_size_y) - box_size_y
 						local scroll_size = end_y - start_y
 						local value = ui_content.value
-						local offset_y = start_y + scroll_size*(value - 1)
+						local offset_y = start_y + scroll_size * (1 - value)
 						box_style.offset[2] = offset_y
 						local box_bottom = ui_style.scroll_bar_box_bottom
 						local box_middle = ui_style.scroll_bar_box_middle
@@ -6479,18 +6479,18 @@ UIWidgets.create_scoreboard_topic_widget = function (scenegraph_id)
 						local color = style.color
 						local uv_start_pixels = style.uv_start_pixels
 						local uv_scale_pixels = style.uv_scale_pixels
-						local uv_pixels = uv_start_pixels + uv_scale_pixels*fraction
+						local uv_pixels = uv_start_pixels + uv_scale_pixels * fraction
 						local uvs = style.uvs
 						local uv_scale_axis = style.scale_axis
 
 						if direction == 1 then
 							uvs[1][uv_scale_axis] = 0
-							uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+							uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 							size[uv_scale_axis] = uv_pixels
 							compact_topic_offset[uv_scale_axis] = 0
 						else
 							uvs[2][uv_scale_axis] = 1
-							uvs[1][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels) - 1
+							uvs[1][uv_scale_axis] = 1 - uv_pixels / (uv_start_pixels + uv_scale_pixels)
 							size[uv_scale_axis] = uv_pixels
 							compact_topic_offset[uv_scale_axis] = -(uv_pixels - (uv_start_pixels + uv_scale_pixels))
 						end
@@ -6643,7 +6643,7 @@ UIWidgets.create_splash_video = function (input)
 					pass_type = "rect",
 					content_check_function = function (content)
 						local w, h = Gui.resolution()
-						local aspect_ratio = w/h
+						local aspect_ratio = w / h
 						local default_aspect_ratio = 1.7777777777777777
 						local height = h
 						local width = w

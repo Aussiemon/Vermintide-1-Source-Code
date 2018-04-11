@@ -20,10 +20,10 @@ BTThrowSimpleProjectileAction.name = "BTThrowSimpleProjectileAction"
 local THROW_PATTERNS = {
 	ninja_star_cluster = {
 		spread_function = function (data, i, aim_rotation)
-			local spread = math.pi/64
-			local roll = Math.random()*math.pi*2
+			local spread = math.pi / 64
+			local roll = Math.random() * math.pi * 2
 			local sideways_projection = math.abs(math.sin(roll))
-			local pitch = (i - Math.random())*spread*(sideways_projection*0.75 + 0.25)
+			local pitch = (i - Math.random()) * spread * (0.25 + sideways_projection * 0.75)
 
 			return Quaternion.multiply(Quaternion.multiply(aim_rotation, Quaternion(Vector3.forward(), roll)), Quaternion(Vector3.right(), pitch))
 		end
@@ -31,17 +31,17 @@ local THROW_PATTERNS = {
 	ninja_star_arc = {
 		spread_function = function (data, i, aim_rotation)
 			if i == 1 then
-				data.roll = Math.random()*math.pi*0.08333333333333333
+				data.roll = Math.random() * math.pi * 0.08333333333333333
 
 				return Quaternion.multiply(aim_rotation, Quaternion(Vector3.forward(), data.roll))
-			elseif i%2 == 0 then
-				local i_left = i/2
-				local yaw = i_left*math.pi*0.016666666666666666
+			elseif i % 2 == 0 then
+				local i_left = i / 2
+				local yaw = i_left * math.pi * 0.016666666666666666
 
 				return Quaternion.multiply(Quaternion.multiply(aim_rotation, Quaternion(Vector3.forward(), data.roll)), Quaternion(-Vector3.up(), yaw))
 			else
-				local i_right = (i + 1)/2
-				local yaw = i_right*math.pi*0.016666666666666666
+				local i_right = (i + 1) / 2
+				local yaw = i_right * math.pi * 0.016666666666666666
 
 				return Quaternion.multiply(Quaternion.multiply(aim_rotation, Quaternion(Vector3.forward(), data.roll)), Quaternion(Vector3.up(), yaw))
 			end
@@ -121,7 +121,7 @@ BTThrowSimpleProjectileAction._aim_to_position = function (self, from_position, 
 		local predict_position = nil
 
 		for i = 1, 3, 1 do
-			predict_position = target_position + target_velocity*distance/projectile_speed
+			predict_position = target_position + target_velocity * distance / projectile_speed
 			distance = Vector3.length(predict_position - from_position)
 		end
 

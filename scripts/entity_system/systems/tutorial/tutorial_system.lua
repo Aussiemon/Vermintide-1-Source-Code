@@ -221,7 +221,7 @@ TutorialSystem.physics_async_update = function (self, context, t)
 
 		if script_data.tutorial_debug then
 			if DebugKeyHandler.key_pressed("f10", "add debug info slate", "tutorials") then
-				local duration = math.random()*5
+				local duration = math.random() * 5
 
 				self.tutorial_ui:queue_info_slate_entry("tutorial", "DEBUG INFO SLATE, LOOK AT IT GOOOO", duration + 5)
 			end

@@ -1038,10 +1038,10 @@ SimpleInventoryExtension.check_and_drop_pickups = function (self, drop_reason)
 			if should_drop then
 				if not item_data.destroy_on_drop then
 					if pickup_data and slot_name ~= "slot_level_event" then
-						local random_vector = Vector3(math.random(-1, 1) + i*2, math.random(-1, 1) + i, math.random(0, 1))
+						local random_vector = Vector3(math.random(-1, 1) + 2 * i, math.random(-1, 1) + i, math.random(0, 1))
 						local random_angle = math.random(-math.half_pi, math.half_pi)
 						local random_direction = Vector3.normalize(random_vector)
-						local position = self_pos + random_vector*0.2
+						local position = self_pos + random_vector * 0.2
 						local rotation = Quaternion.axis_angle(random_direction, random_angle)
 						local pickup_name = pickup_data.pickup_name
 						local pickup_name_id = NetworkLookup.pickup_names[pickup_name]

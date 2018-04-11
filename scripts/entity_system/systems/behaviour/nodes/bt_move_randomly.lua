@@ -28,7 +28,7 @@ BTMoveRandomly.new_goal = function (self, unit, blackboard)
 			p1 = NavigationMesh.vertex(mesh, p1)
 			p2 = NavigationMesh.vertex(mesh, p2)
 			p3 = NavigationMesh.vertex(mesh, p3)
-			local new_pos = (p1 + p2 + p3)/3
+			local new_pos = (p1 + p2 + p3) / 3
 			local goal_pos = Unit.get_data(unit, "goal_pos") or Vector3Box()
 
 			Unit.set_data(unit, "goal_pos", goal_pos)

@@ -80,7 +80,7 @@ StatisticsSystem.update = function (self, context, t)
 
 	if self.is_server and Managers.state.network:game() then
 		local stored_progress = statistics_db.get_stat(statistics_db, "session", "level_progress")
-		local actual_progress = math.min(math.floor(Managers.state.conflict.main_path_info.ahead_percent*110), 100)
+		local actual_progress = math.min(math.floor(Managers.state.conflict.main_path_info.ahead_percent * 110), 100)
 
 		if stored_progress < actual_progress then
 			local stat_name = "level_progress"

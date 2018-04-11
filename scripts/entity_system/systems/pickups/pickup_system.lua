@@ -165,7 +165,7 @@ PickupSystem.remove_pickups_due_to_crossroads = function (self, removed_path_dis
 		for i = 1, #spawners, 1 do
 			local spawner_unit = spawners[i]
 			local percentage_through_level = Unit.get_data(spawner_unit, "percentage_through_level")
-			local travel_dist = percentage_through_level*total_main_path_length
+			local travel_dist = percentage_through_level * total_main_path_length
 
 			for j = 1, num_removed_dist_pairs, 1 do
 				local dist_pair = removed_path_distances[j]
@@ -288,7 +288,7 @@ PickupSystem.spawn_spread_pickups = function (self, spawners, pickup_settings, c
 		end
 
 		local num_sections = #pickups_to_spawn
-		local section_size = num_sections/1
+		local section_size = 1 / num_sections
 		local section_start_point = 0
 		local section_end_point = 0
 		local spawn_debt = 0
@@ -314,7 +314,7 @@ PickupSystem.spawn_spread_pickups = function (self, spawners, pickup_settings, c
 
 			if 0 < num_section_spawners and 0 <= spawn_debt then
 				local remaining_sections = num_sections - i + 1
-				local pickups_in_section = math.min(math.ceil(spawn_debt/remaining_sections) + 1, num_section_spawners)
+				local pickups_in_section = math.min(1 + math.ceil(spawn_debt / remaining_sections), num_section_spawners)
 				local rnd = nil
 				seed, rnd = Math.next_random(seed)
 				local bonus_spawn = remaining_sections ~= 1 and pickups_in_section == 1 and rnd < NearPickupSpawnChance[pickup_type]
@@ -573,7 +573,7 @@ PickupSystem._check_teleporting_pickup_line_of_sight = function (self, unit)
 
 			if MAX_RAY_DIST < length then
 			elseif MIN_RAY_DIST < length then
-				local direction = diff/length
+				local direction = diff / length
 				local hit = PhysicsWorld.immediate_raycast(physics_world, head_height_pos, direction, length, "closest", "collision_filter", "filter_player_mover")
 
 				if not hit then
@@ -811,10 +811,10 @@ PickupSystem.debug_show_pickups = function (self, dt, t)
 	local spawned_pickups = self._spawned_pickups
 	local local_position = Unit.local_position
 	local color = Color(45, 245, 100)
-	local step = (math.pi*2)/6
+	local step = (2 * math.pi) / 6
 
 	for i = 1, spiral_segments, 1 do
-		spiral[i] = Vector3(math.sin(t*6 + i*step)*0.3, math.cos(t*6 + i*step)*0.5, (i - 1)*4)
+		spiral[i] = Vector3(math.sin(t * 6 + i * step) * 0.3, math.cos(t * 6 + i * step) * 0.5, (i - 1) * 4)
 	end
 
 	for k, unit in pairs(spawned_pickups) do

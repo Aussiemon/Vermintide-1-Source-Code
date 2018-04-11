@@ -55,8 +55,8 @@ PlayerManager.rpc_to_client_spawn_player = function (self, sender, local_player_
 		return 
 	end
 
-	local ammo_melee = ammo_melee_percent_int*0.01
-	local ammo_ranged = ammo_ranged_percent_int*0.01
+	local ammo_melee = ammo_melee_percent_int * 0.01
+	local ammo_ranged = ammo_ranged_percent_int * 0.01
 	local player = self.player(self, Network.peer_id(), local_player_id)
 	player.profile_index = profile_index
 

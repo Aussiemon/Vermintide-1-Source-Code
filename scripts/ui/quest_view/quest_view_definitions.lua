@@ -1149,8 +1149,8 @@ local function create_board_contract_widget(parent_scenegraph_id)
 				255
 			},
 			offset = {
-				(contract_size[1] - 551 - 4)*0.5,
-				(contract_size[2] - 124 + 5)*0.5,
+				(contract_size[1] - 551 - 4) * 0.5,
+				(contract_size[2] - 124 + 5) * 0.5,
 				1
 			},
 			size = {
@@ -1174,7 +1174,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			},
 			offset = {
 				-27,
-				(contract_size[2] - 40 + 22)*0.5,
+				(contract_size[2] - 40 + 22) * 0.5,
 				2
 			},
 			size = {
@@ -1198,7 +1198,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			},
 			offset = {
 				contract_size[1] - 18,
-				(contract_size[2] - 40 + 22)*0.5,
+				(contract_size[2] - 40 + 22) * 0.5,
 				2
 			},
 			size = {
@@ -1258,8 +1258,8 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			(contract_size[1] - size_x - 4)*0.5,
-			(contract_size[2] - size_y + 5)*0.5
+			(contract_size[1] - size_x - 4) * 0.5,
+			(contract_size[2] - size_y + 5) * 0.5
 		},
 		size = {
 			size_x,
@@ -1306,7 +1306,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			reward_offset + 26,
-			contract_size[2]/2 - 19,
+			contract_size[2] / 2 - 19,
 			1
 		},
 		size = {
@@ -1333,7 +1333,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			reward_offset + 6,
-			contract_size[2]/2 - 40,
+			contract_size[2] / 2 - 40,
 			1
 		},
 		size = {
@@ -1365,7 +1365,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			reward_offset + 6,
-			contract_size[2]/2 - 40,
+			contract_size[2] / 2 - 40,
 			2
 		}
 	}
@@ -1394,7 +1394,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			reward_offset + 90,
-			contract_size[2]/2 - 27,
+			contract_size[2] / 2 - 27,
 			1
 		},
 		size = {
@@ -1411,7 +1411,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			reward_offset + 100,
-			contract_size[2]/2 - 27,
+			contract_size[2] / 2 - 27,
 			1
 		},
 		size = {
@@ -1498,7 +1498,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			contract_size[1] - ((is_event_contract and 79) or 74),
-			contract_size[2]/2 - 30,
+			contract_size[2] / 2 - 30,
 			1
 		},
 		size = {
@@ -1557,7 +1557,7 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			contract_size[1] - ((is_event_contract and 137) or 133),
-			contract_size[2]/2 - 22.5,
+			contract_size[2] / 2 - 22.5,
 			1
 		},
 		size = {
@@ -1644,8 +1644,8 @@ local function create_board_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			contract_size[1]/2 - 15,
-			contract_size[2]/2 - 19 + 5,
+			contract_size[1] / 2 - 15,
+			contract_size[2] / 2 - 19 + 5,
 			11
 		},
 		size = {
@@ -1882,8 +1882,8 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			log_contract_size[1]/2 - 254 - 2,
-			log_contract_size[2]/2 - 84 + 2,
+			log_contract_size[1] / 2 - 254 - 2,
+			log_contract_size[2] / 2 - 84 + 2,
 			5
 		},
 		size = {
@@ -1909,8 +1909,8 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			log_contract_size[1]/2 - 254 - 2,
-			log_contract_size[2]/2 - 84 + 2,
+			log_contract_size[1] / 2 - 254 - 2,
+			log_contract_size[2] / 2 - 84 + 2,
 			5
 		},
 		size = {
@@ -1937,7 +1937,7 @@ local function create_log_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			26,
-			log_contract_size[2]/2 - 19 - 10,
+			log_contract_size[2] / 2 - 19 - 10,
 			1
 		},
 		size = {
@@ -1964,7 +1964,7 @@ local function create_log_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			6,
-			log_contract_size[2]/2 - 40 - 10,
+			log_contract_size[2] / 2 - 40 - 10,
 			1
 		},
 		size = {
@@ -1996,7 +1996,7 @@ local function create_log_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			6,
-			log_contract_size[2]/2 - 40 - 10,
+			log_contract_size[2] / 2 - 40 - 10,
 			2
 		}
 	}
@@ -2025,7 +2025,7 @@ local function create_log_contract_widget(parent_scenegraph_id)
 		},
 		offset = {
 			92,
-			log_contract_size[2]/2 - 27 - 10,
+			log_contract_size[2] / 2 - 27 - 10,
 			1
 		},
 		size = {
@@ -2301,8 +2301,8 @@ local function create_log_contract_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			log_contract_size[1]/2 - 83.60000000000001 - 10,
-			log_contract_size[2]/2 - 26.8 - 20,
+			log_contract_size[1] / 2 - 83.60000000000001 - 10,
+			log_contract_size[2] / 2 - 26.8 - 20,
 			1
 		},
 		size = {
@@ -2482,7 +2482,7 @@ local function create_quest_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			quest_size[1]/2 - quest_size[1]/2 + 1,
+			quest_size[1] / 2 - quest_size[1] / 2 + 1,
 			-4,
 			0
 		},
@@ -2509,8 +2509,8 @@ local function create_quest_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			quest_size[1]/2 - 259.5 - 1,
-			quest_size[2]/2 - 59.5 - 1,
+			quest_size[1] / 2 - 259.5 - 1,
+			quest_size[2] / 2 - 59.5 - 1,
 			5
 		},
 		size = {
@@ -2536,8 +2536,8 @@ local function create_quest_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			quest_size[1]/2 - 259.5 - 1,
-			quest_size[2]/2 - 59.5 - 1,
+			quest_size[1] / 2 - 259.5 - 1,
+			quest_size[2] / 2 - 59.5 - 1,
 			5
 		},
 		size = {
@@ -2564,7 +2564,7 @@ local function create_quest_widget(parent_scenegraph_id)
 		},
 		offset = {
 			70,
-			quest_size[2]/2 - 32,
+			quest_size[2] / 2 - 32,
 			1
 		},
 		size = {
@@ -2591,7 +2591,7 @@ local function create_quest_widget(parent_scenegraph_id)
 		},
 		offset = {
 			70,
-			quest_size[2]/2 - 32,
+			quest_size[2] / 2 - 32,
 			2
 		},
 		size = {
@@ -2615,7 +2615,7 @@ local function create_quest_widget(parent_scenegraph_id)
 		},
 		offset = {
 			310,
-			quest_size[2]/2 - 37,
+			quest_size[2] / 2 - 37,
 			2
 		},
 		size = {
@@ -2641,8 +2641,8 @@ local function create_quest_widget(parent_scenegraph_id)
 			255
 		},
 		offset = {
-			quest_size[1]/2 - 83.60000000000001 - 15,
-			quest_size[2]/2 - 26.8,
+			quest_size[1] / 2 - 83.60000000000001 - 15,
+			quest_size[2] / 2 - 26.8,
 			1
 		},
 		size = {

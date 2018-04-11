@@ -32,7 +32,7 @@ PlayerCharacterStateEnterLadderTop.on_enter = function (self, unit, input, dt, c
 	local duration = movement_settings_table.ladder.enter_ladder_top_animation_time
 	self.finish_time = t + duration
 
-	self.on_enter_animation_event(self, duration/2)
+	self.on_enter_animation_event(self, 2 / duration)
 	self.wanted_forward_bonus_velocity:store(Quaternion.forward(Unit.local_rotation(ladder_unit, 0)))
 	self.locomotion_extension:enable_script_driven_ladder_transition_movement()
 	self.locomotion_extension:enable_rotation_towards_velocity(false, Unit.local_rotation(ladder_unit, 0), 0.25)
@@ -84,7 +84,7 @@ PlayerCharacterStateEnterLadderTop.update = function (self, unit, input, dt, con
 	local status_extension = self.status_extension
 	local locomotion_extension = self.locomotion_extension
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
-	local wanted_forward_velocity = self.wanted_forward_bonus_velocity:unbox()*-movement_settings_table.ladder.enter_ladder_top_back_push_factor - Vector3(0, 0, movement_settings_table.ladder.enter_ladder_top_push_down_constant)
+	local wanted_forward_velocity = self.wanted_forward_bonus_velocity:unbox() * -movement_settings_table.ladder.enter_ladder_top_back_push_factor - Vector3(0, 0, movement_settings_table.ladder.enter_ladder_top_push_down_constant)
 
 	locomotion_extension.set_forced_velocity(locomotion_extension, wanted_forward_velocity)
 

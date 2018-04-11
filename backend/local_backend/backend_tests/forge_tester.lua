@@ -91,7 +91,7 @@ ForgeTester.update = function (self, dt)
 		else
 			Managers.debug_updator:remove_updator_by_name("ForgeTester")
 			print("ForgeTester Done")
-			print(string.format("Fused %d items into %d new ones", self._fused_times*5, self._fused_times))
+			print(string.format("Fused %d items into %d new ones", self._fused_times * 5, self._fused_times))
 			table.dump(self._errors, "")
 
 			self._state = "done"

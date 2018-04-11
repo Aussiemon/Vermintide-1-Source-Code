@@ -83,10 +83,10 @@ HealthSystem.update = function (self, context, t)
 		local damage_extension = extension.damage_extension
 		local damage_datas, num_damages = damage_extension.recent_damages(damage_extension)
 
-		for i = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-			local damage_index = (i - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
+		for i = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+			local damage_index = (i - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_AMOUNT
 			local damage_amount = damage_datas[damage_index]
-			local damage_type_index = (i - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE
+			local damage_type_index = (i - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE
 			local damage_type = damage_datas[damage_type_index]
 
 			if damage_amount < 0 then
@@ -155,7 +155,7 @@ HealthSystem.update = function (self, context, t)
 				local health_ext = ScriptUnit.extension(unit, "health_system")
 				local current_health = health_ext.health - health_ext.damage
 				local max_health = health_ext.health
-				local p = current_health/max_health
+				local p = current_health / max_health
 				local color = (0.99 < p and color1) or (0.25 < p and color2) or color3
 
 				if p <= 0 then

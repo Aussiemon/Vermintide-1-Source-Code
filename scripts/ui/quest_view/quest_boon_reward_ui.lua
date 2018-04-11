@@ -151,9 +151,9 @@ QuestBoonRewardUI._get_readable_boon_duration = function (self, duration)
 	local text = ""
 
 	if duration and 0 < duration then
-		local days = math.floor(duration/86400)
-		local hours = math.floor(duration/3600)
-		local minutes = math.floor(duration/60)
+		local days = math.floor(duration / 86400)
+		local hours = math.floor(duration / 3600)
+		local minutes = math.floor(duration / 60)
 		local seconds = math.floor(duration)
 
 		if 0 < days then

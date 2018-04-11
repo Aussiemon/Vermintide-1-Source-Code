@@ -338,14 +338,14 @@ QuestManager._calculate_contract_session_progress = function (self, contract, pa
 				damage = damage + statistics_db.get_stat(statistics_db, "session", "damage_taken_per_breed", breed_name)
 			end
 
-			local estimated_damage = (damage*100)/math.max(progress_percent, 1)
-			local damage_multiplier = estimated_damage/allowed_damage
+			local estimated_damage = (100 * damage) / math.max(progress_percent, 1)
+			local damage_multiplier = estimated_damage / allowed_damage
 			local penalty = nil
 
 			if damage_multiplier <= 1 then
-				return math.floor(damage_multiplier*30 - 100)
+				return math.floor(100 - 30 * damage_multiplier)
 			else
-				return math.floor(damage_multiplier/70)
+				return math.floor(70 / damage_multiplier)
 			end
 		elseif task_type == "last_stand_waves_defeated" then
 			local local_player = Managers.player:local_player()

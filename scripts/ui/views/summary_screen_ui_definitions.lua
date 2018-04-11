@@ -811,7 +811,7 @@ local widget_definitions = {
 					dynamic_function = function (content, size, style, dt)
 						local bar_value = content.bar_value
 						local uvs = content.uvs
-						local uv_pixels = style.size[1]*bar_value
+						local uv_pixels = style.size[1] * bar_value
 						uvs[2][1] = bar_value
 						size[1] = uv_pixels
 
@@ -1002,7 +1002,7 @@ local widget_definitions = {
 					dynamic_function = function (content, size, style, dt)
 						local bar_value = content.bar_value
 						local uvs = content.uvs
-						local uv_pixels = style.size[1]*bar_value
+						local uv_pixels = style.size[1] * bar_value
 						uvs[2][1] = bar_value
 						size[1] = uv_pixels
 
@@ -1160,13 +1160,13 @@ local widget_definitions = {
 						local color = style.color
 						local uv_start_pixels = style.uv_start_pixels
 						local uv_scale_pixels = style.uv_scale_pixels
-						local uv_pixels = uv_start_pixels + uv_scale_pixels*fraction
+						local uv_pixels = uv_start_pixels + uv_scale_pixels * fraction
 						local uvs = style.uvs
 						local uv_scale_axis = style.scale_axis
-						local uv_diff = uv_pixels/(uv_start_pixels + uv_scale_pixels)
-						local side_scale = (uv_diff - 1)*0.5
+						local uv_diff = uv_pixels / (uv_start_pixels + uv_scale_pixels)
+						local side_scale = (1 - uv_diff) * 0.5
 						uvs[1][uv_scale_axis] = side_scale
-						uvs[2][uv_scale_axis] = side_scale - 1
+						uvs[2][uv_scale_axis] = 1 - side_scale
 
 						return style.color, uvs, size, style.offset
 					end
@@ -1180,13 +1180,13 @@ local widget_definitions = {
 						local color = style.color
 						local uv_start_pixels = style.uv_start_pixels
 						local uv_scale_pixels = style.uv_scale_pixels
-						local uv_pixels = uv_start_pixels + uv_scale_pixels*fraction
+						local uv_pixels = uv_start_pixels + uv_scale_pixels * fraction
 						local uvs = style.uvs
 						local uv_scale_axis = style.scale_axis
-						local uv_diff = uv_pixels/(uv_start_pixels + uv_scale_pixels)
-						local side_scale = (uv_diff - 1)*0.5
+						local uv_diff = uv_pixels / (uv_start_pixels + uv_scale_pixels)
+						local side_scale = (1 - uv_diff) * 0.5
 						uvs[1][uv_scale_axis] = side_scale
-						uvs[2][uv_scale_axis] = side_scale - 1
+						uvs[2][uv_scale_axis] = 1 - side_scale
 
 						return style.color, uvs, size, style.offset
 					end

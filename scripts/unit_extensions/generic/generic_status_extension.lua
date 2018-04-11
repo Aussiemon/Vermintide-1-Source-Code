@@ -102,7 +102,7 @@ GenericStatusExtension.destroy = function (self)
 	return 
 end
 GenericStatusExtension.add_damage_intensity = function (self, percent_health_lost, damage_type)
-	self.intensity = math.clamp(self.intensity + percent_health_lost*CurrentIntensitySettings.intensity_add_per_percent_dmg_taken*100, 0, 100)
+	self.intensity = math.clamp(self.intensity + percent_health_lost * CurrentIntensitySettings.intensity_add_per_percent_dmg_taken * 100, 0, 100)
 	self.intensity_decay_delay = CurrentIntensitySettings.decay_delay
 
 	return 
@@ -127,19 +127,19 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 		local health_extension = self.health_extension
 		local stride = DamageDataIndex.STRIDE
 
-		for i = 1, num_damages/stride, 1 do
-			local index = (i - 1)*stride
+		for i = 1, num_damages / stride, 1 do
+			local index = (i - 1) * stride
 			local damage_type = damages[index + DamageDataIndex.DAMAGE_TYPE]
 
 			if not intensity_ignored_damage_types[damage_type] then
 				local amount = damages[index + DamageDataIndex.DAMAGE_AMOUNT]
 
-				self.add_damage_intensity(self, amount/health_extension.health, damage_type)
+				self.add_damage_intensity(self, amount / health_extension.health, damage_type)
 			end
 		end
 
 		if self.intensity_decay_delay <= 0 and not Managers.state.conflict:intensity_decay_frozen() then
-			self.intensity = math.clamp(self.intensity - CurrentIntensitySettings.decay_per_second*dt, 0, CurrentIntensitySettings.max_intensity)
+			self.intensity = math.clamp(self.intensity - CurrentIntensitySettings.decay_per_second * dt, 0, CurrentIntensitySettings.max_intensity)
 		end
 
 		self.intensity_decay_delay = self.intensity_decay_delay - dt
@@ -169,7 +169,7 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 			self.attack_allowed = true
 		end
 
-		self.attack_intensity = self.attack_intensity - dt*ATTACK_INTENSITY_DECAY*self.attack_intensity_threshold
+		self.attack_intensity = self.attack_intensity - dt * ATTACK_INTENSITY_DECAY * self.attack_intensity_threshold
 	end
 
 	if self.move_speed_multiplier_timer < 1 then
@@ -179,15 +179,15 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 			move_speed_timer_added_bonus = self.buff_extension:apply_buffs_to_value(move_speed_timer_added_bonus, StatBuffIndex.SLOW_DOWN_ON_HIT_LOW_HEALTH_RECOVER_BONUS, BuffTypes.PLAYER)
 		end
 
-		move_speed_timer_added_bonus = move_speed_timer_added_bonus*PlayerUnitStatusSettings.move_speed_reduction_on_hit_recover_time
+		move_speed_timer_added_bonus = move_speed_timer_added_bonus * PlayerUnitStatusSettings.move_speed_reduction_on_hit_recover_time
 		self.move_speed_multiplier_timer = self.move_speed_multiplier_timer + move_speed_timer_added_bonus
 	end
 
 	if 0 < num_damages then
 		local slow_movement = false
 
-		for i = 1, num_damages/DamageDataIndex.STRIDE, 1 do
-			local damage_type = damages[(i - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
+		for i = 1, num_damages / DamageDataIndex.STRIDE, 1 do
+			local damage_type = damages[(i - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE]
 
 			if PlayerUnitMovementSettings.slowing_damage_types[damage_type] then
 				slow_movement = true
@@ -198,7 +198,7 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 
 		if slow_movement then
 			local buff_extension = self.buff_extension
-			self.move_speed_multiplier = self.current_move_speed_multiplier(self)*0.5
+			self.move_speed_multiplier = self.current_move_speed_multiplier(self) * 0.5
 			self.move_speed_multiplier = math.max(0.2, self.move_speed_multiplier)
 			self.move_speed_multiplier_timer = 0
 		end
@@ -210,22 +210,22 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 		local previous_max_fatigue_points = self.max_fatigue_points
 		local max_fatigue_points = self._get_current_max_fatigue_points(self) or previous_max_fatigue_points
 		local degen_delay = self.block_broken_degen_delay or PlayerUnitStatusSettings.FATIGUE_DEGEN_DELAY
-		degen_delay = degen_delay/self.buff_extension:apply_buffs_to_value(1, StatBuffIndex.FATIGUE_REGEN_FROM_PROC)
+		degen_delay = degen_delay / self.buff_extension:apply_buffs_to_value(1, StatBuffIndex.FATIGUE_REGEN_FROM_PROC)
 
 		if self.buff_extension:has_buff_type("max_fatigue") then
-			degen_delay = degen_delay*0.5
+			degen_delay = degen_delay * 0.5
 		end
 
 		if previous_max_fatigue_points ~= max_fatigue_points then
-			self.fatigue = (max_fatigue_points ~= 0 or 0) and previous_max_fatigue_points/max_fatigue_points*self.fatigue
+			self.fatigue = (max_fatigue_points ~= 0 or 0) and previous_max_fatigue_points / max_fatigue_points * self.fatigue
 		end
 
 		if 0 < num_damages and 50 <= self.fatigue then
-			self.fatigue = self.fatigue - max_fatigue_points/100
+			self.fatigue = self.fatigue - 100 / max_fatigue_points
 		end
 
 		if self.last_fatigue_gain_time + degen_delay <= t then
-			local degen_amount = (max_fatigue_points ~= 0 or 0) and PlayerUnitStatusSettings.FATIGUE_POINTS_DEGEN_AMOUNT/max_fatigue_points*PlayerUnitStatusSettings.MAX_FATIGUE
+			local degen_amount = (max_fatigue_points ~= 0 or 0) and PlayerUnitStatusSettings.FATIGUE_POINTS_DEGEN_AMOUNT / max_fatigue_points * PlayerUnitStatusSettings.MAX_FATIGUE
 			local new_degen_amount = self.buff_extension:apply_buffs_to_value(degen_amount, StatBuffIndex.FATIGUE_REGEN_FROM_PROC)
 
 			if degen_amount < new_degen_amount then
@@ -234,7 +234,7 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 				self.has_bonus_fatigue_active = false
 			end
 
-			self.fatigue = math.max(self.fatigue - new_degen_amount*dt, 0)
+			self.fatigue = math.max(self.fatigue - new_degen_amount * dt, 0)
 			self.block_broken_degen_delay = nil
 		end
 
@@ -272,7 +272,7 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 		local first_person_extension = self.first_person_extension
 
 		if first_person_extension and self.low_health_playing_id then
-			local health = current_player_health*100
+			local health = current_player_health * 100
 			local wwise_world = Managers.world:wwise_world(self.world)
 
 			WwiseWorld.set_source_parameter(wwise_world, self.low_health_source_id, "health_status", health)
@@ -392,7 +392,7 @@ GenericStatusExtension.update_falling = function (self, t)
 
 		if MIN_FALL_DAMAGE_HEIGHT < fall_distance then
 			fall_distance = math.abs(fall_distance)
-			local network_height = math.clamp(fall_distance*4, 0, 255)
+			local network_height = math.clamp(fall_distance * 4, 0, 255)
 			local network_manager = Managers.state.network
 			local unit_storage = Managers.state.unit_storage
 			local go_id = unit_storage.go_id(unit_storage, self.unit)
@@ -434,7 +434,7 @@ GenericStatusExtension._get_current_max_fatigue_points = function (self)
 			if boon_handler then
 				local num_bonus_fatigue_boons = boon_handler.get_num_boons(boon_handler, "bonus_fatigue")
 				local boon_template = BoonTemplates.bonus_fatigue
-				max_fatigue_points = max_fatigue_points + num_bonus_fatigue_boons*boon_template.fatigue_increase
+				max_fatigue_points = max_fatigue_points + num_bonus_fatigue_boons * boon_template.fatigue_increase
 			end
 		end
 
@@ -520,7 +520,7 @@ GenericStatusExtension.blocked_attack = function (self, fatigue_type, attacking_
 	if blocking_unit then
 		local unit_pos = POSITION_LOOKUP[blocking_unit]
 		local unit_rot = Unit.world_rotation(blocking_unit, 0)
-		local particle_position = unit_pos + Quaternion.up(unit_rot)*Math.random()*0.5 + Quaternion.right(unit_rot)*0.1
+		local particle_position = unit_pos + Quaternion.up(unit_rot) * Math.random() * 0.5 + Quaternion.right(unit_rot) * 0.1
 
 		World.create_particles(self.world, "fx/wpnfx_sword_spark_parry", particle_position)
 	end
@@ -580,7 +580,7 @@ GenericStatusExtension.fatigued = function (self)
 	local max_fatigue = PlayerUnitStatusSettings.MAX_FATIGUE
 	local max_fatigue_points = self.max_fatigue_points
 
-	return (max_fatigue_points == 0 and true) or max_fatigue - max_fatigue/max_fatigue_points < self.fatigue
+	return (max_fatigue_points == 0 and true) or max_fatigue - max_fatigue / max_fatigue_points < self.fatigue
 end
 GenericStatusExtension.add_fatigue_points = function (self, fatigue_type, action)
 	if Development.parameter("disable_fatigue_system") then
@@ -590,13 +590,13 @@ GenericStatusExtension.add_fatigue_points = function (self, fatigue_type, action
 	local amount = PlayerUnitStatusSettings.fatigue_point_costs[fatigue_type]
 
 	if (action and action == "block" and self.buff_extension:has_buff_type("no_block_fatigue_cost")) or (action == "push" and self.buff_extension:has_buff_type("no_push_fatigue_cost")) then
-		amount = amount*0.5
+		amount = amount * 0.5
 	end
 
 	local t = Managers.time:time("game")
 	local max_fatigue = PlayerUnitStatusSettings.MAX_FATIGUE
 	local max_fatigue_points = self.max_fatigue_points
-	local fatigue_cost = amount*max_fatigue/max_fatigue_points
+	local fatigue_cost = amount * max_fatigue / max_fatigue_points
 	self.fatigue = math.clamp(self.fatigue + fatigue_cost, 0, max_fatigue)
 	local block_breaking = false
 
@@ -646,7 +646,7 @@ end
 GenericStatusExtension.add_dodge_cooldown = function (self)
 	self.get_dodge_item_data(self)
 
-	self.dodge_cooldown = math.min(self.dodge_cooldown + 1, self.dodge_count + 3)
+	self.dodge_cooldown = math.min(self.dodge_cooldown + 1, 3 + self.dodge_count)
 	self.dodge_cooldown_delay = nil
 
 	return 
@@ -657,7 +657,7 @@ GenericStatusExtension.start_dodge_cooldown = function (self, t)
 	return 
 end
 GenericStatusExtension.get_dodge_cooldown = function (self)
-	local cooldown = (math.max(self.dodge_cooldown - self.dodge_count, 0)/3 - 1)*0.6 + 0.4
+	local cooldown = 0.4 + 0.6 * (1 - math.max(self.dodge_cooldown - self.dodge_count, 0) / 3)
 
 	return cooldown
 end
@@ -671,7 +671,7 @@ GenericStatusExtension.current_fatigue_points = function (self)
 	local max_fatigue = PlayerUnitStatusSettings.MAX_FATIGUE
 	local max_fatigue_points = self.max_fatigue_points
 
-	return (max_fatigue_points ~= 0 or 0) and math.ceil(self.fatigue/max_fatigue/max_fatigue_points), max_fatigue_points
+	return (max_fatigue_points ~= 0 or 0) and math.ceil(self.fatigue / max_fatigue / max_fatigue_points), max_fatigue_points
 end
 GenericStatusExtension.set_pushed = function (self, pushed)
 	if pushed and self.push_cooldown then
@@ -866,7 +866,7 @@ GenericStatusExtension.set_knocked_down = function (self, knocked_down)
 		local player_health = difficulty_settings.max_hp
 
 		damage_extension.reset(damage_extension)
-		health_extension.set_current_damage(health_extension, player_health/2)
+		health_extension.set_current_damage(health_extension, player_health / 2)
 		health_extension.set_max_health(health_extension, player_health, true)
 
 		if is_server and self.knocked_down_bleed_id then
@@ -948,7 +948,7 @@ GenericStatusExtension.set_ready_for_assisted_respawn = function (self, ready, f
 		local player_health = difficulty_settings.max_hp
 
 		health_extension.set_max_health(health_extension, player_health, true)
-		health_extension.set_current_damage(health_extension, player_health/2)
+		health_extension.set_current_damage(health_extension, player_health / 2)
 	end
 
 	return 
@@ -1119,7 +1119,7 @@ GenericStatusExtension.switch_variable_zoom = function (self, zoom_table)
 
 		for i, camera_name in ipairs(zoom_table) do
 			if camera_name == self.zoom_mode then
-				new_index = i%#zoom_table + 1
+				new_index = i % #zoom_table + 1
 
 				break
 			end

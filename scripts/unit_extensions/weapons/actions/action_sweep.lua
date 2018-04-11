@@ -154,10 +154,10 @@ ActionSweep.client_owner_post_update = function (self, dt, t, world, can_damage,
 			i = i + 1
 			local interpolated_dt = math.min(max_dt, dt - current_dt)
 			current_dt = math.min(current_dt + max_dt, dt)
-			local lerp_t = current_dt/dt
+			local lerp_t = current_dt / dt
 			local current_position = Vector3.lerp(start_position, end_position, lerp_t)
 			local current_rotation = Quaternion.lerp(start_rotation, end_rotation, lerp_t)
-			local can_really_damage = self._is_within_damage_window(self, current_time_in_action - dt*2 + current_dt, current_action, owner_unit)
+			local can_really_damage = self._is_within_damage_window(self, current_time_in_action - 2 * dt + current_dt, current_action, owner_unit)
 			aborted = self._do_overlap(self, interpolated_dt, t, unit, owner_unit, current_action, physics_world, can_really_damage, current_position, current_rotation)
 		end
 	else
@@ -175,9 +175,9 @@ ActionSweep._is_within_damage_window = function (self, current_time_in_action, a
 	end
 
 	local anim_time_scale = self.anim_time_scale
-	damage_window_start = damage_window_start/anim_time_scale
+	damage_window_start = damage_window_start / anim_time_scale
 	damage_window_end = damage_window_end or action.total_time or math.huge
-	damage_window_end = damage_window_end/anim_time_scale
+	damage_window_end = damage_window_end / anim_time_scale
 	local after_start = damage_window_start < current_time_in_action
 	local before_end = current_time_in_action < damage_window_end
 
@@ -218,29 +218,29 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 	local weapon_half_extents = self.stored_half_extents:unbox()
 	local weapon_half_length = weapon_half_extents.z
 	local range_mod = current_action.range_mod or 1
-	local width_mod = (current_action.width_mod and current_action.width_mod*1.25) or 25
+	local width_mod = (current_action.width_mod and current_action.width_mod * 1.25) or 25
 	local buff_extension = self.buff_extension
 	local in_brawl_mode = buff_extension.has_buff_type(buff_extension, "brawl_drunk")
 	local is_inside_inn = Managers.state.game_mode:level_key() == "inn_level"
 
 	if is_inside_inn and not in_brawl_mode then
-		range_mod = range_mod*0.65
-		width_mod = width_mod/4
+		range_mod = 0.65 * range_mod
+		width_mod = width_mod / 4
 	end
 
-	weapon_half_length = weapon_half_length*range_mod
-	weapon_half_extents.x = weapon_half_extents.x*width_mod
+	weapon_half_length = weapon_half_length * range_mod
+	weapon_half_extents.x = weapon_half_extents.x * width_mod
 
 	if script_data.debug_weapons then
-		drawer.capsule(drawer, position_previous, position_previous + weapon_up_dir_previous*weapon_half_length*2, 0.02)
-		drawer.capsule(drawer, position_current, position_current + current_rot_up*weapon_half_length*2, 0.01, Color(0, 0, 255))
+		drawer.capsule(drawer, position_previous, position_previous + weapon_up_dir_previous * weapon_half_length * 2, 0.02)
+		drawer.capsule(drawer, position_current, position_current + current_rot_up * weapon_half_length * 2, 0.01, Color(0, 0, 255))
 		Debug.text("Missed target count: %d", self.missed_targets or 0)
 	end
 
 	local weapon_rot = current_rotation
 	local middle_rot = Quaternion.lerp(rotation_previous, weapon_rot, 0.5)
-	local position_start = position_previous + weapon_up_dir_previous*weapon_half_length
-	local position_end = (position_previous + current_rot_up*weapon_half_length*2) - Quaternion.up(rotation_previous)*weapon_half_length
+	local position_start = position_previous + weapon_up_dir_previous * weapon_half_length
+	local position_end = (position_previous + current_rot_up * weapon_half_length * 2) - Quaternion.up(rotation_previous) * weapon_half_length
 	local max_num_hits = 5
 	local attack_direction = calculate_attack_direction(current_action, weapon_rot)
 	local player_manager = Managers.player
@@ -254,9 +254,9 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 		PhysicsWorld.start_reusing_sweep_tables()
 	end
 
-	local sweep_results1 = PhysicsWorld.linear_obb_sweep(physics_world, position_previous, position_previous + weapon_up_dir_previous*weapon_half_length*2, weapon_cross_section, rotation_previous, max_num_hits, "collision_filter", collision_filter, "report_initial_overlap")
+	local sweep_results1 = PhysicsWorld.linear_obb_sweep(physics_world, position_previous, position_previous + weapon_up_dir_previous * weapon_half_length * 2, weapon_cross_section, rotation_previous, max_num_hits, "collision_filter", collision_filter, "report_initial_overlap")
 	local sweep_results2 = PhysicsWorld.linear_obb_sweep(physics_world, position_start, position_end, weapon_half_extents, rotation_previous, max_num_hits, "collision_filter", collision_filter, "report_initial_overlap")
-	local sweep_results3 = PhysicsWorld.linear_obb_sweep(physics_world, position_previous + current_rot_up*weapon_half_length, position_current + current_rot_up*weapon_half_length, weapon_half_extents, rotation_current, max_num_hits, "collision_filter", collision_filter, "report_initial_overlap")
+	local sweep_results3 = PhysicsWorld.linear_obb_sweep(physics_world, position_previous + current_rot_up * weapon_half_length, position_current + current_rot_up * weapon_half_length, weapon_half_extents, rotation_current, max_num_hits, "collision_filter", collision_filter, "report_initial_overlap")
 	local num_results1 = 0
 	local num_results2 = 0
 	local num_results3 = 0
@@ -388,7 +388,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 
 						if hit_zone_name == "head" then
 							local neck_position = Actor.position(hit_actor)
-							local closest_sweep_point = Geometry.closest_point_on_line(neck_position, position_current, position_current + Quaternion.up(rotation_current)*weapon_half_length*2)
+							local closest_sweep_point = Geometry.closest_point_on_line(neck_position, position_current, position_current + Quaternion.up(rotation_current) * weapon_half_length * 2)
 
 							if math.abs(closest_sweep_point.z - neck_position.z) <= 0.1 then
 								hit_zone_name = "neck"
@@ -620,7 +620,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 		drawer.sphere(drawer, position_end, 0.1, Color(255, 0, 255))
 		drawer.vector(drawer, position_start, position_end - position_start)
 
-		local pose = Matrix4x4.from_quaternion_position(rotation_current, position_previous + Quaternion.up(rotation_current)*weapon_half_length)
+		local pose = Matrix4x4.from_quaternion_position(rotation_current, position_previous + Quaternion.up(rotation_current) * weapon_half_length)
 
 		drawer.box_sweep(drawer, pose, weapon_half_extents, position_current - position_previous)
 	end
@@ -638,7 +638,7 @@ ActionSweep._play_environmental_effect = function (self, weapon_rotation, curren
 	local world = self.world
 	local weapon_impact_direction = (current_action.impact_axis and current_action.impact_axis:unbox()) or Vector3.forward()
 	local hit_effect = current_action.hit_effect
-	local impact_direction = weapon_right*weapon_impact_direction.x + weapon_fwd*weapon_impact_direction.y + weapon_up*weapon_impact_direction.z
+	local impact_direction = weapon_right * weapon_impact_direction.x + weapon_fwd * weapon_impact_direction.y + weapon_up * weapon_impact_direction.z
 	local impact_rotation = Quaternion.look(impact_direction, -weapon_right)
 	local owner_unit = self.owner_unit
 	local owner_player = Managers.player:owner(owner_unit)
@@ -653,8 +653,8 @@ ActionSweep._play_environmental_effect = function (self, weapon_rotation, curren
 	if script_data.debug_material_effects then
 		local drawer = self._drawer
 
-		drawer.vector(drawer, hit_position - impact_direction*0.1, impact_direction*0.1)
-		drawer.vector(drawer, hit_position - impact_direction*0.1, weapon_fwd*0.1)
+		drawer.vector(drawer, hit_position - impact_direction * 0.1, impact_direction * 0.1)
+		drawer.vector(drawer, hit_position - impact_direction * 0.1, weapon_fwd * 0.1)
 	end
 
 	return 
@@ -743,11 +743,11 @@ ActionSweep._play_character_impact = function (self, is_server, owner_unit, curr
 		local angle_difference = Vector3.flat_angle(hit_unit_dir, attack_direction)
 		local hit_anim = nil
 
-		if angle_difference < -math.pi*0.75 or math.pi*0.75 < angle_difference then
+		if angle_difference < -math.pi * 0.75 or math.pi * 0.75 < angle_difference then
 			hit_anim = "hit_reaction_backward"
-		elseif angle_difference < -math.pi*0.25 then
+		elseif angle_difference < -math.pi * 0.25 then
 			hit_anim = "hit_reaction_left"
-		elseif angle_difference < math.pi*0.25 then
+		elseif angle_difference < math.pi * 0.25 then
 			hit_anim = "hit_reaction_forward"
 		else
 			hit_anim = "hit_reaction_right"

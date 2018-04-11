@@ -1603,8 +1603,8 @@ local function create_reward_box(scenegraph_id)
 	local defaul_scenegraph = scenegraph_definition[scenegraph_id]
 	local default_size = defaul_scenegraph.size
 	local pivot = {
-		default_size[1]/2,
-		default_size[2]/2
+		default_size[1] / 2,
+		default_size[2] / 2
 	}
 	local widget = {
 		element = {
@@ -1633,7 +1633,7 @@ local function create_reward_box(scenegraph_id)
 		},
 		style = {
 			background = {
-				angle = (scenegraph_id == "reward_box_final" and -(math.pi/2)) or 0,
+				angle = (scenegraph_id == "reward_box_final" and -(math.pi / 2)) or 0,
 				pivot = pivot,
 				size = default_size,
 				offset = {
@@ -1649,7 +1649,7 @@ local function create_reward_box(scenegraph_id)
 				}
 			},
 			frame = {
-				angle = (scenegraph_id == "reward_box_final" and -(math.pi/2)) or 0,
+				angle = (scenegraph_id == "reward_box_final" and -(math.pi / 2)) or 0,
 				pivot = pivot,
 				size = default_size,
 				offset = {
@@ -2298,8 +2298,8 @@ local animations = {
 	lock_open = {
 		{
 			name = "sticks_open",
-			start_progress = lock_open_time_multiplier*0,
-			end_progress = lock_open_time_multiplier*0.5,
+			start_progress = 0 * lock_open_time_multiplier,
+			end_progress = 0.5 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local lock_stick_top_left_position = ui_scenegraph.lock_stick_top_left.local_position
 				lock_stick_top_left_position = scenegraph_definition.lock_stick_top_left.position
@@ -2365,14 +2365,14 @@ local animations = {
 				local lock_stick_bottom_left_default_position = scenegraph_definition.lock_stick_bottom_left.position
 				local lock_stick_bottom_right_position = ui_scenegraph.lock_stick_bottom_right.local_position
 				local lock_stick_bottom_right_default_position = scenegraph_definition.lock_stick_bottom_right.position
-				lock_stick_top_left_position[1] = lock_stick_top_left_default_position[1] - move_distance*value
-				lock_stick_top_left_position[2] = lock_stick_top_left_default_position[2] + move_distance*value
-				lock_stick_top_right_position[1] = lock_stick_top_right_default_position[1] + move_distance*value
-				lock_stick_top_right_position[2] = lock_stick_top_right_default_position[2] + move_distance*value
-				lock_stick_bottom_left_position[1] = lock_stick_bottom_left_default_position[1] - move_distance*value
-				lock_stick_bottom_left_position[2] = lock_stick_bottom_left_default_position[2] - move_distance*value
-				lock_stick_bottom_right_position[1] = lock_stick_bottom_right_default_position[1] + move_distance*value
-				lock_stick_bottom_right_position[2] = lock_stick_bottom_right_default_position[2] - move_distance*value
+				lock_stick_top_left_position[1] = lock_stick_top_left_default_position[1] - move_distance * value
+				lock_stick_top_left_position[2] = lock_stick_top_left_default_position[2] + move_distance * value
+				lock_stick_top_right_position[1] = lock_stick_top_right_default_position[1] + move_distance * value
+				lock_stick_top_right_position[2] = lock_stick_top_right_default_position[2] + move_distance * value
+				lock_stick_bottom_left_position[1] = lock_stick_bottom_left_default_position[1] - move_distance * value
+				lock_stick_bottom_left_position[2] = lock_stick_bottom_left_default_position[2] - move_distance * value
+				lock_stick_bottom_right_position[1] = lock_stick_bottom_right_default_position[1] + move_distance * value
+				lock_stick_bottom_right_position[2] = lock_stick_bottom_right_default_position[2] - move_distance * value
 
 				return 
 			end,
@@ -2382,8 +2382,8 @@ local animations = {
 		},
 		{
 			name = "cover_open",
-			start_progress = lock_open_time_multiplier*0.7,
-			end_progress = lock_open_time_multiplier*1.3,
+			start_progress = 0.7 * lock_open_time_multiplier,
+			end_progress = 1.3 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				return 
 			end,
@@ -2398,15 +2398,15 @@ local animations = {
 				local lock_cover_bottom_left_default_position = scenegraph_definition.lock_cover_bottom_left.position
 				local lock_cover_bottom_right_position = ui_scenegraph.lock_cover_bottom_right.local_position
 				local lock_cover_bottom_right_default_position = scenegraph_definition.lock_cover_bottom_right.position
-				lock_cover_top_left_position[1] = lock_cover_top_left_default_position[1] - move_distance*value
-				lock_cover_top_left_position[2] = lock_cover_top_left_default_position[2] + move_distance*value
-				lock_cover_top_right_position[1] = lock_cover_top_right_default_position[1] + move_distance*value
-				lock_cover_top_right_position[2] = lock_cover_top_right_default_position[2] + move_distance*value
-				lock_cover_bottom_left_position[1] = lock_cover_bottom_left_default_position[1] - move_distance*value
-				lock_cover_bottom_left_position[2] = lock_cover_bottom_left_default_position[2] - move_distance*value
-				lock_cover_bottom_right_position[1] = lock_cover_bottom_right_default_position[1] + move_distance*value
-				lock_cover_bottom_right_position[2] = lock_cover_bottom_right_default_position[2] - move_distance*value
-				local block_angle = math.pi*4*value
+				lock_cover_top_left_position[1] = lock_cover_top_left_default_position[1] - move_distance * value
+				lock_cover_top_left_position[2] = lock_cover_top_left_default_position[2] + move_distance * value
+				lock_cover_top_right_position[1] = lock_cover_top_right_default_position[1] + move_distance * value
+				lock_cover_top_right_position[2] = lock_cover_top_right_default_position[2] + move_distance * value
+				lock_cover_bottom_left_position[1] = lock_cover_bottom_left_default_position[1] - move_distance * value
+				lock_cover_bottom_left_position[2] = lock_cover_bottom_left_default_position[2] - move_distance * value
+				lock_cover_bottom_right_position[1] = lock_cover_bottom_right_default_position[1] + move_distance * value
+				lock_cover_bottom_right_position[2] = lock_cover_bottom_right_default_position[2] - move_distance * value
+				local block_angle = math.pi * 4 * value
 				local lock_block_left_widget = widgets.lock_block_left
 				local lock_block_right_widget = widgets.lock_block_right
 				lock_block_left_widget.style.texture_id.angle = block_angle
@@ -2420,8 +2420,8 @@ local animations = {
 		},
 		{
 			name = "top_and_bottom_pillar_lock",
-			start_progress = lock_open_time_multiplier*1.3,
-			end_progress = lock_open_time_multiplier*1.4,
+			start_progress = 1.3 * lock_open_time_multiplier,
+			end_progress = 1.4 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				return 
 			end,
@@ -2432,8 +2432,8 @@ local animations = {
 				local lock_pillar_top_default_position = scenegraph_definition.lock_pillar_top.position
 				local lock_pillar_bottom_position = ui_scenegraph.lock_pillar_bottom.local_position
 				local lock_pillar_bottom_default_position = scenegraph_definition.lock_pillar_bottom.position
-				lock_pillar_top_position[2] = lock_pillar_top_default_position[2] + move_distance*value
-				lock_pillar_bottom_position[2] = lock_pillar_bottom_default_position[2] - move_distance*value
+				lock_pillar_top_position[2] = lock_pillar_top_default_position[2] + move_distance * value
+				lock_pillar_bottom_position[2] = lock_pillar_bottom_default_position[2] - move_distance * value
 
 				return 
 			end,
@@ -2443,8 +2443,8 @@ local animations = {
 		},
 		{
 			name = "cogwheel_bg_spin",
-			start_progress = lock_open_time_multiplier*1.5,
-			end_progress = lock_open_time_multiplier*1.9,
+			start_progress = 1.5 * lock_open_time_multiplier,
+			end_progress = 1.9 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				return 
 			end,
@@ -2452,7 +2452,7 @@ local animations = {
 				local value = math.easeCubic(local_progress)
 				local lock_cogwheel_bg_left_widget = widgets.lock_cogwheel_bg_left
 				local lock_cogwheel_bg_right_widget = widgets.lock_cogwheel_bg_right
-				local angle = math.pi*0.5*value
+				local angle = math.pi * 0.5 * value
 				lock_cogwheel_bg_left_widget.style.texture_id.angle = angle
 				lock_cogwheel_bg_right_widget.style.texture_id.angle = angle
 
@@ -2464,8 +2464,8 @@ local animations = {
 		},
 		{
 			name = "cogwheel_spin",
-			start_progress = lock_open_time_multiplier*2,
-			end_progress = lock_open_time_multiplier*3,
+			start_progress = 2 * lock_open_time_multiplier,
+			end_progress = 3 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				return 
 			end,
@@ -2476,8 +2476,8 @@ local animations = {
 				local lock_slot_holder_right_widget = widgets.lock_slot_holder_right
 				local lock_cogwheel_left_widget = widgets.lock_cogwheel_left
 				local lock_cogwheel_right_widget = widgets.lock_cogwheel_right
-				local center_angle = math.pi/2*center_value
-				local cogwheel_angle = math.pi*2*cogwheel_value
+				local center_angle = math.pi / 2 * center_value
+				local cogwheel_angle = math.pi * 2 * cogwheel_value
 				lock_slot_holder_left_widget.style.texture_id.angle = -center_angle
 				lock_slot_holder_right_widget.style.texture_id.angle = -center_angle
 				lock_cogwheel_left_widget.style.texture_id.angle = cogwheel_angle
@@ -2491,8 +2491,8 @@ local animations = {
 		},
 		{
 			name = "left_and_right_pillar_lock",
-			start_progress = lock_open_time_multiplier*3,
-			end_progress = lock_open_time_multiplier*3.1,
+			start_progress = 3 * lock_open_time_multiplier,
+			end_progress = 3.1 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				return 
 			end,
@@ -2503,8 +2503,8 @@ local animations = {
 				local lock_pillar_left_default_position = scenegraph_definition.lock_pillar_left.position
 				local lock_pillar_right_position = ui_scenegraph.lock_pillar_right.local_position
 				local lock_pillar_right_default_position = scenegraph_definition.lock_pillar_right.position
-				lock_pillar_left_position[1] = lock_pillar_left_default_position[1] - move_distance*value
-				lock_pillar_right_position[1] = lock_pillar_right_default_position[1] + move_distance*value
+				lock_pillar_left_position[1] = lock_pillar_left_default_position[1] - move_distance * value
+				lock_pillar_right_position[1] = lock_pillar_right_default_position[1] + move_distance * value
 
 				return 
 			end,
@@ -2522,7 +2522,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local value = math.easeCubic(local_progress - 1)
+				local value = math.easeCubic(1 - local_progress)
 				local move_distance = 50
 				local lock_stick_top_left_position = ui_scenegraph.lock_stick_top_left.local_position
 				local lock_stick_top_left_default_position = scenegraph_definition.lock_stick_top_left.position
@@ -2532,14 +2532,14 @@ local animations = {
 				local lock_stick_bottom_left_default_position = scenegraph_definition.lock_stick_bottom_left.position
 				local lock_stick_bottom_right_position = ui_scenegraph.lock_stick_bottom_right.local_position
 				local lock_stick_bottom_right_default_position = scenegraph_definition.lock_stick_bottom_right.position
-				lock_stick_top_left_position[1] = lock_stick_top_left_default_position[1] - move_distance*value
-				lock_stick_top_left_position[2] = lock_stick_top_left_default_position[2] + move_distance*value
-				lock_stick_top_right_position[1] = lock_stick_top_right_default_position[1] + move_distance*value
-				lock_stick_top_right_position[2] = lock_stick_top_right_default_position[2] + move_distance*value
-				lock_stick_bottom_left_position[1] = lock_stick_bottom_left_default_position[1] - move_distance*value
-				lock_stick_bottom_left_position[2] = lock_stick_bottom_left_default_position[2] - move_distance*value
-				lock_stick_bottom_right_position[1] = lock_stick_bottom_right_default_position[1] + move_distance*value
-				lock_stick_bottom_right_position[2] = lock_stick_bottom_right_default_position[2] - move_distance*value
+				lock_stick_top_left_position[1] = lock_stick_top_left_default_position[1] - move_distance * value
+				lock_stick_top_left_position[2] = lock_stick_top_left_default_position[2] + move_distance * value
+				lock_stick_top_right_position[1] = lock_stick_top_right_default_position[1] + move_distance * value
+				lock_stick_top_right_position[2] = lock_stick_top_right_default_position[2] + move_distance * value
+				lock_stick_bottom_left_position[1] = lock_stick_bottom_left_default_position[1] - move_distance * value
+				lock_stick_bottom_left_position[2] = lock_stick_bottom_left_default_position[2] - move_distance * value
+				lock_stick_bottom_right_position[1] = lock_stick_bottom_right_default_position[1] + move_distance * value
+				lock_stick_bottom_right_position[2] = lock_stick_bottom_right_default_position[2] - move_distance * value
 
 				return 
 			end,
@@ -2556,7 +2556,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 90
-				local value = math.easeOutCubic(local_progress - 1)
+				local value = math.easeOutCubic(1 - local_progress)
 				local lock_cover_top_left_position = ui_scenegraph.lock_cover_top_left.local_position
 				local lock_cover_top_left_default_position = scenegraph_definition.lock_cover_top_left.position
 				local lock_cover_top_right_position = ui_scenegraph.lock_cover_top_right.local_position
@@ -2565,15 +2565,15 @@ local animations = {
 				local lock_cover_bottom_left_default_position = scenegraph_definition.lock_cover_bottom_left.position
 				local lock_cover_bottom_right_position = ui_scenegraph.lock_cover_bottom_right.local_position
 				local lock_cover_bottom_right_default_position = scenegraph_definition.lock_cover_bottom_right.position
-				lock_cover_top_left_position[1] = lock_cover_top_left_default_position[1] - move_distance*value
-				lock_cover_top_left_position[2] = lock_cover_top_left_default_position[2] + move_distance*value
-				lock_cover_top_right_position[1] = lock_cover_top_right_default_position[1] + move_distance*value
-				lock_cover_top_right_position[2] = lock_cover_top_right_default_position[2] + move_distance*value
-				lock_cover_bottom_left_position[1] = lock_cover_bottom_left_default_position[1] - move_distance*value
-				lock_cover_bottom_left_position[2] = lock_cover_bottom_left_default_position[2] - move_distance*value
-				lock_cover_bottom_right_position[1] = lock_cover_bottom_right_default_position[1] + move_distance*value
-				lock_cover_bottom_right_position[2] = lock_cover_bottom_right_default_position[2] - move_distance*value
-				local block_angle = math.pi*4*value
+				lock_cover_top_left_position[1] = lock_cover_top_left_default_position[1] - move_distance * value
+				lock_cover_top_left_position[2] = lock_cover_top_left_default_position[2] + move_distance * value
+				lock_cover_top_right_position[1] = lock_cover_top_right_default_position[1] + move_distance * value
+				lock_cover_top_right_position[2] = lock_cover_top_right_default_position[2] + move_distance * value
+				lock_cover_bottom_left_position[1] = lock_cover_bottom_left_default_position[1] - move_distance * value
+				lock_cover_bottom_left_position[2] = lock_cover_bottom_left_default_position[2] - move_distance * value
+				lock_cover_bottom_right_position[1] = lock_cover_bottom_right_default_position[1] + move_distance * value
+				lock_cover_bottom_right_position[2] = lock_cover_bottom_right_default_position[2] - move_distance * value
+				local block_angle = math.pi * 4 * value
 				local lock_block_left_widget = widgets.lock_block_left
 				local lock_block_right_widget = widgets.lock_block_right
 				lock_block_left_widget.style.texture_id.angle = block_angle
@@ -2594,13 +2594,13 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 28
-				local value = math.ease_in_exp(local_progress - 1)
+				local value = math.ease_in_exp(1 - local_progress)
 				local lock_pillar_top_position = ui_scenegraph.lock_pillar_top.local_position
 				local lock_pillar_top_default_position = scenegraph_definition.lock_pillar_top.position
 				local lock_pillar_bottom_position = ui_scenegraph.lock_pillar_bottom.local_position
 				local lock_pillar_bottom_default_position = scenegraph_definition.lock_pillar_bottom.position
-				lock_pillar_top_position[2] = lock_pillar_top_default_position[2] + move_distance*value
-				lock_pillar_bottom_position[2] = lock_pillar_bottom_default_position[2] - move_distance*value
+				lock_pillar_top_position[2] = lock_pillar_top_default_position[2] + move_distance * value
+				lock_pillar_bottom_position[2] = lock_pillar_bottom_default_position[2] - move_distance * value
 
 				return 
 			end,
@@ -2616,10 +2616,10 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local value = math.easeCubic(local_progress - 1)
+				local value = math.easeCubic(1 - local_progress)
 				local lock_cogwheel_bg_left_widget = widgets.lock_cogwheel_bg_left
 				local lock_cogwheel_bg_right_widget = widgets.lock_cogwheel_bg_right
-				local angle = math.pi*0.5*value
+				local angle = math.pi * 0.5 * value
 				lock_cogwheel_bg_left_widget.style.texture_id.angle = angle
 				lock_cogwheel_bg_right_widget.style.texture_id.angle = angle
 
@@ -2637,15 +2637,15 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local cogwheel_value = math.ease_exp(local_progress - 1)
-				local center_value = math.easeInCubic(local_progress - 1)
+				local cogwheel_value = math.ease_exp(1 - local_progress)
+				local center_value = math.easeInCubic(1 - local_progress)
 				local lock_slot_holder_left_widget = widgets.lock_slot_holder_left
 				local lock_slot_holder_right_widget = widgets.lock_slot_holder_right
 				local reward_box_final_widget = widgets.reward_box_final_widget
 				local lock_cogwheel_left_widget = widgets.lock_cogwheel_left
 				local lock_cogwheel_right_widget = widgets.lock_cogwheel_right
-				local center_angle = math.pi/2*center_value
-				local cogwheel_angle = math.pi*2*cogwheel_value
+				local center_angle = math.pi / 2 * center_value
+				local cogwheel_angle = math.pi * 2 * cogwheel_value
 				lock_slot_holder_left_widget.style.texture_id.angle = -center_angle
 				lock_slot_holder_right_widget.style.texture_id.angle = -center_angle
 				reward_box_final_widget.style.frame.angle = -center_angle
@@ -2672,13 +2672,13 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 28
-				local value = math.ease_in_exp(local_progress - 1)
+				local value = math.ease_in_exp(1 - local_progress)
 				local lock_pillar_left_position = ui_scenegraph.lock_pillar_left.local_position
 				local lock_pillar_left_default_position = scenegraph_definition.lock_pillar_left.position
 				local lock_pillar_right_position = ui_scenegraph.lock_pillar_right.local_position
 				local lock_pillar_right_default_position = scenegraph_definition.lock_pillar_right.position
-				lock_pillar_left_position[1] = lock_pillar_left_default_position[1] - move_distance*value
-				lock_pillar_right_position[1] = lock_pillar_right_default_position[1] + move_distance*value
+				lock_pillar_left_position[1] = lock_pillar_left_default_position[1] - move_distance * value
+				lock_pillar_right_position[1] = lock_pillar_right_default_position[1] + move_distance * value
 
 				return 
 			end,

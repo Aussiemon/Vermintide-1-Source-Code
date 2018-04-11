@@ -89,10 +89,10 @@ end
 
 local function _drop_pickup(interactor_unit, pickup_name)
 	local first_person_extension = ScriptUnit.extension(interactor_unit, "first_person_system")
-	local position = first_person_extension.current_position(first_person_extension) + Vector3(math.random(-1, 1), math.random(-1, 1), 0)*0.2
+	local position = first_person_extension.current_position(first_person_extension) + Vector3(math.random(-1, 1), math.random(-1, 1), 0) * 0.2
 	local rotation = first_person_extension.current_rotation(first_person_extension)
 	local direction = Vector3.normalize(Quaternion.forward(rotation))
-	local final_position = position + direction*0.7
+	local final_position = position + direction * 0.7
 	local pickup_spawn_type = "dropped"
 	local pickup_name_id = NetworkLookup.pickup_names[pickup_name]
 	local pickup_spawn_type_id = NetworkLookup.pickup_spawn_types[pickup_spawn_type]
@@ -270,7 +270,7 @@ InteractionDefinitions.revive = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -392,7 +392,7 @@ InteractionDefinitions.pull_up = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/config.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -471,7 +471,7 @@ InteractionDefinitions.release_from_hook = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/config.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -554,7 +554,7 @@ InteractionDefinitions.assisted_respawn = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/config.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -661,7 +661,7 @@ InteractionDefinitions.smartobject = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/data.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / data.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local used = Unit.get_data(interactable_unit, "interaction_data", "used")
@@ -1099,7 +1099,7 @@ InteractionDefinitions.pickup_object = {
 				return nil
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/data.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / data.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config, world)
 			local return_value = not Unit.get_data(interactable_unit, "interaction_data", "used")
@@ -1314,7 +1314,7 @@ InteractionDefinitions.give_item = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/config.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			if not ScriptUnit.has_extension(interactable_unit, "damage_system") then
@@ -1408,7 +1408,7 @@ InteractionDefinitions.heal = {
 				if attack_template.heal_type == "bandage" then
 					local health_extension = ScriptUnit.extension(interactable_unit, "health_system")
 					local damage_taken = health_extension.damage
-					local heal_amount = damage_taken*attack_template.heal_percent
+					local heal_amount = damage_taken * attack_template.heal_percent
 
 					DamageUtils.heal_network(interactable_unit, interactor_unit, heal_amount, attack_template.heal_type)
 				else
@@ -1513,7 +1513,7 @@ InteractionDefinitions.heal = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time)/config.duration)
+			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			if not ScriptUnit.has_extension(interactable_unit, "damage_system") then

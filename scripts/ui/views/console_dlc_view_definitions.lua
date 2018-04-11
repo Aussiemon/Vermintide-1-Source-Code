@@ -106,7 +106,7 @@ local scenegraph_definition = {
 		horizontal_alignment = "right",
 		size = IMAGE_SIZE,
 		position = {
-			IMAGE_SIZE[1]*1.25,
+			IMAGE_SIZE[1] * 1.25,
 			0,
 			1
 		}
@@ -316,7 +316,7 @@ local background_widget_definitions = {
 					scroll_function = function (ui_scenegraph, ui_style, ui_content, input_service, scroll_axis)
 						local scroll_step = ui_content.scroll_step or 0.1
 						local current_scroll_value = ui_content.internal_scroll_value
-						current_scroll_value = current_scroll_value + scroll_step*-scroll_axis.y
+						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
 
 						return 

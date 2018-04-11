@@ -46,7 +46,7 @@ local scenegraph_definition = {
 			1
 		},
 		position = {
-			-(PAGE_SPACING + 592),
+			-(592 + PAGE_SPACING),
 			-30,
 			25
 		}
@@ -60,7 +60,7 @@ local scenegraph_definition = {
 			1
 		},
 		position = {
-			-(PAGE_SPACING + 592),
+			-(592 + PAGE_SPACING),
 			20,
 			1
 		}
@@ -88,7 +88,7 @@ local scenegraph_definition = {
 			1
 		},
 		position = {
-			PAGE_SPACING + 592,
+			592 + PAGE_SPACING,
 			20,
 			1
 		}

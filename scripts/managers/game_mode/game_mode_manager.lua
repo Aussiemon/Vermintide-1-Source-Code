@@ -124,7 +124,7 @@ GameModeManager._set_flow_object_set_enabled = function (self, set, enable, set_
 
 			self._set_flow_object_set_unit_enabled(self, level, unit_index)
 
-			read_index = read_index%max_size + 1
+			read_index = read_index % max_size + 1
 			size = size - 1
 		end
 
@@ -149,7 +149,7 @@ GameModeManager._set_flow_object_set_enabled = function (self, set, enable, set_
 			self._set_flow_object_set_unit_enabled(self, level, unit_index)
 		else
 			buffer[write_index] = unit_index
-			write_index = write_index%max_size + 1
+			write_index = write_index % max_size + 1
 			size = size + 1
 		end
 	end
@@ -181,7 +181,7 @@ GameModeManager.update_flow_object_set_enable = function (self, dt)
 
 			self._set_flow_object_set_unit_enabled(self, level, unit_index)
 
-			read_index = read_index%max_size + 1
+			read_index = read_index % max_size + 1
 			size = size - 1
 		end
 
@@ -521,8 +521,8 @@ GameModeManager.hot_join_sync = function (self, sender)
 	return 
 end
 GameModeManager.activate_end_level_area = function (self, unit, object, from, to)
-	local extents = (to - from)*0.5
-	local offset = (from + to)*0.5
+	local extents = (to - from) * 0.5
+	local offset = (from + to) * 0.5
 	self._end_level_areas[unit] = {
 		object = object,
 		extents = Vector3Box(extents),
@@ -532,8 +532,8 @@ GameModeManager.activate_end_level_area = function (self, unit, object, from, to
 	return 
 end
 GameModeManager.debug_end_level_area = function (self, unit, object, from, to)
-	local extents = (to - from)*0.5
-	local offset = (from + to)*0.5
+	local extents = (to - from) * 0.5
+	local offset = (from + to) * 0.5
 	self._debug_end_level_areas[unit] = {
 		object = object,
 		extents = Vector3Box(extents),
@@ -556,7 +556,7 @@ GameModeManager._update_end_level_areas = function (self)
 		local up = Quaternion.up(rot)
 		local object_pos = Unit.world_position(unit, node)
 		local offset = data.offset:unbox()
-		local pos = object_pos + right*offset.x + fwd*offset.y + up*offset.z
+		local pos = object_pos + right * offset.x + fwd * offset.y + up * offset.z
 		local pose = Matrix4x4.from_quaternion_position(rot, pos)
 		local extents = data.extents:unbox()
 
@@ -591,7 +591,7 @@ GameModeManager._update_end_level_areas = function (self)
 					local forward = Quaternion.forward(object_rot)
 					local up = Quaternion.up(object_rot)
 					local offset = data.offset:unbox()
-					local center_pos = object_pos + right*offset.x + forward*offset.y + up*offset.z
+					local center_pos = object_pos + right * offset.x + forward * offset.y + up * offset.z
 					local extents = data.extents:unbox()
 					local player_offset = pos - center_pos
 

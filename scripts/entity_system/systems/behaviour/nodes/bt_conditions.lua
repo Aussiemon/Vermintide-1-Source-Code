@@ -257,10 +257,10 @@ BTConditions.has_target_and_ammo_greater_than = function (blackboard, args)
 
 	local inventory_ext = blackboard.inventory_extension
 	local current, max = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
-	local ammo_ok = not current or args.ammo_percentage < current/max
+	local ammo_ok = not current or args.ammo_percentage < current / max
 	local overcharge_limit_type = args.overcharge_limit_type
 	local current_oc, threshold_oc, max_oc = inventory_ext.current_overcharge_status(inventory_ext, "slot_ranged")
-	local overcharge_ok = not current_oc or (overcharge_limit_type == "threshold" and current_oc/threshold_oc < args.overcharge_limit) or (overcharge_limit_type == "maximum" and current_oc/max_oc < args.overcharge_limit)
+	local overcharge_ok = not current_oc or (overcharge_limit_type == "threshold" and current_oc / threshold_oc < args.overcharge_limit) or (overcharge_limit_type == "maximum" and current_oc / max_oc < args.overcharge_limit)
 	local obstruction = blackboard.ranged_obstruction_by_static
 	local t = Managers.time:time("game")
 	local obstructed = obstruction and obstruction.unit == blackboard.target_unit and obstruction.timer + 3 < t
@@ -270,7 +270,7 @@ end
 BTConditions.can_loot = function (blackboard)
 	local max_dist = 3.2
 
-	return (blackboard.health_pickup and blackboard.allowed_to_take_health_pickup and blackboard.health_dist < max_dist and blackboard.health_pickup == blackboard.interaction_unit) or (blackboard.ammo_pickup and blackboard.needs_ammo and blackboard.ammo_dist < max_dist and blackboard.ammo_pickup == blackboard.interaction_unit) or (blackboard.mule_pickup and blackboard.mule_pickup == blackboard.interaction_unit and blackboard.mule_pickup_dist_squared < max_dist*max_dist)
+	return (blackboard.health_pickup and blackboard.allowed_to_take_health_pickup and blackboard.health_dist < max_dist and blackboard.health_pickup == blackboard.interaction_unit) or (blackboard.ammo_pickup and blackboard.needs_ammo and blackboard.ammo_dist < max_dist and blackboard.ammo_pickup == blackboard.interaction_unit) or (blackboard.mule_pickup and blackboard.mule_pickup == blackboard.interaction_unit and blackboard.mule_pickup_dist_squared < max_dist * max_dist)
 end
 BTConditions.bot_should_heal = function (blackboard)
 	local self_unit = blackboard.unit
@@ -354,7 +354,7 @@ BTConditions.can_revive = function (blackboard)
 		local can_interact_with_ally = can_interact_with_ally(self_unit, target_ally_unit)
 		local bot_stuck_threshold = 1
 
-		if can_interact_with_ally and (destination_reached or ally_distance < 1 or Vector3.length_squared(blackboard.locomotion_extension:current_velocity()) < bot_stuck_threshold*bot_stuck_threshold) then
+		if can_interact_with_ally and (destination_reached or ally_distance < 1 or Vector3.length_squared(blackboard.locomotion_extension:current_velocity()) < bot_stuck_threshold * bot_stuck_threshold) then
 			return true
 		end
 	end
@@ -622,7 +622,7 @@ BTConditions.grey_seer_teleport = function (blackboard, index)
 	local player_distance = action_data.player_distance
 
 	if player_distance then
-		local player_distance_sq = player_distance*player_distance
+		local player_distance_sq = player_distance * player_distance
 
 		for i = 1, #PLAYER_AND_BOT_POSITIONS, 1 do
 			local player_position = PLAYER_AND_BOT_POSITIONS[i]
@@ -654,7 +654,7 @@ end
 BTConditions.health_lost_percent = function (blackboard, args)
 	local min = args[1]
 	local max = args[2]
-	local lost_percent = ScriptUnit.extension(blackboard.unit, "health_system"):current_health_percent() - 1
+	local lost_percent = 1 - ScriptUnit.extension(blackboard.unit, "health_system"):current_health_percent()
 
 	return min <= lost_percent and lost_percent <= max
 end

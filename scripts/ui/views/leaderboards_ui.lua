@@ -88,7 +88,7 @@ LeaderboardsUI.open = function (self, level_key)
 		local ui_scenegraph = self._ui_scenegraph
 		local target = ui_scenegraph.root.local_position
 		local target_index = 2
-		self._open_window_animation = self.animate_element_by_time(self, target, target_index, (UISettings.ui_scale*-1200)/100, 0, UISettings.scoreboard.open_duration)
+		self._open_window_animation = self.animate_element_by_time(self, target, target_index, (-1200 * UISettings.ui_scale) / 100, 0, UISettings.scoreboard.open_duration)
 	end
 
 	return 
@@ -143,7 +143,7 @@ LeaderboardsUI.close = function (self)
 		local ui_scenegraph = self._ui_scenegraph
 		local target = ui_scenegraph.root.local_position
 		local target_index = 2
-		self._close_window_animation = self.animate_element_by_time(self, target, target_index, 0, (UISettings.ui_scale*-1200)/100, UISettings.scoreboard.close_duration)
+		self._close_window_animation = self.animate_element_by_time(self, target, target_index, 0, (-1200 * UISettings.ui_scale) / 100, UISettings.scoreboard.close_duration)
 		self._open = false
 	end
 
@@ -185,7 +185,7 @@ LeaderboardsUI._update_leaderboard_animation = function (self, dt)
 		return 
 	end
 
-	local progress = leaderboard_type_animation.animation_func(leaderboard_type_animation.timer/leaderboard_type_animation.duration)
+	local progress = leaderboard_type_animation.animation_func(leaderboard_type_animation.timer / leaderboard_type_animation.duration)
 	self._window_widget.style.leaderboard_type.text_color[1] = math.lerp(leaderboard_type_animation.text_color[1], leaderboard_type_animation.pulse_text_color[1], progress)
 	self._window_widget.style.leaderboard_type.text_color[2] = math.lerp(leaderboard_type_animation.text_color[2], leaderboard_type_animation.pulse_text_color[2], progress)
 	self._window_widget.style.leaderboard_type.text_color[3] = math.lerp(leaderboard_type_animation.text_color[3], leaderboard_type_animation.pulse_text_color[3], progress)
@@ -243,7 +243,7 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 		if leaderboard_data and 0 < leaderboard_data.entry_count then
 			for idx, entry in ipairs(leaderboard_data.scores) do
 				local time_in_sec = entry.data[7] or math.random(86400)
-				local time = string.format("%.2d:%.2d:%.2d", time_in_sec/3600, (time_in_sec/60)%60, time_in_sec%60)
+				local time = string.format("%.2d:%.2d:%.2d", time_in_sec / 3600, (time_in_sec / 60) % 60, time_in_sec % 60)
 				entry.data[7] = time
 				self._entries[#self._entries + 1] = definitions.create_entry(entry.name, entry.global_rank, entry.score, entry.data, "entry_root", self._base_offset, idx)
 			end
@@ -262,7 +262,7 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 			for idx, entry in ipairs(leaderboard_data.leaderboard) do
 				local xuid = entry.xuid
 				local time_in_sec = tonumber(entry.scores[7]) or math.random(86400)
-				local time = string.format("%.2d:%.2d:%.2d", time_in_sec/3600, (time_in_sec/60)%60, time_in_sec%60)
+				local time = string.format("%.2d:%.2d:%.2d", time_in_sec / 3600, (time_in_sec / 60) % 60, time_in_sec % 60)
 				local score_data = {
 					entry.scores[6],
 					entry.scores[1],
@@ -287,8 +287,8 @@ end
 LeaderboardsUI._rotate_loading_icon = function (self, dt)
 	local loading_icon_style = self._loading_icon.style.texture_id
 	local angle_fraction = loading_icon_style.fraction or 0
-	angle_fraction = (angle_fraction + dt)%1
-	local angle = angle_fraction*math.degrees_to_radians(360)
+	angle_fraction = (angle_fraction + dt) % 1
+	local angle = angle_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
 
@@ -355,15 +355,15 @@ LeaderboardsUI._update_list_scroll = function (self, dt)
 	local num_entries = #self._entries
 
 	if 15 < #self._entries then
-		local length = num_entries*definitions.entry_size[2]
+		local length = num_entries * definitions.entry_size[2]
 		local area_length = definitions.entry_area[2]
 		local diff = length - area_length
-		local step = diff/num_entries
-		local target_pos = (1 < self._current_index and step*self._current_index) or 0
+		local step = diff / num_entries
+		local target_pos = (1 < self._current_index and step * self._current_index) or 0
 		local current_pos = self._ui_scenegraph.entry_root.local_position[2]
 		self._ui_scenegraph.entry_root.local_position = {
 			0,
-			current_pos + (target_pos - current_pos)*dt*15,
+			current_pos + (target_pos - current_pos) * dt * 15,
 			0
 		}
 	end
@@ -489,7 +489,7 @@ LeaderboardsUI._handle_input = function (self, dt)
 		self.play_sound(self, "Play_hud_select")
 
 		self._entries = {}
-		self._current_leaderboard_type = self._current_leaderboard_type%#self._leaderboard_types + 1
+		self._current_leaderboard_type = 1 + self._current_leaderboard_type % #self._leaderboard_types
 
 		self._add_leaderboard_type_animation(self)
 

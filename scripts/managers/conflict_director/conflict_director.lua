@@ -231,7 +231,7 @@ ConflictDirector.update_player_crumbs = function (self, t, dt)
 				end
 
 				player_crumbs[player_crumbs.current_index] = Vector3Box(pos)
-				local oldest_index = (player_crumbs.current_index - 2)%#player_crumbs + 1
+				local oldest_index = (player_crumbs.current_index - 2) % #player_crumbs + 1
 				local oldest_pos = player_crumbs[oldest_index]
 
 				if oldest_pos then
@@ -501,7 +501,7 @@ ConflictDirector.get_main_path_player_data = function (self, unit)
 	return self.main_path_player_info[unit]
 end
 ConflictDirector.get_index = function (self, number, mod)
-	local index = math.floor(number)%mod
+	local index = math.floor(number) % mod
 
 	if index == 0 then
 		index = mod
@@ -709,7 +709,7 @@ ConflictDirector.start_horde = function (self, t, horde_data)
 
 	local num_spawners = Math.random(data.num_spawnpoints[1], data.num_spawnpoints[2])
 	num_spawners = math.clamp(num_spawners, 1, total_amount)
-	local amount_per_spawner = math.floor(total_amount/num_spawners)
+	local amount_per_spawner = math.floor(total_amount / num_spawners)
 	local breeds = data.breeds
 	local skip_chance = data.skip_chance
 	horde_data.breeds = data.breeds[1]
@@ -761,12 +761,12 @@ ConflictDirector.start_horde = function (self, t, horde_data)
 		end
 	end
 
-	horde_data.total_units = horde_data.number_of_hidden_points*amount_per_spawner
+	horde_data.total_units = horde_data.number_of_hidden_points * amount_per_spawner
 
 	return 
 end
 ConflictDirector.backup_spawn = function (self, horde_data, center_pos)
-	print("spawning", horde_data.number_of_hidden_points*horde_data.amount_per_spawner)
+	print("spawning", horde_data.number_of_hidden_points * horde_data.amount_per_spawner)
 	print("trying to use an existing hidden point")
 
 	local _, point = next(horde_data.refined_points)
@@ -828,7 +828,7 @@ ConflictDirector.refine_hidden_points = function (self, t, horde_data)
 			end
 
 			spawn_pos.spawn_cooldown = t
-			spawn_pos.spawn_count = ((horde_data.in_backup == true and horde_data.number_of_hidden_points) or 1)*horde_data.amount_per_spawner
+			spawn_pos.spawn_count = ((horde_data.in_backup == true and horde_data.number_of_hidden_points) or 1) * horde_data.amount_per_spawner
 			horde_data.number_of_hidden_points = horde_data.number_of_hidden_points - 1
 			point_is_worthy = true
 
@@ -915,7 +915,7 @@ ConflictDirector.setup_hidden_point = function (self, horde_data)
 	local data = horde_data.settings
 	local min_range = data.range_hidden_spawn[1]
 	local max_range = data.range_hidden_spawn[2]
-	local spread = (max_range - min_range)*0.5
+	local spread = (max_range - min_range) * 0.5
 	local dist = min_range + spread
 	local center_pos = horde_data.center_pos:unbox()
 	local tries = 10
@@ -1613,7 +1613,7 @@ ConflictDirector.spawn_unit = function (self, breed, spawn_pos, spawn_rot, spawn
 	local max_health = breed.max_health[difficulty_rank]
 
 	if archetype_index then
-		max_health = max_health*breed.heroic_archetypes[archetype_index].health_multiplier
+		max_health = max_health * breed.heroic_archetypes[archetype_index].health_multiplier
 	end
 
 	local extension_init_data = {
@@ -2204,10 +2204,10 @@ ConflictDirector.spawn_group = function (self, breed, on_navmesh, patrol_templat
 		local spawn_pos = nil
 
 		for j = 1, num_attempts, 1 do
-			local offset = Vector3(math.random()*4 - 2, math.random()*4 - 2, 0)
+			local offset = Vector3(4 * math.random() - 2, 4 * math.random() - 2, 0)
 
 			if spawn_in_grid and j == 1 then
-				offset = Vector3(-grid_size/2 + i%grid_size, -grid_size/2 + math.floor(i/grid_size), 0)
+				offset = Vector3(-grid_size / 2 + i % grid_size, -grid_size / 2 + math.floor(i / grid_size), 0)
 			end
 
 			if on_navmesh then
@@ -2305,7 +2305,7 @@ ConflictDirector.generate_spawns = function (self)
 	if self.spawn_zone_baker.spawn_zones_available then
 		local goal_density = 0.5
 		local spawn_cycle_length = PackSpawningSettings.spawn_cycle_length
-		local area_density_coefficient = PackSpawningSettings.area_density_coefficient*0.01
+		local area_density_coefficient = PackSpawningSettings.area_density_coefficient * 0.01
 		local length_density_coefficient = PackSpawningSettings.length_density_coefficient
 		pos_list, pack_sizes, pack_rotations = self.spawn_zone_baker:generate_spawns(spawn_cycle_length, goal_density, area_density_coefficient, length_density_coefficient)
 
@@ -2468,10 +2468,10 @@ ConflictDirector.update_server_debug = function (self, t, dt)
 
 				if valid then
 					QuickDrawerStay:sphere(pos, 1, green)
-					QuickDrawerStay:line(pos + Vector3(0, 0, 1), pos + Quaternion.forward(rot)*2 + Vector3(0, 0, 1), green)
+					QuickDrawerStay:line(pos + Vector3(0, 0, 1), pos + Quaternion.forward(rot) * 2 + Vector3(0, 0, 1), green)
 				else
 					QuickDrawerStay:sphere(pos, 1, red)
-					QuickDrawerStay:line(pos + Vector3(0, 0, 1), pos + Quaternion.forward(rot)*2 + Vector3(0, 0, 1), red)
+					QuickDrawerStay:line(pos + Vector3(0, 0, 1), pos + Quaternion.forward(rot) * 2 + Vector3(0, 0, 1), red)
 				end
 			end
 		end
@@ -2503,7 +2503,7 @@ ConflictDirector.update_server_debug = function (self, t, dt)
 		end
 
 		for i = 1, size, 1 do
-			local index = self._current_debug_list_index%size + 1
+			local index = self._current_debug_list_index % size + 1
 
 			if index == 1 then
 				self._current_debug_list_index = index
@@ -2603,9 +2603,9 @@ ConflictDirector.update_server_debug = function (self, t, dt)
 		local ai_system = entity_manager.system(entity_manager, "ai_system")
 		local res_x = RESOLUTION_LOOKUP.res_w
 		local res_y = RESOLUTION_LOOKUP.res_h
-		local opacity = math.min(1, (math.cos((self._show_switch_breed - t)*math.pi) - 1)*5)
+		local opacity = math.min(1, (1 - math.cos((self._show_switch_breed - t) * math.pi)) * 5)
 
-		Gui.rect(ai_system.ai_debugger.screen_gui, Vector3(5, res_y - 550, 0), Vector3(350, 500, 0), Color(opacity*230, 10, 10, 10))
+		Gui.rect(ai_system.ai_debugger.screen_gui, Vector3(5, res_y - 550, 0), Vector3(350, 500, 0), Color(230 * opacity, 10, 10, 10))
 	end
 
 	if DebugKeyHandler.key_pressed("p", "spawn " .. self._debug_breed, "ai", "left ctrl") then
@@ -2793,7 +2793,7 @@ ConflictDirector.update_server_debug = function (self, t, dt)
 			QuickDrawer:sphere(clusters[i], cluster_radius)
 
 			for j = 1, sizes[i], 1 do
-				QuickDrawer:sphere(clusters[i] + Vector3(0, 0, j + 2), 0.6)
+				QuickDrawer:sphere(clusters[i] + Vector3(0, 0, 2 + j), 0.6)
 			end
 		end
 

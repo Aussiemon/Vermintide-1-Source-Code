@@ -105,7 +105,7 @@ DiceTester._finish = function (self)
 
 	Managers.debug_updator:remove_updator_by_name("DiceTester")
 	print("Done with dice test")
-	print(string.format("%d rolls in %d seconds at an average of %f seconds/roll", self._num_rolls, self._total_duration, self._total_duration/self._num_rolls))
+	print(string.format("%d rolls in %d seconds at an average of %f seconds/roll", self._num_rolls, self._total_duration, self._total_duration / self._num_rolls))
 
 	if next(self._errors) then
 		print("")
@@ -154,7 +154,7 @@ DiceTester._randomize_dice = function (self)
 	local metal = Math.random(2)
 	local gold = Math.random(3)
 	local warpstone = Math.random(2)
-	local wood = (metal + gold + warpstone) - 7
+	local wood = 7 - (metal + gold + warpstone)
 
 	return string.format("metal,%d;wood,%d;warpstone,%d;gold,%d;", metal, wood, warpstone, gold)
 end

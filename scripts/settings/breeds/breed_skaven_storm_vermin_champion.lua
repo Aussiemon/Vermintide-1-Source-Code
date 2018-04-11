@@ -438,11 +438,11 @@ local action_data = {
 			},
 			move_start_left = {
 				dir = 1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			},
 			move_start_right = {
 				dir = -1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			}
 		},
 		considerations = UtilityConsiderations.storm_vermin_champion_follow
@@ -914,7 +914,7 @@ local action_data = {
 			}
 		},
 		overlap_start_angle_offset = -math.pi,
-		overlap_end_angle_offset = math.pi*0.5,
+		overlap_end_angle_offset = 0.5 * math.pi,
 		ignore_staggers = {
 			true,
 			true,
@@ -993,7 +993,7 @@ local action_data = {
 				30
 			}
 		},
-		overlap_start_angle_offset = math.pi*-0.5,
+		overlap_start_angle_offset = -0.5 * math.pi,
 		overlap_end_angle_offset = math.pi,
 		ignore_staggers = {
 			true,
@@ -1275,7 +1275,7 @@ local action_data = {
 			if t_value < 0.65 then
 				return 0.4
 			else
-				local scaled_t = math.min((t_value - 0.65)*4, 1)
+				local scaled_t = math.min((t_value - 0.65) * 4, 1)
 
 				return math.lerp(0.4, 2.95, scaled_t)
 			end
@@ -1713,11 +1713,11 @@ local action_data = {
 			},
 			turn_left = {
 				dir = 1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			},
 			turn_right = {
 				dir = -1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			}
 		}
 	},
@@ -1799,11 +1799,11 @@ local action_data = {
 			},
 			move_start_left = {
 				dir = 1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			},
 			move_start_right = {
 				dir = -1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			}
 		}
 	},

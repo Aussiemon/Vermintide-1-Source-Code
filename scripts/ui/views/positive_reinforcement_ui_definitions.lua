@@ -98,7 +98,7 @@ local function create_message_widgets(number_of_slots)
 			parent = "root",
 			position = {
 				30,
-				y_pos + FONT_SIZE*(i - 1),
+				y_pos + FONT_SIZE * (i - 1),
 				1
 			},
 			size = {

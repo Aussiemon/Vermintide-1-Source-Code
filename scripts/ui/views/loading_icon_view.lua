@@ -85,7 +85,7 @@ LoadingIconView.update_loading_icon = function (self, dt)
 	local icon_style = widget.style.icon
 	local uvs = icon_style.uvs
 	local icon_data = loading_icon_data
-	local speed = icon_data.frames_per_second/1
+	local speed = 1 / icon_data.frames_per_second
 
 	if not self.icon_timer then
 		self.icon_timer = speed
@@ -117,7 +117,7 @@ LoadingIconView.update_loading_icon = function (self, dt)
 		self._icon_fade_timer = math.clamp(self._icon_fade_timer - dt, 0, FADE_TIME)
 	end
 
-	icon_style.color[1] = self._icon_fade_timer/FADE_TIME*255
+	icon_style.color[1] = self._icon_fade_timer / FADE_TIME * 255
 
 	return 
 end

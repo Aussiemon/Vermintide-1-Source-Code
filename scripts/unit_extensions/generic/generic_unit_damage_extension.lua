@@ -103,7 +103,7 @@ GenericUnitDamageExtension.has_assist_shield = function (self)
 	return false
 end
 GenericUnitDamageExtension.recent_damages = function (self)
-	local previous_buffer_index = self.system_data.active_damage_buffer_index - 3
+	local previous_buffer_index = 3 - self.system_data.active_damage_buffer_index
 	local damage_queue = self.damage_buffers[previous_buffer_index]
 
 	return pdArray.data(damage_queue)

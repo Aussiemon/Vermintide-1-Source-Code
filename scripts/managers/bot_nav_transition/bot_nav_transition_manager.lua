@@ -67,13 +67,13 @@ BotNavTransitionManager.update = function (self, dt, t)
 		local from = transition.from:unbox()
 		local to = transition.to:unbox()
 		local waypoint = transition.waypoint:unbox()
-		local g = math.cos(math.pi*0.5*(t%2 - 1))*200 + 50
+		local g = 50 + math.cos(math.pi * 0.5 * (t % 2 - 1)) * 200
 		local color = Color(50, g, 50)
 
 		drawer.line(drawer, from, waypoint, color)
 		drawer.line(drawer, waypoint, to, color)
 		drawer.sphere(drawer, from, 0.3, color)
-		drawer.cone(drawer, to - Vector3.normalize(from - to)*0.25, to, 0.3, color, 9, 9)
+		drawer.cone(drawer, to - Vector3.normalize(from - to) * 0.25, to, 0.3, color, 9, 9)
 	end
 
 	for _, transition in pairs(self._ladder_transitions) do
@@ -83,7 +83,7 @@ BotNavTransitionManager.update = function (self, dt, t)
 
 		drawer.line(drawer, from, to, color)
 		drawer.sphere(drawer, from, 0.3, color)
-		drawer.cone(drawer, to - Vector3.normalize(from - to)*0.25, to, 0.3, color, 9, 9)
+		drawer.cone(drawer, to - Vector3.normalize(from - to) * 0.25, to, 0.3, color, 9, 9)
 	end
 
 	if Keyboard.pressed(Keyboard.button_index("l")) and 0 < Keyboard.button(Keyboard.button_index("left ctrl")) then
@@ -121,7 +121,7 @@ BotNavTransitionManager._find_matching_layer = function (self, from, to, player_
 	local max_hp = Managers.state.difficulty:get_difficulty_settings().max_hp
 	local fall_settings = PlayerUnitMovementSettings.fall.heights
 
-	if height < -(fall_settings.MIN_FALL_DAMAGE_HEIGHT + (max_hp*0.5 - fall_settings.MIN_FALL_DAMAGE)/fall_settings.FALL_DAMAGE_MULTIPLIER) then
+	if height < -(fall_settings.MIN_FALL_DAMAGE_HEIGHT + (max_hp * 0.5 - fall_settings.MIN_FALL_DAMAGE) / fall_settings.FALL_DAMAGE_MULTIPLIER) then
 		return nil
 	elseif height < -fall_settings.MIN_FALL_DAMAGE_HEIGHT then
 		return "bot_damage_drops"
@@ -165,7 +165,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 	if player_jumped then
 		waypoint = via
 	else
-		waypoint = (via - from)*1.5 + from
+		waypoint = (via - from) * 1.5 + from
 	end
 
 	local nav_world = self._nav_world
@@ -201,7 +201,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 
 				drawer.line(drawer, from, old_wanted_to, color)
 				drawer.sphere(drawer, from, 0.3, color)
-				drawer.cone(drawer, old_wanted_to - Vector3.normalize(from - old_wanted_to)*0.25, old_wanted_to, 0.3, color, 9, 9)
+				drawer.cone(drawer, old_wanted_to - Vector3.normalize(from - old_wanted_to) * 0.25, old_wanted_to, 0.3, color, 9, 9)
 				drawer.cylinder(drawer, old_wanted_to - Vector3(0, 0, beneath), old_wanted_to + Vector3(0, 0, above), lateral, Color(100, 255, 0, 0), 20)
 			end
 
@@ -221,7 +221,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 			drawer.line(drawer, from, to, color)
 			drawer.sphere(drawer, from, 0.3, color)
 			drawer.sphere(drawer, to, 0.3, color)
-			drawer.cone(drawer, to - Vector3.normalize(from - to)*0.25, to, 0.3, color, 9, 9)
+			drawer.cone(drawer, to - Vector3.normalize(from - to) * 0.25, to, 0.3, color, 9, 9)
 		end
 
 		debug_print("area was already traversable")
@@ -276,7 +276,7 @@ BotNavTransitionManager.create_transition = function (self, from, via, wanted_to
 	local next_index = index
 
 	repeat
-		next_index = (next_index - self._index_offset)%self._max_amount + 1 + self._index_offset
+		next_index = (next_index - self._index_offset) % self._max_amount + 1 + self._index_offset
 	until not transitions[next_index] or not transitions[next_index].permanent
 
 	self._current_index = next_index
@@ -321,12 +321,12 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 	local length = Vector3.dot(bottom_pos - align_pos, down)
 	local world = self._world
 	local ph_world = World.get_data(world, "physics_world")
-	local ray_from = align_pos + back*1
+	local ray_from = align_pos + back * 1
 	local ray_length = length + 10
 	local hit, hit_position = PhysicsWorld.immediate_raycast(ph_world, ray_from, down, ray_length, "closest", "collision_filter", "filter_bot_nav_transition_ladder_ray")
 
 	if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
-		local ray_to = ray_from + down*ray_length
+		local ray_to = ray_from + down * ray_length
 		local drawer = Managers.state.debug:drawer({
 			mode = "retained",
 			name = "BotNavTransitionManager_retained"
@@ -334,7 +334,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 		local color = (hit and Color(0, 255, 0)) or Color(125, 0, 0)
 
 		drawer.line(drawer, ray_from, ray_to, color)
-		drawer.cone(drawer, ray_to - down*0.25, ray_to, 0.3, color, 9, 9)
+		drawer.cone(drawer, ray_to - down * 0.25, ray_to, 0.3, color, 9, 9)
 	end
 
 	if not hit then
@@ -342,13 +342,13 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 
 		data.failed = true
 		data.to = Vector3Box(ray_from)
-		data.from = Vector3Box(ray_from + down*ray_length)
+		data.from = Vector3Box(ray_from + down * ray_length)
 
 		return 
 	end
 
 	local from, to, found_nav_mesh, z = nil
-	local transition_to = bottom_pos - down*length
+	local transition_to = bottom_pos - down * length
 	found_nav_mesh, z = GwNavQueries.triangle_from_position(nav_world, transition_to, 0.3, 0.5, self._layerless_traverse_logic)
 
 	if found_nav_mesh then
@@ -360,7 +360,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 		debug_print("failed finding align_pos nav mesh at %s", tostring(align_pos))
 
 		for step_index = 1, max_steps, 1 do
-			local check_pos = transition_to - flat_back*step_size*step_index
+			local check_pos = transition_to - flat_back * step_size * step_index
 
 			if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 				local drawer = Managers.state.debug:drawer({
@@ -402,7 +402,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 		debug_print("failed finding hit_position nav mesh at %s", tostring(align_pos))
 
 		for step_index = 1, max_steps, 1 do
-			local check_pos = hit_position + flat_back*step_size*step_index
+			local check_pos = hit_position + flat_back * step_size * step_index
 
 			if script_data.ai_bots_debug or script_data.ai_bot_transition_debug then
 				local drawer = Managers.state.debug:drawer({
@@ -445,7 +445,7 @@ BotNavTransitionManager.register_ladder = function (self, unit)
 		local graph = GwNavGraph.create(nav_world, ladder_is_bidirectional, {
 			to,
 			align_pos,
-			hit_position + back*0.2,
+			hit_position + back * 0.2,
 			from
 		}, Colors.get("blue"), layer_id, index)
 

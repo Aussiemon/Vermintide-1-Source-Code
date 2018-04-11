@@ -42,7 +42,7 @@ ProjectileScriptUnitLocomotionExtension.update = function (self, unit, input, _,
 
 	local position = POSITION_LOOKUP[unit]
 	local dt = self.dt
-	local speed = self.speed/100
+	local speed = self.speed / 100
 	local angle = self.radians
 	local gravity = self.gravity
 	local target_vector = Vector3Box.unbox(self.target_vector_boxed)

@@ -692,8 +692,8 @@ local animations = {
 				local offset = widget.style.texture_style.offset
 				local text_color = widget.style.texts_style.text_color
 				local original_size = params.title_content.texture_size
-				size[1] = math.lerp(original_size[1], original_size[1]*0.25, math.smoothstep(local_progress, 0, 1))
-				size[2] = math.lerp(original_size[2], original_size[2]*0.25, math.smoothstep(local_progress, 0, 1))
+				size[1] = math.lerp(original_size[1], original_size[1] * 0.25, math.smoothstep(local_progress, 0, 1))
+				size[2] = math.lerp(original_size[2], original_size[2] * 0.25, math.smoothstep(local_progress, 0, 1))
 				offset[1] = math.lerp(title_content.texture_offset[1], -150, math.smoothstep(local_progress, 0, 1))
 				offset[2] = math.lerp(title_content.texture_offset[2], 550, math.smoothstep(local_progress, 0, 1))
 				text_color[1] = math.lerp(Colors.color_definitions.white[1], 0, math.smoothstep(local_progress, 0, 1))
@@ -739,8 +739,8 @@ local animations = {
 				local offset = widget.style.texture_style.offset
 				local text_color = widget.style.texts_style.text_color
 				local original_size = params.title_content.texture_size
-				size[1] = math.lerp(original_size[1], original_size[1]*0.25, math.smoothstep(local_progress, 1, 0))
-				size[2] = math.lerp(original_size[2], original_size[2]*0.25, math.smoothstep(local_progress, 1, 0))
+				size[1] = math.lerp(original_size[1], original_size[1] * 0.25, math.smoothstep(local_progress, 1, 0))
+				size[2] = math.lerp(original_size[2], original_size[2] * 0.25, math.smoothstep(local_progress, 1, 0))
 				offset[1] = math.lerp(title_content.texture_offset[1], -150, math.smoothstep(local_progress, 1, 0))
 				offset[2] = math.lerp(title_content.texture_offset[2], 600, math.smoothstep(local_progress, 1, 0))
 				text_color[1] = math.lerp(Colors.color_definitions.white[1], 0, math.smoothstep(local_progress, 1, 0))
@@ -782,7 +782,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				widgets.input_icon.style.texture_id.color[1] = anim_progress*255
+				widgets.input_icon.style.texture_id.color[1] = anim_progress * 255
 
 				return 
 			end,
@@ -800,7 +800,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
 				local circle_glow_color = widgets.frame_circle_glow.style.texture_id.color
-				local alpha = anim_progress*255
+				local alpha = anim_progress * 255
 
 				if circle_glow_color[1] < alpha then
 					circle_glow_color[1] = alpha
@@ -822,7 +822,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local ease_progress = math.catmullrom(local_progress, -5, 1, 1, -5)
 				local anim_progress = math.easeOutCubic(local_progress)
-				widgets.frame_line_glow.style.texture_id.color[1] = anim_progress*255
+				widgets.frame_line_glow.style.texture_id.color[1] = anim_progress * 255
 
 				return 
 			end,
@@ -851,14 +851,14 @@ local animations = {
 				local default_frame_bottom_size = scenegraph_definition.frame_bottom.size
 				local default_frame_circle_glow_size = scenegraph_definition.frame_circle_glow.size
 				local anim_progress = math.catmullrom(math.easeOutCubic(local_progress), 2, 1, 1, 1.5)
-				frame_top_size[1] = default_frame_top_size[1]*anim_progress
-				frame_top_size[2] = default_frame_top_size[2]*anim_progress
-				frame_bottom_size[1] = default_frame_bottom_size[1]*anim_progress
-				frame_bottom_size[2] = default_frame_bottom_size[2]*anim_progress
-				frame_circle_glow_size[1] = default_frame_circle_glow_size[1]*anim_progress
-				frame_circle_glow_size[2] = default_frame_circle_glow_size[2]*anim_progress
-				input_icon_size[1] = default_input_icon_size[1]*anim_progress
-				input_icon_size[2] = default_input_icon_size[2]*anim_progress
+				frame_top_size[1] = default_frame_top_size[1] * anim_progress
+				frame_top_size[2] = default_frame_top_size[2] * anim_progress
+				frame_bottom_size[1] = default_frame_bottom_size[1] * anim_progress
+				frame_bottom_size[2] = default_frame_bottom_size[2] * anim_progress
+				frame_circle_glow_size[1] = default_frame_circle_glow_size[1] * anim_progress
+				frame_circle_glow_size[2] = default_frame_circle_glow_size[2] * anim_progress
+				input_icon_size[1] = default_input_icon_size[1] * anim_progress
+				input_icon_size[2] = default_input_icon_size[2] * anim_progress
 
 				return 
 			end,
@@ -887,22 +887,22 @@ local animations = {
 				local default_lock_middle_bottom_size = scenegraph_definition.lock_middle_bottom.size
 				local default_lock_middle_top_size = scenegraph_definition.lock_middle_top.size
 				local default_lock_outer_top_size = scenegraph_definition.lock_outer_top.size
-				lock_center_size[1] = default_lock_center_size[1]*anim_progress
-				lock_center_size[2] = default_lock_center_size[2]*anim_progress
-				lock_outer_bottom_size[1] = default_lock_outer_bottom_size[1]*anim_progress
-				lock_outer_bottom_size[2] = default_lock_outer_bottom_size[2]*anim_progress
-				lock_middle_bottom_size[1] = default_lock_middle_bottom_size[1]*anim_progress
-				lock_middle_bottom_size[2] = default_lock_middle_bottom_size[2]*anim_progress
-				lock_middle_top_size[1] = default_lock_middle_top_size[1]*anim_progress
-				lock_middle_top_size[2] = default_lock_middle_top_size[2]*anim_progress
-				lock_outer_top_size[1] = default_lock_outer_top_size[1]*anim_progress
-				lock_outer_top_size[2] = default_lock_outer_top_size[2]*anim_progress
+				lock_center_size[1] = default_lock_center_size[1] * anim_progress
+				lock_center_size[2] = default_lock_center_size[2] * anim_progress
+				lock_outer_bottom_size[1] = default_lock_outer_bottom_size[1] * anim_progress
+				lock_outer_bottom_size[2] = default_lock_outer_bottom_size[2] * anim_progress
+				lock_middle_bottom_size[1] = default_lock_middle_bottom_size[1] * anim_progress
+				lock_middle_bottom_size[2] = default_lock_middle_bottom_size[2] * anim_progress
+				lock_middle_top_size[1] = default_lock_middle_top_size[1] * anim_progress
+				lock_middle_top_size[2] = default_lock_middle_top_size[2] * anim_progress
+				lock_outer_top_size[1] = default_lock_outer_top_size[1] * anim_progress
+				lock_outer_top_size[2] = default_lock_outer_top_size[2] * anim_progress
 				local lock_outer_top_position = ui_scenegraph.lock_outer_top.local_position
 				local lock_middle_top_position = ui_scenegraph.lock_middle_top.local_position
 				local default_lock_outer_top_position = scenegraph_definition.lock_outer_top.position
 				local default_lock_middle_top_position = scenegraph_definition.lock_middle_top.position
-				lock_outer_top_position[2] = default_lock_outer_top_position[2]*anim_progress
-				lock_middle_top_position[2] = default_lock_middle_top_position[2]*anim_progress
+				lock_outer_top_position[2] = default_lock_outer_top_position[2] * anim_progress
+				lock_middle_top_position[2] = default_lock_middle_top_position[2] * anim_progress
 
 				return 
 			end,
@@ -920,7 +920,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local ease_progress = math.catmullrom(local_progress, -5, 1, 1, -5)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				widgets.frame_line_glow.style.texture_id.color[1] = anim_progress*255
+				widgets.frame_line_glow.style.texture_id.color[1] = anim_progress * 255
 
 				return 
 			end,
@@ -937,7 +937,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				widgets.frame_circle_glow.style.texture_id.color[1] = anim_progress*255
+				widgets.frame_circle_glow.style.texture_id.color[1] = anim_progress * 255
 
 				return 
 			end,
@@ -957,9 +957,9 @@ local animations = {
 				local widget_bottom = widgets.frame_bottom
 				local anim_progress = math.ease_out_quad(local_progress)
 				local default_frame_bottom_position = scenegraph_definition.frame_bottom.position
-				ui_scenegraph.frame_top.local_position[2] = anim_progress*170
-				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] + anim_progress*-170
-				ui_scenegraph.frame_background.size[2] = anim_progress*340
+				ui_scenegraph.frame_top.local_position[2] = 170 * anim_progress
+				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] + -170 * anim_progress
+				ui_scenegraph.frame_background.size[2] = 340 * anim_progress
 
 				return 
 			end,
@@ -981,9 +981,9 @@ local animations = {
 				local widget_bottom = widgets.frame_bottom
 				local default_frame_bottom_position = scenegraph_definition.frame_bottom.position
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				ui_scenegraph.frame_top.local_position[2] = anim_progress*170
-				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] - anim_progress*170
-				ui_scenegraph.frame_background.size[2] = anim_progress*340
+				ui_scenegraph.frame_top.local_position[2] = 170 * anim_progress
+				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] - 170 * anim_progress
+				ui_scenegraph.frame_background.size[2] = 340 * anim_progress
 
 				return 
 			end,
@@ -1001,7 +1001,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local ease_progress = math.catmullrom(local_progress, -5, 1, 1, -5)
 				local anim_progress = math.smoothstep(local_progress, 0, 1)
-				widgets.input_icon.style.texture_id.color[1] = anim_progress*255
+				widgets.input_icon.style.texture_id.color[1] = anim_progress * 255
 
 				return 
 			end,
@@ -1021,7 +1021,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget_circle_glow = widgets.frame_circle_glow
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				widget_circle_glow.style.texture_id.color[1] = anim_progress*100 + 155
+				widget_circle_glow.style.texture_id.color[1] = 155 + anim_progress * 100
 
 				return 
 			end,
@@ -1041,7 +1041,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget_circle_glow = widgets.frame_circle_glow
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
-				widget_circle_glow.style.texture_id.color[1] = anim_progress*100 - 255
+				widget_circle_glow.style.texture_id.color[1] = 255 - anim_progress * 100
 
 				return 
 			end,
@@ -1070,7 +1070,7 @@ local animations = {
 					local size = ui_scenegraph[scenegraph_id].size
 					local screen_width = 1820
 					local total_distance = size[1] + screen_width
-					local x_offset = local_progress*total_distance
+					local x_offset = local_progress * total_distance
 
 					if screen_width < x_offset then
 						widget.offset[1] = -total_distance + x_offset
@@ -1107,7 +1107,7 @@ local animations = {
 					local size = ui_scenegraph[scenegraph_id].size
 					local screen_width = 1820
 					local total_distance = size[1] + screen_width
-					local x_offset = local_progress*total_distance
+					local x_offset = local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
 
@@ -1135,9 +1135,9 @@ local animations = {
 					local anim_progress = math.smoothstep(local_progress, 1, 0)
 					local size = ui_scenegraph[scenegraph_id].size
 					local screen_width = 1820
-					local start_offset = -(screen_width*0.5)
+					local start_offset = -(screen_width * 0.5)
 					local total_distance = size[1] + screen_width
-					local x_offset = start_offset + local_progress*total_distance
+					local x_offset = start_offset + local_progress * total_distance
 
 					if screen_width < x_offset then
 						widget.offset[1] = -total_distance + x_offset
@@ -1173,9 +1173,9 @@ local animations = {
 					local anim_progress = math.smoothstep(local_progress, 1, 0)
 					local size = ui_scenegraph[scenegraph_id].size
 					local screen_width = 1820
-					local start_offset = -(screen_width*0.5)
+					local start_offset = -(screen_width * 0.5)
 					local total_distance = size[1] + screen_width
-					local x_offset = -start_offset + local_progress*total_distance
+					local x_offset = -start_offset + local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
 
@@ -1207,7 +1207,7 @@ local animations = {
 					local screen_width = 1820
 					local length_to_screen_edge = size[1]
 					local total_distance = size[1] + screen_width
-					local x_offset = local_progress*total_distance
+					local x_offset = local_progress * total_distance
 
 					if screen_width < x_offset then
 						widget.offset[1] = -total_distance + x_offset
@@ -1245,7 +1245,7 @@ local animations = {
 					local screen_width = 1820
 					local length_to_screen_edge = size[1]
 					local total_distance = size[1] + screen_width
-					local x_offset = local_progress*total_distance
+					local x_offset = local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
 
@@ -1273,9 +1273,9 @@ local animations = {
 					local anim_progress = math.smoothstep(local_progress, 1, 0)
 					local size = ui_scenegraph[scenegraph_id].size
 					local screen_width = 1820
-					local start_offset = -(screen_width*0.5)
+					local start_offset = -(screen_width * 0.5)
 					local total_distance = size[1] + screen_width
-					local x_offset = start_offset + local_progress*total_distance
+					local x_offset = start_offset + local_progress * total_distance
 
 					if screen_width < x_offset then
 						widget.offset[1] = -total_distance + x_offset
@@ -1311,9 +1311,9 @@ local animations = {
 					local anim_progress = math.smoothstep(local_progress, 1, 0)
 					local size = ui_scenegraph[scenegraph_id].size
 					local screen_width = 1820
-					local start_offset = -(screen_width*0.5)
+					local start_offset = -(screen_width * 0.5)
 					local total_distance = size[1] + screen_width
-					local x_offset = -start_offset + local_progress*total_distance
+					local x_offset = -start_offset + local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
 

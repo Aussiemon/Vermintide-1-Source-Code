@@ -146,7 +146,7 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 
 			local radians = math.degrees_to_radians(angle)
 			local gravity = ProjectileGravitySettings[projectile_info.gravity_settings]
-			local position_on_trajectory = WeaponHelper:position_on_trajectory(position, target_vector, speed/100, radians, gravity, life_time)
+			local position_on_trajectory = WeaponHelper:position_on_trajectory(position, target_vector, speed / 100, radians, gravity, life_time)
 			target_vector = Vector3.normalize(Vector3.flat(position_on_trajectory - muzzle_pos))
 			position = muzzle_pos
 		end
@@ -164,7 +164,7 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 		local item_template_name = lookup_data.item_template_name
 		local action_name = lookup_data.action_name
 		local sub_action_name = lookup_data.sub_action_name
-		local charge_level = math.round(self.charge_level*100)
+		local charge_level = math.round(self.charge_level * 100)
 		local scale = charge_level
 
 		ActionUtils.spawn_player_projectile(owner_unit, position, rotation, scale, angle, target_vector, speed, item_name, item_template_name, action_name, sub_action_name, gaze_settings)

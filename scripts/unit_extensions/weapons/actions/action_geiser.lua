@@ -73,7 +73,7 @@ ActionGeiser.fire = function (self, reason)
 	local owner_unit = self.owner_unit
 	local weapon_system = Managers.state.entity:system("weapon_system")
 	local radius = self.radius
-	local half_height = self.height*0.5
+	local half_height = self.height * 0.5
 	local position = self.position:unbox()
 	local physics_world = World.get_data(self.world, "physics_world")
 	local network_manager = Managers.state.network
@@ -139,7 +139,7 @@ ActionGeiser.fire = function (self, reason)
 				local attack_template_name = nil
 
 				if current_action.attack_template_list then
-					local proximity_factor = attack_distance/radius
+					local proximity_factor = attack_distance / radius
 					local pick_this_one = 3
 
 					if 0.75 < proximity_factor then

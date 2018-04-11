@@ -471,10 +471,10 @@ SplashView._update_texture = function (self, gui, dt)
 	dt = math.min(dt, 0.03333333333333333)
 
 	if total_time - 0.5 < timer then
-		local value = (timer - total_time - 0.5)/0.5*255
+		local value = 255 * (timer - total_time - 0.5) / 0.5
 		self._current_widget.style.foreground.color[1] = value
 	elseif timer <= 0.5 then
-		local value = (timer/0.5 - 1)*255
+		local value = 255 * (1 - timer / 0.5)
 		self._current_widget.style.foreground.color[1] = value
 	else
 		self._current_widget.style.foreground.color[1] = 0

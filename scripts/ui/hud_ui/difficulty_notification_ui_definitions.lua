@@ -159,7 +159,7 @@ local animations = {
 				local anim_fraction = math.easeInCubic(progress)
 				local background_top_widget = widgets.background_top
 				local background_bottom_widget = widgets.background_bottom
-				local alpha = anim_fraction*255
+				local alpha = 255 * anim_fraction
 				background_top_widget.style.texture_id.color[1] = alpha
 				background_bottom_widget.style.texture_id.color[1] = alpha
 
@@ -187,10 +187,10 @@ local animations = {
 				local default_background_bottom_size = scenegraph_definition[background_bottom_scenegraph_id].size
 				local current_background_bottom_size = ui_scenegraph[background_bottom_scenegraph_id].size
 				local anim_size_fraction = math.catmullrom(progress, -4, 1, 1, -1)
-				current_background_top_size[1] = default_background_top_size[1]*anim_size_fraction
-				current_background_top_size[2] = default_background_top_size[2]*anim_size_fraction
-				current_background_bottom_size[1] = default_background_bottom_size[1]*anim_size_fraction
-				current_background_bottom_size[2] = default_background_bottom_size[2]*anim_size_fraction
+				current_background_top_size[1] = default_background_top_size[1] * anim_size_fraction
+				current_background_top_size[2] = default_background_top_size[2] * anim_size_fraction
+				current_background_bottom_size[1] = default_background_bottom_size[1] * anim_size_fraction
+				current_background_bottom_size[2] = default_background_bottom_size[2] * anim_size_fraction
 
 				return 
 			end,
@@ -220,13 +220,13 @@ local animations = {
 				local current_background_center_size = ui_scenegraph[background_center_scenegraph_id].size
 				local default_background_center_size = scenegraph_definition[background_center_scenegraph_id].size
 				local center_uvs = background_center_widget.content.texture_id.uvs
-				local total_uv_change = anim_fraction*0.5
+				local total_uv_change = 0.5 * anim_fraction
 				center_uvs[1][2] = total_uv_change
-				center_uvs[2][2] = total_uv_change - 1
-				current_background_center_size[2] = default_background_center_size[2]*anim_fraction
-				local half_center_height = default_background_center_size[2]/2
-				current_background_top_position[2] = default_background_top_position[2] + half_center_height*anim_fraction
-				current_background_bottom_position[2] = default_background_bottom_position[2] - half_center_height*anim_fraction
+				center_uvs[2][2] = 1 - total_uv_change
+				current_background_center_size[2] = default_background_center_size[2] * anim_fraction
+				local half_center_height = default_background_center_size[2] / 2
+				current_background_top_position[2] = default_background_top_position[2] + half_center_height * anim_fraction
+				current_background_bottom_position[2] = default_background_bottom_position[2] - half_center_height * anim_fraction
 
 				return 
 			end,
@@ -251,8 +251,8 @@ local animations = {
 				local anim_fraction = math.easeOutCubic(progress)
 				local difficulty_title_text_widget = widgets.difficulty_title_text
 				local text_style = difficulty_title_text_widget.style.text
-				text_style.text_color[1] = anim_fraction*255
-				text_style.font_size = math.catmullrom(math.easeOutCubic(progress), -0.5, 1, 1, -0.5)*40
+				text_style.text_color[1] = 255 * anim_fraction
+				text_style.font_size = 40 * math.catmullrom(math.easeOutCubic(progress), -0.5, 1, 1, -0.5)
 
 				return 
 			end,
@@ -270,7 +270,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeOutCubic(progress)
 				local difficulty_title_text_widget = widgets.difficulty_title_text
-				difficulty_title_text_widget.style.text.text_color[1] = anim_fraction*255 - 255
+				difficulty_title_text_widget.style.text.text_color[1] = 255 - 255 * anim_fraction
 
 				return 
 			end,
@@ -295,8 +295,8 @@ local animations = {
 				local anim_fraction = math.easeOutCubic(progress)
 				local difficulty_text_widget = widgets.difficulty_text
 				local text_style = difficulty_text_widget.style.text
-				text_style.text_color[1] = anim_fraction*255
-				text_style.font_size = math.catmullrom(math.easeOutCubic(progress), -0.5, 1, 1, -0.5)*40
+				text_style.text_color[1] = 255 * anim_fraction
+				text_style.font_size = 40 * math.catmullrom(math.easeOutCubic(progress), -0.5, 1, 1, -0.5)
 
 				return 
 			end,
@@ -314,7 +314,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeInCubic(progress)
 				local difficulty_text_widget = widgets.difficulty_text
-				difficulty_text_widget.style.text.text_color[1] = anim_fraction*255 - 255
+				difficulty_text_widget.style.text.text_color[1] = 255 - 255 * anim_fraction
 
 				return 
 			end,
@@ -344,13 +344,13 @@ local animations = {
 				local current_background_center_size = ui_scenegraph[background_center_scenegraph_id].size
 				local default_background_center_size = scenegraph_definition[background_center_scenegraph_id].size
 				local center_uvs = background_center_widget.content.texture_id.uvs
-				local total_uv_change = anim_fraction*0.5 - 0.5
+				local total_uv_change = 0.5 - 0.5 * anim_fraction
 				center_uvs[1][2] = total_uv_change
-				center_uvs[2][2] = total_uv_change - 1
-				current_background_center_size[2] = default_background_center_size[2] - default_background_center_size[2]*anim_fraction
-				local half_center_height = default_background_center_size[2]/2
-				current_background_top_position[2] = (default_background_top_position[2] + half_center_height) - half_center_height*anim_fraction
-				current_background_bottom_position[2] = default_background_bottom_position[2] - half_center_height + half_center_height*anim_fraction
+				center_uvs[2][2] = 1 - total_uv_change
+				current_background_center_size[2] = default_background_center_size[2] - default_background_center_size[2] * anim_fraction
+				local half_center_height = default_background_center_size[2] / 2
+				current_background_top_position[2] = (default_background_top_position[2] + half_center_height) - half_center_height * anim_fraction
+				current_background_bottom_position[2] = default_background_bottom_position[2] - half_center_height + half_center_height * anim_fraction
 
 				return 
 			end,
@@ -376,7 +376,7 @@ local animations = {
 				local background_center_widget = widgets.background_center
 				local background_bottom_widget = widgets.background_bottom
 				local anim_fraction = math.easeOutCubic(progress)
-				local alpha = anim_fraction*255 - 255
+				local alpha = 255 - 255 * anim_fraction
 				background_top_widget.style.texture_id.color[1] = alpha
 				background_bottom_widget.style.texture_id.color[1] = alpha
 				background_center_widget.style.texture_id.color[1] = alpha

@@ -24,11 +24,11 @@ BoonUI.init = function (self, ingame_ui_context)
 	local boon_pivot_definition = scenegraph_definition.pivot
 	local boon_pivot_position = boon_pivot_definition.position
 	local size = {
-		(BOON_WIDTH*MAX_NUMBER_OF_BOONS + BOON_SPACING*MAX_NUMBER_OF_BOONS)*2,
+		(BOON_WIDTH * MAX_NUMBER_OF_BOONS + BOON_SPACING * MAX_NUMBER_OF_BOONS) * 2,
 		BOON_HEIGHT
 	}
 	local position = {
-		(boon_pivot_position[1] + 1920) - size[1] - BOON_WIDTH*1.5,
+		(1920 + boon_pivot_position[1]) - size[1] - BOON_WIDTH * 1.5,
 		0
 	}
 	self.cleanui_data = {}
@@ -77,14 +77,14 @@ BoonUI._align_widgets = function (self)
 		local widget = data.widget
 		local widget_offset = widget.offset
 		widget_offset[1] = start_x_offset + widget_total_width
-		widget_offset[2] = math.floor(current_index/MAX_NUMBER_OF_BOONS)*vertical_spacing
+		widget_offset[2] = math.floor(current_index / MAX_NUMBER_OF_BOONS) * vertical_spacing
 		widget_total_width = widget_total_width - horizontal_spacing
 
 		self._set_widget_dirty(self, widget)
 
 		current_index = current_index + 1
 
-		if current_index%MAX_NUMBER_OF_BOONS == 0 then
+		if current_index % MAX_NUMBER_OF_BOONS == 0 then
 			widget_total_width = 0
 		end
 	end
@@ -387,7 +387,7 @@ BoonUI._update_boon_timers = function (self, dt)
 			if not infinite then
 				if network_time < end_time then
 					local time_left = math.max(end_time - network_time, 0)
-					local progress = math.min(time_left/duration, 1) - 1
+					local progress = 1 - math.min(time_left / duration, 1)
 
 					self._set_widget_time_progress(self, widget, progress, time_left)
 				end
@@ -406,9 +406,9 @@ end
 local floor = math.floor
 BoonUI._set_widget_time_progress = function (self, widget, progress, time_left)
 	if time_left and 0 < time_left then
-		local days = floor(time_left/86400)
-		local hours = floor(time_left/3600)
-		local minutes = floor(time_left/60)
+		local days = floor(time_left / 86400)
+		local hours = floor(time_left / 3600)
+		local minutes = floor(time_left / 60)
 		local seconds = floor(time_left)
 
 		if 0 < days then
@@ -422,7 +422,7 @@ BoonUI._set_widget_time_progress = function (self, widget, progress, time_left)
 		end
 
 		widget.content.is_expired = false
-		widget.style.texture_frame.gradient_threshold = progress - 1
+		widget.style.texture_frame.gradient_threshold = 1 - progress
 		widget.style.texture_bg.color = {
 			120,
 			36,

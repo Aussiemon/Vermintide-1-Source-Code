@@ -16,7 +16,7 @@ local function trigger_player_taking_damage_buffs(player_unit, attacker_unit, is
 		if buff_extension.has_buff_type(buff_extension, "chance_to_bonus_fatigue_reg_damage_taken") then
 			local percentage_chance = 1
 			percentage_chance = buff_extension.apply_buffs_to_value(buff_extension, percentage_chance, StatBuffIndex.CHANCE_TO_BONUS_FATIGUE_REG_DAMAGE_TAKEN, BuffTypes.PLAYER) - 1
-			percentage_chance = percentage_chance - 1
+			percentage_chance = 1 - percentage_chance
 
 			if percentage_chance <= math.random() then
 				buff_extension.add_buff(buff_extension, "melee_weapon_proc_bonus_fatigue_regen")

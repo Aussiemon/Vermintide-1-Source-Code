@@ -389,7 +389,7 @@ local subtitle_row_widgets = {}
 
 for i = 1, NUM_SUBTITLE_ROWS, 1 do
 	local scenegraph_id = "subtitle_row_" .. tostring(i)
-	local start_offset_y = -(i - 1)*50
+	local start_offset_y = -(i - 1) * 50
 	local subtitle_row_widget = {
 		element = {
 			passes = {

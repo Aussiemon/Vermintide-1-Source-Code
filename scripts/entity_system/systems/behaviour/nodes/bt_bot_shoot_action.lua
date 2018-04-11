@@ -10,8 +10,8 @@ BTBotShootAction.name = "BTBotShootAction"
 local DEFAULT_AIM_DATA = {
 	min_radius_pseudo_random_c = 0.0557,
 	max_radius_pseudo_random_c = 0.01475,
-	min_radius = math.pi/72,
-	max_radius = math.pi/16
+	min_radius = math.pi / 72,
+	max_radius = math.pi / 16
 }
 local THIS_UNIT = nil
 
@@ -126,15 +126,15 @@ BTBotShootAction._set_new_aim_target = function (self, self_unit, t, shoot_black
 end
 
 local function draw_estimated_arc(max_steps, max_time, position, velocity, gravity)
-	local time_step = max_time/max_steps
+	local time_step = max_time / max_steps
 
 	for i = 1, max_steps, 1 do
-		local new_position = position + velocity*time_step
+		local new_position = position + velocity * time_step
 		local delta = new_position - position
 
 		QuickDrawer:line(position, new_position, Color(100, 200, 200))
 
-		velocity = velocity + gravity*time_step
+		velocity = velocity + gravity * time_step
 		position = new_position
 	end
 
@@ -154,7 +154,7 @@ BTBotShootAction._wanted_aim_rotation = function (self, self_unit, target_unit, 
 
 		Profiler.start("trajectory prediction")
 
-		angle, target_position = prediction_function(projectile_speed/100, -gravity_setting, current_position, target_pos, target_current_velocity)
+		angle, target_position = prediction_function(projectile_speed / 100, -gravity_setting, current_position, target_pos, target_current_velocity)
 
 		Profiler.stop("trajectory prediction")
 
@@ -163,7 +163,7 @@ BTBotShootAction._wanted_aim_rotation = function (self, self_unit, target_unit, 
 				print("BTBotShootAction no angle found, target out of range")
 			end
 
-			angle = math.pi*0.25
+			angle = math.pi * 0.25
 		end
 
 		target_rotation = Quaternion.multiply(Quaternion.look(Vector3.normalize(Vector3.flat(target_position - current_position)), Vector3.up()), Quaternion(Vector3.right(), angle))
@@ -171,8 +171,8 @@ BTBotShootAction._wanted_aim_rotation = function (self, self_unit, target_unit, 
 		if self_unit == script_data.debug_unit then
 			QuickDrawer:sphere(target_position, 0.1, Color(0, 0, 255))
 			QuickDrawer:sphere(current_position, 0.1, Color(0, 0, 255))
-			QuickDrawer:vector(current_position, Quaternion.forward(target_rotation)*3, Color(0, 0, 255))
-			draw_estimated_arc(100, 1, current_position, Quaternion.forward(target_rotation)*projectile_speed*0.01, Vector3(0, 0, gravity_setting))
+			QuickDrawer:vector(current_position, Quaternion.forward(target_rotation) * 3, Color(0, 0, 255))
+			draw_estimated_arc(100, 1, current_position, Quaternion.forward(target_rotation) * projectile_speed * 0.01, Vector3(0, 0, gravity_setting))
 		end
 	else
 		target_position = target_pos
@@ -202,46 +202,46 @@ BTBotShootAction._aim_position = function (self, dt, t, self_unit, current_posit
 	local yaw_speed, pitch_speed = self._calculate_aim_speed(self, self_unit, dt, current_yaw, current_pitch, wanted_yaw, wanted_pitch, shoot_blackboard.aim_speed_yaw, shoot_blackboard.aim_speed_pitch)
 	shoot_blackboard.aim_speed_yaw = yaw_speed
 	shoot_blackboard.aim_speed_pitch = pitch_speed
-	local new_yaw = current_yaw + yaw_speed*dt
-	local new_pitch = current_pitch + pitch_speed*dt
+	local new_yaw = current_yaw + yaw_speed * dt
+	local new_pitch = current_pitch + pitch_speed * dt
 	local yaw_rot = Quaternion(Vector3.up(), new_yaw)
 	local pitch_rot = Quaternion(Vector3.right(), new_pitch)
 	local actual_rotation = Quaternion.multiply(yaw_rot, pitch_rot)
 	local pi = math.pi
-	local yaw_offset = (new_yaw - wanted_yaw + pi)%(pi*2) - pi
+	local yaw_offset = (new_yaw - wanted_yaw + pi) % (pi * 2) - pi
 	local pitch_offset = new_pitch - wanted_pitch
 
 	return yaw_offset, pitch_offset, wanted_rotation, actual_rotation, aim_position
 end
 BTBotShootAction._calculate_aim_speed = function (self, self_unit, dt, current_yaw, current_pitch, wanted_yaw, wanted_pitch, current_yaw_speed, current_pitch_speed)
 	local pi = math.pi
-	local yaw_offset = (wanted_yaw - current_yaw + pi)%(pi*2) - pi
+	local yaw_offset = (wanted_yaw - current_yaw + pi) % (pi * 2) - pi
 	local pitch_offset = wanted_pitch - current_pitch
 	local yaw_offset_sign = math.sign(yaw_offset)
 	local yaw_speed_sign = math.sign(current_yaw_speed)
 	local has_overshot = yaw_speed_sign ~= 0 and yaw_offset_sign ~= yaw_speed_sign
-	local wanted_yaw_speed = yaw_offset*math.pi*10
+	local wanted_yaw_speed = yaw_offset * math.pi * 10
 	local new_yaw_speed = nil
 	local acceleration = 7.5
 	local deceleration = 25
 
 	if has_overshot and 0 < yaw_offset_sign then
-		new_yaw_speed = math.min(current_yaw_speed + deceleration*dt, 0)
+		new_yaw_speed = math.min(current_yaw_speed + deceleration * dt, 0)
 	elseif has_overshot then
-		new_yaw_speed = math.max(current_yaw_speed - deceleration*dt, 0)
+		new_yaw_speed = math.max(current_yaw_speed - deceleration * dt, 0)
 	elseif 0 < yaw_offset_sign then
 		if current_yaw_speed <= wanted_yaw_speed then
-			new_yaw_speed = math.min(current_yaw_speed + acceleration*dt, wanted_yaw_speed)
+			new_yaw_speed = math.min(current_yaw_speed + acceleration * dt, wanted_yaw_speed)
 		else
-			new_yaw_speed = math.max(current_yaw_speed - deceleration*dt, wanted_yaw_speed)
+			new_yaw_speed = math.max(current_yaw_speed - deceleration * dt, wanted_yaw_speed)
 		end
 	elseif wanted_yaw_speed <= current_yaw_speed then
-		new_yaw_speed = math.max(current_yaw_speed - acceleration*dt, wanted_yaw_speed)
+		new_yaw_speed = math.max(current_yaw_speed - acceleration * dt, wanted_yaw_speed)
 	else
-		new_yaw_speed = math.min(current_yaw_speed + deceleration*dt, wanted_yaw_speed)
+		new_yaw_speed = math.min(current_yaw_speed + deceleration * dt, wanted_yaw_speed)
 	end
 
-	local lerped_pitch_speed = pitch_offset/dt
+	local lerped_pitch_speed = pitch_offset / dt
 
 	return new_yaw_speed, lerped_pitch_speed
 end
@@ -327,7 +327,7 @@ BTBotShootAction._aim_good_enough = function (self, dt, t, shoot_blackboard, yaw
 	local aim_data = bb.aim_data
 
 	if bb.reevaluate_aim_time < t then
-		local offset = math.sqrt(pitch_offset*pitch_offset + yaw_offset*yaw_offset)
+		local offset = math.sqrt(pitch_offset * pitch_offset + yaw_offset * yaw_offset)
 
 		if aim_data.max_radius < offset then
 			bb.aim_good_enough = false
@@ -338,9 +338,9 @@ BTBotShootAction._aim_good_enough = function (self, dt, t, shoot_blackboard, yaw
 			local num_rolls = bb.num_aim_rolls + 1
 
 			if offset < aim_data.min_radius then
-				success = Math.random() < aim_data.min_radius_pseudo_random_c*num_rolls
+				success = Math.random() < aim_data.min_radius_pseudo_random_c * num_rolls
 			else
-				local prob = math.auto_lerp(aim_data.min_radius, aim_data.max_radius, aim_data.min_radius_pseudo_random_c, aim_data.max_radius_pseudo_random_c, offset)*num_rolls
+				local prob = math.auto_lerp(aim_data.min_radius, aim_data.max_radius, aim_data.min_radius_pseudo_random_c, aim_data.max_radius_pseudo_random_c, offset) * num_rolls
 				success = Math.random() < prob
 			end
 
@@ -419,7 +419,7 @@ BTBotShootAction._reevaluate_obstruction = function (self, unit, shoot_blackboar
 	end
 
 	shoot_blackboard.obstructed = obstructed
-	shoot_blackboard.reevaluate_obstruction_time = t + min + Math.random()*(max - min)
+	shoot_blackboard.reevaluate_obstruction_time = t + min + Math.random() * (max - min)
 
 	return obstructed_by_static
 end
@@ -430,7 +430,7 @@ local INDEX_ACTOR = 4
 BTBotShootAction._is_shot_obstructed = function (self, physics_world, from, direction, self_unit, target_unit, actual_aim_position, collision_filter)
 	local max_distance = Vector3.length(actual_aim_position - from)
 
-	PhysicsWorld.prepare_actors_for_raycast(physics_world, from, direction, 0.01, 0.5, max_distance*max_distance)
+	PhysicsWorld.prepare_actors_for_raycast(physics_world, from, direction, 0.01, 0.5, max_distance * max_distance)
 
 	local raycast_hits = PhysicsWorld.immediate_raycast(physics_world, from, direction, max_distance, "all", "collision_filter", collision_filter)
 

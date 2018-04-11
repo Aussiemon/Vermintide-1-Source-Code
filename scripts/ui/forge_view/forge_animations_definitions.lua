@@ -3,16 +3,16 @@ local function animate_widget_scenegraph_on_select(widget_scenegraph, default_sc
 	local default_position = default_scenegraph_definition.position
 	local scenegraph_size = widget_scenegraph.size
 	local scenegraph_position = widget_scenegraph.local_position
-	scenegraph_size[1] = catmullrom_value*default_size[1]
-	scenegraph_size[2] = catmullrom_value*default_size[2]
-	local position_offset_fraction = (progress < 1 and catmullrom_value - 1) or 0
-	local x_offset = (position_offset_fraction*default_size[1])/2
-	local y_offset = position_offset_fraction*default_size[2]/2
+	scenegraph_size[1] = catmullrom_value * default_size[1]
+	scenegraph_size[2] = catmullrom_value * default_size[2]
+	local position_offset_fraction = (progress < 1 and 1 - catmullrom_value) or 0
+	local x_offset = (position_offset_fraction * default_size[1]) / 2
+	local y_offset = position_offset_fraction * default_size[2] / 2
 	scenegraph_position[1] = default_position[1] + x_offset
 	scenegraph_position[2] = default_position[2] - y_offset
 
 	if color then
-		color[1] = math.min(progress*4, 1)*255
+		color[1] = math.min(progress * 4, 1) * 255
 	end
 
 	return 

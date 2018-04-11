@@ -233,7 +233,7 @@ StateMapViewSelectLevel._set_level_score = function (self, level_key, difficulty
 			local score_kills = scores[kills_key]
 			local no_data = score_wave == 0
 			widgets[wave_key].content.text = (no_data and no_data_text) or tostring(score_wave)
-			widgets[time_key].content.text = (no_data and no_data_text) or string.format("%.2d:%.2d:%.2d", math.floor(score_time/3600), math.floor(score_time/60)%60, math.floor(score_time)%60)
+			widgets[time_key].content.text = (no_data and no_data_text) or string.format("%.2d:%.2d:%.2d", math.floor(score_time / 3600), math.floor(score_time / 60) % 60, math.floor(score_time) % 60)
 			widget_read_index = widget_read_index + 1
 		end
 	end
@@ -289,7 +289,7 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 		local target_index = 2
 
 		if open then
-			local from = (UISettings.ui_scale*1200)/100
+			local from = (1200 * UISettings.ui_scale) / 100
 			local to = 0
 			local time = UISettings.scoreboard.open_duration
 			self.opening_leaderboards = false
@@ -307,7 +307,7 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 
 			self.open = false
 			local from = 0
-			local to = (UISettings.ui_scale*1200)/100
+			local to = (1200 * UISettings.ui_scale) / 100
 			local time = UISettings.scoreboard.close_duration
 			self.opening_leaderboards = true
 			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
@@ -488,8 +488,8 @@ StateMapViewSelectLevel._update_markers_visibility = function (self, fraction)
 			local target = widget.style.marker.color
 			local target_index = 1
 			local from = target[target_index]
-			local alpha = (0.5 < distance_progress and 255) or distance_progress/0.5*255
-			local alpha_value = anim_fraction*alpha
+			local alpha = (0.5 < distance_progress and 255) or distance_progress / 0.5 * 255
+			local alpha_value = anim_fraction * alpha
 			target[target_index] = alpha_value
 		end
 	end
@@ -502,10 +502,10 @@ local function anim_func(t)
 	local b = 0
 	local c = 1
 	local d = 1
-	local ts = t/d*t
-	local tc = ts*t
+	local ts = t / d * t
+	local tc = ts * t
 
-	return b + c*(tc*2.7*ts + ts*-14.2975*ts + tc*26.095 + ts*-21.195 + t*7.6975)
+	return b + c * (2.7 * tc * ts + -14.2975 * ts * ts + 26.095 * tc + -21.195 * ts + 7.6975 * t)
 end
 
 StateMapViewSelectLevel.start_open_animation = function (self)
@@ -631,7 +631,7 @@ StateMapViewSelectLevel._update_filter_animation = function (self, dt)
 	local level_filter = self.level_filter
 	local fraction = (self._filter_enabled and level_filter.visibility_fraction(level_filter)) or 1
 	local ui_scenegraph = self.ui_scenegraph
-	local value = fraction*250
+	local value = 250 * fraction
 	ui_scenegraph.overlay.local_position[1] = value
 	self.menu_input_description.ui_scenegraph.screen.local_position[1] = value
 	self._map_view.ui_scenegraph.time_line.local_position[1] = value
@@ -809,15 +809,15 @@ StateMapViewSelectLevel._align_elements = function (self)
 	local spacing = 80
 	local element_width = element_size[1]
 	local distance = element_width + spacing
-	local start_offset = -(distance*math.floor(num_elements/2))
+	local start_offset = -(distance * math.floor(num_elements / 2))
 	local max_offset = math.abs(start_offset)
 
 	for index, widget in ipairs(self._elements) do
-		local position = start_offset + distance*(index - 1)
+		local position = start_offset + distance * (index - 1)
 		widget.offset[1] = position
 		widget.content.position_offset = position
 		local is_selection_widget = index == selected_index
-		local position_progress = math.clamp(math.abs(position)/max_offset, 0, 1) - 1
+		local position_progress = 1 - math.clamp(math.abs(position) / max_offset, 0, 1)
 
 		self._animate_element(self, widget, is_selection_widget, position_progress)
 	end
@@ -1000,7 +1000,7 @@ StateMapViewSelectLevel.update_move_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self.move_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -1023,11 +1023,11 @@ StateMapViewSelectLevel._update_elements_position = function (self, dt, instant)
 	local spacing = 80
 	local element_width = element_size[1]
 	local distance = element_width + spacing
-	local start_offset = -(distance*math.floor(num_elements/2))
+	local start_offset = -(distance * math.floor(num_elements / 2))
 	local max_offset = math.abs(start_offset)
-	local center_index = math.floor(num_elements/2)
+	local center_index = math.floor(num_elements / 2)
 	local anim_progress = math.easeCubic(time_progress)
-	local input_offset = self._direction*distance*anim_progress
+	local input_offset = self._direction * distance * anim_progress
 
 	for index, widget in ipairs(elements) do
 		local widget_read_index = index - 1
@@ -1036,10 +1036,10 @@ StateMapViewSelectLevel._update_elements_position = function (self, dt, instant)
 		local element_position = current_position + input_offset
 		local position = element_position
 
-		if max_offset + distance*0.5 < element_position then
-			position = start_offset - distance + element_position%max_offset
+		if max_offset + distance * 0.5 < element_position then
+			position = start_offset - distance + element_position % max_offset
 			change_read_index = true
-		elseif element_position < -(max_offset + distance*0.5) then
+		elseif element_position < -(max_offset + distance * 0.5) then
 			position = max_offset
 			change_read_index = true
 		end
@@ -1054,7 +1054,7 @@ StateMapViewSelectLevel._update_elements_position = function (self, dt, instant)
 			end
 		end
 
-		local position_progress = math.clamp(math.abs(position)/max_offset, 0, 1) - 1
+		local position_progress = 1 - math.clamp(math.abs(position) / max_offset, 0, 1)
 		local is_selection_widget = index == selected_index
 
 		self._animate_element(self, widget, is_selection_widget, position_progress)
@@ -1066,7 +1066,7 @@ StateMapViewSelectLevel._change_element_read_index = function (self, widget, dir
 	local num_levels = self._num_levels
 
 	if 0 < direction then
-		local new_index = (widget.content.read_index - 6)%num_levels + 1
+		local new_index = (widget.content.read_index - 6) % num_levels + 1
 
 		if new_index <= 0 then
 			new_index = num_levels
@@ -1074,7 +1074,7 @@ StateMapViewSelectLevel._change_element_read_index = function (self, widget, dir
 
 		self._set_element_data_by_index(self, widget, new_index)
 	elseif direction < 0 then
-		local new_index = (widget.content.read_index + 4)%num_levels + 1
+		local new_index = (widget.content.read_index + 4) % num_levels + 1
 
 		self._set_element_data_by_index(self, widget, new_index)
 	end
@@ -1091,8 +1091,8 @@ StateMapViewSelectLevel._animate_element = function (self, widget, is_selection_
 	local bg_rect_style = widget_style.bg_rect
 	local frame_style = widget_style.frame
 	local marker_style = widget_style.marker
-	local alpha = (0.5 < distance_progress and 255) or distance_progress/0.5*255
-	local color_value = distance_progress*155 + 100
+	local alpha = (0.5 < distance_progress and 255) or distance_progress / 0.5 * 255
+	local color_value = 100 + distance_progress * 155
 	local image_color = image_style.color
 	local frame_color = frame_style.color
 	local marker_color = marker_style.color
@@ -1124,10 +1124,10 @@ StateMapViewSelectLevel._animate_element = function (self, widget, is_selection_
 	local image_default_height = 310
 	local image_size = image_style.size
 	local image_offset = image_style.offset
-	image_size[1] = image_default_width*distance_progress
-	image_size[2] = image_default_height*distance_progress
-	image_offset[1] = -image_size[1]*0.5
-	image_offset[2] = -image_size[2]*0.5
+	image_size[1] = image_default_width * distance_progress
+	image_size[2] = image_default_height * distance_progress
+	image_offset[1] = -image_size[1] * 0.5
+	image_offset[2] = -image_size[2] * 0.5
 	bg_rect_style.size[1] = image_size[1]
 	bg_rect_style.size[2] = image_size[2]
 	bg_rect_style.offset[1] = image_offset[1]
@@ -1136,45 +1136,45 @@ StateMapViewSelectLevel._animate_element = function (self, widget, is_selection_
 	local frame_default_height = 326
 	local frame_size = frame_style.size
 	local frame_offset = frame_style.offset
-	frame_size[1] = frame_default_width*distance_progress
-	frame_size[2] = frame_default_height*distance_progress
-	frame_offset[1] = -frame_size[1]*0.5
-	frame_offset[2] = -frame_size[2]*0.5
+	frame_size[1] = frame_default_width * distance_progress
+	frame_size[2] = frame_default_height * distance_progress
+	frame_offset[1] = -frame_size[1] * 0.5
+	frame_offset[2] = -frame_size[2] * 0.5
 	local marker_default_width = 560
 	local marker_default_height = 310
 	local marker_size = marker_style.size
 	local marker_offset = marker_style.offset
-	marker_size[1] = marker_default_width*distance_progress
-	marker_size[2] = marker_default_height*distance_progress
-	marker_offset[1] = -marker_size[1]*0.5
-	marker_offset[2] = -marker_size[2]*0.5
-	local default_new_texture_height_offset = distance_progress*25
-	local default_new_texture_width_offset = distance_progress*8
+	marker_size[1] = marker_default_width * distance_progress
+	marker_size[2] = marker_default_height * distance_progress
+	marker_offset[1] = -marker_size[1] * 0.5
+	marker_offset[2] = -marker_size[2] * 0.5
+	local default_new_texture_height_offset = 25 * distance_progress
+	local default_new_texture_width_offset = 8 * distance_progress
 	local new_texture_default_width = 360
 	local new_texture_default_height = 32
 	local new_texture_size = new_texture_style.size
 	local new_texture_offset = new_texture_style.offset
-	new_texture_size[1] = new_texture_default_width*distance_progress
-	new_texture_size[2] = new_texture_default_height*distance_progress
-	new_texture_offset[1] = frame_size[1]*0.5 - new_texture_size[1] - default_new_texture_width_offset
-	new_texture_offset[2] = frame_size[2]*0.5 - new_texture_size[2] - default_new_texture_height_offset
-	local default_lock_offset = frame_size[2]*0.14
+	new_texture_size[1] = new_texture_default_width * distance_progress
+	new_texture_size[2] = new_texture_default_height * distance_progress
+	new_texture_offset[1] = frame_size[1] * 0.5 - new_texture_size[1] - default_new_texture_width_offset
+	new_texture_offset[2] = frame_size[2] * 0.5 - new_texture_size[2] - default_new_texture_height_offset
+	local default_lock_offset = frame_size[2] * 0.14
 	local lock_default_width = 233
 	local lock_default_height = 232
 	local lock_size = locked_texture_style.size
 	local lock_offset = locked_texture_style.offset
-	lock_size[1] = lock_default_width*distance_progress
-	lock_size[2] = lock_default_height*distance_progress
-	lock_offset[1] = -lock_size[1]*0.5
-	lock_offset[2] = default_lock_offset - lock_size[2]*0.5
+	lock_size[1] = lock_default_width * distance_progress
+	lock_size[2] = lock_default_height * distance_progress
+	lock_offset[1] = -lock_size[1] * 0.5
+	lock_offset[2] = default_lock_offset - lock_size[2] * 0.5
 	local dlc_default_width = 95
 	local dlc_default_height = 77
 	local dlc_size = dlc_texture_style.size
 	local dlc_offset = dlc_texture_style.offset
-	dlc_size[1] = dlc_default_width*distance_progress
-	dlc_size[2] = dlc_default_height*distance_progress
-	dlc_offset[1] = -dlc_size[1]*0.5
-	dlc_offset[2] = -dlc_size[2]*1.7
+	dlc_size[1] = dlc_default_width * distance_progress
+	dlc_size[2] = dlc_default_height * distance_progress
+	dlc_offset[1] = -dlc_size[1] * 0.5
+	dlc_offset[2] = -dlc_size[2] * 1.7
 
 	return 
 end
@@ -1192,7 +1192,7 @@ StateMapViewSelectLevel._update_dialogue_play_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self.dialogue_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 

@@ -445,7 +445,7 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 					scroll_function = function (ui_scenegraph, ui_style, ui_content, input_service, scroll_axis)
 						local scroll_step = ui_content.scroll_step or 0.1
 						local current_scroll_value = ui_content.internal_scroll_value
-						current_scroll_value = current_scroll_value + scroll_step*-scroll_axis.y
+						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
 
 						return 
@@ -798,7 +798,7 @@ LobbyItemsList.init = function (self, position, ingame_ui_context, settings)
 	local scenegraph_definition = definitions.scenegraph_definition
 	local item_list_definitions = scenegraph_definition.item_list
 	item_list_definitions.size[1] = element_settings.width
-	item_list_definitions.size[2] = element_settings.height*num_list_items + element_settings.height_spacing*(num_list_items - 1)
+	item_list_definitions.size[2] = element_settings.height * num_list_items + element_settings.height_spacing * (num_list_items - 1)
 	local scroll_field_width = item_list_definitions.size[1]
 	local scroll_field_height = item_list_definitions.size[2]
 	settings.list_size = {
@@ -1095,13 +1095,13 @@ LobbyItemsList.handle_gamepad_input = function (self, dt, num_elements)
 
 			if move_up or move_up_hold then
 				new_list_index = math.max(selected_list_index - 1, 1)
-				self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 			else
 				local move_down = input_service.get(input_service, "move_down")
 				local move_down_hold = input_service.get(input_service, "move_down_hold")
 
 				if move_down or move_down_hold then
-					self.controller_cooldown = GamepadSettings.menu_cooldown*speed_multiplier
+					self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 					new_list_index = math.min(selected_list_index + 1, num_elements)
 				end
 			end
@@ -1181,9 +1181,9 @@ end
 LobbyItemsList.rotate_loading_icon = function (self, dt)
 	local loading_icon_style = self.loading_icon.style.texture_id
 	local angle_fraction = loading_icon_style.fraction or 0
-	angle_fraction = (angle_fraction + dt)%1
+	angle_fraction = (angle_fraction + dt) % 1
 	local anim_fraction = math.easeOutCubic(angle_fraction)
-	local angle = anim_fraction*math.degrees_to_radians(360)
+	local angle = anim_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
 
@@ -1313,7 +1313,7 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 	local num_draws = item_list_widget.style.list_style.num_draws
 
 	if num_lobbies < num_draws then
-		local num_empty = num_draws - num_lobbies%num_draws
+		local num_empty = num_draws - num_lobbies % num_draws
 
 		if num_empty <= num_draws then
 			for i = 1, num_empty, 1 do
@@ -1376,11 +1376,11 @@ LobbyItemsList.set_scrollbar_length = function (self, start_scroll_value, ignore
 
 	if 0 < item_diff_count then
 		local number_of_elements_per_step = (columns and columns) or 1
-		local number_of_steps_possible = math.ceil(item_diff_count/number_of_elements_per_step)
-		local number_of_steps_total = math.ceil(number_of_items_in_list/number_of_elements_per_step)
-		local list_fraction = number_of_steps_total/1
-		bar_fraction = list_fraction*number_of_steps_possible - 1
-		step_fraction = number_of_steps_possible/1
+		local number_of_steps_possible = math.ceil(item_diff_count / number_of_elements_per_step)
+		local number_of_steps_total = math.ceil(number_of_items_in_list / number_of_elements_per_step)
+		local list_fraction = 1 / number_of_steps_total
+		bar_fraction = 1 - list_fraction * number_of_steps_possible
+		step_fraction = 1 / number_of_steps_possible
 	else
 		bar_fraction = 1
 		step_fraction = 1
@@ -1413,9 +1413,9 @@ LobbyItemsList.scroll_inventory_list = function (self, value)
 
 		if max_visible_elements and max_visible_elements < total_elements then
 			local elements_to_scroll = total_elements - max_visible_elements
-			local new_start_index = math.max(0, math.round(value*elements_to_scroll)) + 1
+			local new_start_index = math.max(0, math.round(value * elements_to_scroll)) + 1
 
-			if column_count and new_start_index%column_count == 0 then
+			if column_count and new_start_index % column_count == 0 then
 				new_start_index = (new_start_index + column_count) - 1
 			end
 

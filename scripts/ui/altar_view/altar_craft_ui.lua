@@ -540,22 +540,22 @@ AltarCraftUI._update_token_rotation_animation = function (self, dt)
 	if animation_time then
 		local total_time = token_total_rotation_time
 		animation_time = math.min(animation_time + dt, total_time)
-		local time_progress = animation_time/total_time
+		local time_progress = animation_time / total_time
 		local time_easing_progress = math.easeCubic(time_progress)
 		local token_widgets = self.token_widgets
 		local num_widgets = #token_widgets
 		local old_selection_index = self.selected_token_index or 0
 		local new_selection_index = self.new_token_selection_index
-		local total_progress = num_widgets/0.5
-		local old_index_progress = old_selection_index*total_progress
-		local new_index_progress = new_selection_index*total_progress
+		local total_progress = 0.5 / num_widgets
+		local old_index_progress = old_selection_index * total_progress
+		local new_index_progress = new_selection_index * total_progress
 		local progress_diff = new_index_progress - old_index_progress
-		local rotation_progress = old_index_progress + progress_diff*time_easing_progress
+		local rotation_progress = old_index_progress + progress_diff * time_easing_progress
 		local radius = 170
 
 		self._rotate_widgets(self, self.token_widgets, radius, rotation_progress)
 
-		local disk_angle = math.degrees_to_radians(rotation_progress*360)
+		local disk_angle = math.degrees_to_radians(rotation_progress * 360)
 		local wheel_token_widget = self.widgets_by_name.wheel_token_widget
 		wheel_token_widget.style.texture_id.angle = -disk_angle
 
@@ -587,22 +587,22 @@ AltarCraftUI._update_weapon_type_rotation_animation = function (self, dt)
 	if animation_time then
 		local total_time = weapon_type_total_rotation_time
 		animation_time = math.min(animation_time + dt, total_time)
-		local time_progress = animation_time/total_time
+		local time_progress = animation_time / total_time
 		local time_easing_progress = math.easeCubic(time_progress)
 		local weapon_type_widgets = self.weapon_type_widgets
 		local num_widgets = #weapon_type_widgets
 		local old_selection_index = self.selected_weapon_type_index or 0
 		local new_selection_index = self.new_weapon_type_selection_index
-		local total_progress = num_widgets/0.5
-		local old_index_progress = old_selection_index*total_progress
-		local new_index_progress = new_selection_index*total_progress
+		local total_progress = 0.5 / num_widgets
+		local old_index_progress = old_selection_index * total_progress
+		local new_index_progress = new_selection_index * total_progress
 		local progress_diff = new_index_progress - old_index_progress
-		local rotation_progress = old_index_progress + progress_diff*time_easing_progress
+		local rotation_progress = old_index_progress + progress_diff * time_easing_progress
 		local radius = 104
 
 		self._rotate_widgets(self, weapon_type_widgets, radius, rotation_progress)
 
-		local disk_angle = math.degrees_to_radians(rotation_progress*360)
+		local disk_angle = math.degrees_to_radians(rotation_progress * 360)
 		local wheel_weapon_type_widget = self.widgets_by_name.wheel_weapon_type_widget
 		wheel_weapon_type_widget.style.texture_id.angle = -disk_angle
 
@@ -635,11 +635,11 @@ AltarCraftUI._update_world_cover_animation = function (self, dt)
 		local world_cover_fade_in = self.world_cover_fade_in
 		local total_time = world_cover_total_animation_time
 		animation_time = math.min(animation_time + dt, total_time)
-		local time_progress = animation_time/total_time
+		local time_progress = animation_time / total_time
 		local easing = (world_cover_fade_in and math.easeOutCubic) or math.easeInCubic
 		local time_easing_progress = easing(time_progress)
 		local max_value = 10
-		local new_value = time_easing_progress*max_value
+		local new_value = time_easing_progress * max_value
 
 		if world_cover_fade_in then
 			new_value = max_value - new_value
@@ -663,16 +663,16 @@ end
 AltarCraftUI._rotate_widgets = function (self, widgets, radius, progress)
 	local ui_scenegraph = self.ui_scenegraph
 	local num_widgets = #widgets
-	local progress_angle = progress*360
+	local progress_angle = progress * 360
 	local start_angle = progress_angle - 90
-	local max_angle_between = num_widgets/180
+	local max_angle_between = 180 / num_widgets
 	local actual_angle_between = (num_widgets ~= 1 or 0) and max_angle_between
 	local widget_start_angle = start_angle
 
 	for i = 1, num_widgets, 1 do
-		local angle = (widget_start_angle%360*math.pi)/180
-		local pos_x = radius*math.cos(angle)
-		local pos_y = radius*math.sin(angle)
+		local angle = (widget_start_angle % 360 * math.pi) / 180
+		local pos_x = radius * math.cos(angle)
+		local pos_y = radius * math.sin(angle)
 		local widget = widgets[i]
 		local widget_scenegraph_id = widget.scenegraph_id
 		local position = ui_scenegraph[widget_scenegraph_id].local_position

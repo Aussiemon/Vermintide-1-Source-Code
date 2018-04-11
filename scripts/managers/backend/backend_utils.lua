@@ -32,10 +32,10 @@ local function get_trait_description_value(value, formatting, trait_info, buff_t
 			local formatting = "%.1f"
 
 			if rarity == "unique" then
-				return string.format(formatting, values[2]*100)
+				return string.format(formatting, values[2] * 100)
 			end
 
-			return string.format(formatting, values[1]*100) .. " - " .. string.format(formatting, values[2]*100)
+			return string.format(formatting, values[1] * 100) .. " - " .. string.format(formatting, values[2] * 100)
 		end
 
 		local data = trait_info[value]
@@ -43,16 +43,16 @@ local function get_trait_description_value(value, formatting, trait_info, buff_t
 		if data then
 			local formatting = formatting or "%.1f"
 
-			return string.format(formatting, data*100)
+			return string.format(formatting, data * 100)
 		else
 			local values = buff_template[value]
 			local formatting = "%.1f"
 
 			if rarity == "unique" then
-				return string.format(formatting, values[2]*100)
+				return string.format(formatting, values[2] * 100)
 			end
 
-			return string.format(formatting, values[1]*100) .. " - " .. string.format(formatting, values[2]*100)
+			return string.format(formatting, values[1] * 100) .. " - " .. string.format(formatting, values[2] * 100)
 		end
 	end
 

@@ -570,7 +570,7 @@ local Y_OFFSET = 25
 
 local function player_widget_definition(index)
 	local i = index - 1
-	local y_offset = -(PLAYER_LIST_SIZE[2]*(i - 1) + Y_OFFSET*i)
+	local y_offset = -(PLAYER_LIST_SIZE[2] * (i - 1) + Y_OFFSET * i)
 	local text_y_offset = 9
 	local start_x = 400
 	local definition = {

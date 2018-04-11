@@ -94,7 +94,7 @@ UnitFrameUI.update = function (self, dt, t)
 	local is_knocked_down = data.is_knocked_down
 	local needs_help = data.needs_help
 	local show_overlay = data.show_overlay
-	self.overlay_time = (self.overlay_time or 0) + dt*1.4
+	self.overlay_time = (self.overlay_time or 0) + dt * 1.4
 
 	Profiler.start("overlay")
 
@@ -474,7 +474,7 @@ UnitFrameUI.set_active_percentage = function (self, active_percentage)
 	local widget_content = widget.content
 	widget_content.actual_active_percentage = active_percentage
 
-	self._on_num_grimoires_changed(self, "grimoires", widget, active_percentage - 1)
+	self._on_num_grimoires_changed(self, "grimoires", widget, 1 - active_percentage)
 	self._set_widget_dirty(self, widget)
 
 	return 
@@ -486,7 +486,7 @@ UnitFrameUI.set_health_percentage = function (self, health_percentage, active_pe
 	widget_content.hp_bar.low_health = low_health
 	widget_content.actual_health_percent = health_percentage
 
-	self._on_player_health_changed(self, "health", widget, health_percentage*active_percentage)
+	self._on_player_health_changed(self, "health", widget, health_percentage * active_percentage)
 	self._set_widget_dirty(self, widget)
 
 	return 
@@ -510,7 +510,7 @@ UnitFrameUI.set_health_bar_status = function (self, show_health_bar, is_knocked_
 		if is_knocked_down then
 			Material.set_vector2(gui_material, "color_tint_uv", Vector2(1, 0.5))
 		else
-			local inverted_bar_value = (hp_bar_content.bar_value or 1) - 1
+			local inverted_bar_value = 1 - (hp_bar_content.bar_value or 1)
 
 			Material.set_vector2(gui_material, "color_tint_uv", Vector2(inverted_bar_value, 0.5))
 		end
@@ -555,12 +555,12 @@ UnitFrameUI._update_overlay = function (self, is_dead, is_knocked_down, needs_he
 		self.set_potrait_overlay(self, "unit_frame_portrait_dead")
 
 		local i = math.sirp(0, 0.7, self.overlay_time)
-		alpha = i*255
+		alpha = 255 * i
 	elseif needs_help then
 		self.set_potrait_overlay(self, "unit_frame_red_overlay")
 
 		local i = math.sirp(0.6, 1, self.overlay_time)
-		alpha = i*255
+		alpha = 255 * i
 	end
 
 	local widget = self._widget_by_name(self, "portait_dynamic")
@@ -576,12 +576,12 @@ UnitFrameUI._update_voice_animation = function (self, dt, t, is_talking)
 	local color = highlight_style.color
 	local size = highlight_style.size
 	local old_alpha = color[1]
-	old_alpha = old_alpha + ((is_talking and 1) or -1)*255*dt
+	old_alpha = old_alpha + ((is_talking and 1) or -1) * 255 * dt
 
 	if is_talking then
-		old_alpha = old_alpha + math.sin(t*3)*20
-		old_alpha = old_alpha + math.cos((t + 1)*13)*20
-		size[2] = math.sin(t*7)*15 + 70 + math.cos((t + 1)*17)*10
+		old_alpha = old_alpha + math.sin(t * 3) * 20
+		old_alpha = old_alpha + math.cos((t + 1) * 13) * 20
+		size[2] = 70 + math.sin(t * 7) * 15 + math.cos((t + 1) * 17) * 10
 	end
 
 	old_alpha = math.clamp(old_alpha, 0, 255)
@@ -613,13 +613,13 @@ UnitFrameUI._update_grimoire_bar_animation = function (self, dt, t)
 		local offset = style.offset
 		local uvs = content.uvs
 		local size = style.size
-		local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
-		local uv_change = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+		local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
+		local uv_change = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 		size[uv_scale_axis] = uv_pixels
 
 		if bar_start_side == "left" then
-			uvs[1][uv_scale_axis] = uv_change - 1
-			offset[uv_scale_axis] = style.start_offset + ((uv_start_pixels + uv_scale_pixels) - uv_pixels)*offset_scale
+			uvs[1][uv_scale_axis] = 1 - uv_change
+			offset[uv_scale_axis] = style.start_offset + ((uv_start_pixels + uv_scale_pixels) - uv_pixels) * offset_scale
 		else
 			uvs[2][uv_scale_axis] = uv_change
 		end
@@ -639,13 +639,13 @@ UnitFrameUI._update_grimoire_bar_animation = function (self, dt, t)
 			local grimoire_icon_style = widget_style.hp_bar_grimoire_icon
 
 			if bar_start_side == "left" then
-				local bar_offset = bar_value*uv_scale_pixels
+				local bar_offset = bar_value * uv_scale_pixels
 				max_health_divider_style.offset[1] = max_health_divider_style.start_offset + uv_scale_pixels - math.ceil(bar_offset)
-				grimoire_icon_style.offset[1] = grimoire_icon_style.start_offset - math.ceil(bar_offset/2)
+				grimoire_icon_style.offset[1] = grimoire_icon_style.start_offset - math.ceil(bar_offset / 2)
 			else
-				local bar_offset = bar_value*uv_scale_pixels
+				local bar_offset = bar_value * uv_scale_pixels
 				max_health_divider_style.offset[1] = max_health_divider_style.start_offset + math.ceil(bar_offset)
-				grimoire_icon_style.offset[1] = grimoire_icon_style.start_offset + math.ceil(bar_offset/2)
+				grimoire_icon_style.offset[1] = grimoire_icon_style.start_offset + math.ceil(bar_offset / 2)
 			end
 		end
 
@@ -673,7 +673,7 @@ UnitFrameUI._update_health_bar_animation = function (self, dt, t)
 		local size = style.size
 		local uvs = content.uvs
 		local is_wounded = content.is_wounded
-		local inverted_bar_value = bar_value - 1
+		local inverted_bar_value = 1 - bar_value
 
 		if is_wounded then
 			content.texture_id = content.wounded_texture_id
@@ -689,14 +689,14 @@ UnitFrameUI._update_health_bar_animation = function (self, dt, t)
 			end
 		end
 
-		local uv_pixels = uv_start_pixels + uv_scale_pixels*bar_value
+		local uv_pixels = uv_start_pixels + uv_scale_pixels * bar_value
 		size[uv_scale_axis] = uv_pixels
 
 		if bar_start_side == "left" then
-			uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+			uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 		else
-			uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
-			offset[uv_scale_axis] = default_offset[1] + ((uv_start_pixels + uv_scale_pixels) - uv_pixels)*offset_scale
+			uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
+			offset[uv_scale_axis] = default_offset[1] + ((uv_start_pixels + uv_scale_pixels) - uv_pixels) * offset_scale
 		end
 
 		content.internal_bar_value = bar_value
@@ -735,11 +735,11 @@ UnitFrameUI._update_shield_bar_animation = function (self, dt, t)
 		local size = style.size
 		local uvs = content.uvs
 		local actual_active_percentage = widget_content.actual_active_percentage or 1
-		local grimoire_width = (actual_active_percentage - 1)*uv_scale_pixels
-		local health_bar_length = health_percent*uv_scale_pixels
+		local grimoire_width = (1 - actual_active_percentage) * uv_scale_pixels
+		local health_bar_length = health_percent * uv_scale_pixels
 		local removed_health_length = uv_scale_pixels - health_bar_length
 		local width_between_grimoire_and_health = math.max(uv_scale_pixels - health_bar_length - grimoire_width, 0)
-		local shield_size = uv_start_pixels + shield_percent*uv_scale_pixels
+		local shield_size = uv_start_pixels + shield_percent * uv_scale_pixels
 		shield_size = math.min(shield_size, width_between_grimoire_and_health + health_bar_length)
 		size[uv_scale_axis] = shield_size
 		local position_x = style.start_offset
@@ -747,11 +747,11 @@ UnitFrameUI._update_shield_bar_animation = function (self, dt, t)
 		if bar_start_side == "left" then
 			position_x = position_x + health_bar_length - shield_size + math.min(width_between_grimoire_and_health, shield_size)
 			offset[uv_scale_axis] = position_x
-			uvs[2][uv_scale_axis] = shield_size/(uv_start_pixels + uv_scale_pixels)
+			uvs[2][uv_scale_axis] = shield_size / (uv_start_pixels + uv_scale_pixels)
 		else
 			position_x = (position_x + removed_health_length) - math.min(width_between_grimoire_and_health, shield_size)
 			offset[uv_scale_axis] = position_x
-			uvs[2][uv_scale_axis] = shield_size/(uv_start_pixels + uv_scale_pixels)
+			uvs[2][uv_scale_axis] = shield_size / (uv_start_pixels + uv_scale_pixels)
 		end
 
 		content.internal_bar_value_position = health_percent
@@ -789,17 +789,17 @@ UnitFrameUI._update_overcharge_animation = function (self, dt, t)
 		local uvs = content.uvs
 		local overcharge_offset = uv_scale_pixels
 		local uv_pixels = uv_start_pixels + uv_scale_pixels
-		local bar_size = uv_start_pixels + uv_scale_pixels*overcharge_percent
+		local bar_size = uv_start_pixels + uv_scale_pixels * overcharge_percent
 		size[uv_scale_axis] = bar_size
 		local position_x = style.start_offset
 
 		if bar_start_side == "left" then
-			uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+			uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 			local start_offset = style.start_offset
 			position_x = math.max(start_offset + overcharge_offset, (start_offset + uv_scale_pixels) - bar_size)
 			offset[uv_scale_axis] = position_x
 		else
-			uvs[2][uv_scale_axis] = uv_pixels/(uv_start_pixels + uv_scale_pixels)
+			uvs[2][uv_scale_axis] = uv_pixels / (uv_start_pixels + uv_scale_pixels)
 			local start_offset = style.start_offset
 			position_x = (start_offset + overcharge_offset) - bar_size
 			offset[uv_scale_axis] = position_x
@@ -828,15 +828,15 @@ UnitFrameUI._on_num_grimoires_changed = function (self, name, widget, health_deb
 		local anim_time = nil
 
 		if current_bar_health_debuff < health_debuff_percent then
-			anim_time = (health_debuff_percent - current_bar_health_debuff)*lerp_time
+			anim_time = (health_debuff_percent - current_bar_health_debuff) * lerp_time
 		else
-			anim_time = (current_bar_health_debuff - health_debuff_percent)*lerp_time
+			anim_time = (current_bar_health_debuff - health_debuff_percent) * lerp_time
 		end
 
 		local length_difference = current_bar_health_debuff_style.uv_scale_pixels - current_bar_health_style.uv_scale_pixels
-		local hp_bar_percentage_length = current_bar_health_style.uv_scale_pixels*health_debuff_percent
-		local actual_debuff_length = hp_bar_percentage_length + length_difference*0.5
-		local actual_debuff_percent = actual_debuff_length/current_bar_health_debuff_style.uv_scale_pixels
+		local hp_bar_percentage_length = current_bar_health_style.uv_scale_pixels * health_debuff_percent
+		local actual_debuff_length = hp_bar_percentage_length + length_difference * 0.5
+		local actual_debuff_percent = actual_debuff_length / current_bar_health_debuff_style.uv_scale_pixels
 		health_debuff_percent = actual_debuff_percent
 		bar_animation.animate = true
 		bar_animation.new_value = actual_debuff_percent
@@ -866,9 +866,9 @@ UnitFrameUI._on_overcharge_changed = function (self, name, widget, overcharge_pe
 		local anim_time = nil
 
 		if current_overcharge_percent < overcharge_percent then
-			anim_time = (overcharge_percent - current_overcharge_percent)*lerp_time
+			anim_time = (overcharge_percent - current_overcharge_percent) * lerp_time
 		else
-			anim_time = (current_overcharge_percent - overcharge_percent)*lerp_time
+			anim_time = (current_overcharge_percent - overcharge_percent) * lerp_time
 		end
 
 		bar_animation.animate = true
@@ -905,9 +905,9 @@ UnitFrameUI._on_player_health_changed = function (self, name, widget, health_per
 		local anim_time = nil
 
 		if current_bar_health < health_percent then
-			anim_time = (health_percent - current_bar_health)*lerp_time
+			anim_time = (health_percent - current_bar_health) * lerp_time
 		else
-			anim_time = (current_bar_health - health_percent)*lerp_time
+			anim_time = (current_bar_health - health_percent) * lerp_time
 		end
 
 		local animate_highlight = (not is_knocked_down and health_percent < (health_percent_current or 1)) or false
@@ -984,9 +984,9 @@ UnitFrameUI._update_damage_highlight = function (self, widget, time, dt)
 
 	if 0 < total_time then
 		local style = widget.style
-		local progress = math.min(time/total_time, 1)
+		local progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -8, 0, 0, -8)
-		local highlight_alpha = catmullrom_value*255
+		local highlight_alpha = 255 * catmullrom_value
 		style.hp_bar_highlight.color[1] = highlight_alpha
 
 		self._set_widget_dirty(self, widget)
@@ -1001,16 +1001,16 @@ UnitFrameUI._update_player_bar_animation = function (self, widget, bar, time, to
 
 	if 0 < total_time then
 		local style = widget.style
-		local progress = math.min(time/total_time, 1)
+		local progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -14, 0, 0, 0)
 		local weight = 7
-		local weighted_average = (progress*(weight - 1) + 1)/weight
+		local weighted_average = (progress * (weight - 1) + 1) / weight
 		local bar_fraction = nil
 
 		if anim_start_value < anim_end_value then
-			bar_fraction = anim_start_value + (anim_end_value - anim_start_value)*weighted_average
+			bar_fraction = anim_start_value + (anim_end_value - anim_start_value) * weighted_average
 		else
-			bar_fraction = anim_start_value - (anim_start_value - anim_end_value)*weighted_average
+			bar_fraction = anim_start_value - (anim_start_value - anim_end_value) * weighted_average
 		end
 
 		bar.bar_value = bar_fraction
@@ -1047,9 +1047,9 @@ UnitFrameUI._animate_slot_equip = function (self, animation_data, dt)
 	local total_time = animation_data.total_time
 	local time = animation_data.time
 	time = time + dt
-	local progress = math.min(time/total_time, 1)
+	local progress = math.min(time / total_time, 1)
 	local catmullrom_value = math.catmullrom(progress, -10, 0, 0, -4)
-	style.color[1] = catmullrom_value*255
+	style.color[1] = 255 * catmullrom_value
 	animation_data.time = time
 
 	return (progress < 1 and animation_data) or nil
@@ -1075,7 +1075,7 @@ UnitFrameUI._update_connection_animation = function (self, dt)
 	if widget_content.connecting then
 		local connecting_icon_style = widget.style.connecting_icon
 		local connecting_rotation_speed = 200
-		local connecting_rotation_angle = (dt*connecting_rotation_speed)%360
+		local connecting_rotation_angle = (dt * connecting_rotation_speed) % 360
 		local connecting_radians = math.degrees_to_radians(connecting_rotation_angle)
 		connecting_icon_style.angle = connecting_icon_style.angle + connecting_radians
 

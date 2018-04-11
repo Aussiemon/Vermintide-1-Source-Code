@@ -323,8 +323,8 @@ local animation_definitions = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				local alpha = math.easeCubic(progress)*255
-				local text_alpha = math.easeCubic(progress)*150
+				local alpha = math.easeCubic(progress) * 255
+				local text_alpha = math.easeCubic(progress) * 150
 				local widget_index = params.widget_index
 				local widget = widgets[widget_index]
 				local widget_style = widget.style
@@ -367,7 +367,7 @@ local animation_definitions = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local parent_position = ui_scenegraph.pivot.local_position
 				local parent_default_position = scenegraph_definition.pivot.position
-				parent_position[1] = params.parent_start_position_x - math.easeOutCubic(progress)*1000
+				parent_position[1] = params.parent_start_position_x - 1000 * math.easeOutCubic(progress)
 
 				return 
 			end,
@@ -385,10 +385,10 @@ local animation_definitions = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				local alpha = math.easeCubic(progress)*255 - 255
-				local text_alpha = math.easeCubic(progress)*150 - 150
-				local overlay_alpha = math.easeCubic(progress)*50 - 50
-				local completed_alpha = math.easeCubic(progress)*120 - 120
+				local alpha = 255 - math.easeCubic(progress) * 255
+				local text_alpha = 150 - math.easeCubic(progress) * 150
+				local overlay_alpha = 50 - math.easeCubic(progress) * 50
+				local completed_alpha = 120 - math.easeCubic(progress) * 120
 				local num_widgets = params.num_widgets
 
 				for i = 1, num_widgets, 1 do

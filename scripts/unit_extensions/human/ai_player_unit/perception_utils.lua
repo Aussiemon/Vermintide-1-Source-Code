@@ -82,8 +82,8 @@ PerceptionUtils.healthy_players = function (unit, blackboard, breed)
 			local dist = vector3_distance(POSITION_LOOKUP[enemy_unit], pos)
 
 			if dist < max_distance then
-				local inv_radius = math.clamp(dist/max_distance - 1, 0, 1)
-				score = score + inv_radius*weights.distance_weight
+				local inv_radius = math.clamp(1 - dist / max_distance, 0, 1)
+				score = score + inv_radius * weights.distance_weight
 			end
 
 			if best_score < score then
@@ -131,7 +131,7 @@ PerceptionUtils.special_opportunity = function (unit, blackboard)
 		return 0
 	end
 
-	local rats_per_player_slot = blackboard.total_slots_count/num_healthy_targets
+	local rats_per_player_slot = blackboard.total_slots_count / num_healthy_targets
 
 	if 4 <= rats_per_player_slot then
 		urgency_to_engage = 10
@@ -356,12 +356,12 @@ local function _calculate_horde_pick_closest_target_with_spillover_score(target_
 		stickyness_modifier = -2.5
 	end
 
-	local score_dogpile = dogpile_count*DOGPILE_SCORE
-	local score_distance = distance_sq*DISTANCE_SCORE
+	local score_dogpile = dogpile_count * DOGPILE_SCORE
+	local score_distance = distance_sq * DISTANCE_SCORE
 	local score_stickyness = (target_unit == target_current and stickyness_modifier) or 0
 	local knocked_down_modifer = (is_knocked_down and 5) or 0
 	local previous_attacker_stickyness_value = (is_previous_attacker and perception_previous_attacker_stickyness_value) or 0
-	local score_disabled_slots = disabled_slots_count*DISABLED_SLOT_SCORE
+	local score_disabled_slots = disabled_slots_count * DISABLED_SLOT_SCORE
 	local score_all_slots_disabled = (all_slots_disabled and ALL_SLOTS_DISABLED_SCORE) or 0
 	local score = score_dogpile + score_distance + score_disabled_slots + score_all_slots_disabled + score_stickyness + previous_attacker_stickyness_value + knocked_down_modifer + aggro_modifier
 
@@ -455,7 +455,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 			local distance = Vector3.distance(raycast_pos, target_pos)
 
 			if HEAR_DISTANCE < distance then
-				local direction = (target_pos - raycast_pos)/distance
+				local direction = (target_pos - raycast_pos) / distance
 				local result, pos = PhysicsWorld.immediate_raycast(physics_world, raycast_pos, direction, distance, "closest", "types", "statics", "collision_filter", "filter_ai_line_of_sight_check")
 
 				if result then
@@ -513,12 +513,12 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 		stickyness_modifier = -2.5
 	end
 
-	local score_dogpile = dogpile_count*DOGPILE_SCORE
-	local score_distance = distance_sq*DISTANCE_SCORE
+	local score_dogpile = dogpile_count * DOGPILE_SCORE
+	local score_distance = distance_sq * DISTANCE_SCORE
 	local score_stickyness = (target_unit == target_current and stickyness_modifier) or 0
 	local knocked_down_modifer = (is_knocked_down and 5) or 0
 	local previous_attacker_stickyness_value = (is_previous_attacker and perception_previous_attacker_stickyness_value) or 0
-	local score_disabled_slots = disabled_slots_count*DISABLED_SLOT_SCORE
+	local score_disabled_slots = disabled_slots_count * DISABLED_SLOT_SCORE
 	local score_all_slots_disabled = (all_slots_disabled and ALL_SLOTS_DISABLED_SCORE) or 0
 	local score = score_dogpile + score_disabled_slots + score_all_slots_disabled + score_distance + score_stickyness + previous_attacker_stickyness_value + knocked_down_modifer + aggro_modifier
 
@@ -538,7 +538,7 @@ PerceptionUtils.pick_closest_target_with_spillover = function (ai_unit, blackboa
 	end
 
 	local POSITION_LOOKUP = POSITION_LOOKUP
-	local detection_radius_sq = detection_radius*detection_radius
+	local detection_radius_sq = detection_radius * detection_radius
 	local ai_unit_position = POSITION_LOOKUP[ai_unit]
 	local target_current = blackboard.target_unit
 	local best_target_unit = nil
@@ -590,7 +590,7 @@ local storm_patrol_debug_draw_count = 0
 PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard, breed)
 	assert(ScriptUnit.has_extension(ai_unit, "ai_slot_system"))
 
-	local detection_radius_sqr = breed.patrol_detection_radius*breed.patrol_detection_radius
+	local detection_radius_sqr = breed.patrol_detection_radius * breed.patrol_detection_radius
 	local ai_slot_extension = ScriptUnit.extension(ai_unit, "ai_slot_system")
 	local ai_unit_position = POSITION_LOOKUP[ai_unit]
 	local last_attacker = blackboard.previous_attacker
@@ -675,8 +675,8 @@ PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard,
 					local anchor_direction = blackboard.anchor_direction
 					local ai_unit_rotation = (anchor_direction and anchor_direction.unbox(anchor_direction)) or Quaternion.forward(Unit.world_rotation(ai_unit, 0))
 					local ai_unit_direction = Vector3.normalize(ai_unit_rotation)
-					local angle = math.acos(view_cone_dot)*math.pi/180
-					local view_vector_center = ai_unit_direction*breed.patrol_detection_radius
+					local angle = math.acos(view_cone_dot) * 180 / math.pi
+					local view_vector_center = ai_unit_direction * breed.patrol_detection_radius
 					local view_vector_left = Quaternion.rotate(Quaternion.from_euler_angles_xyz(0, 0, angle), view_vector_center)
 					local view_vector_right = Quaternion.rotate(Quaternion.from_euler_angles_xyz(0, 0, -angle), view_vector_center)
 
@@ -729,7 +729,7 @@ PerceptionUtils.storm_patrol_death_squad_perception = function (ai_unit, blackbo
 				local target_unit_position = POSITION_LOOKUP[target_unit]
 				local distance_sq = Vector3.distance_squared(ai_unit_position, target_unit_position)
 
-				if distance_sq < detection_radius*detection_radius then
+				if distance_sq < detection_radius * detection_radius then
 					group_targets[target_unit] = true
 				end
 			end
@@ -861,10 +861,10 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 						player_score.sticky_time = sticky_time
 					end
 				elseif sticky_time < weights.target_stickyness_duration_b then
-					score = score + (sticky_time/weights.target_stickyness_duration_b - 1)*weights.target_stickyness_bonus_b
+					score = score + (1 - sticky_time / weights.target_stickyness_duration_b) * weights.target_stickyness_bonus_b
 
 					if debug_ai_perception then
-						player_score.sticky_b = (sticky_time/weights.target_stickyness_duration_b - 1)*weights.target_stickyness_bonus_b
+						player_score.sticky_b = (1 - sticky_time / weights.target_stickyness_duration_b) * weights.target_stickyness_bonus_b
 						player_score.sticky_time = sticky_time
 					end
 				end
@@ -882,11 +882,11 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 			dist = vector3_distance(pos, enemy_pos)
 
 			if dist < breed.detection_radius then
-				local inv_radius = math.clamp(dist/weights.max_distance - 1, 0, 1)
-				score = score + inv_radius*inv_radius*weights.distance_weight
+				local inv_radius = math.clamp(1 - dist / weights.max_distance, 0, 1)
+				score = score + inv_radius * inv_radius * weights.distance_weight
 
 				if debug_ai_perception then
-					player_score.dist = inv_radius*weights.distance_weight
+					player_score.dist = inv_radius * weights.distance_weight
 				end
 			end
 
@@ -894,7 +894,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 			local enemy_disabled = status_extension.is_ledge_hanging or status_extension.knocked_down
 
 			if enemy_disabled then
-				aggro = aggro*weights.target_disabled_aggro_mul
+				aggro = aggro * weights.target_disabled_aggro_mul
 				blackboard.aggro_list[enemy_unit] = aggro
 			end
 
@@ -905,7 +905,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 			end
 
 			if enemy_disabled then
-				score = score*weights.target_disabled_mul
+				score = score * weights.target_disabled_mul
 
 				if debug_ai_perception then
 					player_score["ko/ledge"] = weights.target_disabled_mul
@@ -913,7 +913,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 			end
 
 			if t - status_extension.last_catapulted_time < 5 then
-				score = score*weights.target_catapulted_mul
+				score = score * weights.target_catapulted_mul
 
 				if debug_ai_perception then
 					player_score.catapult = weights.target_catapulted_mul
@@ -921,7 +921,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 			end
 
 			if blackboard.target_outside_navmesh then
-				score = score*weights.target_outside_navmesh_mul
+				score = score * weights.target_outside_navmesh_mul
 
 				if debug_ai_perception then
 					player_score.outside = weights.target_outside_navmesh_mul
@@ -1014,7 +1014,7 @@ PerceptionUtils.pick_pack_master_target = function (unit, blackboard, breed)
 			local dist_sq = Vector3.distance_squared(pos, enemy_pos)
 
 			if enemy_unit == blackboard.target_unit then
-				dist_sq = dist_sq*0.8
+				dist_sq = dist_sq * 0.8
 			end
 
 			if dist_sq < closest_dist_sq then
@@ -1040,7 +1040,7 @@ function double_raycast(blackboard, from, cast_template, enemy_unit, physics_wor
 	end
 
 	local cast_table_size = #cast_table
-	local cast_index = cast_table.current_index%cast_table_size + 1
+	local cast_index = cast_table.current_index % cast_table_size + 1
 	cast_table.current_index = cast_index
 	local target_node_name = cast_table[cast_index]
 	local target_node = Unit.node(enemy_unit, target_node_name)
@@ -1064,7 +1064,7 @@ function double_raycast(blackboard, from, cast_template, enemy_unit, physics_wor
 	end
 
 	for i = 1, cast_table_size, 1 do
-		local node_name = cast_table[(cast_index - i)%cast_table_size + 1]
+		local node_name = cast_table[(cast_index - i) % cast_table_size + 1]
 
 		if cast_table[node_name] then
 			return true, node_name
@@ -1198,15 +1198,15 @@ PerceptionUtils._find_circles = function (unit, target_positions, radius, max_di
 				local p2 = positions[j]
 				local distance = Vector3.distance(p1, p2)
 
-				if distance < radius*2 then
-					local midpoint = p1 + (p2 - p1)*0.5
-					local d = distance/2
+				if distance < radius * 2 then
+					local midpoint = p1 + (p2 - p1) * 0.5
+					local d = distance / 2
 					local r = radius
 					local length = math.sqrt(radius^2 - d^2)
 					local dx = p2.x - p1.x
 					local dy = p2.y - p1.y
-					local n1 = midpoint + Vector3.normalize(Vector3(-dy, dx, 0))*length
-					local n2 = midpoint + Vector3.normalize(Vector3(dy, -dx, 0))*length
+					local n1 = midpoint + Vector3.normalize(Vector3(-dy, dx, 0)) * length
+					local n2 = midpoint + Vector3.normalize(Vector3(dy, -dx, 0)) * length
 					circles[#circles + 1] = {
 						targets = 0,
 						pos = n1,
@@ -1252,7 +1252,7 @@ PerceptionUtils.debug_draw_pick_area_target = function (circles, target, radius,
 		mode = "retained",
 		name = "pick_area_target"
 	})
-	local z_offset = Vector3.up()*0.3
+	local z_offset = Vector3.up() * 0.3
 
 	drawer.reset(drawer)
 
@@ -1267,11 +1267,11 @@ PerceptionUtils.debug_draw_pick_area_target = function (circles, target, radius,
 		drawer.circle(drawer, circle_2.pos + z_offset, radius, Vector3.up(), Color(255, color1, color2, color3), 100)
 
 		for i = 1, circle_1.targets, 1 do
-			drawer.circle(drawer, circle_1.pos + z_offset, i*0.1 + 0.5, Vector3.up(), Color(255, color1, color2, color3), 100)
+			drawer.circle(drawer, circle_1.pos + z_offset, 0.5 + i * 0.1, Vector3.up(), Color(255, color1, color2, color3), 100)
 		end
 
 		for i = 1, circle_2.targets, 1 do
-			drawer.circle(drawer, circle_2.pos + z_offset, i*0.1 + 0.5, Vector3.up(), Color(255, color1, color2, color3), 100)
+			drawer.circle(drawer, circle_2.pos + z_offset, 0.5 + i * 0.1, Vector3.up(), Color(255, color1, color2, color3), 100)
 		end
 	end
 
@@ -1413,7 +1413,7 @@ PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_ta
 		local x = offset.x
 		local y = offset.y
 		local z = offset.z
-		blackboard.target_flat_distance = math.sqrt(x*x + y*y)
+		blackboard.target_flat_distance = math.sqrt(x * x + y * y)
 		blackboard.target_height_distance = z
 		local is_on_ladder, ladder_unit = status_extension.get_is_on_ladder(status_extension)
 
@@ -1430,7 +1430,7 @@ PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_ta
 			elseif Vector3.length(ladder_vector) < height_on_ladder then
 				blackboard.ladder_distance = Vector3.length(self_pos - top)
 			else
-				blackboard.ladder_distance = Vector3.length(foot_offset - ladder_up_dir*height_on_ladder)
+				blackboard.ladder_distance = Vector3.length(foot_offset - ladder_up_dir * height_on_ladder)
 			end
 		else
 			blackboard.ladder_distance = math.huge
@@ -1440,7 +1440,7 @@ PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_ta
 			local old_aggro = blackboard.aggro_list[target_unit_old]
 
 			if old_aggro then
-				blackboard.aggro_list[target_unit_old] = old_aggro*breed.perception_weights.old_target_aggro_mul
+				blackboard.aggro_list[target_unit_old] = old_aggro * breed.perception_weights.old_target_aggro_mul
 			end
 
 			blackboard.slams = 0

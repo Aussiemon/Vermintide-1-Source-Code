@@ -10,14 +10,14 @@ AiAnimUtils.get_animation_rotation_scale = function (unit, blackboard, action)
 	local unit_to_target_rot_radians = target_rot_radians - unit_rot_radians
 	local move_animation_name = blackboard.move_animation_name
 	local rotation_sign = action.start_anims_data[move_animation_name].dir
-	unit_to_target_rot_radians = unit_to_target_rot_radians*rotation_sign
+	unit_to_target_rot_radians = unit_to_target_rot_radians * rotation_sign
 
 	if unit_to_target_rot_radians < 0 then
-		unit_to_target_rot_radians = unit_to_target_rot_radians + math.pi*2
+		unit_to_target_rot_radians = unit_to_target_rot_radians + 2 * math.pi
 	end
 
 	local animation_rot_radians = action.start_anims_data[blackboard.move_animation_name].rad
-	local rotation_scale = unit_to_target_rot_radians/animation_rot_radians
+	local rotation_scale = unit_to_target_rot_radians / animation_rot_radians
 
 	return rotation_scale
 end
@@ -132,7 +132,7 @@ local VEL_TO_NETWORK_SCALE = 10
 local VEL_FROM_NETWORK_SCALE = 0.1
 AiAnimUtils.velocity_network_scale = function (velocity, is_sending)
 	if is_sending then
-		velocity = velocity*VEL_TO_NETWORK_SCALE
+		velocity = velocity * VEL_TO_NETWORK_SCALE
 		local result = {
 			math.round(velocity.x),
 			math.round(velocity.y),
@@ -141,7 +141,7 @@ AiAnimUtils.velocity_network_scale = function (velocity, is_sending)
 
 		return result
 	else
-		local result = Vector3(velocity[1]*VEL_FROM_NETWORK_SCALE, velocity[2]*VEL_FROM_NETWORK_SCALE, velocity[3]*VEL_FROM_NETWORK_SCALE)
+		local result = Vector3(velocity[1] * VEL_FROM_NETWORK_SCALE, velocity[2] * VEL_FROM_NETWORK_SCALE, velocity[3] * VEL_FROM_NETWORK_SCALE)
 
 		return result
 	end
@@ -152,7 +152,7 @@ local POS_TO_NETWORK_SCALE = 100
 local POS_FROM_NETWORK_SCALE = 0.01
 AiAnimUtils.position_network_scale = function (position, is_sending)
 	if is_sending then
-		position = position*POS_TO_NETWORK_SCALE
+		position = position * POS_TO_NETWORK_SCALE
 		local result = {
 			math.round(position.x),
 			math.round(position.y),
@@ -161,7 +161,7 @@ AiAnimUtils.position_network_scale = function (position, is_sending)
 
 		return result
 	else
-		local result = Vector3(position[1]*POS_FROM_NETWORK_SCALE, position[2]*POS_FROM_NETWORK_SCALE, position[3]*POS_FROM_NETWORK_SCALE)
+		local result = Vector3(position[1] * POS_FROM_NETWORK_SCALE, position[2] * POS_FROM_NETWORK_SCALE, position[3] * POS_FROM_NETWORK_SCALE)
 
 		return result
 	end
@@ -174,15 +174,15 @@ AiAnimUtils.rotation_network_scale = function (rotation, is_sending)
 	if is_sending then
 		local x, y, z, w = Quaternion.to_elements(rotation)
 		local result = {
-			math.round(x*ROT_TO_NETWORK_SCALE),
-			math.round(y*ROT_TO_NETWORK_SCALE),
-			math.round(z*ROT_TO_NETWORK_SCALE),
-			math.round(w*ROT_TO_NETWORK_SCALE)
+			math.round(x * ROT_TO_NETWORK_SCALE),
+			math.round(y * ROT_TO_NETWORK_SCALE),
+			math.round(z * ROT_TO_NETWORK_SCALE),
+			math.round(w * ROT_TO_NETWORK_SCALE)
 		}
 
 		return result
 	else
-		local result = Quaternion.from_elements(rotation[1]*ROT_FROM_NETWORK_SCALE, rotation[2]*ROT_FROM_NETWORK_SCALE, rotation[3]*ROT_FROM_NETWORK_SCALE, rotation[4]*ROT_FROM_NETWORK_SCALE)
+		local result = Quaternion.from_elements(rotation[1] * ROT_FROM_NETWORK_SCALE, rotation[2] * ROT_FROM_NETWORK_SCALE, rotation[3] * ROT_FROM_NETWORK_SCALE, rotation[4] * ROT_FROM_NETWORK_SCALE)
 
 		return result
 	end
@@ -192,7 +192,7 @@ end
 AiAnimUtils.cycle_anims = function (blackboard, anims, blackboard_index_name)
 	local i = blackboard[blackboard_index_name]
 	i = i + 1
-	local anim_name = anims[(i - 1)%#anims + 1]
+	local anim_name = anims[(i - 1) % #anims + 1]
 	blackboard[blackboard_index_name] = i
 
 	return anim_name

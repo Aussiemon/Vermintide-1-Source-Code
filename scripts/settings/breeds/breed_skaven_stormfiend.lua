@@ -216,11 +216,11 @@ local action_data = {
 			},
 			change_target_left = {
 				dir = 1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			},
 			change_target_right = {
 				dir = -1,
-				rad = math.pi/2
+				rad = math.pi / 2
 			}
 		},
 		change_target_fwd_close_anims = {

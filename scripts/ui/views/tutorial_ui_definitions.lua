@@ -116,11 +116,11 @@ local scenegraph_definition = {
 		parent = "info_slate_root",
 		size = {
 			INFO_SLATE_ENTRY_SIZE[1],
-			INFO_SLATE_ENTRY_SIZE[2]/2
+			INFO_SLATE_ENTRY_SIZE[2] / 2
 		},
 		position = {
 			0,
-			INFO_SLATE_ENTRY_SIZE[2]/2,
+			INFO_SLATE_ENTRY_SIZE[2] / 2,
 			2
 		}
 	},
@@ -142,7 +142,7 @@ local scenegraph_definition = {
 for i = 1, 3, 1 do
 	local slot_name_start = string.format("info_slate_slot%d_start", i)
 	local slot_name_end = string.format("info_slate_slot%d_end", i)
-	local y = (i - 1)*(INFO_SLATE_ENTRY_SIZE[2] + INFO_SLATE_ENTRY_SPACING)
+	local y = (i - 1) * (INFO_SLATE_ENTRY_SIZE[2] + INFO_SLATE_ENTRY_SPACING)
 	scenegraph_definition[slot_name_start] = {
 		parent = "info_slate_mission_goal_end",
 		size = {
@@ -159,7 +159,7 @@ for i = 1, 3, 1 do
 		parent = "info_slate_mission_goal_end",
 		size = {
 			INFO_SLATE_ENTRY_SIZE[1],
-			INFO_SLATE_ENTRY_SIZE[2]/2
+			INFO_SLATE_ENTRY_SIZE[2] / 2
 		},
 		position = {
 			0,
@@ -427,7 +427,7 @@ local function create_health_bar_definitions(num_health_bars)
 				texture_bg = {
 					size = HEALTH_BAR_SIZE_BG,
 					offset = {
-						-HEALTH_BAR_SIZE_BG[1]/2,
+						-HEALTH_BAR_SIZE_BG[1] / 2,
 						0,
 						1
 					},
@@ -442,7 +442,7 @@ local function create_health_bar_definitions(num_health_bars)
 				texture_fg = {
 					size = HEALTH_BAR_SIZE_FG,
 					offset = {
-						-HEALTH_BAR_SIZE_FG[1]/2,
+						-HEALTH_BAR_SIZE_FG[1] / 2,
 						5,
 						1
 					},
@@ -494,7 +494,7 @@ local function create_info_slate_widgets(num_of_entries)
 			horizontal_alignment = "center",
 			parent = scenegraph_id,
 			position = {
-				-INFO_SLATE_ENTRY_SIZE[1]/2 + 30,
+				-INFO_SLATE_ENTRY_SIZE[1] / 2 + 30,
 				0,
 				0
 			},
@@ -603,11 +603,11 @@ local function create_info_slate_widgets(num_of_entries)
 							local fraction = content.fraction
 							local uv_start_pixels = style.uv_start_pixels
 							local uv_scale_pixels = style.uv_scale_pixels
-							local uv_pixels = uv_start_pixels + uv_scale_pixels*fraction
+							local uv_pixels = uv_start_pixels + uv_scale_pixels * fraction
 							local uvs = style.uvs
 							local uv_scale_axis = style.scale_axis
 							local offset_scale = style.offset_scale
-							uvs[1][uv_scale_axis] = fraction - 1
+							uvs[1][uv_scale_axis] = 1 - fraction
 							size[uv_scale_axis] = uv_pixels
 
 							return style.color, uvs, size, temp
@@ -622,13 +622,13 @@ local function create_info_slate_widgets(num_of_entries)
 							local color = style.color
 							local uv_start_pixels = style.uv_start_pixels
 							local uv_scale_pixels = style.uv_scale_pixels
-							local uv_pixels = uv_start_pixels + uv_scale_pixels*fraction
+							local uv_pixels = uv_start_pixels + uv_scale_pixels * fraction
 							local uvs = style.uvs
 							local uv_scale_axis = style.scale_axis
-							local uv_diff = uv_pixels/(uv_start_pixels + uv_scale_pixels)
-							local side_scale = (uv_diff - 1)*0.5
+							local uv_diff = uv_pixels / (uv_start_pixels + uv_scale_pixels)
+							local side_scale = (1 - uv_diff) * 0.5
 							uvs[1][uv_scale_axis] = side_scale
-							uvs[2][uv_scale_axis] = side_scale - 1
+							uvs[2][uv_scale_axis] = 1 - side_scale
 
 							return color, uvs, size, style.offset
 						end

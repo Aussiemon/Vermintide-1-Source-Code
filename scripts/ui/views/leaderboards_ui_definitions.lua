@@ -468,7 +468,7 @@ local ENTRY_SIZE = {
 }
 
 local function create_entry(name, rank, score, data, scenegraph_id, base_offset, index, id, my_id)
-	local uneven = index%2 == 1
+	local uneven = index % 2 == 1
 	local definition = {
 		element = {
 			passes = {
@@ -567,7 +567,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 		style = {
 			background = {
 				color = {
-					((uneven and 32) or 0) + 32,
+					32 + ((uneven and 32) or 0),
 					128,
 					128,
 					128
@@ -624,7 +624,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					-700,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -638,7 +638,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					135,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -652,7 +652,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("gainsboro", 255),
 				offset = {
 					135,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -666,7 +666,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					-100,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -680,7 +680,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					25,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -694,7 +694,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					145,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -708,7 +708,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					272,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -722,7 +722,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("cheeseburger", 255),
 				offset = {
 					400,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -736,7 +736,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("gainsboro", 255),
 				offset = {
 					525,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			},
@@ -750,7 +750,7 @@ local function create_entry(name, rank, score, data, scenegraph_id, base_offset,
 				text_color = Colors.get_color_table_with_alpha("gainsboro", 255),
 				offset = {
 					650,
-					base_offset[2] + -3,
+					-3 + base_offset[2],
 					1
 				}
 			}

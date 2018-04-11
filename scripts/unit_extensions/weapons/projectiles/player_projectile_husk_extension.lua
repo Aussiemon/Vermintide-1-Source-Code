@@ -440,9 +440,9 @@ PlayerProjectileHuskExtension.link_projectile = function (self, hit_unit, hit_po
 	local depth_offset = impact_data.depth_offset or 0.15
 
 	if damage then
-		broken_chance = broken_chance*math.clamp(damage/2, 0.75, 1.25)
+		broken_chance = broken_chance * math.clamp(damage / 2, 0.75, 1.25)
 	else
-		broken_chance = broken_chance*2
+		broken_chance = broken_chance * 2
 	end
 
 	if broken_chance <= 0.5 and projectile_info.dummy_linker_broken_units then
@@ -457,13 +457,13 @@ PlayerProjectileHuskExtension.link_projectile = function (self, hit_unit, hit_po
 			depth_offset = 0.15
 		end
 	elseif damage then
-		depth = depth*math.clamp(damage, 1, 3)
+		depth = depth * math.clamp(damage, 1, 3)
 	end
 
 	local normalized_direction = Vector3.normalize(hit_direction)
 	depth = depth + depth_offset
-	local random_bank = math.random()*2.14 - 0.5
-	local link_position = hit_position + normalized_direction*depth
+	local random_bank = math.random() * 2.14 - 0.5
+	local link_position = hit_position + normalized_direction * depth
 	local link_rotation = Quaternion.look(normalized_direction)
 	local new_link_rotation = Quaternion.multiply(link_rotation, Quaternion(Vector3.forward(), random_bank))
 	local has_projectile_linker_extension = ScriptUnit.has_extension(hit_unit, "projectile_linker_system")

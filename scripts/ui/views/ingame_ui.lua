@@ -494,7 +494,7 @@ IngameUI.update = function (self, dt, t, disable_ingame_ui, end_of_level_ui)
 				local h = RESOLUTION_LOOKUP.res_h
 				local inverse_scale = RESOLUTION_LOOKUP.inv_scale
 
-				UIRenderer.draw_texture(ui_renderer, "gradient_main_menu", Vector3(0, 0, UILayer.menu_gradient), Vector2(w*inverse_scale, h*inverse_scale))
+				UIRenderer.draw_texture(ui_renderer, "gradient_main_menu", Vector3(0, 0, UILayer.menu_gradient), Vector2(w * inverse_scale, h * inverse_scale))
 				Profiler.stop("ingame menu")
 			end
 
@@ -1073,7 +1073,7 @@ IngameUI._render_fps = function (self, dt)
 	if dt < 1e-07 then
 		fps = 0
 	else
-		fps = dt/1
+		fps = 1 / dt
 	end
 
 	local text = string.format("%i FPS", fps)

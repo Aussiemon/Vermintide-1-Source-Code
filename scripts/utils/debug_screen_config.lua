@@ -1155,12 +1155,12 @@ Features that make player mechanics nicer to work with.
 				local ms = 0.1
 
 				printf("Changing pathfinding budget to %.1fms", ms)
-				GwNavWorld.set_pathfinder_budget(nav_world, ms*0.001)
+				GwNavWorld.set_pathfinder_budget(nav_world, ms * 0.001)
 			else
 				local ms = 100
 
 				printf("Changing pathfinding budget to %.1fms", ms)
-				GwNavWorld.set_pathfinder_budget(nav_world, ms*0.001)
+				GwNavWorld.set_pathfinder_budget(nav_world, ms * 0.001)
 			end
 
 			return 

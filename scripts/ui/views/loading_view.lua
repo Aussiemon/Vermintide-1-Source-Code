@@ -254,7 +254,7 @@ LoadingView.setup_tip_text = function (self, act_progression_index, game_mode)
 		local index_table = {}
 
 		if act_progression_index and act_progression_index < 4 then
-			local tip_count = act_progression_index*2 - 9
+			local tip_count = 9 - act_progression_index * 2
 
 			for i = 1, tip_count, 1 do
 				index_table[i] = 3
@@ -312,18 +312,18 @@ LoadingView.setup_tip_text = function (self, act_progression_index, game_mode)
 					local icon_width = button_texture_size[1]
 					local suffix_text_width = UIRenderer.text_size(self.ui_renderer, suffix_text, font[1], scaled_font_size)
 					local total_width = prefix_text_width + icon_width + suffix_text_width
-					local prefix_text_offset = (-total_width*0.5 + prefix_text_width*0.5) - icon_width*0.05
-					local input_icon_offset = -total_width*0.5 + prefix_text_width + icon_width*0.05 + icon_width*0.5
-					local suffix_text_offset = -total_width*0.5 + prefix_text_width + icon_width*0.5 + suffix_text_width*0.5 + icon_width*0.5
+					local prefix_text_offset = (-total_width * 0.5 + prefix_text_width * 0.5) - icon_width * 0.05
+					local input_icon_offset = -total_width * 0.5 + prefix_text_width + icon_width * 0.05 + icon_width * 0.5
+					local suffix_text_offset = -total_width * 0.5 + prefix_text_width + icon_width * 0.5 + suffix_text_width * 0.5 + icon_width * 0.5
 
 					if definitions.MAXIMUM_TIP_WIDTH < prefix_text_width then
 						local text_rows = UIRenderer.word_wrap(self.ui_renderer, prefix_text, font[1], scaled_font_size, definitions.MAXIMUM_TIP_WIDTH)
 						prefix_text = text_rows[2]
 						prefix_text_width = UIRenderer.text_size(self.ui_renderer, prefix_text, font[1], scaled_font_size)
 						total_width = prefix_text_width + icon_width + suffix_text_width
-						prefix_text_offset = (-total_width*0.5 + prefix_text_width*0.5) - icon_width*0.5
-						input_icon_offset = -total_width*0.5 + prefix_text_width + icon_width*0.05
-						suffix_text_offset = -total_width*0.5 + prefix_text_width + icon_width*0.5 + suffix_text_width*0.5
+						prefix_text_offset = (-total_width * 0.5 + prefix_text_width * 0.5) - icon_width * 0.5
+						input_icon_offset = -total_width * 0.5 + prefix_text_width + icon_width * 0.05
+						suffix_text_offset = -total_width * 0.5 + prefix_text_width + icon_width * 0.5 + suffix_text_width * 0.5
 						self.tip_text_prefix_widget.content.text = text_rows[1]
 						self.tip_text_prefix_widget.style.text.horizontal_alignment = "center"
 						self.tip_text_prefix_widget.style.text.word_wrap = true
@@ -345,9 +345,9 @@ LoadingView.setup_tip_text = function (self, act_progression_index, game_mode)
 						suffix_text = text_rows[1]
 						suffix_text_width = UIRenderer.text_size(self.ui_renderer, suffix_text, font[1], scaled_font_size)
 						total_width = prefix_text_width + icon_width + suffix_text_width
-						prefix_text_offset = (-total_width*0.5 + prefix_text_width*0.5) - icon_width*0.5
-						input_icon_offset = -total_width*0.5 + prefix_text_width + icon_width*0.05
-						suffix_text_offset = -total_width*0.5 + prefix_text_width + icon_width*0.5 + suffix_text_width*0.5
+						prefix_text_offset = (-total_width * 0.5 + prefix_text_width * 0.5) - icon_width * 0.5
+						input_icon_offset = -total_width * 0.5 + prefix_text_width + icon_width * 0.05
+						suffix_text_offset = -total_width * 0.5 + prefix_text_width + icon_width * 0.5 + suffix_text_width * 0.5
 						self.second_row_tip_text_prefix_widget.content.text = text_rows[2]
 						self.second_row_tip_text_prefix_widget.style.text.horizontal_alignment = "center"
 						self.second_row_tip_text_prefix_widget.style.text.word_wrap = true
@@ -491,7 +491,7 @@ LoadingView.draw = function (self, dt)
 				news_ticker_widget_position[1] = 1920
 			end
 
-			news_ticker_widget_position[1] = news_ticker_widget_position[1] - dt*self.news_ticker_speed
+			news_ticker_widget_position[1] = news_ticker_widget_position[1] - dt * self.news_ticker_speed
 		end
 	end
 

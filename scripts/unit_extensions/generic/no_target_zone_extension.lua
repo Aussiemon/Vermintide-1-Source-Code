@@ -5,7 +5,7 @@ NoTargetZoneExtension.init = function (self, extension_init_context, unit, exten
 	self._is_server = Managers.state.network.is_server
 	self._was_inside = {}
 	local distance = Unit.get_data(self._unit, "no_target_zone_data", "distance") or 10
-	self._distance_sq = distance*distance
+	self._distance_sq = distance * distance
 	self._current_index = 0
 
 	return 
@@ -42,7 +42,7 @@ end
 NoTargetZoneExtension._evaluate_players = function (self)
 	local num_players = #PLAYER_AND_BOT_UNITS
 	local pose, extents = Unit.box(self._unit)
-	self._current_index = self._current_index%num_players + 1
+	self._current_index = 1 + self._current_index % num_players
 	local unit = PLAYER_AND_BOT_UNITS[self._current_index]
 
 	if unit then

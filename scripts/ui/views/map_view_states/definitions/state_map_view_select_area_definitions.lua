@@ -295,8 +295,8 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					758
 				},
 				offset = {
-					-element_size[1]/2 + 20,
-					-element_size[2]/2,
+					-element_size[1] / 2 + 20,
+					-element_size[2] / 2,
 					5
 				},
 				color = {
@@ -312,8 +312,8 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					758
 				},
 				offset = {
-					element_size[1]/2 - 80,
-					-element_size[2]/2,
+					element_size[1] / 2 - 80,
+					-element_size[2] / 2,
 					5
 				},
 				color = {
@@ -335,7 +335,7 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					400
 				},
 				offset = {
-					-element_size[1]/2,
+					-element_size[1] / 2,
 					-540,
 					4
 				}
@@ -353,8 +353,8 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					0
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					3
 				}
 			},
@@ -371,8 +371,8 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					255
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					1
 				}
 			},
@@ -388,8 +388,8 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					255
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					3
 				}
 			},
@@ -441,8 +441,8 @@ local function create_element(scenegraph_id, color, game_mode_name, textures, lo
 					200
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2 + 50,
+					-element_size[1] / 2,
+					-element_size[2] / 2 + 50,
 					10
 				}
 			}

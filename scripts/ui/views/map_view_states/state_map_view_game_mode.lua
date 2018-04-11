@@ -127,7 +127,7 @@ StateMapViewGameMode._gather_area_statistics = function (self)
 							end
 
 							local highest_completed_difficulty_rank = map_view_helper.get_completed_level_difficulty(map_view_helper, level_key)
-							local level_progress = highest_completed_difficulty_rank/highest_available_difficulty_rank
+							local level_progress = highest_completed_difficulty_rank / highest_available_difficulty_rank
 							total_progress = total_progress + level_progress
 						end
 					end
@@ -135,10 +135,10 @@ StateMapViewGameMode._gather_area_statistics = function (self)
 			end
 		end
 
-		local progression_fraction = total_progress/num_levels
+		local progression_fraction = total_progress / num_levels
 		local game_mode_index = game_mode_index_by_name[game_mode]
 		local widget = self._elements[game_mode_index]
-		widget.content.progress_text = math.floor(progression_fraction*100) .. "% " .. Localize("dlc1_2_survival_mission_wave_completed")
+		widget.content.progress_text = math.floor(progression_fraction * 100) .. "% " .. Localize("dlc1_2_survival_mission_wave_completed")
 	end
 
 	return 
@@ -149,7 +149,7 @@ StateMapViewGameMode.start_open_animation = function (self)
 	for index, widget in ipairs(self._elements) do
 		local target = widget.offset
 		local target_index = 1
-		local from = (index%2 == 0 and 1440) or -1440
+		local from = (index % 2 == 0 and 1440) or -1440
 		local to = target[target_index]
 		local anim_time = 0.5
 
@@ -171,7 +171,7 @@ StateMapViewGameMode.start_close_animation = function (self)
 		local target = widget.offset
 		local target_index = 1
 		local from = target[target_index]
-		local to = (index%2 == 0 and 1440) or -1440
+		local to = (index % 2 == 0 and 1440) or -1440
 		local anim_time = 0.5
 
 		table.clear(widget.animations)
@@ -319,10 +319,10 @@ StateMapViewGameMode._align_elements = function (self)
 	local spacing = 0
 	local element_width = element_size[1]
 	local distance = element_width + spacing
-	local start_offset = -distance*0.5
+	local start_offset = -distance * 0.5
 
 	for index, widget in ipairs(self._elements) do
-		widget.offset[1] = start_offset + distance*(index - 1)
+		widget.offset[1] = start_offset + distance * (index - 1)
 		widget.content.position_offset = widget.offset[1]
 	end
 
@@ -364,7 +364,7 @@ StateMapViewGameMode.update_selection_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -385,7 +385,7 @@ StateMapViewGameMode._update_elements = function (self, dt, instant)
 end
 StateMapViewGameMode._animate_element = function (self, widget, index, progress)
 	local is_selection_widget = self._selection_index == index
-	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(progress - 1)
+	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
 	local widget_style = widget.style
 	local rect_style = widget_style.rect
 	local background_texture_selected_style = widget_style.background_texture_selected
@@ -396,16 +396,16 @@ StateMapViewGameMode._animate_element = function (self, widget, index, progress)
 	local overlay_style = widget_style.overlay
 	local glow_left_texture_style = widget_style.glow_left_texture
 	local glow_right_texture_style = widget_style.glow_right_texture
-	local alpha = anim_progress*255
-	local rect_alpha = anim_progress*170
-	overlay_style.color[1] = (anim_progress - 1)*170
+	local alpha = anim_progress * 255
+	local rect_alpha = anim_progress * 170
+	overlay_style.color[1] = (1 - anim_progress) * 170
 	background_texture_selected_style.color[1] = alpha
 	description_rect_style.color[1] = rect_alpha
 	description_text_style.text_color[1] = alpha
 	glow_left_texture_style.color[1] = alpha
 	glow_right_texture_style.color[1] = alpha
 	local lock_color = locked_texture_style.color
-	local lock_color_value = anim_progress*75 + 180
+	local lock_color_value = 180 + 75 * anim_progress
 	lock_color[2] = lock_color_value
 	lock_color[3] = lock_color_value
 	lock_color[4] = lock_color_value

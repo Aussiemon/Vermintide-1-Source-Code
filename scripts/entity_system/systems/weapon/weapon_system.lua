@@ -225,7 +225,7 @@ WeaponSystem.update_synced_beam_particle_effects = function (self)
 			local aim_position = GameSession.game_object_field(game, unit_id, "aim_position")
 			local range = data.range
 			local result = PhysicsWorld.immediate_raycast_actors(physics_world, aim_position, aim_direction, range, "static_collision_filter", "filter_player_ray_projectile_static_only", "dynamic_collision_filter", "filter_player_ray_projectile_ai_only", "dynamic_collision_filter", "filter_player_ray_projectile_hitbox_only")
-			local beam_end_position = aim_position + aim_direction*range
+			local beam_end_position = aim_position + aim_direction * range
 			local hit_position, hit_unit = nil
 
 			if result then
@@ -263,10 +263,10 @@ WeaponSystem.update_synced_beam_particle_effects = function (self)
 end
 
 local function ballistic_raycast(physics_world, max_steps, max_time, position, velocity, gravity, collision_filter, visualize)
-	local time_step = max_time/max_steps
+	local time_step = max_time / max_steps
 
 	for i = 1, max_steps, 1 do
-		local new_position = position + velocity*time_step
+		local new_position = position + velocity * time_step
 		local delta = new_position - position
 		local direction = Vector3.normalize(delta)
 		local distance = Vector3.length(delta)
@@ -276,7 +276,7 @@ local function ballistic_raycast(physics_world, max_steps, max_time, position, v
 			return result, hit_position, hit_distance, normal, actor
 		end
 
-		velocity = velocity + gravity*time_step
+		velocity = velocity + gravity * time_step
 		position = new_position
 	end
 
@@ -297,8 +297,8 @@ WeaponSystem.update_synced_geiser_particle_effects = function (self, context, t)
 
 			self.geiser_particle_effects[unit] = nil
 		else
-			local charge_value = (t - data.time_to_shoot)/data.charge_time
-			local radius = math.min(data.max_radius, data.max_radius*charge_value + data.min_radius)
+			local charge_value = (t - data.time_to_shoot) / data.charge_time
+			local radius = math.min(data.max_radius, data.max_radius * charge_value + data.min_radius)
 			local player_position = GameSession.game_object_field(game, unit_id, "aim_position")
 			local up = Vector3(0, 0, 1)
 			local player_rotation = Quaternion.look(GameSession.game_object_field(game, unit_id, "aim_direction"), up)
@@ -306,14 +306,14 @@ WeaponSystem.update_synced_geiser_particle_effects = function (self, context, t)
 			local max_time = 1.5
 			local speed = 15
 			local angle = data.angle
-			local velocity = Quaternion.forward(Quaternion.multiply(player_rotation, Quaternion(Vector3.right(), angle)))*speed
+			local velocity = Quaternion.forward(Quaternion.multiply(player_rotation, Quaternion(Vector3.right(), angle))) * speed
 			local gravity = Vector3(0, 0, -9.82)
 			local collision_filter = "filter_geiser_check"
 			local result, hit_position, hit_distance, normal = ballistic_raycast(physics_world, max_steps, max_time, player_position, velocity, gravity, collision_filter, false)
 			local position = hit_position
 
 			World.move_particles(world, data.geiser_effect, position)
-			World.set_particles_variable(world, data.geiser_effect, data.geiser_effect_variable, Vector3(radius*2, radius*2, 1))
+			World.set_particles_variable(world, data.geiser_effect, data.geiser_effect_variable, Vector3(radius * 2, radius * 2, 1))
 		end
 	end
 
@@ -332,7 +332,7 @@ WeaponSystem.rpc_ai_weapon_shoot_start = function (self, sender, owner_unit_id, 
 	local weapon_unit = inventory_extension.get_unit(inventory_extension, inventory_template)
 	local ai_weapon_extension = ScriptUnit.extension(weapon_unit, "weapon_system")
 
-	ai_weapon_extension.shoot_start(ai_weapon_extension, owner_unit, shoot_time/100)
+	ai_weapon_extension.shoot_start(ai_weapon_extension, owner_unit, shoot_time / 100)
 
 	return 
 end

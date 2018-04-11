@@ -179,7 +179,7 @@ ActionTrueFlightBowAim.client_owner_post_update = function (self, dt, t, world, 
 		end
 	end
 
-	self.charge_value = math.min(math.max(t - time_to_shoot, 0)/self.charge_time, 1)
+	self.charge_value = math.min(math.max(t - time_to_shoot, 0) / self.charge_time, 1)
 
 	if not is_bot then
 		local charge_sound_parameter_name = current_action.charge_sound_parameter_name

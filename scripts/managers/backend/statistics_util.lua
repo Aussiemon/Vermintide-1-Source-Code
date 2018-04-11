@@ -289,7 +289,7 @@ StatisticsUtil.register_instakill = function (victim_unit, damage_datas, index)
 	local breed = Unit.get_data(victim_unit, "breed")
 
 	if breed and breed.name == "skaven_storm_vermin" then
-		local attacker_unit_index = (index - 1)*DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER
+		local attacker_unit_index = (index - 1) * DamageDataIndex.STRIDE + DamageDataIndex.ATTACKER
 		local attacker_unit = damage_datas[attacker_unit_index]
 
 		if Unit.alive(attacker_unit) then
@@ -298,7 +298,7 @@ StatisticsUtil.register_instakill = function (victim_unit, damage_datas, index)
 			local local_player = player_manager.local_player(player_manager)
 
 			if owner == local_player then
-				local damage_source_name_index = (index - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_SOURCE_NAME
+				local damage_source_name_index = (index - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_SOURCE_NAME
 				local damage_source_name = damage_datas[damage_source_name_index]
 				local item = rawget(ItemMasterList, damage_source_name)
 
@@ -421,7 +421,7 @@ end
 StatisticsUtil.get_game_progress = function (statistics_db)
 	local local_player = Managers.player:local_player()
 	local stats_id = local_player.stats_id(local_player)
-	local max_value = #MainGameLevels*5
+	local max_value = #MainGameLevels * 5
 	local current_value = 0
 	local level_difficulty_name, level_completed_difficulty = nil
 
@@ -434,7 +434,7 @@ StatisticsUtil.get_game_progress = function (statistics_db)
 		current_value = current_value + level_completed_difficulty
 	end
 
-	local game_progress = current_value/max_value*100
+	local game_progress = current_value / max_value * 100
 
 	return game_progress
 end
@@ -576,8 +576,8 @@ StatisticsUtil.register_online_leaderboards_data = function (statistics_db, scor
 				total_time = total_time + time_in_sec
 			end
 
-			local time_score = math.max(BASE_SCORE*math.max(MAX_TIME_IN_SEC - time_in_sec, 0)/MAX_TIME_IN_SEC, 1)
-			local wave_score = math.floor(wave*BASE_SCORE + time_score)
+			local time_score = math.max(BASE_SCORE * math.max(MAX_TIME_IN_SEC - time_in_sec, 0) / MAX_TIME_IN_SEC, 1)
+			local wave_score = math.floor(wave * BASE_SCORE + time_score)
 			total_score = total_score + wave_score
 
 			print("Wave: " .. wave .. " time: " .. time_in_sec .. " Score: " .. wave_score)
@@ -673,7 +673,7 @@ StatisticsUtil.register_complete_survival_level = function (statistics_db)
 		if started_on_unlocked_difficulty then
 			local difficulty = difficulty_manager.get_difficulty(difficulty_manager)
 			local difficulty_index = table.find(level_difficulties, difficulty)
-			local completed_difficulty_index = (difficulty_index == #level_difficulties and (difficulty_index - start_difficulty_index + 1)*13 <= completed_waves and difficulty_index) or difficulty_index - 1
+			local completed_difficulty_index = (difficulty_index == #level_difficulties and 13 * (difficulty_index - start_difficulty_index + 1) <= completed_waves and difficulty_index) or difficulty_index - 1
 
 			if 0 < completed_difficulty_index then
 				completed_difficulty = level_difficulties[completed_difficulty_index]

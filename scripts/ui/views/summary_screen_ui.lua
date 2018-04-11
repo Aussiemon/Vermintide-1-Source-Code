@@ -308,7 +308,7 @@ SummaryScreenUI.add_bar_progress = function (self, bar_name, current_experience,
 	local min_time = UISettings.summary_screen.bar_progress_min_time
 	local max_time = UISettings.summary_screen.bar_progress_max_time
 	local time_multiplier = UISettings.summary_screen.bar_progress_experience_time_multiplier
-	local time = math.min(math.max(time_multiplier*experience_gained, min_time), max_time)
+	local time = math.min(math.max(time_multiplier * experience_gained, min_time), max_time)
 	local total_experience = current_experience + experience_gained
 	local current_level, start_progress = ExperienceSettings.get_level(current_experience)
 	local resulting_level, end_progress = ExperienceSettings.get_level(total_experience)
@@ -352,7 +352,7 @@ SummaryScreenUI.update_bar_progress = function (self)
 			local last_bar_fraction = bar_data.last_bar_fraction
 			local start_progress = bar_data.start_progress
 			local total_progress = bar_data.total_progress
-			local bar_fraction = math.max(0, math.min((start_progress + smoothstep*total_progress)%1, 1))
+			local bar_fraction = math.max(0, math.min((start_progress + smoothstep * total_progress) % 1, 1))
 
 			if last_bar_fraction and bar_fraction < last_bar_fraction then
 				current_level = current_level + 1
@@ -398,18 +398,18 @@ SummaryScreenUI.update_bar_progress = function (self)
 			self.set_experience_bar_by_fraction(self, bar_widget, current_level, bar_fraction)
 
 			bar_data.last_bar_fraction = bar_fraction
-			widget_style.level_box_bg_lit.color[1] = bar_fraction*255
+			widget_style.level_box_bg_lit.color[1] = bar_fraction * 255
 			local glow_alpha_value_turn_progress = 0.97
 			local glow_alpha_fraction = 0
 
 			if glow_alpha_value_turn_progress < smoothstep then
-				glow_alpha_fraction = (smoothstep - glow_alpha_value_turn_progress)/(glow_alpha_value_turn_progress - 1) - 1
+				glow_alpha_fraction = 1 - (smoothstep - glow_alpha_value_turn_progress) / (1 - glow_alpha_value_turn_progress)
 			else
-				glow_alpha_fraction = math.min(smoothstep/(glow_alpha_value_turn_progress - 1), 1)
+				glow_alpha_fraction = math.min(smoothstep / (1 - glow_alpha_value_turn_progress), 1)
 			end
 
-			widget_style.bar_glow.color[1] = (0.03 < bar_fraction and glow_alpha_fraction*255) or 0
-			widget_style.bar_glow.offset[1] = bar_fraction*widget_style.bar.size[1] - 6
+			widget_style.bar_glow.color[1] = (0.03 < bar_fraction and glow_alpha_fraction * 255) or 0
+			widget_style.bar_glow.offset[1] = bar_fraction * widget_style.bar.size[1] - 6
 			local current_glow_texture = widget_content.bar_glow
 
 			while widget_content.bar_glow == current_glow_texture do
@@ -469,7 +469,7 @@ end
 SummaryScreenUI.set_experience_bar_by_fraction = function (self, bar_widget, level, fraction)
 	local next_level = level + 1
 	local max_exp = ExperienceSettings.get_experience_required_for_level(next_level)
-	local level_experience = fraction*max_exp
+	local level_experience = fraction * max_exp
 	local bar_content = bar_widget.content
 	bar_content.bar_value = fraction
 	bar_content.level_text = level
@@ -495,7 +495,7 @@ SummaryScreenUI.setup_summary_entries = function (self)
 	local start_time = 0
 
 	for index, mission_reward in ipairs(mission_rewards) do
-		widget_index = widget_index%NUM_OF_SUMMARY_WIDGETS + 1
+		widget_index = widget_index % NUM_OF_SUMMARY_WIDGETS + 1
 		local name = "entry_" .. index
 		local text = mission_reward.text
 		local experience = mission_reward.experience or 0
@@ -628,10 +628,10 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 				local smoothstep = self.get_timer_smoothstep(self, value_timer_name)
 
 				if 0 < experience then
-					presentation_amount = math.round(experience*smoothstep)
+					presentation_amount = math.round(experience * smoothstep)
 					widget_content.value_text = presentation_amount .. "xp"
 				elseif 0 < value then
-					local scalar = math.round(value*smoothstep)
+					local scalar = math.round(value * smoothstep)
 					local value_amount = scalar + 1
 
 					if value == scalar and not (value_amount - 1) then
@@ -729,7 +729,7 @@ SummaryScreenUI.align_summary_entry_widgets = function (self)
 		local current_position = ui_scenegraph[scenegraph_id].local_position
 		local current_size = ui_scenegraph[scenegraph_id].size
 		local offset_index = index - 1
-		local widget_height = -(current_size[2]*offset_index + SUMMARY_WIDGET_SPACING*offset_index)
+		local widget_height = -(current_size[2] * offset_index + SUMMARY_WIDGET_SPACING * offset_index)
 		current_position[2] = start_position + widget_height
 	end
 
@@ -741,7 +741,7 @@ SummaryScreenUI.update_summary_widgets_position_animation = function (self, dt)
 	if time then
 		local position = self.summary_entries_animation_position or 0
 		local steps = self.summary_entries_animation_steps
-		local end_position = steps*(self.summary_entry_widget_height + SUMMARY_WIDGET_SPACING)
+		local end_position = steps * (self.summary_entry_widget_height + SUMMARY_WIDGET_SPACING)
 
 		if position == end_position then
 			local visible_entry_widgets = self.visible_summary_entry_widgets
@@ -762,9 +762,9 @@ SummaryScreenUI.update_summary_widgets_position_animation = function (self, dt)
 		else
 			local duration = 0.5
 			time = math.min(time + dt, duration)
-			local progress = math.easeCubic(time/duration)
+			local progress = math.easeCubic(time / duration)
 			self.summary_entries_animation_time = time
-			self.summary_entries_animation_position = progress*end_position
+			self.summary_entries_animation_position = progress * end_position
 		end
 
 		self.align_summary_entry_widgets(self)
@@ -1014,40 +1014,40 @@ SummaryScreenUI.update_reward_screen_animations = function (self, time, dt)
 		multiplier = UISettings.summary_screen.speed_up_experience_time_multiplier
 	end
 
-	time = time + dt*multiplier
+	time = time + dt * multiplier
 
 	if reward_state == "intro" then
 		total_time = 0.2
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -2, 0, 1, 0)
-		local alpha = catmullrom_value*255
+		local alpha = 255 * catmullrom_value
 		self.reward_widget.style.sun_left.color[1] = alpha
 		self.reward_widget.style.sun_right.color[1] = alpha
 	elseif reward_state == "preperation" then
 		total_time = 0.2
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -0.1, 0, 0, 0)
 		local widget_content = self.reward_widget.content
-		local new_size = catmullrom_value*definitions.scenegraph.reward_window_bg.size[1]
+		local new_size = catmullrom_value * definitions.scenegraph.reward_window_bg.size[1]
 		widget_content.background.fraction = catmullrom_value
 		widget_content.glow_middle.fraction = catmullrom_value
 		self.ui_scenegraph.reward_window_bg.size[1] = new_size
 		self.ui_scenegraph.reward_window_glow_bg.size[1] = new_size
 	elseif reward_state == "open" then
 		total_time = 0.4
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, 0, 0, 1, 1)
 		local widget_content = self.reward_widget.content
-		local new_size = catmullrom_value*definitions.scenegraph.reward_window_bg.size[1]
+		local new_size = catmullrom_value * definitions.scenegraph.reward_window_bg.size[1]
 		widget_content.background.fraction = catmullrom_value
 		widget_content.glow_middle.fraction = catmullrom_value
 		self.ui_scenegraph.reward_window_bg.size[1] = new_size
 		self.ui_scenegraph.reward_window_glow_bg.size[1] = new_size
 	elseif reward_state == "reward_text_in" then
 		total_time = 0.35
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -11, 0, 0, -4)
-		local alpha = catmullrom_value*255
+		local alpha = 255 * catmullrom_value
 		local widget_style = self.reward_widget.style
 		widget_style.highlight_glow.color[1] = alpha
 
@@ -1065,30 +1065,30 @@ SummaryScreenUI.update_reward_screen_animations = function (self, time, dt)
 		end
 	elseif reward_state == "waiting" then
 		total_time = 2
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 	elseif reward_state == "reward_text_out" then
 		total_time = 0.3
-		progress = math.min(time/total_time, 1)
-		local alpha = (progress - 1)*255
+		progress = math.min(time / total_time, 1)
+		local alpha = (1 - progress) * 255
 		self.reward_widget.style.title_text.text_color[1] = alpha
 		self.reward_widget.style.description_text.text_color[1] = alpha
 		self.reward_widget.style.icon.color[1] = alpha
 		self.reward_widget.style.icon_bg.color[1] = alpha
 	elseif reward_state == "close" then
 		total_time = 0.4
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, 1, 1, 0, 0)
 		local widget_content = self.reward_widget.content
-		local new_size = catmullrom_value*definitions.scenegraph.reward_window_bg.size[1]
+		local new_size = catmullrom_value * definitions.scenegraph.reward_window_bg.size[1]
 		widget_content.background.fraction = catmullrom_value
 		widget_content.glow_middle.fraction = catmullrom_value
 		self.ui_scenegraph.reward_window_bg.size[1] = new_size
 		self.ui_scenegraph.reward_window_glow_bg.size[1] = new_size
 	elseif reward_state == "exit" then
 		total_time = 0.5
-		progress = math.min(time/total_time, 1)
+		progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, 0, 1, 0, -2)
-		local alpha = catmullrom_value*255
+		local alpha = 255 * catmullrom_value
 		self.reward_widget.style.sun_left.color[1] = alpha
 		self.reward_widget.style.sun_right.color[1] = alpha
 	end
@@ -1283,9 +1283,9 @@ SummaryScreenUI.update_timers = function (self, dt)
 				multiplier = UISettings.summary_screen.speed_up_experience_time_multiplier
 			end
 
-			current_time = math.min(current_time + dt*multiplier, total_time)
+			current_time = math.min(current_time + dt * multiplier, total_time)
 			smoothstep.current_time = current_time
-			smoothstep.progress = current_time/total_time
+			smoothstep.progress = current_time / total_time
 
 			if current_time == total_time then
 				smoothstep.finnished = true

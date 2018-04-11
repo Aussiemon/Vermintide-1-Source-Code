@@ -61,9 +61,9 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 			local i_start = i
 
 			while i < i_start + 10 do
-				local pos_offset = Vector3((i%columns + 1) - math.ceil(columns/2), math.floor(i/columns) - math.floor(columns/2), 0)
+				local pos_offset = Vector3((1 + i % columns) - math.ceil(columns / 2), math.floor(i / columns) - math.floor(columns / 2), 0)
 				i = i + 1
-				pos_offset = pos_offset*2
+				pos_offset = pos_offset * 2
 				local member_goal_destination = goal_destination + pos_offset
 				local success, altitude = GwNavQueries.triangle_from_position(nav_world, member_goal_destination, 3, 3)
 
@@ -226,11 +226,11 @@ AIGroupTemplates.clan_rat_patrol_random = {
 				return 
 			end
 
-			player_center_pos = player_center_pos*player_count/1
+			player_center_pos = player_center_pos * 1 / player_count
 			local random_group_member_pos = POSITION_LOOKUP[next(group.members)]
 			local ai_to_player_vector = player_center_pos - random_group_member_pos
 			local ai_to_player_direction = Vector3.normalize(player_center_pos - random_group_member_pos)
-			local search_origin = random_group_member_pos + ai_to_player_direction*20
+			local search_origin = random_group_member_pos + ai_to_player_direction * 20
 
 			drawer.reset(drawer)
 			drawer.sphere(drawer, search_origin, 2)
@@ -240,9 +240,9 @@ AIGroupTemplates.clan_rat_patrol_random = {
 			local rand_angle_offset = math.random(1, 100)
 
 			for i = 1, 100, 1 do
-				local angle_index = (i + rand_angle_offset)%100
-				local angle = math.degrees_to_radians((angle_index*360)/100)
-				local offset = Vector3(math.cos(angle), math.sin(angle), 0)*30
+				local angle_index = (i + rand_angle_offset) % 100
+				local angle = math.degrees_to_radians((360 * angle_index) / 100)
+				local offset = 30 * Vector3(math.cos(angle), math.sin(angle), 0)
 				local goal_destination = search_origin + offset
 				local success, altitude = GwNavQueries.triangle_from_position(nav_world, goal_destination, 20, 20)
 
@@ -259,12 +259,12 @@ AIGroupTemplates.clan_rat_patrol_random = {
 					local i = 0
 
 					for unit, _ in pairs(members) do
-						local pos_offset = Vector3((i%columns + 1) - math.ceil(columns/2), math.floor(i/columns) - math.floor(columns/2), 0)
+						local pos_offset = Vector3((1 + i % columns) - math.ceil(columns / 2), math.floor(i / columns) - math.floor(columns / 2), 0)
 
 						print(i, pos_offset)
 
 						i = i + 1
-						pos_offset = pos_offset*2
+						pos_offset = pos_offset * 2
 						local blackboard = Unit.get_data(unit, "blackboard")
 						blackboard.goal_destination = Vector3Box(goal_destination + pos_offset)
 					end

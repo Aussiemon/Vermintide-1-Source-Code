@@ -640,7 +640,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				local color = widget.style.rect.color
-				local alpha = local_progress*255
+				local alpha = 255 * local_progress
 
 				if color[1] < alpha then
 					color[1] = alpha
@@ -666,7 +666,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				local color = widget.style.rect.color
-				local alpha = local_progress*255 - 255
+				local alpha = 255 - 255 * local_progress
 
 				if alpha < color[1] then
 					color[1] = alpha
@@ -703,7 +703,7 @@ local animations = {
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				params.draw_flags.draw_text = true
 				local widget = widgets[1]
-				widget.style.rect.color[1] = (local_progress - 1)*255
+				widget.style.rect.color[1] = (1 - local_progress) * 255
 
 				return 
 			end,
@@ -723,9 +723,9 @@ local animations = {
 				local banner_effect_texture_scenegraph_id = widget.style.banner_effect_texture.scenegraph_id
 				local banner_effect_size = ui_scenegraph[banner_effect_texture_scenegraph_id].size
 				local banner_effect_default_size = scenegraph_definition[banner_effect_texture_scenegraph_id].size
-				local size_multiplier = local_progress*0.2 + 1
-				banner_effect_size[1] = size_multiplier*banner_effect_default_size[1]
-				banner_effect_size[2] = size_multiplier*banner_effect_default_size[2]
+				local size_multiplier = 1 + local_progress * 0.2
+				banner_effect_size[1] = size_multiplier * banner_effect_default_size[1]
+				banner_effect_size[2] = size_multiplier * banner_effect_default_size[2]
 
 				return 
 			end,
@@ -742,7 +742,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
-				widget.style.rect.color[1] = local_progress*255
+				widget.style.rect.color[1] = local_progress * 255
 
 				return 
 			end,
@@ -765,7 +765,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
-				local alpha = local_progress*255
+				local alpha = 255 * local_progress
 				widget.style.banner_texture.color[1] = alpha
 				widget.style.banner_overlay_texture.color[1] = alpha
 				widget.style.banner_effect_texture.color[1] = alpha
@@ -789,7 +789,7 @@ local animations = {
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
-				local alpha = local_progress*255 - 255
+				local alpha = 255 - 255 * local_progress
 				widget.style.banner_texture.color[1] = alpha
 				widget.style.banner_overlay_texture.color[1] = alpha
 				widget.style.banner_effect_texture.color[1] = alpha
@@ -814,7 +814,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = local_progress*255
+				local alpha = 255 * local_progress
 				local window_widget = widgets.window
 				local button_1_widget = widgets.button_1
 				local button_2_widget = widgets.button_2
@@ -850,7 +850,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = local_progress*255 - 255
+				local alpha = 255 - 255 * local_progress
 				local window_widget = widgets.window
 				local button_1_widget = widgets.button_1
 				local button_2_widget = widgets.button_2

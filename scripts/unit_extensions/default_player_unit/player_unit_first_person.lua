@@ -41,8 +41,8 @@ PlayerUnitFirstPerson.init = function (self, extension_init_context, unit, exten
 	self.player_height_change_start_time = 0
 	self.hide_weapon_reasons = {}
 	self.hide_weapon_lights_reasons = {}
-	local small_delta = math.pi/15
-	self.MAX_MIN_PITCH = math.pi/2 - small_delta
+	local small_delta = math.pi / 15
+	self.MAX_MIN_PITCH = math.pi / 2 - small_delta
 	self.drawer = Managers.state.debug:drawer({
 		mode = "immediate",
 		name = "PlayerUnitFirstPerson"
@@ -124,7 +124,7 @@ PlayerUnitFirstPerson.update_aim_assist_multiplier = function (self, dt)
 		local weapon_template = inventory_extension.get_wielded_slot_item_template(inventory_extension)
 		local aim_assist_settings = weapon_template and weapon_template.aim_assist_settings
 		local aim_assist_multiplier = (aim_assist_settings and aim_assist_settings.base_multiplier) or 0
-		local no_aim_input_multiplier = (aim_assist_settings and aim_assist_settings.no_aim_input_multiplier) or aim_assist_multiplier*0.5
+		local no_aim_input_multiplier = (aim_assist_settings and aim_assist_settings.no_aim_input_multiplier) or aim_assist_multiplier * 0.5
 		local input_extension = self.input_extension
 		local look_raw = input_extension.get(input_extension, "look_raw_controller")
 		local move = input_extension.get(input_extension, "move_controller")
@@ -173,8 +173,8 @@ PlayerUnitFirstPerson.reset_aim_assist_multiplier = function (self)
 end
 
 local function ease_out_quad(t, b, c, d)
-	t = t/d
-	local res = -c*t*(t - 2) + b
+	t = t / d
+	local res = -c * t * (t - 2) + b
 
 	return res
 end
@@ -223,8 +223,8 @@ PlayerUnitFirstPerson.update_rotation = function (self, t, dt)
 	elseif self.forced_look_rotation ~= nil then
 		local total_lerp_time = self.forced_total_lerp_time or 0.3
 		self.forced_lerp_timer = self.forced_lerp_timer + dt
-		local p = self.forced_lerp_timer/total_lerp_time - 1
-		p = p*p - 1
+		local p = 1 - self.forced_lerp_timer / total_lerp_time
+		p = 1 - p * p
 		local look_rotation = Quaternion.lerp(self.look_rotation:unbox(), self.forced_look_rotation:unbox(), p)
 		local yaw = Quaternion.yaw(look_rotation)
 		local pitch = math.clamp(Quaternion.pitch(look_rotation), -self.MAX_MIN_PITCH, self.MAX_MIN_PITCH)
@@ -283,8 +283,8 @@ PlayerUnitFirstPerson.calculate_aim_assisted_rotation = function (self, look_rot
 	local target_rotation = Quaternion.look(direction, Vector3.up())
 	local aim_score = aim_assist_data.aim_score
 	local aim_assist_multiplier = self.aim_assist_multiplier
-	local horizontal_lerp = (aim_assist_data.vertical_only and look_rotation) or Quaternion.lerp(look_rotation, target_rotation, dt*33*aim_score*aim_assist_multiplier)
-	local vertical_lerp = Quaternion.lerp(look_rotation, target_rotation, aim_assist_multiplier*0.5*dt*33*aim_score*aim_assist_multiplier)
+	local horizontal_lerp = (aim_assist_data.vertical_only and look_rotation) or Quaternion.lerp(look_rotation, target_rotation, dt * 33 * aim_score * aim_assist_multiplier)
+	local vertical_lerp = Quaternion.lerp(look_rotation, target_rotation, aim_assist_multiplier * 0.5 * dt * 33 * aim_score * aim_assist_multiplier)
 	local yaw = Quaternion.yaw(horizontal_lerp)
 	local pitch = Quaternion.pitch(vertical_lerp)
 	local yaw_rotation = Quaternion(Vector3.up(), yaw)
@@ -323,30 +323,30 @@ PlayerUnitFirstPerson.is_within_default_view = function (self, position)
 	local is_infront = 0 < dot
 
 	if is_infront then
-		local base_vertical_fov_rad = (CameraSettings.first_person._node.vertical_fov*math.pi)/180
-		local base_horizontal_fov_rad = base_vertical_fov_rad*1.7777777777777777
+		local base_vertical_fov_rad = (CameraSettings.first_person._node.vertical_fov * math.pi) / 180
+		local base_horizontal_fov_rad = base_vertical_fov_rad * 1.7777777777777777
 		local camera_right = Quaternion.right(camera_rotation)
 		local camera_up = Quaternion.up(camera_rotation)
 		local c_x = Vector3.dot(to_pos_dir, camera_right)
 		local c_y = dot
 		local c_z = Vector3.dot(to_pos_dir, camera_up)
 		local dot_xy = c_y
-		local c_to_pos_dir_length_xy = math.sqrt(c_x*c_x + c_y*c_y)
+		local c_to_pos_dir_length_xy = math.sqrt(c_x * c_x + c_y * c_y)
 
 		if c_to_pos_dir_length_xy == 0 then
 			return false
 		end
 
-		local cos_xy = dot_xy/c_to_pos_dir_length_xy
+		local cos_xy = dot_xy / c_to_pos_dir_length_xy
 		local yaw = math.acos(cos_xy)
 
-		if yaw <= base_horizontal_fov_rad/2 then
+		if yaw <= base_horizontal_fov_rad / 2 then
 			local dot_uz = c_to_pos_dir_length_xy
-			local to_pos_dir_length_uz = math.sqrt(c_to_pos_dir_length_xy*c_to_pos_dir_length_xy + c_z*c_z)
-			local cos_uz = dot_uz/to_pos_dir_length_uz
+			local to_pos_dir_length_uz = math.sqrt(c_to_pos_dir_length_xy * c_to_pos_dir_length_xy + c_z * c_z)
+			local cos_uz = dot_uz / to_pos_dir_length_uz
 			local pitch = math.acos(cos_uz)
 
-			if pitch <= base_vertical_fov_rad/2 then
+			if pitch <= base_vertical_fov_rad / 2 then
 				return true
 			end
 
@@ -406,7 +406,7 @@ PlayerUnitFirstPerson.set_wanted_player_height = function (self, state, t, time_
 	self.player_height_previous = self.player_height_current
 
 	if time_to_change == nil then
-		time_to_change = math.abs(player_height_wanted - self.player_height_previous)/player_height_movement_speed
+		time_to_change = math.abs(player_height_wanted - self.player_height_previous) / player_height_movement_speed
 		time_to_change = math.clamp(time_to_change, 0.001, 1000)
 	end
 

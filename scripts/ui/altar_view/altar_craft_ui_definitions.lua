@@ -879,7 +879,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = math.easeOutCubic(local_progress)*255
+				local alpha = math.easeOutCubic(local_progress) * 255
 
 				for i = 1, #widgets, 1 do
 					widgets[i].style.texture_id.color[1] = alpha
@@ -913,7 +913,7 @@ local animations = {
 				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				local alpha = math.easeOutCubic(local_progress - 1)*255
+				local alpha = math.easeOutCubic(1 - local_progress) * 255
 
 				for i = 1, #widgets, 1 do
 					widgets[i].style.texture_id.color[1] = alpha

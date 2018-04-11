@@ -155,7 +155,7 @@ ConsoleDLCView._create_dlc_widgets = function (self)
 	local scenegraph_size = ui_scenegraph[tab_widget.scenegraph_id].size
 	local style_left = tab_widget_style.dlc_left_text
 	local style_right = tab_widget_style.dlc_right_text
-	self._ui_animations.selection_offset = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.offset, 1, tab_widget_style.selection.offset[1], scenegraph_size[1]*0.5 - tab_widget_content.spacing*0.5 - style_left.width, 0.5, math.easeOutCubic)
+	self._ui_animations.selection_offset = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.offset, 1, tab_widget_style.selection.offset[1], scenegraph_size[1] * 0.5 - tab_widget_content.spacing * 0.5 - style_left.width, 0.5, math.easeOutCubic)
 	self._ui_animations.selection_size = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.rect_size, 1, tab_widget_style.selection.rect_size[1], style_left.width, 0.5, math.easeOutCubic)
 
 	return 
@@ -187,7 +187,7 @@ ConsoleDLCView._create_skins_widgets = function (self)
 	self._update_selection(self, self._dlc_index)
 
 	local scenegraph_entry = self._ui_scenegraph.dlc_image_entry
-	self._ui_animations.clear = UIAnimation.init(UIAnimation.function_by_time, scenegraph_entry.position, 1, scenegraph_entry.position[1], -definitions.entry_size[1]*1.25, 0.5, math.easeOutCubic)
+	self._ui_animations.clear = UIAnimation.init(UIAnimation.function_by_time, scenegraph_entry.position, 1, scenegraph_entry.position[1], -definitions.entry_size[1] * 1.25, 0.5, math.easeOutCubic)
 	self._animation_cbs.clear = function ()
 		table.clear(self._dlc_widgets)
 		print("Deleting dlcs")
@@ -201,7 +201,7 @@ ConsoleDLCView._create_skins_widgets = function (self)
 	local scenegraph_size = ui_scenegraph[tab_widget.scenegraph_id].size
 	local style_left = tab_widget_style.dlc_left_text
 	local style_right = tab_widget_style.dlc_right_text
-	self._ui_animations.selection_offset = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.offset, 1, tab_widget_style.selection.offset[1], scenegraph_size[1]*0.5 + tab_widget_content.spacing*0.5, 0.5, math.easeOutCubic)
+	self._ui_animations.selection_offset = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.offset, 1, tab_widget_style.selection.offset[1], scenegraph_size[1] * 0.5 + tab_widget_content.spacing * 0.5, 0.5, math.easeOutCubic)
 	self._ui_animations.selection_size = UIAnimation.init(UIAnimation.function_by_time, tab_widget_style.selection.rect_size, 1, tab_widget_style.selection.rect_size[1], style_right.width, 0.5, math.easeOutCubic)
 
 	return 
@@ -219,17 +219,17 @@ ConsoleDLCView._setup_tabs = function (self, widget)
 	local font_material, font_size, font_name = unpack(font)
 	font_size = size
 	local left_width = UIRenderer.text_size(self._ui_renderer, text_left, font_material, font_size)
-	style_left.offset[1] = -scengraph_size[1]*0.5 - tab_widget_content.spacing*0.5
+	style_left.offset[1] = -scengraph_size[1] * 0.5 - tab_widget_content.spacing * 0.5
 	style_left.width = left_width
 	local font, size = UIFontByResolution(style_right)
 	local font_material, font_size, font_name = unpack(font)
 	font_size = size
 	local right_width = UIRenderer.text_size(self._ui_renderer, text_right, font_material, font_size)
-	style_right.offset[1] = scengraph_size[1]*0.5 + tab_widget_content.spacing*0.5
+	style_right.offset[1] = scengraph_size[1] * 0.5 + tab_widget_content.spacing * 0.5
 	style_right.width = right_width
-	tab_widget_style.selection.offset[1] = scengraph_size[1]*0.5 - tab_widget_content.spacing*0.5 - style_left.width
+	tab_widget_style.selection.offset[1] = scengraph_size[1] * 0.5 - tab_widget_content.spacing * 0.5 - style_left.width
 	tab_widget_style.selection.rect_size[1] = style_left.width
-	tab_widget_style.selection.offset[1] = scengraph_size[1]*0.5 + tab_widget_content.spacing*0.5
+	tab_widget_style.selection.offset[1] = scengraph_size[1] * 0.5 + tab_widget_content.spacing * 0.5
 	tab_widget_style.selection.rect_size[1] = style_right.width
 
 	return 
@@ -237,7 +237,7 @@ end
 ConsoleDLCView._setup_scrollbar = function (self, dlcs)
 	local scrollbar_widget = UIWidget.init(definitions.scrollbar_definition)
 	self._widgets.scrollbar = scrollbar_widget
-	local percentage = #dlcs/1
+	local percentage = 1 / #dlcs
 	scrollbar_widget.content.scroll_bar_info.bar_height_percentage = percentage
 	scrollbar_widget.content.disable_frame = true
 
@@ -368,8 +368,8 @@ ConsoleDLCView._update_scrollbar = function (self, dt, t)
 	local spacing = definitions.spacing
 	local num_dlcs = self._num_dlcs
 	local pos_y = scenegraph_entry.position[2]
-	local max_y = (num_dlcs - 1)*entry_size[2] + (num_dlcs - 1)*spacing
-	local value = pos_y/max_y
+	local max_y = (num_dlcs - 1) * entry_size[2] + (num_dlcs - 1) * spacing
+	local value = pos_y / max_y
 
 	self._set_scrollbar_value(self, value)
 
@@ -565,7 +565,7 @@ ConsoleDLCView._update_selection = function (self, index)
 	local widgets = (tab_widget_content.selected == "dlc" and self._dlc_widgets) or self._skin_widgets
 	local old_widget = widgets["dlc_entry_" .. self._dlc_index]
 	self._dlc_index = index
-	local end_pos = (self._dlc_index - 1)*entry_size[2] + (self._dlc_index - 1)*spacing
+	local end_pos = (self._dlc_index - 1) * entry_size[2] + (self._dlc_index - 1) * spacing
 	self._ui_animations.selection = UIAnimation.init(UIAnimation.function_by_time, scenegraph_entry.position, 2, scenegraph_entry.position[2], end_pos, 0.5, math.easeOutCubic)
 
 	if tab_widget_content.selected == "dlc" then

@@ -102,7 +102,7 @@ end
 BTPanicAction.set_new_escape_position = function (self, unit, blackboard)
 	local current_position = POSITION_LOOKUP[unit]
 	local escape_direction = blackboard.panic.escape_direction:unbox()
-	local new_escape_position = current_position + self.length_weight*escape_direction
+	local new_escape_position = current_position + self.length_weight * escape_direction
 	local nav_world = blackboard.nav_world
 	local success, altitude = GwNavQueries.triangle_from_position(nav_world, new_escape_position, 30, 30)
 
@@ -140,7 +140,7 @@ BTPanicAction._try_rotated_escape_direction = function (self, unit, radians_to_r
 	local escape_direction = blackboard.panic.escape_direction:unbox()
 	local rotation_quaternion = Quaternion(Vector3.up(), radians_to_rotate)
 	local new_escape_direction = Quaternion.rotate(rotation_quaternion, escape_direction)
-	local test_escape_position = current_position + self.length_weight*new_escape_direction
+	local test_escape_position = current_position + self.length_weight * new_escape_direction
 	local nav_world = blackboard.nav_world
 	local success, altitude = GwNavQueries.triangle_from_position(nav_world, test_escape_position, 30, 30)
 

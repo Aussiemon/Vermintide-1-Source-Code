@@ -41,7 +41,7 @@ PlayerBotBase.init = function (self, extension_init_context, unit, extension_ini
 		target_ally_needs_aid = false,
 		using_navigation_destination_override = false,
 		is_passive = true,
-		re_evaluate_detection = Math.random()*0.5,
+		re_evaluate_detection = Math.random() * 0.5,
 		world = world,
 		unit = unit,
 		level = LevelHelper:current_level(extension_init_context.world),
@@ -322,7 +322,7 @@ PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 	if self._proximity_target_update_timer < t then
 		local blackboard = self._blackboard
 		local self_unit = self._unit
-		self._proximity_target_update_timer = t + 0.25 + Math.random()*0.15
+		self._proximity_target_update_timer = t + 0.25 + Math.random() * 0.15
 		local prox_enemies = self._blackboard.proximite_enemies
 
 		table.clear(prox_enemies)
@@ -392,7 +392,7 @@ PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 
 	return 
 end
-local PROXIMITY_UP_DOWN_THRESHOLD = math.sin(math.pi*0.25)
+local PROXIMITY_UP_DOWN_THRESHOLD = math.sin(math.pi * 0.25)
 PlayerBotBase._target_valid = function (self, unit, enemy_offset)
 	local blackboard = Unit.get_data(unit, "blackboard")
 
@@ -506,7 +506,7 @@ PlayerBotBase._alter_target_position = function (self, nav_world, self_position,
 	if reason == "ledge" then
 		local rotation = Unit.local_rotation(unit, 0)
 		local forward_vector_flat = Vector3.normalize(Vector3.flat(Quaternion.forward(rotation)))
-		wanted_position = target_position - forward_vector_flat*0.5
+		wanted_position = target_position - forward_vector_flat * 0.5
 	elseif reason == "in_need_of_heal" or reason == "can_accept_grenade" or reason == "can_accept_potion" then
 		wanted_position = target_position + Vector3.normalize(self_position - target_position)
 	elseif reason == "knocked_down" and self._blackboard.aggressive_mode then
@@ -656,12 +656,12 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 
 					if can_heal_other and (health_percent < WANTS_TO_HEAL_THRESHOLD or is_wounded) then
 						in_need_type = "in_need_of_heal"
-						local health_utility = ((is_wounded and health_percent*0.33) or health_percent) - 1
-						utility = health_utility*15 + 10
+						local health_utility = 1 - ((is_wounded and health_percent * 0.33) or health_percent)
+						utility = 10 + health_utility * 15
 					elseif can_give_healing_to_other and (health_percent < WANTS_TO_GIVE_HEAL_TO_OTHER or is_wounded) and not inventory_ext.get_slot_data(inventory_ext, "slot_healthkit") then
 						in_need_type = "can_accept_heal_item"
-						local health_utility = ((is_wounded and health_percent - 0.5) or health_percent) - 1
-						utility = health_utility*10 + 10
+						local health_utility = 1 - ((is_wounded and health_percent - 0.5) or health_percent)
+						utility = 10 + health_utility * 10
 					elseif can_give_grenade_to_other and not inventory_ext.get_slot_data(inventory_ext, "slot_grenade") and not is_bot then
 						in_need_type = "can_accept_grenade"
 						utility = 10
@@ -718,7 +718,7 @@ PlayerBotBase._within_aid_range = function (self, blackboard)
 		local target_pos = POSITION_LOOKUP[blackboard.target_ally_unit]
 		local distance_squared = Vector3.distance_squared(self_pos, target_pos)
 
-		if distance_squared <= PROXIMITY_CHECK_RANGE*PROXIMITY_CHECK_RANGE then
+		if distance_squared <= PROXIMITY_CHECK_RANGE * PROXIMITY_CHECK_RANGE then
 			return true
 		end
 	end
@@ -784,7 +784,7 @@ PlayerBotBase._find_rat_ogre_cover_point = function (self, avoid_targets, rat_og
 	local target_pos = POSITION_LOOKUP[rat_ogre_unit]
 	local self_pos = POSITION_LOOKUP[self._unit]
 	local flee_dir = Vector3.flat(Vector3.normalize(self_pos - target_pos))
-	local offset_vector = flee_dir*20
+	local offset_vector = flee_dir * 20
 
 	for _, unit in pairs(avoid_targets) do
 		if alive(unit) then
@@ -827,7 +827,7 @@ PlayerBotBase._update_pickups = function (self, dt, t)
 	local current, num_max = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
 
 	if current then
-		blackboard.needs_ammo = current/num_max < ammo_percentage
+		blackboard.needs_ammo = current / num_max < ammo_percentage
 	end
 
 	return 
@@ -837,7 +837,7 @@ PlayerBotBase._update_interactables = function (self, dt, t)
 	local blackboard = self._blackboard
 
 	if self._interactable_timer < t then
-		self._interactable_timer = t + 0.2 + Math.random()*0.15
+		self._interactable_timer = t + 0.2 + Math.random() * 0.15
 
 		if blackboard.interaction_unit and blackboard.interaction_unit ~= blackboard.target_ally_unit then
 			blackboard.interaction_unit = nil
@@ -892,10 +892,10 @@ PlayerBotBase._find_cover = function (self, take_cover_targets, self_pos, max_ra
 		local offset = Vector3.flat(self_pos - unit_pos)
 		local normalized_offset = Vector3.normalize(offset)
 		offset_vector = offset_vector + normalized_offset
-		allow_forward_distance = math.min(allow_forward_distance, Vector3.length(offset)*0.5)
+		allow_forward_distance = math.min(allow_forward_distance, 0.5 * Vector3.length(offset))
 	end
 
-	local search_pos = self_pos + (max_radius - allow_forward_distance)*offset_vector
+	local search_pos = self_pos + (max_radius - allow_forward_distance) * offset_vector
 	local num_found, hidden_cover_units = ConflictUtils.hidden_cover_points(search_pos, AVOID_POINTS_TEMP_TABLE, 0, max_radius, -0.9)
 
 	table.clear(AVOID_POINTS_TEMP_TABLE)
@@ -913,7 +913,7 @@ function line_of_fire_check(from, to, p, width, length)
 		return false
 	end
 
-	local direct_dist = Vector3.length(diff - lateral_dist*dir)
+	local direct_dist = Vector3.length(diff - lateral_dist * dir)
 
 	if math.min(lateral_dist, width) < direct_dist then
 		return false
@@ -961,7 +961,7 @@ PlayerBotBase._in_line_of_fire = function (self, self_unit, self_pos, take_cover
 end
 
 function to_hash(vector3)
-	return vector3.x + vector3.y*10000 + vector3.z*0.0001
+	return vector3.x + vector3.y * 10000 + vector3.z * 0.0001
 end
 
 PlayerBotBase.cb_cover_point_path_result = function (self, hash, success, destination)
@@ -993,8 +993,8 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 
 	if in_line_of_fire and changed then
 		local fails = cover_bb.fails
-		local radius = math.min(fails*5 + 5, 40)
-		local allowed_forward_dist = radius*0.4
+		local radius = math.min(5 + fails * 5, 40)
+		local allowed_forward_dist = radius * 0.4
 		local num_found, hidden_cover_units = self._find_cover(self, cover_bb.active_threats, self_pos, radius, allowed_forward_dist)
 		local found_point, found_unit, occupied_cover_unit, occupied_cover_point = nil
 
@@ -1210,12 +1210,12 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 end
 local PICKUP_ROTATIONS = {
 	QuaternionBox(Quaternion(Vector3.up(), 0)),
-	QuaternionBox(Quaternion(Vector3.up(), math.pi*0.25)),
-	QuaternionBox(Quaternion(Vector3.up(), -math.pi*0.25)),
-	QuaternionBox(Quaternion(Vector3.up(), math.pi*0.5)),
-	QuaternionBox(Quaternion(Vector3.up(), -math.pi*0.5)),
-	QuaternionBox(Quaternion(Vector3.up(), math.pi*0.75)),
-	QuaternionBox(Quaternion(Vector3.up(), -math.pi*0.75)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi * 0.25)),
+	QuaternionBox(Quaternion(Vector3.up(), -math.pi * 0.25)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi * 0.5)),
+	QuaternionBox(Quaternion(Vector3.up(), -math.pi * 0.5)),
+	QuaternionBox(Quaternion(Vector3.up(), math.pi * 0.75)),
+	QuaternionBox(Quaternion(Vector3.up(), -math.pi * 0.75)),
 	QuaternionBox(Quaternion(Vector3.up(), math.pi))
 }
 PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self_pos, pickup_unit, pickup_attempt)
@@ -1247,7 +1247,7 @@ PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self
 			local rot = Quaternion.multiply(PICKUP_ROTATIONS[index]:unbox(), attempt_rotation)
 			local dir = Quaternion.forward(rot)
 			dist = math.min(dist + STEP, 1)
-			local pos = pickup_pos + dir*dist*range
+			local pos = pickup_pos + dir * dist * range
 			local success, z = GwNavQueries.triangle_from_position(nav_world, pos, above, below)
 
 			if success then
@@ -1256,14 +1256,14 @@ PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self
 				if 0.8 <= dist then
 					found_position = pos
 				else
-					local ray_end_pos = pos + (dist - 1)*dir*range
+					local ray_end_pos = pos + (1 - dist) * dir * range
 					local success, ray_hit_pos = GwNavQueries.raycast(nav_world, pos, ray_end_pos)
 
 					if success then
 						found_position = ray_end_pos
 						dist = 1
 					else
-						found_position = pos*0.1 + ray_hit_pos*0.9
+						found_position = 0.1 * pos + ray_hit_pos * 0.9
 						dist = Vector3.dot(Vector3.flat(found_position - pickup_pos), dir)
 					end
 				end
@@ -1331,7 +1331,7 @@ PlayerBotBase._debug_draw_update = function (self, dt)
 		mode = "immediate",
 		name = drawer_name
 	})
-	local debug_sphere_position = Unit.local_position(self._unit, 0) + Vector3.up()*2
+	local debug_sphere_position = Unit.local_position(self._unit, 0) + Vector3.up() * 2
 	local color = self._player.color:unbox()
 
 	drawer.sphere(drawer, debug_sphere_position, 0.25, color)
@@ -1339,15 +1339,15 @@ PlayerBotBase._debug_draw_update = function (self, dt)
 	local blackboard = self._blackboard
 	local enemy = blackboard.target_unit
 	local ally = blackboard.target_ally_unit
-	local radius_offset = self._player:local_player_id()*0.05
+	local radius_offset = self._player:local_player_id() * 0.05
 
 	if alive(enemy) then
 		drawer.line(drawer, debug_sphere_position, Unit.world_position(enemy, 0) + Vector3(0, 0, 1.5), Color(125, 255, 0, 0))
-		drawer.box(drawer, Unit.world_pose(enemy, 0), Vector3(radius_offset + 0.5, radius_offset + 0.5, radius_offset + 1.5), color)
+		drawer.box(drawer, Unit.world_pose(enemy, 0), Vector3(0.5 + radius_offset, 0.5 + radius_offset, 1.5 + radius_offset), color)
 	end
 
 	if alive(ally) then
-		drawer.circle(drawer, POSITION_LOOKUP[ally] + Vector3(0, 0, 0.2), radius_offset + 0.6, Vector3.up(), color, 16)
+		drawer.circle(drawer, POSITION_LOOKUP[ally] + Vector3(0, 0, 0.2), 0.6 + radius_offset, Vector3.up(), color, 16)
 	end
 
 	self._brain:debug_draw_current_behavior()

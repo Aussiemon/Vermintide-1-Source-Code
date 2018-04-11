@@ -71,7 +71,7 @@ ActionShieldSlam.client_owner_start_action = function (self, new_action, t)
 	self.state = "waiting_to_hit"
 	self.weapon_direction = Quaternion(pos, 1)
 	local attack_speed_modifier = ActionUtils.apply_attack_speed_buff(1, owner_unit)
-	self.time_to_hit = t + (new_action.hit_time or 0)/attack_speed_modifier
+	self.time_to_hit = t + (new_action.hit_time or 0) / attack_speed_modifier
 
 	table.clear(self.hit_units)
 
@@ -110,7 +110,7 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 	local item_name = item_name
 	local unit_forward = Quaternion.forward(Unit.local_rotation(owner_unit, 0))
 	local self_pos = POSITION_LOOKUP[owner_unit]
-	local pos = self_pos + unit_forward*1
+	local pos = self_pos + unit_forward * 1
 	local radius = current_action.push_radius
 	local collision_filter = "filter_melee_sweep"
 	local actors, actors_n = PhysicsWorld.immediate_overlap(physics_world, "shape", "sphere", "position", pos, "size", radius, "types", "dynamics", "collision_filter", collision_filter, "use_global_table")

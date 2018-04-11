@@ -17,7 +17,7 @@ MusicManager.bus_transition_functions = {
 		return math.lerp(transition.start_value, transition.target_value, t)
 	end,
 	sine = function (transition, t)
-		return math.lerp(transition.start_value, transition.target_value, math.sin(t*math.pi*0.5))
+		return math.lerp(transition.start_value, transition.target_value, math.sin(t * math.pi * 0.5))
 	end,
 	smoothstep = function (transition, t)
 		return math.lerp(transition.start_value, transition.target_value, math.smoothstep(t, 0, 1))

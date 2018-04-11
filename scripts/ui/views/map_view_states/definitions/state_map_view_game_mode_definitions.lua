@@ -292,7 +292,7 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					1080
 				},
 				offset = {
-					(index == 1 and element_size[1]/2 - 119) or -(element_size[1]/2) - 119,
+					(index == 1 and element_size[1] / 2 - 119) or -(element_size[1] / 2) - 119,
 					-540,
 					15
 				},
@@ -309,7 +309,7 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					1080
 				},
 				offset = {
-					(index == 1 and -(element_size[1]/2 + 119)) or element_size[1]/2 - 119,
+					(index == 1 and -(element_size[1] / 2 + 119)) or element_size[1] / 2 - 119,
 					-540,
 					12
 				},
@@ -333,8 +333,8 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					0
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					3
 				}
 			},
@@ -344,8 +344,8 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					758
 				},
 				offset = {
-					-element_size[1]/2 + 20,
-					-element_size[2]/2,
+					-element_size[1] / 2 + 20,
+					-element_size[2] / 2,
 					(index == 1 and 11) or 9
 				},
 				color = {
@@ -361,8 +361,8 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					758
 				},
 				offset = {
-					element_size[1]/2 - 80,
-					-element_size[2]/2,
+					element_size[1] / 2 - 80,
+					-element_size[2] / 2,
 					(index == 1 and 9) or 11
 				},
 				color = {
@@ -401,8 +401,8 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					200
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					4
 				}
 			},
@@ -419,8 +419,8 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					255
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					1
 				}
 			},
@@ -436,8 +436,8 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 					255
 				},
 				offset = {
-					-element_size[1]/2,
-					-element_size[2]/2,
+					-element_size[1] / 2,
+					-element_size[2] / 2,
 					2
 				}
 			},
@@ -495,7 +495,7 @@ local function create_element(index, scenegraph_id, color, game_mode_name, textu
 				},
 				offset = {
 					-350,
-					-element_size[2]/2 - 35,
+					-element_size[2] / 2 - 35,
 					15
 				}
 			}

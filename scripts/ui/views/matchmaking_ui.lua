@@ -160,7 +160,7 @@ MatchmakingUI.animate_large_window = function (self, minimize)
 	local to_position_y = (minimize and default_position[2] + 200) or default_position[2]
 	local default_time = 0.5
 	local anim_func = (minimize and math.easeOutCubic) or math.easeInCubic
-	local time_to_animate = (default_time*math.abs(local_position[2] - to_position_y))/100
+	local time_to_animate = (default_time * math.abs(local_position[2] - to_position_y)) / 100
 
 	if 0 < time_to_animate then
 		ui_animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, local_position, 2, local_position[2], to_position_y, time_to_animate, math.easeCubic)
@@ -236,7 +236,7 @@ MatchmakingUI.update_status = function (self, dt)
 	end
 
 	local rotation_speed = 80
-	local rotation_angle = (dt*rotation_speed)%360
+	local rotation_angle = (dt * rotation_speed) % 360
 	local radians = math.degrees_to_radians(rotation_angle)
 	widget_style.loader_part_2.angle = widget_style.loader_part_2.angle + radians
 	widget_style.loader_part_1.angle = widget_style.loader_part_1.angle - radians
@@ -245,7 +245,7 @@ MatchmakingUI.update_status = function (self, dt)
 	loader_icon.style.loader_part_2.angle = loader_icon.style.loader_part_2.angle + radians
 	loader_icon.style.loader_part_1.angle = loader_icon.style.loader_part_1.angle - radians
 	local connecting_rotation_speed = 200
-	local connecting_rotation_angle = (dt*connecting_rotation_speed)%360
+	local connecting_rotation_angle = (dt * connecting_rotation_speed) % 360
 	local connecting_radians = math.degrees_to_radians(connecting_rotation_angle)
 
 	for i = 1, 4, 1 do
@@ -288,17 +288,17 @@ MatchmakingUI.update_button_prompts = function (self)
 		local text_width_input = UIRenderer.text_size(self.ui_renderer, text_input, font_input[1], scaled_font_input_size)
 		local text_width_prefix = UIRenderer.text_size(self.ui_renderer, text_prefix, font_prefix[1], scaled_font_size_prefix)
 		local text_width_suffix = UIRenderer.text_size(self.ui_renderer, text_suffix, font_suffix[1], scaled_font_size_suffix)
-		local offset = -text_width_suffix*0.5 + text_width_prefix*0.5
+		local offset = -text_width_suffix * 0.5 + text_width_prefix * 0.5
 
 		if not texture_data then
 			text_widget.style.text.offset[1] = offset
-			text_widget_prefix.style.text.offset[1] = -text_width_prefix*0.5 - text_width_input*0.5 + offset
-			text_widget_suffix.style.text.offset[1] = text_width_suffix*0.5 + text_width_input*0.5 + offset
+			text_widget_prefix.style.text.offset[1] = -text_width_prefix * 0.5 - text_width_input * 0.5 + offset
+			text_widget_suffix.style.text.offset[1] = text_width_suffix * 0.5 + text_width_input * 0.5 + offset
 		else
 			input_icon_widget.style.texture_id.offset[1] = offset
 			input_icon_widget_bar.style.texture_id.offset[1] = offset
-			text_widget_prefix.style.text.offset[1] = -text_width_prefix*0.5 - input_icon_bar_width*0.5 + offset
-			text_widget_suffix.style.text.offset[1] = text_width_suffix*0.5 + input_icon_bar_width*0.5 + offset
+			text_widget_prefix.style.text.offset[1] = -text_width_prefix * 0.5 - input_icon_bar_width * 0.5 + offset
+			text_widget_suffix.style.text.offset[1] = text_width_suffix * 0.5 + input_icon_bar_width * 0.5 + offset
 		end
 	end
 
@@ -389,7 +389,7 @@ MatchmakingUI.on_player_joined = function (self, index)
 	local animation_name = "player_slot_" .. index
 	local lit_animation_name = "player_slot_" .. index .. "_lit"
 	local animation_duration = 0.5
-	ui_animations[animation_name] = self.animate_element_by_catmullrom(self, widget.style[animation_name].color, 1, 255, 0.6, 0.6, 1, 1, animation_duration*0.5)
+	ui_animations[animation_name] = self.animate_element_by_catmullrom(self, widget.style[animation_name].color, 1, 255, 0.6, 0.6, 1, 1, animation_duration * 0.5)
 	ui_animations[lit_animation_name] = self.animate_element_by_catmullrom(self, widget.style[lit_animation_name].color, 1, 255, -10, 0, 0, -4, animation_duration)
 
 	return 
@@ -454,7 +454,7 @@ MatchmakingUI.large_window_set_countdown_timer = function (self, time)
 end
 MatchmakingUI.large_window_set_time = function (self, time)
 	local widgets = self.large_window_widgets
-	local time_text = string.format(" %02d:%02d", math.floor(time/60), time%60)
+	local time_text = string.format(" %02d:%02d", math.floor(time / 60), time % 60)
 	widgets.timer.content.text = time_text
 
 	return 
@@ -472,8 +472,8 @@ MatchmakingUI.large_window_set_search_zone_title = function (self, title)
 	local font, scaled_font_size = UIFontByResolution(widgets.search_zone_title.style.text)
 	local text_width, _, _ = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
 	local icon_width = self.ui_scenegraph.search_zone_icon.size[1]
-	widgets.search_zone_title.style.text.offset[1] = icon_width/2
-	widgets.search_zone_icon.style.texture_id.offset[1] = -text_width/2
+	widgets.search_zone_title.style.text.offset[1] = icon_width / 2
+	widgets.search_zone_icon.style.texture_id.offset[1] = -text_width / 2
 
 	return 
 end
@@ -523,8 +523,8 @@ MatchmakingUI.set_ready_progress = function (self, progress)
 	local widget_default_size = scenegraph_definition.window_ready_bg.size
 	local uvs = widget.content.texture_id.uvs
 	local size = self.ui_scenegraph.window_ready_bg.size
-	uvs[2][1] = progress - 1
-	size[1] = widget_default_size[1]*progress
+	uvs[2][1] = 1 - progress
+	size[1] = widget_default_size[1] * progress
 
 	if 0 < progress then
 		local widgets = self.large_window_widgets
@@ -549,8 +549,8 @@ MatchmakingUI.set_cancel_progress = function (self, progress)
 	local widget_default_size = scenegraph_definition.window_cancel_bg.size
 	local uvs = widget.content.texture_id.uvs
 	local size = self.ui_scenegraph.window_cancel_bg.size
-	uvs[1][1] = progress - 1
-	size[1] = widget_default_size[1]*progress
+	uvs[1][1] = 1 - progress
+	size[1] = widget_default_size[1] * progress
 
 	return 
 end
@@ -698,7 +698,7 @@ MatchmakingUI.set_action_area_visible = function (self, visible, instant_hide)
 	local to_position_y = (visible and default_position[2]) or default_position[2] + 100
 	local default_time = 0.5
 	local anim_func = (visible and math.easeOutCubic) or math.easeInCubic
-	local time_to_animate = (default_time*math.abs(local_position[2] - to_position_y))/100
+	local time_to_animate = (default_time * math.abs(local_position[2] - to_position_y)) / 100
 
 	if 0 < time_to_animate then
 		ui_animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, local_position, 2, local_position[2], to_position_y, time_to_animate, math.easeCubic)

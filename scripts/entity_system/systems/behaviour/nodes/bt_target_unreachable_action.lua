@@ -31,14 +31,14 @@ BTTargetUnreachableAction.run = function (self, unit, blackboard, t, dt)
 	blackboard.unreachable_check_timer = t + 0.2
 	local closest_pos = nil
 	local best_score = math.huge
-	local reach_distance_squared = blackboard.breed.reach_distance*blackboard.breed.reach_distance
+	local reach_distance_squared = blackboard.breed.reach_distance * blackboard.breed.reach_distance
 
 	for i = 1, #pos_list, 1 do
 		local test_pos = pos_list[i]:unbox()
 		local score = 0
 		local dist_enemy_and_player = Vector3.distance_squared(enemy_pos, test_pos)
 
-		if dist_enemy_and_player < reach_distance_squared*4 then
+		if dist_enemy_and_player < reach_distance_squared * 4 then
 			score = dist_enemy_and_player
 		else
 			local dist_point = Vector3.distance_squared(test_pos, pos)

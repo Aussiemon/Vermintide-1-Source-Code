@@ -230,17 +230,17 @@ CutsceneUI.fx_fade = function (self, fade_in_time, hold_time, fade_out_time, col
 	local start_alpha = 0
 	local target_alpha = 1
 	local anim_time = fade_in_time + hold_time + fade_out_time
-	fade_in_time = fade_in_time/anim_time
-	fade_out_time = fade_out_time/anim_time
-	hold_time = fade_out_time - 1
+	fade_in_time = fade_in_time / anim_time
+	fade_out_time = fade_out_time / anim_time
+	hold_time = 1 - fade_out_time
 
 	local function anim_func(t)
 		if t < fade_in_time then
-			return math_ease_cubic(t/fade_in_time)
+			return math_ease_cubic(t / fade_in_time)
 		elseif t < hold_time then
 			return 1
 		elseif 0 < fade_out_time then
-			return math_ease_cubic((t - 1)/fade_out_time)
+			return math_ease_cubic((1 - t) / fade_out_time)
 		else
 			return 0
 		end
@@ -266,17 +266,17 @@ CutsceneUI.fx_text_popup = function (self, fade_in_time, hold_time, fade_out_tim
 	local start_alpha = 0
 	local target_alpha = 1
 	local anim_time = fade_in_time + hold_time + fade_out_time
-	fade_in_time = fade_in_time/anim_time
-	fade_out_time = fade_out_time/anim_time
-	hold_time = fade_out_time - 1
+	fade_in_time = fade_in_time / anim_time
+	fade_out_time = fade_out_time / anim_time
+	hold_time = 1 - fade_out_time
 
 	local function anim_func(t)
 		if t < fade_in_time then
-			return math_ease_cubic(t/fade_in_time)
+			return math_ease_cubic(t / fade_in_time)
 		elseif t < hold_time then
 			return 1
 		elseif 0 < fade_out_time then
-			return math_ease_cubic((t - 1)/fade_out_time)
+			return math_ease_cubic((1 - t) / fade_out_time)
 		else
 			return 0
 		end

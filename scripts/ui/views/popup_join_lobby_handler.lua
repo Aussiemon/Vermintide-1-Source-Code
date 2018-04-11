@@ -1085,11 +1085,11 @@ PopupJoinLobbyHandler.update = function (self, dt)
 	return 
 end
 PopupJoinLobbyHandler.update_controller_timer = function (self, dt)
-	local lerp_value = self.cancel_timer%1
+	local lerp_value = self.cancel_timer % 1
 
 	Colors.lerp_color_tables(Colors.get_table("white"), Colors.get_table("cheeseburger"), lerp_value, self.background_widget.style.text_controller_timer.text_color)
 
-	self.background_widget.style.text_controller_timer.font_size = lerp_value*10 + 75
+	self.background_widget.style.text_controller_timer.font_size = 75 + 10 * lerp_value
 	self.background_widget.content.text_controller_timer = math.floor(self.cancel_timer)
 
 	return 

@@ -82,7 +82,7 @@ PlayerCharacterStateHammerLeap.update = function (self, unit, input, dt, context
 
 	if distance <= weapon_action.distance_before_leap then
 		local locomotion_extension = self.locomotion_extension
-		local velocity = direction*weapon_action.leap_speed
+		local velocity = direction * weapon_action.leap_speed
 		self.direction = Vector3Box(direction)
 
 		if not self.pause_in_air_timer then

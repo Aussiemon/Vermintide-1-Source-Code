@@ -934,7 +934,7 @@ MapView.on_survival_level_selected = function (self, level_information)
 					widget_content.difficulty_title = setting_text
 					widget_content.waves = tostring(scores.waves)
 					local time = scores.time
-					widget_content.time = string.format("%.2d:%.2d:%.2d", floor(time/3600), floor(time/60)%60, floor(time)%60)
+					widget_content.time = string.format("%.2d:%.2d:%.2d", floor(time / 3600), floor(time / 60) % 60, floor(time) % 60)
 					widget_index = widget_index + 1
 					any_score_added = true
 				end
@@ -1022,7 +1022,7 @@ MapView._adjust_difficulty_lock_icons_position = function (self, widget, text)
 	local text_style = widget_style.setting_text
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
-	self.difficulty_unlock_icon_widget.style.unlock_texture.offset[1] = text_width*0.5 + 15
+	self.difficulty_unlock_icon_widget.style.unlock_texture.offset[1] = text_width * 0.5 + 15
 
 	return 
 end
@@ -1988,7 +1988,7 @@ MapView.on_stepper_arrow_hover = function (self, widget, name, style_id)
 	local current_alpha = pass_style.color[1]
 	local target_alpha = 255
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = (current_alpha/target_alpha - 1)*total_time
+	local animation_duration = (1 - current_alpha / target_alpha) * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_hover"] = self.animate_element_by_time(self, pass_style.color, 1, current_alpha, target_alpha, animation_duration)
@@ -2008,7 +2008,7 @@ MapView.on_stepper_arrow_dehover = function (self, widget, name, style_id)
 	local current_alpha = pass_style.color[1]
 	local target_alpha = 0
 	local total_time = UISettings.scoreboard.topic_hover_duration
-	local animation_duration = current_alpha/255*total_time
+	local animation_duration = current_alpha / 255 * total_time
 
 	if 0 < animation_duration then
 		ui_animations[animation_name .. "_hover"] = self.animate_element_by_time(self, pass_style.color, 1, current_alpha, target_alpha, animation_duration)

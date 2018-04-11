@@ -523,8 +523,8 @@ PopupHandler.update = function (self, dt, from_manager)
 			end
 
 			if current_popup.timer_blink then
-				timer_style.font_size = math.smoothstep(current_popup.timer%1, 0, 1)*20 + 40
-				timer_style.text_color = Colors.lerp_color_tables(Colors.get_color_table_with_alpha("white", 255), Colors.get_color_table_with_alpha("cheeseburger", 255), current_popup.timer%15%1)
+				timer_style.font_size = 40 + 20 * math.smoothstep(current_popup.timer % 1, 0, 1)
+				timer_style.text_color = Colors.lerp_color_tables(Colors.get_color_table_with_alpha("white", 255), Colors.get_color_table_with_alpha("cheeseburger", 255), current_popup.timer % 15 % 1)
 			end
 
 			current_popup.timer = current_popup.timer - dt
@@ -548,7 +548,7 @@ PopupHandler.update = function (self, dt, from_manager)
 		local gamepad_buttons = self.gamepad_button_widgets[n_args]
 
 		for i = 1, n_args, 1 do
-			local button_text = " " .. args[i*2]
+			local button_text = " " .. args[i * 2]
 			local button_enabled = current_popup.button_enabled_state[i] == true
 
 			if gamepad_active then
@@ -567,12 +567,12 @@ PopupHandler.update = function (self, dt, from_manager)
 				text_style.text_color = (button_enabled and self.gamepad_button_colors.enabled) or self.gamepad_button_colors.disabled
 				local font, scaled_font_size = UIFontByResolution(text_style)
 				local text_width, text_height, min = UIRenderer.text_size(ui_renderer, button_text, font[1], scaled_font_size)
-				button_style.icon.offset[1] = text_width*0.5 - 80
+				button_style.icon.offset[1] = 80 - text_width * 0.5
 
 				UIRenderer.draw_widget(ui_renderer, gamepad_button)
 
 				if input_service.get(input_service, input_action, true) then
-					result = args[i*2 - 1]
+					result = args[i * 2 - 1]
 
 					self.play_sound(self, "Play_hud_select")
 				end
@@ -591,7 +591,7 @@ PopupHandler.update = function (self, dt, from_manager)
 				if button_hotspot.on_release then
 					table.clear(button.content.button_hotspot)
 
-					result = args[i*2 - 1]
+					result = args[i * 2 - 1]
 
 					self.play_sound(self, "Play_hud_select")
 				end
@@ -676,10 +676,10 @@ PopupHandler.queue_popup = function (self, text, topic, ...)
 	new_popup.topic = topic
 	local n_args = select("#", ...)
 
-	assert(math.floor(n_args/2)*2 == n_args, "Need one action for each button text")
+	assert(math.floor(n_args / 2) * 2 == n_args, "Need one action for each button text")
 	assert(0 < n_args, "Need at least one button...")
 
-	new_popup.n_args = n_args/2
+	new_popup.n_args = n_args / 2
 	new_popup.button_enabled_state = {}
 
 	for i = 1, new_popup.n_args, 1 do
@@ -731,7 +731,7 @@ PopupHandler.activate_timer = function (self, popup_id, time, default_result, al
 	end
 
 	assert(index, string.format("[PopupHandler:activate_timer] There is no result named %s in popup declaration %s", default_result, popup.topic))
-	assert(index%2 == 1, string.format("[PopupHandler:activate_timer] You need to pass the result - not the text %s in popup declaration %s", default_result, popup.topic))
+	assert(index % 2 == 1, string.format("[PopupHandler:activate_timer] You need to pass the result - not the text %s in popup declaration %s", default_result, popup.topic))
 
 	popup.timer = time
 	popup.default_result = default_result

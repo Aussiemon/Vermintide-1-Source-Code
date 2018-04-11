@@ -119,7 +119,7 @@ local function update_wall_nail(unit, dt, t, data)
 			nail_data.position = Vector3Box(position)
 			local dir = nail_data.attack_direction:unbox()
 			local fly_time = 0.3
-			local ray_dist = nail_data.hit_speed*fly_time
+			local ray_dist = nail_data.hit_speed * fly_time
 
 			fassert(0 < ray_dist, "Ray distance is not greater than 0")
 
@@ -140,9 +140,9 @@ local function update_wall_nail(unit, dt, t, data)
 
 				fassert(Vector3.is_valid(hit_position), "Position from raycast is valid")
 
-				nail_data.target_position = Vector3Box(hit_position - dir*thickness)
+				nail_data.target_position = Vector3Box(hit_position - dir * thickness)
 				nail_data.start_t = t
-				nail_data.end_t = t + math.max(hit_distance/ray_dist*fly_time, 0.01)
+				nail_data.end_t = t + math.max(hit_distance / ray_dist * fly_time, 0.01)
 				data.finish_time = math.max(data.finish_time, t + 30)
 				data.nailed = true
 			else
@@ -392,7 +392,7 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 
 				if ammo_extension then
 					local max_ammo = ammo_extension.max_ammo_count(ammo_extension)
-					local restore_amount = math.clamp(math.floor(max_ammo*amount), 1, math.huge)
+					local restore_amount = math.clamp(math.floor(max_ammo * amount), 1, math.huge)
 
 					ammo_extension.add_ammo_to_reserve(ammo_extension, restore_amount)
 				end
@@ -740,7 +740,7 @@ DeathReactions.templates = {
 							local unit_name = pickup_settings.unit_name
 							local unit_template_name = pickup_settings.unit_template_name or "pickup_unit"
 							local position = POSITION_LOOKUP[unit] + Vector3(math.random() - 0.5, math.random() - 0.5, 1)
-							local rotation = Quaternion(Vector3.right(), math.random()*2*math.pi)
+							local rotation = Quaternion(Vector3.right(), math.random() * 2 * math.pi)
 
 							Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
 
@@ -847,7 +847,7 @@ DeathReactions.templates = {
 				local network_time = Managers.state.network:network_time()
 				local fuse_time_left = data.explode_time - network_time
 				local fuse_time = data.fuse_time
-				local fuse_time_percent = fuse_time_left/fuse_time
+				local fuse_time_percent = fuse_time_left / fuse_time
 
 				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
 				Unit.set_data(unit, "fuse_time_left", fuse_time_left)
@@ -949,7 +949,7 @@ DeathReactions.templates = {
 				local network_time = Managers.state.network:network_time()
 				local fuse_time_left = data.explode_time - network_time
 				local fuse_time = data.fuse_time
-				local fuse_time_percent = fuse_time_left/fuse_time
+				local fuse_time_percent = fuse_time_left / fuse_time
 
 				Unit.set_data(unit, "fuse_time_percent", fuse_time_percent)
 				Unit.set_data(unit, "fuse_time_left", fuse_time_left)

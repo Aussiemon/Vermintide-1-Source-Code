@@ -360,7 +360,7 @@ UnitFramesHandler._align_team_member_frames = function (self)
 			local connecting_peer_id = player_data.connecting_peer_id
 
 			if peer_id or connecting_peer_id then
-				local position_x = start_offset_x + count*340
+				local position_x = start_offset_x + count * 340
 
 				widget.set_position(widget, position_x, position_y)
 
@@ -540,12 +540,12 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 		has_shield, shield_amount = damage_extension.has_assist_shield(damage_extension)
 
 		if has_shield then
-			shield_percent = shield_amount/max_health
+			shield_percent = shield_amount / max_health
 		end
 
 		local num_grimoires = buff_extension.num_buff_type(buff_extension, "grimoire_health_debuff")
 		local multiplier = buff_extension.apply_buffs_to_value(buff_extension, PlayerUnitDamageSettings.GRIMOIRE_HEALTH_DEBUFF, StatBuffIndex.CURSE_PROTECTION)
-		active_percentage = num_grimoires*multiplier - 1
+		active_percentage = 1 - num_grimoires * multiplier
 		local dialogue_extension = extensions.dialogue
 		is_talking = dialogue_extension.currently_playing_dialogue ~= nil
 		equipment = inventory_extension.equipment(inventory_extension)
@@ -919,7 +919,7 @@ UnitFramesHandler.update = function (self, dt, t, my_player)
 	Profiler.start("sync")
 	self._sync_player_stats(self, self._unit_frames[self._current_frame_index])
 
-	self._current_frame_index = self._current_frame_index%#self._unit_frames + 1
+	self._current_frame_index = 1 + self._current_frame_index % #self._unit_frames
 
 	Profiler.stop("sync")
 

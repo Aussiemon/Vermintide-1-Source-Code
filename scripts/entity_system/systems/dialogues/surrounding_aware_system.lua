@@ -49,7 +49,7 @@ SurroundingAwareSystem.add_event = function (unit, event_name, distance, ...)
 
 	assert(type(event_name) == "string", "First argument to add_event must be an event-name.")
 	assert(type(distance) == "number", "Second argument to add_event must be distance.")
-	assert(num_args%2 == 0, "Arguments must be set by key, value-pairs. Thus num args must be an even number.")
+	assert(num_args % 2 == 0, "Arguments must be set by key, value-pairs. Thus num args must be an even number.")
 	pack_index[num_args + 4](array_data, event_array_size + 1, num_args, unit, event_name, distance, ...)
 
 	local new_size = event_array_size + num_args + 4
@@ -66,7 +66,7 @@ SurroundingAwareSystem.add_system_event = function (self, unit, event_name, dist
 
 	assert(type(event_name) == "string", "First argument to add_event must be an event-name.")
 	assert(type(distance) == "number", "Second argument to add_event must be distance.")
-	assert(num_args%2 == 0, "Arguments must be set by key, value-pairs. Thus num args must be an even number.")
+	assert(num_args % 2 == 0, "Arguments must be set by key, value-pairs. Thus num args must be an even number.")
 	pack_index[num_args + 4](array_data, event_array_size + 1, num_args, unit, event_name, distance, ...)
 
 	local new_size = event_array_size + num_args + 4
@@ -97,7 +97,7 @@ SurroundingAwareSystem.on_add_extension = function (self, world, unit, extension
 		extension.has_been_seen = false
 		extension.is_lookat_object = true
 		extension.view_distance = Unit.get_data(unit, "view_distance") or DialogueSettings.default_view_distance
-		extension.view_distance_sq = extension.view_distance*extension.view_distance
+		extension.view_distance_sq = extension.view_distance * extension.view_distance
 	end
 
 	return extension
@@ -195,8 +195,8 @@ SurroundingAwareSystem.update_lookat = function (self, context, t)
 
 		if DialogueSettings.view_event_trigger_interval < time_since_last then
 			local observer_forward = Quaternion.forward(extension.locomotion_extension:current_rotation())
-			local observe_position = observer_wp + observer_forward*DialogueSettings.max_view_distance*0.5
-			local num_nearby = Broadphase.query(broadphase, observer_wp, DialogueSettings.max_view_distance*0.5, found_units)
+			local observe_position = observer_wp + observer_forward * DialogueSettings.max_view_distance * 0.5
+			local num_nearby = Broadphase.query(broadphase, observer_wp, DialogueSettings.max_view_distance * 0.5, found_units)
 
 			for i = 1, num_nearby, 1 do
 				local target = found_units[i]
@@ -212,10 +212,10 @@ SurroundingAwareSystem.update_lookat = function (self, context, t)
 						local observer_target_direction = Vector3.normalize(observer_to_target_vector)
 						local distance_squared = math.max(0.1, Vector3.length_squared(observer_to_target_vector))
 						local view_distance = lookat_target_ext.view_distance
-						local distance_det = (view_distance*view_distance)/2/distance_squared
-						local rotation_diff = math.radians_to_degrees(Vector3.dot(observer_forward, observer_target_direction) - 1)
+						local distance_det = (view_distance * view_distance) / 2 / distance_squared
+						local rotation_diff = math.radians_to_degrees(1 - Vector3.dot(observer_forward, observer_target_direction))
 
-						if distance_squared <= lookat_target_ext.view_distance_sq and rotation_diff < extension.view_angle*distance_det then
+						if distance_squared <= lookat_target_ext.view_distance_sq and rotation_diff < extension.view_angle * distance_det then
 							local is_in_view = not darkness_system.is_in_darkness(darkness_system, POSITION_LOOKUP[target] or Unit.world_position(target, 0)) and check_raycast_center(physics_world, unit, target, lookat_target_ext.collision_filter)
 
 							if is_in_view then
@@ -276,11 +276,11 @@ SurroundingAwareSystem.update_debug = function (self, context, t)
 
 				Debug.text("SAS: %q:%f", Unit.debug_name(target), distance)
 
-				local distance_det = (DialogueSettings.max_view_distance*DialogueSettings.max_view_distance)/2/distance
-				local rotation_diff = math.radians_to_degrees(Vector3.dot(observer_forward, observer_target_direction) - 1)
+				local distance_det = (DialogueSettings.max_view_distance * DialogueSettings.max_view_distance) / 2 / distance
+				local rotation_diff = math.radians_to_degrees(1 - Vector3.dot(observer_forward, observer_target_direction))
 				local lookat_target_ext = ScriptUnit.extension(target, "surrounding_aware_system")
 
-				if lookat_target_ext.is_lookat_object and lookat_target_ext and distance <= lookat_target_ext.view_distance_sq and rotation_diff < extension.view_angle*distance_det then
+				if lookat_target_ext.is_lookat_object and lookat_target_ext and distance <= lookat_target_ext.view_distance_sq and rotation_diff < extension.view_angle * distance_det then
 					local is_in_view = check_raycast_center(physics_world, unit, target)
 
 					if is_in_view then
@@ -360,8 +360,8 @@ SurroundingAwareSystem.update_events = function (self, context, t)
 					event_data.distance = distance
 					event_data.height_distance = height_distance
 
-					for k = 1, num_args/2, 1 do
-						local array_data_index = i + 3 + (k - 1)*2 + 1
+					for k = 1, num_args / 2, 1 do
+						local array_data_index = i + 3 + (k - 1) * 2 + 1
 						event_data[array_data[array_data_index]] = array_data[array_data_index + 1]
 					end
 

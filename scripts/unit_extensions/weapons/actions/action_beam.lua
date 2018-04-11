@@ -131,7 +131,7 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 		local range = current_action.range or 30
 		local collision_filter = "filter_player_ray_projectile"
 		local result = PhysicsWorld.immediate_raycast_actors(physics_world, current_position, direction, range, "static_collision_filter", "filter_player_ray_projectile_static_only", "dynamic_collision_filter", "filter_player_ray_projectile_ai_only", "dynamic_collision_filter", "filter_player_ray_projectile_hitbox_only")
-		local beam_end_position = current_position + direction*range
+		local beam_end_position = current_position + direction * range
 		local hit_unit, hit_position = nil
 
 		if result then
@@ -161,7 +161,7 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 					end
 
 					if hit then
-						hit_position = potential_hit_position - direction*0.15
+						hit_position = potential_hit_position - direction * 0.15
 						hit_unit = potential_hit_unit
 
 						break
@@ -178,11 +178,11 @@ ActionBeam.client_owner_post_update = function (self, dt, t, world, can_damage)
 					self.ramping_interval = 1.5
 				end
 
-				if current_action.damage_interval*self.ramping_interval <= self.damage_timer and ScriptUnit.has_extension(hit_unit, "damage_system") then
+				if current_action.damage_interval * self.ramping_interval <= self.damage_timer and ScriptUnit.has_extension(hit_unit, "damage_system") then
 					Managers.state.entity:system("ai_system"):alert_enemies_within_range(owner_unit, POSITION_LOOKUP[owner_unit], 5)
 
 					self.damage_timer = 0
-					self.ramping_interval = math.clamp(self.ramping_interval*0.8, 0.45, 1.5)
+					self.ramping_interval = math.clamp(self.ramping_interval * 0.8, 0.45, 1.5)
 				end
 
 				if self.damage_timer == 0 and ScriptUnit.has_extension(hit_unit, "damage_system") then

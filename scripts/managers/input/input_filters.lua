@@ -78,7 +78,7 @@ InputFilters.scale_vector3 = {
 
 		input_threshold(val, filter_data.input_threshold or 0)
 
-		return val*filter_data.multiplier
+		return val * filter_data.multiplier
 	end,
 	edit_types = {
 		{
@@ -96,8 +96,8 @@ InputFilters.scale_vector3_xy = {
 
 		input_threshold(val, filter_data.input_threshold or 0)
 
-		local x = val.x*filter_data.multiplier_x
-		local y = val.y*filter_data.multiplier_y
+		local x = val.x * filter_data.multiplier_x
+		local y = val.y * filter_data.multiplier_y
 		local z = val.z
 
 		return Vector3(x, y, z)
@@ -119,7 +119,7 @@ InputFilters.scale_vector3_xy_accelerated_x_legacy = {
 		internal_filter_data.input_x = 0
 		internal_filter_data.input_x_t = 0
 		internal_filter_data.input_x_turnaround_t = 0
-		internal_filter_data.min_multiplier_x = internal_filter_data.min_multiplier_x or internal_filter_data.multiplier_x*0.25
+		internal_filter_data.min_multiplier_x = internal_filter_data.min_multiplier_x or internal_filter_data.multiplier_x * 0.25
 
 		return internal_filter_data
 	end,
@@ -153,18 +153,18 @@ InputFilters.scale_vector3_xy_accelerated_x_legacy = {
 		local turnaround_elapsed_time = time - filter_data.input_x_turnaround_t
 
 		if filter_data.turnaround_threshold and filter_data.acceleration_delay + filter_data.turnaround_delay <= turnaround_elapsed_time and filter_data.turnaround_threshold <= math.abs(val.x) then
-			local value = math.clamp(elapsed_time - (filter_data.acceleration_delay + filter_data.turnaround_delay)/filter_data.turnaround_time_ref, 0, 1)
-			x = val.x*math.lerp(filter_data.min_multiplier_x, filter_data.turnaround_multiplier_x, math.pow(value, filter_data.turnaround_power_of))*Managers.time._mean_dt
+			local value = math.clamp(elapsed_time - (filter_data.acceleration_delay + filter_data.turnaround_delay) / filter_data.turnaround_time_ref, 0, 1)
+			x = val.x * math.lerp(filter_data.min_multiplier_x, filter_data.turnaround_multiplier_x, math.pow(value, filter_data.turnaround_power_of)) * Managers.time._mean_dt
 		elseif filter_data.acceleration_delay <= elapsed_time then
-			local value = math.clamp((elapsed_time - filter_data.acceleration_delay)/filter_data.accelerate_time_ref, 0, 1)
-			x = val.x*math.lerp(filter_data.min_multiplier_x, filter_data.multiplier_x, math.pow(value, filter_data.power_of))*Managers.time._mean_dt
+			local value = math.clamp((elapsed_time - filter_data.acceleration_delay) / filter_data.accelerate_time_ref, 0, 1)
+			x = val.x * math.lerp(filter_data.min_multiplier_x, filter_data.multiplier_x, math.pow(value, filter_data.power_of)) * Managers.time._mean_dt
 		else
-			x = val.x*filter_data.min_multiplier_x*Managers.time._mean_dt
+			x = val.x * filter_data.min_multiplier_x * Managers.time._mean_dt
 		end
 
 		local inverted_y = filter_data.inverted_y
 		local val_y = (inverted_y and -val.y) or val.y
-		local y = val_y*filter_data.multiplier_y*Managers.time._mean_dt
+		local y = val_y * filter_data.multiplier_y * Managers.time._mean_dt
 		local z = val.z
 
 		return Vector3(x, y, z)
@@ -186,7 +186,7 @@ InputFilters.scale_vector3_xy_accelerated_x = {
 		internal_filter_data.input_x = 0
 		internal_filter_data.input_x_t = 0
 		internal_filter_data.input_x_turnaround_t = 0
-		internal_filter_data.min_multiplier_x = internal_filter_data.min_multiplier_x or internal_filter_data.multiplier_x*0.25
+		internal_filter_data.min_multiplier_x = internal_filter_data.min_multiplier_x or internal_filter_data.multiplier_x * 0.25
 
 		return internal_filter_data
 	end,
@@ -220,18 +220,18 @@ InputFilters.scale_vector3_xy_accelerated_x = {
 		local turnaround_elapsed_time = time - filter_data.input_x_turnaround_t
 
 		if filter_data.turnaround_threshold and filter_data.acceleration_delay + filter_data.turnaround_delay <= turnaround_elapsed_time and filter_data.turnaround_threshold <= math.abs(val.x) then
-			local value = math.clamp(elapsed_time - (filter_data.acceleration_delay + filter_data.turnaround_delay)/filter_data.turnaround_time_ref, 0, 1)
-			x = val.x*math.lerp(filter_data.min_multiplier_x, filter_data.turnaround_multiplier_x, math.pow(value, filter_data.turnaround_power_of))*Managers.time._mean_dt
+			local value = math.clamp(elapsed_time - (filter_data.acceleration_delay + filter_data.turnaround_delay) / filter_data.turnaround_time_ref, 0, 1)
+			x = val.x * math.lerp(filter_data.min_multiplier_x, filter_data.turnaround_multiplier_x, math.pow(value, filter_data.turnaround_power_of)) * Managers.time._mean_dt
 		elseif filter_data.acceleration_delay <= elapsed_time then
-			local value = math.clamp((elapsed_time - filter_data.acceleration_delay)/filter_data.accelerate_time_ref, 0, 1)
-			x = val.x*math.lerp(filter_data.min_multiplier_x, filter_data.multiplier_x, math.pow(value, filter_data.power_of))*Managers.time._mean_dt
+			local value = math.clamp((elapsed_time - filter_data.acceleration_delay) / filter_data.accelerate_time_ref, 0, 1)
+			x = val.x * math.lerp(filter_data.min_multiplier_x, filter_data.multiplier_x, math.pow(value, filter_data.power_of)) * Managers.time._mean_dt
 		else
-			x = val.x*filter_data.min_multiplier_x*Managers.time._mean_dt
+			x = val.x * filter_data.min_multiplier_x * Managers.time._mean_dt
 		end
 
 		local inverted_y = filter_data.inverted_y
 		local val_y = (inverted_y and -val.y) or val.y
-		local y = val_y*filter_data.multiplier_y*Managers.time._mean_dt
+		local y = val_y * filter_data.multiplier_y * Managers.time._mean_dt
 		local z = val.z
 
 		return Vector3(x, y, z)
@@ -258,7 +258,7 @@ InputFilters.scale_vector3_invert_y = {
 
 		val.y = -val.y
 
-		return val*filter_data.multiplier
+		return val * filter_data.multiplier
 	end,
 	edit_types = {
 		{

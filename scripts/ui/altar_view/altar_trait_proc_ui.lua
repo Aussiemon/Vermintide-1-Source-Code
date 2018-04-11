@@ -508,8 +508,8 @@ AltarTraitProcUI.update_slider_by_trait = function (self, backend_id, trait_name
 		local multiplier = 100
 		local min_value = proc_chance_data[1]
 		local max_value = proc_chance_data[2]
-		local min_display_text = string.format(formatting, min_value*multiplier)
-		local max_display_text = string.format(formatting, max_value*multiplier)
+		local min_display_text = string.format(formatting, min_value * multiplier)
+		local max_display_text = string.format(formatting, max_value * multiplier)
 		local trait_info = nil
 		local unlocked_traits = ScriptBackendItem.get_traits(backend_id)
 
@@ -521,7 +521,7 @@ AltarTraitProcUI.update_slider_by_trait = function (self, backend_id, trait_name
 
 		local buff_key = "proc_chance"
 		local value = (trait_info and trait_info[buff_key]) or min_value
-		local progress = (value - min_value)/(max_value - min_value)
+		local progress = (value - min_value) / (max_value - min_value)
 		proc_data.progress = progress
 		proc_data.min_value = min_value
 		proc_data.max_value = max_value
@@ -529,11 +529,11 @@ AltarTraitProcUI.update_slider_by_trait = function (self, backend_id, trait_name
 		draw_widget = true
 		local line_length = self.scenegraph_definition.proc_slider_bar.size[1]
 		local current_box_position = self.ui_scenegraph.proc_slider_current_box.local_position
-		local length_diff = math.abs(current_box_position[1] - progress*line_length)
+		local length_diff = math.abs(current_box_position[1] - progress * line_length)
 
 		if 0 < length_diff then
-			local length_diff_fraction = length_diff/line_length
-			local speed = length_diff_fraction - 1 + 1
+			local length_diff_fraction = length_diff / line_length
+			local speed = 1 + 1 - length_diff_fraction
 			self.current_value_animation_id = self.animate_current_value(self, "current_value", value, min_value, max_value, speed)
 		else
 			self.current_value_animation_id = self.animate_current_value(self, "change_box_values_only", value, min_value, max_value)
@@ -564,7 +564,7 @@ end
 AltarTraitProcUI.animate_current_value = function (self, animation_name, current_value, min, max, time_multiplier)
 	local widgets_by_name = self.widgets_by_name
 	local widget = widgets_by_name.slider_widget
-	local progress = (current_value - min)/(max - min)
+	local progress = (current_value - min) / (max - min)
 	local params = {
 		multiplier = 100,
 		formatting = "%.1f",
@@ -580,7 +580,7 @@ end
 AltarTraitProcUI.animate_new_value = function (self, new_value, current_value, min, max, time_multiplier)
 	local widgets_by_name = self.widgets_by_name
 	local widget = widgets_by_name.slider_widget
-	local progress = (new_value - min)/(max - min)
+	local progress = (new_value - min) / (max - min)
 	local params = {
 		formatting = "%.1f",
 		multiplier = 100,
@@ -776,8 +776,8 @@ AltarTraitProcUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
 	local spacing = 80
-	local half_trait_amount = (number_of_traits - 1)*0.5
-	local start_x_position = -((width + spacing)*half_trait_amount)
+	local half_trait_amount = (number_of_traits - 1) * 0.5
+	local start_x_position = -((width + spacing) * half_trait_amount)
 
 	for i = 1, number_of_traits, 1 do
 		local widget_name = "trait_button_" .. i
@@ -978,8 +978,8 @@ AltarTraitProcUI.roll = function (self, new_value)
 		local min_value = selected_proc_data.min_value
 		local max_value = selected_proc_data.max_value
 		local current_value = selected_proc_data.current_value
-		local progress = (new_value - min_value)/(max_value - min_value)
-		local speed = progress - 1 + 1
+		local progress = (new_value - min_value) / (max_value - min_value)
+		local speed = 1 + 1 - progress
 		self.new_value_animation_id = self.animate_new_value(self, new_value, current_value, min_value, max_value, speed)
 		local improved_value_last_roll = current_value < new_value
 

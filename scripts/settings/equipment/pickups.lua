@@ -474,7 +474,7 @@ for pickup_name, spawn_weighting in pairs(LootRatPickups) do
 end
 
 for pickup_name, spawn_weighting in pairs(LootRatPickups) do
-	LootRatPickups[pickup_name] = spawn_weighting/total_loot_rat_spawn_weighting
+	LootRatPickups[pickup_name] = spawn_weighting / total_loot_rat_spawn_weighting
 end
 
 NearPickupSpawnChance = NearPickupSpawnChance or {
@@ -492,7 +492,7 @@ for group, pickups in pairs(Pickups) do
 	end
 
 	for pickup_name, settings in pairs(pickups) do
-		settings.spawn_weighting = settings.spawn_weighting/total_spawn_weighting
+		settings.spawn_weighting = settings.spawn_weighting / total_spawn_weighting
 		AllPickups[pickup_name] = settings
 	end
 

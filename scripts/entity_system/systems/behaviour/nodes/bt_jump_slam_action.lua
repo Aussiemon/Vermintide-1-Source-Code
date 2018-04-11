@@ -53,7 +53,7 @@ BTJumpSlamAction.run = function (self, unit, blackboard, t, dt)
 
 	if z_speed < 0 and not data.constrained then
 		data.constrained = true
-		local constrain_max = POSITION_LOOKUP[unit] + Vector3.up()*2
+		local constrain_max = POSITION_LOOKUP[unit] + Vector3.up() * 2
 		local constrain_min = data.target_pos:unbox()
 
 		LocomotionUtils.constrain_on_clients(unit, true, constrain_min, constrain_max)

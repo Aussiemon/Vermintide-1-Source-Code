@@ -123,15 +123,15 @@ DeathSystem.update = function (self, context, t)
 			local kill_damages, num_kill_damages = damage_extension.recent_damages(damage_extension)
 			local i = 1
 
-			while kill_damages[(i - 1)*DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE] == "heal" do
+			while kill_damages[(i - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE] == "heal" do
 				i = i + 1
 			end
 
-			assert(i*DamageDataIndex.STRIDE <= num_kill_damages, "Could not find any killing blow that killed unit %s. It seems like all damages was heal-type. Amount of damages taken this frame was %d", unit, i/DamageDataIndex.STRIDE)
+			assert(i * DamageDataIndex.STRIDE <= num_kill_damages, "Could not find any killing blow that killed unit %s. It seems like all damages was heal-type. Amount of damages taken this frame was %d", unit, i / DamageDataIndex.STRIDE)
 
 			local killing_blow = FrameTable.alloc_table()
 
-			pack_index[DamageDataIndex.STRIDE](killing_blow, 1, unpack_index[DamageDataIndex.STRIDE](kill_damages, (i - 1)*DamageDataIndex.STRIDE + 1))
+			pack_index[DamageDataIndex.STRIDE](killing_blow, 1, unpack_index[DamageDataIndex.STRIDE](kill_damages, (i - 1) * DamageDataIndex.STRIDE + 1))
 
 			local death_reaction = DeathReactions.templates[extension.death_reaction_template][extension.network_type]
 

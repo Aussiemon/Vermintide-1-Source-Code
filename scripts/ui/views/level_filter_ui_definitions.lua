@@ -527,7 +527,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*1 + element_spacing[1]*1,
+					element_size[1] * 1 + element_spacing[1] * 1,
 					-element_size[2],
 					2
 				}
@@ -541,7 +541,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*2 + element_spacing[1]*2,
+					element_size[1] * 2 + element_spacing[1] * 2,
 					-element_size[2],
 					2
 				}
@@ -555,7 +555,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*3 + element_spacing[1]*3,
+					element_size[1] * 3 + element_spacing[1] * 3,
 					-element_size[2],
 					2
 				}
@@ -583,7 +583,7 @@ local function create_element(scenegraph_id)
 					0
 				},
 				offset = {
-					element_size[1]*1 + element_spacing[1]*1,
+					element_size[1] * 1 + element_spacing[1] * 1,
 					-element_size[2],
 					3
 				}
@@ -597,7 +597,7 @@ local function create_element(scenegraph_id)
 					0
 				},
 				offset = {
-					element_size[1]*2 + element_spacing[1]*2,
+					element_size[1] * 2 + element_spacing[1] * 2,
 					-element_size[2],
 					3
 				}
@@ -611,7 +611,7 @@ local function create_element(scenegraph_id)
 					0
 				},
 				offset = {
-					element_size[1]*3 + element_spacing[1]*3,
+					element_size[1] * 3 + element_spacing[1] * 3,
 					-element_size[2],
 					3
 				}
@@ -639,7 +639,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*1 + element_spacing[1]*1,
+					element_size[1] * 1 + element_spacing[1] * 1,
 					-element_size[2],
 					4
 				}
@@ -653,7 +653,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*2 + element_spacing[1]*2,
+					element_size[1] * 2 + element_spacing[1] * 2,
 					-element_size[2],
 					4
 				}
@@ -667,7 +667,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*3 + element_spacing[1]*3,
+					element_size[1] * 3 + element_spacing[1] * 3,
 					-element_size[2],
 					4
 				}
@@ -684,8 +684,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*0.5 - 15,
-					-element_size[2]*0.5 - 19,
+					element_size[1] * 0.5 - 15,
+					-element_size[2] * 0.5 - 19,
 					4
 				}
 			},
@@ -701,8 +701,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*1 + element_size[1]*0.5) - 15 + element_spacing[1]*1,
-					-element_size[2]*0.5 - 19,
+					(element_size[1] * 1 + element_size[1] * 0.5) - 15 + element_spacing[1] * 1,
+					-element_size[2] * 0.5 - 19,
 					4
 				}
 			},
@@ -718,8 +718,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*2 + element_size[1]*0.5) - 15 + element_spacing[1]*2,
-					-element_size[2]*0.5 - 19,
+					(element_size[1] * 2 + element_size[1] * 0.5) - 15 + element_spacing[1] * 2,
+					-element_size[2] * 0.5 - 19,
 					4
 				}
 			},
@@ -735,8 +735,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*3 + element_spacing[1]*3 + 41,
-					-element_size[2]*0.5 - 19,
+					element_size[1] * 3 + element_spacing[1] * 3 + 41,
+					-element_size[2] * 0.5 - 19,
 					4
 				}
 			},
@@ -763,7 +763,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*1 + element_spacing[1]*1,
+					element_size[1] * 1 + element_spacing[1] * 1,
 					-element_size[2],
 					5
 				}
@@ -777,7 +777,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*2 + element_spacing[1]*2,
+					element_size[1] * 2 + element_spacing[1] * 2,
 					-element_size[2],
 					5
 				}
@@ -791,7 +791,7 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					element_size[1]*3 + element_spacing[1]*3,
+					element_size[1] * 3 + element_spacing[1] * 3,
 					-element_size[2],
 					5
 				}
@@ -809,7 +809,7 @@ local function create_element(scenegraph_id)
 				},
 				offset = {
 					-36.800000000000004,
-					-(element_size[2]*0.5 + 60),
+					-(element_size[2] * 0.5 + 60),
 					1
 				}
 			},
@@ -825,8 +825,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*1 + element_spacing[1]*1) - 36.800000000000004,
-					-(element_size[2]*0.5 + 60),
+					(element_size[1] * 1 + element_spacing[1] * 1) - 36.800000000000004,
+					-(element_size[2] * 0.5 + 60),
 					1
 				}
 			},
@@ -842,8 +842,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*2 + element_spacing[1]*2) - 36.800000000000004,
-					-(element_size[2]*0.5 + 60),
+					(element_size[1] * 2 + element_spacing[1] * 2) - 36.800000000000004,
+					-(element_size[2] * 0.5 + 60),
 					1
 				}
 			},
@@ -859,8 +859,8 @@ local function create_element(scenegraph_id)
 					255
 				},
 				offset = {
-					(element_size[1]*3 + element_spacing[1]*3) - 36.800000000000004,
-					-(element_size[2]*0.5 + 60),
+					(element_size[1] * 3 + element_spacing[1] * 3) - 36.800000000000004,
+					-(element_size[2] * 0.5 + 60),
 					1
 				}
 			}

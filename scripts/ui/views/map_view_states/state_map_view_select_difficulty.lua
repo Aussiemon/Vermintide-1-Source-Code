@@ -286,10 +286,10 @@ local function anim_func(t)
 	local b = 0
 	local c = 1
 	local d = 1
-	local ts = t/d*t
-	local tc = ts*t
+	local ts = t / d * t
+	local tc = ts * t
 
-	return b + c*(tc*2.7*ts + ts*-14.2975*ts + tc*26.095 + ts*-21.195 + t*7.6975)
+	return b + c * (2.7 * tc * ts + -14.2975 * ts * ts + 26.095 * tc + -21.195 * ts + 7.6975 * t)
 end
 
 StateMapViewSelectDifficulty.start_open_animation = function (self)
@@ -363,10 +363,10 @@ StateMapViewSelectDifficulty.start_close_animation = function (self, going_back)
 			local to = 1.2
 			local anim_time = 0.2
 			local math_func = math.easeCubic
-			local animation_in_width = UIAnimation.init(UIAnimation.function_by_time, banner_size, 1, banner_size[1]*from, banner_size[1]*to, anim_time, math_func)
-			local animation_in_height = UIAnimation.init(UIAnimation.function_by_time, banner_size, 2, banner_size[2]*from, banner_size[2]*to, anim_time, math_func)
-			local animation_in_offset_width = UIAnimation.init(UIAnimation.function_by_time, banner_offset, 1, banner_offset[1]*from, banner_offset[1]*to, anim_time, math_func)
-			local animation_in_offset_height = UIAnimation.init(UIAnimation.function_by_time, banner_offset, 2, banner_offset[2]*from, banner_offset[2] - 150, anim_time, math_func)
+			local animation_in_width = UIAnimation.init(UIAnimation.function_by_time, banner_size, 1, banner_size[1] * from, banner_size[1] * to, anim_time, math_func)
+			local animation_in_height = UIAnimation.init(UIAnimation.function_by_time, banner_size, 2, banner_size[2] * from, banner_size[2] * to, anim_time, math_func)
+			local animation_in_offset_width = UIAnimation.init(UIAnimation.function_by_time, banner_offset, 1, banner_offset[1] * from, banner_offset[1] * to, anim_time, math_func)
+			local animation_in_offset_height = UIAnimation.init(UIAnimation.function_by_time, banner_offset, 2, banner_offset[2] * from, banner_offset[2] - 150, anim_time, math_func)
 
 			UIWidget.animate(widget, animation_in_width)
 			UIWidget.animate(widget, animation_in_height)
@@ -376,9 +376,9 @@ StateMapViewSelectDifficulty.start_close_animation = function (self, going_back)
 			local wait_time = anim_time
 			anim_time = 0.15
 			math_func = math.ease_out_exp
-			local animation_out_width = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_size, 1, banner_size[1]*to, banner_size[1]*from, anim_time, math_func)
-			local animation_out_height = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_size, 2, banner_size[2]*to, banner_size[2]*from, anim_time, math_func)
-			local animation_out_offset_width = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_offset, 1, banner_offset[1]*to, banner_offset[1]*from, anim_time, math_func)
+			local animation_out_width = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_size, 1, banner_size[1] * to, banner_size[1] * from, anim_time, math_func)
+			local animation_out_height = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_size, 2, banner_size[2] * to, banner_size[2] * from, anim_time, math_func)
+			local animation_out_offset_width = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_offset, 1, banner_offset[1] * to, banner_offset[1] * from, anim_time, math_func)
 			local animation_out_offset_height = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, banner_offset, 2, banner_offset[2] - 150, banner_offset[2] + 25, anim_time, math_func)
 
 			UIWidget.animate(widget, animation_out_width)
@@ -412,10 +412,10 @@ StateMapViewSelectDifficulty._align_elements = function (self, selected_index)
 	local spacing = 15
 	local element_width = element_size[1]
 	local distance = element_width + spacing
-	local start_offset = -(distance*math.max(selected_index - 2, 0))
+	local start_offset = -(distance * math.max(selected_index - 2, 0))
 
 	for index, widget in ipairs(self._elements) do
-		widget.offset[1] = start_offset + distance*(index - 1)
+		widget.offset[1] = start_offset + distance * (index - 1)
 		widget.content.position_offset = widget.offset[1]
 	end
 
@@ -457,7 +457,7 @@ StateMapViewSelectDifficulty.update_selection_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -485,7 +485,7 @@ StateMapViewSelectDifficulty._update_elements = function (self, dt, instant)
 	end
 
 	local anim_progress = math.easeCubic(selection_progress)
-	local input_offset = direction*distance*anim_progress
+	local input_offset = direction * distance * anim_progress
 
 	for index, widget in ipairs(self._elements) do
 		local current_position = widget.content.position_offset
@@ -496,7 +496,7 @@ StateMapViewSelectDifficulty._update_elements = function (self, dt, instant)
 			widget.content.position_offset = position
 		end
 
-		local position_progress = math.clamp(math.abs(position)/(distance*2), 0, 1) - 1
+		local position_progress = 1 - math.clamp(math.abs(position) / (distance * 2), 0, 1)
 
 		self._animate_element(self, widget, index, selection_progress, position_progress)
 	end
@@ -505,20 +505,20 @@ StateMapViewSelectDifficulty._update_elements = function (self, dt, instant)
 end
 StateMapViewSelectDifficulty._animate_element = function (self, widget, index, progress, distance_progress)
 	local is_selection_widget = self._selection_index == index
-	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(progress - 1)
+	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
 	local widget_style = widget.style
 	local widget_content = widget.content
 	local locked_style = widget_style.locked_texture
 	local banner_style = widget_style.banner_texture
 	local locked_text_style = widget_style.locked_text
-	local alpha = (0.5 < distance_progress and 255) or distance_progress/0.5*255
+	local alpha = (0.5 < distance_progress and 255) or distance_progress / 0.5 * 255
 	local locked_text_color = locked_text_style.text_color
 	local locked_text_rect_color = locked_text_style.rect_color
-	locked_text_color[1] = (0.5 < distance_progress and (distance_progress - 0.5)/0.5*255) or 0
-	locked_text_rect_color[1] = (0.5 < distance_progress and (distance_progress - 0.5)/0.5*150) or 0
+	locked_text_color[1] = (0.5 < distance_progress and (distance_progress - 0.5) / 0.5 * 255) or 0
+	locked_text_rect_color[1] = (0.5 < distance_progress and (distance_progress - 0.5) / 0.5 * 150) or 0
 	local banner_color = banner_style.color
 	local lock_color = locked_style.color
-	local color_value = distance_progress*155 + 100
+	local color_value = 100 + distance_progress * 155
 	banner_color[1] = alpha
 	banner_color[2] = color_value
 	banner_color[3] = color_value
@@ -533,10 +533,10 @@ StateMapViewSelectDifficulty._animate_element = function (self, widget, index, p
 
 	if is_selection_widget then
 		if widget_content.internal_progress < anim_progress then
-			Material.set_scalar(gui_material, "distortion_offset_top", anim_progress*0.5)
+			Material.set_scalar(gui_material, "distortion_offset_top", anim_progress * 0.5)
 		end
 	elseif anim_progress < widget_content.internal_progress then
-		Material.set_scalar(gui_material, "distortion_offset_top", anim_progress*0.5)
+		Material.set_scalar(gui_material, "distortion_offset_top", anim_progress * 0.5)
 	end
 
 	local draw_locked_text = false
@@ -554,20 +554,20 @@ StateMapViewSelectDifficulty._animate_element = function (self, widget, index, p
 	local banner_default_height = 850
 	local banner_size = banner_style.size
 	local banner_offset = banner_style.offset
-	banner_size[1] = banner_default_width*distance_progress
-	banner_size[2] = banner_default_height*distance_progress
-	banner_offset[1] = -banner_size[1]*0.5
-	banner_offset[2] = -banner_size[2]*0.5
+	banner_size[1] = banner_default_width * distance_progress
+	banner_size[2] = banner_default_height * distance_progress
+	banner_offset[1] = -banner_size[1] * 0.5
+	banner_offset[2] = -banner_size[2] * 0.5
 	local locked_default_width = 233
 	local locked_default_height = 232
 	local locked_default_offset_width = -116.5
 	local locked_default_offset_height = 99
 	local locked_size = locked_style.size
 	local locked_offset = locked_style.offset
-	locked_size[1] = locked_default_width*distance_progress
-	locked_size[2] = locked_default_height*distance_progress
-	locked_offset[1] = locked_default_offset_width*distance_progress
-	locked_offset[2] = locked_default_offset_height*distance_progress
+	locked_size[1] = locked_default_width * distance_progress
+	locked_size[2] = locked_default_height * distance_progress
+	locked_offset[1] = locked_default_offset_width * distance_progress
+	locked_offset[2] = locked_default_offset_height * distance_progress
 
 	return 
 end

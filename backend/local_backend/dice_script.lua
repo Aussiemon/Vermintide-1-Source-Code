@@ -576,7 +576,7 @@ LevelRewards = {
 			item_type = LevellingRewardsItemType[level]
 		else
 			rarity = "common"
-			local index = (level - self._num_rewards)%#LevellingRewardsItemTypeAbove
+			local index = (level - self._num_rewards) % #LevellingRewardsItemTypeAbove
 			item_type = LevellingRewardsItemTypeAbove[index]
 		end
 

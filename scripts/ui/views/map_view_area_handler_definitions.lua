@@ -308,7 +308,7 @@ local function add_level_location_difficulty_definitions(passes, style, content,
 	local difficulties = DefaultDifficulties
 	local num_difficulties = #difficulties
 	local max_num_difficulties = 5
-	local even_amount_of_difficulties = num_difficulties%2 == 0
+	local even_amount_of_difficulties = num_difficulties % 2 == 0
 	local predefined_styles = {
 		{
 			size = (is_area and {
@@ -436,8 +436,8 @@ local function add_level_location_difficulty_definitions(passes, style, content,
 			scenegraph_id = optional_parent_scenegraph_id
 		}
 	}
-	local center_index = math.ceil(max_num_difficulties/2)
-	local index = center_index - math.floor(num_difficulties/2)
+	local center_index = math.ceil(max_num_difficulties / 2)
+	local index = center_index - math.floor(num_difficulties / 2)
 
 	for i = 1, num_difficulties, 1 do
 		local style_index = index

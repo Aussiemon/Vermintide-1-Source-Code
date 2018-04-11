@@ -101,9 +101,9 @@ CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 
 	local res_scale = RESOLUTION_LOOKUP.scale
 	local inv_res_scale = RESOLUTION_LOOKUP.inv_scale
-	local res_w = RESOLUTION_LOOKUP.res_w*inv_res_scale
-	local res_h = RESOLUTION_LOOKUP.res_h*inv_res_scale
-	local x_offset = (not UISettings.use_hud_screen_fit or 0) and (res_w - 1920)*0.5
+	local res_w = RESOLUTION_LOOKUP.res_w * inv_res_scale
+	local res_h = RESOLUTION_LOOKUP.res_h * inv_res_scale
+	local x_offset = (not UISettings.use_hud_screen_fit or 0) and (res_w - 1920) * 0.5
 	local is_enabled = rawget(_G, "Tobii") and Application.user_setting("tobii_eyetracking")
 	is_enabled = is_enabled and Tobii.device_status() == Tobii.DEVICE_TRACKING
 	is_enabled = is_enabled and Tobii.user_presence() == Tobii.USER_PRESENT
@@ -121,9 +121,9 @@ CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 			crosshair_position[2] = gaze_point_y
 			self.tobii_time_since_teleport = 0
 		else
-			local time_factor = dt/HZ_SCALE
-			crosshair_position[1] = crosshair_position[1] + dx*DELTA_SMOOTH*time_factor
-			crosshair_position[2] = crosshair_position[2] + dy*DELTA_SMOOTH*time_factor
+			local time_factor = dt / HZ_SCALE
+			crosshair_position[1] = crosshair_position[1] + dx * DELTA_SMOOTH * time_factor
+			crosshair_position[2] = crosshair_position[2] + dy * DELTA_SMOOTH * time_factor
 
 			if self.tobii_time_since_teleport < 0.1 then
 				self.tobii_time_since_teleport = self.tobii_time_since_teleport + dt
@@ -144,24 +144,24 @@ CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 			local world_pos = eyetracking_extension.get_forward_rayhit(eyetracking_extension)
 
 			if world_pos then
-				local x_scale = res_w/RESOLUTION_LOOKUP.res_w
-				local y_scale = res_h/RESOLUTION_LOOKUP.res_h
+				local x_scale = res_w / RESOLUTION_LOOKUP.res_w
+				local y_scale = res_h / RESOLUTION_LOOKUP.res_h
 				local depth = nil
 				position_in_screen, depth = Camera.world_to_screen(camera, world_pos)
 				local x_offset_scale = 1
 
 				if UISettings.use_hud_screen_fit then
-					x_offset_scale = (res_w*UIResolutionWidthFragments())/res_scale
+					x_offset_scale = (res_w * UIResolutionWidthFragments()) / res_scale
 				end
 
-				position_in_screen[1] = position_in_screen[1]*x_scale - x_offset*x_offset_scale - definitions.max_spread_yaw*0.5
-				position_in_screen[2] = position_in_screen[2]*y_scale - definitions.max_spread_pitch*0.5
+				position_in_screen[1] = position_in_screen[1] * x_scale - x_offset * x_offset_scale - definitions.max_spread_yaw * 0.5
+				position_in_screen[2] = position_in_screen[2] * y_scale - definitions.max_spread_pitch * 0.5
 				position_in_screen[3] = 50
 			end
 		end
 	end
 
-	position_in_screen = position_in_screen or Vector3(res_w/2 - x_offset - definitions.max_spread_yaw*0.5, res_h/2 - definitions.max_spread_pitch*0.5, 50)
+	position_in_screen = position_in_screen or Vector3(res_w / 2 - x_offset - definitions.max_spread_yaw * 0.5, res_h / 2 - definitions.max_spread_pitch * 0.5, 50)
 
 	UISceneGraph.set_local_position(self.ui_scenegraph, "crosshair_root", position_in_screen)
 	Profiler.stop()
@@ -265,8 +265,8 @@ CrosshairUI.update_spread = function (self, dt, equipment)
 
 	local maximum_pitch = SpreadTemplates.maximum_pitch
 	local maximum_yaw = SpreadTemplates.maximum_yaw
-	local pitch_percentage = pitch/maximum_pitch
-	local yaw_percentage = yaw/maximum_yaw
+	local pitch_percentage = pitch / maximum_pitch
+	local yaw_percentage = yaw / maximum_yaw
 	local pitch_offset = math.lerp(0, definitions.max_spread_pitch, pitch_percentage)
 	local yaw_offset = math.lerp(0, definitions.max_spread_yaw, yaw_percentage)
 	self.crosshair_up.style.offset[2] = pitch_offset

@@ -200,7 +200,7 @@ StateMapViewOverview._apply_information = function (self)
 	if self._draw_best_performance and scores then
 		local waves = tostring(scores.waves)
 		local time = scores.time
-		time = string.format("%.2d:%.2d:%.2d", math.floor(time/3600), math.floor(time/60)%60, math.floor(time)%60)
+		time = string.format("%.2d:%.2d:%.2d", math.floor(time / 3600), math.floor(time / 60) % 60, math.floor(time) % 60)
 		self._wave_value_widget.content.text = waves
 		self._time_value_widget.content.text = time
 	end
@@ -476,9 +476,9 @@ StateMapViewOverview._handle_input = function (self, dt, t)
 
 					if not handeld then
 						if input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
-							new_selection_index = (player_list_selection_index - 2)%number_of_player + 1
+							new_selection_index = (player_list_selection_index - 2) % number_of_player + 1
 						elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
-							new_selection_index = player_list_selection_index%number_of_player + 1
+							new_selection_index = player_list_selection_index % number_of_player + 1
 						end
 					else
 						self.controller_cooldown = GamepadSettings.menu_cooldown
@@ -507,9 +507,9 @@ StateMapViewOverview._handle_input = function (self, dt, t)
 
 					self._play_sound(self, "Play_hud_hover")
 				elseif input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
-					new_selection_index = (selection_index - 2)%num_elements + 1
+					new_selection_index = (selection_index - 2) % num_elements + 1
 				elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
-					new_selection_index = selection_index%num_elements + 1
+					new_selection_index = selection_index % num_elements + 1
 				end
 
 				if new_selection_index and new_selection_index ~= self._selection_index then
@@ -615,7 +615,7 @@ StateMapViewOverview.update_selection_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -636,12 +636,12 @@ StateMapViewOverview._update_elements = function (self, dt, instant)
 end
 StateMapViewOverview._animate_element = function (self, widget, index, progress)
 	local is_selection_widget = self._selection_index == index
-	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(progress - 1)
+	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
 	local widget_style = widget.style
 	local rect_style = widget_style.rect
 	local text_style = widget_style.text
 	local default_font_size = widget.content.default_font_size
-	local font_size_increase = anim_progress*((default_font_size + selection_font_increase) - default_font_size)
+	local font_size_increase = anim_progress * ((default_font_size + selection_font_increase) - default_font_size)
 	local text_color = text_style.text_color
 	local text_offset = text_style.offset
 	local default_font_size = widget.content.default_font_size
@@ -864,7 +864,7 @@ StateMapViewOverview._get_word_wrap_size = function (self, localized_text, text_
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
 	local text_width, text_height = self._get_text_size(self, localized_text, text_style)
 
-	return text_width, text_height*#lines
+	return text_width, text_height * #lines
 end
 StateMapViewOverview._select_player_list_widget = function (self, index)
 	local player_list_widgets = self._navigation_player_list_widgets
@@ -967,7 +967,7 @@ StateMapViewOverview.update_private_animation_timer = function (self, dt)
 			timer = math.min(timer + dt, total_time)
 			self._private_timer = timer
 
-			return timer/total_time
+			return timer / total_time
 		end
 	end
 
@@ -982,7 +982,7 @@ StateMapViewOverview._update_private_animation = function (self, dt, instant)
 
 	local anim_progress = math.ease_pulse(progress)
 	local text_style = self._private_text_widget.style.text
-	text_style.font_size = anim_progress*10 + 28
+	text_style.font_size = 28 + 10 * anim_progress
 
 	return 
 end
