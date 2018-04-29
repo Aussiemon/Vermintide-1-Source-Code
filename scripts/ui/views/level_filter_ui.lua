@@ -319,7 +319,7 @@ local function animate(widget, time, delay_time, fade_state)
 	if target_style then
 		local target = (style.text and target_style.text_color) or target_style.color
 		local target_index = 1
-		local from = (fade_state ~= "in" or 0) and target[target_index]
+		local from = (fade_state == "in" and 0) or target[target_index]
 		local to = (fade_state == "in" and 255) or 0
 
 		table.clear(widget.animations)

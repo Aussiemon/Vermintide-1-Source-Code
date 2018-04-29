@@ -270,7 +270,7 @@ InteractionDefinitions.revive = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -392,7 +392,7 @@ InteractionDefinitions.pull_up = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -471,7 +471,7 @@ InteractionDefinitions.release_from_hook = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -554,7 +554,7 @@ InteractionDefinitions.assisted_respawn = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local status_extension = ScriptUnit.extension(interactable_unit, "status_system")
@@ -661,7 +661,7 @@ InteractionDefinitions.smartobject = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / data.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / data.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			local used = Unit.get_data(interactable_unit, "interaction_data", "used")
@@ -1099,7 +1099,7 @@ InteractionDefinitions.pickup_object = {
 				return nil
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / data.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / data.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config, world)
 			local return_value = not Unit.get_data(interactable_unit, "interaction_data", "used")
@@ -1314,7 +1314,7 @@ InteractionDefinitions.give_item = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			if not ScriptUnit.has_extension(interactable_unit, "damage_system") then
@@ -1513,7 +1513,7 @@ InteractionDefinitions.heal = {
 				return 0
 			end
 
-			return (data.start_time ~= nil or 0) and math.min(1, (t - data.start_time) / config.duration)
+			return (data.start_time == nil and 0) or math.min(1, (t - data.start_time) / config.duration)
 		end,
 		can_interact = function (interactor_unit, interactable_unit, data, config)
 			if not ScriptUnit.has_extension(interactable_unit, "damage_system") then

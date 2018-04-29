@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 local definitions = local_require("scripts/ui/views/map_view_states/definitions/state_map_view_select_level_definitions")
 local widgets = definitions.widgets
 local element_size = definitions.element_size
@@ -164,13 +162,32 @@ StateMapViewSelectLevel.create_ui_elements = function (self)
 	return 
 end
 StateMapViewSelectLevel._assign_element_data = function (self, specific_read_index)
-
-	-- decompilation error in this vicinity
 	local active_level_list = self._active_level_list
 	local num_levels = #self._active_level_list
 	self._num_levels = num_levels
 	local num_elements = #self._elements
 	local level_list_read_index = nil
+
+	if specific_read_index then
+		level_list_read_index = (specific_read_index - 2) % num_levels
+
+		if level_list_read_index == 0 then
+			level_list_read_index = num_levels
+		end
+	else
+		level_list_read_index = self._level_list_read_index or -2 % num_levels + 1
+	end
+
+	self._level_list_read_index = level_list_read_index
+
+	for index, widget in ipairs(self._elements) do
+		local success = self._set_element_data_by_index(self, widget, level_list_read_index)
+
+		if success then
+			level_list_read_index = level_list_read_index % num_levels + 1
+		end
+	end
+
 	self._selection_index = 3
 
 	self._align_elements(self)

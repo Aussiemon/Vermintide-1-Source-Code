@@ -1,9 +1,5 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/ui/views/menu_input_description_ui")
 
 PopupJoinLobbyHandler = class(PopupJoinLobbyHandler)
@@ -1245,7 +1241,7 @@ PopupJoinLobbyHandler._hero_available_by_controller = function (self, controller
 end
 PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 
-	-- decompilation error in this vicinity
+	-- Decompilation error in this vicinity:
 	local gamepad_active = Managers.input:is_device_active("gamepad")
 
 	if gamepad_active and not self.gamepad_active_last_frame then
@@ -1456,9 +1452,23 @@ PopupJoinLobbyHandler.set_selected_hero = function (self, selected_hero_name)
 	return 
 end
 PopupJoinLobbyHandler.set_selected_level = function (self, level_key)
-
-	-- decompilation error in this vicinity
 	local display_image, display_name = nil
+
+	if not level_key or level_key == "level_any" then
+		display_name = "map_screen_quickplay_button"
+		display_image = "level_image_any"
+	else
+		local level_settings = LevelSettings[level_key]
+		display_name = level_settings and level_settings.display_name
+		display_image = level_settings and level_settings.level_image
+	end
+
+	if not level_key or level_key == "level_any" then
+		self.background_widget.content.text_level = Localize(display_name)
+	else
+		self.background_widget.content.text_level = Localize("level") .. ": " .. Localize(display_name)
+	end
+
 	self.background_widget.content.level_texture = display_image
 	self.current_level = level_key
 

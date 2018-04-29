@@ -554,7 +554,7 @@ EnemyRecycler._update_roaming_spawning = function (self, t, player_positions, pl
 
 				if self.group_manager.operational and zone and area[INDEX_ZONE] then
 					local _, path_dist, cached = self.group_manager:a_star_cached(zone, area[INDEX_ZONE])
-					astar_checks = astar_checks + ((not cached or 0) and 1)
+					astar_checks = astar_checks + ((cached and 0) or 1)
 					astar_cached_checks = astar_cached_checks + ((cached and 1) or 0)
 
 					if not path_dist or path_dist < path_distance_threshold then

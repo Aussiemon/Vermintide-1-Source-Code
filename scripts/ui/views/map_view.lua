@@ -789,7 +789,7 @@ MapView.on_level_index_changed = function (self, index_change, specific_index, i
 
 		while level_list[new_index].level_information.visibility == "hidden" do
 
-			-- decompilation error in this vicinity
+			-- Decompilation error in this vicinity:
 			new_index = new_index + index_change
 		end
 	elseif specific_index then
@@ -1355,7 +1355,7 @@ MapView.update_button_bar_animation = function (self, widget, widget_name, dt)
 			end
 		elseif button_hotspot.on_hover_exit then
 			local background_fade_out_time = bar_settings.background.fade_out_time
-			local background_alpha_normal = (widget_name ~= "equipment_selection" or 0) and bar_settings.background.alpha_normal
+			local background_alpha_normal = (widget_name == "equipment_selection" and 0) or bar_settings.background.alpha_normal
 			active_animations[button_normal_id] = self.animate_element_by_time(self, button_style.color, 1, button_style.color[1], background_alpha_normal, background_fade_out_time)
 		end
 

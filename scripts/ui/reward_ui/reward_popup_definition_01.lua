@@ -1040,7 +1040,7 @@ local animation_sequence = {
 			return 
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
-			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
+			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_left
 			local rotation_angle = catmullrom_value * -35
 			local radians = math.degrees_to_radians(rotation_angle)
@@ -1061,7 +1061,7 @@ local animation_sequence = {
 			return 
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
-			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
+			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_right
 			local rotation_angle = catmullrom_value * 35
 			local radians = math.degrees_to_radians(rotation_angle)
@@ -1083,7 +1083,7 @@ local animation_sequence = {
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			widget.style.banner_holder_left.color[1] = 255
-			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, 5, 1, 0, 2)
+			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, 5, 1, 0, 2)
 			local scenegraph = ui_scenegraph.banner_holder_left
 			local definition = scenegraph_definition.banner_holder_left
 			local default_position = definition.position
@@ -1106,7 +1106,7 @@ local animation_sequence = {
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			widget.style.banner_holder_right.color[1] = 255
-			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, 5, 1, 0, 2)
+			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, 5, 1, 0, 2)
 			local scenegraph = ui_scenegraph.banner_holder_right
 			local definition = scenegraph_definition.banner_holder_right
 			local default_position = definition.position
@@ -1128,7 +1128,7 @@ local animation_sequence = {
 			return 
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
-			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
+			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_left
 			local rotation_angle = catmullrom_value * 35
 			local radians = math.degrees_to_radians(rotation_angle)
@@ -1149,7 +1149,7 @@ local animation_sequence = {
 			return 
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
-			local catmullrom_value = (local_progress ~= 1 or 0) and math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
+			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
 			local style = widget.style.hammer_right
 			local rotation_angle = catmullrom_value * -35
 			local radians = math.degrees_to_radians(rotation_angle)

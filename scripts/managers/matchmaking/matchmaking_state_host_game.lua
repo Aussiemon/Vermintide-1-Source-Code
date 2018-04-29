@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 MatchmakingStateHostGame = class(MatchmakingStateHostGame)
 MatchmakingStateHostGame.NAME = "MatchmakingStateHostGame"
 MatchmakingStateHostGame.init = function (self, params)
@@ -127,6 +125,32 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 
 	if self.controller_cooldown and 0 < self.controller_cooldown then
 		self.controller_cooldown = self.controller_cooldown - dt
+	elseif false and input_service.get(input_service, "matchmaking_ready") then
+		local ready_changed = false
+		self.ready = not self.ready
+		ready_changed = true
+
+		self.matchmaking_ui:set_ready_progress(0)
+
+		self.controller_cooldown = GamepadSettings.menu_cooldown
+
+		if ready_changed then
+			local peer_id = Network.peer_id()
+
+			self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
+
+			if self.ready then
+				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_unready")
+				self.matchmaking_ui:large_window_stop_ready_pulse()
+			else
+				self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
+				self.matchmaking_ui:large_window_start_ready_pulse()
+			end
+		end
+	elseif self.cancel_timer then
+		self.cancel_timer = nil
+
+		self.matchmaking_ui:set_ready_progress(0)
 	end
 
 	if self.game_created then

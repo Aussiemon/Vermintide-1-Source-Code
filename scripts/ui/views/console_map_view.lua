@@ -216,7 +216,7 @@ ConsoleMapView.animate_title_text = function (self, widget, out)
 	local target = widget.style.text.text_color
 	local target_index = 1
 	local from = (out and 255) or 0
-	local to = (not out or 0) and 255
+	local to = (out and 0) or 255
 	local anim_time = 0.5
 
 	table.clear(widget.animations)

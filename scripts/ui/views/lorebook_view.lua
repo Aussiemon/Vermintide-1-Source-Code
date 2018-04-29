@@ -1,7 +1,5 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/ui/views/lorebook_page_layout")
 require("scripts/ui/views/lorebook_pages")
 
@@ -1947,7 +1945,7 @@ LorebookView._add_eventual_paragraph_divider = function (self, texts, return_ind
 
 	if table.contains(return_indices, line_index) and table.contains(return_indices, line_index + 1) and table.contains(return_indices, line_index + 2) then
 
-		-- decompilation error in this vicinity
+		-- Decompilation error in this vicinity:
 		local has_text_2 = texts[line_index + 1] ~= "\n" and texts[line_index + 1] ~= ""
 		local has_text_3 = texts[line_index + 2] ~= "\n" and texts[line_index + 2] ~= ""
 

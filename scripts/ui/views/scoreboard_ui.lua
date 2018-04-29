@@ -1843,7 +1843,7 @@ ScoreboardUI.animate_scenegraph_to_position = function (self, scenegraph_id, wid
 	local topic_spacing = definitions.COMPACT_PREVIEW_SPACING
 	local root_width_size = definitions.scenegraph.topic_dummy_root.size[1] + topic_spacing[1]
 	local from_position = (animate_in and ((direction == "right" and -root_width_size) or root_width_size)) or 0
-	local to_position = (not animate_in or 0) and ((direction == "right" and root_width_size) or -root_width_size)
+	local to_position = (animate_in and 0) or (direction == "right" and root_width_size) or -root_width_size
 	local lerp_position = math.lerp(from_position, to_position, progress)
 	local root_position = ui_scenegraph[scenegraph_id].local_position
 	root_position[1] = lerp_position
