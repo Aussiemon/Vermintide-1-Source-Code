@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 local definitions = local_require("scripts/ui/altar_view/altar_view_definitions")
 local forge_animation_definitions = local_require("scripts/ui/views/inventory_view_animation_definitions")
 local input_actions = definitions.input_actions
@@ -1451,6 +1449,7 @@ AltarView.update_input_description = function (self)
 			local can_afford = page.can_afford_reroll_cost(page)
 			local active_item_id = page.active_item_id
 			local selected_item, is_equipped, is_active = ui_pages.items:selected_item()
+			actions_name_to_use = (active_item_id and ((page.handling_reroll_answer and "select_trait_setup") or (is_selected_item and ((can_afford and "item_added_and_selected_and_afford") or "item_added_and_selected")) or (can_afford and "item_added_and_afford") or "item_added")) or (is_active and "default") or "disabled_item"
 		end
 	end
 

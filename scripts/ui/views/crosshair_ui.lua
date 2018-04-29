@@ -103,7 +103,7 @@ CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 	local inv_res_scale = RESOLUTION_LOOKUP.inv_scale
 	local res_w = RESOLUTION_LOOKUP.res_w * inv_res_scale
 	local res_h = RESOLUTION_LOOKUP.res_h * inv_res_scale
-	local x_offset = (not UISettings.use_hud_screen_fit or 0) and (res_w - 1920) * 0.5
+	local x_offset = (UISettings.use_hud_screen_fit and 0) or (res_w - 1920) * 0.5
 	local is_enabled = rawget(_G, "Tobii") and Application.user_setting("tobii_eyetracking")
 	is_enabled = is_enabled and Tobii.device_status() == Tobii.DEVICE_TRACKING
 	is_enabled = is_enabled and Tobii.user_presence() == Tobii.USER_PRESENT

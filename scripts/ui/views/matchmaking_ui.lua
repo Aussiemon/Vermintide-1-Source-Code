@@ -1,9 +1,5 @@
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/settings/difficulty_settings")
 
 local definitions = local_require("scripts/ui/views/matchmaking_ui_definitions")
@@ -358,7 +354,7 @@ MatchmakingUI.update_debug = function (self)
 end
 MatchmakingUI.update_debug_lobbies = function (self)
 
-	-- decompilation error in this vicinity
+	-- Decompilation error in this vicinity:
 	local matchmaking_manager = Managers.matchmaking
 	local search_data = matchmaking_manager.state_context.game_search_data
 	self.debug_lobbies_widget.content.debug_text = string.lower(debug_text)
@@ -629,10 +625,22 @@ MatchmakingUI.large_window_cancel_enable = function (self, enable)
 	return 
 end
 MatchmakingUI.large_window_set_level = function (self, level_key, optional_name, optional_image)
-
-	-- decompilation error in this vicinity
 	local widgets = self.large_window_widgets
 	local display_name, display_image = nil
+
+	if level_key == "level_any" then
+		display_name = "any_level"
+		display_image = "level_image_any"
+	else
+		local level_settings = level_key and LevelSettings[level_key]
+		display_name = optional_name or (level_settings and level_settings.display_name)
+		display_image = optional_image or (level_settings and level_settings.level_image)
+	end
+
+	widgets.level_description.content.text = (display_name and display_name) or "any_level"
+	widgets.window_level_image.content.texture_id = (display_image and display_image) or "level_image_any"
+
+	return 
 end
 MatchmakingUI.large_window_set_difficulty = function (self, difficulty)
 	local difficulty_setting = difficulty and DifficultySettings[difficulty]
@@ -692,7 +700,7 @@ MatchmakingUI.set_action_area_visible = function (self, visible, instant_hide)
 	local ui_animations = self.ui_animations
 	local animation_name = "action_move"
 	local to_color = (visible and 255) or 0
-	local to_uv = (not visible or 0) and 1
+	local to_uv = (visible and 0) or 1
 	local to_bg_size = (visible and default_bg_size[2]) or 0
 	local to_fg_size = (visible and default_fg_size[2]) or 0
 	local to_position_y = (visible and default_position[2]) or default_position[2] + 100

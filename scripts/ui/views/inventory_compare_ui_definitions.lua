@@ -1043,7 +1043,7 @@ local function create_attack_detailed_info_widget(number_of_entries, scenegraph_
 
 	for i = 1, number_of_entries, 1 do
 		local bar_y_position = (i ~= 1 and element_height_spacing + element_height) or 62
-		local bar_x_position = (i == 1 or 0) and element_x_offset
+		local bar_x_position = (i ~= 1 and 0) or element_x_offset
 		local bar_parent = (i ~= 1 and scenegraph_id .. "_stats_bar_icon_" .. i - 1) or scenegraph_id
 		local stats_bar_icon_scenegraph_id = scenegraph_id .. "_stats_bar_icon_" .. i
 		local bar_icon = "bar_icon_" .. i

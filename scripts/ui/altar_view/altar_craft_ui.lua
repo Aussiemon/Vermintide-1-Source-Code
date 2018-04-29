@@ -666,7 +666,7 @@ AltarCraftUI._rotate_widgets = function (self, widgets, radius, progress)
 	local progress_angle = progress * 360
 	local start_angle = progress_angle - 90
 	local max_angle_between = 180 / num_widgets
-	local actual_angle_between = (num_widgets ~= 1 or 0) and max_angle_between
+	local actual_angle_between = (num_widgets == 1 and 0) or max_angle_between
 	local widget_start_angle = start_angle
 
 	for i = 1, num_widgets, 1 do

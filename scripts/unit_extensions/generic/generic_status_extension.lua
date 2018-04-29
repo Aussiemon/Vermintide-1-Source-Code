@@ -217,7 +217,7 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 		end
 
 		if previous_max_fatigue_points ~= max_fatigue_points then
-			self.fatigue = (max_fatigue_points ~= 0 or 0) and previous_max_fatigue_points / max_fatigue_points * self.fatigue
+			self.fatigue = (max_fatigue_points == 0 and 0) or previous_max_fatigue_points / max_fatigue_points * self.fatigue
 		end
 
 		if 0 < num_damages and 50 <= self.fatigue then
@@ -225,7 +225,7 @@ GenericStatusExtension.update = function (self, unit, input, dt, context, t)
 		end
 
 		if self.last_fatigue_gain_time + degen_delay <= t then
-			local degen_amount = (max_fatigue_points ~= 0 or 0) and PlayerUnitStatusSettings.FATIGUE_POINTS_DEGEN_AMOUNT / max_fatigue_points * PlayerUnitStatusSettings.MAX_FATIGUE
+			local degen_amount = (max_fatigue_points == 0 and 0) or PlayerUnitStatusSettings.FATIGUE_POINTS_DEGEN_AMOUNT / max_fatigue_points * PlayerUnitStatusSettings.MAX_FATIGUE
 			local new_degen_amount = self.buff_extension:apply_buffs_to_value(degen_amount, StatBuffIndex.FATIGUE_REGEN_FROM_PROC)
 
 			if degen_amount < new_degen_amount then
@@ -671,7 +671,7 @@ GenericStatusExtension.current_fatigue_points = function (self)
 	local max_fatigue = PlayerUnitStatusSettings.MAX_FATIGUE
 	local max_fatigue_points = self.max_fatigue_points
 
-	return (max_fatigue_points ~= 0 or 0) and math.ceil(self.fatigue / max_fatigue / max_fatigue_points), max_fatigue_points
+	return (max_fatigue_points == 0 and 0) or math.ceil(self.fatigue / max_fatigue / max_fatigue_points), max_fatigue_points
 end
 GenericStatusExtension.set_pushed = function (self, pushed)
 	if pushed and self.push_cooldown then

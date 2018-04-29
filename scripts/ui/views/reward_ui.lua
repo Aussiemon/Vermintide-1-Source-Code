@@ -1443,7 +1443,7 @@ RewardUI.set_preview_traits_info = function (self, traits_data, start_index, end
 				end
 
 				local position = ui_scenegraph[trait_scenegraph_name].local_position
-				position[2] = (not is_first_widget or 0) and -(total_traits_height + divider_height)
+				position[2] = (is_first_widget and 0) or -(total_traits_height + divider_height)
 				total_traits_height = total_traits_height + trait_total_height
 			end
 

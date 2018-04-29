@@ -127,7 +127,7 @@ ActionShieldSlam._hit = function (self, world, can_damage, owner_unit, current_a
 
 	for i = 1, actors_n, 1 do
 
-		-- decompilation error in this vicinity
+		-- Decompilation error in this vicinity:
 		local hit_actor = actors[i]
 		local hit_unit = Actor.unit(hit_actor)
 		local breed = unit_get_data(hit_unit, "breed")

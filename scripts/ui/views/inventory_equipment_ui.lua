@@ -991,7 +991,7 @@ InventoryEquipmentUI.update_button_bar_animation = function (self, widget, widge
 		elseif button_hotspot.on_hover_exit then
 			local background_fade_out_time = bar_settings.background.fade_out_time
 			local icon_fade_out_time = bar_settings.icon.fade_out_time
-			local background_alpha_normal = (widget_name ~= "equipment_selection" or 0) and bar_settings.background.alpha_normal
+			local background_alpha_normal = (widget_name == "equipment_selection" and 0) or bar_settings.background.alpha_normal
 			local icon_alpha_normal = bar_settings.icon.alpha_normal
 			active_animations[button_style_name] = self.animate_element_by_time(self, button_style.color, 1, button_style.color[1], background_alpha_normal, background_fade_out_time)
 			active_animations[icon_texture_id] = self.animate_element_by_time(self, icon_style.color, 1, icon_style.color[1], icon_alpha_normal, icon_fade_out_time)

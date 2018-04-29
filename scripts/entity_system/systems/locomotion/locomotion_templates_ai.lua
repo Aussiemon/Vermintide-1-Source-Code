@@ -164,7 +164,7 @@ LocomotionTemplates.AILocomotionExtension = {
 
 		for unit, extension in pairs(data.all_update_units) do
 
-			-- decompilation error in this vicinity
+			-- Decompilation error in this vicinity:
 			local wanted_velocity = extension._wanted_velocity
 			local wanted_rotation = extension._wanted_rotation
 		end

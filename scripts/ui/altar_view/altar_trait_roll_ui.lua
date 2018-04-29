@@ -762,7 +762,7 @@ AltarTraitRollUI._update_trait_alignment = function (self, number_of_traits, rot
 	local ui_scenegraph = self.ui_scenegraph
 	local num_total_traits = AltarSettings.num_traits
 	local max_angle_between = 180 / number_of_traits
-	local actual_angle_between = (number_of_traits ~= 1 or 0) and max_angle_between
+	local actual_angle_between = (number_of_traits == 1 and 0) or max_angle_between
 	local start_angle = 90
 	local trait_start_angle = start_angle + actual_angle_between * (number_of_traits - 1) * 0.5
 	local r = 105
@@ -822,7 +822,7 @@ AltarTraitRollUI.set_disk_rotation = function (self, progress)
 	local progress_angle = progress * 360
 	local start_angle = 90 + progress_angle % 360
 	local max_angle_between = 180 / number_of_traits_on_item
-	local actual_angle_between = (number_of_traits_on_item ~= 1 or 0) and max_angle_between
+	local actual_angle_between = (number_of_traits_on_item == 1 and 0) or max_angle_between
 	local trait_start_angle = start_angle + actual_angle_between * (number_of_traits_on_item - 1) * 0.5
 	rotating_disk_widget.style.texture_id.angle = -math.degrees_to_radians(progress_angle)
 	local r = 105
@@ -1537,7 +1537,7 @@ AltarTraitRollUI.set_traits_info = function (self, traits_data, start_index, end
 				end
 
 				local position = ui_scenegraph[trait_scenegraph_name].local_position
-				position[2] = (not is_first_widget or 0) and -(total_traits_height + divider_height)
+				position[2] = (is_first_widget and 0) or -(total_traits_height + divider_height)
 				total_traits_height = total_traits_height + trait_total_height
 			end
 

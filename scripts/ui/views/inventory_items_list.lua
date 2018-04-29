@@ -1,11 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 local definitions = local_require("scripts/ui/views/inventory_items_list_definitions")
 local animation_definitions = local_require("scripts/ui/views/inventory_view_animation_definitions")
 local setup_mouse_scroll_widget_definition = definitions.setup_mouse_scroll_widget_definition
@@ -993,9 +985,7 @@ InventoryItemsList.populate_inventory_list = function (self, ignore_scroll_reset
 
 	if optional_item_filter then
 		backend_items = ScriptBackendItem.get_filtered_items(optional_item_filter)
-	else
-
-		-- decompilation error in this vicinity
+	elseif type(selected_slot_type) == "table" then
 		backend_items = {}
 
 		for index, slot_type_name in ipairs(selected_slot_type) do
@@ -1003,13 +993,16 @@ InventoryItemsList.populate_inventory_list = function (self, ignore_scroll_reset
 
 			table.append(backend_items, new_items)
 		end
-
+	elseif selected_slot_type == "weapons" then
 		local melee_items = (tag_equipped_items and BackendUtils.get_inventory_items(selected_profile_name, "melee")) or BackendUtils.get_inventory_items_except_loadout(selected_profile_name, "melee")
 		local ranged_items = (tag_equipped_items and BackendUtils.get_inventory_items(selected_profile_name, "ranged")) or BackendUtils.get_inventory_items_except_loadout(selected_profile_name, "ranged")
 		backend_items = {}
 
 		table.append(backend_items, melee_items)
 		table.append(backend_items, ranged_items)
+	else
+		selected_slot_type = selected_slot_type or "melee"
+		backend_items = (tag_equipped_items and BackendUtils.get_inventory_items(selected_profile_name, selected_slot_type)) or BackendUtils.get_inventory_items_except_loadout(selected_profile_name, selected_slot_type)
 	end
 
 	if backend_items then

@@ -613,6 +613,8 @@ PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard,
 				local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
 
 				if not target_slot_extension.valid_target then
+					if false then
+					end
 				else
 					local target_unit_position = POSITION_LOOKUP[target_unit]
 					local distance_sq = Vector3.distance_squared(attacker_pos, target_unit_position)
@@ -631,6 +633,8 @@ PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard,
 			local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
 
 			if not target_slot_extension.valid_target then
+				if false then
+				end
 			else
 				local target_unit_position = POSITION_LOOKUP[target_unit]
 				local is_bot = Managers.player:owner(target_unit).bot_player
@@ -1559,7 +1563,7 @@ PerceptionUtils.alert_enemies_within_range = function (___world, player_unit, is
 end
 PerceptionUtils.pack_master_has_line_of_sight_for_attack = function (physics_world, packmaster_unit, target_unit)
 
-	-- decompilation error in this vicinity
+	-- Decompilation error in this vicinity:
 	local start_pos = Unit.world_position(packmaster_unit, Unit.node(packmaster_unit, "j_spine"))
 	local end_pos = Unit.world_position(target_unit, Unit.node(target_unit, "j_neck"))
 	local radius = 0.15
