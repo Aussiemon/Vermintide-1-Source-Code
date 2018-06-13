@@ -1,4 +1,5 @@
 DiceTester = class(DiceTester)
+
 DiceTester.init = function (self)
 	self._state = "done"
 	self._heroes = {
@@ -19,14 +20,13 @@ DiceTester.init = function (self)
 		"none",
 		"drachenfels"
 	}
-
-	return 
 end
+
 DiceTester.start_networked = function (self, max_rolls, delay)
 	if Managers.player.is_server then
 		self._is_host = true
 
-		self.start(self, max_rolls, delay)
+		self:start(max_rolls, delay)
 	else
 		Managers.state.event:register(self, "event_trigger_dice_roll", "event_trigger_dice_roll")
 		Managers.state.event:register(self, "event_trigger_dice_done", "event_trigger_dice_done")
@@ -40,9 +40,8 @@ DiceTester.start_networked = function (self, max_rolls, delay)
 
 		Managers.debug_updator:add_updator(update, "DiceTester")
 	end
-
-	return 
 end
+
 DiceTester.start = function (self, max_rolls, delay)
 	self._delay = delay or 0
 	self._num_rolls = 0
@@ -53,9 +52,8 @@ DiceTester.start = function (self, max_rolls, delay)
 	local update = callback(self, "update")
 
 	Managers.debug_updator:add_updator(update, "DiceTester")
-
-	return 
 end
+
 DiceTester.update = function (self, dt)
 	local rarity = self._rarity
 
@@ -64,11 +62,11 @@ DiceTester.update = function (self, dt)
 			Managers.state.network.network_transmit:send_rpc_all("rpc_event_manager_event", "event_trigger_dice_roll", "")
 		end
 
-		self.roll_one(self)
+		self:roll_one()
 
 		self._state = "poll"
 	elseif self._state == "poll" then
-		local result = self.poll_answer(self)
+		local result = self:poll_answer()
 
 		if result then
 			self._num_rolls = self._num_rolls + 1
@@ -76,7 +74,7 @@ DiceTester.update = function (self, dt)
 			if self._is_client then
 				self._state = "waiting_for_server"
 			elseif self._max_rolls <= self._num_rolls then
-				self._finish(self)
+				self:_finish()
 			else
 				self._state = "waiting_for_delay"
 				local time = Managers.time:time("main")
@@ -93,9 +91,8 @@ DiceTester.update = function (self, dt)
 		self._server_event_roll = false
 		self._state = "roll"
 	end
-
-	return 
 end
+
 DiceTester._finish = function (self)
 	if self._is_host then
 		Managers.state.network.network_transmit:send_rpc_all("rpc_event_manager_event", "event_trigger_dice_done", "")
@@ -114,22 +111,19 @@ DiceTester._finish = function (self)
 			print(value)
 		end
 	end
-
-	return 
 end
+
 DiceTester.event_trigger_dice_roll = function (self)
 	self._server_event_roll = true
-
-	return 
 end
+
 DiceTester.event_trigger_dice_done = function (self)
-	self._finish(self)
-
-	return 
+	self:_finish()
 end
+
 DiceTester.roll_one = function (self)
 	local script = GameSettingsDevelopment.backend_settings.dice_script
-	local dice = self._randomize_dice(self)
+	local dice = self:_randomize_dice()
 	local difficulty = self._difficulties[Math.random(#self._difficulties)]
 	local start_level = 5
 	local end_level = 5
@@ -147,9 +141,8 @@ DiceTester.roll_one = function (self)
 	self._expected_result = {
 		start_time = os.time()
 	}
-
-	return 
 end
+
 DiceTester._randomize_dice = function (self)
 	local metal = Math.random(2)
 	local gold = Math.random(3)
@@ -158,38 +151,37 @@ DiceTester._randomize_dice = function (self)
 
 	return string.format("metal,%d;wood,%d;warpstone,%d;gold,%d;", metal, wood, warpstone, gold)
 end
+
 DiceTester.poll_answer = function (self)
 	local items, parameters, error_message = BackendSession.poll_item_server()
 
 	if error_message then
 		if type(error_message) == "table" then
 			for k, v in pairs(error_message) do
-				self._report_error(self, k .. " " .. v)
+				self:_report_error(k .. " " .. v)
 			end
 		else
-			self._report_error(self, error_message)
+			self:_report_error(error_message)
 		end
 	elseif items then
-		self._verify_result(self, items)
+		self:_verify_result(items)
 
 		return true
 	end
-
-	return 
 end
+
 DiceTester._report_error = function (self, ...)
 	local formatted = string.format(...)
 
 	Application.error(formatted)
 	table.insert(self._errors, formatted)
-
-	return 
 end
+
 DiceTester._verify_result = function (self, items)
 	local duration = os.time() - self._expected_result.start_time
 
-	if 5 < duration then
-		self._report_error(self, string.format("Dice duration too large: %d seconds", duration))
+	if duration > 5 then
+		self:_report_error(string.format("Dice duration too large: %d seconds", duration))
 	end
 
 	print("Dice roll duration:", duration)
@@ -199,8 +191,6 @@ DiceTester._verify_result = function (self, items)
 	for key, value in pairs(items) do
 		print("won", key, value)
 	end
-
-	return 
 end
 
-return 
+return

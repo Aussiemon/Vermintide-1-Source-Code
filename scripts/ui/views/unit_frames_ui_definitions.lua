@@ -407,8 +407,6 @@ local function create_player_portrait_widget_scenegraph_small(index)
 			28
 		}
 	}
-
-	return 
 end
 
 create_player_portrait_widget_scenegraph_small(1)
@@ -552,7 +550,7 @@ UIElements.TeamPlayerPortrait = {
 			style_id = "hp_bar_divider",
 			texture_id = "hp_bar_divider",
 			content_check_function = function (content, style)
-				return 0 < style.texture_amount
+				return style.texture_amount > 0
 			end
 		},
 		{
@@ -995,7 +993,7 @@ UIElements.PlayerPortrait = {
 			style_id = "hp_bar_divider",
 			texture_id = "hp_bar_divider",
 			content_check_function = function (content, style)
-				return 0 < style.texture_amount
+				return style.texture_amount > 0
 			end
 		},
 		{
@@ -1302,8 +1300,6 @@ local function create_player_inventory_widget_scenegraph(index)
 			60
 		}
 	}
-
-	return 
 end
 
 create_player_inventory_widget_scenegraph(1)

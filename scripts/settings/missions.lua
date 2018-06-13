@@ -1060,4 +1060,4 @@ for name, data in pairs(Missions) do
 	data.name = name
 end
 
-return 
+return

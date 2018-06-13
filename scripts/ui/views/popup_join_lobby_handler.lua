@@ -971,6 +971,7 @@ local function create_hero_widgets()
 end
 
 local DO_RELOAD = true
+
 PopupJoinLobbyHandler.init = function (self, ingame_ui_context)
 	self.network_event_delegate = ingame_ui_context.network_event_delegate
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -982,10 +983,10 @@ PopupJoinLobbyHandler.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "popup_join_lobby_handler", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "popup_join_lobby_handler", "keyboard")
-	input_manager.map_device_to_service(input_manager, "popup_join_lobby_handler", "mouse")
-	input_manager.map_device_to_service(input_manager, "popup_join_lobby_handler", "gamepad")
+	input_manager:create_input_service("popup_join_lobby_handler", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("popup_join_lobby_handler", "keyboard")
+	input_manager:map_device_to_service("popup_join_lobby_handler", "mouse")
+	input_manager:map_device_to_service("popup_join_lobby_handler", "gamepad")
 
 	local input_service = Managers.input:get_service("popup_join_lobby_handler")
 	local gui_layer = scenegraph_definition.root.position[3]
@@ -993,14 +994,13 @@ PopupJoinLobbyHandler.init = function (self, ingame_ui_context)
 
 	self.menu_input_description:set_input_description(nil)
 	rawset(_G, "GLOBAL_MM_JL_UI", self)
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.visible = false
 	self.popup_id = 0
 	DO_RELOAD = false
-
-	return 
 end
+
 PopupJoinLobbyHandler.create_ui_elements = function (self)
 	self.ui_animations = {}
 	self.background_widget = UIWidget.init(widgets.background_widget)
@@ -1013,14 +1013,13 @@ PopupJoinLobbyHandler.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 PopupJoinLobbyHandler.update = function (self, dt)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
 	if self.visible and self.block_all_services_timer then
@@ -1029,27 +1028,27 @@ PopupJoinLobbyHandler.update = function (self, dt)
 		if self.block_all_services_timer < 0 then
 			local input_manager = self.input_manager
 
-			input_manager.block_device_except_service(input_manager, "popup_join_lobby_handler", "keyboard", 1)
-			input_manager.block_device_except_service(input_manager, "popup_join_lobby_handler", "mouse", 1)
-			input_manager.block_device_except_service(input_manager, "popup_join_lobby_handler", "gamepad", 1)
+			input_manager:block_device_except_service("popup_join_lobby_handler", "keyboard", 1)
+			input_manager:block_device_except_service("popup_join_lobby_handler", "mouse", 1)
+			input_manager:block_device_except_service("popup_join_lobby_handler", "gamepad", 1)
 
 			self.block_all_services_timer = nil
 		end
 	end
 
 	local ui_renderer = self.ui_renderer
-	local input_service = self.input_service(self)
+	local input_service = self:input_service()
 
 	if self.cancel_timer then
 		self.cancel_timer = self.cancel_timer - dt
 		self.button_decline_widget.content.timer_text_field = math.ceil(self.cancel_timer)
 
-		self.update_controller_timer(self, dt)
+		self:update_controller_timer(dt)
 
 		if self.cancel_timer < 0 and self.visible then
 			local accepted = false
 
-			self.set_result(self, accepted)
+			self:set_result(accepted)
 		end
 	end
 
@@ -1057,14 +1056,14 @@ PopupJoinLobbyHandler.update = function (self, dt)
 		self.unblock_all_services_timer = self.unblock_all_services_timer - dt
 
 		if self.unblock_all_services_timer < 0 then
-			self.unblock_all_services(self)
+			self:unblock_all_services()
 
 			self.unblock_all_services_timer = nil
 		end
 	end
 
 	if not self.visible then
-		return 
+		return
 	end
 
 	for name, animation in pairs(self.ui_animations) do
@@ -1075,11 +1074,10 @@ PopupJoinLobbyHandler.update = function (self, dt)
 		end
 	end
 
-	self.update_lobby(self, dt)
-	self.draw(self, ui_renderer, input_service, dt)
-
-	return 
+	self:update_lobby(dt)
+	self:draw(ui_renderer, input_service, dt)
 end
+
 PopupJoinLobbyHandler.update_controller_timer = function (self, dt)
 	local lerp_value = self.cancel_timer % 1
 
@@ -1087,18 +1085,17 @@ PopupJoinLobbyHandler.update_controller_timer = function (self, dt)
 
 	self.background_widget.style.text_controller_timer.font_size = 75 + 10 * lerp_value
 	self.background_widget.content.text_controller_timer = math.floor(self.cancel_timer)
-
-	return 
 end
+
 PopupJoinLobbyHandler.update_lobby = function (self, dt)
 	if not self.lobby_data then
-		return 
+		return
 	end
 
 	self.lobby_update_timer = self.lobby_update_timer - dt
 
-	if 0 < self.lobby_update_timer then
-		return 
+	if self.lobby_update_timer > 0 then
+		return
 	end
 
 	local lobby_data = self.lobby_data
@@ -1115,19 +1112,18 @@ PopupJoinLobbyHandler.update_lobby = function (self, dt)
 	local level_key = lobby_data.selected_level_key
 
 	if level_key ~= self.current_level then
-		self.set_selected_level(self, level_key)
+		self:set_selected_level(level_key)
 	end
 
 	local difficulty = lobby_data.difficulty
 
 	if difficulty ~= self.current_difficulty then
-		self.set_selected_difficulty(self, difficulty)
+		self:set_selected_difficulty(difficulty)
 	end
 
 	self.lobby_update_timer = 0.5
-
-	return 
 end
+
 PopupJoinLobbyHandler.show = function (self, profile_name, lobby_data, time_until_cancel, join_by_lobby_browser)
 	fassert(self.visible == false, "trying to show PopupJoinLobbyHandler when its already visible")
 
@@ -1148,11 +1144,11 @@ PopupJoinLobbyHandler.show = function (self, profile_name, lobby_data, time_unti
 	self.swap_hero_active = true
 
 	if not self.swap_hero_active then
-		self.set_selected_hero(self, wanted_hero_name)
+		self:set_selected_hero(wanted_hero_name)
 	end
 
-	self.set_selected_level(self, lobby_data.selected_level_key)
-	self.set_selected_difficulty(self, lobby_data.difficulty)
+	self:set_selected_level(lobby_data.selected_level_key)
+	self:set_selected_difficulty(lobby_data.difficulty)
 
 	self.join_lobby_result = nil
 	self.lobby_update_timer = 0
@@ -1167,54 +1163,52 @@ PopupJoinLobbyHandler.show = function (self, profile_name, lobby_data, time_unti
 
 	return self.popup_id
 end
+
 PopupJoinLobbyHandler.hide = function (self)
 	local input_manager = self.input_manager
 
-	input_manager.device_unblock_all_services(input_manager, "keyboard", 1)
-	input_manager.device_unblock_all_services(input_manager, "mouse", 1)
-	input_manager.device_unblock_all_services(input_manager, "gamepad", 1)
+	input_manager:device_unblock_all_services("keyboard", 1)
+	input_manager:device_unblock_all_services("mouse", 1)
+	input_manager:device_unblock_all_services("gamepad", 1)
 	ShowCursorStack.pop()
 
 	self.selected_hero_name = nil
 	self.lobby_data = nil
 	self.visible = false
-
-	return 
 end
+
 PopupJoinLobbyHandler.unblock_all_services = function (self)
 	local input_manager = self.input_manager
 
-	input_manager.device_unblock_all_services(input_manager, "keyboard", 1)
-	input_manager.device_unblock_all_services(input_manager, "mouse", 1)
-	input_manager.device_unblock_all_services(input_manager, "gamepad", 1)
-
-	return 
+	input_manager:device_unblock_all_services("keyboard", 1)
+	input_manager:device_unblock_all_services("mouse", 1)
+	input_manager:device_unblock_all_services("gamepad", 1)
 end
+
 PopupJoinLobbyHandler.update_lobby_data = function (self, lobby_data)
 	self.lobby_data = lobby_data
 
 	if PLATFORM == "win32" and not Managers.input:is_device_active("gamepad") then
-		self.set_selected_hero(self, self.selected_hero_name)
+		self:set_selected_hero(self.selected_hero_name)
 	else
-		self._update_controller_input_description(self)
+		self:_update_controller_input_description()
 	end
-
-	return 
 end
+
 PopupJoinLobbyHandler.input_service = function (self)
 	return self.input_manager:get_service("popup_join_lobby_handler")
 end
+
 PopupJoinLobbyHandler._update_controller_input_description = function (self)
 	self.controller_selection_index = self.controller_selection_index or 1
 
-	if not self._hero_available_by_controller(self, self.controller_selection_index) then
+	if not self:_hero_available_by_controller(self.controller_selection_index) then
 		self.menu_input_description:change_generic_actions(generic_input_actions.unavailable)
 	else
 		self.menu_input_description:change_generic_actions(generic_input_actions.default)
 	end
-
-	return 
 end
+
 PopupJoinLobbyHandler._hero_available_by_controller = function (self, controller_index)
 	local hero_name = nil
 	local selected_button = self.active_button_data[controller_index]
@@ -1239,13 +1233,14 @@ PopupJoinLobbyHandler._hero_available_by_controller = function (self, controller
 
 	return self.lobby_data[profile_slot] == "available", hero_name
 end
+
 PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 
 	-- Decompilation error in this vicinity:
 	local gamepad_active = Managers.input:is_device_active("gamepad")
 
 	if gamepad_active and not self.gamepad_active_last_frame then
-		self.setup_controller_selection(self)
+		self:setup_controller_selection()
 	elseif not gamepad_active then
 		self.gamepad_active_last_frame = false
 	end
@@ -1267,44 +1262,44 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 	end
 
 	if gamepad_active then
-		if input_service.get(input_service, "move_right") then
-			self.controller_select_button_index(self, math.clamp(self.controller_selection_index + 1, 1, #self.active_button_data), nil, true)
-			self._update_controller_input_description(self)
+		if input_service:get("move_right") then
+			self:controller_select_button_index(math.clamp(self.controller_selection_index + 1, 1, #self.active_button_data), nil, true)
+			self:_update_controller_input_description()
 		end
 
-		if input_service.get(input_service, "move_left") then
-			self.controller_select_button_index(self, math.clamp(self.controller_selection_index - 1, 1, #self.active_button_data), nil, false)
-			self._update_controller_input_description(self)
+		if input_service:get("move_left") then
+			self:controller_select_button_index(math.clamp(self.controller_selection_index - 1, 1, #self.active_button_data), nil, false)
+			self:_update_controller_input_description()
 		end
 
-		if input_service.get(input_service, "confirm") and self.controller_select_button_index(self, self.controller_selection_index, true) then
-			local hero_available, hero_name = self._hero_available_by_controller(self, self.controller_selection_index)
+		if input_service:get("confirm") and self:controller_select_button_index(self.controller_selection_index, true) then
+			local hero_available, hero_name = self:_hero_available_by_controller(self.controller_selection_index)
 
 			if hero_available then
 				local accepted = true
 				self.selected_hero_name = hero_name
 
-				self.set_result(self, accepted)
+				self:set_result(accepted)
 			end
 		end
 
-		if input_service.get(input_service, "back") then
+		if input_service:get("back") then
 			local accepted = false
 
-			self.set_result(self, accepted)
+			self:set_result(accepted)
 		end
 	end
 
 	if self.button_confirm_widget.content.button_hotspot.on_release then
 		local accepted = true
 
-		self.set_result(self, accepted)
+		self:set_result(accepted)
 	end
 
-	if self.button_decline_widget.content.button_hotspot.on_release or input_service.get(input_service, "toggle_menu") then
+	if self.button_decline_widget.content.button_hotspot.on_release or input_service:get("toggle_menu") then
 		local accepted = false
 
-		self.set_result(self, accepted)
+		self:set_result(accepted)
 	end
 
 	if swap_hero_active then
@@ -1315,7 +1310,7 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 				local accepted = true
 				self.selected_hero_name = name
 
-				self.set_result(self, accepted)
+				self:set_result(accepted)
 			end
 		end
 	end
@@ -1336,20 +1331,18 @@ PopupJoinLobbyHandler.draw = function (self, ui_renderer, input_service, dt)
 	if gamepad_active then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
+
 PopupJoinLobbyHandler.setup_controller_selection = function (self)
 	local selected_index = 1
 
-	self.setup_controller_buttons(self)
+	self:setup_controller_buttons()
 
 	self.gamepad_active_last_frame = true
 
-	self.controller_select_button_index(self, selected_index, true, true)
-
-	return 
+	self:controller_select_button_index(selected_index, true, true)
 end
+
 PopupJoinLobbyHandler.setup_controller_buttons = function (self)
 	local active_button_data = self.active_button_data
 
@@ -1365,9 +1358,8 @@ PopupJoinLobbyHandler.setup_controller_buttons = function (self)
 	for _, hero_data in ipairs(hero_table) do
 		active_button_data[#active_button_data + 1] = self.button_hero_widgets[hero_data.name]
 	end
-
-	return 
 end
+
 PopupJoinLobbyHandler.controller_select_button_index = function (self, index, ignore_sound, increment_if_disabled)
 	local selection_accepted = false
 	local active_button_data = self.active_button_data
@@ -1419,6 +1411,7 @@ PopupJoinLobbyHandler.controller_select_button_index = function (self, index, ig
 
 	return selection_accepted
 end
+
 PopupJoinLobbyHandler.set_selected_hero = function (self, selected_hero_name)
 	self.swap_hero_active = false
 	local lobby_data = self.lobby_data
@@ -1448,9 +1441,8 @@ PopupJoinLobbyHandler.set_selected_hero = function (self, selected_hero_name)
 
 	self.selected_hero_widget.content.text_hero = Localize("player_list_title_hero") .. ": " .. localized_hero_name
 	self.selected_hero_widget.content.selected_hero_texture = hero_texture
-
-	return 
 end
+
 PopupJoinLobbyHandler.set_selected_level = function (self, level_key)
 	local display_image, display_name = nil
 
@@ -1471,9 +1463,8 @@ PopupJoinLobbyHandler.set_selected_level = function (self, level_key)
 
 	self.background_widget.content.level_texture = display_image
 	self.current_level = level_key
-
-	return 
 end
+
 PopupJoinLobbyHandler.set_selected_difficulty = function (self, difficulty)
 	local display_text = "lorebook_difficulty_text"
 
@@ -1484,9 +1475,8 @@ PopupJoinLobbyHandler.set_selected_difficulty = function (self, difficulty)
 
 	self.background_widget.content.text_difficulty = Localize("lorebook_difficulty") .. ": " .. Localize(display_text)
 	self.current_difficulty = difficulty
-
-	return 
 end
+
 PopupJoinLobbyHandler.set_result = function (self, accepted)
 	local selected_hero_name = accepted and self.selected_hero_name
 	self.join_lobby_result = {
@@ -1494,18 +1484,16 @@ PopupJoinLobbyHandler.set_result = function (self, accepted)
 		selected_hero_name = selected_hero_name
 	}
 
-	self.hide(self)
-
-	return 
+	self:hide()
 end
+
 PopupJoinLobbyHandler.query_result = function (self)
 	return self.join_lobby_result
 end
+
 PopupJoinLobbyHandler.destroy = function (self)
 	rawset(_G, "GLOBAL_MM_JL_UI", nil)
 	self.network_event_delegate:unregister(self)
-
-	return 
 end
 
-return 
+return

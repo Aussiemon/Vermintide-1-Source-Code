@@ -488,14 +488,14 @@ local function create_voting_widget(scenegraph_id, gamepad_selection_scenegraph_
 					pass_type = "texture",
 					texture_id = "texture_id",
 					content_check_function = function (content)
-						return not content.button_hotspot.is_selected and (not content.selected or not content.button_hotspot.is_hover or 0 >= content.button_hotspot.is_clicked)
+						return not content.button_hotspot.is_selected and (not content.selected or not content.button_hotspot.is_hover or content.button_hotspot.is_clicked <= 0)
 					end
 				},
 				{
 					pass_type = "texture",
 					texture_id = "texture_hover_id",
 					content_check_function = function (content)
-						return not content.button_hotspot.is_selected and (content.selected or (content.button_hotspot.is_hover and 0 < content.button_hotspot.is_clicked))
+						return not content.button_hotspot.is_selected and (content.selected or (content.button_hotspot.is_hover and content.button_hotspot.is_clicked > 0))
 					end
 				},
 				{
@@ -528,7 +528,7 @@ local function create_voting_widget(scenegraph_id, gamepad_selection_scenegraph_
 					style_id = "vote_marker",
 					texture_id = "vote_marker",
 					content_check_function = function (content)
-						return 1 <= #content.vote_marker
+						return #content.vote_marker >= 1
 					end
 				}
 			}
@@ -1097,8 +1097,6 @@ local widgets = {
 							end,
 							click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 								ui_content.button_hotspot.is_selected = true
-
-								return 
 							end
 						},
 						{
@@ -1443,7 +1441,7 @@ local function create_detailed_preview_widget_entries(num_of_entries)
 		local scenegraph_icon_id = string.format("%s%d%s", "preview_entry_widget_", i, "_icon_id")
 		local parent_scenegraph_id = nil
 
-		if 1 < i then
+		if i > 1 then
 			parent_scenegraph_id = string.format("%s%d%s", "preview_entry_widget_", i - 1, "_id")
 		else
 			parent_scenegraph_id = "player_list_window"

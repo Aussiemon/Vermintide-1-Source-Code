@@ -249,4 +249,4 @@ Weapons.drakegun_template_1_t3.actions.action_one.shoot_charged.projectile_info 
 Weapons.drakegun_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.drakegun_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.875
 
-return 
+return

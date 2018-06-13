@@ -100,4 +100,4 @@ local num_markers = #NetworkLookup.markers
 
 fassert(num_markers <= NetworkConstants.marker_lookup.max, "Too many dialogue system markers, raise global.network_config value for marker_lookup by a factor 2")
 
-return 
+return

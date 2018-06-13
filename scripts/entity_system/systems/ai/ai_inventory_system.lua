@@ -10,10 +10,11 @@ local extensions = {
 	"AIInventoryExtension"
 }
 AIInventorySystem = class(AIInventorySystem, ExtensionSystemBase)
+
 AIInventorySystem.init = function (self, context, system_name)
 	local entity_manager = context.entity_manager
 
-	entity_manager.register_system(entity_manager, self, system_name, extensions)
+	entity_manager:register_system(self, system_name, extensions)
 
 	self.entity_manager = entity_manager
 	self.is_server = context.is_server
@@ -22,26 +23,22 @@ AIInventorySystem.init = function (self, context, system_name)
 	local network_event_delegate = context.network_event_delegate
 	self.network_event_delegate = network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self.unit_extension_data = {}
 	self.units_to_wield = {}
 	self.units_to_wield_n = 0
 	self.units_to_drop = {}
 	self.units_to_drop_n = 0
-
-	return 
 end
+
 AIInventorySystem.destroy = function (self)
 	self.network_event_delegate:unregister(self)
-
-	return 
 end
+
 AIInventorySystem.drop_item = function (self, unit)
 	self.units_to_drop_n = self.units_to_drop_n + 1
 	self.units_to_drop[self.units_to_drop_n] = unit
-
-	return 
 end
 
 local function link_unit(attachment_node_linking, world, target, source)
@@ -53,11 +50,10 @@ local function link_unit(attachment_node_linking, world, target, source)
 
 		World.link_unit(world, target, target_node_index, source, source_node_index)
 	end
-
-	return 
 end
 
 local dummy_input = {}
+
 AIInventorySystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local extension = nil
 
@@ -73,12 +69,13 @@ AIInventorySystem.on_add_extension = function (self, world, unit, extension_name
 
 	return extension
 end
+
 AIInventorySystem.on_remove_extension = function (self, unit, extension_name)
 	local units_to_wield = self.units_to_wield
 	local units_to_wield_n = self.units_to_wield_n
 	local i = 1
 
-	while i <= units_to_wield_n do
+	while units_to_wield_n >= i do
 		if unit == units_to_wield[i] then
 			units_to_wield[i] = units_to_wield[units_to_wield_n]
 			units_to_wield_n = units_to_wield_n - 1
@@ -92,7 +89,7 @@ AIInventorySystem.on_remove_extension = function (self, unit, extension_name)
 	local units_to_drop_n = self.units_to_drop_n
 	i = 1
 
-	while i <= units_to_drop_n do
+	while units_to_drop_n >= i do
 		if unit == units_to_drop[i] then
 			units_to_drop[i] = units_to_drop[units_to_drop_n]
 			units_to_drop_n = units_to_drop_n - 1
@@ -104,9 +101,8 @@ AIInventorySystem.on_remove_extension = function (self, unit, extension_name)
 	self.units_to_drop_n = units_to_drop_n
 
 	ScriptUnit.remove_extension(unit, self.NAME)
-
-	return 
 end
+
 AIInventorySystem.update = function (self, context, t, dt)
 	local world = self.world
 	local units_to_wield = self.units_to_wield
@@ -147,7 +143,7 @@ AIInventorySystem.update = function (self, context, t, dt)
 		local inventory_items_n = extension.inventory_items_n
 
 		for j = 1, inventory_items_n, 1 do
-			extension.drop_single_item(extension, j)
+			extension:drop_single_item(j)
 		end
 
 		if script_data.ai_debug_inventory then
@@ -156,53 +152,47 @@ AIInventorySystem.update = function (self, context, t, dt)
 	end
 
 	self.units_to_drop_n = 0
-
-	return 
 end
+
 AIInventorySystem.rpc_ai_inventory_wield = function (self, sender, go_id)
 	local unit = self.unit_storage:unit(go_id)
 
 	if unit == nil then
-		return 
+		return
 	end
 
 	self.units_to_wield_n = self.units_to_wield_n + 1
 	self.units_to_wield[self.units_to_wield_n] = unit
-
-	return 
 end
+
 AIInventorySystem.rpc_ai_drop_single_item = function (self, sender, unit_id, item_inventory_index)
 	local unit = self.unit_storage:unit(unit_id)
 
 	if unit == nil then
-		return 
+		return
 	end
 
 	local ai_inventory_extension = ScriptUnit.extension(unit, "ai_inventory_system")
 
-	ai_inventory_extension.drop_single_item(ai_inventory_extension, item_inventory_index)
-
-	return 
+	ai_inventory_extension:drop_single_item(item_inventory_index)
 end
+
 AIInventorySystem.rpc_ai_show_single_item = function (self, sender, unit_id, item_inventory_index, show)
 	local unit = self.unit_storage:unit(unit_id)
 
 	if unit == nil then
-		return 
+		return
 	end
 
 	local ai_inventory_extension = ScriptUnit.extension(unit, "ai_inventory_system")
 
-	ai_inventory_extension.show_single_item(ai_inventory_extension, item_inventory_index, show)
-
-	return 
+	ai_inventory_extension:show_single_item(item_inventory_index, show)
 end
+
 AIInventorySystem.hot_join_sync = function (self, sender)
 	for unit, extension in pairs(self.unit_extension_data) do
-		extension.hot_join_sync(extension, sender)
+		extension:hot_join_sync(sender)
 	end
-
-	return 
 end
 
-return 
+return

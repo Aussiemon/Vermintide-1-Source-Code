@@ -16,8 +16,6 @@ local function setup_list_hover_area(width, height)
 	size[1] = width
 	size[2] = height
 	offset[2] = 0
-
-	return 
 end
 
 local function create_item_data(item)
@@ -192,8 +190,6 @@ local function sort_by_loadout_rarity_name(a, b)
 			return a_rarity_order < b_rarity_order
 		end
 	end
-
-	return 
 end
 
 local function sort_by_rarity_name(a, b)
@@ -212,19 +208,18 @@ local function sort_by_rarity_name(a, b)
 	else
 		return a_rarity_order < b_rarity_order
 	end
-
-	return 
 end
 
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
 InventoryItemsList = class(InventoryItemsList)
+
 InventoryItemsList.init = function (self, position, ingame_ui_context, settings)
 	self.ui_renderer = ingame_ui_context.ui_top_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -280,8 +275,8 @@ InventoryItemsList.init = function (self, position, ingame_ui_context, settings)
 	self.scenegraph_definition = scenegraph_definition
 	self.input_service_name = settings.input_service_name
 
-	self.set_list_item_select_sound(self, "Play_hud_select")
-	self.create_ui_elements(self)
+	self:set_list_item_select_sound("Play_hud_select")
+	self:create_ui_elements()
 
 	local item_widget_elements = {}
 
@@ -305,16 +300,14 @@ InventoryItemsList.init = function (self, position, ingame_ui_context, settings)
 	end
 
 	self.empty_widget_elements = empty_widget_elements
-
-	return 
 end
+
 InventoryItemsList.destroy = function (self)
 	self.ui_animator:destroy()
 
 	self.ui_animator = nil
-
-	return 
 end
+
 InventoryItemsList.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(self.scenegraph_definition)
 	local scrollbar_scenegraph_id = "item_list_scrollbar_root"
@@ -325,37 +318,36 @@ InventoryItemsList.create_ui_elements = function (self)
 	self.gamepad_slot_selection_widget = UIWidget.init(self.widget_definitions.gamepad_slot_selection)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 InventoryItemsList.handle_gamepad_input = function (self, dt, num_elements)
 	local input_manager = self.input_manager
-	local input_service = (self.input_disabled and fake_input_service) or input_manager.get_service(input_manager, self.input_service_name)
+	local input_service = (self.input_disabled and fake_input_service) or input_manager:get_service(self.input_service_name)
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 		local speed_multiplier = self.speed_multiplier or 1
 		local decrease = 0.005
 		local min_multiplier = 0
 		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
 
-		return 
+		return
 	else
 		local selected_absolute_list_index = self.selected_absolute_list_index
 
 		if selected_absolute_list_index then
 			local speed_multiplier = self.speed_multiplier or 1
 			local new_list_index = nil
-			local move_up = input_service.get(input_service, "move_up")
-			local move_up_hold = input_service.get(input_service, "move_up_hold")
+			local move_up = input_service:get("move_up")
+			local move_up_hold = input_service:get("move_up_hold")
 
 			if move_up or move_up_hold then
 				new_list_index = math.max(selected_absolute_list_index - 1, 1)
 				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 			else
-				local move_down = input_service.get(input_service, "move_down")
-				local move_down_hold = input_service.get(input_service, "move_down_hold")
+				local move_down = input_service:get("move_down")
+				local move_down_hold = input_service:get("move_down_hold")
 
 				if move_down or move_down_hold then
 					self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
@@ -366,23 +358,22 @@ InventoryItemsList.handle_gamepad_input = function (self, dt, num_elements)
 			if new_list_index and new_list_index ~= selected_absolute_list_index then
 				self.gamepad_changed_selected_list_index = new_list_index
 
-				return 
+				return
 			end
 		end
 	end
 
 	self.speed_multiplier = 1
-
-	return 
 end
+
 InventoryItemsList.update_gamepad_list_scroll = function (self)
 	local selected_absolute_list_index = self.selected_absolute_list_index
 
 	if not selected_absolute_list_index then
-		return 
+		return
 	end
 
-	local is_outside, state = self.is_entry_outside(self, selected_absolute_list_index)
+	local is_outside, state = self:is_entry_outside(selected_absolute_list_index)
 
 	while is_outside do
 		local button_scroll_step = self.scrollbar_widget.content.button_scroll_step
@@ -395,17 +386,16 @@ InventoryItemsList.update_gamepad_list_scroll = function (self)
 		end
 
 		if scroll_value ~= self.scroll_value then
-			self.set_scroll_amount(self, scroll_value)
+			self:set_scroll_amount(scroll_value)
 		end
 
-		is_outside, state = self.is_entry_outside(self, self.selected_absolute_list_index)
+		is_outside, state = self:is_entry_outside(self.selected_absolute_list_index)
 	end
-
-	return 
 end
+
 InventoryItemsList.update = function (self, dt, use_gamepad, disable_gamepad_pressed)
 	local input_manager = self.input_manager
-	local input_service = (self.input_disabled and fake_input_service) or input_manager.get_service(input_manager, self.input_service_name)
+	local input_service = (self.input_disabled and fake_input_service) or input_manager:get_service(self.input_service_name)
 
 	self.ui_animator:update(dt)
 
@@ -423,12 +413,12 @@ InventoryItemsList.update = function (self, dt, use_gamepad, disable_gamepad_pre
 		local number_of_real_items = self.number_of_real_items
 
 		if number_of_real_items then
-			self.handle_gamepad_input(self, dt, number_of_real_items)
-			self.update_gamepad_list_scroll(self)
+			self:handle_gamepad_input(dt, number_of_real_items)
+			self:update_gamepad_list_scroll()
 		end
 	end
 
-	local hover_index, hover_backend_id = self.on_item_hover_exit(self)
+	local hover_index, hover_backend_id = self:on_item_hover_exit()
 
 	if hover_index and hover_backend_id then
 		local widget_content = list_content[hover_index]
@@ -498,7 +488,7 @@ InventoryItemsList.update = function (self, dt, use_gamepad, disable_gamepad_pre
 		local is_active = button_widget_content.active
 		local is_fake = button_widget_content.fake
 
-		if not is_fake and ((button_hotspot.is_selected and button_hotspot.on_double_click) or button_hotspot.on_right_click or (use_gamepad and i == selected_list_index and not disable_gamepad_pressed and input_service.get(input_service, "confirm"))) then
+		if not is_fake and ((button_hotspot.is_selected and button_hotspot.on_double_click) or button_hotspot.on_right_click or (use_gamepad and i == selected_list_index and not disable_gamepad_pressed and input_service:get("confirm"))) then
 			local item = button_widget_content.item
 
 			if is_active then
@@ -534,7 +524,7 @@ InventoryItemsList.update = function (self, dt, use_gamepad, disable_gamepad_pre
 
 		if button_hotspot.on_hover_enter then
 			if not button_content.fake then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 
 			if i ~= hover_list_index then
@@ -551,22 +541,21 @@ InventoryItemsList.update = function (self, dt, use_gamepad, disable_gamepad_pre
 		end
 	end
 
-	self.on_item_dragged(self)
-	self.update_scroll(self)
+	self:on_item_dragged()
+	self:update_scroll()
 
 	if self.inventory_list_animation_time then
 	end
 
 	self.gamepad_changed_selected_list_index = nil
-
-	return 
 end
+
 InventoryItemsList.draw = function (self, dt, use_gamepad)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = (self.input_disabled and fake_input_service) or input_manager.get_service(input_manager, self.input_service_name)
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = (self.input_disabled and fake_input_service) or input_manager:get_service(self.input_service_name)
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
@@ -583,44 +572,40 @@ InventoryItemsList.draw = function (self, dt, use_gamepad)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 InventoryItemsList.disable_input = function (self, disable)
 	self.input_disabled = disable
-
-	return 
 end
+
 InventoryItemsList.get_pressed_item = function (self)
 	return self.item_selected_local
 end
+
 InventoryItemsList.set_list_item_select_sound = function (self, sound_event)
 	self.item_select_sound_event = sound_event
-
-	return 
 end
+
 InventoryItemsList.set_selected_profile_name = function (self, selected_profile_name)
 	self.selected_profile_name = selected_profile_name
 	self.inventory_list_animation_time = 0
-
-	return 
 end
+
 InventoryItemsList.current_profile_name = function (self)
 	return self.selected_profile_name
 end
+
 InventoryItemsList.set_selected_slot_type = function (self, selected_slot_type)
 	self.selected_slot_type = selected_slot_type
 	self.inventory_list_animation_time = 0
-
-	return 
 end
+
 InventoryItemsList.refresh = function (self, ignore_scroll_reset, backend_id_ignore_list, optional_filter)
-	self.populate_inventory_list(self, ignore_scroll_reset, backend_id_ignore_list, optional_filter)
+	self:populate_inventory_list(ignore_scroll_reset, backend_id_ignore_list, optional_filter)
 
 	self.inventory_list_animation_time = 0
-
-	return 
 end
+
 InventoryItemsList.remove_item = function (self, item_backend_id, ignore_scroll_reset)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -658,27 +643,27 @@ InventoryItemsList.remove_item = function (self, item_backend_id, ignore_scroll_
 			local selected_list_index = self.selected_list_index
 			local move_scroll = false
 
-			if num_items - list_start_index - 1 < num_draws then
+			if num_draws > num_items - list_start_index - 1 then
 				list_style.list_start_index = math.max(list_start_index - 1, 1)
 
-				if 1 < list_start_index then
+				if list_start_index > 1 then
 					selected_absolute_list_index = math.max(selected_absolute_list_index - 1, 1)
 				end
 
 				move_scroll = true
-			elseif 1 < list_start_index then
+			elseif list_start_index > 1 then
 				move_scroll = true
 			end
 
 			self.selected_absolute_list_index = selected_absolute_list_index
 			local new_list_start_index = (not ignore_scroll_reset and 1) or nil
 
-			self.populate_widget_list(self, new_list_start_index)
+			self:populate_widget_list(new_list_start_index)
 
 			local widget_scroll_bar_info = self.scrollbar_widget.content.scroll_bar_info
 			local previous_bar_fraction = widget_scroll_bar_info.bar_height_percentage
 
-			self.set_scrollbar_length(self, nil, ignore_scroll_reset, ignore_scroll_reset)
+			self:set_scrollbar_length(nil, ignore_scroll_reset, ignore_scroll_reset)
 
 			local new_bar_fraction = widget_scroll_bar_info.bar_height_percentage
 			local bar_fraction_difference = new_bar_fraction - previous_bar_fraction
@@ -689,27 +674,24 @@ InventoryItemsList.remove_item = function (self, item_backend_id, ignore_scroll_
 				scroll_value = math.max(math.min(scroll_value + bar_fraction_difference, 1), 0)
 				local ignore_list_scroll = true
 
-				self.set_scroll_amount(self, scroll_value, ignore_list_scroll)
+				self:set_scroll_amount(scroll_value, ignore_list_scroll)
 			end
 
 			break
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.clear_disabled_backend_ids = function (self)
 	self.disabled_backend_ids = {}
-
-	return 
 end
+
 InventoryItemsList.set_backend_id_disabled_state = function (self, backend_id, disabled)
 	self.disabled_backend_ids[backend_id] = disabled
 
-	self.set_item_active_by_backend_id(self, backend_id, not disabled)
-
-	return 
+	self:set_item_active_by_backend_id(backend_id, not disabled)
 end
+
 InventoryItemsList.set_item_active_by_backend_id = function (self, backend_id, active)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -758,7 +740,7 @@ InventoryItemsList.set_item_active_by_backend_id = function (self, backend_id, a
 					end
 
 					if active and not is_active then
-						return 
+						return
 					end
 
 					widget_content.active = active
@@ -768,9 +750,8 @@ InventoryItemsList.set_item_active_by_backend_id = function (self, backend_id, a
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.set_drag_enabled = function (self, enabled)
 	local drag_disabled = not enabled
 	local item_list_widget = self.item_list_widget
@@ -791,30 +772,26 @@ InventoryItemsList.set_drag_enabled = function (self, enabled)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.set_rarity = function (self, rarity)
 	self.selected_rarity = rarity
 
-	self.refresh_items_status(self)
-
-	return 
+	self:refresh_items_status()
 end
+
 InventoryItemsList.sort_items_by_rarity = function (self, enabled)
 	self.sort_by_rarity = enabled
-
-	return 
 end
+
 InventoryItemsList.on_item_list_hover = function (self)
 	local item_list_widget = self.item_list_widget
 
 	if item_list_widget then
 		return item_list_widget.content.internal_is_hover
 	end
-
-	return 
 end
+
 InventoryItemsList.on_item_hover_enter = function (self)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -829,9 +806,8 @@ InventoryItemsList.on_item_hover_enter = function (self)
 			return i, item and item.backend_id
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.on_item_hover_exit = function (self)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -846,9 +822,8 @@ InventoryItemsList.on_item_hover_exit = function (self)
 			return i, item and item.backend_id
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.is_dragging_item = function (self)
 	local item_list_widget = self.item_list_widget
 
@@ -863,9 +838,8 @@ InventoryItemsList.is_dragging_item = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.is_dragging_item_started = function (self)
 	local item_list_widget = self.item_list_widget
 
@@ -880,9 +854,8 @@ InventoryItemsList.is_dragging_item_started = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.on_dragging_item_stopped = function (self)
 	local item_list_widget = self.item_list_widget
 
@@ -897,9 +870,8 @@ InventoryItemsList.on_dragging_item_stopped = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.on_item_dragged = function (self)
 	local item_list_widget = self.item_list_widget
 
@@ -922,9 +894,8 @@ InventoryItemsList.on_item_dragged = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.deselect_all_list_items = function (self)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -940,41 +911,34 @@ InventoryItemsList.deselect_all_list_items = function (self)
 
 	self.selected_list_index = nil
 	self.selected_absolute_list_index = nil
-
-	return 
 end
+
 InventoryItemsList.set_accepted_rarities = function (self, rarity_list)
 	self.accepted_rarity_list = rarity_list
-
-	return 
 end
+
 InventoryItemsList.set_disable_non_trait_items = function (self, enabled)
 	self.disable_non_trait_items = enabled
-
-	return 
 end
+
 InventoryItemsList.mark_equipped_items = function (self)
 	self.tag_equipped_items = true
-
-	return 
 end
+
 InventoryItemsList.tag_all_equipped_items = function (self)
 	self._tag_all_equipped_items = true
-
-	return 
 end
+
 InventoryItemsList.sort_by_loadout_first = function (self)
 	self.sort_by_equipment = true
-
-	return 
 end
+
 InventoryItemsList.set_disable_loadout_items = function (self, disabled)
 	self.disable_equipped_items = disabled
-
-	return 
 end
+
 InventoryItemsList.populate_inventory_list = function (self, ignore_scroll_reset, backend_id_ignore_list, optional_item_filter)
-	self.deselect_all_list_items(self)
+	self:deselect_all_list_items()
 
 	local settings = self.settings
 	local selected_profile_name = self.selected_profile_name
@@ -1031,20 +995,19 @@ InventoryItemsList.populate_inventory_list = function (self, ignore_scroll_reset
 		end
 	end
 
-	self._sync_loadout_items(self)
+	self:_sync_loadout_items()
 
 	local number_of_items_in_list = (items and #items) or 0
 	self.number_of_items_in_list = number_of_items_in_list
-	self.draw_inventory_list = 0 < number_of_items_in_list
+	self.draw_inventory_list = number_of_items_in_list > 0
 	self.stored_items = items
 	local num_item_slots = settings.num_list_items
 	local list_start_index = (not ignore_scroll_reset and 1) or nil
 
-	self.populate_widget_list(self, list_start_index, true)
-	self.set_scrollbar_length(self, nil, ignore_scroll_reset)
-
-	return 
+	self:populate_widget_list(list_start_index, true)
+	self:set_scrollbar_length(nil, ignore_scroll_reset)
 end
+
 InventoryItemsList.populate_widget_list = function (self, list_start_index, sort_list)
 	local items = self.stored_items
 
@@ -1053,11 +1016,11 @@ InventoryItemsList.populate_widget_list = function (self, list_start_index, sort
 		list_start_index = list_start_index or item_list_widget.style.list_style.list_start_index or 1
 		local num_items_in_list = #items
 
-		if num_items_in_list < list_start_index then
-			return 
+		if list_start_index > num_items_in_list then
+			return
 		end
 
-		self._sync_item_list_equipped_status(self, items)
+		self:_sync_item_list_equipped_status(items)
 
 		if sort_list then
 			if self.sort_by_equipment then
@@ -1102,7 +1065,7 @@ InventoryItemsList.populate_widget_list = function (self, list_start_index, sort
 				local is_active = true
 				local is_new = false
 				local item_rarity = item.rarity
-				local item_color = self.get_rarity_color(self, item_rarity)
+				local item_color = self:get_rarity_color(item_rarity)
 				local item_backend_id = item.backend_id
 
 				if new_backend_ids and new_backend_ids[item_backend_id] then
@@ -1155,7 +1118,7 @@ InventoryItemsList.populate_widget_list = function (self, list_start_index, sort
 		if list_content_n < num_draws then
 			local padding_n = num_draws - #list_content % num_draws
 
-			if padding_n < num_draws then
+			if num_draws > padding_n then
 				for i = 1, padding_n, 1 do
 					local empty_element = self.empty_widget_elements[i]
 					local index = #list_content + 1
@@ -1170,18 +1133,16 @@ InventoryItemsList.populate_widget_list = function (self, list_start_index, sort
 		local selected_absolute_list_index = self.selected_absolute_list_index
 
 		if selected_absolute_list_index then
-			self.on_inventory_item_selected(self, selected_absolute_list_index)
+			self:on_inventory_item_selected(selected_absolute_list_index)
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.refresh_items_status = function (self)
-	self._sync_loadout_items(self)
-	self.populate_widget_list(self)
-
-	return 
+	self:_sync_loadout_items()
+	self:populate_widget_list()
 end
+
 InventoryItemsList._sync_loadout_items = function (self)
 	local loadout_items = {}
 	local slots_by_name = InventorySettings.slots_by_name
@@ -1207,9 +1168,8 @@ InventoryItemsList._sync_loadout_items = function (self)
 	end
 
 	self.loadout_items = loadout_items
-
-	return 
 end
+
 InventoryItemsList._sync_item_list_equipped_status = function (self, item_list)
 	local loadout_items = self.loadout_items
 
@@ -1249,9 +1209,8 @@ InventoryItemsList._sync_item_list_equipped_status = function (self, item_list)
 			item.equipped = is_equipped
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList._get_item_id_list_index = function (self, backend_id)
 	local items = self.stored_items
 
@@ -1260,9 +1219,8 @@ InventoryItemsList._get_item_id_list_index = function (self, backend_id)
 			return index
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.set_scroll_amount = function (self, value, ignore_list_scroll)
 	local current_scroll_value = self.scroll_value
 
@@ -1273,12 +1231,11 @@ InventoryItemsList.set_scroll_amount = function (self, value, ignore_list_scroll
 		self.scroll_value = value
 
 		if not ignore_list_scroll then
-			self.scroll_inventory_list(self, value)
+			self:scroll_inventory_list(value)
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.set_scrollbar_length = function (self, start_scroll_value, ignore_scroll_reset, ignore_scroll_set)
 	local settings = self.settings
 	local columns = settings.columns
@@ -1291,7 +1248,7 @@ InventoryItemsList.set_scrollbar_length = function (self, start_scroll_value, ig
 	local bar_fraction = 0
 	local step_fraction = 0
 
-	if 0 < item_diff_count then
+	if item_diff_count > 0 then
 		local number_of_elements_per_step = (columns and columns) or 1
 		local number_of_steps_possible = math.ceil(item_diff_count / number_of_elements_per_step)
 		local number_of_steps_total = math.ceil(number_of_items_in_list / number_of_elements_per_step)
@@ -1312,14 +1269,13 @@ InventoryItemsList.set_scrollbar_length = function (self, start_scroll_value, ig
 			local current_scroll_value = self.scroll_value
 			self.scroll_value = nil
 
-			self.set_scroll_amount(self, current_scroll_value or 0)
+			self:set_scroll_amount(current_scroll_value or 0)
 		else
-			self.set_scroll_amount(self, start_scroll_value or 0)
+			self:set_scroll_amount(start_scroll_value or 0)
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.scroll_inventory_list = function (self, value)
 	local item_list_widget = self.item_list_widget
 
@@ -1339,12 +1295,11 @@ InventoryItemsList.scroll_inventory_list = function (self, value)
 				new_start_index = (new_start_index + column_count) - 1
 			end
 
-			self.populate_widget_list(self, new_start_index)
+			self:populate_widget_list(new_start_index)
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.is_entry_outside = function (self, absolute_index)
 	local item_list_widget = self.item_list_widget
 
@@ -1364,19 +1319,19 @@ InventoryItemsList.is_entry_outside = function (self, absolute_index)
 
 	return false
 end
+
 InventoryItemsList.update_scroll = function (self)
 	local scroll_bar_value = self.scrollbar_widget.content.scroll_bar_info.value
 	local mouse_scroll_value = self.scroll_field_widget.content.internal_scroll_value
 	local current_scroll_value = self.scroll_value
 
 	if current_scroll_value ~= mouse_scroll_value then
-		self.set_scroll_amount(self, mouse_scroll_value)
+		self:set_scroll_amount(mouse_scroll_value)
 	elseif current_scroll_value ~= scroll_bar_value then
-		self.set_scroll_amount(self, scroll_bar_value)
+		self:set_scroll_amount(scroll_bar_value)
 	end
-
-	return 
 end
+
 InventoryItemsList.on_inventory_item_selected = function (self, absolute_index, play_sound)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -1387,11 +1342,11 @@ InventoryItemsList.on_inventory_item_selected = function (self, absolute_index, 
 	local items = self.stored_items
 
 	if not number_of_items_in_list or number_of_items_in_list < 1 then
-		return 
+		return
 	end
 
 	if play_sound then
-		self.play_sound(self, self.item_select_sound_event)
+		self:play_sound(self.item_select_sound_event)
 	end
 
 	absolute_index = math.min(absolute_index, #items)
@@ -1430,6 +1385,7 @@ InventoryItemsList.on_inventory_item_selected = function (self, absolute_index, 
 
 	return item
 end
+
 InventoryItemsList.index_by_backend_id = function (self, backend_id)
 	local items = self.stored_items
 
@@ -1440,9 +1396,8 @@ InventoryItemsList.index_by_backend_id = function (self, backend_id)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.item_by_index = function (self, index)
 	local items = self.stored_items
 
@@ -1453,9 +1408,8 @@ InventoryItemsList.item_by_index = function (self, index)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.selected_item = function (self)
 	local selected_absolute_list_index = self.selected_absolute_list_index
 
@@ -1467,19 +1421,19 @@ InventoryItemsList.selected_item = function (self)
 			local backend_id = item and item.backend_id
 
 			if backend_id then
-				local is_active = self.is_item_active(self, backend_id)
-				local is_equipped = self.is_item_equipped(self, backend_id)
+				local is_active = self:is_item_active(backend_id)
+				local is_equipped = self:is_item_equipped(backend_id)
 
 				return item, is_equipped, is_active
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.is_item_active = function (self, backend_id)
 	return self.item_active_list[backend_id]
 end
+
 InventoryItemsList.is_item_equipped = function (self, backend_id)
 	local loadout_items = self.loadout_items
 
@@ -1490,23 +1444,22 @@ InventoryItemsList.is_item_equipped = function (self, backend_id)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.get_available_equipment_slot_by_type = function (self, slot_type)
 	for index, slot in ipairs(slot_button_index) do
 		if slot == slot_type then
 			return index
 		end
 	end
-
-	return 
 end
+
 InventoryItemsList.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 InventoryItemsList.update_inventory_list_animations = function (self, dt)
 	local item_list_widget = self.item_list_widget
 	local content = item_list_widget.content.list_content
@@ -1522,7 +1475,7 @@ InventoryItemsList.update_inventory_list_animations = function (self, dt)
 	local start_index = list_style.start_index
 
 	if not start_index then
-		return 
+		return
 	end
 
 	local num_draws = list_style.num_draws
@@ -1563,20 +1516,20 @@ InventoryItemsList.update_inventory_list_animations = function (self, dt)
 		if not is_selected and element_content.tweened_click then
 			background_click_style.color[1] = alpha_normal
 			background_style.color[1] = (element_content.room_item and 255) or non_room_item_alpha_value
-			active_animations.background = self.animate_element_by_time(self, background_style.color, 1, background_style.color[1], 255, 0.1)
+			active_animations.background = self:animate_element_by_time(background_style.color, 1, background_style.color[1], 255, 0.1)
 			element_content.tweened_click = nil
 		end
 
 		if button_hotspot.is_hover and not is_selected and not outside_view then
 			if not element_content.tween_in then
 				element_content.tween_in = true
-				active_animations.hover = self.animate_element_by_time(self, background_hover_style.color, 1, background_hover_style.color[1], alpha_hover, hover_fade_in)
+				active_animations.hover = self:animate_element_by_time(background_hover_style.color, 1, background_hover_style.color[1], alpha_hover, hover_fade_in)
 
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 		elseif element_content.tween_in then
 			element_content.tween_in = nil
-			active_animations.hover = self.animate_element_by_time(self, background_hover_style.color, 1, background_hover_style.color[1], alpha_normal, hover_fade_out)
+			active_animations.hover = self:animate_element_by_time(background_hover_style.color, 1, background_hover_style.color[1], alpha_normal, hover_fade_out)
 		end
 
 		if active_animations then
@@ -1592,9 +1545,8 @@ InventoryItemsList.update_inventory_list_animations = function (self, dt)
 
 		self.inventory_list_animations[i] = active_animations
 	end
-
-	return 
 end
+
 InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 	local time = self.inventory_list_animation_time
 	local list_times = UISettings.inventory.item_list.intro
@@ -1629,7 +1581,7 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 
 		if item_fade_in_start_fraction <= progress then
 			local item_progress = progress - item_fade_in_start_fraction
-			local item_tween_progress = (0 < item_progress and math.min(item_progress / (item_fade_in_end_fraction - item_fade_in_start_fraction), 1)) or 0
+			local item_tween_progress = (item_progress > 0 and math.min(item_progress / (item_fade_in_end_fraction - item_fade_in_start_fraction), 1)) or 0
 			local catmullrom_value = math.catmullrom(item_tween_progress, -0.5, 1, 1, -0.5)
 			item_style.color[1] = math.max(122.5, item_tween_progress * 255)
 			local offset_fraction = (item_tween_progress < 1 and 1 - catmullrom_value) or 0
@@ -1650,7 +1602,7 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 
 		if background_fade_in_start_fraction <= progress then
 			local background_progress = progress - background_fade_in_start_fraction
-			local background_tween_progress = (0 < background_progress and math.min(background_progress / (background_fade_in_end_fraction - background_fade_in_start_fraction), 1)) or 0
+			local background_tween_progress = (background_progress > 0 and math.min(background_progress / (background_fade_in_end_fraction - background_fade_in_start_fraction), 1)) or 0
 			local catmullrom_value = math.catmullrom(background_tween_progress, 1.2, 1, 1, 1.2)
 			background_style.color[1] = math.max(122.5, background_tween_progress * 255)
 			background_style.size[1] = catmullrom_value * background_default_style.size[1]
@@ -1667,7 +1619,7 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 
 		if text_fade_in_start_fraction <= progress then
 			local text_progress = progress - text_fade_in_start_fraction
-			local text_tween_progress = (0 < text_progress and math.min(text_progress / text_fade_in_end_fraction, 1)) or 0
+			local text_tween_progress = (text_progress > 0 and math.min(text_progress / text_fade_in_end_fraction, 1)) or 0
 			local text_color = progress * 255
 			text_style.text_color[1] = text_color
 			sub_text_style.text_color[1] = text_color
@@ -1707,17 +1659,16 @@ InventoryItemsList.update_inventory_list_intro_animation = function (self, dt)
 	else
 		self.inventory_list_animation_time = time
 	end
-
-	return 
 end
+
 InventoryItemsList.get_rarity_color = function (self, rarity)
 	return Colors.get_table(rarity or "white")
 end
+
 InventoryItemsList.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 InventoryItemsList.on_focus_lost = function (self)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
@@ -1734,8 +1685,6 @@ InventoryItemsList.on_focus_lost = function (self)
 			ItemHelper.unmark_backend_id_as_new(backend_id)
 		end
 	end
-
-	return 
 end
 
-return 
+return

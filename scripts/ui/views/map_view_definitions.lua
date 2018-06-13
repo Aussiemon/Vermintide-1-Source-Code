@@ -1650,8 +1650,6 @@ local widgets = {
 						else
 							return true
 						end
-
-						return 
 					end
 				},
 				{
@@ -1667,8 +1665,6 @@ local widgets = {
 						else
 							return true
 						end
-
-						return 
 					end
 				},
 				{
@@ -1746,7 +1742,7 @@ local widgets = {
 						local internal_difficulty_level = content.internal_difficulty_level
 						local is_hover = content.difficulty_icon_hotspot_global.is_hover
 
-						return (is_hover and 0 < content.internal_difficulty_level) or (not is_hover and 0 < content.difficulty_level)
+						return (is_hover and content.internal_difficulty_level > 0) or (not is_hover and content.difficulty_level > 0)
 					end
 				},
 				{
@@ -1758,7 +1754,7 @@ local widgets = {
 						local internal_difficulty_level = content.internal_difficulty_level
 						local is_hover = content.difficulty_icon_hotspot_global.is_hover
 
-						return (is_hover and 1 < content.internal_difficulty_level) or (not is_hover and 1 < content.difficulty_level)
+						return (is_hover and content.internal_difficulty_level > 1) or (not is_hover and content.difficulty_level > 1)
 					end
 				},
 				{
@@ -1770,7 +1766,7 @@ local widgets = {
 						local internal_difficulty_level = content.internal_difficulty_level
 						local is_hover = content.difficulty_icon_hotspot_global.is_hover
 
-						return (is_hover and 2 < content.internal_difficulty_level) or (not is_hover and 2 < content.difficulty_level)
+						return (is_hover and content.internal_difficulty_level > 2) or (not is_hover and content.difficulty_level > 2)
 					end
 				},
 				{
@@ -1782,7 +1778,7 @@ local widgets = {
 						local internal_difficulty_level = content.internal_difficulty_level
 						local is_hover = content.difficulty_icon_hotspot_global.is_hover
 
-						return (is_hover and 3 < content.internal_difficulty_level) or (not is_hover and 3 < content.difficulty_level)
+						return (is_hover and content.internal_difficulty_level > 3) or (not is_hover and content.difficulty_level > 3)
 					end
 				},
 				{
@@ -1794,7 +1790,7 @@ local widgets = {
 						local internal_difficulty_level = content.internal_difficulty_level
 						local is_hover = content.difficulty_icon_hotspot_global.is_hover
 
-						return (is_hover and 4 < content.internal_difficulty_level) or (not is_hover and 4 < content.difficulty_level)
+						return (is_hover and content.internal_difficulty_level > 4) or (not is_hover and content.difficulty_level > 4)
 					end
 				},
 				{
@@ -2251,8 +2247,6 @@ local widgets = {
 						else
 							return true
 						end
-
-						return 
 					end
 				},
 				{
@@ -2273,8 +2267,6 @@ local widgets = {
 						else
 							return true
 						end
-
-						return 
 					end
 				},
 				{
@@ -2290,8 +2282,6 @@ local widgets = {
 						else
 							return true
 						end
-
-						return 
 					end
 				},
 				{
@@ -2307,8 +2297,6 @@ local widgets = {
 						else
 							return true
 						end
-
-						return 
 					end
 				}
 			}
@@ -2908,21 +2896,19 @@ MapWidgetsGamepadController = {
 			local content = widget.content
 			content.confirm_pressed = nil
 
-			if input_service.get(input_service, "move_left") then
+			if input_service:get("move_left") then
 				content.left_button_hotspot.on_release = true
 
 				return true
-			elseif input_service.get(input_service, "move_right") then
+			elseif input_service:get("move_right") then
 				content.right_button_hotspot.on_release = true
 
 				return true
-			elseif content.location_selected and input_service.get(input_service, "confirm") then
+			elseif content.location_selected and input_service:get("confirm") then
 				content.confirm_pressed = true
 
 				return true
 			end
-
-			return 
 		end,
 		input_description = {
 			name = "stepper",
@@ -2950,17 +2936,15 @@ MapWidgetsGamepadController = {
 		input_function = function (widget, input_service)
 			local content = widget.content
 
-			if input_service.get(input_service, "move_left") then
+			if input_service:get("move_left") then
 				content.left_button_hotspot.on_release = true
 
 				return true
-			elseif input_service.get(input_service, "move_right") then
+			elseif input_service:get("move_right") then
 				content.right_button_hotspot.on_release = true
 
 				return true
 			end
-
-			return 
 		end,
 		input_description = {
 			name = "stepper",
@@ -2977,29 +2961,27 @@ MapWidgetsGamepadController = {
 		input_function = function (widget, input_service)
 			local content = widget.content
 
-			if input_service.get(input_service, "move_left") then
+			if input_service:get("move_left") then
 				local internal_index = content.internal_index
 				content.internal_index = math.max(internal_index - 1, 1)
 
 				if internal_index ~= content.internal_index then
 					return true
 				end
-			elseif input_service.get(input_service, "move_right") then
+			elseif input_service:get("move_right") then
 				local internal_index = content.internal_index
 				content.internal_index = math.min(internal_index + 1, 5)
 
 				if internal_index ~= content.internal_index then
 					return true
 				end
-			elseif input_service.get(input_service, "confirm") then
+			elseif input_service:get("confirm") then
 				local internal_index = content.internal_index
 				local hotspot_name = "hotspot_" .. internal_index
 				content[hotspot_name].on_release = true
 
 				return true
 			end
-
-			return 
 		end,
 		input_description = {
 			name = "stepper",
@@ -3011,13 +2993,11 @@ MapWidgetsGamepadController = {
 		input_function = function (widget, input_service)
 			local content = widget.content
 
-			if content.kick_enabled and input_service.get(input_service, "confirm", true) then
+			if content.kick_enabled and input_service:get("confirm", true) then
 				content.kick_button_hotspot.on_release = true
 
 				return true
 			end
-
-			return 
 		end,
 		input_description = {
 			name = "stepper",
@@ -3136,8 +3116,6 @@ local function animate_style_on_select(style, size, progress, catmullrom_value, 
 	if not ignore_color then
 		style.color[1] = math.min(progress * 4, 1) * 255
 	end
-
-	return 
 end
 
 local animations = {
@@ -3147,7 +3125,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = UISettings.inventory.button_bars.selected_fade_in,
 			init = function (ui_scenegraph, scenegraph_definition, widget, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 				local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -3162,11 +3140,9 @@ local animations = {
 				local button_size = scenegraph_definition[scenegraph_id].size
 
 				animate_style_on_select(button_click_style, button_size, progress, catmullrom_value)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-				return 
+				return
 			end
 		}
 	},
@@ -3176,7 +3152,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = UISettings.inventory.button_bars.selected_fade_out,
 			init = function (ui_scenegraph, scenegraph_definition, widget, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 				local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -3189,11 +3165,9 @@ local animations = {
 				local default_font_size = 20
 				title_text_style.font_size = default_font_size
 				button_click_style.color[1] = math.max(button_click_style.color[1] - progress * 255, 0)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-				return 
+				return
 			end
 		}
 	}

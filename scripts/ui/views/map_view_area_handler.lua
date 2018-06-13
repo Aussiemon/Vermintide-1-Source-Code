@@ -35,8 +35,6 @@ local function sort_level_information_list(a, b)
 
 		return a_order < b_order
 	end
-
-	return 
 end
 
 local function sort_level_list(a, b)
@@ -69,8 +67,6 @@ local function sort_level_list(a, b)
 
 		return a_order < b_order
 	end
-
-	return 
 end
 
 MapViewAreaHandler.init = function (self, ingame_ui_context, map_save_data, player_stats_id)
@@ -86,11 +82,10 @@ MapViewAreaHandler.init = function (self, ingame_ui_context, map_save_data, play
 	self.map_view_helper = MapViewHelper:new(self.statistics_db, player_stats_id)
 	self._map_save_data = map_save_data
 
-	self._create_ui_elements(self)
-	self._setup_level_lists(self)
-
-	return 
+	self:_create_ui_elements()
+	self:_setup_level_lists()
 end
+
 MapViewAreaHandler._create_ui_elements = function (self)
 	self.ui_animations = {}
 	local create_level_widget = definitions.create_level_widget
@@ -132,9 +127,8 @@ MapViewAreaHandler._create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	self._scenegraph_definition = definitions.scenegraph_definition
-
-	return 
 end
+
 MapViewAreaHandler._validate_level_data = function (self, level_key, level_data)
 	if type(level_data) == "table" then
 		local debug_level = string.match(level_data.package_name, "resource_packages/levels/debug/")
@@ -143,16 +137,15 @@ MapViewAreaHandler._validate_level_data = function (self, level_key, level_data)
 			return true
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler._setup_level_lists = function (self)
 	local map_view_helper = self.map_view_helper
 	local areas_level_list = {}
 	local level_list_by_game_mode = {}
 
 	for level_key, level_data in pairs(LevelSettings) do
-		local valid_level = self._validate_level_data(self, level_key, level_data)
+		local valid_level = self:_validate_level_data(level_key, level_data)
 
 		if valid_level then
 			local map_settings = level_data.map_settings
@@ -196,12 +189,12 @@ MapViewAreaHandler._setup_level_lists = function (self)
 					textures.hover = string.format("%s%s", map_background_texture, "_hover")
 				end
 
-				local visibility, visibility_tooltip = map_view_helper.get_level_visibility(map_view_helper, level_key, level_data)
+				local visibility, visibility_tooltip = map_view_helper:get_level_visibility(level_key, level_data)
 				level_information.visibility = visibility
 				level_information.visibility_tooltip = visibility_tooltip
 
 				if visibility ~= "hidden" then
-					local difficulty_data = map_view_helper.get_difficulty_data(map_view_helper, level_key, level_data)
+					local difficulty_data = map_view_helper:get_difficulty_data(level_key, level_data)
 					level_information.difficulty_data = difficulty_data
 					level_list_by_game_mode[game_mode][#level_list_by_game_mode[game_mode] + 1] = level_information
 				end
@@ -217,8 +210,8 @@ MapViewAreaHandler._setup_level_lists = function (self)
 
 	self._level_list_by_game_mode = level_list_by_game_mode
 
-	self.setup_any_level_by_game_mode(self)
-	self.setup_any_level_by_area(self)
+	self:setup_any_level_by_game_mode()
+	self:setup_any_level_by_area()
 
 	for game_mode, game_mode_area_list in pairs(areas_level_list) do
 		local world_area_level_list = game_mode_area_list.world
@@ -234,7 +227,7 @@ MapViewAreaHandler._setup_level_lists = function (self)
 				local display_name = area_settings.display_name
 				local map_icon = area_settings.map_icon
 				local level_image = area_settings.level_image
-				local level_information = self._create_summary_entry(self, area_list, area, display_name, map_icon, level_image)
+				local level_information = self:_create_summary_entry(area_list, area, display_name, map_icon, level_image)
 				level_information.is_area = true
 
 				if area_settings.dlc_url and not Managers.unlock:is_dlc_unlocked(area_settings.dlc_name) then
@@ -250,9 +243,8 @@ MapViewAreaHandler._setup_level_lists = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.setup_any_level_by_area = function (self)
 	local any_level_key = "any"
 	local display_name = "any_level"
@@ -274,7 +266,7 @@ MapViewAreaHandler.setup_any_level_by_area = function (self)
 			end
 
 			if add_any_level then
-				local level_information = self._create_summary_entry(self, area_level_list, area, display_name, map_icon, level_image)
+				local level_information = self:_create_summary_entry(area_level_list, area, display_name, map_icon, level_image)
 				level_information.position = {
 					-560,
 					290
@@ -286,9 +278,8 @@ MapViewAreaHandler.setup_any_level_by_area = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.setup_any_level_by_game_mode = function (self)
 	local random_levels_by_game_mode = {}
 
@@ -312,7 +303,7 @@ MapViewAreaHandler.setup_any_level_by_game_mode = function (self)
 			local display_name = "any_level"
 			local map_icon = "level_location_any_icon"
 			local level_image = "level_image_any"
-			local level_information = self._create_summary_entry(self, level_list, area, display_name, map_icon, level_image)
+			local level_information = self:_create_summary_entry(level_list, area, display_name, map_icon, level_image)
 			level_information.position = {
 				-560,
 				290
@@ -325,9 +316,8 @@ MapViewAreaHandler.setup_any_level_by_game_mode = function (self)
 	end
 
 	self._random_levels_by_game_mode = random_levels_by_game_mode
-
-	return 
 end
+
 MapViewAreaHandler.get_levels_by_game_mode = function (self, game_mode, include_random_level)
 	if include_random_level then
 		local stored_level_list = self._level_list_by_game_mode[game_mode]
@@ -345,9 +335,8 @@ MapViewAreaHandler.get_levels_by_game_mode = function (self, game_mode, include_
 	else
 		return self._level_list_by_game_mode[game_mode]
 	end
-
-	return 
 end
+
 MapViewAreaHandler.get_level_information_by_game_mode = function (self, level_key, game_mode)
 	if level_key == "any" then
 		return self._random_levels_by_game_mode[game_mode]
@@ -360,9 +349,8 @@ MapViewAreaHandler.get_level_information_by_game_mode = function (self, level_ke
 			end
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.get_level_list_by_game_mode_and_area = function (self, game_mode_name, area_name)
 	for game_mode, game_mode_area_list in pairs(self._areas_level_list) do
 		if game_mode == game_mode_name then
@@ -375,9 +363,8 @@ MapViewAreaHandler.get_level_list_by_game_mode_and_area = function (self, game_m
 			return game_mode_area_list
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.get_difficulty_data_by_game_mode = function (self, game_mode_name)
 	local map_view_helper = self.map_view_helper
 	local data = {}
@@ -385,7 +372,7 @@ MapViewAreaHandler.get_difficulty_data_by_game_mode = function (self, game_mode_
 	for game_mode, game_mode_area_list in pairs(self._areas_level_list) do
 		if game_mode == game_mode_name then
 			for area, area_level_list in pairs(game_mode_area_list) do
-				local difficulty_data = map_view_helper.get_difficulty_data_summary(map_view_helper, area_level_list)
+				local difficulty_data = map_view_helper:get_difficulty_data_summary(area_level_list)
 				data[area] = difficulty_data
 			end
 		end
@@ -393,9 +380,10 @@ MapViewAreaHandler.get_difficulty_data_by_game_mode = function (self, game_mode_
 
 	return data
 end
+
 MapViewAreaHandler._create_summary_entry = function (self, level_list, area, display_name, map_icon, level_image)
 	local map_view_helper = self.map_view_helper
-	local difficulty_data = map_view_helper.get_difficulty_data_summary(map_view_helper, level_list)
+	local difficulty_data = map_view_helper:get_difficulty_data_summary(level_list)
 	local level_information = {
 		area = area,
 		map_icon = map_icon,
@@ -407,29 +395,29 @@ MapViewAreaHandler._create_summary_entry = function (self, level_list, area, dis
 
 	return level_information
 end
+
 MapViewAreaHandler.open_selected_area = function (self)
 	local selected_level_index = self._selected_level_index
 
 	if selected_level_index then
-		local level_list = self.active_level_list(self)
+		local level_list = self:active_level_list()
 		local level_data = level_list[selected_level_index]
 		local level_information = level_data.level_information
 		local is_area = level_information.is_area
 		local area = level_information.area
 
 		if is_area then
-			self.set_active_area(self, area)
-			self.select_level_after_level_list_change(self, true)
+			self:set_active_area(area)
+			self:select_level_after_level_list_change(true)
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.set_active_area = function (self, area)
 	local game_mode = self._active_game_mode
 
 	if not game_mode then
-		return 
+		return
 	end
 
 	self._area_changed = true
@@ -463,21 +451,21 @@ MapViewAreaHandler.set_active_area = function (self, area)
 				local widget_textures = level_information.textures
 				local map_position = level_information.position
 
-				self._reset_widget_for_level(self, widget, level_key, widget_textures, game_mode, map_position, is_area)
+				self:_reset_widget_for_level(widget, level_key, widget_textures, game_mode, map_position, is_area)
 
 				local visibility_tooltip = level_information.visibility_tooltip
 
-				self._set_area_widget_visibility(self, widget, visibility, visibility_tooltip)
+				self:_set_area_widget_visibility(widget, visibility, visibility_tooltip)
 
 				if visibility == "visible" then
 					local difficulty_data = level_information.difficulty_data
 
-					self._set_area_widget_difficulty_icons(self, widget, difficulty_data, game_mode, is_area)
+					self:_set_area_widget_difficulty_icons(widget, difficulty_data, game_mode, is_area)
 
 					local display_name = level_information.display_name
 
 					if not is_area then
-						self._set_area_widget_title_text(self, widget, display_name)
+						self:_set_area_widget_title_text(widget, display_name)
 					end
 				elseif visibility == "dlc" then
 					local dlc_name = level_information.dlc_name
@@ -499,10 +487,10 @@ MapViewAreaHandler.set_active_area = function (self, area)
 			local level_information = data.level_information
 			local is_area = level_information.is_area
 
-			if not is_area and not self._area_already_viewed(self, level_key) then
+			if not is_area and not self:_area_already_viewed(level_key) then
 				local widget = data.widget
 
-				self._on_level_widget_new(self, widget, index)
+				self:_on_level_widget_new(widget, index)
 			end
 		end
 
@@ -534,24 +522,22 @@ MapViewAreaHandler.set_active_area = function (self, area)
 	end
 
 	self._active_level_count = level_count
-
-	return 
 end
+
 MapViewAreaHandler.set_active_game_mode = function (self, game_mode, ignore_sound)
 	if game_mode then
 		self._active_game_mode = game_mode
 		self._selected_level_index = nil
 		self._active_level_information_list = nil
 
-		self.set_active_area(self, "world")
+		self:set_active_area("world")
 
 		if not ignore_sound then
-			self.animate_map_overlay(self)
+			self:animate_map_overlay()
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler._reset_widget_for_level = function (self, widget, level_key, textures, game_mode, position, is_area)
 	local widget_style = widget.style
 	local widget_content = widget.content
@@ -588,7 +574,7 @@ MapViewAreaHandler._reset_widget_for_level = function (self, widget, level_key, 
 	local preview_tooltip_style = widget_style.preview_tooltip
 
 	if preview_tooltip_style then
-		if 0 < position[1] then
+		if position[1] > 0 then
 			preview_tooltip_style.cursor_side = "left"
 			preview_tooltip_style.cursor_offset[1] = -10
 			preview_tooltip_style.cursor_offset[2] = -27
@@ -612,9 +598,8 @@ MapViewAreaHandler._reset_widget_for_level = function (self, widget, level_key, 
 		widget_style.text_background_right.color[1] = alpha
 		widget_style.text_background_center.color[1] = alpha
 	end
-
-	return 
 end
+
 MapViewAreaHandler._set_area_widget_difficulty_icons = function (self, widget, difficulty_data, game_mode, is_area)
 	local difficulty_icons = game_mode_level_area_textures[game_mode].difficulty_icons
 	local locked_difficulty_icon = difficulty_icons.locked
@@ -675,9 +660,8 @@ MapViewAreaHandler._set_area_widget_difficulty_icons = function (self, widget, d
 
 		index = index + 1
 	end
-
-	return 
 end
+
 MapViewAreaHandler._set_area_widget_title_text = function (self, widget, display_name)
 	local area_display_text = Localize(display_name)
 	local widget_style = widget.style
@@ -689,9 +673,8 @@ MapViewAreaHandler._set_area_widget_title_text = function (self, widget, display
 	self.ui_scenegraph[scenegraph_id].size[1] = text_width
 	self._scenegraph_definition[scenegraph_id].size[1] = text_width
 	widget.content.title_text = area_display_text
-
-	return 
 end
+
 MapViewAreaHandler._set_area_widget_visibility = function (self, widget, visibility, tooltip)
 	if visibility == "dlc" or visibility == "locked" then
 		widget.content.button_hotspot.is_preview = true
@@ -706,9 +689,8 @@ MapViewAreaHandler._set_area_widget_visibility = function (self, widget, visibil
 		widget.content.button_hotspot.is_preview = false
 		widget.content.preview_hotspot.is_preview = false
 	end
-
-	return 
 end
+
 MapViewAreaHandler.update = function (self, input_service, dt)
 	self._area_changed = nil
 
@@ -723,39 +705,37 @@ MapViewAreaHandler.update = function (self, input_service, dt)
 	local back_button_widget = self.back_button_widget
 	local back_button_content = back_button_widget.content
 
-	if back_button_content.button_hotspot.on_pressed or (input_service and input_service.get(input_service, "right_press")) then
-		self.zoom_out(self)
+	if back_button_content.button_hotspot.on_pressed or (input_service and input_service:get("right_press")) then
+		self:zoom_out()
 	end
 
-	self._check_level_selection_mouse(self)
-
-	return 
+	self:_check_level_selection_mouse()
 end
+
 MapViewAreaHandler.zoom_out = function (self)
-	local active_area = self.active_area(self)
+	local active_area = self:active_area()
 	local destination_area = "world"
 
 	if active_area ~= destination_area then
-		self.set_active_area(self, destination_area)
-		self.animate_map_overlay(self)
+		self:set_active_area(destination_area)
+		self:animate_map_overlay()
 
-		local level_index = self._get_widget_index_by_area_name(self, active_area)
+		local level_index = self:_get_widget_index_by_area_name(active_area)
 		self.selected_level_index = nil
 
 		if level_index then
-			self.set_selected_level(self, level_index, nil, true)
+			self:set_selected_level(level_index, nil, true)
 		else
-			self.select_level_after_level_list_change(self, true)
+			self:select_level_after_level_list_change(true)
 		end
 
-		self.play_sound(self, "Play_hud_next_tab")
+		self:play_sound("Play_hud_next_tab")
 		table.clear(self.back_button_widget.content.button_hotspot)
 	end
-
-	return 
 end
+
 MapViewAreaHandler._get_widget_index_by_area_name = function (self, area)
-	local level_list = self.active_level_list(self)
+	local level_list = self:active_level_list()
 
 	for i = 1, #level_list, 1 do
 		local data = level_list[i]
@@ -765,13 +745,12 @@ MapViewAreaHandler._get_widget_index_by_area_name = function (self, area)
 			return i
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.draw = function (self, input_service, gamepad_active, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
-	local active_area = self.active_area(self)
+	local active_area = self:active_area()
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
@@ -796,9 +775,9 @@ MapViewAreaHandler.draw = function (self, input_service, gamepad_active, dt)
 
 			if level_information.visibility == "visible" or level_information.is_area then
 				if widget_hotspot.on_hover_enter then
-					self._on_level_widget_hover(self, widget, index)
+					self:_on_level_widget_hover(widget, index)
 				elseif widget_hotspot.on_hover_exit and not widget_hotspot.is_selected then
-					self._on_level_widget_dehover(self, widget, index)
+					self:_on_level_widget_dehover(widget, index)
 				end
 
 				if widget_hotspot.is_hover and not level_hover_index and self._selected_level_index ~= index then
@@ -815,9 +794,8 @@ MapViewAreaHandler.draw = function (self, input_service, gamepad_active, dt)
 	self._level_hover_index = level_hover_index
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 MapViewAreaHandler._check_level_selection_mouse = function (self)
 	local selected_index = self._selected_level_index
 	local active_level_information_list = self._active_level_information_list
@@ -836,17 +814,17 @@ MapViewAreaHandler._check_level_selection_mouse = function (self)
 						if not level_information.dlc_url then
 							local area = level_information.area
 
-							self.set_active_area(self, area)
-							self.animate_map_overlay(self)
-							self.select_level_after_level_list_change(self, true)
-							self.play_sound(self, "Play_hud_select")
+							self:set_active_area(area)
+							self:animate_map_overlay()
+							self:select_level_after_level_list_change(true)
+							self:play_sound("Play_hud_select")
 						end
 
 						break
 					end
 
 					if not selected_index or selected_index ~= index then
-						self._on_level_selected(self, index, true)
+						self:_on_level_selected(index, true)
 					end
 
 					break
@@ -866,13 +844,12 @@ MapViewAreaHandler._check_level_selection_mouse = function (self)
 			end
 
 			if show_store_page then
-				self.show_level_store_page(self, index)
+				self:show_level_store_page(index)
 			end
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.show_level_store_page = function (self, level_index)
 	local active_level_information_list = self._active_level_information_list
 
@@ -897,18 +874,17 @@ MapViewAreaHandler.show_level_store_page = function (self, level_index)
 			end
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.select_level_after_level_list_change = function (self, ignore_sound)
 	local play_game_mode_sound = false
 	local first_level_key = nil
-	local level_list = self.active_level_list(self)
+	local level_list = self:active_level_list()
 
 	if level_list then
-		local num_visible_levels = self.visible_level_count(self)
+		local num_visible_levels = self:visible_level_count()
 
-		if 0 < num_visible_levels and not first_level_key then
+		if num_visible_levels > 0 and not first_level_key then
 			for i = 1, #level_list, 1 do
 				local level_data = level_list[i]
 				local level_key = level_data.level_key
@@ -940,16 +916,15 @@ MapViewAreaHandler.select_level_after_level_list_change = function (self, ignore
 		end
 
 		if new_selection_index then
-			self.set_selected_level(self, new_selection_index, nil, true)
+			self:set_selected_level(new_selection_index, nil, true)
 		end
 	end
 
 	if not ignore_sound then
 		return play_game_mode_sound
 	end
-
-	return 
 end
+
 MapViewAreaHandler._area_already_viewed = function (self, level_key)
 	local viewed_levels = self._map_save_data.viewed_levels
 
@@ -961,9 +936,11 @@ MapViewAreaHandler._area_already_viewed = function (self, level_key)
 
 	return false
 end
+
 MapViewAreaHandler.set_selected_level = function (self, index, play_sound, instant)
-	return self._on_level_selected(self, index, play_sound, instant)
+	return self:_on_level_selected(index, play_sound, instant)
 end
+
 MapViewAreaHandler._on_level_selected = function (self, index, play_sound, instant)
 	local active_level_information_list = self._active_level_information_list
 	local index = (active_level_information_list[index] and index) or 1
@@ -979,15 +956,15 @@ MapViewAreaHandler._on_level_selected = function (self, index, play_sound, insta
 		elseif button_hotspot.is_selected then
 			button_hotspot.is_selected = nil
 
-			self._on_level_widget_deselect(self, widget, i)
+			self:_on_level_widget_deselect(widget, i)
 		end
 	end
 
-	if index and 0 < index then
+	if index and index > 0 then
 		local wwise_events = level_information.wwise_events
 		local widget = area_data.widget
 
-		self._on_level_widget_select(self, widget, index, play_sound, instant)
+		self:_on_level_widget_select(widget, index, play_sound, instant)
 	end
 
 	self._selected_level_index = index
@@ -995,6 +972,7 @@ MapViewAreaHandler._on_level_selected = function (self, index, play_sound, insta
 
 	return level_information
 end
+
 MapViewAreaHandler._on_level_widget_select = function (self, widget, widget_index, play_sound, instant)
 	local ui_animations = self.ui_animations
 	local animation_name = "level_widget_select_" .. widget_index
@@ -1011,20 +989,20 @@ MapViewAreaHandler._on_level_widget_select = function (self, widget, widget_inde
 	local selected_background_scenegraph = not is_area_widget and ui_scenegraph[selected_scenegraph_id]
 	local selected_background_definition = not is_area_widget and scenegraph_definition[selected_scenegraph_id]
 
-	self._on_level_widget_new_cancel(self, widget, widget_index)
+	self:_on_level_widget_new_cancel(widget, widget_index)
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_hover"] = self._animate_element_by_time(self, widget_style.hover.color, 1, widget_style.hover.color[1], target_alpha, animation_duration)
-		ui_animations[animation_name .. "_selected"] = self._animate_element_by_time(self, widget_style.selected.color, 1, widget_style.selected.color[1], target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_hover"] = self:_animate_element_by_time(widget_style.hover.color, 1, widget_style.hover.color[1], target_alpha, animation_duration)
+		ui_animations[animation_name .. "_selected"] = self:_animate_element_by_time(widget_style.selected.color, 1, widget_style.selected.color[1], target_alpha, animation_duration)
 
 		if not is_area_widget then
-			ui_animations[animation_name .. "_selected_size_width"] = self._animate_element_by_catmullrom(self, selected_background_scenegraph.size, 1, selected_background_definition.size[1], 0.7, 1, 1, 0.7, animation_duration)
-			ui_animations[animation_name .. "_selected_size_height"] = self._animate_element_by_catmullrom(self, selected_background_scenegraph.size, 2, selected_background_definition.size[2], 0.7, 1, 1, 0.7, animation_duration)
-			ui_animations[animation_name .. "_preview"] = self._animate_element_by_time(self, widget_style.preview_texture.color, 1, widget_style.preview_texture.color[1], target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_hover"] = self._animate_element_by_time(self, widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_1_hover"] = self._animate_element_by_time(self, widget_style.text_background_left.color, 1, widget_style.text_background_left.color[1], target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_2_hover"] = self._animate_element_by_time(self, widget_style.text_background_right.color, 1, widget_style.text_background_right.color[1], target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_3_hover"] = self._animate_element_by_time(self, widget_style.text_background_center.color, 1, widget_style.text_background_center.color[1], target_alpha, animation_duration)
+			ui_animations[animation_name .. "_selected_size_width"] = self:_animate_element_by_catmullrom(selected_background_scenegraph.size, 1, selected_background_definition.size[1], 0.7, 1, 1, 0.7, animation_duration)
+			ui_animations[animation_name .. "_selected_size_height"] = self:_animate_element_by_catmullrom(selected_background_scenegraph.size, 2, selected_background_definition.size[2], 0.7, 1, 1, 0.7, animation_duration)
+			ui_animations[animation_name .. "_preview"] = self:_animate_element_by_time(widget_style.preview_texture.color, 1, widget_style.preview_texture.color[1], target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_hover"] = self:_animate_element_by_time(widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_1_hover"] = self:_animate_element_by_time(widget_style.text_background_left.color, 1, widget_style.text_background_left.color[1], target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_2_hover"] = self:_animate_element_by_time(widget_style.text_background_right.color, 1, widget_style.text_background_right.color[1], target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_3_hover"] = self:_animate_element_by_time(widget_style.text_background_center.color, 1, widget_style.text_background_center.color[1], target_alpha, animation_duration)
 		end
 	else
 		if not is_area_widget then
@@ -1041,11 +1019,10 @@ MapViewAreaHandler._on_level_widget_select = function (self, widget, widget_inde
 	end
 
 	if play_sound then
-		self.play_sound(self, "Play_hud_select")
+		self:play_sound("Play_hud_select")
 	end
-
-	return 
 end
+
 MapViewAreaHandler._on_level_widget_deselect = function (self, widget, widget_index)
 	local ui_animations = self.ui_animations
 	local animation_name = "level_widget_select_" .. widget_index
@@ -1060,24 +1037,23 @@ MapViewAreaHandler._on_level_widget_deselect = function (self, widget, widget_in
 	local animation_duration = (1 - (255 - current_alpha) / 255) * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_hover"] = self._animate_element_by_time(self, widget_style.hover.color, 1, widget_style.hover.color[1], target_alpha, animation_duration)
-		ui_animations[animation_name .. "_selected"] = self._animate_element_by_time(self, widget_style.selected.color, 1, widget_style.selected.color[1], target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_hover"] = self:_animate_element_by_time(widget_style.hover.color, 1, widget_style.hover.color[1], target_alpha, animation_duration)
+		ui_animations[animation_name .. "_selected"] = self:_animate_element_by_time(widget_style.selected.color, 1, widget_style.selected.color[1], target_alpha, animation_duration)
 
 		if not is_area_widget then
-			ui_animations[animation_name .. "_preview"] = self._animate_element_by_time(self, widget_style.preview_texture.color, 1, widget_style.preview_texture.color[1], 150, animation_duration)
-			ui_animations[animation_name .. "text_hover"] = self._animate_element_by_time(self, widget_style.title_text.text_color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_1_hover"] = self._animate_element_by_time(self, widget_style.text_background_left.color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_2_hover"] = self._animate_element_by_time(self, widget_style.text_background_right.color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_3_hover"] = self._animate_element_by_time(self, widget_style.text_background_center.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "_preview"] = self:_animate_element_by_time(widget_style.preview_texture.color, 1, widget_style.preview_texture.color[1], 150, animation_duration)
+			ui_animations[animation_name .. "text_hover"] = self:_animate_element_by_time(widget_style.title_text.text_color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_1_hover"] = self:_animate_element_by_time(widget_style.text_background_left.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_2_hover"] = self:_animate_element_by_time(widget_style.text_background_right.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_3_hover"] = self:_animate_element_by_time(widget_style.text_background_center.color, 1, current_alpha, target_alpha, animation_duration)
 		end
 	else
 		widget_style.selected.color[1] = target_alpha
 		widget_style.hover.color[1] = target_alpha
 	end
-
-	return 
 end
+
 MapViewAreaHandler._on_level_widget_hover = function (self, widget, widget_index)
 	local ui_animations = self.ui_animations
 	local animation_name = "level_widget_hover_" .. widget_index
@@ -1089,25 +1065,24 @@ MapViewAreaHandler._on_level_widget_hover = function (self, widget, widget_index
 	local animation_duration = (1 - current_alpha / target_alpha) * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 
-	self._on_level_widget_new_cancel(self, widget, widget_index)
+	self:_on_level_widget_new_cancel(widget, widget_index)
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_hover"] = self._animate_element_by_time(self, widget_style.hover.color, 1, current_alpha, target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_hover"] = self:_animate_element_by_time(widget_style.hover.color, 1, current_alpha, target_alpha, animation_duration)
 
 		if not is_area_widget then
-			ui_animations[animation_name .. "text_hover"] = self._animate_element_by_time(self, widget_style.title_text.text_color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_1_hover"] = self._animate_element_by_time(self, widget_style.text_background_left.color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_2_hover"] = self._animate_element_by_time(self, widget_style.text_background_right.color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_3_hover"] = self._animate_element_by_time(self, widget_style.text_background_center.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_hover"] = self:_animate_element_by_time(widget_style.title_text.text_color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_1_hover"] = self:_animate_element_by_time(widget_style.text_background_left.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_2_hover"] = self:_animate_element_by_time(widget_style.text_background_right.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_3_hover"] = self:_animate_element_by_time(widget_style.text_background_center.color, 1, current_alpha, target_alpha, animation_duration)
 		end
 	else
 		widget_style.hover.color[1] = target_alpha
 	end
 
-	self.play_sound(self, "Play_hud_hover")
-
-	return 
+	self:play_sound("Play_hud_hover")
 end
+
 MapViewAreaHandler._on_level_widget_dehover = function (self, widget, widget_index)
 	local ui_animations = self.ui_animations
 	local animation_name = "level_widget_hover_" .. widget_index
@@ -1118,24 +1093,23 @@ MapViewAreaHandler._on_level_widget_dehover = function (self, widget, widget_ind
 	local animation_duration = current_alpha / 255 * total_time
 	local is_area_widget = (widget.content.area_name and true) or false
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_hover"] = self._animate_element_by_time(self, widget_style.hover.color, 1, current_alpha, target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_hover"] = self:_animate_element_by_time(widget_style.hover.color, 1, current_alpha, target_alpha, animation_duration)
 
 		if not is_area_widget then
-			ui_animations[animation_name .. "text_hover"] = self._animate_element_by_time(self, widget_style.title_text.text_color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_1_hover"] = self._animate_element_by_time(self, widget_style.text_background_left.color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_2_hover"] = self._animate_element_by_time(self, widget_style.text_background_right.color, 1, current_alpha, target_alpha, animation_duration)
-			ui_animations[animation_name .. "text_bg_3_hover"] = self._animate_element_by_time(self, widget_style.text_background_center.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_hover"] = self:_animate_element_by_time(widget_style.title_text.text_color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_1_hover"] = self:_animate_element_by_time(widget_style.text_background_left.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_2_hover"] = self:_animate_element_by_time(widget_style.text_background_right.color, 1, current_alpha, target_alpha, animation_duration)
+			ui_animations[animation_name .. "text_bg_3_hover"] = self:_animate_element_by_time(widget_style.text_background_center.color, 1, current_alpha, target_alpha, animation_duration)
 		end
 	else
 		widget_style.hover.color[1] = target_alpha
 	end
-
-	return 
 end
+
 MapViewAreaHandler._on_level_widget_new = function (self, widget, widget_index)
 	if widget.content.area_name then
-		return 
+		return
 	end
 
 	local ui_animations = self.ui_animations
@@ -1149,15 +1123,14 @@ MapViewAreaHandler._on_level_widget_new = function (self, widget, widget_index)
 	local animation_duration = current_alpha / target_alpha * total_time
 	widget.content.is_new = true
 
-	if 0 < animation_duration then
-		ui_animations[animation_name] = self._animate_element_pulse(self, widget_style.new_flag.color, 1, current_alpha, target_alpha, 2)
+	if animation_duration > 0 then
+		ui_animations[animation_name] = self:_animate_element_pulse(widget_style.new_flag.color, 1, current_alpha, target_alpha, 2)
 	end
-
-	return 
 end
+
 MapViewAreaHandler._on_level_widget_new_cancel = function (self, widget, widget_index)
 	if widget.content.area_name then
-		return 
+		return
 	end
 
 	local ui_animations = self.ui_animations
@@ -1171,51 +1144,58 @@ MapViewAreaHandler._on_level_widget_new_cancel = function (self, widget, widget_
 		local level_key = widget.content.level_key
 		local viewed_levels = self._map_save_data.viewed_levels
 
-		if viewed_levels and not self._area_already_viewed(self, level_key) then
+		if viewed_levels and not self:_area_already_viewed(level_key) then
 			viewed_levels[level_key] = true
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler._animate_element_by_time = function (self, target, target_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, from, to, time, math.ease_out_quad)
 
 	return new_animation
 end
+
 MapViewAreaHandler._animate_element_by_catmullrom = function (self, target, target_index, target_value, p0, p1, p2, p3, time)
 	local new_animation = UIAnimation.init(UIAnimation.catmullrom, target, target_index, target_value, p0, p1, p2, p3, time)
 
 	return new_animation
 end
+
 MapViewAreaHandler._animate_element_pulse = function (self, target, target_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.pulse_animation, target, target_index, from, to, time)
 
 	return new_animation
 end
+
 MapViewAreaHandler.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 MapViewAreaHandler.active_game_mode = function (self)
 	return self._active_game_mode
 end
+
 MapViewAreaHandler.active_area = function (self)
 	return self._active_area
 end
+
 MapViewAreaHandler.selected_level_index = function (self)
 	return self._selected_level_index
 end
+
 MapViewAreaHandler.area_changed = function (self)
 	return self._area_changed
 end
+
 MapViewAreaHandler.level_hover_index = function (self)
 	return self._level_hover_index
 end
+
 MapViewAreaHandler.active_level_count = function (self)
 	return self._active_level_count or 0
 end
+
 MapViewAreaHandler.selected_level = function (self)
 	local selected_level_index = self._selected_level_index
 
@@ -1228,9 +1208,8 @@ MapViewAreaHandler.selected_level = function (self)
 			return level_data.level_key, level_data.level_information, selected_level_index
 		end
 	end
-
-	return 
 end
+
 MapViewAreaHandler.get_difficulty_data_by_level_index = function (self, level_index)
 	local active_level_information_list = self._active_level_information_list
 
@@ -1240,15 +1219,15 @@ MapViewAreaHandler.get_difficulty_data_by_level_index = function (self, level_in
 
 		return level_information.difficulty_data
 	end
-
-	return 
 end
+
 MapViewAreaHandler.active_level_list = function (self)
 	return self._active_level_information_list
 end
+
 MapViewAreaHandler.visible_level_count = function (self)
 	local num_visible_levels = 0
-	local level_list = self.active_level_list(self)
+	local level_list = self:active_level_list()
 
 	if level_list then
 		for index, data in ipairs(level_list) do
@@ -1262,11 +1241,10 @@ MapViewAreaHandler.visible_level_count = function (self)
 
 	return num_visible_levels
 end
+
 MapViewAreaHandler.animate_map_overlay = function (self)
 	local color = self.map_overlay_widget.style.texture_id.color
-	self.ui_animations.overlay_fade = self._animate_element_by_time(self, color, 1, 255, 0, 0.3)
-
-	return 
+	self.ui_animations.overlay_fade = self:_animate_element_by_time(color, 1, 255, 0, 0.3)
 end
 
-return 
+return

@@ -5,13 +5,13 @@ BTPackMasterGetHookAction.name = "BTPackMasterGetHookAction"
 local DRAG_DESTINATIONS_N = 10
 local DESTINATION_POS_I = 1
 local DESTINATION_SCORE_I = 2
+
 BTPackMasterGetHookAction.init = function (self, ...)
 	BTPackMasterGetHookAction.super.init(self, ...)
 
 	self.navigation_group_manager = Managers.state.conflict.navigation_group_manager
-
-	return 
 end
+
 BTPackMasterGetHookAction.enter = function (self, unit, blackboard, t)
 	if not blackboard.best_cover then
 		blackboard.end_time = t + 10
@@ -20,9 +20,8 @@ BTPackMasterGetHookAction.enter = function (self, unit, blackboard, t)
 	end
 
 	Managers.state.network:anim_event(unit, "run_away")
-
-	return 
 end
+
 BTPackMasterGetHookAction.leave = function (self, unit, blackboard, t, reason)
 	if reason == "done" then
 		AiUtils.show_polearm(unit, true)
@@ -36,9 +35,8 @@ BTPackMasterGetHookAction.leave = function (self, unit, blackboard, t, reason)
 	end
 
 	Managers.state.network:anim_event(unit, "move_fwd")
-
-	return 
 end
+
 BTPackMasterGetHookAction.run = function (self, unit, blackboard, t, dt)
 	local player_center_pos = ConflictUtils.average_player_position()
 
@@ -54,7 +52,7 @@ BTPackMasterGetHookAction.run = function (self, unit, blackboard, t, dt)
 			return "done"
 		end
 
-		self.find_hidden_cover(self, position, player_center_pos, blackboard)
+		self:find_hidden_cover(position, player_center_pos, blackboard)
 
 		if not blackboard.best_cover then
 			return "done"
@@ -78,6 +76,7 @@ BTPackMasterGetHookAction.run = function (self, unit, blackboard, t, dt)
 
 	return "running"
 end
+
 BTPackMasterGetHookAction.find_hidden_cover = function (self, position, player_center_pos, blackboard)
 	blackboard.best_cover_score = -math.huge
 	blackboard.best_cover = nil
@@ -114,7 +113,7 @@ BTPackMasterGetHookAction.find_hidden_cover = function (self, position, player_c
 			local direction_dot = dot(pm_to_cover_point, wanted_direction)
 			local hidden_dot = dot(Quaternion.forward(rot), -wanted_direction)
 
-			if blackboard.best_cover_score < direction_dot and 0 < hidden_dot then
+			if blackboard.best_cover_score < direction_dot and hidden_dot > 0 then
 				blackboard.best_cover_score = direction_dot
 				blackboard.best_cover = Vector3Box(pos)
 			end
@@ -127,8 +126,6 @@ BTPackMasterGetHookAction.find_hidden_cover = function (self, position, player_c
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

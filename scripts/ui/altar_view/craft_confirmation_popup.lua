@@ -412,6 +412,7 @@ local function create_gamepad_button(input_action, scenegraph_id)
 end
 
 CraftConfirmationPopup = class(CraftConfirmationPopup)
+
 CraftConfirmationPopup.init = function (self, context, position)
 	scenegraph_definition.popup_root.position = position
 	self.ui_top_renderer = context.ui_top_renderer
@@ -419,11 +420,11 @@ CraftConfirmationPopup.init = function (self, context, position)
 	local input_manager = context.input_manager
 	self.input_manager = input_manager
 
-	if not input_manager.get_input_service(input_manager) then
-		input_manager.create_input_service(input_manager, "craft_popup", "IngameMenuKeymaps", "IngameMenuFilters")
-		input_manager.map_device_to_service(input_manager, "craft_popup", "keyboard")
-		input_manager.map_device_to_service(input_manager, "craft_popup", "mouse")
-		input_manager.map_device_to_service(input_manager, "craft_popup", "gamepad")
+	if not input_manager:get_input_service() then
+		input_manager:create_input_service("craft_popup", "IngameMenuKeymaps", "IngameMenuFilters")
+		input_manager:map_device_to_service("craft_popup", "keyboard")
+		input_manager:map_device_to_service("craft_popup", "mouse")
+		input_manager:map_device_to_service("craft_popup", "gamepad")
 	end
 
 	self.debug_num_updates = 0
@@ -434,7 +435,7 @@ CraftConfirmationPopup.init = function (self, context, position)
 	self.popup_ids = 0
 	self.update_text_height = true
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.gamepad_button_colors = {
 		enabled = Colors.get_color_table_with_alpha("white", 255),
@@ -443,9 +444,8 @@ CraftConfirmationPopup.init = function (self, context, position)
 	self.unblocked_services = {}
 	self.unblocked_services_n = 0
 	self.mock_input_manager = MockInputManager:new()
-
-	return 
 end
+
 CraftConfirmationPopup.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self.frame_widget = UIWidget.init(frame_widget)
@@ -474,39 +474,37 @@ CraftConfirmationPopup.create_ui_elements = function (self)
 	gamepad_button_widgets[3][3] = UIWidget.init(create_gamepad_button("refresh", "button_3_3"))
 	self.button_widgets = button_widgets
 	self.gamepad_button_widgets = gamepad_button_widgets
-
-	return 
 end
+
 CraftConfirmationPopup.acquire_input = function (self)
 	local input_manager = self.input_manager
-	self.unblocked_services_n = input_manager.get_unblocked_services(input_manager, nil, nil, self.unblocked_services)
+	self.unblocked_services_n = input_manager:get_unblocked_services(nil, nil, self.unblocked_services)
 
-	input_manager.device_block_services(input_manager, "keyboard", 1, self.unblocked_services, self.unblocked_services_n, "craft_popup")
-	input_manager.device_block_services(input_manager, "gamepad", 1, self.unblocked_services, self.unblocked_services_n, "craft_popup")
-	input_manager.device_block_services(input_manager, "mouse", 1, self.unblocked_services, self.unblocked_services_n, "craft_popup")
-	input_manager.device_unblock_service(input_manager, "keyboard", 1, "craft_popup")
-	input_manager.device_unblock_service(input_manager, "gamepad", 1, "craft_popup")
-	input_manager.device_unblock_service(input_manager, "mouse", 1, "craft_popup")
+	input_manager:device_block_services("keyboard", 1, self.unblocked_services, self.unblocked_services_n, "craft_popup")
+	input_manager:device_block_services("gamepad", 1, self.unblocked_services, self.unblocked_services_n, "craft_popup")
+	input_manager:device_block_services("mouse", 1, self.unblocked_services, self.unblocked_services_n, "craft_popup")
+	input_manager:device_unblock_service("keyboard", 1, "craft_popup")
+	input_manager:device_unblock_service("gamepad", 1, "craft_popup")
+	input_manager:device_unblock_service("mouse", 1, "craft_popup")
 	ShowCursorStack.push()
-
-	return 
 end
+
 CraftConfirmationPopup.release_input = function (self)
 	local input_manager = self.input_manager
 
-	input_manager.device_block_service(input_manager, "keyboard", 1, "craft_popup")
-	input_manager.device_block_service(input_manager, "gamepad", 1, "craft_popup")
-	input_manager.device_block_service(input_manager, "mouse", 1, "craft_popup")
-	input_manager.device_unblock_services(input_manager, "keyboard", 1, self.unblocked_services, self.unblocked_services_n)
-	input_manager.device_unblock_services(input_manager, "gamepad", 1, self.unblocked_services, self.unblocked_services_n)
-	input_manager.device_unblock_services(input_manager, "mouse", 1, self.unblocked_services, self.unblocked_services_n)
+	input_manager:device_block_service("keyboard", 1, "craft_popup")
+	input_manager:device_block_service("gamepad", 1, "craft_popup")
+	input_manager:device_block_service("mouse", 1, "craft_popup")
+	input_manager:device_unblock_services("keyboard", 1, self.unblocked_services, self.unblocked_services_n)
+	input_manager:device_unblock_services("gamepad", 1, self.unblocked_services, self.unblocked_services_n)
+	input_manager:device_unblock_services("mouse", 1, self.unblocked_services, self.unblocked_services_n)
 	ShowCursorStack.pop()
-
-	return 
 end
+
 CraftConfirmationPopup.input_service = function (self)
 	return self.input_manager:get_service("craft_popup")
 end
+
 CraftConfirmationPopup.update = function (self, dt)
 	self.debug_num_updates = self.debug_num_updates + 1
 	local n_popups = self.n_popups
@@ -515,8 +513,8 @@ CraftConfirmationPopup.update = function (self, dt)
 	if current_popup then
 		local ui_top_renderer = self.ui_top_renderer
 		local input_manager = self.input_manager or self.mock_input_manager
-		local input_service = input_manager.get_service(input_manager, "craft_popup")
-		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+		local input_service = input_manager:get_service("craft_popup")
+		local gamepad_active = input_manager:is_device_active("gamepad")
 		local ui_scenegraph = self.ui_scenegraph
 		local frame_widget = self.frame_widget
 		local text = current_popup.text
@@ -525,13 +523,13 @@ CraftConfirmationPopup.update = function (self, dt)
 		if self.update_text_height then
 			local text_style = frame_widget.style.text
 			local text_field_scenegraph = ui_scenegraph[text_style.scenegraph_id]
-			local _, text_height = self.get_word_wrap_size(self, text, text_style, text_field_scenegraph.size[1])
+			local _, text_height = self:get_word_wrap_size(text, text_style, text_field_scenegraph.size[1])
 			self.update_text_height = nil
 			local default_text_height = 70
 			local default_background_height = scenegraph_definition.popup_background.size[2]
 			local text_height_diff = text_height - default_text_height
 
-			if 0 < text_height_diff then
+			if text_height_diff > 0 then
 				ui_scenegraph.popup_background.size[2] = default_background_height + text_height_diff
 			else
 				ui_scenegraph.popup_background.size[2] = default_background_height
@@ -571,7 +569,7 @@ CraftConfirmationPopup.update = function (self, dt)
 				local input_action = button_content.input_action
 
 				if not button_content.icon then
-					local action_texture_data = self.get_gamepad_input_texture_data(self, input_service, input_action)
+					local action_texture_data = self:get_gamepad_input_texture_data(input_service, input_action)
 					button_content.icon = action_texture_data.texture
 				end
 
@@ -585,10 +583,10 @@ CraftConfirmationPopup.update = function (self, dt)
 
 				UIRenderer.draw_widget(ui_top_renderer, gamepad_button)
 
-				if input_service.get(input_service, input_action, true) then
+				if input_service:get(input_action, true) then
 					result = args[i * 2 - 1]
 
-					self.play_sound(self, "Play_hud_select")
+					self:play_sound("Play_hud_select")
 				end
 			else
 				local button = buttons[i]
@@ -599,7 +597,7 @@ CraftConfirmationPopup.update = function (self, dt)
 				UIRenderer.draw_widget(ui_top_renderer, button)
 
 				if button_hotspot.on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self:play_sound("Play_hud_hover")
 				end
 
 				if button_hotspot.on_release then
@@ -607,7 +605,7 @@ CraftConfirmationPopup.update = function (self, dt)
 
 					result = args[i * 2 - 1]
 
-					self.play_sound(self, "Play_hud_select")
+					self:play_sound("Play_hud_select")
 				end
 			end
 		end
@@ -619,7 +617,7 @@ CraftConfirmationPopup.update = function (self, dt)
 			self.n_popups = n_popups
 
 			if n_popups == 0 then
-				self.release_input(self)
+				self:release_input()
 			end
 
 			self.update_text_height = true
@@ -627,9 +625,8 @@ CraftConfirmationPopup.update = function (self, dt)
 
 		UIRenderer.end_pass(ui_top_renderer)
 	end
-
-	return 
 end
+
 CraftConfirmationPopup.get_gamepad_input_texture_data = function (self, input_service, input_action, ignore_keybinding)
 	local platform = PLATFORM
 
@@ -642,9 +639,8 @@ CraftConfirmationPopup.get_gamepad_input_texture_data = function (self, input_se
 	else
 		return UISettings.get_gamepad_input_texture_data(input_service, input_action)
 	end
-
-	return 
 end
+
 CraftConfirmationPopup.set_button_enabled = function (self, popup_id, button_index, enabled)
 	local popup = nil
 
@@ -657,18 +653,16 @@ CraftConfirmationPopup.set_button_enabled = function (self, popup_id, button_ind
 	end
 
 	popup.button_enabled_state[button_index] = enabled
-
-	return 
 end
+
 CraftConfirmationPopup.active_popup = function (self)
 	local popup = self.popups[self.n_popups]
 
 	if popup then
 		return popup.popup_id, popup
 	end
-
-	return 
 end
+
 CraftConfirmationPopup.queue_popup = function (self, text, return_data, ...)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -689,7 +683,7 @@ CraftConfirmationPopup.queue_popup = function (self, text, return_data, ...)
 	local n_args = select("#", ...)
 
 	assert(math.floor(n_args / 2) * 2 == n_args, "Need one action for each button text")
-	assert(0 < n_args, "Need at least one button...")
+	assert(n_args > 0, "Need at least one button...")
 
 	new_popup.n_args = n_args / 2
 	new_popup.button_enabled_state = {}
@@ -704,13 +698,14 @@ CraftConfirmationPopup.queue_popup = function (self, text, return_data, ...)
 	pack_index[n_args](new_popup.args, 1, ...)
 
 	if n_popups == 1 and self.input_manager then
-		self.acquire_input(self)
+		self:acquire_input()
 	end
 
 	popups[n_popups] = new_popup
 
 	return popup_id
 end
+
 CraftConfirmationPopup.activate_timer = function (self, popup_id, time, default_result)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -741,12 +736,12 @@ CraftConfirmationPopup.activate_timer = function (self, popup_id, time, default_
 
 	popup.timer = time
 	popup.default_result = default_result
+end
 
-	return 
-end
 CraftConfirmationPopup.has_popup = function (self)
-	return 0 < self.n_popups
+	return self.n_popups > 0
 end
+
 CraftConfirmationPopup.cancel_popup = function (self, popup_id)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -762,15 +757,14 @@ CraftConfirmationPopup.cancel_popup = function (self, popup_id)
 			self.update_text_height = true
 
 			if self.n_popups == 0 then
-				self.release_input(self)
+				self:release_input()
 			end
 
-			return 
+			return
 		end
 	end
-
-	return 
 end
+
 CraftConfirmationPopup.cancel_all_popups = function (self)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -779,15 +773,14 @@ CraftConfirmationPopup.cancel_all_popups = function (self)
 		popups[i] = nil
 	end
 
-	if 0 < n_popups then
-		self.release_input(self)
+	if n_popups > 0 then
+		self:release_input()
 	end
 
 	self.n_popups = 0
 	self.update_text_height = true
-
-	return 
 end
+
 CraftConfirmationPopup.query_result = function (self, popup_id)
 	local result = self.popup_results[popup_id]
 	local return_data = self.popup_return_data[popup_id]
@@ -796,23 +789,24 @@ CraftConfirmationPopup.query_result = function (self, popup_id)
 
 	return result, return_data
 end
+
 CraftConfirmationPopup.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 CraftConfirmationPopup.get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_top_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 CraftConfirmationPopup.get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local lines = UIRenderer.word_wrap(self.ui_top_renderer, localized_text, font[1], scaled_font_size, text_area_width)
-	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
+	local text_width, text_height = self:get_text_size(localized_text, text_style)
 
 	return text_width, text_height * #lines
 end
 
-return 
+return

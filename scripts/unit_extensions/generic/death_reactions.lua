@@ -13,20 +13,18 @@ local function play_screen_space_blood(world, unit, attacker_unit, killing_blow,
 	local player_manager = Managers.player
 	local camera_manager = Managers.state.camera
 
-	for _, player in pairs(player_manager.human_players(player_manager)) do
-		if not player.remote and (not script_data.disable_remote_blood_splatter or (Unit.alive(attacker_unit) and player == player_manager.owner(player_manager, attacker_unit))) then
+	for _, player in pairs(player_manager:human_players()) do
+		if not player.remote and (not script_data.disable_remote_blood_splatter or (Unit.alive(attacker_unit) and player == player_manager:owner(attacker_unit))) then
 			local vp_name = player.viewport_name
-			local cam_pos = camera_manager.camera_position(camera_manager, vp_name)
+			local cam_pos = camera_manager:camera_position(vp_name)
 
-			if Vector3.distance_squared(cam_pos, pos) < 9 and (not script_data.disable_behind_blood_splatter or camera_manager.is_in_view(camera_manager, vp_name, pos)) then
+			if Vector3.distance_squared(cam_pos, pos) < 9 and (not script_data.disable_behind_blood_splatter or camera_manager:is_in_view(vp_name, pos)) then
 				local particle_name = SCREENSPACE_DEATH_EFFECTS[damage_type] or "fx/screenspace_blood_drops"
 
 				World.create_particles(world, particle_name, Vector3.zero())
 			end
 		end
 	end
-
-	return 
 end
 
 local function ai_default_unit_start(unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
@@ -40,24 +38,24 @@ local function ai_default_unit_start(unit, dt, context, t, killing_blow, is_serv
 	if damaged_by_other then
 		local ai_extension = ScriptUnit.extension(unit, "ai_system")
 
-		AiUtils.alert_nearby_friends_of_enemy(unit, ai_extension.blackboard(ai_extension).group_blackboard.broadphase, killer_unit)
+		AiUtils.alert_nearby_friends_of_enemy(unit, ai_extension:blackboard().group_blackboard.broadphase, killer_unit)
 	end
 
 	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
 	ScriptUnit.extension(unit, "ai_system"):die(killer_unit, killing_blow)
-	locomotion.set_affected_by_gravity(locomotion, false)
-	locomotion.set_movement_type(locomotion, "script_driven")
-	locomotion.set_wanted_velocity(locomotion, Vector3.zero())
+	locomotion:set_affected_by_gravity(false)
+	locomotion:set_movement_type("script_driven")
+	locomotion:set_wanted_velocity(Vector3.zero())
 	ScriptUnit.extension(unit, "ai_navigation_system"):release_bot()
 
 	if ScriptUnit.has_extension(unit, "ai_inventory_system") then
 		local inventory_system = Managers.state.entity:system("ai_inventory_system")
 
-		inventory_system.drop_item(inventory_system, unit)
+		inventory_system:drop_item(unit)
 	end
 
-	locomotion.set_collision_disabled(locomotion, "death_reaction", true)
+	locomotion:set_collision_disabled("death_reaction", true)
 
 	local owner_unit = AiUtils.get_actual_attacker_unit(killer_unit)
 
@@ -99,7 +97,7 @@ local function ai_default_unit_start(unit, dt, context, t, killing_blow, is_serv
 
 	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
-	locomotion_extension.set_movement_type(locomotion_extension, "disabled")
+	locomotion_extension:set_movement_type("disabled")
 
 	return data, DeathReactions.IS_NOT_DONE
 end
@@ -121,7 +119,7 @@ local function update_wall_nail(unit, dt, t, data)
 			local fly_time = 0.3
 			local ray_dist = nail_data.hit_speed * fly_time
 
-			fassert(0 < ray_dist, "Ray distance is not greater than 0")
+			fassert(ray_dist > 0, "Ray distance is not greater than 0")
 
 			local collision_filter = "filter_weapon_nailing"
 			local hit, hit_position, hit_distance, hit_normal, hit_actor = PhysicsWorld.immediate_raycast(World.get_data(world, "physics_world"), position, dir, (data.nailed and math.min(ray_dist, 0.4)) or ray_dist, "closest", "collision_filter", collision_filter)
@@ -157,8 +155,6 @@ local function update_wall_nail(unit, dt, t, data)
 	end
 
 	Profiler.stop("update_wall_nail")
-
-	return 
 end
 
 local function ai_default_unit_update(unit, dt, context, t, data, is_server)
@@ -190,9 +186,9 @@ local function ai_default_husk_start(unit, dt, context, t, killing_blow, is_serv
 	if ScriptUnit.has_extension(unit, "locomotion_system") then
 		local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
-		locomotion.set_mover_disable_reason(locomotion, "husk_death_reaction", true)
-		locomotion.set_collision_disabled(locomotion, "husk_death_reaction", true)
-		locomotion.destroy(locomotion)
+		locomotion:set_mover_disable_reason("husk_death_reaction", true)
+		locomotion:set_collision_disabled("husk_death_reaction", true)
+		locomotion:destroy()
 	end
 
 	local owner_unit = AiUtils.get_actual_attacker_unit(killer_unit)
@@ -202,7 +198,7 @@ local function ai_default_husk_start(unit, dt, context, t, killing_blow, is_serv
 	if ScriptUnit.has_extension(unit, "ai_inventory_system") then
 		local inventory_system = Managers.state.entity:system("ai_inventory_system")
 
-		inventory_system.drop_item(inventory_system, unit)
+		inventory_system:drop_item(unit)
 	end
 
 	local breed = Unit.get_data(unit, "breed")
@@ -252,13 +248,11 @@ end
 
 local function play_unit_audio(unit, blackboard, sound_name)
 	Managers.state.entity:system("audio_system"):play_audio_unit_event(sound_name, unit)
-
-	return 
 end
 
 local function trigger_unit_dialogue_death_event(killed_unit, killer_unit, hit_zone, damage_type)
 	if not Unit.alive(killed_unit) or not Unit.alive(killer_unit) then
-		return 
+		return
 	end
 
 	if Unit.has_data(killed_unit, "enemy_dialogue_face_anim") and Unit.has_animation_state_machine(killed_unit) then
@@ -285,8 +279,8 @@ local function trigger_unit_dialogue_death_event(killed_unit, killer_unit, hit_z
 
 		if player ~= nil then
 			local inventory_extension = ScriptUnit.extension(killer_unit, "inventory_system")
-			local weapon_slot = inventory_extension.get_wielded_slot_name(inventory_extension)
-			local weapon_data = inventory_extension.get_slot_data(inventory_extension, weapon_slot)
+			local weapon_slot = inventory_extension:get_wielded_slot_name()
+			local weapon_data = inventory_extension:get_slot_data(weapon_slot)
 			local attack_template = AttackTemplates[damage_type]
 
 			if weapon_slot == "slot_melee" or weapon_slot == "slot_ranged" then
@@ -319,12 +313,10 @@ local function trigger_unit_dialogue_death_event(killed_unit, killer_unit, hit_z
 
 				local event_name = "enemy_kill"
 
-				dialogue_input.trigger_dialogue_event(dialogue_input, event_name, event_data)
+				dialogue_input:trigger_dialogue_event(event_name, event_data)
 			end
 		end
 	end
-
-	return 
 end
 
 local buff_params = {}
@@ -340,8 +332,8 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 			local health_extension = ScriptUnit.extension(player_unit, "health_system")
 			local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
 
-			if health_extension.current_health_percent(health_extension) < 1 then
-				local heal_amount, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.HEAL_ON_KILL)
+			if health_extension:current_health_percent() < 1 then
+				local heal_amount, procced = buff_extension:apply_buffs_to_value(0, StatBuffIndex.HEAL_ON_KILL)
 				local heal_type = "proc"
 
 				if procced then
@@ -350,15 +342,15 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 					else
 						local network_manager = Managers.state.network
 						local network_transmit = network_manager.network_transmit
-						local owner_unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
+						local owner_unit_id = network_manager:unit_game_object_id(player_unit)
 						local heal_type_id = NetworkLookup.heal_types[heal_type]
 
-						network_transmit.send_rpc_server(network_transmit, "rpc_request_heal", owner_unit_id, heal_amount, heal_type_id)
+						network_transmit:send_rpc_server("rpc_request_heal", owner_unit_id, heal_amount, heal_type_id)
 					end
 				end
 			end
 
-			local attack_speed_multiplier, procced, parent_id = buff_extension.apply_buffs_to_value(buff_extension, 1, StatBuffIndex.ATTACK_SPEED_ON_KILL)
+			local attack_speed_multiplier, procced, parent_id = buff_extension:apply_buffs_to_value(1, StatBuffIndex.ATTACK_SPEED_ON_KILL)
 
 			if procced then
 				table.clear(buff_params)
@@ -367,19 +359,19 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 				buff_params.parent_id = parent_id
 				buff_params_2.parent_id = parent_id
 
-				buff_extension.add_buff(buff_extension, "attack_speed_from_proc", buff_params)
+				buff_extension:add_buff("attack_speed_from_proc", buff_params)
 
-				if inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_ranged" and not buff_extension.has_buff_type(buff_extension, "infinite_ammo_from_proc") then
-					buff_extension.add_buff(buff_extension, "infinite_ammo_from_proc")
-				elseif inventory_extension.get_wielded_slot_name(inventory_extension) == "slot_melee" then
-					buff_extension.add_buff(buff_extension, "damage_reduction_from_proc")
+				if inventory_extension:get_wielded_slot_name() == "slot_ranged" and not buff_extension:has_buff_type("infinite_ammo_from_proc") then
+					buff_extension:add_buff("infinite_ammo_from_proc")
+				elseif inventory_extension:get_wielded_slot_name() == "slot_melee" then
+					buff_extension:add_buff("damage_reduction_from_proc")
 				end
 			end
 
-			local amount, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.AMMO_ON_KILL)
+			local amount, procced = buff_extension:apply_buffs_to_value(0, StatBuffIndex.AMMO_ON_KILL)
 
 			if procced then
-				local slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_ranged")
+				local slot_data = inventory_extension:get_slot_data("slot_ranged")
 				local right_unit_1p = slot_data.right_unit_1p
 				local left_unit_1p = slot_data.left_unit_1p
 				local right_hand_ammo_extension = ScriptUnit.has_extension(right_unit_1p, "ammo_system") and ScriptUnit.extension(right_unit_1p, "ammo_system")
@@ -391,16 +383,14 @@ local function trigger_player_killing_blow_ai_buffs(ai_unit, player_unit, is_ser
 				end
 
 				if ammo_extension then
-					local max_ammo = ammo_extension.max_ammo_count(ammo_extension)
+					local max_ammo = ammo_extension:max_ammo_count()
 					local restore_amount = math.clamp(math.floor(max_ammo * amount), 1, math.huge)
 
-					ammo_extension.add_ammo_to_reserve(ammo_extension, restore_amount)
+					ammo_extension:add_ammo_to_reserve(restore_amount)
 				end
 			end
 		end
 	end
-
-	return 
 end
 
 local function trigger_headshot_dialogue_event(unit, killing_blow)
@@ -420,8 +410,6 @@ local function trigger_headshot_dialogue_event(unit, killing_blow)
 			SurroundingAwareSystem.add_event(source, "heard_speak", last_query.validated_rule.sound_distance, "heard_event", last_query.result, "speaker", source, "speaker_name", speaker_name, "sound_event", extension.last_query_sound_event or "unknown")
 		end
 	end
-
-	return 
 end
 
 local pickup_params = {}
@@ -446,13 +434,13 @@ DeathReactions.templates = {
 				if killing_blow[DamageDataIndex.DAMAGE_TYPE] == "volume_generic_dot" and (breed_name == "skaven_storm_vermin" or breed_name == "skaven_storm_vermin_commander") then
 					local mission_system = Managers.state.entity:system("mission_system")
 
-					mission_system.increment_goal_mission_counter(mission_system, "white_rat_kill_stormvermin", 1, true)
+					mission_system:increment_goal_mission_counter("white_rat_kill_stormvermin", 1, true)
 				end
 
 				if breed_name == "skaven_rat_ogre" then
 					local mission_system = Managers.state.entity:system("mission_system")
 
-					mission_system.increment_goal_mission_counter(mission_system, "black_powder_dont_kill_rat_ogre", 1, true)
+					mission_system:increment_goal_mission_counter("black_powder_dont_kill_rat_ogre", 1, true)
 				end
 
 				return data, result
@@ -536,7 +524,7 @@ DeathReactions.templates = {
 
 				local mission_system = Managers.state.entity:system("mission_system")
 
-				mission_system.increment_goal_mission_counter(mission_system, "enemy_below_kill_gutter_runners", 1, true)
+				mission_system:increment_goal_mission_counter("enemy_below_kill_gutter_runners", 1, true)
 
 				return data, result
 			end,
@@ -573,16 +561,16 @@ DeathReactions.templates = {
 				if damaged_by_other then
 					local ai_extension = ScriptUnit.extension(unit, "ai_system")
 
-					AiUtils.alert_nearby_friends_of_enemy(unit, ai_extension.blackboard(ai_extension).group_blackboard.broadphase, killer_unit)
+					AiUtils.alert_nearby_friends_of_enemy(unit, ai_extension:blackboard().group_blackboard.broadphase, killer_unit)
 				end
 
 				local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
 				ScriptUnit.extension(unit, "ai_system"):die(killer_unit, killing_blow)
-				locomotion.set_affected_by_gravity(locomotion, false)
-				locomotion.set_movement_type(locomotion, "script_driven")
-				locomotion.set_wanted_velocity(locomotion, Vector3.zero())
-				locomotion.set_collision_disabled(locomotion, "death_reaction", true)
+				locomotion:set_affected_by_gravity(false)
+				locomotion:set_movement_type("script_driven")
+				locomotion:set_wanted_velocity(Vector3.zero())
+				locomotion:set_collision_disabled("death_reaction", true)
 				Unit.flow_event(unit, "disable_despawn_fx")
 				World.create_particles(context.world, "fx/chr_gutter_foff", POSITION_LOOKUP[unit], Unit.local_rotation(unit, 0))
 				ScriptUnit.extension(unit, "ai_navigation_system"):release_bot()
@@ -607,9 +595,9 @@ DeathReactions.templates = {
 				if ScriptUnit.has_extension(unit, "locomotion_system") then
 					local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
-					locomotion.set_mover_disable_reason(locomotion, "husk_death_reaction", true)
-					locomotion.set_collision_disabled(locomotion, "husk_death_reaction", true)
-					locomotion.destroy(locomotion)
+					locomotion:set_mover_disable_reason("husk_death_reaction", true)
+					locomotion:set_collision_disabled("husk_death_reaction", true)
+					locomotion:destroy()
 				end
 
 				Unit.flow_event(unit, "disable_despawn_fx")
@@ -659,8 +647,6 @@ DeathReactions.templates = {
 
 					return data, result
 				end
-
-				return 
 			end,
 			update = function (unit, dt, context, t, data)
 				local blackboard = data.blackboard
@@ -745,7 +731,7 @@ DeathReactions.templates = {
 							Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
 
 							if pickup_name == "loot_die" then
-								dice_keeper.bonus_dice_spawned(dice_keeper)
+								dice_keeper:bonus_dice_spawned()
 							end
 
 							break
@@ -806,21 +792,17 @@ DeathReactions.templates = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 				Unit.set_flow_variable(unit, "current_health", 0)
 				Unit.flow_event(unit, "lua_on_death")
-
-				return 
 			end,
 			update = function (unit, dt, context, t, data)
-				return 
+				return
 			end
 		},
 		husk = {
 			start = function (unit, dt, context, t, killing_blow, is_server, cached_wall_nail_data)
 				Unit.flow_event(unit, "lua_on_death")
-
-				return 
 			end,
 			update = function (unit, dt, context, t, data)
-				return 
+				return
 			end
 		}
 	},
@@ -857,17 +839,17 @@ DeathReactions.templates = {
 						local unit_pos = POSITION_LOOKUP[unit]
 						local distance_squared = Vector3.distance_squared(data.starting_pos:unbox(), unit_pos)
 
-						if 1 < distance_squared then
+						if distance_squared > 1 then
 							if data.nav_tag_volume_id then
 								local volume_system = Managers.state.entity:system("volume_system")
 
-								volume_system.destroy_nav_tag_volume(volume_system, data.nav_tag_volume_id)
+								volume_system:destroy_nav_tag_volume(data.nav_tag_volume_id)
 
 								data.nav_tag_volume_id = nil
 							end
 
 							local volume_system = Managers.state.entity:system("volume_system")
-							data.nav_tag_volume_id = volume_system.create_nav_tag_volume_from_data(volume_system, unit_pos, 5, "barrel_explosion")
+							data.nav_tag_volume_id = volume_system:create_nav_tag_volume_from_data(unit_pos, 5, "barrel_explosion")
 
 							data.starting_pos:store(unit_pos)
 						end
@@ -875,7 +857,7 @@ DeathReactions.templates = {
 						local volume_system = Managers.state.entity:system("volume_system")
 						local pos = POSITION_LOOKUP[unit]
 						data.starting_pos = Vector3Box(pos)
-						data.nav_tag_volume_id = volume_system.create_nav_tag_volume_from_data(volume_system, pos, 5, "barrel_explosion")
+						data.nav_tag_volume_id = volume_system:create_nav_tag_volume_from_data(pos, 5, "barrel_explosion")
 					end
 				end
 
@@ -900,11 +882,11 @@ DeathReactions.templates = {
 							Managers.state.entity:system("damage_system"):create_explosion(owner_unit, position, rotation, explosion_template, 1, item_name)
 
 							local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
-							local equipment = inventory_extension.equipment(inventory_extension)
+							local equipment = inventory_extension:equipment()
 							local slot_name = equipment.wielded_slot
 
-							inventory_extension.destroy_slot(inventory_extension, slot_name)
-							inventory_extension.wield_previous_weapon(inventory_extension)
+							inventory_extension:destroy_slot(slot_name)
+							inventory_extension:wield_previous_weapon()
 						end
 					else
 						local position = POSITION_LOOKUP[unit]
@@ -916,17 +898,15 @@ DeathReactions.templates = {
 					end
 
 					data.exploded = true
-				elseif explode_time - 1.2 <= network_time and not data.played_fuse_out then
+				elseif network_time >= explode_time - 1.2 and not data.played_fuse_out then
 					Unit.flow_event(unit, "exploding_barrel_fuse_out")
 
 					data.played_fuse_out = true
-				elseif explode_time + 0.5 <= network_time then
+				elseif network_time >= explode_time + 0.5 then
 					Managers.state.unit_spawner:mark_for_deletion(unit)
 
 					return DeathReactions.IS_DONE
 				end
-
-				return 
 			end
 		},
 		husk = {
@@ -974,27 +954,26 @@ DeathReactions.templates = {
 						Managers.state.entity:system("damage_system"):create_explosion(owner_unit, position, rotation, explosion_template, 1, item_name)
 
 						local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
-						local equipment = inventory_extension.equipment(inventory_extension)
+						local equipment = inventory_extension:equipment()
 						local slot_name = equipment.wielded_slot
 
-						inventory_extension.destroy_slot(inventory_extension, slot_name)
-						inventory_extension.wield_previous_weapon(inventory_extension)
+						inventory_extension:destroy_slot(slot_name)
+						inventory_extension:wield_previous_weapon()
 					end
 
 					data.exploded = true
-				elseif explode_time - 1.2 <= network_time and not data.played_fuse_out then
+				elseif network_time >= explode_time - 1.2 and not data.played_fuse_out then
 					Unit.flow_event(unit, "exploding_barrel_fuse_out")
 
 					data.played_fuse_out = true
-				elseif explode_time + 0.5 <= network_time then
+				elseif network_time >= explode_time + 0.5 then
 					return DeathReactions.IS_DONE
 				end
-
-				return 
 			end
 		}
 	}
 }
+
 DeathReactions.get_reaction = function (death_reaction_template, is_husk)
 	local templates = DeathReactions.templates
 	local husk_key = (is_husk and "husk") or "unit"
@@ -1004,6 +983,7 @@ DeathReactions.get_reaction = function (death_reaction_template, is_husk)
 
 	return reaction
 end
+
 DeathReactions._add_ai_killed_by_player_telemetry = function (victim_unit, breed_name, player_unit, player, damage_type, weapon_name, death_hit_zone)
 	local network_manager = Managers.state.network
 	local is_server = network_manager.is_server
@@ -1016,8 +996,6 @@ DeathReactions._add_ai_killed_by_player_telemetry = function (victim_unit, breed
 
 		Managers.telemetry.events:player_killed_ai(player, player_position, victim_position, breed_name, weapon_name, damage_type, death_hit_zone)
 	end
-
-	return 
 end
 
-return 
+return

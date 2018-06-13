@@ -1,6 +1,7 @@
 require("scripts/network/lobby_aux")
 
 LobbyHost = class(LobbyHost)
+
 LobbyHost.init = function (self, network_options, lobby)
 	local config_file_name = network_options.config_file_name
 	local project_hash = network_options.project_hash
@@ -14,9 +15,8 @@ LobbyHost.init = function (self, network_options, lobby)
 	self.lobby = lobby or LobbyInternal.create_lobby(network_options)
 	self.peer_id = Network.peer_id()
 	self.platform = PLATFORM
-
-	return 
 end
+
 LobbyHost.destroy = function (self)
 	print("[LobbyHost] Destroying")
 
@@ -37,12 +37,11 @@ LobbyHost.destroy = function (self)
 	self.lobby = nil
 
 	GarbageLeakDetector.register_object(self, "Lobby Host")
-
-	return 
 end
+
 LobbyHost.update = function (self, dt)
 	local lobby = self.lobby
-	local lobby_state = lobby.state(lobby)
+	local lobby_state = lobby:state()
 	local new_state = LobbyInternal.state_map[lobby_state]
 	local old_state = self.state or 0
 
@@ -56,15 +55,15 @@ LobbyHost.update = function (self, dt)
 				local lobby_data_table = self.lobby_data_table or {}
 				lobby_data_table.network_hash = self.network_hash
 
-				lobby.set_data_table(lobby, lobby_data_table)
+				lobby:set_data_table(lobby_data_table)
 			else
-				lobby.set_data(lobby, "network_hash", self.network_hash)
+				lobby:set_data("network_hash", self.network_hash)
 
 				local lobby_data_table = self.lobby_data_table
 
 				if lobby_data_table then
 					for key, value in pairs(lobby_data_table) do
-						lobby.set_data(lobby, key, value)
+						lobby:set_data(key, value)
 					end
 				end
 			end
@@ -76,15 +75,14 @@ LobbyHost.update = function (self, dt)
 	end
 
 	if PLATFORM == "ps4" then
-		lobby.update(lobby, dt)
+		lobby:update(dt)
 	end
 
 	if self.lobby_members then
 		self.lobby_members:update()
 	end
-
-	return 
 end
+
 LobbyHost.set_lobby_data = function (self, lobby_data_table)
 	self.lobby_data_table = lobby_data_table
 
@@ -92,43 +90,50 @@ LobbyHost.set_lobby_data = function (self, lobby_data_table)
 		local lobby = self.lobby
 
 		if PLATFORM == "ps4" then
-			lobby.set_data_table(lobby, lobby_data_table)
+			lobby:set_data_table(lobby_data_table)
 		else
 			for key, value in pairs(lobby_data_table) do
-				lobby.set_data(lobby, key, value)
+				lobby:set_data(key, value)
 			end
 		end
 	end
-
-	return 
 end
+
 LobbyHost.get_stored_lobby_data = function (self)
 	return self.lobby_data_table
 end
+
 LobbyHost.members = function (self)
 	return self.lobby_members
 end
+
 LobbyHost.lobby_data = function (self, key)
 	return self.lobby:data(key)
 end
+
 LobbyHost.lobby_host = function (self)
 	return self.lobby:lobby_host()
 end
+
 LobbyHost.user_name = function (self, peer_id)
 	return self.lobby:user_name(peer_id)
 end
+
 LobbyHost.id = function (self)
 	return (LobbyInternal.lobby_id and LobbyInternal.lobby_id(self.lobby)) or "no_id"
 end
+
 LobbyHost.is_joined = function (self)
 	local lobby_state = self.lobby:state()
 	local state = LobbyInternal.state_map[lobby_state]
 
 	return state == LobbyState.JOINED
 end
+
 LobbyHost.get_network_hash = function (self)
 	return self.network_hash
 end
+
 LobbyHost.set_lobby = function (self, lobby)
 	print("leaving old lobby")
 	LobbyInternal.leave_lobby(self.lobby)
@@ -136,11 +141,9 @@ LobbyHost.set_lobby = function (self, lobby)
 	self.lobby = lobby
 	local lobby_data_table = self.lobby_data_table or {}
 
-	self.set_lobby_data(self, lobby_data_table)
+	self:set_lobby_data(lobby_data_table)
 
 	self.lobby_members = LobbyMembers:new(lobby)
-
-	return 
 end
 
-return 
+return

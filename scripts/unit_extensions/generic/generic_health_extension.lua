@@ -1,6 +1,7 @@
 require("scripts/unit_extensions/generic/hit_reactions")
 
 GenericHealthExtension = class(GenericHealthExtension)
+
 GenericHealthExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.unit = unit
 	self.is_server = Managers.player.is_server
@@ -17,53 +18,55 @@ GenericHealthExtension.init = function (self, extension_init_context, unit, exte
 		self.is_invincible = false
 	end
 
-	self.set_max_health(self, health, true)
+	self:set_max_health(health, true)
 
 	self.unmodified_max_health_changed = false
 	self.damage = extension_init_data.damage or 0
 	self.state = "alive"
 	self.instakill = false
+end
 
-	return 
-end
 GenericHealthExtension.extensions_ready = function (self, world, unit)
-	return 
+	return
 end
+
 GenericHealthExtension.destroy = function (self)
-	return 
+	return
 end
+
 GenericHealthExtension.reset = function (self)
 	self.damage = 0
 	self.state = "alive"
-
-	return 
 end
+
 GenericHealthExtension.update = function (self, dt, context, t)
 	self.unmodified_max_health_changed = false
-
-	return 
 end
+
 GenericHealthExtension.is_alive = function (self)
 	return self.damage < self.health
 end
+
 GenericHealthExtension.current_health_percent = function (self)
 	return 1 - self.damage / self.health
 end
+
 GenericHealthExtension.current_health = function (self)
 	return self.health - self.damage
 end
+
 GenericHealthExtension.current_damage = function (self)
 	return self.damage
 end
+
 GenericHealthExtension.get_max_health = function (self)
 	if self.is_invincible then
 		return 0
 	else
 		return self.health
 	end
-
-	return 
 end
+
 GenericHealthExtension.set_max_health = function (self, health, update_unmodfied)
 	if update_unmodfied then
 		self.unmodified_max_health = health
@@ -71,27 +74,23 @@ GenericHealthExtension.set_max_health = function (self, health, update_unmodfied
 	end
 
 	self.health = health
-
-	return 
 end
+
 GenericHealthExtension.add_heal = function (self, heal_amount)
 	self.damage = math.max(0, self.damage - heal_amount)
-
-	return 
 end
+
 GenericHealthExtension.add_damage = function (self, damage)
 	if not self.is_invincible then
 		self.instakill = self.health <= damage and self.damage == 0
 		self.damage = self.damage + damage
 	end
-
-	return 
 end
+
 GenericHealthExtension.set_current_damage = function (self, damage)
 	self.damage = damage
-
-	return 
 end
+
 GenericHealthExtension.die = function (self, damage_type)
 	if self.is_server then
 		local unit = self.unit
@@ -102,8 +101,6 @@ GenericHealthExtension.die = function (self, damage_type)
 			AiUtils.kill_unit(unit, nil, nil, damage_type, nil)
 		end
 	end
-
-	return 
 end
 
-return 
+return

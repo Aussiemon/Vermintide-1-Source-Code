@@ -1,12 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTRatlingGunnerApproachAction = class(BTRatlingGunnerApproachAction, BTNode)
+
 BTRatlingGunnerApproachAction.init = function (self, ...)
 	BTRatlingGunnerApproachAction.super.init(self, ...)
-
-	return 
 end
+
 BTRatlingGunnerApproachAction.name = "BTRatlingGunnerApproachAction"
+
 BTRatlingGunnerApproachAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	local attack_pattern_data = blackboard.attack_pattern_data or {}
@@ -16,20 +17,20 @@ BTRatlingGunnerApproachAction.enter = function (self, unit, blackboard, t)
 	local move_speed = action.move_speed
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_max_speed(navigation_extension, move_speed)
-	navigation_extension.set_enabled(navigation_extension, false)
+	navigation_extension:set_max_speed(move_speed)
+	navigation_extension:set_enabled(false)
 
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
+	locomotion_extension:set_wanted_velocity(Vector3.zero())
 
 	if blackboard.move_state == "moving" then
 		local move_animation = action.move_anim
 		local network_manager = Managers.state.network
 
-		network_manager.anim_event(network_manager, unit, "to_combat")
-		network_manager.anim_event(network_manager, unit, move_animation)
-		navigation_extension.set_enabled(navigation_extension, true)
+		network_manager:anim_event(unit, "to_combat")
+		network_manager:anim_event(unit, move_animation)
+		navigation_extension:set_enabled(true)
 	end
 
 	if action.show_tutorial_message then
@@ -38,9 +39,8 @@ BTRatlingGunnerApproachAction.enter = function (self, unit, blackboard, t)
 
 		Managers.state.network.network_transmit:send_rpc_all("rpc_tutorial_message", template_id, message_id)
 	end
-
-	return 
 end
+
 BTRatlingGunnerApproachAction.leave = function (self, unit, blackboard, t, reason)
 	if reason ~= "done" then
 		blackboard.move_pos = nil
@@ -49,13 +49,12 @@ BTRatlingGunnerApproachAction.leave = function (self, unit, blackboard, t, reaso
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_max_speed(navigation_extension, default_move_speed)
-	navigation_extension.set_enabled(navigation_extension, true)
-
-	return 
+	navigation_extension:set_max_speed(default_move_speed)
+	navigation_extension:set_enabled(true)
 end
+
 BTRatlingGunnerApproachAction.run = function (self, unit, blackboard, t, dt)
-	local is_within_check_distance = self.is_within_check_distance(self, unit, blackboard)
+	local is_within_check_distance = self:is_within_check_distance(unit, blackboard)
 
 	if is_within_check_distance then
 		return "done"
@@ -65,10 +64,10 @@ BTRatlingGunnerApproachAction.run = function (self, unit, blackboard, t, dt)
 	local at_goal = move_pos and blackboard.destination_dist < 0.5
 
 	if not move_pos or at_goal then
-		local position = self.calculate_move_position(self, unit, blackboard)
+		local position = self:calculate_move_position(unit, blackboard)
 
 		if position then
-			self.move_to(self, position, blackboard)
+			self:move_to(position, blackboard)
 
 			return "running"
 		else
@@ -89,8 +88,8 @@ BTRatlingGunnerApproachAction.run = function (self, unit, blackboard, t, dt)
 		local move_animation = action.move_anim
 		local network_manager = Managers.state.network
 
-		network_manager.anim_event(network_manager, unit, "to_combat")
-		network_manager.anim_event(network_manager, unit, move_animation)
+		network_manager:anim_event(unit, "to_combat")
+		network_manager:anim_event(unit, move_animation)
 
 		blackboard.move_state = "moving"
 
@@ -99,6 +98,7 @@ BTRatlingGunnerApproachAction.run = function (self, unit, blackboard, t, dt)
 
 	return "running"
 end
+
 BTRatlingGunnerApproachAction.is_within_check_distance = function (self, unit, blackboard)
 	local action = blackboard.action
 	local has_been_attacked = blackboard.previous_attacker
@@ -109,15 +109,15 @@ BTRatlingGunnerApproachAction.is_within_check_distance = function (self, unit, b
 
 	return is_within_check_distance
 end
+
 BTRatlingGunnerApproachAction.move_to = function (self, position, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.move_to(navigation_extension, position)
+	navigation_extension:move_to(position)
 
 	blackboard.move_pos = Vector3Box(position)
-
-	return 
 end
+
 BTRatlingGunnerApproachAction.calculate_move_position = function (self, unit, blackboard)
 	local action = blackboard.action
 	local min_distance = action.check_distance - 2
@@ -129,4 +129,4 @@ BTRatlingGunnerApproachAction.calculate_move_position = function (self, unit, bl
 	return position
 end
 
-return 
+return

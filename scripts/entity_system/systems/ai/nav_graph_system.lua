@@ -5,10 +5,11 @@ local extensions = {
 	"LevelUnitSmartObjectExtension"
 }
 script_data.nav_mesh_debug = script_data.nav_mesh_debug or Development.parameter("nav_mesh_debug")
+
 NavGraphSystem.init = function (self, context, system_name)
 	local entity_manager = context.entity_manager
 
-	entity_manager.register_system(entity_manager, self, system_name, extensions)
+	entity_manager:register_system(self, system_name, extensions)
 
 	self.entity_manager = entity_manager
 	self.world = context.world
@@ -59,18 +60,17 @@ NavGraphSystem.init = function (self, context, system_name)
 	self.smart_object_ids = {}
 	self.line_object = World.create_line_object(self.world)
 	self.initialized_unit_nav_graphs = {}
-
-	return 
 end
+
 NavGraphSystem.destroy = function (self)
 	World.destroy_line_object(self.world, self.line_object)
 
 	self.line_object = nil
 	self.initialized_unit_nav_graphs = nil
-
-	return 
 end
+
 local control_points = {}
+
 NavGraphSystem.init_nav_graphs = function (self, unit, smart_object_id, extension)
 	local nav_world = self.nav_world
 	local level = LevelHelper:current_level(self.world)
@@ -113,45 +113,44 @@ NavGraphSystem.init_nav_graphs = function (self, unit, smart_object_id, extensio
 
 			if smart_object_type == "ledges" or smart_object_type == "ledges_with_fence" then
 				if smart_object_data.data.ledge_position1 then
-					drawer.line(drawer, control_points[1], Vector3Aux.unbox(smart_object_data.data.ledge_position1), debug_color)
-					drawer.line(drawer, Vector3Aux.unbox(smart_object_data.data.ledge_position1), Vector3Aux.unbox(smart_object_data.data.ledge_position2), debug_color)
-					drawer.line(drawer, control_points[2], Vector3Aux.unbox(smart_object_data.data.ledge_position2), debug_color)
+					drawer:line(control_points[1], Vector3Aux.unbox(smart_object_data.data.ledge_position1), debug_color)
+					drawer:line(Vector3Aux.unbox(smart_object_data.data.ledge_position1), Vector3Aux.unbox(smart_object_data.data.ledge_position2), debug_color)
+					drawer:line(control_points[2], Vector3Aux.unbox(smart_object_data.data.ledge_position2), debug_color)
 				else
-					drawer.line(drawer, control_points[1], Vector3Aux.unbox(smart_object_data.data.ledge_position), debug_color)
-					drawer.line(drawer, control_points[2], Vector3Aux.unbox(smart_object_data.data.ledge_position), debug_color)
+					drawer:line(control_points[1], Vector3Aux.unbox(smart_object_data.data.ledge_position), debug_color)
+					drawer:line(control_points[2], Vector3Aux.unbox(smart_object_data.data.ledge_position), debug_color)
 				end
 
 				if not smart_object_data.data.is_bidirectional then
-					drawer.vector(drawer, control_points[1], Vector3.up(), debug_color)
+					drawer:vector(control_points[1], Vector3.up(), debug_color)
 				end
 			elseif smart_object_type == "jumps" then
-				drawer.line(drawer, control_points[1], control_points[2], Colors.get("aqua_marine"))
+				drawer:line(control_points[1], control_points[2], Colors.get("aqua_marine"))
 			else
-				drawer.line(drawer, control_points[1], control_points[2], debug_color)
+				drawer:line(control_points[1], control_points[2], debug_color)
 			end
 
 			local is_position_on_navmesh = GwNavQueries.triangle_from_position(nav_world, control_points[1])
 
 			if is_position_on_navmesh then
-				drawer.sphere(drawer, control_points[1], 0.05, debug_color)
+				drawer:sphere(control_points[1], 0.05, debug_color)
 			else
-				drawer.sphere(drawer, control_points[1], 0.05, debug_color_fail)
+				drawer:sphere(control_points[1], 0.05, debug_color_fail)
 			end
 
 			is_position_on_navmesh = GwNavQueries.triangle_from_position(nav_world, control_points[2])
 
 			if is_position_on_navmesh then
-				drawer.sphere(drawer, control_points[2], 0.05, debug_color)
+				drawer:sphere(control_points[2], 0.05, debug_color)
 			else
-				drawer.sphere(drawer, control_points[2], 0.05, debug_color_fail)
+				drawer:sphere(control_points[2], 0.05, debug_color_fail)
 			end
 		end
 	end
 
 	self.initialized_unit_nav_graphs[unit] = true
-
-	return 
 end
+
 NavGraphSystem.on_add_extension = function (self, world, unit, extension_name)
 	local extension = {
 		navgraphs = {}
@@ -167,7 +166,7 @@ NavGraphSystem.on_add_extension = function (self, world, unit, extension_name)
 
 		if smart_object_id and self.smart_objects[smart_object_id] then
 			if not Unit.has_data(unit, "enabled_on_spawn") or Unit.get_data(unit, "enabled_on_spawn") == true then
-				self.init_nav_graphs(self, unit, smart_object_id, extension)
+				self:init_nav_graphs(unit, smart_object_id, extension)
 			end
 		elseif Development.parameter("visualize_ledges") then
 			local drawer = Managers.state.debug:drawer({
@@ -176,21 +175,22 @@ NavGraphSystem.on_add_extension = function (self, world, unit, extension_name)
 			})
 			local pose, half_extents = Unit.box(unit)
 
-			drawer.box(drawer, pose, half_extents + Vector3(0.01, 0.01, 0.01), Colors.get("red"))
+			drawer:box(pose, half_extents + Vector3(0.01, 0.01, 0.01), Colors.get("red"))
 		end
 	end
 
 	if extension_name == "LevelUnitSmartObjectExtension" then
-		local smart_object_id = self._level_unit_smart_object_id(self, unit)
-		local smart_object = self.smart_object_from_unit_data(self, unit, smart_object_id)
+		local smart_object_id = self:_level_unit_smart_object_id(unit)
+		local smart_object = self:smart_object_from_unit_data(unit, smart_object_id)
 		self.smart_objects[smart_object_id] = smart_object
 		self.smart_object_ids[unit] = smart_object_id
 
-		self.init_nav_graphs(self, unit, smart_object_id, extension)
+		self:init_nav_graphs(unit, smart_object_id, extension)
 	end
 
 	return extension
 end
+
 NavGraphSystem._level_unit_smart_object_id = function (self, unit)
 	local level = LevelHelper:current_level(self.world)
 	local unit_level_id = Level.unit_index(level, unit)
@@ -200,6 +200,7 @@ NavGraphSystem._level_unit_smart_object_id = function (self, unit)
 
 	return smart_object_id
 end
+
 NavGraphSystem.init_nav_graph_from_flow = function (self, unit)
 	local extension = self.unit_extension_data[unit]
 
@@ -213,11 +214,10 @@ NavGraphSystem.init_nav_graph_from_flow = function (self, unit)
 	local smart_object_id = Unit.get_data(unit, "smart_object_id") or Unit.get_data(unit, "ledge_id")
 
 	if smart_object_id and self.smart_objects[smart_object_id] then
-		self.init_nav_graphs(self, unit, smart_object_id, extension)
+		self:init_nav_graphs(unit, smart_object_id, extension)
 	end
-
-	return 
 end
+
 NavGraphSystem.smart_object_from_unit_data = function (self, unit, smart_object_id)
 	local smart_object = {}
 	local i = 0
@@ -291,6 +291,7 @@ NavGraphSystem.smart_object_from_unit_data = function (self, unit, smart_object_
 
 	return smart_object
 end
+
 NavGraphSystem.on_remove_extension = function (self, unit, extension_name)
 	ScriptUnit.remove_extension(unit, self.NAME)
 
@@ -303,9 +304,8 @@ NavGraphSystem.on_remove_extension = function (self, unit, extension_name)
 	end
 
 	self.unit_extension_data[unit] = nil
-
-	return 
 end
+
 NavGraphSystem.update = function (self, context, t, dt)
 	if self._nav_mesh_debug or script_data.nav_mesh_debug then
 		self._nav_mesh_debug = script_data.nav_mesh_debug
@@ -318,16 +318,16 @@ NavGraphSystem.update = function (self, context, t, dt)
 		end
 	end
 
-	if not LEVEL_EDITOR_TEST and self.ledgelator_version ~= WANTED_LEDGELATOR_VERSION and 3 < math.floor(t) % 10 then
+	if not LEVEL_EDITOR_TEST and self.ledgelator_version ~= WANTED_LEDGELATOR_VERSION and math.floor(t) % 10 > 3 then
 		Debug.text("WARNING: Using old smart objects. Found version=%s Wanted version=%s", tostring(self.ledgelator_version), WANTED_LEDGELATOR_VERSION)
 		Debug.text("Re-generate and save from level editor, then run generate_resource_packages.bat")
 	end
+end
 
-	return 
-end
 NavGraphSystem.hot_join_sync = function (self, sender)
-	return 
+	return
 end
+
 NavGraphSystem.get_smart_object_type = function (self, smart_object_id)
 	if self.smart_object_types[smart_object_id] == nil then
 		slot2 = 1
@@ -335,14 +335,17 @@ NavGraphSystem.get_smart_object_type = function (self, smart_object_id)
 
 	return self.smart_object_types[smart_object_id]
 end
+
 NavGraphSystem.get_smart_object_data = function (self, smart_object_id)
 	return self.smart_object_data[smart_object_id]
 end
+
 NavGraphSystem.get_smart_objects = function (self, smart_object_id)
 	return self.smart_objects[smart_object_id]
 end
+
 NavGraphSystem.get_smart_object_id = function (self, unit)
 	return self.smart_object_ids[unit]
 end
 
-return 
+return

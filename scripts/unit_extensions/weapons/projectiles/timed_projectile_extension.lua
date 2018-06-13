@@ -1,4 +1,5 @@
 TimedProjectileExtension = class(TimedProjectileExtension)
+
 TimedProjectileExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
 	self.unit = unit
@@ -7,19 +8,18 @@ TimedProjectileExtension.init = function (self, extension_init_context, unit, ex
 	self.is_server = Managers.player.is_server
 	self.item_name = extension_init_data.item_name
 	self.has_executed = false
+end
 
-	return 
-end
 TimedProjectileExtension.destroy = function (self)
-	return 
+	return
 end
+
 TimedProjectileExtension.update = function (self, unit, input, dt, context, t)
 	if not self.has_executed and self.stop_time <= t then
-		self.execute(self)
+		self:execute()
 	end
-
-	return 
 end
+
 TimedProjectileExtension.execute = function (self)
 	self.has_executed = true
 	local projectile_template_name = self.projectile_template_name
@@ -30,8 +30,6 @@ TimedProjectileExtension.execute = function (self)
 	end
 
 	template.client.execute(self.world, self.unit)
-
-	return 
 end
 
-return 
+return

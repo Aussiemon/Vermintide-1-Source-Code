@@ -9,12 +9,13 @@ local extensions = {
 	"HeldLimitedItemExtension",
 	"LimitedItemExtension"
 }
+
 LimitedItemTrackSystem.init = function (self, entity_system_creation_context, system_name)
 	LimitedItemTrackSystem.super.init(self, entity_system_creation_context, system_name, extensions)
 
 	local network_event_delegate = entity_system_creation_context.network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self.network_event_delegate = network_event_delegate
 	self.network_manager = Managers.state.network
@@ -28,12 +29,12 @@ LimitedItemTrackSystem.init = function (self, entity_system_creation_context, sy
 	self.queued_group_spawners = {}
 	self.no_group_spawners = {}
 	self.marked_items = {}
+
 	self.mark_item_for_transformation = function (extension)
 		local unit = extension.unit
 		self.marked_items[unit] = extension.id
-
-		return 
 	end
+
 	self.enable_spawner = function (extension)
 		local unit = extension.unit
 		local active_spawners_n = self.active_spawners_n + 1
@@ -43,26 +44,22 @@ LimitedItemTrackSystem.init = function (self, entity_system_creation_context, sy
 
 		self.active_spawners[active_spawners_n] = unit
 		self.active_spawners_n = active_spawners_n
-
-		return 
 	end
+
 	self.disable_spawner = function (extension)
 		local unit = extension.unit
 		local spawner_id = self:find_active_spawner_id(unit)
 
 		if spawner_id == nil then
-			return 
+			return
 		end
 
 		table.remove(self.active_spawners, spawner_id)
 
 		self.active_spawners_n = self.active_spawners_n - 1
-
-		return 
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.register_group = function (self, group_name, pool_size)
 	fassert(self.groups[group_name] == nil, "Limited Item Group with name %q, is already registered", group_name)
 
@@ -74,20 +71,18 @@ LimitedItemTrackSystem.register_group = function (self, group_name, pool_size)
 		spawners_n = spawners_n,
 		pool_size = pool_size
 	}
-
-	return 
 end
+
 LimitedItemTrackSystem.decrease_group_pool_size = function (self, group_name)
 	local group = self.groups[group_name]
 	local pool_size = math.max(group.pool_size - 1, 0)
 	group.pool_size = pool_size
 
 	if pool_size == 0 then
-		self.deactivate_group(self, group_name)
+		self:deactivate_group(group_name)
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.activate_group = function (self, group_name, pool_size)
 	local active_groups = self.active_groups
 	local active_groups_n = self.active_groups_n
@@ -98,16 +93,15 @@ LimitedItemTrackSystem.activate_group = function (self, group_name, pool_size)
 		if active_group_name == group_name then
 			Application.warning(string.format("Limited Item Group %q is already active", group_name))
 
-			return 
+			return
 		end
 	end
 
 	self.active_groups_n = active_groups_n + 1
 	active_groups[self.active_groups_n] = group_name
 	self.groups[group_name].pool_size = pool_size
-
-	return 
 end
+
 LimitedItemTrackSystem.deactivate_group = function (self, group_name)
 	local active_groups = self.active_groups
 	local active_groups_n = self.active_groups_n
@@ -123,9 +117,8 @@ LimitedItemTrackSystem.deactivate_group = function (self, group_name)
 			break
 		end
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.find_active_spawner_id = function (self, unit)
 	local active_spawners = self.active_spawners
 	local active_spawners_n = self.active_spawners_n
@@ -140,16 +133,17 @@ LimitedItemTrackSystem.find_active_spawner_id = function (self, unit)
 
 	return nil
 end
+
 LimitedItemTrackSystem.destroy = function (self)
 	self.network_event_delegate:unregister(self)
 
 	self.network_event_delegate = nil
 	self.network_manager = nil
-
-	return 
 end
+
 local dummy_input = {}
 local temp_extension_init_data = {}
+
 LimitedItemTrackSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	if next(extension_init_data) == nil and not temp_extension_init_data then
 	end
@@ -211,7 +205,7 @@ LimitedItemTrackSystem.on_add_extension = function (self, world, unit, extension
 					ScriptApplication.send_to_crashify("LimitedItemTrackSystem", "Added limited unit with occupied id")
 				end
 
-				if spawner_extension.is_transformed(spawner_extension, extension.id) then
+				if spawner_extension:is_transformed(extension.id) then
 					print("WAS TRANSFORMED")
 
 					spawner_extension.items[extension.id] = unit
@@ -232,9 +226,8 @@ LimitedItemTrackSystem.on_add_extension = function (self, world, unit, extension
 
 		return extension
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.on_remove_extension = function (self, unit, extension_name)
 	print("REMOVING:", extension_name)
 
@@ -249,10 +242,10 @@ LimitedItemTrackSystem.on_remove_extension = function (self, unit, extension_nam
 
 			if marked_id then
 				print("WAS MARKED, TRANSFORMING")
-				spawner_extension.transform(spawner_extension, marked_id)
+				spawner_extension:transform(marked_id)
 			else
 				print("WAS NOT MARKED, REMOVING")
-				spawner_extension.remove(spawner_extension, item_extension.id)
+				spawner_extension:remove(item_extension.id)
 			end
 		end
 
@@ -265,9 +258,8 @@ LimitedItemTrackSystem.on_remove_extension = function (self, unit, extension_nam
 
 		ScriptUnit.remove_extension(unit, self.NAME)
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.spawn_batch = function (self, group)
 	local spawners = group.spawners
 	local spawners_n = group.spawners_n
@@ -296,15 +288,14 @@ LimitedItemTrackSystem.spawn_batch = function (self, group)
 		local num_items = spawner.num_items
 
 		fassert(num_items == 0, "Sanity Check")
-		spawner.spawn_item(spawner)
+		spawner:spawn_item()
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.update = function (self, context, t)
 	local active_groups_n = self.active_groups_n
 
-	if 0 < active_groups_n then
+	if active_groups_n > 0 then
 		local groups = self.groups
 		local active_groups = self.active_groups
 
@@ -317,23 +308,23 @@ LimitedItemTrackSystem.update = function (self, context, t)
 			for i = 1, spawners_n, 1 do
 				local spawner = spawners[i]
 
-				if 0 < spawner.num_items then
+				if spawner.num_items > 0 then
 					no_items = false
 				end
 			end
 
 			if no_items then
-				self.spawn_batch(self, group)
+				self:spawn_batch(group)
 			end
 		end
 	end
 
 	if Debug.active then
-		if 0 < #self.no_group_spawners then
+		if #self.no_group_spawners > 0 then
 			Debug.text("There are limited item spawners on this level without a group assigned to!!!!!")
 		end
 
-		if 0 < table.size(self.queued_group_spawners) then
+		if table.size(self.queued_group_spawners) > 0 then
 			Debug.text("There are limited item spawners assigned to a group that hasn't been registered!!!!!")
 
 			for group_name, spawners in pairs(self.queued_group_spawners) do
@@ -341,26 +332,22 @@ LimitedItemTrackSystem.update = function (self, context, t)
 			end
 		end
 	end
-
-	return 
 end
+
 LimitedItemTrackSystem.rpc_held_limited_item_destroyed = function (self, sender, spawner_unit_id, id)
 	local level = LevelHelper:current_level(self.world)
 	local spawner_unit = Level.unit_by_index(level, spawner_unit_id)
 
-	self.held_limited_item_destroyed(self, spawner_unit, id)
-
-	return 
+	self:held_limited_item_destroyed(spawner_unit, id)
 end
+
 LimitedItemTrackSystem.held_limited_item_destroyed = function (self, spawner_unit, id)
 	assert(self.is_server)
 	print("held limited item destroyed")
 
 	local spawner_extension = self.spawners[spawner_unit]
 
-	spawner_extension.remove(spawner_extension, id)
-
-	return 
+	spawner_extension:remove(id)
 end
 
-return 
+return

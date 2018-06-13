@@ -218,4 +218,4 @@ for name, attachment_data in pairs(Attachments) do
 	assert(attachment_data.slots)
 end
 
-return 
+return

@@ -221,4 +221,4 @@ DialogueLookup[DialogueLookup_n + 109] = "pes_curse"
 DialogueLookup[DialogueLookup_n + 110] = "pes_targeted_by_ratling"
 DialogueLookup_n = DialogueLookup_n + 110
 
-return 
+return

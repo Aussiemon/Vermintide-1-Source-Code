@@ -23,11 +23,10 @@ function dprint(...)
 	if SELF_UNIT == script_data.debug_unit and script_data.ai_bots_debug then
 		print(...)
 	end
-
-	return 
 end
 
 PlayerBotBase = class(PlayerBotBase)
+
 PlayerBotBase.init = function (self, extension_init_context, unit, extension_init_data)
 	local world = extension_init_context.world
 	self._world = world
@@ -74,7 +73,7 @@ PlayerBotBase.init = function (self, extension_init_context, unit, extension_ini
 	Managers.player:assign_unit_ownership(unit, self._player, true)
 	Unit.set_flow_variable(unit, "is_bot", true)
 	Unit.flow_event(unit, "character_vo_set")
-	self._init_brain(self)
+	self:_init_brain()
 
 	self._proximity_target_update_timer = -math.huge
 	self._pickup_search_timer = -math.huge
@@ -99,9 +98,8 @@ PlayerBotBase.init = function (self, extension_init_context, unit, extension_ini
 		rotation = QuaternionBox(),
 		path_position = Vector3Box()
 	}
-
-	return 
 end
+
 PlayerBotBase.ranged_attack_started = function (self, attacking_unit, victim_unit, attack_type)
 	local blackboard = self._blackboard
 
@@ -109,9 +107,8 @@ PlayerBotBase.ranged_attack_started = function (self, attacking_unit, victim_uni
 		local targets = blackboard.taking_cover.threats
 		targets[attacking_unit] = victim_unit
 	end
-
-	return 
 end
+
 PlayerBotBase.ranged_attack_ended = function (self, attacking_unit, victim_unit, attack_type)
 	local blackboard = self._blackboard
 
@@ -119,9 +116,8 @@ PlayerBotBase.ranged_attack_ended = function (self, attacking_unit, victim_unit,
 		local targets = blackboard.taking_cover.threats
 		targets[attacking_unit] = nil
 	end
-
-	return 
 end
+
 PlayerBotBase.extensions_ready = function (self, world, unit)
 	local blackboard = self._blackboard
 	local input_ext = ScriptUnit.extension(unit, "input_system")
@@ -148,97 +144,94 @@ PlayerBotBase.extensions_ready = function (self, world, unit)
 	blackboard.health_extension = health_ext
 	blackboard.ai_bot_group_extension = ai_bot_group_ext
 	blackboard.ai_system_extension = ai_system_ext
-
-	return 
 end
 
 function bot_printf(unit, num, str, ...)
 	local player = Managers.player:owner(unit)
 
-	if player.name(player) == "player_bot_" .. num then
+	if player:name() == "player_bot_" .. num then
 		printf(str, ...)
 	end
-
-	return 
 end
 
 PlayerBotBase._init_brain = function (self)
 	self._brain = AIBrain:new(self._world, self._unit, self._blackboard, self._bot_profile, self._bot_profile.behavior)
-
-	return 
 end
+
 PlayerBotBase.brain = function (self)
 	return self._brain
 end
+
 PlayerBotBase.profile = function (self)
 	return self._bot_profile
 end
+
 PlayerBotBase.blackboard = function (self)
 	return self._blackboard
 end
+
 PlayerBotBase.update = function (self, unit, input, dt, context, t)
 	Profiler.start("PlayerBotBase")
 
 	local health_extension = self._health_extension
 	local status_extension = self._status_extension
-	local is_alive = health_extension.is_alive(health_extension)
-	local is_ready_for_assisted_respawn = status_extension.is_ready_for_assisted_respawn(status_extension)
+	local is_alive = health_extension:is_alive()
+	local is_ready_for_assisted_respawn = status_extension:is_ready_for_assisted_respawn()
 
 	if is_alive and not is_ready_for_assisted_respawn and not self._locomotion_extension:get_moving_platform() then
 		SELF_UNIT = unit
 
 		Profiler.start("update blackboard")
-		self._update_blackboard(self, dt, t)
+		self:_update_blackboard(dt, t)
 		Profiler.stop("update blackboard")
 		Profiler.start("update target enemy")
-		self._update_target_enemy(self, dt, t)
+		self:_update_target_enemy(dt, t)
 		Profiler.stop("update target enemy")
 		Profiler.start("update target ally")
-		self._update_target_ally(self, dt, t)
+		self:_update_target_ally(dt, t)
 		Profiler.stop("update target ally")
 		Profiler.start("_update_rat_ogre_cover")
-		self._update_rat_ogre_cover(self, dt, t)
+		self:_update_rat_ogre_cover(dt, t)
 		Profiler.stop("_update_rat_ogre_cover")
 		Profiler.start("update pickups")
-		self._update_pickups(self, dt, t)
+		self:_update_pickups(dt, t)
 		Profiler.stop("update pickups")
 		Profiler.start("update interactables")
-		self._update_interactables(self, dt, t)
+		self:_update_interactables(dt, t)
 		Profiler.stop("update interactables")
 		Profiler.start("update brain")
 		self._brain:update(unit, t, dt)
 		Profiler.stop("update brain")
 
-		local is_disabled = status_extension.is_disabled(status_extension)
+		local is_disabled = status_extension:is_disabled()
 
 		if is_disabled then
 			self._navigation_extension:teleport(POSITION_LOOKUP[unit])
 		else
 			Profiler.start("update movement target")
-			self._update_movement_target(self, dt, t)
+			self:_update_movement_target(dt, t)
 			Profiler.stop("update movement target")
 		end
 	end
 
 	if script_data.ai_bots_debug then
 		Profiler.start("update debug draw")
-		self._debug_draw_update(self, dt)
+		self:_debug_draw_update(dt)
 		Profiler.stop("update debug draw")
 	end
 
 	Profiler.stop("PlayerBotBase")
-
-	return 
 end
+
 PlayerBotBase._update_blackboard = function (self, dt, t)
 	local bb = self._blackboard
 	local status_ext = self._status_extension
-	bb.is_knocked_down = status_ext.is_knocked_down(status_ext)
-	bb.is_grabbed_by_pack_master = status_ext.is_grabbed_by_pack_master(status_ext)
-	bb.is_pounced_down = status_ext.is_pounced_down(status_ext)
-	bb.is_hanging_from_hook = status_ext.is_hanging_from_hook(status_ext)
-	bb.is_ledge_hanging = status_ext.get_is_ledge_hanging(status_ext)
-	bb.is_transported = status_ext.is_using_transport(status_ext)
+	bb.is_knocked_down = status_ext:is_knocked_down()
+	bb.is_grabbed_by_pack_master = status_ext:is_grabbed_by_pack_master()
+	bb.is_pounced_down = status_ext:is_pounced_down()
+	bb.is_hanging_from_hook = status_ext:is_hanging_from_hook()
+	bb.is_ledge_hanging = status_ext:get_is_ledge_hanging()
+	bb.is_transported = status_ext:is_using_transport()
 
 	if alive(bb.target_unit) then
 		bb.target_dist = Vector3.distance(POSITION_LOOKUP[bb.target_unit], POSITION_LOOKUP[self._unit])
@@ -248,7 +241,7 @@ PlayerBotBase._update_blackboard = function (self, dt, t)
 
 	if self._update_broadphase < t then
 		local ai_bot_group_system = Managers.state.entity:system("ai_bot_group_system")
-		local breakable_object = ai_bot_group_system.bot_breakable(ai_bot_group_system, self._unit)
+		local breakable_object = ai_bot_group_system:bot_breakable(self._unit)
 
 		if breakable_object or bb.breakable_object then
 			bb.breakable_object = breakable_object
@@ -260,19 +253,18 @@ PlayerBotBase._update_blackboard = function (self, dt, t)
 	for _, action_data in pairs(bb.utility_actions) do
 		action_data.time_since_last = t - action_data.last_time
 	end
-
-	return 
 end
+
 PlayerBotBase._update_target_enemy = function (self, dt, t)
 	Profiler.start("update target enemy")
 
 	local pos = POSITION_LOOKUP[self._unit]
 
 	Profiler.start("update_slot_target")
-	self._update_slot_target(self, dt, t, pos)
+	self:_update_slot_target(dt, t, pos)
 	Profiler.stop("update_slot_target")
 	Profiler.start("update_proximity_target")
-	self._update_proximity_target(self, dt, t, pos)
+	self:_update_proximity_target(dt, t, pos)
 	Profiler.stop("update_proximity_target")
 
 	local bb = self._blackboard
@@ -314,10 +306,10 @@ PlayerBotBase._update_target_enemy = function (self, dt, t)
 	end
 
 	Profiler.stop("update target enemy")
-
-	return 
 end
+
 local BROADPHASE_QUERY_TEMP = {}
+
 PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 	if self._proximity_target_update_timer < t then
 		local blackboard = self._blackboard
@@ -332,10 +324,10 @@ PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 		blackboard.force_aid = false
 		local search_position = nil
 
-		if alive(blackboard.target_ally_unit) and blackboard.target_ally_needs_aid and self._within_aid_range(self, blackboard) then
+		if alive(blackboard.target_ally_unit) and blackboard.target_ally_needs_aid and self:_within_aid_range(blackboard) then
 			search_position = POSITION_LOOKUP[blackboard.target_ally_unit]
 			local ai_bot_group_system = Managers.state.entity:system("ai_bot_group_system")
-			local is_prioritized = ai_bot_group_system.is_prioritized_ally(ai_bot_group_system, self_unit, blackboard.target_ally_unit)
+			local is_prioritized = ai_bot_group_system:is_prioritized_ally(self_unit, blackboard.target_ally_unit)
 			local is_reviving = blackboard.current_interaction_unit == blackboard.target_ally_unit
 
 			if is_prioritized and is_reviving then
@@ -362,17 +354,17 @@ PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 			local unit = BROADPHASE_QUERY_TEMP[i]
 			local health_ext = ScriptUnit.extension(unit, "health_system")
 
-			if health_ext.is_alive(health_ext) then
+			if health_ext:is_alive() then
 				local enemy_pos = POSITION_LOOKUP[unit]
 				local enemy_offset = enemy_pos - search_position
 
-				if self._target_valid(self, unit, enemy_offset) then
+				if self:_target_valid(unit, enemy_offset) then
 					prox_enemies[index] = unit
 					index = index + 1
 					local enemy_real_dist = Vector3.length(enemy_offset)
 					local enemy_dist = enemy_real_dist + ((unit == blackboard.target_unit and STICKYNESS_DISTANCE_MODIFIER) or 0)
 
-					if enemy_dist < closest_dist then
+					if closest_dist > enemy_dist then
 						closest_enemy = unit
 						closest_dist = enemy_dist
 						closest_real_dist = enemy_real_dist
@@ -389,10 +381,10 @@ PlayerBotBase._update_proximity_target = function (self, dt, t, self_position)
 
 		blackboard.proximity_target_distance = closest_real_dist
 	end
-
-	return 
 end
+
 local PROXIMITY_UP_DOWN_THRESHOLD = math.sin(math.pi * 0.25)
+
 PlayerBotBase._target_valid = function (self, unit, enemy_offset)
 	local blackboard = Unit.get_data(unit, "blackboard")
 
@@ -412,28 +404,29 @@ PlayerBotBase._target_valid = function (self, unit, enemy_offset)
 
 	return true
 end
+
 PlayerBotBase._update_slot_target = function (self, dt, t, self_position)
 	local bb = self._blackboard
 	local unit = self._unit
 	local current_target = bb.target_unit
 	local pos = self_position
-	local enemy_targetting_self = self._get_closest_target_in_slot(self, pos, unit, current_target, true)
+	local enemy_targetting_self = self:_get_closest_target_in_slot(pos, unit, current_target, true)
 
 	if enemy_targetting_self then
 		bb.slot_target_enemy = enemy_targetting_self
 
-		return 
+		return
 	end
 
 	local ally_unit = bb.target_ally_unit
 
 	if alive(ally_unit) then
-		local enemy_targetting_ally = self._get_closest_target_in_slot(self, pos, ally_unit, current_target)
+		local enemy_targetting_ally = self:_get_closest_target_in_slot(pos, ally_unit, current_target)
 
 		if enemy_targetting_ally then
 			bb.slot_target_enemy = enemy_targetting_ally
 
-			return 
+			return
 		end
 	end
 
@@ -445,7 +438,7 @@ PlayerBotBase._update_slot_target = function (self, dt, t, self_position)
 		local player_unit = player.player_unit
 
 		if alive(player_unit) and player_unit ~= ally_unit and player_unit ~= unit then
-			local target, dist = self._get_closest_target_in_slot(self, pos, player_unit, current_target)
+			local target, dist = self:_get_closest_target_in_slot(pos, player_unit, current_target)
 
 			if dist < best_dist then
 				best_target = target
@@ -457,19 +450,19 @@ PlayerBotBase._update_slot_target = function (self, dt, t, self_position)
 	if best_target then
 		bb.slot_target_enemy = best_target
 
-		return 
+		return
 	end
 
 	if bb.slot_target_enemy then
 		bb.slot_target_enemy = nil
 	end
-
-	return 
 end
+
 local BOT_THREAT_MODIFIER = -1
+
 PlayerBotBase._get_closest_target_in_slot = function (self, position, unit, current_enemy_unit, is_self)
 	local ai_slot_system = Managers.state.entity:system("ai_slot_system")
-	local slot_data = ai_slot_system.get_target_unit_slot_data(ai_slot_system, unit)
+	local slot_data = ai_slot_system:get_target_unit_slot_data(unit)
 	local best_target = nil
 	local target_dist = math.huge
 
@@ -491,7 +484,7 @@ PlayerBotBase._get_closest_target_in_slot = function (self, position, unit, curr
 				end
 			end
 
-			if dist < target_dist then
+			if target_dist > dist then
 				best_target = enemy_unit
 				target_dist = dist
 			end
@@ -500,6 +493,7 @@ PlayerBotBase._get_closest_target_in_slot = function (self, position, unit, curr
 
 	return best_target, target_dist
 end
+
 PlayerBotBase._alter_target_position = function (self, nav_world, self_position, unit, target_position, reason)
 	local wanted_position = nil
 
@@ -533,9 +527,8 @@ PlayerBotBase._alter_target_position = function (self, nav_world, self_position,
 			return target_position
 		end
 	end
-
-	return 
 end
+
 PlayerBotBase._find_target_position_on_nav_mesh = function (self, nav_world, wanted_position)
 	local above = 0.5
 	local below = 0.5
@@ -553,9 +546,8 @@ PlayerBotBase._find_target_position_on_nav_mesh = function (self, nav_world, wan
 			return wanted_position
 		end
 	end
-
-	return 
 end
+
 PlayerBotBase._update_target_ally = function (self, dt, t)
 	Profiler.start("update target ally")
 
@@ -568,7 +560,7 @@ PlayerBotBase._update_target_ally = function (self, dt, t)
 		best_ally = blackboard.priority_target_disabled_ally
 		ally_dist = Vector3.distance(POSITION_LOOKUP[unit], POSITION_LOOKUP[best_ally])
 	else
-		best_ally, ally_dist, in_need_type = self._select_ally_by_utility(self, unit, blackboard, breed, t)
+		best_ally, ally_dist, in_need_type = self:_select_ally_by_utility(unit, blackboard, breed, t)
 	end
 
 	blackboard.target_ally_unit = best_ally or nil
@@ -587,13 +579,12 @@ PlayerBotBase._update_target_ally = function (self, dt, t)
 	if blackboard.target_ally_needs_aid and is_priority_aid_type then
 		local ai_bot_group_system = Managers.state.entity:system("ai_bot_group_system")
 
-		ai_bot_group_system.register_ally_needs_aid_priority(ai_bot_group_system, unit, blackboard.target_ally_unit)
+		ai_bot_group_system:register_ally_needs_aid_priority(unit, blackboard.target_ally_unit)
 	end
 
 	Profiler.stop("update target ally")
-
-	return 
 end
+
 PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed, t)
 	local self_pos = POSITION_LOOKUP[unit]
 	local closest_ally = nil
@@ -601,29 +592,29 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 	local closest_real_dist = math.huge
 	local closest_in_need_type = nil
 	local inventory_ext = blackboard.inventory_extension
-	local health_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
+	local health_slot_data = inventory_ext:get_slot_data("slot_healthkit")
 	local can_heal_other = false
 	local can_give_healing_to_other = false
 
 	if health_slot_data then
-		local template = inventory_ext.get_item_template(inventory_ext, health_slot_data)
+		local template = inventory_ext:get_item_template(health_slot_data)
 		can_heal_other = template.can_heal_other
 		can_give_healing_to_other = template.can_give_other
 	end
 
 	local can_give_grenade_to_other = false
-	local grenade_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_grenade")
+	local grenade_slot_data = inventory_ext:get_slot_data("slot_grenade")
 
 	if grenade_slot_data then
-		local template = inventory_ext.get_item_template(inventory_ext, grenade_slot_data)
+		local template = inventory_ext:get_item_template(grenade_slot_data)
 		can_give_grenade_to_other = template.can_give_other
 	end
 
 	local can_give_potion_to_other = false
-	local potion_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_potion")
+	local potion_slot_data = inventory_ext:get_slot_data("slot_potion")
 
 	if potion_slot_data then
-		local template = inventory_ext.get_item_template(inventory_ext, potion_slot_data)
+		local template = inventory_ext:get_item_template(potion_slot_data)
 		can_give_potion_to_other = template.can_give_other
 	end
 
@@ -637,35 +628,35 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 			local status_ext = ScriptUnit.extension(player_unit, "status_system")
 			local utility = 0
 
-			if not status_ext.is_ready_for_assisted_respawn(status_ext) then
+			if not status_ext:is_ready_for_assisted_respawn() then
 				local in_need_type = nil
 
-				if status_ext.is_knocked_down(status_ext) then
+				if status_ext:is_knocked_down() then
 					in_need_type = "knocked_down"
 					utility = 40
-				elseif status_ext.get_is_ledge_hanging(status_ext) and not status_ext.is_pulled_up(status_ext) then
+				elseif status_ext:get_is_ledge_hanging() and not status_ext:is_pulled_up() then
 					in_need_type = "ledge"
 					utility = 40
-				elseif status_ext.is_hanging_from_hook(status_ext) then
+				elseif status_ext:is_hanging_from_hook() then
 					in_need_type = "hook"
 					utility = 40
 				else
 					local health_percent = ScriptUnit.extension(player_unit, "health_system"):current_health_percent()
 					local inventory_ext = ScriptUnit.extension(player_unit, "inventory_system")
-					local is_wounded = status_ext.is_wounded(status_ext)
+					local is_wounded = status_ext:is_wounded()
 
 					if can_heal_other and (health_percent < WANTS_TO_HEAL_THRESHOLD or is_wounded) then
 						in_need_type = "in_need_of_heal"
 						local health_utility = 1 - ((is_wounded and health_percent * 0.33) or health_percent)
 						utility = 10 + health_utility * 15
-					elseif can_give_healing_to_other and (health_percent < WANTS_TO_GIVE_HEAL_TO_OTHER or is_wounded) and not inventory_ext.get_slot_data(inventory_ext, "slot_healthkit") then
+					elseif can_give_healing_to_other and (health_percent < WANTS_TO_GIVE_HEAL_TO_OTHER or is_wounded) and not inventory_ext:get_slot_data("slot_healthkit") then
 						in_need_type = "can_accept_heal_item"
 						local health_utility = 1 - ((is_wounded and health_percent - 0.5) or health_percent)
 						utility = 10 + health_utility * 10
-					elseif can_give_grenade_to_other and not inventory_ext.get_slot_data(inventory_ext, "slot_grenade") and not is_bot then
+					elseif can_give_grenade_to_other and not inventory_ext:get_slot_data("slot_grenade") and not is_bot then
 						in_need_type = "can_accept_grenade"
 						utility = 10
-					elseif can_give_potion_to_other and not inventory_ext.get_slot_data(inventory_ext, "slot_potion") and not is_bot then
+					elseif can_give_potion_to_other and not inventory_ext:get_slot_data("slot_potion") and not is_bot then
 						in_need_type = "can_accept_potion"
 						utility = 10
 					end
@@ -673,7 +664,7 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 
 				if in_need_type or not is_bot then
 					local target_pos = POSITION_LOOKUP[player_unit]
-					local allowed_follow_path, allowed_aid_path = self._ally_path_allowed(self, player_unit, t)
+					local allowed_follow_path, allowed_aid_path = self:_ally_path_allowed(player_unit, t)
 
 					if allowed_follow_path then
 						if not allowed_aid_path then
@@ -697,7 +688,7 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 							local real_dist = Vector3.distance(self_pos, target_pos)
 							local dist = real_dist - utility
 
-							if dist < closest_dist then
+							if closest_dist > dist then
 								closest_dist = dist
 								closest_real_dist = real_dist
 								closest_ally = player_unit
@@ -712,6 +703,7 @@ PlayerBotBase._select_ally_by_utility = function (self, unit, blackboard, breed,
 
 	return closest_ally, closest_real_dist, closest_in_need_type
 end
+
 PlayerBotBase._within_aid_range = function (self, blackboard)
 	if blackboard.target_ally_needs_aid then
 		local self_pos = POSITION_LOOKUP[self._unit]
@@ -725,6 +717,7 @@ PlayerBotBase._within_aid_range = function (self, blackboard)
 
 	return false
 end
+
 PlayerBotBase._update_rat_ogre_cover = function (self)
 	local spawned_rat_ogres = Managers.state.conflict:spawned_units_by_breed("skaven_rat_ogre")
 
@@ -755,16 +748,16 @@ PlayerBotBase._update_rat_ogre_cover = function (self)
 						end
 
 						if not find_cover then
-							return 
+							return
 						end
 
-						local cover_point = self._find_rat_ogre_cover_point(self, spawned_rat_ogres, target_unit)
+						local cover_point = self:_find_rat_ogre_cover_point(spawned_rat_ogres, target_unit)
 
 						if cover_point then
 							self._blackboard.navigation_flee_destination_override = Vector3Box(cover_point)
 						end
 
-						return 
+						return
 					end
 				end
 			end
@@ -772,10 +765,10 @@ PlayerBotBase._update_rat_ogre_cover = function (self)
 	end
 
 	self._blackboard.navigation_flee_destination_override = nil
-
-	return 
 end
+
 local RAT_OGRE_AVOID_POINTS = {}
+
 PlayerBotBase._find_rat_ogre_cover_point = function (self, avoid_targets, rat_ogre_unit)
 	local found_cover_point = nil
 	local min_radius = 0
@@ -816,6 +809,7 @@ PlayerBotBase._find_rat_ogre_cover_point = function (self, avoid_targets, rat_og
 
 	return found_cover_point
 end
+
 PlayerBotBase._update_pickups = function (self, dt, t)
 	local unit = self._unit
 	local blackboard = self._blackboard
@@ -824,15 +818,15 @@ PlayerBotBase._update_pickups = function (self, dt, t)
 	local has_target = alive(target_unit)
 	local ammo_percentage = (has_target and 0.1) or 0.9
 	local inventory_ext = blackboard.inventory_extension
-	local current, num_max = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
+	local current, num_max = inventory_ext:current_ammo_status("slot_ranged")
 
 	if current then
-		blackboard.needs_ammo = current / num_max < ammo_percentage
+		blackboard.needs_ammo = ammo_percentage > current / num_max
 	end
-
-	return 
 end
+
 local INTERACTABLES_BROADPHASE_QUERY_RESULTS = {}
+
 PlayerBotBase._update_interactables = function (self, dt, t)
 	local blackboard = self._blackboard
 
@@ -874,15 +868,15 @@ PlayerBotBase._update_interactables = function (self, dt, t)
 	elseif alive(blackboard.interaction_unit) then
 		local door_ext = ScriptUnit.has_extension(blackboard.interaction_unit, "door_system")
 
-		if door_ext and door_ext.is_open(door_ext) then
+		if door_ext and door_ext:is_open() then
 			blackboard.interaction_unit = nil
 			blackboard.interaction_type = nil
 		end
 	end
-
-	return 
 end
+
 local AVOID_POINTS_TEMP_TABLE = {}
+
 PlayerBotBase._find_cover = function (self, take_cover_targets, self_pos, max_radius, allow_forward_distance)
 	local offset_vector = Vector3.zero()
 
@@ -902,6 +896,7 @@ PlayerBotBase._find_cover = function (self, take_cover_targets, self_pos, max_ra
 
 	return num_found, hidden_cover_units
 end
+
 local TAKE_COVER_TEMP_TABLE = {}
 
 function line_of_fire_check(from, to, p, width, length)
@@ -920,8 +915,6 @@ function line_of_fire_check(from, to, p, width, length)
 	else
 		return true
 	end
-
-	return 
 end
 
 PlayerBotBase._in_line_of_fire = function (self, self_unit, self_pos, take_cover_targets, taking_cover_from)
@@ -972,9 +965,8 @@ PlayerBotBase.cb_cover_point_path_result = function (self, hash, success, destin
 		table.clear(cover_bb.active_threats)
 		dprint("failed cover point", destination)
 	end
-
-	return 
 end
+
 PlayerBotBase._update_movement_target = function (self, dt, t)
 	local blackboard = self._blackboard
 	local unit = self._unit
@@ -982,12 +974,12 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 	local nav_world = self._nav_world
 	local navigation_ext = blackboard.navigation_extension
 	local override_box = blackboard.navigation_destination_override
-	local override_melee = blackboard.melee and blackboard.melee.engage_position_set and override_box.unbox(override_box)
+	local override_melee = blackboard.melee and blackboard.melee.engage_position_set and override_box:unbox()
 	local override_rat_ogre_flee = blackboard.navigation_flee_destination_override and blackboard.navigation_flee_destination_override:unbox()
 	local moving_towards_follow_position = false
 	local follow_bb = blackboard.follow
 	local cover_bb = blackboard.taking_cover
-	local in_line_of_fire, changed = self._in_line_of_fire(self, unit, self_pos, cover_bb.threats, cover_bb.active_threats)
+	local in_line_of_fire, changed = self:_in_line_of_fire(unit, self_pos, cover_bb.threats, cover_bb.active_threats)
 	local cover_position = nil
 	local bot_group_system = Managers.state.entity:system("ai_bot_group_system")
 
@@ -995,7 +987,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 		local fails = cover_bb.fails
 		local radius = math.min(5 + fails * 5, 40)
 		local allowed_forward_dist = radius * 0.4
-		local num_found, hidden_cover_units = self._find_cover(self, cover_bb.active_threats, self_pos, radius, allowed_forward_dist)
+		local num_found, hidden_cover_units = self:_find_cover(cover_bb.active_threats, self_pos, radius, allowed_forward_dist)
 		local found_point, found_unit, occupied_cover_unit, occupied_cover_point = nil
 
 		for i = 1, num_found, 1 do
@@ -1003,7 +995,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 			local pos = Unit.local_position(cover_unit, 0)
 
 			if not cover_bb.failed_cover_points[to_hash(pos)] then
-				if bot_group_system.in_cover(bot_group_system, cover_unit) then
+				if bot_group_system:in_cover(cover_unit) then
 					occupied_cover_point = occupied_cover_point or pos
 					occupied_cover_unit = occupied_cover_unit or cover_unit
 				else
@@ -1027,7 +1019,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 			cover_bb.fails = 0
 
 			dprint("found point", cover_position)
-			bot_group_system.set_in_cover(bot_group_system, unit, found_unit)
+			bot_group_system:set_in_cover(unit, found_unit)
 		else
 			cover_bb.fails = cover_bb.fails + 1
 
@@ -1041,7 +1033,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 		cover_bb.fails = 0
 		follow_bb.needs_target_position_refresh = true
 
-		bot_group_system.set_in_cover(bot_group_system, unit, nil)
+		bot_group_system:set_in_cover(unit, nil)
 	elseif in_line_of_fire then
 		cover_position = cover_bb.cover_position:unbox()
 	end
@@ -1058,7 +1050,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 
 	if alive(target_ally_unit) then
 		local ally_status_extension = ScriptUnit.extension(target_ally_unit, "status_system")
-		local transport_unit = ally_status_extension.get_inside_transport_unit(ally_status_extension)
+		local transport_unit = ally_status_extension:get_inside_transport_unit()
 
 		if alive(transport_unit) and not blackboard.target_ally_needs_aid then
 			blackboard.ally_inside_transport_unit = transport_unit
@@ -1085,19 +1077,19 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 
 	if override_rat_ogre_flee or cover_position or override_melee then
 		local override = transport_unit_override or override_rat_ogre_flee or cover_position or override_melee
-		local offset = override - navigation_ext.destination(navigation_ext)
+		local offset = override - navigation_ext:destination()
 
 		if Z_MOVE_TO_EPSILON < math.abs(offset.z) or FLAT_MOVE_TO_EPSILON < Vector3.length(Vector3.flat(offset)) then
 			local path_callback = (not transport_unit_override and (override_rat_ogre_flee or cover_position) and callback(self, "cb_cover_point_path_result", to_hash(override))) or nil
 
-			navigation_ext.move_to(navigation_ext, override, path_callback)
+			navigation_ext:move_to(override, path_callback)
 
 			blackboard.using_navigation_destination_override = true
 		end
 	else
 		follow_bb.follow_timer = follow_bb.follow_timer - dt
 
-		if not follow_bb.needs_target_position_refresh and (follow_bb.follow_timer < 0 or (blackboard.target_ally_needs_aid and navigation_ext.destination_reached(navigation_ext))) then
+		if not follow_bb.needs_target_position_refresh and (follow_bb.follow_timer < 0 or (blackboard.target_ally_needs_aid and navigation_ext:destination_reached())) then
 			follow_bb.needs_target_position_refresh = true
 		end
 
@@ -1108,18 +1100,18 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 			local enemy_unit = blackboard.target_unit
 
 			if blackboard.revive_with_urgent_target and blackboard.target_ally_needs_aid then
-				target_position = self._alter_target_position(self, nav_world, self_pos, target_ally_unit, POSITION_LOOKUP[target_ally_unit], blackboard.target_ally_need_type)
+				target_position = self:_alter_target_position(nav_world, self_pos, target_ally_unit, POSITION_LOOKUP[target_ally_unit], blackboard.target_ally_need_type)
 				blackboard.interaction_unit = target_ally_unit
 				path_callback = callback(self, "cb_ally_path_result", target_ally_unit)
 
 				dprint("path to ally")
-			elseif enemy_unit and (enemy_unit == blackboard.priority_target_enemy or enemy_unit == blackboard.urgent_target_enemy) and self._enemy_path_allowed(self, enemy_unit) then
-				target_position = self._find_target_position_on_nav_mesh(self, nav_world, POSITION_LOOKUP[enemy_unit])
+			elseif enemy_unit and (enemy_unit == blackboard.priority_target_enemy or enemy_unit == blackboard.urgent_target_enemy) and self:_enemy_path_allowed(enemy_unit) then
+				target_position = self:_find_target_position_on_nav_mesh(nav_world, POSITION_LOOKUP[enemy_unit])
 				path_callback = callback(self, "cb_enemy_path_result", enemy_unit)
 
 				dprint("path to enemy", enemy_unit, target_position)
 			elseif blackboard.target_ally_needs_aid then
-				target_position = self._alter_target_position(self, nav_world, self_pos, target_ally_unit, POSITION_LOOKUP[target_ally_unit], blackboard.target_ally_need_type)
+				target_position = self:_alter_target_position(nav_world, self_pos, target_ally_unit, POSITION_LOOKUP[target_ally_unit], blackboard.target_ally_need_type)
 				blackboard.interaction_unit = target_ally_unit
 				path_callback = callback(self, "cb_ally_path_result", target_ally_unit)
 
@@ -1131,7 +1123,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 				dprint("path to goal")
 			elseif alive(blackboard.health_pickup) and blackboard.allowed_to_take_health_pickup and t < blackboard.health_pickup_valid_until and (self._last_health_pickup_attempt.unit ~= blackboard.health_pickup or not self._last_health_pickup_attempt.blacklist) then
 				local pickup_unit = blackboard.health_pickup
-				target_position = self._find_pickup_position_on_navmesh(self, nav_world, self_pos, pickup_unit, self._last_health_pickup_attempt)
+				target_position = self:_find_pickup_position_on_navmesh(nav_world, self_pos, pickup_unit, self._last_health_pickup_attempt)
 
 				if target_position then
 					path_callback = callback(self, "cb_health_pickup_path_result", pickup_unit)
@@ -1141,7 +1133,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 				dprint("path to health pickup")
 			elseif alive(blackboard.mule_pickup) and (self._last_mule_pickup_attempt.unit ~= blackboard.mule_pickup or not self._last_mule_pickup_attempt.blacklist) then
 				local pickup_unit = blackboard.mule_pickup
-				target_position = self._find_pickup_position_on_navmesh(self, nav_world, self_pos, pickup_unit, self._last_mule_pickup_attempt)
+				target_position = self:_find_pickup_position_on_navmesh(nav_world, self_pos, pickup_unit, self._last_mule_pickup_attempt)
 
 				if target_position then
 					path_callback = callback(self, "cb_mule_pickup_path_result", pickup_unit)
@@ -1158,7 +1150,7 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 				local below = 1.5
 				local lateral = 1
 				local distance = 0
-				target_position = self._find_position_on_navmesh(self, nav_world, ammo_position, ammo_position + dir, above, below, INTERACT_RAY_DISTANCE - 0.3, distance)
+				target_position = self:_find_position_on_navmesh(nav_world, ammo_position, ammo_position + dir, above, below, INTERACT_RAY_DISTANCE - 0.3, distance)
 
 				if target_position then
 					blackboard.interaction_unit = blackboard.ammo_pickup
@@ -1182,17 +1174,17 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 
 				local current_destination = nil
 
-				if navigation_ext.destination_reached(navigation_ext) then
+				if navigation_ext:destination_reached() then
 					current_destination = self_pos
 				else
-					current_destination = navigation_ext.destination(navigation_ext)
+					current_destination = navigation_ext:destination()
 				end
 
 				local offset = target_position - current_destination
 
 				if Z_MOVE_TO_EPSILON < math.abs(offset.z) or FLAT_MOVE_TO_EPSILON < Vector3.length(Vector3.flat(offset)) then
 					dprint("move to ", target_position)
-					navigation_ext.move_to(navigation_ext, target_position, path_callback)
+					navigation_ext:move_to(target_position, path_callback)
 				end
 
 				blackboard.using_navigation_destination_override = false
@@ -1200,14 +1192,13 @@ PlayerBotBase._update_movement_target = function (self, dt, t)
 		end
 
 		if blackboard.using_navigation_destination_override then
-			navigation_ext.move_to(navigation_ext, follow_bb.target_position:unbox())
+			navigation_ext:move_to(follow_bb.target_position:unbox())
 
 			blackboard.using_navigation_destination_override = false
 		end
 	end
-
-	return 
 end
+
 local PICKUP_ROTATIONS = {
 	QuaternionBox(Quaternion(Vector3.up(), 0)),
 	QuaternionBox(Quaternion(Vector3.up(), math.pi * 0.25)),
@@ -1218,6 +1209,7 @@ local PICKUP_ROTATIONS = {
 	QuaternionBox(Quaternion(Vector3.up(), -math.pi * 0.75)),
 	QuaternionBox(Quaternion(Vector3.up(), math.pi))
 }
+
 PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self_pos, pickup_unit, pickup_attempt)
 	local above = 1.5
 	local below = 2.2
@@ -1253,7 +1245,7 @@ PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self
 			if success then
 				pos.z = z
 
-				if 0.8 <= dist then
+				if dist >= 0.8 then
 					found_position = pos
 				else
 					local ray_end_pos = pos + (1 - dist) * dir * range
@@ -1269,7 +1261,7 @@ PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self
 				end
 			end
 
-			if 1 <= dist then
+			if dist >= 1 then
 				index = index + 1
 				dist = 0
 			end
@@ -1287,14 +1279,13 @@ PlayerBotBase._find_pickup_position_on_navmesh = function (self, nav_world, self
 		else
 			pickup_attempt.blacklist = true
 
-			return 
+			return
 		end
 	else
 		return pickup_attempt.path_position:unbox()
 	end
-
-	return 
 end
+
 PlayerBotBase._find_position_on_navmesh = function (self, nav_world, original_position, offset_position, above, below, lateral, distance)
 	local success, z = GwNavQueries.triangle_from_position(nav_world, offset_position, above, below)
 
@@ -1309,18 +1300,16 @@ PlayerBotBase._find_position_on_navmesh = function (self, nav_world, original_po
 			return GwNavQueries.inside_position_from_outside_position(nav_world, original_position, above, below, lateral, distance)
 		end
 	end
-
-	return 
 end
+
 PlayerBotBase.destroy = function (self)
 	self._brain:destroy()
 
 	if self._blackboard.taking_cover.cover_unit then
 		Managers.state.entity:system("ai_bot_group_system"):set_in_cover(self._unit, nil)
 	end
-
-	return 
 end
+
 PlayerBotBase._debug_draw_update = function (self, dt)
 	if script_data.debug_behaviour_trees then
 		self._brain:debug_draw_behaviours()
@@ -1334,7 +1323,7 @@ PlayerBotBase._debug_draw_update = function (self, dt)
 	local debug_sphere_position = Unit.local_position(self._unit, 0) + Vector3.up() * 2
 	local color = self._player.color:unbox()
 
-	drawer.sphere(drawer, debug_sphere_position, 0.25, color)
+	drawer:sphere(debug_sphere_position, 0.25, color)
 
 	local blackboard = self._blackboard
 	local enemy = blackboard.target_unit
@@ -1342,24 +1331,22 @@ PlayerBotBase._debug_draw_update = function (self, dt)
 	local radius_offset = self._player:local_player_id() * 0.05
 
 	if alive(enemy) then
-		drawer.line(drawer, debug_sphere_position, Unit.world_position(enemy, 0) + Vector3(0, 0, 1.5), Color(125, 255, 0, 0))
-		drawer.box(drawer, Unit.world_pose(enemy, 0), Vector3(0.5 + radius_offset, 0.5 + radius_offset, 1.5 + radius_offset), color)
+		drawer:line(debug_sphere_position, Unit.world_position(enemy, 0) + Vector3(0, 0, 1.5), Color(125, 255, 0, 0))
+		drawer:box(Unit.world_pose(enemy, 0), Vector3(0.5 + radius_offset, 0.5 + radius_offset, 1.5 + radius_offset), color)
 	end
 
 	if alive(ally) then
-		drawer.circle(drawer, POSITION_LOOKUP[ally] + Vector3(0, 0, 0.2), 0.6 + radius_offset, Vector3.up(), color, 16)
+		drawer:circle(POSITION_LOOKUP[ally] + Vector3(0, 0, 0.2), 0.6 + radius_offset, Vector3.up(), color, 16)
 	end
 
 	self._brain:debug_draw_current_behavior()
-
-	return 
 end
+
 PlayerBotBase.clear_failed_paths = function (self)
 	table.clear(self._attempted_ally_paths)
 	table.clear(self._attempted_enemy_paths)
-
-	return 
 end
+
 PlayerBotBase.cb_enemy_path_result = function (self, enemy_unit, success, destination)
 	local paths = self._attempted_enemy_paths
 	local path_status = paths[enemy_unit]
@@ -1387,9 +1374,8 @@ PlayerBotBase.cb_enemy_path_result = function (self, enemy_unit, success, destin
 			paths[unit] = nil
 		end
 	end
-
-	return 
 end
+
 PlayerBotBase._enemy_path_allowed = function (self, enemy_unit)
 	local path_status = self._attempted_enemy_paths[enemy_unit]
 	local enemy_pos = POSITION_LOOKUP[enemy_unit]
@@ -1400,20 +1386,19 @@ PlayerBotBase._enemy_path_allowed = function (self, enemy_unit)
 
 	return true
 end
+
 PlayerBotBase.cb_health_pickup_path_result = function (self, pickup_unit, success, destination)
 	if pickup_unit == self._last_health_pickup_attempt.unit then
 		self._last_health_pickup_attempt.path_failed = not success
 	end
-
-	return 
 end
+
 PlayerBotBase.cb_mule_pickup_path_result = function (self, pickup_unit, success, destination)
 	if pickup_unit == self._last_mule_pickup_attempt.unit then
 		self._last_mule_pickup_attempt.path_failed = not success
 	end
-
-	return 
 end
+
 PlayerBotBase.cb_ally_path_result = function (self, ally_unit, success, destination)
 	local paths = self._attempted_ally_paths
 	local path_status = paths[ally_unit]
@@ -1441,16 +1426,15 @@ PlayerBotBase.cb_ally_path_result = function (self, ally_unit, success, destinat
 			paths[unit] = nil
 		end
 	end
-
-	return 
 end
+
 PlayerBotBase._ally_path_allowed = function (self, ally_unit, t)
 	local path_status = self._attempted_ally_paths[ally_unit]
 
 	if path_status and path_status.failed then
 		local conflict_director = Managers.state.conflict
-		local self_segment = conflict_director.get_player_unit_segment(conflict_director, self._unit) or -1
-		local target_segment = conflict_director.get_player_unit_segment(conflict_director, ally_unit) or -1
+		local self_segment = conflict_director:get_player_unit_segment(self._unit) or -1
+		local target_segment = conflict_director:get_player_unit_segment(ally_unit) or -1
 		local ignore_for = nil
 
 		if self_segment < target_segment then
@@ -1461,7 +1445,7 @@ PlayerBotBase._ally_path_allowed = function (self, ally_unit, t)
 			ignore_for = 5
 		end
 
-		local no_longer_ignored = path_status.ignore_ally_from + ignore_for < t
+		local no_longer_ignored = t > path_status.ignore_ally_from + ignore_for
 
 		if no_longer_ignored then
 			local ally_position = POSITION_LOOKUP[ally_unit]
@@ -1475,8 +1459,6 @@ PlayerBotBase._ally_path_allowed = function (self, ally_unit, t)
 	else
 		return true, true
 	end
-
-	return 
 end
 
-return 
+return

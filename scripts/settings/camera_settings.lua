@@ -409,4 +409,4 @@ CameraSettings.cutscene = {
 	}
 }
 
-return 
+return

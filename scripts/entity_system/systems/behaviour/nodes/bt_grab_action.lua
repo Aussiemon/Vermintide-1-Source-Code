@@ -1,22 +1,23 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTGrabAction = class(BTGrabAction, BTNode)
+
 BTGrabAction.init = function (self, ...)
 	BTGrabAction.super.init(self, ...)
+end
 
-	return 
-end
 BTGrabAction.name = "BTGrabAction"
+
 BTGrabAction.enter = function (self, unit, blackboard, t)
-	return 
+	return
 end
+
 BTGrabAction.leave = function (self, unit, blackboard, t)
 	blackboard.shove_data = nil
-
-	return 
 end
+
 BTGrabAction.run = function (self, unit, blackboard, t, dt)
-	return 
+	return
 end
 
-return 
+return

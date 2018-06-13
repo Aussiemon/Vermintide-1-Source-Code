@@ -1364,8 +1364,6 @@ local animations = {
 				local right_texture_color = selected_item_style.selected_texture_right.color
 				left_texture_color[1] = 0
 				right_texture_color[1] = 0
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local contents_list = widgets[1]
@@ -1382,11 +1380,9 @@ local animations = {
 					left_texture_color[1] = alpha
 					right_texture_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1397,7 +1393,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local contents_list = widgets[1]
@@ -1431,11 +1427,9 @@ local animations = {
 						end
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1446,7 +1440,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local contents_list = widgets[1]
@@ -1477,11 +1471,9 @@ local animations = {
 						end
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1515,8 +1507,6 @@ local animations = {
 				end
 
 				widget_style.cover_rect.color[1] = 0
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -1542,11 +1532,9 @@ local animations = {
 					local alpha_progress = math.min(1, local_progress * size_speed_multiplier)
 					texture_style.color[1] = alpha_progress * 255
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1554,17 +1542,15 @@ local animations = {
 			start_progress = 1,
 			end_progress = 2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				local widget_style = widget.style
 				widget_style.cover_rect.color[1] = 255 * local_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

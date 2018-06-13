@@ -57,4 +57,4 @@ DialogueLookup[DialogueLookup_n + 27] = "pes_bar_brawl_challenge"
 DialogueLookup[DialogueLookup_n + 28] = "pes_bar_brawl_drink"
 DialogueLookup_n = DialogueLookup_n + 28
 
-return 
+return

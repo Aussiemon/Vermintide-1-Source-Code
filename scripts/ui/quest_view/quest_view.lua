@@ -16,8 +16,6 @@ local contract_lists_scenegraph_ids = definitions.contract_lists_scenegraph_ids
 
 local function dprint(...)
 	print("[QuestView]", ...)
-
-	return 
 end
 
 local DO_RELOAD = true
@@ -25,10 +23,10 @@ local debug_draw_scenegraph = false
 QuestView = class(QuestView)
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
 local contract_list_types = {
@@ -105,6 +103,7 @@ local input_actions = {
 	}
 }
 local QuestSettings = QuestSettings
+
 QuestView.init = function (self, ingame_ui_context)
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
@@ -119,7 +118,7 @@ QuestView.init = function (self, ingame_ui_context)
 	self.statistics_db = ingame_ui_context.statistics_db
 	self.player_manager = ingame_ui_context.player_manager
 	local player = Managers.player:local_player()
-	self.player_stats_id = player.stats_id(player)
+	self.player_stats_id = player:stats_id()
 	self.reward_screen = QuestRewardPresentationUI:new(ingame_ui_context)
 	self.world_manager = ingame_ui_context.world_manager
 	local world = self.world_manager:world("level_world")
@@ -127,10 +126,10 @@ QuestView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "quest_view", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "quest_view", "keyboard")
-	input_manager.map_device_to_service(input_manager, "quest_view", "mouse")
-	input_manager.map_device_to_service(input_manager, "quest_view", "gamepad")
+	input_manager:create_input_service("quest_view", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("quest_view", "keyboard")
+	input_manager:map_device_to_service("quest_view", "mouse")
+	input_manager:map_device_to_service("quest_view", "gamepad")
 
 	if not PlayerData.quest_data then
 		local quest_data = {
@@ -153,7 +152,7 @@ QuestView.init = function (self, ingame_ui_context)
 	self.ingame_ui_context = ingame_ui_context
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	local input_service = self.input_manager:get_service("quest_view")
 	local number_of_actvie_descriptions = 3
@@ -164,25 +163,24 @@ QuestView.init = function (self, ingame_ui_context)
 
 	DO_RELOAD = false
 	self._gamepad_select_table_index = 1
-
-	return 
 end
+
 QuestView.input_service = function (self)
 	return (self._waiting_for_reward_presentation and fake_input_service) or self.input_manager:get_service("quest_view")
 end
+
 QuestView.menu_input_service = function (self)
-	return (self.input_blocked and fake_input_service) or self.input_service(self)
+	return (self.input_blocked and fake_input_service) or self:input_service()
 end
+
 QuestView.set_input_blocked = function (self, blocked)
 	self.input_blocked = blocked
-
-	return 
 end
+
 QuestView.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 QuestView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._background_hotspot = UIWidget.init(widget_definitions.background_hotspot)
@@ -319,8 +317,8 @@ QuestView.create_ui_elements = function (self)
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, definitions.animations)
 	self._reload_button_widget = UIWidget.init(widget_definitions.reload_button)
 
-	self._align_board_entries(self)
-	self._align_log_entries(self)
+	self:_align_board_entries()
+	self:_align_log_entries()
 
 	self._event_sounds = {
 		board_start_event = "Play_hud_quest_event_mystery_loop",
@@ -331,15 +329,14 @@ QuestView.create_ui_elements = function (self)
 		select_event = "Play_hud_quest_event_select",
 		board_started = false
 	}
-
-	return 
 end
+
 QuestView.draw = function (self, dt, input_service)
 	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local reward_screen_active = self.reward_screen:active()
 	local widgets_by_name = self.widgets_by_name
 
@@ -385,7 +382,7 @@ QuestView.draw = function (self, dt, input_service)
 				local id = self._selected_widget.content.data.id
 
 				Managers.backend:get_interface("quests"):add_all_contract_progress(id)
-				self._deselect_selection_widget(self)
+				self:_deselect_selection_widget()
 			end
 		end
 
@@ -408,7 +405,7 @@ QuestView.draw = function (self, dt, input_service)
 		if self._reload_button_widget.content.button_hotspot.on_release then
 			self._reload_button_widget.content.button_hotspot.on_release = nil
 
-			self._refresh_quest_and_contracts(self)
+			self:_refresh_quest_and_contracts()
 		end
 	end
 
@@ -417,53 +414,52 @@ QuestView.draw = function (self, dt, input_service)
 	if gamepad_active and not reward_screen_active and not self._decline_contract_popup_id and not self._decline_quest_popup_id and not self._turn_in_contract_popup_id then
 		self.menu_input_description:draw(ui_top_renderer, dt)
 	end
-
-	return 
 end
+
 QuestView.post_update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
 	if self.suspended then
-		return 
+		return
 	end
 
 	local quest_manager = self.quest_manager
-	local is_querying_quests_and_contracts = quest_manager.is_querying_quests_and_contracts(quest_manager)
-	local is_time_to_prepare_sync = quest_manager.prepare_for_new_quests_and_contracts(quest_manager)
+	local is_querying_quests_and_contracts = quest_manager:is_querying_quests_and_contracts()
+	local is_time_to_prepare_sync = quest_manager:prepare_for_new_quests_and_contracts()
 	local loading = (is_querying_quests_and_contracts or is_time_to_prepare_sync) and not self._waiting_for_reward_presentation
 
 	if loading then
 		if not self._loading_previous_frame then
-			self._terminate_all_popups(self)
-			self._deselect_selection_widget(self)
-			self._loading_overlay_fade_in(self, 180)
+			self:_terminate_all_popups()
+			self:_deselect_selection_widget()
+			self:_loading_overlay_fade_in(180)
 		end
 
-		self._rotate_loading_icon(self, dt)
+		self:_rotate_loading_icon(dt)
 	elseif self._loading_previous_frame then
-		self._loading_overlay_fade_out(self)
+		self:_loading_overlay_fade_out()
 	end
 
 	self._loading_previous_frame = loading
 
-	self._poll_backend(self)
-	self._poll_popups(self)
+	self:_poll_backend()
+	self:_poll_popups()
 
 	local input_manager = self.input_manager
-	local input_service = (loading and fake_input_service) or self.menu_input_service(self)
-	local transitioning = self.transitioning(self)
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = (loading and fake_input_service) or self:menu_input_service()
+	local transitioning = self:transitioning()
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local gamepad_input_pressed = self.gamepad_input_pressed
 	local reward_screen = self.reward_screen
-	local reward_screen_active = reward_screen and reward_screen.active(reward_screen)
+	local reward_screen_active = reward_screen and reward_screen:active()
 
 	if reward_screen_active then
 		Profiler.start("reward_screen")
-		reward_screen.update(reward_screen, dt, t)
+		reward_screen:update(dt, t)
 		Profiler.stop()
 
 		input_service = fake_input_service
@@ -480,7 +476,7 @@ QuestView.post_update = function (self, dt, t)
 	end
 
 	if not self.active then
-		return 
+		return
 	end
 
 	if not transitioning then
@@ -488,35 +484,34 @@ QuestView.post_update = function (self, dt, t)
 			if not self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = true
 
-				self._on_gamepad_activated(self)
+				self:_on_gamepad_activated()
 			end
 
 			if not reward_screen_active then
-				self._handle_gamepad_input(self, dt, t, input_service)
+				self:_handle_gamepad_input(dt, t, input_service)
 			end
 
-			self._update_input_description(self)
+			self:_update_input_description()
 		else
 			if self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = false
 
-				self._on_gamepad_deactivated(self)
+				self:_on_gamepad_deactivated()
 			end
 
 			if not loading then
-				self._handle_mouse_input(self, dt, t, input_service)
+				self:_handle_mouse_input(dt, t, input_service)
 			end
 		end
 	end
 
 	if self.active then
-		self.draw(self, dt, input_service)
+		self:draw(dt, input_service)
 	end
 
-	self._update_event_contracts(self, dt, t)
-
-	return 
+	self:_update_event_contracts(dt, t)
 end
+
 QuestView._update_event_contract_countdown = function (self, t, main_time_expire)
 	local ttl = math.max(main_time_expire - t, 0)
 	local h = math.floor(ttl / 3600)
@@ -525,11 +520,11 @@ QuestView._update_event_contract_countdown = function (self, t, main_time_expire
 	local s = rem % 60
 	local str = nil
 
-	if 0 < h then
+	if h > 0 then
 		str = string.format(Localize("qnc_event_contract_hours_left"), h)
-	elseif 0 < m then
+	elseif m > 0 then
 		str = string.format(Localize("qnc_event_contract_minutes_left"), m)
-	elseif 20 < s then
+	elseif s > 20 then
 		str = Localize("qnc_event_contract_less_than_1_min_left")
 	else
 		str = Localize("qnc_event_contract_expiring")
@@ -537,6 +532,7 @@ QuestView._update_event_contract_countdown = function (self, t, main_time_expire
 
 	return str
 end
+
 QuestView._update_event_contracts = function (self)
 	local t = Managers.time:time("main")
 	local should_play = false
@@ -545,11 +541,11 @@ QuestView._update_event_contracts = function (self)
 		for _, widget in pairs(list) do
 			local content = widget.content
 			local data = content.data
-			local is_event = data and self._is_event_contract(self, data)
+			local is_event = data and self:_is_event_contract(data)
 			should_play = should_play or is_event
 
 			if is_event and data.expire_in_log then
-				content.countdown = self._update_event_contract_countdown(self, t, data.main_time_expire)
+				content.countdown = self:_update_event_contract_countdown(t, data.main_time_expire)
 			end
 		end
 	end
@@ -557,11 +553,11 @@ QuestView._update_event_contracts = function (self)
 	for _, widget in pairs(self._log_widgets) do
 		local content = widget.content
 		local data = content.data
-		local is_event = data and self._is_event_contract(self, data)
+		local is_event = data and self:_is_event_contract(data)
 		should_play = should_play or is_event
 
 		if is_event and data.expire_in_log then
-			local countdown_str = self._update_event_contract_countdown(self, t, data.main_time_expire)
+			local countdown_str = self:_update_event_contract_countdown(t, data.main_time_expire)
 			content.title_text = content.title_text_original .. " - " .. countdown_str
 		end
 	end
@@ -569,20 +565,20 @@ QuestView._update_event_contracts = function (self)
 	local sound_data = self._event_sounds
 
 	if not should_play and sound_data.board_started then
-		self.play_sound(self, sound_data.board_stop_event)
+		self:play_sound(sound_data.board_stop_event)
 
 		sound_data.board_started = false
 	elseif should_play and not sound_data.board_started then
-		self.play_sound(self, sound_data.board_start_event)
+		self:play_sound(sound_data.board_start_event)
 
 		sound_data.board_started = true
 	end
+end
 
-	return 
-end
 QuestView.update = function (self, dt, t)
-	return 
+	return
 end
+
 QuestView._poll_popups = function (self)
 	if self._decline_contract_popup_id then
 		local popup_result = Managers.popup:query_result(self._decline_contract_popup_id)
@@ -600,7 +596,7 @@ QuestView._poll_popups = function (self)
 				local data = selected_contract_list_widget.content.data
 				local id = data.id
 
-				self._decline_contract(self, id, self._is_event_contract(self, data))
+				self:_decline_contract(id, self:_is_event_contract(data))
 			end
 		end
 	end
@@ -621,7 +617,7 @@ QuestView._poll_popups = function (self)
 				local data = selected_contract_list_widget.content.data
 				local id = data.id
 
-				self._decline_quest(self, id)
+				self:_decline_quest(id)
 			end
 		end
 	end
@@ -642,19 +638,18 @@ QuestView._poll_popups = function (self)
 				local data = selected_contract_list_widget.content.data
 				local id = data.id
 
-				self._turn_in_contract(self, id, self._is_event_contract(self, data))
+				self:_turn_in_contract(id, self:_is_event_contract(data))
 			end
 		end
 	end
-
-	return 
 end
+
 QuestView.on_enter = function (self)
 	local input_manager = self.input_manager
 
-	input_manager.block_device_except_service(input_manager, "quest_view", "keyboard", 1)
-	input_manager.block_device_except_service(input_manager, "quest_view", "mouse", 1)
-	input_manager.block_device_except_service(input_manager, "quest_view", "gamepad", 1)
+	input_manager:block_device_except_service("quest_view", "keyboard", 1)
+	input_manager:block_device_except_service("quest_view", "mouse", 1)
+	input_manager:block_device_except_service("quest_view", "gamepad", 1)
 
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -663,22 +658,23 @@ QuestView.on_enter = function (self)
 	ScriptWorld.deactivate_viewport(world, viewport)
 	self.reward_screen:on_enter()
 	self.quest_manager:set_poll_active(true)
-	self.play_sound(self, "Play_hud_quest_menu_open")
+	self:play_sound("Play_hud_quest_menu_open")
 
 	self.active = true
 	self._debug_menu = Development.parameter("debug_quest_view")
 
-	self._sync_quests_and_contracts(self)
+	self:_sync_quests_and_contracts()
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
+end
 
-	return 
-end
 QuestView.post_update_on_enter = function (self)
-	return 
+	return
 end
+
 QuestView.post_update_on_exit = function (self)
-	return 
+	return
 end
+
 QuestView.on_exit = function (self)
 	self.exiting = nil
 	self.active = nil
@@ -688,31 +684,30 @@ QuestView.on_exit = function (self)
 
 	ScriptWorld.activate_viewport(world, viewport)
 	self.reward_screen:exit()
-	self._terminate_all_popups(self)
-	self._deselect_selection_widget(self)
+	self:_terminate_all_popups()
+	self:_deselect_selection_widget()
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
 
 	local event_sound_data = self._event_sounds
 
 	if event_sound_data.board_started then
-		self.play_sound(self, event_sound_data.board_stop_event)
+		self:play_sound(event_sound_data.board_stop_event)
 
 		event_sound_data.board_started = false
 	end
 
 	if event_sound_data.hover_started then
-		self.play_sound(self, event_sound_data.hover_stop_event)
+		self:play_sound(event_sound_data.hover_stop_event)
 
 		event_sound_data.hover_started = false
 	end
-
-	return 
 end
+
 QuestView.exit = function (self, return_to_game)
 	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
 
 	self.ingame_ui:transition_with_fade(exit_transition)
-	self.play_sound(self, "Play_hud_button_close")
+	self:play_sound("Play_hud_button_close")
 
 	self.exiting = true
 
@@ -721,18 +716,16 @@ QuestView.exit = function (self, return_to_game)
 	PlayerData.quest_data = self.quest_data
 
 	Managers.save:auto_save(SaveFileName, SaveData)
-
-	return 
 end
+
 QuestView.transitioning = function (self)
 	if self.exiting then
 		return true
 	else
 		return not self.active
 	end
-
-	return 
 end
+
 QuestView.suspend = function (self)
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -745,11 +738,10 @@ QuestView.suspend = function (self)
 
 	self.suspended = true
 
-	self._terminate_all_popups(self)
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_terminate_all_popups()
+	self:_deselect_selection_widget()
 end
+
 QuestView.unsuspend = function (self)
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -761,42 +753,38 @@ QuestView.unsuspend = function (self)
 	self.input_manager:block_device_except_service("quest_view", "gamepad", 1)
 
 	self.suspended = nil
-
-	return 
 end
+
 QuestView._show_reward = function (self, rewards)
 	self.reward_screen:start_reward_presentation(rewards)
-
-	return 
 end
+
 QuestView._hide_reward = function (self)
 	self.reward_screen:stop_reward_presentation()
 
 	local input_manager = self.input_manager
 
-	input_manager.block_device_except_service(input_manager, "quest_view", "mouse")
-	input_manager.block_device_except_service(input_manager, "quest_view", "keyboard")
-	input_manager.block_device_except_service(input_manager, "quest_view", "gamepad")
-
-	return 
+	input_manager:block_device_except_service("quest_view", "mouse")
+	input_manager:block_device_except_service("quest_view", "keyboard")
+	input_manager:block_device_except_service("quest_view", "gamepad")
 end
+
 QuestView._handle_exit = function (self, input_service)
 	local exit_button_widget = self._exit_button_widget
 
 	if exit_button_widget.content.button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
-	if exit_button_widget.content.button_hotspot.on_release or input_service.get(input_service, "toggle_menu") then
+	if exit_button_widget.content.button_hotspot.on_release or input_service:get("toggle_menu") then
 		local return_to_game = not self.ingame_ui.menu_active
 
-		self.exit(self, return_to_game)
+		self:exit(return_to_game)
 
 		return true
 	end
-
-	return 
 end
+
 QuestView.destroy = function (self)
 	if self.reward_screen then
 		self.reward_screen:destroy()
@@ -818,9 +806,8 @@ QuestView.destroy = function (self)
 	self.quest_manager:set_poll_active(false)
 
 	self.quest_manager = nil
-
-	return 
 end
+
 QuestView._on_gamepad_activated = function (self)
 	self._exit_button_widget.content.visible = false
 	self._accept_button_widget.content.visible = false
@@ -831,9 +818,8 @@ QuestView._on_gamepad_activated = function (self)
 			widget.style.tooltip_text.use_fixed_position = use_fixed_position
 		end
 	end
-
-	return 
 end
+
 QuestView._on_gamepad_deactivated = function (self)
 	self._exit_button_widget.content.visible = true
 	self._accept_button_widget.content.visible = true
@@ -844,9 +830,8 @@ QuestView._on_gamepad_deactivated = function (self)
 			widget.style.tooltip_text.use_fixed_position = use_fixed_position
 		end
 	end
-
-	return 
 end
+
 QuestView._update_input_description = function (self)
 	local actions_name_to_use = nil
 
@@ -866,14 +851,14 @@ QuestView._update_input_description = function (self)
 
 		self.menu_input_description:set_input_description(input_description_data)
 	end
-
-	return 
 end
+
 QuestView._is_widget_selectable = function (self, widget)
 	local data = widget.content.data
 
 	return data ~= nil
 end
+
 QuestView._get_closest_widget_by_direction = function (self, table_index, current_selection_index, direction)
 	local gamepad_widget_navigation_table = self._gamepad_widget_navigation_table
 	local widgets = gamepad_widget_navigation_table[table_index]
@@ -885,7 +870,7 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 			local read_index = index % num_widgets + 1
 			local widget = widgets[read_index]
 
-			if self._is_widget_selectable(self, widget) then
+			if self:_is_widget_selectable(widget) then
 				closest_index = read_index
 
 				break
@@ -896,7 +881,7 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 			local read_index = index % num_widgets + 1
 			local widget = widgets[read_index]
 
-			if self._is_widget_selectable(self, widget) then
+			if self:_is_widget_selectable(widget) then
 				closest_index = read_index
 
 				break
@@ -907,9 +892,8 @@ QuestView._get_closest_widget_by_direction = function (self, table_index, curren
 	if closest_index then
 		return widgets[closest_index], closest_index
 	end
-
-	return 
 end
+
 QuestView._get_next_select_table_index = function (self, current_index, direction)
 	local new_select_table_index = nil
 
@@ -921,19 +905,20 @@ QuestView._get_next_select_table_index = function (self, current_index, directio
 
 	return new_select_table_index
 end
+
 QuestView._gamepad_navigate_selection = function (self, direction)
-	local new_select_table_index = self._get_next_select_table_index(self, self._gamepad_select_table_index, direction)
+	local new_select_table_index = self:_get_next_select_table_index(self._gamepad_select_table_index, direction)
 
 	if new_select_table_index then
 		if new_select_table_index ~= self._gamepad_select_table_index then
-			while 1 <= new_select_table_index and new_select_table_index <= 3 do
-				local widget, index = self._get_closest_widget_by_direction(self, new_select_table_index, 0, "down")
+			while new_select_table_index >= 1 and new_select_table_index <= 3 do
+				local widget, index = self:_get_closest_widget_by_direction(new_select_table_index, 0, "down")
 
 				if widget then
 					self._gamepad_select_table_index = new_select_table_index
 					self._gamepad_select_widget_index = index
 
-					self._select_entry_widget(self, widget)
+					self:_select_entry_widget(widget)
 
 					break
 				else
@@ -942,84 +927,82 @@ QuestView._gamepad_navigate_selection = function (self, direction)
 			end
 		end
 	else
-		local widget, index = self._get_closest_widget_by_direction(self, self._gamepad_select_table_index or 1, self._gamepad_select_widget_index or 0, direction)
+		local widget, index = self:_get_closest_widget_by_direction(self._gamepad_select_table_index or 1, self._gamepad_select_widget_index or 0, direction)
 
 		if index and index ~= self._gamepad_select_widget_index then
 			self._gamepad_select_widget_index = index
 
-			self._select_entry_widget(self, widget)
+			self:_select_entry_widget(widget)
 		end
 	end
-
-	return 
 end
+
 QuestView._handle_gamepad_input = function (self, dt, t, input_service)
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	else
 		local gamepad_preview = false
 
-		if input_service.get(input_service, "move_left") or input_service.get(input_service, "move_left_hold") then
+		if input_service:get("move_left") or input_service:get("move_left_hold") then
 			self.controller_cooldown = GamepadSettings.quest_menu_navigation_cooldown
 
-			self._gamepad_navigate_selection(self, "left")
-		elseif input_service.get(input_service, "move_right") or input_service.get(input_service, "move_right_hold") then
+			self:_gamepad_navigate_selection("left")
+		elseif input_service:get("move_right") or input_service:get("move_right_hold") then
 			self.controller_cooldown = GamepadSettings.quest_menu_navigation_cooldown
 
-			self._gamepad_navigate_selection(self, "right")
-		elseif input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
+			self:_gamepad_navigate_selection("right")
+		elseif input_service:get("move_up") or input_service:get("move_up_hold") then
 			self.controller_cooldown = GamepadSettings.quest_menu_navigation_cooldown
 
-			self._gamepad_navigate_selection(self, "up")
-		elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
+			self:_gamepad_navigate_selection("up")
+		elseif input_service:get("move_down") or input_service:get("move_down_hold") then
 			self.controller_cooldown = GamepadSettings.quest_menu_navigation_cooldown
 
-			self._gamepad_navigate_selection(self, "down")
-		elseif input_service.get(input_service, "cycle_previous_hold") and self._selected_widget then
+			self:_gamepad_navigate_selection("down")
+		elseif input_service:get("cycle_previous_hold") and self._selected_widget then
 			gamepad_preview = true
-		elseif not self._accept_input_blocked and input_service.get(input_service, "confirm") then
+		elseif not self._accept_input_blocked and input_service:get("confirm") then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
-			local input_handled = self._on_accept_pressed(self)
+			local input_handled = self:_on_accept_pressed()
 
 			if input_handled then
-				self.play_sound(self, "Play_hud_select")
+				self:play_sound("Play_hud_select")
 			end
-		elseif input_service.get(input_service, "back") or input_service.get(input_service, "toggle_menu") then
+		elseif input_service:get("back") or input_service:get("toggle_menu") then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 
-			self.play_sound(self, "Play_hud_select")
+			self:play_sound("Play_hud_select")
 
 			local return_to_game = not self.ingame_ui.menu_active
 
-			self.exit(self, return_to_game)
+			self:exit(return_to_game)
 		end
 
 		if self._selected_widget then
 			self._selected_widget.content.gamepad_preview = gamepad_preview
 		end
 	end
-
-	return 
 end
+
 QuestView._handle_mouse_input = function (self, dt, t, input_service)
 	local quest_manager = self.quest_manager
 	local input_pressed = false
 	local any_hovered = false
 	local any_hovered_event = false
-	local button_on_hover_enter = self._button_on_hover_enter(self, self._accept_button_widget)
-	local on_pressed = self._is_button_pressed(self, self._accept_button_widget)
+	local button_on_hover_enter = self:_button_on_hover_enter(self._accept_button_widget)
+	local on_pressed = self:_is_button_pressed(self._accept_button_widget)
 
 	if button_on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
 	if on_pressed then
-		input_pressed = self._on_accept_pressed(self)
+		input_pressed = self:_on_accept_pressed()
 
 		if input_pressed then
-			self.play_sound(self, "Play_hud_select")
+			self:play_sound("Play_hud_select")
 		end
 	end
 
@@ -1037,10 +1020,10 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 				local on_pressed = button_hotspot.on_pressed
 				local is_hover = button_hotspot.is_hover
 				local on_hover_enter = button_hotspot.on_hover_enter
-				local is_event_contract = self._is_event_contract(self, content.data)
+				local is_event_contract = self:_is_event_contract(content.data)
 
 				if on_hover_enter then
-					self.play_sound(self, (is_event_contract and self._event_sounds.hover_event) or "Play_hud_hover")
+					self:play_sound((is_event_contract and self._event_sounds.hover_event) or "Play_hud_hover")
 				end
 
 				if is_hover then
@@ -1049,7 +1032,7 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 				end
 
 				if on_pressed then
-					self._select_entry_widget(self, widget)
+					self:_select_entry_widget(widget)
 
 					new_selection = true
 					input_pressed = true
@@ -1072,10 +1055,10 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 				local on_pressed = button_hotspot.on_pressed
 				local is_hover = button_hotspot.is_hover
 				local on_hover_enter = button_hotspot.on_hover_enter
-				local is_event_contract = self._is_event_contract(self, content.data)
+				local is_event_contract = self:_is_event_contract(content.data)
 
 				if on_hover_enter then
-					self.play_sound(self, (is_event_contract and self._event_sounds.hover_event) or "Play_hud_hover")
+					self:play_sound((is_event_contract and self._event_sounds.hover_event) or "Play_hud_hover")
 				end
 
 				if is_hover then
@@ -1084,7 +1067,7 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 				end
 
 				if on_pressed then
-					self._select_entry_widget(self, widget)
+					self:_select_entry_widget(widget)
 
 					new_selection = true
 					input_pressed = true
@@ -1093,30 +1076,29 @@ QuestView._handle_mouse_input = function (self, dt, t, input_service)
 		end
 	end
 
-	local exit_pressed = self._handle_exit(self, input_service)
+	local exit_pressed = self:_handle_exit(input_service)
 
 	if exit_pressed then
-		self.play_sound(self, "Play_hud_select")
+		self:play_sound("Play_hud_select")
 	end
 
 	if not any_hovered and self._hovered_widget then
-		self._select_entry_widget(self, self._selected_widget)
+		self:_select_entry_widget(self._selected_widget)
 	end
 
 	local event_sound_data = self._event_sounds
 
 	if any_hovered_event and not event_sound_data.hover_started then
-		self.play_sound(self, event_sound_data.hover_start_event)
+		self:play_sound(event_sound_data.hover_start_event)
 
 		event_sound_data.hover_started = true
 	elseif not any_hovered_event and event_sound_data.hover_started then
-		self.play_sound(self, event_sound_data.hover_stop_event)
+		self:play_sound(event_sound_data.hover_stop_event)
 
 		event_sound_data.hover_started = false
 	end
-
-	return 
 end
+
 QuestView._on_accept_pressed = function (self)
 	local selected_contract_list_widget = self._selected_widget
 
@@ -1136,20 +1118,20 @@ QuestView._on_accept_pressed = function (self)
 
 				if requirements_met then
 					if is_quest then
-						self._turn_in_quest(self, id)
+						self:_turn_in_quest(id)
 					else
 						local has_key = data_type == "main"
 
 						if has_key then
-							self._request_turn_in_contract(self, id, self._is_event_contract(self, data))
+							self:_request_turn_in_contract(id, self:_is_event_contract(data))
 						else
-							self._turn_in_contract(self, id, self._is_event_contract(self, data))
+							self:_turn_in_contract(id, self:_is_event_contract(data))
 						end
 					end
 				elseif is_quest then
-					self._request_decline_quest(self, id, expired)
+					self:_request_decline_quest(id, expired)
 				else
-					self._request_decline_contract(self, id, expired)
+					self:_request_decline_contract(id, expired)
 				end
 
 				return true
@@ -1158,9 +1140,9 @@ QuestView._on_accept_pressed = function (self)
 				local is_quest = data.is_quest
 
 				if is_quest then
-					self._accept_quest(self, id)
+					self:_accept_quest(id)
 				else
-					self._accept_contract(self, id, self._is_event_contract(self, data))
+					self:_accept_contract(id, self:_is_event_contract(data))
 				end
 
 				if script_data.show_contract_reward_on_accept then
@@ -1178,16 +1160,15 @@ QuestView._on_accept_pressed = function (self)
 						reward.amount = widget_content.reward.tokens.amount
 					end
 
-					self._show_reward(self, reward)
+					self:_show_reward(reward)
 				end
 
 				return true
 			end
 		end
 	end
-
-	return 
 end
+
 QuestView._is_button_pressed = function (self, widget)
 	local button_hotspot = widget.content.button_hotspot
 
@@ -1196,9 +1177,8 @@ QuestView._is_button_pressed = function (self, widget)
 
 		return true
 	end
-
-	return 
 end
+
 QuestView._button_on_hover_enter = function (self, widget)
 	local button_hotspot = widget.content.button_hotspot
 	local on_hover_enter = button_hotspot.on_hover_enter
@@ -1206,24 +1186,21 @@ QuestView._button_on_hover_enter = function (self, widget)
 	if on_hover_enter then
 		return true
 	end
-
-	return 
 end
+
 QuestView._is_cursor_over = function (self, widget)
 	local button_hotspot = widget.content.button_hotspot
 
 	if button_hotspot.cursor_hover then
 		return true
 	end
-
-	return 
 end
+
 QuestView._refresh_quest_and_contracts = function (self)
 	self.quest_manager:query_quests_and_contracts()
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_deselect_selection_widget()
 end
+
 QuestView._terminate_all_popups = function (self)
 	if self._decline_quest_popup_id then
 		Managers.popup:cancel_popup(self._decline_quest_popup_id)
@@ -1242,65 +1219,62 @@ QuestView._terminate_all_popups = function (self)
 
 		self._turn_in_contract_popup_id = nil
 	end
-
-	return 
 end
+
 QuestView._sync_quests_and_contracts = function (self)
-	self._terminate_all_popups(self)
-	self._deselect_selection_widget(self)
+	self:_terminate_all_popups()
+	self:_deselect_selection_widget()
 
 	local quest_manager = self.quest_manager
-	local quests = quest_manager.get_quests(quest_manager)
-	local contracts = quest_manager.get_contracts(quest_manager)
+	local quests = quest_manager:get_quests()
+	local contracts = quest_manager:get_contracts()
 
 	dprint("RESYNC ALL LISTS")
-	self._clear_board(self)
-	self._clear_log(self)
+	self:_clear_board()
+	self:_clear_log()
 
 	local log_id_fill_list = {}
 	local board_id_fill_list = {}
 
-	self._set_number_of_progress_steps_for_active_quest(self, 0)
-	self._set_quest_bar_progress(self, 0)
+	self:_set_number_of_progress_steps_for_active_quest(0)
+	self:_set_quest_bar_progress(0)
 
 	local is_quests = true
 
-	self._populate_board(self, quests, board_id_fill_list, is_quests)
+	self:_populate_board(quests, board_id_fill_list, is_quests)
 
-	self._num_log_quests = self._populate_log(self, quests, log_id_fill_list, is_quests)
+	self._num_log_quests = self:_populate_log(quests, log_id_fill_list, is_quests)
 	is_quests = false
 
-	self._populate_board(self, contracts, board_id_fill_list, is_quests)
+	self:_populate_board(contracts, board_id_fill_list, is_quests)
 
-	self._num_log_contracts = self._populate_log(self, contracts, log_id_fill_list, is_quests)
+	self._num_log_contracts = self:_populate_log(contracts, log_id_fill_list, is_quests)
 	self._stored_log_ids = log_id_fill_list
 	self._stored_board_ids = board_id_fill_list
-
-	return 
 end
+
 QuestView._poll_backend = function (self)
 	local quest_manager = self.quest_manager
-	local quests_and_contracts_dirty = quest_manager.is_quests_and_contracts_dirty(quest_manager)
+	local quests_and_contracts_dirty = quest_manager:is_quests_and_contracts_dirty()
 
 	if quests_and_contracts_dirty then
-		self._sync_quests_and_contracts(self)
+		self:_sync_quests_and_contracts()
 	end
 
 	if not self.reward_screen:active() then
-		local reward = quest_manager.poll_reward(quest_manager)
+		local reward = quest_manager:poll_reward()
 
 		if reward then
 			self._got_first_reward = true
 
-			self._show_reward(self, reward)
+			self:_show_reward(reward)
 		elseif not reward and self._got_first_reward then
 			self._waiting_for_reward_presentation = nil
 			self._got_first_reward = nil
 		end
 	end
-
-	return 
 end
+
 QuestView._level_locked = function (self, level_key)
 	local settings = LevelSettings[level_key]
 	local dlc_name = settings.dlc_name
@@ -1311,6 +1285,7 @@ QuestView._level_locked = function (self, level_key)
 
 	return false
 end
+
 QuestView._assign_widget_data = function (self, widget, data)
 	local content = widget.content
 	local style = widget.style
@@ -1377,7 +1352,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 			content.locked = not level_unlocked
 		end
 
-		local is_event_contract = self._is_event_contract(self, data)
+		local is_event_contract = self:_is_event_contract(data)
 		local difficulty_key = requirements.difficulty
 
 		if difficulty_key then
@@ -1406,7 +1381,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 
 		if data_type == "string" then
 			boon_key = boons
-		elseif data_type == "table" and 0 < #boons then
+		elseif data_type == "table" and #boons > 0 then
 			boon_key = boons[1]
 		end
 
@@ -1416,7 +1391,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 		content.boon_reward_texture = boon_icon
 
 		if boon_template then
-			local duration = boon_template and self._get_readable_boon_duration(self, boon_template.duration)
+			local duration = boon_template and self:_get_readable_boon_duration(boon_template.duration)
 			content.tooltip_text = Localize(boon_template.ui_name) .. " (" .. duration .. ")" .. "\n" .. Localize(boon_template.tooltip)
 		end
 	else
@@ -1429,7 +1404,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 
 		if data_type == "string" then
 			item_key = items
-		elseif data_type == "table" and 0 < #boons then
+		elseif data_type == "table" and #boons > 0 then
 			item_key = items[1]
 		end
 
@@ -1446,7 +1421,7 @@ QuestView._assign_widget_data = function (self, widget, data)
 		end
 
 		content.has_item = true
-		local tooltip_text, tooltip_colors = self._get_item_tooltip(self, item_key, style.tooltip_text)
+		local tooltip_text, tooltip_colors = self:_get_item_tooltip(item_key, style.tooltip_text)
 		content.tooltip_text = tooltip_text
 		style.tooltip_text.line_colors = tooltip_colors
 	else
@@ -1468,10 +1443,10 @@ QuestView._assign_widget_data = function (self, widget, data)
 
 	content.data = data
 	content.active = true
-
-	return 
 end
+
 local default_reward_name_color = Colors.get_color_table_with_alpha("cheeseburger", 255)
+
 QuestView._present_data = function (self, data)
 	local presentation_widgets = self._presentation_widgets
 	local id = data.id
@@ -1483,7 +1458,7 @@ QuestView._present_data = function (self, data)
 	self.ui_scenegraph.presentation_title.local_position[2] = (is_quest and -50) or 0
 
 	if is_quest then
-		self._set_presentation_background(self, "quest_paper_bg")
+		self:_set_presentation_background("quest_paper_bg")
 
 		local acquired = requirements.task.amount.acquired
 		local required = requirements.task.amount.required
@@ -1511,12 +1486,12 @@ QuestView._present_data = function (self, data)
 		local difficulty_display_name = difficulty_settings.display_name
 		local difficulty_display_text = nil
 
-		if self._is_event_contract(self, data) then
-			self._set_presentation_background(self, "contract_paper_bg_event")
+		if self:_is_event_contract(data) then
+			self:_set_presentation_background("contract_paper_bg_event")
 
 			difficulty_display_text = Localize(difficulty_display_name)
 		else
-			self._set_presentation_background(self, "contract_paper_bg")
+			self:_set_presentation_background("contract_paper_bg")
 
 			difficulty_display_text = string.format(Localize("dlc1_3_1_quests_difficulty_text"), Localize(difficulty_display_name))
 		end
@@ -1577,7 +1552,7 @@ QuestView._present_data = function (self, data)
 
 		if data_type == "string" then
 			boon_key = boons
-		elseif data_type == "table" and 0 < #boons then
+		elseif data_type == "table" and #boons > 0 then
 			boon_key = boons[1]
 		end
 
@@ -1585,7 +1560,7 @@ QuestView._present_data = function (self, data)
 		local boon_icon = boon_template and boon_template.ui_icon
 
 		if boon_template then
-			local duration = self._get_readable_boon_duration(self, boon_template.duration)
+			local duration = self:_get_readable_boon_duration(boon_template.duration)
 			presentation_widgets.item_name.content.text = Localize(boon_template.ui_name) .. " (" .. duration .. ")"
 			presentation_widgets.item_name.style.text.text_color = default_reward_name_color
 			presentation_widgets.item_type_name.content.text = Localize(boon_template.tooltip)
@@ -1603,7 +1578,7 @@ QuestView._present_data = function (self, data)
 
 		if data_type == "string" then
 			item_key = items
-		elseif data_type == "table" and 0 < #boons then
+		elseif data_type == "table" and #boons > 0 then
 			item_key = items[1]
 		end
 
@@ -1617,7 +1592,7 @@ QuestView._present_data = function (self, data)
 			presentation_widgets.item_name.style.text.text_color = item_color
 			presentation_widgets.item_type_name.content.text = Localize(item.item_type)
 
-			self._set_traits_info(self, item, item.traits)
+			self:_set_traits_info(item, item.traits)
 
 			local draw_hero_icon = (#item.can_wield == 1 and true) or false
 
@@ -1643,7 +1618,7 @@ QuestView._present_data = function (self, data)
 		presentation_widgets.item_hero_tooltip.content.visible = false
 		presentation_widgets.item_hero_icon.content.visible = false
 
-		self._set_traits_info(self, nil, nil)
+		self:_set_traits_info(nil, nil)
 	end
 
 	if tokens then
@@ -1661,9 +1636,8 @@ QuestView._present_data = function (self, data)
 	end
 
 	presentation_widgets.completed.content.visible = false
-
-	return 
 end
+
 QuestView._set_presentation_background = function (self, texture)
 	local presentation_widgets = self._presentation_widgets
 	local widget = presentation_widgets.background
@@ -1672,9 +1646,8 @@ QuestView._set_presentation_background = function (self, texture)
 	local size = self.ui_scenegraph.presentation_bg.size
 	size[1] = texture_settings.size[1]
 	size[2] = texture_settings.size[2]
-
-	return 
 end
+
 QuestView._set_traits_info = function (self, item, traits)
 	local presentation_widgets = self._presentation_widgets
 	local num_total_traits = ForgeSettings.num_traits
@@ -1733,12 +1706,12 @@ QuestView._set_traits_info = function (self, item, traits)
 	end
 
 	self._numb_traits_on_item = number_of_traits_on_item
-
-	return 
 end
+
 local tooltip_color_orange = Colors.get_color_table_with_alpha("cheeseburger", 255)
 local tooltip_color_white = Colors.get_color_table_with_alpha("white", 255)
 local tooltip_color_red = Colors.get_color_table_with_alpha("red", 255)
+
 QuestView._get_item_tooltip = function (self, item_key, style)
 	local tooltip_trait_locked_text = Localize("tooltip_trait_locked")
 	local tooltip_trait_unique_text = Localize("unique_trait_description")
@@ -1778,7 +1751,7 @@ QuestView._get_item_tooltip = function (self, item_key, style)
 			if trait_template then
 				local display_name = trait_template.display_name or "Unknown"
 				local description_text = BackendUtils.get_trait_description(trait_name, rarity)
-				local description_rows = self._get_number_of_rows(self, style, description_text)
+				local description_rows = self:_get_number_of_rows(style, description_text)
 				tooltip_text = tooltip_text .. "\n" .. Localize(display_name) .. "\n" .. description_text
 				tooltip_text_colors[#tooltip_text_colors + 1] = tooltip_color_orange
 
@@ -1804,28 +1777,30 @@ QuestView._get_item_tooltip = function (self, item_key, style)
 
 	return tooltip_text, tooltip_text_colors
 end
+
 QuestView._get_readable_boon_duration = function (self, duration)
 	local text = ""
 
-	if duration and 0 < duration then
+	if duration and duration > 0 then
 		local days = math.floor(duration / 86400)
 		local hours = math.floor(duration / 3600)
 		local minutes = math.floor(duration / 60)
 		local seconds = math.floor(duration)
 
-		if 0 < days then
+		if days > 0 then
 			text = tostring(days) .. "d"
-		elseif 0 < hours then
+		elseif hours > 0 then
 			text = tostring(hours) .. "h"
-		elseif 0 < minutes then
+		elseif minutes > 0 then
 			text = tostring(minutes) .. "m"
-		elseif 0 <= seconds then
+		elseif seconds >= 0 then
 			text = tostring(seconds) .. "s"
 		end
 	end
 
 	return text
 end
+
 QuestView._clear_entry_widget = function (self, widget)
 	local content = widget.content
 
@@ -1833,97 +1808,87 @@ QuestView._clear_entry_widget = function (self, widget)
 
 	content.active = false
 	content.data = nil
-
-	return 
 end
+
 QuestView._accept_quest = function (self, quest_id)
 	self._num_log_quests = self._num_log_quests + 1
 
-	self.play_sound(self, "Play_hud_quest_menu_accept_big_quest")
+	self:play_sound("Play_hud_quest_menu_accept_big_quest")
 	self.quest_manager:accept_quest_by_id(quest_id)
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_deselect_selection_widget()
 end
+
 QuestView._request_decline_quest = function (self, quest_id, expired)
 	if expired then
 		self._decline_quest_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_discard_quest_warning_text"), Localize("dlc1_3_1_discard_quest_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 	else
 		self._decline_quest_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_decline_quest_warning_text"), Localize("dlc1_3_1_decline_quest_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 	end
-
-	return 
 end
+
 QuestView._decline_quest = function (self, quest_id)
-	self.play_sound(self, "Play_hud_quest_menu_decline_quest")
+	self:play_sound("Play_hud_quest_menu_decline_quest")
 	self.quest_manager:decline_quest_by_id(quest_id)
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_deselect_selection_widget()
 end
+
 QuestView._turn_in_quest = function (self, quest_id)
-	self.play_sound(self, "Play_hud_quest_menu_finish_quest_turn_in_stamp")
+	self:play_sound("Play_hud_quest_menu_finish_quest_turn_in_stamp")
 	self.quest_manager:complete_quest_by_id(quest_id)
 
 	self._waiting_for_reward_presentation = true
 
-	self._deselect_selection_widget(self)
+	self:_deselect_selection_widget()
 	self.statistics_db:increment_stat(self.player_stats_id, "quests_completed")
-
-	return 
 end
+
 QuestView._accept_contract = function (self, contract_id, is_event_contract)
 	local sound = (is_event_contract and "Play_hud_quest_event_accept") or "Play_hud_quest_menu_accept_small_quest"
 	self._num_log_contracts = self._num_log_contracts + 1
 
-	self.play_sound(self, sound)
+	self:play_sound(sound)
 	self.quest_manager:accept_contract_by_id(contract_id)
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_deselect_selection_widget()
 end
+
 QuestView._request_decline_contract = function (self, contract_id, expired)
 	if expired then
 		self._decline_contract_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_discard_contract_warning_text"), Localize("dlc1_3_1_discard_contract_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 	else
 		self._decline_contract_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_decline_contract_warning_text"), Localize("dlc1_3_1_decline_contract_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 	end
-
-	return 
 end
+
 QuestView._decline_contract = function (self, contract_id, is_event_contract)
 	local sound = (is_event_contract and "Play_hud_quest_event_decline") or "Play_hud_quest_menu_decline_quest"
 	self._num_log_contracts = self._num_log_contracts - 1
 
-	self.play_sound(self, sound)
+	self:play_sound(sound)
 	self.quest_manager:decline_contract_by_id(contract_id)
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_deselect_selection_widget()
 end
+
 QuestView._request_turn_in_contract = function (self, contract_id, is_event_contract)
 	local has_no_quest = not self._num_log_quests or self._num_log_quests == 0
 
 	if has_no_quest then
 		self._turn_in_contract_popup_id = Managers.popup:queue_popup(Localize("dlc1_3_1_key_contract_warning_text"), Localize("dlc1_3_1_key_contract_warning_title"), "yes", Localize("popup_choice_yes"), "no", Localize("popup_choice_no"))
 	else
-		self._turn_in_contract(self, contract_id, is_event_contract)
+		self:_turn_in_contract(contract_id, is_event_contract)
 	end
-
-	return 
 end
+
 QuestView._turn_in_contract = function (self, contract_id, is_event_contract)
 	local sound = (is_event_contract and "Play_hud_quest_event_finish") or "Play_hud_quest_menu_finish_quest_turn_in_stamp"
 
-	self.play_sound(self, sound)
+	self:play_sound(sound)
 	self.quest_manager:complete_contract_by_id(contract_id)
 
 	self._waiting_for_reward_presentation = true
 
-	self._deselect_selection_widget(self)
-
-	return 
+	self:_deselect_selection_widget()
 end
+
 QuestView._get_number_of_rows = function (self, text_style, text)
 	local ui_renderer = self.ui_renderer
 	local max_width = text_style.max_width
@@ -1937,12 +1902,15 @@ QuestView._get_number_of_rows = function (self, text_style, text)
 
 	return #texts
 end
+
 QuestView._is_event_contract = function (self, data)
 	local rew = data.rewards
 
 	return (rew and rew.progress) == 2
 end
+
 local NUM_KEY_CONTRACTS = 2
+
 QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 	local counter = 0
 	local quest_manager = self.quest_manager
@@ -1951,7 +1919,7 @@ QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 	for _, data in pairs(entries) do
 		local id = data.id
 		local ttl = data.ttl or 0
-		local expired = quest_manager.has_time_expired(quest_manager, ttl)
+		local expired = quest_manager:has_time_expired(ttl)
 		local active = data.active
 		local requirements_met = data.requirements_met
 		local add_contract = not expired and not active and not requirements_met
@@ -1959,17 +1927,17 @@ QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 		if add_contract then
 			local new_entry = not stored_board_ids[id]
 			local contract_type = data.type
-			local is_event_contract = self._is_event_contract(self, data)
+			local is_event_contract = self:_is_event_contract(data)
 			local list_index = (is_quest and 1) or (is_event_contract and 4) or contract_list_index_by_type[contract_type]
 			local widget_index = (is_event_contract and 1) or (list_index == 3 and data.index - NUM_KEY_CONTRACTS) or data.index
-			local widget = self._get_inactive_board_widget(self, list_index, widget_index)
+			local widget = self:_get_inactive_board_widget(list_index, widget_index)
 
 			if widget then
 				id_fill_list[id] = true
 				local widget_content = widget.content
 				data.is_quest = is_quest
 
-				self._assign_widget_data(self, widget, data)
+				self:_assign_widget_data(widget, data)
 
 				counter = counter + 1
 			end
@@ -1978,17 +1946,17 @@ QuestView._populate_board = function (self, entries, id_fill_list, is_quest)
 
 	return counter
 end
+
 QuestView._clear_board = function (self)
 	local board_widgets = self._board_widgets
 
 	for _, widget_list in ipairs(board_widgets) do
 		for _, widget in ipairs(widget_list) do
-			self._clear_entry_widget(self, widget)
+			self:_clear_entry_widget(widget)
 		end
 	end
-
-	return 
 end
+
 QuestView._align_board_entries = function (self)
 	local list_spacing = 18
 	local widget_spacing = 11
@@ -2015,9 +1983,8 @@ QuestView._align_board_entries = function (self)
 
 		total_list_height = total_list_height - list_spacing
 	end
-
-	return 
 end
+
 QuestView._show_entry_marked = function (self, widget)
 	self._draw_progress_button = nil
 
@@ -2026,7 +1993,7 @@ QuestView._show_entry_marked = function (self, widget)
 		local button_hotspot = content.button_hotspot
 		local data = content.data
 
-		self._present_data(self, data)
+		self:_present_data(data)
 
 		local active = data.active
 		local is_quest = data.is_quest
@@ -2069,9 +2036,8 @@ QuestView._show_entry_marked = function (self, widget)
 		self._accept_input_blocked = button_disabled
 		self._draw_progress_button = active
 	end
-
-	return 
 end
+
 QuestView._select_entry_widget = function (self, widget)
 	if self._selected_widget then
 		local prev_selection_widget = self._selected_widget
@@ -2079,12 +2045,12 @@ QuestView._select_entry_widget = function (self, widget)
 		local button_hotspot = content.button_hotspot
 		button_hotspot.is_selected = false
 
-		self._deselect_selection_widget(self)
+		self:_deselect_selection_widget()
 	end
 
 	self._selected_widget = widget
 
-	self._show_entry_marked(self, widget)
+	self:_show_entry_marked(widget)
 
 	if widget then
 		local content = widget.content
@@ -2092,39 +2058,36 @@ QuestView._select_entry_widget = function (self, widget)
 		button_hotspot.is_selected = true
 
 		if not self._hovered_widget or widget.content.data.id ~= self._hovered_widget.content.data.id then
-			self._fade_in_presentation_widgets(self)
+			self:_fade_in_presentation_widgets()
 		end
 
-		local is_event_contract = self._is_event_contract(self, content.data)
+		local is_event_contract = self:_is_event_contract(content.data)
 
 		if is_event_contract then
-			self.play_sound(self, self._event_sounds.select_event)
+			self:play_sound(self._event_sounds.select_event)
 		else
-			self.play_sound(self, "Play_hud_quest_menu_select_quest")
+			self:play_sound("Play_hud_quest_menu_select_quest")
 		end
 	end
 
 	self._hovered_widget = nil
-
-	return 
 end
+
 QuestView._deselect_selection_widget = function (self)
 	if self._selected_widget then
 		self._selected_widget.content.gamepad_preview = false
 		self._selected_widget = nil
 	end
-
-	return 
 end
+
 QuestView._hover_entry_widget = function (self, widget)
-	self._show_entry_marked(self, widget)
+	self:_show_entry_marked(widget)
 
 	self._hovered_widget = widget
 
-	self._fade_in_presentation_widgets(self)
-
-	return 
+	self:_fade_in_presentation_widgets()
 end
+
 QuestView._get_inactive_board_widget = function (self, list_index, specific_index)
 	local board_widgets = self._board_widgets
 	local widget_list = board_widgets[list_index]
@@ -2140,9 +2103,8 @@ QuestView._get_inactive_board_widget = function (self, list_index, specific_inde
 			return widget
 		end
 	end
-
-	return 
 end
+
 QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 	local stored_log_ids = self._stored_log_ids
 	local counter = 0
@@ -2156,13 +2118,13 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 
 			if not new_entry then
 				local widget_index = stored_log_ids[id]
-				local widget = self._get_inactive_log_widget(self, widget_index)
+				local widget = self:_get_inactive_log_widget(widget_index)
 
 				if widget then
 					id_fill_list[id] = widget_index
 					data.is_quest = is_quest
 
-					self._assign_widget_data(self, widget, data)
+					self:_assign_widget_data(widget, data)
 
 					counter = counter + 1
 
@@ -2174,11 +2136,11 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 						local acquired = requirements.task.amount.acquired
 						local required = requirements.task.amount.required
 
-						self._set_number_of_progress_steps_for_active_quest(self, required - 1)
+						self:_set_number_of_progress_steps_for_active_quest(required - 1)
 
 						local progress = acquired / required
 
-						self._set_quest_bar_progress(self, progress)
+						self:_set_quest_bar_progress(progress)
 					end
 				end
 			end
@@ -2193,13 +2155,13 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 			local new_entry = stored_log_ids[id] == nil
 
 			if new_entry then
-				local widget, widget_index = self._get_inactive_log_widget(self, is_quest and 1)
+				local widget, widget_index = self:_get_inactive_log_widget(is_quest and 1)
 
 				if widget then
 					id_fill_list[id] = widget_index
 					data.is_quest = is_quest
 
-					self._assign_widget_data(self, widget, data)
+					self:_assign_widget_data(widget, data)
 
 					counter = counter + 1
 
@@ -2212,11 +2174,11 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 					local acquired = requirements.task.amount.acquired
 					local required = requirements.task.amount.required
 
-					self._set_number_of_progress_steps_for_active_quest(self, required - 1)
+					self:_set_number_of_progress_steps_for_active_quest(required - 1)
 
 					local progress = acquired / required
 
-					self._set_quest_bar_progress(self, progress)
+					self:_set_quest_bar_progress(progress)
 				end
 			end
 		end
@@ -2224,15 +2186,15 @@ QuestView._populate_log = function (self, entries, id_fill_list, is_quest)
 
 	return counter
 end
+
 QuestView._clear_log = function (self)
 	local log_widgets = self._log_widgets
 
 	for _, widget in ipairs(log_widgets) do
-		self._clear_entry_widget(self, widget)
+		self:_clear_entry_widget(widget)
 	end
-
-	return 
 end
+
 QuestView._align_log_entries = function (self)
 	local first_widget_spacing = 140
 	local widget_spacing = 63
@@ -2249,9 +2211,8 @@ QuestView._align_log_entries = function (self)
 		local spacing = (widget_index == 1 and first_widget_spacing) or widget_spacing
 		total_list_height = total_list_height - (target_offset + spacing)
 	end
-
-	return 
 end
+
 QuestView._get_inactive_log_widget = function (self, specific_index)
 	local widget_list = self._log_widgets
 
@@ -2262,13 +2223,12 @@ QuestView._get_inactive_log_widget = function (self, specific_index)
 			if widget_index == specific_index then
 				return widget, widget_index
 			end
-		elseif 1 < widget_index and not widget_content.active then
+		elseif widget_index > 1 and not widget_content.active then
 			return widget, widget_index
 		end
 	end
-
-	return 
 end
+
 QuestView._rotate_loading_icon = function (self, dt)
 	local widgets = self._loading_widgets
 	local loading_icon_style = widgets.icon.style.texture_id
@@ -2278,9 +2238,8 @@ QuestView._rotate_loading_icon = function (self, dt)
 	local angle = anim_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
-
-	return 
 end
+
 QuestView._loading_overlay_fade_in = function (self, alpha)
 	local widgets = self._loading_widgets
 	local widget = widgets.icon
@@ -2296,10 +2255,9 @@ QuestView._loading_overlay_fade_in = function (self, alpha)
 
 	widgets.overlay.style.rect.color[1] = alpha
 
-	self._animate_loading_text(self)
-
-	return 
+	self:_animate_loading_text()
 end
+
 QuestView._loading_overlay_fade_out = function (self)
 	local function fade(widget, color)
 		local animation = UIAnimation.init(UIAnimation.function_by_time, color, 1, color[1], 0, 0.3, math.easeOutCubic)
@@ -2307,8 +2265,6 @@ QuestView._loading_overlay_fade_out = function (self)
 		table.clear(widget.animations)
 
 		widget.animations[animation] = true
-
-		return 
 	end
 
 	local widgets = self._loading_widgets
@@ -2316,9 +2272,8 @@ QuestView._loading_overlay_fade_out = function (self)
 	fade(widgets.overlay, widgets.overlay.style.rect.color)
 	fade(widgets.icon, widgets.icon.style.texture_id.color)
 	fade(widgets.text, widgets.text.style.text.text_color)
-
-	return 
 end
+
 QuestView._animate_loading_text = function (self)
 	local widgets = self._loading_widgets
 	local widget = widgets.text
@@ -2332,17 +2287,15 @@ QuestView._animate_loading_text = function (self)
 
 		widget.animations[animation] = true
 	end
-
-	return 
 end
+
 QuestView._set_number_of_progress_steps_for_active_quest = function (self, amount)
 	local widgets = self._quest_bar_widgets
 	widgets.bar_dots.style.texture_id.texture_amount = amount
 	widgets.bar_dot_slots.style.texture_id.texture_amount = amount
 	widgets.bar_slots_dots.style.texture_id.texture_amount = amount
-
-	return 
 end
+
 QuestView._set_quest_bar_progress = function (self, progress)
 	local ui_scenegraph = self.ui_scenegraph
 	local widgets = self._quest_bar_widgets
@@ -2371,8 +2324,6 @@ QuestView._set_quest_bar_progress = function (self, progress)
 		size[1] = default_texture_size[1] * dot_progress
 		uvs[2][1] = dot_progress
 	end
-
-	return 
 end
 
 local function animate_widget_style_alpha(widget, target)
@@ -2383,8 +2334,6 @@ local function animate_widget_style_alpha(widget, target)
 	local animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, from, to, anim_time, math.easeCubic)
 
 	UIWidget.animate(widget, animation)
-
-	return 
 end
 
 QuestView._fade_in_presentation_widgets = function (self)
@@ -2408,8 +2357,6 @@ QuestView._fade_in_presentation_widgets = function (self)
 			animate_widget_style_alpha(widget, target)
 		end
 	end
-
-	return 
 end
 
-return 
+return

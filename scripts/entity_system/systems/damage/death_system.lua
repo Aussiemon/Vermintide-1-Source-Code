@@ -15,13 +15,14 @@ DeathReactions_profiler_names = DeathReactions_profiler_names or {
 	husk = {}
 }
 local profiler_names = DeathReactions_profiler_names
+
 DeathSystem.init = function (self, entity_system_creation_context, system_name)
 	DeathSystem.super.init(self, entity_system_creation_context, system_name, extensions)
 
 	local network_event_delegate = entity_system_creation_context.network_event_delegate
 	self.network_event_delegate = network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self.unit_extensions = {}
 	self.waiting_units = {}
@@ -29,14 +30,12 @@ DeathSystem.init = function (self, entity_system_creation_context, system_name)
 		unit = {},
 		husk = {}
 	}
-
-	return 
 end
+
 DeathSystem.destroy = function (self)
 	self.network_event_delegate:unregister(self)
-
-	return 
 end
+
 DeathSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local extension = ScriptUnit.add_extension(self.extension_init_context, unit, extension_name, self.NAME, extension_init_data)
 	self.unit_extensions[unit] = extension
@@ -57,14 +56,14 @@ DeathSystem.on_add_extension = function (self, world, unit, extension_name, exte
 
 	return extension
 end
+
 DeathSystem.extensions_ready = function (self, world, unit)
 	local extension = self.unit_extensions[unit]
 	extension.damage_extension = ScriptUnit.extension(unit, "damage_system")
 
 	assert(extension.damage_extension)
-
-	return 
 end
+
 DeathSystem.on_remove_extension = function (self, unit, extension_name)
 	assert(ScriptUnit.has_extension(unit, self.NAME), "Trying to remove non-existing extension %q from unit %s", extension_name, unit)
 	ScriptUnit.remove_extension(unit, self.NAME)
@@ -73,13 +72,14 @@ DeathSystem.on_remove_extension = function (self, unit, extension_name)
 	self.unit_extensions[unit] = nil
 	self.waiting_units[unit] = nil
 	self.active_reactions[extension.network_type][extension.death_reaction_template][unit] = nil
+end
 
-	return 
-end
 DeathSystem.hot_join_sync = function (self, sender)
-	return 
+	return
 end
+
 local dummy_input = {}
+
 DeathSystem.update = function (self, context, t)
 	local dt = context.dt
 	local DeathReactions = DeathReactions
@@ -120,14 +120,14 @@ DeathSystem.update = function (self, context, t)
 		if health_extension.health <= health_extension.damage then
 			waiting_units[unit] = nil
 			local damage_extension = extension.damage_extension
-			local kill_damages, num_kill_damages = damage_extension.recent_damages(damage_extension)
+			local kill_damages, num_kill_damages = damage_extension:recent_damages()
 			local i = 1
 
 			while kill_damages[(i - 1) * DamageDataIndex.STRIDE + DamageDataIndex.DAMAGE_TYPE] == "heal" do
 				i = i + 1
 			end
 
-			assert(i * DamageDataIndex.STRIDE <= num_kill_damages, "Could not find any killing blow that killed unit %s. It seems like all damages was heal-type. Amount of damages taken this frame was %d", unit, i / DamageDataIndex.STRIDE)
+			assert(num_kill_damages >= i * DamageDataIndex.STRIDE, "Could not find any killing blow that killed unit %s. It seems like all damages was heal-type. Amount of damages taken this frame was %d", unit, i / DamageDataIndex.STRIDE)
 
 			local killing_blow = FrameTable.alloc_table()
 
@@ -168,8 +168,6 @@ DeathSystem.update = function (self, context, t)
 	end
 
 	Profiler.stop("waiting_units")
-
-	return 
 end
 
-return 
+return

@@ -15,4 +15,4 @@ loading_icons_atlas = {
 	}
 }
 
-return 
+return

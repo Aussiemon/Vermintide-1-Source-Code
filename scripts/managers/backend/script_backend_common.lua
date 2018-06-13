@@ -1,4 +1,5 @@
 ScriptBackendCommon = ScriptBackendCommon or {}
+
 ScriptBackendCommon.filter_slot_items = function (items, profile, slot)
 	local item_list = {}
 	local item_master_list = ItemMasterList
@@ -14,6 +15,7 @@ ScriptBackendCommon.filter_slot_items = function (items, profile, slot)
 
 	return item_list
 end
+
 ScriptBackendCommon.can_wield = function (profile, item_data)
 	local can_wield = item_data.can_wield
 
@@ -24,9 +26,8 @@ ScriptBackendCommon.can_wield = function (profile, item_data)
 			return true
 		end
 	end
-
-	return 
 end
+
 local filter_operators = {
 	not = {
 		4,
@@ -116,8 +117,6 @@ local filter_macros = {
 				end
 			end
 		end
-
-		return 
 	end,
 	equipped_by = function (item_data, backend_id)
 		local hero = ScriptBackendItem.equipped_by(backend_id)
@@ -127,7 +126,7 @@ local filter_macros = {
 	current_hero = function (item_data, backend_id)
 		local profile_synchronizer = Managers.state.network.profile_synchronizer
 		local player = Managers.player:local_player()
-		local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, player.network_id(player), player.local_player_id(player))
+		local profile_index = profile_synchronizer:profile_by_peer(player:network_id(), player:local_player_id())
 		local hero_data = SPProfiles[profile_index]
 		local hero_name = hero_data.display_name
 
@@ -176,6 +175,7 @@ local filter_macros = {
 	end
 }
 ScriptBackendCommon.filter_postfix_cache = ScriptBackendCommon.filter_postfix_cache or {}
+
 ScriptBackendCommon.filter_items = function (items, filter_infix)
 	local filter_postfix = ScriptBackendCommon.filter_postfix_cache[filter_infix]
 
@@ -228,13 +228,14 @@ ScriptBackendCommon.filter_items = function (items, filter_infix)
 
 	return passed
 end
+
 ScriptBackendCommon.infix_to_postfix_item_filter = function (filter_infix)
 	local output = {}
 	local stack = {}
 
 	for token in string.gmatch(filter_infix, "%S+") do
 		if filter_operators[token] then
-			while 0 < #stack do
+			while #stack > 0 do
 				local top = stack[#stack]
 
 				if filter_operators[top] and filter_operators[token][1] <= filter_operators[top][1] then
@@ -248,7 +249,7 @@ ScriptBackendCommon.infix_to_postfix_item_filter = function (filter_infix)
 		elseif token == "(" then
 			stack[#stack + 1] = "("
 		elseif token == ")" then
-			while 0 < #stack do
+			while #stack > 0 do
 				local top = stack[#stack]
 
 				if top ~= "(" then
@@ -264,7 +265,7 @@ ScriptBackendCommon.infix_to_postfix_item_filter = function (filter_infix)
 		end
 	end
 
-	while 0 < #stack do
+	while #stack > 0 do
 		output[#output + 1] = table.remove(stack)
 	end
 
@@ -282,6 +283,7 @@ ScriptBackendCommon.infix_to_postfix_item_filter = function (filter_infix)
 
 	return output
 end
+
 ScriptBackendCommon.serialize_traits = function (traits)
 	local serialized_traits = ""
 
@@ -302,4 +304,4 @@ ScriptBackendCommon.serialize_traits = function (traits)
 	return serialized_traits
 end
 
-return 
+return

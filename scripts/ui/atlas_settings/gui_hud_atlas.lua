@@ -2185,4 +2185,4 @@ hud_atlas = {
 	}
 }
 
-return 
+return

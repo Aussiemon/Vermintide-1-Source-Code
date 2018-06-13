@@ -631,4 +631,4 @@ altar_atlas = {
 	}
 }
 
-return 
+return

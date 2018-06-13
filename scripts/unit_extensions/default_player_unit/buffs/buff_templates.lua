@@ -3728,4 +3728,4 @@ for buff_name, buff_template in pairs(BuffTemplates) do
 	end
 end
 
-return 
+return

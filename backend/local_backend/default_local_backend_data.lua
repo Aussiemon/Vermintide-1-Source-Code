@@ -140,7 +140,7 @@ DefaultLocalBackendData = {
 
 local function add_items()
 	if script_data.dont_give_all_lan_backend_items then
-		return 
+		return
 	end
 
 	local default_items = {}
@@ -153,21 +153,22 @@ local function add_items()
 	local items = DefaultLocalBackendData.items
 
 	for item_name, item in pairs(ItemMasterList) do
-		if default_items[item_name] then
-		else
+		repeat
+			if default_items[item_name] then
+				break
+			end
+
 			items[#items + 1] = {
 				traits = "",
 				xp = 0,
 				key = item_name
 			}
-		end
+		until true
 	end
 
 	print(string.format("Adding %d items to profile", #items))
 
 	DefaultLocalBackendData.items = items
-
-	return 
 end
 
 if Application.platform() ~= "xb1" and Application.platform() ~= "ps4" then
@@ -175,7 +176,7 @@ if Application.platform() ~= "xb1" and Application.platform() ~= "ps4" then
 else
 	local function add_xbox_rarity_items()
 		if script_data.dont_give_all_lan_backend_items then
-			return 
+			return
 		end
 
 		local default_items = {}
@@ -188,18 +189,21 @@ else
 		local items = DefaultLocalBackendData.items
 
 		for item_name, item in pairs(ItemMasterList) do
-			if default_items[item_name] then
-			elseif item.rarity then
-				XBoxItemsByRarity[item.rarity] = XBoxItemsByRarity[item.rarity] or {}
-				XBoxItemsByRarity[item.rarity][#XBoxItemsByRarity[item.rarity] + 1] = {
-					traits = "",
-					xp = 0,
-					key = item_name
-				}
-			end
-		end
+			repeat
+				if default_items[item_name] then
+					break
+				end
 
-		return 
+				if item.rarity then
+					XBoxItemsByRarity[item.rarity] = XBoxItemsByRarity[item.rarity] or {}
+					XBoxItemsByRarity[item.rarity][#XBoxItemsByRarity[item.rarity] + 1] = {
+						traits = "",
+						xp = 0,
+						key = item_name
+					}
+				end
+			until true
+		end
 	end
 
 	XB1DefaultLocalBackendData = {}
@@ -209,9 +213,7 @@ else
 
 	XB1DefaultLocalBackendData.add_items = function ()
 		add_items()
-
-		return 
 	end
 end
 
-return 
+return

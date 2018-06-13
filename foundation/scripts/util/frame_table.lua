@@ -1,5 +1,5 @@
 if rawget(_G, "FrameTable") then
-	return 
+	return
 end
 
 local DEBUG_FRAME_TABLES = false
@@ -86,10 +86,10 @@ local function alloc_table()
 	if DEBUG_FRAME_TABLES then
 		local cs = callstack()
 		local callstack_string_cutoff = "local_variables:"
-		local i = cs.find(cs, callstack_string_cutoff)
+		local i = cs:find(callstack_string_cutoff)
 
 		if i then
-			cs = cs.sub(cs, 1, i - 1)
+			cs = cs:sub(1, i - 1)
 		end
 
 		allocation_stacks[frame_table_current_buffer][frame_table_counter] = cs
@@ -113,18 +113,14 @@ local function clear_tables()
 	end
 
 	frame_table_counters[frame_table_current_buffer] = 0
-
-	return 
 end
 
 local function swap_tables()
 	frame_table_current_buffer = 3 - frame_table_current_buffer
-
-	return 
 end
 
 local function frame_table_noop()
-	return 
+	return
 end
 
 local function frame_table_ordinary_alloc()
@@ -133,14 +129,12 @@ end
 
 local function frame_table_init(use_ordinary_tables)
 	if not use_ordinary_tables then
-		return 
+		return
 	end
 
 	FrameTable.alloc_table = frame_table_ordinary_alloc
 	FrameTable.clear_tables = frame_table_noop
 	FrameTable.swap_tables = frame_table_noop
-
-	return 
 end
 
 FrameTable = {
@@ -150,4 +144,4 @@ FrameTable = {
 	swap_tables = swap_tables
 }
 
-return 
+return

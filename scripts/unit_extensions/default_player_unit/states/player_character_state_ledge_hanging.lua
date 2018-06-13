@@ -1,34 +1,32 @@
 PlayerCharacterStateLedgeHanging = class(PlayerCharacterStateLedgeHanging, PlayerCharacterState)
+
 PlayerCharacterStateLedgeHanging.init = function (self, character_state_init_context)
 	PlayerCharacterState.init(self, character_state_init_context, "ledge_hanging")
 
 	local context = character_state_init_context
 	self.lerp_target_position = Vector3Box()
 	self.lerp_start_position = Vector3Box()
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.on_enter_animation = function (self)
 	local unit = self.unit
 
 	CharacterStateHelper.play_animation_event_first_person(self.first_person_extension, "idle")
 	CharacterStateHelper.play_animation_event(unit, "hanging")
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.change_to_third_person_camera = function (self)
 	CharacterStateHelper.change_camera_state(self.player, "follow_third_person_ledge")
 
 	local first_person_extension = self.first_person_extension
 
-	first_person_extension.set_first_person_mode(first_person_extension, false)
+	first_person_extension:set_first_person_mode(false)
 
 	local include_local_player = true
 
 	CharacterStateHelper.show_inventory_3p(self.unit, false, include_local_player, self.is_server, self.inventory_extension)
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.on_enter = function (self, unit, input, dt, context, t, previous_state, params)
 	local unit = self.unit
 	local ledge_unit = params.ledge_unit
@@ -41,14 +39,13 @@ PlayerCharacterStateLedgeHanging.on_enter = function (self, unit, input, dt, con
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 	self.fall_down_time = t + movement_settings_table.ledge_hanging.time_until_fall_down
 
-	self.calculate_and_start_rotation_to_ledge(self)
-	self.calculate_start_position(self)
-	self.on_enter_animation(self)
-	self.change_to_third_person_camera(self)
+	self:calculate_and_start_rotation_to_ledge()
+	self:calculate_start_position()
+	self:on_enter_animation()
+	self:change_to_third_person_camera()
 	CharacterStateHelper.set_is_on_ledge(self.ledge_unit, unit, true, self.is_server, self.status_extension)
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.on_exit = function (self, unit, input, dt, context, t, next_state)
 	self.rotate_timer_yaw = nil
 	self.position_lerp_timer = nil
@@ -73,9 +70,8 @@ PlayerCharacterStateLedgeHanging.on_exit = function (self, unit, input, dt, cont
 	elseif next_state == "leave_ledge_hanging_pull_up" or next_state == "leave_ledge_hanging_falling" then
 		CharacterStateHelper.change_camera_state(self.player, "follow_third_person")
 	end
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, context, t)
 	local csm = self.csm
 	local unit = self.unit
@@ -84,22 +80,22 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 	local status_extension = self.status_extension
 	local first_person_extension = self.first_person_extension
 
-	if status_extension.is_pulled_up(status_extension) or DebugKeyHandler.key_pressed("c", "pull up from ledge hanging", "player") then
+	if status_extension:is_pulled_up() or DebugKeyHandler.key_pressed("c", "pull up from ledge hanging", "player") then
 		local params = self.temp_params
 		params.ledge_unit = self.ledge_unit
 
-		csm.change_state(csm, "leave_ledge_hanging_pull_up", params)
+		csm:change_state("leave_ledge_hanging_pull_up", params)
 
-		return 
+		return
 	end
 
 	if self.fall_down_time < t or CharacterStateHelper.is_knocked_down(status_extension) then
 		local params = self.temp_params
 		params.ledge_unit = self.ledge_unit
 
-		csm.change_state(csm, "leave_ledge_hanging_falling", params)
+		csm:change_state("leave_ledge_hanging_falling", params)
 
-		return 
+		return
 	end
 
 	if self.position_lerp_timer then
@@ -109,7 +105,7 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 		local target_position = self.lerp_target_position:unbox()
 		local new_position = start_position + (target_position - start_position) * percentage_in_lerp
 
-		locomotion_extension.teleport_to(locomotion_extension, new_position)
+		locomotion_extension:teleport_to(new_position)
 
 		if percentage_in_lerp == 1 then
 			self.time_for_position_lerp = nil
@@ -118,15 +114,14 @@ PlayerCharacterStateLedgeHanging.update = function (self, unit, input, dt, conte
 	end
 
 	if CharacterStateHelper.do_common_state_transitions(status_extension, csm) then
-		return 
+		return
 	end
 
 	self.locomotion_extension:set_disable_rotation_update()
 	CharacterStateHelper.look(input_extension, self.player.viewport_name, self.first_person_extension, status_extension, self.inventory_extension)
 	self.locomotion_extension:set_forced_velocity(Vector3:zero())
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.calculate_start_position = function (self)
 	local unit = self.unit
 	local ledge_unit = self.ledge_unit
@@ -150,9 +145,8 @@ PlayerCharacterStateLedgeHanging.calculate_start_position = function (self)
 
 	self.time_for_position_lerp = distance * movement_settings_table.ledge_hanging.attach_position_lerp_time_per_meter
 	self.position_lerp_timer = 0
-
-	return 
 end
+
 PlayerCharacterStateLedgeHanging.calculate_and_start_rotation_to_ledge = function (self)
 	local unit = self.unit
 	local ledge_unit = self.ledge_unit
@@ -163,8 +157,6 @@ PlayerCharacterStateLedgeHanging.calculate_and_start_rotation_to_ledge = functio
 	local rotation = Quaternion(Vector3.up(), finger_box_yaw + math.pi)
 
 	Unit.set_local_rotation(unit, 0, rotation)
-
-	return 
 end
 
-return 
+return

@@ -13,6 +13,7 @@ local extensions = {
 	"EnemyOutlineExtension"
 }
 OutlineSystem = class(OutlineSystem, ExtensionSystemBase)
+
 OutlineSystem.init = function (self, context, system_name)
 	OutlineSystem.super.init(self, context, system_name, extensions)
 
@@ -22,9 +23,8 @@ OutlineSystem.init = function (self, context, system_name)
 	self.units = {}
 	self.current_index = 0
 	self.darkness_system = Managers.state.entity:system("darkness_system")
-
-	return 
 end
+
 OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 	local extension = {}
 
@@ -40,6 +40,7 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 		extension.last_set_method = extension.method
 		extension.flag = "outline_unit"
 		extension.apply_method = "unit_and_childs"
+
 		extension.set_method_player_setting = function (method)
 			if extension.override_method then
 				extension.last_set_method = method
@@ -47,9 +48,8 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 				extension.method = method
 				extension.last_set_method = method
 			end
-
-			return 
 		end
+
 		extension.update_override_method_player_setting = function ()
 			local override_method = nil
 			local player_outlines = Application.user_setting("player_outlines")
@@ -67,8 +67,6 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 			else
 				extension.method = override_method
 			end
-
-			return 
 		end
 
 		extension.update_override_method_player_setting()
@@ -130,19 +128,16 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 	extension.set_outline_color = function (color)
 		extension.outline_color = OutlineSettings.colors[color]
 		extension.new_color = true
-
-		return 
 	end
+
 	extension.reapply_outline = function ()
 		extension.reapply = true
-
-		return 
 	end
+
 	extension.set_method = function (method)
 		extension.method = method
-
-		return 
 	end
+
 	extension.set_pinged = function (pinged)
 		if pinged then
 			if not extension.pinged then
@@ -177,9 +172,8 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 		end
 
 		extension.pinged = pinged
-
-		return 
 	end
+
 	extension.outlined = false
 	extension.new_color = false
 
@@ -190,26 +184,25 @@ OutlineSystem.on_add_extension = function (self, world, unit, extension_name)
 
 	return extension
 end
+
 OutlineSystem.on_remove_extension = function (self, unit, extension_name)
 	self.unit_extension_data[unit] = nil
 
 	table.remove(self.units, table.find(self.units, unit))
 	ScriptUnit.remove_extension(unit, self.NAME)
-
-	return 
 end
+
 OutlineSystem.local_player_created = function (self, player)
 	self.camera_unit = player.camera_follow_unit
-
-	return 
 end
+
 OutlineSystem.update = function (self, context, t)
 	if #self.units == 0 then
-		return 
+		return
 	end
 
 	if script_data.disable_outlines then
-		return 
+		return
 	end
 
 	local checks_per_frame = 4
@@ -217,17 +210,20 @@ OutlineSystem.update = function (self, context, t)
 	local units = self.units
 
 	for i = 1, checks_per_frame, 1 do
-		current_index = current_index + 1
+		repeat
+			current_index = current_index + 1
 
-		if not units[current_index] then
-			current_index = 1
-		end
+			if not units[current_index] then
+				current_index = 1
+			end
 
-		local unit = self.units[current_index]
-		local extension = self.unit_extension_data[unit]
+			local unit = self.units[current_index]
+			local extension = self.unit_extension_data[unit]
 
-		if not extension then
-		else
+			if not extension then
+				break
+			end
+
 			local is_pinged = extension.pinged
 			local method = (is_pinged and extension.pinged_method) or extension.method
 
@@ -236,7 +232,7 @@ OutlineSystem.update = function (self, context, t)
 					local c = (is_pinged and OutlineSettings.colors.player_attention.channel) or extension.outline_color.channel
 					local channel = Color(c[1], c[2], c[3], c[4])
 
-					self.outline_unit(self, unit, extension.flag, channel, true, extension.apply_method, extension.reapply)
+					self:outline_unit(unit, extension.flag, channel, true, extension.apply_method, extension.reapply)
 
 					extension.outlined = true
 				end
@@ -244,20 +240,19 @@ OutlineSystem.update = function (self, context, t)
 				local c = extension.outline_color.channel
 				local channel = Color(c[1], c[2], c[3], c[4])
 
-				self.outline_unit(self, unit, extension.flag, channel, false, extension.apply_method, extension.reapply)
+				self:outline_unit(unit, extension.flag, channel, false, extension.apply_method, extension.reapply)
 
 				extension.outlined = false
 			end
 
 			extension.new_color = false
 			extension.reapply = false
-		end
+		until true
 	end
 
 	self.current_index = current_index
-
-	return 
 end
+
 OutlineSystem.outline_unit = function (self, unit, flag, channel, do_outline, apply_method, is_reapply)
 	if Unit.has_data(unit, "outlined_meshes") then
 		local i = 0
@@ -301,9 +296,8 @@ OutlineSystem.outline_unit = function (self, unit, flag, channel, do_outline, ap
 	else
 		error(sprintf("Non-existant apply method %s", apply_method))
 	end
-
-	return 
 end
+
 OutlineSystem.raycast_result = function (self, unit_center)
 	local physics_world = self.physics_world
 	local camera_position = Unit.local_position(self.camera_unit, 0)
@@ -313,6 +307,7 @@ OutlineSystem.raycast_result = function (self, unit_center)
 
 	return result, num_hits
 end
+
 OutlineSystem.distance_to_unit = function (self, unit)
 	local camera_position = Unit.local_position(self.camera_unit, 0)
 	local pose, radius = Unit.box(unit)
@@ -321,19 +316,23 @@ OutlineSystem.distance_to_unit = function (self, unit)
 
 	return distance
 end
+
 OutlineSystem.never = function (self, unit, extension)
 	return false
 end
+
 OutlineSystem.always = function (self, unit, extension)
 	return true
 end
+
 OutlineSystem.visible = function (self, unit, extension)
 	local pose, radius = Unit.box(unit)
 	local unit_center = Matrix4x4.translation(pose)
 	local in_darkness = self.darkness_system:is_in_darkness(unit_center)
 
-	return not in_darkness and not self.raycast_result(self, unit_center)
+	return not in_darkness and not self:raycast_result(unit_center)
 end
+
 OutlineSystem.not_in_dark = function (self, unit, extension)
 	local pose, radius = Unit.box(unit)
 	local unit_center = Matrix4x4.translation(pose)
@@ -341,11 +340,13 @@ OutlineSystem.not_in_dark = function (self, unit, extension)
 
 	return not in_darkness
 end
+
 OutlineSystem.not_visible = function (self, unit, extension)
-	return not self.visible(self, unit, extension)
+	return not self:visible(unit, extension)
 end
+
 OutlineSystem.within_distance_and_not_in_dark = function (self, unit, extension)
-	if not self.within_distance(self, unit, extension) then
+	if not self:within_distance(unit, extension) then
 		return false
 	end
 
@@ -355,32 +356,37 @@ OutlineSystem.within_distance_and_not_in_dark = function (self, unit, extension)
 
 	return not in_darkness
 end
+
 OutlineSystem.within_distance = function (self, unit, extension)
-	return self.distance_to_unit(self, unit) <= extension.distance
+	return self:distance_to_unit(unit) <= extension.distance
 end
+
 OutlineSystem.outside_distance = function (self, unit, extension)
-	return extension.distance < self.distance_to_unit(self, unit)
+	return extension.distance < self:distance_to_unit(unit)
 end
+
 OutlineSystem.outside_distance_or_not_visible = function (self, unit, extension)
-	if self.outside_distance(self, unit, extension) then
+	if self:outside_distance(unit, extension) then
 		return true
 	end
 
-	if self.not_visible(self, unit, extension) then
+	if self:not_visible(unit, extension) then
 		return true
 	end
 
 	return false
 end
+
 OutlineSystem.within_distance_and_visible = function (self, unit, extension)
-	if self.within_distance(self, unit, extension) and self.visible(self, unit, extension) then
+	if self:within_distance(unit, extension) and self:visible(unit, extension) then
 		return true
 	end
 
 	return false
 end
+
 OutlineSystem.conditional_within_distance = function (self, unit, extension)
-	if self.within_distance(self, unit, extension) then
+	if self:within_distance(unit, extension) then
 		local interaction_type = Unit.get_data(unit, "interaction_data", "interaction_type")
 		local interaction_data = InteractionDefinitions[interaction_type]
 		local local_player = Managers.player:local_player()
@@ -397,4 +403,4 @@ OutlineSystem.conditional_within_distance = function (self, unit, extension)
 	return false
 end
 
-return 
+return

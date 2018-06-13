@@ -6,8 +6,6 @@ local function import(lib)
 	for k, v in pairs(lib) do
 		_G[k] = v
 	end
-
-	return 
 end
 
 if s3d then
@@ -16,15 +14,13 @@ end
 
 BUILD = Application.build()
 PLATFORM = Application.platform()
+
 Application.build = function ()
 	error("Trying to use BUILD, use global variable BUILD instead.")
-
-	return 
 end
+
 Application.platform = function ()
 	error("Trying to use Application.platform(), use global variable PLATFORM instead.")
-
-	return 
 end
 
 if ijdbg then
@@ -36,23 +32,22 @@ if not PROFILER_SCOPES_INITED then
 	local ProfilerScopes = {}
 	PROFILER_SCOPES_INITED = true
 	local profiler_start = Profiler.start
+
 	Profiler.start = function (scope_name)
 		ProfilerScopes[scope_name] = true
 
 		profiler_start(scope_name)
-
-		return 
 	end
 end
 
 GLOBAL_FRAME_INDEX = GLOBAL_FRAME_INDEX or 0
 
 function project_setup()
-	return 
+	return
 end
 
 function pre_update()
-	return 
+	return
 end
 
 local function base_require(path, ...)
@@ -61,8 +56,6 @@ local function base_require(path, ...)
 	}) do
 		require(string.format("foundation/scripts/%s/%s", path, s))
 	end
-
-	return 
 end
 
 local function init_development_parameters()
@@ -111,12 +104,11 @@ local function init_development_parameters()
 	end
 
 	print("*****************************************************************")
-
-	return 
 end
 
 Boot = Boot or {}
 local controlled_exit = false
+
 Boot.setup = function (self)
 	local platform = PLATFORM
 
@@ -126,7 +118,7 @@ Boot.setup = function (self)
 	end
 
 	print(Application.sysinfo())
-	self._init_package_manager(self)
+	self:_init_package_manager()
 	init_development_parameters()
 
 	local window_title = Development.parameter("window-title")
@@ -135,20 +127,19 @@ Boot.setup = function (self)
 		Window.set_title(window_title)
 	end
 
-	self._require_scripts(self)
+	self:_require_scripts()
 	FrameTable.init()
-	self._init_managers(self)
+	self:_init_managers()
 
 	local state_machine_class, start_state, params = project_setup()
 
 	if start_state then
-		self._setup_statemachine(self, state_machine_class, start_state, params)
+		self:_setup_statemachine(state_machine_class, start_state, params)
 	else
 		Boot.has_pre_state_machine_update = true
 	end
-
-	return 
 end
+
 Boot._init_package_manager = function (self)
 	base_require("managers", "managers", "package/package_manager")
 
@@ -156,17 +147,15 @@ Boot._init_package_manager = function (self)
 
 	Managers.package:init()
 	Managers.package:load("foundation/resource_packages/boot", "boot")
-
-	return 
 end
+
 Boot._require_scripts = function (self)
 	Profiler.start("Boot:_require_scripts()")
 	base_require("util", "verify_plugins", "clipboard", "error", "patches", "class", "callback", "rectangle", "state_machine", "misc_util", "stack", "grow_queue", "table", "math", "vector3", "quaternion", "script_world", "script_viewport", "script_camera", "script_unit", "frame_table", "path")
 	base_require("managers", "world/world_manager", "player/player", "free_flight/free_flight_manager", "time/time_manager", "token/token_manager")
 	Profiler.stop("Boot:_require_scripts()")
-
-	return 
 end
+
 Boot._init_managers = function (self)
 	Profiler.start("Boot:_init_managers()")
 
@@ -175,12 +164,12 @@ Boot._init_managers = function (self)
 	Managers.token = TokenManager:new()
 
 	Profiler.stop("Boot:_init_managers()")
+end
 
-	return 
-end
 Boot.pre_update = function (self, dt)
-	return 
+	return
 end
+
 Boot.update = function (self, dt)
 	GLOBAL_FRAME_INDEX = GLOBAL_FRAME_INDEX + 1
 
@@ -213,52 +202,45 @@ Boot.update = function (self, dt)
 			type = "stop_testing"
 		})
 	end
-
-	return 
 end
+
 Boot.is_controlled_exit = function (self)
 	return controlled_exit
 end
+
 Boot.post_update = function (self, dt)
 	self._machine:post_update(dt)
 	FrameTable.swap_tables()
 	FrameTable.clear_tables()
-
-	return 
 end
+
 Boot.render = function (self)
 	Managers.world:render()
 
 	if not Boot.has_pre_state_machine_update then
 		self._machine:render()
 	end
-
-	return 
 end
+
 Boot._setup_statemachine = function (self, state_machine_class, start_state, params)
 	Profiler.start("Boot:_setup_statemachine()")
 
-	self._machine = state_machine_class.new(state_machine_class, self, start_state, params, true)
+	self._machine = state_machine_class:new(self, start_state, params, true)
 
 	Profiler.stop("Boot:_setup_statemachine()")
-
-	return 
 end
+
 Boot.shutdown = function (self)
 	if not Boot.has_pre_state_machine_update then
 		self._machine:destroy(true)
 	end
 
 	Managers:destroy()
-
-	return 
 end
 
 function init()
 	Script.set_index_offset(0)
 	Boot:setup()
-
-	return 
 end
 
 function update(dt)
@@ -275,20 +257,14 @@ function update(dt)
 		Boot:post_update(dt)
 		Profiler.stop("LUA post_update")
 	end
-
-	return 
 end
 
 function render()
 	Boot:render()
-
-	return 
 end
 
 function shutdown()
 	Boot:shutdown()
-
-	return 
 end
 
-return 
+return

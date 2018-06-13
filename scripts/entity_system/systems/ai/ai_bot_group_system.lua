@@ -6,18 +6,22 @@ local extensions = {
 	"BotBreakableExtension"
 }
 AIBotGroupExtension = class(AIBotGroupExtension)
+
 AIBotGroupExtension.init = function (self)
-	return 
+	return
 end
+
 AIBotGroupExtension.destroy = function (self)
-	return 
+	return
 end
+
 local STICKYNESS_DISTANCE_MODIFIER = -0.2
 local PLAYER_UNITS = PLAYER_UNITS
+
 AIBotGroupSystem.init = function (self, context, system_name)
 	local entity_manager = context.entity_manager
 
-	entity_manager.register_system(entity_manager, self, system_name, extensions)
+	entity_manager:register_system(self, system_name, extensions)
 
 	self._is_server = context.is_server
 	self._world = context.world
@@ -88,12 +92,12 @@ AIBotGroupSystem.init = function (self, context, system_name)
 	self._update_pickups_at = -math.huge
 	self._used_covers = {}
 	self._pathing_points = {}
+end
 
-	return 
-end
 AIBotGroupSystem.destroy = function (self)
-	return 
+	return
 end
+
 AIBotGroupSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	if extension_name == "BotBreakableExtension" then
 		Broadphase.add(self._bot_breakables_broadphase, unit, Unit.world_position(unit, 0), 1)
@@ -121,9 +125,8 @@ AIBotGroupSystem.on_add_extension = function (self, world, unit, extension_name,
 
 		return ext
 	end
-
-	return 
 end
+
 AIBotGroupSystem.on_remove_extension = function (self, unit, extension_name)
 	if extension_name == "AIBotGroupExtension" then
 		self._bot_ai_data[unit] = nil
@@ -131,20 +134,19 @@ AIBotGroupSystem.on_remove_extension = function (self, unit, extension_name)
 	end
 
 	ScriptUnit.remove_extension(unit, self.NAME)
+end
 
-	return 
-end
 AIBotGroupSystem.hot_join_sync = function (self, sender, player)
-	return 
+	return
 end
+
 AIBotGroupSystem.set_in_carry_event = function (self, enable)
 	self._in_carry_event = enable
-
-	return 
 end
+
 AIBotGroupSystem.update = function (self, context, t)
 	if not self._is_server or self._num_bots == 0 then
-		return 
+		return
 	end
 
 	self._last_move_target_rotations = self._last_move_target_rotations or {}
@@ -152,32 +154,31 @@ AIBotGroupSystem.update = function (self, context, t)
 	local dt = context.dt
 
 	Profiler.start("_update_urgent_targets")
-	self._update_urgent_targets(self, dt, t)
+	self:_update_urgent_targets(dt, t)
 	Profiler.stop("_update_urgent_targets")
 	Profiler.start("_update_opportunity_targets")
-	self._update_opportunity_targets(self, dt, t)
+	self:_update_opportunity_targets(dt, t)
 	Profiler.stop()
 	Profiler.start("_update_move_targets")
-	self._update_move_targets(self, dt, t)
+	self:_update_move_targets(dt, t)
 	Profiler.stop("_update_move_targets")
 	Profiler.start("_update_priority_targets")
-	self._update_priority_targets(self, dt, t)
+	self:_update_priority_targets(dt, t)
 	Profiler.stop("_update_priority_targets")
 	Profiler.start("_update_pickups")
-	self._update_pickups(self, dt, t)
+	self:_update_pickups(dt, t)
 	Profiler.stop("_update_pickups")
 	Profiler.start("_update_first_person_debug")
-	self._update_first_person_debug(self)
+	self:_update_first_person_debug()
 	Profiler.stop("_update_first_person_debug")
 	Profiler.start("_update_weapon_debug")
-	self._update_weapon_debug(self)
+	self:_update_weapon_debug()
 	Profiler.stop()
 	Profiler.start("_update_ally_needs_aid_priority")
-	self._update_ally_needs_aid_priority(self)
+	self:_update_ally_needs_aid_priority()
 	Profiler.stop("_update_ally_needs_aid_priority")
-
-	return 
 end
+
 local PRIORITY_TARGETS_TEMP = {}
 local NEW_TARGETS = {}
 local OLD_TARGETS = {}
@@ -185,13 +186,14 @@ local TEMP_PLAYER_UNITS = {}
 local TEMP_DISABLED_PLAYER_UNITS = {}
 local TEMP_PLAYER_POSITIONS = {}
 local TEMP_MAN_MAN_POINTS = {}
+
 AIBotGroupSystem._update_move_targets = function (self, dt, t)
 	local human_players = Managers.player:human_players()
 
 	for i = 1, #PLAYER_UNITS, 1 do
 		local player_unit = PLAYER_UNITS[i]
 		local status_ext = player_unit and ScriptUnit.extension(player_unit, "status_system")
-		local not_disabled = status_ext and not status_ext.is_disabled(status_ext)
+		local not_disabled = status_ext and not status_ext:is_disabled()
 
 		if not_disabled then
 			TEMP_PLAYER_UNITS[#TEMP_PLAYER_UNITS + 1] = player_unit
@@ -203,7 +205,7 @@ AIBotGroupSystem._update_move_targets = function (self, dt, t)
 	local num_units = #TEMP_PLAYER_UNITS
 	local num_disabled_units = #TEMP_DISABLED_PLAYER_UNITS
 
-	if num_units == 0 and 0 < num_disabled_units then
+	if num_units == 0 and num_disabled_units > 0 then
 		num_units = num_disabled_units
 		local tmp = TEMP_PLAYER_UNITS
 		TEMP_PLAYER_UNITS = TEMP_DISABLED_PLAYER_UNITS
@@ -216,12 +218,12 @@ AIBotGroupSystem._update_move_targets = function (self, dt, t)
 
 	if num_units == 0 then
 		selected_unit = nil
-	elseif 3 <= num_units then
+	elseif num_units >= 3 then
 		if self._in_carry_event then
 			local bot_unit, data = next(self._bot_ai_data)
-			selected_unit = self._find_most_lonely_move_target(self, TEMP_PLAYER_UNITS, bot_unit)
+			selected_unit = self:_find_most_lonely_move_target(TEMP_PLAYER_UNITS, bot_unit)
 		else
-			selected_unit = self._find_least_lonely_move_target(self, TEMP_PLAYER_UNITS, self._last_move_target_unit)
+			selected_unit = self:_find_least_lonely_move_target(TEMP_PLAYER_UNITS, self._last_move_target_unit)
 		end
 	elseif num_units == 2 and num_bots == 2 and self._in_carry_event then
 		local points = TEMP_MAN_MAN_POINTS
@@ -229,25 +231,25 @@ AIBotGroupSystem._update_move_targets = function (self, dt, t)
 		for i, unit in ipairs(TEMP_PLAYER_UNITS) do
 			local nav_world = Managers.state.entity:system("ai_system"):nav_world()
 			local unit_pos = POSITION_LOOKUP[unit]
-			local disallowed_at_pos, current_mapping = self._selected_unit_is_in_disallowed_nav_tag_volume(self, nav_world, unit_pos)
+			local disallowed_at_pos, current_mapping = self:_selected_unit_is_in_disallowed_nav_tag_volume(nav_world, unit_pos)
 			local destination_points = nil
 
 			if disallowed_at_pos then
-				local origin_point = self._find_origin(self, nav_world, unit)
-				destination_points = self._find_destination_points_outside_volume(self, nav_world, unit_pos, current_mapping, origin_point, 1)
+				local origin_point = self:_find_origin(nav_world, unit)
+				destination_points = self:_find_destination_points_outside_volume(nav_world, unit_pos, current_mapping, origin_point, 1)
 			else
-				local cluster_position, rotation = self._find_cluster_position(self, nav_world, unit)
-				destination_points = self._find_destination_points(self, nav_world, cluster_position, rotation, 1)
+				local cluster_position, rotation = self:_find_cluster_position(nav_world, unit)
+				destination_points = self:_find_destination_points(nav_world, cluster_position, rotation, 1)
 			end
 
 			table.append(points, destination_points)
 		end
 
-		self._assign_destination_points(self, self._bot_ai_data, points, nil, TEMP_PLAYER_UNITS)
+		self:_assign_destination_points(self._bot_ai_data, points, nil, TEMP_PLAYER_UNITS)
 		table.clear(TEMP_PLAYER_UNITS)
 		table.clear(points)
 
-		return 
+		return
 	else
 		local average_bot_pos = Vector3(0, 0, 0)
 
@@ -256,25 +258,25 @@ AIBotGroupSystem._update_move_targets = function (self, dt, t)
 		end
 
 		average_bot_pos = average_bot_pos / num_bots
-		selected_unit = self._find_closest_move_target(self, TEMP_PLAYER_UNITS, self._last_move_target_unit, average_bot_pos)
+		selected_unit = self:_find_closest_move_target(TEMP_PLAYER_UNITS, self._last_move_target_unit, average_bot_pos)
 	end
 
 	if selected_unit and not script_data.bots_dont_follow and not Managers.state.game_mode:game_mode().bot_follow_disabled then
 		self._last_move_target_unit = selected_unit
 		local nav_world = Managers.state.entity:system("ai_system"):nav_world()
 		local unit_pos = POSITION_LOOKUP[selected_unit]
-		local disallowed_at_pos, current_mapping = self._selected_unit_is_in_disallowed_nav_tag_volume(self, nav_world, unit_pos)
+		local disallowed_at_pos, current_mapping = self:_selected_unit_is_in_disallowed_nav_tag_volume(nav_world, unit_pos)
 		local destination_points = nil
 
 		if disallowed_at_pos then
-			local origin_point = self._find_origin(self, nav_world, selected_unit)
-			destination_points = self._find_destination_points_outside_volume(self, nav_world, unit_pos, current_mapping, origin_point, num_bots)
+			local origin_point = self:_find_origin(nav_world, selected_unit)
+			destination_points = self:_find_destination_points_outside_volume(nav_world, unit_pos, current_mapping, origin_point, num_bots)
 		else
-			local cluster_position, rotation = self._find_cluster_position(self, nav_world, selected_unit)
-			destination_points = self._find_destination_points(self, nav_world, cluster_position, rotation, num_bots)
+			local cluster_position, rotation = self:_find_cluster_position(nav_world, selected_unit)
+			destination_points = self:_find_destination_points(nav_world, cluster_position, rotation, num_bots)
 		end
 
-		self._assign_destination_points(self, self._bot_ai_data, destination_points, selected_unit)
+		self:_assign_destination_points(self._bot_ai_data, destination_points, selected_unit)
 	else
 		for unit, data in pairs(self._bot_ai_data) do
 			data.follow_position = nil
@@ -284,9 +286,8 @@ AIBotGroupSystem._update_move_targets = function (self, dt, t)
 
 	table.clear(TEMP_PLAYER_UNITS)
 	table.clear(TEMP_DISABLED_PLAYER_UNITS)
-
-	return 
 end
+
 AIBotGroupSystem._selected_unit_is_in_disallowed_nav_tag_volume = function (self, nav_world, selected_unit_pos)
 	local tag_volumes_query = GwNavQueries.tag_volumes_from_position(nav_world, selected_unit_pos, 2, 2)
 
@@ -298,7 +299,7 @@ AIBotGroupSystem._selected_unit_is_in_disallowed_nav_tag_volume = function (self
 			local is_exclusive, color, layer_id, smart_object_id, user_data_id = GwNavTagVolume.navtag(nav_tag_volume)
 			local layer_name = LAYER_ID_MAPPING[layer_id]
 			local volume_system = Managers.state.entity:system("volume_system")
-			local current_mapping = volume_system.get_volume_mapping_from_lookup_id(volume_system, user_data_id)
+			local current_mapping = volume_system:get_volume_mapping_from_lookup_id(user_data_id)
 
 			if current_mapping and self._disallowed_tag_layers[layer_name] then
 				return true, current_mapping
@@ -309,9 +310,8 @@ AIBotGroupSystem._selected_unit_is_in_disallowed_nav_tag_volume = function (self
 	else
 		return false
 	end
-
-	return 
 end
+
 AIBotGroupSystem._find_closest_move_target = function (self, targets, last_target, pos)
 	local closest_index = nil
 	local closest_value = math.huge
@@ -323,7 +323,7 @@ AIBotGroupSystem._find_closest_move_target = function (self, targets, last_targe
 			dist_sq = dist_sq - 9
 		end
 
-		if dist_sq < closest_value then
+		if closest_value > dist_sq then
 			closest_value = dist_sq
 			closest_index = i
 		end
@@ -331,6 +331,7 @@ AIBotGroupSystem._find_closest_move_target = function (self, targets, last_targe
 
 	return targets[closest_index]
 end
+
 AIBotGroupSystem._find_least_lonely_move_target = function (self, targets, last_target)
 	for i, unit in ipairs(targets) do
 		TEMP_PLAYER_POSITIONS[i] = POSITION_LOOKUP[unit]
@@ -362,6 +363,7 @@ AIBotGroupSystem._find_least_lonely_move_target = function (self, targets, last_
 
 	return targets[least_lonely_index]
 end
+
 AIBotGroupSystem._find_most_lonely_move_target = function (self, targets, origin_unit)
 	local origin = POSITION_LOOKUP[origin_unit]
 
@@ -376,7 +378,7 @@ AIBotGroupSystem._find_most_lonely_move_target = function (self, targets, origin
 		local loneliness = nil
 		local sq_dist = Vector3.distance_squared(pos, origin)
 
-		if 900 < sq_dist then
+		if sq_dist > 900 then
 			loneliness = -sq_dist * 3
 		else
 			loneliness = 0
@@ -396,6 +398,7 @@ AIBotGroupSystem._find_most_lonely_move_target = function (self, targets, origin
 
 	return targets[most_lonely_index]
 end
+
 AIBotGroupSystem._find_origin = function (self, nav_world, selected_unit)
 	local unit_pos = POSITION_LOOKUP[selected_unit]
 	local unit_is_on_navmesh, z = GwNavQueries.triangle_from_position(nav_world, unit_pos, 5, 5)
@@ -413,15 +416,16 @@ AIBotGroupSystem._find_origin = function (self, nav_world, selected_unit)
 
 	return origin_pos
 end
+
 AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_unit)
 	local locomotion_ext = ScriptUnit.extension(selected_unit, "locomotion_system")
-	local current_velocity = locomotion_ext.current_velocity(locomotion_ext)
+	local current_velocity = locomotion_ext:current_velocity()
 	local velocity = nil
 
 	if Vector3.length_squared(current_velocity) < 0.01 then
 		velocity = Vector3(0, 0, 0)
 	else
-		velocity = locomotion_ext.average_velocity(locomotion_ext)
+		velocity = locomotion_ext:average_velocity()
 	end
 
 	local unit_pos = POSITION_LOOKUP[selected_unit]
@@ -443,7 +447,7 @@ AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_un
 	local cluster_position = nil
 
 	if ray_start_pos then
-		local distance, ray_pos = self._raycast(self, nav_world, ray_start_pos, velocity, 5)
+		local distance, ray_pos = self:_raycast(nav_world, ray_start_pos, velocity, 5)
 		cluster_position = Vector3.lerp(ray_start_pos, ray_pos, 0.6)
 		local success, z = GwNavQueries.triangle_from_position(nav_world, cluster_position, 5, 5)
 
@@ -458,17 +462,17 @@ AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_un
 
 	local rotation = nil
 
-	if 0.1 < Vector3.length(velocity) then
+	if Vector3.length(velocity) > 0.1 then
 		rotation = Quaternion.look(velocity, Vector3.up())
 		self._last_move_target_rotations[selected_unit] = nil
 	elseif self._last_move_target_rotations[selected_unit] then
 		rotation = self._last_move_target_rotations[selected_unit]:unbox()
 	else
 		local network_manager = Managers.state.network
-		local game = network_manager.game(network_manager)
+		local game = network_manager:game()
 
 		if game and not LEVEL_EDITOR_TEST then
-			local game_object_id = network_manager.unit_game_object_id(network_manager, selected_unit)
+			local game_object_id = network_manager:unit_game_object_id(selected_unit)
 			local aim_direction = GameSession.game_object_field(game, game_object_id, "aim_direction")
 			rotation = Quaternion.look(Vector3.flat(aim_direction), Vector3.up())
 		else
@@ -480,6 +484,7 @@ AIBotGroupSystem._find_cluster_position = function (self, nav_world, selected_un
 
 	return cluster_position, rotation
 end
+
 local TEMP_UNITS = {}
 local TEMP_TESTED_POINTS = {}
 local TEMP_CURRENT_SOLUTION = {}
@@ -488,7 +493,7 @@ local TEMP_BEST_SOLUTION = {}
 local function find_permutation(current_index, units, tested_points, current_solution, utility, data, best_utility, best_solution)
 	local num_units = #units
 
-	if num_units < current_index then
+	if current_index > num_units then
 		if best_utility < utility then
 			for i = 1, num_units, 1 do
 				best_solution[i] = current_solution[i]
@@ -514,8 +519,6 @@ local function find_permutation(current_index, units, tested_points, current_sol
 
 		return best_utility
 	end
-
-	return 
 end
 
 AIBotGroupSystem._assign_destination_points = function (self, bot_ai_data, points, follow_unit, follow_unit_table)
@@ -557,9 +560,8 @@ AIBotGroupSystem._assign_destination_points = function (self, bot_ai_data, point
 	table.clear(TEMP_TESTED_POINTS)
 	table.clear(TEMP_CURRENT_SOLUTION)
 	table.clear(TEMP_BEST_SOLUTION)
-
-	return 
 end
+
 AIBotGroupSystem._calculate_center_of_volume = function (self, volume_mapping)
 	local center_pos = Vector3(0, 0, 0)
 
@@ -576,13 +578,14 @@ AIBotGroupSystem._calculate_center_of_volume = function (self, volume_mapping)
 
 	return center_pos, longest_distance_sq
 end
+
 AIBotGroupSystem._find_destination_points_outside_volume = function (self, nav_world, selected_unit_pos, volume_mapping, origin_point, needed_points)
-	local center_point, area_radius_sq = self._calculate_center_of_volume(self, volume_mapping)
+	local center_point, area_radius_sq = self:_calculate_center_of_volume(volume_mapping)
 	local range = math.sqrt(area_radius_sq) + 1
 	local dir = Vector3.flat(Vector3.normalize(selected_unit_pos - center_point))
 	local rotation = Quaternion.look(dir, Vector3.up())
 	local space_per_player = range - 1
-	local points = self._find_points(self, nav_world, Vector3(center_point[1], center_point[2], selected_unit_pos[3]), rotation, self._left_vectors_outside_volume, self._right_vectors_outside_volume, space_per_player, range, needed_points)
+	local points = self:_find_points(nav_world, Vector3(center_point[1], center_point[2], selected_unit_pos[3]), rotation, self._left_vectors_outside_volume, self._right_vectors_outside_volume, space_per_player, range, needed_points)
 
 	if script_data.ai_bots_debug then
 		for k, v in ipairs(points) do
@@ -607,10 +610,11 @@ AIBotGroupSystem._find_destination_points_outside_volume = function (self, nav_w
 
 	return points
 end
+
 AIBotGroupSystem._find_destination_points = function (self, nav_world, origin_point, rotation, needed_points)
 	local range = 3
 	local space_per_player = 1
-	local points = self._find_points(self, nav_world, origin_point, rotation, self._left_vectors, self._right_vectors, space_per_player, range, needed_points)
+	local points = self:_find_points(nav_world, origin_point, rotation, self._left_vectors, self._right_vectors, space_per_player, range, needed_points)
 
 	if script_data.ai_bots_debug then
 		for k, v in ipairs(points) do
@@ -618,7 +622,7 @@ AIBotGroupSystem._find_destination_points = function (self, nav_world, origin_po
 		end
 	end
 
-	if #points < needed_points then
+	if needed_points > #points then
 		for i = #points + 1, needed_points, 1 do
 			points[i] = origin_point
 		end
@@ -629,15 +633,13 @@ end
 
 local function add_points(points, from_pos, to_pos, amount)
 	if amount == 0 then
-		return 
+		return
 	end
 
 	for i = 1, amount, 1 do
 		local pos = Vector3.lerp(from_pos, to_pos, i / amount)
 		points[#points + 1] = pos
 	end
-
-	return 
 end
 
 AIBotGroupSystem._find_points = function (self, nav_world, origin_point, rotation, left_vectors, right_vectors, space_per_player, range, needed_points)
@@ -650,11 +652,11 @@ AIBotGroupSystem._find_points = function (self, nav_world, origin_point, rotatio
 
 	table.clear(points)
 
-	while (left_index < #left_vectors or right_index < #right_vectors) and found_points_left + found_points_right < needed_points do
+	while (left_index < #left_vectors or right_index < #right_vectors) and needed_points > found_points_left + found_points_right do
 
 		-- Decompilation error in this vicinity:
 		right_index = right_index + 1
-		local distance, hit_pos = self._raycast(self, nav_world, origin_point, Quaternion.rotate(rotation, right_vectors[right_index]:unbox()), range)
+		local distance, hit_pos = self:_raycast(nav_world, origin_point, Quaternion.rotate(rotation, right_vectors[right_index]:unbox()), range)
 		local num_points = math.floor(distance / space_per_player)
 
 		add_points(points, origin_point, hit_pos, num_points)
@@ -666,7 +668,9 @@ AIBotGroupSystem._find_points = function (self, nav_world, origin_point, rotatio
 
 	return points
 end
+
 local SPACE_NEEDED = 0.25
+
 AIBotGroupSystem._raycast = function (self, nav_world, point, vector, range)
 	local ray_range = range + SPACE_NEEDED
 	local to = point + vector * ray_range
@@ -687,9 +691,8 @@ AIBotGroupSystem._raycast = function (self, nav_world, point, vector, range)
 			return distance - SPACE_NEEDED, pos - vector * SPACE_NEEDED, success
 		end
 	end
-
-	return 
 end
+
 AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 	for _, player in pairs(Managers.player:players()) do
 		local player_unit = player.player_unit
@@ -698,10 +701,10 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 			local status_ext = ScriptUnit.extension(player_unit, "status_system")
 			local target = nil
 
-			if status_ext.is_pounced_down(status_ext) then
-				target = status_ext.get_pouncer_unit(status_ext)
-			elseif status_ext.is_grabbed_by_pack_master(status_ext) then
-				target = status_ext.get_pack_master_grabber(status_ext)
+			if status_ext:is_pounced_down() then
+				target = status_ext:get_pouncer_unit()
+			elseif status_ext:is_grabbed_by_pack_master() then
+				target = status_ext:get_pack_master_grabber()
 			end
 
 			if AiUtils.unit_alive(target) then
@@ -720,7 +723,7 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 
 		table.clear(data.priority_targets)
 
-		if PRIORITY_TARGETS_TEMP[unit] or status_ext.is_disabled(status_ext) then
+		if PRIORITY_TARGETS_TEMP[unit] or status_ext:is_disabled() then
 			data.current_priority_target_disabled_ally = nil
 			data.current_priority_target = nil
 			data.priority_target_distance = math.huge
@@ -732,7 +735,7 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 			local best_distance = math.huge
 
 			for ally, target in pairs(PRIORITY_TARGETS_TEMP) do
-				local utility, distance = self._calculate_priority_target_utility(self, self_pos, target, NEW_TARGETS[target], data.current_priority_target)
+				local utility, distance = self:_calculate_priority_target_utility(self_pos, target, NEW_TARGETS[target], data.current_priority_target)
 				data.priority_targets[target] = utility
 
 				if best_utility < utility then
@@ -749,7 +752,7 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 		end
 
 		local ai_extension = ScriptUnit.extension(unit, "ai_system")
-		local bb = ai_extension.blackboard(ai_extension)
+		local bb = ai_extension:blackboard()
 
 		if bb.priority_target_disabled_ally or data.current_priority_target_disabled_ally then
 			bb.priority_target_disabled_ally = data.current_priority_target_disabled_ally
@@ -770,13 +773,13 @@ AIBotGroupSystem._update_priority_targets = function (self, dt, t)
 	table.clear(NEW_TARGETS)
 
 	OLD_TARGETS = old_foes
-
-	return 
 end
+
 local BOSS_ENGAGE_DISTANCE = 15
+
 AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 	local conflict_director = Managers.state.conflict
-	local alive_bosses = conflict_director.alive_bosses(conflict_director)
+	local alive_bosses = conflict_director:alive_bosses()
 
 	for bot_unit, data in pairs(self._bot_ai_data) do
 		local best_utility = -math.huge
@@ -790,9 +793,9 @@ AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 		for target_unit, is_target_until in pairs(self._urgent_targets) do
 			local time_left = is_target_until - t
 
-			if 0 < time_left then
+			if time_left > 0 then
 				if AiUtils.unit_alive(target_unit) then
-					local utility, distance = self._calculate_opportunity_utility(self, bot_unit, self_pos, old_target, target_unit, t, true)
+					local utility, distance = self:_calculate_opportunity_utility(bot_unit, self_pos, old_target, target_unit, t, true)
 
 					if best_utility < utility then
 						best_utility = utility
@@ -810,7 +813,7 @@ AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 				local pos = POSITION_LOOKUP[target_unit]
 
 				if AiUtils.unit_alive(target_unit) and Vector3.distance(pos, self_pos) < BOSS_ENGAGE_DISTANCE and not Unit.get_data(target_unit, "blackboard").defensive_mode_duration then
-					local utility, distance = self._calculate_opportunity_utility(self, bot_unit, self_pos, old_target, target_unit, t, false)
+					local utility, distance = self:_calculate_opportunity_utility(bot_unit, self_pos, old_target, target_unit, t, false)
 
 					if best_utility < utility then
 						best_utility = utility
@@ -826,13 +829,13 @@ AIBotGroupSystem._update_urgent_targets = function (self, dt, t)
 		blackboard.urgent_target_enemy = best_target
 		blackboard.urgent_target_distance = best_distance
 	end
-
-	return 
 end
+
 local FALLBACK_OPPORTUNITY_DISTANCE = 15
+
 AIBotGroupSystem._update_opportunity_targets = function (self, dt, t)
 	local conflict_director = Managers.state.conflict
-	local alive_specials = conflict_director.alive_specials(conflict_director)
+	local alive_specials = conflict_director:alive_specials()
 
 	for bot_unit, data in pairs(self._bot_ai_data) do
 		local best_utility = -math.huge
@@ -846,7 +849,7 @@ AIBotGroupSystem._update_opportunity_targets = function (self, dt, t)
 			local target_pos = POSITION_LOOKUP[target_unit]
 
 			if AiUtils.unit_alive(target_unit) and Vector3.distance(target_pos, self_pos) < FALLBACK_OPPORTUNITY_DISTANCE then
-				local utility, distance = self._calculate_opportunity_utility(self, bot_unit, self_pos, old_target, target_unit, t, false)
+				local utility, distance = self:_calculate_opportunity_utility(bot_unit, self_pos, old_target, target_unit, t, false)
 
 				if best_utility < utility then
 					best_utility = utility
@@ -859,9 +862,8 @@ AIBotGroupSystem._update_opportunity_targets = function (self, dt, t)
 		blackboard.opportunity_target_enemy = best_target
 		blackboard.opportunity_target_distance = best_distance
 	end
-
-	return 
 end
+
 AIBotGroupSystem._calculate_opportunity_utility = function (self, bot_unit, self_position, current_target, potential_target, t, force_seen)
 	local prox_ext = ScriptUnit.has_extension(potential_target, "proximity_system")
 	local distance = math.max(Vector3.length(self_position - POSITION_LOOKUP[potential_target]), 1)
@@ -885,6 +887,7 @@ AIBotGroupSystem._calculate_opportunity_utility = function (self, bot_unit, self
 
 	return proximity, distance
 end
+
 AIBotGroupSystem._update_pickups = function (self, dt, t)
 	local players = Managers.player:players()
 
@@ -909,23 +912,23 @@ AIBotGroupSystem._update_pickups = function (self, dt, t)
 		local player_unit = player.player_unit
 
 		if AiUtils.unit_alive(player_unit) and not ScriptUnit.extension(player_unit, "status_system"):is_ready_for_assisted_respawn() then
-			self._update_pickups_near_player(self, player_unit, t)
+			self:_update_pickups_near_player(player_unit, t)
 		end
 	end
 
 	Profiler.stop("do overlaps")
 	Profiler.start("update who takes what health")
-	self._update_health_pickups(self, dt, t)
+	self:_update_health_pickups(dt, t)
 	Profiler.stop("update who takes what health")
 	Profiler.start("update who takes what mule pickup")
-	self._update_mule_pickups(self, dt, t)
+	self:_update_mule_pickups(dt, t)
 	Profiler.stop("update who takes what mule pickup")
 	Profiler.stop("update pickups")
-
-	return 
 end
+
 local PICKUP_CHECK_RANGE = 15
 local PICKUP_FETCH_RESULTS = {}
+
 AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 	local self_pos = POSITION_LOOKUP[unit]
 	local hp_pickups = self._available_health_pickups
@@ -950,7 +953,7 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 	local allowed_distance_to_follow_pos = 15
 	local game_mode_key = Managers.state.game_mode:game_mode_key()
 	local pickup_system = Managers.state.entity:system("pickup_system")
-	local num_pickups = pickup_system.get_pickups(pickup_system, self_pos, PICKUP_CHECK_RANGE, PICKUP_FETCH_RESULTS)
+	local num_pickups = pickup_system:get_pickups(self_pos, PICKUP_CHECK_RANGE, PICKUP_FETCH_RESULTS)
 
 	for i = 1, num_pickups, 1 do
 		local pickup_unit = PICKUP_FETCH_RESULTS[i]
@@ -987,7 +990,7 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 
 					if pickup_name == "all_ammo_small" then
 						local inventory_ext = bb.inventory_extension
-						local current_ammo, _ = inventory_ext.current_ammo_status(inventory_ext, "slot_ranged")
+						local current_ammo, _ = inventory_ext:current_ammo_status("slot_ranged")
 						allowed_to_take_ammo = current_ammo and current_ammo == 0
 					else
 						allowed_to_take_ammo = true
@@ -1007,9 +1010,8 @@ AIBotGroupSystem._update_pickups_near_player = function (self, unit, t)
 	end
 
 	table.clear(PICKUP_FETCH_RESULTS)
-
-	return 
 end
+
 local HEALTH_ITEMS_TEMP = {}
 local HEALTH_ITEMS_TEMP_TEMP = {}
 local AUXILIARY_HEALTH_SLOT_ITEMS_TEMP = {}
@@ -1053,17 +1055,16 @@ local function find_permutation(current_bot_index, current_utility, solution, be
 			end
 		end
 
-		if 0 < empties_left then
+		if empties_left > 0 then
 			best_utility = find_permutation(current_bot_index + 1, current_utility, solution, best_utility, best_solution, empties_left - 1, health_item_lookup, health_item_list, num_valid_bots)
 		end
 
 		return best_utility
 	end
-
-	return 
 end
 
 local ASSIGNED_MULE_PICKUPS_TEMP = {}
+
 AIBotGroupSystem._update_mule_pickups = function (self, dt, t)
 	local Unit_alive = Unit.alive
 	local Vector3_distance_squared = Vector3.distance_squared
@@ -1114,9 +1115,9 @@ AIBotGroupSystem._update_mule_pickups = function (self, dt, t)
 			if AiUtils.unit_alive(player_unit) then
 				local inventory_ext = ScriptUnit.extension(player_unit, "inventory_system")
 				local status_ext = ScriptUnit.extension(player_unit, "status_system")
-				local item = inventory_ext.get_slot_data(inventory_ext, slot_name)
+				local item = inventory_ext:get_slot_data(slot_name)
 
-				if not item and not status_ext.is_ready_for_assisted_respawn(status_ext) then
+				if not item and not status_ext:is_ready_for_assisted_respawn() then
 					local player_pos = POSITION_LOOKUP[player_unit]
 
 					for pickup_unit, data in pairs(available_pickups) do
@@ -1161,9 +1162,8 @@ AIBotGroupSystem._update_mule_pickups = function (self, dt, t)
 			end
 		end
 	end
-
-	return 
 end
+
 AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 	local Unit_alive = Unit.alive
 	local available_pickups = self._available_health_pickups
@@ -1190,15 +1190,15 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 		if AiUtils.unit_alive(player_unit) then
 			local inventory_ext = ScriptUnit.extension(player_unit, "inventory_system")
 			local status_ext = ScriptUnit.extension(player_unit, "status_system")
-			local med_item = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
+			local med_item = inventory_ext:get_slot_data("slot_healthkit")
 			local health_extension = ScriptUnit.extension(player_unit, "health_system")
 
-			if not med_item and not status_ext.is_ready_for_assisted_respawn(status_ext) then
+			if not med_item and not status_ext:is_ready_for_assisted_respawn() then
 				local closest_dist = math.huge
 				local closest_item = nil
 				local pos = POSITION_LOOKUP[player_unit]
 
-				if 0 < num_health_items then
+				if num_health_items > 0 then
 					for unit, item_pos in pairs(HEALTH_ITEMS_TEMP) do
 						local dist = Vector3.distance_squared(pos, item_pos)
 
@@ -1210,7 +1210,7 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 
 					num_health_items = num_health_items - 1
 					HEALTH_ITEMS_TEMP[closest_item] = nil
-				elseif 0 < num_aux_items then
+				elseif num_aux_items > 0 then
 					for unit, item_pos in pairs(AUXILIARY_HEALTH_SLOT_ITEMS_TEMP) do
 						local dist = Vector3.distance_squared(pos, item_pos)
 
@@ -1225,10 +1225,10 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 				end
 			end
 
-			if status_ext.is_knocked_down(status_ext) or status_ext.is_wounded(status_ext) then
+			if status_ext:is_knocked_down() or status_ext:is_wounded() then
 				lowest_human_hp_percent = math.min(0, lowest_human_hp_percent)
 			else
-				local health_percent = health_extension.current_health_percent(health_extension)
+				local health_percent = health_extension:current_health_percent()
 				lowest_human_hp_percent = math.min(health_percent, lowest_human_hp_percent)
 			end
 		end
@@ -1245,18 +1245,18 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 		blackboard.force_use_health_pickup = false
 		local inventory_ext = ScriptUnit.extension(unit, "inventory_system")
 		local status_ext = ScriptUnit.extension(unit, "status_system")
-		local health_slot_data = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
-		local has_heal_item = health_slot_data and inventory_ext.get_item_template(inventory_ext, health_slot_data).can_heal_self
+		local health_slot_data = inventory_ext:get_slot_data("slot_healthkit")
+		local has_heal_item = health_slot_data and inventory_ext:get_item_template(health_slot_data).can_heal_self
 
-		if not has_heal_item and AiUtils.unit_alive(unit) and not status_ext.is_ready_for_assisted_respawn(status_ext) then
+		if not has_heal_item and AiUtils.unit_alive(unit) and not status_ext:is_ready_for_assisted_respawn() then
 			num_valid_bots = num_valid_bots + 1
 			BOT_UNITS[num_valid_bots] = unit
 			BOT_BBS[num_valid_bots] = blackboard
 			BOT_POSES[num_valid_bots] = POSITION_LOOKUP[unit]
 			local health_extension = ScriptUnit.extension(unit, "health_system")
-			local hp_percent = health_extension.current_health_percent(health_extension)
+			local hp_percent = health_extension:current_health_percent()
 
-			if status_ext.is_wounded(status_ext) then
+			if status_ext:is_wounded() then
 				hp_percent = hp_percent / 3
 			end
 
@@ -1269,9 +1269,9 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 			end
 
 			BOT_INDICES[unit] = num_valid_bots
-		elseif has_heal_item and AiUtils.unit_alive(unit) and not status_ext.is_ready_for_assisted_respawn(status_ext) then
+		elseif has_heal_item and AiUtils.unit_alive(unit) and not status_ext:is_ready_for_assisted_respawn() then
 			local health_extension = ScriptUnit.extension(unit, "health_system")
-			local hp_percent = health_extension.current_health_percent(health_extension)
+			local hp_percent = health_extension:current_health_percent()
 
 			if hp_percent < lowest_bot_health_procent then
 				lowest_bot_health_procent = hp_percent
@@ -1333,7 +1333,7 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 	for i = 1, num_valid_bots, 1 do
 		local unit_i = BOT_UNITS[i]
 		local inventory_ext = ScriptUnit.extension(unit_i, "inventory_system")
-		local has_aux_item = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
+		local has_aux_item = inventory_ext:get_slot_data("slot_healthkit")
 		local in_solution = BEST_SOLUTION_TEMP[i]
 
 		if not in_solution and not has_aux_item then
@@ -1361,7 +1361,7 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 
 	num_valid_bots = current_index - 1
 
-	if 0 < num_valid_bots then
+	if num_valid_bots > 0 then
 		table.merge(HEALTH_ITEMS_TEMP_TEMP, AUXILIARY_HEALTH_SLOT_ITEMS_TEMP)
 
 		local allowed_empties = math.max(0, num_valid_bots - num_aux_items)
@@ -1412,9 +1412,8 @@ AIBotGroupSystem._update_health_pickups = function (self, dt, t)
 	if not self._in_carry_event and more_items_than_players and lowest_hp_bot_has_item and math.min(lowest_bot_health_procent * 1.2, 1) < lowest_human_hp_percent then
 		lowest_hp_bot_blackboard.force_use_health_pickup = true
 	end
-
-	return 
 end
+
 AIBotGroupSystem._calculate_priority_target_utility = function (self, self_position, target, time, current_target)
 	local stickyness_modifier = (target == current_target and STICKYNESS_DISTANCE_MODIFIER) or 0
 	local distance = math.max(Vector3.length(self_position - POSITION_LOOKUP[target]), 1)
@@ -1423,28 +1422,28 @@ AIBotGroupSystem._calculate_priority_target_utility = function (self, self_posit
 
 	return proximity + duration, distance
 end
+
 AIBotGroupSystem._update_first_person_debug = function (self)
 	if not script_data.ai_bots_debug then
-		return 
+		return
 	end
 
 	if PLATFORM == "win32" then
 		if Keyboard.pressed(Keyboard.button_index("numpad 1")) then
-			self.first_person_debug(self, 1)
+			self:first_person_debug(1)
 		elseif Keyboard.pressed(Keyboard.button_index("numpad 2")) then
-			self.first_person_debug(self, 2)
+			self:first_person_debug(2)
 		elseif Keyboard.pressed(Keyboard.button_index("numpad 3")) then
-			self.first_person_debug(self, 3)
+			self:first_person_debug(3)
 		elseif Keyboard.pressed(Keyboard.button_index("numpad enter")) then
-			self.first_person_debug(self, nil)
+			self:first_person_debug(nil)
 		end
 	end
-
-	return 
 end
+
 AIBotGroupSystem._update_weapon_debug = function (self)
 	if not script_data.ai_bots_weapon_debug then
-		return 
+		return
 	end
 
 	local player_manager = Managers.player
@@ -1452,14 +1451,14 @@ AIBotGroupSystem._update_weapon_debug = function (self)
 	Debug.text("BOT RANGED WEAPON")
 
 	for unit, data in pairs(self._bot_ai_data) do
-		local player_bot = player_manager.owner(player_manager, unit)
-		local bot_name = player_bot.profile_display_name(player_bot)
+		local player_bot = player_manager:owner(unit)
+		local bot_name = player_bot:profile_display_name()
 		local blackboard = data.blackboard
 		local inventory_extension = blackboard.inventory_extension
-		local current_ammo, max_ammo = inventory_extension.current_ammo_status(inventory_extension, "slot_ranged")
-		local current_oc, threshold_oc, max_oc = inventory_extension.current_overcharge_status(inventory_extension, "slot_ranged")
-		local slot_data = inventory_extension.get_slot_data(inventory_extension, "slot_ranged")
-		local item_template = inventory_extension.get_item_template(inventory_extension, slot_data)
+		local current_ammo, max_ammo = inventory_extension:current_ammo_status("slot_ranged")
+		local current_oc, threshold_oc, max_oc = inventory_extension:current_overcharge_status("slot_ranged")
+		local slot_data = inventory_extension:get_slot_data("slot_ranged")
+		local item_template = inventory_extension:get_item_template(slot_data)
 		local weapon_name = item_template.name
 		local ammo_substring = (current_ammo and string.format(" %d|%d", current_ammo, max_ammo)) or ""
 		local oc_substring = (current_oc and string.format(" %02d|%d|%d", current_oc, threshold_oc, max_oc)) or ""
@@ -1467,9 +1466,8 @@ AIBotGroupSystem._update_weapon_debug = function (self)
 
 		Debug.text(debug_text)
 	end
-
-	return 
 end
+
 AIBotGroupSystem._update_ally_needs_aid_priority = function (self)
 	local unit_alive = Unit.alive
 	local bot_ai_data = self._bot_ai_data
@@ -1486,12 +1484,11 @@ AIBotGroupSystem._update_ally_needs_aid_priority = function (self)
 			self._ally_needs_aid_priority[target_unit] = nil
 		end
 	end
-
-	return 
 end
+
 AIBotGroupSystem.first_person_debug = function (self, bot_number)
 	if bot_number == self._debugging_bot then
-		return 
+		return
 	end
 
 	local local_player = nil
@@ -1514,13 +1511,13 @@ AIBotGroupSystem.first_person_debug = function (self, bot_number)
 	end
 
 	if not new_player then
-		return 
+		return
 	end
 
 	local new_unit = new_player.player_unit
 
 	if not Unit.alive(new_unit) then
-		return 
+		return
 	end
 
 	local old_player = nil
@@ -1534,7 +1531,7 @@ AIBotGroupSystem.first_person_debug = function (self, bot_number)
 	local old_unit = old_player.player_unit
 
 	if not Unit.alive(old_unit) then
-		return 
+		return
 	end
 
 	if not Managers.state.camera:has_viewport(new_player.viewport_name) then
@@ -1549,37 +1546,36 @@ AIBotGroupSystem.first_person_debug = function (self, bot_number)
 	ScriptUnit.extension(old_unit, "first_person_system"):debug_set_first_person_mode(old_player == local_player, false)
 
 	self._debugging_bot = bot_number
-
-	return 
 end
+
 AIBotGroupSystem.ranged_attack_started = function (self, attacker_unit, victim_unit, attack_type)
 	if DamageUtils.is_player_unit(victim_unit) then
 		for unit, data in pairs(self._bot_ai_data) do
 			local ai_ext = ScriptUnit.extension(unit, "ai_system")
 
-			ai_ext.ranged_attack_started(ai_ext, attacker_unit, victim_unit, attack_type)
+			ai_ext:ranged_attack_started(attacker_unit, victim_unit, attack_type)
 		end
 
 		fassert(self._urgent_targets[attacker_unit] ~= math.huge, "Attacker unit %s is already attacking another victim! max one victim at a time allowed, otherwise we need to add ref counting", attacker_unit)
 
 		self._urgent_targets[attacker_unit] = math.huge
 	end
-
-	return 
 end
+
 local OPPORTUNITY_TARGET_COOLDOWN = 30
+
 AIBotGroupSystem.ranged_attack_ended = function (self, attacker_unit, victim_unit, attack_type)
 	for unit, data in pairs(self._bot_ai_data) do
 		local ai_ext = ScriptUnit.extension(unit, "ai_system")
 
-		ai_ext.ranged_attack_ended(ai_ext, attacker_unit, victim_unit, attack_type)
+		ai_ext:ranged_attack_ended(attacker_unit, victim_unit, attack_type)
 	end
 
 	self._urgent_targets[attacker_unit] = self._t + OPPORTUNITY_TARGET_COOLDOWN
-
-	return 
 end
+
 local ALLY_AID_PRIORITY_STICKINESS_DISTANCE = 3
+
 AIBotGroupSystem.register_ally_needs_aid_priority = function (self, bot_unit, target_unit)
 	local aider_unit = self._ally_needs_aid_priority[target_unit]
 	local set_new_aider = true
@@ -1590,19 +1586,20 @@ AIBotGroupSystem.register_ally_needs_aid_priority = function (self, bot_unit, ta
 		local new_aider_bb = bot_ai_data[bot_unit].blackboard
 		local current_aider_dist = current_aider_bb.ally_distance
 		local new_aider_dist = new_aider_bb.ally_distance
-		set_new_aider = new_aider_dist + ALLY_AID_PRIORITY_STICKINESS_DISTANCE < current_aider_dist
+		set_new_aider = current_aider_dist > new_aider_dist + ALLY_AID_PRIORITY_STICKINESS_DISTANCE
 	end
 
 	if set_new_aider then
 		self._ally_needs_aid_priority[target_unit] = bot_unit
 	end
-
-	return 
 end
+
 AIBotGroupSystem.is_prioritized_ally = function (self, bot_unit, target_unit)
 	return self._ally_needs_aid_priority[target_unit] == bot_unit
 end
+
 local BROADPHASE_RESULTS = {}
+
 AIBotGroupSystem.bot_breakable = function (self, bot_unit)
 	local bot_pos = POSITION_LOOKUP[bot_unit]
 
@@ -1610,7 +1607,7 @@ AIBotGroupSystem.bot_breakable = function (self, bot_unit)
 
 	local hit_unit = BROADPHASE_RESULTS[1]
 
-	if 1 < #BROADPHASE_RESULTS then
+	if #BROADPHASE_RESULTS > 1 then
 		local min_distance = math.huge
 
 		for _, unit in pairs(BROADPHASE_RESULTS) do
@@ -1626,11 +1623,11 @@ AIBotGroupSystem.bot_breakable = function (self, bot_unit)
 
 	return hit_unit
 end
+
 AIBotGroupSystem.set_in_cover = function (self, bot_unit, cover_unit)
 	self._used_covers[bot_unit] = cover_unit
-
-	return 
 end
+
 AIBotGroupSystem.in_cover = function (self, cover_unit)
 	for bot_unit, cover in pairs(self._used_covers) do
 		if cover == cover_unit then
@@ -1640,6 +1637,7 @@ AIBotGroupSystem.in_cover = function (self, cover_unit)
 
 	return nil
 end
+
 local EPSILON = 0.01
 
 local function detect_cylinder(nav_world, traverse_logic, bot_position, bot_height, bot_radius, x, y, z, rotation, size)
@@ -1652,9 +1650,9 @@ local function detect_cylinder(nav_world, traverse_logic, bot_position, bot_heig
 	local radius = math.max(size.x, size.y)
 	local half_height = size.z
 
-	if radius + bot_radius < flat_dist_from_center then
-		return 
-	elseif bot_z < z + half_height and z - bot_height - half_height < bot_z then
+	if flat_dist_from_center > radius + bot_radius then
+		return
+	elseif bot_z < z + half_height and bot_z > z - bot_height - half_height then
 		local escape_dist = radius - flat_dist_from_center
 		local escape_dir = nil
 
@@ -1670,7 +1668,7 @@ local function detect_cylinder(nav_world, traverse_logic, bot_position, bot_heig
 		local success, z = GwNavQueries.triangle_from_position(nav_world, to, above, below)
 
 		if not success then
-			return 
+			return
 		end
 
 		to.z = z
@@ -1680,8 +1678,6 @@ local function detect_cylinder(nav_world, traverse_logic, bot_position, bot_heig
 			return escape_dir
 		end
 	end
-
-	return 
 end
 
 local function detect_sphere(nav_world, traverse_logic, bot_position, bot_height, bot_radius, sphere_x, sphere_y, sphere_z, rotation, sphere_radius)
@@ -1692,9 +1688,9 @@ local function detect_sphere(nav_world, traverse_logic, bot_position, bot_height
 	local offset_y = bot_y - sphere_y
 	local flat_dist_from_center = math.sqrt(offset_x * offset_x + offset_y * offset_y)
 
-	if sphere_radius + bot_radius < flat_dist_from_center then
-		return 
-	elseif bot_z < sphere_z + sphere_radius and sphere_z - bot_height - sphere_radius < bot_z then
+	if flat_dist_from_center > sphere_radius + bot_radius then
+		return
+	elseif bot_z < sphere_z + sphere_radius and bot_z > sphere_z - bot_height - sphere_radius then
 		local escape_dist = radius - flat_dist_from_center
 		local escape_dir = nil
 
@@ -1710,7 +1706,7 @@ local function detect_sphere(nav_world, traverse_logic, bot_position, bot_height
 		local success, z = GwNavQueries.triangle_from_position(nav_world, to, above, below)
 
 		if not success then
-			return 
+			return
 		end
 
 		to.z = z
@@ -1720,8 +1716,6 @@ local function detect_sphere(nav_world, traverse_logic, bot_position, bot_height
 			return escape_dir
 		end
 	end
-
-	return 
 end
 
 local function detect_oobb(nav_world, traverse_logic, bot_position, bot_height, bot_radius, x, y, z, rotation, extents)
@@ -1736,7 +1730,7 @@ local function detect_oobb(nav_world, traverse_logic, bot_position, bot_height, 
 	local extents_z = extents.z + half_bot_height
 
 	if extents_x < x_offset or x_offset < -extents_x or extents_y < y_offset or y_offset < -extents_y or extents_z < z_offset or z_offset < -extents_z then
-		return 
+		return
 	end
 
 	local sign = math.sign(x_offset)
@@ -1748,7 +1742,7 @@ local function detect_oobb(nav_world, traverse_logic, bot_position, bot_height, 
 		local success, z = GwNavQueries.triangle_from_position(nav_world, to, above, below)
 
 		if not success then
-			return 
+			return
 		end
 
 		to.z = z
@@ -1760,8 +1754,6 @@ local function detect_oobb(nav_world, traverse_logic, bot_position, bot_height, 
 			sign = -sign
 		end
 	end
-
-	return 
 end
 
 AIBotGroupSystem.aoe_threat_created = function (self, position, shape, size, rotation, duration)
@@ -1798,8 +1790,6 @@ AIBotGroupSystem.aoe_threat_created = function (self, position, shape, size, rot
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

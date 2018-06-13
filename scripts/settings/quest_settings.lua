@@ -235,4 +235,4 @@ for _, key in ipairs(replace_list) do
 	setmetatable(QuestSettings[key], meta)
 end
 
-return 
+return

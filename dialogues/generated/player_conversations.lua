@@ -45941,6 +45941,4 @@ return function ()
 			}
 		}
 	})
-
-	return 
 end

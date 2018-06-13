@@ -17,12 +17,12 @@ weapon_template.actions = {
 			condition_func = function (user_unit)
 				local heal_extension = ScriptUnit.extension(user_unit, "health_system")
 
-				return 0 < heal_extension.damage
+				return heal_extension.damage > 0
 			end,
 			chain_condition_func = function (user_unit)
 				local heal_extension = ScriptUnit.extension(user_unit, "health_system")
 
-				return 0 < heal_extension.damage
+				return heal_extension.damage > 0
 			end
 		}
 	},
@@ -54,7 +54,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		},
 		give_item = ActionTemplates.give_item_on_defend
@@ -83,12 +83,12 @@ weapon_template.actions = {
 			condition_func = function (user_unit)
 				local heal_extension = ScriptUnit.extension(user_unit, "health_system")
 
-				return 0 < heal_extension.damage
+				return heal_extension.damage > 0
 			end,
 			chain_condition_func = function (user_unit)
 				local heal_extension = ScriptUnit.extension(user_unit, "health_system")
 
-				return 0 < heal_extension.damage
+				return heal_extension.damage > 0
 			end
 		}
 	},
@@ -140,4 +140,4 @@ weapon_template.can_give_other = true
 weapon_template.bot_heal_threshold = 0.5
 Weapons.healing_draught = Weapons.healing_draught or table.clone(weapon_template)
 
-return 
+return

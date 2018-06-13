@@ -2590,4 +2590,4 @@ HitEffectsStormVerminChampion = {
 	}
 }
 
-return 
+return

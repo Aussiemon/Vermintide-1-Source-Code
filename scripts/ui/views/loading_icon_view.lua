@@ -14,12 +14,13 @@ local loading_icon_data = {
 LoadingIconView = class(LoadingIconView)
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
+
 LoadingIconView.init = function (self, world)
 	self.world = world
 	self.ui_renderer = UIRenderer.create(world, "material", "materials/ui/ui_1080p_loading")
@@ -27,59 +28,53 @@ LoadingIconView.init = function (self, world)
 		snap_pixel_positions = true
 	}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self._icon_fade_timer = 0
 	self._show_loading_icon = false
 	DO_RELOAD = false
-
-	return 
 end
+
 LoadingIconView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.loading_icon_widget = UIWidget.init(definitions.loading_icon)
-
-	return 
 end
+
 LoadingIconView.show_loading_icon = function (self)
 	self._show_loading_icon = true
-
-	return 
 end
+
 LoadingIconView.hide_loading_icon = function (self)
 	self._show_loading_icon = false
-
-	return 
 end
+
 LoadingIconView.show_icon_background = function (self)
 	local widget = self.loading_icon_widget
 	widget.style.background_rect.color[1] = 255
-
-	return 
 end
+
 LoadingIconView.hide_icon_background = function (self)
 	local widget = self.loading_icon_widget
 	widget.style.background_rect.color[1] = 0
+end
 
-	return 
-end
 LoadingIconView.active = function (self)
-	return self._show_loading_icon or 0 < self._icon_fade_timer
+	return self._show_loading_icon or self._icon_fade_timer > 0
 end
+
 LoadingIconView.update = function (self, dt)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
-	if self.active(self) then
-		self.update_loading_icon(self, dt)
-		self.draw(self, dt)
+	if self:active() then
+		self:update_loading_icon(dt)
+		self:draw(dt)
 	end
-
-	return 
 end
+
 LoadingIconView.update_loading_icon = function (self, dt)
 	local widget = self.loading_icon_widget
 	local icon_style = widget.style.icon
@@ -118,9 +113,8 @@ LoadingIconView.update_loading_icon = function (self, dt)
 	end
 
 	icon_style.color[1] = self._icon_fade_timer / FADE_TIME * 255
-
-	return 
 end
+
 LoadingIconView.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -128,13 +122,10 @@ LoadingIconView.draw = function (self, dt)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, fake_input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.loading_icon_widget)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 LoadingIconView.destroy = function (self)
 	UIRenderer.destroy(self.ui_renderer, self.world)
-
-	return 
 end
 
-return 
+return

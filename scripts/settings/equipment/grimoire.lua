@@ -101,7 +101,7 @@ Weapons.wpn_side_objective_tome_01.actions = {
 			chain_condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -119,7 +119,7 @@ Weapons.wpn_side_objective_tome_01.actions = {
 			end,
 			total_time = math.huge,
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			buff_data = {
 				{
@@ -151,4 +151,4 @@ Weapons.wpn_side_objective_tome_01.pickup_data = {
 	pickup_name = "tome"
 }
 
-return 
+return

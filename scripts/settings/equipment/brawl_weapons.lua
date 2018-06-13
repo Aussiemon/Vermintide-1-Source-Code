@@ -231,7 +231,7 @@ wooden_sword_template.actions = {
 				}
 			},
 			chain_condition_func = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
+				input_extension:reset_release_input()
 
 				return true
 			end,
@@ -307,7 +307,7 @@ wooden_sword_template.actions = {
 				}
 			},
 			chain_condition_func = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
+				input_extension:reset_release_input()
 
 				return true
 			end,
@@ -546,7 +546,7 @@ wooden_sword_template.actions = {
 			chain_condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -563,7 +563,7 @@ wooden_sword_template.actions = {
 			end,
 			total_time = math.huge,
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			buff_data = {
 				{
@@ -705,7 +705,7 @@ unarmed_template.actions = {
 			condition_func = function (action_user, input_extension)
 				local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
 
-				return not inventory_extension.is_wielding(inventory_extension)
+				return not inventory_extension:is_wielding()
 			end
 		},
 		default_right = {
@@ -992,7 +992,7 @@ unarmed_template.actions = {
 				}
 			},
 			chain_condition_func = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
+				input_extension:reset_release_input()
 
 				return true
 			end,
@@ -1070,7 +1070,7 @@ unarmed_template.actions = {
 				}
 			},
 			chain_condition_func = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
+				input_extension:reset_release_input()
 
 				return true
 			end,
@@ -1368,7 +1368,7 @@ unarmed_template.actions = {
 			end,
 			total_time = math.huge,
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			buff_data = {
 				{
@@ -1397,7 +1397,7 @@ unarmed_template.actions = {
 			condition_func = function (action_user, input_extension)
 				local inventory_extension = ScriptUnit.extension(action_user, "inventory_system")
 
-				return not inventory_extension.is_wielding(inventory_extension)
+				return not inventory_extension:is_wielding()
 			end
 		}
 	},
@@ -1472,4 +1472,4 @@ Weapons = Weapons or {}
 Weapons.wooden_sword = table.clone(wooden_sword_template)
 Weapons.brawl_unarmed = table.clone(unarmed_template)
 
-return 
+return

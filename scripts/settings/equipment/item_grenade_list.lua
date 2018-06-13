@@ -114,4 +114,4 @@ ItemMasterList.grenade_fire_02 = {
 	}
 }
 
-return 
+return

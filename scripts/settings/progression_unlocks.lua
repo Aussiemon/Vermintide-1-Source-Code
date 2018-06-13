@@ -63,8 +63,6 @@ ProgressionUnlocks = {
 		if not template.disabled and template.level_requirement <= level then
 			return true
 		end
-
-		return 
 	end,
 	get_level_unlock = function (level)
 		local result_template = nil
@@ -93,10 +91,9 @@ ProgressionUnlocks = {
 		if template.level_requirement <= level then
 			return true
 		end
-
-		return 
 	end
 }
+
 ProgressionUnlocks.can_upgrade_prestige = function ()
 	local prestige = ScriptBackendProfileAttribute.get("prestige")
 	local experience = ScriptBackendProfileAttribute.get("experience")
@@ -105,6 +102,7 @@ ProgressionUnlocks.can_upgrade_prestige = function ()
 
 	return can_unlock
 end
+
 ProgressionUnlocks.upgrade_prestige = function ()
 	local can_unlock = ProgressionUnlocks.can_upgrade_prestige()
 
@@ -114,12 +112,12 @@ ProgressionUnlocks.upgrade_prestige = function ()
 
 	ScriptBackendProfileAttribute.set("prestige", prestige + 1)
 	ScriptBackendProfileAttribute.set("experience", 0)
-
-	return 
 end
+
 ProgressionUnlocks.get_prestige_level = function ()
 	return ScriptBackendProfileAttribute.get("prestige")
 end
+
 local DO_DEBUG_PRINT = false
 local NUM_LEVELS = 40
 local NUM_PRESTIGE_LEVELS = 5
@@ -143,4 +141,4 @@ for prestige_level = 0, NUM_PRESTIGE_LEVELS, 1 do
 	end
 end
 
-return 
+return

@@ -65,29 +65,27 @@ local widget_definitions = {
 	}
 }
 InformationView = class(InformationView)
+
 InformationView.init = function (self, world)
 	self._world = world
 	self.ui_renderer = UIRenderer.create(self._world, "material", "materials/fonts/gw_fonts")
 
 	UISetupFontHeights(self.ui_renderer.gui)
-	self._create_ui_elements(self)
-
-	return 
+	self:_create_ui_elements()
 end
+
 InformationView._create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph)
 	self.information_text_widget = UIWidget.init(widget_definitions.information_text)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self.set_information_text(self)
-
-	return 
+	self:set_information_text()
 end
+
 InformationView.update = function (self, dt)
-	self.draw(self, dt)
-
-	return 
+	self:draw(dt)
 end
+
 InformationView.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -95,15 +93,13 @@ InformationView.draw = function (self, dt)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, nil, dt)
 	UIRenderer.draw_widget(ui_renderer, self.information_text_widget)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 InformationView.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "InformationView")
 	UIRenderer.destroy(self.ui_renderer, self._world)
-
-	return 
 end
+
 InformationView.set_information_text = function (self, optinal_text)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -119,8 +115,6 @@ InformationView.set_information_text = function (self, optinal_text)
 	end
 
 	ui_scenegraph.information_text.local_position[1] = 0
-
-	return 
 end
 
-return 
+return

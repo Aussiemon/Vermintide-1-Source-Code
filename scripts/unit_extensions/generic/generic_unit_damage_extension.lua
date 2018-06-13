@@ -19,6 +19,7 @@ end
 DamageDataIndex.STRIDE = #data_fields
 data_fields = nil
 GenericUnitDamageExtension = class(GenericUnitDamageExtension)
+
 GenericUnitDamageExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.system_data = extension_init_context.system_data
 	self.unit = unit
@@ -28,24 +29,23 @@ GenericUnitDamageExtension.init = function (self, extension_init_context, unit, 
 	}
 	self.statistics_db = extension_init_context.statistics_db
 	self._recent_damage_type = nil
+end
 
-	return 
-end
 GenericUnitDamageExtension.destroy = function (self)
-	return 
+	return
 end
+
 GenericUnitDamageExtension.reset = function (self)
 	pdArray.set_empty(self.damage_buffers[1])
 	pdArray.set_empty(self.damage_buffers[2])
-
-	return 
 end
+
 GenericUnitDamageExtension.update = function (self, unit, input, dt, context, t)
 	assert(false)
-
-	return 
 end
+
 local my_temp_table = {}
+
 GenericUnitDamageExtension.add_damage = function (self, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source_name, hit_ragdoll_actor, damaging_unit)
 	local damage_direction_table = {
 		damage_direction.x,
@@ -73,9 +73,8 @@ GenericUnitDamageExtension.add_damage = function (self, attacker_unit, damage_am
 	assert(damage_type, "No damage_type!")
 
 	self._recent_damage_type = damage_type
-
-	return 
 end
+
 GenericUnitDamageExtension.heal = function (self, attacker_unit, heal_amount, heal_source_name)
 	local damage_queue = self.damage_buffers[self.system_data.active_damage_buffer_index]
 	local temp_table = my_temp_table
@@ -93,23 +92,25 @@ GenericUnitDamageExtension.heal = function (self, attacker_unit, heal_amount, he
 	if script_data.damage_debug then
 		printf("[GenericUnitDamageExtension] heal %.1f to %s by %s", heal_amount, tostring(self.unit), tostring(attacker_unit))
 	end
-
-	return 
 end
+
 GenericUnitDamageExtension.get_damage_after_shield = function (self, damage)
 	return damage
 end
+
 GenericUnitDamageExtension.has_assist_shield = function (self)
 	return false
 end
+
 GenericUnitDamageExtension.recent_damages = function (self)
 	local previous_buffer_index = 3 - self.system_data.active_damage_buffer_index
 	local damage_queue = self.damage_buffers[previous_buffer_index]
 
 	return pdArray.data(damage_queue)
 end
+
 GenericUnitDamageExtension.recently_damaged = function (self)
 	return self._recent_damage_type
 end
 
-return 
+return

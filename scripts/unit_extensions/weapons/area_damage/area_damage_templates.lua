@@ -12,7 +12,7 @@ AreaDamageTemplates.templates = {
 
 				local area_damage_position = Unit.local_position(unit, 0)
 
-				if 0 < damage_timer and damage_timer < damage_interval then
+				if damage_timer > 0 and damage_timer < damage_interval then
 					return false
 				end
 
@@ -48,8 +48,6 @@ AreaDamageTemplates.templates = {
 				local damage_source = data.damage_source
 
 				DamageUtils.add_damage_network(unit, extension_unit, damage, "torso", "damage_over_time", Vector3(1, 0, 0), damage_source)
-
-				return 
 			end
 		},
 		client = {
@@ -70,7 +68,7 @@ AreaDamageTemplates.templates = {
 								particle_id = particle_id,
 								start_time = t
 							}
-						elseif is_inside_radius and player_unit_particles[player_unit].start_time + 5 <= t then
+						elseif is_inside_radius and t >= player_unit_particles[player_unit].start_time + 5 then
 							local particle_id = player_unit_particles[player_unit].particle_id
 
 							World.stop_spawning_particles(world, particle_id)
@@ -93,8 +91,6 @@ AreaDamageTemplates.templates = {
 						end
 					end
 				end
-
-				return 
 			end,
 			spawn_effect = function (world, unit, effect_name, particle_var_table)
 				local position = Unit.local_position(unit, 0)
@@ -112,7 +108,7 @@ AreaDamageTemplates.templates = {
 				return effect_id
 			end,
 			destroy = function ()
-				return 
+				return
 			end
 		}
 	},
@@ -121,7 +117,7 @@ AreaDamageTemplates.templates = {
 			update = function (damage_source, unit, radius, damage, life_time, life_timer, damage_interval, damage_timer, aoe_dot_player_take_damage)
 				local area_damage_position = Unit.local_position(unit, 0)
 
-				if 0 < damage_timer and damage_timer < damage_interval then
+				if damage_timer > 0 and damage_timer < damage_interval then
 					return false
 				end
 
@@ -157,8 +153,6 @@ AreaDamageTemplates.templates = {
 				local damage_source = data.damage_source
 
 				DamageUtils.add_damage_network(unit, unit, damage, "torso", "damage_over_time", Vector3(1, 0, 0), damage_source)
-
-				return 
 			end
 		},
 		client = {
@@ -179,7 +173,7 @@ AreaDamageTemplates.templates = {
 								particle_id = particle_id,
 								start_time = t
 							}
-						elseif is_inside_radius and player_unit_particles[player_unit].start_time + 5 <= t then
+						elseif is_inside_radius and t >= player_unit_particles[player_unit].start_time + 5 then
 							local particle_id = player_unit_particles[player_unit].particle_id
 
 							World.stop_spawning_particles(world, particle_id)
@@ -202,8 +196,6 @@ AreaDamageTemplates.templates = {
 						end
 					end
 				end
-
-				return 
 			end,
 			spawn_effect = function (world, unit, effect_name, particle_var_table)
 				local position = Unit.local_position(unit, 0)
@@ -221,7 +213,7 @@ AreaDamageTemplates.templates = {
 				return effect_id
 			end,
 			destroy = function ()
-				return 
+				return
 			end
 		}
 	},
@@ -244,7 +236,7 @@ AreaDamageTemplates.templates = {
 				end
 
 				if aoe_data.attack_template then
-					if 0 < damage_timer and damage_timer < damage_interval then
+					if damage_timer > 0 and damage_timer < damage_interval then
 						return false
 					end
 
@@ -302,8 +294,6 @@ AreaDamageTemplates.templates = {
 
 					return true, damage_buffer
 				end
-
-				return 
 			end,
 			do_damage = function (data, extension_unit)
 				local unit = data.unit
@@ -313,8 +303,8 @@ AreaDamageTemplates.templates = {
 				local hit_direction_normalized = Vector3.normalize(hit_direction)
 				local network_manager = Managers.state.network
 				local damage_source_id = NetworkLookup.damage_sources[data.damage_source]
-				local attacker_unit_id = network_manager.unit_game_object_id(network_manager, extension_unit)
-				local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+				local attacker_unit_id = network_manager:unit_game_object_id(extension_unit)
+				local unit_id = network_manager:unit_game_object_id(unit)
 				local attack_template_id = NetworkLookup.attack_templates[data.attack_template_name]
 				local attack_template_damage_type_id = NetworkLookup.attack_damage_values[data.attack_template_damage_type_name]
 				local hit_zone_id = NetworkLookup.hit_zones[data.hit_zone_name]
@@ -323,14 +313,12 @@ AreaDamageTemplates.templates = {
 				local hawkeye_multiplier = 0
 				local weapon_system = Managers.state.entity:system("weapon_system")
 
-				weapon_system.rpc_attack_hit(weapon_system, nil, damage_source_id, attacker_unit_id, unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
-
-				return 
+				weapon_system:rpc_attack_hit(nil, damage_source_id, attacker_unit_id, unit_id, attack_template_id, hit_zone_id, hit_direction_normalized, attack_template_damage_type_id, hit_ragdoll_actor_id, backstab_multiplier, hawkeye_multiplier)
 			end
 		},
 		client = {
 			update = function (world, radius, aoe_unit, player_screen_effect_name, player_unit_particles, damage_players, explosion_template_name)
-				return 
+				return
 			end,
 			spawn_effect = function (world, unit, effect_name, particle_var_table, override_position)
 				local position = override_position or Unit.world_position(unit, 0)
@@ -352,7 +340,7 @@ AreaDamageTemplates.templates = {
 	area_poison_ai_random_death = {
 		server = {
 			update = function (damage_source, unit, radius, death_interval, damage_timer)
-				if 0 < damage_timer and damage_timer < death_interval then
+				if damage_timer > 0 and damage_timer < death_interval then
 					return false
 				end
 
@@ -368,7 +356,7 @@ AreaDamageTemplates.templates = {
 
 					assert(health_extension)
 
-					local is_alive = health_extension.is_alive(health_extension)
+					local is_alive = health_extension:is_alive()
 
 					if is_alive then
 						local die_roll = math.random(1, 100)
@@ -392,12 +380,11 @@ AreaDamageTemplates.templates = {
 				local damage_direction = Vector3.normalize(unit_position - area_damage_position)
 
 				DamageUtils.deal_damage("skaven_poison_wind_globadier", unit, unit, damage_direction, "poison_globe_ai_initial_damage", "full")
-
-				return 
 			end
 		}
 	}
 }
+
 AreaDamageTemplates.get_template = function (area_damage_template, is_husk)
 	local templates = AreaDamageTemplates.templates
 	local husk_key = (is_husk == true and "husk") or (is_husk == false and "unit") or nil
@@ -408,4 +395,4 @@ AreaDamageTemplates.get_template = function (area_damage_template, is_husk)
 	return template
 end
 
-return 
+return

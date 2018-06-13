@@ -4,11 +4,11 @@ BTAttackAction = class(BTAttackAction, BTNode)
 local DEFAULT_SPEED_MODIFIER_ON_TARGET_DODGE = 0.1
 local DEFAULT_SPEED_LERP_TIME_ON_TARGET_DODGE = 0.5
 local REEVAL_TIME = 0.5
+
 BTAttackAction.init = function (self, ...)
 	BTAttackAction.super.init(self, ...)
-
-	return 
 end
+
 BTAttackAction.name = "BTAttackAction"
 
 local function randomize(event)
@@ -17,8 +17,6 @@ local function randomize(event)
 	else
 		return event
 	end
-
-	return 
 end
 
 BTAttackAction.enter = function (self, unit, blackboard, t)
@@ -29,7 +27,7 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 	blackboard.attack_aborted = false
 	local target_unit = blackboard.target_unit
 	local target_unit_status_extension = (ScriptUnit.has_extension(target_unit, "status_system") and ScriptUnit.extension(target_unit, "status_system")) or nil
-	local attack = self._select_attack(self, action, unit, target_unit, blackboard, target_unit_status_extension)
+	local attack = self:_select_attack(action, unit, target_unit, blackboard, target_unit_status_extension)
 	local attack_anim = randomize(attack.anims)
 	blackboard.attack_anim = attack_anim
 	local box_range = attack.damage_box_range
@@ -41,13 +39,13 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 	end
 
 	if target_unit_status_extension then
-		blackboard.attack_token = (target_unit_status_extension and target_unit_status_extension.want_an_attack(target_unit_status_extension)) or nil
+		blackboard.attack_token = (target_unit_status_extension and target_unit_status_extension:want_an_attack()) or nil
 	else
 		blackboard.attack_token = true
 	end
 
 	if blackboard.attack_token and target_unit_status_extension then
-		target_unit_status_extension.add_attack_intensity(target_unit_status_extension, 0.75 + 0.5 * math.random())
+		target_unit_status_extension:add_attack_intensity(0.75 + 0.5 * math.random())
 
 		local breed = blackboard.breed
 		local should_backstab = breed.use_backstab_vo and blackboard.total_slots_count < 5
@@ -62,18 +60,17 @@ BTAttackAction.enter = function (self, unit, blackboard, t)
 	blackboard.target_unit_status_extension = target_unit_status_extension
 	local network_manager = Managers.state.network
 
-	network_manager.anim_event(network_manager, unit, "to_combat")
+	network_manager:anim_event(unit, "to_combat")
 
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 
 	network_manager.network_transmit:send_rpc_all("rpc_enemy_has_target", unit_id, true)
 
 	blackboard.attack_setup_delayed = true
 	blackboard.attacking_target = blackboard.target_unit
 	blackboard.spawn_to_running = nil
-
-	return 
 end
+
 BTAttackAction._select_attack = function (self, action, unit, target_unit, blackboard, target_unit_status_extension)
 	local target_type = Unit.get_data(target_unit, "target_type")
 	local target_exception_attack = target_type and action.target_type_exceptions and action.target_type_exceptions[target_type]
@@ -97,20 +94,19 @@ BTAttackAction._select_attack = function (self, action, unit, target_unit, black
 			return mid_attack
 		elseif low_attack and z_offset < low_attack.z_threshold then
 			return low_attack
-		elseif knocked_down_attack and z_offset < knocked_down_attack.z_threshold and target_unit_status_extension and target_unit_status_extension.is_knocked_down(target_unit_status_extension) then
+		elseif knocked_down_attack and z_offset < knocked_down_attack.z_threshold and target_unit_status_extension and target_unit_status_extension:is_knocked_down() then
 			return knocked_down_attack
 		else
 			return default_attack
 		end
 	end
-
-	return 
 end
+
 BTAttackAction.leave = function (self, unit, blackboard, t)
 	if blackboard.move_state ~= "idle" and AiUtils.unit_alive(unit) then
 		local network_manager = Managers.state.network
 
-		network_manager.anim_event(network_manager, unit, "idle")
+		network_manager:anim_event(unit, "idle")
 
 		blackboard.move_state = "idle"
 	end
@@ -119,8 +115,8 @@ BTAttackAction.leave = function (self, unit, blackboard, t)
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_enabled(navigation_extension, true)
-	navigation_extension.set_max_speed(navigation_extension, default_move_speed)
+	navigation_extension:set_enabled(true)
+	navigation_extension:set_max_speed(default_move_speed)
 
 	blackboard.target_unit_status_extension = nil
 	blackboard.target_dodged_during_attack = nil
@@ -142,9 +138,8 @@ BTAttackAction.leave = function (self, unit, blackboard, t)
 
 	blackboard.action = nil
 	blackboard.backstab_attack_trigger = nil
-
-	return 
 end
+
 BTAttackAction.run = function (self, unit, blackboard, t, dt)
 	if not Unit.alive(blackboard.attacking_target) then
 		return "done"
@@ -178,7 +173,7 @@ BTAttackAction.run = function (self, unit, blackboard, t, dt)
 			local navigation_extension = blackboard.navigation_extension
 			local attacking_target = blackboard.attacking_target
 
-			navigation_extension.set_max_speed(navigation_extension, breed.run_speed)
+			navigation_extension:set_max_speed(breed.run_speed)
 			Unit.set_data(attacking_target, "last_first_attack_t", t)
 		else
 			blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
@@ -188,13 +183,14 @@ BTAttackAction.run = function (self, unit, blackboard, t, dt)
 		blackboard.attack_setup_delayed = false
 	end
 
-	self.attack(self, unit, t, dt, blackboard)
+	self:attack(unit, t, dt, blackboard)
 
 	return "running"
 end
+
 BTAttackAction.attack_success = function (self, unit, blackboard)
 	local t = Managers.time:time("game")
-	local cooldown, cooldown_at = self.get_attack_cooldown_finished_at(self, unit, blackboard, t)
+	local cooldown, cooldown_at = self:get_attack_cooldown_finished_at(unit, blackboard, t)
 	blackboard.attack_cooldown_at = cooldown_at
 	blackboard.is_in_attack_cooldown = cooldown
 	blackboard.attack_success = true
@@ -210,9 +206,8 @@ BTAttackAction.attack_success = function (self, unit, blackboard)
 			blackboard.backstab_attack_trigger = false
 		end
 	end
-
-	return 
 end
+
 BTAttackAction.attack = function (self, unit, t, dt, blackboard)
 	local action = blackboard.action
 	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
@@ -226,17 +221,16 @@ BTAttackAction.attack = function (self, unit, t, dt, blackboard)
 	local rotation = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.attacking_target)
 
 	if not blackboard.dodge_rotation_stun_during_attack and blackboard.target_unit_status_extension and blackboard.target_unit_status_extension:get_is_dodging() then
-		locomotion.set_rotation_speed_modifier(locomotion, blackboard.breed.speed_modifer_on_target_dodge or DEFAULT_SPEED_MODIFIER_ON_TARGET_DODGE, blackboard.breed.speed_lerp_time_on_target_dodge or DEFAULT_SPEED_LERP_TIME_ON_TARGET_DODGE, t)
+		locomotion:set_rotation_speed_modifier(blackboard.breed.speed_modifer_on_target_dodge or DEFAULT_SPEED_MODIFIER_ON_TARGET_DODGE, blackboard.breed.speed_lerp_time_on_target_dodge or DEFAULT_SPEED_LERP_TIME_ON_TARGET_DODGE, t)
 
 		blackboard.target_dodged_during_attack = true
 	end
 
 	blackboard.current_time_for_dodge = t
 
-	locomotion.set_wanted_rotation(locomotion, rotation)
-
-	return 
+	locomotion:set_wanted_rotation(rotation)
 end
+
 BTAttackAction.get_attack_cooldown_finished_at = function (self, unit, blackboard, t)
 	local attacking_target = blackboard.attacking_target
 
@@ -270,4 +264,4 @@ BTAttackAction.get_attack_cooldown_finished_at = function (self, unit, blackboar
 	return true, cooldown + t
 end
 
-return 
+return

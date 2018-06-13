@@ -87,8 +87,6 @@ local level_element_definition = {
 			end,
 			click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 				ui_content.button_hotspot.is_selected = true
-
-				return 
 			end
 		},
 		{
@@ -218,8 +216,6 @@ local area_element_definition_drachenfels = {
 			end,
 			click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 				ui_content.button_hotspot.is_selected = true
-
-				return 
 			end
 		},
 		{
@@ -275,8 +271,6 @@ local area_element_definition_ubersreik = {
 			end,
 			click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 				ui_content.button_hotspot.is_selected = true
-
-				return 
 			end
 		},
 		{
@@ -459,8 +453,6 @@ local function add_level_location_difficulty_definitions(passes, style, content,
 		}
 		index = index + 1
 	end
-
-	return 
 end
 
 local game_mode_level_area_textures = {
@@ -1545,8 +1537,6 @@ local function create_area_widget(widget_name)
 	else
 		return create_dlc_widget(widget_name)
 	end
-
-	return 
 end
 
 local function create_zoom_bar(scenegraph_base, textures, offset, size, titles, tooltips)

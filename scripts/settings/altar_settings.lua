@@ -81,4 +81,4 @@ AltarSettings = {
 	}
 }
 
-return 
+return

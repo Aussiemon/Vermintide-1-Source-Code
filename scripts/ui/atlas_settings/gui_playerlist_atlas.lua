@@ -141,4 +141,4 @@ playerlist_atlas = {
 	}
 }
 
-return 
+return

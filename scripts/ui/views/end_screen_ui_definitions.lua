@@ -634,8 +634,6 @@ local animations = {
 			end_progress = UISettings.end_screen.background_fade_in,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_background = true
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -645,11 +643,9 @@ local animations = {
 				if color[1] < alpha then
 					color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -660,8 +656,6 @@ local animations = {
 			end_progress = UISettings.end_screen.background_fade_out,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_background = true
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -671,13 +665,9 @@ local animations = {
 				if alpha < color[1] then
 					color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_background = false
-
-				return 
 			end
 		}
 	},
@@ -697,18 +687,14 @@ local animations = {
 				widget.style.banner_effect_texture.color[1] = 255
 				widget.style.banner_texture.color[1] = 255
 				widget.style.banner_overlay_texture.color[1] = 255
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				params.draw_flags.draw_text = true
 				local widget = widgets[1]
 				widget.style.rect.color[1] = (1 - local_progress) * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -716,7 +702,7 @@ local animations = {
 			start_progress = 0.6,
 			end_progress = 5.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -726,11 +712,9 @@ local animations = {
 				local size_multiplier = 1 + local_progress * 0.2
 				banner_effect_size[1] = size_multiplier * banner_effect_default_size[1]
 				banner_effect_size[2] = size_multiplier * banner_effect_default_size[2]
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -738,18 +722,14 @@ local animations = {
 			start_progress = 5.6,
 			end_progress = 7,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				widget.style.rect.color[1] = local_progress * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_text = false
-
-				return 
 			end
 		}
 	},
@@ -760,8 +740,6 @@ local animations = {
 			end_progress = UISettings.end_screen.text_fade_in,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_text = true
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -769,11 +747,9 @@ local animations = {
 				widget.style.banner_texture.color[1] = alpha
 				widget.style.banner_overlay_texture.color[1] = alpha
 				widget.style.banner_effect_texture.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -784,8 +760,6 @@ local animations = {
 			end_progress = UISettings.end_screen.text_fade_out,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_text = true
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -793,13 +767,9 @@ local animations = {
 				widget.style.banner_texture.color[1] = alpha
 				widget.style.banner_overlay_texture.color[1] = alpha
 				widget.style.banner_effect_texture.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_text = false
-
-				return 
 			end
 		}
 	},
@@ -810,8 +780,6 @@ local animations = {
 			end_progress = UISettings.end_screen.continue_fade_in,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_continue = true
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = 255 * local_progress
@@ -831,11 +799,9 @@ local animations = {
 				button_1_widget_style.color[1] = alpha
 				button_2_widget_style.color[1] = alpha
 				button_3_widget_style.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -846,8 +812,6 @@ local animations = {
 			end_progress = UISettings.end_screen.continue_fade_out,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_continue = true
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = 255 - 255 * local_progress
@@ -867,13 +831,9 @@ local animations = {
 				button_1_widget_style.color[1] = alpha
 				button_2_widget_style.color[1] = alpha
 				button_3_widget_style.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				params.draw_continue = false
-
-				return 
 			end
 		}
 	}

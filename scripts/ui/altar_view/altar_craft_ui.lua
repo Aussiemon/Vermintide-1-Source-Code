@@ -18,6 +18,7 @@ local weapon_type_index_list = {
 	"any",
 	"ranged"
 }
+
 AltarCraftUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.parent = parent
 	self.world = ingame_ui_context.world
@@ -42,15 +43,14 @@ AltarCraftUI.init = function (self, parent, position, animation_definitions, ing
 	self.animations = {}
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, definitions.animations)
 
-	self.create_ui_elements(self)
-	self.select_token(self, 1, true)
-	self.select_weapon_type(self, 1, true)
-	self._update_token_rotation_animation(self, math.huge)
-	self._update_weapon_type_rotation_animation(self, math.huge)
-	self.update_craft_cost_display(self)
-
-	return 
+	self:create_ui_elements()
+	self:select_token(1, true)
+	self:select_weapon_type(1, true)
+	self:_update_token_rotation_animation(math.huge)
+	self:_update_weapon_type_rotation_animation(math.huge)
+	self:update_craft_cost_display()
 end
+
 AltarCraftUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.widgets = {}
@@ -112,10 +112,9 @@ AltarCraftUI.create_ui_elements = function (self)
 	}
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self._setup_candle_animations(self)
-
-	return 
+	self:_setup_candle_animations()
 end
+
 AltarCraftUI._setup_candle_animations = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local animations = self.animations
@@ -123,33 +122,30 @@ AltarCraftUI._setup_candle_animations = function (self)
 	local candle_right_widget = widgets_by_name.background_candle_right_widget
 	local candle_glow_left_widget = widgets_by_name.candle_glow_left_widget
 	local candle_glow_right_widget = widgets_by_name.candle_glow_right_widget
-	animations.candle_left_flame = self.animate_element_pulse(self, candle_left_widget.style.texture_id.color, 1, 255, 210, 1)
-	animations.candle_left_glow = self.animate_element_pulse(self, candle_glow_left_widget.style.texture_id.color, 1, 205, 160, 1)
-	animations.candle_right_flame = self.animate_element_pulse(self, candle_right_widget.style.texture_id.color, 1, 255, 185, 1.5)
-	animations.candle_right_glow = self.animate_element_pulse(self, candle_glow_right_widget.style.texture_id.color, 1, 205, 125, 1.5)
-
-	return 
+	animations.candle_left_flame = self:animate_element_pulse(candle_left_widget.style.texture_id.color, 1, 255, 210, 1)
+	animations.candle_left_glow = self:animate_element_pulse(candle_glow_left_widget.style.texture_id.color, 1, 205, 160, 1)
+	animations.candle_right_flame = self:animate_element_pulse(candle_right_widget.style.texture_id.color, 1, 255, 185, 1.5)
+	animations.candle_right_glow = self:animate_element_pulse(candle_glow_right_widget.style.texture_id.color, 1, 205, 125, 1.5)
 end
+
 AltarCraftUI.on_enter = function (self)
 	local my_profile = self.profile_synchronizer:profile_by_peer(self.peer_id, self.local_player_id)
 	local profile_name = SPProfiles[my_profile].display_name
 	local texture_name = "altar_craft_icon_" .. profile_name
 	self.item_button_class_icon_widget.content.texture_id = texture_name
 
-	self.remove_item(self)
-	self.update_craft_cost_display(self)
-
-	return 
+	self:remove_item()
+	self:update_craft_cost_display()
 end
+
 AltarCraftUI.set_gamepad_focus = function (self, enabled)
 	self.use_gamepad = enabled
-
-	return 
 end
+
 AltarCraftUI.handle_gamepad_input = function (self, dt)
 	local input_manager = self.input_manager
 	local input_service = self.parent:page_input_service()
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local use_gamepad = self.use_gamepad
 
 	if self.had_active_item_id ~= self.active_item_id then
@@ -168,34 +164,34 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad then
 		if self.active_item_id then
-			if input_service.get(input_service, "special_1") or input_service.get(input_service, "back", true) then
+			if input_service:get("special_1") or input_service:get("back", true) then
 				if self.active_item_id then
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 					self.gamepad_item_remove_request = true
 				end
-			elseif input_service.get(input_service, "refresh_press") and not self.charging and self.can_afford_craft_cost(self) then
-				self.start_charge_progress(self)
-			elseif self.charging and not input_service.get(input_service, "refresh_hold") then
-				self.abort_charge_progress(self)
+			elseif input_service:get("refresh_press") and not self.charging and self:can_afford_craft_cost() then
+				self:start_charge_progress()
+			elseif self.charging and not input_service:get("refresh_hold") then
+				self:abort_charge_progress()
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end
 		end
 
 		if not self.charging and self.active_item_id then
-			local move_left = input_service.get(input_service, "move_left")
-			local move_right = input_service.get(input_service, "move_right")
-			local move_up = input_service.get(input_service, "move_up")
-			local move_down = input_service.get(input_service, "move_down")
+			local move_left = input_service:get("move_left")
+			local move_right = input_service:get("move_right")
+			local move_up = input_service:get("move_up")
+			local move_down = input_service:get("move_down")
 			local gamepad_setting_selection = self.gamepad_setting_selection
 
 			if gamepad_setting_selection then
 				if move_up or move_down then
-					if move_up and 1 < gamepad_setting_selection then
+					if move_up and gamepad_setting_selection > 1 then
 						self.gamepad_setting_selection = gamepad_setting_selection - 1
 						local wheel_glow_weapon_type_widget = self.widgets_by_name.wheel_glow_weapon_type_widget
 						wheel_glow_weapon_type_widget.style.texture_id.color[1] = 255
@@ -203,7 +199,7 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 						wheel_glow_token_widget.style.texture_id.color[1] = 0
 						self.settings_selection_changed = true
 
-						self.play_sound(self, "Play_hud_select")
+						self:play_sound("Play_hud_select")
 					elseif move_down and gamepad_setting_selection < 2 then
 						self.gamepad_setting_selection = self.gamepad_setting_selection + 1
 						local wheel_glow_weapon_type_widget = self.widgets_by_name.wheel_glow_weapon_type_widget
@@ -212,7 +208,7 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 						wheel_glow_token_widget.style.texture_id.color[1] = 255
 						self.settings_selection_changed = true
 
-						self.play_sound(self, "Play_hud_select")
+						self:play_sound("Play_hud_select")
 					end
 				end
 
@@ -229,30 +225,30 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 
 					if move_right then
 						if gamepad_setting_selection == 1 then
-							if not weapon_type_rotation_time and 0 < selected_weapon_type_index then
-								self.select_weapon_type(self, selected_weapon_type_index - 1)
-								self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+							if not weapon_type_rotation_time and selected_weapon_type_index > 0 then
+								self:select_weapon_type(selected_weapon_type_index - 1)
+								self:play_sound("Play_hud_reroll_traits_half_table_spin")
 							end
-						elseif not token_rotation_time and 0 < selected_token_index then
-							self.select_token(self, selected_token_index - 1)
-							self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+						elseif not token_rotation_time and selected_token_index > 0 then
+							self:select_token(selected_token_index - 1)
+							self:play_sound("Play_hud_reroll_traits_half_table_spin")
 						end
 					elseif move_left then
 						if gamepad_setting_selection == 1 then
 							if not weapon_type_rotation_time and selected_weapon_type_index < #weapon_type_index_list - 1 then
-								self.select_weapon_type(self, selected_weapon_type_index + 1)
-								self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+								self:select_weapon_type(selected_weapon_type_index + 1)
+								self:play_sound("Play_hud_reroll_traits_half_table_spin")
 							end
 						elseif not token_rotation_time and selected_token_index < #token_index_list - 1 then
-							self.select_token(self, selected_token_index + 1)
-							self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+							self:select_token(selected_token_index + 1)
+							self:play_sound("Play_hud_reroll_traits_half_table_spin")
 						end
 					end
 				else
 					use_button_glow = (self.active_item_id and true) or false
 
-					self._set_token_step_button_glow_state(self, (gamepad_setting_selection == 1 and use_button_glow) or false)
-					self._set_weapon_type_step_button_glow_state(self, (gamepad_setting_selection == 2 and use_button_glow) or false)
+					self:_set_token_step_button_glow_state((gamepad_setting_selection == 1 and use_button_glow) or false)
+					self:_set_weapon_type_step_button_glow_state((gamepad_setting_selection == 2 and use_button_glow) or false)
 				end
 			end
 		end
@@ -266,8 +262,8 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 				wheel_glow_token_widget.style.texture_id.color[1] = 0
 				local use_button_glow = (self.active_item_id and true) or false
 
-				self._set_token_step_button_glow_state(self, (self.gamepad_setting_selection == 2 and use_button_glow) or false)
-				self._set_weapon_type_step_button_glow_state(self, (self.gamepad_setting_selection == 1 and use_button_glow) or false)
+				self:_set_token_step_button_glow_state((self.gamepad_setting_selection == 2 and use_button_glow) or false)
+				self:_set_weapon_type_step_button_glow_state((self.gamepad_setting_selection == 1 and use_button_glow) or false)
 			end
 		elseif self.gamepad_setting_selection then
 			self.gamepad_setting_selection = nil
@@ -277,15 +273,14 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 			wheel_glow_token_widget.style.texture_id.color[1] = 0
 			local use_button_glow = (self.active_item_id and true) or false
 
-			self._set_token_step_button_glow_state(self, use_button_glow)
-			self._set_weapon_type_step_button_glow_state(self, use_button_glow)
+			self:_set_token_step_button_glow_state(use_button_glow)
+			self:_set_weapon_type_step_button_glow_state(use_button_glow)
 		end
 	end
 
 	self.had_active_item_id = self.active_item_id
-
-	return 
 end
+
 AltarCraftUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -321,23 +316,22 @@ AltarCraftUI.draw = function (self, dt)
 	UIRenderer.draw_widget(ui_top_renderer, self.fg_glow_widget)
 	UIRenderer.draw_widget(ui_top_renderer, self.item_button_widget)
 	UIRenderer.end_pass(ui_top_renderer)
-
-	return 
 end
+
 AltarCraftUI.update = function (self, dt)
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	if gamepad_active then
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 	end
 
 	local ignore_frame_input = self.ignore_frame_input
@@ -346,13 +340,13 @@ AltarCraftUI.update = function (self, dt)
 	self.item_remove_request = nil
 	self.pressed_item_backend_id = nil
 
-	self._update_token_rotation_animation(self, dt)
-	self._update_weapon_type_rotation_animation(self, dt)
-	self._update_world_cover_animation(self, dt)
-	self._update_animations(self, dt)
+	self:_update_token_rotation_animation(dt)
+	self:_update_weapon_type_rotation_animation(dt)
+	self:_update_world_cover_animation(dt)
+	self:_update_animations(dt)
 
 	if not self.crafting then
-		self.handle_gamepad_input(self, dt)
+		self:handle_gamepad_input(dt)
 	end
 
 	for name, animation in pairs(self.animations) do
@@ -361,7 +355,7 @@ AltarCraftUI.update = function (self, dt)
 		if UIAnimation.completed(animation) then
 			self.animations[name] = nil
 
-			self.on_charge_animations_complete(self, name)
+			self:on_charge_animations_complete(name)
 		end
 	end
 
@@ -377,15 +371,15 @@ AltarCraftUI.update = function (self, dt)
 			local selected_weapon_type_index = self.selected_weapon_type_index
 
 			if weapon_type_step_button_2_hotspot.on_release then
-				if 0 < selected_weapon_type_index then
-					self.select_weapon_type(self, selected_weapon_type_index - 1)
-					self.play_sound(self, "Play_hud_select")
-					self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+				if selected_weapon_type_index > 0 then
+					self:select_weapon_type(selected_weapon_type_index - 1)
+					self:play_sound("Play_hud_select")
+					self:play_sound("Play_hud_reroll_traits_half_table_spin")
 				end
 			elseif weapon_type_step_button_1_hotspot.on_release and selected_weapon_type_index < #weapon_type_index_list - 1 then
-				self.select_weapon_type(self, selected_weapon_type_index + 1)
-				self.play_sound(self, "Play_hud_select")
-				self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+				self:select_weapon_type(selected_weapon_type_index + 1)
+				self:play_sound("Play_hud_select")
+				self:play_sound("Play_hud_reroll_traits_half_table_spin")
 			end
 
 			local selected_weapon_type_index = self.selected_weapon_type_index
@@ -396,16 +390,16 @@ AltarCraftUI.update = function (self, dt)
 				local required_hover_hotspot = weapon_type_widget.content.required_hover_hotspot
 
 				if button_hotspot.on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self:play_sound("Play_hud_hover")
 				end
 
 				if button_hotspot.on_pressed and required_hover_hotspot.is_hover then
 					local list_index = i - 1
 
 					if list_index ~= selected_weapon_type_index and list_index ~= new_weapon_type_selection_index then
-						self.select_weapon_type(self, list_index)
-						self.play_sound(self, "Play_hud_select")
-						self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+						self:select_weapon_type(list_index)
+						self:play_sound("Play_hud_select")
+						self:play_sound("Play_hud_reroll_traits_half_table_spin")
 					end
 				end
 			end
@@ -415,15 +409,15 @@ AltarCraftUI.update = function (self, dt)
 			local selected_token_index = self.selected_token_index
 
 			if token_step_button_2_hotspot.on_release then
-				if 0 < selected_token_index then
-					self.select_token(self, selected_token_index - 1)
-					self.play_sound(self, "Play_hud_select")
-					self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+				if selected_token_index > 0 then
+					self:select_token(selected_token_index - 1)
+					self:play_sound("Play_hud_select")
+					self:play_sound("Play_hud_reroll_traits_half_table_spin")
 				end
 			elseif token_step_button_1_hotspot.on_release and selected_token_index < #token_index_list - 1 then
-				self.select_token(self, selected_token_index + 1)
-				self.play_sound(self, "Play_hud_select")
-				self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+				self:select_token(selected_token_index + 1)
+				self:play_sound("Play_hud_select")
+				self:play_sound("Play_hud_reroll_traits_half_table_spin")
 			end
 
 			local selected_token_index = self.selected_token_index
@@ -434,28 +428,28 @@ AltarCraftUI.update = function (self, dt)
 				local required_hover_hotspot = token_widget.content.required_hover_hotspot
 
 				if button_hotspot.on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self:play_sound("Play_hud_hover")
 				end
 
 				if button_hotspot.on_pressed and required_hover_hotspot.is_hover then
 					local list_index = i - 1
 
 					if list_index ~= selected_token_index and list_index ~= new_token_selection_index then
-						self.select_token(self, list_index)
-						self.play_sound(self, "Play_hud_select")
-						self.play_sound(self, "Play_hud_reroll_traits_half_table_spin")
+						self:select_token(list_index)
+						self:play_sound("Play_hud_select")
+						self:play_sound("Play_hud_reroll_traits_half_table_spin")
 					end
 				end
 			end
 		end
 
 		if token_step_button_1_hotspot.on_hover_enter or token_step_button_2_hotspot.on_hover_enter then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 		elseif not token_step_button_1_hotspot.on_hover_exit and token_step_button_2_hotspot.on_hover_exit then
 		end
 
 		if weapon_type_step_button_1_hotspot.on_hover_enter or weapon_type_step_button_2_hotspot.on_hover_enter then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 		elseif not weapon_type_step_button_1_hotspot.on_hover_exit and weapon_type_step_button_2_hotspot.on_hover_exit then
 		end
 
@@ -464,19 +458,19 @@ AltarCraftUI.update = function (self, dt)
 
 		if item_slot_button_hotspot.on_hover_enter then
 			if self.active_item_id then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 
 			local bar_settings = UISettings.inventory.button_bars
 			local fade_in_time = bar_settings.background.fade_in_time
 			local alpha_hover = bar_settings.background.alpha_hover
 			local widget_hover_color = widget.style.hover_texture.color
-			self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
+			self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
 		elseif item_slot_button_hotspot.on_hover_exit then
 			local bar_settings = UISettings.inventory.button_bars
 			local fade_out_time = bar_settings.background.fade_out_time
 			local widget_hover_color = widget.style.hover_texture.color
-			self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
+			self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
 		end
 
 		if item_slot_button_hotspot.on_double_click or item_slot_button_hotspot.on_right_click or self.gamepad_item_remove_request then
@@ -492,48 +486,45 @@ AltarCraftUI.update = function (self, dt)
 		local craft_button_hotspot = craft_button_content.button_hotspot
 
 		if craft_button_hotspot.on_hover_enter then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 		end
 
 		if craft_button_hotspot.on_release or self.gamepad_craft_request then
 			craft_button_hotspot.on_release = nil
 
-			if self.can_afford_craft_cost(self) then
+			if self:can_afford_craft_cost() then
 				self.craft_request = true
 
-				self.play_sound(self, "Play_hud_select")
-				self.play_sound(self, "Play_hud_reroll_traits_create_weapon")
+				self:play_sound("Play_hud_select")
+				self:play_sound("Play_hud_reroll_traits_create_weapon")
 			end
 		end
 
-		self.on_item_dragged(self)
+		self:on_item_dragged()
 	end
 
 	self.gamepad_item_remove_request = nil
 	self.gamepad_craft_request = nil
 
-	if self.is_dragging_started(self) then
-		self.play_sound(self, "Play_hud_inventory_pickup_item")
+	if self:is_dragging_started() then
+		self:play_sound("Play_hud_inventory_pickup_item")
 	end
 
 	self.ignore_frame_input = nil
-
-	return 
 end
+
 AltarCraftUI._set_weapon_type_step_button_glow_state = function (self, active)
 	local widgets_by_name = self.widgets_by_name
 	widgets_by_name.weapon_type_step_button_1.content.show_glow = active
 	widgets_by_name.weapon_type_step_button_2.content.show_glow = active
-
-	return 
 end
+
 AltarCraftUI._set_token_step_button_glow_state = function (self, active)
 	local widgets_by_name = self.widgets_by_name
 	widgets_by_name.token_step_button_1.content.show_glow = active
 	widgets_by_name.token_step_button_2.content.show_glow = active
-
-	return 
 end
+
 AltarCraftUI._update_token_rotation_animation = function (self, dt)
 	local animation_time = self.token_rotation_time
 
@@ -553,13 +544,13 @@ AltarCraftUI._update_token_rotation_animation = function (self, dt)
 		local rotation_progress = old_index_progress + progress_diff * time_easing_progress
 		local radius = 170
 
-		self._rotate_widgets(self, self.token_widgets, radius, rotation_progress)
+		self:_rotate_widgets(self.token_widgets, radius, rotation_progress)
 
 		local disk_angle = math.degrees_to_radians(rotation_progress * 360)
 		local wheel_token_widget = self.widgets_by_name.wheel_token_widget
 		wheel_token_widget.style.texture_id.angle = -disk_angle
 
-		if 0.9 < time_easing_progress then
+		if time_easing_progress > 0.9 then
 			slot18 = self.widgets_by_name.wheel_glow_token_widget
 		elseif self.token_rotation_time == 0 then
 			slot18 = self.widgets_by_name.wheel_glow_token_widget
@@ -572,15 +563,14 @@ AltarCraftUI._update_token_rotation_animation = function (self, dt)
 			self.new_token_selection_index = nil
 
 			if selected_token_index then
-				self.update_craft_cost_display(self)
+				self:update_craft_cost_display()
 			end
 		else
 			self.token_rotation_time = animation_time
 		end
 	end
-
-	return 
 end
+
 AltarCraftUI._update_weapon_type_rotation_animation = function (self, dt)
 	local animation_time = self.weapon_type_rotation_time
 
@@ -600,13 +590,13 @@ AltarCraftUI._update_weapon_type_rotation_animation = function (self, dt)
 		local rotation_progress = old_index_progress + progress_diff * time_easing_progress
 		local radius = 104
 
-		self._rotate_widgets(self, weapon_type_widgets, radius, rotation_progress)
+		self:_rotate_widgets(weapon_type_widgets, radius, rotation_progress)
 
 		local disk_angle = math.degrees_to_radians(rotation_progress * 360)
 		local wheel_weapon_type_widget = self.widgets_by_name.wheel_weapon_type_widget
 		wheel_weapon_type_widget.style.texture_id.angle = -disk_angle
 
-		if 0.9 < time_easing_progress then
+		if time_easing_progress > 0.9 then
 			slot18 = self.widgets_by_name.wheel_glow_weapon_type_widget
 		elseif self.weapon_type_rotation_time == 0 then
 			slot18 = self.widgets_by_name.wheel_glow_weapon_type_widget
@@ -619,15 +609,14 @@ AltarCraftUI._update_weapon_type_rotation_animation = function (self, dt)
 			self.new_weapon_type_selection_index = nil
 
 			if selected_weapon_type_index then
-				self.update_craft_cost_display(self)
+				self:update_craft_cost_display()
 			end
 		else
 			self.weapon_type_rotation_time = animation_time
 		end
 	end
-
-	return 
 end
+
 AltarCraftUI._update_world_cover_animation = function (self, dt)
 	local animation_time = self.world_cover_animation_time
 
@@ -645,7 +634,7 @@ AltarCraftUI._update_world_cover_animation = function (self, dt)
 			new_value = max_value - new_value
 		end
 
-		self._set_world_cover_gradient_exponent(self, new_value)
+		self:_set_world_cover_gradient_exponent(new_value)
 
 		if time_progress == 1 then
 			self.world_cover_animation_time = nil
@@ -657,9 +646,8 @@ AltarCraftUI._update_world_cover_animation = function (self, dt)
 			self.world_cover_animation_time = animation_time
 		end
 	end
-
-	return 
 end
+
 AltarCraftUI._rotate_widgets = function (self, widgets, radius, progress)
 	local ui_scenegraph = self.ui_scenegraph
 	local num_widgets = #widgets
@@ -680,9 +668,8 @@ AltarCraftUI._rotate_widgets = function (self, widgets, radius, progress)
 		position[2] = pos_y
 		widget_start_angle = widget_start_angle - actual_angle_between
 	end
-
-	return 
 end
+
 AltarCraftUI.selected_profile_name = function (self)
 	local active_item_data = self.active_item_data
 
@@ -701,19 +688,20 @@ AltarCraftUI.selected_profile_name = function (self)
 
 		return profile_name
 	end
-
-	return 
 end
+
 AltarCraftUI.selected_slot_name = function (self)
 	local selected_weapon_type_index = self.selected_weapon_type_index + 1
 
 	return weapon_type_index_list[selected_weapon_type_index]
 end
+
 AltarCraftUI.selected_token_rarity = function (self)
 	local selected_token_index = self.selected_token_index + 1
 
 	return token_index_list[selected_token_index]
 end
+
 AltarCraftUI.craft = function (self)
 	local selected_token_index = self.selected_token_index + 1
 	local selected_weapon_type_index = self.selected_weapon_type_index + 1
@@ -732,9 +720,8 @@ AltarCraftUI.craft = function (self)
 	local animation_name = "glow_slots"
 	self.craft_anim_id = self.ui_animator:start_animation(animation_name, widgets, self.scenegraph_definition, params)
 	self.crafting = true
-
-	return 
 end
+
 AltarCraftUI.world_unit_presentation_complete = function (self)
 	self.craft_animation_ready = nil
 	self.item_button_widget.content.visible = true
@@ -742,25 +729,23 @@ AltarCraftUI.world_unit_presentation_complete = function (self)
 	self.crafting = nil
 	self.ignore_frame_input = true
 
-	self.update_craft_cost_display(self)
-
-	return 
+	self:update_craft_cost_display()
 end
+
 AltarCraftUI.on_world_unit_spawn = function (self)
 	self.craft_animation_ready = nil
 	self.item_button_widget.content.visible = false
 	self.item_button_class_icon_widget.content.visible = false
 
-	self._animate_out_world_cover(self)
-	self.update_craft_cost_display(self, true)
-
-	return 
+	self:_animate_out_world_cover()
+	self:update_craft_cost_display(true)
 end
+
 AltarCraftUI.select_token = function (self, index, instant)
 	if self.charging then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	if self.token_rotation_time then
@@ -769,14 +754,13 @@ AltarCraftUI.select_token = function (self, index, instant)
 
 	self.new_token_selection_index = index
 	self.token_rotation_time = (instant and token_total_rotation_time) or 0
-
-	return 
 end
+
 AltarCraftUI.select_weapon_type = function (self, index, instant)
 	if self.charging then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	if self.weapon_type_rotation_time then
@@ -785,21 +769,18 @@ AltarCraftUI.select_weapon_type = function (self, index, instant)
 
 	self.new_weapon_type_selection_index = index
 	self.weapon_type_rotation_time = (instant and weapon_type_total_rotation_time) or 0
-
-	return 
 end
+
 AltarCraftUI._animate_in_world_cover = function (self)
 	self.world_cover_animation_time = 0
 	self.world_cover_fade_in = true
-
-	return 
 end
+
 AltarCraftUI._animate_out_world_cover = function (self)
 	self.world_cover_animation_time = 0
 	self.world_cover_fade_in = nil
-
-	return 
 end
+
 AltarCraftUI._set_world_cover_gradient_exponent = function (self, value)
 	local material_name = "gradient_enchantment_craft"
 	local ui_top_renderer = self.ui_top_renderer
@@ -807,45 +788,42 @@ AltarCraftUI._set_world_cover_gradient_exponent = function (self, value)
 	local gui_material = Gui.material(gui, material_name)
 
 	Material.set_scalar(gui_material, "exponent", value)
-
-	return 
 end
+
 AltarCraftUI._update_animations = function (self, dt)
 	local ui_animator = self.ui_animator
 
-	ui_animator.update(ui_animator, dt)
+	ui_animator:update(dt)
 
-	if self.craft_anim_id and ui_animator.is_animation_completed(ui_animator, self.craft_anim_id) then
-		self._animate_in_world_cover(self)
+	if self.craft_anim_id and ui_animator:is_animation_completed(self.craft_anim_id) then
+		self:_animate_in_world_cover()
 
 		self.craft_anim_id = nil
 	end
-
-	return 
 end
+
 AltarCraftUI.is_dragging_started = function (self)
 	local widget = self.item_button_widget
 
 	return widget.content.on_drag_started
 end
+
 AltarCraftUI.on_item_hover_enter = function (self)
 	local widget = self.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_enter then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 AltarCraftUI.on_item_hover_exit = function (self)
 	local widget = self.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_exit then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 AltarCraftUI.is_slot_hovered = function (self, is_dragging_item)
 	local widget = self.item_button_widget
 	local internal_is_hover = widget.content.button_hotspot.internal_is_hover
@@ -865,6 +843,7 @@ AltarCraftUI.is_slot_hovered = function (self, is_dragging_item)
 
 	return internal_is_hover
 end
+
 AltarCraftUI.on_dragging_item_stopped = function (self)
 	local active_item_id = self.active_item_id
 
@@ -875,9 +854,8 @@ AltarCraftUI.on_dragging_item_stopped = function (self)
 			return active_item_id
 		end
 	end
-
-	return 
 end
+
 AltarCraftUI.on_item_dragged = function (self)
 	local widget = self.item_button_widget
 	local content = widget.content
@@ -888,56 +866,54 @@ AltarCraftUI.on_item_dragged = function (self)
 	elseif content.on_drag_stopped and icon_color[1] ~= 255 then
 		icon_color[1] = 255
 	end
-
-	return 
 end
+
 AltarCraftUI.set_craft_button_disabled = function (self, disabled)
 	local widgets_by_name = self.widgets_by_name
 	local craft_button_widget = widgets_by_name.craft_button_widget
 	craft_button_widget.content.button_hotspot.disabled = disabled
 	craft_button_widget.content.show_title = disabled
 	craft_button_widget.content.show_glow = not disabled
-
-	return 
 end
+
 AltarCraftUI.is_craft_possible = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local craft_button_widget = widgets_by_name.craft_button_widget
 
 	return not craft_button_widget.content.button_hotspot.disabled
 end
+
 AltarCraftUI.set_description_text = function (self, text)
 	local widgets_by_name = self.widgets_by_name
 	local description_widget = widgets_by_name.description_text_1
 	description_widget.content.text = text
-
-	return 
 end
+
 AltarCraftUI.add_item = function (self, backend_item_id)
 	local craft_button_widget = self.widgets_by_name.craft_button_widget
 
 	if self.charging or craft_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 
 	if not gamepad_active then
-		self._set_token_step_button_glow_state(self, true)
-		self._set_weapon_type_step_button_glow_state(self, true)
+		self:_set_token_step_button_glow_state(true)
+		self:_set_weapon_type_step_button_glow_state(true)
 	else
 		local gamepad_setting_selection = self.gamepad_setting_selection
 
 		if gamepad_setting_selection == 1 then
-			self._set_weapon_type_step_button_glow_state(self, true)
+			self:_set_weapon_type_step_button_glow_state(true)
 		else
-			self._set_token_step_button_glow_state(self, true)
+			self:_set_token_step_button_glow_state(true)
 		end
 	end
 
-	self.play_sound(self, "Play_hud_inventory_drop_item")
+	self:play_sound("Play_hud_inventory_drop_item")
 
 	local item_data = BackendUtils.get_item_from_masterlist(backend_item_id)
 	local icon_texture = item_data.inventory_icon
@@ -958,19 +934,18 @@ AltarCraftUI.add_item = function (self, backend_item_id)
 		description_text = description_text .. "_ps4"
 	end
 
-	self.set_description_text(self, description_text)
+	self:set_description_text(description_text)
 
 	local craft_button_widget = self.widgets_by_name.craft_button_widget
 	craft_button_widget.content.default_text_on_disable = true
 
-	self.update_craft_cost_display(self)
-
-	return 
+	self:update_craft_cost_display()
 end
+
 AltarCraftUI.update_craft_cost_display = function (self, force_disable_button)
 	local craft_button_widget = self.widgets_by_name.craft_button_widget
-	local can_afford = self.can_afford_craft_cost(self)
-	local token_type, traits_cost, texture = self.get_craft_cost(self)
+	local can_afford = self:can_afford_craft_cost()
+	local token_type, traits_cost, texture = self:get_craft_cost()
 
 	if token_type then
 		craft_button_widget.content.texture_token_type = texture
@@ -980,7 +955,7 @@ AltarCraftUI.update_craft_cost_display = function (self, force_disable_button)
 		craft_button_widget.content.token_text = ""
 	end
 
-	self.set_craft_button_disabled(self, force_disable_button or not can_afford)
+	self:set_craft_button_disabled(force_disable_button or not can_afford)
 
 	craft_button_widget.content.button_hotspot.is_selected = false
 	craft_button_widget.content.button_hotspot.is_hover = false
@@ -996,13 +971,12 @@ AltarCraftUI.update_craft_cost_display = function (self, force_disable_button)
 		craft_button_widget.style.text_selected.text_color = Colors.get_table("red", 255)
 		craft_button_widget.style.text.text_color = Colors.get_table("red", 255)
 	end
-
-	return 
 end
+
 AltarCraftUI.get_craft_cost = function (self)
-	local selected_token_rarity = self.selected_token_rarity(self)
+	local selected_token_rarity = self:selected_token_rarity()
 	local rarity_settings = AltarSettings.pray_for_loot_cost[selected_token_rarity]
-	local selected_slot_name = self.selected_slot_name(self)
+	local selected_slot_name = self:selected_slot_name()
 	local traits_cost = 0
 
 	if PLATFORM == "xb1" then
@@ -1022,26 +996,29 @@ AltarCraftUI.get_craft_cost = function (self)
 
 	return token_type, traits_cost, token_texture
 end
+
 AltarCraftUI.can_afford_craft_cost = function (self)
 	if not self.active_item_id then
-		return 
+		return
 	end
 
-	local token_type, traits_cost = self.get_craft_cost(self)
+	local token_type, traits_cost = self:get_craft_cost()
 	local num_tokens_owned = BackendUtils.get_tokens(token_type)
 
 	return traits_cost <= num_tokens_owned
 end
+
 AltarCraftUI.can_remove_item = function (self)
 	return self.active_item_id and not self.crafting
 end
+
 AltarCraftUI.remove_item = function (self)
 	local craft_button_widget = self.widgets_by_name.craft_button_widget
 
 	if self.charging or craft_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	self.number_of_traits_on_item = nil
@@ -1055,36 +1032,36 @@ AltarCraftUI.remove_item = function (self)
 	end
 
 	if self.active_item_id then
-		self.play_sound(self, "Play_hud_forge_item_remove")
+		self:play_sound("Play_hud_forge_item_remove")
 	end
 
 	self.active_item_id = nil
 
-	self.set_description_text(self, "altar_craft_description_1")
-	self.update_craft_cost_display(self)
-	self._set_token_step_button_glow_state(self, false)
-	self._set_weapon_type_step_button_glow_state(self, false)
+	self:set_description_text("altar_craft_description_1")
+	self:update_craft_cost_display()
+	self:_set_token_step_button_glow_state(false)
+	self:_set_weapon_type_step_button_glow_state(false)
 
 	local craft_button_widget = self.widgets_by_name.craft_button_widget
 	craft_button_widget.content.default_text_on_disable = false
-
-	return 
 end
+
 AltarCraftUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 AltarCraftUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 AltarCraftUI.animate_element_pulse = function (self, target, target_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.pulse_animation, target, target_index, from, to, time)
 
 	return new_animation
 end
+
 AltarCraftUI.start_charge_progress = function (self)
 	self.charging = true
 	local animation_name = "gamepad_charge_progress"
@@ -1095,15 +1072,14 @@ AltarCraftUI.start_charge_progress = function (self)
 	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.craft_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
 	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
 
-	self.cancel_abort_animation(self)
+	self:cancel_abort_animation()
 
 	widget.content.charging = true
 	widget.style.progress_fill.color[1] = 255
 
-	self.play_sound(self, "Play_hud_reroll_traits_charge")
-
-	return 
+	self:play_sound("Play_hud_reroll_traits_charge")
 end
+
 AltarCraftUI.abort_charge_progress = function (self, force_shutdown)
 	local animation_name = "gamepad_charge_progress"
 	self.animations[animation_name] = nil
@@ -1111,16 +1087,15 @@ AltarCraftUI.abort_charge_progress = function (self, force_shutdown)
 	self.charging = nil
 	self.ui_scenegraph.craft_button_fill.size[1] = 0
 
-	self.play_sound(self, "Stop_hud_reroll_traits_charge")
+	self:play_sound("Stop_hud_reroll_traits_charge")
 
 	if force_shutdown then
-		self.cancel_abort_animation(self)
+		self:cancel_abort_animation()
 	else
-		self.start_abort_animation(self)
+		self:start_abort_animation()
 	end
-
-	return 
 end
+
 AltarCraftUI.on_charge_complete = function (self)
 	self.charging = nil
 	self.gamepad_craft_request = true
@@ -1137,10 +1112,9 @@ AltarCraftUI.on_charge_complete = function (self)
 	widget.style.text_disabled.text_color[1] = 0
 	widget.style.texture_token_type.color[1] = 0
 
-	self.play_sound(self, "Stop_hud_reroll_traits_charge")
-
-	return 
+	self:play_sound("Stop_hud_reroll_traits_charge")
 end
+
 AltarCraftUI.start_abort_animation = function (self)
 	local animation_name = "gamepad_charge_progress_abort"
 	local from = 0
@@ -1153,9 +1127,8 @@ AltarCraftUI.start_abort_animation = function (self)
 	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
-
-	return 
 end
+
 AltarCraftUI.cancel_abort_animation = function (self)
 	local animations = self.animations
 	animations.gamepad_charge_progress_abort = nil
@@ -1178,35 +1151,33 @@ AltarCraftUI.cancel_abort_animation = function (self)
 	widget.style.text_disabled.text_color[1] = 255
 	widget.style.token_text.text_color[1] = 255
 	widget.style.text.text_color[1] = 255
-
-	return 
 end
+
 AltarCraftUI.on_charge_animations_complete = function (self, animation_name)
 	if animation_name == "gamepad_charge_progress" then
-		self.on_charge_complete(self)
+		self:on_charge_complete()
 	end
 
 	if animation_name == "gamepad_charge_progress_abort" then
 		local widget = self.widgets_by_name.craft_button_widget
 		widget.content.show_cancel_text = false
 	end
-
-	return 
 end
+
 AltarCraftUI.on_gamepad_activated = function (self)
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "enchantment_view")
+	local input_service = input_manager:get_service("enchantment_view")
 	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
 	local button_texture = button_texture_data.texture
 	local button_size = button_texture_data.size
 	local widget = self.widgets_by_name.craft_button_widget
 	widget.content.progress_input_icon = button_texture
+end
 
-	return 
-end
 AltarCraftUI.on_gamepad_deactivated = function (self)
-	return 
+	return
 end
+
 AltarCraftUI.set_active = function (self, active)
 	self.active = active
 	local widget = self.widgets_by_name.craft_button_widget
@@ -1214,10 +1185,8 @@ AltarCraftUI.set_active = function (self, active)
 	if self.charging or widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
-
-	return 
 end
 
-return 
+return

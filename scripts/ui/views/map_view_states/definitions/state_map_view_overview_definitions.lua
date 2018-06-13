@@ -3,13 +3,11 @@ local player_list_navigation_helper = {
 	input_function = function (widget, input_service)
 		local content = widget.content
 
-		if content.kick_enabled and input_service.get(input_service, "special_1", true) then
+		if content.kick_enabled and input_service:get("special_1", true) then
 			return "kick"
-		elseif input_service.get(input_service, "confirm", true) then
+		elseif input_service:get("confirm", true) then
 			return "gamercard"
 		end
-
-		return 
 	end,
 	input_description = {
 		name = "stepper",

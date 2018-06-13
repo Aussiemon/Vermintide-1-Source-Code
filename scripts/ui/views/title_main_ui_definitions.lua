@@ -684,7 +684,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -697,11 +697,9 @@ local animations = {
 				offset[1] = math.lerp(title_content.texture_offset[1], -150, math.smoothstep(local_progress, 0, 1))
 				offset[2] = math.lerp(title_content.texture_offset[2], 550, math.smoothstep(local_progress, 0, 1))
 				text_color[1] = math.lerp(Colors.color_definitions.white[1], 0, math.smoothstep(local_progress, 0, 1))
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -711,17 +709,15 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				local color = widget.style.sidebar.color
 				color[1] = math.lerp(0, 255, math.smoothstep(local_progress, 0, 1))
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -731,7 +727,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
@@ -744,11 +740,9 @@ local animations = {
 				offset[1] = math.lerp(title_content.texture_offset[1], -150, math.smoothstep(local_progress, 1, 0))
 				offset[2] = math.lerp(title_content.texture_offset[2], 600, math.smoothstep(local_progress, 1, 0))
 				text_color[1] = math.lerp(Colors.color_definitions.white[1], 0, math.smoothstep(local_progress, 1, 0))
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -758,17 +752,15 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets[1]
 				local color = widget.style.sidebar.color
 				color[1] = math.lerp(0, 255, math.smoothstep(local_progress, 1, 0))
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -778,16 +770,14 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
 				widgets.input_icon.style.texture_id.color[1] = anim_progress * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -795,7 +785,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
@@ -805,11 +795,9 @@ local animations = {
 				if circle_glow_color[1] < alpha then
 					circle_glow_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -817,17 +805,15 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local ease_progress = math.catmullrom(local_progress, -5, 1, 1, -5)
 				local anim_progress = math.easeOutCubic(local_progress)
 				widgets.frame_line_glow.style.texture_id.color[1] = anim_progress * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -838,8 +824,6 @@ local animations = {
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				widgets.input_icon.style.texture_id.color[1] = 0
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local input_icon_size = ui_scenegraph.input_icon.size
@@ -859,11 +843,9 @@ local animations = {
 				frame_circle_glow_size[2] = default_frame_circle_glow_size[2] * anim_progress
 				input_icon_size[1] = default_input_icon_size[1] * anim_progress
 				input_icon_size[2] = default_input_icon_size[2] * anim_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -872,8 +854,6 @@ local animations = {
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				widgets.input_icon.style.texture_id.color[1] = 0
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.catmullrom(math.easeOutCubic(local_progress), 2, 1, 1, 1.5)
@@ -903,11 +883,9 @@ local animations = {
 				local default_lock_middle_top_position = scenegraph_definition.lock_middle_top.position
 				lock_outer_top_position[2] = default_lock_outer_top_position[2] * anim_progress
 				lock_middle_top_position[2] = default_lock_middle_top_position[2] * anim_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -915,17 +893,15 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local ease_progress = math.catmullrom(local_progress, -5, 1, 1, -5)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
 				widgets.frame_line_glow.style.texture_id.color[1] = anim_progress * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -933,16 +909,14 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
 				widgets.frame_circle_glow.style.texture_id.color[1] = anim_progress * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -950,7 +924,7 @@ local animations = {
 			start_progress = 0.3,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget_top = widgets.frame_top
@@ -960,11 +934,9 @@ local animations = {
 				ui_scenegraph.frame_top.local_position[2] = 170 * anim_progress
 				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] + -170 * anim_progress
 				ui_scenegraph.frame_background.size[2] = 340 * anim_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -974,7 +946,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget_top = widgets.frame_top
@@ -984,11 +956,9 @@ local animations = {
 				ui_scenegraph.frame_top.local_position[2] = 170 * anim_progress
 				ui_scenegraph.frame_bottom.local_position[2] = default_frame_bottom_position[2] - 170 * anim_progress
 				ui_scenegraph.frame_background.size[2] = 340 * anim_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -996,17 +966,15 @@ local animations = {
 			start_progress = 0.3,
 			end_progress = 0.45,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local ease_progress = math.catmullrom(local_progress, -5, 1, 1, -5)
 				local anim_progress = math.smoothstep(local_progress, 0, 1)
 				widgets.input_icon.style.texture_id.color[1] = anim_progress * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1016,17 +984,15 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget_circle_glow = widgets.frame_circle_glow
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
 				widget_circle_glow.style.texture_id.color[1] = 155 + anim_progress * 100
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1036,17 +1002,15 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget_circle_glow = widgets.frame_circle_glow
 				local anim_progress = math.smoothstep(local_progress, 1, 0)
 				widget_circle_glow.style.texture_id.color[1] = 255 - anim_progress * 100
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1058,8 +1022,6 @@ local animations = {
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local widget = widgets.fog_back_1
 				widget.style.texture_id.color[1] = 90
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_back_1
@@ -1078,11 +1040,9 @@ local animations = {
 						widget.offset[1] = x_offset
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1095,8 +1055,6 @@ local animations = {
 				if widget then
 					widget.style.texture_id.color[1] = 90
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_back_2
@@ -1110,11 +1068,9 @@ local animations = {
 					local x_offset = local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1124,8 +1080,6 @@ local animations = {
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local widget = widgets.fog_back_3
 				widget.style.texture_id.color[1] = 70
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_back_3
@@ -1145,11 +1099,9 @@ local animations = {
 						widget.offset[1] = x_offset
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1162,8 +1114,6 @@ local animations = {
 				if widget then
 					widget.style.texture_id.color[1] = 70
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_back_4
@@ -1178,11 +1128,9 @@ local animations = {
 					local x_offset = -start_offset + local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1194,8 +1142,6 @@ local animations = {
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local widget = widgets.fog_front_1
 				widget.style.texture_id.color[1] = 50
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_front_1
@@ -1215,11 +1161,9 @@ local animations = {
 						widget.offset[1] = x_offset
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1232,8 +1176,6 @@ local animations = {
 				if widget then
 					widget.style.texture_id.color[1] = 50
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_front_2
@@ -1248,11 +1190,9 @@ local animations = {
 					local x_offset = local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1262,8 +1202,6 @@ local animations = {
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local widget = widgets.fog_front_3
 				widget.style.texture_id.color[1] = 25
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_front_3
@@ -1283,11 +1221,9 @@ local animations = {
 						widget.offset[1] = x_offset
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1300,8 +1236,6 @@ local animations = {
 				if widget then
 					widget.style.texture_id.color[1] = 25
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.fog_front_4
@@ -1316,11 +1250,9 @@ local animations = {
 					local x_offset = -start_offset + local_progress * total_distance
 					widget.offset[1] = x_offset
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

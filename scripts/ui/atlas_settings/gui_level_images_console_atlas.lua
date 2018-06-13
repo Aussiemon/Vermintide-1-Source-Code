@@ -421,4 +421,4 @@ level_images_console_atlas = {
 	}
 }
 
-return 
+return

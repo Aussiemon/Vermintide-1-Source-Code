@@ -3,22 +3,21 @@ require("scripts/level/environment/environment_blend_volume")
 
 EnvironmentHandler = class(EnvironmentHandler)
 EnvironmentHandler.ID = EnvironmentHandler.ID or 0
+
 EnvironmentHandler.init = function (self)
 	self._blends = {}
 	self._weights = {}
-
-	return 
 end
+
 EnvironmentHandler.add_blend_group = function (self, group)
 	self._blends[group] = {}
-
-	return 
 end
+
 EnvironmentHandler.add_blend = function (self, blend_class_name, group, priority, blend_data)
 	EnvironmentHandler.ID = EnvironmentHandler.ID + 1
 	local id = EnvironmentHandler.ID
 	local blend_class = rawget(_G, blend_class_name)
-	local blend = blend_class.new(blend_class, blend_data)
+	local blend = blend_class:new(blend_data)
 	local group = self._blends[group]
 	group[#group + 1] = {
 		priority = priority,
@@ -32,6 +31,7 @@ EnvironmentHandler.add_blend = function (self, blend_class_name, group, priority
 
 	return id
 end
+
 EnvironmentHandler.remove_blend = function (self, id)
 	for _, group in pairs(self._blends) do
 		for key, blend_data in pairs(group) do
@@ -39,30 +39,27 @@ EnvironmentHandler.remove_blend = function (self, id)
 				blend_data.blend:destroy()
 				table.remove(group, key)
 				table.clear(self._weights)
-				self._update_weights(self)
+				self:_update_weights()
 
-				return 
+				return
 			end
 		end
 	end
-
-	return 
 end
+
 EnvironmentHandler.update = function (self, dt, t)
-	self._update_blends(self, dt)
-	self._update_weights(self, dt)
-
-	return 
+	self:_update_blends(dt)
+	self:_update_weights(dt)
 end
+
 EnvironmentHandler._update_blends = function (self, dt)
 	for _, blends in pairs(self._blends) do
 		for _, b in ipairs(blends) do
 			b.blend:update(dt)
 		end
 	end
-
-	return 
 end
+
 EnvironmentHandler._update_weights = function (self)
 	local particle_light_intensity = nil
 
@@ -79,7 +76,7 @@ EnvironmentHandler._update_weights = function (self)
 			weight_data.blend = b.blend
 			weight_data.particle_light_intensity = b.blend:particle_light_intensity()
 
-			if 0 < weight_pool then
+			if weight_pool > 0 then
 				local weight = math.min(b.blend:value(), weight_pool)
 				weight_data.weight = weight
 				weight_pool = weight_pool - weight
@@ -93,12 +90,12 @@ EnvironmentHandler._update_weights = function (self)
 
 		self._weights[group] = weights
 	end
-
-	return 
 end
+
 EnvironmentHandler.weights = function (self, group)
 	return self._weights[group]
 end
+
 EnvironmentHandler.override_settings = function (self)
 	local max_prio = 0
 	local blend_volume = nil
@@ -111,11 +108,12 @@ EnvironmentHandler.override_settings = function (self)
 	end
 
 	if blend_volume then
-		return blend_volume.override_settings(blend_volume)
+		return blend_volume:override_settings()
 	end
 
 	return nil
 end
+
 EnvironmentHandler.destroy = function (self)
 	for _, blends in pairs(self._blends) do
 		for _, b in ipairs(blends) do
@@ -124,8 +122,6 @@ EnvironmentHandler.destroy = function (self)
 	end
 
 	self._blends = nil
-
-	return 
 end
 
-return 
+return

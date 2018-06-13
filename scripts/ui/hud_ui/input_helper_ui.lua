@@ -73,6 +73,7 @@ local widget_definitions = {
 	background_overlay = UIWidgets.create_simple_rect("background_overlay", Colors.get_color_table_with_alpha("black", 200)),
 	input_description_text = UIWidgets.create_simple_text("press_any_key_to_continue", "input_description_text", 18, Colors.get_color_table_with_alpha("white", 255))
 }
+
 InputHelperUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -82,21 +83,19 @@ InputHelperUI.init = function (self, ingame_ui_context)
 	self.platform = Application.platform()
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	if not SaveData.input_helper_displayed and Application.platform() ~= "ps4" then
 		self.show_at_startup = true
 	end
-
-	return 
 end
+
 InputHelperUI.display_first_time = function (self)
 	self.active = true
 	self.close_cooldown = 3
 	self.show_at_startup = nil
-
-	return 
 end
+
 InputHelperUI.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -105,33 +104,30 @@ InputHelperUI.create_ui_elements = function (self)
 	self.helper_screen_gamepad_widget = UIWidget.init(widget_definitions.helper_screen_gamepad)
 	self.background_overlay_widget = UIWidget.init(widget_definitions.background_overlay)
 	self.input_description_text_widget = UIWidget.init(widget_definitions.input_description_text)
-
-	return 
 end
+
 InputHelperUI.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "input_helper_ui")
-
-	return 
 end
+
 InputHelperUI.update_close_cooldown = function (self, dt)
 	local close_cooldown = self.close_cooldown
 
 	if close_cooldown then
 		close_cooldown = close_cooldown - dt
 
-		if 0 < close_cooldown then
+		if close_cooldown > 0 then
 			self.close_cooldown = close_cooldown
 		else
 			self.close_cooldown = nil
 
-			self.save_game_info_read(self)
+			self:save_game_info_read()
 		end
 	end
-
-	return 
 end
+
 InputHelperUI.update = function (self, dt, t)
-	self.update_close_cooldown(self, dt)
+	self:update_close_cooldown(dt)
 
 	if not self.close_cooldown then
 		local input_manager = self.input_manager
@@ -140,29 +136,28 @@ InputHelperUI.update = function (self, dt, t)
 			local in_fade_active = Managers.transition:in_fade_active()
 
 			if not in_fade_active then
-				local input_service = input_manager.get_service(input_manager, "Player")
+				local input_service = input_manager:get_service("Player")
 
-				if input_service.get(input_service, "toggle_input_helper") then
+				if input_service:get("toggle_input_helper") then
 					self.active = true
 				end
 			end
-		elseif input_manager.any_input_pressed(input_manager) then
+		elseif input_manager:any_input_pressed() then
 			self.active = nil
 		end
 	end
 
 	if self.active then
-		self.draw(self, dt, t)
+		self:draw(dt, t)
 	end
-
-	return 
 end
+
 InputHelperUI.draw = function (self, dt, t)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "ingame_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("ingame_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.background_overlay_widget)
@@ -181,21 +176,17 @@ InputHelperUI.draw = function (self, dt, t)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 InputHelperUI.save_game_info_read = function (self)
 	local save_manager = Managers.save
 	SaveData.input_helper_displayed = true
 
-	save_manager.auto_save(save_manager, SaveFileName, SaveData, callback(self, "on_save_ended_callback"))
-
-	return 
+	save_manager:auto_save(SaveFileName, SaveData, callback(self, "on_save_ended_callback"))
 end
+
 InputHelperUI.on_save_ended_callback = function (self)
 	print("[InputHelperUI] - Input helper screen shown saved")
-
-	return 
 end
 
-return 
+return

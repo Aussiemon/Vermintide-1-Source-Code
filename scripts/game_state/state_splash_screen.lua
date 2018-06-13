@@ -51,23 +51,23 @@ StateSplashScreen.on_enter = function (self)
 	end
 
 	Managers.transition:force_fade_in()
-	self.setup_world(self)
+	self:setup_world()
 
 	if PLATFORM == "win32" then
-		self.setup_input(self)
+		self:setup_input()
 	end
 
 	if PLATFORM == "win32" then
-		self.setup_splash_screen_view(self)
+		self:setup_splash_screen_view()
 	elseif PLATFORM == "ps4" then
 		if PS4.title_id() == "CUSA02133_00" then
-			self.setup_esrb_logo(self)
+			self:setup_esrb_logo()
 		else
 			Managers.package:load("resource_packages/start_menu_splash", "StateSplashScreen", callback(self, "cb_splashes_loaded"), true, true)
 		end
 	elseif PLATFORM == "xb1" then
-		if self._is_in_esrb_terratory(self) then
-			self.setup_esrb_logo(self)
+		if self:_is_in_esrb_terratory() then
+			self:setup_esrb_logo()
 		else
 			Managers.package:load("resource_packages/start_menu_splash", "StateSplashScreen", callback(self, "cb_splashes_loaded"), true, true)
 		end
@@ -76,10 +76,10 @@ StateSplashScreen.on_enter = function (self)
 	local loading_context = self.parent.loading_context
 
 	if loading_context.reload_packages then
-		self.unload_packages(self)
+		self:unload_packages()
 	end
 
-	self.load_packages(self)
+	self:load_packages()
 	Managers.transition:fade_out(1)
 
 	local args = {
@@ -98,9 +98,8 @@ StateSplashScreen.on_enter = function (self)
 		self.parent.loading_context.show_profile_on_startup = true
 		loading_context.first_time = true
 	end
-
-	return 
 end
+
 StateSplashScreen._is_in_esrb_terratory = function (self)
 	local esrb_regions = {
 		CA = true,
@@ -112,6 +111,7 @@ StateSplashScreen._is_in_esrb_terratory = function (self)
 
 	return esrb_regions[iso2]
 end
+
 StateSplashScreen.setup_esrb_logo = function (self)
 	self.gui = World.create_screen_gui(self.world, "material", "materials/ui/esrb_console_logo", "immediate")
 
@@ -119,9 +119,8 @@ StateSplashScreen.setup_esrb_logo = function (self)
 
 	self.showing_esrb = true
 	self.esrb_timer = 0
-
-	return 
 end
+
 StateSplashScreen.update_esrb_logo = function (self, dt, t)
 	if not self._test then
 		Application.error("##########################")
@@ -140,7 +139,7 @@ StateSplashScreen.update_esrb_logo = function (self, dt, t)
 	}
 	local bitmap_name = "esrb_logo"
 
-	if total_time - 0.5 < timer then
+	if timer > total_time - 0.5 then
 		alpha = 255 - 255 * math.clamp((total_time - timer) / 0.5, 0, 1)
 	elseif timer <= 0.5 then
 		alpha = 255 * math.clamp(1 - timer / 0.5, 0, 255)
@@ -155,31 +154,27 @@ StateSplashScreen.update_esrb_logo = function (self, dt, t)
 	self.esrb_timer = math.clamp(self.esrb_timer + math.clamp(dt, 0, 0.1), 0, total_time)
 
 	if total_time <= self.esrb_timer and self.splashes_loaded then
-		self.setup_splash_screen_view(self)
+		self:setup_splash_screen_view()
 		Managers.transition:force_fade_in()
 	end
-
-	return 
 end
+
 StateSplashScreen.cb_splashes_loaded = function (self)
 	self.splashes_loaded = true
 
 	if not self.showing_esrb then
-		self.setup_splash_screen_view(self)
+		self:setup_splash_screen_view()
 		Application.error("##########################")
 		Application.error("######## RENDERING #######")
 		Application.error("##########################")
 	end
-
-	return 
 end
+
 StateSplashScreen.setup_world = function (self)
 	self._world_name = "splash_ui"
 	self._viewport_name = "splash_view_viewport"
 	self.world = Managers.world:create_world(self._world_name, GameSettingsDevelopment.default_environment, nil, 980, Application.DISABLE_PHYSICS, Application.DISABLE_APEX_CLOTH)
 	self.viewport = ScriptWorld.create_viewport(self.world, self._viewport_name, "overlay", 1)
-
-	return 
 end
 
 if PLATFORM == "win32" then
@@ -190,8 +185,6 @@ if PLATFORM == "win32" then
 		self.input_manager:initialize_device("keyboard", 1)
 		self.input_manager:initialize_device("mouse", 1)
 		self.input_manager:initialize_device("gamepad")
-
-		return 
 	end
 end
 
@@ -209,9 +202,8 @@ StateSplashScreen.setup_splash_screen_view = function (self)
 	else
 		self.splash_view:set_index(4)
 	end
-
-	return 
 end
+
 StateSplashScreen.update = function (self, dt, t)
 	if PLATFORM ~= "xb1" and PLATFORM ~= "ps4" then
 		Debug.update(t, dt)
@@ -221,28 +213,28 @@ StateSplashScreen.update = function (self, dt, t)
 	if self.splash_view then
 		self.splash_view:update(dt)
 	elseif self.showing_esrb then
-		self.update_esrb_logo(self, dt, t)
+		self:update_esrb_logo(dt, t)
 	end
 
-	if not self.wanted_state and ((self.splash_view and self.splash_view:is_completed()) or self._skip_splash) and self.packages_loaded(self) then
+	if not self.wanted_state and ((self.splash_view and self.splash_view:is_completed()) or self._skip_splash) and self:packages_loaded() then
 		require("scripts/game_state/state_title_screen")
 		Managers.transition:fade_in(0.5, callback(self, "cb_fade_in_done"))
 	end
 
-	local state = self.next_state(self)
+	local state = self:next_state()
 
 	return state
 end
+
 StateSplashScreen.render = function (self)
 	if self.splash_view then
 		self.splash_view:render()
 	end
-
-	return 
 end
+
 StateSplashScreen.next_state = function (self)
-	if not self.packages_loaded(self) or not self.wanted_state then
-		return 
+	if not self:packages_loaded() or not self.wanted_state then
+		return
 	end
 
 	if PLATFORM == "win32" and not self.debug_setup then
@@ -253,12 +245,13 @@ StateSplashScreen.next_state = function (self)
 
 	return self.wanted_state
 end
+
 StateSplashScreen.unload_packages = function (self)
 	local package_manager = Managers.package
 
 	for i, name in ipairs(StateSplashScreen.packages_to_load) do
-		if package_manager.has_loaded(package_manager, name, "state_splash_screen") then
-			package_manager.unload(package_manager, name, "state_splash_screen")
+		if package_manager:has_loaded(name, "state_splash_screen") then
+			package_manager:unload(name, "state_splash_screen")
 		end
 	end
 
@@ -266,43 +259,41 @@ StateSplashScreen.unload_packages = function (self)
 		GlobalResources.loaded = nil
 
 		for i, name in ipairs(GlobalResources) do
-			package_manager.unload(package_manager, name, "global")
+			package_manager:unload(name, "global")
 		end
 	end
-
-	return 
 end
+
 StateSplashScreen.load_packages = function (self)
 	local package_manager = Managers.package
 
 	for i, name in ipairs(StateSplashScreen.packages_to_load) do
-		if not package_manager.has_loaded(package_manager, name, "state_splash_screen") then
-			package_manager.load(package_manager, name, "state_splash_screen", nil, true)
+		if not package_manager:has_loaded(name, "state_splash_screen") then
+			package_manager:load(name, "state_splash_screen", nil, true)
 		end
 	end
 
 	if Development.parameter("gdc") then
 		local package_name_to_load = "resource_packages/debug/gdc_materials"
 
-		if not package_manager.has_loaded(package_manager, package_name_to_load) then
-			package_manager.load(package_manager, package_name_to_load, "state_splash_screen", nil, true)
+		if not package_manager:has_loaded(package_name_to_load) then
+			package_manager:load(package_name_to_load, "state_splash_screen", nil, true)
 		end
 	end
-
-	return 
 end
+
 StateSplashScreen.packages_loaded = function (self)
 	local package_manager = Managers.package
 
 	for i, name in ipairs(StateSplashScreen.packages_to_load) do
-		if not package_manager.has_loaded(package_manager, name) then
+		if not package_manager:has_loaded(name) then
 			return false
 		end
 	end
 
 	if PLATFORM == "xb1" or PLATFORM == "ps4" then
 		for i, name in ipairs(StateSplashScreen.delayed_global_packages) do
-			if not package_manager.has_loaded(package_manager, name) then
+			if not package_manager:has_loaded(name) then
 				return false
 			end
 		end
@@ -312,7 +303,7 @@ StateSplashScreen.packages_loaded = function (self)
 		end
 
 		if not self._console_delayed_scripts_setup_and_required then
-			self._require_and_setup_delayed_scripts(self)
+			self:_require_and_setup_delayed_scripts()
 
 			self._console_delayed_scripts_setup_and_required = true
 		end
@@ -320,8 +311,8 @@ StateSplashScreen.packages_loaded = function (self)
 
 	if not GlobalResources.loaded then
 		for i, name in ipairs(GlobalResources) do
-			if not package_manager.has_loaded(package_manager, name) then
-				package_manager.load(package_manager, name, "global", nil, true)
+			if not package_manager:has_loaded(name) then
+				package_manager:load(name, "global", nil, true)
 			end
 		end
 
@@ -339,8 +330,6 @@ if PLATFORM == "xb1" or PLATFORM == "ps4" then
 			}) do
 				require("scripts/" .. path .. "/" .. s)
 			end
-
-			return 
 		end
 
 		local function foundation_require(path, ...)
@@ -349,8 +338,6 @@ if PLATFORM == "xb1" or PLATFORM == "ps4" then
 			}) do
 				require("foundation/scripts/" .. path .. "/" .. s)
 			end
-
-			return 
 		end
 
 		foundation_require("managers", "localization/localization_manager", "event/event_manager")
@@ -363,7 +350,7 @@ if PLATFORM == "xb1" or PLATFORM == "ps4" then
 		game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 		game_require("network", "unit_spawner", "unit_storage", "network_unit")
 		DefaultUserSettings.set_default_user_settings()
-		self._init_localizer(self)
+		self:_init_localizer()
 		game_require("ui", "ui_fonts", "views/show_cursor_stack", "views/ingame_ui", "views/end_of_level_ui", "views/title_loading_ui")
 		require("foundation/scripts/util/garbage_leak_detector")
 		parse_item_master_list()
@@ -402,8 +389,6 @@ if PLATFORM == "xb1" or PLATFORM == "ps4" then
 		end
 
 		self.splash_view:allow_console_skip()
-
-		return 
 	end
 end
 
@@ -427,7 +412,7 @@ StateSplashScreen._init_localizer = function (self)
 
 		fassert(input_service, "[key_parser] No input service with the name %s", input_service_name)
 
-		local key = input_service.get_keymapping(input_service, key_name)
+		local key = input_service:get_keymapping(key_name)
 
 		fassert(key, "[key_parser] There is no such key: %s in input service: %s", key_name, input_service_name)
 
@@ -472,14 +457,12 @@ StateSplashScreen._init_localizer = function (self)
 	end
 
 	Managers.localizer:add_macro("KEY", key_parser)
-
-	return 
 end
+
 StateSplashScreen.cb_fade_in_done = function (self)
 	self.wanted_state = StateTitleScreen
-
-	return 
 end
+
 StateSplashScreen.on_exit = function (self, application_shutdown)
 	if PLATFORM == "win32" then
 		local max_fps = Application.user_setting("max_fps")
@@ -516,8 +499,6 @@ StateSplashScreen.on_exit = function (self, application_shutdown)
 		Managers.package:unload("resource_packages/start_menu_splash", "StateSplashScreen")
 		VisualAssertLog.cleanup()
 	end
-
-	return 
 end
 
-return 
+return

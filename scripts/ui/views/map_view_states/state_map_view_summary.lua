@@ -4,6 +4,7 @@ local scenegraph_definition = definitions.scenegraph_definition
 local generic_input_actions = definitions.generic_input_actions
 StateMapViewSummary = class(StateMapViewSummary)
 StateMapViewSummary.NAME = "StateMapViewSummary"
+
 StateMapViewSummary.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewSummary")
 
@@ -26,15 +27,14 @@ StateMapViewSummary.on_enter = function (self, params)
 
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
-	self.setup_game_info(self)
+	self:create_ui_elements()
+	self:setup_game_info()
 	self._map_view:set_time_line_index(4)
 	self._map_view:animate_title_text(self._title_text_widget)
 	self._map_view:set_mask_enabled(true)
-	self.start_open_animation(self)
-
-	return 
+	self:start_open_animation()
 end
+
 StateMapViewSummary.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._dead_space_filler_widget = UIWidget.init(widgets.dead_space_filler)
@@ -87,11 +87,10 @@ StateMapViewSummary.create_ui_elements = function (self)
 	}
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 StateMapViewSummary.setup_game_info = function (self)
-	self._change_privacy_setting(self, 1, true)
+	self:_change_privacy_setting(1, true)
 
 	local game_info = self.game_info
 	local use_level_filter = game_info.use_level_filter
@@ -132,9 +131,8 @@ StateMapViewSummary.setup_game_info = function (self)
 	local gui_material = Gui.material(gui, difficulty_banner_texture)
 
 	Material.set_scalar(gui_material, "distortion_offset_top", 0.5)
-
-	return 
 end
+
 StateMapViewSummary._start_game = function (self, t)
 	local game_info = self.game_info
 	local game_mode = game_info.game_mode
@@ -179,80 +177,77 @@ StateMapViewSummary._start_game = function (self, t)
 	print("+++++++")
 	print("------------------------------------------")
 	Managers.matchmaking:find_game(level_key, difficulty_key, private_game, random_level, game_mode, area, t, use_level_filter and level_filter_list)
-	self._play_sound(self, "hud_menu_press_start")
-
-	return 
+	self:_play_sound("hud_menu_press_start")
 end
+
 StateMapViewSummary.on_exit = function (self, params)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 StateMapViewSummary.update = function (self, dt, t)
 	if not self._transition_timer then
-		self._handle_input(self, dt, t)
+		self:_handle_input(dt, t)
 	end
 
-	self.draw(self, dt)
-	self._update_transition_timer(self, dt)
+	self:draw(dt)
+	self:_update_transition_timer(dt)
 
 	if not self._transition_timer then
 		return self._new_state
 	end
+end
 
-	return 
-end
 StateMapViewSummary.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewSummary._handle_input = function (self, dt, t)
 	if self._new_state then
-		return 
+		return
 	end
 
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
-	elseif input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
+	elseif input_service:get("move_up") or input_service:get("move_up_hold") then
 		self.controller_cooldown = GamepadSettings.menu_cooldown
 
-		if self._change_privacy_setting(self, 1) then
-			self._play_sound(self, "Play_hud_select")
+		if self:_change_privacy_setting(1) then
+			self:_play_sound("Play_hud_select")
 		end
-	elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
+	elseif input_service:get("move_down") or input_service:get("move_down_hold") then
 		self.controller_cooldown = GamepadSettings.menu_cooldown
 
-		if self._change_privacy_setting(self, -1) then
-			self._play_sound(self, "Play_hud_select")
+		if self:_change_privacy_setting(-1) then
+			self:_play_sound("Play_hud_select")
 		end
-	elseif input_service.get(input_service, "confirm") then
-		self._start_game(self, t)
-	elseif input_service.get(input_service, "back") then
+	elseif input_service:get("confirm") then
+		self:_start_game(t)
+	elseif input_service:get("back") then
 		self._new_state = StateMapViewSelectDifficulty
 
-		self._play_sound(self, "Play_hud_select")
-	elseif input_service.get(input_service, "toggle_menu") then
+		self:_play_sound("Play_hud_select")
+	elseif input_service:get("toggle_menu") then
 		local return_to_game = not self.parent.ingame_ui.menu_active
 
 		self._map_view:exit(return_to_game)
 	end
 
 	if self._new_state then
-		self.start_close_animation(self)
+		self:start_close_animation()
 	end
-
-	return 
 end
+
 StateMapViewSummary.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
@@ -290,14 +285,12 @@ StateMapViewSummary.draw = function (self, dt)
 	if not self._transition_timer then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
+
 StateMapViewSummary._play_sound = function (self, event)
 	self._map_view:play_sound(event)
-
-	return 
 end
+
 local privacy_settings = {
 	{
 		display_name = "map_public_setting",
@@ -308,6 +301,7 @@ local privacy_settings = {
 		private = true
 	}
 }
+
 StateMapViewSummary._change_privacy_setting = function (self, value, ignore_animations)
 	local num_privacy_settings = #privacy_settings
 
@@ -322,7 +316,7 @@ StateMapViewSummary._change_privacy_setting = function (self, value, ignore_anim
 	end
 
 	if not ignore_animations then
-		if 0 < value then
+		if value > 0 then
 			local up_arrow_scenegraph = self.ui_scenegraph.setting_arrow_up
 			local up_arrow_scenegraph_position = up_arrow_scenegraph.position
 			local animation_height_offset = UIAnimation.init(UIAnimation.function_by_time, up_arrow_scenegraph_position, 2, 40, 45, 0.2, math.ease_pulse)
@@ -368,14 +362,13 @@ end
 StateMapViewSummary.start_open_animation = function (self)
 	self._draw_masked_widgets = true
 	self._transition_timer = 0.75
+
 	self._transition_cb = function ()
 		self._transition_timer = 0.15
 
 		self._map_view:set_mask_enabled(false)
 
 		self._draw_masked_widgets = false
-
-		return 
 	end
 
 	for index, widget in ipairs(self.open_animation_widgets) do
@@ -412,19 +405,17 @@ StateMapViewSummary.start_open_animation = function (self)
 		end
 	end
 
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewSummary.start_close_animation = function (self)
 	self._transition_timer = 0.15
+
 	self._transition_cb = function ()
 		self._draw_masked_widgets = true
 		self._transition_timer = 0.75
 
 		self._map_view:set_mask_enabled(true)
-
-		return 
 	end
 
 	local function animate(widget, time, delay)
@@ -439,8 +430,6 @@ StateMapViewSummary.start_close_animation = function (self)
 		local animation = UIAnimation.init(UIAnimation.wait, delay, UIAnimation.function_by_time, target, target_index, from, to, anim_time, anim_func)
 
 		UIWidget.animate(widget, animation)
-
-		return 
 	end
 
 	animate(self._difficulty_banner_masked_widget, 0.75, 0.15)
@@ -471,13 +460,12 @@ StateMapViewSummary.start_close_animation = function (self)
 	end
 
 	self._map_view:animate_title_text(self._title_text_widget, true)
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewSummary._update_transition_timer = function (self, dt)
 	if not self._transition_timer then
-		return 
+		return
 	end
 
 	if self._transition_timer == 0 then
@@ -491,8 +479,6 @@ StateMapViewSummary._update_transition_timer = function (self, dt)
 	else
 		self._transition_timer = math.max(self._transition_timer - dt, 0)
 	end
-
-	return 
 end
 
-return 
+return

@@ -1,4 +1,5 @@
 GenericImpactProjectileUnitExtension = class(GenericImpactProjectileUnitExtension)
+
 GenericImpactProjectileUnitExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
 	self.unit = unit
@@ -12,32 +13,31 @@ GenericImpactProjectileUnitExtension.init = function (self, extension_init_conte
 	self.network_manager = Managers.state.network
 
 	Unit.flow_event(unit, "lua_projectile_init")
-
-	return 
 end
+
 GenericImpactProjectileUnitExtension.extensions_ready = function (self, world, unit)
 	self.locomotion_extension = ScriptUnit.extension(unit, "projectile_locomotion_system")
 	self.impact_extension = ScriptUnit.has_extension(unit, "projectile_impact_system") and ScriptUnit.extension(unit, "projectile_impact_system")
+end
 
-	return 
-end
 GenericImpactProjectileUnitExtension.destroy = function (self)
-	return 
+	return
 end
+
 GenericImpactProjectileUnitExtension.update = function (self, unit, input, _, context, t)
 	local impact_extension = self.impact_extension
 
 	if not impact_extension then
-		return 
+		return
 	end
 
-	local recent_impacts, num_impacts = impact_extension.recent_impacts(impact_extension)
+	local recent_impacts, num_impacts = impact_extension:recent_impacts()
 
 	if num_impacts == 0 then
-		return 
+		return
 	end
 
-	self.impact(self, recent_impacts, num_impacts)
+	self:impact(recent_impacts, num_impacts)
 
 	local UNIT = ProjectileImpactDataIndex.UNIT
 	local POSITION = ProjectileImpactDataIndex.POSITION
@@ -46,7 +46,7 @@ GenericImpactProjectileUnitExtension.update = function (self, unit, input, _, co
 	local ACTOR_INDEX = ProjectileImpactDataIndex.ACTOR_INDEX
 	local STRIDE = ProjectileImpactDataIndex.STRIDE
 	local network_manager = self.network_manager
-	local self_unit_id = network_manager.unit_game_object_id(network_manager, self.unit)
+	local self_unit_id = network_manager:unit_game_object_id(self.unit)
 
 	for i = 1, num_impacts / STRIDE, 1 do
 		local j = (i - 1) * STRIDE
@@ -55,7 +55,7 @@ GenericImpactProjectileUnitExtension.update = function (self, unit, input, _, co
 		local direction = recent_impacts[j + DIRECTION]:unbox()
 		local normal = recent_impacts[j + NORMAL]:unbox()
 		local actor_index = recent_impacts[j + ACTOR_INDEX]
-		local unit_id, is_level_unit = network_manager.game_object_or_level_id(network_manager, unit)
+		local unit_id, is_level_unit = network_manager:game_object_or_level_id(unit)
 		local game_object_id, level_unit_id = nil
 
 		if is_level_unit then
@@ -74,9 +74,8 @@ GenericImpactProjectileUnitExtension.update = function (self, unit, input, _, co
 			end
 		end
 	end
-
-	return 
 end
+
 GenericImpactProjectileUnitExtension.impact = function (self, recent_impacts, num_impacts)
 	local impact = ProjectileTemplates.get_impact_template(self.impact_template_name)
 	local server_stop = false
@@ -90,10 +89,10 @@ GenericImpactProjectileUnitExtension.impact = function (self, recent_impacts, nu
 	if server_stop or client_stop then
 		self.locomotion_extension:stop()
 	end
-
-	return 
 end
+
 local rpc_dummy_impact = {}
+
 GenericImpactProjectileUnitExtension.rpc_impact = function (self, unit, position, direction, normal, actor_index)
 	rpc_dummy_impact[ProjectileImpactDataIndex.UNIT] = unit
 	rpc_dummy_impact[ProjectileImpactDataIndex.POSITION] = position
@@ -101,11 +100,11 @@ GenericImpactProjectileUnitExtension.rpc_impact = function (self, unit, position
 	rpc_dummy_impact[ProjectileImpactDataIndex.NORMAL] = normal
 	rpc_dummy_impact[ProjectileImpactDataIndex.ACTOR_INDEX] = actor_index
 
-	self.impact(self, rpc_dummy_impact, ProjectileImpactDataIndex.STRIDE)
-
-	return 
+	self:impact(rpc_dummy_impact, ProjectileImpactDataIndex.STRIDE)
 end
+
 local dummy_impact = {}
+
 GenericImpactProjectileUnitExtension.force_impact = function (self, unit, hit_position)
 	local locomotion_extension = self.locomotion_extension
 	dummy_impact[ProjectileImpactDataIndex.POSITION] = Vector3Box(hit_position)
@@ -119,10 +118,8 @@ GenericImpactProjectileUnitExtension.force_impact = function (self, unit, hit_po
 	local client_stop = impact.client.execute(self.world, self.damage_source, unit, dummy_impact, 1)
 
 	if server_stop or client_stop then
-		locomotion_extension.stop(locomotion_extension)
+		locomotion_extension:stop()
 	end
-
-	return 
 end
 
-return 
+return

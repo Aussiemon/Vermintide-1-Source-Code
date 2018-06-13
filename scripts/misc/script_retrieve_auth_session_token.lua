@@ -1,11 +1,11 @@
 ScriptSteamAuthSessionToken = class(ScriptSteamAuthSessionToken)
+
 ScriptSteamAuthSessionToken.init = function (self, token)
 	self._done = false
 	self._error = true
 	self._token = token
-
-	return 
 end
+
 ScriptSteamAuthSessionToken.update = function (self)
 	local auth_session_ticket = Steam.poll_auth_session_ticket(self._token)
 
@@ -14,9 +14,8 @@ ScriptSteamAuthSessionToken.update = function (self)
 		self._done = true
 		self._error = false
 	end
-
-	return 
 end
+
 ScriptSteamAuthSessionToken.info = function (self)
 	local info = {
 		auth_session_ticket = self._auth_session_ticket,
@@ -25,11 +24,13 @@ ScriptSteamAuthSessionToken.info = function (self)
 
 	return info
 end
+
 ScriptSteamAuthSessionToken.done = function (self)
 	return self._done
 end
+
 ScriptSteamAuthSessionToken.close = function (self)
-	return 
+	return
 end
 
-return 
+return

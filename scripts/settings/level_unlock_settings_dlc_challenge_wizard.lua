@@ -5,4 +5,4 @@ DLCProgressionOrder.challenge_wizard = {
 NoneActLevels[#NoneActLevels + 1] = "dlc_challenge_wizard"
 LengthTypeByLevel.dlc_challenge_wizard = "long"
 
-return 
+return

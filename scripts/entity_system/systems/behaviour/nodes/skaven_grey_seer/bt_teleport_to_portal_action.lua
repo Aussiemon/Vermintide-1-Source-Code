@@ -1,12 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTTeleportToPortalAction = class(BTTeleportToPortalAction, BTNode)
+
 BTTeleportToPortalAction.init = function (self, ...)
 	BTTeleportToPortalAction.super.init(self, ...)
-
-	return 
 end
+
 BTTeleportToPortalAction.name = "BTTeleportToPortalAction"
+
 BTTeleportToPortalAction.enter = function (self, unit, blackboard, t)
 	local unit_position = POSITION_LOOKUP[unit]
 	local action_data = self._tree_node.action_data
@@ -14,9 +15,8 @@ BTTeleportToPortalAction.enter = function (self, unit, blackboard, t)
 	local id = action_data.level_portal_id
 	local portal_data = blackboard.teleport_portals[id]
 	blackboard.teleport_position = portal_data.position
-
-	return 
 end
+
 BTTeleportToPortalAction.leave = function (self, unit, blackboard, t)
 	local action_data = self._tree_node.action_data
 	local id = action_data.level_portal_id
@@ -35,7 +35,7 @@ BTTeleportToPortalAction.leave = function (self, unit, blackboard, t)
 	if reset_damage then
 		local health_extension = ScriptUnit.extension(unit, "health_system")
 
-		health_extension.reset(health_extension)
+		health_extension:reset()
 	end
 
 	local level_flow_event = action_data.level_flow_event
@@ -53,19 +53,18 @@ BTTeleportToPortalAction.leave = function (self, unit, blackboard, t)
 	end
 
 	blackboard.teleport_triggered_by = nil
-
-	return 
 end
+
 BTTeleportToPortalAction.run = function (self, unit, blackboard, t, dt)
 	local navigation_extension = ScriptUnit.extension(unit, "ai_navigation_system")
 	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 	local teleport_position = blackboard.teleport_position:unbox()
 
-	navigation_extension.set_navbot_position(navigation_extension, teleport_position)
-	locomotion_extension.teleport_to(locomotion_extension, teleport_position)
-	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
+	navigation_extension:set_navbot_position(teleport_position)
+	locomotion_extension:teleport_to(teleport_position)
+	locomotion_extension:set_wanted_velocity(Vector3.zero())
 
 	return "done"
 end
 
-return 
+return

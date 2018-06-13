@@ -86,8 +86,6 @@ Attacks = {
 			local damage_type = attack_template.damage_type
 
 			DamageUtils.add_damage_network(hit_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, attack_direction, damage_source, hit_ragdoll_actor)
-
-			return 
 		end
 	},
 	damage_headshot = {
@@ -101,8 +99,6 @@ Attacks = {
 			local damage_type = attack_template.damage_type
 
 			DamageUtils.add_damage_network(hit_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, attack_direction, damage_source, hit_ragdoll_actor)
-
-			return 
 		end
 	},
 	hacky_damage_burn = {
@@ -117,8 +113,6 @@ Attacks = {
 			local hit_zone = hit_zone_name or "full"
 
 			DamageUtils.add_damage_network(hit_unit, attacker_unit, damage_amount, hit_zone, damage_type, attack_direction, damage_source)
-
-			return 
 		end
 	},
 	heal = {
@@ -129,8 +123,6 @@ Attacks = {
 			local heal_type = attack_template.heal_type
 
 			DamageUtils.heal_network(hit_unit, attacker_unit, heal_amount, heal_type, damage_source)
-
-			return 
 		end
 	},
 	damage_dropoff = {
@@ -144,8 +136,6 @@ Attacks = {
 			local damage_type = attack_template.damage_type
 
 			DamageUtils.add_damage_network(hit_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, attack_direction, damage_source)
-
-			return 
 		end
 	},
 	grenade = {
@@ -158,8 +148,6 @@ Attacks = {
 			local damage_type = attack_template.damage_type
 
 			DamageUtils.add_damage_network(hit_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, attack_direction, damage_source)
-
-			return 
 		end
 	},
 	debug_damage_player = {
@@ -172,19 +160,17 @@ Attacks = {
 			local damage_type = attack_template.damage_type
 
 			DamageUtils.add_damage_network(hit_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, attack_direction, damage_source)
-
-			return 
 		end
 	}
 }
 Staggers = {
 	ai_stagger = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, t)
 		if not DamageUtils.is_enemy(hit_unit) then
-			return 
+			return
 		end
 
 		local ai_extension = ScriptUnit.extension(hit_unit, "ai_system")
-		local blackboard = ai_extension.blackboard(ai_extension)
+		local blackboard = ai_extension:blackboard()
 		local breed_data = Unit.get_data(hit_unit, "breed")
 		local hit_unit_pos = POSITION_LOOKUP[hit_unit] or Unit.world_position(hit_unit, 0)
 		local attacker_pos = POSITION_LOOKUP[attacker_unit] or Unit.world_position(attacker_unit, 0)
@@ -202,7 +188,7 @@ Staggers = {
 					Unit.flow_event(hit_unit, hit_flow_event)
 				end
 
-				return 
+				return
 			end
 		end
 
@@ -218,14 +204,12 @@ Staggers = {
 			attack_direction.z = -1
 		end
 
-		if 0 < stagger_type and (not breed_data.stagger_immune or stagger_type == 6) then
+		if stagger_type > 0 and (not breed_data.stagger_immune or stagger_type == 6) then
 			local stagger_length = DamageUtils.modify_push_distance_with_buff(attacker_unit, attack_template.stagger_length)
 			local blackboard = Unit.get_data(hit_unit, "blackboard")
 
 			AiUtils.stagger(hit_unit, blackboard, attacker_unit, attack_direction, stagger_length, stagger_type, stagger_duration, attack_template.stagger_animation_scale, t)
 		end
-
-		return 
 	end
 }
 local buff_params = {}
@@ -250,10 +234,8 @@ Dots = {
 			buff_params.attacker_unit = attacker_unit
 			buff_params.damage_source = damage_source
 
-			buff_extension.add_buff(buff_extension, attack_template.dot_template_name, buff_params)
+			buff_extension:add_buff(attack_template.dot_template_name, buff_params)
 		end
-
-		return 
 	end,
 	burning_dot = function (attack_template, attacker_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, damage_source)
 		if ScriptUnit.has_extension(hit_unit, "buff_system") then
@@ -261,10 +243,8 @@ Dots = {
 			buff_params.attacker_unit = attacker_unit
 			buff_params.damage_source = damage_source
 
-			buff_extension.add_buff(buff_extension, attack_template.dot_template_name, buff_params)
+			buff_extension:add_buff(attack_template.dot_template_name, buff_params)
 		end
-
-		return 
 	end
 }
 AttackDamageValues = {
@@ -4556,4 +4536,4 @@ for item_template_name, item_template in pairs(Weapons) do
 	end
 end
 
-return 
+return

@@ -3,12 +3,13 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 local position_lookup = POSITION_LOOKUP
 local player_and_bot_units = PLAYER_AND_BOT_UNITS
 BTJumpSlamImpactAction = class(BTJumpSlamImpactAction, BTNode)
+
 BTJumpSlamImpactAction.init = function (self, ...)
 	BTJumpSlamImpactAction.super.init(self, ...)
-
-	return 
 end
+
 BTJumpSlamImpactAction.name = "BTJumpSlamImpactAction"
+
 BTJumpSlamImpactAction.enter = function (self, unit, blackboard, t)
 	print("ENTER BTJumpSlamImpactAction")
 
@@ -17,9 +18,8 @@ BTJumpSlamImpactAction.enter = function (self, unit, blackboard, t)
 	blackboard.active_node = BTJumpSlamImpactAction
 	blackboard.attack_finished = nil
 	blackboard.attacking_target = blackboard.target_unit
-
-	return 
 end
+
 BTJumpSlamImpactAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.action = nil
 	blackboard.active_node = nil
@@ -35,9 +35,8 @@ BTJumpSlamImpactAction.leave = function (self, unit, blackboard, t, reason)
 
 	blackboard.attacking_target = nil
 	blackboard.keep_target = nil
-
-	return 
 end
+
 BTJumpSlamImpactAction.run = function (self, unit, blackboard, t, dt)
 	local data = blackboard.jump_slam_data
 	local state = data.state
@@ -45,13 +44,14 @@ BTJumpSlamImpactAction.run = function (self, unit, blackboard, t, dt)
 	if blackboard.anim_cb_damage then
 		blackboard.anim_cb_damage = nil
 
-		self.jump_slam_impact(self, unit, blackboard, t)
+		self:jump_slam_impact(unit, blackboard, t)
 	elseif blackboard.attack_finished then
 		return "done"
 	end
 
 	return "running"
 end
+
 BTJumpSlamImpactAction.jump_slam_impact = function (self, unit, blackboard, t)
 	local action = blackboard.action
 	local impact_position = position_lookup[unit]
@@ -61,24 +61,22 @@ BTJumpSlamImpactAction.jump_slam_impact = function (self, unit, blackboard, t)
 	if action.catapult_players then
 		BTJumpSlamImpactAction.catapult_players(impact_position, action.catapult_within_radius, action.catapulted_player_speed)
 	end
-
-	return 
 end
+
 BTJumpSlamImpactAction.catapult_players = function (impact_position, radius, speed)
 	for i = 1, #player_and_bot_units, 1 do
 		local target_unit = player_and_bot_units[i]
 
 		BTJumpSlamImpactAction.catapult_player(target_unit, impact_position, radius, speed)
 	end
-
-	return 
 end
+
 BTJumpSlamImpactAction.catapult_player = function (target_unit, impact_position, radius, push_speed)
 	local target_position = position_lookup[target_unit]
 	local towards_player = target_position - impact_position
 
 	if radius < Vector3.length(towards_player) then
-		return 
+		return
 	end
 
 	local angle = math.pi / 6
@@ -89,11 +87,11 @@ BTJumpSlamImpactAction.catapult_player = function (target_unit, impact_position,
 	push_velocity.z = height
 	local target_status_extension = ScriptUnit.extension(target_unit, "status_system")
 
-	target_status_extension.set_catapulted(target_status_extension, true, push_velocity)
-
-	return 
+	target_status_extension:set_catapulted(true, push_velocity)
 end
+
 local ai_units = {}
+
 BTJumpSlamImpactAction.impact_damage = function (attacking_unit, t, radius, stagger_length, impact, damage, damage_type, max_damage_radius, impact_position)
 	local falloff_radius = radius - max_damage_radius
 	local num_ai_units = AiUtils.broadphase_query(impact_position, radius, ai_units)
@@ -103,7 +101,7 @@ BTJumpSlamImpactAction.impact_damage = function (attacking_unit, t, radius, stag
 
 		if ai_unit ~= attacking_unit then
 			local health_extension = ScriptUnit.extension(ai_unit, "health_system")
-			local is_alive = health_extension.is_alive(health_extension)
+			local is_alive = health_extension:is_alive()
 
 			if is_alive then
 				local unit_position = position_lookup[ai_unit]
@@ -112,14 +110,14 @@ BTJumpSlamImpactAction.impact_damage = function (attacking_unit, t, radius, stag
 				stagger_duration = 1
 				local target_ai_blackboard = Unit.get_data(ai_unit, "blackboard")
 
-				if 0 < stagger_type then
+				if stagger_type > 0 then
 					AiUtils.stagger(ai_unit, target_ai_blackboard, attacking_unit, vector_to_target, stagger_length, stagger_type, stagger_duration, nil, t)
 				end
 
 				if damage then
 					local raw_damage = damage[target_ai_blackboard.breed.armor_category]
 
-					if 0 < raw_damage then
+					if raw_damage > 0 then
 						local direction = Vector3.normalize(Vector3(Vector3.x(vector_to_target), Vector3.y(vector_to_target), 0))
 						local distance = Vector3.length(vector_to_target)
 						local is_inside_radius = distance < radius
@@ -140,8 +138,6 @@ BTJumpSlamImpactAction.impact_damage = function (attacking_unit, t, radius, stag
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

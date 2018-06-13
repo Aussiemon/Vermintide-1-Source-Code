@@ -2,6 +2,7 @@ require("scripts/unit_extensions/generic/generic_state_machine")
 
 local is_windows_platform = PLATFORM == "win32"
 PlayerInputExtension = class(PlayerInputExtension)
+
 PlayerInputExtension.get_window_is_in_focus = function ()
 	local is_in_focus = false
 
@@ -15,6 +16,7 @@ PlayerInputExtension.get_window_is_in_focus = function ()
 
 	return is_in_focus
 end
+
 PlayerInputExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.unit = unit
 	self.player = extension_init_data.player
@@ -53,15 +55,16 @@ PlayerInputExtension.init = function (self, extension_init_context, unit, extens
 		wield_4 = true,
 		wield_switch = true
 	}
+end
 
-	return 
-end
 PlayerInputExtension.destroy = function (self)
-	return 
+	return
 end
+
 PlayerInputExtension.reset = function (self)
-	return 
+	return
 end
+
 PlayerInputExtension.update = function (self, unit, input, dt, context, t)
 	if self.buffer_key then
 	end
@@ -72,7 +75,7 @@ PlayerInputExtension.update = function (self, unit, input, dt, context, t)
 	end
 
 	if self.new_input_buffer then
-		if self.last_added_buffer_time + (self.new_buffer_key_doubleclick_window or 0.2) < t then
+		if t > self.last_added_buffer_time + (self.new_buffer_key_doubleclick_window or 0.2) then
 			self.input_buffer_timer = self.new_input_buffer_timer
 			self.input_buffer = self.new_input_buffer
 			self.buffer_key = self.new_buffer_key
@@ -102,24 +105,22 @@ PlayerInputExtension.update = function (self, unit, input, dt, context, t)
 			self.wield_cooldown_timer_clock = self.wield_cooldown_timer_clock + dt
 		end
 	end
-
-	return 
 end
+
 PlayerInputExtension.start_double_tap = function (self, input_key, t)
 	self.double_tap_timers[input_key] = t
-
-	return 
 end
+
 PlayerInputExtension.clear_double_tap = function (self, input_key)
 	self.double_tap_timers[input_key] = nil
-
-	return 
 end
+
 PlayerInputExtension.was_double_tap = function (self, input_key, t, max_duration)
 	local last_double_tap = self.double_tap_timers[input_key]
 
 	return last_double_tap and t < last_double_tap + max_duration
 end
+
 PlayerInputExtension.get = function (self, input_key, consume)
 	local value = self.input_service:get(input_key, consume)
 
@@ -135,19 +136,19 @@ PlayerInputExtension.get = function (self, input_key, consume)
 
 	return value
 end
+
 PlayerInputExtension.set_enabled = function (self, enabled)
 	self.enabled = enabled
-
-	return 
 end
+
 PlayerInputExtension.get_last_scroll_value = function (self)
 	return self.wield_scroll_value
 end
+
 PlayerInputExtension.set_last_scroll_value = function (self, scroll_value)
 	self.wield_scroll_value = scroll_value
-
-	return 
 end
+
 PlayerInputExtension.released_input = function (self, input)
 	if self.has_released_input then
 		return true
@@ -161,11 +162,13 @@ PlayerInputExtension.released_input = function (self, input)
 
 	return self.has_released_input
 end
+
 PlayerInputExtension.reset_release_input = function (self)
 	self.has_released_input = false
 
 	return true
 end
+
 PlayerInputExtension.get_wield_cooldown = function (self, override_cooldown_time)
 	if override_cooldown_time then
 		if override_cooldown_time < self.wield_cooldown_timer_clock then
@@ -181,12 +184,12 @@ PlayerInputExtension.get_wield_cooldown = function (self, override_cooldown_time
 
 	return false
 end
+
 PlayerInputExtension.add_wield_cooldown = function (self, cooldown_time)
 	self.wield_cooldown = true
 	self.wield_cooldown_timer = cooldown_time
-
-	return 
 end
+
 PlayerInputExtension.get_buffer = function (self, input_key)
 	if self.input_buffer_timer and self.buffer_key == input_key then
 		return self.input_buffer
@@ -194,11 +197,12 @@ PlayerInputExtension.get_buffer = function (self, input_key)
 
 	return nil
 end
+
 PlayerInputExtension.add_buffer = function (self, input_key, doubleclick_window)
 	if input_key == "action_one_hold" or (self.priority_input[self.buffer_key] and not self.priority_input[input_key]) then
-		return 
+		return
 	elseif input_key == "action_two_hold" then
-		return 
+		return
 	end
 
 	local value = self.input_service:get(input_key)
@@ -215,37 +219,34 @@ PlayerInputExtension.add_buffer = function (self, input_key, doubleclick_window)
 			self.new_buffer_key_doubleclick_window = doubleclick_window
 		end
 	end
-
-	return 
 end
+
 PlayerInputExtension.add_stun_buffer = function (self, input_key)
 	self.added_stun_buffer = true
 	self.input_buffer_timer = 10
 	self.input_buffer = 1
 	self.buffer_key = "action_one"
-
-	return 
 end
+
 PlayerInputExtension.reset_input_buffer = function (self)
 	if self.buffer_key == "action_one" and not self.input_service:get("action_one_hold") then
 		self.buffer_key = "action_one_release"
 		self.input_buffer_timer = 0.5
 
-		return 
+		return
 	end
 
 	if self.added_stun_buffer then
 		self.added_stun_buffer = false
 
-		return 
+		return
 	else
 		self.input_buffer_timer = 0
 		self.input_buffer = nil
 		self.buffer_key = nil
 	end
-
-	return 
 end
+
 PlayerInputExtension.clear_input_buffer = function (self)
 	self.input_buffer_reset = true
 	self.input_buffer_timer = 0
@@ -254,8 +255,6 @@ PlayerInputExtension.clear_input_buffer = function (self)
 	self.new_input_buffer_timer = 0
 	self.new_input_buffer = nil
 	self.new_buffer_key = nil
-
-	return 
 end
 
-return 
+return

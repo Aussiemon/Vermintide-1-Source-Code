@@ -16,6 +16,7 @@ require("scripts/network/lobby_psn")
 StateTitleScreenInitNetwork = class(StateTitleScreenInitNetwork)
 StateTitleScreenInitNetwork.NAME = "StateTitleScreenInitNetwork"
 StateTitleScreenInitNetwork.lobby_port_increment = 0
+
 StateTitleScreenInitNetwork.on_enter = function (self, params)
 	print("- Enter Substate StateTitleScreenInitNetwork")
 
@@ -24,18 +25,16 @@ StateTitleScreenInitNetwork.on_enter = function (self, params)
 	self._viewport = params.viewport
 	self._information_view = InformationView:new(self._world)
 	self._network_state = "_state_setup_network"
-
-	return 
 end
+
 StateTitleScreenInitNetwork.update = function (self, dt, t)
 	self[self._network_state](self, dt, t)
 	self._information_view:update(dt, t)
 	self._level_transition_handler:update()
 	Network.update(dt, self._network_event_delegate.event_table)
 	Managers.backend:update(dt)
-
-	return 
 end
+
 StateTitleScreenInitNetwork.on_exit = function (self, application_shutdown)
 	if application_shutdown then
 		if self._lobby_finder then
@@ -125,9 +124,8 @@ StateTitleScreenInitNetwork.on_exit = function (self, application_shutdown)
 
 		self._network_event_delegate = nil
 	end
-
-	return 
 end
+
 StateTitleScreenInitNetwork._check_errors = function (self)
 	local error_message = ""
 
@@ -152,9 +150,8 @@ StateTitleScreenInitNetwork._check_errors = function (self)
 		self._error_popup = Managers.popup:queue_popup(error_message, Localize("popup_error_topic"), "restart_as_server", Localize("menu_accept"))
 		self._network_state = "_state_error"
 	end
-
-	return 
 end
+
 StateTitleScreenInitNetwork._state_setup_network = function (self)
 	local auto_join_setting = Development.parameter("auto_join")
 
@@ -215,9 +212,8 @@ StateTitleScreenInitNetwork._state_setup_network = function (self)
 
 		self._network_state = "_state_create_lobby_host"
 	end
-
-	return 
 end
+
 StateTitleScreenInitNetwork._state_create_lobby_host = function (self)
 	if LobbyInternal.client_ready() then
 		self._lobby_host = LobbyHost:new(self._network_options)
@@ -227,10 +223,9 @@ StateTitleScreenInitNetwork._state_create_lobby_host = function (self)
 		self._network_state = "_state_create_psn_room"
 	end
 
-	self._check_errors(self)
-
-	return 
+	self:_check_errors()
 end
+
 StateTitleScreenInitNetwork._state_create_lobby_client = function (self)
 	if LobbyInternal.client_ready() then
 		local lobby_data = Managers.invite:get_invited_lobby_data()
@@ -244,10 +239,9 @@ StateTitleScreenInitNetwork._state_create_lobby_client = function (self)
 		end
 	end
 
-	self._check_errors(self)
-
-	return 
+	self:_check_errors()
 end
+
 StateTitleScreenInitNetwork._state_create_lobby_finder = function (self)
 	if LobbyInternal.client_ready() then
 		self._lobby_finder = LobbyFinder:new(self._network_options)
@@ -257,14 +251,13 @@ StateTitleScreenInitNetwork._state_create_lobby_finder = function (self)
 		self._network_state = "_state_find_psn_room"
 	end
 
-	self._check_errors(self)
-
-	return 
+	self:_check_errors()
 end
+
 StateTitleScreenInitNetwork._state_create_psn_room = function (self, dt)
 	local lobby_host = self._lobby_host
 
-	lobby_host.update(lobby_host, dt)
+	lobby_host:update(dt)
 
 	local lobby_state = lobby_host.state
 
@@ -282,19 +275,18 @@ StateTitleScreenInitNetwork._state_create_psn_room = function (self, dt)
 		self._network_state = "_state_enter_game"
 	end
 
-	self._check_errors(self)
-
-	return 
+	self:_check_errors()
 end
+
 StateTitleScreenInitNetwork._state_join_psn_room = function (self, dt)
 	local lobby_client = self._lobby_client
 
-	lobby_client.update(lobby_client, dt)
+	lobby_client:update(dt)
 
 	local lobby_state = lobby_client.state
 
 	if lobby_state == LobbyState.JOINED then
-		local host = lobby_client.lobby_host(lobby_client)
+		local host = lobby_client:lobby_host()
 
 		if host ~= "0" then
 			local level_key = self._level_transition_handler:get_current_level_keys()
@@ -310,16 +302,15 @@ StateTitleScreenInitNetwork._state_join_psn_room = function (self, dt)
 		end
 	end
 
-	self._check_errors(self)
-
-	return 
+	self:_check_errors()
 end
+
 StateTitleScreenInitNetwork._state_find_psn_room = function (self, dt)
 	local lobby_finder = self._lobby_finder
 
-	lobby_finder.update(lobby_finder, dt)
+	lobby_finder:update(dt)
 
-	local lobbies = lobby_finder.lobbies(lobby_finder)
+	local lobbies = lobby_finder:lobbies()
 
 	for i, lobby in ipairs(lobbies) do
 		local auto_join = lobby.unique_server_name == Development.parameter("unique_server_name")
@@ -336,10 +327,9 @@ StateTitleScreenInitNetwork._state_find_psn_room = function (self, dt)
 		end
 	end
 
-	self._check_errors(self)
-
-	return 
+	self:_check_errors()
 end
+
 StateTitleScreenInitNetwork._state_enter_game = function (self, dt)
 	self._network_transmit:transmit_local_rpcs()
 
@@ -355,16 +345,16 @@ StateTitleScreenInitNetwork._state_enter_game = function (self, dt)
 		self._network_client:update(dt)
 	end
 
-	self._check_errors(self)
+	self:_check_errors()
 
 	local package_manager = Managers.package
 
 	if not self._global_resources_loaded then
 		for i, name in ipairs(GlobalResources) do
-			if not package_manager.has_loaded(package_manager, name) then
+			if not package_manager:has_loaded(name) then
 				self._information_view:set_information_text("Loading " .. name)
 
-				return 
+				return
 			end
 		end
 
@@ -385,32 +375,31 @@ StateTitleScreenInitNetwork._state_enter_game = function (self, dt)
 		else
 			self._information_view:set_information_text("Loading Level")
 
-			return 
+			return
 		end
 	end
 
 	if not Managers.backend:profiles_loaded() then
 		self._information_view:set_information_text("Loading Profiles")
 
-		return 
+		return
 	end
 
 	if self._network_server and not self._network_server:can_enter_game() then
 		self._information_view:set_information_text("Entering Game")
 
-		return 
+		return
 	end
 
 	if self._network_client and not self._network_client:can_enter_game() then
 		self._information_view:set_information_text("Entering Game")
 
-		return 
+		return
 	end
 
 	self.parent.state = StateIngame
-
-	return 
 end
+
 StateTitleScreenInitNetwork._state_error = function (self)
 	if self._error_popup then
 		local result = Managers.popup:query_result(self._error_popup)
@@ -459,7 +448,7 @@ StateTitleScreenInitNetwork._state_error = function (self)
 			Managers.invite:reset()
 
 			local level_transition_handler = self._level_transition_handler
-			local default_level_key = level_transition_handler.default_level_key(level_transition_handler)
+			local default_level_key = level_transition_handler:default_level_key()
 			local is_loading_level = level_transition_handler.loading_packages[default_level_key]
 			local has_loaded_level = level_transition_handler.loaded_levels[default_level_key]
 
@@ -472,8 +461,6 @@ StateTitleScreenInitNetwork._state_error = function (self)
 			self._network_state = "_state_create_lobby_host"
 		end
 	end
-
-	return 
 end
 
-return 
+return

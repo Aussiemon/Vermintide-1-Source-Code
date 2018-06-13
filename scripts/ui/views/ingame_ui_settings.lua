@@ -6,15 +6,13 @@ local transitions = {
 
 		local network_server = Managers.state.network.network_server
 
-		if network_server and not network_server.are_all_peers_ingame(network_server) then
+		if network_server and not network_server:are_all_peers_ingame() then
 			local text = Localize("player_join_block_exit_game")
 			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_error_topic"), "cancel_popup", Localize("menu_ok"))
 		else
 			local text = Localize("leave_game_popup_text")
 			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_leave_game_topic"), "leave_game", Localize("popup_choice_yes"), "cancel_popup", Localize("popup_choice_no"))
 		end
-
-		return 
 	end,
 	quit_game = function (self)
 		if self.popup_id then
@@ -23,8 +21,6 @@ local transitions = {
 
 		local text = Localize("exit_game_popup_text")
 		self.popup_id = Managers.popup:queue_popup(text, Localize("popup_exit_game_topic"), "end_game", Localize("popup_choice_yes"), "cancel_popup", Localize("popup_choice_no"))
-
-		return 
 	end,
 	return_to_title_screen = function (self)
 		if self.popup_id then
@@ -33,15 +29,13 @@ local transitions = {
 
 		local network_server = Managers.state.network.network_server
 
-		if network_server and not network_server.are_all_peers_ingame(network_server) then
+		if network_server and not network_server:are_all_peers_ingame() then
 			local text = Localize("player_join_block_exit_game")
 			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_error_topic"), "cancel_popup", Localize("menu_ok"))
 		else
 			local text = Localize("exit_game_popup_text_xb1")
 			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_exit_game_topic_xb1"), "do_return_to_title_screen", Localize("popup_choice_yes"), "cancel_popup", Localize("popup_choice_no"))
 		end
-
-		return 
 	end,
 	prestige = function (self)
 		if self.popup_id then
@@ -50,8 +44,6 @@ local transitions = {
 
 		local text = Localize("prestige_popup_text")
 		self.popup_id = Managers.popup:queue_popup(text, Localize("prestige_game_topic"), "prestige_confirmation", Localize("popup_choice_yes"), "cancel_prestige_popup", Localize("popup_choice_no"))
-
-		return 
 	end,
 	prestige_confirmation = function (self)
 		if self.popup_id then
@@ -60,8 +52,6 @@ local transitions = {
 
 		local text = Localize("prestige_confirmation_popup_text")
 		self.popup_id = Managers.popup:queue_popup(text, Localize("prestige_game_topic"), "accept_prestige_confirmation", Localize("popup_choice_yes"), "cancel_prestige_popup", Localize("popup_choice_no"))
-
-		return 
 	end,
 	accept_prestige_confirmation = function (self)
 		print("Prestige Level Up!")
@@ -79,8 +69,6 @@ local transitions = {
 
 			GameSession.set_game_object_field(game, go_id, "prestige_level", prestige_level or debug_prestige_level)
 		end
-
-		return 
 	end,
 	end_game = function (self)
 		self.input_manager:block_device_except_service(nil, "keyboard", 1)
@@ -90,8 +78,8 @@ local transitions = {
 		local telemetry_survey_view = self.views.telemetry_survey
 		local level_key = Managers.state.game_mode:level_key()
 		local use_survey = TelemetrySettings.send and TelemetrySettings.use_session_survey
-		local is_answered = telemetry_survey_view.is_survey_answered(telemetry_survey_view)
-		local is_timed_out = telemetry_survey_view.is_survey_timed_out(telemetry_survey_view)
+		local is_answered = telemetry_survey_view:is_survey_answered()
+		local is_timed_out = telemetry_survey_view:is_survey_timed_out()
 
 		if (use_survey and (is_answered or is_timed_out)) or not use_survey or level_key == "inn_level" then
 			Boot.quit_game = true
@@ -99,15 +87,11 @@ local transitions = {
 		else
 			self.current_view = "telemetry_survey"
 
-			telemetry_survey_view.set_transition(telemetry_survey_view, "end_game")
+			telemetry_survey_view:set_transition("end_game")
 		end
-
-		return 
 	end,
 	do_return_to_title_screen = function (self)
 		self.return_to_title_screen = true
-
-		return 
 	end,
 	leave_game = function (self)
 		if self.popup_id then
@@ -116,7 +100,7 @@ local transitions = {
 
 		local network_server = Managers.state.network.network_server
 
-		if network_server and not network_server.are_all_peers_ingame(network_server) then
+		if network_server and not network_server:are_all_peers_ingame() then
 			local text = Localize("player_join_block_exit_game")
 			self.popup_id = Managers.popup:queue_popup(text, Localize("popup_error_topic"), "cancel_popup", Localize("menu_ok"))
 		else
@@ -126,27 +110,19 @@ local transitions = {
 
 			self.leave_game = true
 		end
-
-		return 
 	end,
 	lobby_browser_view = function (self)
 		self.current_view = "lobby_browser_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	lobby_browser_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "lobby_browser_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	profile_view = function (self)
 		self.current_view = "profile_view"
-
-		return 
 	end,
 	ingame_menu = function (self)
 		if not self.menu_active then
@@ -155,7 +131,7 @@ local transitions = {
 			self.menu_active = true
 
 			ShowCursorStack.push()
-			self.play_sound(self, "Play_hud_button_open")
+			self:play_sound("Play_hud_button_open")
 		end
 
 		self.input_manager:block_device_except_service("ingame_menu", "keyboard", 1)
@@ -163,99 +139,69 @@ local transitions = {
 		self.input_manager:block_device_except_service("ingame_menu", "gamepad", 1)
 
 		self.current_view = nil
-
-		return 
 	end,
 	inventory_view = function (self)
 		self.current_view = "inventory_view"
-
-		return 
 	end,
 	lorebook_view = function (self)
 		self.current_view = "lorebook_view"
-
-		return 
 	end,
 	lorebook_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "lorebook_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	map_menu = function (self)
 		self.current_view = "map_view"
-
-		return 
 	end,
 	map_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "map_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	inventory_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "inventory_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	forge_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "forge_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	forge_view = function (self)
 		self.current_view = "forge_view"
-
-		return 
 	end,
 	friends_view = function (self)
 		self.current_view = "friends_view"
-
-		return 
 	end,
 	altar_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "altar_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	altar_view = function (self)
 		self.current_view = "altar_view"
-
-		return 
 	end,
 	quest_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "quest_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	quest_view = function (self)
 		self.current_view = "quest_view"
-
-		return 
 	end,
 	friends_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "friends_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	initial_profile_view_force = function (self)
 		self.input_manager:block_device_except_service("ingame_menu", "keyboard", 1)
@@ -266,24 +212,18 @@ local transitions = {
 		self.current_view = "profile_view"
 		self.initial_profile_view = true
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	profile_view_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "profile_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	unlock_key_force = function (self)
 		ShowCursorStack.push()
 
 		self.current_view = "unlock_key_view"
 		self.views[self.current_view].exit_to_game = true
-
-		return 
 	end,
 	join_lobby = function (self, lobby_client)
 		self.input_manager:block_device_except_service(nil, "keyboard", 1)
@@ -296,8 +236,6 @@ local transitions = {
 
 		self.menu_active = false
 		self.current_view = nil
-
-		return 
 	end,
 	exit_menu = function (self)
 		if self.current_view or self.menu_active then
@@ -305,7 +243,7 @@ local transitions = {
 		end
 
 		if self.menu_active then
-			self.play_sound(self, "Play_hud_button_close")
+			self:play_sound("Play_hud_button_close")
 		end
 
 		if not self.countdown_ui:is_enter_game() and not Managers.chat:chat_is_focused() and not Managers.matchmaking:is_join_popup_visible() then
@@ -317,8 +255,6 @@ local transitions = {
 		self.menu_active = false
 		self.current_view = nil
 		MOOD_BLACKBOARD.menu = false
-
-		return 
 	end,
 	exit_initial_profile_view = function (self)
 		ShowCursorStack.pop()
@@ -330,8 +266,6 @@ local transitions = {
 		self.current_view = nil
 		self.initial_profile_view = nil
 		MOOD_BLACKBOARD.menu = false
-
-		return 
 	end,
 	cancel_popup = function (self)
 		self.popup_id = nil
@@ -339,18 +273,12 @@ local transitions = {
 		self.input_manager:block_device_except_service("ingame_menu", "keyboard", 1)
 		self.input_manager:block_device_except_service("ingame_menu", "mouse", 1)
 		self.input_manager:block_device_except_service("ingame_menu", "gamepad", 1)
-
-		return 
 	end,
 	cancel_prestige_popup = function (self)
 		self.popup_id = nil
-
-		return 
 	end,
 	credits_menu = function (self)
 		self.current_view = "credits_view"
-
-		return 
 	end,
 	options_menu = function (self)
 		self.input_manager:block_device_except_service("options_menu", "keyboard", 1)
@@ -358,8 +286,6 @@ local transitions = {
 		self.input_manager:block_device_except_service("options_menu", "gamepad", 1)
 
 		self.current_view = "options_view"
-
-		return 
 	end,
 	lorebook_menu = function (self)
 		self.input_manager:block_device_except_service("lorebook_menu", "keyboard", 1)
@@ -367,8 +293,6 @@ local transitions = {
 		self.input_manager:block_device_except_service("lorebook_menu", "gamepad", 1)
 
 		self.current_view = "lorebook_view"
-
-		return 
 	end,
 	restart_game = function (self)
 		self.input_manager:device_unblock_all_services("keyboard", 1)
@@ -376,8 +300,6 @@ local transitions = {
 		self.input_manager:device_unblock_all_services("gamepad", 1)
 
 		self.restart_game = true
-
-		return 
 	end,
 	close_active = function (self)
 		local close_menu = false
@@ -386,7 +308,7 @@ local transitions = {
 
 		if view then
 			if view.exit then
-				view.exit(view, true)
+				view:exit(true)
 			elseif menu_active then
 				close_menu = true
 			end
@@ -413,8 +335,6 @@ local transitions = {
 
 			MOOD_BLACKBOARD.menu = false
 		end
-
-		return 
 	end
 }
 view_settings = {
@@ -425,8 +345,6 @@ view_settings = {
 			else
 				return UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 			end
-
-			return 
 		end,
 		ui_top_renderer_function = function (top_world)
 			if PLATFORM == "win32" then
@@ -434,8 +352,6 @@ view_settings = {
 			else
 				return UIRenderer.create(top_world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 			end
-
-			return 
 		end,
 		views_function = function (ingame_ui_context)
 			return {
@@ -468,8 +384,6 @@ view_settings = {
 			else
 				return UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts", "material", "video/dwarfs_trailer", "material", "video/stromdorf_trailer", "material", "video/survival_ruins_trailer", "material", "video/reikwald_trailer", "material", "video/drachenfels_trailer")
 			end
-
-			return 
 		end,
 		ui_top_renderer_function = function (top_world)
 			if PLATFORM == "win32" then
@@ -477,8 +391,6 @@ view_settings = {
 			else
 				return UIRenderer.create(top_world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 			end
-
-			return 
 		end,
 		views_function = function (ingame_ui_context)
 			return {
@@ -554,8 +466,6 @@ view_settings = {
 			else
 				return UIRenderer.create(world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 			end
-
-			return 
 		end,
 		ui_top_renderer_function = function (top_world)
 			if PLATFORM == "win32" then
@@ -563,8 +473,6 @@ view_settings = {
 			else
 				return UIRenderer.create(top_world, "material", "materials/ui/end_screen_banners/end_screen_banners", "material", "materials/ui/ui_1080p_ingame_common", "material", "materials/ui/ui_1080p_ingame_inn_console", "material", "materials/ui/ui_1080p_level_images_console", "material", "materials/ui/ui_1080p_ingame", "material", "materials/ui/ui_1080p_chat", "material", "materials/fonts/gw_fonts")
 			end
-
-			return 
 		end,
 		views_function = function (ingame_ui_context)
 			return {

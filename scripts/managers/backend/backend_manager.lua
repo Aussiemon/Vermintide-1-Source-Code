@@ -58,6 +58,7 @@ BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED = 256
 ERROR_CODES[BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED] = "backend_err_use_local_backend_not_allowed"
 BackendManager = class(BackendManager)
 local TIMEOUT_SIGNIN = 20
+
 BackendManager.init = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 
@@ -93,19 +94,17 @@ BackendManager.init = function (self)
 	self._button_local_backend = "button_local_backend"
 	self._button_disconnected = "button_disconnected"
 
-	self.reset(self)
-
-	return 
+	self:reset()
 end
+
 BackendManager.reset = function (self)
 	self._errors = {}
 	self._is_disconnected = false
 	self._prevent_update = nil
 
-	self._destroy_backend(self)
-
-	return 
+	self:_destroy_backend()
 end
+
 BackendManager.signin = function (self, authentication_token)
 	local plugin_loaded = rawget(_G, "Backend") ~= nil
 	local allow_local = GameSettingsDevelopment.backend_settings.allow_local
@@ -119,30 +118,30 @@ BackendManager.signin = function (self, authentication_token)
 				reason = BACKEND_LUA_ERRORS.ERR_LOADING_PLUGIN
 			}
 
-			self._post_error(self, error_data)
+			self:_post_error(error_data)
 
-			return 
+			return
 		elseif not use_backend then
 			local error_data = {
 				reason = BACKEND_LUA_ERRORS.ERR_USE_LOCAL_BACKEND_NOT_ALLOWED
 			}
 
-			self._post_error(self, error_data)
+			self:_post_error(error_data)
 
-			return 
+			return
 		else
 			error("Bad backend combination")
 		end
 	end
 
 	if self._should_disable then
-		self.disable(self)
+		self:disable()
 
-		return 
+		return
 	end
 
 	if self._backend then
-		self.reset(self)
+		self:reset()
 	end
 
 	print("[BackendManager] Backend Enabled")
@@ -158,64 +157,64 @@ BackendManager.signin = function (self, authentication_token)
 
 		self._need_signin = true
 	end
-
-	return 
 end
+
 BackendManager._destroy_backend = function (self)
 	if self._backend then
 		self._backend:destroy()
 
 		self._backend = nil
 	end
-
-	return 
 end
+
 BackendManager.item_script_type = function (self)
 	return ScriptBackendItem.type()
 end
+
 BackendManager.get_interface = function (self, interface_name, player_id)
 	fassert(self._interfaces[interface_name], "Requesting unknown interface %q", interface_name)
 
 	return self._interfaces[interface_name]
 end
+
 BackendManager.get_data_server_queue = function (self)
 	return self._data_server_queue
 end
+
 BackendManager.is_disconnected = function (self)
 	return self._is_disconnected
 end
+
 BackendManager.is_waiting_for_user_input = function (self)
 	return not not self._error_dialog
 end
+
 BackendManager.disable = function (self)
 	print("[BackendManager] Backend Disabled")
 
 	self._disable_backend = true
 
-	self._destroy_backend(self)
+	self:_destroy_backend()
 
 	Managers.backend = BackendManagerLocal:new()
 	self._should_disable = false
-
-	return 
 end
+
 BackendManager.start_tutorial = function (self)
 	fassert(self._script_backend_items_backup == nil, "Tutorial already started")
 
 	self._script_backend_items_backup = ScriptBackendItem
 
 	make_script_backend_item_tutorial()
-
-	return 
 end
+
 BackendManager.stop_tutorial = function (self)
 	fassert(self._script_backend_items_backup ~= nil, "Stopping tutorial without starting it")
 
 	ScriptBackendItem = self._script_backend_items_backup
 	self._script_backend_items_backup = nil
-
-	return 
 end
+
 BackendManager._update_state = function (self)
 	Profiler.start("BackendManager update_state")
 
@@ -227,7 +226,7 @@ BackendManager._update_state = function (self)
 		if result_data then
 			self._need_signin = false
 
-			self._post_error(self, result_data)
+			self:_post_error(result_data)
 		elseif self._backend:authenticated() then
 			self._need_signin = false
 
@@ -241,21 +240,20 @@ BackendManager._update_state = function (self)
 		local result_data = self._backend:update_state()
 
 		if result_data then
-			self._post_error(self, result_data)
+			self:_post_error(result_data)
 		end
 	end
 
 	Profiler.stop()
-
-	return 
 end
+
 BackendManager._update_error_handling = function (self, dt)
 	Profiler.start("BackendManager update_error_handling")
 
-	if 0 < #self._errors and not self._error_dialog and not self._is_disconnected then
+	if #self._errors > 0 and not self._error_dialog and not self._is_disconnected then
 		local error_data = table.remove(self._errors, 1)
 
-		self._show_error_dialog(self, error_data.reason, error_data.details)
+		self:_show_error_dialog(error_data.reason, error_data.details)
 	end
 
 	if self._error_dialog then
@@ -281,14 +279,13 @@ BackendManager._update_error_handling = function (self, dt)
 	end
 
 	Profiler.stop()
-
-	return 
 end
+
 BackendManager.update = function (self, dt)
 	if self._should_disable then
-		self.disable(self)
+		self:disable()
 
-		return 
+		return
 	end
 
 	if self._backend and not self._prevent_update then
@@ -301,7 +298,7 @@ BackendManager.update = function (self, dt)
 		Profiler.stop()
 
 		if error_data then
-			self._post_error(self, error_data)
+			self:_post_error(error_data)
 		end
 
 		self._data_server_queue:update()
@@ -315,7 +312,7 @@ BackendManager.update = function (self, dt)
 			self._interfaces.boons:update()
 		end
 
-		self._update_state(self)
+		self:_update_state()
 
 		local error_data = nil
 
@@ -326,41 +323,40 @@ BackendManager.update = function (self, dt)
 		end
 
 		if error_data then
-			self._post_error(self, error_data)
+			self:_post_error(error_data)
 		end
 
 		if self._should_disable then
-			self._destroy_backend(self)
+			self:_destroy_backend()
 		end
 	end
 
-	self._update_error_handling(self, dt)
-
-	return 
+	self:_update_error_handling(dt)
 end
+
 BackendManager.authenticated = function (self)
 	return self._backend and self._backend:authenticated()
 end
+
 BackendManager._post_error = function (self, error_data)
 	ScriptApplication.send_to_crashify("Backend_Error", "ERROR: %s", error_data.details)
 	fassert(error_data.reason, "Posting error without reason, %q: %q", error_data.reason or "nil")
 	print("[BackendManager] adding error:", error_data.reason, error_data.details)
 
 	if not self._error_dialog and not self._is_disconnected then
-		self._show_error_dialog(self, error_data.reason, error_data.details)
+		self:_show_error_dialog(error_data.reason, error_data.details)
 	else
 		self._errors[#self._errors + 1] = error_data
 	end
-
-	return 
 end
+
 BackendManager._format_error_message_console = function (self, reason, details_message)
 	local button = {
 		id = self._button_retry,
 		text = Localize("button_ok")
 	}
 
-	if not self.profiles_loaded(self) then
+	if not self:profiles_loaded() then
 		if reason == Backend.ERR_AUTH then
 			if PLATFORM == "xb1" then
 				return "backend_err_auth_xb1", button
@@ -377,13 +373,12 @@ BackendManager._format_error_message_console = function (self, reason, details_m
 	else
 		return "backend_err_network", button
 	end
-
-	return 
 end
+
 BackendManager._format_error_message_windows = function (self, reason, details_message)
 	local error_text, button_1, button_2 = nil
 
-	if not self.profiles_loaded(self) then
+	if not self:profiles_loaded() then
 		button_1 = {
 			id = self._button_quit,
 			text = Localize("menu_quit")
@@ -417,6 +412,7 @@ BackendManager._format_error_message_windows = function (self, reason, details_m
 
 	return error_text, button_1, button_2
 end
+
 BackendManager._show_error_dialog = function (self, reason, details_message)
 	print(string.format("[BackendManager] Showing error dialog: %q, %q", reason or "nil", details_message or "nil"))
 
@@ -424,9 +420,9 @@ BackendManager._show_error_dialog = function (self, reason, details_message)
 	local error_text, button_1, button_2 = nil
 
 	if PLATFORM == "xb1" or PLATFORM == "ps4" then
-		error_text, button_1 = self._format_error_message_console(self, reason, details_message)
+		error_text, button_1 = self:_format_error_message_console(reason, details_message)
 	else
-		error_text, button_1, button_2 = self._format_error_message_windows(self, reason, details_message)
+		error_text, button_1, button_2 = self:_format_error_message_windows(reason, details_message)
 	end
 
 	local localzed_error_text = Localize(error_text)
@@ -436,15 +432,16 @@ BackendManager._show_error_dialog = function (self, reason, details_message)
 	else
 		self._error_dialog = Managers.popup:queue_popup(localzed_error_text, error_topic, button_1.id, button_1.text)
 	end
-
-	return 
 end
+
 BackendManager.get_stats = function (self)
 	return self._backend:get_stats()
 end
+
 BackendManager.set_stats = function (self, stats)
 	return self._backend:set_stats(stats)
 end
+
 BackendManager.available = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 
@@ -459,15 +456,16 @@ BackendManager.available = function (self)
 	else
 		return rawget(_G, "Backend") ~= nil
 	end
-
-	return 
 end
+
 BackendManager.commit = function (self)
 	return self._backend:commit()
 end
+
 BackendManager.commit_status = function (self, commit_id)
 	return self._backend:commit_status(commit_id)
 end
+
 BackendManager.profiles_loaded = function (self)
 	local settings = GameSettingsDevelopment.backend_settings
 	local ready = nil
@@ -480,25 +478,23 @@ BackendManager.profiles_loaded = function (self)
 
 	return ready
 end
+
 BackendManager.refresh_log_level = function (self)
 	if self._backend then
 		self._backend:refresh_log_level()
 	else
 		print("[BackendManager] No backend to set log level on!")
 	end
-
-	return 
 end
+
 BackendManager.logout = function (self)
 	error("[BackendManager] Not implemented yet")
-
-	return 
 end
+
 BackendManager.disconnect = function (self)
 	error("[BackendManager] Not implemented yet")
-
-	return 
 end
+
 BackendManager.destroy = function (self)
 	if self._interfaces.quests then
 		self._interfaces.quests:delete()
@@ -507,10 +503,8 @@ BackendManager.destroy = function (self)
 	local backend = self._backend
 
 	if backend then
-		backend.wait_for_shutdown(backend, 1)
+		backend:wait_for_shutdown(1)
 	end
-
-	return 
 end
 
-return 
+return

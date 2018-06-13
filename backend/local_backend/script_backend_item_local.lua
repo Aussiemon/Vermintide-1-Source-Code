@@ -1,10 +1,10 @@
 ScriptBackendItemLocal = ScriptBackendItemLocal or {}
 ScriptBackendItemLocal.NAME = "ScriptBackendItemLocal"
 local forge_printf = (script_data.forge_debug and printf) or function ()
-	return 
+	return
 end
 local forge_table_dump = (script_data.forge_debug and table.dump) or function ()
-	return 
+	return
 end
 
 local function get_item(item_id)
@@ -37,19 +37,21 @@ local MUST_HAVE_SLOTS = {
 	slot_melee = true,
 	slot_ranged = true
 }
+
 ScriptBackendItemLocal.type = function ()
 	return "local"
 end
+
 ScriptBackendItemLocal.num_current_item_server_requests = function ()
 	return 0
 end
+
 ScriptBackendItemLocal.set_traits = function (item_id, traits)
 	local serialized_traits = ScriptBackendCommon.serialize_traits(traits)
 	local item = get_item(item_id)
 	item.traits = serialized_traits
-
-	return 
 end
+
 ScriptBackendItemLocal.add_trait = function (backend_id, trait_name, variable, value)
 	fassert(trait_name ~= "", "setting empty trait")
 
@@ -63,9 +65,8 @@ ScriptBackendItemLocal.add_trait = function (backend_id, trait_name, variable, v
 	end
 
 	item.traits = item.traits .. serialized_traits
-
-	return 
 end
+
 ScriptBackendItemLocal.get_traits = function (item_id)
 	local item = get_item(item_id)
 	local serialized_traits = item.traits
@@ -85,23 +86,25 @@ ScriptBackendItemLocal.get_traits = function (item_id)
 
 	return traits
 end
+
 ScriptBackendItemLocal.make_dirty = function ()
-	return 
+	return
 end
+
 ScriptBackendItemLocal.get_key = function (item_id)
 	local item = get_item(item_id)
 
 	if item then
 		return item.key
 	end
-
-	return 
 end
+
 ScriptBackendItemLocal.get_item_from_id = function (backend_id)
 	local items = Managers.backend._save_data.items
 
 	return items[backend_id]
 end
+
 ScriptBackendItemLocal.get_item_id = function (key)
 	local items = Managers.backend._save_data.items
 
@@ -112,35 +115,39 @@ ScriptBackendItemLocal.get_item_id = function (key)
 	end
 
 	error("no item with key " .. tostring(key) .. " in backend_local database")
-
-	return 
 end
+
 ScriptBackendItemLocal.get_loadout_item_id = function (profile, slot)
 	return Managers.backend:_get_loadout_item_id(profile, slot)
 end
+
 ScriptBackendItemLocal.set_loadout_item = function (item_id, profile, slot)
 	Managers.backend:_set_loadout_item(item_id, profile, slot)
-
-	return 
 end
+
 ScriptBackendItemLocal.get_all_backend_items = function ()
 	return Managers.backend:_get_all_backend_items()
 end
+
 ScriptBackendItemLocal.get_items = function (profile, slot, rarity)
 	return Managers.backend:_get_items(profile, slot, rarity)
 end
+
 ScriptBackendItemLocal.get_filtered_items = function (filter)
 	local all_items = Managers.backend:_get_all_backend_items()
 	local items = ScriptBackendCommon.filter_items(all_items, filter)
 
 	return items
 end
+
 ScriptBackendItemLocal.remove_item = function (item_id)
 	return Managers.backend:_remove_item(item_id)
 end
+
 ScriptBackendItemLocal.award_item = function (item_key)
 	return Managers.backend:_add_item(item_key)
 end
+
 local difficulties = {
 	"easy",
 	"normal",
@@ -153,6 +160,7 @@ local param_difficulty = param_difficulty or "normal"
 local param_level_start = 0
 local param_level_end = 0
 local param_hero_name = "witch_hunter"
+
 ScriptBackendItemLocal.generate_item_server_loot = function (dice, difficulty, level_start, level_end, hero_name)
 	local dice_string = ""
 
@@ -168,15 +176,16 @@ ScriptBackendItemLocal.generate_item_server_loot = function (dice, difficulty, l
 	param_level_start = level_start
 	param_level_end = level_end
 	param_hero_name = hero_name
+end
 
-	return 
-end
 ScriptBackendItemLocal.upgrades_failed_game = function (level_start, level_end)
-	return 
+	return
 end
+
 ScriptBackendItemLocal.poll_upgrades_failed_game = function ()
 	return {}
 end
+
 ScriptBackendItemLocal.is_equipped = function (backend_id, profile_name)
 	if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		local loadout = SaveData.local_backend_save.loadout
@@ -194,6 +203,7 @@ ScriptBackendItemLocal.is_equipped = function (backend_id, profile_name)
 
 	return false
 end
+
 ScriptBackendItemLocal.is_salvageable = function (backend_id)
 	if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		local unequipped = not ScriptBackendItem.is_equipped(backend_id)
@@ -207,9 +217,8 @@ ScriptBackendItemLocal.is_salvageable = function (backend_id)
 	else
 		return true
 	end
-
-	return 
 end
+
 ScriptBackendItemLocal.equipped_by = function (backend_id)
 	local loadout = Managers.backend:_get_loadout()
 
@@ -220,19 +229,20 @@ ScriptBackendItemLocal.equipped_by = function (backend_id)
 			end
 		end
 	end
-
-	return 
 end
+
 local rerolling_trait_state = false
+
 ScriptBackendItemLocal.set_rerolling_trait_state = function (state)
 	rerolling_trait_state = state
-
-	return 
 end
+
 ScriptBackendItemLocal.get_rerolling_trait_state = function ()
 	return rerolling_trait_state
 end
+
 fuse_script_data = fuse_script_data or {}
+
 ScriptBackendItemLocal.check_for_loot = function ()
 	local level_up_rewards = LevelRewards:level_up_rewards(param_level_start, param_level_end)
 	local num_successes, successes_serialized, dice = get_successes(param_dice)
@@ -248,6 +258,7 @@ ScriptBackendItemLocal.check_for_loot = function ()
 
 	return dice_list, win_list, backend_id, level_up_rewards
 end
+
 local rarity_table_by_index = {
 	"plentiful",
 	"common",
@@ -258,19 +269,21 @@ local rarity_table_by_index = {
 local get_next_rarity, get_random_item, split_string_to_table = nil
 local forged_item_data = {}
 ForgeItemsLocal = class(ForgeItemsLocal)
+
 ForgeItemsLocal.init = function (self, item_key)
 	self._items = {
 		[0] = item_key
 	}
-
-	return 
 end
+
 ForgeItemsLocal.is_done = function (self)
 	return true
 end
+
 ForgeItemsLocal.items = function (self)
 	return self._items
 end
+
 ScriptBackendItemLocal.forge = function (items)
 	print("##############")
 	table.dump(items, "Items to Merge", 2)
@@ -301,6 +314,7 @@ ScriptBackendItemLocal.forge = function (items)
 
 	return ForgeItemsLocal:new(upgrade_name)
 end
+
 ScriptBackendItemLocal.poll_forge = function ()
 	if Application.platform() == "xb1" or Application.platform() == "ps4" then
 		local item_key = forged_item_data.item_key
@@ -333,8 +347,6 @@ ScriptBackendItemLocal.poll_forge = function ()
 
 		return item_key, backend_id
 	end
-
-	return 
 end
 
 function debug_give_all_item_type(item_type)
@@ -351,8 +363,6 @@ function debug_give_all_item_type(item_type)
 	else
 		print("player already owns all items of type " .. item_type)
 	end
-
-	return 
 end
 
-return 
+return

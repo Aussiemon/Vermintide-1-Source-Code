@@ -2,12 +2,13 @@ MatchmakingStateSearchPlayers = class(MatchmakingStateSearchPlayers)
 MatchmakingStateSearchPlayers.NAME = "MatchmakingStateSearchPlayers"
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
+
 MatchmakingStateSearchPlayers.init = function (self, params)
 	self.lobby = params.lobby
 	self.network_transmit = params.network_transmit
@@ -17,22 +18,20 @@ MatchmakingStateSearchPlayers.init = function (self, params)
 	self.handshaker_host = params.handshaker_host
 	self.matchmaking_ui = params.matchmaking_ui
 	self.wwise_world = params.wwise_world
-
-	return 
 end
+
 MatchmakingStateSearchPlayers.destroy = function (self)
 	if self._popup_id then
 		Managers.popup:cancel_popup(self._popup_id)
 
 		self._popup_id = nil
 	end
-
-	return 
 end
+
 MatchmakingStateSearchPlayers.on_enter = function (self, state_context)
 	self.state_context = state_context
 	local lobby_members = self.lobby:members()
-	local members_joined = lobby_members.get_members(lobby_members)
+	local members_joined = lobby_members:get_members()
 	self.number_of_players = #members_joined
 	local game_data = state_context.game_search_data
 	local private_game = game_data.private_game
@@ -40,16 +39,14 @@ MatchmakingStateSearchPlayers.on_enter = function (self, state_context)
 
 	self.matchmaking_manager:set_status_message(self.status_message)
 	self.matchmaking_ui:large_window_ready_enable(true)
-
-	return 
 end
+
 MatchmakingStateSearchPlayers.on_exit = function (self)
 	self.matchmaking_ui:large_window_stop_ready_pulse()
 	self.matchmaking_ui:large_window_ready_enable(false)
 	self.matchmaking_ui:set_action_area_visible(false)
-
-	return 
 end
+
 MatchmakingStateSearchPlayers._signal_start_game = function (self, all_peers_ingame, all_peers_ready)
 	if all_peers_ingame and all_peers_ready then
 		if self._gamepad_path then
@@ -67,15 +64,14 @@ MatchmakingStateSearchPlayers._signal_start_game = function (self, all_peers_ing
 		self.matchmaking_ui:set_start_progress(0)
 		self.matchmaking_ui:animate_large_window(true)
 	end
-
-	return 
 end
+
 MatchmakingStateSearchPlayers.update = function (self, dt, t)
 	local gamepad_active_last_frame = self._gamepad_active_last_frame
 	local gamepad_active = Managers.input:is_device_active("gamepad")
 	local status_message = self.status_message
 	local peer_id = Network.peer_id()
-	local current_number_of_members = self.current_number_lobby_members(self)
+	local current_number_of_members = self:current_number_lobby_members()
 	local ready_peers = self.matchmaking_manager.ready_peers
 	local all_peers_ingame = self.network_server:are_all_peers_ingame()
 	local all_peers_ready = self.matchmaking_manager:all_peers_ready(self._gamepad_path)
@@ -117,7 +113,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 		end
 
 		if result == "yes" then
-			self._signal_start_game(self, all_peers_ingame, all_peers_ready)
+			self:_signal_start_game(all_peers_ingame, all_peers_ready)
 		elseif result == "no" then
 			self.ready = false
 			local peer_id = Network.peer_id()
@@ -159,12 +155,12 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 	end
 
 	local player_manager = Managers.player
-	local player = player_manager.player(player_manager, peer_id, 1)
+	local player = player_manager:player(peer_id, 1)
 	local can_use_input = player and Unit.alive(player.player_unit)
 	local input_service = (can_use_input and Managers.input:get_service("ingame_menu")) or fake_input_service
 
 	if self.full_group_timer then
-		local full_group_timer_ended = (all_peers_ready and all_peers_ingame and self.update_full_group_timer(self, dt)) or false
+		local full_group_timer_ended = (all_peers_ready and all_peers_ingame and self:update_full_group_timer(dt)) or false
 
 		if full_group_timer_ended then
 			local player = Managers.player:local_player(1)
@@ -195,13 +191,13 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 				end
 			end
 
-			if self.controller_cooldown and 0 < self.controller_cooldown then
+			if self.controller_cooldown and self.controller_cooldown > 0 then
 				self.controller_cooldown = self.controller_cooldown - dt
 			elseif self._gamepad_path then
 				self.matchmaking_ui:set_ready_area_enabled(true)
 				self.matchmaking_ui:large_window_start_ready_pulse()
 
-				if input_service.get(input_service, "matchmaking_ready") then
+				if input_service:get("matchmaking_ready") then
 					local total_time = 1
 					local cancel_timer = self.start_cancel_timer
 					cancel_timer = (cancel_timer and cancel_timer + dt) or dt
@@ -216,7 +212,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 						else
 							self.start_cancel_timer = nil
 
-							self._signal_start_game(self, all_peers_ingame, all_peers_ready)
+							self:_signal_start_game(all_peers_ingame, all_peers_ready)
 						end
 					else
 						self.start_cancel_timer = cancel_timer
@@ -235,8 +231,8 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 			else
 				self.matchmaking_ui:large_window_stop_ready_pulse()
 
-				if input_service.get(input_service, "matchmaking_start") then
-					self._signal_start_game(self, all_peers_ingame, all_peers_ready)
+				if input_service:get("matchmaking_start") then
+					self:_signal_start_game(all_peers_ingame, all_peers_ready)
 				else
 					self.start_cancel_timer = nil
 
@@ -262,9 +258,9 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 	end
 
 	if not self._gamepad_path then
-		if self.controller_cooldown and 0 < self.controller_cooldown then
+		if self.controller_cooldown and self.controller_cooldown > 0 then
 			self.controller_cooldown = self.controller_cooldown - dt
-		elseif input_service.get(input_service, "matchmaking_ready") then
+		elseif input_service:get("matchmaking_ready") then
 			local ready_changed = false
 
 			if gamepad_active then
@@ -319,6 +315,7 @@ MatchmakingStateSearchPlayers.update = function (self, dt, t)
 
 	return nil
 end
+
 MatchmakingStateSearchPlayers.update_full_group_timer = function (self, dt)
 	self.full_group_timer = self.full_group_timer - dt
 	local time_left = math.round(self.full_group_timer)
@@ -326,26 +323,27 @@ MatchmakingStateSearchPlayers.update_full_group_timer = function (self, dt)
 
 	return self.full_group_timer < 0
 end
+
 MatchmakingStateSearchPlayers.current_number_lobby_members = function (self)
 	local lobby_members = self.lobby:members()
-	local members_joined = lobby_members.get_members(lobby_members)
+	local members_joined = lobby_members:get_members()
 
 	return #members_joined
 end
+
 MatchmakingStateSearchPlayers.rpc_matchmaking_request_profile = function (self, sender, client_cookie, host_cookie, profile)
 	if not self.handshaker_host:validate_cookies(sender, client_cookie, host_cookie) then
-		return 
+		return
 	end
-
-	return 
 end
+
 MatchmakingStateSearchPlayers.rpc_matchmaking_set_ready = function (self, sender, client_cookie, host_cookie, peer_id, ready)
 	if not self.handshaker_host:validate_cookies(sender, client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local matchmaking_manager = self.matchmaking_manager
-	local portrait_index = matchmaking_manager.get_portrait_index(matchmaking_manager, peer_id)
+	local portrait_index = matchmaking_manager:get_portrait_index(peer_id)
 	local ready_peers = matchmaking_manager.ready_peers
 	ready_peers[peer_id] = ready
 
@@ -355,12 +353,11 @@ MatchmakingStateSearchPlayers.rpc_matchmaking_set_ready = function (self, sender
 	if ready then
 		WwiseWorld.trigger_event(self.wwise_world, "Play_hud_matchmaking_ready")
 	end
-
-	return 
 end
+
 MatchmakingStateSearchPlayers.rpc_matchmaking_request_ready_data = function (self, sender, client_cookie, host_cookie)
 	if not self.handshaker_host:validate_cookies(sender, client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local matchmaking_manager = self.matchmaking_manager
@@ -377,8 +374,6 @@ MatchmakingStateSearchPlayers.rpc_matchmaking_request_ready_data = function (sel
 
 		self.handshaker_host:send_rpc_to_client("rpc_matchmaking_set_ready", sender, peer_id, ready)
 	end
-
-	return 
 end
 
-return 
+return

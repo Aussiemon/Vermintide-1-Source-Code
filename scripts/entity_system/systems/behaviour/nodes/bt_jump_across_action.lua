@@ -14,19 +14,20 @@ local function debug_graph()
 end
 
 BTJumpAcrossAction = class(BTJumpAcrossAction, BTNode)
+
 BTJumpAcrossAction.init = function (self, ...)
 	BTJumpAcrossAction.super.init(self, ...)
-
-	return 
 end
+
 BTJumpAcrossAction.name = "BTJumpAcrossAction"
+
 BTJumpAcrossAction.enter = function (self, unit, blackboard, t)
 	local drawer = Managers.state.debug:drawer({
 		mode = "retained",
 		name = "BTJumpAcrossAction"
 	})
 
-	drawer.reset(drawer)
+	drawer:reset()
 
 	local next_smart_object_data = blackboard.next_smart_object_data
 	local entrance_pos = next_smart_object_data.entrance_pos:unbox()
@@ -36,9 +37,9 @@ BTJumpAcrossAction.enter = function (self, unit, blackboard, t)
 	blackboard.jump_ledge_lookat_direction = Vector3Box(Vector3.normalize(Vector3.flat(exit_pos - entrance_pos)))
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_affected_by_gravity(locomotion_extension, false)
-	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
-	locomotion_extension.set_rotation_speed(locomotion_extension, 10)
+	locomotion_extension:set_affected_by_gravity(false)
+	locomotion_extension:set_movement_type("snap_to_navmesh")
+	locomotion_extension:set_rotation_speed(10)
 
 	blackboard.jump_state = "moving_to_ledge"
 
@@ -58,9 +59,8 @@ BTJumpAcrossAction.enter = function (self, unit, blackboard, t)
 	else
 		debug_graph():set_active(false)
 	end
-
-	return 
 end
+
 BTJumpAcrossAction.leave = function (self, unit, blackboard, t)
 	blackboard.jump_spline_ground = nil
 	blackboard.jump_spline_ledge = nil
@@ -78,18 +78,17 @@ BTJumpAcrossAction.leave = function (self, unit, blackboard, t)
 
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
+	locomotion_extension:set_movement_type("snap_to_navmesh")
 
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_enabled(navigation_extension, true)
+	navigation_extension:set_enabled(true)
 
 	local hit_reaction_extension = ScriptUnit.extension(unit, "hit_reaction_system")
 	hit_reaction_extension.force_ragdoll_on_death = nil
-	slot7 = navigation_extension.is_using_smart_object(navigation_extension) and navigation_extension.use_smart_object(navigation_extension, false)
-
-	return 
+	slot7 = navigation_extension:is_using_smart_object() and navigation_extension:use_smart_object(false)
 end
+
 BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 	local navigation_extension = blackboard.navigation_extension
 	local locomotion_extension = blackboard.locomotion_extension
@@ -98,16 +97,16 @@ BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 	local exit_pos = blackboard.jump_exit_pos:unbox()
 
 	if script_data.ai_debug_smartobject then
-		self._debug_draw_update(self, unit, blackboard, t)
+		self:_debug_draw_update(unit, blackboard, t)
 	end
 
 	if blackboard.jump_state == "moving_to_ledge" and Vector3.distance_squared(entrance_pos, unit_position) < 1 then
 		LocomotionUtils.set_animation_driven_movement(unit, false)
-		locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
-		locomotion_extension.set_movement_type(locomotion_extension, "script_driven")
-		navigation_extension.set_enabled(navigation_extension, false)
+		locomotion_extension:set_wanted_velocity(Vector3.zero())
+		locomotion_extension:set_movement_type("script_driven")
+		navigation_extension:set_enabled(false)
 
-		if navigation_extension.use_smart_object(navigation_extension, true) then
+		if navigation_extension:use_smart_object(true) then
 			blackboard.is_smart_objecting = true
 			blackboard.is_jumping = true
 			blackboard.jump_state = "moving_towards_smartobject_entrance"
@@ -125,7 +124,7 @@ BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 		local vector_to_target = move_target - unit_position
 		local distance_to_target = Vector3.length(vector_to_target)
 
-		if 0.1 < distance_to_target then
+		if distance_to_target > 0.1 then
 			local speed = blackboard.breed.run_speed
 
 			if distance_to_target < speed * dt then
@@ -135,8 +134,8 @@ BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 			local direction_to_target = Vector3.normalize(vector_to_target)
 			local wanted_velocity = direction_to_target * speed
 
-			locomotion_extension.set_wanted_velocity(locomotion_extension, wanted_velocity)
-			locomotion_extension.set_wanted_rotation(locomotion_extension, wanted_rotation)
+			locomotion_extension:set_wanted_velocity(wanted_velocity)
+			locomotion_extension:set_wanted_rotation(wanted_rotation)
 
 			if script_data.ai_debug_smartobject then
 				local drawer = Managers.state.debug:drawer({
@@ -144,13 +143,13 @@ BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 					name = "BTJumpAcrossAction2"
 				})
 
-				drawer.vector(drawer, unit_position + Vector3.up() * 0.3, vector_to_target)
-				drawer.sphere(drawer, move_target, 0.3, Colors.get("blue"))
+				drawer:vector(unit_position + Vector3.up() * 0.3, vector_to_target)
+				drawer:sphere(move_target, 0.3, Colors.get("blue"))
 			end
 		else
 			local animation_distance = 4
 
-			locomotion_extension.teleport_to(locomotion_extension, move_target, wanted_rotation)
+			locomotion_extension:teleport_to(move_target, wanted_rotation)
 			LocomotionUtils.set_animation_driven_movement(unit, true)
 			Managers.state.network:anim_event(unit, "jump_over_gap_4m")
 
@@ -167,8 +166,8 @@ BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 	end
 
 	if blackboard.jump_state == "waiting_to_reach_end" and blackboard.jump_start_finished then
-		navigation_extension.set_navbot_position(navigation_extension, exit_pos)
-		locomotion_extension.teleport_to(locomotion_extension, exit_pos)
+		navigation_extension:set_navbot_position(exit_pos)
+		locomotion_extension:teleport_to(exit_pos)
 		Managers.state.network:anim_event(unit, "move_fwd")
 
 		blackboard.spawn_to_running = true
@@ -185,6 +184,7 @@ BTJumpAcrossAction.run = function (self, unit, blackboard, t, dt)
 
 	return "running"
 end
+
 BTJumpAcrossAction._debug_draw_update = function (self, unit, blackboard, t)
 	local drawer = Managers.state.debug:drawer({
 		mode = "immediate",
@@ -198,12 +198,10 @@ BTJumpAcrossAction._debug_draw_update = function (self, unit, blackboard, t)
 	Debug.text("BTJumpAcrossAction entrance_pos=%s", tostring(jump_entrance_pos))
 	Debug.text("BTJumpAcrossAction exit_pos=        %s", tostring(jump_exit_pos))
 	Debug.text("BTJumpAcrossAction pos=             %s", tostring(unit_position))
-	drawer.sphere(drawer, jump_entrance_pos, 0.3, Colors.get("red"))
-	drawer.sphere(drawer, jump_exit_pos, 0.3, Colors.get("red"))
-	drawer.sphere(drawer, unit_position, 0.3 + math.sin(t * 5) * 0.01, Colors.get("purple"))
+	drawer:sphere(jump_entrance_pos, 0.3, Colors.get("red"))
+	drawer:sphere(jump_exit_pos, 0.3, Colors.get("red"))
+	drawer:sphere(unit_position, 0.3 + math.sin(t * 5) * 0.01, Colors.get("purple"))
 	debug_graph():add_point(t, unit_position.z)
-
-	return 
 end
 
-return 
+return

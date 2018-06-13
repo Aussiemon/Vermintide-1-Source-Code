@@ -62,9 +62,9 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
+				input_extension:clear_input_buffer()
 
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end
 		},
 		fast_shot = {
@@ -131,9 +131,9 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
+				input_extension:clear_input_buffer()
 
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end
 		}
 	},
@@ -178,7 +178,7 @@ weapon_template.actions = {
 				}
 			},
 			condition_func = function (unit, input_extension, ammo_extension)
-				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+				if ammo_extension and ammo_extension:total_remaining_ammo() <= 0 then
 					return false
 				end
 
@@ -290,4 +290,4 @@ Weapons.brace_of_pistols_template_1_t3.actions.action_one.fast_shot.attack_templ
 Weapons.brace_of_pistols_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.brace_of_pistols_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.75
 
-return 
+return

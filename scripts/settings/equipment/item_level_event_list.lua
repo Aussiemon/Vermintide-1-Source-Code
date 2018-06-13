@@ -87,4 +87,4 @@ ItemMasterList.packmaster_claw = {
 	}
 }
 
-return 
+return

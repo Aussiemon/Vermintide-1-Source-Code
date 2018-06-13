@@ -45,4 +45,4 @@ ItemMasterList.wpn_cannon_ball_01 = {
 	}
 }
 
-return 
+return

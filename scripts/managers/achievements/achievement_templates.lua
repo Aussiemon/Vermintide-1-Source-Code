@@ -7,7 +7,7 @@ local function check_level_list(statistics_db, stats_id, levels_to_complete)
 
 	for i = 1, #levels_to_complete, 1 do
 		local level_id = levels_to_complete[i]
-		local completed = 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_id)
+		local completed = statistics_db:get_persistent_stat(stats_id, "completed_levels", level_id) > 0
 
 		if not completed then
 			return false
@@ -25,7 +25,7 @@ local function check_level_list_difficulty(statistics_db, stats_id, levels_to_co
 	for i = 1, #levels_to_complete, 1 do
 		local level_id = levels_to_complete[i]
 		local level_difficulty_name = LevelDifficultyDBNames[level_id]
-		local completed = difficulty <= statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels_difficulty", level_difficulty_name)
+		local completed = difficulty <= statistics_db:get_persistent_stat(stats_id, "completed_levels_difficulty", level_difficulty_name)
 
 		if not completed then
 			return false
@@ -38,7 +38,7 @@ end
 local function check_unlock(unlock_name)
 	local backend_manager = Managers.backend
 
-	if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+	if backend_manager:available() and backend_manager:profiles_loaded() then
 		local experience = ScriptBackendProfileAttribute.get("experience")
 		local level = ExperienceSettings.get_level(experience)
 		local prestige = 0
@@ -51,24 +51,24 @@ end
 
 local function get_hard_mode_completed_mission_data(mission_name, difficulty)
 	if not Managers.state.entity then
-		return 
+		return
 	end
 
 	if not Managers.state.game_mode:game_won() then
-		return 
+		return
 	end
 
 	local difficulty_rank = DifficultySettings[difficulty].rank
 
 	if Managers.state.difficulty:get_difficulty_rank() < difficulty_rank then
-		return 
+		return
 	end
 
 	local mission_system = Managers.state.entity:system("mission_system")
-	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+	local active_missions, completed_missions = mission_system:get_missions()
 
 	if not completed_missions then
-		return 
+		return
 	end
 
 	return completed_missions[mission_name]
@@ -77,13 +77,11 @@ end
 local function add_level_complete_achievement(AchievementTemplates, level_name, xb1_id, ps4_id)
 	AchievementTemplates["complete_" .. level_name] = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_name)
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", level_name) > 0
 		end,
 		ID_XB1 = xb1_id,
 		ID_PS4 = ps4_id
 	}
-
-	return 
 end
 
 AchievementTemplates = {
@@ -158,7 +156,7 @@ AchievementTemplates = {
 			for i = 1, #level_list, 1 do
 				local level_id = level_list[i]
 
-				if 3 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) then
+				if LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) >= 3 then
 					return true
 				end
 			end
@@ -181,7 +179,7 @@ AchievementTemplates = {
 			for i = 1, #level_list, 1 do
 				local level_id = level_list[i]
 
-				if 4 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) then
+				if LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) >= 4 then
 					return true
 				end
 			end
@@ -204,7 +202,7 @@ AchievementTemplates = {
 			for i = 1, #level_list, 1 do
 				local level_id = level_list[i]
 
-				if 5 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) then
+				if LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, level_id) >= 5 then
 					return true
 				end
 			end
@@ -216,7 +214,7 @@ AchievementTemplates = {
 		ID_XB1 = "DomesticDisturbance",
 		ID_PS4 = "012",
 		evaluate = function (statistics_db, stats_id)
-			return 500 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "dynamic_objects_destroyed")
+			return statistics_db:get_persistent_stat(stats_id, "dynamic_objects_destroyed") >= 500
 		end
 	},
 	carry_a_grimoire_to_the_end_of_a_level = {
@@ -232,7 +230,7 @@ AchievementTemplates = {
 			end
 
 			for _, level_id in pairs(level_list) do
-				if 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", level_id) then
+				if statistics_db:get_persistent_stat(stats_id, "collected_grimoires", level_id) > 0 then
 					return true
 				end
 			end
@@ -244,22 +242,22 @@ AchievementTemplates = {
 		ID_XB1 = "Moulderbane",
 		ID_PS4 = "014",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
+			return statistics_db:get_stat(stats_id, "kills_per_breed", "skaven_rat_ogre") > 0
 		end
 	},
 	be_part_of_killing_a_rat_ogre = {
 		ID_XB1 = "Rakogridrengi",
 		ID_PS4 = "015",
 		evaluate = function (statistics_db, stats_id)
-			local has_damaged_ogre = 0 < statistics_db.get_stat(statistics_db, stats_id, "damage_dealt_per_breed", "skaven_rat_ogre")
+			local has_damaged_ogre = statistics_db:get_stat(stats_id, "damage_dealt_per_breed", "skaven_rat_ogre") > 0
 
 			if has_damaged_ogre then
 				local players = Managers.player:human_and_bot_players()
 
 				for _, player in pairs(players) do
-					local stats_id = player.stats_id(player)
+					local stats_id = player:stats_id()
 
-					if 0 < statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre") then
+					if statistics_db:get_stat(stats_id, "kills_per_breed", "skaven_rat_ogre") > 0 then
 						return true
 					end
 				end
@@ -272,21 +270,21 @@ AchievementTemplates = {
 		ID_XB1 = "PestControl",
 		ID_PS4 = "016",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "killed_patrols")
+			return statistics_db:get_stat(stats_id, "killed_patrols") > 0
 		end
 	},
 	use_ten_medical_supplies_on_your_allies = {
 		ID_XB1 = "Shallya",
 		ID_PS4 = "017",
 		evaluate = function (statistics_db, stats_id)
-			return 10 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "times_friend_healed")
+			return statistics_db:get_persistent_stat(stats_id, "times_friend_healed") >= 10
 		end
 	},
 	kill_five_skavens_with_one_grenade = {
 		ID_XB1 = "FiveRatsOneStone",
 		ID_PS4 = "018",
 		evaluate = function (statistics_db, stats_id)
-			return 4 < statistics_db.get_stat(statistics_db, stats_id, "best_projectile_multikill")
+			return statistics_db:get_stat(stats_id, "best_projectile_multikill") > 4
 		end
 	},
 	acquire_an_item_with_exotic_quality = {
@@ -295,7 +293,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+			if backend_manager:available() and backend_manager:profiles_loaded() then
 				local items = ScriptBackendItem.get_all_backend_items()
 
 				for _, backend_item_data in pairs(items) do
@@ -316,14 +314,12 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+			if backend_manager:available() and backend_manager:profiles_loaded() then
 				local experience = ScriptBackendProfileAttribute.get("experience")
 				local level = ExperienceSettings.get_level(experience)
 
-				return 100 <= level
+				return level >= 100
 			end
-
-			return 
 		end
 	},
 	unlock_the_forge = {
@@ -337,35 +333,35 @@ AchievementTemplates = {
 		ID_XB1 = "FlotsamAndJetsam",
 		ID_PS4 = "022",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "salvaged_items")
+			return statistics_db:get_persistent_stat(stats_id, "salvaged_items") > 0
 		end
 	},
 	upgrade_one_item = {
 		ID_XB1 = "DwarvenHands",
 		ID_PS4 = "023",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "upgraded_items")
+			return statistics_db:get_stat(stats_id, "upgraded_items") > 0
 		end
 	},
 	fuse_an_item_in_the_forge = {
 		ID_XB1 = "TilDeathDoUsPart",
 		ID_PS4 = "024",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "fused_items")
+			return statistics_db:get_persistent_stat(stats_id, "fused_items") > 0
 		end
 	},
 	salvage_one_hundred_items = {
 		ID_XB1 = "ImperialSalvager",
 		ID_PS4 = "025",
 		evaluate = function (statistics_db, stats_id)
-			return 100 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "salvaged_items")
+			return statistics_db:get_persistent_stat(stats_id, "salvaged_items") >= 100
 		end
 	},
 	fuse_twenty_five_items_in_the_forge = {
 		ID_XB1 = "Grungni",
 		ID_PS4 = "026",
 		evaluate = function (statistics_db, stats_id)
-			return 25 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "fused_items")
+			return statistics_db:get_persistent_stat(stats_id, "fused_items") >= 25
 		end
 	},
 	equip_a_trinket_for_the_first_time = {
@@ -374,7 +370,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+			if backend_manager:available() and backend_manager:profiles_loaded() then
 				for idx, profile in pairs(SPProfiles) do
 					local slot_trinket_1 = BackendUtils.get_loadout_item(profile.display_name, "slot_trinket_1")
 					local slot_trinket_2 = BackendUtils.get_loadout_item(profile.display_name, "slot_trinket_2")
@@ -402,7 +398,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+			if backend_manager:available() and backend_manager:profiles_loaded() then
 				local slots = InventorySettings.slots
 
 				for _, profile in pairs(SPProfiles) do
@@ -444,7 +440,7 @@ AchievementTemplates = {
 			end
 
 			for _, level_id in pairs(LevelSettingsCampaign.level_list) do
-				if 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", level_id) then
+				if statistics_db:get_persistent_stat(stats_id, "collected_tomes", level_id) > 0 then
 					return true
 				end
 			end
@@ -466,7 +462,7 @@ AchievementTemplates = {
 
 			for _, level_id in pairs(levels_with_tomes) do
 				local max_amount = LevelSettingsCampaign.tome_amount_exceptions[level_id] or 3
-				local amount = statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", level_id)
+				local amount = statistics_db:get_persistent_stat(stats_id, "collected_tomes", level_id)
 
 				if amount < max_amount then
 					return false
@@ -482,9 +478,9 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+			if backend_manager:available() and backend_manager:profiles_loaded() then
 				for idx, profile in pairs(SPProfiles) do
-					if 0 >= statistics_db.get_persistent_stat(statistics_db, stats_id, "complete_level_" .. profile.display_name) then
+					if statistics_db:get_persistent_stat(stats_id, "complete_level_" .. profile.display_name) <= 0 then
 						return false
 					end
 				end
@@ -499,8 +495,8 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "complete_level_bright_wizard")
+			if backend_manager:available() and backend_manager:profiles_loaded() then
+				return statistics_db:get_persistent_stat(stats_id, "complete_level_bright_wizard") > 0
 			end
 
 			return false
@@ -510,8 +506,8 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "complete_level_wood_elf")
+			if backend_manager:available() and backend_manager:profiles_loaded() then
+				return statistics_db:get_persistent_stat(stats_id, "complete_level_wood_elf") > 0
 			end
 
 			return false
@@ -521,8 +517,8 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "complete_level_empire_soldier")
+			if backend_manager:available() and backend_manager:profiles_loaded() then
+				return statistics_db:get_persistent_stat(stats_id, "complete_level_empire_soldier") > 0
 			end
 
 			return false
@@ -532,8 +528,8 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "complete_level_witch_hunter")
+			if backend_manager:available() and backend_manager:profiles_loaded() then
+				return statistics_db:get_persistent_stat(stats_id, "complete_level_witch_hunter") > 0
 			end
 
 			return false
@@ -543,8 +539,8 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local backend_manager = Managers.backend
 
-			if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
-				return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "complete_level_dwarf_ranger")
+			if backend_manager:available() and backend_manager:profiles_loaded() then
+				return statistics_db:get_persistent_stat(stats_id, "complete_level_dwarf_ranger") > 0
 			end
 
 			return false
@@ -552,113 +548,113 @@ AchievementTemplates = {
 	},
 	roll_seven_successes = {
 		evaluate = function (statistics_db, stats_id)
-			return 8 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "dice_roll_successes")
+			return statistics_db:get_persistent_stat(stats_id, "dice_roll_successes") >= 8
 		end
 	},
 	collect_both_grimoires_on_magnus = {
 		evaluate = function (statistics_db, stats_id)
-			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "magnus")
+			return statistics_db:get_persistent_stat(stats_id, "collected_grimoires", "magnus") >= 2
 		end
 	},
 	collect_both_grimoires_on_merchant = {
 		evaluate = function (statistics_db, stats_id)
-			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "merchant")
+			return statistics_db:get_persistent_stat(stats_id, "collected_grimoires", "merchant") >= 2
 		end
 	},
 	collect_both_grimoires_on_wizard = {
 		evaluate = function (statistics_db, stats_id)
-			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "wizard")
+			return statistics_db:get_persistent_stat(stats_id, "collected_grimoires", "wizard") >= 2
 		end
 	},
 	collect_both_grimoires_on_forest_ambush = {
 		evaluate = function (statistics_db, stats_id)
-			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "forest_ambush")
+			return statistics_db:get_persistent_stat(stats_id, "collected_grimoires", "forest_ambush") >= 2
 		end
 	},
 	collect_both_grimoires_on_cemetery = {
 		evaluate = function (statistics_db, stats_id)
-			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "cemetery")
+			return statistics_db:get_persistent_stat(stats_id, "collected_grimoires", "cemetery") >= 2
 		end
 	},
 	collect_both_grimoires_on_tunnels = {
 		evaluate = function (statistics_db, stats_id)
-			return 2 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_grimoires", "tunnels")
+			return statistics_db:get_persistent_stat(stats_id, "collected_grimoires", "tunnels") >= 2
 		end
 	},
 	collect_all_tomes_on_magnus = {
 		ID_XB1 = "ThePious",
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "magnus")
+			return statistics_db:get_persistent_stat(stats_id, "collected_tomes", "magnus") >= 3
 		end
 	},
 	collect_all_tomes_on_merchant = {
 		ID_XB1 = "Marktplatz",
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "merchant")
+			return statistics_db:get_persistent_stat(stats_id, "collected_tomes", "merchant") >= 3
 		end
 	},
 	collect_all_tomes_on_wizard = {
 		ID_XB1 = "WindsOfUlgu",
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "wizard")
+			return statistics_db:get_persistent_stat(stats_id, "collected_tomes", "wizard") >= 3
 		end
 	},
 	collect_all_tomes_on_forest_ambush = {
 		ID_XB1 = "Reikwald",
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "forest_ambush")
+			return statistics_db:get_persistent_stat(stats_id, "collected_tomes", "forest_ambush") >= 3
 		end
 	},
 	collect_all_tomes_on_cemetery = {
 		ID_XB1 = "BlackGuard",
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "cemetery")
+			return statistics_db:get_persistent_stat(stats_id, "collected_tomes", "cemetery") >= 3
 		end
 	},
 	collect_all_tomes_on_tunnels = {
 		ID_XB1 = "Mandred",
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "collected_tomes", "tunnels")
+			return statistics_db:get_persistent_stat(stats_id, "collected_tomes", "tunnels") >= 3
 		end
 	},
 	win_item_as_wood_elf = {
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_wood_elf") == 1
+			return statistics_db:get_stat(stats_id, "win_item_as_wood_elf") == 1
 		end
 	},
 	win_item_as_witch_hunter = {
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_witch_hunter") == 1
+			return statistics_db:get_stat(stats_id, "win_item_as_witch_hunter") == 1
 		end
 	},
 	win_item_as_bright_wizard = {
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_bright_wizard") == 1
+			return statistics_db:get_stat(stats_id, "win_item_as_bright_wizard") == 1
 		end
 	},
 	win_item_as_dwarf_ranger = {
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_dwarf_ranger") == 1
+			return statistics_db:get_stat(stats_id, "win_item_as_dwarf_ranger") == 1
 		end
 	},
 	win_item_as_empire_soldier = {
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "win_item_as_empire_soldier") == 1
+			return statistics_db:get_stat(stats_id, "win_item_as_empire_soldier") == 1
 		end
 	},
 	last_stand_town_meeting_bronze = {
 		ID_XB1 = "Defient",
 		ID_PS4 = "033",
 		evaluate = function (statistics_db, stats_id)
-			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			return SurvivalSettings.achievement_data.bronze <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
 		end
 	},
 	last_stand_town_meeting_silver = {
 		ID_XB1 = "Stalwart",
 		ID_PS4 = "034",
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
+			local complete = SurvivalSettings.achievement_data.silver <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
 
 			return complete
 		end
@@ -667,31 +663,31 @@ AchievementTemplates = {
 		ID_XB1 = "Unbreakable",
 		ID_PS4 = "035",
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
+			local complete = SurvivalSettings.achievement_data.gold <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
 
 			return complete
 		end
 	},
 	last_stand_the_fall_bronze = {
 		evaluate = function (statistics_db, stats_id)
-			return SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			return SurvivalSettings.achievement_data.bronze <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
 		end
 	},
 	last_stand_the_fall_silver = {
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
+			local complete = SurvivalSettings.achievement_data.silver <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
 
 			return complete
 		end
 	},
 	last_stand_the_fall_gold = {
 		evaluate = function (statistics_db, stats_id)
-			local complete = SurvivalSettings.achievement_data.gold <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
-			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
-			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
+			local complete = SurvivalSettings.achievement_data.gold <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
+			complete = complete or SurvivalSettings.achievement_data.silver <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
+			complete = complete or SurvivalSettings.achievement_data.bronze <= statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
 
 			return complete
 		end
@@ -700,12 +696,12 @@ AchievementTemplates = {
 		ID_XB1 = "OneDownEndlessToGo",
 		ID_PS4 = "036",
 		evaluate = function (statistics_db, stats_id)
-			local complete = 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hard_waves")
-			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_harder_waves")
-			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_ruins_survival_hardest_waves")
-			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hard_waves")
-			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_harder_waves")
-			complete = complete or 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "survival_dlc_survival_magnus_survival_hardest_waves")
+			local complete = statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_hard_waves") >= 1
+			complete = complete or statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_harder_waves") >= 1
+			complete = complete or statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_ruins_survival_hardest_waves") >= 1
+			complete = complete or statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_hard_waves") >= 1
+			complete = complete or statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_harder_waves") >= 1
+			complete = complete or statistics_db:get_persistent_stat(stats_id, "survival_dlc_survival_magnus_survival_hardest_waves") >= 1
 
 			return complete
 		end
@@ -714,49 +710,49 @@ AchievementTemplates = {
 		ID_XB1 = "FindersKeepers",
 		ID_PS4 = "037",
 		evaluate = function (statistics_db, stats_id)
-			return 1 <= statistics_db.get_stat(statistics_db, stats_id, "endurance_badges")
+			return statistics_db:get_stat(stats_id, "endurance_badges") >= 1
 		end
 	},
 	last_stand_multiple_endurance_badges = {
 		ID_XB1 = "Tenacious",
 		ID_PS4 = "038",
 		evaluate = function (statistics_db, stats_id)
-			return 200 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "endurance_badges")
+			return statistics_db:get_persistent_stat(stats_id, "endurance_badges") >= 200
 		end
 	},
 	complete_drachenfels_portals = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_portals")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_portals") > 0
 		end
 	},
 	complete_drachenfels_castle = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_castle") > 0
 		end
 	},
 	complete_drachenfels_castle_dungeon = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle_dungeon")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_castle_dungeon") > 0
 		end
 	},
 	complete_challenge_wizard_hard = {
 		evaluate = function (statistics_db, stats_id)
-			return 3 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
+			return LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard") >= 3
 		end
 	},
 	complete_challenge_wizard_nightmare = {
 		evaluate = function (statistics_db, stats_id)
-			return 4 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
+			return LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard") >= 4
 		end
 	},
 	complete_challenge_wizard_cataclysm = {
 		evaluate = function (statistics_db, stats_id)
-			return 5 <= LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard")
+			return LevelUnlockUtils.completed_level_difficulty_index(statistics_db, stats_id, "dlc_challenge_wizard") >= 5
 		end
 	},
 	complete_drachenfels_castle_dungeon = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_castle_dungeon")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_castle_dungeon") > 0
 		end
 	},
 	magnus_hard_mode_nightmare = {
@@ -769,8 +765,6 @@ AchievementTemplates = {
 			else
 				return mission_data and mission_data.end_time <= 240
 			end
-
-			return 
 		end
 	},
 	supply_and_demand_hard_mode_nightmare = {
@@ -803,12 +797,10 @@ AchievementTemplates = {
 			local mission_data = get_hard_mode_completed_mission_data("white_rat_kill_stormvermin", "harder")
 
 			if PLATFORM == "win32" then
-				return mission_data and 13 <= mission_data.generic_counter
+				return mission_data and mission_data.generic_counter >= 13
 			else
-				return mission_data and 5 <= mission_data.generic_counter
+				return mission_data and mission_data.generic_counter >= 5
 			end
-
-			return 
 		end
 	},
 	well_watch_hard_mode_nightmare = {
@@ -829,8 +821,6 @@ AchievementTemplates = {
 			else
 				return mission_data and mission_data.end_time <= 60
 			end
-
-			return 
 		end
 	},
 	garden_of_morr_hard_mode_nightmare = {
@@ -847,12 +837,10 @@ AchievementTemplates = {
 			local mission_data = get_hard_mode_completed_mission_data("enemy_below_kill_gutter_runners", "harder")
 
 			if PLATFORM == "win32" then
-				return mission_data and 20 <= mission_data.generic_counter
+				return mission_data and mission_data.generic_counter >= 20
 			else
-				return mission_data and 13 <= mission_data.generic_counter
+				return mission_data and mission_data.generic_counter >= 13
 			end
-
-			return 
 		end
 	},
 	black_powder_hard_mode_nightmare = {
@@ -881,30 +869,28 @@ AchievementTemplates = {
 			else
 				return mission_data and mission_data.generic_counter == 3
 			end
-
-			return 
 		end
 	},
 	wizards_tower_hard_mode_nightmare = {
 		ID_XB1 = "PierceTheVeil",
 		evaluate = function (statistics_db, stats_id)
 			if not Managers.state.entity then
-				return 
+				return
 			end
 
 			local difficulty = "harder"
 			local difficulty_rank = DifficultySettings[difficulty].rank
 
 			if Managers.state.difficulty:get_difficulty_rank() < difficulty_rank then
-				return 
+				return
 			end
 
 			local mission_system = Managers.state.entity:system("mission_system")
-			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+			local active_missions, completed_missions = mission_system:get_missions()
 
 			if PLATFORM ~= "win32" then
 				if not completed_missions then
-					return 
+					return
 				end
 
 				local mission = completed_missions.wizards_tower_protect_wards
@@ -912,15 +898,13 @@ AchievementTemplates = {
 				return mission and mission.generic_counter == 0
 			else
 				if not active_missions then
-					return 
+					return
 				end
 
 				local mission = active_missions.wizards_tower_protect_wards
 
-				return mission and 0 < mission.generic_counter
+				return mission and mission.generic_counter > 0
 			end
-
-			return 
 		end
 	},
 	magnus_hard_mode_cataclysm = {
@@ -955,7 +939,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("white_rat_kill_stormvermin", "hardest")
 
-			return mission_data and 13 <= mission_data.generic_counter
+			return mission_data and mission_data.generic_counter >= 13
 		end
 	},
 	well_watch_hard_mode_cataclysm = {
@@ -983,7 +967,7 @@ AchievementTemplates = {
 		evaluate = function (statistics_db, stats_id)
 			local mission_data = get_hard_mode_completed_mission_data("enemy_below_kill_gutter_runners", "hardest")
 
-			return mission_data and 20 <= mission_data.generic_counter
+			return mission_data and mission_data.generic_counter >= 20
 		end
 	},
 	black_powder_hard_mode_cataclysm = {
@@ -1010,26 +994,26 @@ AchievementTemplates = {
 	wizards_tower_hard_mode_cataclysm = {
 		evaluate = function (statistics_db, stats_id)
 			if not Managers.state.entity then
-				return 
+				return
 			end
 
 			local difficulty = "hardest"
 			local difficulty_rank = DifficultySettings[difficulty].rank
 
 			if Managers.state.difficulty:get_difficulty_rank() < difficulty_rank then
-				return 
+				return
 			end
 
 			local mission_system = Managers.state.entity:system("mission_system")
-			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+			local active_missions, completed_missions = mission_system:get_missions()
 
 			if not active_missions then
-				return 
+				return
 			end
 
 			local mission = active_missions.wizards_tower_protect_wards
 
-			return mission and 0 < mission.generic_counter
+			return mission and mission.generic_counter > 0
 		end
 	}
 }
@@ -1037,17 +1021,17 @@ AchievementTemplates = {
 if PLATFORM == "win32" then
 	AchievementTemplates.complete_dwarf_exterior = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_dwarf_exterior") > 0
 		end
 	}
 	AchievementTemplates.complete_dwarf_interior = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_dwarf_interior") > 0
 		end
 	}
 	AchievementTemplates.complete_dwarf_beacons = {
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_dwarf_beacons") > 0
 		end
 	}
 end
@@ -1059,21 +1043,21 @@ AchievementTemplates.dodged_krench = {
 	ID_XB1 = "Krench",
 	ID_PS4 = "053",
 	evaluate = function (statistics_db, stats_id)
-		return 3 <= statistics_db.get_stat(statistics_db, stats_id, "dodged_storm_vermin_champion")
+		return statistics_db:get_stat(stats_id, "dodged_storm_vermin_champion") >= 3
 	end
 }
 AchievementTemplates.equipped_executioners_sword = {
 	ID_XB1 = "HeadsWillRoll",
 	ID_PS4 = "054",
 	evaluate = function (statistics_db, stats_id)
-		return 0 < statistics_db.get_stat(statistics_db, stats_id, "equipped_executioners_sword")
+		return statistics_db:get_stat(stats_id, "equipped_executioners_sword") > 0
 	end
 }
 AchievementTemplates.executor_headshots = {
 	ID_XB1 = "HeadingForDecapitation",
 	ID_PS4 = "055",
 	evaluate = function (statistics_db, stats_id)
-		return 1 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "executor_headshot")
+		return statistics_db:get_persistent_stat(stats_id, "executor_headshot") >= 1
 	end
 }
 
@@ -1084,14 +1068,14 @@ AchievementTemplates.equipped_ceremonial_daggers = {
 	ID_XB1 = "BladesOfAqshy",
 	ID_PS4 = "058",
 	evaluate = function (statistics_db, stats_id)
-		return 0 < statistics_db.get_stat(statistics_db, stats_id, "equipped_ceremonial_daggers")
+		return statistics_db:get_stat(stats_id, "equipped_ceremonial_daggers") > 0
 	end
 }
 AchievementTemplates.ceremonial_dagger_burn = {
 	ID_XB1 = "Cauterizer",
 	ID_PS4 = "059",
 	evaluate = function (statistics_db, stats_id)
-		return 100 <= statistics_db.get_persistent_stat(statistics_db, stats_id, "ceremonial_dagger_burn")
+		return statistics_db:get_persistent_stat(stats_id, "ceremonial_dagger_burn") >= 100
 	end
 }
 
@@ -1100,28 +1084,28 @@ if PLATFORM ~= "win32" then
 		ID_XB1 = "Wutelgi",
 		ID_PS4 = "039",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "tutorial_revive_ally")
+			return statistics_db:get_stat(stats_id, "tutorial_revive_ally") > 0
 		end
 	}
 	AchievementTemplates.complete_dwarf_exterior = {
 		ID_XB1 = "ByValaya",
 		ID_PS4 = "043",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_interior")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_dwarf_interior") > 0
 		end
 	}
 	AchievementTemplates.complete_dwarf_interior = {
 		ID_XB1 = "SmashAndGrab",
 		ID_PS4 = "044",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_exterior")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_dwarf_exterior") > 0
 		end
 	}
 	AchievementTemplates.complete_dwarf_beacons = {
 		ID_XB1 = "BeaconOfHope",
 		ID_PS4 = "045",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_dwarf_beacons")
+			return statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_dwarf_beacons") > 0
 		end
 	}
 	AchievementTemplates.khazid_kro_complete_the_brewery_event_in_less_than_x_seconds = {
@@ -1129,20 +1113,20 @@ if PLATFORM ~= "win32" then
 		ID_PS4 = "046",
 		evaluate = function (statistics_db, stats_id)
 			if not Managers.state.entity then
-				return 
+				return
 			end
 
 			local mission_system = Managers.state.entity:system("mission_system")
-			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+			local active_missions, completed_missions = mission_system:get_missions()
 
 			if not completed_missions then
-				return 
+				return
 			end
 
 			local completed_dwarf_interior_stabilize_pressure = completed_missions.dwarf_interior_stabilize_pressure
 
 			if not completed_dwarf_interior_stabilize_pressure then
-				return 
+				return
 			end
 
 			return completed_dwarf_interior_stabilize_pressure.end_time < 240
@@ -1153,20 +1137,20 @@ if PLATFORM ~= "win32" then
 		ID_PS4 = "047",
 		evaluate = function (statistics_db, stats_id)
 			if not Managers.state.entity then
-				return 
+				return
 			end
 
 			local mission_system = Managers.state.entity:system("mission_system")
-			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+			local active_missions, completed_missions = mission_system:get_missions()
 
 			if not completed_missions then
-				return 
+				return
 			end
 
 			local dwarf_beacons_activate_beacon = completed_missions.dwarf_beacons_activate_beacon
 
 			if not dwarf_beacons_activate_beacon then
-				return 
+				return
 			end
 
 			return dwarf_beacons_activate_beacon.generic_counter == 0
@@ -1177,20 +1161,20 @@ if PLATFORM ~= "win32" then
 		ID_PS4 = "048",
 		evaluate = function (statistics_db, stats_id)
 			if not Managers.state.entity then
-				return 
+				return
 			end
 
 			local mission_system = Managers.state.entity:system("mission_system")
-			local active_missions, completed_missions = mission_system.get_missions(mission_system)
+			local active_missions, completed_missions = mission_system:get_missions()
 
 			if not completed_missions then
-				return 
+				return
 			end
 
 			local dwarf_exterior_survive = completed_missions.dwarf_exterior_survive
 
 			if not dwarf_exterior_survive then
-				return 
+				return
 			end
 
 			return dwarf_exterior_survive.generic_counter == 0
@@ -1200,28 +1184,28 @@ if PLATFORM ~= "win32" then
 		ID_XB1 = "PerfectTiming",
 		ID_PS4 = "049",
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "fuse_time_when_socketed") < 2
+			return statistics_db:get_stat(stats_id, "fuse_time_when_socketed") < 2
 		end
 	}
 	AchievementTemplates.kill_a_stormvermin_in_one_blow_using_bardins_pick = {
 		ID_XB1 = "PickHisBrain",
 		ID_PS4 = "050",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "stormvermin_pick_instakills")
+			return statistics_db:get_stat(stats_id, "stormvermin_pick_instakills") > 0
 		end
 	}
 	AchievementTemplates.complete_your_first_contract = {
 		ID_XB1 = "Mercenary",
 		ID_PS4 = "040",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "contracts_completed")
+			return statistics_db:get_stat(stats_id, "contracts_completed") > 0
 		end
 	}
 	AchievementTemplates.complete_your_first_quest = {
 		ID_XB1 = "BountyHunter",
 		ID_PS4 = "041",
 		evaluate = function (statistics_db, stats_id)
-			return 0 < statistics_db.get_stat(statistics_db, stats_id, "quests_completed")
+			return statistics_db:get_stat(stats_id, "quests_completed") > 0
 		end
 	}
 	AchievementTemplates.get_your_first_boon = {
@@ -1234,7 +1218,7 @@ if PLATFORM ~= "win32" then
 				return false
 			end
 
-			local local_player = player_manager.local_player(player_manager)
+			local local_player = player_manager:local_player()
 
 			if not local_player then
 				return false
@@ -1246,7 +1230,7 @@ if PLATFORM ~= "win32" then
 				return false
 			end
 
-			return boon_handler.has_any_boon(boon_handler)
+			return boon_handler:has_any_boon()
 		end
 	}
 end
@@ -1255,11 +1239,11 @@ local function completed_levels(statistics_db, stats_id)
 	local levels_completed = 0
 
 	for _, level_id in ipairs(MainGameLevels) do
-		levels_completed = levels_completed + statistics_db.get_stat(statistics_db, stats_id, "completed_levels", level_id)
+		levels_completed = levels_completed + statistics_db:get_stat(stats_id, "completed_levels", level_id)
 	end
 
 	for _, level_id in ipairs(NoneActLevels) do
-		levels_completed = levels_completed + statistics_db.get_stat(statistics_db, stats_id, "completed_levels", level_id)
+		levels_completed = levels_completed + statistics_db:get_stat(stats_id, "completed_levels", level_id)
 	end
 
 	return levels_completed
@@ -1267,7 +1251,7 @@ end
 
 local function collected_tomes(statistics_db, stats_id)
 	local mission_system = Managers.state.entity:system("mission_system")
-	local tome_mission_data = mission_system.get_level_end_mission_data(mission_system, "tome_bonus_mission")
+	local tome_mission_data = mission_system:get_level_end_mission_data("tome_bonus_mission")
 
 	if not tome_mission_data then
 		return 0
@@ -1278,7 +1262,7 @@ end
 
 local function collected_grimoires(statistics_db, stats_id)
 	local mission_system = Managers.state.entity:system("mission_system")
-	local grimoire_mission_data = mission_system.get_level_end_mission_data(mission_system, "grimoire_hidden_mission")
+	local grimoire_mission_data = mission_system:get_level_end_mission_data("grimoire_hidden_mission")
 
 	if not grimoire_mission_data then
 		return 0
@@ -1299,14 +1283,14 @@ HeroStats = {
 		persistent = false,
 		stat_name = "HeroSkavenKilled",
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "kills_total")
+			return statistics_db:get_stat(stats_id, "kills_total")
 		end
 	},
 	rat_ogres_killed = {
 		persistent = false,
 		stat_name = "HeroOgresKilled",
 		evaluate = function (statistics_db, stats_id)
-			return statistics_db.get_stat(statistics_db, stats_id, "kills_per_breed", "skaven_rat_ogre")
+			return statistics_db:get_stat(stats_id, "kills_per_breed", "skaven_rat_ogre")
 		end
 	},
 	tomes_collected = {
@@ -1336,4 +1320,4 @@ end
 
 AchievementTemplates = templates
 
-return 
+return

@@ -1,9 +1,10 @@
 LobbyMembers = class(LobbyMembers)
+
 LobbyMembers.init = function (self, lobby)
 	self.lobby = lobby
 	self.members_joined = {}
 	self.members_left = {}
-	local members = lobby.members(lobby)
+	local members = lobby:members()
 	local my_members = {}
 
 	for i, peer_id in ipairs(members) do
@@ -12,12 +13,12 @@ LobbyMembers.init = function (self, lobby)
 	end
 
 	self.members = my_members
+end
 
-	return 
-end
 LobbyMembers.clear = function (self)
-	return 
+	return
 end
+
 LobbyMembers.update = function (self)
 	local members_joined = self.members_joined
 	local members_left = self.members_left
@@ -57,20 +58,22 @@ LobbyMembers.update = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 LobbyMembers.get_members_left = function (self)
 	return self.members_left
 end
+
 LobbyMembers.get_members_joined = function (self)
 	return self.members_joined
 end
+
 LobbyMembers.get_members = function (self)
 	return self.lobby:members()
 end
+
 LobbyMembers.members_map = function (self)
 	return self.members
 end
 
-return 
+return

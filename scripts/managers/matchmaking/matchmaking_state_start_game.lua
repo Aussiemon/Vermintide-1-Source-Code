@@ -1,5 +1,6 @@
 MatchmakingStateStartGame = class(MatchmakingStateStartGame)
 MatchmakingStateStartGame.NAME = "MatchmakingStateStartGame"
+
 MatchmakingStateStartGame.init = function (self, params)
 	self.lobby = params.lobby
 	self.network_transmit = params.network_transmit
@@ -7,23 +8,23 @@ MatchmakingStateStartGame.init = function (self, params)
 	self.handshaker_host = params.handshaker_host
 	self.network_server = params.network_server
 	self.statistics_db = params.statistics_db
+end
 
-	return 
-end
 MatchmakingStateStartGame.destroy = function (self)
-	return 
+	return
 end
+
 MatchmakingStateStartGame.on_enter = function (self, state_context)
 	self.state_context = state_context
 
-	self.start_game_countdown(self)
+	self:start_game_countdown()
 	self.network_server:enter_post_game()
+end
 
-	return 
-end
 MatchmakingStateStartGame.on_exit = function (self)
-	return 
+	return
 end
+
 MatchmakingStateStartGame.start_game_countdown = function (self)
 	local current_level_key, _ = self.level_transition_handler:get_current_level_keys()
 
@@ -34,20 +35,20 @@ MatchmakingStateStartGame.start_game_countdown = function (self)
 	else
 		self.not_in_level = true
 	end
-
-	return 
 end
+
 MatchmakingStateStartGame.update = function (self, dt, t)
 	if self.start_game_timer then
-		local start_game = self.update_start_game_timer(self, dt)
+		local start_game = self:update_start_game_timer(dt)
 
 		if start_game then
-			self.start_game(self)
+			self:start_game()
 		end
 	end
 
 	return nil
 end
+
 MatchmakingStateStartGame.update_start_game_timer = function (self, dt)
 	local time = self.start_game_timer
 	time = time + dt
@@ -59,12 +60,11 @@ MatchmakingStateStartGame.update_start_game_timer = function (self, dt)
 	else
 		self.start_game_timer = time
 	end
-
-	return 
 end
+
 MatchmakingStateStartGame.start_game = function (self)
 	local lobby_members = self.lobby:members()
-	local members = lobby_members.get_members(lobby_members)
+	local members = lobby_members:get_members()
 	local nr_friends = 0
 
 	for _, peer_id in pairs(members) do
@@ -87,7 +87,7 @@ MatchmakingStateStartGame.start_game = function (self)
 		local game_search_data = state_context.game_search_data
 		local started_matchmaking_t = game_search_data.started_matchmaking_t
 		local time_manager = Managers.time
-		local t = time_manager.time(time_manager, "game") or started_matchmaking_t
+		local t = time_manager:time("game") or started_matchmaking_t
 		local time_taken = t - started_matchmaking_t
 		local nr_members = table.size(members)
 
@@ -102,8 +102,6 @@ MatchmakingStateStartGame.start_game = function (self)
 
 	self.handshaker_host:send_rpc_to_clients("rpc_matchmaking_join_game")
 	Managers.state.game_mode:complete_level()
-
-	return 
 end
 
-return 
+return

@@ -314,8 +314,6 @@ local widget_definitions = {
 						local current_scroll_value = ui_content.internal_scroll_value
 						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
-
-						return 
 					end
 				}
 			}

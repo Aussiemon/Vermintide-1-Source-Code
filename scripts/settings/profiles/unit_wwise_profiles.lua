@@ -69,4 +69,4 @@ for profile_name, profile_third_person_units in pairs(UnitWwiseProfiles.third_pe
 	end
 end
 
-return 
+return

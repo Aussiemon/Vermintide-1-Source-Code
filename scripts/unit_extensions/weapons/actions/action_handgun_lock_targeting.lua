@@ -1,4 +1,5 @@
 ActionHandgunLockTargeting = class(ActionHandgunLockTargeting)
+
 ActionHandgunLockTargeting.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.owner_unit = owner_unit
 	self.owner_unit_first_person = first_person_unit
@@ -11,9 +12,8 @@ ActionHandgunLockTargeting.init = function (self, world, item_name, is_server, o
 	if ScriptUnit.has_extension(weapon_unit, "ammo_system") then
 		self.ammo_extension = ScriptUnit.extension(weapon_unit, "ammo_system")
 	end
-
-	return 
 end
+
 ActionHandgunLockTargeting.client_owner_start_action = function (self, new_action, t)
 	table.clear(self.targets)
 
@@ -21,13 +21,12 @@ ActionHandgunLockTargeting.client_owner_start_action = function (self, new_actio
 	local ammo_extension = self.ammo_extension
 
 	if ammo_extension then
-		self.max_targets = math.min(ammo_extension.ammo_count(ammo_extension), new_action.max_targets)
+		self.max_targets = math.min(ammo_extension:ammo_count(), new_action.max_targets)
 	else
 		self.max_targets = new_action.max_targets
 	end
-
-	return 
 end
+
 ActionHandgunLockTargeting.client_owner_post_update = function (self, dt, t, world, can_damage)
 	local physics_world = World.get_data(world, "physics_world")
 	local owner_unit_1p = self.owner_unit_first_person
@@ -36,7 +35,7 @@ ActionHandgunLockTargeting.client_owner_post_update = function (self, dt, t, wor
 	local direction = Vector3.normalize(Quaternion.forward(player_rotation))
 
 	if #self.targets == self.max_targets then
-		return 
+		return
 	end
 
 	local collision_filter = "filter_player_ray_projectile_no_player"
@@ -80,9 +79,8 @@ ActionHandgunLockTargeting.client_owner_post_update = function (self, dt, t, wor
 			end
 		end
 	end
-
-	return 
 end
+
 ActionHandgunLockTargeting.finish = function (self, reason)
 	local current_action = self.current_action
 
@@ -101,4 +99,4 @@ ActionHandgunLockTargeting.finish = function (self, reason)
 	return chain_action_data
 end
 
-return 
+return

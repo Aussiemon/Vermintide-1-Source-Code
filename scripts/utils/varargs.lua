@@ -7,7 +7,7 @@ local function iter(...)
 	i = i + 1
 
 	if l < i then
-		return 
+		return
 	end
 
 	return i, t[i]
@@ -31,7 +31,7 @@ end
 
 unpack_index = {
 	[0] = function ()
-		return 
+		return
 	end,
 	function (array, index)
 		return array[index]
@@ -96,33 +96,25 @@ unpack_index = {
 }
 pack_index = {
 	[0] = function ()
-		return 
+		return
 	end,
 	function (array, index, a1)
 		array[index] = a1
-
-		return 
 	end,
 	function (array, index, a1, a2)
 		array[index] = a1
 		array[index + 1] = a2
-
-		return 
 	end,
 	function (array, index, a1, a2, a3)
 		array[index] = a1
 		array[index + 1] = a2
 		array[index + 2] = a3
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4)
 		array[index] = a1
 		array[index + 1] = a2
 		array[index + 2] = a3
 		array[index + 3] = a4
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5)
 		array[index] = a1
@@ -130,8 +122,6 @@ pack_index = {
 		array[index + 2] = a3
 		array[index + 3] = a4
 		array[index + 4] = a5
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6)
 		array[index] = a1
@@ -140,8 +130,6 @@ pack_index = {
 		array[index + 3] = a4
 		array[index + 4] = a5
 		array[index + 5] = a6
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7)
 		array[index] = a1
@@ -151,8 +139,6 @@ pack_index = {
 		array[index + 4] = a5
 		array[index + 5] = a6
 		array[index + 6] = a7
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8)
 		array[index] = a1
@@ -163,8 +149,6 @@ pack_index = {
 		array[index + 5] = a6
 		array[index + 6] = a7
 		array[index + 7] = a8
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9)
 		array[index] = a1
@@ -176,8 +160,6 @@ pack_index = {
 		array[index + 6] = a7
 		array[index + 7] = a8
 		array[index + 8] = a9
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
 		array[index] = a1
@@ -190,8 +172,6 @@ pack_index = {
 		array[index + 7] = a8
 		array[index + 8] = a9
 		array[index + 9] = a10
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)
 		array[index] = a1
@@ -205,8 +185,6 @@ pack_index = {
 		array[index + 8] = a9
 		array[index + 9] = a10
 		array[index + 10] = a11
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)
 		array[index] = a1
@@ -221,8 +199,6 @@ pack_index = {
 		array[index + 9] = a10
 		array[index + 10] = a11
 		array[index + 11] = a12
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)
 		array[index] = a1
@@ -238,8 +214,6 @@ pack_index = {
 		array[index + 10] = a11
 		array[index + 11] = a12
 		array[index + 12] = a13
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)
 		array[index] = a1
@@ -256,8 +230,6 @@ pack_index = {
 		array[index + 11] = a12
 		array[index + 12] = a13
 		array[index + 13] = a14
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)
 		array[index] = a1
@@ -275,8 +247,6 @@ pack_index = {
 		array[index + 12] = a13
 		array[index + 13] = a14
 		array[index + 14] = a15
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)
 		array[index] = a1
@@ -295,8 +265,6 @@ pack_index = {
 		array[index + 13] = a14
 		array[index + 14] = a15
 		array[index + 15] = a16
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)
 		array[index] = a1
@@ -316,8 +284,6 @@ pack_index = {
 		array[index + 14] = a15
 		array[index + 15] = a16
 		array[index + 16] = a17
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)
 		array[index] = a1
@@ -338,8 +304,6 @@ pack_index = {
 		array[index + 15] = a16
 		array[index + 16] = a17
 		array[index + 17] = a18
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)
 		array[index] = a1
@@ -361,8 +325,6 @@ pack_index = {
 		array[index + 16] = a17
 		array[index + 17] = a18
 		array[index + 18] = a19
-
-		return 
 	end,
 	function (array, index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)
 		array[index] = a1
@@ -385,9 +347,7 @@ pack_index = {
 		array[index + 17] = a18
 		array[index + 18] = a19
 		array[index + 19] = a20
-
-		return 
 	end
 }
 
-return 
+return

@@ -4,6 +4,7 @@ local drag_colors = {
 	normal = Colors.get_color_table_with_alpha("drag_same_slot", 255),
 	hover = Colors.get_color_table_with_alpha("drag_same_slot_hover", 255)
 }
+
 ForgeUpgradeUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
@@ -24,21 +25,18 @@ ForgeUpgradeUI.init = function (self, parent, position, animation_definitions, i
 	self.scenegraph_definition.page_root.position = position
 	self.animations = {}
 
-	self.create_ui_elements(self)
-	self.clear_item_display_data(self)
-
-	return 
+	self:create_ui_elements()
+	self:clear_item_display_data()
 end
+
 ForgeUpgradeUI.on_enter = function (self)
-	self.remove_item(self)
-
-	return 
+	self:remove_item()
 end
+
 ForgeUpgradeUI.set_gamepad_focus = function (self, enabled)
 	self.use_gamepad = enabled
-
-	return 
 end
+
 ForgeUpgradeUI.handle_gamepad_input = function (self, dt)
 	local input_manager = self.input_manager
 	local input_service = self.parent:page_input_service()
@@ -48,18 +46,18 @@ ForgeUpgradeUI.handle_gamepad_input = function (self, dt)
 	local upgrade_disabled = upgrade_button_widget.content.button_hotspot.disabled
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad and self.active_item_id then
-		if (input_service.get(input_service, "back", true) or input_service.get(input_service, "special_1")) and not self.upgrading then
+		if (input_service:get("back", true) or input_service:get("special_1")) and not self.upgrading then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 			self.gamepad_item_remove_request = true
-		elseif input_service.get(input_service, "refresh_press") and not self.upgrading and not self.charging then
+		elseif input_service:get("refresh_press") and not self.upgrading and not self.charging then
 			if not upgrade_disabled then
-				self.start_charge_progress(self)
+				self:start_charge_progress()
 			end
-		elseif self.charging and not input_service.get(input_service, "refresh_hold", nil, true) and not upgrade_disabled then
-			self.abort_charge_progress(self)
+		elseif self.charging and not input_service:get("refresh_hold", nil, true) and not upgrade_disabled then
+			self:abort_charge_progress()
 
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 		end
@@ -71,10 +69,10 @@ ForgeUpgradeUI.handle_gamepad_input = function (self, dt)
 			if number_of_traits_on_item and selected_trait_index then
 				local new_trait_index = nil
 
-				if input_service.get(input_service, "move_right") then
+				if input_service:get("move_right") then
 					new_trait_index = math.min(selected_trait_index + 1, number_of_traits_on_item)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
-				elseif input_service.get(input_service, "move_left") then
+				elseif input_service:get("move_left") then
 					new_trait_index = math.max(selected_trait_index - 1, 1)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 				end
@@ -85,9 +83,8 @@ ForgeUpgradeUI.handle_gamepad_input = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.widgets = {}
@@ -107,23 +104,22 @@ ForgeUpgradeUI.create_ui_elements = function (self)
 		self.animations.eye_glow = UIAnimation.init(UIAnimation.pulse_animation, upgrade_button_widget.style.eye_glow_texture.color, 1, 150, 255, 2)
 		self.animations.gamepad_glow = UIAnimation.init(UIAnimation.pulse_animation, upgrade_button_widget.style.gamepad_glow_texture.color, 1, 150, 255, 2)
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.update = function (self, dt)
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	if gamepad_active then
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 	end
 
 	self.upgrade_completed = nil
@@ -138,7 +134,7 @@ ForgeUpgradeUI.update = function (self, dt)
 		end
 	end
 
-	self.handle_gamepad_input(self, dt)
+	self:handle_gamepad_input(dt)
 
 	for name, animation in pairs(self.animations) do
 		UIAnimation.update(animation, dt)
@@ -146,7 +142,7 @@ ForgeUpgradeUI.update = function (self, dt)
 		if UIAnimation.completed(animation) then
 			self.animations[name] = nil
 
-			self.on_charge_animations_complete(self, name)
+			self:on_charge_animations_complete(name)
 		end
 	end
 
@@ -157,19 +153,19 @@ ForgeUpgradeUI.update = function (self, dt)
 
 	if item_slot_button_hotspot.on_hover_enter and not self.upgrading then
 		if self.active_item_id then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 		end
 
 		local bar_settings = UISettings.inventory.button_bars
 		local fade_in_time = bar_settings.background.fade_in_time
 		local alpha_hover = bar_settings.background.alpha_hover
 		local widget_hover_color = widget.style.hover_texture.color
-		self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
+		self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
 	elseif item_slot_button_hotspot.on_hover_exit then
 		local bar_settings = UISettings.inventory.button_bars
 		local fade_out_time = bar_settings.background.fade_out_time
 		local widget_hover_color = widget.style.hover_texture.color
-		self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
+		self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
 	end
 
 	if not self.upgrading then
@@ -189,15 +185,15 @@ ForgeUpgradeUI.update = function (self, dt)
 	local upgrade_button_hotspot = upgrade_button_content.button_hotspot
 
 	if upgrade_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
-	if not self.upgrading and self.is_upgrade_possible(self) and (upgrade_button_hotspot.on_release or self.gamepad_upgrade_request) then
-		if self.can_afford_upgrade_cost(self) then
+	if not self.upgrading and self:is_upgrade_possible() and (upgrade_button_hotspot.on_release or self.gamepad_upgrade_request) then
+		if self:can_afford_upgrade_cost() then
 			self.upgrading_trait_index = self.selected_trait_index
 			self.upgrade_request = true
 		else
-			self.upgrade_failed(self)
+			self:upgrade_failed()
 		end
 	end
 
@@ -212,7 +208,7 @@ ForgeUpgradeUI.update = function (self, dt)
 			local button_hotspot = widget.content.button_hotspot
 
 			if button_hotspot.on_hover_enter and not button_hotspot.is_selected and current_traits_data[i] then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 		end
 	end
@@ -223,8 +219,8 @@ ForgeUpgradeUI.update = function (self, dt)
 		local button_hotspot = widget.content.button_hotspot
 
 		if (button_hotspot.on_pressed or self.gamepad_changed_selected_trait_index == i) and not button_hotspot.is_selected and i ~= self.selected_trait_index then
-			self.play_sound(self, "Play_hud_select")
-			self.set_selected_trait(self, i)
+			self:play_sound("Play_hud_select")
+			self:set_selected_trait(i)
 
 			widget.content.button_hotspot.on_pressed = nil
 
@@ -234,37 +230,35 @@ ForgeUpgradeUI.update = function (self, dt)
 
 	self.gamepad_changed_selected_trait_index = nil
 
-	self.on_item_dragged(self)
+	self:on_item_dragged()
 
-	if self.is_dragging_started(self) then
-		self.play_sound(self, "Play_hud_inventory_pickup_item")
+	if self:is_dragging_started() then
+		self:play_sound("Play_hud_inventory_pickup_item")
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.is_dragging_started = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	return widget.content.on_drag_started
 end
+
 ForgeUpgradeUI.on_item_hover_enter = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_enter then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.on_item_hover_exit = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_exit then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.is_slot_hovered = function (self, is_dragging_item)
 	local widget = self.widgets_by_name.item_button_widget
 	local internal_is_hover = widget.content.button_hotspot.internal_is_hover
@@ -284,6 +278,7 @@ ForgeUpgradeUI.is_slot_hovered = function (self, is_dragging_item)
 
 	return internal_is_hover
 end
+
 ForgeUpgradeUI.on_dragging_item_stopped = function (self)
 	local active_item_id = self.active_item_id
 
@@ -294,9 +289,8 @@ ForgeUpgradeUI.on_dragging_item_stopped = function (self)
 			return active_item_id
 		end
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.on_item_dragged = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 	local content = widget.content
@@ -307,9 +301,8 @@ ForgeUpgradeUI.on_item_dragged = function (self)
 	elseif content.on_drag_stopped and icon_color[1] ~= 255 then
 		icon_color[1] = 255
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.set_selected_trait = function (self, selected_index)
 	local num_traits = ForgeSettings.num_traits
 	local widgets_by_name = self.widgets_by_name
@@ -348,13 +341,12 @@ ForgeUpgradeUI.set_selected_trait = function (self, selected_index)
 		self.selected_trait_widget_name = nil
 	end
 
-	self.set_upgrade_button_disabled(self, is_trait_unlocked)
-	self.update_trait_cost_display(self, is_trait_unlocked)
+	self:set_upgrade_button_disabled(is_trait_unlocked)
+	self:update_trait_cost_display(is_trait_unlocked)
 
 	self.selected_trait_index = selected_index
-
-	return 
 end
+
 ForgeUpgradeUI.clear_item_display_data = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = ForgeSettings.num_traits
@@ -375,12 +367,11 @@ ForgeUpgradeUI.clear_item_display_data = function (self)
 	description_widget.content.text = ""
 	description_widget.content.visible = false
 
-	self.set_description_text(self, "upgrade_description_1")
-	self.set_upgrade_button_disabled(self, true)
-	self.update_trait_alignment(self, num_traits - 1)
-
-	return 
+	self:set_description_text("upgrade_description_1")
+	self:set_upgrade_button_disabled(true)
+	self:update_trait_alignment(num_traits - 1)
 end
+
 ForgeUpgradeUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
@@ -399,41 +390,39 @@ ForgeUpgradeUI.draw = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 ForgeUpgradeUI.set_upgrade_button_disabled = function (self, disabled)
 	local widgets_by_name = self.widgets_by_name
 	local upgrade_button_widget = widgets_by_name.upgrade_button_widget
 	upgrade_button_widget.content.button_hotspot.disabled = disabled
 	upgrade_button_widget.content.show_title = disabled
-
-	return 
 end
+
 ForgeUpgradeUI.is_upgrade_possible = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local upgrade_button_widget = widgets_by_name.upgrade_button_widget
 
 	return not upgrade_button_widget.content.button_hotspot.disabled
 end
+
 ForgeUpgradeUI.set_description_text = function (self, text)
 	local widgets_by_name = self.widgets_by_name
 	local description_widget = widgets_by_name.description_text_1
 	description_widget.content.text = text
-
-	return 
 end
+
 ForgeUpgradeUI.add_item = function (self, backend_item_id)
 	local upgrade_button_widget = self.widgets_by_name.upgrade_button_widget
 
 	if self.charging or upgrade_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
-	self.clear_item_display_data(self)
-	self.play_sound(self, "Play_hud_inventory_drop_item")
+	self:clear_item_display_data()
+	self:play_sound("Play_hud_inventory_drop_item")
 
 	local item_data = BackendUtils.get_item_from_masterlist(backend_item_id)
 	local icon_texture = item_data.inventory_icon
@@ -499,23 +488,22 @@ ForgeUpgradeUI.add_item = function (self, backend_item_id)
 	self.current_traits_data = current_traits_data
 	self.number_of_owned_traits = num_owned_traits
 
-	if 0 < number_of_traits_on_item then
-		self.set_upgrade_button_disabled(self, false)
+	if number_of_traits_on_item > 0 then
+		self:set_upgrade_button_disabled(false)
 	end
 
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	self.update_trait_alignment(self, number_of_traits_on_item)
-	self.set_selected_trait(self, first_locked_trait_index or 1)
+	self:update_trait_alignment(number_of_traits_on_item)
+	self:set_selected_trait(first_locked_trait_index or 1)
 
 	if can_unlock_traits_on_this_item then
-		self.set_description_text(self, "upgrade_description_2")
+		self:set_description_text("upgrade_description_2")
 	else
-		self.set_description_text(self, "upgrade_description_3")
+		self:set_description_text("upgrade_description_3")
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
@@ -538,13 +526,12 @@ ForgeUpgradeUI.update_trait_alignment = function (self, number_of_traits)
 		local widget = widgets_by_name[widget_name]
 		widget.content.visible = (i <= number_of_traits and true) or false
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.update_trait_cost_display = function (self, is_trait_unlocked)
 	local upgrade_button_widget = self.widgets_by_name.upgrade_button_widget
-	local can_afford = self.can_afford_upgrade_cost(self)
-	local token_type, traits_cost, texture = self.get_upgrade_cost(self)
+	local can_afford = self:can_afford_upgrade_cost()
+	local token_type, traits_cost, texture = self:get_upgrade_cost()
 
 	if traits_cost then
 		upgrade_button_widget.content.texture_token_type = texture
@@ -575,9 +562,8 @@ ForgeUpgradeUI.update_trait_cost_display = function (self, is_trait_unlocked)
 		upgrade_button_widget.style.text_selected.text_color = Colors.get_table("red", 255)
 		upgrade_button_widget.style.text.text_color = Colors.get_table("red", 255)
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.get_upgrade_cost = function (self)
 	local item_data = self.active_item_data
 	local number_of_owned_traits = self.number_of_owned_traits or 0
@@ -592,19 +578,20 @@ ForgeUpgradeUI.get_upgrade_cost = function (self)
 
 	return token_type, token_cost, token_texture
 end
+
 ForgeUpgradeUI.can_afford_upgrade_cost = function (self)
-	local token_type, traits_cost = self.get_upgrade_cost(self)
+	local token_type, traits_cost = self:get_upgrade_cost()
 	local num_tokens_owned = BackendUtils.get_tokens(token_type)
 
 	return (traits_cost and traits_cost <= num_tokens_owned) or false
 end
+
 ForgeUpgradeUI.refresh = function (self)
 	local selected_index = self.selected_trait_index
 
-	self.set_selected_trait(self, selected_index)
-
-	return 
+	self:set_selected_trait(selected_index)
 end
+
 ForgeUpgradeUI.remove_item = function (self)
 	self.number_of_traits_on_item = nil
 	local widgets_by_name = self.widgets_by_name
@@ -617,7 +604,7 @@ ForgeUpgradeUI.remove_item = function (self)
 	end
 
 	if self.active_item_id then
-		self.play_sound(self, "Play_hud_forge_item_remove")
+		self:play_sound("Play_hud_forge_item_remove")
 	end
 
 	self.active_item_id = nil
@@ -627,16 +614,15 @@ ForgeUpgradeUI.remove_item = function (self)
 	if self.charging or upgrade_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
-	self.clear_item_display_data(self)
-
-	return 
+	self:clear_item_display_data()
 end
+
 ForgeUpgradeUI.upgrade = function (self)
 	if self.charging then
-		return 
+		return
 	end
 
 	self.upgrading = true
@@ -646,48 +632,44 @@ ForgeUpgradeUI.upgrade = function (self)
 	self.number_of_owned_traits = math.min(self.number_of_owned_traits + 1, ForgeSettings.num_traits)
 	self.upgrade_animation = UIAnimation.init(UIAnimation.function_by_time, widget.style.texture_glow_id.color, 1, 0, 255, 0.5, math.easeInCubic, UIAnimation.function_by_time, widget.style.texture_lock_id.color, 1, 255, 0, 0.5, math.easeInCubic, UIAnimation.function_by_time, widget.style.texture_glow_id.color, 1, 255, 0, 0.5, math.easeInCubic)
 
-	self.set_upgrade_button_disabled(self, true)
-	self.update_trait_cost_display(self, true)
+	self:set_upgrade_button_disabled(true)
+	self:update_trait_cost_display(true)
 
 	local selected_index = self.upgrading_trait_index
 	self.upgrading_trait_index = nil
 	local description_text = BackendUtils.get_item_trait_description(self.active_item_id, selected_index)
 	self.current_traits_data[selected_index].description_text = description_text
 
-	self.set_selected_trait(self, selected_index)
-
-	return 
+	self:set_selected_trait(selected_index)
 end
+
 ForgeUpgradeUI.upgrade_failed = function (self)
 	self.upgrading_trait_index = nil
-
-	return 
 end
+
 ForgeUpgradeUI.display_upgrade_failure_message = function (self)
 	local description_failure = self.widgets_by_name.description_failure
 	local failure_color = description_failure.style.text.text_color
 	self.animations.failure_message = UIAnimation.init(UIAnimation.function_by_time, failure_color, 1, 0, 255, 0.1, math.easeCubic, UIAnimation.wait, 2, UIAnimation.function_by_time, failure_color, 1, 255, 0, 1.5, math.easeInCubic)
-
-	return 
 end
+
 ForgeUpgradeUI.hide_upgrade_failure_message = function (self)
 	self.animations.failure_message = nil
 	local description_failure = self.widgets_by_name.description_failure
 	local failure_color = description_failure.style.text.text_color
 	failure_color[1] = 0
-
-	return 
 end
+
 ForgeUpgradeUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 ForgeUpgradeUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 ForgeUpgradeUI.start_charge_progress = function (self)
 	self.charging = true
 	local animation_name = "gamepad_charge_progress"
@@ -698,15 +680,14 @@ ForgeUpgradeUI.start_charge_progress = function (self)
 	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.upgrade_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
 	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
 
-	self.cancel_abort_animation(self)
+	self:cancel_abort_animation()
 
 	widget.content.charging = true
 	widget.style.progress_fill.color[1] = 255
 
-	self.play_sound(self, "Play_hud_forge_charge")
-
-	return 
+	self:play_sound("Play_hud_forge_charge")
 end
+
 ForgeUpgradeUI.abort_charge_progress = function (self, force_shutdown)
 	local animation_name = "gamepad_charge_progress"
 	self.animations[animation_name] = nil
@@ -714,16 +695,15 @@ ForgeUpgradeUI.abort_charge_progress = function (self, force_shutdown)
 	self.charging = nil
 	self.ui_scenegraph.upgrade_button_fill.size[1] = 0
 
-	self.play_sound(self, "Stop_hud_forge_charge")
+	self:play_sound("Stop_hud_forge_charge")
 
 	if force_shutdown then
-		self.cancel_abort_animation(self)
+		self:cancel_abort_animation()
 	else
-		self.start_abort_animation(self)
+		self:start_abort_animation()
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.on_charge_complete = function (self)
 	self.charging = nil
 	self.gamepad_upgrade_request = true
@@ -740,10 +720,9 @@ ForgeUpgradeUI.on_charge_complete = function (self)
 	widget.style.text_disabled.text_color[1] = 0
 	widget.style.texture_token_type.color[1] = 0
 
-	self.play_sound(self, "Stop_hud_forge_charge")
-
-	return 
+	self:play_sound("Stop_hud_forge_charge")
 end
+
 ForgeUpgradeUI.start_abort_animation = function (self)
 	local animation_name = "gamepad_charge_progress_abort"
 	local from = 0
@@ -756,9 +735,8 @@ ForgeUpgradeUI.start_abort_animation = function (self)
 	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
-
-	return 
 end
+
 ForgeUpgradeUI.cancel_abort_animation = function (self)
 	local animations = self.animations
 	animations.gamepad_charge_progress_abort = nil
@@ -781,21 +759,19 @@ ForgeUpgradeUI.cancel_abort_animation = function (self)
 	widget.style.text_disabled.text_color[1] = 255
 	widget.style.token_text.text_color[1] = 255
 	widget.style.text.text_color[1] = 255
-
-	return 
 end
+
 ForgeUpgradeUI.on_charge_animations_complete = function (self, animation_name)
 	if animation_name == "gamepad_charge_progress" then
-		self.on_charge_complete(self)
+		self:on_charge_complete()
 	end
 
 	if animation_name == "gamepad_charge_progress_abort" then
 		local widget = self.widgets_by_name.upgrade_button_widget
 		widget.content.show_cancel_text = false
 	end
-
-	return 
 end
+
 ForgeUpgradeUI.on_gamepad_activated = function (self)
 	local input_service = self.input_manager:get_service("forge_view")
 	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
@@ -803,12 +779,12 @@ ForgeUpgradeUI.on_gamepad_activated = function (self)
 	local button_size = button_texture_data.size
 	local widget = self.widgets_by_name.upgrade_button_widget
 	widget.content.progress_input_icon = button_texture
+end
 
-	return 
-end
 ForgeUpgradeUI.on_gamepad_deactivated = function (self)
-	return 
+	return
 end
+
 ForgeUpgradeUI.set_active = function (self, active)
 	self.active = active
 	local widget = self.widgets_by_name.upgrade_button_widget
@@ -816,10 +792,8 @@ ForgeUpgradeUI.set_active = function (self, active)
 	if self.charging or widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
-
-	return 
 end
 
-return 
+return

@@ -48,7 +48,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		},
 		give_item = ActionTemplates.give_item_on_defend
@@ -129,4 +129,4 @@ Weapons.invulnerability_potion.pickup_data = {
 	pickup_name = "invulnerability_potion"
 }
 
-return 
+return

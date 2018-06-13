@@ -143,8 +143,6 @@ end
 for _, message_name in ipairs(NetworkLookup.matchmaking_messages) do
 	RPC[message_name] = function (recipient, ...)
 		RPC.rpc_matchmaking_generic_message(recipient, NetworkLookup.matchmaking_messages[message_name], ...)
-
-		return 
 	end
 end
 
@@ -1565,8 +1563,6 @@ local function statistics_path_names(path_names, stat)
 			statistics_path_names(path_names, stat_definition)
 		end
 	end
-
-	return 
 end
 
 local path_names = {}
@@ -1611,14 +1607,10 @@ local function init(self, name)
 	local meta = {
 		__index = function (_, key)
 			error(index_error_print .. tostring(key))
-
-			return 
 		end
 	}
 
 	setmetatable(self, meta)
-
-	return 
 end
 
 local DialogueLookup = DialogueLookup
@@ -1630,4 +1622,4 @@ for key, lookup_table in pairs(NetworkLookup) do
 	init(lookup_table, key)
 end
 
-return 
+return

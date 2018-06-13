@@ -62,9 +62,7 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
-
-				return 
+				input_extension:clear_input_buffer()
 			end,
 			projectile_info = Projectiles.spark
 		},
@@ -128,9 +126,7 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
-
-				return 
+				input_extension:clear_input_buffer()
 			end,
 			projectile_info = Projectiles.spark
 		},
@@ -207,10 +203,8 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
-				input_extension.clear_input_buffer(input_extension)
-
-				return 
+				input_extension:reset_release_input()
+				input_extension:clear_input_buffer()
 			end,
 			projectile_info = Projectiles.spear
 		},
@@ -280,10 +274,8 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
-				input_extension.clear_input_buffer(input_extension)
-
-				return 
+				input_extension:reset_release_input()
+				input_extension:clear_input_buffer()
 			end,
 			projectile_info = Projectiles.spear_2
 		},
@@ -353,10 +345,8 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.reset_release_input(input_extension)
-				input_extension.clear_input_buffer(input_extension)
-
-				return 
+				input_extension:reset_release_input()
+				input_extension:clear_input_buffer()
 			end,
 			projectile_info = Projectiles.spear_3
 		}
@@ -585,4 +575,4 @@ Weapons.staff_spark_spear_template_1_t3.actions.action_one.shoot_charged_3.proje
 Weapons.staff_spark_spear_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.3125
 Weapons.staff_spark_spear_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 1
 
-return 
+return

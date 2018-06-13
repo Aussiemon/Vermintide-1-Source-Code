@@ -6,25 +6,25 @@ if _G.PoolTableVisualizer == nil then
 end
 
 PoolTableVisualizer.templates = templates
+
 PoolTableVisualizer.setup = function (world)
 	PoolTableVisualizer.world = world
 	PoolTableVisualizer.gui = World.create_screen_gui(world, "material", "materials/fonts/gw_fonts", "immediate")
-
-	return 
 end
+
 PoolTableVisualizer.destroy = function ()
 	World.destroy_gui(PoolTableVisualizer.gui)
 
 	PoolTableVisualizer.world = nil
-
-	return 
 end
+
 local font_size = 14
 local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
+
 PoolTableVisualizer.render = function (t)
 	if not script_data.profile_pool_tables then
-		return 
+		return
 	end
 
 	Profiler.start("PoolTableVisualizer")
@@ -103,8 +103,6 @@ PoolTableVisualizer.render = function (t)
 	end
 
 	Profiler.stop("PoolTableVisualizer")
-
-	return 
 end
 
-return 
+return

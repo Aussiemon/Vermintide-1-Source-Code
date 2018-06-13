@@ -1,5 +1,6 @@
 UICleanUI = {}
 local UICleanUI = UICleanUI
+
 UICleanUI.create = function ()
 	return {
 		was_enabled = false,
@@ -7,11 +8,13 @@ UICleanUI.create = function ()
 		widget_area_map = {}
 	}
 end
+
 TOBII_HAS_BEEN_INITIALIZED = TOBII_HAS_BEEN_INITIALIZED or false
 
 if rawget(_G, "Tobii") and not TOBII_HAS_BEEN_INITIALIZED then
 	TOBII_HAS_BEEN_INITIALIZED = true
 	local get_gaze_point_orig = Tobii.get_gaze_point
+
 	Tobii.get_gaze_point = function ()
 		local gaze_x, gaze_y = get_gaze_point_orig()
 
@@ -20,6 +23,7 @@ if rawget(_G, "Tobii") and not TOBII_HAS_BEEN_INITIALIZED then
 end
 
 local min_alpha_value_name = "tobii_clean_ui_alpha"
+
 UICleanUI.update = function (self, dt)
 	local is_enabled = rawget(_G, "Tobii") and Application.user_setting("tobii_eyetracking") and Application.user_setting("tobii_clean_ui")
 	is_enabled = is_enabled and Tobii.device_status() == Tobii.DEVICE_TRACKING
@@ -38,7 +42,7 @@ UICleanUI.update = function (self, dt)
 	self.was_enabled = is_enabled
 
 	if not is_enabled then
-		return 
+		return
 	end
 
 	local min_alpha_value = Application.user_setting(min_alpha_value_name) or DefaultUserSettings[min_alpha_value_name]
@@ -68,7 +72,7 @@ UICleanUI.update = function (self, dt)
 			local timer = area.timer + dt
 			area.timer = timer
 
-			if 0.5 < timer then
+			if timer > 0.5 then
 				local alpha_scale = math.max(area.alpha_scale - dt * 2, min_alpha_value)
 
 				if area.alpha_scale ~= alpha_scale then
@@ -84,11 +88,11 @@ UICleanUI.update = function (self, dt)
 			area.alpha_scale = 1
 		end
 	end
-
-	return 
 end
+
 local SCREEN_MAX_X = 1920
 local SCREEN_MAX_Y = 1080
+
 UICleanUI.debug_draw = function (self, ui_renderer)
 	local areas = self.areas
 	local n_areas = #areas
@@ -114,9 +118,8 @@ UICleanUI.debug_draw = function (self, ui_renderer)
 
 		UIRenderer.draw_rect(ui_renderer, llc, size, color)
 	end
-
-	return 
 end
+
 UICleanUI.has_registered_area = function (self, name)
 	local areas = self.areas
 
@@ -127,11 +130,11 @@ UICleanUI.has_registered_area = function (self, name)
 			return true, i
 		end
 	end
-
-	return 
 end
+
 local SCREEN_MAX_X = 1920
 local SCREEN_MAX_Y = 1080
+
 UICleanUI.register_area = function (self, name, widget, position, size, aligns_x)
 	local center = {
 		center[1] / SCREEN_MAX_X,
@@ -166,17 +169,15 @@ UICleanUI.register_area = function (self, name, widget, position, size, aligns_x
 	area.aligns_x = aligns_x
 	self.areas[area_index] = area
 	self.widget_area_map[widget] = area
-
-	return 
 end
+
 UICleanUI.get_alpha = function (self, widget)
 	return self.widget_area_map[widget].alpha_scale
 end
+
 UICleanUI.reset_area = function (self, widget)
 	self.widget_area_map[widget].alpha_scale = 1
 	self.widget_area_map[widget].timer = 0
-
-	return 
 end
 
-return 
+return

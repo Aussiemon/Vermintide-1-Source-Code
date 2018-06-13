@@ -1,12 +1,12 @@
 ScriptFetchLeaderboardToken = class(ScriptFetchLeaderboardToken)
+
 ScriptFetchLeaderboardToken.init = function (self, token, callback)
 	self._token = token
 	self._done = false
 	self._callback = callback
 	self._result = nil
-
-	return 
 end
+
 ScriptFetchLeaderboardToken.update = function (self)
 	local token = self._token
 	local progress_data = Leaderboard.progress(token)
@@ -18,9 +18,8 @@ ScriptFetchLeaderboardToken.update = function (self)
 		self._total_scores = progress_data.total_scores
 		self._entry_count = progress_data.leaderboard_entry_count
 	end
-
-	return 
 end
+
 ScriptFetchLeaderboardToken.info = function (self)
 	local info = {
 		result = self._result,
@@ -32,13 +31,13 @@ ScriptFetchLeaderboardToken.info = function (self)
 
 	return info
 end
+
 ScriptFetchLeaderboardToken.done = function (self)
 	return self._done
 end
+
 ScriptFetchLeaderboardToken.close = function (self)
 	Leaderboard.close(self._token)
-
-	return 
 end
 
-return 
+return

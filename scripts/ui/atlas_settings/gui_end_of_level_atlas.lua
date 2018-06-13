@@ -1625,4 +1625,4 @@ end_of_level_atlas = {
 	}
 }
 
-return 
+return

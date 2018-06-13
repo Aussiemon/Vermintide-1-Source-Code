@@ -12,6 +12,7 @@ local widgets = definitions.widgets
 local DO_RELOAD = false
 StateMapViewOverview = class(StateMapViewOverview)
 StateMapViewOverview.NAME = "StateMapViewOverview"
+
 StateMapViewOverview.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewOverview")
 
@@ -31,7 +32,7 @@ StateMapViewOverview.on_enter = function (self, params)
 	self.popup_handler = self.ingame_ui.popup_handler
 	self.is_server = ingame_ui_context.is_server
 	local player = self.player_manager:local_player()
-	local player_stats_id = player.stats_id(player)
+	local player_stats_id = player:stats_id()
 	local network_manager = Managers.state.network
 	local network_transmit = network_manager.network_transmit
 	local server_peer_id = network_transmit.server_peer_id
@@ -48,8 +49,6 @@ StateMapViewOverview.on_enter = function (self, params)
 			else
 				return StateMapViewSelectLevel
 			end
-
-			return 
 		end,
 		function (game_info)
 			return StateMapViewSelectDifficulty
@@ -62,23 +61,22 @@ StateMapViewOverview.on_enter = function (self, params)
 		end
 	}
 
-	self._setup_game_information(self)
+	self:_setup_game_information()
 
 	self.platform = PLATFORM
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	local input_service = self.input_manager:get_service("map_menu")
 	local gui_layer = UILayer.default + 30
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 5, gui_layer, generic_input_actions.default)
 
 	self.menu_input_description:set_input_description(nil)
-	self._setup_own_player_in_player_list(self)
-	self._apply_information(self)
-
-	return 
+	self:_setup_own_player_in_player_list()
+	self:_apply_information()
 end
+
 StateMapViewOverview._setup_game_information = function (self)
 	print("------------------------------------------")
 	print("----------SETUP GAME INFORMATION----------")
@@ -87,11 +85,11 @@ StateMapViewOverview._setup_game_information = function (self)
 	local map_view_area_handler = self.map_view_area_handler
 	local map_view_helper = self.map_view_helper
 	local game_info = self.params.game_info
-	local active_game_mode = map_view_area_handler.active_game_mode(map_view_area_handler)
+	local active_game_mode = map_view_area_handler:active_game_mode()
 	local game_mode_changed = game_info.previous_info.game_mode and game_info.game_mode ~= game_info.previous_info.game_mode
 	game_info.previous_info.game_mode = nil
 
-	if ((active_game_mode and active_game_mode == "survival") or (game_info.game_mode and game_info.game_mode == "survival")) and not map_view_helper.is_survival_unlocked(map_view_helper) then
+	if ((active_game_mode and active_game_mode == "survival") or (game_info.game_mode and game_info.game_mode == "survival")) and not map_view_helper:is_survival_unlocked() then
 		active_game_mode = nil
 		game_info.game_mode = nil
 		game_mode_changed = true
@@ -100,26 +98,26 @@ StateMapViewOverview._setup_game_information = function (self)
 	if not active_game_mode then
 		local default_game_mode = game_info.game_mode or "adventure"
 
-		map_view_area_handler.set_active_game_mode(map_view_area_handler, default_game_mode)
+		map_view_area_handler:set_active_game_mode(default_game_mode)
 
 		game_info.game_mode = default_game_mode
 	else
 		game_info.game_mode = active_game_mode
 	end
 
-	local active_area = map_view_area_handler.active_area(map_view_area_handler)
+	local active_area = map_view_area_handler:active_area()
 
 	if game_info.game_mode == "adventure" and (not active_area or active_area == "world") then
 		local default_area = "ubersreik"
 
-		map_view_area_handler.set_active_area(map_view_area_handler, default_area)
+		map_view_area_handler:set_active_area(default_area)
 
 		game_info.area = default_area
 	else
 		game_info.area = active_area
 	end
 
-	local selected_level_index = game_info.level_index or map_view_area_handler.selected_level_index(map_view_area_handler)
+	local selected_level_index = game_info.level_index or map_view_area_handler:selected_level_index()
 
 	if not selected_level_index or game_mode_changed then
 		local default_level_index = 1
@@ -130,7 +128,7 @@ StateMapViewOverview._setup_game_information = function (self)
 
 	local play_sound = false
 	local instant_change = true
-	local level_information = map_view_area_handler.set_selected_level(map_view_area_handler, game_info.level_index, play_sound, instant_change)
+	local level_information = map_view_area_handler:set_selected_level(game_info.level_index, play_sound, instant_change)
 	local level_filter_list = game_info.level_filter_list or self.level_filter:get_unmarked_levels()
 	game_info.level_filter_list = level_filter_list
 
@@ -141,7 +139,7 @@ StateMapViewOverview._setup_game_information = function (self)
 	local default_difficulty_rank = 2
 	local difficulty_data = level_information.difficulty_data
 	local selected_difficulty_rank = game_info.difficulty_rank or default_difficulty_rank
-	local unlocked_rank = self._get_closest_unlocked_rank(self, selected_difficulty_rank, difficulty_data)
+	local unlocked_rank = self:_get_closest_unlocked_rank(selected_difficulty_rank, difficulty_data)
 	game_info.difficulty_rank = unlocked_rank
 	game_info.private = game_info.private or false
 	self.game_info = game_info
@@ -152,9 +150,8 @@ StateMapViewOverview._setup_game_information = function (self)
 	print("Level:", game_info.level_index, game_info.level_key)
 	print("Difficulty:", game_info.difficulty_rank)
 	print("------------------------------------------")
-
-	return 
 end
+
 StateMapViewOverview._get_closest_unlocked_rank = function (self, rank, difficulty_data)
 	local return_rank = nil
 
@@ -166,11 +163,12 @@ StateMapViewOverview._get_closest_unlocked_rank = function (self, rank, difficul
 
 	return return_rank
 end
+
 StateMapViewOverview._apply_information = function (self)
 	local map_view = self._map_view
 	local map_view_area_handler = self.map_view_area_handler
 	local game_info = self.params.game_info
-	local level_key, level_information, level_index = map_view_area_handler.selected_level(map_view_area_handler)
+	local level_key, level_information, level_index = map_view_area_handler:selected_level()
 	local difficulty_data = level_information.difficulty_data
 	local scores = nil
 	local difficulty_display_name = ""
@@ -223,10 +221,9 @@ StateMapViewOverview._apply_information = function (self)
 	self._title_text_widget.content.text = game_mode_display_name
 	self._level_text_widget.content.text = display_name
 
-	self._set_private_enabled(self, game_info.private)
-
-	return 
+	self:_set_private_enabled(game_info.private)
 end
+
 StateMapViewOverview.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._frame_left_widget = UIWidget.init(widgets.frame_left)
@@ -315,44 +312,43 @@ StateMapViewOverview.create_ui_elements = function (self)
 
 	local selection_index = self.game_info.overview_selection_index or 1
 
-	self._set_selection(self, selection_index, true)
-
-	return 
+	self:_set_selection(selection_index, true)
 end
+
 StateMapViewOverview.on_exit = function (self, params)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 StateMapViewOverview.update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
 	local transitioning = self._map_view:transitioning()
 
 	if not transitioning then
-		self._handle_input(self, dt, t)
+		self:_handle_input(dt, t)
 	end
 
-	self._update_player_list(self)
-	self._update_elements(self, dt)
-	self._update_private_animation(self, dt)
-	self.draw(self, dt)
+	self:_update_player_list()
+	self:_update_elements(dt)
+	self:_update_private_animation(dt)
+	self:draw(dt)
 
-	local wanted_state = self._wanted_state(self)
+	local wanted_state = self:_wanted_state()
 
 	return wanted_state or self._new_state
 end
+
 StateMapViewOverview.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local friends_list_active = self._map_view:friends_list_active()
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
@@ -416,37 +412,37 @@ StateMapViewOverview.draw = function (self, dt)
 	if not friends_list_active then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
+end
 
-	return 
-end
 StateMapViewOverview.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewOverview._handle_input = function (self, dt, t)
 	if self._new_state then
-		return 
+		return
 	end
 
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	else
 		local new_selection_index = nil
 		local selection_index = self._selection_index or 0
 		local num_elements = #self._elements
 		local friends_list_active = self._map_view:friends_list_active()
-		local friends_input_service = input_manager.get_service(input_manager, "friends_view")
+		local friends_input_service = input_manager:get_service("friends_view")
 
 		if friends_list_active then
-			if friends_input_service.get(friends_input_service, "toggle_menu") or friends_input_service.get(friends_input_service, "back") then
+			if friends_input_service:get("toggle_menu") or friends_input_service:get("back") then
 				self._map_view:deactivate_friends_menu()
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end
-		elseif input_service.get(input_service, "refresh") then
+		elseif input_service:get("refresh") then
 			self._map_view:on_friends_pressed()
 
 			self.controller_cooldown = GamepadSettings.menu_cooldown
@@ -455,12 +451,12 @@ StateMapViewOverview._handle_input = function (self, dt, t)
 				local player_list_selection_index = self._player_list_selection_index
 				local number_of_player = self._number_of_player
 
-				if input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back", true) then
+				if input_service:get("toggle_menu") or input_service:get("back", true) then
 					local return_to_game = not self.parent.ingame_ui.menu_active
 
 					self.parent:exit(return_to_game)
-				elseif input_service.get(input_service, "move_left") then
-					self._deselect_player_list_widget(self, self._player_list_selection_index)
+				elseif input_service:get("move_left") then
+					self:_deselect_player_list_widget(self._player_list_selection_index)
 
 					self._player_list_selection_index = nil
 
@@ -469,35 +465,35 @@ StateMapViewOverview._handle_input = function (self, dt, t)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 					local selection_index = self.game_info.overview_selection_index or 1
 
-					self._set_selection(self, selection_index)
-					self._play_sound(self, "Play_hud_hover")
+					self:_set_selection(selection_index)
+					self:_play_sound("Play_hud_hover")
 				else
-					local handeld = self._handle_player_list_input(self, input_service, dt)
+					local handeld = self:_handle_player_list_input(input_service, dt)
 
 					if not handeld then
-						if input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
+						if input_service:get("move_up") or input_service:get("move_up_hold") then
 							new_selection_index = (player_list_selection_index - 2) % number_of_player + 1
-						elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
+						elseif input_service:get("move_down") or input_service:get("move_down_hold") then
 							new_selection_index = player_list_selection_index % number_of_player + 1
 						end
 					else
 						self.controller_cooldown = GamepadSettings.menu_cooldown
 
-						self._play_sound(self, "Play_hud_select")
+						self:_play_sound("Play_hud_select")
 					end
 
 					if new_selection_index and new_selection_index ~= self._player_list_selection_index then
 						self.controller_cooldown = GamepadSettings.menu_cooldown
 
-						self._deselect_player_list_widget(self, self._player_list_selection_index)
-						self._select_player_list_widget(self, new_selection_index)
-						self._play_sound(self, "Play_hud_hover")
+						self:_deselect_player_list_widget(self._player_list_selection_index)
+						self:_select_player_list_widget(new_selection_index)
+						self:_play_sound("Play_hud_hover")
 					end
 				end
 			else
-				if input_service.get(input_service, "move_right") and self._selection_index then
-					self._select_player_list_widget(self, 1)
-					self._deselect_element_by_index(self, self._selection_index)
+				if input_service:get("move_right") and self._selection_index then
+					self:_select_player_list_widget(1)
+					self:_deselect_element_by_index(self._selection_index)
 
 					self._selection_index = nil
 
@@ -505,22 +501,22 @@ StateMapViewOverview._handle_input = function (self, dt, t)
 
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 
-					self._play_sound(self, "Play_hud_hover")
-				elseif input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
+					self:_play_sound("Play_hud_hover")
+				elseif input_service:get("move_up") or input_service:get("move_up_hold") then
 					new_selection_index = (selection_index - 2) % num_elements + 1
-				elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
+				elseif input_service:get("move_down") or input_service:get("move_down_hold") then
 					new_selection_index = selection_index % num_elements + 1
 				end
 
 				if new_selection_index and new_selection_index ~= self._selection_index then
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 
-					self._play_sound(self, "Play_hud_hover")
-					self._set_selection(self, new_selection_index)
-				elseif input_service.get(input_service, "confirm", true) and self._selection_index then
+					self:_play_sound("Play_hud_hover")
+					self:_set_selection(new_selection_index)
+				elseif input_service:get("confirm", true) and self._selection_index then
 					if self._selection_index == 4 then
-						self._start_game(self, t)
-						self._play_sound(self, "Play_hud_main_menu_open")
+						self:_start_game(t)
+						self:_play_sound("Play_hud_main_menu_open")
 					else
 						local state_function = self._menu_item_state_functions[self._selection_index]
 
@@ -532,54 +528,52 @@ StateMapViewOverview._handle_input = function (self, dt, t)
 							if new_state then
 								self._new_state = new_state
 
-								self._play_sound(self, "Play_hud_select")
+								self:_play_sound("Play_hud_select")
 							end
 						end
 					end
-				elseif input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back", true) then
+				elseif input_service:get("toggle_menu") or input_service:get("back", true) then
 					local return_to_game = not self.parent.ingame_ui.menu_active
 
 					self.parent:exit(return_to_game)
 				end
 			end
 
-			if input_service.get(input_service, "left_stick_press") then
+			if input_service:get("left_stick_press") then
 				local private_enabled = self.game_info.private
 
-				self._set_private_enabled(self, not private_enabled, true)
+				self:_set_private_enabled(not private_enabled, true)
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 
-				self._play_sound(self, "Play_hud_select")
+				self:_play_sound("Play_hud_select")
 			end
 		end
 	end
-
-	return 
 end
+
 StateMapViewOverview._deselect_element_by_index = function (self, index)
 	if self._selection_timer then
 		local instant = true
 
-		self._update_elements(self, 0, instant)
+		self:_update_elements(0, instant)
 	end
 
 	self._selection_timer = 0
-
-	return 
 end
+
 StateMapViewOverview._set_selection = function (self, index, instant)
 	if self._selection_timer then
 		local instant = true
 
-		self._update_elements(self, 0, instant)
+		self:_update_elements(0, instant)
 	end
 
 	self._selection_index = index
 	self.game_info.overview_selection_index = index
 
 	if instant then
-		self._update_elements(self, 0, instant)
+		self:_update_elements(0, instant)
 
 		self._selection_timer = nil
 	else
@@ -595,12 +589,11 @@ StateMapViewOverview._set_selection = function (self, index, instant)
 	local current_font_size = widget_style.text.font_size
 	local default_font_size = widget.content.default_font_size
 	widget_style.text.font_size = default_font_size + selection_font_increase
-	local text_width, text_height = self._get_word_wrap_size(self, Localize(text), widget_style.text, 1000)
+	local text_width, text_height = self:_get_word_wrap_size(Localize(text), widget_style.text, 1000)
 	ui_scenegraph.selection_anchor.size[1] = text_width or 0
 	widget_style.text.font_size = current_font_size
-
-	return 
 end
+
 StateMapViewOverview.update_selection_timer = function (self, dt)
 	local timer = self._selection_timer
 
@@ -610,7 +603,7 @@ StateMapViewOverview.update_selection_timer = function (self, dt)
 		if timer == total_time then
 			self._selection_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
@@ -618,22 +611,20 @@ StateMapViewOverview.update_selection_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewOverview._update_elements = function (self, dt, instant)
-	local selection_progress = (instant and 1) or self.update_selection_timer(self, dt)
+	local selection_progress = (instant and 1) or self:update_selection_timer(dt)
 
 	if not selection_progress then
-		return 
+		return
 	end
 
 	for index, widget in ipairs(self._elements) do
-		self._animate_element(self, widget, index, selection_progress)
+		self:_animate_element(widget, index, selection_progress)
 	end
-
-	return 
 end
+
 StateMapViewOverview._animate_element = function (self, widget, index, progress)
 	local is_selection_widget = self._selection_index == index
 	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
@@ -670,9 +661,8 @@ StateMapViewOverview._animate_element = function (self, widget, index, progress)
 		self._menu_selection_left.offset[1] = math.lerp(-25, 0, anim_progress)
 		self._menu_selection_right.offset[1] = math.lerp(25, 0, anim_progress)
 	end
-
-	return 
 end
+
 StateMapViewOverview._start_game = function (self, t)
 	local game_info = self.game_info
 	local map_view_area_handler = self.map_view_area_handler
@@ -702,9 +692,9 @@ StateMapViewOverview._start_game = function (self, t)
 		end
 	else
 		local level_index = game_info.level_index
-		local level_list = map_view_area_handler.active_level_list(map_view_area_handler)
+		local level_list = map_view_area_handler:active_level_list()
 		local level_data = level_list[level_index]
-		local difficulty_data = map_view_area_handler.get_difficulty_data_by_level_index(map_view_area_handler, level_index)
+		local difficulty_data = map_view_area_handler:get_difficulty_data_by_level_index(level_index)
 		local difficulty_index = 1
 
 		for i = 1, #difficulty_data, 1 do
@@ -750,9 +740,8 @@ StateMapViewOverview._start_game = function (self, t)
 	print("+++++++")
 	print("------------------------------------------")
 	Managers.matchmaking:find_game(level_key, difficulty_key, private_game, random_level, game_mode, area, t, self._level_filter_active and level_filter_list)
-
-	return 
 end
+
 StateMapViewOverview._wanted_state = function (self)
 	local new_state = self.parent:wanted_gamepad_state()
 
@@ -766,15 +755,13 @@ end
 local function sort_players(a, b)
 	local my_peer_id = self.peer_id
 
-	if a.network_id(a) == my_peer_id then
+	if a:network_id() == my_peer_id then
 		return true
-	elseif b.network_id(b) == my_peer_id then
+	elseif b:network_id() == my_peer_id then
 		return false
 	else
-		return a.name(a) < b.name(b)
+		return a:name() < b:name()
 	end
-
-	return 
 end
 
 StateMapViewOverview._setup_own_player_in_player_list = function (self)
@@ -782,11 +769,11 @@ StateMapViewOverview._setup_own_player_in_player_list = function (self)
 	local player_manager = self.player_manager
 	local profile_synchronizer = self.profile_synchronizer
 	local my_peer_id = self.peer_id
-	local my_player = player_manager.player_from_peer_id(player_manager, my_peer_id)
+	local my_player = player_manager:player_from_peer_id(my_peer_id)
 	local player_unit = my_player.player_unit
 	local widget_index_counter = 1
 	local widget = widgets[widget_index_counter]
-	local name = my_player.name(my_player)
+	local name = my_player:name()
 	local display_name = (player_name_max_length < UTF8Utils.string_length(name) and UIRenderer.crop_text_width(self.ui_renderer, name, 350, widget.style.text)) or name
 	widget.content.text = display_name
 	widget.content.is_host = self.is_server
@@ -794,7 +781,7 @@ StateMapViewOverview._setup_own_player_in_player_list = function (self)
 	widget.content.kick_enabled = kick_enabled
 	widget.content.kick_button_hotspot.disable_button = not kick_enabled
 	widget.content.peer_id = my_peer_id
-	local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, my_peer_id, my_player.local_player_id(my_player))
+	local profile_index = profile_synchronizer:profile_by_peer(my_peer_id, my_player:local_player_id())
 
 	if profile_index then
 		local profile_data = SPProfiles[profile_index]
@@ -806,21 +793,20 @@ StateMapViewOverview._setup_own_player_in_player_list = function (self)
 
 	self._number_of_player = widget_index_counter or 0
 	self._player_list_conuter_text_widget.content.text = widget_index_counter .. "/" .. 4
-
-	return 
 end
+
 StateMapViewOverview._update_player_list = function (self)
 	local widgets = self._player_list_widgets
 	local player_manager = self.player_manager
 	local profile_synchronizer = self.profile_synchronizer
 	local my_peer_id = self.peer_id
-	local my_player = player_manager.player_from_peer_id(player_manager, my_peer_id)
+	local my_player = player_manager:player_from_peer_id(my_peer_id)
 	local player_unit = my_player.player_unit
-	local human_players = player_manager.human_players(player_manager)
+	local human_players = player_manager:human_players()
 	local widget_index_counter = 1
 
 	for _, player in pairs(human_players) do
-		local player_peer_id = player.network_id(player)
+		local player_peer_id = player:network_id()
 
 		if player_peer_id ~= my_peer_id then
 			widget_index_counter = widget_index_counter + 1
@@ -829,13 +815,13 @@ StateMapViewOverview._update_player_list = function (self)
 			if widget.content.peer_id ~= player_peer_id then
 				widget.content.is_host = self.host_peer_id == player_peer_id
 				widget.content.peer_id = player_peer_id
-				local name = player.name(player)
+				local name = player:name()
 				local display_name = (player_name_max_length < UTF8Utils.string_length(name) and UIRenderer.crop_text_width(self.ui_renderer, name, 350, style.name)) or name
 				widget.content.text = display_name
 				local kick_enabled = true
 				widget.content.kick_enabled = kick_enabled
 				widget.content.kick_button_hotspot.disable_button = not kick_enabled
-				local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, player_peer_id, player.local_player_id(player))
+				local profile_index = profile_synchronizer:profile_by_peer(player_peer_id, player:local_player_id())
 
 				if profile_index then
 					local profile_data = SPProfiles[profile_index]
@@ -850,22 +836,23 @@ StateMapViewOverview._update_player_list = function (self)
 
 	self._number_of_player = widget_index_counter or 0
 	self._player_list_conuter_text_widget.content.text = widget_index_counter .. "/" .. 4
-
-	return 
 end
+
 StateMapViewOverview._get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 StateMapViewOverview._get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
-	local text_width, text_height = self._get_text_size(self, localized_text, text_style)
+	local text_width, text_height = self:_get_text_size(localized_text, text_style)
 
 	return text_width, text_height * #lines
 end
+
 StateMapViewOverview._select_player_list_widget = function (self, index)
 	local player_list_widgets = self._navigation_player_list_widgets
 	local widget_data = player_list_widgets[index]
@@ -873,10 +860,9 @@ StateMapViewOverview._select_player_list_widget = function (self, index)
 	widget.content.button_hotspot.is_selected = true
 	self._player_list_selection_index = index
 
-	self._update_player_list_description(self)
-
-	return 
+	self:_update_player_list_description()
 end
+
 StateMapViewOverview._deselect_player_list_widget = function (self, index)
 	local player_list_widgets = self._navigation_player_list_widgets
 	local widget_data = player_list_widgets[index]
@@ -887,9 +873,8 @@ StateMapViewOverview._deselect_player_list_widget = function (self, index)
 
 		self.menu_input_description:set_input_description({})
 	end
-
-	return 
 end
+
 StateMapViewOverview._handle_player_list_input = function (self, input_service, dt)
 	local player_list_widgets = self._navigation_player_list_widgets
 	local player_list_selection_index = self._player_list_selection_index
@@ -918,9 +903,8 @@ StateMapViewOverview._handle_player_list_input = function (self, input_service, 
 
 		return input_result
 	end
-
-	return 
 end
+
 StateMapViewOverview._update_player_list_description = function (self)
 	local player_list_selection_index = self._player_list_selection_index
 	local is_player_list = player_list_selection_index ~= nil
@@ -935,9 +919,8 @@ StateMapViewOverview._update_player_list_description = function (self)
 
 		self.menu_input_description:set_input_description(input_description)
 	end
-
-	return 
 end
+
 StateMapViewOverview.on_kicked_player_callback = function (self)
 	local player_list_selection_index = self._player_list_selection_index
 	local number_of_player = self._number_of_player
@@ -946,13 +929,12 @@ StateMapViewOverview.on_kicked_player_callback = function (self)
 		local new_index = math.max(player_list_selection_index - 1, 1)
 
 		if new_index ~= player_list_selection_index then
-			self._deselect_player_list_widget(self, player_list_selection_index)
-			self._select_player_list_widget(self, new_index)
+			self:_deselect_player_list_widget(player_list_selection_index)
+			self:_select_player_list_widget(new_index)
 		end
 	end
-
-	return 
 end
+
 StateMapViewOverview.update_private_animation_timer = function (self, dt)
 	local timer = self._private_timer
 
@@ -962,7 +944,7 @@ StateMapViewOverview.update_private_animation_timer = function (self, dt)
 		if timer == total_time then
 			self._private_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self._private_timer = timer
@@ -970,22 +952,20 @@ StateMapViewOverview.update_private_animation_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewOverview._update_private_animation = function (self, dt, instant)
-	local progress = self.update_private_animation_timer(self, dt)
+	local progress = self:update_private_animation_timer(dt)
 
 	if not progress then
-		return 
+		return
 	end
 
 	local anim_progress = math.ease_pulse(progress)
 	local text_style = self._private_text_widget.style.text
 	text_style.font_size = 28 + 10 * anim_progress
-
-	return 
 end
+
 StateMapViewOverview._set_private_enabled = function (self, enabled, animate)
 	self.game_info.private = enabled
 	local text = (enabled and "map_screen_private_button") or "map_public_setting"
@@ -995,13 +975,10 @@ StateMapViewOverview._set_private_enabled = function (self, enabled, animate)
 	if animate then
 		self._private_timer = 0
 	end
-
-	return 
 end
+
 StateMapViewOverview._play_sound = function (self, event)
 	self._map_view:play_sound(event)
-
-	return 
 end
 
-return 
+return

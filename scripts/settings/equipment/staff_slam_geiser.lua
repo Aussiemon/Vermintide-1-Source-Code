@@ -251,4 +251,4 @@ Weapons.staff_slam_geiser_template_1_t2.actions.action_one.geiser_launch.attack_
 }
 Weapons.staff_slam_geiser_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.5
 
-return 
+return

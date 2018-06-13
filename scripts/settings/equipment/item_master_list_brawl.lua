@@ -48,4 +48,4 @@ ItemMasterList.brawl_unarmed = {
 	}
 }
 
-return 
+return

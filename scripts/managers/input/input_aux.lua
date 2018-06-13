@@ -22,6 +22,7 @@ local function synergy_wrapper(device_name)
 
 		return index
 	end
+
 	wrapper.pressed = function (key)
 		local pressed = device.pressed(key)
 
@@ -82,28 +83,28 @@ InputAux.input_map_types = {
 	pressed = "boolean",
 	held = "boolean"
 }
+
 InputAux.get_device_type = function (device)
 	if not type(device) == "table" then
 		assert(false, "[InputAux.get_device_type] You need to pass a table")
 	end
 
-	fassert(InputAux.input_device_type_lookup[device], "[InputAux.get_device_type] There is no mapping for device %s", (device and device.type and device.type(device)) or device)
+	fassert(InputAux.input_device_type_lookup[device], "[InputAux.get_device_type] There is no mapping for device %s", (device and device.type and device:type()) or device)
 
 	return InputAux.input_device_type_lookup[device]
 end
+
 InputAux.remove_device = function (input_device_type, input_device)
 	local index = table.find(InputAux.input_device_mapping[input_device_type], input_device)
 
 	fassert(index, "[InputAux] There is no controller with the name %s available", input_device.name())
 	table.remove(InputAux.input_device_mapping[input_device_type], index)
-
-	return 
 end
+
 InputAux.add_device = function (input_device_type, input_device)
 	InputAux.input_device_mapping[input_device_type][#InputAux.input_device_mapping[input_device_type] + 1] = input_device
-
-	return 
 end
+
 InputAux.combination_functions = {
 	max = math.max,
 	min = math.min,
@@ -207,4 +208,4 @@ TestFilters = {
 	}
 }
 
-return 
+return

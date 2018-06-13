@@ -74,7 +74,7 @@ local function get_upgrade_rarity_list(item)
 	if not RarityPrio[new_rarity] and not rarity_upgrades then
 		print("No upgrades of rarity " .. rarity .. " found.")
 
-		return 
+		return
 	end
 
 	return rarity_upgrades
@@ -125,4 +125,4 @@ function grant_item(param_items_to_merge)
 	return upgrade_name
 end
 
-return 
+return

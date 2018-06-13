@@ -729,4 +729,4 @@ map_console_atlas = {
 	}
 }
 
-return 
+return

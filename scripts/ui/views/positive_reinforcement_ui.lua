@@ -7,6 +7,7 @@ local event_colors = {
 	personal = Colors.get_table("dodger_blue")
 }
 PositiveReinforcementUI = class(PositiveReinforcementUI)
+
 PositiveReinforcementUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -14,7 +15,7 @@ PositiveReinforcementUI.init = function (self, ingame_ui_context)
 	self.peer_id = ingame_ui_context.peer_id
 	self.world = ingame_ui_context.world_manager:world("level_world")
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self._positive_enforcement_events = {}
 	self._hash_order = {}
@@ -25,14 +26,12 @@ PositiveReinforcementUI.init = function (self, ingame_ui_context)
 	Managers.state.event:register(self, "add_coop_feedback_kill", "event_add_positive_enforcement_kill")
 	Managers.state.event:register(self, "add_personal_feedback", "event_add_lorebook_page_pickup")
 	Managers.state.event:register(self, "add_personal_interaction_warning", "event_add_interaction_warning")
-
-	return 
 end
+
 PositiveReinforcementUI.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "positive_reinforcement_ui")
-
-	return 
 end
+
 PositiveReinforcementUI.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
@@ -46,19 +45,18 @@ PositiveReinforcementUI.create_ui_elements = function (self)
 	end
 
 	self.pulsing_widget = self.message_widgets[1]
-
-	return 
 end
+
 local buff_params = {}
 script_data.debug_legendary_traits = script_data.debug_legendary_traits or Development.parameter("debug_legendary_traits")
 
 local function trigger_assist_buffs(savior_unit, saved_unit)
 	local status_ext = ScriptUnit.extension(saved_unit, "status_system")
-	local is_knocked_down = status_ext.is_knocked_down(status_ext)
+	local is_knocked_down = status_ext:is_knocked_down()
 
 	if is_knocked_down then
 		local buff_ext = ScriptUnit.extension(savior_unit, "buff_system")
-		local heal_amount, procced = buff_ext.apply_buffs_to_value(buff_ext, 0, StatBuffIndex.HEALING_KNOCKED_DOWN_PLAYER_BY_ASSIST)
+		local heal_amount, procced = buff_ext:apply_buffs_to_value(0, StatBuffIndex.HEALING_KNOCKED_DOWN_PLAYER_BY_ASSIST)
 		local heal_type = "proc"
 
 		if script_data.debug_legendary_traits then
@@ -72,36 +70,34 @@ local function trigger_assist_buffs(savior_unit, saved_unit)
 			else
 				local network_manager = Managers.state.network
 				local network_transmit = network_manager.network_transmit
-				local owner_unit_id = network_manager.unit_game_object_id(network_manager, saved_unit)
+				local owner_unit_id = network_manager:unit_game_object_id(saved_unit)
 				local heal_type_id = NetworkLookup.heal_types[heal_type]
 
-				network_transmit.send_rpc_server(network_transmit, "rpc_request_heal", owner_unit_id, heal_amount, heal_type_id)
+				network_transmit:send_rpc_server("rpc_request_heal", owner_unit_id, heal_amount, heal_type_id)
 			end
 		end
 	end
 
 	local buff_ext = ScriptUnit.extension(savior_unit, "buff_system")
 	local saved_unit_damage_ext = ScriptUnit.extension(saved_unit, "damage_system")
-	local shield_amount, procced = buff_ext.apply_buffs_to_value(buff_ext, 0, StatBuffIndex.SHIELDING_PLAYER_BY_ASSIST)
+	local shield_amount, procced = buff_ext:apply_buffs_to_value(0, StatBuffIndex.SHIELDING_PLAYER_BY_ASSIST)
 
 	if script_data.debug_legendary_traits then
 		shield_amount = 30
 		procced = true
 	end
 
-	if procced and not saved_unit_damage_ext.has_assist_shield(saved_unit_damage_ext) then
+	if procced and not saved_unit_damage_ext:has_assist_shield() then
 		if Managers.player.is_server then
 			DamageUtils.assist_shield_network(saved_unit, savior_unit, shield_amount)
 		else
 			local network_manager = Managers.state.network
 			local network_transmit = network_manager.network_transmit
-			local owner_unit_id = network_manager.unit_game_object_id(network_manager, saved_unit)
+			local owner_unit_id = network_manager:unit_game_object_id(saved_unit)
 
-			network_transmit.send_rpc_server(network_transmit, "rpc_request_heal", owner_unit_id, shield_amount, NetworkLookup.heal_types.shield_by_assist)
+			network_transmit:send_rpc_server("rpc_request_heal", owner_unit_id, shield_amount, NetworkLookup.heal_types.shield_by_assist)
 		end
 	end
-
-	return 
 end
 
 PositiveReinforcementUI.add_event = function (self, hash, local_player, color_from, event_type, ...)
@@ -191,14 +187,13 @@ PositiveReinforcementUI.add_event = function (self, hash, local_player, color_fr
 			self._animations["icon_move_" .. full_hash] = UIAnimation.init(UIAnimation.linear_scale2, widget_icon_style.offset, -20, -20, -26, -26, 0.2, UIAnimation.linear_scale2, widget_icon_style.offset, -26, -26, -20, -20, 0.3)
 		end
 	end
-
-	return 
 end
-PositiveReinforcementUI.event_add_positive_enforcement = function (self, hash, local_player, event_type, player1, player2)
-	local player_1_name = (player1 and player1.name(player1)) or nil
-	local player_2_name = (player2 and player2.name(player2)) or nil
 
-	self.add_event(self, hash, local_player, event_colors.default, event_type, player_1_name, player_2_name)
+PositiveReinforcementUI.event_add_positive_enforcement = function (self, hash, local_player, event_type, player1, player2)
+	local player_1_name = (player1 and player1:name()) or nil
+	local player_2_name = (player2 and player2:name()) or nil
+
+	self:add_event(hash, local_player, event_colors.default, event_type, player_1_name, player_2_name)
 
 	if event_type == "aid" and local_player then
 		local player_one_unit = player1 and player1.player_unit
@@ -208,24 +203,20 @@ PositiveReinforcementUI.event_add_positive_enforcement = function (self, hash, l
 			trigger_assist_buffs(player_one_unit, player_two_unit)
 		end
 	end
-
-	return 
 end
+
 PositiveReinforcementUI.event_add_positive_enforcement_kill = function (self, hash, local_player, event_type, ...)
-	self.add_event(self, hash, local_player, event_colors.kill, event_type, ...)
-
-	return 
+	self:add_event(hash, local_player, event_colors.kill, event_type, ...)
 end
+
 PositiveReinforcementUI.event_add_lorebook_page_pickup = function (self, hash, local_player, event_type, page_id)
-	self.add_event(self, hash, local_player, event_colors.personal, event_type, page_id)
-
-	return 
+	self:add_event(hash, local_player, event_colors.personal, event_type, page_id)
 end
+
 PositiveReinforcementUI.event_add_interaction_warning = function (self, hash, message)
-	self.add_event(self, hash, true, event_colors.kill, "interaction_warning", Localize(message))
-
-	return 
+	self:add_event(hash, true, event_colors.kill, "interaction_warning", Localize(message))
 end
+
 PositiveReinforcementUI.update = function (self, dt, t)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -291,8 +282,6 @@ PositiveReinforcementUI.update = function (self, dt, t)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
 
-return 
+return

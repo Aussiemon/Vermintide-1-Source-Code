@@ -34817,4 +34817,4 @@ ItemMasterList.we_longbow_trueflight_0257 = {
 	}
 }
 
-return 
+return

@@ -91,4 +91,4 @@ DialogueLookup[DialogueLookup_n + 44] = "nik_intro_forge_reminder"
 DialogueLookup[DialogueLookup_n + 45] = "narrator_cut_scene_end_boss_vo"
 DialogueLookup_n = DialogueLookup_n + 45
 
-return 
+return

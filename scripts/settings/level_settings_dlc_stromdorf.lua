@@ -198,4 +198,4 @@ LevelSettings.dlc_stromdorf_hills = {
 	}
 }
 
-return 
+return

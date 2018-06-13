@@ -1,4 +1,5 @@
 ActionAoEDamage = class(ActionAoEDamage)
+
 ActionAoEDamage.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.world = world
 	self.owner_unit = owner_unit
@@ -12,22 +13,21 @@ ActionAoEDamage.init = function (self, world, item_name, is_server, owner_unit, 
 	end
 
 	self._overlap_callback = callback(self, "overlap_callback")
-
-	return 
 end
+
 ActionAoEDamage.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
+end
 
-	return 
-end
 ActionAoEDamage.client_owner_post_update = function (self, dt, t, world, can_damage)
-	return 
+	return
 end
+
 ActionAoEDamage.finish = function (self, reason)
 	local current_action = self.current_action
 
 	if reason ~= "action_complete" then
-		return 
+		return
 	end
 
 	local owner_unit = self.owner_unit
@@ -35,13 +35,13 @@ ActionAoEDamage.finish = function (self, reason)
 	local network_manager = Managers.state.network
 	local effect_name = current_action.effect_name
 	local effect_name_id = NetworkLookup.effects[effect_name]
-	local owner_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+	local owner_unit_id = network_manager:unit_game_object_id(owner_unit)
 	local node_id = 0
 	local effect_offset = Vector3(0, 0, 0)
 	local rotation_offset = Quaternion.identity()
 
 	if self.is_server then
-		network_manager.rpc_play_particle_effect(network_manager, nil, effect_name_id, owner_unit_id, node_id, effect_offset, rotation_offset, false)
+		network_manager:rpc_play_particle_effect(nil, effect_name_id, owner_unit_id, node_id, effect_offset, rotation_offset, false)
 	else
 		network_manager.network_transmit:send_rpc_server("rpc_play_particle_effect", effect_name_id, owner_unit_id, node_id, effect_offset, rotation_offset, false)
 	end
@@ -53,15 +53,14 @@ ActionAoEDamage.finish = function (self, reason)
 	if self.ammo_extension then
 		self.ammo_extension:use_ammo(current_action.ammo_usage)
 	end
-
-	return 
 end
+
 ActionAoEDamage.overlap_callback = function (self, actors)
 	local current_action = self.current_action
 	local network_manager = Managers.state.network
 	local owner_unit = self.owner_unit
 	local attacker_position = Unit.local_position(owner_unit, 0)
-	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+	local attacker_unit_id = network_manager:unit_game_object_id(owner_unit)
 	local attack_template_name = current_action.attack_template
 	local attack_template = AttackTemplates[attack_template_name]
 	local attack_template_id = attack_template.lookup_id
@@ -75,22 +74,20 @@ ActionAoEDamage.overlap_callback = function (self, actors)
 		local unit = Actor.unit(actor)
 
 		if unit and Unit.alive(unit) then
-			local unit_go_id = network_manager.unit_game_object_id(network_manager, unit)
+			local unit_go_id = network_manager:unit_game_object_id(unit)
 			units[#units + 1] = unit_go_id
 		end
 	end
 
 	local num_units = #units
 
-	if 0 < num_units then
+	if num_units > 0 then
 		if self.is_server or LEVEL_EDITOR_TEST then
 			self.weapon_system:rpc_attack_hit_multiple(nil, damage_source_id, attacker_unit_id, units, attack_template_id, hit_zone_id)
 		else
 			network_manager.network_transmit:send_rpc_server("rpc_attack_hit_multiple", damage_source_id, attacker_unit_id, units, attack_template_id, hit_zone_id)
 		end
 	end
-
-	return 
 end
 
-return 
+return

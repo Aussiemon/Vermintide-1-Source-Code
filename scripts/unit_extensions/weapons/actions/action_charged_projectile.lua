@@ -1,4 +1,5 @@
 ActionChargedProjectile = class(ActionChargedProjectile)
+
 ActionChargedProjectile.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.world = world
 	self.owner_unit = owner_unit
@@ -22,9 +23,8 @@ ActionChargedProjectile.init = function (self, world, item_name, is_server, owne
 	end
 
 	self.buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
-
-	return 
 end
+
 ActionChargedProjectile.client_owner_start_action = function (self, new_action, t, chain_action_data)
 	self.current_action = new_action
 	self.state = "waiting_to_shoot"
@@ -48,11 +48,10 @@ ActionChargedProjectile.client_owner_start_action = function (self, new_action, 
 	if loaded_projectile_settings then
 		local inventory_extension = ScriptUnit.extension(self.owner_unit, "inventory_system")
 
-		inventory_extension.set_loaded_projectile_override(inventory_extension, loaded_projectile_settings)
+		inventory_extension:set_loaded_projectile_override(loaded_projectile_settings)
 	end
-
-	return 
 end
+
 ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world, can_damage)
 	local current_action = self.current_action
 	local owner_unit = self.owner_unit
@@ -79,7 +78,7 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 			else
 				local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
-				inventory_extension.wield_previous_weapon(inventory_extension)
+				inventory_extension:wield_previous_weapon()
 			end
 		end
 
@@ -101,7 +100,7 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 		end
 
 		local network_manager = self.network_manager
-		local owner_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+		local owner_unit_id = network_manager:unit_game_object_id(owner_unit)
 		local first_person_unit = self.first_person_unit
 		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
 		local position = Unit.world_position(first_person_unit, 0)
@@ -113,7 +112,7 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 
 			if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
 				local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
-				rotation = eyetracking_extension.gaze_rotation(eyetracking_extension)
+				rotation = eyetracking_extension:gaze_rotation()
 				gaze_settings = true
 			end
 		end
@@ -121,10 +120,10 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 		local spread_extension = self.spread_extension
 
 		if spread_extension then
-			rotation = spread_extension.get_randomised_spread(spread_extension, rotation)
+			rotation = spread_extension:get_randomised_spread(rotation)
 
 			if add_spread then
-				spread_extension.set_shooting(spread_extension)
+				spread_extension:set_shooting()
 			end
 		end
 
@@ -174,7 +173,7 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 		if fire_sound_event then
 			local play_on_husk = self.current_action.fire_sound_on_husk
 
-			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event, nil, play_on_husk)
+			first_person_extension:play_hud_sound_event(fire_sound_event, nil, play_on_husk)
 		end
 
 		if current_action.alert_sound_range_fire then
@@ -190,23 +189,20 @@ ActionChargedProjectile.client_owner_post_update = function (self, dt, t, world,
 			local event_data = FrameTable.alloc_table()
 			event_data.item_type = projectile_info.pickup_name
 
-			dialogue_input.trigger_networked_dialogue_event(dialogue_input, "throwing_item", event_data)
+			dialogue_input:trigger_networked_dialogue_event("throwing_item", event_data)
 		end
 	end
-
-	return 
 end
+
 ActionChargedProjectile.finish = function (self, reason)
 	local owner_unit = self.owner_unit
 	local inventory_extension = ScriptUnit.extension(owner_unit, "inventory_system")
 
-	inventory_extension.set_loaded_projectile_override(inventory_extension, nil)
+	inventory_extension:set_loaded_projectile_override(nil)
 
 	if self.spread_extension then
 		self.spread_extension:reset_spread_template()
 	end
-
-	return 
 end
 
-return 
+return

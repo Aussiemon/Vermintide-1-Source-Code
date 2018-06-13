@@ -2,6 +2,7 @@ local font_size = 26
 local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
 PlayerHud = class(PlayerHud)
+
 PlayerHud.init = function (self, extension_init_context, unit, extension_init_data)
 	self.world = extension_init_context.world
 	self.gui = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
@@ -12,28 +13,30 @@ PlayerHud.init = function (self, extension_init_context, unit, extension_init_da
 	self.current_location = nil
 	self.picked_up_ammo = false
 
-	self.reset(self)
+	self:reset()
+end
 
-	return 
-end
 PlayerHud.extensions_ready = function (self, world, unit)
-	return 
+	return
 end
+
 PlayerHud.destroy = function (self)
-	return 
+	return
 end
+
 PlayerHud.reset = function (self)
 	self.outline_timers = {}
+end
 
-	return 
-end
 local show_intensity = true
+
 PlayerHud.update = function (self, unit, input, dt, context, t)
-	return 
+	return
 end
+
 PlayerHud.draw_player_names = function (self, unit)
 	local player_manager = Managers.player
-	local players = player_manager.players(player_manager)
+	local players = player_manager:players()
 	local viewport_name = "player_1"
 	local viewport = ScriptWorld.viewport(self.world, viewport_name)
 	local camera = ScriptViewport.camera(viewport)
@@ -46,13 +49,13 @@ PlayerHud.draw_player_names = function (self, unit)
 	local offset_vector = Vector3(0, 0, 0.925)
 
 	for k, player in pairs(players) do
-		local name = player.name(player)
+		local name = player:name()
 
 		if player.player_unit and player.player_unit ~= unit then
 			local player_world_pos_center = Unit.local_position(player.player_unit, 0) + offset_vector
 			local player_world_pos_head = player_world_pos_center + offset_vector
 
-			if 0 < Camera.inside_frustum(camera, player_world_pos_center) then
+			if Camera.inside_frustum(camera, player_world_pos_center) > 0 then
 				local min, max = Gui.text_extents(gui, name, font_mtrl, font_size)
 				local text_length = max.x - min.x
 				local player_screen_pos_center = Camera.world_to_screen(camera, player_world_pos_center)
@@ -68,9 +71,8 @@ PlayerHud.draw_player_names = function (self, unit)
 			end
 		end
 	end
-
-	return 
 end
+
 PlayerHud.draw_player_list = function (self, unit, dt, t)
 	local res_x = RESOLUTION_LOOKUP.res_w
 	local res_y = RESOLUTION_LOOKUP.res_h
@@ -78,12 +80,15 @@ PlayerHud.draw_player_list = function (self, unit, dt, t)
 	local pos = Vector3(res_x - 350, res_y - 200, 0)
 	pos.y = res_y
 	local player_manager = Managers.player
-	local players = player_manager.human_and_bot_players(player_manager)
+	local players = player_manager:human_and_bot_players()
 	local i = 1
 
 	for k, player in pairs(players) do
-		if player.player_unit == nil then
-		else
+		repeat
+			if player.player_unit == nil then
+				break
+			end
+
 			i = i + 1
 			local player_unit = player.player_unit
 			local health_extension = ScriptUnit.extension(player_unit, "health_system")
@@ -93,7 +98,7 @@ PlayerHud.draw_player_list = function (self, unit, dt, t)
 				color = Color(255, 255, 255, 100)
 			end
 
-			local name = player.name(player)
+			local name = player:name()
 			local intensity_str = ""
 
 			if show_intensity then
@@ -110,33 +115,29 @@ PlayerHud.draw_player_list = function (self, unit, dt, t)
 			local player_str = string.format("%s  [%s hp] %s", name, health_str, intensity_str)
 
 			Gui.text(gui, player_str, font_mtrl, font_size, font, pos + Vector3(20, -(i - 1) * font_size, 0), color)
-		end
+		until true
 	end
 
 	pos.y = res_y - i * font_size
 	pos.z = -10
 
 	Gui.rect(gui, pos, Vector2(350, font_size * i), Color(150, 50, 50, 50))
-
-	return 
 end
+
 PlayerHud.set_current_location = function (self, location)
 	self.current_location = location
-
-	return 
 end
+
 PlayerHud.gdc_intro_active = function (self, state)
 	self.show_gdc_intro = true
-
-	return 
 end
+
 PlayerHud.set_picked_up_ammo = function (self, picked_up_ammo)
 	self.picked_up_ammo = picked_up_ammo
-
-	return 
 end
+
 PlayerHud.get_picked_up_ammo = function (self)
 	return self.picked_up_ammo
 end
 
-return 
+return

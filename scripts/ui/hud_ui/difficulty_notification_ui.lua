@@ -4,6 +4,7 @@ local animation_definitions = definitions.animations
 local survival_start_wave_by_difficulty = SurvivalStartWaveByDifficulty
 DifficultyNotificationUI = class(DifficultyNotificationUI)
 local DO_RELOAD = false
+
 DifficultyNotificationUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -13,13 +14,12 @@ DifficultyNotificationUI.init = function (self, ingame_ui_context)
 	self.difficulty_manager = Managers.state.difficulty
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
-	self.difficulty_set(self)
+	self:create_ui_elements()
+	self:difficulty_set()
 	Managers.state.event:register(self, "difficulty_synced", "difficulty_set")
 	rawset(_G, "difficulty_notification_ui", self)
-
-	return 
 end
+
 DifficultyNotificationUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	local widget_definitions = definitions.widget_definitions
@@ -33,9 +33,8 @@ DifficultyNotificationUI.create_ui_elements = function (self)
 
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, animation_definitions)
 	self.is_visible = true
-
-	return 
 end
+
 DifficultyNotificationUI.difficulty_set = function (self)
 	local level_key = Managers.state.game_mode:level_key()
 	local level_settings = LevelSettings[level_key]
@@ -60,28 +59,25 @@ DifficultyNotificationUI.difficulty_set = function (self)
 		self.next_presentation_wave = persentation_wave_list[1]
 		self.persentation_wave_list = persentation_wave_list
 	end
-
-	return 
 end
+
 DifficultyNotificationUI.destroy = function (self)
 	self.ui_animator = nil
 
-	self.set_visible(self, false)
+	self:set_visible(false)
 	rawset(_G, "difficulty_notification_ui", nil)
-
-	return 
 end
+
 DifficultyNotificationUI.set_visible = function (self, visible)
 	self.is_visible = visible
-
-	return 
 end
+
 DifficultyNotificationUI._check_for_presentation_start = function (self, mission_data)
 	local previous_wave_completed = self.previous_wave_completed or 0
 	local wave_completed = mission_data.wave_completed - mission_data.starting_wave
 
-	if wave_completed <= previous_wave_completed then
-		return 
+	if previous_wave_completed >= wave_completed then
+		return
 	end
 
 	local next_presentation_wave = self.next_presentation_wave
@@ -91,26 +87,25 @@ DifficultyNotificationUI._check_for_presentation_start = function (self, mission
 
 		self.next_presentation_wave = self.persentation_wave_list[1]
 
-		self.display_presentation(self)
+		self:display_presentation()
 	end
 
 	self.previous_wave_completed = wave_completed
-
-	return 
 end
+
 DifficultyNotificationUI.update = function (self, dt, mission_data)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
 	if self.next_presentation_wave then
-		self._check_for_presentation_start(self, mission_data)
+		self:_check_for_presentation_start(mission_data)
 	end
 
 	if not self.is_visible or not self.draw_widgets then
-		return 
+		return
 	end
 
 	local is_dirty = nil
@@ -130,17 +125,17 @@ DifficultyNotificationUI.update = function (self, dt, mission_data)
 
 	local ui_animator = self.ui_animator
 
-	ui_animator.update(ui_animator, dt)
+	ui_animator:update(dt)
 
 	local presentation_anim_id = self.presentation_anim_id
 
 	if presentation_anim_id then
-		if ui_animator.is_animation_completed(ui_animator, presentation_anim_id) then
-			ui_animator.stop_animation(ui_animator, presentation_anim_id)
+		if ui_animator:is_animation_completed(presentation_anim_id) then
+			ui_animator:stop_animation(presentation_anim_id)
 
 			self.presentation_anim_id = nil
 
-			self.on_presentation_complete(self)
+			self:on_presentation_complete()
 		end
 
 		is_dirty = true
@@ -157,10 +152,9 @@ DifficultyNotificationUI.update = function (self, dt, mission_data)
 	if is_dirty then
 	end
 
-	self.draw(self, dt)
-
-	return 
+	self:draw(dt)
 end
+
 DifficultyNotificationUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -173,25 +167,23 @@ DifficultyNotificationUI.draw = function (self, dt)
 	UIRenderer.draw_widget(ui_renderer, self.difficulty_text_widget)
 	UIRenderer.draw_widget(ui_renderer, self.difficulty_title_text_widget)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 DifficultyNotificationUI.display_presentation = function (self)
 	print("----display_presentation----")
-	self.start_presentation_animation(self)
+	self:start_presentation_animation()
 
 	self.draw_widgets = true
-
-	return 
 end
+
 DifficultyNotificationUI.on_presentation_complete = function (self)
 	self.draw_widgets = false
-
-	return 
 end
+
 DifficultyNotificationUI.is_presentation_active = function (self)
 	return self.draw_widgets
 end
+
 DifficultyNotificationUI.start_presentation_animation = function (self)
 	local params = {
 		wwise_world = self.wwise_world
@@ -204,8 +196,6 @@ DifficultyNotificationUI.start_presentation_animation = function (self)
 		difficulty_title_text = self.difficulty_title_text_widget
 	}
 	self.presentation_anim_id = self.ui_animator:start_animation("presentation", widgets, scenegraph_definition, params)
-
-	return 
 end
 
-return 
+return

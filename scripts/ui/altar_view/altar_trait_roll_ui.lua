@@ -4,6 +4,7 @@ local drag_colors = {
 	normal = Colors.get_color_table_with_alpha("drag_same_slot", 255),
 	hover = Colors.get_color_table_with_alpha("drag_same_slot_hover", 255)
 }
+
 AltarTraitRollUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.parent = parent
 	self.world = ingame_ui_context.world
@@ -25,41 +26,38 @@ AltarTraitRollUI.init = function (self, parent, position, animation_definitions,
 	self.animations = {}
 	self.total_rotation_animation_time = 0.5
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, definitions.animations)
 
-	self._clear_item_display_data(self)
-
-	return 
+	self:_clear_item_display_data()
 end
+
 AltarTraitRollUI.on_enter = function (self)
-	self.remove_item(self)
-
-	return 
+	self:remove_item()
 end
+
 AltarTraitRollUI.set_gamepad_focus = function (self, enabled)
 	self.use_gamepad = enabled
-
-	return 
 end
+
 AltarTraitRollUI._handle_gamepad_input = function (self, dt)
 	local input_manager = self.input_manager
 	local input_service = self.parent:page_input_service()
 	local use_gamepad = self.use_gamepad
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad then
 		if self.active_item_id then
-			if (input_service.get(input_service, "back", true) or input_service.get(input_service, "special_1")) and self.can_remove_item(self) then
+			if (input_service:get("back", true) or input_service:get("special_1")) and self:can_remove_item() then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_item_remove_request = true
-			elseif input_service.get(input_service, "refresh_press") and not self.charging and self.can_afford_reroll_cost(self) then
-				self.start_charge_progress(self)
-			elseif self.charging and not input_service.get(input_service, "refresh_hold") then
-				self.abort_charge_progress(self)
+			elseif input_service:get("refresh_press") and not self.charging and self:can_afford_reroll_cost() then
+				self:start_charge_progress()
+			elseif self.charging and not input_service:get("refresh_hold") then
+				self:abort_charge_progress()
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end
@@ -71,27 +69,27 @@ AltarTraitRollUI._handle_gamepad_input = function (self, dt)
 			if trait_window_selection_index then
 				local new_trait_setup_selection_index = nil
 
-				if input_service.get(input_service, "move_right") then
+				if input_service:get("move_right") then
 					new_trait_setup_selection_index = math.min(trait_window_selection_index + 1, 2)
-				elseif input_service.get(input_service, "move_left") then
+				elseif input_service:get("move_left") then
 					new_trait_setup_selection_index = math.max(trait_window_selection_index - 1, 1)
 				end
 
 				if new_trait_setup_selection_index and new_trait_setup_selection_index ~= trait_window_selection_index then
 					if trait_window_selection_index == 1 then
-						self._on_preview_window_1_button_hover_exit(self)
+						self:_on_preview_window_1_button_hover_exit()
 					elseif trait_window_selection_index == 2 then
-						self._on_preview_window_2_button_hover_exit(self)
+						self:_on_preview_window_2_button_hover_exit()
 					end
 
 					if new_trait_setup_selection_index == 1 then
-						self._on_preview_window_1_button_hovered(self)
+						self:_on_preview_window_1_button_hovered()
 					elseif new_trait_setup_selection_index == 2 then
-						self._on_preview_window_2_button_hovered(self)
+						self:_on_preview_window_2_button_hovered()
 					end
 
 					self.controller_cooldown = GamepadSettings.menu_cooldown
-				elseif input_service.get(input_service, "confirm") then
+				elseif input_service:get("confirm") then
 					local preview_window_button_hotspot = self.widgets_by_name["preview_window_" .. trait_window_selection_index .. "_button"].content.button_hotspot
 					preview_window_button_hotspot.on_release = true
 					self.controller_cooldown = GamepadSettings.menu_cooldown
@@ -104,9 +102,9 @@ AltarTraitRollUI._handle_gamepad_input = function (self, dt)
 			if number_of_traits_on_item and selected_trait_index then
 				local new_trait_index = nil
 
-				if input_service.get(input_service, "move_right") then
+				if input_service:get("move_right") then
 					new_trait_index = math.min(selected_trait_index + 1, number_of_traits_on_item)
-				elseif input_service.get(input_service, "move_left") then
+				elseif input_service:get("move_left") then
 					new_trait_index = math.max(selected_trait_index - 1, 1)
 				end
 
@@ -117,9 +115,8 @@ AltarTraitRollUI._handle_gamepad_input = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 AltarTraitRollUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.trait_preview_widgets = {}
@@ -157,12 +154,11 @@ AltarTraitRollUI.create_ui_elements = function (self)
 	preview_window_2_button_content.default_text_on_disable = false
 	self.ui_scenegraph.expand_frame_background.size[1] = 0
 
-	self._set_option_buttons_visibility(self, false)
+	self:_set_option_buttons_visibility(false)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self._setup_candle_animations(self)
-
-	return 
+	self:_setup_candle_animations()
 end
+
 AltarTraitRollUI._setup_candle_animations = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local animations = self.animations
@@ -172,47 +168,45 @@ AltarTraitRollUI._setup_candle_animations = function (self)
 	local candle_glow_left_top_widget = widgets_by_name.candle_glow_left_top_widget
 	local candle_glow_left_widget = widgets_by_name.candle_glow_left_widget
 	local candle_glow_right_widget = widgets_by_name.candle_glow_right_widget
-	animations.candle_top_left_flame = self.animate_element_pulse(self, candle_top_left_widget.style.texture_id.color, 1, 255, 175, 2.3)
-	animations.candle_top_left_glow = self.animate_element_pulse(self, candle_glow_left_top_widget.style.texture_id.color, 1, 205, 125, 1.9)
-	animations.candle_left_flame = self.animate_element_pulse(self, candle_left_widget.style.texture_id.color, 1, 255, 210, 1)
-	animations.candle_left_glow = self.animate_element_pulse(self, candle_glow_left_widget.style.texture_id.color, 1, 205, 160, 1)
-	animations.candle_right_flame = self.animate_element_pulse(self, candle_right_widget.style.texture_id.color, 1, 255, 185, 1.5)
-	animations.candle_right_glow = self.animate_element_pulse(self, candle_glow_right_widget.style.texture_id.color, 1, 205, 125, 1.5)
-
-	return 
+	animations.candle_top_left_flame = self:animate_element_pulse(candle_top_left_widget.style.texture_id.color, 1, 255, 175, 2.3)
+	animations.candle_top_left_glow = self:animate_element_pulse(candle_glow_left_top_widget.style.texture_id.color, 1, 205, 125, 1.9)
+	animations.candle_left_flame = self:animate_element_pulse(candle_left_widget.style.texture_id.color, 1, 255, 210, 1)
+	animations.candle_left_glow = self:animate_element_pulse(candle_glow_left_widget.style.texture_id.color, 1, 205, 160, 1)
+	animations.candle_right_flame = self:animate_element_pulse(candle_right_widget.style.texture_id.color, 1, 255, 185, 1.5)
+	animations.candle_right_glow = self:animate_element_pulse(candle_glow_right_widget.style.texture_id.color, 1, 205, 125, 1.5)
 end
+
 AltarTraitRollUI._update_animations = function (self, dt)
 	local ui_animator = self.ui_animator
 
-	ui_animator.update(ui_animator, dt)
+	ui_animator:update(dt)
 
 	self.trait_options_presentation_complete = nil
 
-	if (self.preview_window_open_anim_id and ui_animator.is_animation_completed(ui_animator, self.preview_window_open_anim_id)) or (self.fade_in_preview_window_new_traits_anim_id and ui_animator.is_animation_completed(ui_animator, self.fade_in_preview_window_new_traits_anim_id)) then
+	if (self.preview_window_open_anim_id and ui_animator:is_animation_completed(self.preview_window_open_anim_id)) or (self.fade_in_preview_window_new_traits_anim_id and ui_animator:is_animation_completed(self.fade_in_preview_window_new_traits_anim_id)) then
 		self.preview_window_open_anim_id = nil
 		self.fade_in_preview_window_new_traits_anim_id = nil
 
-		self._update_trait_cost_display(self)
-		self._on_trait_options_presentation_complete(self)
-	elseif self.preview_window_close_anim_id and ui_animator.is_animation_completed(ui_animator, self.preview_window_close_anim_id) then
+		self:_update_trait_cost_display()
+		self:_on_trait_options_presentation_complete()
+	elseif self.preview_window_close_anim_id and ui_animator:is_animation_completed(self.preview_window_close_anim_id) then
 		self.preview_window_close_anim_id = nil
 
-		self._on_reroll_completed(self)
-	elseif self.fade_out_preview_window_new_traits_anim_id and ui_animator.is_animation_completed(ui_animator, self.fade_out_preview_window_new_traits_anim_id) then
+		self:_on_reroll_completed()
+	elseif self.fade_out_preview_window_new_traits_anim_id and ui_animator:is_animation_completed(self.fade_out_preview_window_new_traits_anim_id) then
 		self.fade_out_preview_window_new_traits_anim_id = nil
 		local new_item_key = self.new_item_key
 		local new_item_data = ItemMasterList[new_item_key]
 		local new_item_traits = new_item_data.traits
 		local new_item_rarity = new_item_data.rarity
 
-		self._set_new_traits(self, new_item_traits, new_item_rarity)
-		self._start_traits_reroll_animation(self)
+		self:_set_new_traits(new_item_traits, new_item_rarity)
+		self:_start_traits_reroll_animation()
 
-		self.fade_in_preview_window_new_traits_anim_id = self._animate_preview_window(self, "fade_in_preview_window_2_traits")
+		self.fade_in_preview_window_new_traits_anim_id = self:_animate_preview_window("fade_in_preview_window_2_traits")
 	end
-
-	return 
 end
+
 AltarTraitRollUI.update = function (self, dt)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 
@@ -220,12 +214,12 @@ AltarTraitRollUI.update = function (self, dt)
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 	end
 
 	if gamepad_active then
@@ -233,20 +227,20 @@ AltarTraitRollUI.update = function (self, dt)
 			local trait_window_selection_index = self.trait_window_selection_index
 
 			if not trait_window_selection_index then
-				self._on_preview_window_1_button_hovered(self)
+				self:_on_preview_window_1_button_hovered()
 			elseif trait_window_selection_index == 1 and not self.window_1_corner_glow_anim_id then
-				self._on_preview_window_1_button_hovered(self)
+				self:_on_preview_window_1_button_hovered()
 			elseif trait_window_selection_index == 2 and not self.window_2_corner_glow_anim_id then
-				self._on_preview_window_2_button_hovered(self)
+				self:_on_preview_window_2_button_hovered()
 			end
 		end
 	elseif self.gamepad_active_last_frame then
 		local trait_window_selection_index = self.trait_window_selection_index
 
 		if trait_window_selection_index == 1 then
-			self._on_preview_window_1_button_hover_exit(self)
+			self:_on_preview_window_1_button_hover_exit()
 		elseif trait_window_selection_index == 2 then
-			self._on_preview_window_2_button_hover_exit(self)
+			self:_on_preview_window_2_button_hover_exit()
 		end
 
 		self.trait_window_selection_index = nil
@@ -254,14 +248,14 @@ AltarTraitRollUI.update = function (self, dt)
 
 	self.reroll_completed_value = nil
 
-	self._update_animations(self, dt)
+	self:_update_animations(dt)
 
 	local handling_reroll_answer = self.handling_reroll_answer
 
-	self._update_rotation_animation(self, dt)
+	self:_update_rotation_animation(dt)
 
 	if gamepad_active and (not self.preview_window_open_anim_id or not self.preview_window_close_anim_id) then
-		self._handle_gamepad_input(self, dt)
+		self:_handle_gamepad_input(dt)
 	end
 
 	for name, animation in pairs(self.animations) do
@@ -270,7 +264,7 @@ AltarTraitRollUI.update = function (self, dt)
 		if UIAnimation.completed(animation) then
 			self.animations[name] = nil
 
-			self.on_charge_animations_complete(self, name)
+			self:on_charge_animations_complete(name)
 		end
 	end
 
@@ -282,19 +276,19 @@ AltarTraitRollUI.update = function (self, dt)
 
 	if item_slot_button_hotspot.on_hover_enter and (not self.preview_window_open_anim_id or not self.preview_window_close_anim_id) then
 		if self.active_item_id then
-			self._play_sound(self, "Play_hud_hover")
+			self:_play_sound("Play_hud_hover")
 		end
 
 		local bar_settings = UISettings.inventory.button_bars
 		local fade_in_time = bar_settings.background.fade_in_time
 		local alpha_hover = bar_settings.background.alpha_hover
 		local widget_hover_color = widget.style.hover_texture.color
-		self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
+		self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
 	elseif item_slot_button_hotspot.on_hover_exit then
 		local bar_settings = UISettings.inventory.button_bars
 		local fade_out_time = bar_settings.background.fade_out_time
 		local widget_hover_color = widget.style.hover_texture.color
-		self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
+		self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
 	end
 
 	if self.handling_reroll_answer then
@@ -303,19 +297,19 @@ AltarTraitRollUI.update = function (self, dt)
 			local preview_window_2_hotspot = widgets_by_name.preview_window_2.content.hotspot
 
 			if preview_window_1_hotspot.on_hover_enter or (preview_window_1_hotspot.is_hover and self.trait_window_selection_index ~= 1) then
-				self._on_preview_window_1_button_hovered(self)
+				self:_on_preview_window_1_button_hovered()
 
 				preview_window_1_hotspot.on_hover_enter = nil
 			elseif preview_window_1_hotspot.on_hover_exit then
-				self._on_preview_window_1_button_hover_exit(self)
+				self:_on_preview_window_1_button_hover_exit()
 			end
 
 			if preview_window_2_hotspot.on_hover_enter or (preview_window_2_hotspot.is_hover and self.trait_window_selection_index ~= 2) then
-				self._on_preview_window_2_button_hovered(self)
+				self:_on_preview_window_2_button_hovered()
 
 				preview_window_2_hotspot.on_hover_enter = nil
 			elseif preview_window_2_hotspot.on_hover_exit then
-				self._on_preview_window_2_button_hover_exit(self)
+				self:_on_preview_window_2_button_hover_exit()
 			end
 		end
 
@@ -323,7 +317,7 @@ AltarTraitRollUI.update = function (self, dt)
 		local preview_window_2_button_hotspot = widgets_by_name.preview_window_2_button.content.button_hotspot
 
 		if preview_window_1_button_hotspot.on_hover_enter or preview_window_2_button_hotspot.on_hover_enter then
-			self._play_sound(self, "Play_hud_hover")
+			self:_play_sound("Play_hud_hover")
 		end
 
 		self.reroll_option_selected = nil
@@ -333,14 +327,14 @@ AltarTraitRollUI.update = function (self, dt)
 			preview_window_1_button_hotspot.on_release = nil
 			local keep_old_traits = true
 
-			self.handle_traits_reroll_options(self, keep_old_traits)
-			self._play_sound(self, "Play_hud_reroll_traits_accept")
+			self:handle_traits_reroll_options(keep_old_traits)
+			self:_play_sound("Play_hud_reroll_traits_accept")
 		elseif preview_window_2_button_hotspot.on_release then
 			preview_window_2_button_hotspot.on_release = nil
 			local keep_old_traits = false
 
-			self.handle_traits_reroll_options(self, keep_old_traits)
-			self._play_sound(self, "Play_hud_reroll_traits_accept")
+			self:handle_traits_reroll_options(keep_old_traits)
+			self:_play_sound("Play_hud_reroll_traits_accept")
 		end
 	elseif item_slot_button_hotspot.on_double_click or item_slot_button_hotspot.on_right_click or self.gamepad_item_remove_request then
 		if not self.rerolling and widget.content.icon_texture_id then
@@ -359,16 +353,16 @@ AltarTraitRollUI.update = function (self, dt)
 		local reroll_button_hotspot = reroll_button_content.button_hotspot
 
 		if reroll_button_hotspot.on_hover_enter then
-			self._play_sound(self, "Play_hud_hover")
+			self:_play_sound("Play_hud_hover")
 		end
 
 		if reroll_button_hotspot.on_release or self.gamepad_reroll_request then
 			reroll_button_hotspot.on_release = nil
 
-			if self.can_afford_reroll_cost(self) then
+			if self:can_afford_reroll_cost() then
 				self.reroll_request = true
 
-				self._play_sound(self, "Play_hud_select")
+				self:_play_sound("Play_hud_select")
 			end
 		end
 	end
@@ -386,7 +380,7 @@ AltarTraitRollUI.update = function (self, dt)
 			local has_trait_data = (i <= num_traits and current_traits_data[i]) or (new_traits_data and new_traits_data[i])
 
 			if button_hotspot.on_hover_enter and not button_hotspot.is_selected and has_trait_data then
-				self._play_sound(self, "Play_hud_hover")
+				self:_play_sound("Play_hud_hover")
 			end
 		end
 	end
@@ -397,8 +391,8 @@ AltarTraitRollUI.update = function (self, dt)
 		local button_hotspot = widget.content.button_hotspot
 
 		if (button_hotspot.on_pressed or self.gamepad_changed_selected_trait_index == i) and not button_hotspot.is_selected and i ~= self.selected_trait_index then
-			self._play_sound(self, "Play_hud_select")
-			self._set_selected_trait(self, i)
+			self:_play_sound("Play_hud_select")
+			self:_set_selected_trait(i)
 
 			widget.content.button_hotspot.on_pressed = nil
 
@@ -408,16 +402,15 @@ AltarTraitRollUI.update = function (self, dt)
 
 	self.gamepad_changed_selected_trait_index = nil
 
-	self.on_item_dragged(self)
+	self:on_item_dragged()
 
-	if self.is_dragging_started(self) then
-		self._play_sound(self, "Play_hud_inventory_pickup_item")
+	if self:is_dragging_started() then
+		self:_play_sound("Play_hud_inventory_pickup_item")
 	end
 
 	self.gamepad_active_last_frame = gamepad_active
-
-	return 
 end
+
 AltarTraitRollUI._set_selected_trait = function (self, selected_index)
 	local num_traits = AltarSettings.num_traits
 	local widgets_by_name = self.widgets_by_name
@@ -462,9 +455,8 @@ AltarTraitRollUI._set_selected_trait = function (self, selected_index)
 	end
 
 	self.selected_trait_index = selected_index
-
-	return 
 end
+
 AltarTraitRollUI._clear_item_display_data = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = AltarSettings.num_traits
@@ -485,14 +477,13 @@ AltarTraitRollUI._clear_item_display_data = function (self)
 	description_widget.content.text = ""
 	description_widget.content.visible = false
 
-	self._set_description_text(self, "altar_trait_roll_description_1")
-	self._update_trait_cost_display(self, true)
-	self._update_trait_alignment(self, num_traits - 1, false)
-	self._clear_new_trait_slots(self)
-	self._set_option_buttons_visibility(self, false)
-
-	return 
+	self:_set_description_text("altar_trait_roll_description_1")
+	self:_update_trait_cost_display(true)
+	self:_update_trait_alignment(num_traits - 1, false)
+	self:_clear_new_trait_slots()
+	self:_set_option_buttons_visibility(false)
 end
+
 AltarTraitRollUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
@@ -526,25 +517,22 @@ AltarTraitRollUI.draw = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_top_renderer)
-
-	return 
 end
+
 AltarTraitRollUI._set_reroll_button_disabled = function (self, disabled)
 	local widgets_by_name = self.widgets_by_name
 	local reroll_button_widget = widgets_by_name.reroll_button_widget
 	reroll_button_widget.content.button_hotspot.disabled = disabled
 	reroll_button_widget.content.show_title = disabled
 	reroll_button_widget.content.show_glow = not disabled
-
-	return 
 end
+
 AltarTraitRollUI._set_description_text = function (self, text)
 	local widgets_by_name = self.widgets_by_name
 	local description_widget = widgets_by_name.description_text_1
 	description_widget.content.text = text
-
-	return 
 end
+
 AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_equipped)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
@@ -552,17 +540,17 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 	if self.charging or reroll_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	if self.active_item_id and self.active_item_id ~= backend_item_id then
 		self.popup_confirmed = nil
 	end
 
-	self._clear_item_display_data(self)
+	self:_clear_item_display_data()
 
 	if not ignore_sound then
-		self._play_sound(self, "Play_hud_inventory_drop_item")
+		self:_play_sound("Play_hud_inventory_drop_item")
 	end
 
 	local item_data = BackendUtils.get_item_from_masterlist(backend_item_id)
@@ -641,14 +629,14 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 	self.current_traits_data = current_traits_data
 	self.number_of_owned_traits = num_owned_traits
 
-	if 0 < number_of_traits_on_item then
-		self._set_reroll_button_disabled(self, false)
+	if number_of_traits_on_item > 0 then
+		self:_set_reroll_button_disabled(false)
 	end
 
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	self._update_trait_alignment(self, number_of_traits_on_item, false)
-	self._set_selected_trait(self, 1)
+	self:_update_trait_alignment(number_of_traits_on_item, false)
+	self:_set_selected_trait(1)
 
 	local platform = PLATFORM
 	local description_text = "altar_trait_roll_description_2"
@@ -659,13 +647,13 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 		description_text = description_text .. "_ps4"
 	end
 
-	self._set_description_text(self, description_text)
+	self:_set_description_text(description_text)
 
 	local item_button_bg_glow_widget = widgets_by_name.item_button_bg_glow_widget
 	item_button_bg_glow_widget.style.texture_id.color[1] = 0
 
-	self._clear_new_trait_slots(self, true)
-	self.set_traits_info(self, self.current_traits_data, 1, num_traits)
+	self:_clear_new_trait_slots(true)
+	self:set_traits_info(self.current_traits_data, 1, num_traits)
 
 	local platform = PLATFORM
 	local description_text = "altar_trait_roll_description_2"
@@ -676,14 +664,13 @@ AltarTraitRollUI.add_item = function (self, backend_item_id, ignore_sound, is_eq
 		description_text = description_text .. "_ps4"
 	end
 
-	self._set_description_text(self, description_text)
-	self._update_trait_cost_display(self)
+	self:_set_description_text(description_text)
+	self:_update_trait_cost_display()
 
 	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
 	reroll_button_widget.content.default_text_on_disable = true
-
-	return 
 end
+
 AltarTraitRollUI._set_new_traits = function (self, traits, rarity)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = AltarSettings.num_traits
@@ -735,10 +722,9 @@ AltarTraitRollUI._set_new_traits = function (self, traits, rarity)
 
 	self.new_traits_data = new_traits_data
 
-	self.set_traits_info(self, self.new_traits_data, num_traits + 1, num_traits * 2)
-
-	return 
+	self:set_traits_info(self.new_traits_data, num_traits + 1, num_traits * 2)
 end
+
 AltarTraitRollUI._clear_new_trait_slots = function (self, use_unknown_texture)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = AltarSettings.num_traits
@@ -755,9 +741,8 @@ AltarTraitRollUI._clear_new_trait_slots = function (self, use_unknown_texture)
 		trait_widget_style.texture_lock_id.color[1] = 0
 		trait_widget_style.texture_glow_id.color[1] = 0
 	end
-
-	return 
 end
+
 AltarTraitRollUI._update_trait_alignment = function (self, number_of_traits, rotate_background)
 	local ui_scenegraph = self.ui_scenegraph
 	local num_total_traits = AltarSettings.num_traits
@@ -806,14 +791,13 @@ AltarTraitRollUI._update_trait_alignment = function (self, number_of_traits, rot
 		local rotating_disk_widget = self.widgets_by_name.rotating_disk_widget
 		rotating_disk_widget.style.texture_id.angle = 0
 	end
-
-	return 
 end
+
 AltarTraitRollUI.set_disk_rotation = function (self, progress)
 	local number_of_traits_on_item = self.number_of_traits_on_item
 
 	if not number_of_traits_on_item then
-		return 
+		return
 	end
 
 	local ui_scenegraph = self.ui_scenegraph
@@ -851,9 +835,8 @@ AltarTraitRollUI.set_disk_rotation = function (self, progress)
 		position[2] = pos_y
 		trait_start_angle = trait_start_angle + actual_angle_between
 	end
-
-	return 
 end
+
 AltarTraitRollUI._update_rotation_animation = function (self, dt)
 	local animation_time = self.rotation_animation_time
 
@@ -863,38 +846,36 @@ AltarTraitRollUI._update_rotation_animation = function (self, dt)
 		local progress = math.min(animation_time / total_rotation_animation_time, 1)
 		local fraction = math.easeCubic(progress)
 
-		self.set_disk_rotation(self, fraction * 0.5)
+		self:set_disk_rotation(fraction * 0.5)
 
 		if progress == 1 then
 			local rotating_disk_glow_widget = self.widgets_by_name.rotating_disk_glow_widget
-			self.animations.large_glow = self.animate_element_by_time(self, rotating_disk_glow_widget.style.texture_id.color, 1, rotating_disk_glow_widget.style.texture_id.color[1], 0, 0.3)
+			self.animations.large_glow = self:animate_element_by_time(rotating_disk_glow_widget.style.texture_id.color, 1, rotating_disk_glow_widget.style.texture_id.color[1], 0, 0.3)
 
-			self._on_rotation_animation_complete(self)
+			self:_on_rotation_animation_complete()
 		elseif self.rotation_animation_time == 0 then
 			local rotating_disk_glow_widget = self.widgets_by_name.rotating_disk_glow_widget
-			self.animations.large_glow = self.animate_element_by_time(self, rotating_disk_glow_widget.style.texture_id.color, 1, rotating_disk_glow_widget.style.texture_id.color[1], 255, 0.2)
+			self.animations.large_glow = self:animate_element_by_time(rotating_disk_glow_widget.style.texture_id.color, 1, rotating_disk_glow_widget.style.texture_id.color[1], 255, 0.2)
 		end
 
 		self.rotation_animation_time = (animation_time < total_rotation_animation_time and animation_time) or nil
 	end
-
-	return 
 end
+
 AltarTraitRollUI._on_rotation_animation_complete = function (self)
 	local new_item_backend_id = self.new_item_backend_id
 
 	if new_item_backend_id then
 		local item_backend_id = new_item_backend_id or self.active_item_id
 
-		self.add_item(self, item_backend_id, true)
+		self:add_item(item_backend_id, true)
 	end
-
-	return 
 end
+
 AltarTraitRollUI._update_trait_cost_display = function (self, force_disable_button)
 	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
-	local can_afford = self.can_afford_reroll_cost(self)
-	local token_type, traits_cost, texture = self._get_upgrade_cost(self)
+	local can_afford = self:can_afford_reroll_cost()
+	local token_type, traits_cost, texture = self:_get_upgrade_cost()
 
 	if token_type then
 		reroll_button_widget.content.texture_token_type = texture
@@ -910,7 +891,7 @@ AltarTraitRollUI._update_trait_cost_display = function (self, force_disable_butt
 		can_afford = not force_disable_button
 	end
 
-	self._set_reroll_button_disabled(self, not can_afford)
+	self:_set_reroll_button_disabled(not can_afford)
 
 	reroll_button_widget.content.button_hotspot.is_selected = false
 	reroll_button_widget.content.button_hotspot.is_hover = false
@@ -927,9 +908,8 @@ AltarTraitRollUI._update_trait_cost_display = function (self, force_disable_butt
 		reroll_button_widget.style.text_selected.text_color = Colors.get_table("red", 255)
 		reroll_button_widget.style.text.text_color = Colors.get_table("red", 255)
 	end
-
-	return 
 end
+
 AltarTraitRollUI._get_upgrade_cost = function (self)
 	local item_data = self.active_item_data
 
@@ -943,30 +923,29 @@ AltarTraitRollUI._get_upgrade_cost = function (self)
 
 		return token_type, traits_cost, texture
 	end
-
-	return 
 end
+
 AltarTraitRollUI.can_afford_reroll_cost = function (self)
-	local token_type, traits_cost = self._get_upgrade_cost(self)
+	local token_type, traits_cost = self:_get_upgrade_cost()
 
 	if traits_cost then
 		local num_tokens_owned = BackendUtils.get_tokens(token_type)
 
 		return traits_cost <= num_tokens_owned
 	end
-
-	return 
 end
+
 AltarTraitRollUI.can_remove_item = function (self)
 	return self.active_item_id and not self.handling_reroll_answer and not self.rerolling
 end
+
 AltarTraitRollUI.remove_item = function (self)
 	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
 
 	if self.charging or reroll_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	self.popup_confirmed = nil
@@ -981,7 +960,7 @@ AltarTraitRollUI.remove_item = function (self)
 	end
 
 	if self.active_item_id then
-		self._play_sound(self, "Play_hud_forge_item_remove")
+		self:_play_sound("Play_hud_forge_item_remove")
 	end
 
 	self.active_item_id = nil
@@ -993,16 +972,15 @@ AltarTraitRollUI.remove_item = function (self)
 	local reroll_button_widget = self.widgets_by_name.reroll_button_widget
 	reroll_button_widget.content.default_text_on_disable = false
 
-	self._clear_item_display_data(self)
-
-	return 
+	self:_clear_item_display_data()
 end
+
 AltarTraitRollUI.reroll = function (self, new_item_key)
-	self._play_sound(self, "Play_hud_reroll_traits_magic_process")
+	self:_play_sound("Play_hud_reroll_traits_magic_process")
 
 	self.popup_confirmed = true
 
-	self._set_selected_trait(self, nil)
+	self:_set_selected_trait(nil)
 
 	self.new_item_key = new_item_key
 	local preview_window_1_button = self.widgets_by_name.preview_window_1_button
@@ -1011,15 +989,15 @@ AltarTraitRollUI.reroll = function (self, new_item_key)
 	preview_window_2_button.content.disable_input_icon = true
 
 	if self.rerolling then
-		self.fade_out_preview_window_new_traits_anim_id = self._animate_preview_window(self, "fade_out_preview_window_2_traits")
+		self.fade_out_preview_window_new_traits_anim_id = self:_animate_preview_window("fade_out_preview_window_2_traits")
 
-		self._instant_fade_out_traits_options_glow(self)
+		self:_instant_fade_out_traits_options_glow()
 	else
 		local new_item_data = ItemMasterList[new_item_key]
 		local new_item_traits = new_item_data.traits
 		local new_item_rarity = new_item_data.rarity
 
-		self._set_new_traits(self, new_item_traits, new_item_rarity)
+		self:_set_new_traits(new_item_traits, new_item_rarity)
 
 		local widgets_by_name = self.widgets_by_name
 		local num_traits = AltarSettings.num_traits
@@ -1032,26 +1010,24 @@ AltarTraitRollUI.reroll = function (self, new_item_key)
 			trait_widget_hotspot.disabled = true
 		end
 
-		self.preview_window_open_anim_id = self._animate_preview_window(self, "preview_window_open")
+		self.preview_window_open_anim_id = self:_animate_preview_window("preview_window_open")
 
-		self._start_traits_reroll_animation(self)
+		self:_start_traits_reroll_animation()
 	end
 
-	self._update_trait_cost_display(self, true)
+	self:_update_trait_cost_display(true)
 
 	self.rerolling = true
 
-	self.set_drag_enabled(self, false)
-	self._set_description_text(self, "altar_trait_roll_description_3")
-
-	return 
+	self:set_drag_enabled(false)
+	self:_set_description_text("altar_trait_roll_description_3")
 end
+
 AltarTraitRollUI.handle_traits_reroll_options = function (self, keep_old_traits)
 	self.reroll_option_selected = true
 	self.reroll_option_keep_old = keep_old_traits
-
-	return 
 end
+
 AltarTraitRollUI.on_traits_option_response_done = function (self, new_item_backend_id)
 	local num_traits = AltarSettings.num_traits
 	local number_of_traits_on_item = self.number_of_traits_on_item
@@ -1060,27 +1036,27 @@ AltarTraitRollUI.on_traits_option_response_done = function (self, new_item_backe
 	if new_item_backend_id then
 		self.rotation_animation_time = 0
 
-		self._play_sound(self, "Play_hud_reroll_traits_wheel")
-		self._set_glow_enabled_for_traits(self, num_traits + 1, num_traits + number_of_traits_on_item, true)
+		self:_play_sound("Play_hud_reroll_traits_wheel")
+		self:_set_glow_enabled_for_traits(num_traits + 1, num_traits + number_of_traits_on_item, true)
 	else
 		local item_backend_id = self.active_item_id
 
-		self.add_item(self, item_backend_id, true)
+		self:add_item(item_backend_id, true)
 	end
 
 	self.handling_reroll_answer = nil
 
-	self._set_option_buttons_visibility(self, false)
+	self:_set_option_buttons_visibility(false)
 
-	self.preview_window_close_anim_id = self._animate_preview_window(self, "preview_window_close")
+	self.preview_window_close_anim_id = self:_animate_preview_window("preview_window_close")
 
-	self._update_trait_cost_display(self, true)
-
-	return 
+	self:_update_trait_cost_display(true)
 end
+
 AltarTraitRollUI.pending_reroll_answer = function (self)
 	return self.handling_reroll_answer
 end
+
 AltarTraitRollUI._set_option_buttons_visibility = function (self, visible)
 	local widgets_by_name = self.widgets_by_name
 	local preview_window_1_button = widgets_by_name.preview_window_1_button
@@ -1098,9 +1074,8 @@ AltarTraitRollUI._set_option_buttons_visibility = function (self, visible)
 		preview_window_1_button_style.button_frame_glow_texture.color[1] = 0
 		preview_window_2_button_style.button_frame_glow_texture.color[1] = 0
 	end
-
-	return 
 end
+
 AltarTraitRollUI._set_glow_enabled_for_traits = function (self, trait_start_index, trait_end_index, enabled)
 	local widgets_by_name = self.widgets_by_name
 
@@ -1109,23 +1084,20 @@ AltarTraitRollUI._set_glow_enabled_for_traits = function (self, trait_start_inde
 		local widget = widgets_by_name[trait_widget_name]
 		widget.style.texture_glow_id.color[1] = (enabled and 255) or 0
 	end
-
-	return 
 end
+
 AltarTraitRollUI._play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 AltarTraitRollUI._on_trait_options_presentation_complete = function (self)
 	self.trait_options_presentation_complete = true
 	self.handling_reroll_answer = true
 
-	self._update_trait_cost_display(self)
-	self._set_option_buttons_visibility(self, true)
-
-	return 
+	self:_update_trait_cost_display()
+	self:_set_option_buttons_visibility(true)
 end
+
 AltarTraitRollUI._on_reroll_completed = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local number_of_traits_on_item = self.number_of_traits_on_item
@@ -1138,24 +1110,23 @@ AltarTraitRollUI._on_reroll_completed = function (self)
 		trait_widget_hotspot.disabled = false
 	end
 
-	self._set_selected_trait(self, 1)
+	self:_set_selected_trait(1)
 
 	self.reroll_completed_value = (self.new_item_backend_id and "new") or "old"
 	self.rerolling = nil
 
-	self.set_drag_enabled(self, true)
+	self:set_drag_enabled(true)
 
 	self.trait_window_selection_index = nil
 
-	self._instant_fade_out_traits_options_glow(self)
+	self:_instant_fade_out_traits_options_glow()
 
 	self.new_item_key = nil
 	self.new_item_backend_id = nil
 
-	self._update_trait_cost_display(self)
-
-	return 
+	self:_update_trait_cost_display()
 end
+
 AltarTraitRollUI._start_traits_reroll_animation = function (self)
 	local num_traits = self.number_of_traits_on_item
 	local max_num_traits = AltarSettings.num_traits
@@ -1172,7 +1143,7 @@ AltarTraitRollUI._start_traits_reroll_animation = function (self)
 		easing = math.easeOutCubic
 	}
 
-	self._animate_traits_widget_texture(self, glow_animation_data, true)
+	self:_animate_traits_widget_texture(glow_animation_data, true)
 
 	glow_animation_data.animation_name = "traits_glow_fade_out"
 	glow_animation_data.from = 255
@@ -1180,8 +1151,8 @@ AltarTraitRollUI._start_traits_reroll_animation = function (self)
 	glow_animation_data.start_delay = 0.9
 	glow_animation_data.duration = 0.2
 
-	self._animate_traits_widget_texture(self, glow_animation_data, true)
-	self._play_sound(self, "Play_hud_reroll_traits_glow")
+	self:_animate_traits_widget_texture(glow_animation_data, true)
+	self:_play_sound("Play_hud_reroll_traits_glow")
 
 	local icon_animation_data = {
 		duration = 0.2,
@@ -1203,25 +1174,26 @@ AltarTraitRollUI._start_traits_reroll_animation = function (self)
 		to = 255
 	}
 
-	self._animate_traits_widget_texture(self, icon_animation_data, true)
+	self:_animate_traits_widget_texture(icon_animation_data, true)
 
 	icon_animation_data.animation_name = "traits_lock_new"
 	icon_animation_data.texture_id = "texture_lock_id"
 
-	self._animate_traits_widget_texture(self, icon_animation_data, true)
-
-	return 
+	self:_animate_traits_widget_texture(icon_animation_data, true)
 end
+
 AltarTraitRollUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 AltarTraitRollUI.animate_element_pulse = function (self, target, target_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.pulse_animation, target, target_index, from, to, time)
 
 	return new_animation
 end
+
 AltarTraitRollUI._animate_traits_widget_texture = function (self, data, unique_animations)
 	local widgets_by_name = self.widgets_by_name
 	local target = data.target_index
@@ -1276,9 +1248,8 @@ AltarTraitRollUI._animate_traits_widget_texture = function (self, data, unique_a
 	if not unique_animations then
 		animations[animation_name] = UIAnimation.init(unpack(params))
 	end
-
-	return 
 end
+
 AltarTraitRollUI._animate_preview_window = function (self, animation_name)
 	local widgets_by_name = self.widgets_by_name
 	local trait_preview_widgets_by_name = self.trait_preview_widgets_by_name
@@ -1303,35 +1274,34 @@ AltarTraitRollUI._animate_preview_window = function (self, animation_name)
 
 	return self.ui_animator:start_animation(animation_name, widgets, self.scenegraph_definition, params)
 end
+
 AltarTraitRollUI.set_drag_enabled = function (self, enabled)
 	local widget = self.widgets_by_name.item_button_widget
 	widget.content.button_hotspot.disable_interaction = not enabled
-
-	return 
 end
+
 AltarTraitRollUI.is_dragging_started = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	return widget.content.on_drag_started
 end
+
 AltarTraitRollUI.on_item_hover_enter = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_enter then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 AltarTraitRollUI.on_item_hover_exit = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_exit then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 AltarTraitRollUI.is_slot_hovered = function (self, is_dragging_item)
 	local widget = self.widgets_by_name.item_button_widget
 	local internal_is_hover = widget.content.button_hotspot.internal_is_hover
@@ -1351,6 +1321,7 @@ AltarTraitRollUI.is_slot_hovered = function (self, is_dragging_item)
 
 	return internal_is_hover
 end
+
 AltarTraitRollUI.on_dragging_item_stopped = function (self)
 	local active_item_id = self.active_item_id
 
@@ -1361,9 +1332,8 @@ AltarTraitRollUI.on_dragging_item_stopped = function (self)
 			return active_item_id
 		end
 	end
-
-	return 
 end
+
 AltarTraitRollUI.on_item_dragged = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 	local content = widget.content
@@ -1374,9 +1344,8 @@ AltarTraitRollUI.on_item_dragged = function (self)
 	elseif content.on_drag_stopped and icon_color[1] ~= 255 then
 		icon_color[1] = 255
 	end
-
-	return 
 end
+
 AltarTraitRollUI._on_preview_window_1_button_hovered = function (self)
 	local params = {
 		wwise_world = self.wwise_world
@@ -1390,9 +1359,8 @@ AltarTraitRollUI._on_preview_window_1_button_hovered = function (self)
 	self.trait_window_selection_index = 1
 	local preview_window_1_button = self.widgets_by_name.preview_window_1_button
 	preview_window_1_button.content.disable_input_icon = false
-
-	return 
 end
+
 AltarTraitRollUI._on_preview_window_2_button_hovered = function (self)
 	local params = {
 		wwise_world = self.wwise_world
@@ -1406,9 +1374,8 @@ AltarTraitRollUI._on_preview_window_2_button_hovered = function (self)
 	self.trait_window_selection_index = 2
 	local preview_window_2_button = self.widgets_by_name.preview_window_2_button
 	preview_window_2_button.content.disable_input_icon = false
-
-	return 
 end
+
 AltarTraitRollUI._on_preview_window_1_button_hover_exit = function (self)
 	local params = {
 		wwise_world = self.wwise_world
@@ -1424,9 +1391,8 @@ AltarTraitRollUI._on_preview_window_1_button_hover_exit = function (self)
 
 	local preview_window_1_button = self.widgets_by_name.preview_window_1_button
 	preview_window_1_button.content.disable_input_icon = true
-
-	return 
 end
+
 AltarTraitRollUI._on_preview_window_2_button_hover_exit = function (self)
 	local params = {
 		wwise_world = self.wwise_world
@@ -1442,15 +1408,13 @@ AltarTraitRollUI._on_preview_window_2_button_hover_exit = function (self)
 
 	local preview_window_2_button = self.widgets_by_name.preview_window_2_button
 	preview_window_2_button.content.disable_input_icon = true
-
-	return 
 end
+
 AltarTraitRollUI._on_option_button_hovered_exit = function (self)
-	self._on_preview_window_1_button_hover_exit(self)
-	self._on_preview_window_2_button_hover_exit(self)
-
-	return 
+	self:_on_preview_window_1_button_hover_exit()
+	self:_on_preview_window_2_button_hover_exit()
 end
+
 AltarTraitRollUI._instant_fade_out_traits_options_glow = function (self)
 	local widgets = self.widgets_by_name
 	local alpha = 0
@@ -1474,9 +1438,8 @@ AltarTraitRollUI._instant_fade_out_traits_options_glow = function (self)
 
 	self.window_1_corner_glow_anim_id = nil
 	self.window_2_corner_glow_anim_id = nil
-
-	return 
 end
+
 AltarTraitRollUI.set_traits_info = function (self, traits_data, start_index, end_index)
 	local num_total_traits = AltarSettings.num_traits
 	local number_of_traits_on_item = 0
@@ -1529,7 +1492,7 @@ AltarTraitRollUI.set_traits_info = function (self, traits_data, start_index, end
 				local trait_scenegraph_name = "trait_preview_" .. i
 				local description_scenegraph_id = "trait_description_" .. i
 				local description_field_scenegraph = ui_scenegraph[description_scenegraph_id]
-				local _, description_text_height = self.get_word_wrap_size(self, description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
+				local _, description_text_height = self:get_word_wrap_size(description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
 				local trait_total_height = icon_height + description_text_spacing + description_text_height
 
 				if not is_first_widget then
@@ -1544,22 +1507,23 @@ AltarTraitRollUI.set_traits_info = function (self, traits_data, start_index, end
 			number_of_traits_on_item = number_of_traits_on_item + 1
 		end
 	end
-
-	return 
 end
+
 AltarTraitRollUI.get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_top_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 AltarTraitRollUI.get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local lines = UIRenderer.word_wrap(self.ui_top_renderer, localized_text, font[1], scaled_font_size, text_area_width)
-	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
+	local text_width, text_height = self:get_text_size(localized_text, text_style)
 
 	return text_width, text_height * #lines
 end
+
 AltarTraitRollUI.start_charge_progress = function (self)
 	self.charging = true
 	local animation_name = "gamepad_charge_progress"
@@ -1570,15 +1534,14 @@ AltarTraitRollUI.start_charge_progress = function (self)
 	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.reroll_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
 	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
 
-	self.cancel_abort_animation(self)
+	self:cancel_abort_animation()
 
 	widget.content.charging = true
 	widget.style.progress_fill.color[1] = 255
 
-	self._play_sound(self, "Play_hud_reroll_traits_charge")
-
-	return 
+	self:_play_sound("Play_hud_reroll_traits_charge")
 end
+
 AltarTraitRollUI.abort_charge_progress = function (self, force_shutdown)
 	local animation_name = "gamepad_charge_progress"
 	self.animations[animation_name] = nil
@@ -1586,16 +1549,15 @@ AltarTraitRollUI.abort_charge_progress = function (self, force_shutdown)
 	self.charging = nil
 	self.ui_scenegraph.reroll_button_fill.size[1] = 0
 
-	self._play_sound(self, "Stop_hud_reroll_traits_charge")
+	self:_play_sound("Stop_hud_reroll_traits_charge")
 
 	if force_shutdown then
-		self.cancel_abort_animation(self)
+		self:cancel_abort_animation()
 	else
-		self.start_abort_animation(self)
+		self:start_abort_animation()
 	end
-
-	return 
 end
+
 AltarTraitRollUI.on_charge_complete = function (self)
 	self.charging = nil
 	self.gamepad_reroll_request = true
@@ -1612,10 +1574,9 @@ AltarTraitRollUI.on_charge_complete = function (self)
 	widget.style.texture_token_type.color[1] = 0
 	widget.style.text_disabled.text_color[1] = 0
 
-	self._play_sound(self, "Stop_hud_reroll_traits_charge")
-
-	return 
+	self:_play_sound("Stop_hud_reroll_traits_charge")
 end
+
 AltarTraitRollUI.start_abort_animation = function (self)
 	local animation_name = "gamepad_charge_progress_abort"
 	local from = 0
@@ -1628,9 +1589,8 @@ AltarTraitRollUI.start_abort_animation = function (self)
 	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
-
-	return 
 end
+
 AltarTraitRollUI.cancel_abort_animation = function (self)
 	local animations = self.animations
 	animations.gamepad_charge_progress_abort = nil
@@ -1653,25 +1613,23 @@ AltarTraitRollUI.cancel_abort_animation = function (self)
 	widget.style.token_text.text_color[1] = 255
 	widget.style.text.text_color[1] = 255
 	widget.style.text_disabled.text_color[1] = 255
-
-	return 
 end
+
 AltarTraitRollUI.on_charge_animations_complete = function (self, animation_name)
 	if animation_name == "gamepad_charge_progress" then
-		self.on_charge_complete(self)
+		self:on_charge_complete()
 	end
 
 	if animation_name == "gamepad_charge_progress_abort" then
 		local widget = self.widgets_by_name.reroll_button_widget
 		widget.content.show_cancel_text = false
 	end
-
-	return 
 end
+
 AltarTraitRollUI.on_gamepad_activated = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "enchantment_view")
+	local input_service = input_manager:get_service("enchantment_view")
 	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
 	local button_texture = button_texture_data.texture
 	local button_size = button_texture_data.size
@@ -1685,12 +1643,12 @@ AltarTraitRollUI.on_gamepad_activated = function (self)
 	preview_window_2_button.content.enable_input_icon = true
 	preview_window_1_button.content.progress_input_icon = select_button_texture
 	preview_window_2_button.content.progress_input_icon = select_button_texture
+end
 
-	return 
-end
 AltarTraitRollUI.on_gamepad_deactivated = function (self)
-	return 
+	return
 end
+
 AltarTraitRollUI.set_active = function (self, active)
 	self.active = active
 	local widget = self.widgets_by_name.reroll_button_widget
@@ -1698,10 +1656,8 @@ AltarTraitRollUI.set_active = function (self, active)
 	if self.charging or widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
-
-	return 
 end
 
-return 
+return

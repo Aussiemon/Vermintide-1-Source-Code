@@ -79,4 +79,4 @@ DialogueLookup[DialogueLookup_n + 38] = "pwh_level_chamber_rasknitt_flees_three_
 DialogueLookup[DialogueLookup_n + 39] = "pwh_level_chamber_rasknitt_ward"
 DialogueLookup_n = DialogueLookup_n + 39
 
-return 
+return

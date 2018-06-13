@@ -83,6 +83,7 @@ local PAGE_SPACING = definitions.PAGE_SPACING
 local scenegraph_definition = definitions.scenegraph_definition
 local SLOT_TYPES = InventorySettings.inventory_slot_types_button_index
 InventoryView = class(InventoryView)
+
 InventoryView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	local input_manager = ingame_ui_context.input_manager
@@ -90,10 +91,10 @@ InventoryView.init = function (self, ingame_ui_context)
 	self.input_manager = input_manager
 	self.ingame_ui = ingame_ui_context.ingame_ui
 
-	input_manager.create_input_service(input_manager, "inventory_menu", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "inventory_menu", "keyboard")
-	input_manager.map_device_to_service(input_manager, "inventory_menu", "mouse")
-	input_manager.map_device_to_service(input_manager, "inventory_menu", "gamepad")
+	input_manager:create_input_service("inventory_menu", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("inventory_menu", "keyboard")
+	input_manager:map_device_to_service("inventory_menu", "mouse")
+	input_manager:map_device_to_service("inventory_menu", "gamepad")
 
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.player_manager = ingame_ui_context.player_manager
@@ -120,7 +121,7 @@ InventoryView.init = function (self, ingame_ui_context)
 
 	self.ui_pages.items:sort_items_by_rarity(true)
 	self.ui_pages.compare:set_title_text("inventory_screen_compare_button")
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	local input_service = self.input_manager:get_service("inventory_menu")
 	local number_of_actvie_descriptions = 5
@@ -129,12 +130,12 @@ InventoryView.init = function (self, ingame_ui_context)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, number_of_actvie_descriptions, gui_layer, input_description)
 
 	self.menu_input_description:set_input_description(nil)
-
-	return 
 end
+
 InventoryView.input_service = function (self)
 	return self.input_manager:get_service("inventory_menu")
 end
+
 InventoryView.suspend = function (self)
 	self.suspended = true
 
@@ -144,7 +145,7 @@ InventoryView.suspend = function (self)
 
 	for page_name, page in pairs(self.ui_pages) do
 		if page.suspend then
-			page.suspend(page)
+			page:suspend()
 		end
 	end
 
@@ -153,9 +154,8 @@ InventoryView.suspend = function (self)
 	local viewport = ScriptWorld.viewport(world, viewport_name)
 
 	ScriptWorld.activate_viewport(world, viewport)
-
-	return 
 end
+
 InventoryView.unsuspend = function (self)
 	self.input_manager:block_device_except_service("inventory_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("inventory_menu", "mouse", 1)
@@ -163,7 +163,7 @@ InventoryView.unsuspend = function (self)
 
 	for page_name, page in pairs(self.ui_pages) do
 		if page.unsuspend then
-			page.unsuspend(page)
+			page:unsuspend()
 		end
 	end
 
@@ -174,9 +174,8 @@ InventoryView.unsuspend = function (self)
 	ScriptWorld.deactivate_viewport(world, viewport)
 
 	self.suspended = nil
-
-	return 
 end
+
 InventoryView.on_enter = function (self)
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -186,15 +185,14 @@ InventoryView.on_enter = function (self)
 	self.input_manager:block_device_except_service("inventory_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("inventory_menu", "mouse", 1)
 	self.input_manager:block_device_except_service("inventory_menu", "gamepad", 1)
-	self.play_sound(self, "Play_hud_button_open")
+	self:play_sound("Play_hud_button_open")
 
 	self.waiting_for_post_update_enter = true
 	self.active = true
 
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
-
-	return 
 end
+
 InventoryView.post_update_on_enter = function (self)
 	local pages = self.ui_pages
 
@@ -207,19 +205,19 @@ InventoryView.post_update_on_enter = function (self)
 	local items_page = pages.items
 	local equipment_page = pages.equipment
 
-	equipment_page.on_character_profile_selected(equipment_page, profile_name)
-	items_page.set_selected_hero(items_page, profile_name)
+	equipment_page:on_character_profile_selected(profile_name)
+	items_page:set_selected_hero(profile_name)
 
 	local first_selection_slot = InventorySettings.slots_by_name.slot_melee
 	local first_selection_slot_type = first_selection_slot.type
 
-	equipment_page.on_equipment_slot_selected(equipment_page, first_selection_slot)
-	items_page.on_inventory_type_selected(items_page, first_selection_slot_type)
+	equipment_page:on_equipment_slot_selected(first_selection_slot)
+	items_page:on_inventory_type_selected(first_selection_slot_type)
 
-	local item = items_page.on_inventory_item_selected(items_page, 1)
+	local item = items_page:on_inventory_item_selected(1)
 
 	if item then
-		self.compare_item_with_loadout_item(self, item.backend_id)
+		self:compare_item_with_loadout_item(item.backend_id)
 	end
 
 	if not self.is_in_inn then
@@ -227,9 +225,8 @@ InventoryView.post_update_on_enter = function (self)
 	end
 
 	self.waiting_for_post_update_enter = nil
-
-	return 
 end
+
 InventoryView.on_exit = function (self)
 	self.exiting = nil
 	self.active = nil
@@ -240,9 +237,8 @@ InventoryView.on_exit = function (self)
 
 	ScriptWorld.activate_viewport(world, viewport)
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
-
-	return 
 end
+
 InventoryView.post_update_on_exit = function (self)
 	local pages = self.ui_pages
 
@@ -250,9 +246,8 @@ InventoryView.post_update_on_exit = function (self)
 	pages.items:on_exit()
 	pages.compare:on_exit()
 	Managers.backend:commit()
-
-	return 
 end
+
 InventoryView.destroy = function (self)
 	self.menu_input_description:destroy()
 
@@ -260,33 +255,30 @@ InventoryView.destroy = function (self)
 	local pages = self.ui_pages
 
 	for page_name, page in pairs(pages) do
-		page.destroy(page)
+		page:destroy()
 	end
 
 	self.ui_pages = nil
-
-	return 
 end
+
 InventoryView.exit = function (self, return_to_game)
 	self.exiting = true
 
-	self.play_sound(self, "Play_hud_button_close")
+	self:play_sound("Play_hud_button_close")
 
 	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
 
 	self.ingame_ui:transition_with_fade(exit_transition)
-
-	return 
 end
+
 InventoryView.transitioning = function (self)
 	if self.exiting then
 		return true
 	else
 		return not self.active
 	end
-
-	return 
 end
+
 InventoryView.update_animations = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 
@@ -297,9 +289,8 @@ InventoryView.update_animations = function (self, dt)
 			self.ui_animations[name] = nil
 		end
 	end
-
-	return 
 end
+
 InventoryView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self.background_widgets = {
@@ -313,15 +304,14 @@ InventoryView.create_ui_elements = function (self)
 	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 InventoryView.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "inventory_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("inventory_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
@@ -341,63 +331,61 @@ InventoryView.draw = function (self, dt)
 	UIRenderer.end_pass(ui_renderer)
 
 	for ui_name, ui_page in pairs(self.ui_pages) do
-		ui_page.draw(ui_page, dt)
+		ui_page:draw(dt)
 	end
 
 	if gamepad_active then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
+
 InventoryView.update = function (self, dt)
 	if self.waiting_for_post_update_enter then
-		return 
+		return
 	end
 
-	if not self.transitioning(self) then
+	if not self:transitioning() then
 		local local_player = Managers.player:local_player()
 		local player_unit = local_player and local_player.player_unit
 
 		if not player_unit or (player_unit and not Unit.alive(player_unit)) then
 			local return_to_game = not self.ingame_ui.menu_active
 
-			self.exit(self, return_to_game)
+			self:exit(return_to_game)
 		end
 	end
-
-	return 
 end
+
 InventoryView.post_update = function (self, dt)
 	if RELOAD_INVENTORY_GUI then
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 
 		RELOAD_INVENTORY_GUI = false
 	end
 
 	if self.suspended then
-		return 
+		return
 	end
 
 	local is_transitioning = nil
 
-	if next(self.ui_animations) ~= nil or self.transitioning(self) then
+	if next(self.ui_animations) ~= nil or self:transitioning() then
 		is_transitioning = true
 	end
 
-	self.update_animations(self, dt)
+	self:update_animations(dt)
 
 	if self.active then
-		self.draw(self, dt)
+		self:draw(dt)
 	end
 
-	self.handle_index_changes(self)
+	self:handle_index_changes()
 
 	for ui_name, ui_page in pairs(self.ui_pages) do
-		ui_page.update(ui_page, dt, is_transitioning)
+		ui_page:update(dt, is_transitioning)
 
 		if ui_page.draw_viewport then
-			ui_page.draw_viewport(ui_page, dt)
+			ui_page:draw_viewport(dt)
 		end
 	end
 
@@ -408,57 +396,54 @@ InventoryView.post_update = function (self, dt)
 			if not self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = true
 
-				self.on_gamepad_activated(self)
+				self:on_gamepad_activated()
 			end
 
-			self.handle_gamepad_input(self, dt)
+			self:handle_gamepad_input(dt)
 		elseif self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = false
 
-			self.on_gamepad_deactivated(self)
+			self:on_gamepad_deactivated()
 		end
 
-		self.handle_input(self, dt)
-		self.handle_item_drag(self)
+		self:handle_input(dt)
+		self:handle_item_drag()
 	end
-
-	return 
 end
+
 InventoryView.handle_input = function (self, dt)
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "inventory_menu")
+	local input_service = input_manager:get_service("inventory_menu")
 	local equip_button_widget = self.equip_button_widget
 	local equip_button_hotspot = equip_button_widget.content.button_hotspot
 	local cancel_button_widget = self.cancel_button_widget
 	local cancel_button_hotspot = cancel_button_widget.content.button_hotspot
 
 	if equip_button_hotspot.on_hover_enter or cancel_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
-	if input_service.get(input_service, "toggle_menu") or cancel_button_hotspot.on_release then
+	if input_service:get("toggle_menu") or cancel_button_hotspot.on_release then
 		local return_to_game = not self.ingame_ui.menu_active
 
-		self.exit(self, return_to_game)
+		self:exit(return_to_game)
 	end
-
-	return 
 end
+
 InventoryView.handle_item_drag = function (self)
 	local pages = self.ui_pages
 	local equipment_page = pages.equipment
 	local items_page = pages.items
 	local compare_page = pages.compare
-	local dragged_stopped, dragged_list_item = items_page.on_dragging_item_stopped(items_page)
-	local hovered_slot_index, hovered_slot = equipment_page.on_equipment_slot_hover(equipment_page, dragged_list_item)
+	local dragged_stopped, dragged_list_item = items_page:on_dragging_item_stopped()
+	local hovered_slot_index, hovered_slot = equipment_page:on_equipment_slot_hover(dragged_list_item)
 
 	if dragged_stopped and hovered_slot_index and dragged_list_item.slot_type == hovered_slot.type then
 		items_page.item_to_equip = dragged_list_item
 		equipment_page.specific_equip_index = hovered_slot_index
 	end
-
-	return 
 end
+
 InventoryView.handle_index_changes = function (self)
 	local pages = self.ui_pages
 	local items_page = pages.items
@@ -467,7 +452,7 @@ InventoryView.handle_index_changes = function (self)
 	local equip_button_widget = self.equip_button_widget
 	local equip_button_hotspot = equip_button_widget.content.button_hotspot
 	local skip_select_sound = false
-	local selected_item, is_equipped, active = items_page.selected_item(items_page)
+	local selected_item, is_equipped, active = items_page:selected_item()
 	local can_remove_item = selected_item and selected_item.slot_type == "trinket" and is_equipped
 	equip_button_hotspot.disabled = (not can_remove_item and not is_equipped and not active) or false
 	self.equip_button_widget.content.text_field = (is_equipped and "input_description_remove_item") or "inventory_screen_equip_button"
@@ -475,31 +460,31 @@ InventoryView.handle_index_changes = function (self)
 
 	if item_to_equip then
 		if equip_button_hotspot.on_release then
-			self.play_sound(self, "Play_hud_select")
+			self:play_sound("Play_hud_select")
 		end
 
-		local success = equipment_page.equip_inventory_item(equipment_page, item_to_equip, equipment_page.specific_equip_index)
+		local success = equipment_page:equip_inventory_item(item_to_equip, equipment_page.specific_equip_index)
 
 		if success then
-			items_page.refresh_items_status(items_page)
+			items_page:refresh_items_status()
 		end
 	elseif equip_button_hotspot.on_release then
 		equip_button_hotspot.on_release = nil
 
 		if selected_item then
 			if can_remove_item then
-				local remove_successful = equipment_page.remove_inventory_item(equipment_page, selected_item)
+				local remove_successful = equipment_page:remove_inventory_item(selected_item)
 
-				self.play_sound(self, "Play_hud_select")
-				items_page.refresh_items_status(items_page)
+				self:play_sound("Play_hud_select")
+				items_page:refresh_items_status()
 			elseif active and not is_equipped then
-				local success = equipment_page.equip_inventory_item(equipment_page, selected_item, equipment_page.specific_equip_index)
+				local success = equipment_page:equip_inventory_item(selected_item, equipment_page.specific_equip_index)
 
 				if success then
-					items_page.refresh_items_status(items_page)
+					items_page:refresh_items_status()
 				end
 
-				self.play_sound(self, "Play_hud_select")
+				self:play_sound("Play_hud_select")
 			end
 		end
 	end
@@ -508,24 +493,24 @@ InventoryView.handle_index_changes = function (self)
 	local item_to_remove = items_page.item_to_remove
 
 	if item_to_remove and item_to_remove.slot_type == "trinket" then
-		local remove_successful = equipment_page.remove_inventory_item(equipment_page, item_to_remove, equipment_page.specific_equip_index)
+		local remove_successful = equipment_page:remove_inventory_item(item_to_remove, equipment_page.specific_equip_index)
 
 		if remove_successful then
-			items_page.refresh_items_status(items_page)
+			items_page:refresh_items_status()
 		end
 	elseif remove_slot_item_request_index then
-		local remove_successful = equipment_page.remove_inventory_item(equipment_page, nil, remove_slot_item_request_index)
+		local remove_successful = equipment_page:remove_inventory_item(nil, remove_slot_item_request_index)
 
 		if remove_successful then
-			items_page.refresh_items_status(items_page)
+			items_page:refresh_items_status()
 		end
 	end
 
 	local character_profile_changed = equipment_page.character_profile_changed
 
 	if character_profile_changed then
-		equipment_page.on_character_profile_selected(equipment_page, character_profile_changed)
-		items_page.set_selected_hero(items_page, character_profile_changed)
+		equipment_page:on_character_profile_selected(character_profile_changed)
+		items_page:set_selected_hero(character_profile_changed)
 
 		items_page.inventory_list_index_changed = 1
 		skip_select_sound = true
@@ -537,24 +522,24 @@ InventoryView.handle_index_changes = function (self)
 	if loadout_slot_changed then
 		local slot = InventorySettings.slots_by_name[loadout_slot_changed]
 
-		equipment_page.on_equipment_slot_selected(equipment_page, slot)
-		items_page.on_inventory_type_selected(items_page, slot.type)
+		equipment_page:on_equipment_slot_selected(slot)
+		items_page:on_inventory_type_selected(slot.type)
 
-		local equipment_backend_id_selected = equipment_page.item_backend_id_selected(equipment_page)
-		local equipement_item_list_index = items_page.index_by_backend_id(items_page, equipment_backend_id_selected)
+		local equipment_backend_id_selected = equipment_page:item_backend_id_selected()
+		local equipement_item_list_index = items_page:index_by_backend_id(equipment_backend_id_selected)
 		items_page.inventory_list_index_changed = equipement_item_list_index or 1
 		skip_select_sound = true
 	elseif loadout_slot_index_pressed then
-		local equipment_backend_id_selected = equipment_page.item_backend_id_selected(equipment_page)
-		local equipement_item_list_index = items_page.index_by_backend_id(items_page, equipment_backend_id_selected)
+		local equipment_backend_id_selected = equipment_page:item_backend_id_selected()
+		local equipement_item_list_index = items_page:index_by_backend_id(equipment_backend_id_selected)
 		items_page.inventory_list_index_changed = equipement_item_list_index or 1
 	end
 
 	local slot_type_changed = items_page.slot_type_changed
 
 	if slot_type_changed then
-		items_page.on_inventory_type_selected(items_page, slot_type_changed)
-		equipment_page.select_equipment_slot_by_slot(equipment_page, slot_type_changed)
+		items_page:on_inventory_type_selected(slot_type_changed)
+		equipment_page:select_equipment_slot_by_slot(slot_type_changed)
 
 		items_page.inventory_list_index_changed = 1
 		skip_select_sound = true
@@ -564,22 +549,21 @@ InventoryView.handle_index_changes = function (self)
 
 	if inventory_list_index_changed then
 		local play_sound = not skip_select_sound
-		local item = items_page.on_inventory_item_selected(items_page, inventory_list_index_changed, play_sound)
+		local item = items_page:on_inventory_item_selected(inventory_list_index_changed, play_sound)
 
 		if item then
 			local item_backend_id = item and item.backend_id
 
-			self.compare_item_with_loadout_item(self, item_backend_id)
+			self:compare_item_with_loadout_item(item_backend_id)
 		end
 
 		items_page.inventory_list_index_changed = nil
 	end
-
-	return 
 end
+
 InventoryView.compare_item_with_loadout_item = function (self, item_backend_id)
 	if not item_backend_id then
-		return 
+		return
 	end
 
 	local pages = self.ui_pages
@@ -590,7 +574,7 @@ InventoryView.compare_item_with_loadout_item = function (self, item_backend_id)
 	local item_type = item.slot_type
 
 	if item_type == "melee" or item_type == "ranged" then
-		local selected_profile_name = items_page.current_profile_name(items_page)
+		local selected_profile_name = items_page:current_profile_name()
 		local slot_names_by_type = InventorySettings.slot_names_by_type
 		local slots_by_name = InventorySettings.slots_by_name
 		local slot_name = slot_names_by_type[item_type][1]
@@ -598,42 +582,38 @@ InventoryView.compare_item_with_loadout_item = function (self, item_backend_id)
 		loadout_item_backend_id = loadout_item.backend_id
 	end
 
-	compare_page.on_item_selected(compare_page, item_backend_id, loadout_item_backend_id)
-
-	return 
+	compare_page:on_item_selected(item_backend_id, loadout_item_backend_id)
 end
+
 InventoryView.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 InventoryView.on_gamepad_activated = function (self)
 	local start_page = "equipment"
 
-	self.set_gamepad_page_focus(self, start_page)
-
-	return 
+	self:set_gamepad_page_focus(start_page)
 end
+
 InventoryView.set_gamepad_page_focus = function (self, name)
 	for page_name, page in pairs(self.gamepad_pages) do
 		local page_enabled = page_name == name
 
-		page.set_gamepad_focus(page, page_enabled)
+		page:set_gamepad_focus(page_enabled)
 	end
 
 	self.gamepad_selected_page = name
 
-	self.update_input_description(self)
-
-	return 
+	self:update_input_description()
 end
+
 InventoryView.update_input_description = function (self)
 	local gamepad_selected_page = self.gamepad_selected_page
 	local actions_name_to_use = nil
 
 	if gamepad_selected_page == "items" then
 		local page = self.gamepad_pages[gamepad_selected_page]
-		local selected_item, is_equipped, is_active = page.selected_item(page)
+		local selected_item, is_equipped, is_active = page:selected_item()
 
 		if is_equipped then
 			if selected_item.slot_type == "trinket" then
@@ -655,42 +635,38 @@ InventoryView.update_input_description = function (self)
 
 		self.menu_input_description:set_input_description(input_description_data)
 	end
-
-	return 
 end
+
 InventoryView.on_gamepad_deactivated = function (self)
 	for page_name, page in pairs(self.gamepad_pages) do
-		page.set_gamepad_focus(page, false)
+		page:set_gamepad_focus(false)
 	end
 
 	self.gamepad_selected_page = nil
-
-	return 
 end
+
 InventoryView.handle_gamepad_input = function (self, dt)
-	self.update_input_description(self)
+	self:update_input_description()
 
 	local input_service = self.input_manager:get_service("inventory_menu")
 	local gamepad_selected_page = self.gamepad_selected_page
 
 	if gamepad_selected_page == "equipment" then
-		if input_service.get(input_service, "confirm") then
-			self.play_sound(self, "Play_hud_select")
-			self.set_gamepad_page_focus(self, "items")
-		elseif input_service.get(input_service, "back") then
+		if input_service:get("confirm") then
+			self:play_sound("Play_hud_select")
+			self:set_gamepad_page_focus("items")
+		elseif input_service:get("back") then
 			local return_to_game = not self.ingame_ui.menu_active
 
-			self.exit(self, return_to_game)
-			self.play_sound(self, "Play_hud_select")
+			self:exit(return_to_game)
+			self:play_sound("Play_hud_select")
 
-			return 
+			return
 		end
-	elseif input_service.get(input_service, "back") then
-		self.play_sound(self, "Play_hud_select")
-		self.set_gamepad_page_focus(self, "equipment")
+	elseif input_service:get("back") then
+		self:play_sound("Play_hud_select")
+		self:set_gamepad_page_focus("equipment")
 	end
-
-	return 
 end
 
-return 
+return

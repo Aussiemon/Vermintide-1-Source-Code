@@ -19,4 +19,4 @@ DialogueLookup[DialogueLookup_n + 8] = "ect_gameplay_wood_elf_knocked_down"
 DialogueLookup[DialogueLookup_n + 9] = "ect_gameplay_empire_soldier_knocked_down"
 DialogueLookup_n = DialogueLookup_n + 9
 
-return 
+return

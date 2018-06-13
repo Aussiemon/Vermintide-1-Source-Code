@@ -1,5 +1,6 @@
 MatchmakingStateHostGame = class(MatchmakingStateHostGame)
 MatchmakingStateHostGame.NAME = "MatchmakingStateHostGame"
+
 MatchmakingStateHostGame.init = function (self, params)
 	self.lobby = params.lobby
 	self.network_transmit = params.network_transmit
@@ -18,12 +19,12 @@ MatchmakingStateHostGame.init = function (self, params)
 	self.network_event_delegate = network_event_delegate
 	self.hero_popup_at_t = nil
 	self.selected_hero_at_t = nil
+end
 
-	return 
-end
 MatchmakingStateHostGame.destroy = function (self)
-	return 
+	return
 end
+
 MatchmakingStateHostGame.on_enter = function (self, state_context)
 	self.state_context = state_context
 	self.game_declined = false
@@ -32,8 +33,8 @@ MatchmakingStateHostGame.on_enter = function (self, state_context)
 	local private_game = game_data.private_game
 	local num_connections = table.size(self.connection_handler.current_connections)
 
-	self.start_hosting_game(self)
-	self.set_debug_info(self)
+	self:start_hosting_game()
+	self:set_debug_info()
 
 	local level = game_data.level_key
 	local difficulty = game_data.difficulty
@@ -63,9 +64,8 @@ MatchmakingStateHostGame.on_enter = function (self, state_context)
 		self.handshaker_host:send_rpc_to_self("rpc_matchmaking_set_ready", peer_id, self.ready)
 		self.matchmaking_ui:large_window_set_ready_button_text("matchmaking_surfix_ready")
 	end
-
-	return 
 end
+
 MatchmakingStateHostGame.set_debug_info = function (self)
 	local game_data = self.state_context.game_search_data
 	local level = game_data.level_key
@@ -80,18 +80,18 @@ MatchmakingStateHostGame.set_debug_info = function (self)
 	Managers.matchmaking.debug.difficulty = difficulty
 	Managers.matchmaking.debug.hero = hero_name
 	Managers.matchmaking.debug.progression = game_data.required_progression
+end
 
-	return 
-end
 MatchmakingStateHostGame.on_exit = function (self)
-	return 
+	return
 end
+
 MatchmakingStateHostGame.update = function (self, dt, t)
 	if self.spawn_join_popup_timer then
 		self.spawn_join_popup_timer = self.spawn_join_popup_timer - dt
 
 		if self.spawn_join_popup_timer < 0 then
-			self.spawn_join_popup(self, t)
+			self:spawn_join_popup(t)
 
 			self.spawn_join_popup_timer = nil
 		end
@@ -101,12 +101,12 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 	local popup_id = self.popup_id
 
 	if popup_id then
-		local popup_result = popup_join_lobby_handler.query_result(popup_join_lobby_handler, popup_id)
+		local popup_result = popup_join_lobby_handler:query_result(popup_id)
 
 		if popup_result then
 			self.selected_hero_at_t = t
 
-			self.handle_popup_result(self, popup_result)
+			self:handle_popup_result(popup_result)
 		end
 	end
 
@@ -114,18 +114,18 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 	local hero_spawner_request_id = self.hero_spawner_request_id
 
 	if hero_spawner_request_id then
-		local hero_spawner_result = hero_spawner_handler.query_result(hero_spawner_handler, hero_spawner_request_id)
+		local hero_spawner_result = hero_spawner_handler:query_result(hero_spawner_request_id)
 
 		if hero_spawner_result then
-			self.handle_hero_spawner_result(self, hero_spawner_result)
+			self:handle_hero_spawner_result(hero_spawner_result)
 		end
 	end
 
 	local input_service = Managers.input:get_service("ingame_menu")
 
-	if self.controller_cooldown and 0 < self.controller_cooldown then
+	if self.controller_cooldown and self.controller_cooldown > 0 then
 		self.controller_cooldown = self.controller_cooldown - dt
-	elseif false and input_service.get(input_service, "matchmaking_ready") then
+	elseif false and input_service:get("matchmaking_ready") then
 		local ready_changed = false
 		self.ready = not self.ready
 		ready_changed = true
@@ -162,7 +162,7 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 
 		self.next_state_timer = self.next_state_timer - dt
 
-		if 0 < self.next_state_timer then
+		if self.next_state_timer > 0 then
 			return nil
 		end
 
@@ -186,6 +186,7 @@ MatchmakingStateHostGame.update = function (self, dt, t)
 
 	return nil
 end
+
 MatchmakingStateHostGame.spawn_join_popup = function (self, t)
 	local lobby_data = self.lobby:get_stored_lobby_data()
 	local state_context = self.state_context
@@ -200,9 +201,8 @@ MatchmakingStateHostGame.spawn_join_popup = function (self, t)
 	local auto_cancel_time = MatchmakingSettings.JOIN_LOBBY_TIME_UNTIL_AUTO_CANCEL
 	self.popup_id = self.popup_join_lobby_handler:show(hero_name, difficulty, level, lobby_data, auto_cancel_time)
 	self.hero_popup_at_t = t
-
-	return 
 end
+
 MatchmakingStateHostGame.handle_popup_result = function (self, result)
 	self.popup_id = nil
 	local reason, selected_hero_name = nil
@@ -218,9 +218,9 @@ MatchmakingStateHostGame.handle_popup_result = function (self, result)
 		self.selected_hero_name = selected_hero_name
 
 		if current_hero_name == selected_hero_name then
-			self.start_hosting_game(self)
+			self:start_hosting_game()
 		else
-			self.hero_spawner_request_id = hero_spawner_handler.spawn_hero_request(hero_spawner_handler, player, selected_hero_name)
+			self.hero_spawner_request_id = hero_spawner_handler:spawn_hero_request(player, selected_hero_name)
 		end
 
 		reason = "profile_accepted"
@@ -241,37 +241,34 @@ MatchmakingStateHostGame.handle_popup_result = function (self, result)
 	local time_taken = (self.selected_hero_at_t and self.selected_hero_at_t - self.hero_popup_at_t) or 0
 
 	Managers.telemetry.events:ui_matchmaking_select_player(player, selected_hero_name, reason, time_taken)
-
-	return 
 end
+
 MatchmakingStateHostGame.handle_hero_spawner_result = function (self, result)
 	if result == "success" then
-		self.start_hosting_game(self)
+		self:start_hosting_game()
 	end
 
 	self.hero_spawner_request_id = nil
-
-	return 
 end
+
 MatchmakingStateHostGame.start_hosting_game = function (self)
 	local state_context = self.state_context
 	local game_data = state_context.game_search_data
 
 	self.profile_synchronizer:update_lobby_profile_data()
 
-	self.start_directly = self.host_game(self, game_data.level_key, game_data.difficulty, game_data.game_mode, game_data.private_game, game_data.required_progression)
+	self.start_directly = self:host_game(game_data.level_key, game_data.difficulty, game_data.game_mode, game_data.private_game, game_data.required_progression)
 	self.private_game = game_data.private_game
 	self.game_created = true
-
-	return 
 end
+
 MatchmakingStateHostGame.host_game = function (self, next_level_key, difficulty, game_mode, private_game, required_progression)
 	self.difficulty_manager:set_difficulty(difficulty)
 
 	local level_transition_handler = self.level_transition_handler
-	local current_level_key = level_transition_handler.get_current_level_keys(level_transition_handler)
+	local current_level_key = level_transition_handler:get_current_level_keys()
 	local lobby_members = self.lobby:members()
-	local members = lobby_members.get_members(lobby_members)
+	local members = lobby_members:get_members()
 	local num_players = #members
 	local start_directly = false
 	local is_matchmaking = not private_game
@@ -287,19 +284,20 @@ MatchmakingStateHostGame.host_game = function (self, next_level_key, difficulty,
 	lobby_data.required_progression = required_progression
 	lobby_data.country_code = rawget(_G, "Steam") and Steam.user_country_code()
 
-	level_transition_handler.set_next_level(level_transition_handler, next_level_key)
+	level_transition_handler:set_next_level(next_level_key)
 	self.lobby:set_lobby_data(lobby_data)
 	print("[MATCHMAKING] - Hosting game on level:", current_level_key, next_level_key)
 
 	return start_directly
 end
+
 MatchmakingStateHostGame.rpc_matchmaking_set_ready = function (self, sender, client_cookie, host_cookie, peer_id, ready)
 	if not self.handshaker_host:validate_cookies(sender, client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local matchmaking_manager = self.matchmaking_manager
-	local portrait_index = matchmaking_manager.get_portrait_index(matchmaking_manager, peer_id)
+	local portrait_index = matchmaking_manager:get_portrait_index(peer_id)
 	local ready_peers = matchmaking_manager.ready_peers
 	ready_peers[peer_id] = ready
 
@@ -309,12 +307,11 @@ MatchmakingStateHostGame.rpc_matchmaking_set_ready = function (self, sender, cli
 	if ready then
 		WwiseWorld.trigger_event(self.wwise_world, "Play_hud_matchmaking_ready")
 	end
-
-	return 
 end
+
 MatchmakingStateHostGame.rpc_matchmaking_request_ready_data = function (self, sender, client_cookie, host_cookie)
 	if not self.handshaker_host:validate_cookies(sender, client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local matchmaking_manager = self.matchmaking_manager
@@ -331,8 +328,6 @@ MatchmakingStateHostGame.rpc_matchmaking_request_ready_data = function (self, se
 
 		self.handshaker_host:send_rpc_to_client("rpc_matchmaking_set_ready", sender, peer_id, ready)
 	end
-
-	return 
 end
 
-return 
+return

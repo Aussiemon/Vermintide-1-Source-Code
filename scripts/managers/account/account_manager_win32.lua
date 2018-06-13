@@ -4,63 +4,76 @@ local debug_friends_list = Development.parameter("debug_friends_list")
 
 local function dprint(...)
 	print("[AccountManager] ", ...)
-
-	return 
 end
 
 AccountManager.init = function (self)
-	return 
+	return
 end
+
 AccountManager.reset_popups = function (self)
-	return 
+	return
 end
+
 AccountManager.set_level_transition_handler = function (self, level_transition_handler)
-	return 
+	return
 end
+
 AccountManager.user_id = function (self)
-	return 
+	return
 end
+
 AccountManager.update = function (self, dt)
-	return 
+	return
 end
+
 AccountManager.sign_in = function (self, user_id)
 	Managers.state.event:trigger("account_user_signed_in")
-
-	return 
 end
+
 AccountManager.num_signed_in_users = function (self)
 	return 1
 end
+
 AccountManager.user_detached = function (self)
 	return false
 end
+
 AccountManager.acitve_controller = function (self)
-	return 
+	return
 end
+
 AccountManager.leaving_game = function (self)
-	return 
+	return
 end
+
 AccountManager.reset = function (self)
-	return 
+	return
 end
+
 AccountManager.set_presence_menu = function (self)
-	return 
+	return
 end
+
 AccountManager.set_presence_idle = function (self)
-	return 
+	return
 end
+
 AccountManager.set_presence_credits = function (self)
-	return 
+	return
 end
+
 AccountManager.set_presence_ingame = function (self, level_key)
-	return 
+	return
 end
+
 AccountManager.set_controller_disconnected = function (self, disconnected)
-	return 
+	return
 end
+
 AccountManager.controller_disconnected = function (self)
-	return 
+	return
 end
+
 AccountManager.get_friends = function (self, friends_list_limit, callback)
 	if debug_friends_list then
 		callback(SteamHelper.debug_friends())
@@ -69,14 +82,14 @@ AccountManager.get_friends = function (self, friends_list_limit, callback)
 	else
 		callback(nil)
 	end
-
-	return 
 end
+
 AccountManager.set_current_lobby = function (self, lobby)
-	return 
-end
-AccountManager.all_lobbies_freed = function (self)
-	return 
+	return
 end
 
-return 
+AccountManager.all_lobbies_freed = function (self)
+	return
+end
+
+return

@@ -1,5 +1,6 @@
 MatchmakingStateRequestJoinGame = class(MatchmakingStateRequestJoinGame)
 MatchmakingStateRequestJoinGame.NAME = "MatchmakingStateRequestJoinGame"
+
 MatchmakingStateRequestJoinGame.init = function (self, params)
 	self.lobby = params.lobby
 	self.network_options = params.network_options
@@ -16,12 +17,12 @@ MatchmakingStateRequestJoinGame.init = function (self, params)
 	self.matchmaking_manager.selected_profile_index = nil
 	self.matchmaking_loading_context = {}
 	self.state = "waiting_to_join_lobby"
+end
 
-	return 
-end
 MatchmakingStateRequestJoinGame.destroy = function (self)
-	return 
+	return
 end
+
 MatchmakingStateRequestJoinGame.on_enter = function (self, state_context)
 	self.game_reply = nil
 	self.connected_to_server = false
@@ -30,19 +31,19 @@ MatchmakingStateRequestJoinGame.on_enter = function (self, state_context)
 	self.state_context = state_context
 	self.join_lobby_data = state_context.join_lobby_data
 
-	self._setup_lobby_connection(self, self.join_lobby_data)
+	self:_setup_lobby_connection(self.join_lobby_data)
 
 	local host = self.join_lobby_data.host or "nohostname"
 	self.matchmaking_manager.debug.text = "Joining lobby"
 	self.matchmaking_manager.debug.state = "hosted by: " .. host
 
 	self.matchmaking_manager:set_status_message("matchmaking_status_joining_game")
+end
 
-	return 
-end
 MatchmakingStateRequestJoinGame.on_exit = function (self)
-	return 
+	return
 end
+
 MatchmakingStateRequestJoinGame._setup_lobby_connection = function (self, join_lobby_data)
 	local development_port = Development.parameter("server_port") or GameSettingsDevelopment.network_port
 	development_port = development_port + 0
@@ -54,20 +55,19 @@ MatchmakingStateRequestJoinGame._setup_lobby_connection = function (self, join_l
 		lobby_port = lobby_port
 	}
 	self.lobby_client = LobbyClient:new(network_options, join_lobby_data)
-
-	return 
 end
+
 MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 	local lobby_client = self.lobby_client
 
-	lobby_client.update(lobby_client, dt)
+	lobby_client:update(dt)
 
-	local host = lobby_client.lobby_host(lobby_client)
-	local lobby_id = lobby_client.id(lobby_client)
+	local host = lobby_client:lobby_host()
+	local lobby_id = lobby_client:id()
 	local new_lobby_state = lobby_client.state
 
 	if new_lobby_state == LobbyState.FAILED then
-		return self.join_game_failed(self, lobby_id, new_lobby_state, t, true)
+		return self:join_game_failed(lobby_id, new_lobby_state, t, true)
 	end
 
 	local state = self.state
@@ -75,7 +75,7 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 	if state == "waiting_to_join_lobby" then
 		if new_lobby_state == LobbyState.JOINED and host ~= "0" then
 			self.matchmaking_manager.debug.text = "Connecting to host"
-			local host_name = (LobbyInternal.user_name and LobbyInternal.user_name(host)) or (lobby_client.user_name and lobby_client.user_name(lobby_client, host)) or "-"
+			local host_name = (LobbyInternal.user_name and LobbyInternal.user_name(host)) or (lobby_client.user_name and lobby_client:user_name(host)) or "-"
 
 			mm_printf("Joined lobby, waiting to connect to host with user name '%s'...", tostring(host_name))
 
@@ -96,7 +96,7 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 
 			mm_printf_force("Failed to connect to host due to timeout. lobby_id=%s, host_id:%s", lobby_id, host_name)
 
-			return self.join_game_failed(self, lobby_id, "connection_timeout", t, true)
+			return self:join_game_failed(lobby_id, "connection_timeout", t, true)
 		end
 	elseif self.state == "waiting_for_handshake" then
 		local handshake_time = self.handshake_timeout - t + 1
@@ -114,7 +114,7 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 
 			mm_printf("Failed to resolve handshake in time. lobby_id=%s, host_id:%s", lobby_id, host_name)
 
-			return self.join_game_failed(self, lobby_id, "handshake_timeout", t, true)
+			return self:join_game_failed(lobby_id, "handshake_timeout", t, true)
 		end
 	elseif state == "verifying_network_hash" then
 		local network_hash = self.lobby_client:lobby_data("network_hash")
@@ -134,14 +134,14 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 
 				mm_printf("Non-mathching network hash, aborting join... lobby_id=%s, host_id:%s", lobby_id, host_name)
 
-				return self.join_game_failed(self, lobby_id, "failure_start_join_server_incorrect_hash", t, true, self.lobby_client.network_hash, network_hash)
+				return self:join_game_failed(lobby_id, "failure_start_join_server_incorrect_hash", t, true, self.lobby_client.network_hash, network_hash)
 			end
 		elseif self.join_timeout < t then
 			local host_name = (LobbyInternal.user_name and LobbyInternal.user_name(host)) or "-"
 
 			mm_printf("Failed to fetch network hash in time. lobby_id=%s, host_id:%s", lobby_id, host_name)
 
-			return self.join_game_failed(self, lobby_id, "join_timeout", t, true)
+			return self:join_game_failed(lobby_id, "join_timeout", t, true)
 		end
 	elseif state == "asking_to_join" then
 		local join_time = MatchmakingSettings.REQUEST_JOIN_LOBBY_REPLY_TIME - self.join_timeout - t
@@ -152,27 +152,29 @@ MatchmakingStateRequestJoinGame.update = function (self, dt, t)
 		if self.join_timeout < t then
 			mm_printf_force("Failed to join game due to timeout. lobby_id=%s, host_id:%s", lobby_id, host_name)
 
-			return self.join_game_failed(self, lobby_id, "join_timeout", t, true)
+			return self:join_game_failed(lobby_id, "join_timeout", t, true)
 		elseif game_reply ~= nil then
 			if game_reply == "lobby_ok" then
 				mm_printf("Successfully joined game after %.2f seconds: lobby_id=%s host_id:%s", join_time, lobby_id, host_name)
 
-				return self.join_game_success(self, t)
+				return self:join_game_success(t)
 			else
 				mm_printf_force("Failed to join game due to host responding '%s'. lobby_id=%s, host_id:%s", game_reply, lobby_id, host_name)
 
-				return self.join_game_failed(self, lobby_id, game_reply, t, game_reply == "lobby_id_mismatch")
+				return self:join_game_failed(lobby_id, game_reply, t, game_reply == "lobby_id_mismatch")
 			end
 		end
 	end
 
 	return nil
 end
+
 MatchmakingStateRequestJoinGame.join_game_success = function (self, t)
 	self.state_context.lobby_client = self.lobby_client
 
 	return MatchmakingStateRequestProfiles, self.state_context
 end
+
 MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, reason, t, is_bad_connection, ...)
 	self.matchmaking_manager:add_broken_lobby(lobby_id, t, is_bad_connection)
 	self.lobby_client:destroy()
@@ -191,22 +193,18 @@ MatchmakingStateRequestJoinGame.join_game_failed = function (self, lobby_id, rea
 	else
 		return MatchmakingStateSearchGame, self.state_context
 	end
-
-	return 
 end
+
 MatchmakingStateRequestJoinGame.rpc_matchmaking_request_join_lobby_reply = function (self, sender, client_cookie, host_cookie, reply_id)
 	if not self.handshaker_client:validate_cookies(client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	self.game_reply = NetworkLookup.game_ping_reply[reply_id]
-
-	return 
 end
+
 MatchmakingStateRequestJoinGame.rpc_notify_connected = function (self, sender)
 	self.connected_to_server = true
-
-	return 
 end
 
-return 
+return

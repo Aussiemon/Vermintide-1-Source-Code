@@ -574,7 +574,7 @@ local condition_function_by_game_mode = {
 		end
 
 		local map_view_helper = params.map_view_helper
-		local unlocked = map_view_helper.is_survival_unlocked(map_view_helper)
+		local unlocked = map_view_helper:is_survival_unlocked()
 
 		if not unlocked then
 			local required_level_display_name = LevelSettings.magnus.display_name
@@ -582,8 +582,6 @@ local condition_function_by_game_mode = {
 
 			return true, description_text
 		end
-
-		return 
 	end
 }
 local game_mode_index_by_name = {}

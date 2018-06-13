@@ -670,4 +670,4 @@ SpecialSubtitleEvents = {
 	}
 }
 
-return 
+return

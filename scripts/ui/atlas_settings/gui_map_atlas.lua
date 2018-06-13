@@ -1429,4 +1429,4 @@ map_atlas = {
 	}
 }
 
-return 
+return

@@ -661,4 +661,4 @@ UtilityConsiderations = {
 	}
 }
 
-return 
+return

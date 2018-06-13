@@ -1,4 +1,5 @@
 PrayForLootTester = class(PrayForLootTester)
+
 PrayForLootTester.init = function (self)
 	self._state = "done"
 	self._profiles = {
@@ -19,9 +20,8 @@ PrayForLootTester.init = function (self)
 		"ranged",
 		"any"
 	}
-
-	return 
 end
+
 PrayForLootTester.start = function (self, max_queries)
 	self._num_queries = 0
 	self._state = "query"
@@ -30,18 +30,17 @@ PrayForLootTester.start = function (self, max_queries)
 	local update = callback(self, "update")
 
 	Managers.debug_updator:add_updator(update, "PrayForLootTester")
-
-	return 
 end
+
 PrayForLootTester.update = function (self, dt)
 	local rarity = self._rarity
 
 	if self._state == "query" then
-		self._query(self)
+		self:_query()
 
 		self._state = "poll"
 	elseif self._state == "poll" then
-		local result = self.poll_answer(self)
+		local result = self:poll_answer()
 
 		if result then
 			self._num_queries = self._num_queries + 1
@@ -64,16 +63,14 @@ PrayForLootTester.update = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 PrayForLootTester._query = function (self)
 	local script_name = GameSettingsDevelopment.backend_settings.pray_for_loot_script
 
-	self._submit_query(self, script_name, self._parameters(self))
-
-	return 
+	self:_submit_query(script_name, self:_parameters())
 end
+
 PrayForLootTester._parameters = function (self)
 	self._expected_result = self._expected_result or {}
 	local profile_name = self._profiles[Math.random(#self._profiles)]
@@ -85,64 +82,60 @@ PrayForLootTester._parameters = function (self)
 
 	return "param_profile_name", profile_name, "param_rarity", rarity, "param_slot_type", slot_type
 end
+
 PrayForLootTester._submit_query = function (self, script_name, ...)
 	printf("Script Name %s", script_name)
 	print("Parameters:", ...)
 	BackendSession.item_server_script(script_name, ...)
-
-	return 
 end
+
 PrayForLootTester.poll_answer = function (self)
 	local items, parameters, error_message = BackendSession.poll_item_server()
 
 	if error_message then
 		if type(error_message) == "table" then
 			for k, v in pairs(error_message) do
-				self._report_error(self, k .. " " .. v)
+				self:_report_error(k .. " " .. v)
 			end
 		else
-			self._report_error(self, error_message)
+			self:_report_error(error_message)
 		end
 	elseif items then
-		self._verify_result(self, items)
+		self:_verify_result(items)
 
 		return true
 	end
-
-	return 
 end
+
 PrayForLootTester._report_error = function (self, ...)
 	local formatted = string.format(...)
 
 	Application.error(formatted)
 	table.insert(self._errors, formatted)
-
-	return 
 end
+
 PrayForLootTester._verify_result = function (self, items)
 	for backend_id, key in pairs(items) do
 		local item_data = ItemMasterList[key]
 
 		if item_data.rarity ~= self._expected_result.rarity then
-			self._report_error(self, "Expectied rarity: %s, got %s", self._expected_result.rarity, item_data.rarity)
+			self:_report_error("Expectied rarity: %s, got %s", self._expected_result.rarity, item_data.rarity)
 		end
 
 		if not table.contains(item_data.can_wield, self._expected_result.profile_name) then
-			self._report_error(self, "Expected item that %s can wield, got item %s", self._expected_result.profile_name, key)
+			self:_report_error("Expected item that %s can wield, got item %s", self._expected_result.profile_name, key)
 		end
 
 		if self._expected_result.slot_type ~= "any" and item_data.slot_type ~= self._expected_result.slot_type then
-			self._report_error(self, "Expected slot type %s, got slot type %s", self._expected_result.slot_type, item_data.slot_type)
+			self:_report_error("Expected slot type %s, got slot type %s", self._expected_result.slot_type, item_data.slot_type)
 		end
 
 		if item_data.item_type == "ww_2h_axe" or item_data.item_type == "wh_repeating_crossbow" then
-			self._report_error(self, "Shouldn't be able to pray for items of item_type: %q", item_data.item_type)
+			self:_report_error("Shouldn't be able to pray for items of item_type: %q", item_data.item_type)
 		end
 
 		print("won", backend_id, key)
 	end
-
-	return 
 end
 
-return 
+return

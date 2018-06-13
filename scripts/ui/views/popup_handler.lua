@@ -354,6 +354,7 @@ local function create_gamepad_button(input_action, scenegraph_id)
 end
 
 PopupHandler = class(PopupHandler)
+
 PopupHandler.init = function (self, context, from_manager)
 	fassert(from_manager, "Not created by the popoup manager")
 
@@ -368,7 +369,7 @@ PopupHandler.init = function (self, context, from_manager)
 	self.n_popups = 0
 	self.popup_ids = 0
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.gamepad_button_colors = {
 		enabled = Colors.get_color_table_with_alpha("white", 255),
@@ -377,41 +378,39 @@ PopupHandler.init = function (self, context, from_manager)
 	self.unblocked_services = {}
 	self.unblocked_services_n = 0
 	self.mock_input_manager = MockInputManager:new()
-
-	return 
 end
+
 PopupHandler.set_input_manager = function (self, input_manager)
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "popup", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "popup", "keyboard")
-	input_manager.map_device_to_service(input_manager, "popup", "mouse")
-	input_manager.map_device_to_service(input_manager, "popup", "gamepad")
+	input_manager:create_input_service("popup", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("popup", "keyboard")
+	input_manager:map_device_to_service("popup", "mouse")
+	input_manager:map_device_to_service("popup", "gamepad")
 
-	if self.has_popup(self) then
-		self.acquire_input(self)
+	if self:has_popup() then
+		self:acquire_input()
 	end
-
-	return 
 end
+
 PopupHandler.get_input_manager = function (self)
 	return self.input_manager
 end
+
 PopupHandler.remove_input_manager = function (self, application_shutdown)
-	if self.has_popup(self) then
-		self.release_input(self)
+	if self:has_popup() then
+		self:release_input()
 	end
 
-	if not application_shutdown and self.has_popup(self) then
-		local popup_id, popup = self.active_popup(self)
+	if not application_shutdown and self:has_popup() then
+		local popup_id, popup = self:active_popup()
 
 		error(string.format("Trying to proceed to next gamestate without handling popup %q: %q", popup.topic or "nil", popup.text or "nil"))
 	end
 
 	self.input_manager = nil
-
-	return 
 end
+
 PopupHandler.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self.frame_widget = UIWidget.init(frame_widget)
@@ -440,38 +439,36 @@ PopupHandler.create_ui_elements = function (self)
 	gamepad_button_widgets[3][3] = UIWidget.init(create_gamepad_button("refresh", "button_3_3"))
 	self.button_widgets = button_widgets
 	self.gamepad_button_widgets = gamepad_button_widgets
-
-	return 
 end
+
 PopupHandler.acquire_input = function (self, ignore_cursor_stack)
 	local input_manager = self.input_manager
 
-	self.release_input(self, true)
+	self:release_input(true)
 
-	self.unblocked_services_n = input_manager.get_unblocked_services(input_manager, nil, nil, self.unblocked_services)
+	self.unblocked_services_n = input_manager:get_unblocked_services(nil, nil, self.unblocked_services)
 
-	input_manager.device_block_services(input_manager, "keyboard", 1, self.unblocked_services, self.unblocked_services_n, "popup")
-	input_manager.device_block_services(input_manager, "gamepad", 1, self.unblocked_services, self.unblocked_services_n, "popup")
-	input_manager.device_block_services(input_manager, "mouse", 1, self.unblocked_services, self.unblocked_services_n, "popup")
-	input_manager.device_unblock_service(input_manager, "keyboard", 1, "popup")
-	input_manager.device_unblock_service(input_manager, "gamepad", 1, "popup")
-	input_manager.device_unblock_service(input_manager, "mouse", 1, "popup")
+	input_manager:device_block_services("keyboard", 1, self.unblocked_services, self.unblocked_services_n, "popup")
+	input_manager:device_block_services("gamepad", 1, self.unblocked_services, self.unblocked_services_n, "popup")
+	input_manager:device_block_services("mouse", 1, self.unblocked_services, self.unblocked_services_n, "popup")
+	input_manager:device_unblock_service("keyboard", 1, "popup")
+	input_manager:device_unblock_service("gamepad", 1, "popup")
+	input_manager:device_unblock_service("mouse", 1, "popup")
 
 	if not ignore_cursor_stack then
 		ShowCursorStack.push()
 	end
-
-	return 
 end
+
 PopupHandler.release_input = function (self, ignore_cursor_stack)
 	local input_manager = self.input_manager
 
-	input_manager.device_block_service(input_manager, "keyboard", 1, "popup")
-	input_manager.device_block_service(input_manager, "gamepad", 1, "popup")
-	input_manager.device_block_service(input_manager, "mouse", 1, "popup")
-	input_manager.device_unblock_services(input_manager, "keyboard", 1, self.unblocked_services, self.unblocked_services_n)
-	input_manager.device_unblock_services(input_manager, "gamepad", 1, self.unblocked_services, self.unblocked_services_n)
-	input_manager.device_unblock_services(input_manager, "mouse", 1, self.unblocked_services, self.unblocked_services_n)
+	input_manager:device_block_service("keyboard", 1, "popup")
+	input_manager:device_block_service("gamepad", 1, "popup")
+	input_manager:device_block_service("mouse", 1, "popup")
+	input_manager:device_unblock_services("keyboard", 1, self.unblocked_services, self.unblocked_services_n)
+	input_manager:device_unblock_services("gamepad", 1, self.unblocked_services, self.unblocked_services_n)
+	input_manager:device_unblock_services("mouse", 1, self.unblocked_services, self.unblocked_services_n)
 	table.clear(self.unblocked_services)
 
 	self.unblocked_services_n = 0
@@ -479,9 +476,8 @@ PopupHandler.release_input = function (self, ignore_cursor_stack)
 	if not ignore_cursor_stack then
 		ShowCursorStack.pop()
 	end
-
-	return 
 end
+
 PopupHandler.update = function (self, dt, from_manager)
 	fassert(from_manager, "Update does not come from the popup manager")
 
@@ -492,8 +488,8 @@ PopupHandler.update = function (self, dt, from_manager)
 	if current_popup then
 		local ui_renderer = self.ui_renderer
 		local input_manager = self.input_manager or self.mock_input_manager
-		local input_service = input_manager.get_service(input_manager, "popup")
-		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+		local input_service = input_manager:get_service("popup")
+		local gamepad_active = input_manager:is_device_active("gamepad")
 		local frame_widget = self.frame_widget
 		frame_widget.style.text.font_size = current_popup.text_font_size
 		frame_widget.content.text_field = current_popup.text
@@ -557,7 +553,7 @@ PopupHandler.update = function (self, dt, from_manager)
 				local input_action = button_content.input_action
 
 				if not button_content.icon then
-					local action_texture_data = self.get_gamepad_input_texture_data(self, input_service, input_action)
+					local action_texture_data = self:get_gamepad_input_texture_data(input_service, input_action)
 					button_content.icon = action_texture_data.texture
 				end
 
@@ -571,10 +567,10 @@ PopupHandler.update = function (self, dt, from_manager)
 
 				UIRenderer.draw_widget(ui_renderer, gamepad_button)
 
-				if input_service.get(input_service, input_action, true) then
+				if input_service:get(input_action, true) then
 					result = args[i * 2 - 1]
 
-					self.play_sound(self, "Play_hud_select")
+					self:play_sound("Play_hud_select")
 				end
 			else
 				local button = buttons[i]
@@ -585,7 +581,7 @@ PopupHandler.update = function (self, dt, from_manager)
 				UIRenderer.draw_widget(ui_renderer, button)
 
 				if button_hotspot.on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self:play_sound("Play_hud_hover")
 				end
 
 				if button_hotspot.on_release then
@@ -593,7 +589,7 @@ PopupHandler.update = function (self, dt, from_manager)
 
 					result = args[i * 2 - 1]
 
-					self.play_sound(self, "Play_hud_select")
+					self:play_sound("Play_hud_select")
 				end
 			end
 		end
@@ -604,15 +600,14 @@ PopupHandler.update = function (self, dt, from_manager)
 			self.n_popups = n_popups
 
 			if n_popups == 0 then
-				self.release_input(self)
+				self:release_input()
 			end
 		end
 
 		UIRenderer.end_pass(ui_renderer)
 	end
-
-	return 
 end
+
 PopupHandler.get_gamepad_input_texture_data = function (self, input_service, input_action, ignore_keybinding)
 	local platform = PLATFORM
 
@@ -625,9 +620,8 @@ PopupHandler.get_gamepad_input_texture_data = function (self, input_service, inp
 	else
 		return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 	end
-
-	return 
 end
+
 PopupHandler.set_button_enabled = function (self, popup_id, button_index, enabled)
 	local popup = nil
 
@@ -640,18 +634,16 @@ PopupHandler.set_button_enabled = function (self, popup_id, button_index, enable
 	end
 
 	popup.button_enabled_state[button_index] = enabled
-
-	return 
 end
+
 PopupHandler.active_popup = function (self)
 	local popup = self.popups[self.n_popups]
 
 	if popup then
 		return popup.popup_id, popup
 	end
-
-	return 
 end
+
 PopupHandler.queue_popup = function (self, text, topic, ...)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -670,14 +662,14 @@ PopupHandler.queue_popup = function (self, text, topic, ...)
 	local frame_widget = self.frame_widget
 	local text_style = frame_widget.style.text
 	local scaled_text_field_size = UIScaleVectorToResolution(scenegraph_definition.popup_text.size)
-	local number_of_text_rows = self.get_number_of_rows(self, text, text_style, scaled_text_field_size[1])
-	new_popup.text_font_size = (7 <= number_of_text_rows and 20) or 28
+	local number_of_text_rows = self:get_number_of_rows(text, text_style, scaled_text_field_size[1])
+	new_popup.text_font_size = (number_of_text_rows >= 7 and 20) or 28
 	new_popup.text = text
 	new_popup.topic = topic
 	local n_args = select("#", ...)
 
 	assert(math.floor(n_args / 2) * 2 == n_args, "Need one action for each button text")
-	assert(0 < n_args, "Need at least one button...")
+	assert(n_args > 0, "Need at least one button...")
 
 	new_popup.n_args = n_args / 2
 	new_popup.button_enabled_state = {}
@@ -691,16 +683,17 @@ PopupHandler.queue_popup = function (self, text, topic, ...)
 
 	pack_index[n_args](new_popup.args, 1, ...)
 
-	local ignore_cursor_stack = 1 < n_popups
+	local ignore_cursor_stack = n_popups > 1
 
 	if self.input_manager then
-		self.acquire_input(self, ignore_cursor_stack)
+		self:acquire_input(ignore_cursor_stack)
 	end
 
 	popups[n_popups] = new_popup
 
 	return popup_id
 end
+
 PopupHandler.activate_timer = function (self, popup_id, time, default_result, alignment, blink, optional_timer_format_func, optional_font_size)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -739,12 +732,12 @@ PopupHandler.activate_timer = function (self, popup_id, time, default_result, al
 	popup.timer_blink = (blink == nil and true) or blink
 	popup.timer_format_func = optional_timer_format_func
 	popup.timer_font_size = optional_font_size
+end
 
-	return 
-end
 PopupHandler.has_popup = function (self)
-	return 0 < self.n_popups
+	return self.n_popups > 0
 end
+
 PopupHandler.has_popup_with_id = function (self, popup_id)
 	for _, popup in pairs(self.popups) do
 		if popup.popup_id == popup_id then
@@ -754,6 +747,7 @@ PopupHandler.has_popup_with_id = function (self, popup_id)
 
 	return false
 end
+
 PopupHandler.cancel_popup = function (self, popup_id)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -768,15 +762,14 @@ PopupHandler.cancel_popup = function (self, popup_id)
 			self.n_popups = n_popups - 1
 
 			if self.n_popups == 0 then
-				self.release_input(self)
+				self:release_input()
 			end
 
-			return 
+			return
 		end
 	end
-
-	return 
 end
+
 PopupHandler.cancel_all_popups = function (self)
 	local n_popups = self.n_popups
 	local popups = self.popups
@@ -785,28 +778,28 @@ PopupHandler.cancel_all_popups = function (self)
 		popups[i] = nil
 	end
 
-	if 0 < n_popups then
-		self.release_input(self)
+	if n_popups > 0 then
+		self:release_input()
 	end
 
 	self.n_popups = 0
-
-	return 
 end
+
 PopupHandler.query_result = function (self, popup_id)
 	local result = self.popup_results[popup_id]
 	self.popup_results[popup_id] = nil
 
 	return result
 end
+
 PopupHandler.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 PopupHandler.fit_text_width_to_popup = function (self, text)
 	return UIRenderer.crop_text_width(self.ui_renderer, text, 500, self.frame_widget.style.text)
 end
+
 PopupHandler.get_number_of_rows = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
@@ -814,4 +807,4 @@ PopupHandler.get_number_of_rows = function (self, localized_text, text_style, te
 	return #lines
 end
 
-return 
+return

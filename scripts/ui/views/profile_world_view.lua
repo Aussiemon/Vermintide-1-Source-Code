@@ -98,8 +98,6 @@ local function outline_unit(unit, flag, channel, do_outline)
 			end
 		end
 	end
-
-	return 
 end
 
 local flow_events = {
@@ -211,6 +209,7 @@ local definitions = local_require("scripts/ui/views/profile_view_definitions")
 local profile_world_view_definitions = definitions.profile_world_view
 local DO_RELOAD_PROFILE_VIEW = true
 ProfileWorldView = class(ProfileWorldView)
+
 ProfileWorldView.init = function (self, ingame_ui_context)
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.input_manager = ingame_ui_context.input_manager
@@ -239,21 +238,18 @@ ProfileWorldView.init = function (self, ingame_ui_context)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.top_renderer, input_service, 3, UILayer.default, generic_map_actions.default.select_character)
 
 	self.menu_input_description:set_input_description(nil)
-
-	return 
 end
+
 ProfileWorldView.destroy = function (self)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 ProfileWorldView.post_update = function (self, dt, t)
 	self.function_command_queue:run_commands()
-
-	return 
 end
+
 ProfileWorldView.on_enter = function (self, viewport_widget, input_service, character_info_widget, button_widgets, cancel_input_disabled)
 	self.gamepad_active_generic_actions_name = nil
 	self.input_service = input_service
@@ -374,8 +370,8 @@ ProfileWorldView.on_enter = function (self, viewport_widget, input_service, char
 	local saved_profile_index = SaveData.wanted_profile_index or 3
 	local starting_selection_unit = self.units[saved_profile_index]
 
-	self.hover_unit(self, starting_selection_unit)
-	self.select_unit(self, starting_selection_unit, true)
+	self:hover_unit(starting_selection_unit)
+	self:select_unit(starting_selection_unit, true)
 
 	for index, unit in ipairs(self.sorted_units) do
 		if starting_selection_unit == unit then
@@ -385,10 +381,9 @@ ProfileWorldView.on_enter = function (self, viewport_widget, input_service, char
 		end
 	end
 
-	self.update_input_description(self)
-
-	return 
+	self:update_input_description()
 end
+
 ProfileWorldView.on_exit = function (self)
 	local max_shadow_casting_lights = Application.user_setting("render_settings", "max_shadow_casting_lights")
 
@@ -415,11 +410,10 @@ ProfileWorldView.on_exit = function (self)
 
 	table.clear(self.attachment_units)
 	GarbageLeakDetector.register_object(self, "ProfileWorldView")
-
-	return 
 end
+
 ProfileWorldView.handle_mouse_input = function (self, input_service)
-	local mouse = input_service.get(input_service, "cursor")
+	local mouse = input_service:get("cursor")
 	local hover_unit, hover_index = nil
 	local profile_selection_widgets = self.profile_selection_widgets
 	local num_profile_selection_widgets = #profile_selection_widgets
@@ -442,14 +436,14 @@ ProfileWorldView.handle_mouse_input = function (self, input_service)
 		hover_unit = nil
 	end
 
-	self.hover_unit(self, hover_unit)
+	self:hover_unit(hover_unit)
 
-	if input_service.get(input_service, "left_release") and not is_hovering_button and hover_unit and self.state == "selecting_profile" then
+	if input_service:get("left_release") and not is_hovering_button and hover_unit and self.state == "selecting_profile" then
 		local profile_index = self.units[hover_unit]
 		local available = self.available_units[profile_index]
 
 		if available then
-			self.select_unit(self, hover_unit)
+			self:select_unit(hover_unit)
 		end
 	end
 
@@ -468,20 +462,19 @@ ProfileWorldView.handle_mouse_input = function (self, input_service)
 			self.state = "selecting_profile"
 		end
 	end
-
-	return 
 end
+
 ProfileWorldView.handle_controller_input = function (self, input_service, dt)
 	local new_controller_index = nil
 
 	if self.hovered_unit == nil or self.controller_index == nil then
 		new_controller_index = 1
 	else
-		if input_service.get(input_service, "move_left") then
+		if input_service:get("move_left") then
 			new_controller_index = math.max(1, self.controller_index - 1)
 		end
 
-		if input_service.get(input_service, "move_right") then
+		if input_service:get("move_right") then
 			new_controller_index = math.min(5, self.controller_index + 1)
 		end
 	end
@@ -490,11 +483,11 @@ ProfileWorldView.handle_controller_input = function (self, input_service, dt)
 		self.controller_index = new_controller_index
 		local hover_unit = self.sorted_units[self.controller_index]
 
-		self.hover_unit(self, hover_unit)
-		self.select_unit_gamepad(self, hover_unit, 0.5, true)
+		self:hover_unit(hover_unit)
+		self:select_unit_gamepad(hover_unit, 0.5, true)
 	end
 
-	if self.state == "selecting_profile" and self.selected_unit == self.sorted_units[self.controller_index] and input_service.get(input_service, "confirm") and not self.blocked_accept then
+	if self.state == "selecting_profile" and self.selected_unit == self.sorted_units[self.controller_index] and input_service:get("confirm") and not self.blocked_accept then
 		self.done = true
 		local profile_index = self.units[self.selected_unit]
 		local player = Managers.player:local_player()
@@ -506,11 +499,10 @@ ProfileWorldView.handle_controller_input = function (self, input_service, dt)
 		end
 	end
 
-	self.update_select_unit_gamepad(self, dt)
-	self.update_input_description(self)
-
-	return 
+	self:update_select_unit_gamepad(dt)
+	self:update_input_description()
 end
+
 ProfileWorldView.update_input_description = function (self)
 	local actions_name_to_use = "default"
 	local hover_unit = self.sorted_units[self.controller_index]
@@ -528,9 +520,8 @@ ProfileWorldView.update_input_description = function (self)
 
 		self.menu_input_description:change_generic_actions(generic_actions)
 	end
-
-	return 
 end
+
 ProfileWorldView.update = function (self, dt)
 	if DO_RELOAD_PROFILE_VIEW then
 		DO_RELOAD_PROFILE_VIEW = false
@@ -571,7 +562,7 @@ ProfileWorldView.update = function (self, dt)
 	end
 
 	if self.state == "waiting_for_profile_switch" then
-		return 
+		return
 	end
 
 	local player = Managers.player:local_player()
@@ -581,7 +572,7 @@ ProfileWorldView.update = function (self, dt)
 		local lol = math.random()
 		local unit = self.units[i]
 		local profile_index = self.units[unit]
-		local is_available = not profile_synchronizer.owner(profile_synchronizer, i)
+		local is_available = not profile_synchronizer:owner(i)
 
 		if player ~= nil and player.profile_index == profile_index then
 			is_available = true
@@ -650,13 +641,12 @@ ProfileWorldView.update = function (self, dt)
 
 	self.title_text_anim_t = self.title_text_anim_t + dt
 
-	if 0.5 < self.title_text_anim_t then
+	if self.title_text_anim_t > 0.5 then
 		local title_text_color = self.character_info_widget.style.title_text.text_color
 		title_text_color[1] = math.min(255, title_text_color[1] + dt * 400)
 	end
-
-	return 
 end
+
 ProfileWorldView.draw_widgets = function (self, dt, input_service)
 	local ui_renderer = self.ui_renderer
 	local top_renderer = self.top_renderer
@@ -676,9 +666,8 @@ ProfileWorldView.draw_widgets = function (self, dt, input_service)
 	if self.input_manager:is_device_active("gamepad") then
 		self.menu_input_description:draw(top_renderer, dt)
 	end
-
-	return 
 end
+
 ProfileWorldView.hover_unit = function (self, unit)
 	local level = self.level
 
@@ -719,25 +708,22 @@ ProfileWorldView.hover_unit = function (self, unit)
 	end
 
 	self.hovered_unit = unit
-
-	return 
 end
+
 ProfileWorldView.select_unit_gamepad = function (self, unit, delay, ignore_sound)
 	self._unit_to_select = unit
 	self._gamepad_select_delay = delay
 	self._ignore_sound = ignore_sound
-
-	return 
 end
+
 ProfileWorldView.update_select_unit_gamepad = function (self, dt)
 	self._gamepad_select_delay = self._gamepad_select_delay - dt
 
 	if self._gamepad_select_delay <= 0 and self._unit_to_select then
-		self.select_unit(self, self._unit_to_select, self._ignore_sound)
+		self:select_unit(self._unit_to_select, self._ignore_sound)
 	end
-
-	return 
 end
+
 ProfileWorldView.select_unit = function (self, unit, ignore_sound)
 	local level = self.level
 
@@ -752,15 +738,15 @@ ProfileWorldView.select_unit = function (self, unit, ignore_sound)
 	end
 
 	if unit == nil then
-		return 
+		return
 	end
 
 	if unit == self.selected_unit then
-		return 
+		return
 	end
 
 	if not self.available_units[self.units[unit]] then
-		return 
+		return
 	end
 
 	local profile_index = self.units[unit]
@@ -775,8 +761,6 @@ ProfileWorldView.select_unit = function (self, unit, ignore_sound)
 
 	self.selected_unit = unit
 	self.unit_states[profile_index].wanted_state = "selected"
-
-	return 
 end
 
-return 
+return

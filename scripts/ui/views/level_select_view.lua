@@ -15,14 +15,14 @@ for name, data in pairs(LevelSettings) do
 end
 
 LevelSelectView = class(LevelSelectView)
+
 LevelSelectView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
 	self.ingame_ui = ingame_ui_context.ingame_ui
 	self.level_transition_handler = ingame_ui_context.level_transition_handler
-
-	return 
 end
+
 local font_size = 26
 local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
@@ -38,20 +38,20 @@ local select_color = {
 	255,
 	0
 }
+
 LevelSelectView.on_enter = function (self)
 	self.input_manager:block_device_except_service("ingame_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("ingame_menu", "mouse", 1)
 	self.input_manager:block_device_except_service("ingame_menu", "gamepad", 1)
-
-	return 
 end
+
 LevelSelectView.update = function (self, dt)
 	local current_selection = self.current_selection or 1
 
 	if Keyboard.pressed(Keyboard.button_index("down")) then
 		current_selection = current_selection + 1
 
-		if #level_array < current_selection then
+		if current_selection > #level_array then
 			current_selection = 1
 		end
 	end
@@ -86,12 +86,11 @@ LevelSelectView.update = function (self, dt)
 		self.level_transition_handler:set_next_level(level_array[current_selection])
 		self.ingame_ui:handle_transition("exit_menu")
 	end
-
-	return 
 end
+
 LevelSelectView.event_enable_level_select = function (self)
 	if not Managers.player.is_server then
-		return 
+		return
 	end
 
 	local players = Managers.player:players()
@@ -108,8 +107,6 @@ LevelSelectView.event_enable_level_select = function (self)
 	if player then
 		self.ingame_ui:handle_transition("select_level")
 	end
-
-	return 
 end
 
-return 
+return

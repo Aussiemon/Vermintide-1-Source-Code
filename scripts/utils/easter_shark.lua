@@ -2,6 +2,7 @@ require("scripts/managers/conflict_director/conflict_director")
 
 EasterShark = class(EasterShark)
 local TIMEOUT_WINDOW = 1
+
 EasterShark.init = function (self, world)
 	self._combo = {
 		"w",
@@ -18,9 +19,8 @@ EasterShark.init = function (self, world)
 	self._fatshark = nil
 	self._player_units = nil
 	self._timeout = 0
-
-	return 
 end
+
 EasterShark.check_combo = function (self, button_index)
 	local button = Keyboard.button_name(button_index)
 
@@ -30,6 +30,7 @@ EasterShark.check_combo = function (self, button_index)
 
 	return true
 end
+
 EasterShark.update = function (self, dt, t)
 	Profiler.start("EasterShark")
 
@@ -41,12 +42,12 @@ EasterShark.update = function (self, dt, t)
 	if button_index and self._fatshark == nil then
 		self._timeout = t + TIMEOUT_WINDOW
 		self._index = self._index + 1
-		correct = self.check_combo(self, button_index)
+		correct = self:check_combo(button_index)
 
 		if not correct then
 			self._index = 0
 		elseif self._index == #self._combo then
-			self._fatshark = self.spawn_shark(self)
+			self._fatshark = self:spawn_shark()
 			self._index = 0
 		end
 	end
@@ -55,16 +56,15 @@ EasterShark.update = function (self, dt, t)
 		self._index = 0
 	end
 
-	self.update_unit(self, dt)
+	self:update_unit(dt)
 	Profiler.stop("EasterShark")
-
-	return 
 end
+
 EasterShark.update_unit = function (self, dt)
 	local shark = self._fatshark
 
 	if shark == nil then
-		return 
+		return
 	end
 
 	local player = self._player_units[1]
@@ -85,18 +85,17 @@ EasterShark.update_unit = function (self, dt)
 	end
 
 	if Vector3.distance(shark_position, player_position) <= 2.6 then
-		self.despawn_shark(self, shark, shark_position)
+		self:despawn_shark(shark, shark_position)
 	end
-
-	return 
 end
+
 EasterShark.spawn_shark = function (self)
 	local player = self._player_units[1]
 
 	print(player)
 
 	local first_person_extension = ScriptUnit.extension(player, "first_person_system")
-	local first_person_unit = first_person_extension.get_first_person_unit(first_person_extension)
+	local first_person_unit = first_person_extension:get_first_person_unit()
 	local player_position = POSITION_LOOKUP[first_person_unit]
 	local player_rotation = Quaternion.forward(Unit.local_rotation(first_person_unit, 0))
 	player_rotation.z = -0.09
@@ -107,12 +106,11 @@ EasterShark.spawn_shark = function (self)
 
 	return shark
 end
+
 EasterShark.despawn_shark = function (self, shark, shark_position)
 	World.destroy_unit(self.world, shark)
 
 	self._fatshark = nil
-
-	return 
 end
 
-return 
+return

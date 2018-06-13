@@ -1,11 +1,11 @@
 local function apply_outline(unit)
-	return 
+	return
 end
 
 local function has_melee_weapon_equipped(unit)
 	local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-	local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-	local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+	local slot_name = inventory_extension:get_wielded_slot_name()
+	local slot_data = inventory_extension:get_slot_data(slot_name)
 
 	if slot_data == nil then
 		return false
@@ -38,14 +38,12 @@ TutorialTemplates = {
 		},
 		init_data = function (data)
 			data.core_block_count = data.core_block_count or 0
-
-			return 
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit)
 			if raycast_unit == nil or not Unit.alive(raycast_unit) then
@@ -60,7 +58,7 @@ TutorialTemplates = {
 
 			local health_extension = ScriptUnit.extension(unit, "health_system")
 
-			if 0.5 < health_extension.current_health_percent(health_extension) then
+			if health_extension:current_health_percent() > 0.5 then
 				return false
 			end
 
@@ -78,11 +76,9 @@ TutorialTemplates = {
 				return false
 			end
 
-			if start_t + 3 < t then
+			if t > start_t + 3 then
 				return true
 			end
-
-			return 
 		end
 	},
 	core_knocked_down = {
@@ -91,13 +87,13 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit)
 			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
@@ -108,14 +104,12 @@ TutorialTemplates = {
 
 			local status_extension = ScriptUnit.extension(unit, "status_system")
 
-			if status_extension.is_knocked_down(status_extension) then
+			if status_extension:is_knocked_down() then
 				return true
 			end
-
-			return 
 		end,
 		is_completed = function (t, start_t, unit, data)
-			return 
+			return
 		end
 	},
 	core_needs_help = {
@@ -127,13 +121,13 @@ TutorialTemplates = {
 		icon = "hud_tutorial_icon_attention",
 		is_mission_tutorial = true,
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit)
 			local players = Managers.player:human_and_bot_players()
@@ -147,7 +141,7 @@ TutorialTemplates = {
 				if Unit.alive(player_unit) and unit ~= player_unit then
 					local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-					if status_extension.is_pounced_down(status_extension) or status_extension.get_is_ledge_hanging(status_extension) or status_extension.is_grabbed_by_pack_master(status_extension) then
+					if status_extension:is_pounced_down() or status_extension:get_is_ledge_hanging() or status_extension:is_grabbed_by_pack_master() then
 						local player_position = POSITION_LOOKUP[player_unit]
 						local distance_sq = Vector3.distance_squared(unit_position, player_position)
 
@@ -183,23 +177,23 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-			local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+			local slot_name = inventory_extension:get_wielded_slot_name()
 
 			if slot_name ~= "slot_ranged" then
 				return false
 			end
 
-			local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+			local slot_data = inventory_extension:get_slot_data(slot_name)
 
 			if slot_data == nil then
 				return false
@@ -223,11 +217,11 @@ TutorialTemplates = {
 
 			if ammo_unit then
 				local ammo_extension = ScriptUnit.extension(ammo_unit, "ammo_system")
-				local current_ammo_count = ammo_extension.ammo_count(ammo_extension)
-				local remaining_ammo = ammo_extension.remaining_ammo(ammo_extension)
+				local current_ammo_count = ammo_extension:ammo_count()
+				local remaining_ammo = ammo_extension:remaining_ammo()
 				local max_ammo = ammo_extension.max_ammo
 
-				if current_ammo_count + remaining_ammo == 0 or max_ammo * 0.25 < current_ammo_count + remaining_ammo then
+				if current_ammo_count + remaining_ammo == 0 or current_ammo_count + remaining_ammo > max_ammo * 0.25 then
 					return false
 				end
 
@@ -246,23 +240,23 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-			local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
+			local slot_name = inventory_extension:get_wielded_slot_name()
 
 			if slot_name ~= "slot_ranged" then
 				return false
 			end
 
-			local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+			local slot_data = inventory_extension:get_slot_data(slot_name)
 
 			if slot_data == nil then
 				return false
@@ -286,10 +280,10 @@ TutorialTemplates = {
 
 			if ammo_unit then
 				local ammo_extension = ScriptUnit.extension(ammo_unit, "ammo_system")
-				local remaining_ammo = ammo_extension.remaining_ammo(ammo_extension)
-				local current_ammo_count = ammo_extension.ammo_count(ammo_extension)
+				local remaining_ammo = ammo_extension:remaining_ammo()
+				local current_ammo_count = ammo_extension:ammo_count()
 
-				if 0 < current_ammo_count + remaining_ammo then
+				if current_ammo_count + remaining_ammo > 0 then
 					return false
 				end
 
@@ -312,13 +306,13 @@ TutorialTemplates = {
 		icon = "hud_tutorial_icon_attention",
 		is_mission_tutorial = true,
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
@@ -338,7 +332,7 @@ TutorialTemplates = {
 				if Unit.alive(player_unit) and unit ~= player_unit then
 					local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-					if status_extension.is_knocked_down(status_extension) then
+					if status_extension:is_knocked_down() then
 						local player_position = POSITION_LOOKUP[player_unit]
 						local distance_sq = Vector3.distance_squared(unit_position, player_position)
 
@@ -383,13 +377,13 @@ TutorialTemplates = {
 			}
 		},
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			if raycast_unit == nil or not Unit.alive(raycast_unit) then
@@ -403,8 +397,8 @@ TutorialTemplates = {
 			end
 
 			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-			local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-			local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+			local slot_name = inventory_extension:get_wielded_slot_name()
+			local slot_data = inventory_extension:get_slot_data(slot_name)
 
 			if slot_data == nil then
 				return false
@@ -415,8 +409,8 @@ TutorialTemplates = {
 
 			if is_weapon_slot and ScriptUnit.has_extension(right_unit_1p, "ammo_system") then
 				local ammo_extension = ScriptUnit.extension(right_unit_1p, "ammo_system")
-				local current_ammo_count = ammo_extension.ammo_count(ammo_extension)
-				local clip_size = ammo_extension.clip_size(ammo_extension)
+				local current_ammo_count = ammo_extension:ammo_count()
+				local clip_size = ammo_extension:clip_size()
 
 				if current_ammo_count == clip_size then
 					apply_outline(raycast_unit)
@@ -437,29 +431,29 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local health_extension = ScriptUnit.extension(unit, "health_system")
 			local status_extension = ScriptUnit.extension(unit, "status_system")
 
-			if 0.5 < health_extension.current_health_percent(health_extension) then
+			if health_extension:current_health_percent() > 0.5 then
 				return false
 			end
 
-			if status_extension.is_knocked_down(status_extension) then
+			if status_extension:is_knocked_down() then
 				return false
 			end
 
 			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
 			local medkit_slot_name = "slot_healthkit"
-			local slot_data = inventory_extension.get_slot_data(inventory_extension, medkit_slot_name)
+			local slot_data = inventory_extension:get_slot_data(medkit_slot_name)
 
 			if slot_data == nil then
 				return false
@@ -477,24 +471,24 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local health_extension = ScriptUnit.extension(unit, "health_system")
 
-			if 0.5 < health_extension.current_health_percent(health_extension) then
+			if health_extension:current_health_percent() > 0.5 then
 				return false
 			end
 
 			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
 			local medkit_slot_name = "slot_healthkit"
-			local slot_data = inventory_extension.get_slot_data(inventory_extension, medkit_slot_name)
+			local slot_data = inventory_extension:get_slot_data(medkit_slot_name)
 
 			if slot_data ~= nil then
 				return false
@@ -525,13 +519,13 @@ TutorialTemplates = {
 			return data.inputs
 		end,
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			if raycast_unit == nil or not Unit.alive(raycast_unit) then
@@ -549,8 +543,8 @@ TutorialTemplates = {
 			end
 
 			local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-			local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-			local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+			local slot_name = inventory_extension:get_wielded_slot_name()
+			local slot_data = inventory_extension:get_slot_data(slot_name)
 
 			if slot_data == nil then
 				return false
@@ -617,16 +611,16 @@ TutorialTemplates = {
 			"tutorial_infoslate_advanced_enemy_armor_02"
 		},
 		init_data = function (data)
-			return 
+			return
 		end,
 		get_text = function (data, template)
 			return template.text[math.floor(math.random(#template.text))]
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			if raycast_unit == nil or not Unit.alive(raycast_unit) then
@@ -662,21 +656,21 @@ TutorialTemplates = {
 			"tutorial_infoslate_advanced_fatigue_02"
 		},
 		init_data = function (data)
-			return 
+			return
 		end,
 		get_text = function (data, template)
 			return template.text[math.floor(math.random(#template.text))]
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local status_extension = ScriptUnit.extension(unit, "status_system")
 
-			if status_extension.fatigued(status_extension) then
+			if status_extension:fatigued() then
 				return true
 			end
 
@@ -693,21 +687,21 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local status_extension = ScriptUnit.extension(unit, "status_system")
 
-			if status_extension.wounded and not status_extension.is_knocked_down(status_extension) then
+			if status_extension.wounded and not status_extension:is_knocked_down() then
 				local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
 				local medkit_slot_name = "slot_healthkit"
-				local slot_data = inventory_extension.get_slot_data(inventory_extension, medkit_slot_name)
+				local slot_data = inventory_extension:get_slot_data(medkit_slot_name)
 
 				if slot_data == nil then
 					return false
@@ -729,21 +723,21 @@ TutorialTemplates = {
 		display_type = "info_slate",
 		icon = "hud_tutorial_icon_attention",
 		init_data = function (data)
-			return 
+			return
 		end,
 		clear_data = function (data)
-			return 
+			return
 		end,
 		update_data = function (t, unit, data)
-			return 
+			return
 		end,
 		can_show = function (t, unit, data, raycast_unit, world)
 			local status_extension = ScriptUnit.extension(unit, "status_system")
 
-			if status_extension.wounded and not status_extension.is_knocked_down(status_extension) then
+			if status_extension.wounded and not status_extension:is_knocked_down() then
 				local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
 				local medkit_slot_name = "slot_healthkit"
-				local slot_data = inventory_extension.get_slot_data(inventory_extension, medkit_slot_name)
+				local slot_data = inventory_extension:get_slot_data(medkit_slot_name)
 
 				if slot_data ~= nil then
 					return false
@@ -766,13 +760,13 @@ TutorialTemplates.advanced_sweep = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		if not has_melee_weapon_equipped(unit) then
@@ -803,27 +797,27 @@ TutorialTemplates.advanced_push = {
 		"tutorial_infoslate_advanced_push_02"
 	},
 	init_data = function (data)
-		return 
+		return
 	end,
 	get_text = function (data, template)
 		return template.text[math.floor(math.random(#template.text))]
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local health_extension = ScriptUnit.extension(unit, "health_system")
 
-		if 0.5 < health_extension.current_health_percent(health_extension) then
+		if health_extension:current_health_percent() > 0.5 then
 			return false
 		end
 
 		local status_extension = ScriptUnit.extension(unit, "status_system")
 
-		if not status_extension.is_blocking(status_extension) then
+		if not status_extension:is_blocking() then
 			return false
 		end
 
@@ -847,22 +841,22 @@ TutorialTemplates.advanced_overcharge = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local inventory_ext = ScriptUnit.extension(unit, "inventory_system")
 
-		if not inventory_ext.get_slot_data(inventory_ext, "slot_ranged") then
+		if not inventory_ext:get_slot_data("slot_ranged") then
 			return false
 		end
 
-		local current_oc, threshold_oc, max_oc = inventory_ext.current_overcharge_status(inventory_ext, "slot_ranged")
+		local current_oc, threshold_oc, max_oc = inventory_ext:current_overcharge_status("slot_ranged")
 
 		if not current_oc or current_oc < threshold_oc then
 			return false
@@ -880,17 +874,17 @@ TutorialTemplates.advanced_heal_ally = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local inventory_ext = ScriptUnit.extension(unit, "inventory_system")
-		local med_kit = inventory_ext.get_slot_data(inventory_ext, "slot_healthkit")
+		local med_kit = inventory_ext:get_slot_data("slot_healthkit")
 		local has_med_kit = false
 
 		if med_kit then
@@ -908,9 +902,9 @@ TutorialTemplates.advanced_heal_ally = {
 					if Unit.alive(unit) then
 						local health_ext = ScriptUnit.extension(unit, "health_system")
 						local status_ext = ScriptUnit.extension(unit, "status_system")
-						local health_percent = health_ext.current_health_percent(health_ext)
+						local health_percent = health_ext:current_health_percent()
 
-						if health_ext.current_health_percent(health_ext) < 0.3 and not status_ext.is_disabled(status_ext) then
+						if health_ext:current_health_percent() < 0.3 and not status_ext:is_disabled() then
 							return true
 						end
 					end
@@ -931,13 +925,13 @@ TutorialTemplates.advanced_avoid_friendly_fire = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local in_brawl_mode = Managers.state.game_mode:level_key() == "inn_level"
@@ -958,7 +952,7 @@ TutorialTemplates.advanced_avoid_friendly_fire = {
 
 					if Unit.alive(player_unit) then
 						local damage_ext = ScriptUnit.extension(player_unit, "damage_system")
-						local recent_damages = damage_ext.recent_damages(damage_ext)
+						local recent_damages = damage_ext:recent_damages()
 						local attacking_unit = recent_damages[DamageDataIndex.ATTACKER]
 
 						if attacking_unit == unit then
@@ -982,13 +976,13 @@ TutorialTemplates.advanced_grenade = {
 	icon = "grenade_icon",
 	is_mission_tutorial = true,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local unit_position = POSITION_LOOKUP[unit]
@@ -1059,21 +1053,19 @@ TutorialTemplates.play_go_tutorial_tooltip = {
 		return data.force_update
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
 		if data.force_update then
 			data.force_update = false
 		end
-
-		return 
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local mission_system = Managers.state.entity:system("mission_system")
-		local active_missions, completed_missions = mission_system.get_missions(mission_system)
+		local active_missions, completed_missions = mission_system:get_missions()
 
 		for mission_name, mission_data in pairs(active_missions) do
 			if active_missions[mission_name].mission_data.tooltip_text ~= nil then
@@ -1108,13 +1100,13 @@ TutorialTemplates.elite_cage_respawn = {
 	icon = "hud_tutorial_icon_rescue",
 	is_mission_tutorial = true,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local players = Managers.player:human_and_bot_players()
@@ -1128,7 +1120,7 @@ TutorialTemplates.elite_cage_respawn = {
 			if Unit.alive(player_unit) and unit ~= player_unit then
 				local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-				if status_extension.is_ready_for_assisted_respawn(status_extension) then
+				if status_extension:is_ready_for_assisted_respawn() then
 					local player_position = POSITION_LOOKUP[player_unit]
 					local distance_sq = Vector3.distance_squared(unit_position, player_position)
 
@@ -1159,13 +1151,13 @@ TutorialTemplates.elite_tutorial_cage_respawn = {
 		return data.text
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local players = Managers.player:human_and_bot_players()
@@ -1179,7 +1171,7 @@ TutorialTemplates.elite_tutorial_cage_respawn = {
 			if Unit.alive(player_unit) and unit ~= player_unit then
 				local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-				if status_extension.is_ready_for_assisted_respawn(status_extension) then
+				if status_extension:is_ready_for_assisted_respawn() then
 					return true
 				end
 			end
@@ -1200,13 +1192,13 @@ TutorialTemplates.elite_player_dead = {
 		return data.text
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local players = Managers.player:human_and_bot_players()
@@ -1217,7 +1209,7 @@ TutorialTemplates.elite_player_dead = {
 			if Unit.alive(player_unit) and unit ~= player_unit then
 				local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-				if status_extension.is_dead(status_extension) then
+				if status_extension:is_dead() then
 					return true
 				end
 			end
@@ -1238,17 +1230,17 @@ TutorialTemplates.elite_grimoire = {
 		return data.text
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local inventory_ext = ScriptUnit.extension(unit, "inventory_system")
-		local slot_data = inventory_ext.recently_acquired(inventory_ext, "slot_potion")
+		local slot_data = inventory_ext:recently_acquired("slot_potion")
 
 		if slot_data and slot_data.item_data.name == "wpn_grimoire_01" then
 			return true
@@ -1298,18 +1290,16 @@ TutorialTemplates.elite_enemies = {
 		return data.text
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	on_message = function (data, message)
 		data.elite_enemy_trigger = message
-
-		return 
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		if not data.elite_enemy_trigger then
@@ -1345,25 +1335,25 @@ TutorialTemplates.elite_aggro = {
 		"tutorial_infoslate_elite_aggro_02"
 	},
 	init_data = function (data)
-		return 
+		return
 	end,
 	get_text = function (data, template)
 		return template.text[math.floor(math.random(#template.text))]
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	on_message = function (data, message)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local proximity_extension = ScriptUnit.extension(unit, "proximity_system")
 		local proximity_types = proximity_extension.proximity_types
 
-		if 0 < proximity_types.enemies_close.num then
+		if proximity_types.enemies_close.num > 0 then
 			return false
 		end
 
@@ -1383,26 +1373,24 @@ TutorialTemplates.elite_potions = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local potion_slot = "slot_potion"
 		local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-		local slot_data = inventory_extension.get_slot_data(inventory_extension, potion_slot)
+		local slot_data = inventory_extension:get_slot_data(potion_slot)
 
 		if slot_data == nil then
 			data.potion_equipped = nil
 		elseif not data.potion_equipped and slot_data.item_data.name ~= "wpn_grimoire_01" then
 			return true
 		end
-
-		return 
 	end,
 	is_completed = function (t, start_t, unit, data)
 		return false
@@ -1415,33 +1403,31 @@ TutorialTemplates.elite_grenades = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local grenade_slot = "slot_grenade"
 		local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-		local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-		local recently_acquired = inventory_extension.recently_acquired(inventory_extension, grenade_slot)
+		local slot_name = inventory_extension:get_wielded_slot_name()
+		local recently_acquired = inventory_extension:recently_acquired(grenade_slot)
 
 		if not recently_acquired then
 			return false
 		end
 
-		local slot_data = inventory_extension.get_slot_data(inventory_extension, grenade_slot)
+		local slot_data = inventory_extension:get_slot_data(grenade_slot)
 
 		if slot_data == nil then
 			data.grenade_equipped = nil
 		elseif not data.grenade_equipped then
 			return true
 		end
-
-		return 
 	end,
 	is_completed = function (t, start_t, unit, data)
 		return false
@@ -1457,23 +1443,23 @@ TutorialTemplates.elite_loot_dice = {
 		"tutroial_infoslate_elite_loot_dice_02"
 	},
 	init_data = function (data)
-		return 
+		return
 	end,
 	get_text = function (data, template)
 		return template.text[math.floor(math.random(#template.text))]
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local dice_keeper = data.dice_keeper
-		local dice = dice_keeper.get_dice(dice_keeper)
+		local dice = dice_keeper:get_dice()
 
 		for k, v in pairs(NetworkLookup.die_types) do
-			if dice[k] ~= nil and 0 < dice_keeper.num_new_dices(dice_keeper, k) then
+			if dice[k] ~= nil and dice_keeper:num_new_dices(k) > 0 then
 				return true
 			end
 		end
@@ -1490,16 +1476,16 @@ TutorialTemplates.elite_mutators = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
-		return 
+		return
 	end,
 	is_completed = function (t, start_t, unit, data)
 		return false
@@ -1511,13 +1497,13 @@ TutorialTemplates.elite_trinkets = {
 	display_type = "info_slate",
 	icon = "hud_tutorial_icon_info",
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local levels = World.get_data(world, "levels")
@@ -1561,18 +1547,18 @@ TutorialTemplates.objective_pickup = {
 		return data.objective_text
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-		local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-		local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+		local slot_name = inventory_extension:get_wielded_slot_name()
+		local slot_data = inventory_extension:get_slot_data(slot_name)
 
 		if slot_name == "slot_level_event" and slot_data ~= nil then
 			return false
@@ -1594,7 +1580,7 @@ TutorialTemplates.objective_pickup = {
 				if ScriptUnit.has_extension(pickup_unit, "death_system") then
 					local death_extension = ScriptUnit.extension(pickup_unit, "death_system")
 
-					if death_extension.has_death_started(death_extension) then
+					if death_extension:has_death_started() then
 						disregard = true
 					end
 				end
@@ -1609,7 +1595,7 @@ TutorialTemplates.objective_pickup = {
 			end
 		end
 
-		if 0 < objective_units_n then
+		if objective_units_n > 0 then
 			local unit = objective_units[1]
 			data.objective_text = Unit.get_data(unit, "tutorial_text_id") or "tutorial_no_text"
 
@@ -1633,19 +1619,19 @@ TutorialTemplates.objective_socket = {
 		return data.objective_text
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local unit_position = POSITION_LOOKUP[unit]
 		local inventory_extension = ScriptUnit.extension(unit, "inventory_system")
-		local slot_name = inventory_extension.get_wielded_slot_name(inventory_extension)
-		local slot_data = inventory_extension.get_slot_data(inventory_extension, slot_name)
+		local slot_name = inventory_extension:get_wielded_slot_name()
+		local slot_data = inventory_extension:get_slot_data(slot_name)
 
 		if slot_name == "slot_level_event" and slot_data ~= nil then
 			local best_distance_sq = 10000
@@ -1707,13 +1693,13 @@ TutorialTemplates.objective_unit = {
 		return data.objective_wave
 	end,
 	init_data = function (data)
-		return 
+		return
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit, world)
 		local unit_position = POSITION_LOOKUP[unit]
@@ -1767,14 +1753,12 @@ TutorialTemplates.endurance_badge_pickup = {
 			"endurance_badge_05_mission"
 		}
 		data.collect_amount = 0
-
-		return 
 	end,
 	clear_data = function (data)
-		return 
+		return
 	end,
 	update_data = function (t, unit, data)
-		return 
+		return
 	end,
 	can_show = function (t, unit, data, raycast_unit)
 		local mission_system = Managers.state.entity:system("mission_system")
@@ -1784,7 +1768,7 @@ TutorialTemplates.endurance_badge_pickup = {
 			local mission_names = data.mission_names
 
 			for _, mission_name in ipairs(mission_names) do
-				local mission_data = mission_system.get_level_end_mission_data(mission_system, mission_name)
+				local mission_data = mission_system:get_level_end_mission_data(mission_name)
 
 				if mission_data then
 					local current_amount = mission_data.current_amount
@@ -1835,4 +1819,4 @@ end
 table.sort(TutorialTooltipTemplates, tooltip_sort_function)
 table.sort(TutorialObjectiveTooltipTemplates, tooltip_sort_function)
 
-return 
+return

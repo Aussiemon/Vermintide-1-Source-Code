@@ -1,17 +1,17 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTMoveRandomly = class(BTMoveRandomly, BTNode)
+
 BTMoveRandomly.init = function (self, ...)
 	BTMoveRandomly.super.init(self, ...)
-
-	return 
 end
+
 local RUMBEL_RADIUS = 10
-BTMoveRandomly.setup = function (self, unit, blackboard, profile)
-	self.new_goal(self, unit, blackboard, profile)
 
-	return 
+BTMoveRandomly.setup = function (self, unit, blackboard, profile)
+	self:new_goal(unit, blackboard, profile)
 end
+
 BTMoveRandomly.new_goal = function (self, unit, blackboard)
 	local tries = 0
 
@@ -32,31 +32,30 @@ BTMoveRandomly.new_goal = function (self, unit, blackboard)
 			local goal_pos = Unit.get_data(unit, "goal_pos") or Vector3Box()
 
 			Unit.set_data(unit, "goal_pos", goal_pos)
-			goal_pos.store(goal_pos, new_pos)
+			goal_pos:store(new_pos)
 
 			break
 		end
 
 		tries = tries + 1
 	end
-
-	return 
 end
+
 BTMoveRandomly.run = function (self, unit, blackboard, t)
 	local goal_pos = Unit.get_data(unit, "goal_pos")
 
 	if goal_pos then
-		local dist = Vector3.distance(goal_pos.unbox(goal_pos), POSITION_LOOKUP[unit])
+		local dist = Vector3.distance(goal_pos:unbox(), POSITION_LOOKUP[unit])
 		local ai_navigation = ScriptUnit.extension(unit, "ai_navigation_system")
 
-		ai_navigation.move_to(ai_navigation, goal_pos.unbox(goal_pos))
+		ai_navigation:move_to(goal_pos:unbox())
 
-		if ai_navigation.reached_last_point(ai_navigation) or dist < 5 then
-			self.new_goal(self, unit, blackboard)
+		if ai_navigation:reached_last_point() or dist < 5 then
+			self:new_goal(unit, blackboard)
 		end
 	end
 
 	return "success"
 end
 
-return 
+return

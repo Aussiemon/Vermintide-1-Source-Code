@@ -45,10 +45,10 @@ local loot_reward_sound_by_rarity = {
 }
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
 local generic_input_actions = {
@@ -73,6 +73,7 @@ local generic_input_actions = {
 	}
 }
 RewardUI = class(RewardUI)
+
 RewardUI.init = function (self, end_of_level_ui_context, ui_world)
 	local input_manager = end_of_level_ui_context.input_manager
 	self.ui_renderer = end_of_level_ui_context.ui_renderer
@@ -81,10 +82,10 @@ RewardUI.init = function (self, end_of_level_ui_context, ui_world)
 	}
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "reward_ui", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "reward_ui", "keyboard")
-	input_manager.map_device_to_service(input_manager, "reward_ui", "mouse")
-	input_manager.map_device_to_service(input_manager, "reward_ui", "gamepad")
+	input_manager:create_input_service("reward_ui", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("reward_ui", "keyboard")
+	input_manager:map_device_to_service("reward_ui", "mouse")
+	input_manager:map_device_to_service("reward_ui", "gamepad")
 
 	self.wwise_world = Managers.world:wwise_world(ui_world)
 
@@ -93,7 +94,7 @@ RewardUI.init = function (self, end_of_level_ui_context, ui_world)
 	self.ui_dice_animations = {}
 	self.handle_transition_calls = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.loaded_packages = {}
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, animation_definitions)
@@ -106,19 +107,18 @@ RewardUI.init = function (self, end_of_level_ui_context, ui_world)
 	end
 
 	local gui_layer = scenegraph_definition.root.position[3]
-	self.menu_input_description = MenuInputDescriptionUI:new(end_of_level_ui_context, self.ui_renderer, self.input_service(self), 2, gui_layer, generic_input_actions.default)
+	self.menu_input_description = MenuInputDescriptionUI:new(end_of_level_ui_context, self.ui_renderer, self:input_service(), 2, gui_layer, generic_input_actions.default)
 
 	self.menu_input_description:set_input_description(nil)
-
-	return 
 end
+
 RewardUI.create_ui_elements = function (self)
 	self.roll_button_eye_glow_widget = UIWidget.init(widgets.roll_button_eye_glow)
 	self.roll_button_widget = UIWidget.init(widgets.roll_button)
 	self.gamepad_continue_text_widget = UIWidget.init(widgets.gamepad_continue_text)
 	self.gamepad_continue_text_widget.style.text.localize = false
 
-	self.set_roll_button_text(self, "loot_screen_roll_button")
+	self:set_roll_button_text("loot_screen_roll_button")
 
 	self.dices_widget = UIWidget.init(widgets.dices)
 	self.loot_box_widgets = {}
@@ -257,13 +257,12 @@ RewardUI.create_ui_elements = function (self)
 
 	local dice_type_success_sides = UISettings.dice_type_success_sides
 
-	self.set_number_of_successes_by_dice_type(self, dice_types[1], dice_type_success_sides[dice_types[1]])
-	self.set_number_of_successes_by_dice_type(self, dice_types[2], dice_type_success_sides[dice_types[2]])
-	self.set_number_of_successes_by_dice_type(self, dice_types[3], dice_type_success_sides[dice_types[3]])
-	self.set_number_of_successes_by_dice_type(self, dice_types[4], dice_type_success_sides[dice_types[4]])
-
-	return 
+	self:set_number_of_successes_by_dice_type(dice_types[1], dice_type_success_sides[dice_types[1]])
+	self:set_number_of_successes_by_dice_type(dice_types[2], dice_type_success_sides[dice_types[2]])
+	self:set_number_of_successes_by_dice_type(dice_types[3], dice_type_success_sides[dice_types[3]])
+	self:set_number_of_successes_by_dice_type(dice_types[4], dice_type_success_sides[dice_types[4]])
 end
+
 RewardUI.set_number_of_successes_by_dice_type = function (self, type, successes)
 	local widgets = self.rules_widgets
 	local widget_name = "rules_dice_successes_" .. type
@@ -272,31 +271,31 @@ RewardUI.set_number_of_successes_by_dice_type = function (self, type, successes)
 	for i = 1, successes, 1 do
 		widget.content.texture[i] = "dice_game_success_icon"
 	end
-
-	return 
 end
+
 RewardUI.input_service = function (self)
 	return self.input_manager:get_service("reward_ui")
 end
+
 RewardUI.on_enter = function (self, ignore_input_blocking)
 	local chat_focused = Managers.chat:chat_is_focused()
 	local input_manager = self.input_manager
 
 	if not ignore_input_blocking and not chat_focused then
-		input_manager.block_device_except_service(input_manager, "reward_ui", "keyboard")
-		input_manager.block_device_except_service(input_manager, "reward_ui", "mouse")
-		input_manager.block_device_except_service(input_manager, "reward_ui", "gamepad")
+		input_manager:block_device_except_service("reward_ui", "keyboard")
+		input_manager:block_device_except_service("reward_ui", "mouse")
+		input_manager:block_device_except_service("reward_ui", "gamepad")
 	end
 
 	if not self.draw_intro_description then
-		self.handle_animation_transitions(self, "start")
+		self:handle_animation_transitions("start")
 	end
+end
 
-	return 
-end
 RewardUI.exit = function (self)
-	return 
+	return
 end
+
 RewardUI.on_exit = function (self)
 	local reward_world = self.reward_world
 
@@ -332,17 +331,15 @@ RewardUI.on_exit = function (self)
 		self.menu_input_description = nil
 	end
 
-	self.unload_packages(self)
+	self:unload_packages()
 	table.clear(self.loaded_packages)
-
-	return 
 end
+
 RewardUI.destroy = function (self)
 	rawset(_G, "my_global_pointer", self)
-	self.on_exit(self)
-
-	return 
+	self:on_exit()
 end
+
 RewardUI.set_traits_info = function (self, item, traits)
 	local tooltip_trait_locked_text = Localize("tooltip_trait_locked")
 	local tooltip_trait_unique_text = Localize("unique_trait_description")
@@ -398,18 +395,17 @@ RewardUI.set_traits_info = function (self, item, traits)
 
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	self.update_trait_alignment(self, number_of_traits_on_item)
+	self:update_trait_alignment(number_of_traits_on_item)
 
-	if 0 < number_of_traits_on_item then
+	if number_of_traits_on_item > 0 then
 		self.menu_input_description:change_generic_actions(generic_input_actions.default)
 	else
 		self.menu_input_description:change_generic_actions(generic_input_actions.no_traits)
 	end
 
-	self._set_preview_traits(self, traits, item.rarity)
-
-	return 
+	self:_set_preview_traits(traits, item.rarity)
 end
+
 RewardUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
@@ -435,19 +431,16 @@ RewardUI.update_trait_alignment = function (self, number_of_traits)
 		local widget = trait_icon_widgets[i]
 		widget.content.visible = (i <= number_of_traits and true) or false
 	end
-
-	return 
 end
+
 RewardUI.on_complete = function (self)
 	self.is_complete = true
-
-	return 
 end
+
 RewardUI.start_reward = function (self)
-	self.handle_animation_transitions(self, "present_roll_successes")
-
-	return 
+	self:handle_animation_transitions("present_roll_successes")
 end
+
 RewardUI.set_reward_values = function (self, num_successes, dice_types, win_list, item_key, backend_id)
 	if num_successes <= 0 then
 		self.no_reward_gained = true
@@ -463,19 +456,19 @@ RewardUI.set_reward_values = function (self, num_successes, dice_types, win_list
 		local item = ItemMasterList[item_key]
 		self.reward_item_rarity = item.rarity
 
-		self.load_reward_units(self)
+		self:load_reward_units()
 	end
 
-	self.set_player_dice_pool(self, dice_types)
-
-	return 
+	self:set_player_dice_pool(dice_types)
 end
+
 local rarity_level = {
 	"wood",
 	"metal",
 	"gold",
 	"warpstone"
 }
+
 RewardUI.set_player_dice_pool = function (self, dice_types)
 	local dices_widget = self.dices_widget
 	local widget_content = dices_widget.content
@@ -491,9 +484,8 @@ RewardUI.set_player_dice_pool = function (self, dice_types)
 			texture_index = texture_index + 1
 		end
 	end
-
-	return 
 end
+
 RewardUI.set_reward_display_info = function (self, item_key)
 	local item = ItemMasterList[item_key]
 	local ratity_color = Colors.get_color_table_with_alpha(item.rarity, 0)
@@ -515,10 +507,9 @@ RewardUI.set_reward_display_info = function (self, item_key)
 	self.draw_hero_icon = draw_hero_icon
 	local traits = item.traits
 
-	self.set_traits_info(self, item, traits)
-
-	return 
+	self:set_traits_info(item, traits)
 end
+
 RewardUI.handle_animation_transitions = function (self, transition_name)
 	self.transition_name = transition_name
 
@@ -546,25 +537,25 @@ RewardUI.handle_animation_transitions = function (self, transition_name)
 
 				local box_rarity = item_data.rarity
 
-				self.set_loot_box_data(self, i, box_texture, box_rarity)
+				self:set_loot_box_data(i, box_texture, box_rarity)
 			end
 		end
 
 		self.draw_roll_button = nil
 		self.reward_box_spawn_index = 0
 
-		self.handle_animation_transitions(self, "reward_entry")
+		self:handle_animation_transitions("reward_entry")
 	elseif transition_name == "reward_entry" then
-		self.play_sound(self, "dice_game_loot_entry")
+		self:play_sound("dice_game_loot_entry")
 
 		local reward_box_spawn_index = (self.reward_box_spawn_index + 1 <= TOTAL_NUMBERS_OF_LOOT_BOXES and self.reward_box_spawn_index + 1) or nil
 
 		if reward_box_spawn_index then
 			self.reward_box_spawn_index = reward_box_spawn_index
 
-			self.start_loot_box_entry_animations(self, reward_box_spawn_index)
+			self:start_loot_box_entry_animations(reward_box_spawn_index)
 		else
-			self.handle_animation_transitions(self, "roll_dices")
+			self:handle_animation_transitions("roll_dices")
 		end
 	elseif transition_name == "roll_dices" then
 		self.draw_roll_button = true
@@ -573,54 +564,52 @@ RewardUI.handle_animation_transitions = function (self, transition_name)
 		self.draw_roll_button = false
 
 		if self.no_reward_gained then
-			self.on_complete(self)
+			self:on_complete()
 		else
 			local reward_results = self.reward_results
 			local successes_to_present = reward_results.successes_to_present
 
 			if successes_to_present then
-				self.start_presenting_roll_results(self, successes_to_present)
+				self:start_presenting_roll_results(successes_to_present)
 
 				reward_results.successes_to_present = nil
 				self.reward_box_index = successes_to_present
 			end
 		end
 	elseif transition_name == "animate_door_close" then
-		self.animate_door_close(self)
+		self:animate_door_close()
 	elseif transition_name == "animate_lock_open" then
 		self.disable_dice_game = true
 
-		self.animate_lock_open(self)
+		self:animate_lock_open()
 	elseif transition_name == "animate_reward_box" then
 		local reward_box_index = self.reward_box_index
 
-		self.start_reward_box_presentation(self, reward_box_index, self.reward_results.item_key)
+		self:start_reward_box_presentation(reward_box_index, self.reward_results.item_key)
 	elseif transition_name == "animate_lock_close" then
-		self.animate_lock_close(self)
+		self:animate_lock_close()
 	elseif transition_name == "animate_door_open" then
-		self.animate_door_open(self)
+		self:animate_door_open()
 
 		self.display_reward_world = true
 	elseif transition_name == "present_reward" then
-		self.spawn_link_unit(self)
-		self.spawn_reward_units(self)
-		self.set_reward_display_info(self, self.reward_results.item_key)
-		self.animate_reward_info(self)
+		self:spawn_link_unit()
+		self:spawn_reward_units()
+		self:set_reward_display_info(self.reward_results.item_key)
+		self:animate_reward_info()
 
 		self.draw_roll_button = true
 		self.continue_timer = continue_timers.reward_display
 	end
-
-	return 
 end
+
 RewardUI.set_loot_box_data = function (self, box_index, icon_texture, rarity)
 	local loot_box_widgets = self.loot_box_widgets
 	local widget = loot_box_widgets[box_index]
 	widget.style.frame.color = Colors.get_color_table_with_alpha(rarity, 255)
 	widget.content.background = icon_texture
-
-	return 
 end
+
 RewardUI.start_loot_box_entry_animations = function (self, reward_entry_index)
 	local ui_scenegraph = self.ui_scenegraph
 	local loot_box_scenegraph_ids = self.loot_box_scenegraph_ids
@@ -635,9 +624,8 @@ RewardUI.start_loot_box_entry_animations = function (self, reward_entry_index)
 	local fg_widget_style_color = fg_widget_style.color
 	local animation_name = "loot_box_entry"
 	self.ui_dice_animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, fg_widget_style_color, 1, 255, 0, color_animation_time, math.easeInCubic)
-
-	return 
 end
+
 RewardUI.start_presenting_roll_results = function (self, current_success_index)
 	local ui_scenegraph = self.ui_scenegraph
 	local loot_box_scenegraph_ids = self.loot_box_scenegraph_ids
@@ -663,13 +651,12 @@ RewardUI.start_presenting_roll_results = function (self, current_success_index)
 	self.ui_dice_animations[animation_name .. "_right"] = UIAnimation.init(UIAnimation.function_by_time, current_box_holder_right_position, 1, default_box_holder_right_position[1], default_box_holder_right_position[1] + 15, open_side_holder_timer, math.easeOutCubic, UIAnimation.wait, wait_to_move_parent_timer, UIAnimation.wait, move_parent_holder_timer, UIAnimation.function_by_time, current_box_holder_right_position, 1, default_box_holder_right_position[1], default_box_holder_right_position[1], close_side_holder_timer, math.easeCubic)
 	local fade_wait_time = wait_to_move_parent_timer + close_side_holder_timer + move_parent_holder_timer
 
-	self.fade_out_rewards_except(self, index, fade_wait_time)
-	self.play_sound(self, "dice_game_holder_unlock")
+	self:fade_out_rewards_except(index, fade_wait_time)
+	self:play_sound("dice_game_holder_unlock")
 
 	self.ui_dice_animations.play_holder_lock = UIAnimation.init(UIAnimation.wait, fade_wait_time)
-
-	return 
 end
+
 RewardUI.fade_out_rewards_except = function (self, index, wait_time)
 	local animation_name = "fade_out_rewards"
 	local fade_out_timer = 0.2
@@ -683,9 +670,8 @@ RewardUI.fade_out_rewards_except = function (self, index, wait_time)
 			self.ui_dice_animations[icon_fade_name] = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, widget.style.fg.color, 1, 0, 255, fade_out_timer, math.easeCubic)
 		end
 	end
-
-	return 
 end
+
 RewardUI.start_reward_box_presentation = function (self, reward_index, item_key)
 	local item = ItemMasterList[item_key]
 	local slot_type = item.slot_type
@@ -713,11 +699,10 @@ RewardUI.start_reward_box_presentation = function (self, reward_index, item_key)
 	local end_wait_time = 0.3
 	self.ui_dice_animations[animation_name] = UIAnimation.init(UIAnimation.wait, start_wait_time, UIAnimation.function_by_time, widget_background_style.color, 1, 0, 255, fade_out_timer, math.easeCubic, UIAnimation.wait, end_wait_time)
 	self.ui_dice_animations[animation_name .. "_2"] = UIAnimation.init(UIAnimation.wait, start_wait_time, UIAnimation.function_by_time, widget_frame_style.color, 1, 0, 255, fade_out_timer, math.easeCubic, UIAnimation.wait, end_wait_time)
-
-	return 
 end
+
 RewardUI.animate_door_close = function (self)
-	self.play_sound(self, "dice_game_doors_close")
+	self:play_sound("dice_game_doors_close")
 
 	local ui_scenegraph = self.ui_scenegraph
 	local door_widgets = self.door_widgets
@@ -738,11 +723,10 @@ RewardUI.animate_door_close = function (self)
 	self.ui_dice_animations[animation_name .. "_left"] = UIAnimation.init(UIAnimation.function_by_time, left_widget_size, 1, 0, 1080, animation_time, math.easeInCubic)
 	self.ui_dice_animations[animation_name .. "_right_uvs"] = UIAnimation.init(UIAnimation.function_by_time, left_uvs[1], 1, 1, 0, animation_time, math.easeInCubic)
 	self.ui_dice_animations.show_fake_lock = UIAnimation.init(UIAnimation.wait, animation_time * 0.7)
-
-	return 
 end
+
 RewardUI.animate_door_open = function (self)
-	self.play_sound(self, "dice_game_doors_open")
+	self:play_sound("dice_game_doors_open")
 
 	local ui_scenegraph = self.ui_scenegraph
 	local door_widgets = self.door_widgets
@@ -767,23 +751,20 @@ RewardUI.animate_door_open = function (self)
 	self.ui_dice_animations[animation_name .. "_right"] = UIAnimation.init(UIAnimation.function_by_time, right_widget_size, 1, 960, 0, animation_time, math.easeInCubic)
 	self.ui_dice_animations[animation_name .. "_right_uvs"] = UIAnimation.init(UIAnimation.function_by_time, right_uvs[2], 1, 1, 0, animation_time, math.easeInCubic)
 	self.ui_dice_animations.hide_fake_lock = UIAnimation.init(UIAnimation.wait, animation_time * 0.8)
-
-	return 
 end
+
 RewardUI.animate_lock_open = function (self)
-	self.play_sound(self, "dice_game_lock_open")
+	self:play_sound("dice_game_lock_open")
 
 	self.lock_open_anim_id = self.ui_animator:start_animation("lock_open", self.lock_widgets, scenegraph_definition)
-
-	return 
 end
+
 RewardUI.animate_lock_close = function (self)
-	self.play_sound(self, "dice_game_lock_close")
+	self:play_sound("dice_game_lock_close")
 
 	self.lock_close_anim_id = self.ui_animator:start_animation("lock_close", self.lock_widgets, scenegraph_definition)
-
-	return 
 end
+
 RewardUI.animate_reward_info = function (self)
 	local reward_text_widgets = self.reward_text_widgets
 	local name_text_style = reward_text_widgets.name_text.style.text
@@ -818,19 +799,16 @@ RewardUI.animate_reward_info = function (self)
 	end
 
 	self.display_reward_texts = true
-
-	return 
 end
+
 RewardUI.on_loot_box_entry_complete = function (self)
 	self.draw_roll_button = true
-
-	return 
 end
+
 RewardUI.set_reroll_state = function (self, enabled)
 	self.reroll_needed = enabled
-
-	return 
 end
+
 RewardUI.update_continue_timer = function (self, dt)
 	local continue_timer = self.continue_timer
 
@@ -845,28 +823,27 @@ RewardUI.update_continue_timer = function (self, dt)
 			self.continue_timer = continue_timer
 		end
 	end
-
-	return 
 end
-RewardUI.update = function (self, dt)
-	local auto_continue = self.update_continue_timer(self, dt)
 
-	self.auto_rotate(self, dt)
+RewardUI.update = function (self, dt)
+	local auto_continue = self:update_continue_timer(dt)
+
+	self:auto_rotate(dt)
 
 	local ui_animator = self.ui_animator
 
-	ui_animator.update(ui_animator, dt)
+	ui_animator:update(dt)
 
-	if self.lock_open_anim_id and ui_animator.is_animation_completed(ui_animator, self.lock_open_anim_id) then
+	if self.lock_open_anim_id and ui_animator:is_animation_completed(self.lock_open_anim_id) then
 		self.lock_open_anim_id = nil
 
-		self.play_sound(self, "dice_game_add_item_to_lock")
-		self.handle_animation_transitions(self, "animate_reward_box")
-	elseif self.lock_close_anim_id and ui_animator.is_animation_completed(ui_animator, self.lock_close_anim_id) then
+		self:play_sound("dice_game_add_item_to_lock")
+		self:handle_animation_transitions("animate_reward_box")
+	elseif self.lock_close_anim_id and ui_animator:is_animation_completed(self.lock_close_anim_id) then
 		self.lock_close_anim_id = nil
 		self.draw_lock = false
 
-		self.handle_animation_transitions(self, "animate_door_open")
+		self:handle_animation_transitions("animate_door_open")
 	end
 
 	for name, ui_animation in pairs(self.ui_dice_animations) do
@@ -878,7 +855,7 @@ RewardUI.update = function (self, dt)
 			if name == "loot_box_entry" then
 				self.handle_transition_calls[#self.handle_transition_calls + 1] = "reward_entry"
 			elseif name == "play_holder_lock" then
-				self.play_sound(self, "dice_game_holder_lock")
+				self:play_sound("dice_game_holder_lock")
 			elseif name == "roll_presentation" then
 				self.handle_transition_calls[#self.handle_transition_calls + 1] = "animate_door_close"
 			elseif name == "doors_close" then
@@ -900,7 +877,7 @@ RewardUI.update = function (self, dt)
 
 	if handle_transition_calls then
 		for index, value in ipairs(handle_transition_calls) do
-			self.handle_animation_transitions(self, value)
+			self:handle_animation_transitions(value)
 
 			handle_transition_calls[index] = nil
 		end
@@ -923,13 +900,13 @@ RewardUI.update = function (self, dt)
 
 	local draw_intro_description = self.draw_intro_description
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "reward_ui")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("reward_ui")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local ui_renderer = self.ui_renderer
 
 	UIRenderer.begin_pass(ui_renderer, self.ui_scenegraph, (draw_intro_description and fake_input_service) or input_service, dt, nil, self.render_settings)
 
-	if gamepad_active and input_service.get(input_service, "cycle_previous_hold") then
+	if gamepad_active and input_service:get("cycle_previous_hold") then
 		self._show_traits_preview = true
 	else
 		self._show_traits_preview = nil
@@ -943,12 +920,12 @@ RewardUI.update = function (self, dt)
 			UIRenderer.draw_widget(ui_renderer, text_widget)
 		end
 
-		if input_manager.any_input_pressed(input_manager) or auto_continue then
+		if input_manager:any_input_pressed() or auto_continue then
 			self.continue_timer = nil
 			self.draw_intro_description = false
 
-			self.save_game_info_read(self)
-			self.handle_animation_transitions(self, "start")
+			self:save_game_info_read()
+			self:handle_animation_transitions("start")
 		end
 	elseif auto_continue then
 		self.auto_roll = true
@@ -1003,11 +980,11 @@ RewardUI.update = function (self, dt)
 
 			if gamepad_active then
 				if self.display_reward_texts then
-					if input_service.get(input_service, "confirm_press") then
+					if input_service:get("confirm_press") then
 						roll_button_hotspot.on_release = true
 					end
 				else
-					if input_manager.any_input_pressed(input_manager) then
+					if input_manager:any_input_pressed() then
 						roll_button_hotspot.on_release = true
 					end
 
@@ -1018,7 +995,7 @@ RewardUI.update = function (self, dt)
 				UIRenderer.draw_widget(ui_renderer, self.roll_button_eye_glow_widget)
 
 				if roll_button_hotspot.on_hover_enter then
-					self.play_sound(self, "Play_hud_hover")
+					self:play_sound("Play_hud_hover")
 				end
 			end
 		end
@@ -1061,7 +1038,7 @@ RewardUI.update = function (self, dt)
 			end
 		end
 
-		if 0 < self.number_of_traits_on_item and self._show_traits_preview then
+		if self.number_of_traits_on_item > 0 and self._show_traits_preview then
 			local preview_widgets = self.preview_widgets_by_name
 
 			for list_name, widget_list in pairs(preview_widgets) do
@@ -1085,14 +1062,12 @@ RewardUI.update = function (self, dt)
 	if self.display_reward_texts and self.continue_timer ~= nil and gamepad_active then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
+
 RewardUI.set_draw_roll_button_enabled = function (self, enabled)
 	self.draw_roll_button = enabled
-
-	return 
 end
+
 RewardUI.is_roll_button_pressed = function (self)
 	local button_hotspot = self.roll_button_widget.content.button_hotspot
 	local on_release = button_hotspot.on_release or self.auto_roll
@@ -1105,18 +1080,17 @@ RewardUI.is_roll_button_pressed = function (self)
 
 	return on_release
 end
+
 RewardUI.set_roll_button_text = function (self, text)
 	local localized_text = Localize(text)
 	self.roll_button_widget.content.text_field = localized_text
 	self.gamepad_continue_text_widget.content.text = Localize("press_any_button_prefix") .. " " .. localized_text
-
-	return 
 end
+
 RewardUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 RewardUI.load_reward_units = function (self)
 	local item_key = self.reward_results.item_key
 	local item_data = ItemMasterList[item_key]
@@ -1131,7 +1105,7 @@ RewardUI.load_reward_units = function (self)
 		if left_hand_unit then
 			local left_unit = left_hand_unit .. "_3p"
 
-			self.load_package(self, left_unit)
+			self:load_package(left_unit)
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
 				unit_name = left_unit,
@@ -1143,7 +1117,7 @@ RewardUI.load_reward_units = function (self)
 			local right_unit = right_hand_unit .. "_3p"
 
 			if right_hand_unit ~= left_hand_unit then
-				self.load_package(self, right_unit)
+				self:load_package(right_unit)
 			end
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
@@ -1155,7 +1129,7 @@ RewardUI.load_reward_units = function (self)
 		local unit = item_data.unit
 
 		if unit then
-			self.load_package(self, unit)
+			self:load_package(unit)
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
 				unit_name = unit,
@@ -1165,26 +1139,23 @@ RewardUI.load_reward_units = function (self)
 	end
 
 	self.units_to_spawn_data = units_to_spawn_data
-
-	return 
 end
+
 RewardUI.load_package = function (self, package_name)
 	local package_manager = Managers.package
 	local cb = callback(self, "on_load_complete", package_name)
 
-	package_manager.load(package_manager, package_name, "RewardUI", cb, true)
-
-	return 
+	package_manager:load(package_name, "RewardUI", cb, true)
 end
+
 RewardUI.on_load_complete = function (self, package_name)
 	self.loaded_packages[package_name] = true
 
-	if self.spawn_reward_units_when_ready and self.ready_to_spawn(self) then
-		self.spawn_reward_units(self)
+	if self.spawn_reward_units_when_ready and self:ready_to_spawn() then
+		self:spawn_reward_units()
 	end
-
-	return 
 end
+
 RewardUI.unload_packages = function (self)
 	local loaded_packages = self.loaded_packages
 
@@ -1192,12 +1163,11 @@ RewardUI.unload_packages = function (self)
 		local package_manager = Managers.package
 
 		for package_name, _ in pairs(loaded_packages) do
-			package_manager.unload(package_manager, package_name, "RewardUI")
+			package_manager:unload(package_name, "RewardUI")
 		end
 	end
-
-	return 
 end
+
 RewardUI.ready_to_spawn = function (self)
 	local units_to_spawn_data = self.units_to_spawn_data
 	local loaded_packages = self.loaded_packages
@@ -1212,17 +1182,18 @@ RewardUI.ready_to_spawn = function (self)
 
 	return true
 end
+
 RewardUI.spawn_link_unit = function (self)
 	local item_key = self.reward_results.item_key
 	local item_template = ItemHelper.get_template_by_item_name(item_key)
 	local item_data = ItemMasterList[item_key]
 	local unit_name = item_template.display_unit
-	local camera_rotation = self.get_camera_rotation(self)
+	local camera_rotation = self:get_camera_rotation()
 	local camera_forward_vector = Quaternion.forward(camera_rotation)
 	local camera_look_rotation = Quaternion.look(camera_forward_vector, Vector3.up())
 	local horizontal_rotation = Quaternion.axis_angle(Vector3.up(), math.pi * 1)
 	local unit_spawn_rotation = Quaternion.multiply(camera_look_rotation, horizontal_rotation)
-	local camera_position = self.get_camera_position(self)
+	local camera_position = self:get_camera_position()
 	local unit_spawn_position = camera_position + camera_forward_vector
 	local world = self.reward_world
 	local link_unit = World.spawn_unit(world, unit_name, unit_spawn_position, unit_spawn_rotation)
@@ -1263,13 +1234,12 @@ RewardUI.spawn_link_unit = function (self)
 
 		self.link_unit = link_unit
 	end
-
-	return 
 end
+
 RewardUI.spawn_reward_units = function (self)
 	local link_unit = self.link_unit
 
-	if self.ready_to_spawn(self) and link_unit then
+	if self:ready_to_spawn() and link_unit then
 		local scene_graph_links = {}
 		local world = self.reward_world
 		local units_to_spawn_data = self.units_to_spawn_data
@@ -1298,25 +1268,26 @@ RewardUI.spawn_reward_units = function (self)
 		local item_rarity = self.reward_item_rarity
 		local sound_event = loot_reward_sound_by_rarity[item_rarity]
 
-		self.play_sound(self, sound_event)
+		self:play_sound(sound_event)
 	else
 		self.spawn_reward_units_when_ready = true
 	end
-
-	return 
 end
+
 RewardUI.get_camera_position = function (self)
 	local reward_viewport = self.reward_viewport
 	local camera = ScriptViewport.camera(reward_viewport)
 
 	return ScriptCamera.position(camera)
 end
+
 RewardUI.get_camera_rotation = function (self)
 	local reward_viewport = self.reward_viewport
 	local camera = ScriptViewport.camera(reward_viewport)
 
 	return ScriptCamera.rotation(camera)
 end
+
 RewardUI.auto_rotate = function (self, dt)
 	local link_unit = self.link_unit
 
@@ -1330,22 +1301,19 @@ RewardUI.auto_rotate = function (self, dt)
 
 		self.unit_auto_rotate_value = value
 	end
-
-	return 
 end
+
 RewardUI.save_game_info_read = function (self)
 	local save_manager = Managers.save
 	SaveData.dice_game_intro_displayed = true
 
-	save_manager.auto_save(save_manager, SaveFileName, SaveData, callback(self, "on_save_ended_callback"))
-
-	return 
+	save_manager:auto_save(SaveFileName, SaveData, callback(self, "on_save_ended_callback"))
 end
+
 RewardUI.on_save_ended_callback = function (self)
 	print("[RewardUI] - dice game intro shown saved")
-
-	return 
 end
+
 RewardUI._set_preview_traits = function (self, traits, rarity)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = ForgeSettings.num_traits
@@ -1379,10 +1347,9 @@ RewardUI._set_preview_traits = function (self, traits, rarity)
 		end
 	end
 
-	self.set_preview_traits_info(self, traits_data, 1, num_traits)
-
-	return 
+	self:set_preview_traits_info(traits_data, 1, num_traits)
 end
+
 RewardUI.set_preview_traits_info = function (self, traits_data, start_index, end_index)
 	local num_total_traits = ForgeSettings.num_traits
 	local number_of_traits_on_item = 0
@@ -1435,7 +1402,7 @@ RewardUI.set_preview_traits_info = function (self, traits_data, start_index, end
 				local trait_scenegraph_name = "trait_preview_" .. i
 				local description_scenegraph_id = "trait_description_" .. i
 				local description_field_scenegraph = ui_scenegraph[description_scenegraph_id]
-				local _, description_text_height = self.get_word_wrap_size(self, description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
+				local _, description_text_height = self:get_word_wrap_size(description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
 				local trait_total_height = icon_height + description_text_spacing + description_text_height
 
 				if not is_first_widget then
@@ -1467,21 +1434,21 @@ RewardUI.set_preview_traits_info = function (self, traits_data, start_index, end
 	background_widgets.preview_frame_background.content.uvs = new_uvs
 	ui_scenegraph.preview_frame_background.size[2] = total_traits_height
 	ui_scenegraph.preview_frame.size[2] = total_traits_height
-
-	return 
 end
+
 RewardUI.get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 RewardUI.get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
-	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
+	local text_width, text_height = self:get_text_size(localized_text, text_style)
 
 	return text_width, text_height * #lines
 end
 
-return 
+return

@@ -85,4 +85,4 @@ OutlineSettings.ranges = {
 	player_husk = 60
 }
 
-return 
+return

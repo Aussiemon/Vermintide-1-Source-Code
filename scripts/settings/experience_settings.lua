@@ -74,7 +74,7 @@ end
 ExperienceSettings = {
 	get_player_level = function (player)
 		local network_manager = Managers.state.network
-		local network_game = network_manager.game(network_manager)
+		local network_game = network_manager:game()
 
 		if not network_game then
 			return nil
@@ -82,7 +82,7 @@ ExperienceSettings = {
 
 		local unit_storage = Managers.state.unit_storage
 		local unit = player.player_unit
-		local go_id = unit_storage.go_id(unit_storage, unit)
+		local go_id = unit_storage:go_id(unit)
 
 		if not go_id then
 			return nil
@@ -96,7 +96,7 @@ ExperienceSettings = {
 		return ScriptBackendProfileAttribute.get("experience")
 	end,
 	get_level = function (experience)
-		assert(0 <= experience, "Negative XP!??")
+		assert(experience >= 0, "Negative XP!??")
 
 		local exp_total = 0
 		local level = 0
@@ -146,4 +146,4 @@ ExperienceSettings = {
 	}
 }
 
-return 
+return

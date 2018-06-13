@@ -31,8 +31,6 @@ function setup()
 	end
 
 	LorebookCollectablePages.any = {}
-
-	return 
 end
 
 local categories_to_remove = {}
@@ -56,8 +54,6 @@ function find_pages_to_strip(categories, parent_path)
 			find_pages_to_strip(sub_categories, path)
 		end
 	end
-
-	return 
 end
 
 function strip_layout(category_name_to_strip, categories)
@@ -77,20 +73,18 @@ function strip_layout(category_name_to_strip, categories)
 
 				if num_sub_categories == 0 then
 					categories.sub_categories = nil
-				elseif 0 < num_sub_categories then
+				elseif num_sub_categories > 0 then
 					strip_layout(category_name_to_strip, sub_categories)
 				end
 			end
 		end
 	end
-
-	return 
 end
 
 function strip_pages()
 	local num_pages_to_strip = #categories_to_remove
 
-	if 0 < num_pages_to_strip then
+	if num_pages_to_strip > 0 then
 		for i = num_pages_to_strip, 1, -1 do
 			local category_name = categories_to_remove[i]
 
@@ -107,8 +101,6 @@ function strip_pages()
 			strip_layout(category_name, JournalPageLayout)
 		end
 	end
-
-	return 
 end
 
 local dlc_pages = {}
@@ -146,16 +138,12 @@ function fill_page_names(categories, parent_path)
 			fill_page_names(sub_categories, path)
 		end
 	end
-
-	return 
 end
 
 function add_dlc_pages()
 	for index, category_name in ipairs(dlc_pages) do
 		LorebookCategoryNames[#LorebookCategoryNames + 1] = category_name
 	end
-
-	return 
 end
 
 setup()
@@ -178,4 +166,4 @@ add_dlc_pages()
 
 LorebookCategoryLookup = table.mirror_array_inplace(LorebookCategoryNames)
 
-return 
+return

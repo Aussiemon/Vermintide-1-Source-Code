@@ -275,14 +275,12 @@ local animation_definitions = {
 				local banner_bg_size = ui_scenegraph.banner_bg.size
 				banner_bg_size[2] = 0
 				widgets.banner_bg.style.texture_id.color[1] = 255
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -294,14 +292,12 @@ local animation_definitions = {
 				ui_scenegraph.frame_left.local_position[1] = scenegraph_definition.frame_left.position[1] - 300
 				ui_scenegraph.frame_right.local_position[1] = scenegraph_definition.frame_right.position[1] + 300
 				ui_scenegraph.frame_bottom.local_position[2] = scenegraph_definition.frame_bottom.position[2] - 300
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -309,17 +305,15 @@ local animation_definitions = {
 			start_progress = 0,
 			end_progress = 0.4,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local widget = widgets.token_bg
 				local widget_color = widget.style.texture_id.color
 				widget_color[1] = 255 * math.easeInCubic(progress)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -327,7 +321,7 @@ local animation_definitions = {
 			start_progress = 0.6,
 			end_progress = 0.8,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -336,13 +330,9 @@ local animation_definitions = {
 				local alpha = 255 * math.ease_exp(progress)
 				local frame_top = widgets.frame_top
 				frame_top.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_stone_metal_hit")
-
-				return 
 			end
 		},
 		{
@@ -350,7 +340,7 @@ local animation_definitions = {
 			start_progress = 0.75,
 			end_progress = 1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -359,13 +349,9 @@ local animation_definitions = {
 				local alpha = 255 * math.ease_exp(progress)
 				local frame_bottom = widgets.frame_bottom
 				frame_bottom.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_stone_metal_hit")
-
-				return 
 			end
 		},
 		{
@@ -373,7 +359,7 @@ local animation_definitions = {
 			start_progress = 0.9,
 			end_progress = 1.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -382,13 +368,9 @@ local animation_definitions = {
 				local alpha = 255 * math.ease_exp(progress)
 				local frame_left = widgets.frame_left
 				frame_left.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_stone_metal_hit")
-
-				return 
 			end
 		},
 		{
@@ -396,7 +378,7 @@ local animation_definitions = {
 			start_progress = 1.05,
 			end_progress = 1.25,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -405,13 +387,9 @@ local animation_definitions = {
 				local alpha = 255 * math.ease_exp(progress)
 				local frame_right = widgets.frame_right
 				frame_right.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_stone_metal_hit")
-
-				return 
 			end
 		},
 		{
@@ -419,7 +397,7 @@ local animation_definitions = {
 			start_progress = 1.3,
 			end_progress = 1.45,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
@@ -428,13 +406,9 @@ local animation_definitions = {
 				local token_icon_default_size = scenegraph_definition.token_icon.size
 				token_icon_size[1] = token_icon_default_size[1] * scale_progress
 				token_icon_size[2] = token_icon_default_size[2] * scale_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_reward_stone")
-
-				return 
 			end
 		},
 		{
@@ -442,17 +416,15 @@ local animation_definitions = {
 			start_progress = 1.3,
 			end_progress = 1.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local widget = widgets.icon
 				local widget_color = widget.style.texture_id.color
 				widget_color[1] = 255 * math.easeOutCubic(progress)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -460,18 +432,16 @@ local animation_definitions = {
 			start_progress = 1.35,
 			end_progress = 1.55,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
 				local widget = widgets.token_glow
 				local widget_color = widget.style.texture_id.color
 				widget_color[1] = 255 * eased_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -479,7 +449,7 @@ local animation_definitions = {
 			start_progress = 1.45,
 			end_progress = 1.65,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
@@ -516,11 +486,9 @@ local animation_definitions = {
 				local token_glow_default_size = scenegraph_definition.token_glow.size
 				token_glow_size[1] = token_glow_default_size[1] * scale_progress
 				token_glow_size[2] = token_glow_default_size[2] * scale_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -528,19 +496,15 @@ local animation_definitions = {
 			start_progress = 1.6,
 			end_progress = 2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = 255 * math.easeCubic(progress)
 				local widget = widgets.banner_top
 				widget.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_reward_cloth")
-
-				return 
 			end
 		},
 		{
@@ -548,7 +512,7 @@ local animation_definitions = {
 			start_progress = 2,
 			end_progress = 2.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local widget = widgets.banner_bg
@@ -560,11 +524,9 @@ local animation_definitions = {
 				local banner_bg_default_size = scenegraph_definition.banner_bg.size
 				banner_bg_size[2] = anim_progress * banner_bg_default_size[2]
 				uvs[2][2] = math.min(anim_progress, 1)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -572,18 +534,16 @@ local animation_definitions = {
 			start_progress = 2.4,
 			end_progress = 2.9,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = 255 * math.easeOutCubic(progress)
 				widgets.title_text.style.text.text_color[1] = alpha
 				widgets.name_text.style.text.text_color[1] = alpha
 				widgets.type_text.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

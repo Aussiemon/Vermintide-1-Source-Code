@@ -2,7 +2,7 @@ function assert(condition, ...)
 	if not condition then
 		local n_args = select("#", ...)
 
-		if 0 < n_args then
+		if n_args > 0 then
 			local s, r = pcall(function (...)
 				return string.format(...)
 			end, ...)
@@ -20,4 +20,4 @@ function assert(condition, ...)
 	return condition
 end
 
-return 
+return

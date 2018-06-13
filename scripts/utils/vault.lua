@@ -43,8 +43,6 @@ local function init_forge_vault()
 
 		key_table[key] = cost_table
 	end
-
-	return 
 end
 
 init_forge_vault()
@@ -82,8 +80,6 @@ local function init_altar_vault()
 
 		Vault.deposit_single(t.cost, val.cost)
 	end
-
-	return 
 end
 
 init_altar_vault()
@@ -100,10 +96,8 @@ local function init_economy_vault()
 
 		Vault.deposit_single(t.amount, level_failed_reward.token_amount)
 	end
-
-	return 
 end
 
 init_economy_vault()
 
-return 
+return

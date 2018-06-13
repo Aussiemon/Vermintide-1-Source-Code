@@ -89,9 +89,7 @@ local special_keys = {
 local simplesave, tablesave, arraysave, stringsave = nil
 
 function stringsave(o, buffer)
-	t_insert(buffer, "\"" .. o.gsub(o, ".", escapes) .. "\"")
-
-	return 
+	t_insert(buffer, "\"" .. o:gsub(".", escapes) .. "\"")
 end
 
 function arraysave(o, buffer)
@@ -107,8 +105,6 @@ function arraysave(o, buffer)
 	end
 
 	t_insert(buffer, "]")
-
-	return 
 end
 
 function tablesave(o, buffer)
@@ -191,14 +187,10 @@ function tablesave(o, buffer)
 	else
 		arraysave(__array, buffer)
 	end
-
-	return 
 end
 
 function userdatasave(o, buffer)
 	stringsave(tostring(o), buffer)
-
-	return 
 end
 
 function simplesave(o, buffer)
@@ -223,8 +215,6 @@ function simplesave(o, buffer)
 	else
 		t_insert(buffer, "null")
 	end
-
-	return 
 end
 
 json.encode = function (obj)
@@ -234,6 +224,7 @@ json.encode = function (obj)
 
 	return t_concat(t)
 end
+
 json.encode_ordered = function (obj)
 	local t = {
 		ordered = true
@@ -243,6 +234,7 @@ json.encode_ordered = function (obj)
 
 	return t_concat(t)
 end
+
 json.encode_array = function (obj)
 	local t = {}
 
@@ -252,7 +244,7 @@ json.encode_array = function (obj)
 end
 
 local function _skip_whitespace(json, index)
-	return json.find(json, "[^ \t\r\n]", index) or index
+	return json:find("[^ \t\r\n]", index) or index
 end
 
 local function _fixobject(obj)
@@ -294,8 +286,8 @@ local function _readobject(json, index)
 		local key, val = nil
 		index = _skip_whitespace(json, index + 1)
 
-		if json.byte(json, index) ~= 34 then
-			if json.byte(json, index) == 125 then
+		if json:byte(index) ~= 34 then
+			if json:byte(index) == 125 then
 				return o, index + 1
 			end
 
@@ -310,7 +302,7 @@ local function _readobject(json, index)
 
 		index = _skip_whitespace(json, index)
 
-		if json.byte(json, index) ~= 58 then
+		if json:byte(index) ~= 58 then
 			return nil, "colon expected"
 		end
 
@@ -322,7 +314,7 @@ local function _readobject(json, index)
 
 		o[key] = val
 		index = _skip_whitespace(json, index)
-		local b = json.byte(json, index)
+		local b = json:byte(index)
 
 		if b == 125 then
 			return _fixobject(o), index + 1
@@ -332,20 +324,18 @@ local function _readobject(json, index)
 			return nil, "object eof"
 		end
 	end
-
-	return 
 end
 
 local function _readarray(json, index)
 	local a = {}
 	local oindex = index
-	local oindex_byte = json.byte(json, oindex)
+	local oindex_byte = json:byte(oindex)
 
 	while true do
 		local val = nil
 		index = _skip_whitespace(json, index + 1)
 
-		if json.byte(json, index) == 93 then
+		if json:byte(index) == 93 then
 			return setmetatable(a, array_mt), index + 1
 		end
 
@@ -358,7 +348,7 @@ local function _readarray(json, index)
 		t_insert(a, val)
 
 		index = _skip_whitespace(json, index)
-		local b = json.byte(json, index)
+		local b = json:byte(index)
 
 		if b == 93 then
 			return setmetatable(a, array_mt), index + 1
@@ -368,15 +358,13 @@ local function _readarray(json, index)
 			return nil, "array eof"
 		end
 	end
-
-	return 
 end
 
 local _unescape_error = nil
 
 local function _unescape_surrogate_func(x)
-	local lead = tonumber(x.sub(x, 3, 6), 16)
-	local trail = tonumber(x.sub(x, 9, 12), 16)
+	local lead = tonumber(x:sub(3, 6), 16)
+	local trail = tonumber(x:sub(9, 12), 16)
 	local codepoint = (lead * 1024 + trail) - 56613888
 	local a = codepoint % 64
 	codepoint = (codepoint - a) / 64
@@ -389,25 +377,23 @@ local function _unescape_surrogate_func(x)
 end
 
 local function _unescape_func(x)
-	x = x.match(x, "%x%x%x%x", 3)
+	x = x:match("%x%x%x%x", 3)
 
 	if x then
 		return codepoint_to_utf8(tonumber(x, 16))
 	end
 
 	_unescape_error = true
-
-	return 
 end
 
 function _readstring(json, index)
 	index = index + 1
-	local endindex = json.find(json, "\"", index, true)
+	local endindex = json:find("\"", index, true)
 
 	if endindex then
-		local s = json.sub(json, index, endindex - 1)
+		local s = json:sub(index, endindex - 1)
 		_unescape_error = nil
-		s = s.gsub(s, "\\u.?.?.?.?", _unescape_func)
+		s = s:gsub("\\u.?.?.?.?", _unescape_func)
 
 		if _unescape_error then
 			return nil, "invalid escape"
@@ -420,13 +406,13 @@ function _readstring(json, index)
 end
 
 local function _readnumber(json, index)
-	local m = json.match(json, "[0-9%.%-eE%+]+", index)
+	local m = json:match("[0-9%.%-eE%+]+", index)
 
 	return tonumber(m), index + #m
 end
 
 local function _readnull(json, index)
-	local a, b, c = json.byte(json, index + 1, index + 3)
+	local a, b, c = json:byte(index + 1, index + 3)
 
 	if a == 117 and b == 108 and c == 108 then
 		return null, index + 4
@@ -436,7 +422,7 @@ local function _readnull(json, index)
 end
 
 local function _readtrue(json, index)
-	local a, b, c = json.byte(json, index + 1, index + 3)
+	local a, b, c = json:byte(index + 1, index + 3)
 
 	if a == 114 and b == 117 and c == 101 then
 		return true, index + 4
@@ -446,7 +432,7 @@ local function _readtrue(json, index)
 end
 
 local function _readfalse(json, index)
-	local a, b, c, d = json.byte(json, index + 1, index + 4)
+	local a, b, c, d = json:byte(index + 1, index + 4)
 
 	if a == 97 and b == 108 and c == 115 and d == 101 then
 		return false, index + 5
@@ -457,7 +443,7 @@ end
 
 function _readvalue(json, index)
 	index = _skip_whitespace(json, index)
-	local b = json.byte(json, index)
+	local b = json:byte(index)
 
 	if b == 123 then
 		return _readobject(json, index)
@@ -465,7 +451,7 @@ function _readvalue(json, index)
 		return _readarray(json, index)
 	elseif b == 34 then
 		return _readstring(json, index)
-	elseif (b ~= nil and 48 <= b and b <= 57) or b == 45 then
+	elseif (b ~= nil and b >= 48 and b <= 57) or b == 45 then
 		return _readnumber(json, index)
 	elseif b == 110 then
 		return _readnull(json, index)
@@ -476,8 +462,6 @@ function _readvalue(json, index)
 	else
 		return nil, "value expected"
 	end
-
-	return 
 end
 
 local first_escape = {
@@ -491,20 +475,22 @@ local first_escape = {
 	["\\r"] = "\\u000D",
 	["\\\""] = "\\u0022"
 }
+
 json.decode = function (json)
-	json = json.gsub(json, "\\.", first_escape)
+	json = json:gsub("\\.", first_escape)
 	local val, index = _readvalue(json, 1)
 
 	if val == nil then
 		return val, index
 	end
 
-	if json.find(json, "[^ \t\r\n]", index) then
+	if json:find("[^ \t\r\n]", index) then
 		return nil, "garbage at eof"
 	end
 
 	return val
 end
+
 json.test = function (object)
 	local encoded = json.encode(object)
 	local decoded = json.decode(encoded)

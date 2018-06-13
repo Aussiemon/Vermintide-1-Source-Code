@@ -132,12 +132,10 @@ ScoreboardHelper.scoreboard_topic_stats = {
 
 local function get_score(statistics_db, stats_id, stat_type)
 	if type(stat_type) == "table" then
-		return statistics_db.get_stat(statistics_db, stats_id, unpack(stat_type))
+		return statistics_db:get_stat(stats_id, unpack(stat_type))
 	else
-		return statistics_db.get_stat(statistics_db, stats_id, stat_type)
+		return statistics_db:get_stat(stats_id, stat_type)
 	end
-
-	return 
 end
 
 ScoreboardHelper.get_sorted_topic_statistics = function (statistics_db, profile_synchronizer)
@@ -150,15 +148,15 @@ ScoreboardHelper.get_sorted_topic_statistics = function (statistics_db, profile_
 
 	for _, player in pairs(bots_and_players) do
 		local is_local_player = player.local_player
-		local player_peer_id = player.network_id(player)
-		local player_name = player.name(player)
-		local stats_id = player.stats_id(player)
-		local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, player_peer_id, player.local_player_id(player))
-		local is_player_controlled = player.is_player_controlled(player)
+		local player_peer_id = player:network_id()
+		local player_name = player:name()
+		local stats_id = player:stats_id()
+		local profile_index = profile_synchronizer:profile_by_peer(player_peer_id, player:local_player_id())
+		local is_player_controlled = player:is_player_controlled()
 		player_list[stats_id] = {
 			name = player_name,
 			peer_id = player_peer_id,
-			local_player_id = player.local_player_id(player),
+			local_player_id = player:local_player_id(),
 			stats_id = stats_id,
 			profile_index = profile_index,
 			is_player_controlled = is_player_controlled
@@ -244,4 +242,4 @@ ScoreboardHelper.get_sorted_topic_statistics = function (statistics_db, profile_
 	}
 end
 
-return 
+return

@@ -27,6 +27,7 @@ require("scripts/ui/gift_popup/gift_popup_ui")
 
 local definitions = local_require("scripts/ui/views/ingame_hud_definitions")
 IngameHud = class(IngameHud)
+
 IngameHud.init = function (self, ingame_ui_context)
 	self.is_in_inn = ingame_ui_context.is_in_inn
 	local cutscene_system = Managers.state.entity:system("cutscene_system")
@@ -37,7 +38,7 @@ IngameHud.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.peer_id = ingame_ui_context.peer_id
@@ -85,9 +86,8 @@ IngameHud.init = function (self, ingame_ui_context)
 	if self.gdc_build then
 		self.gdc_start_ui = GDCStartUI:new(ingame_ui_context)
 	end
-
-	return 
 end
+
 IngameHud.destroy = function (self)
 	if self.unit_frames_handler then
 		self.unit_frames_handler:destroy()
@@ -142,16 +142,14 @@ IngameHud.destroy = function (self)
 	end
 
 	self.gift_popup_ui:destroy()
-
-	return 
 end
+
 IngameHud.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
-
-	return 
 end
+
 IngameHud.set_visible = function (self, visible)
 	if self.player_inventory_ui then
 		self.player_inventory_ui:set_visible(visible)
@@ -172,13 +170,13 @@ IngameHud.set_visible = function (self, visible)
 	local difficulty_unlock_ui = self.difficulty_unlock_ui
 
 	if difficulty_unlock_ui then
-		difficulty_unlock_ui.set_visible(difficulty_unlock_ui, visible)
+		difficulty_unlock_ui:set_visible(visible)
 	end
 
 	local difficulty_notification_ui = self.difficulty_notification_ui
 
 	if difficulty_notification_ui then
-		difficulty_notification_ui.set_visible(difficulty_notification_ui, visible)
+		difficulty_notification_ui:set_visible(visible)
 	end
 
 	if self.boon_ui then
@@ -196,15 +194,14 @@ IngameHud.set_visible = function (self, visible)
 	local observer_ui = self.observer_ui
 
 	if observer_ui then
-		local observer_ui_visibility = self.is_own_player_dead(self) and not self.ingame_player_list_ui.active and visible
+		local observer_ui_visibility = self:is_own_player_dead() and not self.ingame_player_list_ui.active and visible
 
-		if observer_ui and observer_ui.is_visible(observer_ui) ~= observer_ui_visibility then
-			observer_ui.set_visible(observer_ui, observer_ui_visibility)
+		if observer_ui and observer_ui:is_visible() ~= observer_ui_visibility then
+			observer_ui:set_visible(observer_ui_visibility)
 		end
 	end
-
-	return 
 end
+
 IngameHud.is_own_player_dead = function (self)
 	local peer_id = self.peer_id
 	local my_player = self.player_manager:player_from_peer_id(peer_id)
@@ -215,31 +212,30 @@ IngameHud.is_own_player_dead = function (self)
 	else
 		local status_extension = ScriptUnit.extension(player_unit, "status_system")
 
-		return status_extension.is_ready_for_assisted_respawn(status_extension)
+		return status_extension:is_ready_for_assisted_respawn()
 	end
-
-	return 
 end
+
 IngameHud._update_survival_ui = function (self, dt, t)
 	local game_timer_ui = self.game_timer_ui
 
 	if game_timer_ui then
 		local mission_system = self.mission_system
-		local active_missions, completed_missions = mission_system.get_missions(mission_system)
+		local active_missions, completed_missions = mission_system:get_missions()
 
 		if active_missions then
 			local mission_data = active_missions.survival_wave
 
 			if mission_data then
 				Profiler.start("game timer")
-				game_timer_ui.update(game_timer_ui, dt, mission_data)
+				game_timer_ui:update(dt, mission_data)
 				Profiler.stop("game timer")
 				Profiler.start("endurance badges")
 
 				local endurance_badge_ui = self.endurance_badge_ui
 
 				if endurance_badge_ui then
-					endurance_badge_ui.update(endurance_badge_ui, dt)
+					endurance_badge_ui:update(dt)
 				end
 
 				Profiler.stop("endurance badges")
@@ -249,9 +245,9 @@ IngameHud._update_survival_ui = function (self, dt, t)
 				local active_presentation = false
 
 				if difficulty_notification_ui then
-					difficulty_notification_ui.update(difficulty_notification_ui, dt, mission_data)
+					difficulty_notification_ui:update(dt, mission_data)
 
-					active_presentation = difficulty_notification_ui.is_presentation_active(difficulty_notification_ui)
+					active_presentation = difficulty_notification_ui:is_presentation_active()
 				end
 
 				Profiler.stop("Difficulty notification")
@@ -260,25 +256,25 @@ IngameHud._update_survival_ui = function (self, dt, t)
 				local difficulty_unlock_ui = self.difficulty_unlock_ui
 
 				if difficulty_unlock_ui then
-					difficulty_unlock_ui.update(difficulty_unlock_ui, dt, mission_data, active_presentation)
+					difficulty_unlock_ui:update(dt, mission_data, active_presentation)
 				end
 
 				Profiler.stop("Difficulty unlock")
 			end
 		end
 	end
-
-	return 
 end
+
 IngameHud.is_cutscene_active = function (self)
 	local cutscene_system = self.cutscene_system
 
 	return cutscene_system.active_camera and not cutscene_system.ingame_hud_enabled
 end
+
 IngameHud.update = function (self, dt, t, menu_active)
 	Profiler.start("IngameHud")
 
-	local active_cutscene = self.is_cutscene_active(self)
+	local active_cutscene = self:is_cutscene_active()
 	local ui_scenegraph = self.ui_scenegraph
 	local peer_id = self.peer_id
 	local my_player = self.player_manager:player_from_peer_id(peer_id)
@@ -294,17 +290,17 @@ IngameHud.update = function (self, dt, t, menu_active)
 
 	Profiler.stop("Access Player Extensions")
 
-	local is_own_player_dead = self.is_own_player_dead(self)
+	local is_own_player_dead = self:is_own_player_dead()
 	local gift_popup_ui = self.gift_popup_ui
 
 	if not menu_active then
-		gift_popup_ui.update(gift_popup_ui, dt, t)
+		gift_popup_ui:update(dt, t)
 	end
 
-	local gift_popup_active = gift_popup_ui.active(gift_popup_ui)
+	local gift_popup_active = gift_popup_ui:active()
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-	local input_service = input_manager.get_service(input_manager, "ingame_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
+	local input_service = input_manager:get_service("ingame_menu")
 	local ui_renderer = self.ui_renderer
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
@@ -328,13 +324,13 @@ IngameHud.update = function (self, dt, t, menu_active)
 	local show_hud = not is_own_player_dead and not active_cutscene and not gift_popup_active and not gamepad_player_list_active
 
 	if show_hud ~= self.show_hud then
-		self.set_visible(self, show_hud)
+		self:set_visible(show_hud)
 	end
 
 	self.show_hud = show_hud
 
 	if show_hud then
-		self._update_survival_ui(self, dt, t)
+		self:_update_survival_ui(dt, t)
 		Profiler.start("Wait For Rescue")
 		self.wait_for_rescue_ui:update(dt, t)
 		Profiler.stop("Wait For Rescue")
@@ -392,8 +388,8 @@ IngameHud.update = function (self, dt, t, menu_active)
 	local observer_ui_visibility = is_own_player_dead and not self.ingame_player_list_ui.active and not menu_active and not self.is_in_inn
 	local observer_ui = self.observer_ui
 
-	if observer_ui and observer_ui.is_visible(observer_ui) ~= observer_ui_visibility then
-		observer_ui.set_visible(observer_ui, observer_ui_visibility)
+	if observer_ui and observer_ui:is_visible() ~= observer_ui_visibility then
+		observer_ui:set_visible(observer_ui_visibility)
 	end
 
 	if not show_hud and observer_ui_visibility then
@@ -412,7 +408,7 @@ IngameHud.update = function (self, dt, t, menu_active)
 
 	local ingame_player_list_ui = self.ingame_player_list_ui
 
-	ingame_player_list_ui.update(ingame_player_list_ui, dt)
+	ingame_player_list_ui:update(dt)
 	Profiler.stop("Player List")
 	Profiler.start("area_indicator")
 	self.area_indicator:update(dt)
@@ -432,17 +428,14 @@ IngameHud.update = function (self, dt, t, menu_active)
 
 	Profiler.stop("gdc")
 	Profiler.stop("IngameHud")
-
-	return 
 end
+
 IngameHud.post_update = function (self, dt, t, menu_active)
-	local is_own_player_dead = self.is_own_player_dead(self)
+	local is_own_player_dead = self:is_own_player_dead()
 
 	if not menu_active then
 		self.gift_popup_ui:post_update(dt, t)
 	end
-
-	return 
 end
 
-return 
+return

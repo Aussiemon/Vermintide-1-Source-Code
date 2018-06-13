@@ -77,4 +77,4 @@ LeaderboardSettings.characters = {
 	"empire_soldier"
 }
 
-return 
+return

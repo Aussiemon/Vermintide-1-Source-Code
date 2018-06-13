@@ -136,8 +136,6 @@ local function create_selection_bar(textures, icons, tooltips, offset, scenegrap
 				end
 
 				ui_content[button_hotspot_name].is_selected = true
-
-				return 
 			end
 		}, {
 			pass_type = "texture",

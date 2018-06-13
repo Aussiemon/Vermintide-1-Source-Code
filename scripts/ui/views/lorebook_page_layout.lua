@@ -2292,4 +2292,4 @@ DefaultLorebookPages = {
 	dlc1_3_lb_vt_world_nations_empire_holy_order_templar_sigmar_title = true
 }
 
-return 
+return

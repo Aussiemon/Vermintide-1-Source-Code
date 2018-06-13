@@ -54,4 +54,4 @@ Weapons.fireball = weapon_template
 Weapons.torch = Weapons.torch or table.clone(weapon_template)
 Weapons.torch.right_hand_unit = "units/weapons/player/wpn_fireball/wpn_fireball"
 
-return 
+return

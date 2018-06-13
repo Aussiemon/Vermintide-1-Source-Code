@@ -164,8 +164,6 @@ local breed_data = {
 	num_push_anims = {},
 	run_on_spawn = function (unit, blackboard)
 		blackboard.cycle_rage_anim_index = 1
-
-		return 
 	end,
 	debug_color = {
 		255,
@@ -356,4 +354,4 @@ local action_data = {
 }
 BreedActions.skaven_stormfiend = table.create_copy(BreedActions.skaven_stormfiend, action_data)
 
-return 
+return

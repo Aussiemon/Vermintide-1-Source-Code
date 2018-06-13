@@ -13,6 +13,7 @@ local BOT_PEER_IDS_TABLE = {
 	[1005] = true
 }
 ProfileSynchronizer = class(ProfileSynchronizer)
+
 ProfileSynchronizer.init = function (self, is_server, lobby_host, network_server)
 	local profile_owners = {}
 
@@ -42,9 +43,8 @@ ProfileSynchronizer.init = function (self, is_server, lobby_host, network_server
 	self._player_manager = Managers.player
 	self._reserved_profiles = {}
 	self._hot_join_synced_peers = {}
-
-	return 
 end
+
 local REQUEST_RESULTS = {
 	"success",
 	"failure",
@@ -61,16 +61,16 @@ local RPCS = {
 	"rpc_server_inventory_all_synced"
 }
 local NO_CLIENT_SYNC_ID = 0
+
 ProfileSynchronizer.register_rpcs = function (self, network_event_delegate, network_transmit)
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self._network_event_delegate = network_event_delegate
 	self._network_transmit = network_transmit
 
 	self._inventory_package_synchronizer:register_rpc(network_transmit, network_event_delegate)
-
-	return 
 end
+
 ProfileSynchronizer.unregister_network_events = function (self)
 	if self._network_event_delegate then
 		self._network_event_delegate:unregister(self)
@@ -81,40 +81,38 @@ ProfileSynchronizer.unregister_network_events = function (self)
 	self._network_transmit = nil
 
 	self._inventory_package_synchronizer:unregister()
-
-	return 
 end
+
 ProfileSynchronizer.destroy = function (self)
-	self.unregister_network_events(self)
+	self:unregister_network_events()
 	self._inventory_package_synchronizer:destroy()
 
 	self._inventory_package_synchronizer = nil
 	self._inventory_package_synchronizer_server = nil
 
 	GarbageLeakDetector.register_object(self, "Profile Synchronizer")
-
-	return 
 end
+
 ProfileSynchronizer.inventory_package_synchronizer = function (self)
 	return self._inventory_package_synchronizer
 end
+
 ProfileSynchronizer._send_rpc_lobby_clients = function (self, rpc, ...)
 	fassert(self._is_server, "Trying to send rpc to lobby clients without being lobby host.")
 
 	local lobby_members = self._lobby_host:members()
 
 	if not lobby_members then
-		return 
+		return
 	end
 
-	for _, peer_id in ipairs(lobby_members.get_members(lobby_members)) do
+	for _, peer_id in ipairs(lobby_members:get_members()) do
 		if peer_id ~= Network.peer_id() and self._hot_join_synced_peers[peer_id] then
 			RPC[rpc](peer_id, ...)
 		end
 	end
-
-	return 
 end
+
 ProfileSynchronizer.update = function (self)
 	self._inventory_package_synchronizer:update()
 
@@ -133,18 +131,18 @@ ProfileSynchronizer.update = function (self)
 
 	if all_synced and not was_synced and self._is_server then
 		self._network_transmit:send_rpc_server("rpc_server_inventory_all_synced", self._inventory_sync_id)
-		self._send_rpc_lobby_clients(self, "rpc_server_inventory_all_synced", self._inventory_sync_id)
+		self:_send_rpc_lobby_clients("rpc_server_inventory_all_synced", self._inventory_sync_id)
 	end
 
 	self._all_synced = all_synced
-
-	return 
 end
+
 local inventory_map_to_network_array = nil
 local EMPTY_TABLE = {}
 local NO_PEER = "0"
 local NO_LOCAL_PLAYER_ID = 0
 local IS_LOCAL_CALL = "is_local_call"
+
 ProfileSynchronizer.set_profile_peer_id = function (self, profile_index, peer_id, local_player_id)
 	assert(self._is_server)
 	assert(profile_index)
@@ -154,7 +152,7 @@ ProfileSynchronizer.set_profile_peer_id = function (self, profile_index, peer_id
 
 	if peer_id then
 		new_profile_index = profile_index
-		previous_profile_index = self.profile_by_peer(self, peer_id, local_player_id)
+		previous_profile_index = self:profile_by_peer(peer_id, local_player_id)
 
 		profile_printf("[ProfileSynchronizer] set_profile_peer_id from profile %s to %s for peer id %s:%i", tostring(previous_profile_index), tostring(new_profile_index), peer_id, local_player_id)
 	else
@@ -177,44 +175,44 @@ ProfileSynchronizer.set_profile_peer_id = function (self, profile_index, peer_id
 	if previous_profile_index then
 		local sender = nil
 
-		self._profile_select_inventory(self, previous_profile_index, EMPTY_TABLE, EMPTY_TABLE, sender, local_player_id, NO_CLIENT_SYNC_ID)
+		self:_profile_select_inventory(previous_profile_index, EMPTY_TABLE, EMPTY_TABLE, sender, local_player_id, NO_CLIENT_SYNC_ID)
 	end
 
 	transmit_peer_id = peer_id or NO_PEER
 	local transmit_local_player_id = local_player_id or NO_LOCAL_PLAYER_ID
 
-	self.rpc_server_mark_profile_used(self, IS_LOCAL_CALL, transmit_peer_id, transmit_local_player_id, previous_profile_index or 0, new_profile_index or 0)
-	self._send_rpc_lobby_clients(self, "rpc_server_mark_profile_used", transmit_peer_id, transmit_local_player_id, previous_profile_index or 0, new_profile_index or 0)
+	self:rpc_server_mark_profile_used(IS_LOCAL_CALL, transmit_peer_id, transmit_local_player_id, previous_profile_index or 0, new_profile_index or 0)
+	self:_send_rpc_lobby_clients("rpc_server_mark_profile_used", transmit_peer_id, transmit_local_player_id, previous_profile_index or 0, new_profile_index or 0)
 
 	self._all_synced = false
-
-	return 
 end
+
 ProfileSynchronizer.all_synced = function (self)
 	return self._all_synced
 end
+
 ProfileSynchronizer.clear_ownership = function (self, profile_index)
 	self._profile_owners[profile_index] = nil
-
-	return 
 end
+
 ProfileSynchronizer.owner = function (self, profile_index)
 	return self._profile_owners[profile_index]
 end
+
 ProfileSynchronizer.owner_peer_id_local_player_id = function (self, profile_index)
-	local owner = self.owner(self, profile_index)
+	local owner = self:owner(profile_index)
 
 	return owner.peer_id, owner.local_player_id
 end
+
 ProfileSynchronizer.profile_by_peer = function (self, peer_id, local_player_id)
 	for index, owner_table in pairs(self._profile_owners) do
 		if owner_table.peer_id == peer_id and owner_table.local_player_id == local_player_id then
 			return index
 		end
 	end
-
-	return 
 end
+
 ProfileSynchronizer.owned_profiles = function (self, table_to_fill)
 	local owned_profiles = table_to_fill
 
@@ -226,6 +224,7 @@ ProfileSynchronizer.owned_profiles = function (self, table_to_fill)
 
 	return owned_profiles
 end
+
 ProfileSynchronizer.hot_join_sync = function (self, peer_id, local_ids)
 	local profile_owners = self._profile_owners
 	local network_transmit = self._network_transmit
@@ -241,15 +240,15 @@ ProfileSynchronizer.hot_join_sync = function (self, peer_id, local_ids)
 
 			if owner_peer_id ~= peer_id then
 				if self_peer_id == peer_id then
-					self.rpc_server_mark_profile_used(self, IS_LOCAL_CALL, owner_peer_id, owner_local_player_id, 0, i)
+					self:rpc_server_mark_profile_used(IS_LOCAL_CALL, owner_peer_id, owner_local_player_id, 0, i)
 				else
-					network_transmit.send_rpc(network_transmit, "rpc_server_mark_profile_used", peer_id, owner_peer_id, owner_local_player_id, 0, i)
+					network_transmit:send_rpc("rpc_server_mark_profile_used", peer_id, owner_peer_id, owner_local_player_id, 0, i)
 				end
 			end
 		elseif self_peer_id == peer_id then
-			self.rpc_server_mark_profile_used(self, IS_LOCAL_CALL, NO_PEER, NO_LOCAL_PLAYER_ID, 0, i)
+			self:rpc_server_mark_profile_used(IS_LOCAL_CALL, NO_PEER, NO_LOCAL_PLAYER_ID, 0, i)
 		else
-			network_transmit.send_rpc(network_transmit, "rpc_server_mark_profile_used", peer_id, NO_PEER, NO_LOCAL_PLAYER_ID, 0, i)
+			network_transmit:send_rpc("rpc_server_mark_profile_used", peer_id, NO_PEER, NO_LOCAL_PLAYER_ID, 0, i)
 		end
 	end
 
@@ -261,18 +260,14 @@ ProfileSynchronizer.hot_join_sync = function (self, peer_id, local_ids)
 	end
 
 	self._loaded_peers[peer_id] = peer_table
-
-	return 
 end
+
 ProfileSynchronizer.peer_entered_session = function (self, peer_id)
 	self._hot_join_synced_peers[peer_id] = true
-
-	return 
 end
+
 ProfileSynchronizer.peer_left_session = function (self, peer_id)
 	self._hot_join_synced_peers[peer_id] = nil
-
-	return 
 end
 
 function inventory_map_to_network_array(inventory_map, destination)
@@ -326,12 +321,12 @@ ProfileSynchronizer.rpc_server_mark_profile_used = function (self, sender, peer_
 	profile_printf("[ProfileSynchronizer] rpc_server_mark_profile_used [peer_id %s:%i, previous profile %s, profile %s]", tostring(peer_id), local_player_id or NO_LOCAL_PLAYER_ID, tostring(previous_profile_index), tostring(profile_index))
 
 	if self._is_server then
-		self.update_lobby_profile_data(self)
+		self:update_lobby_profile_data()
 
 		local matchmaking_manager = Managers.matchmaking
 
 		if matchmaking_manager then
-			matchmaking_manager.update_profiles_data_on_clients(matchmaking_manager)
+			matchmaking_manager:update_profiles_data_on_clients()
 		end
 	end
 
@@ -344,13 +339,13 @@ ProfileSynchronizer.rpc_server_mark_profile_used = function (self, sender, peer_
 		inventory_map_to_network_array(inventory_list_first_person, network_inventory_list_first_person)
 		self._network_transmit:send_rpc_server("rpc_client_select_inventory", local_player_id, network_inventory_list, network_inventory_list_first_person, NO_CLIENT_SYNC_ID)
 	end
-
-	return 
 end
+
 local inventory_list = {}
 local inventory_list_first_person = {}
+
 ProfileSynchronizer.rpc_client_select_inventory = function (self, sender, local_player_id, network_inventory_list, network_inventory_list_first_person, client_sync_id)
-	local profile_index = self.profile_by_peer(self, sender, local_player_id)
+	local profile_index = self:profile_by_peer(sender, local_player_id)
 
 	for i, package_id in ipairs(network_inventory_list) do
 		inventory_list[i] = NetworkLookup.inventory_packages[package_id]
@@ -360,17 +355,17 @@ ProfileSynchronizer.rpc_client_select_inventory = function (self, sender, local_
 		inventory_list_first_person[i] = NetworkLookup.inventory_packages[package_id]
 	end
 
-	self._profile_select_inventory(self, profile_index, inventory_list, inventory_list_first_person, sender, local_player_id, client_sync_id)
-
-	return 
+	self:_profile_select_inventory(profile_index, inventory_list, inventory_list_first_person, sender, local_player_id, client_sync_id)
 end
+
 local TEMP_PROFILE_INDICES = {}
 local TEMP_PEERS = {}
+
 ProfileSynchronizer._profile_select_inventory = function (self, profile_index, inventory_list, inventory_list_first_person, sender, local_player_id, client_sync_id)
 	local network_transmit = self._network_transmit
 	local inventory_package_synchronizer_server = self._inventory_package_synchronizer_server
 
-	inventory_package_synchronizer_server.set_inventory_list(inventory_package_synchronizer_server, profile_index, inventory_list, inventory_list_first_person)
+	inventory_package_synchronizer_server:set_inventory_list(profile_index, inventory_list, inventory_list_first_person)
 	table.clear(inventory_list)
 	table.clear(inventory_list_first_person)
 	assert(self._is_server, "profile_select_inventory called not on server, wtf?")
@@ -393,7 +388,7 @@ ProfileSynchronizer._profile_select_inventory = function (self, profile_index, i
 			end
 		end
 
-		local inventory_package_map = inventory_package_synchronizer_server.get_complete_package_map_for_profile(inventory_package_synchronizer_server, TEMP_PROFILE_INDICES)
+		local inventory_package_map = inventory_package_synchronizer_server:get_complete_package_map_for_profile(TEMP_PROFILE_INDICES)
 
 		table.clear(TEMP_PROFILE_INDICES)
 
@@ -401,11 +396,11 @@ ProfileSynchronizer._profile_select_inventory = function (self, profile_index, i
 
 		inventory_map_to_network_array(inventory_package_map, temporary_inventory_array)
 
-		if 0 < client_sync_id and owned_peer_id == sender then
-			network_transmit.send_rpc(network_transmit, "rpc_server_set_inventory_sync_id", owned_peer_id, client_sync_id, inventory_sync_id)
+		if client_sync_id > 0 and owned_peer_id == sender then
+			network_transmit:send_rpc("rpc_server_set_inventory_sync_id", owned_peer_id, client_sync_id, inventory_sync_id)
 		end
 
-		network_transmit.send_rpc(network_transmit, "rpc_server_set_inventory_packages", owned_peer_id, inventory_sync_id, temporary_inventory_array)
+		network_transmit:send_rpc("rpc_server_set_inventory_packages", owned_peer_id, inventory_sync_id, temporary_inventory_array)
 		network_printf("[NETWORK] send_rpc(rpc_server_set_inventory_packages) owned_peer_id:%s inventory_sync_id:%d my_peer_id:%s", owned_peer_id, inventory_sync_id, my_peer_id)
 	end
 
@@ -416,9 +411,8 @@ ProfileSynchronizer._profile_select_inventory = function (self, profile_index, i
 	end
 
 	self._all_synced = false
-
-	return 
 end
+
 ProfileSynchronizer.rpc_client_inventory_map_loaded = function (self, sender, inventory_sync_id)
 	if inventory_sync_id == self._inventory_sync_id then
 		local peer_table = self._loaded_peers[sender]
@@ -432,23 +426,21 @@ ProfileSynchronizer.rpc_client_inventory_map_loaded = function (self, sender, in
 			peer_table[local_player_id] = true
 		end
 	end
-
-	return 
 end
+
 ProfileSynchronizer.request_select_profile = function (self, profile_index, local_player_id)
 	assert(not self._has_pending_request)
 
 	local network_manager = Managers.state.network
-	local game_session = network_manager.game(network_manager)
+	local game_session = network_manager:game()
 
 	if game_session then
 		self._has_pending_request = true
 
 		self._network_transmit:send_rpc_server("rpc_client_request_mark_profile", profile_index, local_player_id)
 	end
-
-	return 
 end
+
 ProfileSynchronizer.get_first_free_profile = function (self)
 	local ProfilePriority = ProfilePriority
 
@@ -462,9 +454,8 @@ ProfileSynchronizer.get_first_free_profile = function (self)
 
 	table.dump(self._profile_owners, "profile owners", 2)
 	fassert(false, "Trying to get free profile when there are no free profiles.")
-
-	return 
 end
+
 ProfileSynchronizer.rpc_client_request_mark_profile = function (self, sender, profile_index, local_player_id)
 	if self._profile_owners[profile_index] then
 		local result = REQUEST_RESULTS.failure
@@ -477,32 +468,31 @@ ProfileSynchronizer.rpc_client_request_mark_profile = function (self, sender, pr
 
 		self._reserved_profiles[profile_index] = nil
 
-		self.set_profile_peer_id(self, profile_index, sender, local_player_id)
+		self:set_profile_peer_id(profile_index, sender, local_player_id)
 	end
-
-	return 
 end
+
 ProfileSynchronizer.rpc_server_request_mark_profile_result = function (self, sender, profile_index, result, local_player_id)
 	self._request_local_player_id = local_player_id
 	self._request_result = REQUEST_RESULTS[result]
 	self._has_pending_request = false
-
-	return 
 end
+
 ProfileSynchronizer.profile_request_result = function (self)
 	return self._request_result, self._request_local_player_id
 end
+
 ProfileSynchronizer.clear_profile_request_result = function (self)
 	self._request_result = nil
 	self._request_local_player_id = nil
-
-	return 
 end
+
 ProfileSynchronizer.is_human_player = function (self, peer_id, local_player_id)
 	local player = self._player_manager:player(peer_id, local_player_id)
 
-	return not player or player.is_player_controlled(player)
+	return not player or player:is_player_controlled()
 end
+
 ProfileSynchronizer.reserve_profile = function (self, profile_index, peer_id, local_player_id)
 	fassert(not self._reserved_profiles[profile_index], "Trying to reserve already reserved profile index")
 	profile_printf("[ProfileSynchronizer] reserve_profile %i [peer_id %s:%i]", profile_index, peer_id, local_player_id)
@@ -511,9 +501,8 @@ ProfileSynchronizer.reserve_profile = function (self, profile_index, peer_id, lo
 		peer_id = peer_id,
 		local_player_id = local_player_id
 	}
-
-	return 
 end
+
 ProfileSynchronizer.unreserve_profile = function (self, profile_index, peer_id, local_player_id)
 	local existing_reservation = self._reserved_profiles[profile_index]
 
@@ -521,9 +510,8 @@ ProfileSynchronizer.unreserve_profile = function (self, profile_index, peer_id, 
 	profile_printf("[ProfileSynchronizer] unreserve_profile %i [peer_id %s:%i]", profile_index, peer_id, local_player_id)
 
 	self._reserved_profiles[profile_index] = nil
-
-	return 
 end
+
 ProfileSynchronizer.owner_type = function (self, profile_index)
 	if self._reserved_profiles[profile_index] then
 		return "human", "reserved"
@@ -531,23 +519,22 @@ ProfileSynchronizer.owner_type = function (self, profile_index)
 
 	local owner_table = self._profile_owners[profile_index]
 
-	if owner_table and self.is_human_player(self, owner_table.peer_id, owner_table.local_player_id) then
+	if owner_table and self:is_human_player(owner_table.peer_id, owner_table.local_player_id) then
 		return "human"
 	elseif owner_table then
 		return "bot"
 	else
 		return "available"
 	end
-
-	return 
 end
+
 ProfileSynchronizer.update_lobby_profile_data = function (self)
 	local stored_lobby_host_data = self._lobby_host:get_stored_lobby_data()
 
 	if stored_lobby_host_data then
 		for i = 1, NUM_PROFILES, 1 do
 			local owner_table = self._profile_owners[i]
-			local is_human_player = (owner_table and self.is_human_player(self, owner_table.peer_id, owner_table.local_player_id)) or nil
+			local is_human_player = (owner_table and self:is_human_player(owner_table.peer_id, owner_table.local_player_id)) or nil
 			local unique_id = (is_human_player and self._player_manager:_unique_id(owner_table.peer_id, owner_table.local_player_id)) or nil
 			local value = unique_id or "available"
 			stored_lobby_host_data["player_slot_" .. i] = value
@@ -555,9 +542,8 @@ ProfileSynchronizer.update_lobby_profile_data = function (self)
 
 		self._lobby_host:set_lobby_data(stored_lobby_host_data)
 	end
-
-	return 
 end
+
 ProfileSynchronizer.resync_loadout = function (self, profile_index, player)
 	local inventory_list, inventory_list_first_person = self._inventory_package_synchronizer:build_inventory_lists(profile_index)
 	local network_inventory_list = FrameTable.alloc_table()
@@ -569,20 +555,19 @@ ProfileSynchronizer.resync_loadout = function (self, profile_index, player)
 	self._client_sync_id = self._client_sync_id + 1
 	local client_sync_id = self._client_sync_id
 
-	self._network_transmit:send_rpc_server("rpc_client_select_inventory", player.local_player_id(player), network_inventory_list, network_inventory_list_first_person, client_sync_id)
+	self._network_transmit:send_rpc_server("rpc_client_select_inventory", player:local_player_id(), network_inventory_list, network_inventory_list_first_person, client_sync_id)
 
 	return client_sync_id
 end
+
 ProfileSynchronizer.rpc_server_set_inventory_sync_id = function (self, sender, client_sync_id, inventory_sync_id)
 	self._client_sync_id_map[client_sync_id] = inventory_sync_id
-
-	return 
 end
+
 ProfileSynchronizer.rpc_server_inventory_all_synced = function (self, sender, inventory_sync_id)
 	self.last_inventory_sync_id = inventory_sync_id
-
-	return 
 end
+
 ProfileSynchronizer.all_clients_have_loaded_sync_id = function (self, client_sync_id)
 	local inventory_sync_id = self._client_sync_id_map[client_sync_id]
 
@@ -595,4 +580,4 @@ ProfileSynchronizer.all_clients_have_loaded_sync_id = function (self, client_syn
 	return all_have_loaded
 end
 
-return 
+return

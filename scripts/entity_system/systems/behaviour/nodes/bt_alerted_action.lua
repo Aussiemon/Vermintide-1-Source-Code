@@ -1,12 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTAlertedAction = class(BTAlertedAction, BTNode)
+
 BTAlertedAction.init = function (self, ...)
 	BTAlertedAction.super.init(self, ...)
-
-	return 
 end
+
 BTAlertedAction.name = "BTAlertedAction"
+
 BTAlertedAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	blackboard.action = action
@@ -36,7 +37,7 @@ BTAlertedAction.enter = function (self, unit, blackboard, t)
 				local success_target, ray_pos_target = GwNavQueries.raycast(nav_world, to_pos, from_pos)
 				local diff = ray_pos_self - ray_pos_target
 				local height_diff = diff.z
-				blackboard.no_hesitation = 2 < height_diff and math.pi / 3 < math.asin(height_diff / Vector3.length(diff))
+				blackboard.no_hesitation = height_diff > 2 and math.asin(height_diff / Vector3.length(diff)) > math.pi / 3
 
 				if script_data.ai_hesitation_debug then
 					if blackboard.no_hesitation then
@@ -51,19 +52,18 @@ BTAlertedAction.enter = function (self, unit, blackboard, t)
 		end
 	end
 
-	self.decide_deadline(self, unit, blackboard, t)
-	self.init_alerted(self, unit, blackboard)
+	self:decide_deadline(unit, blackboard, t)
+	self:init_alerted(unit, blackboard)
 	blackboard.navigation_extension:set_enabled(false)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
 
 	blackboard.in_alerted_state = true
 	blackboard.move_state = "idle"
-
-	return 
 end
+
 BTAlertedAction.init_alerted = function (self, unit, blackboard)
 	local network_manager = Managers.state.network
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 
 	if script_data.enable_alert_icon then
 		local category_name = "detect"
@@ -78,7 +78,7 @@ BTAlertedAction.init_alerted = function (self, unit, blackboard)
 		network_manager.network_transmit:send_rpc_clients("rpc_enemy_is_alerted", unit_id, true)
 	end
 
-	network_manager.anim_event(network_manager, unit, "alerted")
+	network_manager:anim_event(unit, "alerted")
 
 	if ScriptUnit.has_extension(unit, "ai_inventory_system") then
 		network_manager.network_transmit:send_rpc_all("rpc_ai_inventory_wield", unit_id)
@@ -87,10 +87,9 @@ BTAlertedAction.init_alerted = function (self, unit, blackboard)
 	local dialogue_input = ScriptUnit.extension_input(unit, "dialogue_system")
 	local event_data = FrameTable.alloc_table()
 
-	dialogue_input.trigger_networked_dialogue_event(dialogue_input, "startled", event_data)
-
-	return 
+	dialogue_input:trigger_networked_dialogue_event("startled", event_data)
 end
+
 BTAlertedAction.decide_deadline = function (self, unit, blackboard, t)
 	local target_unit = blackboard.target_unit
 	local current_pos = POSITION_LOOKUP[unit]
@@ -99,13 +98,12 @@ BTAlertedAction.decide_deadline = function (self, unit, blackboard, t)
 	local rotation = Unit.local_rotation(unit, 0)
 	local forward_vector_flat = Vector3.normalize(Vector3.flat(Quaternion.forward(rotation)))
 	local dot_product = Vector3.dot(forward_vector_flat, target_vector_flat)
-	local min_deadline = (0.25 < dot_product and 0.5) or 1
+	local min_deadline = (dot_product > 0.25 and 0.5) or 1
 	local max_deadline = math.max(min_deadline, 2 - dot_product * 2)
 	local time_alerted = Math.random(min_deadline, max_deadline)
 	blackboard.alerted_action.deadline = time_alerted + t
-
-	return 
 end
+
 BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 	local network_manager = Managers.state.network
 
@@ -114,7 +112,7 @@ BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 
 		Managers.state.debug_text:clear_unit_text(unit, category_name)
 
-		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+		local unit_id = network_manager:unit_game_object_id(unit)
 
 		network_manager.network_transmit:send_rpc_clients("rpc_enemy_is_alerted", unit_id, false)
 	end
@@ -124,12 +122,12 @@ BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 
 		local ai_slot_system = Managers.state.entity:system("ai_slot_system")
 
-		ai_slot_system.do_slot_search(ai_slot_system, unit, true)
+		ai_slot_system:do_slot_search(unit, true)
 
 		if blackboard.move_animation_name then
 			local locomotion_extension = blackboard.locomotion_extension
 
-			locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+			locomotion_extension:use_lerp_rotation(true)
 			LocomotionUtils.set_animation_driven_movement(unit, false)
 			LocomotionUtils.set_animation_rotation_scale(unit, 1)
 
@@ -140,7 +138,7 @@ BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 				blackboard.anim_locked = 0
 				blackboard.spawn_to_running = true
 
-				network_manager.anim_event(network_manager, unit, "move_fwd")
+				network_manager:anim_event(unit, "move_fwd")
 			end
 		end
 	end
@@ -155,9 +153,8 @@ BTAlertedAction.leave = function (self, unit, blackboard, t, reason)
 	if not blackboard.confirmed_player_sighting then
 		Managers.state.network:anim_event(unit, "to_passive")
 	end
-
-	return 
 end
+
 BTAlertedAction.run = function (self, unit, blackboard, t, dt)
 	local action = blackboard.action
 	local target_unit = blackboard.target_unit
@@ -193,7 +190,7 @@ BTAlertedAction.run = function (self, unit, blackboard, t, dt)
 			local ai_unit_to_target_dir = Vector3.normalize(target_pos - current_pos)
 			local dot = Vector3.dot(ai_unit_to_target_dir, ai_unit_direction)
 
-			if -0.5 < dot or target_dist_sq < 16 then
+			if dot > -0.5 or target_dist_sq < 16 then
 				blackboard.is_alerted = true
 
 				return "done"
@@ -204,11 +201,11 @@ BTAlertedAction.run = function (self, unit, blackboard, t, dt)
 	if blackboard.alerted_deadline_reached_and_sighted_enemy and blackboard.no_hesitation and not blackboard.move_animation_name then
 		local ai_slot_system = Managers.state.entity:system("ai_slot_system")
 
-		ai_slot_system.do_slot_search(ai_slot_system, unit, true)
+		ai_slot_system:do_slot_search(unit, true)
 
 		local locomotion_extension = blackboard.locomotion_extension
 
-		locomotion_extension.use_lerp_rotation(locomotion_extension, false)
+		locomotion_extension:use_lerp_rotation(false)
 		LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 
 		local animation_name = AiAnimUtils.get_start_move_animation(unit, blackboard, action)
@@ -223,12 +220,12 @@ BTAlertedAction.run = function (self, unit, blackboard, t, dt)
 		if blackboard.move_animation_name == action.start_anims_name.fwd then
 			local locomotion_extension = blackboard.locomotion_extension
 
-			locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+			locomotion_extension:use_lerp_rotation(true)
 			LocomotionUtils.set_animation_driven_movement(unit, false)
 
 			local rot = LocomotionUtils.rotation_towards_unit_flat(unit, target_unit)
 
-			locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
+			locomotion_extension:set_wanted_rotation(rot)
 		else
 			blackboard.anim_cb_rotation_start = false
 			local rot_scale = AiAnimUtils.get_animation_rotation_scale(unit, blackboard, action)
@@ -244,8 +241,6 @@ BTAlertedAction.run = function (self, unit, blackboard, t, dt)
 	else
 		return "running"
 	end
-
-	return 
 end
 
-return 
+return

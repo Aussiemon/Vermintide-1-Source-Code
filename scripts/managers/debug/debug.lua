@@ -3,6 +3,7 @@ local font = "gw_arial_32"
 local font_mtrl = "materials/fonts/" .. font
 local remove_list = {}
 Debug = Debug or {}
+
 Debug.setup = function (world, world_name)
 	Debug.active = true
 	Debug.world = world
@@ -17,27 +18,26 @@ Debug.setup = function (world, world_name)
 	Debug.world_sticky_texts = {}
 	Debug.world_sticky_index = 0
 	Debug.num_world_sticky_texts = 0
-
-	return 
 end
+
 Debug.create_line_object = function (name)
 	local disable_depth_test = false
 	Debug.line_objects[name] = World.create_line_object(Debug.world, disable_depth_test)
 
 	return Debug.line_objects[name]
 end
+
 Debug.test_popup = function ()
 	local header = Localize("popup_debug_header")
 	local message = Localize("popup_debug_message") .. "\nhost_name"
 	Debug.popup_id = Managers.popup:queue_popup(message, header, "cancel", Localize("popup_choice_cancel"))
 
 	Managers.popup:activate_timer(Debug.popup_id, 120, "cancel")
-
-	return 
 end
+
 Debug.update = function (t, dt)
 	if not Debug.active or (script_data and script_data.disable_debug_draw) then
-		return 
+		return
 	end
 
 	if Debug.popup_id then
@@ -59,7 +59,7 @@ Debug.update = function (t, dt)
 	local num_debug_texts = #Debug.debug_texts
 	local max = 100
 
-	if max < num_debug_texts then
+	if num_debug_texts > max then
 		table.dump(Debug.text_texts, "debug_texts", 3)
 		fassert(false, "Number of debug texts above %i during the same frame.", max)
 	end
@@ -70,7 +70,7 @@ Debug.update = function (t, dt)
 		local instance_text_color = data.color
 		local text_pos = Vector3(10, pos, 700)
 
-		Gui.text(gui, text, font_mtrl, font_size, font, text_pos, (instance_text_color and instance_text_color.unbox(instance_text_color)) or text_color)
+		Gui.text(gui, text, font_mtrl, font_size, font, text_pos, (instance_text_color and instance_text_color:unbox()) or text_color)
 
 		if show_debug_text_background then
 			local text_min, text_max = Gui.text_extents(gui, text, font_mtrl, font_size)
@@ -85,10 +85,10 @@ Debug.update = function (t, dt)
 	local sticky_texts = Debug.sticky_texts
 	local num_sticky = #sticky_texts
 
-	if 0 < num_sticky then
+	if num_sticky > 0 then
 		local i = 1
 
-		while i <= num_sticky do
+		while num_sticky >= i do
 			local text, display_time = unpack(sticky_texts[i])
 
 			Gui.text(gui, text, font_mtrl, font_size, font, Vector3(10, pos, 700), text_color)
@@ -121,11 +121,11 @@ Debug.update = function (t, dt)
 		if inventory_view then
 			local next_select_at = Debug.next_select_at or 0
 
-			if next_select_at < t then
+			if t > next_select_at then
 				local selected_item = Debug.previous_selected_item or 1
 				local next_select_item = selected_item + 1
 
-				if 7 < next_select_item then
+				if next_select_item > 7 then
 					next_select_item = 1
 				end
 
@@ -135,39 +135,35 @@ Debug.update = function (t, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 Debug.cond_text = function (c, ...)
 	if c then
 		Debug.text(...)
 	end
-
-	return 
 end
+
 Debug.text = function (...)
 	if not Debug.active then
-		return 
+		return
 	end
 
 	table.insert(Debug.debug_texts, {
 		text = string.format(...)
 	})
-
-	return 
 end
+
 Debug.colored_text = function (color, ...)
 	if not Debug.active then
-		return 
+		return
 	end
 
 	table.insert(Debug.debug_texts, {
 		text = string.format(...),
 		color = ColorBox(color)
 	})
-
-	return 
 end
+
 local max_world_sticky = 256
 local debug_colors = {
 	red = {
@@ -206,9 +202,10 @@ local debug_colors = {
 		160
 	}
 }
+
 Debug.update_world_sticky_texts = function ()
 	if not Managers.state.debug_text then
-		return 
+		return
 	end
 
 	local world_gui = Managers.state.debug_text._world_gui
@@ -223,12 +220,11 @@ Debug.update_world_sticky_texts = function ()
 		Gui.text_3d(world_gui, text, font_mtrl, 0.3, font, tm, Vector3(item[2], item[3], item[4]), 1, Color(item[5], item[6], item[7]))
 		QuickDrawer:sphere(Vector3(item[2], item[3], item[4]), 0.03)
 	end
-
-	return 
 end
+
 Debug.world_sticky_text = function (pos, text, color_name)
 	if not Debug.active then
-		return 
+		return
 	end
 
 	local wt = Debug.world_sticky_texts
@@ -263,18 +259,16 @@ Debug.world_sticky_text = function (pos, text, color_name)
 	end
 
 	Debug.world_sticky_index = index
-
-	return 
 end
+
 Debug.reset_sticky_world_texts = function ()
 	Debug.num_world_sticky_texts = 0
 	Debug.world_sticky_index = 0
-
-	return 
 end
+
 Debug.sticky_text = function (...)
 	if not Debug.active then
-		return 
+		return
 	end
 
 	local t = {
@@ -289,9 +283,8 @@ Debug.sticky_text = function (...)
 		string.format(...),
 		Managers.time:time("game") + delay
 	})
-
-	return 
 end
+
 Debug.drawer = function (name, disabled)
 	name = name or "default"
 	local lo = Debug.line_objects[name]
@@ -299,6 +292,7 @@ Debug.drawer = function (name, disabled)
 
 	return DebugDrawer:new(lo, to_boolean(not disabled))
 end
+
 Debug.teardown = function ()
 	Debug.active = false
 	local w = Debug.world
@@ -308,12 +302,11 @@ Debug.teardown = function ()
 	end
 
 	table.clear(Debug.line_objects)
-
-	return 
 end
+
 debug.animation_log_specific_profile = function (profile, enable)
 	local player_manager = Managers.player
-	local players = player_manager.players(player_manager)
+	local players = player_manager:players()
 
 	for _, player in pairs(players) do
 		local units = player.owned_units
@@ -334,28 +327,25 @@ debug.animation_log_specific_profile = function (profile, enable)
 			end
 		end
 	end
-
-	return 
 end
+
 debug.spawn_hero = function (hero_name)
 	local spawn_manager = Managers.state.spawn
 	local hero_spawner_handler = spawn_manager.hero_spawner_handler
 	local peer_id = Network:peer_id()
 	local player = Managers.player:player_from_peer_id(peer_id)
 
-	hero_spawner_handler.spawn_hero_request(hero_spawner_handler, player, hero_name)
-
-	return 
+	hero_spawner_handler:spawn_hero_request(player, hero_name)
 end
+
 debug.load_level = function (level_name)
 	local game_mode_manager = Managers.state.game_mode
 	local level_transition_handler = game_mode_manager.level_transition_handler
 
-	level_transition_handler.set_next_level(level_transition_handler, level_name)
-	level_transition_handler.level_completed(level_transition_handler)
-
-	return 
+	level_transition_handler:set_next_level(level_name)
+	level_transition_handler:level_completed()
 end
+
 debug.level_loaded = function (level_name)
 	local game_mode_manager = Managers.state.game_mode
 
@@ -370,7 +360,7 @@ debug.level_loaded = function (level_name)
 		return false
 	end
 
-	local packages_loaded = level_transition_handler.all_packages_loaded(level_transition_handler)
+	local packages_loaded = level_transition_handler:all_packages_loaded()
 
 	if not packages_loaded then
 		return false
@@ -386,17 +376,18 @@ debug.level_loaded = function (level_name)
 
 	return true
 end
+
 Debug.visualize_level_unit = function (level_unit_id)
 	local level = Managers.state.networked_flow_state._level
 
 	if not level then
-		return 
+		return
 	end
 
 	local unit = Level.unit_by_index(level, level_unit_id)
 
 	if not unit then
-		return 
+		return
 	end
 
 	local position = Unit.world_position(unit, 0)
@@ -406,8 +397,6 @@ Debug.visualize_level_unit = function (level_unit_id)
 	for i = 1, 20, 1 do
 		QuickDrawer:sphere(position, i * 10, Colors.get("medium_aqua_marine"))
 	end
-
-	return 
 end
 
-return 
+return

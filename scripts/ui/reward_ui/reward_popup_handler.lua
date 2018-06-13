@@ -1,20 +1,21 @@
 local popup_definition = local_require("scripts/ui/reward_ui/reward_popup_definition_01")
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
 RewardPopupHandler = class(RewardPopupHandler)
+
 RewardPopupHandler.init = function (self, input_manager, ui_renderer, wait_time_after_animation, service_input_name, wait_for_player_continue)
 	self.input_manager = input_manager
 	local world_manager = Managers.world
 	local ui_world_name = "ingame_view"
-	local ui_world = world_manager.world(world_manager, ui_world_name)
+	local ui_world = world_manager:world(ui_world_name)
 	self.ui_world = ui_world
-	local world = world_manager.world(world_manager, "level_world")
+	local world = world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 	self.render_settings = {
 		snap_pixel_positions = true
@@ -22,14 +23,13 @@ RewardPopupHandler.init = function (self, input_manager, ui_renderer, wait_time_
 	self.ui_renderer = ui_renderer
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.service_input_name = service_input_name
 	self.wait_time_after_animation = wait_time_after_animation
 	self.wait_for_player_continue = wait_for_player_continue
-
-	return 
 end
+
 RewardPopupHandler.create_ui_elements = function (self)
 	self.popup_widget = UIWidget.init(popup_definition.widget_popup)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(popup_definition.scenegraph_definition)
@@ -70,19 +70,18 @@ RewardPopupHandler.create_ui_elements = function (self)
 	local hero_icon_widgets = self.hero_icon_widgets
 	local hero_icon_widget = hero_icon_widgets.icon
 	hero_icon_widget.style.texture_id.color[1] = 0
-
-	return 
 end
+
 RewardPopupHandler.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 local zero_position = {
 	0,
 	0,
 	996
 }
+
 RewardPopupHandler.update = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -106,7 +105,7 @@ RewardPopupHandler.update = function (self, dt)
 		animation_wait_time = animation_wait_time - dt
 
 		if animation_wait_time <= 0 then
-			self.on_wait_time_complete(self)
+			self:on_wait_time_complete()
 		else
 			self.wait_time_until_complete = animation_wait_time
 		end
@@ -115,7 +114,7 @@ RewardPopupHandler.update = function (self, dt)
 	local continue_button_hotspot = self.continue_button_widget.content.button_hotspot
 
 	if continue_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
 	if continue_button_hotspot.on_release then
@@ -125,7 +124,7 @@ RewardPopupHandler.update = function (self, dt)
 		self.continue_button_widget.content.visible = false
 	end
 
-	self.update_animation(self, dt)
+	self:update_animation(dt)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.popup_widget)
 
@@ -165,25 +164,23 @@ RewardPopupHandler.update = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 RewardPopupHandler.destroy = function (self)
 	self.ui_renderer = nil
-
-	return 
 end
+
 RewardPopupHandler.start_animation = function (self, reward_item_key)
 	self.animation_completed = nil
 	self.wait_time_until_complete = nil
 
-	self.play_sound(self, "hud_dice_game_unlock_item")
+	self:play_sound("hud_dice_game_unlock_item")
 
 	self.draw_tooltips = nil
 	local item = ItemMasterList[reward_item_key]
 
-	self.set_reward_display_info(self, reward_item_key)
-	self.set_popup_widget_item_info(self, item)
+	self:set_reward_display_info(reward_item_key)
+	self:set_popup_widget_item_info(item)
 
 	self.animation_time = 0
 	local scenegraph_definition = popup_definition.scenegraph_definition
@@ -197,10 +194,9 @@ RewardPopupHandler.start_animation = function (self, reward_item_key)
 		animation.init(ui_scenegraph, scenegraph_definition, widget)
 	end
 
-	self.animate_reward_info(self)
-
-	return 
+	self:animate_reward_info()
 end
+
 RewardPopupHandler.animate_reward_info = function (self)
 	local reward_text_widgets = self.reward_text_widgets
 	local name_text_style = reward_text_widgets.name_text.style.text
@@ -244,9 +240,8 @@ RewardPopupHandler.animate_reward_info = function (self)
 	end
 
 	self.display_reward_texts = true
-
-	return 
 end
+
 RewardPopupHandler.set_popup_widget_item_info = function (self, item)
 	local widget = self.popup_widget
 	local widget_content = widget.content
@@ -256,9 +251,8 @@ RewardPopupHandler.set_popup_widget_item_info = function (self, item)
 	local rarity_color = Colors.get_color_table_with_alpha(item_rarity, 0)
 	widget.style.glow_background.color = rarity_color
 	widget.style.icon_frame.color = rarity_color
-
-	return 
 end
+
 RewardPopupHandler.set_reward_display_info = function (self, item_key)
 	local item = ItemMasterList[item_key]
 	local ratity_color = Colors.get_color_table_with_alpha(item.rarity, 0)
@@ -283,10 +277,9 @@ RewardPopupHandler.set_reward_display_info = function (self, item_key)
 
 	self.draw_hero_icon = draw_hero_icon
 
-	self.set_traits_info(self, item.traits, item.slot_type, item.rarity)
-
-	return 
+	self:set_traits_info(item.traits, item.slot_type, item.rarity)
 end
+
 RewardPopupHandler.set_traits_info = function (self, traits, slot_type, rarity)
 	local trait_icon_widgets = self.trait_icon_widgets
 	local tooltip_widgets = self.tooltip_widgets
@@ -342,10 +335,9 @@ RewardPopupHandler.set_traits_info = function (self, traits, slot_type, rarity)
 
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	self.update_trait_alignment(self, number_of_traits_on_item)
-
-	return 
+	self:update_trait_alignment(number_of_traits_on_item)
 end
+
 RewardPopupHandler.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
@@ -371,9 +363,8 @@ RewardPopupHandler.update_trait_alignment = function (self, number_of_traits)
 		local widget = trait_icon_widgets[i]
 		widget.content.visible = (i <= number_of_traits and true) or false
 	end
-
-	return 
 end
+
 RewardPopupHandler.on_wait_time_complete = function (self)
 	if self.wait_for_player_continue then
 		self.continue_button_widget.content.visible = true
@@ -381,17 +372,16 @@ RewardPopupHandler.on_wait_time_complete = function (self)
 		self.wait_time_until_complete = nil
 		self.animation_completed = true
 	end
-
-	return 
 end
+
 RewardPopupHandler.on_animation_complete = function (self)
 	self.wait_time_until_complete = self.wait_time_after_animation
-
-	return 
 end
+
 RewardPopupHandler.is_animation_completed = function (self)
 	return self.animation_completed
 end
+
 RewardPopupHandler.update_animation = function (self, dt)
 	local time = self.animation_time
 
@@ -400,17 +390,16 @@ RewardPopupHandler.update_animation = function (self, dt)
 		local total_time = 2
 		local progress = math.min(time / total_time, 1)
 
-		self.update_animation_sequence(self, dt, progress)
+		self:update_animation_sequence(dt, progress)
 
 		self.animation_time = (progress < 1 and time) or nil
 
 		if not self.animation_time then
-			self.on_animation_complete(self)
+			self:on_animation_complete()
 		end
 	end
-
-	return 
 end
+
 RewardPopupHandler.update_animation_sequence = function (self, dt, progress)
 	local ui_scenegraph = self.ui_scenegraph
 	local widget = self.popup_widget
@@ -446,8 +435,6 @@ RewardPopupHandler.update_animation_sequence = function (self, dt, progress)
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

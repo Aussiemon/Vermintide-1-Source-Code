@@ -18,8 +18,6 @@ local function animate_style_on_select(style, size, progress, catmullrom_value, 
 	if not ignore_color then
 		style.color[1] = math.min(progress * 4, 1) * 255
 	end
-
-	return 
 end
 
 local bar_item_select = {
@@ -28,7 +26,7 @@ local bar_item_select = {
 		start_progress = 0,
 		end_progress = UISettings.inventory.button_bars.selected_fade_in,
 		init = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 			local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -44,11 +42,9 @@ local bar_item_select = {
 
 			animate_style_on_select(button_click_style, button_size, progress, catmullrom_value)
 			animate_style_on_select(icon_click_style, icon_size, progress, catmullrom_value)
-
-			return 
 		end,
 		on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end
 	}
 }
@@ -58,7 +54,7 @@ local bar_item_deselect = {
 		start_progress = 0,
 		end_progress = UISettings.inventory.button_bars.selected_fade_out,
 		init = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 			local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -71,11 +67,9 @@ local bar_item_deselect = {
 			local icon_click_style = widget_style[string.format("icon_click_%d", selected_index)]
 			icon_click_style.color[1] = math.max(icon_click_style.color[1] - progress * 255, 0)
 			button_click_style.color[1] = math.max(button_click_style.color[1] - progress * 255, 0)
-
-			return 
 		end,
 		on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end
 	}
 }
@@ -85,7 +79,7 @@ local item_select = {
 		start_progress = 0,
 		end_progress = UISettings.inventory.button_bars.selected_fade_in,
 		init = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 			local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -95,11 +89,9 @@ local item_select = {
 			local icon_click_style = widget_style[string.format("icon_click_%d", selected_index)]
 			icon_click_style.color[1] = math.max(progress * 255, 0)
 			button_click_style.color[1] = math.max(progress * 255, 0)
-
-			return 
 		end,
 		on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end
 	}
 }
@@ -109,7 +101,7 @@ local item_deselect = {
 		start_progress = 0,
 		end_progress = UISettings.inventory.button_bars.selected_fade_out,
 		init = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 			local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -119,11 +111,9 @@ local item_deselect = {
 			local icon_click_style = widget_style[string.format("icon_click_%d", selected_index)]
 			icon_click_style.color[1] = math.max((1 - progress) * 255, 0)
 			button_click_style.color[1] = math.max((1 - progress) * 255, 0)
-
-			return 
 		end,
 		on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end
 	}
 }

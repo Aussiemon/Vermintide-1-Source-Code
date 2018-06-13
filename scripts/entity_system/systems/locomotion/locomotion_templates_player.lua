@@ -9,17 +9,18 @@ if DETAILED_PROFILING then
 	detailed_profiler_start = Profiler.stop
 else
 	function detailed_profiler_start()
-		return 
+		return
 	end
 
 	function detailed_profiler_stop()
-		return 
+		return
 	end
 end
 
 local UPDATE_STATISTICS = false
 LocomotionTemplates.PlayerUnitLocomotionExtension = {}
 local T = LocomotionTemplates.PlayerUnitLocomotionExtension
+
 T.init = function (data, nav_world)
 	data.nav_world = nav_world
 	data.all_update_units = {}
@@ -39,9 +40,8 @@ T.init = function (data, nav_world)
 		GraphHelper.set_range("PlayerUnitLocomotionExtension", -10, 10)
 		GraphHelper.hide("PlayerUnitLocomotionExtension")
 	end
-
-	return 
 end
+
 T.update = function (data, t, dt)
 	Profiler.start("player_locomotion_update")
 	T.update_movement(data, t, dt)
@@ -59,9 +59,8 @@ T.update = function (data, t, dt)
 	end
 
 	Profiler.stop("player_locomotion_update")
-
-	return 
 end
+
 T.update_average_velocity = function (data, t, dt)
 	Profiler.start("update_average_velocity")
 
@@ -95,7 +94,7 @@ T.update_average_velocity = function (data, t, dt)
 			local total_velocity = Vector3(0, 0, 0)
 
 			for k, velocity in ipairs(velocities) do
-				total_velocity = total_velocity + velocity.unbox(velocity)
+				total_velocity = total_velocity + velocity:unbox()
 			end
 
 			extension._average_velocity:store(total_velocity / num_velocities)
@@ -118,10 +117,10 @@ T.update_average_velocity = function (data, t, dt)
 			Debug.text("Player position: %s", tostring(Unit.local_position(unit, 0)))
 		end
 	end
-
-	return 
 end
+
 local MAX_TIME_SINCE_LAST_DOWN_COLLIDE = 0.2
+
 T.update_movement = function (data, t, dt)
 	Profiler.start("update movement")
 
@@ -145,35 +144,34 @@ T.update_movement = function (data, t, dt)
 		if state == "script_driven" then
 			local calculate_fall_velocity = true
 
-			extension.update_script_driven_movement(extension, unit, dt, t, calculate_fall_velocity)
+			extension:update_script_driven_movement(unit, dt, t, calculate_fall_velocity)
 		elseif state == "animation_driven" then
-			extension.update_animation_driven_movement(extension, unit, dt, t)
+			extension:update_animation_driven_movement(unit, dt, t)
 		elseif state == "animation_driven_with_rotation_no_mover" then
-			extension.update_animation_driven_movement_with_rotation_no_mover(extension, unit, dt, t)
+			extension:update_animation_driven_movement_with_rotation_no_mover(unit, dt, t)
 		elseif state == "linked_movement" then
-			extension.update_linked_movement(extension, unit, dt, t)
+			extension:update_linked_movement(unit, dt, t)
 		elseif state == "script_driven_ladder" then
 			local calculate_fall_velocity = false
 
-			extension.update_script_driven_movement(extension, unit, dt, t, calculate_fall_velocity)
+			extension:update_script_driven_movement(unit, dt, t, calculate_fall_velocity)
 		elseif state == "script_driven_ladder_transition_movement" then
-			extension.update_script_driven_ladder_transition_movement(extension, unit, dt, t)
+			extension:update_script_driven_ladder_transition_movement(unit, dt, t)
 		elseif state == "script_driven_no_mover" then
-			extension.update_script_driven_no_mover_movement(extension, unit, dt, t)
+			extension:update_script_driven_no_mover_movement(unit, dt, t)
 		end
 	end
 
 	Profiler.stop("update movement")
-
-	return 
 end
+
 T.update_network = function (data, dt)
 	Profiler.start("network")
 
 	local game = Managers.state.network:game()
 
 	if not game or LEVEL_EDITOR_TEST then
-		return 
+		return
 	end
 
 	local MAX_MOVE_SPEED = 99.9999
@@ -211,9 +209,8 @@ T.update_network = function (data, dt)
 	end
 
 	Profiler.stop("network")
-
-	return 
 end
+
 T.update_statistics = function (data, t, dt)
 	Profiler.start("statistics")
 
@@ -223,9 +220,8 @@ T.update_statistics = function (data, t, dt)
 	end
 
 	Profiler.stop("statistics")
-
-	return 
 end
+
 T.update_rotation = function (data, t, dt)
 	Profiler.start("rotation")
 
@@ -243,7 +239,7 @@ T.update_rotation = function (data, t, dt)
 		if not extension.disable_rotation_update then
 			if extension.rotate_along_direction then
 				local first_person_extension = extension.first_person_extension
-				local current_rotation = first_person_extension.current_rotation(first_person_extension)
+				local current_rotation = first_person_extension:current_rotation()
 				local current_rotation_flat = Vector3_flat(Quaternion_forward(current_rotation))
 				local velocity_current = extension.velocity_current:unbox()
 				velocity_current.z = 0
@@ -297,9 +293,8 @@ T.update_rotation = function (data, t, dt)
 	end
 
 	Profiler.stop("rotation")
-
-	return 
 end
+
 T.update_disabled_units = function (data, dt)
 	Profiler.start("disabled")
 
@@ -310,18 +305,17 @@ T.update_disabled_units = function (data, dt)
 		local go_id = Managers.state.unit_storage:go_id(unit)
 
 		if game and go_id then
-			extension.sync_network_rotation(extension, game, go_id)
-			extension.sync_network_position(extension, game, go_id)
-			extension.sync_network_velocity(extension, game, go_id, dt)
+			extension:sync_network_rotation(game, go_id)
+			extension:sync_network_position(game, go_id)
+			extension:sync_network_velocity(game, go_id, dt)
 		end
 
-		return 
+		return
 	end
 
 	Profiler.stop("disabled")
-
-	return 
 end
+
 T.update_debug_anims = function (data)
 	Profiler.start("debug anims")
 
@@ -350,8 +344,6 @@ T.update_debug_anims = function (data)
 	end
 
 	Profiler.stop("debug anims")
-
-	return 
 end
 
-return 
+return

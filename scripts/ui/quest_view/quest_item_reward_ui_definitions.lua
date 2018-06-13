@@ -305,14 +305,12 @@ local animation_definitions = {
 				local scenegraph_id = "entry_" .. widget_index
 				local position = ui_scenegraph[scenegraph_id].local_position
 				position[2] = scenegraph_definition[scenegraph_id].position[2]
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -320,7 +318,7 @@ local animation_definitions = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = math.easeCubic(progress) * 255
@@ -345,11 +343,9 @@ local animation_definitions = {
 				widget_style.task_value_1.text_color[1] = text_alpha
 				widget_style.task_value_2.text_color[1] = text_alpha
 				widget_style.task_value_3.text_color[1] = text_alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -361,18 +357,14 @@ local animation_definitions = {
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local parent_position = ui_scenegraph.pivot.local_position
 				params.parent_start_position_x = parent_position[1]
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local parent_position = ui_scenegraph.pivot.local_position
 				local parent_default_position = scenegraph_definition.pivot.position
 				parent_position[1] = params.parent_start_position_x - 1000 * math.easeOutCubic(progress)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -382,7 +374,7 @@ local animation_definitions = {
 			start_progress = 0,
 			end_progress = 0.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = 255 - math.easeCubic(progress) * 255
@@ -421,11 +413,9 @@ local animation_definitions = {
 					widget_style.task_value_2.text_color[1] = text_alpha
 					widget_style.task_value_3.text_color[1] = text_alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

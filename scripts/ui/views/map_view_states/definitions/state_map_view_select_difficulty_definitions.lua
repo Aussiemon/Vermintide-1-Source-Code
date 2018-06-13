@@ -336,7 +336,7 @@ local function create_element(scenegraph_id, color, index, difficulty_data, gui)
 					pass_type = "rect_text",
 					text_id = "locked_text",
 					content_check_function = function (content, style)
-						return content.locked and 0 < style.text_color[1]
+						return content.locked and style.text_color[1] > 0
 					end
 				}
 			}

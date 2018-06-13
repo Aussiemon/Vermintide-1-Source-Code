@@ -2,6 +2,7 @@ require("scripts/managers/player/player_boon_handler")
 require("scripts/managers/player/boon_templates")
 
 BulldozerPlayer = class(BulldozerPlayer, Player)
+
 BulldozerPlayer.init = function (self, network_manager, input_source, viewport_name, viewport_world_name, is_server, local_player_id, unique_id)
 	BulldozerPlayer.super.init(self, network_manager, input_source, viewport_name, viewport_world_name, is_server, local_player_id)
 
@@ -12,7 +13,7 @@ BulldozerPlayer.init = function (self, network_manager, input_source, viewport_n
 	self.player_unit = nil
 	local peer_id = Network.peer_id()
 	self.peer_id = peer_id
-	self._debug_name = "Local #" .. peer_id.sub(peer_id, 1, 3)
+	self._debug_name = "Local #" .. peer_id:sub(1, 3)
 	self._local_player_id = local_player_id
 	self._unique_id = unique_id
 	self.is_server = is_server
@@ -21,18 +22,19 @@ BulldozerPlayer.init = function (self, network_manager, input_source, viewport_n
 	Managers.free_flight:register_player(local_player_id)
 
 	self._cached_name = nil
-
-	return 
 end
+
 BulldozerPlayer.type = function (self)
 	return "BulldozerPlayer"
 end
+
 BulldozerPlayer.profile_display_name = function (self)
 	local profile = SPProfiles[self.profile_index]
 	local display_name = profile and profile.display_name
 
 	return display_name
 end
+
 BulldozerPlayer.despawn = function (self)
 	local player_unit = self.player_unit
 
@@ -40,15 +42,13 @@ BulldozerPlayer.despawn = function (self)
 		REMOVE_PLAYER_UNIT_FROM_LISTS(player_unit)
 		Managers.state.unit_spawner:mark_for_deletion(player_unit)
 	end
-
-	return 
 end
+
 BulldozerPlayer.set_spawn_position_rotation = function (self, position, rotation)
 	self.spawn_position = Vector3Box(position)
 	self.spawn_rotation = QuaternionBox(rotation)
-
-	return 
 end
+
 BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is_initial_spawn, ammo_melee, ammo_ranged, healthkit, potion, grenade)
 	local profile_index = self.profile_index
 	local profile = SPProfiles[profile_index]
@@ -57,7 +57,7 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 
 	local nav_world = Managers.state.entity:system("ai_system"):nav_world()
 	local difficulty_manager = Managers.state.difficulty
-	local difficulty_settings = difficulty_manager.get_difficulty_settings(difficulty_manager)
+	local difficulty_settings = difficulty_manager:get_difficulty_settings()
 	local player_health = difficulty_settings.max_hp
 	local player_wounds = difficulty_settings.wounds
 
@@ -95,7 +95,7 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 		PlayerCharacterStateWaitingForAssistedRespawn,
 		PLayerCharacterStateOverchargeExploding
 	}
-	local initial_inventory = self._get_initial_inventory(self, healthkit, potion, grenade)
+	local initial_inventory = self:_get_initial_inventory(healthkit, potion, grenade)
 	local extension_init_data = {
 		input_system = {
 			player = self
@@ -167,7 +167,7 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 		},
 		statistics_system = {
 			template = "player",
-			statistics_id = self.telemetry_id(self)
+			statistics_id = self:telemetry_id()
 		},
 		ai_slot_system = {
 			profile_index = profile_index
@@ -182,7 +182,7 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 		extension_init_data = extension_init_data
 	}
 	local spawn_manager = Managers.state.spawn
-	local unit = spawn_manager.spawn_unit(spawn_manager, spawn_data, optional_position, optional_rotation)
+	local unit = spawn_manager:spawn_unit(spawn_data, optional_position, optional_rotation)
 	local player_manager = Managers.player
 
 	Unit.set_data(unit, "unit_name", profile.unit_name)
@@ -195,7 +195,7 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 
 	local is_player_unit = true
 
-	player_manager.assign_unit_ownership(player_manager, unit, self, is_player_unit)
+	player_manager:assign_unit_ownership(unit, self, is_player_unit)
 	Managers.state.event:trigger("level_start_local_player_spawned", is_initial_spawn)
 
 	local peer_type = (self.is_server and "host") or "client"
@@ -205,15 +205,15 @@ BulldozerPlayer.spawn = function (self, optional_position, optional_rotation, is
 
 	return unit
 end
+
 BulldozerPlayer.create_boon_handler = function (self, world)
 	local backend_settings = GameSettingsDevelopment.backend_settings
 
 	if backend_settings.quests_enabled then
 		self.boon_handler = PlayerBoonHandler:new(self, world, self.is_server)
 	end
-
-	return 
 end
+
 BulldozerPlayer._get_initial_inventory = function (self, healthkit, potion, grenade)
 	local initial_inventory = {
 		slot_packmaster_claw = "packmaster_claw",
@@ -224,6 +224,7 @@ BulldozerPlayer._get_initial_inventory = function (self, healthkit, potion, gren
 
 	return initial_inventory
 end
+
 BulldozerPlayer.create_game_object = function (self)
 	local empty_boon_id = NetworkLookup.boons["n/a"]
 	local game_object_data_table = {
@@ -241,8 +242,8 @@ BulldozerPlayer.create_game_object = function (self)
 		boon_10_remaining_duration = 0,
 		player_controlled = true,
 		go_type = NetworkLookup.go_types.player,
-		network_id = self.network_id(self),
-		local_player_id = self.local_player_id(self),
+		network_id = self:network_id(),
+		local_player_id = self:local_player_id(),
 		clan_tag = Application.user_setting("clan_tag") or "0",
 		boon_1_id = empty_boon_id,
 		boon_2_id = empty_boon_id,
@@ -258,47 +259,52 @@ BulldozerPlayer.create_game_object = function (self)
 	local callback = callback(self, "cb_game_session_disconnect")
 	local game_object_id = self.network_manager:create_player_game_object("player", game_object_data_table, callback)
 	self.game_object_id = game_object_id
-
-	return 
 end
+
 BulldozerPlayer.cb_game_session_disconnect = function (self)
 	self.game_object_id = nil
 
 	if self.boon_handler then
 		self.boon_handler = nil
 	end
-
-	return 
 end
+
 BulldozerPlayer.network_id = function (self)
 	return self.peer_id
 end
+
 BulldozerPlayer.local_player_id = function (self)
 	return self._local_player_id
 end
+
 BulldozerPlayer.platform_id = function (self)
 	return self.peer_id
 end
+
 BulldozerPlayer.profile_id = function (self)
 	return self._unique_id
 end
+
 BulldozerPlayer.ui_id = function (self)
 	return self._unique_id
 end
+
 BulldozerPlayer.stats_id = function (self)
 	return self._unique_id
 end
+
 BulldozerPlayer.telemetry_id = function (self)
 	return self._unique_id
 end
+
 BulldozerPlayer.is_player_controlled = function (self)
 	return true
 end
+
 BulldozerPlayer.set_game_object_id = function (self, id)
 	self.game_object_id = id
-
-	return 
 end
+
 BulldozerPlayer.name = function (self)
 	if rawget(_G, "Steam") then
 		if self._cached_name then
@@ -311,7 +317,7 @@ BulldozerPlayer.name = function (self)
 				clan_tag = tostring(Clans.clan_tag(clan_tag_id)) .. "|"
 			end
 
-			local name = clan_tag .. Steam.user_name(self.network_id(self))
+			local name = clan_tag .. Steam.user_name(self:network_id())
 			self._cached_name = name
 
 			return name
@@ -321,27 +327,24 @@ BulldozerPlayer.name = function (self)
 			return self._cached_name
 		end
 
-		local name = Managers.state.network:lobby():user_name(self.network_id(self)) or "Remote #" .. tostring(self.peer_id:sub(1, 3))
+		local name = Managers.state.network:lobby():user_name(self:network_id()) or "Remote #" .. tostring(self.peer_id:sub(1, 3))
 		self._cached_name = name
 
 		return name
 	else
 		return self._debug_name
 	end
-
-	return 
 end
+
 BulldozerPlayer.destroy = function (self)
 	if self.is_server and self.game_object_id then
 		self.network_manager:destroy_game_object(self.game_object_id)
 	end
 
-	Managers.free_flight:unregister_player(self.local_player_id(self))
+	Managers.free_flight:unregister_player(self:local_player_id())
 	Managers.music:unregister_active_player(self._local_player_id)
 
 	self.game_object_id = nil
-
-	return 
 end
 
-return 
+return

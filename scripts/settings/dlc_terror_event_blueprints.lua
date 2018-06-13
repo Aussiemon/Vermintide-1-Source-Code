@@ -2739,10 +2739,11 @@ local TerrorEventBlueprints = {
 		}
 	}
 }
+
 DLCTerrorEventBlueprints.get_terror_event_blueprints = function (level_name)
 	assert(TerrorEventBlueprints[level_name][PLATFORM], string.format("There is no DLC level called %q", level_name))
 
 	return TerrorEventBlueprints[level_name][PLATFORM]
 end
 
-return 
+return

@@ -1,13 +1,14 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTBotInteractAction = class(BTBotInteractAction, BTNode)
+
 BTBotInteractAction.init = function (self, ...)
 	BTBotInteractAction.super.init(self, ...)
-
-	return 
 end
+
 BTBotInteractAction.name = "BTBotInteractAction"
 local unit_alive = Unit.alive
+
 BTBotInteractAction.enter = function (self, unit, blackboard, t)
 	blackboard.interact = {
 		tried = false
@@ -15,25 +16,24 @@ BTBotInteractAction.enter = function (self, unit, blackboard, t)
 	local input_ext = blackboard.input_extension
 	local soft_aiming = true
 
-	input_ext.set_aiming(input_ext, true, soft_aiming)
+	input_ext:set_aiming(true, soft_aiming)
 
 	local interaction_unit = blackboard.interaction_unit
 	blackboard.current_interaction_unit = interaction_unit
 	local interaction_ext = blackboard.interaction_extension
 
-	interaction_ext.set_exclusive_interaction_unit(interaction_ext, interaction_unit)
-
-	return 
+	interaction_ext:set_exclusive_interaction_unit(interaction_unit)
 end
+
 BTBotInteractAction.leave = function (self, unit, blackboard, t)
 	blackboard.interact = false
 	local interaction_ext = blackboard.interaction_extension
 
-	interaction_ext.set_exclusive_interaction_unit(interaction_ext, nil)
+	interaction_ext:set_exclusive_interaction_unit(nil)
 
 	local input_ext = blackboard.input_extension
 
-	input_ext.set_aiming(input_ext, false)
+	input_ext:set_aiming(false)
 
 	local interaction_unit = blackboard.current_interaction_unit
 
@@ -50,7 +50,7 @@ BTBotInteractAction.leave = function (self, unit, blackboard, t)
 
 				local navigation_ext = blackboard.navigation_extension
 
-				navigation_ext.move_to(navigation_ext, wanted_position)
+				navigation_ext:move_to(wanted_position)
 			end
 		end
 
@@ -58,9 +58,8 @@ BTBotInteractAction.leave = function (self, unit, blackboard, t)
 	end
 
 	blackboard.current_interaction_unit = nil
-
-	return 
 end
+
 BTBotInteractAction.run = function (self, unit, blackboard, t, dt)
 	local interaction_unit = blackboard.current_interaction_unit
 
@@ -77,20 +76,20 @@ BTBotInteractAction.run = function (self, unit, blackboard, t, dt)
 	local do_interaction = true
 
 	if action_data and action_data.use_block_interaction then
-		input_ext.defend(input_ext)
+		input_ext:defend()
 
-		do_interaction = status_ext.is_blocking(status_ext)
+		do_interaction = status_ext:is_blocking()
 	end
 
 	if do_interaction then
 		if state == "waiting_to_interact" and not bb.tried then
-			input_ext.interact(input_ext)
+			input_ext:interact()
 
 			bb.tried = true
 		elseif state == "waiting_to_interact" then
 			bb.tried = false
 		else
-			input_ext.interact(input_ext)
+			input_ext:interact()
 		end
 	end
 
@@ -102,9 +101,9 @@ BTBotInteractAction.run = function (self, unit, blackboard, t, dt)
 		aim_position = Unit.world_position(interaction_unit, 0)
 	end
 
-	input_ext.set_aim_position(input_ext, aim_position)
+	input_ext:set_aim_position(aim_position)
 
 	return "running"
 end
 
-return 
+return

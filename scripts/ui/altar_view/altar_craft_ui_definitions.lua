@@ -729,7 +729,7 @@ local function create_step_button(scenegraph_id)
 					content_check_function = function (content)
 						local button_hotspot = content.button_hotspot
 
-						return not button_hotspot.button_disabled and (not button_hotspot.is_clicked or 0 < button_hotspot.is_clicked)
+						return not button_hotspot.button_disabled and (not button_hotspot.is_clicked or button_hotspot.is_clicked > 0)
 					end
 				},
 				{
@@ -748,7 +748,7 @@ local function create_step_button(scenegraph_id)
 					content_check_function = function (content)
 						local button_hotspot = content.button_hotspot
 
-						return not button_hotspot.button_disabled and content.show_glow and (not button_hotspot.is_clicked or 0 < button_hotspot.is_clicked)
+						return not button_hotspot.button_disabled and content.show_glow and (not button_hotspot.is_clicked or button_hotspot.is_clicked > 0)
 					end
 				},
 				{
@@ -875,8 +875,6 @@ local animations = {
 				for i = 1, #widgets, 1 do
 					widgets[i].style.texture_id.color[1] = 0
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = math.easeOutCubic(local_progress) * 255
@@ -884,11 +882,9 @@ local animations = {
 				for i = 1, #widgets, 1 do
 					widgets[i].style.texture_id.color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -896,13 +892,13 @@ local animations = {
 			start_progress = 0.5,
 			end_progress = 0.8,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -910,7 +906,7 @@ local animations = {
 			start_progress = 0.8,
 			end_progress = 1.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = math.easeOutCubic(1 - local_progress) * 255
@@ -918,11 +914,9 @@ local animations = {
 				for i = 1, #widgets, 1 do
 					widgets[i].style.texture_id.color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

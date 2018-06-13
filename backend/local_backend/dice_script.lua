@@ -434,14 +434,14 @@ local function get_random_hero_item(rarity, hero_name)
 	local item_type_list = get_random_hero_weighted_item(hero_list, hero_name)
 
 	if not item_type_list then
-		return 
+		return
 	end
 
 	local item_list = get_random_item(item_type_list)
 	local item_name = get_random_item(item_list)
 
 	if rarity == "unique" and player_has(item_name) then
-		return 
+		return
 	end
 
 	return item_name
@@ -457,8 +457,6 @@ local function get_random_trinket(rarity)
 	else
 		echo("found no trinket of rarity " .. rarity)
 	end
-
-	return 
 end
 
 local function get_random_hat(rarity, hero_name)
@@ -469,15 +467,13 @@ local function get_random_hat(rarity, hero_name)
 		local item_name = get_random_item(hat_list)
 
 		if rarity == "unique" and player_has(item_name) then
-			return 
+			return
 		end
 
 		return item_name
 	else
 		echo("found no hat of rarity " .. rarity)
 	end
-
-	return 
 end
 
 local function user_has_all_of_rarity(rarity)
@@ -583,7 +579,7 @@ LevelRewards = {
 		return rarity, item_type
 	end,
 	reward_by_level = function (self, level)
-		local rarity, item_type = self.reward_settings_by_level(self, level)
+		local rarity, item_type = self:reward_settings_by_level(level)
 
 		if item_type then
 			local reward_table = LevellingRewards[rarity][item_type]
@@ -591,8 +587,6 @@ LevelRewards = {
 
 			return reward_name
 		end
-
-		return 
 	end,
 	level_up_rewards = function (self, start_level, end_level)
 		local num_rewards, max_index = table_count(LevellingRewardsItemType)
@@ -605,7 +599,7 @@ LevelRewards = {
 		end
 
 		for ii = start_level + 1, end_level, 1 do
-			local reward = self.reward_by_level(self, ii)
+			local reward = self:reward_by_level(ii)
 
 			if reward then
 				rewards[#rewards + 1] = reward
@@ -637,4 +631,4 @@ function dice_script_local(param_dice, param_difficulty, param_start_level, para
 	return entities, parameters, nil
 end
 
-return 
+return

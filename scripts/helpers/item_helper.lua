@@ -7,6 +7,7 @@ local item_type_templates = {
 	trinket = Attachments,
 	hat = Attachments
 }
+
 ItemHelper.get_template_by_item_name = function (name)
 	local item_data = ItemMasterList[name]
 
@@ -25,6 +26,7 @@ ItemHelper.get_template_by_item_name = function (name)
 
 	return template
 end
+
 ItemHelper.get_loadout_item = function (slot, profile)
 	local item_data = nil
 	local profile_name = profile.display_name
@@ -32,6 +34,7 @@ ItemHelper.get_loadout_item = function (slot, profile)
 
 	return item_data
 end
+
 ItemHelper.get_slot_type = function (slot)
 	local slots_n = #InventorySettings.slots
 
@@ -44,18 +47,16 @@ ItemHelper.get_slot_type = function (slot)
 	end
 
 	fassert(false, "no slot in InventorySettings.slots with name: ", slot)
-
-	return 
 end
+
 ItemHelper.mark_backend_id_as_new = function (backend_id)
 	local new_item_ids = PlayerData.new_item_ids or {}
 	new_item_ids[backend_id] = true
 	PlayerData.new_item_ids = new_item_ids
 
 	Managers.save:auto_save(SaveFileName, SaveData, nil)
-
-	return 
 end
+
 ItemHelper.unmark_backend_id_as_new = function (backend_id)
 	local new_item_ids = PlayerData.new_item_ids
 
@@ -64,11 +65,10 @@ ItemHelper.unmark_backend_id_as_new = function (backend_id)
 	new_item_ids[backend_id] = nil
 
 	Managers.save:auto_save(SaveFileName, SaveData, nil)
-
-	return 
 end
+
 ItemHelper.get_new_backend_ids = function ()
 	return PlayerData.new_item_ids
 end
 
-return 
+return

@@ -705,17 +705,15 @@ LobbyBrowserGamepadWidgets = {
 		input_function = function (widget, input_service)
 			local content = widget.content
 
-			if input_service.get(input_service, "move_left") then
+			if input_service:get("move_left") then
 				content.left_button_hotspot.on_release = true
 
 				return true
-			elseif input_service.get(input_service, "move_right") then
+			elseif input_service:get("move_right") then
 				content.right_button_hotspot.on_release = true
 
 				return true
 			end
-
-			return 
 		end
 	}
 }

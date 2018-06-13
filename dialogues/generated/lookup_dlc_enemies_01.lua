@@ -11,4 +11,4 @@ DialogueLookup[DialogueLookup_n + 4] = "pdr_gameplay_seeing_a_scr"
 DialogueLookup[DialogueLookup_n + 5] = "pwe_gameplay_seeing_a_scr"
 DialogueLookup_n = DialogueLookup_n + 5
 
-return 
+return

@@ -1,18 +1,18 @@
 require("scripts/settings/difficulty_settings")
 
 DifficultyManager = class(DifficultyManager)
+
 DifficultyManager.init = function (self, world, is_server, network_event_delegate, lobby_host)
 	self.world = world
 	self.is_server = is_server
 	self.network_event_delegate = network_event_delegate
 	self.lobby_host = lobby_host
 
-	network_event_delegate.register(network_event_delegate, self, "rpc_set_difficulty")
+	network_event_delegate:register(self, "rpc_set_difficulty")
 
 	self.difficulty = nil
-
-	return 
 end
+
 DifficultyManager.set_difficulty = function (self, difficulty)
 	self.difficulty = difficulty
 	self.difficulty_rank = DifficultySettings[difficulty].rank
@@ -48,12 +48,11 @@ DifficultyManager.set_difficulty = function (self, difficulty)
 			local network_transmit = network_manager.network_transmit
 			local difficulty_id = NetworkLookup.difficulties[self.difficulty]
 
-			network_transmit.send_rpc_clients(network_transmit, "rpc_set_difficulty", difficulty_id, false)
+			network_transmit:send_rpc_clients("rpc_set_difficulty", difficulty_id, false)
 		end
 	end
-
-	return 
 end
+
 DifficultyManager.get_level_difficulties = function (self, level_key)
 	local level_settings = LevelSettings[level_key]
 	local difficulty_settings = level_settings.difficulties
@@ -61,39 +60,39 @@ DifficultyManager.get_level_difficulties = function (self, level_key)
 
 	return difficulty_settings or DefaultDifficulties, starting_difficulty or DefaultStartingDifficulty
 end
+
 DifficultyManager.get_difficulty = function (self)
 	return self.difficulty
 end
+
 DifficultyManager.get_difficulty_rank = function (self)
 	return self.difficulty_rank
 end
+
 DifficultyManager.get_difficulty_settings = function (self)
 	return DifficultySettings[self.difficulty]
 end
+
 DifficultyManager.hot_join_sync = function (self, sender)
 	local network_manager = Managers.state.network
 	local network_transmit = network_manager.network_transmit
 	local difficulty_id = NetworkLookup.difficulties[self.difficulty]
 
-	network_transmit.send_rpc(network_transmit, "rpc_set_difficulty", sender, difficulty_id, true)
-
-	return 
+	network_transmit:send_rpc("rpc_set_difficulty", sender, difficulty_id, true)
 end
+
 DifficultyManager.destroy = function (self)
 	self.network_event_delegate:unregister(self)
-
-	return 
 end
+
 DifficultyManager.rpc_set_difficulty = function (self, sender, difficulty_id, hot_join)
 	local difficulty = NetworkLookup.difficulties[difficulty_id]
 
-	self.set_difficulty(self, difficulty)
+	self:set_difficulty(difficulty)
 
 	if hot_join then
 		Managers.state.event:trigger("difficulty_synced")
 	end
-
-	return 
 end
 
-return 
+return

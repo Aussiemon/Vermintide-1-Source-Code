@@ -1,4 +1,5 @@
 PlayerDamageExtension = class(PlayerDamageExtension, GenericUnitDamageExtension)
+
 PlayerDamageExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	PlayerDamageExtension.super.init(self, extension_init_context, unit, extension_init_data)
 
@@ -14,27 +15,26 @@ PlayerDamageExtension.init = function (self, extension_init_context, unit, exten
 	}
 	self._level_key = Managers.state.game_mode:level_key()
 	self._mission_system = Managers.state.entity:system("mission_system")
-
-	return 
 end
+
 PlayerDamageExtension.update = function (self, unit, input, dt, context, t)
-	if 0 < self._shield_duration_left then
+	if self._shield_duration_left > 0 then
 		self._shield_duration_left = self._shield_duration_left - dt
 	elseif not self._end_reason then
-		self.remove_assist_shield(self, "timed_out")
+		self:remove_assist_shield("timed_out")
 	end
-
-	return 
 end
+
 local my_temp_table = {}
+
 PlayerDamageExtension.add_damage = function (self, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source_name, hit_ragdoll_actor, damaging_unit)
 	PlayerDamageExtension.super.add_damage(self, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source_name, hit_ragdoll_actor, damaging_unit)
 
 	local player_manager = Managers.player
 	local unit = self.unit
-	local owner = player_manager.owner(player_manager, unit)
+	local owner = player_manager:owner(unit)
 
-	if Managers.state.controller_features and owner.local_player and 0 < damage_amount then
+	if Managers.state.controller_features and owner.local_player and damage_amount > 0 then
 		Managers.state.controller_features:add_effect("hit_rumble", {
 			damage_amount = damage_amount,
 			unit = unit
@@ -45,10 +45,9 @@ PlayerDamageExtension.add_damage = function (self, attacker_unit, damage_amount,
 		self._mission_system:increment_goal_mission_counter("dwarf_exterior_survive", math.max(damage_amount, 0), true)
 	end
 
-	self._add_player_damage_telemetry(self, damage_type, damage_source_name or "n/a")
-
-	return 
+	self:_add_player_damage_telemetry(damage_type, damage_source_name or "n/a")
 end
+
 PlayerDamageExtension._add_player_damage_telemetry = function (self, damage_type, damage_source)
 	local unit = self.unit
 	local owner = Managers.player:owner(unit)
@@ -64,9 +63,8 @@ PlayerDamageExtension._add_player_damage_telemetry = function (self, damage_type
 			Managers.telemetry.events:player_damage(owner, damage_type, damage_source, position)
 		end
 	end
-
-	return 
 end
+
 PlayerDamageExtension.shield = function (self, shield_amount)
 	self._shield_amount = shield_amount
 	self._shield_duration_left = 10
@@ -75,34 +73,34 @@ PlayerDamageExtension.shield = function (self, shield_amount)
 	if script_data.damage_debug then
 		printf("[PlayerDamageExtension] shield %.1f to %s", shield_amount, tostring(self.unit))
 	end
-
-	return 
 end
+
 PlayerDamageExtension.get_damage_after_shield = function (self, damage)
-	if self.has_assist_shield(self) then
+	if self:has_assist_shield() then
 		damage = damage - self._shield_amount
 
 		if script_data.damage_debug then
 			printf("[PlayerDamageExtension] reduced incoming damage to %s by %.1f", tostring(self.unit), self._shield_amount)
 		end
 
-		self.remove_assist_shield(self, "blocked_damage")
+		self:remove_assist_shield("blocked_damage")
 	end
 
 	return damage
 end
+
 PlayerDamageExtension.has_assist_shield = function (self)
-	return 0 < self._shield_duration_left and 0 < self._shield_amount, self._shield_amount
+	return self._shield_duration_left > 0 and self._shield_amount > 0, self._shield_amount
 end
+
 PlayerDamageExtension.remove_assist_shield = function (self, end_reason)
 	self._shield_duration_left = 0
 	self._shield_amount = 0
 	self._end_reason = end_reason
-
-	return 
 end
+
 PlayerDamageExtension.previous_shield_end_reason = function (self)
 	return self._end_reason
 end
 
-return 
+return

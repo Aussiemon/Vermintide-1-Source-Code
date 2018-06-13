@@ -18,46 +18,43 @@ AiBreedSnippets.on_storm_vermin_champion_spawn = function (unit, blackboard)
 	blackboard.surrounding_players_last = -math.huge
 	blackboard.run_speed = blackboard.breed.run_speed
 
-	if 3 <= Managers.state.difficulty:get_difficulty_rank() then
+	if Managers.state.difficulty:get_difficulty_rank() >= 3 then
 		blackboard.trickle_timer = Managers.time:time("game") + 20
 	else
 		print("no trickle, difficulty:", Managers.state.difficulty:get_difficulty_rank())
 	end
 
 	local network_manager = Managers.state.network
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 	local conflict_director = Managers.state.conflict
 
-	conflict_director.freeze_intensity_decay(conflict_director, 10)
-	conflict_director.add_unit_to_bosses(conflict_director, unit)
+	conflict_director:freeze_intensity_decay(10)
+	conflict_director:add_unit_to_bosses(unit)
 
 	local actor = Unit.actor(unit, "c_trophy_rack_ward")
 
 	Actor.set_collision_enabled(actor, false)
 	Actor.set_scene_query_enabled(actor, false)
-
-	return 
 end
+
 AiBreedSnippets.on_storm_vermin_champion_husk_spawn = function (unit)
 	local actor = Unit.actor(unit, "c_trophy_rack_ward")
 
 	Actor.set_collision_enabled(actor, false)
 	Actor.set_scene_query_enabled(actor, false)
-
-	return 
 end
+
 AiBreedSnippets.on_storm_vermin_hot_join_sync = function (sender, unit)
 	local bb = Unit.get_data(unit, "blackboard")
 
 	if bb.ward_active then
 		local network_manager = Managers.state.network
-		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+		local unit_id = network_manager:unit_game_object_id(unit)
 
 		RPC.rpc_set_ward_state(sender, unit_id, true)
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_storm_vermin_champion_update = function (unit, blackboard, t, dt)
 	local self_pos = POSITION_LOOKUP[unit]
 	local range = BreedActions.skaven_storm_vermin_champion.special_attack_spin.radius
@@ -71,14 +68,14 @@ AiBreedSnippets.on_storm_vermin_champion_update = function (unit, blackboard, t,
 
 	blackboard.surrounding_players = num
 
-	if 0 < blackboard.surrounding_players then
+	if blackboard.surrounding_players > 0 then
 		blackboard.surrounding_players_last = t
 	end
 
 	if blackboard.trickle_timer and blackboard.trickle_timer < t and not blackboard.defensive_mode_duration then
 		local conflict_director = Managers.state.conflict
 
-		if conflict_director.count_units_by_breed(conflict_director, "skaven_clan_rat") < 3 then
+		if conflict_director:count_units_by_breed("skaven_clan_rat") < 3 then
 			local strictly_not_close_to_players = true
 			local silent = true
 			local composition_type = "mini_patrol"
@@ -119,25 +116,22 @@ AiBreedSnippets.on_storm_vermin_champion_update = function (unit, blackboard, t,
 	if blackboard.ward_active and script_data.ai_champion_spawn_debug then
 		QuickDrawer:sphere(POSITION_LOOKUP[unit] + Vector3(0, 0, 1.5), 1.5, Color(255, 0, 0))
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_storm_vermin_champion_death = function (unit, blackboard)
 	local conflict_director = Managers.state.conflict
 
-	conflict_director.freeze_intensity_decay(conflict_director, 1)
-	conflict_director.remove_unit_from_bosses(conflict_director, unit)
-
-	return 
+	conflict_director:freeze_intensity_decay(1)
+	conflict_director:remove_unit_from_bosses(unit)
 end
+
 AiBreedSnippets.on_storm_vermin_champion_despawn = function (unit, blackboard)
 	local conflict_director = Managers.state.conflict
 
-	conflict_director.freeze_intensity_decay(conflict_director, 1)
-	conflict_director.remove_unit_from_bosses(conflict_director, unit)
-
-	return 
+	conflict_director:freeze_intensity_decay(1)
+	conflict_director:remove_unit_from_bosses(unit)
 end
+
 local breed_data = {
 	initial_is_passive = false,
 	walk_speed = 2,
@@ -736,7 +730,7 @@ local action_data = {
 				ready_function = function (unit, blackboard, t)
 					local charge_t = t - blackboard.attack_sequence_start_time
 
-					return (1.5 < charge_t and 0 < blackboard.surrounding_players) or 2.5 < charge_t
+					return (charge_t > 1.5 and blackboard.surrounding_players > 0) or charge_t > 2.5
 				end
 			}
 		},
@@ -1279,8 +1273,6 @@ local action_data = {
 
 				return math.lerp(0.4, 2.95, scaled_t)
 			end
-
-			return 
 		end
 	},
 	special_attack_shatter = {
@@ -1814,4 +1806,4 @@ local action_data = {
 }
 BreedActions.skaven_storm_vermin_champion = table.create_copy(BreedActions.skaven_storm_vermin_champion, action_data)
 
-return 
+return

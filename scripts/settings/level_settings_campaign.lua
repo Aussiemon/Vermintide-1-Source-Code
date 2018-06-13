@@ -99,4 +99,4 @@ LevelSettingsCampaign = {
 	}
 }
 
-return 
+return

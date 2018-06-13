@@ -60,9 +60,9 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
+				input_extension:clear_input_buffer()
 
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end
 		},
 		charged_beam = {
@@ -109,9 +109,9 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
+				input_extension:clear_input_buffer()
 
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end
 		}
 	},
@@ -305,4 +305,4 @@ Weapons.staff_blast_beam_template_1_t3.actions.action_two.default.attack_templat
 Weapons.staff_blast_beam_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.5
 Weapons.staff_blast_beam_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.25
 
-return 
+return

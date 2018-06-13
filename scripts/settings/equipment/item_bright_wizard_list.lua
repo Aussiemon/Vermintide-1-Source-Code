@@ -20028,4 +20028,4 @@ ItemMasterList.bw_flame_wave_staff_0001 = {
 	traits = {}
 }
 
-return 
+return

@@ -51,6 +51,7 @@ require("scripts/managers/leaderboards/leaderboard_manager")
 
 StateIngame = class(StateIngame)
 StateIngame.NAME = "StateIngame"
+
 StateIngame.on_enter = function (self)
 	if PLATFORM == "xb1" then
 		Application.set_kinect_enabled(false)
@@ -80,27 +81,27 @@ StateIngame.on_enter = function (self)
 	self.input_manager = input_manager
 	Managers.input = self.input_manager
 
-	input_manager.initialize_device(input_manager, "keyboard")
-	input_manager.initialize_device(input_manager, "mouse")
-	input_manager.initialize_device(input_manager, "gamepad")
+	input_manager:initialize_device("keyboard")
+	input_manager:initialize_device("mouse")
+	input_manager:initialize_device("gamepad")
 
 	if script_data.debug_enabled then
-		input_manager.create_input_service(input_manager, "Debug", "DebugKeymap", "DebugInputFilters")
-		input_manager.map_device_to_service(input_manager, "Debug", "keyboard")
-		input_manager.map_device_to_service(input_manager, "Debug", "mouse")
-		input_manager.map_device_to_service(input_manager, "Debug", "gamepad")
-		input_manager.create_input_service(input_manager, "DebugMenu", "DebugKeymap", "DebugInputFilters")
-		input_manager.map_device_to_service(input_manager, "DebugMenu", "keyboard")
-		input_manager.map_device_to_service(input_manager, "DebugMenu", "mouse")
-		input_manager.map_device_to_service(input_manager, "DebugMenu", "gamepad")
+		input_manager:create_input_service("Debug", "DebugKeymap", "DebugInputFilters")
+		input_manager:map_device_to_service("Debug", "keyboard")
+		input_manager:map_device_to_service("Debug", "mouse")
+		input_manager:map_device_to_service("Debug", "gamepad")
+		input_manager:create_input_service("DebugMenu", "DebugKeymap", "DebugInputFilters")
+		input_manager:map_device_to_service("DebugMenu", "keyboard")
+		input_manager:map_device_to_service("DebugMenu", "mouse")
+		input_manager:map_device_to_service("DebugMenu", "gamepad")
 
 		if PLATFORM == "win32" and (BUILD == "dev" or BUILD == "debug") then
-			input_manager.initialize_device(input_manager, "synergy_keyboard")
-			input_manager.initialize_device(input_manager, "synergy_mouse")
-			input_manager.map_device_to_service(input_manager, "Debug", "synergy_keyboard")
-			input_manager.map_device_to_service(input_manager, "Debug", "synergy_mouse")
-			input_manager.map_device_to_service(input_manager, "DebugMenu", "synergy_keyboard")
-			input_manager.map_device_to_service(input_manager, "DebugMenu", "synergy_mouse")
+			input_manager:initialize_device("synergy_keyboard")
+			input_manager:initialize_device("synergy_mouse")
+			input_manager:map_device_to_service("Debug", "synergy_keyboard")
+			input_manager:map_device_to_service("Debug", "synergy_mouse")
+			input_manager:map_device_to_service("DebugMenu", "synergy_keyboard")
+			input_manager:map_device_to_service("DebugMenu", "synergy_mouse")
 		end
 	end
 
@@ -124,7 +125,7 @@ StateIngame.on_enter = function (self)
 	else
 		local db = StatisticsDatabase:new()
 
-		db.register(db, "session", "session", nil)
+		db:register("session", "session", nil)
 
 		loading_context.statistics_db = db
 		self.statistics_db = db
@@ -143,7 +144,7 @@ StateIngame.on_enter = function (self)
 
 	self.world_name = "level_world"
 
-	self._setup_world(self)
+	self:_setup_world()
 
 	local world = self.world
 	self.peer_id = Network.peer_id()
@@ -181,7 +182,7 @@ StateIngame.on_enter = function (self)
 	end
 
 	self.network_transmit:set_network_event_delegate(network_event_delegate)
-	network_event_delegate.register(network_event_delegate, self, "rpc_kick_peer")
+	network_event_delegate:register(self, "rpc_kick_peer")
 	self.statistics_db:register_network_event_delegate(network_event_delegate)
 
 	loading_context.network_transmit = self.network_transmit
@@ -240,7 +241,7 @@ StateIngame.on_enter = function (self)
 
 	Managers.matchmaking:register_rpcs(network_event_delegate)
 	Managers.matchmaking:set_statistics_db(self.statistics_db)
-	self._setup_state_context(self, world, is_server, network_event_delegate)
+	self:_setup_state_context(world, is_server, network_event_delegate)
 	self.level_transition_handler:register_rpcs(network_event_delegate)
 
 	Managers.state.quest = QuestManager:new(self.statistics_db, level_key)
@@ -276,9 +277,9 @@ StateIngame.on_enter = function (self)
 
 	local event_manager = Managers.state.event
 
-	event_manager.register(event_manager, self, "event_play_particle_effect", "event_play_particle_effect", "event_start_network_timer", "event_start_network_timer", "xbox_one_hack_start_game", "event_xbox_one_hack_start_game")
+	event_manager:register(self, "event_play_particle_effect", "event_play_particle_effect", "event_start_network_timer", "event_start_network_timer", "xbox_one_hack_start_game", "event_xbox_one_hack_start_game")
 
-	local level = self._create_level(self)
+	local level = self:_create_level()
 	self.level = level
 
 	Managers.state.entity:system("darkness_system"):set_level(level)
@@ -403,7 +404,7 @@ StateIngame.on_enter = function (self)
 	Network.write_dump_tag("start of game")
 
 	local network_manager = Managers.state.network
-	local network_game = network_manager.game(network_manager)
+	local network_game = network_manager:game()
 	local is_spawn_owner = self._lobby_host and network_game
 
 	if is_spawn_owner or LEVEL_EDITOR_TEST then
@@ -411,7 +412,7 @@ StateIngame.on_enter = function (self)
 
 		local volume_system = Managers.state.entity:system("volume_system")
 
-		volume_system.ai_ready(volume_system)
+		volume_system:ai_ready()
 	end
 
 	Profiler.start("populate pickups")
@@ -525,33 +526,29 @@ StateIngame.on_enter = function (self)
 	local in_game_session = Managers.state.network:in_game_session()
 
 	print("In gamesession", in_game_session)
-	self._check_mutators(self)
-
-	return 
+	self:_check_mutators()
 end
+
 StateIngame._check_mutators = function (self)
 	if Managers.state.quest:is_mutator_active("fog") then
 		local darkness_system = Managers.state.entity:system("darkness_system")
 
-		darkness_system.set_global_darkness(darkness_system, true)
-		darkness_system.set_local_players_light_intensity(darkness_system, 3)
+		darkness_system:set_global_darkness(true)
+		darkness_system:set_local_players_light_intensity(3)
 		Managers.state.camera:set_fog_depth_override(0, 5)
 	end
-
-	return 
 end
+
 StateIngame.event_xbox_one_hack_start_game = function (self, level_key, difficulty)
 	Managers.state.difficulty:set_difficulty(difficulty)
 	self.level_transition_handler:set_next_level(level_key)
 	Managers.state.game_mode:complete_level()
-
-	return 
 end
+
 StateIngame.cb_save_data = function (self)
 	print("saved data")
-
-	return 
 end
+
 StateIngame._setup_world = function (self)
 	local shading_callback = callback(self, "shading_callback")
 	local layer = 1
@@ -564,27 +561,22 @@ StateIngame._setup_world = function (self)
 
 	Managers.world:set_anim_update_callback(self.world, function ()
 		self.machines[1]:state():update_ui()
-
-		return 
 	end)
 	Managers.world:set_scene_update_callback(self.world, function ()
 		Profiler.start("Scene update Callback")
 		self:physics_async_update(self.dt)
 		Profiler.stop("Scene update Callback")
-
-		return 
 	end)
 
 	if Managers.splitscreen then
 		Managers.splitscreen:add_splitscreen_viewport(self.world)
 	end
-
-	return 
 end
+
 StateIngame._safe_to_do_entity_update = function (self)
 	local network_manager = Managers.state.network
 
-	if network_manager.has_left_game(network_manager) or not network_manager.in_game_session(network_manager) then
+	if network_manager:has_left_game() or not network_manager:in_game_session() then
 		return false
 	end
 
@@ -594,6 +586,7 @@ StateIngame._safe_to_do_entity_update = function (self)
 
 	return not left_game_mode
 end
+
 StateIngame.physics_async_update = function (self, dt)
 	local t = Managers.time:time("game")
 
@@ -601,22 +594,19 @@ StateIngame.physics_async_update = function (self, dt)
 	Managers.music:update(self.dt, t)
 	Profiler.stop("Music manager")
 
-	if self._safe_to_do_entity_update(self) then
+	if self:_safe_to_do_entity_update() then
 		self.entity_system:physics_async_update()
 	end
-
-	return 
 end
+
 StateIngame.shading_callback = function (self, world, shading_env, viewport)
 	Managers.state.camera:shading_callback(world, shading_env, viewport)
-
-	return 
 end
+
 StateIngame._teardown_level = function (self)
 	World.destroy_level(self.world, self.level)
-
-	return 
 end
+
 StateIngame._teardown_world = function (self)
 	if Managers.splitscreen then
 		Managers.splitscreen:remove_splitscreen_viewport()
@@ -629,39 +619,36 @@ StateIngame._teardown_world = function (self)
 	World.destroy_gui(self.world, self._debug_gui)
 	World.destroy_gui(self.world, self._debug_gui_immediate)
 	Managers.world:destroy_world(self.world_name)
-
-	return 
 end
+
 StateIngame.spawn_unit = function (self, unit, ...)
 	if not Managers.state.entity then
 		printf("Unit %s is spawned after level destroy?", tostring(unit))
 
-		return 
+		return
 	end
 
 	Managers.state.entity:register_unit(self.world, unit, ...)
-
-	return 
 end
+
 StateIngame.unspawn_unit = function (self, unit)
 	if not Managers.state.entity then
 		printf("Unit %s has not been destroyed by entity manager or level destroy", tostring(unit))
 
-		return 
+		return
 	end
 
 	Unit.flow_event(unit, "unit_despawned")
 	Managers.state.entity:unregister_unit(unit)
-
-	return 
 end
+
 StateIngame._create_level = function (self)
 	Profiler.start("create_level")
 
 	local level_key = self.level_transition_handler:get_current_level_keys()
 	local level_name = LevelSettings[level_key].level_name
 	local game_mode_manager = Managers.state.game_mode
-	local game_mode_object_sets = game_mode_manager.object_sets(game_mode_manager)
+	local game_mode_object_sets = game_mode_manager:object_sets()
 	local spawned_object_sets = {}
 	local object_sets = {}
 	local available_level_sets = LevelResource.object_set_names(level_name)
@@ -697,20 +684,22 @@ StateIngame._create_level = function (self)
 	Managers.state.networked_flow_state:set_level(level)
 	World.set_flow_callback_object(self.world, self)
 	Managers.state.entity:add_and_register_units(self.world, World.units(self.world))
-	game_mode_manager.register_object_sets(game_mode_manager, object_sets)
+	game_mode_manager:register_object_sets(object_sets)
 	Level.spawn_background(level)
 	Profiler.stop("create_level")
 
 	return level
 end
+
 script_data.disable_ui = script_data.disable_ui or Development.parameter("disable_ui")
+
 StateIngame.pre_update = function (self, dt)
 	local t = Managers.time:time("game")
 	local network_manager = Managers.state.network
 
 	UPDATE_POSITION_LOOKUP()
 	UPDATE_PLAYER_LISTS()
-	network_manager.update_receive(network_manager, dt)
+	network_manager:update_receive(dt)
 	Profiler.start("Network Client/Server update")
 
 	if self.network_server then
@@ -727,13 +716,13 @@ StateIngame.pre_update = function (self, dt)
 	Profiler.stop("spawn")
 	self.entity_system:commit_and_remove_pending_units()
 
-	if self._safe_to_do_entity_update(self) then
+	if self:_safe_to_do_entity_update() then
 		self.entity_system:pre_update(dt, t)
 	end
-
-	return 
 end
+
 local knoywloke = nil
+
 StateIngame.update = function (self, dt, main_t)
 	Vault.reseed()
 
@@ -807,14 +796,14 @@ StateIngame.update = function (self, dt, main_t)
 
 		if self._lobby_host:is_joined() then
 			local lobby_members = self._lobby_host:members()
-			local members_joined = lobby_members.get_members_joined(lobby_members)
+			local members_joined = lobby_members:get_members_joined()
 			local members_joined_n = #members_joined
-			local members_left = lobby_members.get_members_left(lobby_members)
+			local members_left = lobby_members:get_members_left()
 			local members_left_n = #members_left
 
 			if members_joined_n ~= 0 or members_left_n ~= 0 then
 				local lobby_data = self._lobby_host:get_stored_lobby_data()
-				local members = lobby_members.get_members(lobby_members)
+				local members = lobby_members:get_members()
 				local members_n = #members
 				lobby_data.num_players = members_n
 
@@ -832,7 +821,7 @@ StateIngame.update = function (self, dt, main_t)
 	end
 
 	for _, machine in pairs(self.machines) do
-		machine.update(machine, dt, t)
+		machine:update(dt, t)
 	end
 
 	local game_mode_ended = Managers.state.game_mode:is_game_mode_ended()
@@ -845,7 +834,7 @@ StateIngame.update = function (self, dt, main_t)
 		self.game_mode_end_timer = t + 0.2
 	end
 
-	if self._safe_to_do_entity_update(self) then
+	if self:_safe_to_do_entity_update() then
 		self.entity_system:update(dt, t)
 	end
 
@@ -854,7 +843,7 @@ StateIngame.update = function (self, dt, main_t)
 			local ai_system = Managers.state.entity:system("ai_system")
 			local ai_debugger = ai_system.ai_debugger
 
-			ai_debugger.update(ai_debugger, t, dt)
+			ai_debugger:update(t, dt)
 		end
 
 		Profiler.start("Game Mode Server")
@@ -863,7 +852,7 @@ StateIngame.update = function (self, dt, main_t)
 	end
 
 	if not self._new_state then
-		self._new_state = self._check_exit(self, t)
+		self._new_state = self:_check_exit(t)
 	end
 
 	if self.exit_type then
@@ -899,10 +888,10 @@ StateIngame.update = function (self, dt, main_t)
 	end
 
 	VALIDATE_POSITION_LOOKUP()
-
-	return 
 end
+
 local CONNECTION_TIMEOUT = 1
+
 StateIngame.connected_to_network = function (self, t)
 	if Development.parameter("use_lan_backend") then
 		return true
@@ -918,40 +907,39 @@ StateIngame.connected_to_network = function (self, t)
 		self.last_connected_to_network_at = t
 	end
 
-	if not connected_to_network and self.last_connected_to_network_at + CONNECTION_TIMEOUT < t then
+	if not connected_to_network and t > self.last_connected_to_network_at + CONNECTION_TIMEOUT then
 		return false
 	end
 
 	return true
 end
+
 StateIngame.cb_transition_fade_in_done = function (self, new_state)
 	self._new_state = new_state
-
-	return 
 end
+
 StateIngame.event_start_network_timer = function (self, time)
 	self.network_timer_handler:start_timer_server(time)
-
-	return 
 end
+
 StateIngame._check_exit = function (self, t)
 	local network_manager = Managers.state.network
 	local lobby = self._lobby_host or self._lobby_client
 	local platform = PLATFORM
 	local backend_manager = Managers.backend
-	local waiting_user_input = backend_manager.is_waiting_for_user_input(backend_manager)
-	local rerolling = ScriptBackendItem.get_rerolling_trait_state() and not backend_manager.is_disconnected(backend_manager)
-	local waiting_for_item_poll = (ScriptBackendItem.num_current_item_server_requests() ~= 0 or UISettings.waiting_for_response) and not backend_manager.is_disconnected(backend_manager)
-	local connected_to_network = self.connected_to_network(self, t)
+	local waiting_user_input = backend_manager:is_waiting_for_user_input()
+	local rerolling = ScriptBackendItem.get_rerolling_trait_state() and not backend_manager:is_disconnected()
+	local waiting_for_item_poll = (ScriptBackendItem.num_current_item_server_requests() ~= 0 or UISettings.waiting_for_response) and not backend_manager:is_disconnected()
+	local connected_to_network = self:connected_to_network(t)
 
 	if not self.exit_type and not waiting_user_input and not waiting_for_item_poll and not rerolling then
 		local transition, join_lobby_data = nil
 
 		for _, machine in pairs(self.machines) do
-			transition, join_lobby_data = machine.state(machine):wanted_transition()
+			transition, join_lobby_data = machine:state():wanted_transition()
 		end
 
-		if script_data.hammer_join and 5 < Managers.time:time("game") then
+		if script_data.hammer_join and Managers.time:time("game") > 5 then
 			transition = "restart_game"
 
 			Development.set_parameter("auto_join", true)
@@ -964,10 +952,10 @@ StateIngame._check_exit = function (self, t)
 		if Managers.backend:is_disconnected() then
 			self.exit_type = "backend_disconnected"
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			self.leave_lobby = true
@@ -977,10 +965,10 @@ StateIngame._check_exit = function (self, t)
 		elseif transition == "return_to_title_screen" then
 			self.exit_type = "return_to_title_screen"
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			self.leave_lobby = true
@@ -998,10 +986,10 @@ StateIngame._check_exit = function (self, t)
 				self.exit_type = "perform_host_migration"
 			end
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
@@ -1017,10 +1005,10 @@ StateIngame._check_exit = function (self, t)
 				self.exit_type = "perform_host_migration"
 			end
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
@@ -1028,10 +1016,10 @@ StateIngame._check_exit = function (self, t)
 		elseif not connected_to_network then
 			self.exit_type = "lobby_state_failed"
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
@@ -1046,10 +1034,10 @@ StateIngame._check_exit = function (self, t)
 				Managers.matchmaking:add_broken_lobby(lobby_id, t, true)
 			end
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
@@ -1059,10 +1047,10 @@ StateIngame._check_exit = function (self, t)
 
 			self.network_server:disconnect_all_peers("host_left_game")
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
@@ -1072,7 +1060,7 @@ StateIngame._check_exit = function (self, t)
 
 			if self.is_server then
 				network_manager.network_transmit:send_rpc_clients("rpc_reload_level")
-				network_manager.leave_game(network_manager)
+				network_manager:leave_game()
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
@@ -1087,7 +1075,7 @@ StateIngame._check_exit = function (self, t)
 
 				self.network_server:set_current_level(level_to_transition_to)
 				network_manager.network_transmit:send_rpc_clients("rpc_load_level", NetworkLookup.level_keys[level_to_transition_to], self.level_transition_handler.level_seed)
-				network_manager.leave_game(network_manager)
+				network_manager:leave_game()
 			else
 				self.network_client:set_wait_for_state_loading(true)
 			end
@@ -1107,10 +1095,10 @@ StateIngame._check_exit = function (self, t)
 				Managers.matchmaking:add_broken_lobby(lobby_id, t, true)
 			end
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
@@ -1118,10 +1106,10 @@ StateIngame._check_exit = function (self, t)
 		elseif transition == "afk_kick" then
 			self.exit_type = "afk_kick"
 
-			if network_manager.in_game_session(network_manager) then
+			if network_manager:in_game_session() then
 				local force_diconnect = true
 
-				network_manager.leave_game(network_manager, force_diconnect)
+				network_manager:leave_game(force_diconnect)
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed, nil)
@@ -1129,8 +1117,8 @@ StateIngame._check_exit = function (self, t)
 		elseif transition == "join_lobby" then
 			self.exit_type = "join_game"
 
-			if network_manager.in_game_session(network_manager) then
-				network_manager.leave_game(network_manager)
+			if network_manager:in_game_session() then
+				network_manager:leave_game()
 			end
 
 			self.parent.loading_context.join_lobby_data = join_lobby_data
@@ -1140,8 +1128,8 @@ StateIngame._check_exit = function (self, t)
 		elseif transition == "start_lobby" then
 			self.exit_type = "join_game"
 
-			if network_manager.in_game_session(network_manager) then
-				network_manager.leave_game(network_manager)
+			if network_manager:in_game_session() then
+				network_manager:leave_game()
 			end
 
 			self.parent.loading_context.start_lobby_data = join_lobby_data
@@ -1151,8 +1139,8 @@ StateIngame._check_exit = function (self, t)
 		elseif transition == "restart_game" then
 			self.exit_type = "restart_game"
 
-			if network_manager.in_game_session(network_manager) then
-				network_manager.leave_game(network_manager)
+			if network_manager:in_game_session() then
+				network_manager:leave_game()
 			end
 
 			Managers.transition:fade_in(GameSettings.transition_fade_in_speed)
@@ -1166,9 +1154,9 @@ StateIngame._check_exit = function (self, t)
 
 			local input_manager = self.input_manager
 
-			input_manager.block_device_except_service(input_manager, nil, "keyboard", 1)
-			input_manager.block_device_except_service(input_manager, nil, "mouse", 1)
-			input_manager.block_device_except_service(input_manager, nil, "gamepad", 1)
+			input_manager:block_device_except_service(nil, "keyboard", 1)
+			input_manager:block_device_except_service(nil, "mouse", 1)
+			input_manager:block_device_except_service(nil, "gamepad", 1)
 			Managers.popup:cancel_all_popups()
 			self.level_transition_handler:set_transition_exit_type(self.exit_type)
 
@@ -1182,16 +1170,16 @@ StateIngame._check_exit = function (self, t)
 
 	if self.exit_time and self.exit_time <= t then
 		local exit_type = self.exit_type
-		local has_left = network_manager.has_left_game(network_manager)
-		local game_session_is_closed = has_left or not network_manager.in_game_session(network_manager)
+		local has_left = network_manager:has_left_game()
+		local game_session_is_closed = has_left or not network_manager:in_game_session()
 
-		if not game_session_is_closed and self.exit_time + SESSION_LEAVE_TIMEOUT <= t then
+		if not game_session_is_closed and t >= self.exit_time + SESSION_LEAVE_TIMEOUT then
 			print("Session leave timeout reached, force disconnecting")
-			network_manager.force_disconnect_from_session(network_manager)
+			network_manager:force_disconnect_from_session()
 
-			return 
+			return
 		elseif not game_session_is_closed then
-			return 
+			return
 		end
 
 		if exit_type == "join_lobby_failed" or exit_type == "left_game" or exit_type == "lobby_state_failed" or exit_type == "kicked_by_server" or exit_type == "afk_kick" then
@@ -1259,7 +1247,7 @@ StateIngame._check_exit = function (self, t)
 				difficulty = difficulty
 			}
 			self.parent.loading_context.host_migration_info = host_migration_info
-			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
+			self.parent.loading_context.wanted_profile_index = self:wanted_profile_index()
 			self.leave_lobby = true
 
 			return StateLoading
@@ -1282,13 +1270,13 @@ StateIngame._check_exit = function (self, t)
 			self.parent.loading_context.lobby_host = self._lobby_host
 			self.parent.loading_context.lobby_client = self._lobby_client
 			self.parent.loading_context.matchmaking_loading_context = Managers.matchmaking:loading_context()
-			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
+			self.parent.loading_context.wanted_profile_index = self:wanted_profile_index()
 
 			return StateLoading
 		elseif exit_type == "join_game" then
 			self.leave_lobby = true
 			self.parent.loading_context.matchmaking_loading_context = Managers.matchmaking:loading_context()
-			self.parent.loading_context.wanted_profile_index = self.wanted_profile_index(self)
+			self.parent.loading_context.wanted_profile_index = self:wanted_profile_index()
 
 			return StateLoading
 		elseif exit_type == "restart_game" then
@@ -1302,9 +1290,8 @@ StateIngame._check_exit = function (self, t)
 			return StateSplashScreen
 		end
 	end
-
-	return 
 end
+
 StateIngame.wanted_profile_index = function (self)
 	local peer_id = Network.peer_id()
 	local player = Managers.player:player_from_peer_id(peer_id)
@@ -1315,6 +1302,7 @@ StateIngame.wanted_profile_index = function (self)
 
 	return wanted_profile_index
 end
+
 StateIngame.post_update = function (self, dt)
 	local t = Managers.time:time("game")
 
@@ -1322,7 +1310,7 @@ StateIngame.post_update = function (self, dt)
 
 	for _, machine in pairs(self.machines) do
 		if machine.post_update then
-			machine.post_update(machine, dt, t)
+			machine:post_update(dt, t)
 		end
 	end
 
@@ -1334,14 +1322,13 @@ StateIngame.post_update = function (self, dt)
 	Managers.state.unit_spawner:update_death_watch_list(dt, t)
 	self.entity_system:commit_and_remove_pending_units()
 	Managers.state.spawn:post_unit_destroy_update()
-	network_manager.update_transmit(network_manager, dt)
+	network_manager:update_transmit(dt)
 
 	if Managers.voice_chat then
 		Managers.voice_chat:update(dt, t)
 	end
-
-	return 
 end
+
 StateIngame.on_exit = function (self, application_shutdown)
 	UPDATE_POSITION_LOOKUP()
 	UPDATE_PLAYER_LISTS()
@@ -1354,7 +1341,7 @@ StateIngame.on_exit = function (self, application_shutdown)
 		end
 	end
 
-	self._check_and_add_end_game_telemetry(self, application_shutdown)
+	self:_check_and_add_end_game_telemetry(application_shutdown)
 
 	if TelemetrySettings.collect_memory then
 		local memory_tree = Profiler.memory_tree()
@@ -1392,7 +1379,7 @@ StateIngame.on_exit = function (self, application_shutdown)
 
 	for local_player_id, machine in pairs(self.machines) do
 		Managers.player:remove_player(Network.peer_id(), local_player_id)
-		machine.destroy(machine)
+		machine:destroy()
 	end
 
 	self.machines = nil
@@ -1412,11 +1399,11 @@ StateIngame.on_exit = function (self, application_shutdown)
 	local unit_spawner = Managers.state.unit_spawner
 	unit_spawner.locked = false
 
-	unit_spawner.commit_and_remove_pending_units(unit_spawner)
+	unit_spawner:commit_and_remove_pending_units()
 
 	local world = self.world
 	local unit_storage = Managers.state.unit_storage
-	local units = unit_storage.units(unit_storage)
+	local units = unit_storage:units()
 
 	for id, unit_to_destroy in pairs(units) do
 		Managers.state.entity:unregister_unit(unit_to_destroy)
@@ -1428,10 +1415,10 @@ StateIngame.on_exit = function (self, application_shutdown)
 	Profiler.stop("destroy units")
 	ScriptBackendSession.leave()
 	Managers.player:exit_ingame()
-	self._teardown_level(self)
+	self:_teardown_level()
 	Managers.state:destroy()
 	VisualAssertLog.cleanup()
-	self._teardown_world(self)
+	self:_teardown_world()
 	ScriptUnit.check_all_units_deleted()
 	self.statistics_db:unregister_network_event_delegate()
 	Managers.time:unregister_timer("game")
@@ -1473,8 +1460,6 @@ StateIngame.on_exit = function (self, application_shutdown)
 			__index = function (event_table, event_key)
 				return function ()
 					Application.warning("Got RPC %s during forced network update when exiting StateIngame", event_key)
-
-					return 
 				end
 			end
 		}
@@ -1591,9 +1576,8 @@ StateIngame.on_exit = function (self, application_shutdown)
 			Managers.account:set_realtime_multiplay_state("inn", false)
 		end
 	end
-
-	return 
 end
+
 StateIngame._check_and_add_end_game_telemetry = function (self, application_shutdown)
 	local player = Managers.player:player_from_peer_id(self.peer_id)
 	local level_key = self.level_key
@@ -1621,9 +1605,8 @@ StateIngame._check_and_add_end_game_telemetry = function (self, application_shut
 	end
 
 	Managers.telemetry.events:game_ended(player, self.is_server, level_key, difficulty, reason)
-
-	return 
 end
+
 StateIngame._setup_state_context = function (self, world, is_server, network_event_delegate)
 	local network_clock = nil
 
@@ -1635,12 +1618,12 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 
 	self.network_clock = network_clock
 
-	network_clock.register_rpcs(network_clock, network_event_delegate)
+	network_clock:register_rpcs(network_event_delegate)
 
 	local network_manager = GameNetworkManager:new(world, self._lobby_host or self._lobby_client, is_server)
 	Managers.state.network = network_manager
 
-	network_manager.register_event_delegate(network_manager, network_event_delegate)
+	network_manager:register_event_delegate(network_event_delegate)
 
 	local build = BUILD
 
@@ -1721,20 +1704,20 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 	local unit_spawner = UnitSpawner:new(world, entity_manager, is_server)
 	Managers.state.unit_spawner = unit_spawner
 
-	unit_spawner.set_unit_template_lookup_table(unit_spawner, unit_templates)
+	unit_spawner:set_unit_template_lookup_table(unit_templates)
 
 	local unit_storage = NetworkUnitStorage:new()
 	Managers.state.unit_storage = unit_storage
 
-	unit_spawner.set_unit_storage(unit_spawner, unit_storage)
+	unit_spawner:set_unit_storage(unit_storage)
 
 	local go_context = {
 		world = world
 	}
 	local unit_go_sync_functions = require("scripts/network/game_object_initializers_extractors")
 
-	unit_spawner.set_gameobject_initializer_data(unit_spawner, unit_go_sync_functions.initializers, unit_go_sync_functions.extractors, go_context)
-	unit_spawner.set_gameobject_to_unit_creator_function(unit_spawner, unit_go_sync_functions.unit_from_gameobject_creator_func)
+	unit_spawner:set_gameobject_initializer_data(unit_go_sync_functions.initializers, unit_go_sync_functions.extractors, go_context)
+	unit_spawner:set_gameobject_to_unit_creator_function(unit_go_sync_functions.unit_from_gameobject_creator_func)
 
 	self.free_flight_manager = Managers.free_flight
 
@@ -1776,7 +1759,7 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 		voting_manager = Managers.state.voting
 	}
 
-	network_manager.post_init(network_manager, network_manager_post_init_data)
+	network_manager:post_init(network_manager_post_init_data)
 
 	self.entity_system_bag = EntitySystemBag:new()
 	local entity_systems_init_context = {
@@ -1819,16 +1802,14 @@ StateIngame._setup_state_context = function (self, world, is_server, network_eve
 	Managers.state.bot_nav_transition = BotNavTransitionManager:new(self.world, is_server, network_event_delegate)
 	Managers.state.achievement = AchievementManager:new(self.world, self.statistics_db)
 	Managers.state.blood = BloodManager:new(self.world)
-
-	return 
 end
+
 StateIngame.rpc_kick_peer = function (self)
 	if not self.is_server then
 		self.kicked_by_server = true
 	end
-
-	return 
 end
+
 StateIngame.event_play_particle_effect = function (self, effect_name, unit, node, offset, rotation_offset, linked)
 	if linked then
 		ScriptWorld.create_particles_linked(self.world, effect_name, unit, node, "destroy", Matrix4x4.from_quaternion_position(rotation_offset, offset))
@@ -1849,8 +1830,6 @@ StateIngame.event_play_particle_effect = function (self, effect_name, unit, node
 
 		World.create_particles(self.world, effect_name, Matrix4x4.translation(transform), Matrix4x4.rotation(transform))
 	end
-
-	return 
 end
 
-return 
+return

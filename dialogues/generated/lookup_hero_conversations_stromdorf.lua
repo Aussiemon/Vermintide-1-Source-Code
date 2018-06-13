@@ -81,4 +81,4 @@ DialogueLookup[DialogueLookup_n + 39] = "pes_stromdorf_personal_one_02"
 DialogueLookup[DialogueLookup_n + 40] = "pwh_stromdorf_personal_one_03"
 DialogueLookup_n = DialogueLookup_n + 40
 
-return 
+return

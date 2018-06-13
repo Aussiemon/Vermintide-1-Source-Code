@@ -7,23 +7,22 @@ require("scripts/managers/input/input_debugger")
 
 local most_recent_input_device = most_recent_input_device or (Application.platform() == "win32" and Keyboard) or Pad1
 InputManager2 = class(InputManager2)
+
 InputManager2.init = function (self)
 	self.input_services = {}
 	self.input_devices = {}
 
 	Pad1.set_down_threshold(0.25)
-
-	return 
 end
+
 InputManager2.destroy = function (self)
 	self.input_services = nil
 	self.input_devices = nil
-
-	return 
 end
+
 InputManager2.initialize_device = function (self, input_device_type, input_device_slot)
 	if Development.parameter("disable_gamepad") and input_device_type == "gamepad" then
-		return 
+		return
 	end
 
 	local device_list = assert(InputAux.input_device_mapping[input_device_type], "No such input device type: %s", input_device_type)
@@ -43,19 +42,18 @@ InputManager2.initialize_device = function (self, input_device_type, input_devic
 		blocked_access = {},
 		consumed_input = {}
 	}
-
-	return 
 end
+
 InputManager2.block_device_except_service = function (self, service_exception, device_type, device_index, block_reason)
 	if Development.parameter("disable_gamepad") and device_type == "gamepad" then
-		return 
+		return
 	end
 
 	device_index = device_index or 1
 	local device_list = InputAux.input_device_mapping[device_type]
 
 	if not device_list then
-		return 
+		return
 	end
 
 	local input_device = device_list[device_index]
@@ -65,11 +63,11 @@ InputManager2.block_device_except_service = function (self, service_exception, d
 		if service.block_reasons and service.block_reasons[block_reason] then
 			device_data.blocked_access[name] = true
 
-			service.set_blocked(service, true)
+			service:set_blocked(true)
 		elseif not service.block_reasons then
 			device_data.blocked_access[name] = true
 
-			service.set_blocked(service, true)
+			service:set_blocked(true)
 		end
 	end
 
@@ -78,12 +76,11 @@ InputManager2.block_device_except_service = function (self, service_exception, d
 
 		device_data.blocked_access[service_exception] = nil
 	end
-
-	return 
 end
+
 InputManager2.device_unblock_all_services = function (self, device_type, device_index)
 	if Development.parameter("disable_gamepad") and device_type == "gamepad" then
-		return 
+		return
 	end
 
 	device_index = device_index or 1
@@ -97,18 +94,17 @@ InputManager2.device_unblock_all_services = function (self, device_type, device_
 
 		device_data.blocked_access[name] = nil
 	end
-
-	return 
 end
+
 InputManager2.device_block_service = function (self, device_type, device_index, service_name, block_reason)
 	if Development.parameter("disable_gamepad") and device_type == "gamepad" then
-		return 
+		return
 	end
 
 	local input_service = self.input_services[service_name]
 
 	if input_service.block_reasons and not input_service.block_reasons[block_reason] then
-		return 
+		return
 	end
 
 	device_index = device_index or 1
@@ -117,13 +113,12 @@ InputManager2.device_block_service = function (self, device_type, device_index, 
 	local device_data = self.input_devices[input_device]
 	device_data.blocked_access[service_name] = true
 
-	input_service.set_blocked(input_service, true)
-
-	return 
+	input_service:set_blocked(true)
 end
+
 InputManager2.device_unblock_service = function (self, device_type, device_index, service_name)
 	if Development.parameter("disable_gamepad") and device_type == "gamepad" then
-		return 
+		return
 	end
 
 	device_index = device_index or 1
@@ -133,14 +128,13 @@ InputManager2.device_unblock_service = function (self, device_type, device_index
 	device_data.blocked_access[service_name] = nil
 
 	self.input_services[service_name]:set_blocked(nil)
-
-	return 
 end
+
 InputManager2.get_unblocked_services = function (self, device_type, device_index, services_dest)
 	local services_n = 0
 
 	for service_name, service in pairs(self.input_services) do
-		if not service.is_blocked(service) then
+		if not service:is_blocked() then
 			services_n = services_n + 1
 			services_dest[services_n] = service_name
 		end
@@ -148,11 +142,12 @@ InputManager2.get_unblocked_services = function (self, device_type, device_index
 
 	return services_n
 end
+
 InputManager2.get_blocked_services = function (self, device_type, device_index, services_dest)
 	local services_n = 0
 
 	for service_name, service in pairs(self.input_services) do
-		if service.is_blocked(service) then
+		if service:is_blocked() then
 			services_n = services_n + 1
 			services_dest[services_n] = service_name
 		end
@@ -160,36 +155,34 @@ InputManager2.get_blocked_services = function (self, device_type, device_index, 
 
 	return services_n
 end
+
 InputManager2.device_block_services = function (self, device_type, device_index, services, services_n, block_reason)
 	device_index = device_index or 1
 
 	for i = 1, services_n, 1 do
 		local service_name = services[i]
 
-		self.device_block_service(self, device_type, device_index, service_name, block_reason)
+		self:device_block_service(device_type, device_index, service_name, block_reason)
 	end
-
-	return 
 end
+
 InputManager2.device_unblock_services = function (self, device_type, device_index, services, services_n)
 	device_index = device_index or 1
 
 	for i = 1, services_n, 1 do
 		local service_name = services[i]
 
-		self.device_unblock_service(self, device_type, device_index, service_name)
+		self:device_unblock_service(device_type, device_index, service_name)
 	end
-
-	return 
 end
+
 InputManager2.create_input_service = function (self, input_service_name, keymaps, filters, block_reasons)
 	self.input_services[input_service_name] = InputService:new(input_service_name, keymaps, filters, block_reasons)
-
-	return 
 end
+
 InputManager2.map_device_to_service = function (self, input_service_name, input_device_type, input_device_slot)
 	if Development.parameter("disable_gamepad") and input_device_type == "gamepad" then
-		return 
+		return
 	end
 
 	local input_service = assert(self.input_services[input_service_name], "No such input service name: %s", input_service_name)
@@ -198,23 +191,21 @@ InputManager2.map_device_to_service = function (self, input_service_name, input_
 	local input_device = assert(device_list[input_device_slot], "No input device %s with index %d", input_device_type, input_device_slot)
 	local input_device_data = self.input_devices[input_device]
 
-	input_service.map_device(input_service, input_device_type, input_device, input_device_data)
-
-	return 
+	input_service:map_device(input_device_type, input_device, input_device_data)
 end
+
 InputManager2.update = function (self, dt, t)
 	Profiler.start("InputManager2")
 
 	InputAux.default_values_for_types.Vector3 = Vector3.zero()
 
 	Profiler.start("device_updates")
-	self.update_devices(self, dt, t)
+	self:update_devices(dt, t)
 	Profiler.stop()
 	InputDebugger:finalize_update(self.input_services, dt, t)
 	Profiler.stop()
-
-	return 
 end
+
 InputManager2.update_devices = function (self, dt, t)
 	local input_devices = self.input_devices
 	self.any_device_input_pressed = nil
@@ -231,7 +222,7 @@ InputManager2.update_devices = function (self, dt, t)
 		for key = 0, num_buttons, 1 do
 			local button_value = input_device.button(key)
 			soft_button[key] = button_value
-			held[key] = 0.5 < button_value
+			held[key] = button_value > 0.5
 		end
 
 		local any_pressed = input_device.any_pressed()
@@ -297,17 +288,18 @@ InputManager2.update_devices = function (self, dt, t)
 
 		table.clear(device_data.consumed_input)
 	end
-
-	return 
 end
+
 InputManager2.get_service = function (self, input_service_name)
 	return self.input_services[input_service_name]
 end
+
 local disabled_gamepad = {
 	active = function ()
 		return false
 	end
 }
+
 InputManager2.get_device = function (self, input_device_type, input_device_slot)
 	if Development.parameter("disable_gamepad") and input_device_type == "gamepad" then
 		return disabled_gamepad
@@ -318,20 +310,24 @@ InputManager2.get_device = function (self, input_device_type, input_device_slot)
 
 	return device_list[input_device_slot]
 end
+
 InputManager2.any_input_pressed = function (self)
 	return self.any_device_input_pressed
 end
+
 InputManager2.any_input_axis_moved = function (self)
 	return self.any_device_input_axis_moved
 end
+
 InputManager2.get_most_recent_device = function (self)
 	return most_recent_input_device
 end
+
 InputManager2.is_device_active = function (self, input_device_type, input_device_slot)
 	local most_recent_device = most_recent_input_device
-	local device = self.get_device(self, input_device_type, input_device_slot)
+	local device = self:get_device(input_device_type, input_device_slot)
 
 	return device == most_recent_device
 end
 
-return 
+return

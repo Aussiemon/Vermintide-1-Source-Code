@@ -3,6 +3,7 @@ local scenegraph_definition = definitions.scenegraph_definition
 QuestItemRewardUI = class(QuestItemRewardUI)
 local ENABLE_DEBUG = false
 local debug_item_key = "wh_2h_sword_0165"
+
 QuestItemRewardUI.init = function (self, ingame_ui_context, input_service_name, world, viewport)
 	self.world_manager = ingame_ui_context.world_manager
 	local level_world = self.world_manager:world("level_world")
@@ -19,11 +20,10 @@ QuestItemRewardUI.init = function (self, ingame_ui_context, input_service_name, 
 	self.peer_id = ingame_ui_context.peer_id
 	self.player_manager = ingame_ui_context.player_manager
 
-	self._create_ui_elements(self)
+	self:_create_ui_elements()
 	rawset(_G, "quest_item_reward_ui", self)
-
-	return 
 end
+
 QuestItemRewardUI._create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	local widget_definitions = definitions.widget_definitions
@@ -50,14 +50,12 @@ QuestItemRewardUI._create_ui_elements = function (self)
 	}
 
 	UIRenderer.clear_scenegraph_queue(self.ui_top_renderer)
-
-	return 
 end
+
 QuestItemRewardUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 QuestItemRewardUI._destroy_units = function (self)
 	local reward_world = self.reward_world
 
@@ -80,9 +78,8 @@ QuestItemRewardUI._destroy_units = function (self)
 	end
 
 	self.units_spawned = nil
-
-	return 
 end
+
 QuestItemRewardUI.start = function (self, reward)
 	local item_key = nil
 
@@ -91,47 +88,46 @@ QuestItemRewardUI.start = function (self, reward)
 
 		if data_type == "string" then
 			item_key = reward.data
-		elseif data_type == "table" and 0 < #reward then
+		elseif data_type == "table" and #reward > 0 then
 			item_key = reward.data[1]
 		end
 	end
 
 	assert(item_key ~= nil, "reward data does not contain an item key!")
-	self.set_item_key(self, item_key)
-	self.spawn_link_unit(self)
-	self.spawn_reward_units(self)
-	self.set_reward_display_info(self, self.item_key)
-	self.animate_reward_info(self)
-	self.play_sound(self, "Play_hud_quest_menu_finish_quest_turn_in_reward_weapon")
-
-	return 
+	self:set_item_key(item_key)
+	self:spawn_link_unit()
+	self:spawn_reward_units()
+	self:set_reward_display_info(self.item_key)
+	self:animate_reward_info()
+	self:play_sound("Play_hud_quest_menu_finish_quest_turn_in_reward_weapon")
 end
+
 QuestItemRewardUI.stop = function (self)
 	self.item_key = nil
 	self.display_reward_texts = nil
 	self.presentation_done = nil
 
-	self._destroy_units(self)
-	self.unload_packages(self)
+	self:_destroy_units()
+	self:unload_packages()
 	table.clear(self.loaded_packages)
-
-	return 
 end
+
 QuestItemRewardUI.done = function (self)
 	return self.presentation_done
 end
+
 QuestItemRewardUI.active = function (self)
 	return (self.item_key or self.units_spawned) ~= nil
 end
+
 QuestItemRewardUI.destroy = function (self)
 	self.item_key = nil
 	self.presentation_done = nil
 
-	self._destroy_units(self)
+	self:_destroy_units()
 	rawset(_G, "quest_item_reward_ui", nil)
-
-	return 
 end
+
 QuestItemRewardUI.update = function (self, dt, t)
 	for name, ui_animation in pairs(self.ui_animations) do
 		UIAnimation.update(ui_animation, dt)
@@ -145,16 +141,15 @@ QuestItemRewardUI.update = function (self, dt, t)
 		end
 	end
 
-	self._draw(self, dt)
-
-	return 
+	self:_draw(dt)
 end
+
 QuestItemRewardUI._draw = function (self, dt)
 	if self.display_reward_texts then
 		local ui_renderer = self.ui_top_renderer
 		local ui_scenegraph = self.ui_scenegraph
 		local input_manager = self.input_manager
-		local input_service = input_manager.get_service(input_manager, self.input_service_name)
+		local input_service = input_manager:get_service(self.input_service_name)
 
 		UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 
@@ -189,26 +184,23 @@ QuestItemRewardUI._draw = function (self, dt)
 
 		UIRenderer.end_pass(ui_renderer)
 	end
-
-	return 
 end
+
 QuestItemRewardUI.load_package = function (self, package_name)
 	local package_manager = Managers.package
 	local cb = callback(self, "on_load_complete", package_name)
 
-	package_manager.load(package_manager, package_name, "QuestItemRewardUI", cb, true)
-
-	return 
+	package_manager:load(package_name, "QuestItemRewardUI", cb, true)
 end
+
 QuestItemRewardUI.on_load_complete = function (self, package_name)
 	self.loaded_packages[package_name] = true
 
-	if self.spawn_reward_units_when_ready and self.ready_to_spawn(self) then
-		self.spawn_reward_units(self)
+	if self.spawn_reward_units_when_ready and self:ready_to_spawn() then
+		self:spawn_reward_units()
 	end
-
-	return 
 end
+
 QuestItemRewardUI.unload_packages = function (self)
 	local loaded_packages = self.loaded_packages
 
@@ -216,12 +208,11 @@ QuestItemRewardUI.unload_packages = function (self)
 		local package_manager = Managers.package
 
 		for package_name, _ in pairs(loaded_packages) do
-			package_manager.unload(package_manager, package_name, "QuestItemRewardUI")
+			package_manager:unload(package_name, "QuestItemRewardUI")
 		end
 	end
-
-	return 
 end
+
 QuestItemRewardUI.ready_to_spawn = function (self)
 	local units_to_spawn_data = self.units_to_spawn_data
 	local loaded_packages = self.loaded_packages
@@ -236,21 +227,22 @@ QuestItemRewardUI.ready_to_spawn = function (self)
 
 	return true
 end
+
 QuestItemRewardUI.spawn_link_unit = function (self)
 	if self.link_unit then
-		return 
+		return
 	end
 
 	local item_key = self.item_key
 	local item_template = ItemHelper.get_template_by_item_name(item_key)
 	local item_data = ItemMasterList[item_key]
 	local unit_name = item_template.display_unit
-	local camera_rotation = self.get_camera_rotation(self)
+	local camera_rotation = self:get_camera_rotation()
 	local camera_forward_vector = Quaternion.forward(camera_rotation)
 	local camera_look_rotation = Quaternion.look(camera_forward_vector, Vector3.up())
 	local horizontal_rotation = Quaternion.axis_angle(Vector3.up(), math.pi * 1)
 	local unit_spawn_rotation = Quaternion.multiply(camera_look_rotation, horizontal_rotation)
-	local camera_position = self.get_camera_position(self)
+	local camera_position = self:get_camera_position()
 	local unit_spawn_position = camera_position + camera_forward_vector
 	unit_spawn_position.z = unit_spawn_position.z + 0.05
 	local reward_world = self.reward_world
@@ -292,13 +284,12 @@ QuestItemRewardUI.spawn_link_unit = function (self)
 
 		self.link_unit = link_unit
 	end
-
-	return 
 end
+
 QuestItemRewardUI.spawn_reward_units = function (self)
 	local link_unit = self.link_unit
 
-	if self.ready_to_spawn(self) and link_unit then
+	if self:ready_to_spawn() and link_unit then
 		local scene_graph_links = {}
 		local reward_world = self.reward_world
 		local units_to_spawn_data = self.units_to_spawn_data
@@ -328,21 +319,22 @@ QuestItemRewardUI.spawn_reward_units = function (self)
 	else
 		self.spawn_reward_units_when_ready = true
 	end
-
-	return 
 end
+
 QuestItemRewardUI.get_camera_position = function (self)
 	local reward_viewport = self.reward_viewport
 	local camera = ScriptViewport.camera(reward_viewport)
 
 	return ScriptCamera.position(camera)
 end
+
 QuestItemRewardUI.get_camera_rotation = function (self)
 	local reward_viewport = self.reward_viewport
 	local camera = ScriptViewport.camera(reward_viewport)
 
 	return ScriptCamera.rotation(camera)
 end
+
 QuestItemRewardUI.set_item_key = function (self, item_key)
 	local num_total_traits = ForgeSettings.num_traits
 
@@ -359,10 +351,9 @@ QuestItemRewardUI.set_item_key = function (self, item_key)
 	hero_icon_widget.style.texture_id.color[1] = 0
 	self.item_key = (ENABLE_DEBUG and debug_item_key) or item_key
 
-	self.load_reward_units(self)
-
-	return 
+	self:load_reward_units()
 end
+
 QuestItemRewardUI.load_reward_units = function (self)
 	local item_key = self.item_key
 	local item_data = ItemMasterList[item_key]
@@ -377,7 +368,7 @@ QuestItemRewardUI.load_reward_units = function (self)
 		if left_hand_unit then
 			local left_unit = left_hand_unit .. "_3p"
 
-			self.load_package(self, left_unit)
+			self:load_package(left_unit)
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
 				unit_name = left_unit,
@@ -389,7 +380,7 @@ QuestItemRewardUI.load_reward_units = function (self)
 			local right_unit = right_hand_unit .. "_3p"
 
 			if right_hand_unit ~= left_hand_unit then
-				self.load_package(self, right_unit)
+				self:load_package(right_unit)
 			end
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
@@ -401,7 +392,7 @@ QuestItemRewardUI.load_reward_units = function (self)
 		local unit = item_data.unit
 
 		if unit then
-			self.load_package(self, unit)
+			self:load_package(unit)
 
 			units_to_spawn_data[#units_to_spawn_data + 1] = {
 				unit_name = unit,
@@ -411,9 +402,8 @@ QuestItemRewardUI.load_reward_units = function (self)
 	end
 
 	self.units_to_spawn_data = units_to_spawn_data
-
-	return 
 end
+
 QuestItemRewardUI.animate_reward_info = function (self)
 	local reward_text_widgets = self.reward_text_widgets
 	local name_text_style = reward_text_widgets.name_text.style.text
@@ -443,9 +433,8 @@ QuestItemRewardUI.animate_reward_info = function (self)
 	end
 
 	self.display_reward_texts = true
-
-	return 
 end
+
 QuestItemRewardUI.set_reward_display_info = function (self, item_key)
 	local item = ItemMasterList[item_key]
 	local ratity_color = Colors.get_color_table_with_alpha(item.rarity, 0)
@@ -470,10 +459,9 @@ QuestItemRewardUI.set_reward_display_info = function (self, item_key)
 
 	hero_icon_widget.content.visible = draw_hero_icon
 
-	self.set_traits_info(self, item, item.traits)
-
-	return 
+	self:set_traits_info(item, item.traits)
 end
+
 QuestItemRewardUI.set_traits_info = function (self, item, traits)
 	local trait_icon_widgets = self.trait_icon_widgets
 	local tooltip_widgets = self.tooltip_widgets
@@ -530,10 +518,9 @@ QuestItemRewardUI.set_traits_info = function (self, item, traits)
 
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	self.update_trait_alignment(self, number_of_traits_on_item)
-
-	return 
+	self:update_trait_alignment(number_of_traits_on_item)
 end
+
 QuestItemRewardUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
@@ -559,8 +546,6 @@ QuestItemRewardUI.update_trait_alignment = function (self, number_of_traits)
 		local widget = trait_icon_widgets[i]
 		widget.content.visible = (i <= number_of_traits and true) or false
 	end
-
-	return 
 end
 
-return 
+return

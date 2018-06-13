@@ -85,4 +85,4 @@ friends_list_atlas = {
 	}
 }
 
-return 
+return

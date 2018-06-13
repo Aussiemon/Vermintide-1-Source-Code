@@ -64,7 +64,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -108,4 +108,4 @@ Weapons.beer_barrel.actions.action_one.default.projectile_info = {
 	projectile_unit_name = "units/weapons/player/pup_explosive_barrel/pup_explosive_barrel_01"
 }
 
-return 
+return

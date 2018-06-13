@@ -2,11 +2,11 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTRatlingGunnerReloadAction = class(BTRatlingGunnerReloadAction, BTNode)
 BTRatlingGunnerReloadAction.name = "BTRatlingGunnerReloadAction"
+
 BTRatlingGunnerReloadAction.init = function (self, ...)
 	BTRatlingGunnerReloadAction.super.init(self, ...)
-
-	return 
 end
+
 BTRatlingGunnerReloadAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	local attack_pattern_data = blackboard.attack_pattern_data or {}
@@ -22,9 +22,8 @@ BTRatlingGunnerReloadAction.enter = function (self, unit, blackboard, t)
 	if script_data.ai_ratling_gunner_debug then
 		AiUtils.temp_anim_event(unit, "reload_start")
 	end
-
-	return 
 end
+
 BTRatlingGunnerReloadAction.leave = function (self, unit, blackboard, t)
 	local attack_pattern_data = blackboard.attack_pattern_data
 
@@ -34,9 +33,8 @@ BTRatlingGunnerReloadAction.leave = function (self, unit, blackboard, t)
 	blackboard.anim_cb_reload_start_finished = nil
 
 	blackboard.navigation_extension:set_enabled(true)
-
-	return 
 end
+
 BTRatlingGunnerReloadAction.run = function (self, unit, blackboard, t, dt)
 	local attack_pattern_data = blackboard.attack_pattern_data
 
@@ -66,4 +64,4 @@ BTRatlingGunnerReloadAction.run = function (self, unit, blackboard, t, dt)
 	return "running"
 end
 
-return 
+return

@@ -20,10 +20,10 @@ local scenegraph_definition = definitions.scenegraph_definition
 local widgets = definitions.widgets
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
 local game_mode_changed_wwise_events = {
@@ -38,6 +38,7 @@ local dialogue_speakers = {
 	nfl = "ferry_lady"
 }
 ConsoleMapView = class(ConsoleMapView)
+
 ConsoleMapView.init = function (self, ingame_ui_context)
 	self.dialogue_system = ingame_ui_context.dialogue_system
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -59,14 +60,14 @@ ConsoleMapView.init = function (self, ingame_ui_context)
 	self.timeline_enabled = true
 	self.platform = PLATFORM
 	local player = Managers.player:local_player()
-	local player_stats_id = player.stats_id(player)
+	local player_stats_id = player:stats_id()
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "map_menu", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "map_menu", "keyboard")
-	input_manager.map_device_to_service(input_manager, "map_menu", "mouse")
-	input_manager.map_device_to_service(input_manager, "map_menu", "gamepad")
+	input_manager:create_input_service("map_menu", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("map_menu", "keyboard")
+	input_manager:map_device_to_service("map_menu", "mouse")
+	input_manager:map_device_to_service("map_menu", "gamepad")
 
 	local network_manager = Managers.state.network
 	local network_transmit = network_manager.network_transmit
@@ -108,10 +109,9 @@ ConsoleMapView.init = function (self, ingame_ui_context)
 	}
 	self._state_machine_params = state_machine_params
 
-	self.create_ui_elements(self)
-
-	return 
+	self:create_ui_elements()
 end
+
 ConsoleMapView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._mask_widgets = {
@@ -131,9 +131,8 @@ ConsoleMapView.create_ui_elements = function (self)
 	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 ConsoleMapView._setup_state_machine = function (self, state_machine_params)
 	if self._machine then
 		self._machine:destroy()
@@ -145,37 +144,36 @@ ConsoleMapView._setup_state_machine = function (self, state_machine_params)
 	local profiling_debugging_enabled = false
 	self._machine = StateMachine:new(self, start_state, state_machine_params, profiling_debugging_enabled)
 	self._state_machine_params = state_machine_params
-
-	return 
 end
+
 ConsoleMapView.update = function (self, dt, t)
 	if not self.menu_active or self.suspended then
-		return 
+		return
 	end
 
 	local map_view_area_handler = self.map_view_area_handler
 	local draw_intro_description = self.draw_intro_description
-	local transitioning = self.transitioning(self)
+	local transitioning = self:transitioning()
 	local input_manager = self.input_manager
-	local input_service = (transitioning and fake_input_service) or input_manager.get_service(input_manager, "map_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = (transitioning and fake_input_service) or input_manager:get_service("map_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	if self.popup_id then
 		local popup_result = Managers.popup:query_result(self.popup_id)
 
 		if popup_result then
-			self.handle_popup_result(self, popup_result)
+			self:handle_popup_result(popup_result)
 		end
 	end
 
 	if not transitioning then
-		map_view_area_handler.update(map_view_area_handler, nil, dt)
+		map_view_area_handler:update(nil, dt)
 	end
 
 	if self.wwise_playing_id and not WwiseWorld.is_playing(self.wwise_world, self.wwise_playing_id) then
 		local subtitle_gui = self.ingame_ui.ingame_hud.subtitle_gui
 
-		subtitle_gui.stop_subtitle(subtitle_gui, self.dialogue_speaker)
+		subtitle_gui:stop_subtitle(self.dialogue_speaker)
 
 		self.wwise_playing_id = nil
 		self.dialogue_speaker = nil
@@ -183,22 +181,20 @@ ConsoleMapView.update = function (self, dt, t)
 	end
 
 	if self.active then
-		self._update_animations(self, dt, t)
-		self.draw(self, dt)
+		self:_update_animations(dt, t)
+		self:draw(dt)
 		self._machine:update(dt, t)
 	end
-
-	return 
 end
+
 ConsoleMapView.animate_mask = function (self, to, time)
 	local ui_scenegraph = self.ui_scenegraph
 	local scenegraph_entry = ui_scenegraph.mask_root
 	local target = scenegraph_entry.local_position
 	local target_index = 2
 	self._mask_animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, target[2], to, time, math.ease_out_quad)
-
-	return 
 end
+
 ConsoleMapView._update_animations = function (self, dt, t)
 	local mask_animation = self._mask_animation
 
@@ -209,9 +205,8 @@ ConsoleMapView._update_animations = function (self, dt, t)
 			self._mask_animation = nil
 		end
 	end
-
-	return 
 end
+
 ConsoleMapView.animate_title_text = function (self, widget, out)
 	local target = widget.style.text.text_color
 	local target_index = 1
@@ -224,8 +219,6 @@ ConsoleMapView.animate_title_text = function (self, widget, out)
 	local animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, from, to, anim_time, math.easeCubic)
 
 	UIWidget.animate(widget, animation)
-
-	return 
 end
 
 local function animate_widget(widget)
@@ -240,15 +233,12 @@ local function animate_widget(widget)
 	local animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, from, to, anim_time, math.easeCubic)
 
 	UIWidget.animate(widget, animation)
-
-	return 
 end
 
 ConsoleMapView.set_mask_enabled = function (self, enabled)
 	self._draw_mask = enabled
-
-	return 
 end
+
 ConsoleMapView.set_time_line_index = function (self, index)
 	if index then
 		if not self.draw_time_line_index then
@@ -264,20 +254,18 @@ ConsoleMapView.set_time_line_index = function (self, index)
 	end
 
 	self.draw_time_line_index = index
-
-	return 
 end
+
 ConsoleMapView.enable_timeline = function (self, enable)
 	self.timeline_enabled = enable
-
-	return 
 end
+
 ConsoleMapView.draw = function (self, dt)
 	local draw_time_line_index = self.draw_time_line_index
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
@@ -300,21 +288,18 @@ ConsoleMapView.draw = function (self, dt)
 
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_4k_filler)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 ConsoleMapView.save_map_settings = function (self)
 	PlayerData.map_view_data = self.map_save_data
 
 	Managers.save:auto_save(SaveFileName, SaveData, callback(self, "on_save_ended_callback"))
-
-	return 
 end
+
 ConsoleMapView.on_save_ended_callback = function (self)
 	print("[ConsoleMapView] - settings saved")
-
-	return 
 end
+
 ConsoleMapView.event_enable_level_select = function (self)
 	self.observer_only = not Managers.player.is_server
 	local player = Managers.player:local_player()
@@ -322,12 +307,11 @@ ConsoleMapView.event_enable_level_select = function (self)
 	if player then
 		self.ingame_ui:set_map_active_state(true)
 	end
-
-	return 
 end
+
 ConsoleMapView.on_exit = function (self)
-	self.save_map_settings(self)
-	self.play_sound(self, "Play_hud_map_close")
+	self:save_map_settings()
+	self:play_sound("Play_hud_map_close")
 
 	self.active = nil
 	self.exiting = nil
@@ -340,39 +324,36 @@ ConsoleMapView.on_exit = function (self)
 	end
 
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
-
-	return 
 end
+
 ConsoleMapView.suspend = function (self)
 	self.suspended = true
 
 	self.input_manager:device_unblock_all_services("keyboard", 1)
 	self.input_manager:device_unblock_all_services("mouse", 1)
 	self.input_manager:device_unblock_all_services("gamepad", 1)
-
-	return 
 end
+
 ConsoleMapView.unsuspend = function (self)
 	self.suspended = nil
 
 	self.input_manager:block_device_except_service("map_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("map_menu", "mouse", 1)
 	self.input_manager:block_device_except_service("map_menu", "gamepad", 1)
-
-	return 
 end
+
 ConsoleMapView.transitioning = function (self)
 	if self.exiting then
 		return true
 	else
 		return not self.active
 	end
-
-	return 
 end
+
 ConsoleMapView.input_service = function (self)
 	return self.input_manager:get_service("map_menu")
 end
+
 ConsoleMapView.destroy = function (self)
 	self.ui_animator = nil
 
@@ -389,44 +370,40 @@ ConsoleMapView.destroy = function (self)
 
 		self._machine = nil
 	end
-
-	return 
 end
+
 ConsoleMapView.exit = function (self, return_to_game, exit_transition)
 	local transition = exit_transition or (return_to_game and "exit_menu") or "ingame_menu"
 
 	self.ingame_ui:transition_with_fade(transition)
 
 	self.exiting = true
-
-	return 
 end
+
 ConsoleMapView.on_enter = function (self)
 	local input_manager = self.input_manager
 
-	input_manager.block_device_except_service(input_manager, "map_menu", "keyboard", 1)
-	input_manager.block_device_except_service(input_manager, "map_menu", "mouse", 1)
-	input_manager.block_device_except_service(input_manager, "map_menu", "gamepad", 1)
-	self.play_sound(self, "Play_hud_map_open")
+	input_manager:block_device_except_service("map_menu", "keyboard", 1)
+	input_manager:block_device_except_service("map_menu", "mouse", 1)
+	input_manager:block_device_except_service("map_menu", "gamepad", 1)
+	self:play_sound("Play_hud_map_open")
 
 	self.menu_active = true
 	self.active = true
 	local params = self._state_machine_params
 	params.initial_state = true
 
-	self._setup_state_machine(self, self._state_machine_params)
+	self:_setup_state_machine(self._state_machine_params)
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
-
-	return 
 end
+
 ConsoleMapView.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 ConsoleMapView.set_map_interaction_state = function (self, enabled)
 	if not self.interaction_map_unit then
-		self.interaction_map_unit = self.get_map_unit(self)
+		self.interaction_map_unit = self:get_map_unit()
 	end
 
 	local map_unit = self.interaction_map_unit
@@ -439,18 +416,17 @@ ConsoleMapView.set_map_interaction_state = function (self, enabled)
 		if not enabled and self.menu_active then
 			local return_to_game = true
 
-			self.exit(self, return_to_game)
+			self:exit(return_to_game)
 		end
 	end
-
-	return 
 end
+
 ConsoleMapView.get_map_unit = function (self)
 	local world_manager = Managers.world
 
-	if world_manager.has_world(world_manager, "level_world") then
+	if world_manager:has_world("level_world") then
 		local map_unit = nil
-		local world = world_manager.world(world_manager, "level_world")
+		local world = world_manager:world("level_world")
 		local level_name = "levels/inn/world"
 		local level = ScriptWorld.level(world, level_name)
 
@@ -464,17 +440,16 @@ ConsoleMapView.get_map_unit = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 ConsoleMapView.wanted_gamepad_state = function (self)
 	return self._new_gamepad_state
 end
+
 ConsoleMapView.clear_wanted_gamepad_state = function (self)
 	self._new_gamepad_state = nil
-
-	return 
 end
+
 ConsoleMapView.show_selected_player_gamercard = function (self, peer_id)
 	if peer_id then
 		local platform = self.platform
@@ -496,9 +471,8 @@ ConsoleMapView.show_selected_player_gamercard = function (self, peer_id)
 			Managers.account:show_player_profile_with_np_id(np_id)
 		end
 	end
-
-	return 
 end
+
 ConsoleMapView.request_kick_player = function (self, peer_id, cb)
 	if not self.popup_id then
 		self.kick_player_peer_id = peer_id
@@ -506,21 +480,19 @@ ConsoleMapView.request_kick_player = function (self, peer_id, cb)
 		local text = Localize("kick_player_popup_text")
 		self.popup_id = Managers.popup:queue_popup(text, Localize("popup_kick_player_topic"), "kick_player", Localize("popup_choice_yes"), "cancel_popup", Localize("popup_choice_no"))
 	end
-
-	return 
 end
+
 ConsoleMapView.kick_player = function (self, peer_id)
 	local network_server = self.network_server
 
-	network_server.kick_peer(network_server, peer_id)
-
-	return 
+	network_server:kick_peer(peer_id)
 end
+
 ConsoleMapView.handle_popup_result = function (self, popup_result)
 	if popup_result == "kick_player" then
 		self.popup_id = nil
 
-		self.kick_player(self, self.kick_player_peer_id)
+		self:kick_player(self.kick_player_peer_id)
 		self.kick_player_callback()
 
 		self.kick_player_callback = nil
@@ -531,12 +503,10 @@ ConsoleMapView.handle_popup_result = function (self, popup_result)
 		self.kick_player_callback = nil
 		local input_manager = self.input_manager
 
-		input_manager.block_device_except_service(input_manager, "map_menu", "keyboard")
-		input_manager.block_device_except_service(input_manager, "map_menu", "mouse")
-		input_manager.block_device_except_service(input_manager, "map_menu", "gamepad")
+		input_manager:block_device_except_service("map_menu", "keyboard")
+		input_manager:block_device_except_service("map_menu", "mouse")
+		input_manager:block_device_except_service("map_menu", "gamepad")
 	end
-
-	return 
 end
 
-return 
+return

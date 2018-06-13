@@ -85,7 +85,7 @@ local function get_upgrade_rarity_list(rarity)
 
 		successfull_run = fail_code
 
-		return 
+		return
 	end
 
 	return rarity_upgrades
@@ -135,7 +135,7 @@ local function check_cost(num_items, num_tokens, params_token_type, rarity)
 
 		successfull_run = fail_code
 
-		return 
+		return
 	end
 
 	local cost = config.cost[5 - num_items]
@@ -145,7 +145,7 @@ local function check_cost(num_items, num_tokens, params_token_type, rarity)
 
 		successfull_run = fail_code
 
-		return 
+		return
 	end
 
 	return true
@@ -173,11 +173,11 @@ function fuse_script_local(param_items_to_merge, params_num_tokens, params_token
 	local items = extract_items(param_items_to_merge)
 
 	if not verify_same_rarity(items) then
-		return 
+		return
 	end
 
 	if not verify_owns_items(items) then
-		return 
+		return
 	end
 
 	local item_data = ForgeItemMasterList[items[1][1]]
@@ -185,18 +185,18 @@ function fuse_script_local(param_items_to_merge, params_num_tokens, params_token
 	local item_type_list = get_upgrade_rarity_list(current_rarity)
 
 	if not item_type_list then
-		return 
+		return
 	end
 
 	if not check_cost(#items, tonumber(params_num_tokens), params_token_type, current_rarity) then
-		return 
+		return
 	end
 
 	local item = items[math.random(#items)]
 	local upgrade_name = get_upgrade_of_item(item, item_type_list)
 
 	if not upgrade_name then
-		return 
+		return
 	end
 
 	local delete_items = ""

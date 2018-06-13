@@ -15,6 +15,7 @@ require("scripts/game_state/components/dice_keeper")
 
 local definitions = local_require("scripts/ui/views/end_of_level_ui_definitions")
 EndOfLevelUI = class(EndOfLevelUI)
+
 EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 	self.game_won = game_won
 	local ui_world_name = "top_ingame_view"
@@ -29,9 +30,9 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 	self.ingame_ui = end_of_level_ui_context.ingame_ui
 
 	if not Managers.chat:chat_is_focused() then
-		input_manager.block_device_except_service(input_manager, "ingame_menu", "mouse")
-		input_manager.block_device_except_service(input_manager, "ingame_menu", "keyboard")
-		input_manager.block_device_except_service(input_manager, "ingame_menu", "gamepad")
+		input_manager:block_device_except_service("ingame_menu", "mouse")
+		input_manager:block_device_except_service("ingame_menu", "keyboard")
+		input_manager:block_device_except_service("ingame_menu", "gamepad")
 	end
 
 	if PLATFORM == "win32" then
@@ -52,25 +53,25 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 
 		local level_dice_keeper = end_of_level_ui_context.level_dice_keeper
 
-		self.award_mission_rewards(self, level_dice_keeper)
+		self:award_mission_rewards(level_dice_keeper)
 
 		if game_mode_key ~= "survival" then
-			self.setup_level(self)
+			self:setup_level()
 
-			local dice_game_hero = self._dice_game_hero(self)
+			local dice_game_hero = self:_dice_game_hero()
 			self.level_dice_roller = DiceRoller:new(self.world, level_dice_keeper, rewards, dice_game_hero)
 			end_of_level_ui_context.dice_roller = self.level_dice_roller
 		end
 	end
 
-	rewards.award_experience(rewards, game_won, game_mode_key)
+	rewards:award_experience(game_won, game_mode_key)
 
 	self.level_transition_handler = end_of_level_ui_context.level_transition_handler
 	self.statistics_db = end_of_level_ui_context.statistics_db
 	self.is_server = end_of_level_ui_context.is_server
 	self.game_won = game_won
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	rawset(_G, "GLOBAL_EOLUI", self)
 
 	self.views = {
@@ -80,14 +81,13 @@ EndOfLevelUI.init = function (self, end_of_level_ui_context, game_won)
 		contract_presentation = ContractPresentationScreenUI:new(end_of_level_ui_context)
 	}
 
-	self.start_fade_in(self)
-
-	return 
+	self:start_fade_in()
 end
+
 EndOfLevelUI._dice_game_hero = function (self)
 	local profile_synchronizer = Managers.state.network.profile_synchronizer
 	local player = Managers.player:local_player()
-	local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, player.network_id(player), player.local_player_id(player))
+	local profile_index = profile_synchronizer:profile_by_peer(player:network_id(), player:local_player_id())
 	local hero_data = SPProfiles[profile_index]
 	local hero_name = hero_data.display_name
 
@@ -106,21 +106,19 @@ EndOfLevelUI._dice_game_hero = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 EndOfLevelUI.start = function (self, ignore_input_blocking)
 	ShowCursorStack.push()
 
 	self.cursor_pushed = true
 
-	self.handle_transition(self, "summary_screen", ignore_input_blocking)
+	self:handle_transition("summary_screen", ignore_input_blocking)
 
 	self.initialize_start_transition = nil
 	self.start_transition_initialized = true
-
-	return 
 end
+
 EndOfLevelUI.destroy = function (self)
 	if self.cursor_pushed then
 		ShowCursorStack.pop()
@@ -128,12 +126,12 @@ EndOfLevelUI.destroy = function (self)
 
 	local input_manager = self.input_manager
 
-	input_manager.device_unblock_all_services(input_manager, "mouse", 1)
-	input_manager.device_unblock_all_services(input_manager, "gamepad", 1)
-	input_manager.device_unblock_all_services(input_manager, "keyboard", 1)
+	input_manager:device_unblock_all_services("mouse", 1)
+	input_manager:device_unblock_all_services("gamepad", 1)
+	input_manager:device_unblock_all_services("keyboard", 1)
 
 	for view_name, view in pairs(self.views) do
-		view.destroy(view)
+		view:destroy()
 	end
 
 	self.views = nil
@@ -155,11 +153,10 @@ EndOfLevelUI.destroy = function (self)
 	local max_shadow_casting_lights = Application.user_setting("render_settings", "max_shadow_casting_lights")
 
 	Application.set_render_setting("max_shadow_casting_lights", max_shadow_casting_lights)
-	self.play_sound(self, "unmute_all_world_sounds")
+	self:play_sound("unmute_all_world_sounds")
 	rawset(_G, "GLOBAL_EOLUI", nil)
-
-	return 
 end
+
 EndOfLevelUI.setup_level = function (self)
 	self.world_name = "dicegame_level"
 	local layer = 1
@@ -199,21 +196,19 @@ EndOfLevelUI.setup_level = function (self)
 
 	ScriptCamera.set_local_position(camera, position or Vector3(7, 12.5, 30))
 	ScriptCamera.set_local_rotation(camera, rotation or Quaternion.look(Vector3.normalize(Vector3(0, -0.5, -1))))
-
-	return 
 end
+
 EndOfLevelUI.deactivate_dice_world_viewport = function (self)
 	local viewport = ScriptWorld.viewport(self.world, self.viewport_name)
 
 	ScriptWorld.deactivate_viewport(self.world, viewport)
 
 	self.dice_viewport_deactivated = true
-
-	return 
 end
+
 EndOfLevelUI.award_mission_rewards = function (self, level_dice_keeper)
 	local mission_system = Managers.state.entity:system("mission_system")
-	local active_missions, _ = mission_system.get_missions(mission_system)
+	local active_missions, _ = mission_system:get_missions()
 
 	for token_type, _ in pairs(ForgeSettings.token_types) do
 		local amount = BackendUtils.get_tokens(token_type)
@@ -247,13 +242,13 @@ EndOfLevelUI.award_mission_rewards = function (self, level_dice_keeper)
 				end
 			end
 
-			if 0 < bonus_dice and level_dice_keeper then
+			if bonus_dice > 0 and level_dice_keeper then
 				local dice_type = data.dice_type
 
-				level_dice_keeper.add_die(level_dice_keeper, dice_type, bonus_dice)
+				level_dice_keeper:add_die(dice_type, bonus_dice)
 			end
 
-			if 0 < bonus_tokens then
+			if bonus_tokens > 0 then
 				local token_type = data.token_type
 
 				print("Adding tokens", mission_name, bonus_tokens, token_type)
@@ -267,33 +262,25 @@ EndOfLevelUI.award_mission_rewards = function (self, level_dice_keeper)
 
 		print("Player owns", amount, token_type)
 	end
-
-	return 
 end
+
 local transitions = {
 	summary_screen = function (self)
 		self.current_view = "summary_screen"
-
-		return 
 	end,
 	scoreboard_screen = function (self)
 		Managers.state.event:trigger("event_enable_achievements", true)
 
 		self.current_view = "scoreboard_screen"
-
-		return 
 	end,
 	dice_game = function (self)
 		self.current_view = "dice_game"
-
-		return 
 	end,
 	contract_presentation = function (self)
 		self.current_view = "contract_presentation"
-
-		return 
 	end
 }
+
 EndOfLevelUI.handle_transition = function (self, new_transition, ...)
 	assert(transitions[new_transition])
 
@@ -310,12 +297,12 @@ EndOfLevelUI.handle_transition = function (self, new_transition, ...)
 			self.views[self.current_view]:on_enter(...)
 		end
 	end
-
-	return 
 end
+
 EndOfLevelUI.enable_chat = function (self)
 	return true
 end
+
 EndOfLevelUI.active_input_service = function (self)
 	local input_service = nil
 
@@ -327,6 +314,7 @@ EndOfLevelUI.active_input_service = function (self)
 
 	return input_service
 end
+
 EndOfLevelUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.background_rect_widget = UIWidget.init(definitions.widgets.background_rect)
@@ -343,16 +331,14 @@ EndOfLevelUI.create_ui_elements = function (self)
 	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	if self.current_curtain_fraction then
-		self.set_curtain_progress(self, self.current_curtain_fraction)
+		self:set_curtain_progress(self.current_curtain_fraction)
 	end
-
-	return 
 end
+
 EndOfLevelUI.play_sound = function (self, sound)
 	WwiseWorld.trigger_event(self.wwise_world, sound)
-
-	return 
 end
+
 EndOfLevelUI.update = function (self, dt)
 	AccomodateViewport()
 
@@ -373,7 +359,7 @@ EndOfLevelUI.update = function (self, dt)
 	local game_mode_key = self.game_mode_key
 
 	if self.initialize_start_transition and not Managers.backend:is_waiting_for_user_input() then
-		self.start(self, ignore_input_blocking)
+		self:start(ignore_input_blocking)
 	elseif not self.start_transition_initialized then
 		if game_won and game_mode_key ~= "survival" then
 			self.initialize_start_transition = self.level_dice_roller:poll_for_backend_result()
@@ -382,8 +368,8 @@ EndOfLevelUI.update = function (self, dt)
 		end
 	end
 
-	self.update_fade_in(self, dt)
-	self.update_curtains_animation(self, dt)
+	self:update_fade_in(dt)
+	self:update_curtains_animation(dt)
 
 	local ui_renderer = self.ui_renderer
 	local input_service = self.input_manager:get_service("ingame_menu")
@@ -403,7 +389,7 @@ EndOfLevelUI.update = function (self, dt)
 	local has_dice_results = nil
 
 	if game_won and self.start_transition_initialized and self.game_mode_key ~= "survival" then
-		has_dice_results = self.update_dice_rolling_results(self, dt)
+		has_dice_results = self:update_dice_rolling_results(dt)
 	end
 
 	local current_view = self.current_view
@@ -411,37 +397,33 @@ EndOfLevelUI.update = function (self, dt)
 	if current_view then
 		local active_view = self.views[current_view]
 
-		active_view.update(active_view, dt)
+		active_view:update(dt)
 
-		if self.animating_curtains(self) then
-			return 
+		if self:animating_curtains() then
+			return
 		end
 
 		if active_view.is_complete then
 			if current_view == "summary_screen" then
-				self.handle_transition(self, "contract_presentation", ignore_input_blocking)
+				self:handle_transition("contract_presentation", ignore_input_blocking)
 			elseif current_view == "contract_presentation" then
 				if game_won and self.game_mode_key ~= "survival" then
 					local function callback()
 						self:handle_transition("dice_game", ignore_input_blocking)
-
-						return 
 					end
 
-					self.animate_curtains(self, 0.5, callback)
-					self.play_sound(self, "dice_game_curtain_open")
+					self:animate_curtains(0.5, callback)
+					self:play_sound("dice_game_curtain_open")
 				else
-					self.handle_transition(self, "scoreboard_screen", ignore_input_blocking)
+					self:handle_transition("scoreboard_screen", ignore_input_blocking)
 				end
 			elseif current_view == "dice_game" then
 				local function callback()
 					self:handle_transition("scoreboard_screen", ignore_input_blocking)
-
-					return 
 				end
 
-				self.animate_curtains(self, 1, callback)
-				self.play_sound(self, "dice_game_curtain_close")
+				self:animate_curtains(1, callback)
+				self:play_sound("dice_game_curtain_close")
 			elseif current_view == "scoreboard_screen" then
 				local session_state = ScriptBackendSession.get_state()
 
@@ -451,82 +433,82 @@ EndOfLevelUI.update = function (self, dt)
 			end
 		elseif current_view == "dice_game" then
 			local level_dice_roller = self.level_dice_roller
-			local is_rolling = level_dice_roller.is_rolling(level_dice_roller)
-			local has_rerolls = level_dice_roller.has_rerolls(level_dice_roller)
-			local level_dice_results = level_dice_roller.get_dice_results(level_dice_roller)
-			local dice_rolling_completed = level_dice_roller.is_completed(level_dice_roller)
+			local is_rolling = level_dice_roller:is_rolling()
+			local has_rerolls = level_dice_roller:has_rerolls()
+			local level_dice_results = level_dice_roller:get_dice_results()
+			local dice_rolling_completed = level_dice_roller:is_completed()
 
 			if active_view.disable_dice_game and not self.dice_viewport_deactivated then
-				self.deactivate_dice_world_viewport(self)
+				self:deactivate_dice_world_viewport()
 			end
 
 			if dice_rolling_completed and not self.dice_rolling_completed then
 				self.dice_rolling_completed = true
 
-				active_view.set_reroll_state(active_view, false)
-				active_view.set_roll_button_text(active_view, "loot_screen_continue_button")
-				active_view.start_reward(active_view)
+				active_view:set_reroll_state(false)
+				active_view:set_roll_button_text("loot_screen_continue_button")
+				active_view:start_reward()
 
 				local backend_manager = Managers.backend
 
-				if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+				if backend_manager:available() and backend_manager:profiles_loaded() then
 					local stats_id = Managers.player:local_player():stats_id()
 					local statistics_db = Managers.player:statistics_db()
 
-					statistics_db.set_stat(statistics_db, stats_id, "dice_roll_successes", self._num_dice_successes)
+					statistics_db:set_stat(stats_id, "dice_roll_successes", self._num_dice_successes)
 				end
 			end
 
 			if has_dice_results and not is_rolling then
 				if self.has_rolled and has_rerolls then
-					active_view.set_roll_button_text(active_view, "loot_screen_reroll_button")
-					active_view.set_reroll_state(active_view, true)
+					active_view:set_roll_button_text("loot_screen_reroll_button")
+					active_view:set_reroll_state(true)
 				end
 
-				if active_view.is_roll_button_pressed(active_view) then
+				if active_view:is_roll_button_pressed() then
 					if dice_rolling_completed then
-						active_view.on_complete(active_view)
+						active_view:on_complete()
 					else
-						level_dice_roller.roll_dices(level_dice_roller)
+						level_dice_roller:roll_dices()
 
 						self.has_rolled = true
 
-						active_view.set_draw_roll_button_enabled(active_view, false)
-						self.play_sound(self, "Play_hud_select")
+						active_view:set_draw_roll_button_enabled(false)
+						self:play_sound("Play_hud_select")
 					end
 				end
 			end
 		end
 	end
-
-	return 
 end
+
 EndOfLevelUI.update_dice_rolling_results = function (self, dt)
 	local level_dice_roller = self.level_dice_roller
 
-	level_dice_roller.update(level_dice_roller, dt)
+	level_dice_roller:update(dt)
 
 	if not self.successes then
-		local num_successes = level_dice_roller.num_successes(level_dice_roller)
-		local win_list = level_dice_roller.win_list(level_dice_roller)
+		local num_successes = level_dice_roller:num_successes()
+		local win_list = level_dice_roller:win_list()
 		self._num_dice_successes = num_successes
-		self.successes = level_dice_roller.successes(level_dice_roller)
-		self.dice_types = level_dice_roller.dice(level_dice_roller)
-		self.reward_item_key = self.reward_item_key or level_dice_roller.reward_item_key(level_dice_roller)
-		self.reward_item_backend_id = self.reward_item_backend_id or level_dice_roller.reward_backend_id(level_dice_roller)
+		self.successes = level_dice_roller:successes()
+		self.dice_types = level_dice_roller:dice()
+		self.reward_item_key = self.reward_item_key or level_dice_roller:reward_item_key()
+		self.reward_item_backend_id = self.reward_item_backend_id or level_dice_roller:reward_backend_id()
 
 		self.views.dice_game:set_reward_values(num_successes, self.dice_types, win_list, self.reward_item_key, self.reward_item_backend_id)
 	end
 
 	if not self.dice_simulation_complete then
-		self.dice_simulation_complete = level_dice_roller.simulate_dice_rolls(level_dice_roller, self.successes)
+		self.dice_simulation_complete = level_dice_roller:simulate_dice_rolls(self.successes)
 	end
 
 	return self.successes and self.dice_simulation_complete
 end
+
 EndOfLevelUI.shading_callback = function (self, world, shading_env, viewport)
 	if world ~= self.world then
-		return 
+		return
 	end
 
 	for name, settings in pairs(OutlineSettings.colors) do
@@ -536,14 +518,12 @@ EndOfLevelUI.shading_callback = function (self, world, shading_env, viewport)
 		ShadingEnvironment.set_vector3(shading_env, settings.variable, color)
 		ShadingEnvironment.set_scalar(shading_env, settings.outline_multiplier_variable, settings.outline_multiplier)
 	end
-
-	return 
 end
+
 EndOfLevelUI.start_fade_in = function (self)
 	self.fade_in_timer = 0.7
-
-	return 
 end
+
 EndOfLevelUI.update_fade_in = function (self, dt)
 	local time = self.fade_in_timer
 
@@ -556,17 +536,17 @@ EndOfLevelUI.update_fade_in = function (self, dt)
 		if time <= 0 then
 			self.fade_in_timer = nil
 
-			self.on_fade_complete(self)
+			self:on_fade_complete()
 		else
 			self.fade_in_timer = time
 		end
 	end
+end
 
-	return 
-end
 EndOfLevelUI.on_fade_complete = function (self)
-	return 
+	return
 end
+
 EndOfLevelUI.set_curtain_progress = function (self, value)
 	local ui_scenegraph = self.ui_scenegraph
 	local scenegraph_definition = definitions.scenegraph_definition
@@ -579,14 +559,13 @@ EndOfLevelUI.set_curtain_progress = function (self, value)
 	local left_default_definition = scenegraph_definition.curtain_left
 	local left_scenegraph = ui_scenegraph.curtain_left
 	left_scenegraph.size[1] = left_default_definition.size[1] * value
-
-	return 
 end
+
 EndOfLevelUI.animate_curtains = function (self, open_fraction, callback)
 	local current_curtain_fraction = self.current_curtain_fraction or 1
 
 	if open_fraction == current_curtain_fraction then
-		return 
+		return
 	end
 
 	self.curtain_anim_data = {
@@ -595,9 +574,8 @@ EndOfLevelUI.animate_curtains = function (self, open_fraction, callback)
 		opening = open_fraction < current_curtain_fraction,
 		callback = callback
 	}
-
-	return 
 end
+
 EndOfLevelUI.animating_curtains = function (self)
 	if self.curtain_anim_data then
 		return true
@@ -605,6 +583,7 @@ EndOfLevelUI.animating_curtains = function (self)
 
 	return false
 end
+
 EndOfLevelUI.update_curtains_animation = function (self, dt)
 	local curtain_anim_data = self.curtain_anim_data
 
@@ -628,7 +607,7 @@ EndOfLevelUI.update_curtains_animation = function (self, dt)
 			curtain_fraction = current_curtain_fraction + curtain_progress * fraction_diff_abs
 		end
 
-		self.set_curtain_progress(self, curtain_fraction)
+		self:set_curtain_progress(curtain_fraction)
 
 		if progress == 1 then
 			local callback = self.curtain_anim_data.callback
@@ -644,12 +623,10 @@ EndOfLevelUI.update_curtains_animation = function (self, dt)
 			curtain_anim_data.curtain_fraction = curtain_fraction
 		end
 	end
-
-	return 
 end
 
 if rawget(_G, "GLOBAL_EOLUI") then
 	rawget(_G, "GLOBAL_EOLUI"):create_ui_elements()
 end
 
-return 
+return

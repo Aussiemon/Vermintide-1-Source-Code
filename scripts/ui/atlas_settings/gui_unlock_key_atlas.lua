@@ -15,4 +15,4 @@ unlock_key_atlas = {
 	}
 }
 
-return 
+return

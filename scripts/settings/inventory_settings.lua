@@ -209,4 +209,4 @@ InventorySettings.item_types = {
 	"ww_trueflight"
 }
 
-return 
+return

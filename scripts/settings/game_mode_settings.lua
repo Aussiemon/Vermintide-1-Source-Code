@@ -53,4 +53,4 @@ for table_key, settings in pairs(GameModeSettings) do
 	end
 end
 
-return 
+return

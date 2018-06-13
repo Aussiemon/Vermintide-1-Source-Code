@@ -680,14 +680,12 @@ local animation_definitions = {
 				icon_widget.style.texture_id.color[1] = alpha
 				glow_bg_widget.style.texture_id.color[1] = alpha
 				icon_frame_widget.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -695,7 +693,7 @@ local animation_definitions = {
 			start_progress = 0.2,
 			end_progress = 0.4,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = 255 * math.easeOutCubic(progress)
@@ -710,8 +708,6 @@ local animation_definitions = {
 						widget.style.texture_id.color[1] = alpha
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local alpha = 255
@@ -727,8 +723,6 @@ local animation_definitions = {
 				local icon_widget = widgets.boon_icon
 				bg_widget.style.texture_id.color[1] = alpha
 				icon_widget.style.texture_id.color[1] = alpha
-
-				return 
 			end
 		},
 		{
@@ -736,7 +730,7 @@ local animation_definitions = {
 			start_progress = 0.7,
 			end_progress = 1.7,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeCubic(progress)
@@ -745,11 +739,9 @@ local animation_definitions = {
 				local amount = 7
 				position[1] = (default_position[1] + amount) - amount * math.catmullrom(math.bounce(eased_progress), 2, 1, 1, -1)
 				position[2] = (default_position[2] + amount) - amount * math.catmullrom(math.bounce(eased_progress), -1, 1, 1, 2)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -757,7 +749,7 @@ local animation_definitions = {
 			start_progress = 0.4,
 			end_progress = 1.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeInCubic(progress)
@@ -770,11 +762,9 @@ local animation_definitions = {
 				widgets.boon_glow_06.style.texture_id.gradient_threshold = gradient_threshold
 				widgets.boon_glow_07.style.texture_id.gradient_threshold = gradient_threshold
 				widgets.boon_glow_08.style.texture_id.gradient_threshold = gradient_threshold
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -782,7 +772,7 @@ local animation_definitions = {
 			start_progress = 1.7,
 			end_progress = 1.9,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeInCubic(1 - progress)
@@ -795,11 +785,9 @@ local animation_definitions = {
 				widgets.boon_glow_06.style.texture_id.gradient_threshold = gradient_threshold
 				widgets.boon_glow_07.style.texture_id.gradient_threshold = gradient_threshold
 				widgets.boon_glow_08.style.texture_id.gradient_threshold = gradient_threshold
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -807,7 +795,7 @@ local animation_definitions = {
 			start_progress = 1.6,
 			end_progress = 2.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local pulse_progress = math.ease_pulse(progress)
@@ -820,11 +808,9 @@ local animation_definitions = {
 				local glow_background_default_size = scenegraph_definition.glow_background.size
 				glow_background_size[1] = glow_background_default_size[1] * scale_progress
 				glow_background_size[2] = glow_background_default_size[2] * scale_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -832,7 +818,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
@@ -841,11 +827,9 @@ local animation_definitions = {
 				local default_position = scenegraph_definition.part_1.position
 				position[1] = default_position[1] - distance
 				position[2] = default_position[2] + distance
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -853,7 +837,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
@@ -862,11 +846,9 @@ local animation_definitions = {
 				local default_position = scenegraph_definition.part_2.position
 				position[1] = default_position[1] + distance
 				position[2] = default_position[2] + distance
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -874,7 +856,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
@@ -883,11 +865,9 @@ local animation_definitions = {
 				local default_position = scenegraph_definition.part_3.position
 				position[1] = default_position[1] - distance
 				position[2] = default_position[2] - distance
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -895,7 +875,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.easeOutCubic(progress)
@@ -904,11 +884,9 @@ local animation_definitions = {
 				local default_position = scenegraph_definition.part_4.position
 				position[1] = default_position[1] + distance
 				position[2] = default_position[2] - distance
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -916,7 +894,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -926,11 +904,9 @@ local animation_definitions = {
 				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = -progress_angle
 				part_2.style.texture_id.angle = progress_angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -938,7 +914,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -948,11 +924,9 @@ local animation_definitions = {
 				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = -progress_angle
 				part_2.style.texture_id.angle = progress_angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -960,7 +934,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -970,11 +944,9 @@ local animation_definitions = {
 				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = progress_angle
 				part_2.style.texture_id.angle = -progress_angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -982,7 +954,7 @@ local animation_definitions = {
 			start_progress = 1.8,
 			end_progress = 2.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_in_exp(progress)
@@ -992,13 +964,9 @@ local animation_definitions = {
 				local progress_angle = angle * eased_progress
 				part_1.style.texture_id.angle = progress_angle
 				part_2.style.texture_id.angle = -progress_angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_reward_boon")
-
-				return 
 			end
 		},
 		{
@@ -1006,7 +974,7 @@ local animation_definitions = {
 			start_progress = 2.2,
 			end_progress = 2.4,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local eased_progress = math.ease_out_exp(progress)
@@ -1034,7 +1002,7 @@ local animation_definitions = {
 						pivot[2] = default_pivot[2] * scale_progress
 						pivot[1] = default_pivot[1] * scale_progress
 
-						if 2 < i then
+						if i > 2 then
 							offset[2] = part_default_size[2] - part_size[2]
 						end
 					end
@@ -1054,11 +1022,9 @@ local animation_definitions = {
 				local boon_icon_default_size = scenegraph_definition.boon_icon.size
 				boon_icon_size[1] = boon_icon_default_size[1] * scale_progress
 				boon_icon_size[2] = boon_icon_default_size[2] * scale_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1066,19 +1032,15 @@ local animation_definitions = {
 			start_progress = 2.2,
 			end_progress = 2.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = 255 * math.easeCubic(progress)
 				local widget = widgets.banner_top
 				widget.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_quest_menu_finish_quest_turn_in_reward_cloth")
-
-				return 
 			end
 		},
 		{
@@ -1086,7 +1048,7 @@ local animation_definitions = {
 			start_progress = 2.6,
 			end_progress = 3.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local widget = widgets.banner_bg
@@ -1098,11 +1060,9 @@ local animation_definitions = {
 				local banner_bg_default_size = scenegraph_definition.banner_bg.size
 				banner_bg_size[2] = anim_progress * banner_bg_default_size[2]
 				uvs[2][2] = math.min(anim_progress, 1)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1110,18 +1070,16 @@ local animation_definitions = {
 			start_progress = 3,
 			end_progress = 3.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local alpha = 255 * math.easeOutCubic(progress)
 				widgets.title_text.style.text.text_color[1] = alpha
 				widgets.name_text.style.text.text_color[1] = alpha
 				widgets.type_text.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

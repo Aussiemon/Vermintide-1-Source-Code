@@ -4,48 +4,47 @@ local unit_alive = Unit.alive
 local Profiler = Profiler
 
 local function nop()
-	return 
+	return
 end
 
 BTSelector_ogre = class(BTSelector_ogre, BTNode)
 BTSelector_ogre.name = "BTSelector_ogre"
+
 BTSelector_ogre.init = function (self, ...)
 	BTSelector_ogre.super.init(self, ...)
 
 	self._children = {}
-
-	return 
 end
+
 BTSelector_ogre.leave = function (self, unit, blackboard, t, reason)
-	self.set_running_child(self, unit, blackboard, t, nil, reason)
-
-	return 
+	self:set_running_child(unit, blackboard, t, nil, reason)
 end
+
 BTSelector_ogre.run = function (self, unit, blackboard, t, dt)
 	local Profiler_start = Profiler.start
 	local Profiler_stop = Profiler.stop
-	local child_running = self.current_running_child(self, blackboard)
+	local child_running = self:current_running_child(blackboard)
 	local children = self._children
 	local node_spawn = children[1]
 	local condition_result = blackboard.spawn
 
 	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_spawn, "aborted")
+		self:set_running_child(unit, blackboard, t, node_spawn, "aborted")
 		Profiler_start("spawn")
 
-		local result, evaluate = node_spawn.run(node_spawn, unit, blackboard, t, dt)
+		local result, evaluate = node_spawn:run(unit, blackboard, t, dt)
 
 		Profiler_stop("spawn")
 
 		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
+			self:set_running_child(unit, blackboard, t, nil, result)
 		end
 
 		if result ~= "failed" then
 			return result, evaluate
 		end
 	elseif node_spawn == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
+		self:set_running_child(unit, blackboard, t, nil, "failed")
 	end
 
 	local node_smartobject = children[2]
@@ -64,22 +63,22 @@ BTSelector_ogre.run = function (self, unit, blackboard, t, dt)
 	end
 
 	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_smartobject, "aborted")
+		self:set_running_child(unit, blackboard, t, node_smartobject, "aborted")
 		Profiler_start("smartobject")
 
-		local result, evaluate = node_smartobject.run(node_smartobject, unit, blackboard, t, dt)
+		local result, evaluate = node_smartobject:run(unit, blackboard, t, dt)
 
 		Profiler_stop("smartobject")
 
 		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
+			self:set_running_child(unit, blackboard, t, nil, result)
 		end
 
 		if result ~= "failed" then
 			return result, evaluate
 		end
 	elseif node_smartobject == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
+		self:set_running_child(unit, blackboard, t, nil, "failed")
 	end
 
 	local node_stagger = children[3]
@@ -90,69 +89,66 @@ BTSelector_ogre.run = function (self, unit, blackboard, t, dt)
 	end
 
 	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_stagger, "aborted")
+		self:set_running_child(unit, blackboard, t, node_stagger, "aborted")
 		Profiler_start("stagger")
 
-		local result, evaluate = node_stagger.run(node_stagger, unit, blackboard, t, dt)
+		local result, evaluate = node_stagger:run(unit, blackboard, t, dt)
 
 		Profiler_stop("stagger")
 
 		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
+			self:set_running_child(unit, blackboard, t, nil, result)
 		end
 
 		if result ~= "failed" then
 			return result, evaluate
 		end
 	elseif node_stagger == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
+		self:set_running_child(unit, blackboard, t, nil, "failed")
 	end
 
 	local node_has_target = children[4]
 	local condition_result = unit_alive(blackboard.target_unit)
 
 	if condition_result then
-		self.set_running_child(self, unit, blackboard, t, node_has_target, "aborted")
+		self:set_running_child(unit, blackboard, t, node_has_target, "aborted")
 		Profiler_start("has_target")
 
-		local result, evaluate = node_has_target.run(node_has_target, unit, blackboard, t, dt)
+		local result, evaluate = node_has_target:run(unit, blackboard, t, dt)
 
 		Profiler_stop("has_target")
 
 		if result ~= "running" then
-			self.set_running_child(self, unit, blackboard, t, nil, result)
+			self:set_running_child(unit, blackboard, t, nil, result)
 		end
 
 		if result ~= "failed" then
 			return result, evaluate
 		end
 	elseif node_has_target == child_running then
-		self.set_running_child(self, unit, blackboard, t, nil, "failed")
+		self:set_running_child(unit, blackboard, t, nil, "failed")
 	end
 
 	local node_idle = children[5]
 
-	self.set_running_child(self, unit, blackboard, t, node_idle, "aborted")
+	self:set_running_child(unit, blackboard, t, node_idle, "aborted")
 	Profiler_start("idle")
 
-	local result, evaluate = node_idle.run(node_idle, unit, blackboard, t, dt)
+	local result, evaluate = node_idle:run(unit, blackboard, t, dt)
 
 	Profiler_stop("idle")
 
 	if result ~= "running" then
-		self.set_running_child(self, unit, blackboard, t, nil, result)
+		self:set_running_child(unit, blackboard, t, nil, result)
 	end
 
 	if result ~= "failed" then
 		return result, evaluate
 	end
-
-	return 
 end
+
 BTSelector_ogre.add_child = function (self, node)
 	self._children[#self._children + 1] = node
-
-	return 
 end
 
-return 
+return

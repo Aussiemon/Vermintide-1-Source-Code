@@ -10,6 +10,7 @@ local CROSSHAIR_ENABLED_STYLES_LOOKUP = {
 	circle = true,
 	dot = true
 }
+
 CrosshairUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -18,8 +19,8 @@ CrosshairUI.init = function (self, ingame_ui_context)
 	self.level_world = self.world_manager:world("level_world")
 	self.local_player = Managers.player:local_player()
 
-	self.create_ui_elements(self)
-	self.set_enabled_crosshair_styles(self, Application.user_setting("enabled_crosshairs"))
+	self:create_ui_elements()
+	self:set_enabled_crosshair_styles(Application.user_setting("enabled_crosshairs"))
 	rawset(_G, "crosshair_ui", self)
 
 	self.t = 0
@@ -28,9 +29,8 @@ CrosshairUI.init = function (self, ingame_ui_context)
 		0
 	}
 	self.tobii_time_since_teleport = 0
-
-	return 
 end
+
 CrosshairUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.crosshair_dot = UIWidget.init(definitions.widget_definitions.crosshair_dot)
@@ -50,27 +50,24 @@ CrosshairUI.create_ui_elements = function (self)
 	self.hit_markers = hit_markers
 	self.hit_markers_n = hit_markers_n
 	self.hit_marker_animations = {}
-
-	return 
 end
+
 CrosshairUI.destroy = function (self)
 	rawset(_G, "crosshair_ui", nil)
-
-	return 
 end
+
 CrosshairUI.update = function (self, dt)
 	local player_unit = self.local_player.player_unit
 	local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
-	local equipment = inventory_extension.equipment(inventory_extension)
+	local equipment = inventory_extension:equipment()
 
-	self.update_crosshair_style(self, equipment)
-	self.update_crosshair_position(self, player_unit, dt)
-	self.update_hit_markers(self, dt)
-	self.update_spread(self, dt, equipment)
-	self.draw(self, dt)
-
-	return 
+	self:update_crosshair_style(equipment)
+	self:update_crosshair_position(player_unit, dt)
+	self:update_hit_markers(dt)
+	self:update_spread(dt, equipment)
+	self:draw(dt)
 end
+
 CrosshairUI.set_enabled_crosshair_styles = function (self, enabled_style)
 	if enabled_style == "melee" then
 		CROSSHAIR_ENABLED_STYLES_LOOKUP.dot = true
@@ -89,13 +86,13 @@ CrosshairUI.set_enabled_crosshair_styles = function (self, enabled_style)
 		CROSSHAIR_ENABLED_STYLES_LOOKUP.default = true
 		CROSSHAIR_ENABLED_STYLES_LOOKUP.circle = true
 	end
-
-	return 
 end
+
 local TOBII_X_THRESHHOLD = 0.05
 local TOBII_Y_THRESHHOLD = 0.08888888888888889
 local DELTA_SMOOTH = 0.1
 local HZ_SCALE = 0.03333333333333333
+
 CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 	Profiler.start("update_crosshair_position")
 
@@ -134,14 +131,14 @@ CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 
 		local eyetracking_extension = ScriptUnit.extension(player_unit, "eyetracking_system")
 
-		eyetracking_extension.set_smoothed_gaze(eyetracking_extension, crosshair_position[1], crosshair_position[2])
+		eyetracking_extension:set_smoothed_gaze(crosshair_position[1], crosshair_position[2])
 
 		if extended_view_enabled then
 			local player = Managers.player:owner(player_unit)
 			local viewport_name = player.viewport_name
 			local viewport = ScriptWorld.viewport(self.level_world, viewport_name)
 			local camera = ScriptViewport.camera(viewport)
-			local world_pos = eyetracking_extension.get_forward_rayhit(eyetracking_extension)
+			local world_pos = eyetracking_extension:get_forward_rayhit()
 
 			if world_pos then
 				local x_scale = res_w / RESOLUTION_LOOKUP.res_w
@@ -165,10 +162,10 @@ CrosshairUI.update_crosshair_position = function (self, player_unit, dt)
 
 	UISceneGraph.set_local_position(self.ui_scenegraph, "crosshair_root", position_in_screen)
 	Profiler.stop()
-
-	return 
 end
+
 local GAZE_FOLLOWING_CROSSHAIRS = {}
+
 CrosshairUI.update_crosshair_style = function (self, equipment)
 	Profiler.start("update_crosshair_style")
 
@@ -181,8 +178,8 @@ CrosshairUI.update_crosshair_style = function (self, equipment)
 	if Unit.alive(weapon_unit) then
 		local weapon_extension = ScriptUnit.extension(weapon_unit, "weapon_system")
 
-		if weapon_extension.has_current_action(weapon_extension) then
-			local action_settings = weapon_extension.get_current_action_settings(weapon_extension)
+		if weapon_extension:has_current_action() then
+			local action_settings = weapon_extension:get_current_action_settings()
 
 			if action_settings.crosshair_style then
 				crosshair_style = action_settings.crosshair_style
@@ -207,9 +204,8 @@ CrosshairUI.update_crosshair_style = function (self, equipment)
 	self.crosshair_style = crosshair_style
 
 	Profiler.stop("update_crosshair_style")
-
-	return 
 end
+
 CrosshairUI.update_hit_markers = function (self, dt)
 	Profiler.start("update_hit_markers")
 
@@ -243,9 +239,8 @@ CrosshairUI.update_hit_markers = function (self, dt)
 	end
 
 	Profiler.stop("update_hit_markers")
-
-	return 
 end
+
 CrosshairUI.update_spread = function (self, dt, equipment)
 	Profiler.start("update_spread")
 
@@ -259,7 +254,7 @@ CrosshairUI.update_spread = function (self, dt, equipment)
 
 		if weapon_unit and ScriptUnit.has_extension(weapon_unit, "spread_system") then
 			local spread_extension = ScriptUnit.extension(weapon_unit, "spread_system")
-			pitch, yaw = spread_extension.get_current_pitch_and_yaw(spread_extension)
+			pitch, yaw = spread_extension:get_current_pitch_and_yaw()
 		end
 	end
 
@@ -275,9 +270,8 @@ CrosshairUI.update_spread = function (self, dt, equipment)
 	self.crosshair_right.style.offset[1] = yaw_offset
 
 	Profiler.stop("update_spread")
-
-	return 
 end
+
 CrosshairUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -306,27 +300,22 @@ CrosshairUI.draw = function (self, dt)
 
 	Profiler.stop("draw widgets")
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 CrosshairUI.draw_default_style_crosshair = function (self, ui_renderer)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_dot)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_up)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_down)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_left)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_right)
-
-	return 
 end
+
 CrosshairUI.draw_dot_style_crosshair = function (self, ui_renderer)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_dot)
-
-	return 
 end
+
 CrosshairUI.draw_circle_style_crosshair = function (self, ui_renderer)
 	UIRenderer.draw_widget(ui_renderer, self.crosshair_circle)
-
-	return 
 end
 
-return 
+return

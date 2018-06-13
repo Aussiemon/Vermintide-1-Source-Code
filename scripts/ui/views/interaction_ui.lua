@@ -309,6 +309,7 @@ local widget_definitions = {
 		}
 	}
 }
+
 InteractionUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -319,37 +320,35 @@ InteractionUI.init = function (self, ingame_ui_context)
 	self.platform = PLATFORM
 	self.interaction_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.localized_texts = {
 		hold = Localize("interaction_prefix_hold"),
 		press = Localize("interaction_prefix_press"),
 		to = Localize("interaction_to")
 	}
-
-	return 
 end
+
 InteractionUI.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self.interaction_widget = UIWidget.init(widget_definitions.tooltip)
 	self.interaction_bar_widget = UIWidget.init(widget_definitions.interaction_bar)
-
-	return 
 end
+
 InteractionUI.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "interaction_gui")
-
-	return 
 end
+
 InteractionUI.button_texture_data_by_input_action = function (self, input_action)
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "Player")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("Player")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	return UISettings.get_gamepad_input_texture_data(input_service, input_action, gamepad_active)
 end
+
 InteractionUI.update = function (self, dt, t, my_player)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -358,7 +357,7 @@ InteractionUI.update = function (self, dt, t, my_player)
 	local player_unit = my_player.player_unit
 
 	if not player_unit then
-		return 
+		return
 	end
 
 	for name, ui_animation in pairs(self.interaction_animations) do
@@ -372,9 +371,9 @@ InteractionUI.update = function (self, dt, t, my_player)
 	local interactor_extension = ScriptUnit.extension(player_unit, "interactor_system")
 	local interaction_bar_active = false
 
-	if interactor_extension.is_interacting(interactor_extension) and not interactor_extension.is_waiting_for_interaction_approval(interactor_extension) then
+	if interactor_extension:is_interacting() and not interactor_extension:is_waiting_for_interaction_approval() then
 		local t = Managers.time:time("game")
-		local progress = interactor_extension.get_progress(interactor_extension, t)
+		local progress = interactor_extension:get_progress(t)
 
 		if progress and progress ~= 0 then
 			local widget_content = self.interaction_bar_widget.content
@@ -391,17 +390,17 @@ InteractionUI.update = function (self, dt, t, my_player)
 			interaction_bar_active = true
 			widget_content.bar.bar_value = progress
 		end
-	elseif not interactor_extension.is_interacting(interactor_extension) and not interactor_extension.is_waiting_for_interaction_approval(interactor_extension) then
+	elseif not interactor_extension:is_interacting() and not interactor_extension:is_waiting_for_interaction_approval() then
 		local hud_description_text, extra_param, interact_action = nil
-		local can_interact, failed_reason, interaction_type = interactor_extension.can_interact(interactor_extension)
+		local can_interact, failed_reason, interaction_type = interactor_extension:can_interact()
 
 		if (can_interact or failed_reason) and interaction_type ~= "heal" and interaction_type ~= "give_item" then
 			interact_action = "interact"
 
 			if can_interact then
-				hud_description_text, extra_param = interactor_extension.interaction_description(interactor_extension)
+				hud_description_text, extra_param = interactor_extension:interaction_description()
 			elseif failed_reason then
-				hud_description_text, extra_param = interactor_extension.interaction_description(interactor_extension, failed_reason)
+				hud_description_text, extra_param = interactor_extension:interaction_description(failed_reason)
 			end
 
 			if CONSOLE_DISABLED_INTERACTIONS[interaction_type] then
@@ -412,7 +411,7 @@ InteractionUI.update = function (self, dt, t, my_player)
 			local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
 			local highest_prio = 0
 			local best_action_name, best_sub_action_name = nil
-			local equipment = inventory_extension.equipment(inventory_extension)
+			local equipment = inventory_extension:equipment()
 			local item_data = equipment.wielded
 			local item_template = BackendUtils.get_item_template(item_data)
 
@@ -422,7 +421,7 @@ InteractionUI.update = function (self, dt, t, my_player)
 						local interaction_priority = action_settings.interaction_priority or -1000
 
 						if action_settings.interaction_type ~= nil and highest_prio < interaction_priority and action_settings.condition_func(player_unit) then
-							local input_device_supports_action = self.button_texture_data_by_input_action(self, action_settings.hold_input or action_name)
+							local input_device_supports_action = self:button_texture_data_by_input_action(action_settings.hold_input or action_name)
 
 							if input_device_supports_action then
 								highest_prio = action_settings.interaction_priority
@@ -438,7 +437,7 @@ InteractionUI.update = function (self, dt, t, my_player)
 				local action_settings = item_template.actions[best_action_name][best_sub_action_name]
 				local interaction_type = action_settings.interaction_type
 				local interaction_template = InteractionDefinitions[interaction_type]
-				local interactable_unit = interactor_extension.interactable_unit(interactor_extension)
+				local interactable_unit = interactor_extension:interactable_unit()
 
 				if Unit.alive(interactable_unit) then
 					local can_interact_func = interaction_template.client.can_interact
@@ -458,11 +457,11 @@ InteractionUI.update = function (self, dt, t, my_player)
 		end
 
 		if not hud_description_text then
-			hud_description_text, interact_action = self.external_interact_ui_description(self, player_unit)
+			hud_description_text, interact_action = self:external_interact_ui_description(player_unit)
 		end
 
 		if hud_description_text and hud_description_text ~= self.current_hud_description_text then
-			local button_texture_data, button_text = self.button_texture_data_by_input_action(self, interact_action)
+			local button_texture_data, button_text = self:button_texture_data_by_input_action(interact_action)
 
 			assert(button_texture_data, "Could not find button texture(s) for action: %s", interact_action)
 
@@ -473,11 +472,11 @@ InteractionUI.update = function (self, dt, t, my_player)
 			end
 
 			if hud_description_text == "interact_heal_ally" or hud_description_text == "interact_give_ally" then
-				local interactable_unit = interactor_extension.interactable_unit(interactor_extension)
+				local interactable_unit = interactor_extension:interactable_unit()
 
 				if Unit.alive(interactable_unit) then
 					local player = Managers.player:owner(interactable_unit)
-					local profile_index = self.profile_synchronizer:profile_by_peer(player.network_id(player), player.local_player_id(player))
+					local profile_index = self.profile_synchronizer:profile_by_peer(player:network_id(), player:local_player_id())
 					local hero_data = SPProfiles[profile_index]
 					local hero_name = hero_data.display_name
 					text = text .. ": " .. Localize(hero_name)
@@ -592,14 +591,14 @@ InteractionUI.update = function (self, dt, t, my_player)
 		local interact_at_gaze_enabled = HAS_TOBII and Tobii.user_presence() == Tobii.USER_PRESENT and Tobii.device_status() == Tobii.DEVICE_TRACKING
 
 		if interact_at_gaze_enabled then
-			local interactable_unit = interactor_extension.interactable_unit(interactor_extension)
+			local interactable_unit = interactor_extension:interactable_unit()
 
 			if Unit.alive(interactable_unit) then
 				local mesh = Unit.mesh(interactable_unit, 0)
 				local orientation_mat, _ = Mesh.box(mesh)
 				local interactable_world_pos = Matrix4x4.translation(orientation_mat)
 				local eyetracking_extension = ScriptUnit.extension(player_unit, "eyetracking_system")
-				local pos_in_screen = eyetracking_extension.world_position_in_screen(eyetracking_extension, interactable_world_pos)
+				local pos_in_screen = eyetracking_extension:world_position_in_screen(interactable_world_pos)
 				local x_scale = 1920 / RESOLUTION_LOOKUP.res_w
 				local y_scale = 1080 / RESOLUTION_LOOKUP.res_h
 				local new_position = Vector3(pos_in_screen[1] * x_scale - 960, pos_in_screen[2] * y_scale - 540, 0)
@@ -614,13 +613,12 @@ InteractionUI.update = function (self, dt, t, my_player)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 InteractionUI.external_interact_ui_description = function (self, player_unit)
 	local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
-	local wielded_slot = inventory_extension.get_wielded_slot_name(inventory_extension)
-	local slot_data = inventory_extension.get_slot_data(inventory_extension, wielded_slot)
+	local wielded_slot = inventory_extension:get_wielded_slot_name()
+	local slot_data = inventory_extension:get_slot_data(wielded_slot)
 	local hud_description_text, interact_action = nil
 
 	if slot_data then
@@ -629,7 +627,7 @@ InteractionUI.external_interact_ui_description = function (self, player_unit)
 		if ScriptUnit.has_extension(wielded_unit, "overcharge_system") then
 			local overcharge_extension = ScriptUnit.extension(wielded_unit, "overcharge_system")
 
-			if overcharge_extension.is_above_critical_limit(overcharge_extension) and not overcharge_extension.are_you_exploding(overcharge_extension) then
+			if overcharge_extension:is_above_critical_limit() and not overcharge_extension:are_you_exploding() then
 				hud_description_text = "vent_overcharge"
 				interact_action = "weapon_reload"
 			end
@@ -639,4 +637,4 @@ InteractionUI.external_interact_ui_description = function (self, player_unit)
 	return hud_description_text, interact_action
 end
 
-return 
+return

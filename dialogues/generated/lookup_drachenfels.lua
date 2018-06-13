@@ -629,4 +629,4 @@ DialogueLookup[DialogueLookup_n + 313] = "pdr_portals_intro_b"
 DialogueLookup[DialogueLookup_n + 314] = "pdr_portals_intro_c"
 DialogueLookup_n = DialogueLookup_n + 314
 
-return 
+return

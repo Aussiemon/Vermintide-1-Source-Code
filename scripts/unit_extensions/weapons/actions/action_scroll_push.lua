@@ -1,4 +1,5 @@
 ActionScrollPush = class(ActionScrollPush)
+
 ActionScrollPush.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.world = world
 	self.owner_unit = owner_unit
@@ -10,20 +11,19 @@ ActionScrollPush.init = function (self, world, item_name, is_server, owner_unit,
 	if ScriptUnit.has_extension(weapon_unit, "ammo_system") then
 		self.ammo_extension = ScriptUnit.extension(weapon_unit, "ammo_system")
 	end
-
-	return 
 end
+
 ActionScrollPush.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
+end
 
-	return 
-end
 ActionScrollPush.client_owner_post_update = function (self, dt, t, world, can_damage)
-	return 
+	return
 end
+
 ActionScrollPush.finish = function (self, reason)
 	if reason ~= "action_complete" then
-		return 
+		return
 	end
 
 	local current_action = self.current_action
@@ -31,7 +31,7 @@ ActionScrollPush.finish = function (self, reason)
 	local unit_position = POSITION_LOOKUP[owner_unit]
 	local radius = current_action.push_radius
 	local network_manager = Managers.state.network
-	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, self.owner_unit)
+	local attacker_unit_id = network_manager:unit_game_object_id(self.owner_unit)
 	local attack_template = AttackTemplates[current_action.attack_template]
 	local attack_template_id = attack_template.lookup_id
 
@@ -56,8 +56,6 @@ ActionScrollPush.finish = function (self, reason)
 
 		self.ammo_extension:use_ammo(ammo_usage)
 	end
-
-	return 
 end
 
-return 
+return

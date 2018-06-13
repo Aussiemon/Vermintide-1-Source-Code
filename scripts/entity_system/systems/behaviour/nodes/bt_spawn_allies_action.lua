@@ -1,9 +1,9 @@
 BTSpawnAllies = class(BTSpawnAllies, BTNode)
+
 BTSpawnAllies.init = function (self, ...)
 	BTSpawnAllies.super.init(self, ...)
-
-	return 
 end
+
 BTSpawnAllies.name = "BTSpawnAllies"
 
 local function randomize(event)
@@ -12,8 +12,6 @@ local function randomize(event)
 	else
 		return event
 	end
-
-	return 
 end
 
 BTSpawnAllies.enter = function (self, unit, blackboard, t)
@@ -23,11 +21,11 @@ BTSpawnAllies.enter = function (self, unit, blackboard, t)
 		end_time = math.huge
 	}
 	blackboard.spawning_allies = data
-	local call_position = self._find_spawn_point(self, unit, blackboard, action, data)
+	local call_position = self:_find_spawn_point(unit, blackboard, action, data)
 	local nav_ext = blackboard.navigation_extension
 
-	nav_ext.set_max_speed(nav_ext, action.run_to_spawn_speed)
-	nav_ext.move_to(nav_ext, call_position)
+	nav_ext:set_max_speed(action.run_to_spawn_speed)
+	nav_ext:move_to(call_position)
 
 	blackboard.run_speed_overridden = true
 
@@ -53,37 +51,31 @@ BTSpawnAllies.enter = function (self, unit, blackboard, t)
 		blackboard.move_state = "moving"
 	end
 
-	self._activate_ward(self, unit, blackboard)
-
-	return 
+	self:_activate_ward(unit, blackboard)
 end
+
 BTSpawnAllies._activate_ward = function (self, unit, blackboard)
 	if not blackboard.ward_active then
 		blackboard.ward_active = true
 
 		AiUtils.stormvermin_champion_set_ward_state(unit, true, true)
 	end
-
-	return 
 end
 
 local function draw(shape, ...)
 	if script_data.ai_champion_spawn_debug then
 		QuickDrawerStay[shape](QuickDrawerStay, ...)
 	end
-
-	return 
 end
 
 local function dprint(...)
 	if script_data.ai_champion_spawn_debug then
 		print(...)
 	end
-
-	return 
 end
 
 local SPAWN_POS_TEMP = {}
+
 BTSpawnAllies._find_spawn_point = function (self, unit, blackboard, action, data)
 	local spawn_group = action.spawn_group
 	local spawner_system = Managers.state.entity:system("spawner_system")
@@ -103,7 +95,7 @@ BTSpawnAllies._find_spawn_point = function (self, unit, blackboard, action, data
 	local Vector3_distance_squared = Vector3.distance_squared
 	local call_position = POSITION_LOOKUP[unit]
 
-	if 0 < num_players then
+	if num_players > 0 then
 		local flat_average_player_position = Vector3.flat(average_player_position / num_players)
 		local best_dist_sq = -math.huge
 		local best_index = nil
@@ -204,6 +196,7 @@ BTSpawnAllies._find_spawn_point = function (self, unit, blackboard, action, data
 
 	return call_position
 end
+
 BTSpawnAllies._spawn = function (self, unit, data, blackboard, t)
 	local action = blackboard.action
 
@@ -212,9 +205,9 @@ BTSpawnAllies._spawn = function (self, unit, data, blackboard, t)
 
 	local loc_ext = blackboard.locomotion_extension
 
-	loc_ext.set_wanted_velocity(loc_ext, Vector3.zero())
-	loc_ext.use_lerp_rotation(loc_ext, true)
-	loc_ext.set_wanted_rotation(loc_ext, Quaternion.look(data.spawn_forward:unbox(), Vector3.up()))
+	loc_ext:set_wanted_velocity(Vector3.zero())
+	loc_ext:use_lerp_rotation(true)
+	loc_ext:set_wanted_rotation(Quaternion.look(data.spawn_forward:unbox(), Vector3.up()))
 
 	local spawn_list = action.difficulty_spawn_list[Managers.state.difficulty:get_difficulty()] or action.spawn_list
 	local spawners = data.spawners
@@ -226,7 +219,7 @@ BTSpawnAllies._spawn = function (self, unit, data, blackboard, t)
 	for i = 1, #spawn_list, 1 do
 		local unit = spawners[(i - 1) % #spawners + 1]
 
-		spawner_system.spawn_horde(spawner_system, unit, 1, {
+		spawner_system:spawn_horde(unit, 1, {
 			Breeds[spawn_list[i]]
 		})
 		draw("sphere", ScriptUnit.extension(unit, "spawner_system"):spawn_position(), 0.5 + i * 0.05, Color(0, 255, 0))
@@ -239,9 +232,8 @@ BTSpawnAllies._spawn = function (self, unit, data, blackboard, t)
 	local conflict_director = Managers.state.conflict
 
 	conflict_director.horde_spawner:execute_event_horde(t, terror_event_id, composition_type, limit_spawners, silent, nil, strictly_not_close_to_players)
-
-	return 
 end
+
 BTSpawnAllies.run = function (self, unit, blackboard, t, dt)
 	local data = blackboard.spawning_allies
 
@@ -250,39 +242,37 @@ BTSpawnAllies.run = function (self, unit, blackboard, t, dt)
 	else
 		local action = blackboard.action
 
-		if not data.spawned and (Vector3.distance_squared(POSITION_LOOKUP[unit], data.call_position:unbox()) < 0.5 or 1 < blackboard.navigation_extension:number_failed_move_attempts()) then
+		if not data.spawned and (Vector3.distance_squared(POSITION_LOOKUP[unit], data.call_position:unbox()) < 0.5 or blackboard.navigation_extension:number_failed_move_attempts() > 1) then
 			data.spawned = true
 			data.end_time = t + action.duration
 
 			if blackboard.follow_animation_locked then
-				self._release_animation_lock(self, unit, blackboard)
+				self:_release_animation_lock(unit, blackboard)
 			end
 
-			self._spawn(self, unit, data, blackboard, t)
+			self:_spawn(unit, data, blackboard, t)
 		elseif data.spawned then
 			blackboard.locomotion_extension:set_wanted_rotation(Quaternion.look(data.spawn_forward:unbox(), Vector3.up()))
 		elseif blackboard.follow_animation_locked and blackboard.anim_cb_rotation_start then
-			self._release_animation_lock(self, unit, blackboard)
+			self:_release_animation_lock(unit, blackboard)
 		end
 
 		return "running"
 	end
-
-	return 
 end
+
 BTSpawnAllies._release_animation_lock = function (self, unit, blackboard)
 	blackboard.follow_animation_locked = nil
 
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 	blackboard.locomotion_extension:use_lerp_rotation(true)
-
-	return 
 end
+
 BTSpawnAllies.leave = function (self, unit, blackboard, t, reason)
 	local nav_ext = blackboard.navigation_extension
 
-	nav_ext.set_enabled(nav_ext, true)
-	nav_ext.set_max_speed(nav_ext, blackboard.run_speed)
+	nav_ext:set_enabled(true)
+	nav_ext:set_max_speed(blackboard.run_speed)
 
 	blackboard.run_speed_overridden = nil
 	blackboard.defensive_mode_duration = 20
@@ -291,10 +281,8 @@ BTSpawnAllies.leave = function (self, unit, blackboard, t, reason)
 	blackboard.spawned_allies_wave = blackboard.spawned_allies_wave + 1
 
 	if blackboard.follow_animation_locked then
-		self._release_animation_lock(self, unit, blackboard)
+		self:_release_animation_lock(unit, blackboard)
 	end
-
-	return 
 end
 
-return 
+return

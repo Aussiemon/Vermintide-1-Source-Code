@@ -33,4 +33,4 @@ LocalQuestTemplates = {
 	}
 }
 
-return 
+return

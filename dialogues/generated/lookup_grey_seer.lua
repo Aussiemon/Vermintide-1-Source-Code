@@ -51,4 +51,4 @@ DialogueLookup[DialogueLookup_n + 24] = "egs_player_achieved_objective_chain"
 DialogueLookup[DialogueLookup_n + 25] = "egs_warp_moon_meteor"
 DialogueLookup_n = DialogueLookup_n + 25
 
-return 
+return

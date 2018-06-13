@@ -1,4 +1,5 @@
 ProjectileTrueFlightLocomotionExtension = class(ProjectileTrueFlightLocomotionExtension)
+
 ProjectileTrueFlightLocomotionExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	local world = extension_init_context.world
 	local gravity_settings = extension_init_data.gravity_settings or "default"
@@ -44,16 +45,15 @@ ProjectileTrueFlightLocomotionExtension.init = function (self, extension_init_co
 	Unit.set_local_position(unit, 0, initial_position)
 
 	self.hit_units = {}
-
-	return 
 end
+
 ProjectileTrueFlightLocomotionExtension.update = function (self, unit, input, dt, context, t)
 	self.dt = t - self.t
 	self.moved = false
 	self.on_target_time = self.on_target_time + dt
 
 	if self.stopped then
-		return 
+		return
 	end
 
 	if self.is_husk then
@@ -68,7 +68,7 @@ ProjectileTrueFlightLocomotionExtension.update = function (self, unit, input, dt
 			Unit.set_local_rotation(unit, 0, rotation)
 		end
 
-		return 
+		return
 	end
 
 	local current_position = POSITION_LOOKUP[unit]
@@ -79,10 +79,10 @@ ProjectileTrueFlightLocomotionExtension.update = function (self, unit, input, dt
 	if target and Unit.alive(target) and ScriptUnit.has_extension(target, "health_system") then
 		local health_extension = ScriptUnit.extension(target, "health_system")
 
-		if health_extension.is_alive(health_extension) and not self.hit_units[target] then
+		if health_extension:is_alive() and not self.hit_units[target] then
 			has_good_target = true
 
-			if self.legitimate_target(self, target, current_position) then
+			if self:legitimate_target(target, current_position) then
 				can_see_target = true
 			end
 		end
@@ -91,7 +91,7 @@ ProjectileTrueFlightLocomotionExtension.update = function (self, unit, input, dt
 	local new_position = nil
 
 	if can_see_target then
-		new_position = self.update_towards_target(self, current_position, dt)
+		new_position = self:update_towards_target(current_position, dt)
 	elseif not has_good_target then
 		if target and Unit.alive(target) and ScriptUnit.has_extension(target, "outline_system") then
 			local target_outline_extension = ScriptUnit.extension(target, "outline_system")
@@ -99,26 +99,26 @@ ProjectileTrueFlightLocomotionExtension.update = function (self, unit, input, dt
 			target_outline_extension.set_method("never")
 		end
 
-		local position, new_target = self.update_seeking_target(self, current_position, dt, t, self.on_target_time < 0.75)
+		local position, new_target = self:update_seeking_target(current_position, dt, t, self.on_target_time < 0.75)
 		new_position = position
 		self.target_unit = new_target
 	else
-		local position, new_target = self.update_seeking_target(self, current_position, dt, t, false)
+		local position, new_target = self:update_seeking_target(current_position, dt, t, false)
 		new_position = position
 	end
 
-	if not self.valid_position(self, new_position) then
-		self.stop(self)
+	if not self:valid_position(new_position) then
+		self:stop()
 		Managers.state.unit_spawner:mark_for_deletion(self.unit)
 
-		return 
+		return
 	end
 
 	local direction = new_position - current_position
 	local length = Vector3.length(direction)
 
 	if length <= 0.001 then
-		return 
+		return
 	end
 
 	if script_data.debug_projectiles then
@@ -149,9 +149,8 @@ ProjectileTrueFlightLocomotionExtension.update = function (self, unit, input, dt
 
 	self.angle = math.degrees_to_radians(DamageUtils.pitch_from_rotation(rotation))
 	self.moved = true
-
-	return 
 end
+
 ProjectileTrueFlightLocomotionExtension.valid_position = function (self, position)
 	local min = NetworkConstants.position.min
 	local max = NetworkConstants.position.max
@@ -168,6 +167,7 @@ ProjectileTrueFlightLocomotionExtension.valid_position = function (self, positio
 
 	return true
 end
+
 ProjectileTrueFlightLocomotionExtension.update_towards_target = function (self, position, dt)
 	local unit = self.unit
 	local target_unit = self.target_unit
@@ -194,6 +194,7 @@ ProjectileTrueFlightLocomotionExtension.update_towards_target = function (self, 
 
 	return new_position
 end
+
 ProjectileTrueFlightLocomotionExtension.update_seeking_target = function (self, position, dt, t, seeking)
 	local speed_multiplier = TrueFlightTemplates[self.true_flight_template].speed_multiplier
 	local dt = self.dt
@@ -206,23 +207,24 @@ ProjectileTrueFlightLocomotionExtension.update_seeking_target = function (self, 
 	local is_husk = self.is_husk
 	local trajectory = ProjectileTemplates.get_trajectory_template(trajectory_template_name, is_husk)
 	local new_position = trajectory.update(speed, angle, gravity, initial_position, target_vector, dt)
-	local target = seeking and self.find_new_target(self, position, dt, t)
+	local target = seeking and self:find_new_target(position, dt, t)
 
 	return new_position, target
 end
+
 ProjectileTrueFlightLocomotionExtension.find_new_target = function (self, position, dt, t)
 	if self.raycast_timer < t then
 		local time_between_raycasts = TrueFlightTemplates[self.true_flight_template].time_between_raycasts
 		self.raycast_timer = t + time_between_raycasts
-		local target = self.find_broadphase_target(self, position)
+		local target = self:find_broadphase_target(position)
 		self.target_node = "c_spine"
 
 		return target
 	end
-
-	return 
 end
+
 local ai_units = {}
+
 ProjectileTrueFlightLocomotionExtension.find_broadphase_target = function (self, position)
 	local broadphase_radius = TrueFlightTemplates[self.true_flight_template].broadphase_radius
 
@@ -241,7 +243,7 @@ ProjectileTrueFlightLocomotionExtension.find_broadphase_target = function (self,
 		end
 	end
 
-	if 0 < ai_units_n then
+	if ai_units_n > 0 then
 		table.shuffle(ai_units)
 
 		for i = 1, ai_units_n, 1 do
@@ -250,7 +252,7 @@ ProjectileTrueFlightLocomotionExtension.find_broadphase_target = function (self,
 			if ScriptUnit.has_extension(unit, "health_system") then
 				local health_extension = ScriptUnit.extension(unit, "health_system")
 
-				if health_extension.is_alive(health_extension) and not self.hit_units[unit] and self.legitimate_target(self, unit, position) then
+				if health_extension:is_alive() and not self.hit_units[unit] and self:legitimate_target(unit, position) then
 					return unit
 				end
 			end
@@ -259,6 +261,7 @@ ProjectileTrueFlightLocomotionExtension.find_broadphase_target = function (self,
 
 	return nil
 end
+
 ProjectileTrueFlightLocomotionExtension.legitimate_target = function (self, unit, position)
 	local target_position = Unit.world_position(unit, Unit.node(unit, "c_head"))
 	local current_direction = self.current_direction:unbox()
@@ -266,7 +269,7 @@ ProjectileTrueFlightLocomotionExtension.legitimate_target = function (self, unit
 	local wanted_direction = Vector3.normalize(direction_to_target)
 	local dot_value = Vector3.dot(current_direction, wanted_direction)
 
-	if -0.75 < dot_value then
+	if dot_value > -0.75 then
 		local physics_world = World.get_data(self.world, "physics_world")
 		local result = PhysicsWorld.immediate_raycast_actors(physics_world, position, wanted_direction, 900, "static_collision_filter", "filter_player_ray_projectile_static_only", "dynamic_collision_filter", "filter_player_ray_projectile_ai_only", "dynamic_collision_filter", "filter_player_ray_projectile_hitbox_only")
 		local INDEX_POSITION = 1
@@ -306,6 +309,7 @@ ProjectileTrueFlightLocomotionExtension.legitimate_target = function (self, unit
 
 	return false
 end
+
 ProjectileTrueFlightLocomotionExtension.use_this_later = function (self, unit, position, dt)
 	local target_unit = self.target_unit
 	local current_direction = self.current_direction:unbox()
@@ -321,7 +325,7 @@ ProjectileTrueFlightLocomotionExtension.use_this_later = function (self, unit, p
 	local dot_value = Vector3.dot(current_direction, wanted_direction)
 	local new_direction = current_direction
 
-	if -0.75 < dot_value then
+	if dot_value > -0.75 then
 		local up_vector = Vector3.up()
 		local right_vector = Vector3.right()
 		local current_rotation = Quaternion.look(current_direction)
@@ -337,12 +341,15 @@ ProjectileTrueFlightLocomotionExtension.use_this_later = function (self, unit, p
 
 	return new_position
 end
+
 ProjectileTrueFlightLocomotionExtension.moved_this_frame = function (self)
 	return self.moved
 end
+
 ProjectileTrueFlightLocomotionExtension.current_velocity = function (self)
 	return self.velocity:unbox()
 end
+
 ProjectileTrueFlightLocomotionExtension.destroy = function (self)
 	local target = self.target_unit
 
@@ -353,14 +360,12 @@ ProjectileTrueFlightLocomotionExtension.destroy = function (self)
 	end
 
 	self.hit_units = nil
-
-	return 
 end
+
 ProjectileTrueFlightLocomotionExtension.notify_hit_enemy = function (self, hit_unit)
 	self.hit_units[hit_unit] = true
-
-	return 
 end
+
 ProjectileTrueFlightLocomotionExtension.stop = function (self)
 	self.stopped = true
 	local target = self.target_unit
@@ -370,8 +375,6 @@ ProjectileTrueFlightLocomotionExtension.stop = function (self)
 
 		target_outline_extension.set_method("never")
 	end
-
-	return 
 end
 
-return 
+return

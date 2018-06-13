@@ -1,5 +1,6 @@
 local definitions = local_require("scripts/ui/views/area_indicator_ui_definitions")
 AreaIndicatorUI = class(AreaIndicatorUI)
+
 AreaIndicatorUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -7,27 +8,24 @@ AreaIndicatorUI.init = function (self, ingame_ui_context)
 	local world = ingame_ui_context.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	rawset(_G, "area_indicator_ui", self)
-
-	return 
 end
+
 AreaIndicatorUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.area_text_box = UIWidget.init(definitions.widget_definitions.area_text_box)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 AreaIndicatorUI.destroy = function (self)
 	rawset(_G, "area_indicator_ui", nil)
-
-	return 
 end
+
 AreaIndicatorUI.update = function (self, dt)
 	local player_manager = Managers.player
-	local local_player = player_manager.local_player(player_manager)
+	local local_player = player_manager:local_player()
 	local player_unit = local_player and local_player.player_unit
 
 	if Unit.alive(player_unit) then
@@ -47,14 +45,13 @@ AreaIndicatorUI.update = function (self, dt)
 	end
 
 	if self.area_text_box_animation == nil then
-		return 
+		return
 	end
 
-	self.update_animations(self, dt)
-	self.draw(self, dt)
-
-	return 
+	self:update_animations(dt)
+	self:draw(dt)
 end
+
 AreaIndicatorUI.update_animations = function (self, dt)
 	local area_text_box_animation = self.area_text_box_animation
 
@@ -65,9 +62,8 @@ AreaIndicatorUI.update_animations = function (self, dt)
 			self.area_text_box_animation = nil
 		end
 	end
-
-	return 
 end
+
 AreaIndicatorUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -76,8 +72,6 @@ AreaIndicatorUI.draw = function (self, dt)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 	UIRenderer.draw_widget(ui_renderer, self.area_text_box)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
 
-return 
+return

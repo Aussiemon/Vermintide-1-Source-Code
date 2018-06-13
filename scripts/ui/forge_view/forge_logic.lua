@@ -1,15 +1,18 @@
 local forge_printf = (script_data.forge_debug and printf) or function ()
-	return 
+	return
 end
 ForgeLogic = class(ForgeLogic)
+
 ForgeLogic.init = function (self)
-	return 
+	return
 end
+
 local UPGRADE_RARITY = {
 	common = "rare",
 	plentiful = "common",
 	rare = "exotic"
 }
+
 ForgeLogic.merge_items = function (self, items_to_merge, token_type, num_tokens)
 	forge_printf("[FORGE] merging items")
 
@@ -18,7 +21,7 @@ ForgeLogic.merge_items = function (self, items_to_merge, token_type, num_tokens)
 	if num_items == 0 then
 		forge_printf("[FORGE] no items to merge")
 
-		return 
+		return
 	end
 
 	local rarity = nil
@@ -53,14 +56,13 @@ ForgeLogic.merge_items = function (self, items_to_merge, token_type, num_tokens)
 	self._fuse_item = ScriptBackendItem.forge(items, num_tokens, token_type)
 
 	Managers.backend:commit()
-
-	return 
 end
+
 ForgeLogic.poll_forge = function (self)
 	local fuse_item = self._fuse_item
 
-	if fuse_item.is_done(fuse_item) and not fuse_item.error_message(fuse_item) then
-		local items = fuse_item.items(fuse_item)
+	if fuse_item:is_done() and not fuse_item:error_message() then
+		local items = fuse_item:items()
 		local backend_id, item_key = next(items)
 		local config = ItemMasterList[item_key]
 		local item_type = config.item_type
@@ -74,9 +76,8 @@ ForgeLogic.poll_forge = function (self)
 
 		return item_key, backend_id
 	end
-
-	return 
 end
+
 ForgeLogic.upgrade_item = function (self, backend_id, trait_name, token_type, traits_cost)
 	if not backend_id or not trait_name then
 		return false
@@ -85,7 +86,7 @@ ForgeLogic.upgrade_item = function (self, backend_id, trait_name, token_type, tr
 	local item_data = BackendUtils.get_item_from_masterlist(backend_id)
 	local trait_config = BuffTemplates[trait_name]
 	local buff_data = trait_config.buffs[1]
-	local value = self._randomize_trait_variable(self, item_data, trait_name, "proc_chance")
+	local value = self:_randomize_trait_variable(item_data, trait_name, "proc_chance")
 
 	if value then
 		forge_printf("[FORGE] upgrade_item: %s trait_name: %s proc_chance %d", item_data.name, trait_name, value)
@@ -105,6 +106,7 @@ ForgeLogic.upgrade_item = function (self, backend_id, trait_name, token_type, tr
 
 	return true
 end
+
 ForgeLogic.reroll_trait_variable = function (self, backend_id, trait_name, variable_name)
 	local item_info = ScriptBackendItem.get_item_from_id(backend_id)
 	local item_data = ItemMasterList[item_info.key]
@@ -114,7 +116,7 @@ ForgeLogic.reroll_trait_variable = function (self, backend_id, trait_name, varia
 	BackendUtils.remove_tokens(Vault.withdraw_single(VaultAltarRerollTraitProcCostKeyTable[rarity].cost, settings.cost), settings.token_type)
 
 	local item_data = BackendUtils.get_item_from_masterlist(backend_id)
-	local new_variable_value = self._randomize_trait_variable(self, item_data, trait_name, variable_name, true)
+	local new_variable_value = self:_randomize_trait_variable(item_data, trait_name, variable_name, true)
 	local traits = ScriptBackendItem.get_traits(backend_id)
 	local current_variable_value = nil
 
@@ -134,6 +136,7 @@ ForgeLogic.reroll_trait_variable = function (self, backend_id, trait_name, varia
 
 	return new_variable_value
 end
+
 ForgeLogic._randomize_trait_variable = function (self, item_data, trait_name, variable_name, reroll)
 	local trait_config = BuffTemplates[trait_name]
 	local buff_data = trait_config.buffs[1]
@@ -167,6 +170,7 @@ ForgeLogic._randomize_trait_variable = function (self, item_data, trait_name, va
 
 	return variable
 end
+
 ForgeLogic.melt_item = function (self, item_backend_id)
 	local item_data = BackendUtils.get_item_from_masterlist(item_backend_id)
 	local rarity = item_data.rarity
@@ -190,14 +194,14 @@ ForgeLogic.melt_item = function (self, item_backend_id)
 
 		return true, item_name, number_of_tokens
 	end
-
-	return 
 end
+
 local allowed_slot_types = {
 	melee = true,
 	ranged = true,
 	any = true
 }
+
 ForgeLogic.pray_for_loot = function (self, profile_name, rarity, slot_type)
 	fassert(allowed_slot_types[slot_type], "Can't produce items for slot of type %s", slot_type)
 
@@ -218,22 +222,20 @@ ForgeLogic.pray_for_loot = function (self, profile_name, rarity, slot_type)
 	self._prayer_item = ScriptBackendItem.data_server_script(pray_for_loot_script, "param_profile_name", profile_name, "param_rarity", rarity, "param_slot_type", slot_type)
 
 	Managers.backend:commit()
-
-	return 
 end
+
 ForgeLogic.poll_pray_for_loot = function (self)
 	local prayer_item = self._prayer_item
 
-	if prayer_item.is_done(prayer_item) and not prayer_item.error_message(prayer_item) then
+	if prayer_item:is_done() and not prayer_item:error_message() then
 		self._prayer_item = nil
-		local items = prayer_item.items(prayer_item)
+		local items = prayer_item:items()
 		local backend_id, item_key = next(items)
 
 		return item_key, backend_id
 	end
-
-	return 
 end
+
 ForgeLogic.reroll_traits = function (self, backend_id, item_is_equipped)
 	local item_info = ScriptBackendItem.get_item_from_id(backend_id)
 	local item_data = ItemMasterList[item_info.key]
@@ -254,7 +256,7 @@ ForgeLogic.reroll_traits = function (self, backend_id, item_is_equipped)
 		end
 	end
 
-	fassert(1 < #all_of_item_type, "Trying to reroll traits for item type %s and rarity %s, but there are only one such item", item_type, rarity)
+	fassert(#all_of_item_type > 1, "Trying to reroll traits for item type %s and rarity %s, but there are only one such item", item_type, rarity)
 
 	local old_item_key = item_data.key
 	local new_item_key = nil
@@ -277,9 +279,8 @@ ForgeLogic.reroll_traits = function (self, backend_id, item_is_equipped)
 	}
 
 	Managers.backend:commit()
-
-	return 
 end
+
 ForgeLogic.poll_reroll_traits = function (self)
 	local data = self._reroll_trait_data
 
@@ -288,9 +289,8 @@ ForgeLogic.poll_reroll_traits = function (self)
 
 		return data.new_item_key
 	end
-
-	return 
 end
+
 ForgeLogic.select_rerolled_traits = function (self, accept_new)
 	local data = self._reroll_trait_data
 	data.accept_new = accept_new
@@ -305,9 +305,8 @@ ForgeLogic.select_rerolled_traits = function (self, accept_new)
 	end
 
 	data.state = 3
-
-	return 
 end
+
 ForgeLogic.poll_select_rerolled_traits = function (self)
 	local data = self._reroll_trait_data
 
@@ -351,8 +350,6 @@ ForgeLogic.poll_select_rerolled_traits = function (self)
 			return {}
 		end
 	end
-
-	return 
 end
 
-return 
+return

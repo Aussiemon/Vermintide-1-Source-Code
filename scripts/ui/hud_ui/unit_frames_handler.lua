@@ -34,6 +34,7 @@ local MAX_HEALTH_DIVIDERS = 10
 local NUM_TEAM_MEMBERS = 3
 UnitFramesHandler = class(UnitFramesHandler)
 local DO_RELOAD = true
+
 UnitFramesHandler.init = function (self, ingame_ui_context)
 	self.ingame_ui_context = ingame_ui_context
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -53,13 +54,11 @@ UnitFramesHandler.init = function (self, ingame_ui_context)
 	self._unit_frames = {}
 	self.unit_frame_index_by_ui_id = {}
 
-	self._create_player_unit_frame(self)
-	self._create_team_members_unit_frames(self)
+	self:_create_player_unit_frame()
+	self:_create_team_members_unit_frames()
 	rawset(_G, "unit_frames_handler", self)
 
 	self._current_frame_index = 1
-
-	return 
 end
 
 local function get_portrait_name_by_profile_index(profile_index)
@@ -76,15 +75,15 @@ end
 
 UnitFramesHandler._create_player_unit_frame = function (self)
 	local frame_type = "player"
-	local unit_frame = self._create_unit_frame_by_type(self, frame_type)
+	local unit_frame = self:_create_unit_frame_by_type(frame_type)
 	local player = self.my_player
-	local player_ui_id = player.ui_id(player)
+	local player_ui_id = player:ui_id()
 	local player_data = {
 		player_ui_id = player_ui_id,
 		player = player,
 		own_player = true,
-		peer_id = player.network_id(player),
-		local_player_id = player.local_player_id(player)
+		peer_id = player:network_id(),
+		local_player_id = player:local_player_id()
 	}
 	unit_frame.player_data = player_data
 	unit_frame.sync = true
@@ -101,23 +100,21 @@ UnitFramesHandler._create_player_unit_frame = function (self)
 	UICleanUI.register_area(self.cleanui, "unit_frame_" .. frame_type, self._unit_frames[1].widget, position, size)
 
 	self.unit_frame_index_by_ui_id[player_ui_id] = 1
-
-	return 
 end
+
 UnitFramesHandler._create_team_members_unit_frames = function (self)
 	local player_manager = self.player_manager
 	local players = self.player_manager:human_and_bot_players()
 	local unit_frames = self._unit_frames
 
 	for i = 1, NUM_TEAM_MEMBERS, 1 do
-		local unit_frame = self._create_unit_frame_by_type(self, "team", i)
+		local unit_frame = self:_create_unit_frame_by_type("team", i)
 		unit_frames[#unit_frames + 1] = unit_frame
 	end
 
-	self._align_team_member_frames(self)
-
-	return 
+	self:_align_team_member_frames()
 end
+
 UnitFramesHandler._create_unit_frame_by_type = function (self, frame_type, frame_index)
 	local ingame_ui_context = self.ingame_ui_context
 	local unit_frame = {}
@@ -171,6 +168,7 @@ UnitFramesHandler._create_unit_frame_by_type = function (self, frame_type, frame
 
 	return unit_frame
 end
+
 UnitFramesHandler._get_unused_unit_frame = function (self)
 	for index, unit_frame in ipairs(self._unit_frames) do
 		local player_data = unit_frame.player_data
@@ -179,32 +177,30 @@ UnitFramesHandler._get_unused_unit_frame = function (self)
 			return unit_frame, index
 		end
 	end
-
-	return 
 end
+
 UnitFramesHandler._get_unit_frame_by_connecting_peer_id = function (self, peer_id)
 	for index, unit_frame in ipairs(self._unit_frames) do
 		if unit_frame.player_data.connecting_peer_id == peer_id then
 			return unit_frame, index
 		end
 	end
-
-	return 
 end
+
 UnitFramesHandler._reset_unit_frame = function (self, unit_frame)
 	local widget = unit_frame.widget
 
-	widget.reset(widget)
+	widget:reset()
 	table.clear(unit_frame.player_data)
 	table.clear(unit_frame.data)
 
 	unit_frame.sync = false
-
-	return 
 end
+
 local temp_active_ui_ids = {}
 local temp_active_peer_ids = {}
 local temp_connecting_peer_ids = {}
+
 UnitFramesHandler._handle_unit_frame_assigning = function (self)
 	local player_manager = self.player_manager
 	local players = self.player_manager:human_and_bot_players()
@@ -219,8 +215,8 @@ UnitFramesHandler._handle_unit_frame_assigning = function (self)
 	local frames_changed = false
 
 	for index, player in pairs(players) do
-		local player_ui_id = player.ui_id(player)
-		local player_peer_id = player.network_id(player)
+		local player_ui_id = player:ui_id()
+		local player_peer_id = player:network_id()
 		temp_active_ui_ids[player_ui_id] = true
 		temp_active_peer_ids[player_peer_id] = true
 		local own_player = player == my_player
@@ -236,10 +232,10 @@ UnitFramesHandler._handle_unit_frame_assigning = function (self)
 				if different_player then
 					avaiable_unit_frame = unit_frame
 				else
-					avaiable_unit_frame, unit_frame_index = self._get_unit_frame_by_connecting_peer_id(self, player_peer_id)
+					avaiable_unit_frame, unit_frame_index = self:_get_unit_frame_by_connecting_peer_id(player_peer_id)
 
 					if not avaiable_unit_frame then
-						avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+						avaiable_unit_frame, unit_frame_index = self:_get_unused_unit_frame()
 					end
 				end
 
@@ -253,36 +249,35 @@ UnitFramesHandler._handle_unit_frame_assigning = function (self)
 						player = player,
 						own_player = own_player,
 						peer_id = player_peer_id,
-						local_player_id = player.local_player_id(player)
+						local_player_id = player:local_player_id()
 					}
 					avaiable_unit_frame.player_data = player_data
 					avaiable_unit_frame.sync = true
 					frames_changed = true
 
-					if player.is_player_controlled(player) then
+					if player:is_player_controlled() then
 						unit_frames_used_by_players = unit_frames_used_by_players + 1
 					end
 				end
-			elseif player.is_player_controlled(player) then
+			elseif player:is_player_controlled() then
 				unit_frames_used_by_players = unit_frames_used_by_players + 1
 			end
 		end
 	end
 
-	if self._handle_connecting_peers(self, temp_active_peer_ids, unit_frames_used_by_players) then
+	if self:_handle_connecting_peers(temp_active_peer_ids, unit_frames_used_by_players) then
 		frames_changed = true
 	end
 
-	if self._cleanup_unused_unit_frames(self, temp_active_ui_ids, temp_connecting_peer_ids) then
+	if self:_cleanup_unused_unit_frames(temp_active_ui_ids, temp_connecting_peer_ids) then
 		frames_changed = true
 	end
 
 	if frames_changed then
-		self._align_team_member_frames(self)
+		self:_align_team_member_frames()
 	end
-
-	return 
 end
+
 UnitFramesHandler._handle_connecting_peers = function (self, active_peer_ids, num_unit_frames_used)
 	local added_connection = false
 
@@ -292,17 +287,17 @@ UnitFramesHandler._handle_connecting_peers = function (self, active_peer_ids, nu
 		local members = self.lobby:members()
 
 		if members then
-			local lobby_members = members.get_members(members)
+			local lobby_members = members:get_members()
 
 			for idx, peer_id in ipairs(lobby_members) do
 				if not active_peer_ids[peer_id] then
-					local unit_frame = self._get_unit_frame_by_connecting_peer_id(self, peer_id)
+					local unit_frame = self:_get_unit_frame_by_connecting_peer_id(peer_id)
 
 					if not unit_frame then
-						local avaiable_unit_frame, unit_frame_index = self._get_unused_unit_frame(self)
+						local avaiable_unit_frame, unit_frame_index = self:_get_unused_unit_frame()
 
 						if avaiable_unit_frame then
-							self._reset_unit_frame(self, avaiable_unit_frame)
+							self:_reset_unit_frame(avaiable_unit_frame)
 
 							avaiable_unit_frame.player_data = {
 								connecting_peer_id = peer_id
@@ -324,6 +319,7 @@ UnitFramesHandler._handle_connecting_peers = function (self, active_peer_ids, nu
 
 	return added_connection
 end
+
 UnitFramesHandler._cleanup_unused_unit_frames = function (self, active_ui_ids, connecting_peer_ids)
 	local frames_cleared = false
 
@@ -335,7 +331,7 @@ UnitFramesHandler._cleanup_unused_unit_frames = function (self, active_ui_ids, c
 		local clear_unit_frame = (connecting_peer_id and not connecting_peer_ids[connecting_peer_id]) or (player_ui_id and not active_ui_ids[player_ui_id])
 
 		if clear_unit_frame then
-			self._reset_unit_frame(self, unit_frame)
+			self:_reset_unit_frame(unit_frame)
 
 			frames_cleared = true
 
@@ -347,13 +343,14 @@ UnitFramesHandler._cleanup_unused_unit_frames = function (self, active_ui_ids, c
 
 	return frames_cleared
 end
+
 UnitFramesHandler._align_team_member_frames = function (self)
 	local position_y = 100
 	local start_offset_x = 70
 	local count = 0
 
 	for index, unit_frame in ipairs(self._unit_frames) do
-		if 1 < index then
+		if index > 1 then
 			local widget = unit_frame.widget
 			local player_data = unit_frame.player_data
 			local peer_id = player_data.peer_id
@@ -362,25 +359,23 @@ UnitFramesHandler._align_team_member_frames = function (self)
 			if peer_id or connecting_peer_id then
 				local position_x = start_offset_x + count * 340
 
-				widget.set_position(widget, position_x, position_y)
+				widget:set_position(position_x, position_y)
 
 				count = count + 1
 
-				widget.set_visible(widget, true)
+				widget:set_visible(true)
 			else
-				widget.set_visible(widget, false)
+				widget:set_visible(false)
 			end
 		end
 	end
-
-	return 
 end
 
 local function get_ammunition_count(left_hand_wielded_unit, right_hand_wielded_unit, item_template)
 	local ammo_extension = nil
 
 	if not item_template.ammo_data then
-		return 
+		return
 	end
 
 	local ammo_unit_hand = item_template.ammo_data.ammo_hand
@@ -390,12 +385,12 @@ local function get_ammunition_count(left_hand_wielded_unit, right_hand_wielded_u
 	elseif ammo_unit_hand == "left" then
 		ammo_extension = ScriptUnit.extension(left_hand_wielded_unit, "ammo_system")
 	else
-		return 
+		return
 	end
 
-	local ammo_count = ammo_extension.ammo_count(ammo_extension)
-	local remaining_ammo = ammo_extension.remaining_ammo(ammo_extension)
-	local single_clip = ammo_extension.using_single_clip(ammo_extension)
+	local ammo_count = ammo_extension:ammo_count()
+	local remaining_ammo = ammo_extension:remaining_ammo()
+	local single_clip = ammo_extension:using_single_clip()
 
 	return ammo_count, remaining_ammo, single_clip
 end
@@ -410,14 +405,12 @@ local function get_overcharge_amount(left_hand_wielded_unit, right_hand_wielded_
 	end
 
 	if overcharge_extension then
-		local overcharge_fraction = overcharge_extension.overcharge_fraction(overcharge_extension)
-		local threshold_fraction = overcharge_extension.threshold_fraction(overcharge_extension)
-		local anim_blend_overcharge = overcharge_extension.get_anim_blend_overcharge(overcharge_extension)
+		local overcharge_fraction = overcharge_extension:overcharge_fraction()
+		local threshold_fraction = overcharge_extension:threshold_fraction()
+		local anim_blend_overcharge = overcharge_extension:get_anim_blend_overcharge()
 
 		return true, overcharge_fraction, threshold_fraction, anim_blend_overcharge
 	end
-
-	return 
 end
 
 UnitFramesHandler._set_player_extensions = function (self, player_data, player_unit)
@@ -427,8 +420,6 @@ UnitFramesHandler._set_player_extensions = function (self, player_data, player_u
 			assert(type(v) == "table")
 
 			mt[k] = v
-
-			return 
 		end,
 		__index = function (t, k)
 			return mt[k]
@@ -469,13 +460,13 @@ UnitFramesHandler._set_player_extensions = function (self, player_data, player_u
 
 	player_data.extensions = extensions
 	player_data.player_unit = player_unit
-
-	return 
 end
+
 local empty_features_list = {}
+
 UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if not unit_frame.sync then
-		return 
+		return
 	end
 
 	local features_list = unit_frame.features_list or empty_features_list
@@ -483,7 +474,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	local player = player_data.player
 
 	if not player then
-		return 
+		return
 	end
 
 	local peer_id = player_data.peer_id
@@ -496,14 +487,14 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 		local player_unit = player.player_unit
 
 		if player_unit then
-			self._set_player_extensions(self, player_data, player_unit)
+			self:_set_player_extensions(player_data, player_unit)
 		end
 	end
 
-	local profile_index = profile_synchronizer.profile_by_peer(profile_synchronizer, peer_id, local_player_id)
+	local profile_index = profile_synchronizer:profile_by_peer(peer_id, local_player_id)
 
 	if not profile_index then
-		return 
+		return
 	end
 
 	local health_percent, active_percentage, has_shield, is_dead, is_knocked_down, needs_help, is_wounded, is_ready_for_assisted_respawn = nil
@@ -525,30 +516,30 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 		local damage_extension = extensions.damage
 		local inventory_extension = extensions.inventory
 
-		if status_extension.is_dead(status_extension) then
+		if status_extension:is_dead() then
 			health_percent = 0
 		else
-			health_percent = health_extension.current_health_percent(health_extension)
+			health_percent = health_extension:current_health_percent()
 		end
 
-		is_wounded = status_extension.is_wounded(status_extension)
-		is_knocked_down = status_extension.is_knocked_down(status_extension) and 0 < health_percent
-		is_ready_for_assisted_respawn = status_extension.is_ready_for_assisted_respawn(status_extension)
-		needs_help = status_extension.is_grabbed_by_pack_master(status_extension) or is_ready_for_assisted_respawn or status_extension.is_hanging_from_hook(status_extension) or status_extension.is_pounced_down(status_extension) or status_extension.get_is_ledge_hanging(status_extension)
+		is_wounded = status_extension:is_wounded()
+		is_knocked_down = status_extension:is_knocked_down() and health_percent > 0
+		is_ready_for_assisted_respawn = status_extension:is_ready_for_assisted_respawn()
+		needs_help = status_extension:is_grabbed_by_pack_master() or is_ready_for_assisted_respawn or status_extension:is_hanging_from_hook() or status_extension:is_pounced_down() or status_extension:get_is_ledge_hanging()
 		local max_health = health_extension.unmodified_max_health
 		local shield_amount = nil
-		has_shield, shield_amount = damage_extension.has_assist_shield(damage_extension)
+		has_shield, shield_amount = damage_extension:has_assist_shield()
 
 		if has_shield then
 			shield_percent = shield_amount / max_health
 		end
 
-		local num_grimoires = buff_extension.num_buff_type(buff_extension, "grimoire_health_debuff")
-		local multiplier = buff_extension.apply_buffs_to_value(buff_extension, PlayerUnitDamageSettings.GRIMOIRE_HEALTH_DEBUFF, StatBuffIndex.CURSE_PROTECTION)
+		local num_grimoires = buff_extension:num_buff_type("grimoire_health_debuff")
+		local multiplier = buff_extension:apply_buffs_to_value(PlayerUnitDamageSettings.GRIMOIRE_HEALTH_DEBUFF, StatBuffIndex.CURSE_PROTECTION)
 		active_percentage = 1 - num_grimoires * multiplier
 		local dialogue_extension = extensions.dialogue
 		is_talking = dialogue_extension.currently_playing_dialogue ~= nil
-		equipment = inventory_extension.equipment(inventory_extension)
+		equipment = inventory_extension:equipment()
 	else
 		health_percent = 0
 		active_percentage = 1
@@ -556,8 +547,8 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	end
 
 	local is_dead = health_percent <= 0
-	local is_player_controlled = player.is_player_controlled(player)
-	local display_name = UIRenderer.crop_text(player.name(player), 26)
+	local is_player_controlled = player:is_player_controlled()
+	local display_name = UIRenderer.crop_text(player:name(), 26)
 	local level_text = (is_player_controlled and (ExperienceSettings.get_player_level(player) or "")) or "BOT"
 	local portrait_texture, portrait_texture_point_sample = get_portrait_name_by_profile_index(profile_index)
 	local is_player_server = self.host_peer_id == peer_id
@@ -587,7 +578,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.connecting ~= connecting then
 		data.connecting = connecting
 
-		widget.set_connecting_status(widget, connecting)
+		widget:set_connecting_status(connecting)
 	end
 
 	if data.is_knocked_down ~= is_knocked_down then
@@ -614,7 +605,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.is_talking ~= is_talking then
 		data.is_talking = is_talking
 
-		widget.set_talking(widget, is_talking)
+		widget:set_talking(is_talking)
 
 		dirty = true
 	end
@@ -622,7 +613,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.show_overlay ~= show_overlay then
 		data.show_overlay = show_overlay
 
-		widget.set_overlay_visibility(widget, show_overlay)
+		widget:set_overlay_visibility(show_overlay)
 
 		dirty = true
 	end
@@ -630,7 +621,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.show_icon ~= show_icon then
 		data.show_icon = show_icon
 
-		widget.set_icon_visibility(widget, show_icon)
+		widget:set_icon_visibility(show_icon)
 
 		dirty = true
 	end
@@ -644,7 +635,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.portrait_texture ~= portrait_texture then
 		data.portrait_texture = portrait_texture
 
-		widget.set_potrait(widget, portrait_texture)
+		widget:set_potrait(portrait_texture)
 
 		dirty = true
 	end
@@ -652,7 +643,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.level_text ~= level_text then
 		data.level_text = level_text
 
-		widget.set_player_level(widget, level_text)
+		widget:set_player_level(level_text)
 
 		dirty = true
 	end
@@ -660,7 +651,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.display_name ~= display_name then
 		data.display_name = display_name
 
-		widget.set_player_name(widget, display_name)
+		widget:set_player_name(display_name)
 
 		dirty = true
 	end
@@ -668,13 +659,13 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.is_host ~= is_host then
 		data.is_host = is_host
 
-		widget.set_host_status(widget, is_host)
+		widget:set_host_status(is_host)
 
 		dirty = true
 	end
 
 	if update_portrait_status then
-		widget.set_portrait_status(widget, is_knocked_down, needs_help)
+		widget:set_portrait_status(is_knocked_down, needs_help)
 
 		dirty = true
 	end
@@ -686,7 +677,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 		data.health_percent = health_percent
 		local low_health = (not is_dead and not is_knocked_down and health_percent < UISettings.unit_frames.low_health_threshold) or nil
 
-		widget.set_health_percentage(widget, health_percent, active_percentage, low_health)
+		widget:set_health_percentage(health_percent, active_percentage, low_health)
 
 		dirty = true
 	end
@@ -694,7 +685,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.health_bar_divider_count ~= health_bar_divider_count then
 		data.health_bar_divider_count = health_bar_divider_count
 
-		widget.set_health_bar_divider_amount(widget, health_bar_divider_count)
+		widget:set_health_bar_divider_amount(health_bar_divider_count)
 
 		dirty = true
 	end
@@ -702,13 +693,13 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if data.active_percentage ~= active_percentage then
 		data.active_percentage = active_percentage
 
-		widget.set_active_percentage(widget, active_percentage)
+		widget:set_active_percentage(active_percentage)
 
 		dirty = true
 	end
 
 	if data.has_shield ~= has_shield or data.shield_percent ~= data.shield_percent or (has_shield and current_health_percent ~= health_percent) or (has_shield and current_active_percentage ~= active_percentage) then
-		widget.set_shielded(widget, has_shield, shield_percent)
+		widget:set_shielded(has_shield, shield_percent)
 
 		data.has_shield = has_shield
 		data.shield_percent = shield_percent
@@ -747,7 +738,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 						stored_slot_data.visible = slot_visible
 						stored_slot_data.item_name = item_name
 
-						widget.set_inventory_slot_data(widget, slot_name, slot_visible, item_name)
+						widget:set_inventory_slot_data(slot_name, slot_visible, item_name)
 
 						dirty = true
 						slot_dirty = true
@@ -756,7 +747,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 					if stored_slot_data.is_wielded ~= is_wielded or slot_dirty then
 						stored_slot_data.is_wielded = is_wielded
 
-						widget.set_selected_slot(widget, slot_name, item_name, is_wielded, slot_visible)
+						widget:set_selected_slot(slot_name, item_name, is_wielded, slot_visible)
 
 						dirty = true
 					end
@@ -775,7 +766,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 						local is_wielded = wielded == item_data
 
 						if stored_slot_data.is_wielded ~= is_wielded or stored_slot_data.item_name ~= item_name then
-							widget.set_equipped_weapon_info(widget, slot_name, is_wielded, item_name, hud_icon)
+							widget:set_equipped_weapon_info(slot_name, is_wielded, item_name, hud_icon)
 
 							if stored_slot_data.item_name ~= item_name then
 								stored_slot_data.no_ammo = nil
@@ -797,13 +788,13 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 								stored_slot_data.remaining_ammo = remaining_ammo
 								stored_slot_data.no_ammo = nil
 
-								widget.set_ammo_for_slot(widget, slot_name, ammo_count, remaining_ammo, using_single_clip)
+								widget:set_ammo_for_slot(slot_name, ammo_count, remaining_ammo, using_single_clip)
 
 								dirty = true
 							end
 
 							if slot_name == "slot_ranged" and stored_slot_data.overcharge_fraction then
-								widget.set_overcharge_percentage(widget, false, nil)
+								widget:set_overcharge_percentage(false, nil)
 
 								stored_slot_data.overcharge_fraction = nil
 							end
@@ -812,7 +803,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 								stored_slot_data.no_ammo = true
 								dirty = true
 
-								widget.set_ammo_for_slot(widget, slot_name, nil, nil)
+								widget:set_ammo_for_slot(slot_name, nil, nil)
 
 								stored_slot_data.overcharge_fraction = nil
 								stored_slot_data.ammo_count = nil
@@ -823,7 +814,7 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 								local has_overcharge, overcharge_fraction, threshold_fraction = get_overcharge_amount(slot_data.left_unit_1p, slot_data.right_unit_1p)
 
 								if stored_slot_data.overcharge_fraction ~= overcharge_fraction then
-									widget.set_overcharge_percentage(widget, has_overcharge, overcharge_fraction)
+									widget:set_overcharge_percentage(has_overcharge, overcharge_fraction)
 
 									stored_slot_data.overcharge_fraction = overcharge_fraction
 								end
@@ -838,25 +829,23 @@ UnitFramesHandler._sync_player_stats = function (self, unit_frame)
 	if update_health_bar_status then
 		local show_health_bar = not is_ready_for_assisted_respawn
 
-		widget.set_health_bar_status(widget, show_health_bar, is_knocked_down, is_wounded)
+		widget:set_health_bar_status(show_health_bar, is_knocked_down, is_wounded)
 
 		dirty = true
 	end
 
 	if dirty then
-		widget.set_dirty(widget)
+		widget:set_dirty()
 	end
-
-	return 
 end
+
 UnitFramesHandler.destroy = function (self)
 	self.ui_animator = nil
 
-	self.set_visible(self, false)
+	self:set_visible(false)
 	rawset(_G, "unit_frames_handler", nil)
-
-	return 
 end
+
 UnitFramesHandler.set_visible = function (self, visible)
 	self._is_visible = visible
 
@@ -867,37 +856,34 @@ UnitFramesHandler.set_visible = function (self, visible)
 			unit_frame.widget:set_visible(visible)
 		end
 	end
-
-	return 
 end
+
 UnitFramesHandler.on_gamepad_activated = function (self)
 	local my_unit_frame = self._unit_frames[1]
 
 	if not my_unit_frame.gamepad_version then
 		my_unit_frame.widget:destroy()
 
-		local new_unit_frame = self._create_unit_frame_by_type(self, "player")
+		local new_unit_frame = self:_create_unit_frame_by_type("player")
 		new_unit_frame.player_data = my_unit_frame.player_data
 		new_unit_frame.sync = true
 		self._unit_frames[1] = new_unit_frame
 	end
-
-	return 
 end
+
 UnitFramesHandler.on_gamepad_deactivated = function (self)
 	local my_unit_frame = self._unit_frames[1]
 
 	if my_unit_frame.gamepad_version then
 		my_unit_frame.widget:destroy()
 
-		local new_unit_frame = self._create_unit_frame_by_type(self, "player")
+		local new_unit_frame = self:_create_unit_frame_by_type("player")
 		new_unit_frame.player_data = my_unit_frame.player_data
 		new_unit_frame.sync = true
 		self._unit_frames[1] = new_unit_frame
 	end
-
-	return 
 end
+
 UnitFramesHandler.update = function (self, dt, t, my_player)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 
@@ -905,19 +891,19 @@ UnitFramesHandler.update = function (self, dt, t, my_player)
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 	end
 
 	Profiler.start("handle_unit_frame_assigning")
-	self._handle_unit_frame_assigning(self)
+	self:_handle_unit_frame_assigning()
 	Profiler.stop("handle_unit_frame_assigning")
 	Profiler.start("sync")
-	self._sync_player_stats(self, self._unit_frames[self._current_frame_index])
+	self:_sync_player_stats(self._unit_frames[self._current_frame_index])
 
 	self._current_frame_index = 1 + self._current_frame_index % #self._unit_frames
 
@@ -930,10 +916,10 @@ UnitFramesHandler.update = function (self, dt, t, my_player)
 	end
 
 	Profiler.start("handle_resolution_modified")
-	self._handle_resolution_modified(self)
+	self:_handle_resolution_modified()
 	Profiler.stop("handle_resolution_modified")
 	Profiler.start("draw")
-	self._draw(self, dt)
+	self:_draw(dt)
 	Profiler.stop("draw")
 
 	if DO_RELOAD then
@@ -943,21 +929,19 @@ UnitFramesHandler.update = function (self, dt, t, my_player)
 			table.clear(unit_frame.data)
 		end
 	end
-
-	return 
 end
+
 UnitFramesHandler._handle_resolution_modified = function (self)
 	if RESOLUTION_LOOKUP.modified then
 		for index, unit_frame in ipairs(self._unit_frames) do
 			unit_frame.widget:on_resolution_modified()
 		end
 	end
-
-	return 
 end
+
 UnitFramesHandler._draw = function (self, dt)
 	if not self._is_visible then
-		return 
+		return
 	end
 
 	local ui_renderer = self.ui_renderer
@@ -966,10 +950,8 @@ UnitFramesHandler._draw = function (self, dt)
 	for index, unit_frame in ipairs(self._unit_frames) do
 		local widget = unit_frame.widget
 
-		widget.draw(widget, dt)
+		widget:draw(dt)
 	end
-
-	return 
 end
 
-return 
+return

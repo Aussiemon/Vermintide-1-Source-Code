@@ -1,43 +1,42 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTBotHealOtherAction = class(BTBotHealOtherAction, BTNode)
+
 BTBotHealOtherAction.init = function (self, ...)
 	BTBotHealOtherAction.super.init(self, ...)
-
-	return 
 end
+
 BTBotHealOtherAction.name = "BTBotHealOtherAction"
+
 BTBotHealOtherAction.enter = function (self, unit, blackboard, t)
 	local input_ext = blackboard.input_extension
 	local soft_aiming = true
 	local use_rotation = false
 
-	input_ext.set_aiming(input_ext, true, soft_aiming, use_rotation)
+	input_ext:set_aiming(true, soft_aiming, use_rotation)
 
 	local interaction_unit = blackboard.target_ally_unit
 	blackboard.current_interaction_unit = interaction_unit
 	local interaction_ext = blackboard.interaction_extension
 
-	interaction_ext.set_exclusive_interaction_unit(interaction_ext, interaction_unit)
+	interaction_ext:set_exclusive_interaction_unit(interaction_unit)
 
 	blackboard.is_healing_other = true
 	self._initializing = true
-
-	return 
 end
+
 BTBotHealOtherAction.leave = function (self, unit, blackboard, t)
 	local input_ext = blackboard.input_extension
 
-	input_ext.set_aiming(input_ext, false)
+	input_ext:set_aiming(false)
 
 	blackboard.current_interaction_unit = nil
 	blackboard.is_healing_other = false
 	local interaction_ext = blackboard.interaction_extension
 
-	interaction_ext.set_exclusive_interaction_unit(interaction_ext, nil)
-
-	return 
+	interaction_ext:set_exclusive_interaction_unit(nil)
 end
+
 BTBotHealOtherAction.run = function (self, unit, blackboard, t, dt)
 	local interaction_unit = blackboard.current_interaction_unit
 
@@ -56,7 +55,7 @@ BTBotHealOtherAction.run = function (self, unit, blackboard, t, dt)
 
 	local input_ext = blackboard.input_extension
 
-	input_ext.set_aim_position(input_ext, aim_position)
+	input_ext:set_aim_position(aim_position)
 
 	if self._initializing then
 		self._initializing = false
@@ -69,4 +68,4 @@ BTBotHealOtherAction.run = function (self, unit, blackboard, t, dt)
 	return "running"
 end
 
-return 
+return

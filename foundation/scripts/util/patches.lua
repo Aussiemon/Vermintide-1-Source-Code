@@ -9,8 +9,6 @@ local meta = {
 		end
 
 		rawset(t, k, v)
-
-		return 
 	end,
 	__index = function (t, k)
 		local info = debug.getinfo(2, "S")
@@ -18,8 +16,6 @@ local meta = {
 		if k ~= "to_console_line" and info and info.what ~= "main" and info.what ~= "C" then
 			error(string.format("Cannot access undeclared global %q", k), 2)
 		end
-
-		return 
 	end
 }
 
@@ -27,7 +23,7 @@ setmetatable(_G, meta)
 
 if PLATFORM == "ps4" or PLATFORM == "xb1" then
 	if rawget(_G, "FREEN_LOLS") then
-		return 
+		return
 	end
 
 	rawset(_G, "FREEN_LOLS", true)
@@ -68,132 +64,174 @@ if PLATFORM == "ps4" or PLATFORM == "xb1" then
 		}
 		TerrainDecoration = setmetatable({}, NilMeta)
 		LandscapeDecoration = setmetatable({}, NilMeta)
+
 		Application.apply_user_settings = function ()
-			return 
+			return
 		end
+
 		Application.user_settings_load_error = function ()
-			return 
+			return
 		end
+
 		Application.enum_display_modes = function ()
 			return {}
 		end
+
 		Application.open_url_in_browser = function ()
-			return 
+			return
 		end
+
 		Application.process_id = function ()
 			return 4919
 		end
+
 		Application.restart_file_log = function ()
-			return 
+			return
 		end
+
 		Window = Window or {}
+
 		Window.set_title = function ()
-			return 
+			return
 		end
+
 		Window.mouse_focus = function ()
-			return 
+			return
 		end
+
 		Window.set_mouse_focus = function ()
-			return 
+			return
 		end
+
 		Window.set_focus = function ()
-			return 
+			return
 		end
+
 		Window.has_focus = function ()
-			return 
+			return
 		end
+
 		Window.set_title = function ()
-			return 
+			return
 		end
+
 		Window.show_cursor = function ()
-			return 
+			return
 		end
+
 		Window.set_show_cursor = function ()
-			return 
+			return
 		end
+
 		Window.clip_cursor = function ()
-			return 
+			return
 		end
+
 		Window.set_clip_cursor = function ()
-			return 
+			return
 		end
+
 		Window.set_cursor = function ()
-			return 
+			return
 		end
+
 		Window.set_resizable = function ()
-			return 
+			return
 		end
+
 		Window.is_resizable = function ()
-			return 
+			return
 		end
+
 		DisplayAdapter = DisplayAdapter or {}
+
 		DisplayAdapter.num_adapters = function ()
 			return 0
 		end
+
 		DisplayAdapter.name = function ()
 			return "fml"
 		end
+
 		DisplayAdapter.num_outputs = function ()
 			return 0
 		end
+
 		DisplayAdapter.num_modes = function ()
 			return 0
 		end
+
 		DisplayAdapter.mode = function ()
 			return 1, 1
 		end
+
 		CommandWindow = CommandWindow or {}
+
 		CommandWindow.print = function ()
-			return 
+			return
 		end
+
 		CommandWindow.open = function ()
-			return 
+			return
 		end
+
 		CommandWindow.title = function ()
 			return "fml"
 		end
+
 		CommandWindow.close = function ()
-			return 
+			return
 		end
+
 		CommandWindow.read_line = function ()
-			return 
+			return
 		end
+
 		CommandWindow.update = function ()
-			return 
+			return
 		end
 	end
 
 	if P ~= "win32" then
 		Application.set_max_frame_stacking = function ()
-			return 
+			return
 		end
+
 		Application.save_render_target = function ()
-			return 
+			return
 		end
+
 		Window = Window or {}
+
 		Window.open = function ()
-			return 
+			return
 		end
+
 		Window.close = function ()
-			return 
+			return
 		end
+
 		Window.is_closing = function ()
-			return 
+			return
 		end
+
 		Window.minimize = function ()
-			return 
+			return
 		end
+
 		Window.set_keystroke_enabled = function ()
-			return 
+			return
 		end
+
 		Window.KEYSTROKE_WINDOWS = 0
 		Window.KEYSTROKE_ALT_TAB = 0
 		Window.KEYSTROKE_ALT_ENTER = 0
 		Window.KEYSTROKE_ALT_F4 = 0
+
 		Window.set_ime_enabled = function ()
-			return 
+			return
 		end
 	end
 end
 
-return 
+return

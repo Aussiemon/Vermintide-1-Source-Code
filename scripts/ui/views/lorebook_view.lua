@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/ui/views/lorebook_page_layout")
 require("scripts/ui/views/lorebook_pages")
 
@@ -16,6 +14,7 @@ local input_description_data = {
 	name = "lorebook_menu"
 }
 LorebookView = class(LorebookView)
+
 LorebookView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -25,23 +24,23 @@ LorebookView.init = function (self, ingame_ui_context)
 	self.wwise_world = ingame_ui_context.dialogue_system.wwise_world
 	local input_manager = self.input_manager
 
-	input_manager.create_input_service(input_manager, "lorebook_menu", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "lorebook_menu", "keyboard")
-	input_manager.map_device_to_service(input_manager, "lorebook_menu", "mouse")
-	input_manager.map_device_to_service(input_manager, "lorebook_menu", "gamepad")
+	input_manager:create_input_service("lorebook_menu", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("lorebook_menu", "keyboard")
+	input_manager:map_device_to_service("lorebook_menu", "mouse")
+	input_manager:map_device_to_service("lorebook_menu", "gamepad")
 
 	self.list_elements = {}
 	self.index_list_elements = {}
 	self.index_array = {}
 	self.page_layout = table.clone(JournalPageLayout)
-	self.new_page_paths = self.initialize_new_page_paths(self)
-	self.locked_page_paths = self.initialize_locked_page_paths(self)
+	self.new_page_paths = self:initialize_new_page_paths()
+	self.locked_page_paths = self:initialize_locked_page_paths()
 
 	rawset(_G, "global_lorebook_view", self)
 
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.controller_cooldown = 0
 	local input_service = self.input_manager:get_service("lorebook_menu")
@@ -75,12 +74,12 @@ LorebookView.init = function (self, ingame_ui_context)
 			}
 		}
 	end
-
-	return 
 end
+
 LorebookView.input_service = function (self)
 	return self.input_manager:get_service("lorebook_menu")
 end
+
 LorebookView.destroy = function (self)
 	rawset(_G, "global_lorebook_view", nil)
 	self.menu_input_description:destroy()
@@ -88,11 +87,11 @@ LorebookView.destroy = function (self)
 	self.menu_input_description = nil
 
 	GarbageLeakDetector.register_object(self, "LorebookView")
-
-	return 
 end
+
 local widget_definitions = definitions.widget_definitions
 local create_simple_texture_widget = definitions.create_simple_texture_widget
+
 LorebookView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.background_widgets = {
@@ -140,9 +139,8 @@ LorebookView.create_ui_elements = function (self)
 	local index_item_styles = index_list_style.item_styles
 	self.index_list = index_list
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, definitions.animations)
-
-	return 
 end
+
 LorebookView.initialize_locked_page_paths = function (self)
 	local lorebook_collectable_pages = LorebookCollectablePages
 	local locked_page_paths = {}
@@ -155,6 +153,7 @@ LorebookView.initialize_locked_page_paths = function (self)
 
 	return locked_page_paths
 end
+
 LorebookView.initialize_new_page_paths = function (self)
 	local new_page_ids = LoreBookHelper.get_new_page_ids()
 
@@ -167,12 +166,11 @@ LorebookView.initialize_new_page_paths = function (self)
 
 		return new_page_paths
 	end
-
-	return 
 end
+
 LorebookView.change_tab_index = function (self, new_index, play_sound)
 	if self.index_array[1] and self.index_array[1] == new_index then
-		return 
+		return
 	end
 
 	table.clear(self.index_array)
@@ -180,7 +178,7 @@ LorebookView.change_tab_index = function (self, new_index, play_sound)
 	self.index_array[1] = new_index
 
 	if play_sound then
-		self.play_sound(self, "Play_hud_lorebook_button")
+		self:play_sound("Play_hud_lorebook_button")
 	end
 
 	local contents_list = self.contents_list
@@ -190,7 +188,7 @@ LorebookView.change_tab_index = function (self, new_index, play_sound)
 	local tab_category = self.page_layout[new_index]
 	local sub_categories = tab_category.sub_categories
 
-	self.populate_list(self, list_content, item_styles, sub_categories)
+	self:populate_list(list_content, item_styles, sub_categories)
 
 	local index_list = self.index_list
 	local index_list_content = index_list.content.list_content
@@ -199,16 +197,15 @@ LorebookView.change_tab_index = function (self, new_index, play_sound)
 	local tab_category = self.page_layout[new_index]
 	local sub_categories = tab_category.sub_categories
 
-	self.populate_index_list(self, index_list_content, index_item_styles, sub_categories)
+	self:populate_index_list(index_list_content, index_item_styles, sub_categories)
 
 	local category_name = tab_category.category_name
 
-	self.fill_page_content(self, tab_category.page_text, category_name, tab_category.images, tab_category.image)
-	self.set_content_title(self, category_name)
-	self.set_page_title(self)
-
-	return 
+	self:fill_page_content(tab_category.page_text, category_name, tab_category.images, tab_category.image)
+	self:set_content_title(category_name)
+	self:set_page_title()
 end
+
 LorebookView.get_current_categories = function (self)
 	local index_array = self.index_array
 	local depth = #index_array
@@ -222,31 +219,29 @@ LorebookView.get_current_categories = function (self)
 
 	return categories
 end
+
 LorebookView.get_next_sub_categories_by_index = function (self, index)
-	local current_categories = self.get_current_categories(self)
+	local current_categories = self:get_current_categories()
 	local current_sub_categories = current_categories.sub_categories
 
 	if current_sub_categories then
 		return current_sub_categories[index].sub_categories, current_sub_categories[index]
 	end
-
-	return 
 end
+
 LorebookView.set_content_title = function (self, title)
 	local contents_title = self.contents_title
 	local contents_title_content = contents_title.content
 	contents_title_content.text_field = Localize(title)
 	self.contents_title_divider.content.visible = true
-
-	return 
 end
+
 LorebookView.set_page_title = function (self, title)
 	local page_title = self.page_title
 	local page_title_content = page_title.content
 	page_title_content.text_field = (title and Localize(title)) or ""
-
-	return 
 end
+
 LorebookView.fill_page_content = function (self, page_text, category_name, images, image)
 	local seed = LorebookCategoryLookup[category_name] * 5208943
 	local page_title = self.page_title
@@ -306,13 +301,13 @@ LorebookView.fill_page_content = function (self, page_text, category_name, image
 			end
 		end
 
-		self.setup_page_image_and_exclusion_zone(self, "page_image_1", image.name, vertical_alignment, horizontal_alignment, exclusion_zones)
+		self:setup_page_image_and_exclusion_zone("page_image_1", image.name, vertical_alignment, horizontal_alignment, exclusion_zones)
 	elseif page_text ~= "" and images then
 		local num_images = nil
 		seed, num_images = Math.next_random(seed, 0, 1)
 		local vertical_alignment, horizontal_alignment = nil
 
-		if 0 < num_images then
+		if num_images > 0 then
 			local value = nil
 			seed, value = Math.next_random(seed, 2)
 
@@ -335,7 +330,7 @@ LorebookView.fill_page_content = function (self, page_text, category_name, image
 			page_image_1_content.texture_id = image_name
 			page_image_1_content.visible = true
 
-			self.setup_page_image_and_exclusion_zone(self, "page_image_1", image_name, vertical_alignment, horizontal_alignment, exclusion_zones)
+			self:setup_page_image_and_exclusion_zone("page_image_1", image_name, vertical_alignment, horizontal_alignment, exclusion_zones)
 
 			if num_images == 2 then
 				local page_image_1_horizontal_alignment = horizontal_alignment
@@ -361,40 +356,44 @@ LorebookView.fill_page_content = function (self, page_text, category_name, image
 				local page_text_size = page_content_scenegraph.size
 
 				for i = 1, #images, 1 do
-					if image_found then
-					else
+					repeat
+						if image_found then
+							break
+						end
+
 						local image_name = images[i]
 
 						if image_name == page_image_1_content.texture_id then
-						else
-							local page_image_1_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(page_image_1_image)
-							local page_image_2_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(image_name)
-							local page_image_1_size = page_image_1_settings.size
-							local page_image_2_size = page_image_2_settings.size
-
-							if (page_image_1_horizontal_alignment == horizontal_alignment or page_text_size[1] < page_image_1_size[1] + page_image_2_size[1]) and page_text_size[2] < page_image_1_size[2] + page_image_2_size[2] then
-							else
-								image_found = true
-								page_image_2_content.texture_id = image_name
-								page_image_2_content.visible = true
-
-								self.setup_page_image_and_exclusion_zone(self, "page_image_2", image_name, vertical_alignment, horizontal_alignment, exclusion_zones)
-							end
+							break
 						end
-					end
+
+						local page_image_1_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(page_image_1_image)
+						local page_image_2_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(image_name)
+						local page_image_1_size = page_image_1_settings.size
+						local page_image_2_size = page_image_2_settings.size
+
+						if (page_image_1_horizontal_alignment == horizontal_alignment or page_text_size[1] < page_image_1_size[1] + page_image_2_size[1]) and page_text_size[2] < page_image_1_size[2] + page_image_2_size[2] then
+							break
+						end
+
+						image_found = true
+						page_image_2_content.texture_id = image_name
+						page_image_2_content.visible = true
+
+						self:setup_page_image_and_exclusion_zone("page_image_2", image_name, vertical_alignment, horizontal_alignment, exclusion_zones)
+					until true
 				end
 			end
 		end
 	end
 
-	self.setup_page_texts(self, page_widget.style, page_widget.content, localized_page_text)
+	self:setup_page_texts(page_widget.style, page_widget.content, localized_page_text)
 
 	local page_count = self.page_count
 	local content = self.page_count.content
 	content.text_field = "1 / " .. self.num_content_pages
-
-	return 
 end
+
 local image_offsets = {
 	top = {
 		left = {
@@ -455,6 +454,7 @@ local image_padding = {
 		}
 	}
 }
+
 LorebookView.setup_page_image_and_exclusion_zone = function (self, scenegraph_id, image_name, vertical_alignment, horizontal_alignment, exclusion_zones)
 	local image_settings = UIAtlasHelper.get_atlas_settings_by_texture_name(image_name)
 	local size = image_settings.size
@@ -479,14 +479,13 @@ LorebookView.setup_page_image_and_exclusion_zone = function (self, scenegraph_id
 	exclusion_zone.width = size[1] + x_padding
 	exclusion_zone.height = size[2] + y_padding
 	exclusion_zone.active = true
-
-	return 
 end
+
 LorebookView.on_element_pressed = function (self, index, element_content, play_sound)
 	local should_select = false
 	local index_array = self.index_array
 	local depth = #index_array
-	local next_sub_categories, next_parent_category = self.get_next_sub_categories_by_index(self, index)
+	local next_sub_categories, next_parent_category = self:get_next_sub_categories_by_index(index)
 
 	if next_sub_categories then
 		index_array[depth + 1] = index
@@ -495,30 +494,30 @@ LorebookView.on_element_pressed = function (self, index, element_content, play_s
 		local num_contents_list_items = #list_content
 		local item_styles = contents_list.style.list_style.item_styles
 
-		self.populate_list(self, list_content, item_styles, next_sub_categories)
+		self:populate_list(list_content, item_styles, next_sub_categories)
 
 		local index_list = self.index_list
 		local index_list_content = index_list.content.list_content
 		local num_index_list_items = #index_list_content
 		local index_item_styles = index_list.style.list_style.item_styles
 
-		self.populate_index_list(self, index_list_content, index_item_styles, next_sub_categories)
+		self:populate_index_list(index_list_content, index_item_styles, next_sub_categories)
 
 		local category_name = next_parent_category.category_name
 
-		self.fill_page_content(self, next_parent_category.page_text, category_name, next_parent_category.images, next_parent_category.image)
-		self.set_content_title(self, category_name)
-		self.set_page_title(self)
+		self:fill_page_content(next_parent_category.page_text, category_name, next_parent_category.images, next_parent_category.image)
+		self:set_content_title(category_name)
+		self:set_page_title()
 	elseif next_parent_category then
-		self.set_page_title(self, next_parent_category.page_title)
+		self:set_page_title(next_parent_category.page_title)
 
 		local category_name = next_parent_category.category_name
 
-		self.fill_page_content(self, next_parent_category.page_text, category_name, next_parent_category.images, next_parent_category.image)
+		self:fill_page_content(next_parent_category.page_text, category_name, next_parent_category.images, next_parent_category.image)
 
 		should_select = true
 
-		self.play_element_select_animation(self, index)
+		self:play_element_select_animation(index)
 	end
 
 	local sound_event = "Play_hud_lorebook_topic"
@@ -532,11 +531,12 @@ LorebookView.on_element_pressed = function (self, index, element_content, play_s
 	end
 
 	if play_sound then
-		self.play_sound(self, sound_event)
+		self:play_sound(sound_event)
 	end
 
 	return should_select
 end
+
 LorebookView.on_index_element_pressed = function (self, index, element_content, play_sound)
 	print(index)
 
@@ -552,10 +552,10 @@ LorebookView.on_index_element_pressed = function (self, index, element_content, 
 	end
 
 	if play_sound then
-		self.play_sound(self, "Play_hud_lorebook_close_topic")
+		self:play_sound("Play_hud_lorebook_close_topic")
 	end
 
-	local current_categories = self.get_current_categories(self)
+	local current_categories = self:get_current_categories()
 
 	if current_categories then
 		local contents_list = self.contents_list
@@ -563,26 +563,28 @@ LorebookView.on_index_element_pressed = function (self, index, element_content, 
 		local num_contents_list_items = #list_content
 		local item_styles = contents_list.style.list_style.item_styles
 
-		self.populate_list(self, list_content, item_styles, current_categories.sub_categories or current_categories)
+		self:populate_list(list_content, item_styles, current_categories.sub_categories or current_categories)
 
 		local index_list = self.index_list
 		local index_list_content = index_list.content.list_content
 		local num_index_list_items = #index_list_content
 		local index_item_styles = index_list.style.list_style.item_styles
 
-		self.populate_index_list(self, index_list_content, index_item_styles, current_categories.sub_categories or current_categories)
+		self:populate_index_list(index_list_content, index_item_styles, current_categories.sub_categories or current_categories)
 
 		local category_name = current_categories.category_name
 
-		self.fill_page_content(self, current_categories.page_text, category_name, current_categories.images, current_categories.image)
-		self.set_content_title(self, category_name)
-		self.set_page_title(self)
+		self:fill_page_content(current_categories.page_text, category_name, current_categories.images, current_categories.image)
+		self:set_content_title(category_name)
+		self:set_page_title()
 	end
 
 	return previous_category_index
 end
+
 local hover_params = {}
 local hover_widgets = {}
+
 LorebookView.on_element_hover_enter = function (self, index, element_style, play_sound)
 	if self.element_hover_anim_id then
 		self.ui_animator:stop_animation(self.element_hover_anim_id)
@@ -603,13 +605,13 @@ LorebookView.on_element_hover_enter = function (self, index, element_style, play
 	self.element_hover_anim_id = self.ui_animator:start_animation("on_element_hover", hover_widgets, definitions.scenegraph_definition, hover_params, speed)
 
 	if play_sound then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
-
-	return 
 end
+
 local index_hover_params = {}
 local index_hover_widgets = {}
+
 LorebookView.on_index_element_hover_enter = function (self, index, element_style, play_sound)
 	if self.index_element_hover_anim_id then
 		self.ui_animator:stop_animation(self.index_element_hover_anim_id)
@@ -630,13 +632,13 @@ LorebookView.on_index_element_hover_enter = function (self, index, element_style
 	self.index_element_hover_anim_id = self.ui_animator:start_animation("on_index_element_hover", index_hover_widgets, definitions.scenegraph_definition, index_hover_params, speed)
 
 	if play_sound then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
-
-	return 
 end
+
 local select_params = {}
 local select_widgets = {}
+
 LorebookView.play_element_select_animation = function (self, index)
 	if self.element_select_anim_id then
 		self.ui_animator:stop_animation(self.element_select_anim_id)
@@ -647,9 +649,8 @@ LorebookView.play_element_select_animation = function (self, index)
 	select_widgets[1] = self.contents_list
 	select_params.select_index = index
 	self.element_select_anim_id = self.ui_animator:start_animation("on_element_select", select_widgets, definitions.scenegraph_definition, select_params)
-
-	return 
 end
+
 LorebookView.on_back_pressed = function (self, play_sound)
 	local index_array = self.index_array
 	local depth = #index_array
@@ -661,19 +662,19 @@ LorebookView.on_back_pressed = function (self, play_sound)
 		self.element_select_anim_id = nil
 	end
 
-	if 1 < depth then
+	if depth > 1 then
 		previous_category_index = index_array[depth]
 		index_array[depth] = nil
 		depth = depth - 1
 	elseif depth == 1 then
-		return 
+		return
 	end
 
 	if play_sound then
-		self.play_sound(self, "Play_hud_lorebook_close_topic")
+		self:play_sound("Play_hud_lorebook_close_topic")
 	end
 
-	local current_categories = self.get_current_categories(self)
+	local current_categories = self:get_current_categories()
 
 	if current_categories then
 		local contents_list = self.contents_list
@@ -681,24 +682,25 @@ LorebookView.on_back_pressed = function (self, play_sound)
 		local num_contents_list_items = #list_content
 		local item_styles = contents_list.style.list_style.item_styles
 
-		self.populate_list(self, list_content, item_styles, current_categories.sub_categories or current_categories)
+		self:populate_list(list_content, item_styles, current_categories.sub_categories or current_categories)
 
 		local index_list = self.index_list
 		local index_list_content = index_list.content.list_content
 		local num_index_list_items = #index_list_content
 		local index_item_styles = index_list.style.list_style.item_styles
 
-		self.populate_index_list(self, index_list_content, index_item_styles, current_categories.sub_categories or current_categories)
+		self:populate_index_list(index_list_content, index_item_styles, current_categories.sub_categories or current_categories)
 
 		local category_name = current_categories.category_name
 
-		self.fill_page_content(self, current_categories.page_text, category_name, current_categories.images, current_categories.image)
-		self.set_content_title(self, category_name)
-		self.set_page_title(self)
+		self:fill_page_content(current_categories.page_text, category_name, current_categories.images, current_categories.image)
+		self:set_content_title(category_name)
+		self:set_page_title()
 	end
 
 	return previous_category_index
 end
+
 LorebookView.mark_page_content_as_read = function (self, content)
 	local new_paths = self.new_page_paths
 	local page_id = content.name
@@ -706,10 +708,9 @@ LorebookView.mark_page_content_as_read = function (self, content)
 
 	LoreBookHelper.unmark_page_id_as_new(content.category_name)
 
-	self.new_page_paths = self.initialize_new_page_paths(self)
-
-	return 
+	self.new_page_paths = self:initialize_new_page_paths()
 end
+
 LorebookView.mark_categories_as_new = function (self, list_content)
 	local new_paths = self.new_page_paths
 
@@ -742,15 +743,14 @@ LorebookView.mark_categories_as_new = function (self, list_content)
 			end
 		end
 	end
-
-	return 
 end
+
 LorebookView.is_category_unlocked = function (self, category)
 	local sub_categories = category.sub_categories
 
 	if sub_categories then
 		for i = 1, #sub_categories, 1 do
-			local unlocked = self.is_category_unlocked(self, sub_categories[i])
+			local unlocked = self:is_category_unlocked(sub_categories[i])
 
 			if unlocked then
 				return true
@@ -758,15 +758,14 @@ LorebookView.is_category_unlocked = function (self, category)
 		end
 	else
 		local category_name = category.category_name
-		local unlocked = self.is_page_unlocked(self, category_name)
+		local unlocked = self:is_page_unlocked(category_name)
 
 		if unlocked then
 			return true
 		end
 	end
-
-	return 
 end
+
 LorebookView.is_page_unlocked = function (self, category_name)
 	local unlocked = nil
 
@@ -775,12 +774,13 @@ LorebookView.is_page_unlocked = function (self, category_name)
 	else
 		local id = LorebookCategoryLookup[category_name]
 		local local_player = Managers.player:local_player()
-		local stats_id = local_player.stats_id(local_player)
+		local stats_id = local_player:stats_id()
 		unlocked = self.statistics_db:get_persistent_lorebook_stat(stats_id, "lorebook_unlocks", id)
 	end
 
 	return unlocked
 end
+
 LorebookView.populate_list = function (self, list_content, item_styles, categories)
 	local num_categories = #categories
 	local list_elements = self.list_elements
@@ -793,15 +793,15 @@ LorebookView.populate_list = function (self, list_content, item_styles, categori
 		local use_existing_element = i <= #list_elements
 
 		if not use_existing_element then
-			self.create_list_element(self, category)
+			self:create_list_element(category)
 		end
 
-		local list_element = (use_existing_element and self.set_element_data(self, list_elements[i], category)) or list_elements[i]
+		local list_element = (use_existing_element and self:set_element_data(list_elements[i], category)) or list_elements[i]
 		list_content[i] = list_element.content
 		item_styles[i] = list_element.style
 	end
 
-	self.mark_categories_as_new(self, list_content)
+	self:mark_categories_as_new(list_content)
 
 	local contents_list = self.contents_list
 	local contents_list_style = contents_list.style.list_style
@@ -811,14 +811,13 @@ LorebookView.populate_list = function (self, list_content, item_styles, categori
 
 	for _, element in ipairs(list_content) do
 		if not element.has_sub_pages and element.new then
-			self.play_sound(self, "Play_hud_lorebook_new_page")
+			self:play_sound("Play_hud_lorebook_new_page")
 
 			break
 		end
 	end
-
-	return 
 end
+
 LorebookView.populate_index_list = function (self, list_content, item_styles, categories)
 	local index_array = self.index_array
 	local max_depth = #index_array - 1
@@ -837,10 +836,10 @@ LorebookView.populate_index_list = function (self, list_content, item_styles, ca
 		local use_existing_element = i <= #index_list_elements
 
 		if not use_existing_element then
-			self.create_index_list_element(self, category)
+			self:create_index_list_element(category)
 		end
 
-		local list_element = (use_existing_element and self.set_index_list_element_data(self, index_list_elements[i], category)) or index_list_elements[i]
+		local list_element = (use_existing_element and self:set_index_list_element_data(index_list_elements[i], category)) or index_list_elements[i]
 		list_content[i] = list_element.content
 		item_styles[i] = list_element.style
 		categories_real = (in_sub_category and categories_real[index].sub_categories) or categories_real[index]
@@ -854,12 +853,11 @@ LorebookView.populate_index_list = function (self, list_content, item_styles, ca
 	self.index_list.element.pass_data[1].num_list_elements = nil
 	index_list_style.total_width = math.max(0, total_width - 20)
 
-	if 0 < max_depth then
+	if max_depth > 0 then
 		index_list_elements[max_depth].content.last_element = true
 	end
-
-	return 
 end
+
 LorebookView.create_list_element = function (self, category)
 	local index = #self.list_elements
 	local index_name = category.index_name
@@ -869,7 +867,7 @@ LorebookView.create_list_element = function (self, category)
 	local offset = (index - 1) * default_height_offest
 	local list_member_height_offset = -offset
 	local page_text = category.page_text
-	local is_category_unlocked = self.is_category_unlocked(self, category)
+	local is_category_unlocked = self:is_category_unlocked(category)
 	local content = {
 		selected_texture_left = "journal_marker_left_glow",
 		hover_texture_left = "journal_marker_left",
@@ -1082,17 +1080,16 @@ LorebookView.create_list_element = function (self, category)
 		}
 	}
 	local name_style = style.name
-	local text_width, text_height = self.get_text_size(self, Localize(content.name), name_style)
+	local text_width, text_height = self:get_text_size(Localize(content.name), name_style)
 
-	self.align_element_icons_by_text_length(self, text_width, style)
+	self:align_element_icons_by_text_length(text_width, style)
 
 	self.list_elements[index + 1] = {
 		content = content,
 		style = style
 	}
-
-	return 
 end
+
 LorebookView.create_index_list_element = function (self, category)
 	local index = #self.index_list_elements
 	local index_name = category.index_name
@@ -1202,13 +1199,13 @@ LorebookView.create_index_list_element = function (self, category)
 			}
 		}
 	}
-	local text_width, text_height = self.get_text_size(self, Localize(content.name), style.name)
+	local text_width, text_height = self:get_text_size(Localize(content.name), style.name)
 	style.hotspot.size[1] = text_width
 	style.name.size[1] = text_width
 	local previous_element_offset = 0
 	local divider_offset = 20
 
-	if 0 < index then
+	if index > 0 then
 		local previous_element = self.index_list_elements[index]
 		local previous_element_content = previous_element.content
 		previous_element_offset = previous_element_content.total_width
@@ -1224,25 +1221,24 @@ LorebookView.create_index_list_element = function (self, category)
 		content = content,
 		style = style
 	}
-
-	return 
 end
+
 LorebookView.set_element_data = function (self, list_element, category)
 	local element_content = list_element.content
 	local element_style = list_element.style
 	local index_name = category.index_name
 	local category_name = category.category_name
 	local page_text = category.page_text
-	local is_category_unlocked = self.is_category_unlocked(self, category)
+	local is_category_unlocked = self:is_category_unlocked(category)
 	element_content.unlocked = is_category_unlocked
 	element_content.category_name = category_name
 	element_content.name = Localize(index_name or category_name)
 	element_content.page_text = page_text
 	element_content.has_sub_pages = category.sub_categories ~= nil
 	local name_style = element_style.name
-	local text_width, text_height = self.get_text_size(self, element_content.name, name_style)
+	local text_width, text_height = self:get_text_size(element_content.name, name_style)
 
-	self.align_element_icons_by_text_length(self, text_width, element_style)
+	self:align_element_icons_by_text_length(text_width, element_style)
 
 	element_content.new = false
 	element_content.selected = false
@@ -1250,9 +1246,8 @@ LorebookView.set_element_data = function (self, list_element, category)
 	element_style.name.text_color[1] = ELEMENT_SELECTED_ALPHA
 
 	table.clear(element_content.button_hotspot)
-
-	return 
 end
+
 LorebookView.set_index_list_element_data = function (self, list_element, category)
 	local content = list_element.content
 	local style = list_element.style
@@ -1260,14 +1255,14 @@ LorebookView.set_index_list_element_data = function (self, list_element, categor
 	local category_name = category.category_name
 	content.category_name = category_name
 	content.name = Localize(index_name or category_name)
-	local text_width, text_height = self.get_text_size(self, content.name, style.name)
+	local text_width, text_height = self:get_text_size(content.name, style.name)
 	style.hotspot.size[1] = text_width
 	style.name.size[1] = text_width
 	local index = content.index
 	local previous_element_offset = 0
 	local divider_offset = 20
 
-	if 0 < index then
+	if index > 0 then
 		local previous_element = self.index_list_elements[index]
 		local previous_element_content = previous_element.content
 		previous_element_offset = previous_element_content.total_width
@@ -1284,9 +1279,8 @@ LorebookView.set_index_list_element_data = function (self, list_element, categor
 	content.last_element = false
 
 	table.clear(content.button_hotspot)
-
-	return 
 end
+
 LorebookView.align_element_icons_by_text_length = function (self, text_length, element_style)
 	local name_style = element_style.name
 	local hotspot_x_offset = name_style.size[1] * 0.5 - text_length * 0.5
@@ -1309,20 +1303,20 @@ LorebookView.align_element_icons_by_text_length = function (self, text_length, e
 	local selected_texture_size = selected_texture_left_style.size
 	selected_texture_right_style.offset[1] = (hotspot_x_offset + text_length + HOVER_TEXTURE_SPACING) - 13
 	selected_texture_left_style.offset[1] = hotspot_x_offset - (hover_texture_left_style.size[1] + HOVER_TEXTURE_SPACING) - 13
-
-	return 
 end
+
 LorebookView.get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 LorebookView._collected_lorebook_page_amount = function (self)
 	local player_manager = Managers.player
-	local local_player = player_manager.local_player(player_manager)
-	local statistics_db = player_manager.statistics_db(player_manager)
-	local stats_id = local_player.stats_id(local_player)
+	local local_player = player_manager:local_player()
+	local statistics_db = player_manager:statistics_db()
+	local stats_id = local_player:stats_id()
 	local collectable_pages = LorebookCollectablePages
 	local total_collected = 0
 
@@ -1332,7 +1326,7 @@ LorebookView._collected_lorebook_page_amount = function (self)
 		for i = 1, num_pages, 1 do
 			local category_name = pages[i]
 			local id = LorebookCategoryLookup[category_name]
-			local unlocked = statistics_db.get_persistent_lorebook_stat(statistics_db, stats_id, "lorebook_unlocks", id)
+			local unlocked = statistics_db:get_persistent_lorebook_stat(stats_id, "lorebook_unlocks", id)
 
 			if unlocked then
 				total_collected = total_collected + 1
@@ -1342,6 +1336,7 @@ LorebookView._collected_lorebook_page_amount = function (self)
 
 	return total_collected
 end
+
 LorebookView.on_enter = function (self)
 	self.input_manager:block_device_except_service("lorebook_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("lorebook_menu", "mouse", 1)
@@ -1349,24 +1344,23 @@ LorebookView.on_enter = function (self)
 
 	local lorebook_front_page_collectible_counter = self.lorebook_front_page_collectible_counter
 	local total_amount_of_collectible_lorebook_pages = LorebookCollectablePagesAmount
-	local num_collected_pages = self._collected_lorebook_page_amount(self)
+	local num_collected_pages = self:_collected_lorebook_page_amount()
 	lorebook_front_page_collectible_counter.content.text = tostring(num_collected_pages) .. "/" .. tostring(total_amount_of_collectible_lorebook_pages)
 
-	self.play_sound(self, "Play_hud_lorebook_open")
+	self:play_sound("Play_hud_lorebook_open")
 
 	self.active = true
 
-	self.change_tab_index(self, 1, false)
+	self:change_tab_index(1, false)
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
 
 	if PLATFORM ~= "win32" and not SaveData.has_shown_lorebook_popup then
 		self._popup_id = Managers.popup:queue_popup(BaseLocalize("popup_lorebook_not_localized"), BaseLocalize("popup_info_topic"), "ok", BaseLocalize("menu_ok"))
 	end
-
-	return 
 end
+
 LorebookView.on_exit = function (self)
-	self.play_sound(self, "Play_hud_lorebook_close")
+	self:play_sound("Play_hud_lorebook_close")
 
 	self.exiting = nil
 	self.active = nil
@@ -1376,58 +1370,52 @@ LorebookView.on_exit = function (self)
 	end
 
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
-
-	return 
 end
+
 LorebookView.exit = function (self, return_to_game)
-	self.on_menu_close(self)
+	self:on_menu_close()
 
 	self.exiting = true
 	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
 
 	self.ingame_ui:transition_with_fade(exit_transition)
-
-	return 
 end
+
 LorebookView.transitioning = function (self)
 	if self.exiting then
 		return true
 	else
 		return not self.active
 	end
-
-	return 
 end
+
 LorebookView.suspend = function (self)
 	self.suspended = true
 
 	self.input_manager:device_unblock_all_services("keyboard", 1)
 	self.input_manager:device_unblock_all_services("mouse", 1)
 	self.input_manager:device_unblock_all_services("gamepad", 1)
-
-	return 
 end
+
 LorebookView.unsuspend = function (self)
 	self.input_manager:block_device_except_service("lorebook_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("lorebook_menu", "mouse", 1)
 	self.input_manager:block_device_except_service("lorebook_menu", "gamepad", 1)
 
 	self.suspended = nil
-
-	return 
 end
+
 LorebookView.update_animations = function (self, dt)
 	local ui_animator = self.ui_animator
 
-	ui_animator.update(ui_animator, dt)
-	self._handle_popup(self)
+	ui_animator:update(dt)
+	self:_handle_popup()
 
-	if self.page_reveal_anim_id and ui_animator.is_animation_completed(ui_animator, self.page_reveal_anim_id) then
+	if self.page_reveal_anim_id and ui_animator:is_animation_completed(self.page_reveal_anim_id) then
 		self.page_reveal_anim_id = nil
 	end
-
-	return 
 end
+
 LorebookView._handle_popup = function (self)
 	if self._popup_id then
 		local result = Managers.popup:query_result(self._popup_id)
@@ -1442,9 +1430,8 @@ LorebookView._handle_popup = function (self)
 			self._popup_id = nil
 		end
 	end
-
-	return 
 end
+
 LorebookView.reveal_page = function (self, instant)
 	if self.page_reveal_anim_id then
 		self.ui_animator:stop_animation(self.page_reveal_anim_id)
@@ -1470,22 +1457,21 @@ LorebookView.reveal_page = function (self, instant)
 		}
 		self.page_reveal_anim_id = self.ui_animator:start_animation("page_reveal", widgets, definitions.scenegraph_definition, nil)
 	end
-
-	return 
 end
+
 LorebookView.update = function (self, dt)
 	if self.suspended then
-		return 
+		return
 	end
 
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "lorebook_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
-	local transitioning = self.transitioning(self)
+	local input_service = input_manager:get_service("lorebook_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
+	local transitioning = self:transitioning()
 
-	self.update_animations(self, dt)
+	self:update_animations(dt)
 
 	for name, ui_animation in pairs(self.ui_animations) do
 		UIAnimation.update(ui_animation, dt)
@@ -1496,7 +1482,7 @@ LorebookView.update = function (self, dt)
 	end
 
 	if self.active then
-		self.draw_widgets(self, dt, gamepad_active)
+		self:draw_widgets(dt, gamepad_active)
 	end
 
 	if not transitioning then
@@ -1504,18 +1490,18 @@ LorebookView.update = function (self, dt)
 			if not self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = true
 
-				self.on_gamepad_activated(self)
+				self:on_gamepad_activated()
 			end
 
-			self.handle_gamepad_input(self, input_service, dt)
+			self:handle_gamepad_input(input_service, dt)
 		else
 			if self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = false
 
-				self.on_gamepad_deactivated(self)
+				self:on_gamepad_deactivated()
 			end
 
-			self.handle_input(self, input_service)
+			self:handle_input(input_service)
 		end
 	end
 
@@ -1526,20 +1512,20 @@ LorebookView.update = function (self, dt)
 	local exit_button_hotspot = self.exit_button.content.button_hotspot
 
 	if exit_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
-	if not transitioning and (input_service.get(input_service, "toggle_menu") or exit_button_hotspot.on_release) then
+	if not transitioning and (input_service:get("toggle_menu") or exit_button_hotspot.on_release) then
 		exit_button_hotspot.on_release = nil
 		local return_to_game = not self.ingame_ui.menu_active
 
-		self.play_sound(self, "Play_hud_select")
-		self.exit(self, return_to_game)
+		self:play_sound("Play_hud_select")
+		self:exit(return_to_game)
 	end
-
-	return 
 end
+
 local input_actions = definitions.input_actions
+
 LorebookView.update_input_description = function (self)
 	local actions_name_to_use = nil
 
@@ -1548,18 +1534,18 @@ LorebookView.update_input_description = function (self)
 		local index_array = self.index_array
 
 		if index_array[1] then
-			local gamepad_hover_index, hover_content, num_draws = self.get_gamepad_hover_index(self)
+			local gamepad_hover_index, hover_content, num_draws = self:get_gamepad_hover_index()
 
 			if hover_content then
 				local num_content_pages = self.num_content_pages
 
 				if not hover_content.unlocked then
-					if num_content_pages and 1 < num_content_pages then
+					if num_content_pages and num_content_pages > 1 then
 						actions_name_to_use = "selection_locked_includes_pages"
 					else
 						actions_name_to_use = "selection_locked"
 					end
-				elseif num_content_pages and 1 < num_content_pages then
+				elseif num_content_pages and num_content_pages > 1 then
 					actions_name_to_use = "selection_includes_pages"
 				else
 					actions_name_to_use = "selection"
@@ -1574,9 +1560,8 @@ LorebookView.update_input_description = function (self)
 
 		self.menu_input_description:set_input_description(input_description_data)
 	end
-
-	return 
 end
+
 LorebookView.draw_widgets = function (self, dt, gamepad_active)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -1635,8 +1620,8 @@ LorebookView.draw_widgets = function (self, dt, gamepad_active)
 		UIRenderer.draw_widget(ui_renderer, self.page_image_2)
 	end
 
-	if self.num_content_pages and 1 < self.num_content_pages then
-		if 1 < self.current_page then
+	if self.num_content_pages and self.num_content_pages > 1 then
+		if self.current_page > 1 then
 			UIRenderer.draw_widget(ui_renderer, self.previous_page)
 		end
 
@@ -1649,54 +1634,53 @@ LorebookView.draw_widgets = function (self, dt, gamepad_active)
 
 	UIRenderer.draw_widget(ui_renderer, self.dead_space_filler)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 LorebookView.handle_gamepad_input = function (self, input_service, dt)
-	self.update_input_description(self)
+	self:update_input_description()
 
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	else
 		local index_array = self.index_array
 
-		if input_service.get(input_service, "back") then
-			if 1 < #index_array then
-				local previous_category_index = self.on_back_pressed(self, true)
+		if input_service:get("back") then
+			if #index_array > 1 then
+				local previous_category_index = self:on_back_pressed(true)
 
 				if previous_category_index then
-					self.set_gamepad_hover_index(self, previous_category_index)
+					self:set_gamepad_hover_index(previous_category_index)
 				end
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			else
 				local return_to_game = not self.ingame_ui.menu_active
 
-				self.exit(self, return_to_game)
+				self:exit(return_to_game)
 			end
 
-			return 
+			return
 		end
 
-		local gamepad_hover_index, hover_content, num_draws = self.get_gamepad_hover_index(self)
+		local gamepad_hover_index, hover_content, num_draws = self:get_gamepad_hover_index()
 
-		if 0 < num_draws then
+		if num_draws > 0 then
 			local new_gamepad_hover_index = nil
 
 			if not gamepad_hover_index then
 				new_gamepad_hover_index = 1
-			elseif input_service.get(input_service, "move_up_hold") then
+			elseif input_service:get("move_up_hold") then
 				new_gamepad_hover_index = math.max(gamepad_hover_index - 1, 1)
-			elseif input_service.get(input_service, "move_down_hold") then
+			elseif input_service:get("move_down_hold") then
 				new_gamepad_hover_index = math.min(gamepad_hover_index + 1, num_draws)
-			elseif input_service.get(input_service, "confirm") then
-				local selecting_element, element_locked = self.set_gamepad_selection_index(self, gamepad_hover_index, true)
+			elseif input_service:get("confirm") then
+				local selecting_element, element_locked = self:set_gamepad_selection_index(gamepad_hover_index, true)
 
 				if not element_locked then
 					if not selecting_element then
-						self.set_gamepad_hover_index(self, 1)
+						self:set_gamepad_hover_index(1)
 					end
 
 					self.controller_cooldown = GamepadSettings.menu_cooldown
@@ -1704,27 +1688,26 @@ LorebookView.handle_gamepad_input = function (self, input_service, dt)
 			end
 
 			if new_gamepad_hover_index and new_gamepad_hover_index ~= gamepad_hover_index then
-				self.set_gamepad_hover_index(self, new_gamepad_hover_index, true)
+				self:set_gamepad_hover_index(new_gamepad_hover_index, true)
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 
-				return 
+				return
 			end
 		end
 
-		self.handle_page_change_input(self, input_service)
+		self:handle_page_change_input(input_service)
 	end
-
-	return 
 end
+
 LorebookView.on_gamepad_activated = function (self)
-	return 
+	return
 end
-LorebookView.on_gamepad_deactivated = function (self)
-	self.set_gamepad_hover_index(self, nil)
 
-	return 
+LorebookView.on_gamepad_deactivated = function (self)
+	self:set_gamepad_hover_index(nil)
 end
+
 LorebookView.get_gamepad_hover_index = function (self)
 	local contents_list = self.contents_list
 	local contents_list_content = contents_list.content.list_content
@@ -1744,6 +1727,7 @@ LorebookView.get_gamepad_hover_index = function (self)
 
 	return nil, nil, num_draws + 1
 end
+
 LorebookView.set_gamepad_hover_index = function (self, index, play_sound)
 	local contents_list = self.contents_list
 	local contents_list_content = contents_list.content.list_content
@@ -1760,10 +1744,9 @@ LorebookView.set_gamepad_hover_index = function (self, index, play_sound)
 
 	local selected_index_style = index and item_styles[index]
 
-	self.on_element_hover_enter(self, index, selected_index_style, play_sound)
-
-	return 
+	self:on_element_hover_enter(index, selected_index_style, play_sound)
 end
+
 LorebookView.set_gamepad_selection_index = function (self, index, play_sound)
 	local contents_list = self.contents_list
 	local contents_list_content = contents_list.content.list_content
@@ -1778,12 +1761,12 @@ LorebookView.set_gamepad_selection_index = function (self, index, play_sound)
 	local start_index = contents_list_style.start_index
 	local num_draws = contents_list_style.num_draws - 1
 	local stop_index = math.min(start_index + num_draws, #contents_list_content)
-	local should_select = self.on_element_pressed(self, index, content, play_sound)
+	local should_select = self:on_element_pressed(index, content, play_sound)
 	local instant_page_fade = true
 
 	if should_select then
 		if content.new then
-			self.mark_page_content_as_read(self, content)
+			self:mark_page_content_as_read(content)
 
 			instant_page_fade = false
 		end
@@ -1794,25 +1777,26 @@ LorebookView.set_gamepad_selection_index = function (self, index, play_sound)
 		end
 	end
 
-	self.reveal_page(self, instant_page_fade)
+	self:reveal_page(instant_page_fade)
 
 	return should_select, true
 end
+
 LorebookView.handle_input = function (self, input_service)
 	local next_page_hotspot = self.next_page.content.button_hotspot
 	local previous_page_hotspot = self.previous_page.content.button_hotspot
 	local back_button_button_hotspot = self.page_back_button.content.button_hotspot
 
 	if next_page_hotspot.on_hover_enter or previous_page_hotspot.on_hover_enter or back_button_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
-	if back_button_button_hotspot.on_release or input_service.get(input_service, "right_press") then
+	if back_button_button_hotspot.on_release or input_service:get("right_press") then
 		if back_button_button_hotspot.on_release then
 			back_button_button_hotspot.on_release = nil
 		end
 
-		self.on_back_pressed(self, true)
+		self:on_back_pressed(true)
 	end
 
 	local contents_list = self.contents_list
@@ -1831,17 +1815,17 @@ LorebookView.handle_input = function (self, input_service)
 			local button_hotspot = content.button_hotspot
 
 			if button_hotspot.on_hover_enter then
-				self.on_element_hover_enter(self, i, item_styles[i], true)
+				self:on_element_hover_enter(i, item_styles[i], true)
 			end
 
 			if content.unlocked and not content.selected and button_hotspot.on_release then
 				button_hotspot.on_release = nil
-				local should_select = self.on_element_pressed(self, i, content, true)
+				local should_select = self:on_element_pressed(i, content, true)
 				local instant_page_fade = true
 
 				if should_select then
 					if content.new then
-						self.mark_page_content_as_read(self, content)
+						self:mark_page_content_as_read(content)
 
 						instant_page_fade = false
 					end
@@ -1852,7 +1836,7 @@ LorebookView.handle_input = function (self, input_service)
 					end
 				end
 
-				self.reveal_page(self, instant_page_fade)
+				self:reveal_page(instant_page_fade)
 			end
 		end
 	end
@@ -1873,43 +1857,41 @@ LorebookView.handle_input = function (self, input_service)
 			local button_hotspot = content.button_hotspot
 
 			if button_hotspot.on_hover_enter then
-				self.on_index_element_hover_enter(self, i, item_styles[i], true)
+				self:on_index_element_hover_enter(i, item_styles[i], true)
 			end
 
 			if button_hotspot.on_release then
-				self.on_index_element_pressed(self, i, content, true)
+				self:on_index_element_pressed(i, content, true)
 			end
 		end
 	end
 
-	self.handle_page_change_input(self, input_service)
-
-	return 
+	self:handle_page_change_input(input_service)
 end
+
 LorebookView.handle_page_change_input = function (self, input_service)
 	local next_page_hotspot = self.next_page.content.button_hotspot
 	local previous_page_hotspot = self.previous_page.content.button_hotspot
 	local num_content_pages = self.num_content_pages
 	local current_page = self.current_page
 
-	if (input_service.get(input_service, "cycle_next") or next_page_hotspot.on_release) and num_content_pages and current_page < num_content_pages then
+	if (input_service:get("cycle_next") or next_page_hotspot.on_release) and num_content_pages and current_page < num_content_pages then
 		next_page_hotspot.on_release = nil
 		self.current_page = self.current_page + 1
 
-		self._set_content_to_current_page(self)
-		self.play_sound(self, "Play_hud_lorebook_next_page")
+		self:_set_content_to_current_page()
+		self:play_sound("Play_hud_lorebook_next_page")
 	end
 
-	if (input_service.get(input_service, "cycle_previous") or previous_page_hotspot.on_release) and num_content_pages and 1 < current_page then
+	if (input_service:get("cycle_previous") or previous_page_hotspot.on_release) and num_content_pages and current_page > 1 then
 		previous_page_hotspot.on_release = nil
 		self.current_page = self.current_page - 1
 
-		self._set_content_to_current_page(self)
-		self.play_sound(self, "Play_hud_lorebook_next_page")
+		self:_set_content_to_current_page()
+		self:play_sound("Play_hud_lorebook_next_page")
 	end
-
-	return 
 end
+
 LorebookView._set_content_to_current_page = function (self)
 	local index = self.current_page
 	self.page_content.content.page = self.page_texts[index]
@@ -1919,11 +1901,11 @@ LorebookView._set_content_to_current_page = function (self)
 	local page_count = self.page_count
 	local page_count_content = self.page_count.content
 	page_count_content.text_field = index .. " / " .. self.num_content_pages
-
-	return 
 end
+
 local divider_position_offset = 10
 local divider_size_offset = -20
+
 LorebookView._add_eventual_paragraph_divider = function (self, texts, return_indices, line_index, total_potential_lines, text_pos, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
 	local seed = line_index * 40147
 	local paragraph_divider_offsets = self.paragraph_divider_offsets[page_index]
@@ -1944,17 +1926,41 @@ LorebookView._add_eventual_paragraph_divider = function (self, texts, return_ind
 	local small_divider_position = scenegraph_small_position[1] + divider_position_offset
 
 	if table.contains(return_indices, line_index) and table.contains(return_indices, line_index + 1) and table.contains(return_indices, line_index + 2) then
-
-		-- Decompilation error in this vicinity:
 		local has_text_2 = texts[line_index + 1] ~= "\n" and texts[line_index + 1] ~= ""
 		local has_text_3 = texts[line_index + 2] ~= "\n" and texts[line_index + 2] ~= ""
 
-		if bottom_zone_active and top_height + center_height < math.abs(y_pos) and math.abs(y_pos) < top_height + center_height + bottom_height and (large_divider_position < bottom_offset or bottom_offset + bottom_width < large_divider_position + large_width) then
+		if has_text_2 or has_text_3 then
+			return
+
+			local empty_end_of_page = line_index + 2 == total_potential_lines and not has_text_2 and not has_text_3
+
+			if empty_end_of_page then
+			end
+
+			local divider_size = "large"
+			local y_pos = text_pos[2] - full_font_height * 0.8333333333333334
+			local top_zone_active = top_exclusion_zone and top_exclusion_zone.active
+			local bottom_zone_active = bottom_exclusion_zone and bottom_exclusion_zone.active
+
+			if top_zone_active and math.abs(y_pos) < top_height and (large_divider_position < top_offset or top_offset + top_width < large_divider_position + large_width) then
+				if medium_divider_position < top_offset or top_offset + top_width < medium_divider_position + medium_width then
+					if small_divider_position < top_offset or top_offset + top_width < small_divider_position + small_width then
+						return
+					else
+						divider_size = "small"
+					end
+				else
+					divider_size = "medium"
+				end
+			end
+		end
+
+		if bottom_zone_active and math.abs(y_pos) > top_height + center_height and math.abs(y_pos) < top_height + center_height + bottom_height and (large_divider_position < bottom_offset or bottom_offset + bottom_width < large_divider_position + large_width) then
 			if medium_divider_position < bottom_offset or bottom_offset + bottom_width < medium_divider_position + medium_width then
 				if small_divider_position < bottom_offset or bottom_offset + bottom_width < small_divider_position + small_width then
-					return 
+					return
 				else
-					local divider_size = "small"
+					divider_size = "small"
 				end
 			else
 				divider_size = "medium"
@@ -1977,7 +1983,7 @@ LorebookView._add_eventual_paragraph_divider = function (self, texts, return_ind
 						local small_bottom_x_overlap = small_divider_position < bottom_offset or bottom_offset + bottom_width < small_divider_position + small_width
 
 						if small_top_x_overlap and small_bottom_x_overlap then
-							return 
+							return
 						else
 							divider_size = "small"
 						end
@@ -1994,9 +2000,8 @@ LorebookView._add_eventual_paragraph_divider = function (self, texts, return_ind
 		seed, value = Math.next_random(seed, 2, 4)
 		self["paragraph_divider_" .. divider_size].content.texture_ids[index] = "journal_page_divider_0" .. tostring(value) .. "_" .. divider_size
 	end
-
-	return 
 end
+
 LorebookView.setup_page_texts = function (self, style, content, text)
 	local text_style = style.text
 	local ui_renderer = self.ui_renderer
@@ -2060,7 +2065,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 	end
 
 	while string_offset < string_length do
-		if 1 < page_index then
+		if page_index > 1 then
 			top_exclusion_zone, bottom_exclusion_zone = nil
 			top_width = area_width
 			center_width = 0
@@ -2120,7 +2125,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			top_width = area_width
 			top_offset = 0
 		elseif top_exclusion_zone and bottom_exclusion_zone then
-			if top_exclusion_height + bottom_exclusion_height <= area_height then
+			if area_height >= top_exclusion_height + bottom_exclusion_height then
 				top_height = top_exclusion_height
 				top_width = area_width - top_exclusion_width
 				bottom_height = bottom_exclusion_height
@@ -2200,9 +2205,9 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			bottom_text_amount = math.floor(bottom_height / full_font_height)
 			local total = 0
 
-			if 0 < top_text_amount and bottom_text_amount < 0 then
+			if top_text_amount > 0 and bottom_text_amount < 0 then
 				total = top_text_amount
-			elseif 0 < top_text_amount and 0 < bottom_text_amount then
+			elseif top_text_amount > 0 and bottom_text_amount > 0 then
 				total = bottom_text_amount + top_text_amount
 			else
 				total = bottom_text_amount
@@ -2221,7 +2226,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			top_text_amount = math.ceil(top_height / full_font_height)
 			bottom_text_amount = math.ceil(bottom_height / full_font_height)
 			local total = top_text_amount + bottom_text_amount
-			center_text_amount = total < total_potential_lines and total_potential_lines - total
+			center_text_amount = total_potential_lines > total and total_potential_lines - total
 		end
 
 		local page = page_texts[page_index]
@@ -2246,7 +2251,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			end
 
 			if texts[1] == "" or texts[1] == "\n" then
-				if 0 < n_linebreaks_at_beginning_of_block then
+				if n_linebreaks_at_beginning_of_block > 0 then
 					string_offset = string_offset + n_linebreaks_at_beginning_of_block
 				end
 
@@ -2263,7 +2268,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				local line_text = texts[i]
 				local justified = not table.contains(return_indices, i)
 
-				self._add_eventual_paragraph_divider(self, texts, return_indices, i, total_potential_lines, position, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
+				self:_add_eventual_paragraph_divider(texts, return_indices, i, total_potential_lines, position, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
 
 				if i == 1 and string.sub(line_text, 1, 1) == " " then
 					line_text = string.sub(line_text, 2)
@@ -2319,7 +2324,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			end
 
 			if texts[1] == "" or texts[1] == "\n" then
-				if 1 < n_linebreaks_at_end_of_block or n_linebreaks_at_beginning_of_block == 3 then
+				if n_linebreaks_at_end_of_block > 1 or n_linebreaks_at_beginning_of_block == 3 then
 					string_offset = string_offset + 1
 					center_text_amount = center_text_amount + 1
 					bottom_text_amount = bottom_text_amount and bottom_text_amount - 1
@@ -2336,7 +2341,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				local line_text = texts[i]
 				local justified = not table.contains(return_indices, i)
 
-				self._add_eventual_paragraph_divider(self, texts, return_indices, i, total_potential_lines, position, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
+				self:_add_eventual_paragraph_divider(texts, return_indices, i, total_potential_lines, position, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
 
 				if i == 1 and string.sub(line_text, 1, 1) == " " then
 					line_text = string.sub(line_text, 2)
@@ -2392,7 +2397,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 			end
 
 			if texts[1] == "" or texts[1] == "\n" then
-				if 1 < n_linebreaks_at_end_of_block or n_linebreaks_at_beginning_of_block == 3 then
+				if n_linebreaks_at_end_of_block > 1 or n_linebreaks_at_beginning_of_block == 3 then
 					string_offset = string_offset + 1
 				end
 
@@ -2408,7 +2413,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 				local justified = not table.contains(return_indices, i)
 
 				if i ~= num_texts and i ~= num_texts - 1 and i ~= num_texts - 2 then
-					self._add_eventual_paragraph_divider(self, texts, return_indices, i, total_potential_lines, position, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
+					self:_add_eventual_paragraph_divider(texts, return_indices, i, total_potential_lines, position, full_font_height, page_index, top_exclusion_zone, bottom_exclusion_zone, top_height, center_height, bottom_height, top_width, bottom_width, top_offset, bottom_offset)
 				end
 
 				if i == 1 and string.sub(line_text, 1, 1) == " " then
@@ -2443,10 +2448,9 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 	self.num_content_pages = page_index - 1
 	self.current_page = 1
 
-	self._set_content_to_current_page(self)
-
-	return 
+	self:_set_content_to_current_page()
 end
+
 LorebookView.expand_sub_categories = function (self, list_content, item_styles, category_indicies, expand)
 	local num_categories = #category_indicies
 
@@ -2465,12 +2469,11 @@ LorebookView.expand_sub_categories = function (self, list_content, item_styles, 
 		if (expand and category_content.expanded) or not expand then
 			local sub_category_indicies = category_content.sub_category_indicies
 
-			self.expand_sub_categories(self, list_content, item_styles, sub_category_indicies, expand)
+			self:expand_sub_categories(list_content, item_styles, sub_category_indicies, expand)
 		end
 	end
-
-	return 
 end
+
 LorebookView.make_categories_available = function (self, list_content, category_indicies)
 	local num_categories = #category_indicies
 	local has_expanded_category = false
@@ -2483,7 +2486,7 @@ LorebookView.make_categories_available = function (self, list_content, category_
 			local sub_category_indicies = category_content.sub_category_indicies
 			has_expanded_category = true
 
-			self.make_categories_available(self, list_content, sub_category_indicies)
+			self:make_categories_available(list_content, sub_category_indicies)
 		end
 	end
 
@@ -2495,9 +2498,8 @@ LorebookView.make_categories_available = function (self, list_content, category_
 			category_content.available = not has_expanded_category
 		end
 	end
-
-	return 
 end
+
 LorebookView.calculate_num_draws = function (self, list_content, max_draws)
 	local num_list_content = #list_content
 	local current_draws = 0
@@ -2519,23 +2521,25 @@ LorebookView.calculate_num_draws = function (self, list_content, max_draws)
 
 	return last_index
 end
+
 LorebookView.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
+end
 
-	return 
-end
 LorebookView.on_reset = function (self)
-	return 
+	return
 end
+
 LorebookView.on_apply = function (self)
-	return 
+	return
 end
+
 LorebookView.on_menu_close = function (self)
-	return 
+	return
 end
 
 if rawget(_G, "global_lorebook_view") then
 	global_lorebook_view:create_ui_elements()
 end
 
-return 
+return

@@ -5,4 +5,4 @@ DLCProgressionOrder.chamber = {
 NoneActLevels[#NoneActLevels + 1] = "chamber"
 LengthTypeByLevel.chamber = "long"
 
-return 
+return

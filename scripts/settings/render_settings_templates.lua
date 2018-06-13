@@ -588,4 +588,4 @@ GraphicsQuality = {
 	}
 }
 
-return 
+return

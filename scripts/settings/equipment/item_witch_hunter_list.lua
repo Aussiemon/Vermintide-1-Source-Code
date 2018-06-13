@@ -22135,4 +22135,4 @@ ItemMasterList.wh_crossbow_0127 = {
 	}
 }
 
-return 
+return

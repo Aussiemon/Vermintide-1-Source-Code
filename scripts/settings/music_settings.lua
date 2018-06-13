@@ -50,4 +50,4 @@ SyncedMusicGroupFlags = {
 	combat_intensity = true
 }
 
-return 
+return

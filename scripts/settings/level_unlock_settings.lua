@@ -236,7 +236,7 @@ LevelUnlockUtils = {
 			local act_levels = GameActs[key]
 
 			for _, level_key in ipairs(act_levels) do
-				local level_stat = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels", level_key)
+				local level_stat = statistics_db:get_persistent_stat(player_stats_id, "completed_levels", level_key)
 				local level_completed = level_stat and level_stat ~= 0
 
 				if not level_completed then
@@ -255,7 +255,7 @@ LevelUnlockUtils = {
 
 			for _, level_key in ipairs(act_levels) do
 				local level_stat = tonumber(stats[level_key])
-				local level_completed = level_stat and 1 <= level_stat
+				local level_completed = level_stat and level_stat >= 1
 
 				if not level_completed then
 					return math.max(act_index - 1, 0)
@@ -266,6 +266,7 @@ LevelUnlockUtils = {
 		return math.max(#GameActsOrder - 1, 0)
 	end
 }
+
 LevelUnlockUtils.unlocked_level_difficulty_index = function (statistics_db, player_stats_id, level_key)
 	local level_settings = LevelSettings[level_key]
 	local game_mode = level_settings.game_mode
@@ -293,22 +294,20 @@ LevelUnlockUtils.unlocked_level_difficulty_index = function (statistics_db, play
 
 		return math.max(math.min(completed_difficulty_index + 1, highest_available_difficulty_index), automatic_difficulty_unlock_index)
 	end
-
-	return 
 end
+
 LevelUnlockUtils.completed_level_difficulty_index = function (statistics_db, player_stats_id, level_key)
 	local level_difficulty_name = LevelDifficultyDBNames[level_key]
 
 	if level_difficulty_name then
-		local difficulty_index = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels_difficulty", level_difficulty_name)
+		local difficulty_index = statistics_db:get_persistent_stat(player_stats_id, "completed_levels_difficulty", level_difficulty_name)
 
 		return difficulty_index
 	else
 		return 0
 	end
-
-	return 
 end
+
 LevelUnlockUtils.completed_adventure_difficulty = function (statistics_db, player_stats_id)
 	local lowest_completed = math.huge
 
@@ -317,7 +316,7 @@ LevelUnlockUtils.completed_adventure_difficulty = function (statistics_db, playe
 			local level_difficulty_name = LevelDifficultyDBNames[level_key]
 
 			if level_difficulty_name then
-				local difficulty_index = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels_difficulty", level_difficulty_name)
+				local difficulty_index = statistics_db:get_persistent_stat(player_stats_id, "completed_levels_difficulty", level_difficulty_name)
 
 				if difficulty_index < lowest_completed then
 					lowest_completed = difficulty_index
@@ -345,8 +344,6 @@ local function sort_levels_by_order(a, b)
 
 		return a_order < b_order
 	end
-
-	return 
 end
 
 LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats_id, current_level_key)
@@ -376,7 +373,7 @@ LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats
 
 		for i = 1, num_unlock_levels, 1 do
 			local level_key = unlock_levels[i]
-			local level_stat = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels", level_key)
+			local level_stat = statistics_db:get_persistent_stat(player_stats_id, "completed_levels", level_key)
 			local level_completed = script_data.unlock_all_levels or (level_stat and level_stat ~= 0)
 
 			if not level_completed then
@@ -405,6 +402,7 @@ LevelUnlockUtils.get_next_level_in_order = function (statistics_db, player_stats
 
 	return next_level_key
 end
+
 LevelUnlockUtils.level_unlocked = function (statistics_db, player_stats_id, level_key)
 	if script_data.unlock_all_levels then
 		return true
@@ -456,6 +454,7 @@ LevelUnlockUtils.level_unlocked = function (statistics_db, player_stats_id, leve
 
 	return act_unlocked
 end
+
 LevelUnlockUtils.get_act_key_by_level = function (level_key)
 	for key, levels in pairs(GameActs) do
 		for _, act_level_key in ipairs(levels) do
@@ -464,9 +463,8 @@ LevelUnlockUtils.get_act_key_by_level = function (level_key)
 			end
 		end
 	end
-
-	return 
 end
+
 LevelUnlockUtils.act_unlocked = function (statistics_db, player_stats_id, act_key)
 	assert(GameActs[act_key] ~= nil, "Act %s does not exist.", act_key)
 
@@ -478,7 +476,7 @@ LevelUnlockUtils.act_unlocked = function (statistics_db, player_stats_id, act_ke
 		local act_levels = GameActs[key]
 
 		for _, level_key in ipairs(act_levels) do
-			local level_stat = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels", level_key)
+			local level_stat = statistics_db:get_persistent_stat(player_stats_id, "completed_levels", level_key)
 			local level_completed = level_stat and level_stat ~= 0
 
 			if not level_completed then
@@ -489,13 +487,14 @@ LevelUnlockUtils.act_unlocked = function (statistics_db, player_stats_id, act_ke
 
 	return false
 end
+
 LevelUnlockUtils.act_completed = function (statistics_db, player_stats_id, act_key)
 	assert(GameActs[act_key] ~= nil, "Act %s does not exist.", act_key)
 
 	local act_levels = GameActs[act_key]
 
 	for _, level_key in ipairs(act_levels) do
-		local level_stat = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels", level_key)
+		local level_stat = statistics_db:get_persistent_stat(player_stats_id, "completed_levels", level_key)
 		local level_completed = level_stat and level_stat ~= 0
 
 		if not level_completed then
@@ -505,6 +504,7 @@ LevelUnlockUtils.act_completed = function (statistics_db, player_stats_id, act_k
 
 	return true
 end
+
 LevelUnlockUtils.all_acts_completed = function (statistics_db, player_stats_id)
 	if Development.parameter("unlock_all_levels") then
 		return true
@@ -518,47 +518,46 @@ LevelUnlockUtils.all_acts_completed = function (statistics_db, player_stats_id)
 
 	return true
 end
+
 LevelUnlockUtils.reset_progression = function ()
 	local statistics_db = Managers.player:statistics_db()
 	local player = Managers.player:local_player()
-	local stats_id = player.stats_id(player)
+	local stats_id = player:stats_id()
 
 	for level_key, level_difficulty_key in pairs(LevelDifficultyDBNames) do
-		statistics_db.set_stat(statistics_db, stats_id, "completed_levels_difficulty", level_difficulty_key, 0)
-		statistics_db.set_stat(statistics_db, stats_id, "completed_levels", level_key, 0)
+		statistics_db:set_stat(stats_id, "completed_levels_difficulty", level_difficulty_key, 0)
+		statistics_db:set_stat(stats_id, "completed_levels", level_key, 0)
 	end
 
 	local backend_stats = {}
 
-	statistics_db.generate_backend_stats(statistics_db, stats_id, backend_stats)
+	statistics_db:generate_backend_stats(stats_id, backend_stats)
 	Managers.backend:set_stats(backend_stats)
 	Managers.backend:commit()
-
-	return 
 end
+
 LevelUnlockUtils.debug_set_completed_game_difficulty = function (difficulty)
 	local statistics_db = Managers.player:statistics_db()
 	local player = Managers.player:local_player()
-	local stats_id = player.stats_id(player)
+	local stats_id = player:stats_id()
 
 	for level_key, level_difficulty_key in pairs(LevelDifficultyDBNames) do
-		statistics_db.set_stat(statistics_db, stats_id, "completed_levels_difficulty", level_difficulty_key, difficulty)
-		statistics_db.increment_stat(statistics_db, stats_id, "completed_levels", level_key)
+		statistics_db:set_stat(stats_id, "completed_levels_difficulty", level_difficulty_key, difficulty)
+		statistics_db:increment_stat(stats_id, "completed_levels", level_key)
 	end
 
 	local backend_stats = {}
 
-	statistics_db.generate_backend_stats(statistics_db, stats_id, backend_stats)
+	statistics_db:generate_backend_stats(stats_id, backend_stats)
 	Managers.backend:set_stats(backend_stats)
 	Managers.backend:commit()
-
-	return 
 end
+
 LevelUnlockUtils.debug_unlock_act = function (act_index)
 	local player_manager = Managers.player
-	local statistics_db = player_manager.statistics_db(player_manager)
-	local player = player_manager.local_player(player_manager)
-	local stats_id = player.stats_id(player)
+	local statistics_db = player_manager:statistics_db()
+	local player = player_manager:local_player()
+	local stats_id = player:stats_id()
 	local actual_act_index = math.min(act_index + 1, #GameActsOrder)
 	local act_key = GameActsOrder[actual_act_index]
 
@@ -575,14 +574,14 @@ LevelUnlockUtils.debug_unlock_act = function (act_index)
 
 		for _, level_key in ipairs(act_levels) do
 			if not debug_act_passed then
-				statistics_db.increment_stat(statistics_db, stats_id, "completed_levels", level_key)
+				statistics_db:increment_stat(stats_id, "completed_levels", level_key)
 			else
-				local completed_times = statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_key)
+				local completed_times = statistics_db:get_persistent_stat(stats_id, "completed_levels", level_key)
 
-				while 0 < completed_times do
-					statistics_db.decrement_stat(statistics_db, stats_id, "completed_levels", level_key)
+				while completed_times > 0 do
+					statistics_db:decrement_stat(stats_id, "completed_levels", level_key)
 
-					completed_times = statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", level_key)
+					completed_times = statistics_db:get_persistent_stat(stats_id, "completed_levels", level_key)
 				end
 			end
 		end
@@ -590,11 +589,9 @@ LevelUnlockUtils.debug_unlock_act = function (act_index)
 
 	local backend_stats = {}
 
-	statistics_db.generate_backend_stats(statistics_db, stats_id, backend_stats)
+	statistics_db:generate_backend_stats(stats_id, backend_stats)
 	Managers.backend:set_stats(backend_stats)
 	Managers.backend:commit()
-
-	return 
 end
 
-return 
+return

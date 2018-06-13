@@ -4,11 +4,11 @@ BTIdleAction = class(BTIdleAction, BTNode)
 BTIdleAction.name = "BTIdleAction"
 local PLAYER_POSITIONS = PLAYER_POSITIONS
 local PLAYER_UNITS = PLAYER_UNITS
+
 BTIdleAction.init = function (self, ...)
 	BTIdleAction.super.init(self, ...)
-
-	return 
 end
+
 BTIdleAction.enter = function (self, unit, blackboard, t)
 	local network_manager = Managers.state.network
 	local action = self._tree_node.action_data
@@ -19,25 +19,22 @@ BTIdleAction.enter = function (self, unit, blackboard, t)
 	AiAnimUtils.set_idle_animation_merge(unit, blackboard)
 
 	if blackboard.is_passive then
-		network_manager.anim_event(network_manager, unit, "to_passive")
+		network_manager:anim_event(unit, "to_passive")
 	end
 
 	if blackboard.move_state ~= "idle" or (action and action.force_idle_animation) then
-		network_manager.anim_event(network_manager, unit, animation)
+		network_manager:anim_event(unit, animation)
 
 		blackboard.move_state = "idle"
 	end
 
 	blackboard.navigation_extension:set_enabled(false)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
-
-	return 
 end
+
 BTIdleAction.leave = function (self, unit, blackboard, t)
 	AiAnimUtils.reset_animation_merge(unit)
 	blackboard.navigation_extension:set_enabled(true)
-
-	return 
 end
 
 local function player_within_distance(unit, sqr_near_dist)
@@ -54,8 +51,6 @@ local function player_within_distance(unit, sqr_near_dist)
 			return PLAYER_UNITS[i]
 		end
 	end
-
-	return 
 end
 
 BTIdleAction._discovery_sound_when_close = function (self, unit, blackboard)
@@ -66,21 +61,21 @@ BTIdleAction._discovery_sound_when_close = function (self, unit, blackboard)
 
 		if player_unit then
 			local player = Managers.player:unit_owner(player_unit)
-			local peer_id = player.network_id(player)
+			local peer_id = player:network_id()
 			local network_manager = Managers.state.network
 			local sound_event = blackboard.action.sound_when_near_event
 			local sound_id = NetworkLookup.sound_events[sound_event]
-			local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+			local unit_id = network_manager:unit_game_object_id(unit)
 
 			network_manager.network_transmit:send_rpc("rpc_server_audio_unit_event", peer_id, sound_id, unit_id, 0)
 
 			blackboard.sound_when_near_played = true
 		end
 	end
-
-	return 
 end
+
 local Unit_alive = Unit.alive
+
 BTIdleAction.run = function (self, unit, blackboard, t, dt)
 	local target_unit = blackboard.target_unit
 
@@ -99,9 +94,9 @@ BTIdleAction.run = function (self, unit, blackboard, t, dt)
 		end
 	end
 
-	self._discovery_sound_when_close(self, unit, blackboard)
+	self:_discovery_sound_when_close(unit, blackboard)
 
 	return "running"
 end
 
-return 
+return

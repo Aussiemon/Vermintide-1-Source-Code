@@ -18,6 +18,7 @@ local slot_type_title_names = {
 	trinket = "inventory_screen_trinket_title"
 }
 InventoryItemsUI = class(InventoryItemsUI)
+
 InventoryItemsUI.init = function (self, parent, window_position, page_spacing, animation_definitions, ingame_ui_context)
 	self.parent = parent
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -37,7 +38,7 @@ InventoryItemsUI.init = function (self, parent, window_position, page_spacing, a
 		snap_pixel_positions = true
 	}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	local settings = {
 		input_service_name = "inventory_menu",
@@ -53,115 +54,111 @@ InventoryItemsUI.init = function (self, parent, window_position, page_spacing, a
 
 	self.inventory_item_list:mark_equipped_items()
 	self.inventory_item_list:sort_by_loadout_first()
-
-	return 
 end
+
 InventoryItemsUI.set_gamepad_focus = function (self, enabled)
 	if self.use_gamepad and not enabled then
 		self.inventory_item_list:on_focus_lost()
 	end
 
 	self.use_gamepad = enabled
-
-	return 
 end
+
 InventoryItemsUI.on_enter = function (self)
-	self.set_disable_loadout_items(self, true)
-
-	return 
+	self:set_disable_loadout_items(true)
 end
+
 InventoryItemsUI.on_exit = function (self)
 	self.inventory_item_list:on_focus_lost()
-
-	return 
 end
+
 InventoryItemsUI.destroy = function (self)
 	self.ui_animator = nil
-
-	return 
 end
+
 InventoryItemsUI.current_profile_name = function (self)
 	return self.inventory_item_list:current_profile_name()
 end
+
 InventoryItemsUI.set_disable_loadout_items = function (self, disabled)
 	self.inventory_item_list:set_disable_loadout_items(disabled)
-
-	return 
 end
+
 InventoryItemsUI.sort_items_by_rarity = function (self, enabled)
 	self.inventory_item_list:sort_items_by_rarity(enabled)
-
-	return 
 end
+
 InventoryItemsUI.set_selected_hero = function (self, hero)
 	self.selected_profile_name = hero
 
 	self.inventory_item_list:set_selected_profile_name(hero)
 	self.inventory_item_list:populate_inventory_list()
-
-	return 
 end
+
 InventoryItemsUI.set_rarity = function (self, rarity)
 	self.inventory_item_list:set_rarity(rarity)
 	self.inventory_item_list:populate_inventory_list()
-
-	return 
 end
+
 InventoryItemsUI.refresh = function (self, alternate_start_select_index)
 	self.inventory_item_list:refresh()
 
 	if alternate_start_select_index then
 		self.inventory_list_index_changed = alternate_start_select_index
 	end
-
-	return 
 end
+
 InventoryItemsUI.refresh_items_status = function (self, alternate_start_select_index)
 	self.inventory_item_list:refresh_items_status()
 
 	if alternate_start_select_index then
 		self.inventory_list_index_changed = alternate_start_select_index
 	end
-
-	return 
 end
+
 InventoryItemsUI.is_dragging_started = function (self)
 	return self.inventory_item_list:is_dragging_item_started()
 end
+
 InventoryItemsUI.is_dragging_item = function (self)
 	return self.inventory_item_list:is_dragging_item()
 end
+
 InventoryItemsUI.on_dragging_item_stopped = function (self)
 	return self.inventory_item_list:on_dragging_item_stopped()
 end
+
 InventoryItemsUI.on_item_list_hover = function (self)
 	return self.inventory_item_list:on_item_list_hover()
 end
+
 InventoryItemsUI.on_item_hover_enter = function (self)
 	return self.inventory_item_list:on_item_hover_enter()
 end
+
 InventoryItemsUI.on_item_hover_exit = function (self)
 	return self.inventory_item_list:on_item_hover_exit()
 end
+
 InventoryItemsUI.selected_item = function (self)
 	return self.inventory_item_list:selected_item()
 end
+
 InventoryItemsUI.select_inventory_type_by_slot = function (self, slot_type, force_update)
 	for i = 1, #SLOT_TYPES, 1 do
 		if SLOT_TYPES[i] == slot_type then
-			self.on_inventory_type_selected(self, i, force_update)
+			self:on_inventory_type_selected(i, force_update)
 
 			break
 		end
 	end
-
-	return 
 end
+
 InventoryItemsUI.on_inventory_type_selected = function (self, slot_type, force_update)
 	local button_index = (slot_type and SLOT_INDEX_BY_TYPE[slot_type]) or self.selected_inventory_type_index
 
 	if self.selected_inventory_type_index == button_index then
-		return 
+		return
 	end
 
 	slot_type = slot_type or SLOT_TYPES[button_index]
@@ -197,9 +194,8 @@ InventoryItemsUI.on_inventory_type_selected = function (self, slot_type, force_u
 
 	local title_text = Localize(slot_type_title_names[slot_type])
 	self.item_type_display_text.content.text_field = title_text
-
-	return 
 end
+
 InventoryItemsUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(self.scenegraph_definition)
 	self.background_widgets = {
@@ -210,13 +206,12 @@ InventoryItemsUI.create_ui_elements = function (self)
 	self.item_type_display_text = UIWidget.init(definitions.widget_definitions.item_type_display_text)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 InventoryItemsUI.update = function (self, dt)
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "inventory_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("inventory_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	self.ui_animator:update(dt)
 
@@ -227,7 +222,7 @@ InventoryItemsUI.update = function (self, dt)
 
 	for i = 1, NUM_INVENTORY_TYPE_BUTTONS, 1 do
 		if inventory_selection_content[i].is_selected and i ~= selected_inventory_type_index then
-			self.play_sound(self, "Play_hud_next_tab")
+			self:play_sound("Play_hud_next_tab")
 
 			self.slot_type_changed = SLOT_TYPES[i]
 
@@ -235,18 +230,18 @@ InventoryItemsUI.update = function (self, dt)
 		end
 	end
 
-	self.update_button_bar_animation(self, inventory_selection_bar_widget, "inventory_selection", dt)
+	self:update_button_bar_animation(inventory_selection_bar_widget, "inventory_selection", dt)
 
 	local inventory_item_list = self.inventory_item_list
 	local handle_gamepad = gamepad_active and self.use_gamepad
 
-	inventory_item_list.update(inventory_item_list, dt, handle_gamepad)
+	inventory_item_list:update(dt, handle_gamepad)
 
 	self.inventory_list_index_changed = nil
 	self.inventory_list_index_changed = inventory_item_list.inventory_list_index_changed
 	self.item_to_equip = nil
 	self.item_to_remove = nil
-	local item_selected = inventory_item_list.get_pressed_item(inventory_item_list)
+	local item_selected = inventory_item_list:get_pressed_item()
 
 	if item_selected then
 		local selected_profile_name = self.selected_profile_name
@@ -260,19 +255,18 @@ InventoryItemsUI.update = function (self, dt)
 		end
 	end
 
-	if self.is_dragging_started(self) then
-		self.play_sound(self, "Play_hud_inventory_pickup_item")
+	if self:is_dragging_started() then
+		self:play_sound("Play_hud_inventory_pickup_item")
 	end
-
-	return 
 end
+
 InventoryItemsUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "inventory_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("inventory_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 
@@ -297,15 +291,16 @@ InventoryItemsUI.draw = function (self, dt)
 
 	UIRenderer.end_pass(ui_top_renderer)
 	self.inventory_item_list:draw(dt, self.use_gamepad)
-
-	return 
 end
+
 InventoryItemsUI.on_inventory_item_selected = function (self, index, play_sound)
 	return self.inventory_item_list:on_inventory_item_selected(index, play_sound)
 end
+
 InventoryItemsUI.index_by_backend_id = function (self, backend_id)
 	return self.inventory_item_list:index_by_backend_id(backend_id)
 end
+
 InventoryItemsUI.update_button_bar_animation = function (self, widget, widget_name, dt)
 	local content = widget.content
 	local style = widget.style
@@ -328,21 +323,21 @@ InventoryItemsUI.update_button_bar_animation = function (self, widget, widget_na
 		local is_selected = content[i].is_selected
 
 		if not is_selected and button_hotspot.on_hover_enter then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 
 			local background_fade_in_time = bar_settings.background.fade_in_time
 			local icon_fade_in_time = bar_settings.icon.fade_in_time
 			local background_alpha_hover = bar_settings.background.alpha_hover
 			local icon_alpha_hover = bar_settings.icon.alpha_hover
-			active_animations[button_style_name] = self.animate_element_by_time(self, button_style.color, 1, button_style.color[1], background_alpha_hover, background_fade_in_time)
-			active_animations[icon_texture_id] = self.animate_element_by_time(self, icon_style.color, 1, icon_style.color[1], icon_alpha_hover, icon_fade_in_time)
+			active_animations[button_style_name] = self:animate_element_by_time(button_style.color, 1, button_style.color[1], background_alpha_hover, background_fade_in_time)
+			active_animations[icon_texture_id] = self:animate_element_by_time(icon_style.color, 1, icon_style.color[1], icon_alpha_hover, icon_fade_in_time)
 		elseif button_hotspot.on_hover_exit then
 			local background_fade_out_time = bar_settings.background.fade_out_time
 			local icon_fade_out_time = bar_settings.icon.fade_out_time
 			local background_alpha_normal = bar_settings.background.alpha_normal
 			local icon_alpha_normal = bar_settings.icon.alpha_normal
-			active_animations[button_style_name] = self.animate_element_by_time(self, button_style.color, 1, button_style.color[1], background_alpha_normal, background_fade_out_time)
-			active_animations[icon_texture_id] = self.animate_element_by_time(self, icon_style.color, 1, icon_style.color[1], icon_alpha_normal, icon_fade_out_time)
+			active_animations[button_style_name] = self:animate_element_by_time(button_style.color, 1, button_style.color[1], background_alpha_normal, background_fade_out_time)
+			active_animations[icon_texture_id] = self:animate_element_by_time(icon_style.color, 1, icon_style.color[1], icon_alpha_normal, icon_fade_out_time)
 		end
 
 		if active_animations then
@@ -358,18 +353,16 @@ InventoryItemsUI.update_button_bar_animation = function (self, widget, widget_na
 
 		self.bar_animations[widget_name][i] = active_animations
 	end
-
-	return 
 end
+
 InventoryItemsUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 InventoryItemsUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
 
-return 
+return

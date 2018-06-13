@@ -144,4 +144,4 @@ BreedBehaviors.storm_vermin_champion = {
 	name = "horde"
 }
 
-return 
+return

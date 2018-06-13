@@ -135,4 +135,4 @@ if SelectedBetaLevelSettingsVariant == "VARIANT4" then
 	}
 end
 
-return 
+return

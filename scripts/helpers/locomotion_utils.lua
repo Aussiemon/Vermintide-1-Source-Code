@@ -2,9 +2,10 @@ LocomotionUtils = {}
 local unit_local_position = Unit.local_position
 local unit_set_local_rotation = Unit.set_local_rotation
 local quaternion_look = Quaternion.look
+
 LocomotionUtils.follow_target = function (unit, blackboard, t, dt)
 	if not Unit.alive(blackboard.target_unit) then
-		return 
+		return
 	end
 
 	local breed = blackboard.breed
@@ -13,7 +14,7 @@ LocomotionUtils.follow_target = function (unit, blackboard, t, dt)
 	local goal_has_moved = nil
 
 	if blackboard.remembered_threat_pos then
-		goal_has_moved = 1 < Vector3.distance(Vector3Box.unbox(blackboard.remembered_threat_pos), threat_position)
+		goal_has_moved = Vector3.distance(Vector3Box.unbox(blackboard.remembered_threat_pos), threat_position) > 1
 	else
 		blackboard.remembered_threat_pos = Vector3Box()
 		goal_has_moved = true
@@ -28,28 +29,27 @@ LocomotionUtils.follow_target = function (unit, blackboard, t, dt)
 		if is_position_on_navmesh then
 			goal_pos.z = altitude
 			local ai_extension = ScriptUnit.extension(unit, "ai_system")
-			local navigation = ai_extension.navigation(ai_extension)
+			local navigation = ai_extension:navigation()
 
-			navigation.move_to(navigation, goal_pos)
+			navigation:move_to(goal_pos)
 
 			blackboard.target_outside_navmesh = false
 		else
 			blackboard.target_outside_navmesh = true
 		end
 	end
-
-	return 
 end
+
 LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 	local target_unit = blackboard.target_unit
 
 	if not Unit.alive(target_unit) then
-		return 
+		return
 	end
 
 	local pos = POSITION_LOOKUP[unit]
 	local status_extension = ScriptUnit.extension(target_unit, "status_system")
-	local is_on_ladder, ladder_unit = status_extension.get_is_on_ladder(status_extension)
+	local is_on_ladder, ladder_unit = status_extension:get_is_on_ladder()
 	local threat_position, goal_pos = nil
 
 	if is_on_ladder then
@@ -63,7 +63,7 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 	local goal_has_moved = nil
 
 	if blackboard.remembered_threat_pos then
-		goal_has_moved = 1 < Vector3.distance(Vector3Box.unbox(blackboard.remembered_threat_pos), threat_position)
+		goal_has_moved = Vector3.distance(Vector3Box.unbox(blackboard.remembered_threat_pos), threat_position) > 1
 
 		if not goal_has_moved and blackboard.next_move_check < t then
 			blackboard.next_move_check = t + 2
@@ -94,7 +94,7 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 
 				blackboard.target_outside_navmesh = false
 
-				return 
+				return
 			end
 		end
 
@@ -109,7 +109,7 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 
 			blackboard.target_outside_navmesh = false
 
-			return 
+			return
 		end
 
 		if is_position_on_navmesh then
@@ -119,12 +119,12 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 
 			blackboard.target_outside_navmesh = false
 
-			return 
+			return
 		end
 
 		local dist = Vector3.length(to_target)
 
-		if 5 < dist then
+		if dist > 5 then
 			local is_position_on_navmesh, altitude = GwNavQueries.triangle_from_position(nav_world, threat_position, 2, 2)
 
 			if is_position_on_navmesh then
@@ -134,18 +134,18 @@ LocomotionUtils.follow_target_ogre = function (unit, blackboard, t, dt)
 
 				blackboard.target_outside_navmesh = false
 
-				return 
+				return
 			end
 		end
 
 		blackboard.target_outside_navmesh = true
 	end
-
-	return 
 end
+
 local SteeringTweakData = {
 	ROTATION_LERP_LOOK_AT = 20
 }
+
 LocomotionUtils.update_combat_rotation = function (unit, blackboard, t, dt)
 	local pos = unit_local_position(unit, 0)
 	local current_rot = Unit.local_rotation(unit, 0)
@@ -155,9 +155,8 @@ LocomotionUtils.update_combat_rotation = function (unit, blackboard, t, dt)
 	local new_rot = Quaternion.lerp(current_rot, wanted_rot, lerp_value)
 
 	unit_set_local_rotation(unit, 0, new_rot)
-
-	return 
 end
+
 LocomotionUtils.look_at_target_rotation = function (unit, blackboard, t, dt)
 	local pos = unit_local_position(unit, 0)
 	local current_rot = Unit.local_rotation(unit, 0)
@@ -168,6 +167,7 @@ LocomotionUtils.look_at_target_rotation = function (unit, blackboard, t, dt)
 
 	return new_rot
 end
+
 LocomotionUtils.look_at_target_rotation_flat = function (unit, blackboard, t, dt)
 	local pos = unit_local_position(unit, 0)
 	local current_rot = Unit.local_rotation(unit, 0)
@@ -182,6 +182,7 @@ LocomotionUtils.look_at_target_rotation_flat = function (unit, blackboard, t, dt
 
 	return new_rot
 end
+
 LocomotionUtils.rotation_towards_unit = function (unit, target_unit)
 	local pos_unit = unit_local_position(unit, 0)
 	local pos_target_unit = unit_local_position(target_unit, 0)
@@ -190,6 +191,7 @@ LocomotionUtils.rotation_towards_unit = function (unit, target_unit)
 
 	return rotation
 end
+
 LocomotionUtils.rotation_towards_unit_position = function (unit, pos_target_unit)
 	local pos_unit = unit_local_position(unit, 0)
 	local direction = Vector3.normalize(pos_target_unit - pos_unit)
@@ -197,6 +199,7 @@ LocomotionUtils.rotation_towards_unit_position = function (unit, pos_target_unit
 
 	return rotation
 end
+
 LocomotionUtils.rotation_towards_unit_flat = function (unit, target_unit)
 	local pos_unit = unit_local_position(unit, 0)
 	local pos_target_unit = unit_local_position(target_unit, 0)
@@ -207,6 +210,7 @@ LocomotionUtils.rotation_towards_unit_flat = function (unit, target_unit)
 
 	return flat_rotation
 end
+
 LocomotionUtils.rotation_towards_unit_position_flat = function (unit, pos_target_unit)
 	local pos_unit = unit_local_position(unit, 0)
 	local direction = Vector3.normalize(pos_target_unit - pos_unit)
@@ -215,6 +219,7 @@ LocomotionUtils.rotation_towards_unit_position_flat = function (unit, pos_target
 
 	return rotation
 end
+
 LocomotionUtils.look_at_target_rotation_plain = function (unit, blackboard, t, dt)
 	local pos = unit_local_position(unit, 0)
 	local current_rot = Unit.local_rotation(unit, 0)
@@ -223,6 +228,7 @@ LocomotionUtils.look_at_target_rotation_plain = function (unit, blackboard, t, d
 
 	return wanted_rot
 end
+
 LocomotionUtils.look_at_position = function (unit, position)
 	local pos = unit_local_position(unit, 0)
 	local current_rot = Unit.local_rotation(unit, 0)
@@ -231,6 +237,7 @@ LocomotionUtils.look_at_position = function (unit, position)
 
 	return wanted_rot
 end
+
 LocomotionUtils.look_at_position_flat = function (unit, position)
 	local pos = unit_local_position(unit, 0)
 	local current_rot = Unit.local_rotation(unit, 0)
@@ -241,6 +248,7 @@ LocomotionUtils.look_at_position_flat = function (unit, position)
 
 	return wanted_rot
 end
+
 LocomotionUtils.get_attack_anim = function (unit, blackboard, attack_anims)
 	if attack_anims then
 		local target_unit = blackboard.target_unit
@@ -252,13 +260,13 @@ LocomotionUtils.get_attack_anim = function (unit, blackboard, attack_anims)
 		dot = math.clamp(dot, -1, 1)
 		local angle = math.acos(dot)
 
-		if math.pi * 0.95 < angle then
+		if angle > math.pi * 0.95 then
 			return attack_anims.directly_fwd[1], attack_anims.directly_fwd[2]
-		elseif math.pi * 0.75 < angle then
+		elseif angle > math.pi * 0.75 then
 			return attack_anims.fwd[1], attack_anims.fwd[2]
 		elseif angle < math.pi * 0.25 then
 			return attack_anims.bwd[1], attack_anims.bwd[2]
-		elseif 0 < Vector3.cross(my_fwd, to_enemy).z then
+		elseif Vector3.cross(my_fwd, to_enemy).z > 0 then
 			return attack_anims.right[1], attack_anims.right[2]
 		else
 			return attack_anims.left[1], attack_anims.left[2]
@@ -267,6 +275,7 @@ LocomotionUtils.get_attack_anim = function (unit, blackboard, attack_anims)
 
 	return nil, false
 end
+
 LocomotionUtils.get_start_anim = function (unit, blackboard, start_anims)
 	if start_anims then
 		local target_unit = blackboard.target_unit
@@ -278,69 +287,64 @@ LocomotionUtils.get_start_anim = function (unit, blackboard, start_anims)
 		dot = math.clamp(dot, -1, 1)
 		local angle = math.acos(dot)
 
-		if math.pi * 0.75 < angle then
+		if angle > math.pi * 0.75 then
 			return start_anims.fwd
 		elseif angle < math.pi * 0.25 then
 			return start_anims.bwd, true
-		elseif 0 < Vector3.cross(my_fwd, to_enemy).z then
+		elseif Vector3.cross(my_fwd, to_enemy).z > 0 then
 			return start_anims.right
 		else
 			return start_anims.left
 		end
 	end
-
-	return 
 end
+
 LocomotionUtils.constrain_on_clients = function (unit, constrain, min, max)
 	local network_manager = Managers.state.network
 
-	if network_manager.game(network_manager) then
+	if network_manager:game() then
 		local realmin = Vector3(math.min(min.x, max.x), math.min(min.y, max.y), math.min(min.z, max.z))
 		local realmax = Vector3(math.max(min.x, max.x), math.max(min.y, max.y), math.max(min.z, max.z))
 		local go_id = Managers.state.unit_storage:go_id(unit)
 
 		network_manager.network_transmit:send_rpc_clients("rpc_constrain_ai", go_id, constrain, realmin, realmax)
 	end
-
-	return 
 end
+
 LocomotionUtils.set_animation_driven_movement = function (unit, animation_driven, is_affected_by_gravity, script_driven_rotation)
 	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
-	locomotion_extension.set_animation_driven(locomotion_extension, animation_driven, is_affected_by_gravity, script_driven_rotation)
-
-	return 
+	locomotion_extension:set_animation_driven(animation_driven, is_affected_by_gravity, script_driven_rotation)
 end
+
 LocomotionUtils.set_animation_translation_scale = function (unit, animation_translation_scale)
 	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
-	locomotion_extension.set_animation_translation_scale(locomotion_extension, animation_translation_scale)
+	locomotion_extension:set_animation_translation_scale(animation_translation_scale)
 
 	local network_manager = Managers.state.network
 
-	if network_manager.game(network_manager) then
+	if network_manager:game() then
 		local go_id = Managers.state.unit_storage:go_id(unit)
 
 		network_manager.network_transmit:send_rpc_clients("rpc_set_animation_translation_scale", go_id, animation_translation_scale)
 	end
-
-	return 
 end
+
 LocomotionUtils.set_animation_rotation_scale = function (unit, animation_rotation_scale)
 	local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
-	locomotion_extension.set_animation_rotation_scale(locomotion_extension, animation_rotation_scale)
+	locomotion_extension:set_animation_rotation_scale(animation_rotation_scale)
 
 	local network_manager = Managers.state.network
 
-	if network_manager.game(network_manager) then
+	if network_manager:game() then
 		local go_id = Managers.state.unit_storage:go_id(unit)
 
 		network_manager.network_transmit:send_rpc_clients("rpc_set_animation_rotation_scale", go_id, animation_rotation_scale)
 	end
-
-	return 
 end
+
 LocomotionUtils.update_local_animation_driven_movement = function (unit, dt)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local wanted_position = Matrix4x4.translation(wanted_pose)
@@ -350,9 +354,8 @@ LocomotionUtils.update_local_animation_driven_movement = function (unit, dt)
 	local wanted_rotation = Matrix4x4.rotation(wanted_pose)
 
 	Unit.set_local_rotation(unit, 0, wanted_rotation)
-
-	return 
 end
+
 LocomotionUtils.update_local_animation_driven_movement_with_parent = function (unit, dt, parent)
 	local master_pos = Unit.local_position(parent.master_unit, 0)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
@@ -362,9 +365,8 @@ LocomotionUtils.update_local_animation_driven_movement_with_parent = function (u
 	local wanted_rotation = Matrix4x4.rotation(wanted_pose)
 
 	Unit.set_local_rotation(unit, 0, wanted_rotation)
-
-	return 
 end
+
 LocomotionUtils.update_local_animation_driven_movement_with_mover = function (unit, dt)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local wanted_position = Matrix4x4.translation(wanted_pose)
@@ -381,9 +383,8 @@ LocomotionUtils.update_local_animation_driven_movement_with_mover = function (un
 	local wanted_rotation = Matrix4x4.rotation(wanted_pose)
 
 	Unit.set_local_rotation(unit, 0, wanted_rotation)
-
-	return 
 end
+
 LocomotionUtils.update_local_animation_driven_movement_plus_mover = function (unit, dt)
 	local mover = Unit.mover(unit)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
@@ -397,9 +398,8 @@ LocomotionUtils.update_local_animation_driven_movement_plus_mover = function (un
 	local wanted_rotation = Matrix4x4.rotation(wanted_pose)
 
 	Unit.set_local_rotation(unit, 0, wanted_rotation)
-
-	return 
 end
+
 LocomotionUtils.update_local_animation_driven_movement_with_min_z = function (unit, dt, min_z)
 	local wanted_pose = Unit.animation_wanted_root_pose(unit)
 	local wanted_position = Matrix4x4.translation(wanted_pose)
@@ -413,15 +413,14 @@ LocomotionUtils.update_local_animation_driven_movement_with_min_z = function (un
 	local wanted_rotation = Matrix4x4.rotation(wanted_pose)
 
 	Unit.set_local_rotation(unit, 0, wanted_rotation)
-
-	return 
 end
+
 LocomotionUtils.new_random_goal = function (nav_world, blackboard, start_pos, min_dist, max_dist, max_tries, test_points, above, below)
 	local above = above or 30
 	local below = below or 30
 	local tries = 0
 
-	while tries < max_tries do
+	while max_tries > tries do
 		local dist = min_dist + math.random() * (max_dist - min_dist)
 		local add_vec = Vector3(dist, 0, 1.5)
 		local pos = start_pos + Quaternion.rotate(Quaternion(Vector3.up(), math.degrees_to_radians(Math.random(1, 360))), add_vec)
@@ -440,15 +439,14 @@ LocomotionUtils.new_random_goal = function (nav_world, blackboard, start_pos, mi
 
 		tries = tries + 1
 	end
-
-	return 
 end
+
 LocomotionUtils.new_random_goal_uniformly_distributed = function (nav_world, blackboard, start_pos, min_dist, max_dist, max_tries, test_points, above, below)
 	local above = above or 30
 	local below = below or 30
 	local tries = 0
 
-	while tries < max_tries do
+	while max_tries > tries do
 		local min_dist_proportion = (min_dist / max_dist)^2
 		local random_value = Math.random()
 		local normalized_dist = min_dist_proportion + random_value * (1 - min_dist_proportion)
@@ -471,9 +469,8 @@ LocomotionUtils.new_random_goal_uniformly_distributed = function (nav_world, bla
 
 		tries = tries + 1
 	end
-
-	return 
 end
+
 LocomotionUtils.new_random_goal_uniformly_distributed_with_inside_from_outside_on_last = function (nav_world, blackboard, start_pos, min_dist, max_dist, max_tries, test_points, above, below, horizontal)
 	local above = above or 30
 	local below = below or 30
@@ -481,7 +478,7 @@ LocomotionUtils.new_random_goal_uniformly_distributed_with_inside_from_outside_o
 	local distance_from_obstacle = 0.1
 	local tries = 0
 
-	while tries < max_tries do
+	while max_tries > tries do
 		local min_dist_proportion = (min_dist / max_dist)^2
 		local random_value = Math.random()
 		local normalized_dist = min_dist_proportion + random_value * (1 - min_dist_proportion)
@@ -512,9 +509,8 @@ LocomotionUtils.new_random_goal_uniformly_distributed_with_inside_from_outside_o
 
 		tries = tries + 1
 	end
-
-	return 
 end
+
 LocomotionUtils.new_random_goal_in_front_of_unit = function (nav_world, unit, min_dist, max_dist, max_tries, test_points, min_width, max_width, above, below)
 	local above = above or 30
 	local below = below or 30
@@ -526,10 +522,10 @@ LocomotionUtils.new_random_goal_in_front_of_unit = function (nav_world, unit, mi
 		local direction, speed = nil
 
 		if locomotion_ext then
-			local average_velocity = Vector3.flat(locomotion_ext.average_velocity(locomotion_ext))
+			local average_velocity = Vector3.flat(locomotion_ext:average_velocity())
 			speed = Vector3.length(average_velocity)
 
-			if 0.1 < speed then
+			if speed > 0.1 then
 				direction = average_velocity
 			else
 				direction = Quaternion.forward(Unit.local_rotation(unit, 0))
@@ -569,14 +565,15 @@ LocomotionUtils.new_random_goal_in_front_of_unit = function (nav_world, unit, mi
 
 	return nil
 end
+
 LocomotionUtils.new_goal_in_transport = function (nav_world, unit, ally_unit)
 	local tries = 0
 	local status_extension = ScriptUnit.extension(ally_unit, "status_system")
-	local transport_unit = status_extension.get_inside_transport_unit(status_extension)
+	local transport_unit = status_extension:get_inside_transport_unit()
 
 	if Unit.alive(transport_unit) then
 		local transport_extension = ScriptUnit.extension(transport_unit, "transportation_system")
-		local pos = transport_extension.assign_position_to_bot(transport_extension)
+		local pos = transport_extension:assign_position_to_bot()
 		local success, altitude = GwNavQueries.triangle_from_position(nav_world, pos, 30, 30)
 
 		if success then
@@ -588,6 +585,7 @@ LocomotionUtils.new_goal_in_transport = function (nav_world, unit, ally_unit)
 
 	return nil
 end
+
 LocomotionUtils.outside_goal = function (nav_world, unit, blackboard, min_dist, max_dist, angle, max_tries, above, below)
 	local tries = 0
 	local pos = POSITION_LOOKUP[unit]
@@ -596,7 +594,7 @@ LocomotionUtils.outside_goal = function (nav_world, unit, blackboard, min_dist, 
 	to_vec.z = 0
 
 	if Vector3.length_squared(to_vec) < 0.001 then
-		return 
+		return
 	end
 
 	local span = max_dist - min_dist
@@ -619,9 +617,8 @@ LocomotionUtils.outside_goal = function (nav_world, unit, blackboard, min_dist, 
 
 		tries = tries + 1
 	end
-
-	return 
 end
+
 LocomotionUtils.test_pos = function (nav_world, pos)
 	local fail = 0
 	local success = 0
@@ -642,9 +639,8 @@ LocomotionUtils.test_pos = function (nav_world, pos)
 	end
 
 	Debug.text("Points ok %.2f fail: %d", success / (success + fail), fail)
-
-	return 
 end
+
 LocomotionUtils.get_close_pos_on_mesh = function (nav_world, pos, searches)
 	local failed_points = {}
 	local success, altitude, p1, p2, p3 = GwNavQueries.triangle_from_position(nav_world, pos, 30, 30)
@@ -683,6 +679,7 @@ LocomotionUtils.get_close_pos_on_mesh = function (nav_world, pos, searches)
 
 	return nil, failed_points
 end
+
 local circle_points = {
 	1,
 	0,
@@ -701,6 +698,7 @@ local circle_points = {
 	0.707,
 	-0.707
 }
+
 LocomotionUtils.mesh_positions_closest_to_outside_pos = function (nav_world, outside_pos, radius, point_list)
 	local num_points = #circle_points
 
@@ -713,8 +711,9 @@ LocomotionUtils.mesh_positions_closest_to_outside_pos = function (nav_world, out
 		end
 	end
 
-	return 0 < #point_list
+	return #point_list > 0
 end
+
 LocomotionUtils.closest_mesh_positions_outward = function (nav_world, outside_pos, radius, point_list)
 	local step_dist = 3
 	local steps = math.ceil(radius / step_dist)
@@ -735,9 +734,8 @@ LocomotionUtils.closest_mesh_positions_outward = function (nav_world, outside_po
 			end
 		end
 	end
-
-	return 
 end
+
 LocomotionUtils.pos_on_mesh = function (nav_world, pos, above, below)
 	local above = above or 30
 	local below = below or 30
@@ -748,9 +746,8 @@ LocomotionUtils.pos_on_mesh = function (nav_world, pos, above, below)
 
 		return projected_pos
 	end
-
-	return 
 end
+
 LocomotionUtils.ray_can_go_on_mesh = function (nav_world, position_start, position_end, traverse_logic, above, below)
 	local projected_start_pos = LocomotionUtils.pos_on_mesh(nav_world, position_start, above, below)
 	local projected_end_pos = projected_start_pos and LocomotionUtils.pos_on_mesh(nav_world, position_end, above, below)
@@ -764,7 +761,9 @@ LocomotionUtils.ray_can_go_on_mesh = function (nav_world, position_start, positi
 
 	return raycango, projected_start_pos, projected_end_pos
 end
+
 local FLAT_GROUND_UP_DOT_THRESHOLD = 0.9
+
 LocomotionUtils.is_on_flat_ground_raycast = function (physics_world, unit_position)
 	local ray_source = unit_position + Vector3.up() * 0.1
 	local hit_ground, _, _, ground_normal = PhysicsWorld.immediate_raycast(physics_world, ray_source, Vector3.down(), 0.15, "closest", "collision_filter", "filter_ai_mover")
@@ -777,12 +776,14 @@ LocomotionUtils.is_on_flat_ground_raycast = function (physics_world, unit_positi
 
 	return is_standing_on_flat_ground
 end
+
 local EPSILON_SQ = 0.0001
 local NAV_CHECK_ABOVE = 0.25
 local NAV_CHECK_BELOW = 0.25
 local NAV_CHECK_DISTANCE = 0.3
 local WALL_CHECK_RAYCAST_LENGTH = 1.3
 local WALL_CHECK_RAYCAST_LOW_HEIGHT = 0.4
+
 LocomotionUtils.navmesh_movement_check = function (unit_position, unit_velocity, nav_world, physics_world, traverse_logic)
 	local is_moving = EPSILON_SQ < Vector3.length_squared(unit_velocity)
 	local direction = (is_moving and Vector3.normalize(unit_velocity)) or Vector3.zero()
@@ -820,10 +821,12 @@ LocomotionUtils.navmesh_movement_check = function (unit_position, unit_velocity,
 
 	return result
 end
+
 local INDEX_POSITION = 1
 local INDEX_DISTANCE = 2
 local INDEX_NORMAL = 3
 local INDEX_ACTOR = 4
+
 LocomotionUtils.clear_los = function (physics_world, p1, p2, ignore_unit1, ignore_unit2)
 	local to_vec = p2 - p1
 	local dist = Vector3.length(to_vec)
@@ -844,9 +847,10 @@ LocomotionUtils.clear_los = function (physics_world, p1, p2, ignore_unit1, ignor
 
 	return true
 end
+
 LocomotionUtils.target_in_los = function (unit, blackboard)
 	if not Unit.alive(blackboard.target_unit) then
-		return 
+		return
 	end
 
 	local target_node = Unit.node(blackboard.target_unit, "j_neck")
@@ -875,58 +879,56 @@ LocomotionUtils.target_in_los = function (unit, blackboard)
 
 	return true
 end
+
 LocomotionUtils.enable_linked_movement = function (world, child_unit, parent_unit, parent_node_index, offset)
 	local player_manager = Managers.player
-	local player = player_manager.owner(player_manager, child_unit)
+	local player = player_manager:owner(child_unit)
 
 	if player.remote then
 		local unit_storage = Managers.state.unit_storage
-		local go_id = unit_storage.go_id(unit_storage, child_unit)
-		local owner_id = unit_storage.owner(unit_storage, go_id)
+		local go_id = unit_storage:go_id(child_unit)
+		local owner_id = unit_storage:owner(go_id)
 		local level = LevelHelper:current_level(world)
 		local parent_level_unit_index = Level.unit_index(level, parent_unit)
 		local network_manager = Managers.state.network
 
-		if network_manager.game(network_manager) then
+		if network_manager:game() then
 			network_manager.network_transmit:send_rpc("rpc_enable_linked_movement", owner_id, go_id, parent_level_unit_index, parent_node_index, offset)
 		end
 	else
 		local locomotion_extension = ScriptUnit.extension(child_unit, "locomotion_system")
 
-		locomotion_extension.enable_linked_movement(locomotion_extension, parent_unit, parent_node_index, offset)
+		locomotion_extension:enable_linked_movement(parent_unit, parent_node_index, offset)
 	end
-
-	return 
 end
+
 LocomotionUtils.disable_linked_movement = function (unit)
 	local player_manager = Managers.player
-	local player = player_manager.owner(player_manager, unit)
+	local player = player_manager:owner(unit)
 
 	if player and player.remote then
 		local unit_storage = Managers.state.unit_storage
-		local go_id = unit_storage.go_id(unit_storage, unit)
-		local owner_id = unit_storage.owner(unit_storage, go_id)
+		local go_id = unit_storage:go_id(unit)
+		local owner_id = unit_storage:owner(go_id)
 		local network_manager = Managers.state.network
 
-		if network_manager.game(network_manager) then
+		if network_manager:game() then
 			network_manager.network_transmit:send_rpc("rpc_disable_linked_movement", owner_id, go_id)
 		end
 	else
 		local locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 
-		locomotion_extension.disable_linked_movement(locomotion_extension)
+		locomotion_extension:disable_linked_movement()
 	end
-
-	return 
 end
+
 LocomotionUtils.calculate_wanted_lerp_velocity = function (position_current, position_start, position_end, start_time, end_time, dt, t)
 	local lerp_t = math.min(1, (t - start_time) / (end_time - start_time))
 	local position = Vector3.lerp(position_start, position_end, lerp_t)
 	local distance = Vector3.distance(position_current, position)
 	local wanted_velocity = distance / dt
-
-	return 
 end
+
 LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_crosshairs_time, min_distance, max_distance)
 	min_distance = min_distance or 0
 	max_distance = max_distance or math.huge
@@ -938,8 +940,8 @@ LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_
 	for i = 1, #units, 1 do
 		local player_unit = units[i]
 		local player_inventory = ScriptUnit.extension(player_unit, "inventory_system")
-		local using_ranged_weapon = player_inventory.get_wielded_slot_name(player_inventory) == "slot_ranged"
-		local weapon_template = player_inventory.get_wielded_slot_item_template(player_inventory)
+		local using_ranged_weapon = player_inventory:get_wielded_slot_name() == "slot_ranged"
+		local weapon_template = player_inventory:get_wielded_slot_item_template()
 
 		if weapon_template and weapon_template.no_dodge then
 			using_ranged_weapon = false
@@ -950,7 +952,7 @@ LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_
 			local player_pos = Unit.world_position(player_unit, Unit.node(player_unit, "camera_attach"))
 			local to_rat = pos - player_pos
 			local player_locomotion = ScriptUnit.extension(player_unit, "locomotion_system")
-			local rotation = player_locomotion.current_rotation(player_locomotion)
+			local rotation = player_locomotion:current_rotation()
 			local aim_direction = Quaternion.forward(rotation)
 			local dist = Vector3.length(to_rat)
 			local miss_vec = to_rat - aim_direction * dist
@@ -993,9 +995,8 @@ LocomotionUtils.in_crosshairs_dodge = function (unit, blackboard, t, radius, in_
 			end
 		end
 	end
-
-	return 
 end
+
 LocomotionUtils.separate_mover_fallbacks = function (mover, seprarate_dist)
 	local is_colliding, colliding_actor, move_vector, new_position = Mover.separate(mover, seprarate_dist)
 
@@ -1007,6 +1008,7 @@ LocomotionUtils.separate_mover_fallbacks = function (mover, seprarate_dist)
 
 	return success
 end
+
 LocomotionUtils.on_alerted_dodge = function (unit, blackboard, alerting_unit, enemy_unit)
 	local pos = Unit.world_position(unit, Unit.node(unit, "j_neck"))
 	local enemy_pos, rotation = nil
@@ -1015,7 +1017,7 @@ LocomotionUtils.on_alerted_dodge = function (unit, blackboard, alerting_unit, en
 	if DamageUtils.is_player_unit(real_attacker_unit) then
 		local locomotion_extension = ScriptUnit.has_extension(real_attacker_unit, "locomotion_system")
 		local node = Unit.has_node(real_attacker_unit, "camera_attach") and Unit.node(real_attacker_unit, "camera_attach")
-		rotation = locomotion_extension.current_rotation(locomotion_extension)
+		rotation = locomotion_extension:current_rotation()
 		enemy_pos = Unit.world_position(real_attacker_unit, node)
 	else
 		rotation = Unit.world_rotation(real_attacker_unit, 0)
@@ -1030,4 +1032,4 @@ LocomotionUtils.on_alerted_dodge = function (unit, blackboard, alerting_unit, en
 	return miss_vec, aim_direction
 end
 
-return 
+return

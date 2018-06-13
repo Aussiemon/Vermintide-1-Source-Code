@@ -11744,4 +11744,4 @@ LevellingRewards = {
 	}
 }
 
-return 
+return

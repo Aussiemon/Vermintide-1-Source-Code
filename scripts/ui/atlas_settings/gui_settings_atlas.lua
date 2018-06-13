@@ -323,4 +323,4 @@ settings_atlas = {
 	}
 }
 
-return 
+return

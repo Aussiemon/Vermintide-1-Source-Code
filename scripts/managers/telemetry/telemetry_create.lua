@@ -18,8 +18,6 @@ function CreateTelemetryManager()
 	else
 		return TelemetryManager:new()
 	end
-
-	return 
 end
 
-return 
+return

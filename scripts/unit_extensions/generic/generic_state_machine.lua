@@ -5,35 +5,32 @@ local no_write_meta = {
 	end,
 	__newindex = function (t, k, v)
 		error("FAIL : tried to set [" .. k .. "] to [" .. tostring(v) .. "]")
-
-		return 
 	end
 }
 GenericStateMachine = class(GenericStateMachine)
+
 GenericStateMachine.init = function (self, extension_init_context, unit, states, start_state)
 	self.unit = unit
 	self.debugging = false
-
-	return 
 end
+
 GenericStateMachine.post_init = function (self, states, start_state)
 	self.states = states
 	self.dummy_params = setmetatable({}, no_write_meta)
 	self.dummy_state = setmetatable({
 		name = "dummy",
 		update = function ()
-			return 
+			return
 		end,
 		on_exit = function ()
-			return 
+			return
 		end
 	}, no_write_meta)
 	self.state_current = self.dummy_state
 	self.state_next = start_state
 	self.state_next_params = {}
-
-	return 
 end
+
 GenericStateMachine.update = function (self, unit, input, dt, context, t)
 	if self.state_current ~= nil then
 		Profiler.start(self.state_current.name)
@@ -55,7 +52,7 @@ GenericStateMachine.update = function (self, unit, input, dt, context, t)
 
 		local state = self.states[self.state_next]
 
-		state.on_enter(state, unit, input, dt, context, t, self.state_current.name, self.state_next_params or self.dummy_params)
+		state:on_enter(unit, input, dt, context, t, self.state_current.name, self.state_next_params or self.dummy_params)
 
 		self.state_current = state
 		self.state_next = nil
@@ -65,17 +62,15 @@ GenericStateMachine.update = function (self, unit, input, dt, context, t)
 	if self.debugging ~= script_data.debug_state_machines then
 		self.debugging = not not script_data.debug_state_machines
 	end
-
-	return 
 end
+
 GenericStateMachine.change_state = function (self, state_next, state_next_params)
 	assert(self.state_next == nil, "next state is already set ")
 
 	self.state_next = state_next
 	self.state_next_params = state_next_params
-
-	return 
 end
+
 GenericStateMachine.exit_current_state = function (self)
 	if self.state_current then
 		local t = Managers.time:time("game")
@@ -85,8 +80,6 @@ GenericStateMachine.exit_current_state = function (self)
 
 		self.state_current = nil
 	end
-
-	return 
 end
 
-return 
+return

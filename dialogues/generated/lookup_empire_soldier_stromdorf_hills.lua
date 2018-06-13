@@ -47,4 +47,4 @@ DialogueLookup[DialogueLookup_n + 22] = "pes_objective_stromdorf_hills_intro_c"
 DialogueLookup[DialogueLookup_n + 23] = "pes_objective_stromdorf_hills_grave_tomb"
 DialogueLookup_n = DialogueLookup_n + 23
 
-return 
+return

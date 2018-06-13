@@ -6,6 +6,7 @@ local BOON_SPACING = 15
 BoonUI = class(BoonUI)
 local MAX_NUMBER_OF_BOONS = definitions.MAX_NUMBER_OF_BOONS
 local DEBUG_BOONS_UI = false
+
 BoonUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -19,7 +20,7 @@ BoonUI.init = function (self, ingame_ui_context)
 	}
 	self.is_in_inn = ingame_ui_context.is_in_inn
 
-	self._create_ui_elements(self)
+	self:_create_ui_elements()
 
 	local boon_pivot_definition = scenegraph_definition.pivot
 	local boon_pivot_position = boon_pivot_definition.position
@@ -35,9 +36,8 @@ BoonUI.init = function (self, ingame_ui_context)
 
 	UICleanUI.register_area(self.cleanui, "boon_ui", self.cleanui_data, position, size)
 	rawset(_G, "boon_ui", self)
-
-	return 
 end
+
 BoonUI._create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	local widgets = {}
@@ -53,15 +53,14 @@ BoonUI._create_ui_elements = function (self)
 	self._active_boons = {}
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self.set_visible(self, true)
-	self.set_dirty(self)
+	self:set_visible(true)
+	self:set_dirty()
 
 	self._num_active_boons = 0
 
-	self._align_widgets(self)
-
-	return 
+	self:_align_widgets()
 end
+
 BoonUI._align_widgets = function (self)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 	local boon_width = 38
@@ -80,7 +79,7 @@ BoonUI._align_widgets = function (self)
 		widget_offset[2] = math.floor(current_index / MAX_NUMBER_OF_BOONS) * vertical_spacing
 		widget_total_width = widget_total_width - horizontal_spacing
 
-		self._set_widget_dirty(self, widget)
+		self:_set_widget_dirty(widget)
 
 		current_index = current_index + 1
 
@@ -89,10 +88,9 @@ BoonUI._align_widgets = function (self)
 		end
 	end
 
-	self.set_dirty(self)
-
-	return 
+	self:set_dirty()
 end
+
 local sorted_boons = {}
 
 local function boon_sort_func(a, b)
@@ -106,6 +104,7 @@ end
 
 local widgets_to_remove = {}
 local verified_widgets = {}
+
 BoonUI._sync_boons = function (self)
 	table.clear(sorted_boons)
 
@@ -117,15 +116,18 @@ BoonUI._sync_boons = function (self)
 	if boon_handler then
 		table.clear(verified_widgets)
 
-		local boons = boon_handler.get_active_boons(boon_handler)
+		local boons = boon_handler:get_active_boons()
 		local align_widgets = false
 
 		for i = 1, #boons, 1 do
-			local boon_data = boons[i]
-			local boon_name = boon_data.name
+			repeat
+				local boon_data = boons[i]
+				local boon_name = boon_data.name
 
-			if not boon_name then
-			else
+				if not boon_name then
+					break
+				end
+
 				local own_boon = boon_data.own_boon
 				local end_time = network_time + boon_data.remaining_duration
 				local verified = false
@@ -146,12 +148,12 @@ BoonUI._sync_boons = function (self)
 				end
 
 				if not verified and (boon_data.remaining_duration > 0 or not self.is_in_inn) then
-					self._add_boon(self, boon_name, own_boon, end_time)
+					self:_add_boon(boon_name, own_boon, end_time)
 
 					verified_widgets[#active_boons] = true
 					align_widgets = true
 				end
-			end
+			until true
 		end
 
 		table.clear(widgets_to_remove)
@@ -167,24 +169,23 @@ BoonUI._sync_boons = function (self)
 		for i = 1, #widgets_to_remove, 1 do
 			local index = widgets_to_remove[i] - index_mod
 
-			self._remove_boon(self, index)
+			self:_remove_boon(index)
 
 			index_mod = index_mod + 1
 			align_widgets = true
 		end
 
 		if align_widgets then
-			self._align_widgets(self)
+			self:_align_widgets()
 		end
 	end
-
-	return 
 end
+
 BoonUI._add_boon = function (self, boon_name, own_boon, end_time)
 	local num_active_boons = self._num_active_boons or 0
 
 	if MAX_NUMBER_OF_BOONS <= num_active_boons then
-		return 
+		return
 	end
 
 	local unused_widgets = self._unused_widgets
@@ -200,7 +201,7 @@ BoonUI._add_boon = function (self, boon_name, own_boon, end_time)
 	local color = (infinite and widget_content.infinite_color) or widget_content.normal_color
 	widget_content.texture_icon = boon_template.ui_icon
 
-	self._set_widget_colors(self, widget, color)
+	self:_set_widget_colors(widget, color)
 
 	local data = {
 		name = boon_name,
@@ -214,15 +215,14 @@ BoonUI._add_boon = function (self, boon_name, own_boon, end_time)
 
 	self._num_active_boons = num_active_boons + 1
 
-	self._set_widget_time_progress(self, widget, 1)
-
-	return 
+	self:_set_widget_time_progress(widget, 1)
 end
+
 BoonUI._remove_boon = function (self, index)
 	local num_active_boons = self._num_active_boons or 0
 
 	if num_active_boons <= 0 then
-		return 
+		return
 	end
 
 	local active_boons = self._active_boons
@@ -233,28 +233,25 @@ BoonUI._remove_boon = function (self, index)
 	UIRenderer.set_element_visible(self.ui_renderer, widget.element, false)
 
 	self._num_active_boons = num_active_boons - 1
-
-	return 
 end
+
 BoonUI.set_position = function (self, x, y)
 	local position = self.ui_scenegraph.pivot.local_position
 	position[1] = x
 	position[2] = y
 
 	for _, widget in ipairs(self._widgets) do
-		self._set_widget_dirty(self, widget)
+		self:_set_widget_dirty(widget)
 	end
 
-	self.set_dirty(self)
-
-	return 
+	self:set_dirty()
 end
+
 BoonUI.destroy = function (self)
-	self.set_visible(self, false)
+	self:set_visible(false)
 	rawset(_G, "boon_ui", nil)
-
-	return 
 end
+
 BoonUI.set_visible = function (self, visible)
 	self._is_visible = visible
 	local ui_renderer = self.ui_renderer
@@ -263,10 +260,9 @@ BoonUI.set_visible = function (self, visible)
 		UIRenderer.set_element_visible(ui_renderer, widget.element, visible)
 	end
 
-	self.set_dirty(self)
-
-	return 
+	self:set_dirty()
 end
+
 BoonUI.update = function (self, dt, t)
 	local dirty = false
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
@@ -275,14 +271,14 @@ BoonUI.update = function (self, dt, t)
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 
 			dirty = true
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 
 		dirty = true
 	end
@@ -296,32 +292,29 @@ BoonUI.update = function (self, dt, t)
 	end
 
 	if dirty or DEBUG_BOONS_UI or self.cleanui_data.is_dirty then
-		self.set_dirty(self)
+		self:set_dirty()
 	end
 
-	self._sync_boons(self)
-	self._handle_resolution_modified(self)
-	self._update_boon_timers(self, dt)
-	self.draw(self, dt)
-
-	return 
+	self:_sync_boons()
+	self:_handle_resolution_modified()
+	self:_update_boon_timers(dt)
+	self:draw(dt)
 end
+
 BoonUI._handle_resolution_modified = function (self)
 	if RESOLUTION_LOOKUP.modified then
-		self._on_resolution_modified(self)
+		self:_on_resolution_modified()
 	end
-
-	return 
 end
+
 BoonUI._on_resolution_modified = function (self)
 	for _, widget in ipairs(self._widgets) do
-		self._set_widget_dirty(self, widget)
+		self:_set_widget_dirty(widget)
 	end
 
-	self.set_dirty(self)
-
-	return 
+	self:set_dirty()
 end
+
 BoonUI._set_widget_colors = function (self, widget, color)
 	local style = widget.style
 	local bg_color = style.texture_bg.color
@@ -336,16 +329,15 @@ BoonUI._set_widget_colors = function (self, widget, color)
 	text__color[2] = color[2]
 	text__color[3] = color[3]
 	text__color[4] = color[4]
-
-	return 
 end
+
 BoonUI.draw = function (self, dt)
 	if not self._is_visible then
-		return 
+		return
 	end
 
 	if not self._dirty then
-		return 
+		return
 	end
 
 	local ui_renderer = self.ui_renderer
@@ -369,9 +361,8 @@ BoonUI.draw = function (self, dt)
 	UIRenderer.end_pass(ui_renderer)
 
 	self._dirty = false
-
-	return 
 end
+
 BoonUI._update_boon_timers = function (self, dt)
 	local dirty = false
 	local network_time = Managers.state.network:network_time()
@@ -389,7 +380,7 @@ BoonUI._update_boon_timers = function (self, dt)
 					local time_left = math.max(end_time - network_time, 0)
 					local progress = 1 - math.min(time_left / duration, 1)
 
-					self._set_widget_time_progress(self, widget, progress, time_left)
+					self:_set_widget_time_progress(widget, progress, time_left)
 				end
 
 				dirty = true
@@ -398,26 +389,26 @@ BoonUI._update_boon_timers = function (self, dt)
 	end
 
 	if dirty or DEBUG_BOONS_UI then
-		self.set_dirty(self)
+		self:set_dirty()
 	end
-
-	return 
 end
+
 local floor = math.floor
+
 BoonUI._set_widget_time_progress = function (self, widget, progress, time_left)
-	if time_left and 0 < time_left then
+	if time_left and time_left > 0 then
 		local days = floor(time_left / 86400)
 		local hours = floor(time_left / 3600)
 		local minutes = floor(time_left / 60)
 		local seconds = floor(time_left)
 
-		if 0 < days then
+		if days > 0 then
 			widget.content.timer_text = tostring(days) .. "d"
-		elseif 2 < hours then
+		elseif hours > 2 then
 			widget.content.timer_text = tostring(hours) .. "h"
-		elseif 0 < minutes then
+		elseif minutes > 0 then
 			widget.content.timer_text = tostring(minutes) .. "m"
-		elseif 0 <= seconds then
+		elseif seconds >= 0 then
 			widget.content.timer_text = tostring(seconds) .. "s"
 		end
 
@@ -449,29 +440,23 @@ BoonUI._set_widget_time_progress = function (self, widget, progress, time_left)
 		widget.style.texture_icon.color = Colors.get_color_table_with_alpha("white", 120)
 	end
 
-	self._set_widget_dirty(self, widget)
-
-	return 
+	self:_set_widget_dirty(widget)
 end
+
 BoonUI.set_dirty = function (self)
 	self._dirty = true
-
-	return 
 end
+
 BoonUI._set_widget_dirty = function (self, widget)
 	widget.element.dirty = true
-
-	return 
 end
+
 BoonUI.on_gamepad_activated = function (self)
-	self._align_widgets(self)
-
-	return 
+	self:_align_widgets()
 end
+
 BoonUI.on_gamepad_deactivated = function (self)
-	self._align_widgets(self)
-
-	return 
+	self:_align_widgets()
 end
 
-return 
+return

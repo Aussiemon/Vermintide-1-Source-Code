@@ -10,6 +10,7 @@ local difficulty_progression_textures = definitions.difficulty_progression_textu
 local DO_RELOAD = false
 StateMapViewSelectLevel = class(StateMapViewSelectLevel)
 StateMapViewSelectLevel.NAME = "StateMapViewSelectLevel"
+
 StateMapViewSelectLevel.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewSelectLevel")
 
@@ -57,13 +58,12 @@ StateMapViewSelectLevel.on_enter = function (self, params)
 	self._number_of_levels_in_filter = 0
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	self._map_view:set_time_line_index(2)
 	self._map_view:animate_title_text(self._title_text_widget)
 	self._map_view:set_mask_enabled(true)
-
-	return 
 end
+
 StateMapViewSelectLevel.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._dead_space_filler_widget = UIWidget.init(widgets.dead_space_filler)
@@ -101,7 +101,7 @@ StateMapViewSelectLevel.create_ui_elements = function (self)
 	for i = 1, 3, 1 do
 		local sufix = "_" .. i
 
-		if 1 < i then
+		if i > 1 then
 			local divider = UIWidget.init(widgets["performance_divider" .. sufix])
 			score_widgets[#score_widgets + 1] = divider
 		end
@@ -150,17 +150,16 @@ StateMapViewSelectLevel.create_ui_elements = function (self)
 	self._elements = elements
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self._setup_elements_level_data(self)
+	self:_setup_elements_level_data()
 
 	local ignore_sound = false
 	local selected_read_index = self.game_info.level_index or 1
 
-	self._assign_element_data(self, selected_read_index)
-	self._set_selected_widget_by_index(self, self._selection_index, ignore_sound)
-	self.start_open_animation(self)
-
-	return 
+	self:_assign_element_data(selected_read_index)
+	self:_set_selected_widget_by_index(self._selection_index, ignore_sound)
+	self:start_open_animation()
 end
+
 StateMapViewSelectLevel._assign_element_data = function (self, specific_read_index)
 	local active_level_list = self._active_level_list
 	local num_levels = #self._active_level_list
@@ -181,7 +180,7 @@ StateMapViewSelectLevel._assign_element_data = function (self, specific_read_ind
 	self._level_list_read_index = level_list_read_index
 
 	for index, widget in ipairs(self._elements) do
-		local success = self._set_element_data_by_index(self, widget, level_list_read_index)
+		local success = self:_set_element_data_by_index(widget, level_list_read_index)
 
 		if success then
 			level_list_read_index = level_list_read_index % num_levels + 1
@@ -190,10 +189,9 @@ StateMapViewSelectLevel._assign_element_data = function (self, specific_read_ind
 
 	self._selection_index = 3
 
-	self._align_elements(self)
-
-	return 
+	self:_align_elements()
 end
+
 StateMapViewSelectLevel._set_element_data_by_index = function (self, widget, read_index)
 	local active_level_list = self._active_level_list
 	local level_information = active_level_list[read_index]
@@ -210,7 +208,7 @@ StateMapViewSelectLevel._set_element_data_by_index = function (self, widget, rea
 		if level_key ~= "any" then
 			local level_settings = LevelSettings[level_key]
 			dlc_name = level_settings.dlc_name
-			new_level = not self._area_already_viewed(self, level_key)
+			new_level = not self:_area_already_viewed(level_key)
 		end
 
 		widget.content.dlc_name = (not dlc_unlocked and dlc_name) or nil
@@ -229,9 +227,8 @@ StateMapViewSelectLevel._set_element_data_by_index = function (self, widget, rea
 
 		return true
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._set_level_score = function (self, level_key, difficulty_data)
 	local score_value_widgets_by_key = self.score_value_widgets_by_key
 	local wave_key = "waves"
@@ -254,9 +251,8 @@ StateMapViewSelectLevel._set_level_score = function (self, level_key, difficulty
 			widget_read_index = widget_read_index + 1
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._is_level_difficulty_unlocked = function (self, level_key, difficulty_data)
 	local current_difficulty_index = self.game_info.difficulty_index
 
@@ -266,9 +262,8 @@ StateMapViewSelectLevel._is_level_difficulty_unlocked = function (self, level_ke
 		local unlocked = data.unlocked
 		slot11 = data.available
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._setup_elements_level_data = function (self)
 	local game_mode = self.game_info.game_mode or "adventure"
 	local include_random_level = game_mode == "survival"
@@ -279,12 +274,11 @@ StateMapViewSelectLevel._setup_elements_level_data = function (self)
 	if self._filter_enabled then
 		self.level_filter:setup_level_list(level_list, game_mode)
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel.on_exit = function (self, params)
 	if self.last_dialogue_reason then
-		self.stop_dialogue(self, self.last_dialogue_reason)
+		self:stop_dialogue(self.last_dialogue_reason)
 
 		self.last_dialogue_reason = nil
 	end
@@ -292,12 +286,11 @@ StateMapViewSelectLevel.on_exit = function (self, params)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 	if not self._draw_score then
-		return 
+		return
 	end
 
 	if not self.close_window_animation and not self.open_window_animation then
@@ -310,14 +303,14 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 			local to = 0
 			local time = UISettings.scoreboard.open_duration
 			self.opening_leaderboards = false
-			self.open_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+			self.open_window_animation = self:animate_element_by_time(target, target_index, from, to, time)
 
-			self._play_sound(self, "Play_hud_button_close")
+			self:_play_sound("Play_hud_button_close")
 			self._leaderboards_ui:close()
 			self.parent:animate_mask(to, time)
 		else
 			if not level_key then
-				return 
+				return
 			end
 
 			self._map_view:enable_timeline(false)
@@ -327,24 +320,24 @@ StateMapViewSelectLevel.animate_window = function (self, open, level_key)
 			local to = (1200 * UISettings.ui_scale) / 100
 			local time = UISettings.scoreboard.close_duration
 			self.opening_leaderboards = true
-			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+			self.close_window_animation = self:animate_element_by_time(target, target_index, from, to, time)
 
-			self._play_sound(self, "Play_hud_button_open")
+			self:_play_sound("Play_hud_button_open")
 			self._leaderboards_ui:open(level_key)
 			self.parent:animate_mask(to, time)
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.ease_out_quad)
 
 	return new_animation
 end
+
 StateMapViewSelectLevel._update_transition_timer = function (self, dt)
 	if not self._transition_timer then
-		return 
+		return
 	end
 
 	if self._transition_timer == 0 then
@@ -356,35 +349,32 @@ StateMapViewSelectLevel._update_transition_timer = function (self, dt)
 	else
 		self._transition_timer = math.max(self._transition_timer - dt, 0)
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel.on_open_complete = function (self)
 	self.open = true
 
 	self._map_view:enable_timeline(true)
-
-	return 
 end
+
 StateMapViewSelectLevel.on_close_complete = function (self)
 	self.open = false
-
-	return 
 end
+
 StateMapViewSelectLevel.update = function (self, dt, t)
 	script_data.mapview = self
 
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
 	if not self._transition_timer then
-		self._handle_input(self, dt)
+		self:_handle_input(dt)
 	end
 
-	self._update_elements_position(self, dt)
+	self:_update_elements_position(dt)
 
 	local open_animation = self.open_window_animation
 
@@ -394,7 +384,7 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 		if UIAnimation.completed(open_animation) then
 			self.open_window_animation = nil
 
-			self.on_open_complete(self)
+			self:on_open_complete()
 		end
 	else
 		local close_animation = self.close_window_animation
@@ -406,7 +396,7 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 				self.close_window_animation = nil
 
 				if not self.opening_leaderboards then
-					self.on_close_complete(self)
+					self:on_close_complete()
 				end
 			end
 		end
@@ -415,16 +405,16 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 	if self._leaderboards_ui then
 		local input_service = self.input_manager:get_service("map_menu")
 
-		if self.open and input_service.get(input_service, "refresh") then
+		if self.open and input_service:get("refresh") then
 			local level_data = self._active_level_list[self._selected_read_index]
 			local level_key = level_data and level_data.level_key
 
-			self.animate_window(self, not self.open, level_key)
-		elseif not self.open and (input_service.get(input_service, "back") or input_service.get(input_service, "refresh")) then
+			self:animate_window(not self.open, level_key)
+		elseif not self.open and (input_service:get("back") or input_service:get("refresh")) then
 			local level_data = self._active_level_list[self._selected_read_index]
 			local level_key = level_data and level_data.level_key
 
-			self.animate_window(self, not self.open, level_key)
+			self:animate_window(not self.open, level_key)
 		end
 
 		self._leaderboards_ui:update(dt)
@@ -433,17 +423,17 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 	if self._filter_enabled then
 		local level_filter = self.level_filter
 
-		level_filter.update(level_filter, dt, t)
-		self._update_filter_animation(self, dt)
+		level_filter:update(dt, t)
+		self:_update_filter_animation(dt)
 
-		if self.filter_active(self) then
-			local progress = level_filter.visibility_fraction(level_filter)
+		if self:filter_active() then
+			local progress = level_filter:visibility_fraction()
 
-			self._update_markers_visibility(self, progress)
+			self:_update_markers_visibility(progress)
 		end
 
-		local filter_active = self.filter_active(self)
-		local number_of_levels_in_filter = level_filter.get_number_of_playable_levels(level_filter)
+		local filter_active = self:filter_active()
+		local number_of_levels_in_filter = level_filter:get_number_of_playable_levels()
 		local num_filter_levels_changed = number_of_levels_in_filter ~= self._number_of_levels_in_filter
 		local filter_active_changed = filter_active ~= self._filter_active_last_frame
 
@@ -452,15 +442,15 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 				self._number_of_levels_in_filter = number_of_levels_in_filter
 			end
 
-			self._update_input_description(self)
+			self:_update_input_description()
 
 			self._filter_active_last_frame = filter_active
 
-			self._set_marker_visible_state(self, filter_active)
+			self:_set_marker_visible_state(filter_active)
 		elseif num_filter_levels_changed then
 			self._number_of_levels_in_filter = number_of_levels_in_filter
 
-			self._update_input_description(self)
+			self:_update_input_description()
 		end
 	end
 
@@ -468,31 +458,30 @@ StateMapViewSelectLevel.update = function (self, dt, t)
 		self._leaderboards_ui:draw(dt)
 	end
 
-	self.draw(self, dt)
-	self._update_transition_timer(self, dt)
+	self:draw(dt)
+	self:_update_transition_timer(dt)
 
-	if self._update_dialogue_play_timer(self, dt) == 1 then
+	if self:_update_dialogue_play_timer(dt) == 1 then
 		local wwise_events = self._next_wwise_events
 
-		self.play_dialogue(self, wwise_events, "level")
+		self:play_dialogue(wwise_events, "level")
 	end
 
 	if not self._transition_timer then
 		return self._new_state
 	end
+end
 
-	return 
-end
 StateMapViewSelectLevel.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewSelectLevel._set_marker_visible_state = function (self, visible)
 	for index, widget in ipairs(self._elements) do
 		widget.content.filter_active = visible
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._update_markers_visibility = function (self, fraction)
 	local animate = self.move_timer == nil
 	local anim_fraction = math.easeCubic(fraction)
@@ -505,13 +494,11 @@ StateMapViewSelectLevel._update_markers_visibility = function (self, fraction)
 			local target = widget.style.marker.color
 			local target_index = 1
 			local from = target[target_index]
-			local alpha = (0.5 < distance_progress and 255) or distance_progress / 0.5 * 255
+			local alpha = (distance_progress > 0.5 and 255) or distance_progress / 0.5 * 255
 			local alpha_value = anim_fraction * alpha
 			target[target_index] = alpha_value
 		end
 	end
-
-	return 
 end
 
 local function anim_func(t)
@@ -533,7 +520,7 @@ StateMapViewSelectLevel.start_open_animation = function (self)
 		local target_index = 2
 		local from = -1000
 		local to = target[target_index]
-		local is_selected = 20 < math.abs(target[1])
+		local is_selected = math.abs(target[1]) > 20
 		local anim_time = (is_selected and 0.75) or 0.85
 
 		table.clear(widget.animations)
@@ -567,10 +554,9 @@ StateMapViewSelectLevel.start_open_animation = function (self)
 		self.level_filter:animate_button_fade(0.15, 0.5, "in")
 	end
 
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewSelectLevel.start_close_animation = function (self)
 	self._transition_timer = 0.65
 
@@ -579,7 +565,7 @@ StateMapViewSelectLevel.start_close_animation = function (self)
 		local target_index = 2
 		local from = target[target_index]
 		local to = 1000
-		local is_selected = 20 < math.abs(target[1])
+		local is_selected = math.abs(target[1]) > 20
 		local anim_time = 0.75
 		local anim_wait_time = (is_selected and 0.25) or 0.15
 
@@ -616,16 +602,15 @@ StateMapViewSelectLevel.start_close_animation = function (self)
 	end
 
 	self._map_view:animate_title_text(self._title_text_widget, true)
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewSelectLevel.update_marker_for_selected_level = function (self)
 	local selected_read_index = self._selected_read_index
 	local active_level_list = self._active_level_list
 
 	if not selected_read_index or not active_level_list then
-		return 
+		return
 	end
 
 	local level_information = active_level_list[selected_read_index]
@@ -633,7 +618,7 @@ StateMapViewSelectLevel.update_marker_for_selected_level = function (self)
 
 	if level_key ~= "any" then
 		local level_filter = self.level_filter
-		local return_value = level_filter.set_level_marked(level_filter, level_key)
+		local return_value = level_filter:set_level_marked(level_key)
 		local selected_index = self._selected_index
 
 		if selected_index then
@@ -641,64 +626,62 @@ StateMapViewSelectLevel.update_marker_for_selected_level = function (self)
 			selected_widget.content.use_marker = return_value
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._update_filter_animation = function (self, dt)
 	local level_filter = self.level_filter
-	local fraction = (self._filter_enabled and level_filter.visibility_fraction(level_filter)) or 1
+	local fraction = (self._filter_enabled and level_filter:visibility_fraction()) or 1
 	local ui_scenegraph = self.ui_scenegraph
 	local value = 250 * fraction
 	ui_scenegraph.overlay.local_position[1] = value
 	self.menu_input_description.ui_scenegraph.screen.local_position[1] = value
 	self._map_view.ui_scenegraph.time_line.local_position[1] = value
-
-	return 
 end
+
 StateMapViewSelectLevel._handle_input = function (self, dt)
 	if self._new_state or (self._leaderboards_ui and self._leaderboards_ui:enabled()) then
-		return 
+		return
 	end
 
 	local level_filter = self.level_filter
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
-	elseif input_service.get(input_service, "move_left") or input_service.get(input_service, "move_left_hold") then
+	elseif input_service:get("move_left") or input_service:get("move_left_hold") then
 		self.controller_cooldown = GamepadSettings.menu_cooldown
 
-		self._cycle(self, 1)
-	elseif input_service.get(input_service, "move_right") or input_service.get(input_service, "move_right_hold") then
+		self:_cycle(1)
+	elseif input_service:get("move_right") or input_service:get("move_right_hold") then
 		self.controller_cooldown = GamepadSettings.menu_cooldown
 
-		self._cycle(self, -1)
-	elseif input_service.get(input_service, "cycle_previous") and self._filter_enabled then
-		self.controller_cooldown = GamepadSettings.menu_cooldown
-
-		if self._filter_enabled then
-			level_filter.toggle_visibility(level_filter)
-			self._play_sound(self, "Play_hud_next_tab")
-		end
-	elseif input_service.get(input_service, "special_1") and self.filter_active(self) then
+		self:_cycle(-1)
+	elseif input_service:get("cycle_previous") and self._filter_enabled then
 		self.controller_cooldown = GamepadSettings.menu_cooldown
 
 		if self._filter_enabled then
-			self.update_marker_for_selected_level(self)
+			level_filter:toggle_visibility()
+			self:_play_sound("Play_hud_next_tab")
 		end
-	elseif (input_service.get(input_service, "confirm") or (self._filter_enabled and input_service.get(input_service, "refresh") and 0 < self._number_of_levels_in_filter)) and self._selected_read_index then
+	elseif input_service:get("special_1") and self:filter_active() then
+		self.controller_cooldown = GamepadSettings.menu_cooldown
+
+		if self._filter_enabled then
+			self:update_marker_for_selected_level()
+		end
+	elseif (input_service:get("confirm") or (self._filter_enabled and input_service:get("refresh") and self._number_of_levels_in_filter > 0)) and self._selected_read_index then
 		if self._selected_level_dlc_name then
 			local dlc_name = self._selected_level_dlc_name
 
-			self._play_sound(self, "Play_hud_select")
-			self._show_store_page(self, dlc_name)
-		elseif not self.filter_active(self) and not self._is_selected_level_locked then
+			self:_play_sound("Play_hud_select")
+			self:_show_store_page(dlc_name)
+		elseif not self:filter_active() and not self._is_selected_level_locked then
 			local map_view_area_handler = self.map_view_area_handler
 			local game_info = self.game_info
 
-			if input_service.get(input_service, "refresh") then
+			if input_service:get("refresh") then
 				game_info.use_level_filter = true
 			else
 				game_info.use_level_filter = false
@@ -737,41 +720,41 @@ StateMapViewSelectLevel._handle_input = function (self, dt)
 
 			self._new_state = StateMapViewSelectDifficulty
 
-			self._save_viewed_levels(self)
-			self._play_sound(self, "Play_hud_main_menu_open")
+			self:_save_viewed_levels()
+			self:_play_sound("Play_hud_main_menu_open")
 		end
-	elseif input_service.get(input_service, "back") then
-		if self.filter_active(self) then
-			level_filter.close(level_filter)
-			self._play_sound(self, "Play_hud_next_tab")
+	elseif input_service:get("back") then
+		if self:filter_active() then
+			level_filter:close()
+			self:_play_sound("Play_hud_next_tab")
 		else
-			self._save_viewed_levels(self)
+			self:_save_viewed_levels()
 
 			local game_info = self.game_info
 			self._new_state = StateMapViewGameMode
 
-			self._play_sound(self, "Play_hud_select")
+			self:_play_sound("Play_hud_select")
 		end
-	elseif input_service.get(input_service, "toggle_menu") then
+	elseif input_service:get("toggle_menu") then
 		local return_to_game = not self.parent.ingame_ui.menu_active
 
 		self._map_view:exit(return_to_game)
 	end
 
 	if self._new_state then
-		self.start_close_animation(self)
+		self:start_close_animation()
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel.filter_active = function (self)
 	return self._filter_enabled and self.level_filter:visibility_fraction() ~= 0
 end
+
 StateMapViewSelectLevel.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self._title_text_widget)
@@ -817,9 +800,8 @@ StateMapViewSelectLevel.draw = function (self, dt)
 			self.menu_input_description:draw(ui_renderer, dt)
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._align_elements = function (self)
 	local num_elements = #self._elements
 	local selected_index = self._selected_index
@@ -836,14 +818,13 @@ StateMapViewSelectLevel._align_elements = function (self)
 		local is_selection_widget = index == selected_index
 		local position_progress = 1 - math.clamp(math.abs(position) / max_offset, 0, 1)
 
-		self._animate_element(self, widget, is_selection_widget, position_progress)
+		self:_animate_element(widget, is_selection_widget, position_progress)
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._cycle = function (self, direction, ignore_sound)
 	if self.move_timer then
-		return 
+		return
 	end
 
 	self._direction = direction
@@ -859,13 +840,12 @@ StateMapViewSelectLevel._cycle = function (self, direction, ignore_sound)
 	end
 
 	if not ignore_sound then
-		self._play_sound(self, "Play_hud_shift")
+		self:_play_sound("Play_hud_shift")
 	end
 
-	self._set_selected_widget_by_index(self, selected_index, ignore_sound)
-
-	return 
+	self:_set_selected_widget_by_index(selected_index, ignore_sound)
 end
+
 StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, ignore_sound)
 	self._selected_index = index
 	local new_selection_widget = self._elements[index]
@@ -897,7 +877,7 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 
 	self._draw_act_title = draw_act_title
 
-	self._mark_level_as_viewed(self, level_key)
+	self:_mark_level_as_viewed(level_key)
 
 	if self._filter_enabled then
 		self.level_filter:set_selected_level(level_key)
@@ -938,12 +918,12 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 	end
 
 	if input_descriptions_path and input_descriptions_path ~= self.input_descriptions_path then
-		self._update_input_description(self, input_descriptions_path)
+		self:_update_input_description(input_descriptions_path)
 	end
 
 	self.dialogue_timer = nil
 
-	self.stop_dialogue(self, "level")
+	self:stop_dialogue("level")
 
 	if not ignore_sound and not level_locked then
 		local wwise_events = level_information.wwise_events
@@ -953,7 +933,7 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 			self._next_wwise_events = wwise_events
 		end
 	elseif level_locked then
-		self.set_description_text(self, locked_text, nil, true)
+		self:set_description_text(locked_text, nil, true)
 	end
 
 	self._is_selected_level_locked = level_locked
@@ -961,7 +941,7 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 	self._level_count_text_widget.content.text = level_read_index .. "/" .. self._active_total_level_count
 
 	if game_mode and game_mode == "survival" then
-		self._set_level_score(self, level_key, difficulty_data)
+		self:_set_level_score(level_key, difficulty_data)
 
 		self._draw_score = true
 
@@ -975,11 +955,10 @@ StateMapViewSelectLevel._set_selected_widget_by_index = function (self, index, i
 			self.menu_input_description:enable_button(3, false)
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._update_input_description = function (self, optional_path)
-	local filter_active = self.filter_active(self)
+	local filter_active = self:filter_active()
 	local end_path = optional_path or self.input_descriptions_path
 	local source_table_path = nil
 
@@ -1000,9 +979,8 @@ StateMapViewSelectLevel._update_input_description = function (self, optional_pat
 	self.menu_input_description:change_generic_actions(input_descriptions)
 
 	self.input_descriptions_path = end_path
-
-	return 
 end
+
 StateMapViewSelectLevel.update_move_timer = function (self, dt)
 	local timer = self.move_timer
 
@@ -1012,7 +990,7 @@ StateMapViewSelectLevel.update_move_timer = function (self, dt)
 		if timer == total_time then
 			self.move_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self.move_timer = timer
@@ -1020,14 +998,13 @@ StateMapViewSelectLevel.update_move_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._update_elements_position = function (self, dt, instant)
-	local time_progress = (instant and 1) or self.update_move_timer(self, dt)
+	local time_progress = (instant and 1) or self:update_move_timer(dt)
 
 	if not time_progress then
-		return 
+		return
 	end
 
 	if self._filter_enabled then
@@ -1053,7 +1030,7 @@ StateMapViewSelectLevel._update_elements_position = function (self, dt, instant)
 		local element_position = current_position + input_offset
 		local position = element_position
 
-		if max_offset + distance * 0.5 < element_position then
+		if element_position > max_offset + distance * 0.5 then
 			position = start_offset - distance + element_position % max_offset
 			change_read_index = true
 		elseif element_position < -(max_offset + distance * 0.5) then
@@ -1063,41 +1040,39 @@ StateMapViewSelectLevel._update_elements_position = function (self, dt, instant)
 
 		widget.offset[1] = position
 
-		if 1 <= time_progress then
+		if time_progress >= 1 then
 			widget.content.position_offset = position
 
 			if change_read_index then
-				self._change_element_read_index(self, widget, self._direction)
+				self:_change_element_read_index(widget, self._direction)
 			end
 		end
 
 		local position_progress = 1 - math.clamp(math.abs(position) / max_offset, 0, 1)
 		local is_selection_widget = index == selected_index
 
-		self._animate_element(self, widget, is_selection_widget, position_progress)
+		self:_animate_element(widget, is_selection_widget, position_progress)
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._change_element_read_index = function (self, widget, direction)
 	local num_levels = self._num_levels
 
-	if 0 < direction then
+	if direction > 0 then
 		local new_index = (widget.content.read_index - 6) % num_levels + 1
 
 		if new_index <= 0 then
 			new_index = num_levels
 		end
 
-		self._set_element_data_by_index(self, widget, new_index)
+		self:_set_element_data_by_index(widget, new_index)
 	elseif direction < 0 then
 		local new_index = (widget.content.read_index + 4) % num_levels + 1
 
-		self._set_element_data_by_index(self, widget, new_index)
+		self:_set_element_data_by_index(widget, new_index)
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._animate_element = function (self, widget, is_selection_widget, distance_progress)
 	widget.content.distance_progress = distance_progress
 	local widget_style = widget.style
@@ -1108,7 +1083,7 @@ StateMapViewSelectLevel._animate_element = function (self, widget, is_selection_
 	local bg_rect_style = widget_style.bg_rect
 	local frame_style = widget_style.frame
 	local marker_style = widget_style.marker
-	local alpha = (0.5 < distance_progress and 255) or distance_progress / 0.5 * 255
+	local alpha = (distance_progress > 0.5 and 255) or distance_progress / 0.5 * 255
 	local color_value = 100 + distance_progress * 155
 	local image_color = image_style.color
 	local frame_color = frame_style.color
@@ -1192,9 +1167,8 @@ StateMapViewSelectLevel._animate_element = function (self, widget, is_selection_
 	dlc_size[2] = dlc_default_height * distance_progress
 	dlc_offset[1] = -dlc_size[1] * 0.5
 	dlc_offset[2] = -dlc_size[2] * 1.7
-
-	return 
 end
+
 StateMapViewSelectLevel._update_dialogue_play_timer = function (self, dt)
 	local timer = self.dialogue_timer
 
@@ -1204,7 +1178,7 @@ StateMapViewSelectLevel._update_dialogue_play_timer = function (self, dt)
 		if timer == total_time then
 			self.dialogue_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self.dialogue_timer = timer
@@ -1212,9 +1186,8 @@ StateMapViewSelectLevel._update_dialogue_play_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel.play_dialogue = function (self, wwise_events, reason)
 	local wwise_event = wwise_events[math.random(1, #wwise_events)]
 
@@ -1230,20 +1203,19 @@ StateMapViewSelectLevel.play_dialogue = function (self, wwise_events, reason)
 	self.dialogue_speaker = dialogue_speakers[wwise_event_prefix_key]
 	local subtitle_gui = self.ingame_ui.ingame_hud.subtitle_gui
 
-	subtitle_gui.start_subtitle(subtitle_gui, self.dialogue_speaker, wwise_event)
-	self.set_description_text(self, Localize(wwise_event), Localize(self.dialogue_speaker))
-
-	return 
+	subtitle_gui:start_subtitle(self.dialogue_speaker, wwise_event)
+	self:set_description_text(Localize(wwise_event), Localize(self.dialogue_speaker))
 end
+
 StateMapViewSelectLevel.stop_dialogue = function (self, reason)
 	if self.last_dialogue_reason ~= reason then
-		return 
+		return
 	end
 
 	if self.wwise_playing_id and WwiseWorld.is_playing(self.wwise_world, self.wwise_playing_id) then
 		local subtitle_gui = self.ingame_ui.ingame_hud.subtitle_gui
 
-		subtitle_gui.stop_subtitle(subtitle_gui, self.dialogue_speaker)
+		subtitle_gui:stop_subtitle(self.dialogue_speaker)
 		WwiseWorld.stop_event(self.wwise_world, self.wwise_playing_id)
 
 		self.wwise_playing_id = nil
@@ -1251,10 +1223,9 @@ StateMapViewSelectLevel.stop_dialogue = function (self, reason)
 		self.playing_wwise_event = nil
 	end
 
-	self.set_description_text(self, "", nil)
-
-	return 
+	self:set_description_text("", nil)
 end
+
 StateMapViewSelectLevel.set_description_text = function (self, text, prefix, locked)
 	if prefix then
 		text = prefix .. ": " .. text .. "\n"
@@ -1276,9 +1247,8 @@ StateMapViewSelectLevel.set_description_text = function (self, text, prefix, loc
 		text_color[3] = target_color[3]
 		text_color[4] = target_color[4]
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._show_store_page = function (self, dlc_name)
 	if self.platform == "win32" then
 		local dlc_id = Managers.unlock:dlc_id(dlc_name)
@@ -1299,14 +1269,12 @@ StateMapViewSelectLevel._show_store_page = function (self, dlc_name)
 			product_label
 		})
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._play_sound = function (self, event)
 	self._map_view:play_sound(event)
-
-	return 
 end
+
 StateMapViewSelectLevel._area_already_viewed = function (self, level_key)
 	local viewed_levels = self.game_info.viewed_levels
 
@@ -1316,6 +1284,7 @@ StateMapViewSelectLevel._area_already_viewed = function (self, level_key)
 
 	return false
 end
+
 StateMapViewSelectLevel._mark_level_as_viewed = function (self, level_key)
 	if not self._temp_viewed_levels then
 		self._temp_viewed_levels = {}
@@ -1326,9 +1295,8 @@ StateMapViewSelectLevel._mark_level_as_viewed = function (self, level_key)
 	if viewed_levels then
 		viewed_levels[level_key] = true
 	end
-
-	return 
 end
+
 StateMapViewSelectLevel._save_viewed_levels = function (self)
 	local viewed_levels = self._temp_viewed_levels
 
@@ -1339,8 +1307,6 @@ StateMapViewSelectLevel._save_viewed_levels = function (self)
 			game_info_viewed_levels[level_key] = true
 		end
 	end
-
-	return 
 end
 
-return 
+return

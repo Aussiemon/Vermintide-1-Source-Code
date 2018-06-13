@@ -178,4 +178,4 @@ Weapons.blunderbuss_template_1_t3.actions.action_two.default.attack_template_dam
 Weapons.blunderbuss_template_1_t3.compare_statistics.attacks.light_attack.damage = 1
 Weapons.blunderbuss_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.375
 
-return 
+return

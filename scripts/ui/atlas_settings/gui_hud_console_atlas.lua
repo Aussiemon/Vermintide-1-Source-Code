@@ -141,4 +141,4 @@ hud_console_atlas = {
 	}
 }
 
-return 
+return

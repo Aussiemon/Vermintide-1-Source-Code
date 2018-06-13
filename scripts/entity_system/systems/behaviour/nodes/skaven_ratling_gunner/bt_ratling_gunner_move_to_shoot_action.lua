@@ -1,12 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTRatlingGunnerMoveToShootAction = class(BTRatlingGunnerMoveToShootAction, BTNode)
+
 BTRatlingGunnerMoveToShootAction.init = function (self, ...)
 	BTRatlingGunnerMoveToShootAction.super.init(self, ...)
-
-	return 
 end
+
 BTRatlingGunnerMoveToShootAction.name = "BTRatlingGunnerMoveToShootAction"
+
 BTRatlingGunnerMoveToShootAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	local attack_pattern_data = {}
@@ -19,18 +20,18 @@ BTRatlingGunnerMoveToShootAction.enter = function (self, unit, blackboard, t)
 		attack_pattern_data.target_node_name = node_name
 		attack_pattern_data.exit_node = true
 
-		return 
+		return
 	end
 
 	local move_speed = action.move_speed
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_max_speed(navigation_extension, move_speed)
-	navigation_extension.set_enabled(navigation_extension, false)
+	navigation_extension:set_max_speed(move_speed)
+	navigation_extension:set_enabled(false)
 
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_wanted_velocity(locomotion_extension, Vector3.zero())
+	locomotion_extension:set_wanted_velocity(Vector3.zero())
 
 	blackboard.move_pos = nil
 
@@ -38,9 +39,8 @@ BTRatlingGunnerMoveToShootAction.enter = function (self, unit, blackboard, t)
 
 	blackboard.move_state = "idle"
 	blackboard.move_attempts = 0
-
-	return 
 end
+
 BTRatlingGunnerMoveToShootAction.leave = function (self, unit, blackboard, t, reason)
 	if reason ~= "done" then
 		blackboard.move_pos = nil
@@ -50,11 +50,10 @@ BTRatlingGunnerMoveToShootAction.leave = function (self, unit, blackboard, t, re
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_max_speed(navigation_extension, default_move_speed)
-	navigation_extension.set_enabled(navigation_extension, true)
-
-	return 
+	navigation_extension:set_max_speed(default_move_speed)
+	navigation_extension:set_enabled(true)
 end
+
 BTRatlingGunnerMoveToShootAction.run = function (self, unit, blackboard, t, dt)
 	if blackboard.attack_pattern_data.exit_node then
 		blackboard.attack_pattern_data.exit_node = nil
@@ -65,13 +64,13 @@ BTRatlingGunnerMoveToShootAction.run = function (self, unit, blackboard, t, dt)
 	local move_pos = blackboard.move_pos
 
 	if not move_pos then
-		local position = self.calculate_move_position(self, unit, blackboard)
+		local position = self:calculate_move_position(unit, blackboard)
 		blackboard.move_attempts = blackboard.move_attempts or 0
 		blackboard.move_attempts = blackboard.move_attempts + 1
 
 		if position then
-			self.move_to(self, position, unit, blackboard)
-		elseif 5 < blackboard.move_attempts then
+			self:move_to(position, unit, blackboard)
+		elseif blackboard.move_attempts > 5 then
 			return "failed"
 		end
 
@@ -97,8 +96,8 @@ BTRatlingGunnerMoveToShootAction.run = function (self, unit, blackboard, t, dt)
 		local move_animation = action.move_anim
 		local network_manager = Managers.state.network
 
-		network_manager.anim_event(network_manager, unit, "to_combat")
-		network_manager.anim_event(network_manager, unit, move_animation)
+		network_manager:anim_event(unit, "to_combat")
+		network_manager:anim_event(unit, move_animation)
 
 		blackboard.move_state = "moving"
 
@@ -107,15 +106,15 @@ BTRatlingGunnerMoveToShootAction.run = function (self, unit, blackboard, t, dt)
 
 	return "running"
 end
+
 BTRatlingGunnerMoveToShootAction.move_to = function (self, position, unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.move_to(navigation_extension, position)
+	navigation_extension:move_to(position)
 
 	blackboard.move_pos = Vector3Box(position)
-
-	return 
 end
+
 BTRatlingGunnerMoveToShootAction.calculate_move_position = function (self, unit, blackboard)
 	local action = blackboard.action
 	local min_distance = action.keep_target_distance[1]
@@ -128,4 +127,4 @@ BTRatlingGunnerMoveToShootAction.calculate_move_position = function (self, unit,
 	return position
 end
 
-return 
+return

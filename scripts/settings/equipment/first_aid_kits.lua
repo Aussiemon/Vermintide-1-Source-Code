@@ -18,7 +18,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit)
 				local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
 
-				return interactor_extension and interactor_extension.can_interact(interactor_extension, attacker_unit, "heal")
+				return interactor_extension and interactor_extension:can_interact(attacker_unit, "heal")
 			end
 		},
 		push = {
@@ -53,7 +53,7 @@ weapon_template.actions = {
 			chain_condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -71,7 +71,7 @@ weapon_template.actions = {
 			end,
 			total_time = math.huge,
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			buff_data = {
 				{
@@ -116,7 +116,7 @@ weapon_template.actions = {
 				local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "heal") and not status_extension.get_is_dodging(status_extension)
+				return interactor_extension and interactor_extension:can_interact(nil, "heal") and not status_extension:get_is_dodging()
 			end
 		}
 	},
@@ -142,7 +142,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit)
 				local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
 
-				return interactor_extension and interactor_extension.can_interact(interactor_extension, attacker_unit, "heal")
+				return interactor_extension and interactor_extension:can_interact(attacker_unit, "heal")
 			end
 		}
 	},
@@ -168,7 +168,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit)
 				local interactor_extension = ScriptUnit.extension(attacker_unit, "interactor_system")
 
-				return interactor_extension and interactor_extension.can_interact(interactor_extension, nil, "heal")
+				return interactor_extension and interactor_extension:can_interact(nil, "heal")
 			end
 		}
 	},
@@ -216,4 +216,4 @@ Weapons.first_aid_kit_02.left_hand_unit = "units/weapons/player/wpn_first_aid_ki
 Weapons.first_aid_kit_02.gui_texture = "hud_teammate_consumable_icon_medkit"
 Weapons.healthkit = weapon_template
 
-return 
+return

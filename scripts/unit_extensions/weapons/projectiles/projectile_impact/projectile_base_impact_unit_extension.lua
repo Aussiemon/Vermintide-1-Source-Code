@@ -7,21 +7,21 @@ ProjectileImpactDataIndex = {
 	DIRECTION = 3,
 	NORMAL = 4
 }
+
 ProjectileBaseImpactUnitExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	local world = extension_init_context.world
 	self.world = world
 	self.unit = unit
 	self.physics_world = World.get_data(world, "physics_world")
 	self.impact_buffer = pdArray.new()
-
-	return 
 end
+
 ProjectileBaseImpactUnitExtension.update = function (self, unit, input, dt, context, t)
 	pdArray.set_empty(self.impact_buffer)
-
-	return 
 end
+
 local temp_table = {}
+
 ProjectileBaseImpactUnitExtension.impact = function (self, hit_unit, hit_position, hit_direction, hit_normal, hit_actor_index)
 	local impact_buffer = self.impact_buffer
 	temp_table[ProjectileImpactDataIndex.UNIT] = hit_unit
@@ -41,11 +41,10 @@ ProjectileBaseImpactUnitExtension.impact = function (self, hit_unit, hit_positio
 	if script_data.debug_projectiles then
 		QuickDrawerStay:sphere(hit_position, 0.1, Color(255, 255, 255, 0))
 	end
-
-	return 
 end
+
 ProjectileBaseImpactUnitExtension.recent_impacts = function (self)
 	return pdArray.data(self.impact_buffer)
 end
 
-return 
+return

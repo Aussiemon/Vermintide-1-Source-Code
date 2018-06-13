@@ -2,6 +2,7 @@ if PLATFORM == "win32" then
 end
 
 ScriptWorld.foundation_create_viewport = ScriptWorld.create_viewport
+
 ScriptWorld.create_viewport = function (world, name, template, layer, position, rotation, add_shadow_cull_camera, force_no_scaling)
 	local viewports = World.get_data(world, "viewports")
 
@@ -65,11 +66,12 @@ ScriptWorld.create_viewport = function (world, name, template, layer, position, 
 
 	return viewport
 end
+
 ScriptWorld.render = function (world)
 	local shading_env = World.get_data(world, "shading_environment")
 
 	if not shading_env then
-		return 
+		return
 	end
 
 	local global_free_flight_viewport = World.get_data(world, "global_free_flight_viewport")
@@ -91,7 +93,7 @@ ScriptWorld.render = function (world)
 		local render_queue = World.get_data(world, "render_queue")
 
 		if table.is_empty(render_queue) then
-			return 
+			return
 		end
 
 		local viewport = render_queue[1]
@@ -116,7 +118,7 @@ ScriptWorld.render = function (world)
 		if table.is_empty(render_queue) then
 			Application.update_render_world(world)
 
-			return 
+			return
 		end
 
 		for _, viewport in ipairs(render_queue) do
@@ -139,8 +141,6 @@ ScriptWorld.render = function (world)
 			Application.render_world(world, camera, viewport, shading_env)
 		end
 	end
-
-	return 
 end
 
-return 
+return

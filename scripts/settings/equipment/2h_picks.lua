@@ -376,7 +376,7 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			default_target = {
 				attack_template_damage_type = "no_damage",
@@ -755,7 +755,7 @@ weapon_template.actions = {
 			chain_condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -772,7 +772,7 @@ weapon_template.actions = {
 			end,
 			total_time = math.huge,
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			buff_data = {
 				{
@@ -905,4 +905,4 @@ Weapons.two_handed_picks_template_1_t3_un = table.clone(Weapons.two_handed_picks
 Weapons.two_handed_picks_template_1_t3_un.actions.action_inspect.default.anim_event = "inspect_start_2"
 Weapons.two_handed_picks_template_1_t3_un.actions.action_inspect.default.anim_end_event = "inspect_end_2"
 
-return 
+return

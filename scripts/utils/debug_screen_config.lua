@@ -42,8 +42,6 @@ local settings = {
 			for key, boxed_pos in pairs(portals) do
 				options[#options + 1] = key
 			end
-
-			return 
 		end,
 		func = function (options, index)
 			local local_player = Managers.player:local_player()
@@ -59,13 +57,11 @@ local settings = {
 					local world = Managers.world:world("level_world")
 
 					LevelHelper:flow_event(world, "teleport_" .. options[index])
-					locomotion.teleport_to(locomotion, pos)
+					locomotion:teleport_to(pos)
 				end
 			end
 
 			print("TELEPORT")
-
-			return 
 		end
 	},
 	{
@@ -122,8 +118,6 @@ local settings = {
 		setting_name = "reset_settings",
 		func = function ()
 			DebugScreen.reset_settings()
-
-			return 
 		end
 	},
 	{
@@ -510,8 +504,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "achievement_reset",
 		func = function ()
 			Managers.state.achievement:reset()
-
-			return 
 		end
 	},
 	{
@@ -545,9 +537,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.add_boon_debug(boons_interface, "reduced_damage")
-
-			return 
+			boons_interface:add_boon_debug("reduced_damage")
 		end
 	},
 	{
@@ -557,9 +547,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.add_boon_debug(boons_interface, "increased_damage")
-
-			return 
+			boons_interface:add_boon_debug("increased_damage")
 		end
 	},
 	{
@@ -569,9 +557,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.add_boon_debug(boons_interface, "bonus_starting_gear")
-
-			return 
+			boons_interface:add_boon_debug("bonus_starting_gear")
 		end
 	},
 	{
@@ -581,9 +567,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.add_boon_debug(boons_interface, "bonus_fatigue")
-
-			return 
+			boons_interface:add_boon_debug("bonus_fatigue")
 		end
 	},
 	{
@@ -593,9 +577,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.add_boon_debug(boons_interface, "increased_combat_movement")
-
-			return 
+			boons_interface:add_boon_debug("increased_combat_movement")
 		end
 	},
 	{
@@ -605,9 +587,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.add_boon_debug(boons_interface, "increased_stagger_type")
-
-			return 
+			boons_interface:add_boon_debug("increased_stagger_type")
 		end
 	},
 	{
@@ -617,9 +597,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local boons_interface = Managers.backend:get_interface("boons")
 
-			boons_interface.clear_boons_debug(boons_interface)
-
-			return 
+			boons_interface:clear_boons_debug()
 		end
 	},
 	{
@@ -635,9 +613,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local quests_interface = Managers.backend:get_interface("quests")
 
-			quests_interface.reset_quests_and_contracts(quests_interface, true, true)
-
-			return 
+			quests_interface:reset_quests_and_contracts(true, true)
 		end
 	},
 	{
@@ -647,9 +623,7 @@ Features that make player mechanics nicer to work with.
 		func = function ()
 			local quests_interface = Managers.backend:get_interface("quests")
 
-			quests_interface.reset_quests_and_contracts(quests_interface, false, true)
-
-			return 
+			quests_interface:reset_quests_and_contracts(false, true)
 		end
 	},
 	{
@@ -926,8 +900,6 @@ Features that make player mechanics nicer to work with.
 
 				Managers.state.conflict.level_analysis:debug_spawn_boss_from_closest_spawner_to_player(only_draw)
 			end
-
-			return 
 		end
 	},
 	{
@@ -936,8 +908,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "debug_draw_respaners",
 		func = function ()
 			Managers.state.spawn.respawn_handler:debug_draw_respaners()
-
-			return 
 		end
 	},
 	{
@@ -946,8 +916,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "debug_spawn_special",
 		func = function ()
 			Managers.state.conflict.specials_pacing:debug_spawn()
-
-			return 
 		end
 	},
 	{
@@ -1162,8 +1130,6 @@ Features that make player mechanics nicer to work with.
 				printf("Changing pathfinding budget to %.1fms", ms)
 				GwNavWorld.set_pathfinder_budget(nav_world, ms * 0.001)
 			end
-
-			return 
 		end
 	},
 	{
@@ -4148,8 +4114,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "take_screenshot",
 		func = function ()
 			FrameCapture.screen_shot("console_send", 2)
-
-			return 
 		end
 	},
 	{
@@ -4560,13 +4524,9 @@ Features that make player mechanics nicer to work with.
 			for key, file in pairs(level_dialogue_files) do
 				options[#options + 1] = string.match(file, "^.+/(.+)$")
 			end
-
-			return 
 		end,
 		func = function (options, index)
 			DebugVoByFile(options[index], false)
-
-			return 
 		end
 	},
 	{
@@ -4805,7 +4765,7 @@ Features that make player mechanics nicer to work with.
 			if option == "default" then
 				Application.set_time_step_policy("no_throttle")
 
-				return 
+				return
 			elseif option == "throttle_fps_1" then
 				fps = 1
 			elseif option == "throttle_fps_5" then
@@ -4821,8 +4781,6 @@ Features that make player mechanics nicer to work with.
 			end
 
 			Application.set_time_step_policy("throttle", fps)
-
-			return 
 		end
 	},
 	{
@@ -5216,8 +5174,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set high texture quality",
 		func = function ()
 			DebugScreen.set_texture_quality(0)
-
-			return 
 		end
 	},
 	{
@@ -5226,8 +5182,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set low texture quality",
 		func = function ()
 			DebugScreen.set_texture_quality(3)
-
-			return 
 		end
 	},
 	{
@@ -5362,8 +5316,6 @@ Features that make player mechanics nicer to work with.
 		},
 		func = function ()
 			Managers.backend:refresh_log_level()
-
-			return 
 		end
 	},
 	{
@@ -5372,8 +5324,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Reset Progression",
 		func = function ()
 			LevelUnlockUtils.reset_progression()
-
-			return 
 		end
 	},
 	{
@@ -5382,8 +5332,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set act 0",
 		func = function ()
 			LevelUnlockUtils.debug_unlock_act(0)
-
-			return 
 		end
 	},
 	{
@@ -5392,8 +5340,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set act 1",
 		func = function ()
 			LevelUnlockUtils.debug_unlock_act(1)
-
-			return 
 		end
 	},
 	{
@@ -5402,8 +5348,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set act 2",
 		func = function ()
 			LevelUnlockUtils.debug_unlock_act(2)
-
-			return 
 		end
 	},
 	{
@@ -5412,8 +5356,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set act 3",
 		func = function ()
 			LevelUnlockUtils.debug_unlock_act(3)
-
-			return 
 		end
 	},
 	{
@@ -5422,8 +5364,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set act 4",
 		func = function ()
 			LevelUnlockUtils.debug_unlock_act(4)
-
-			return 
 		end
 	},
 	{
@@ -5432,8 +5372,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty none",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(0)
-
-			return 
 		end
 	},
 	{
@@ -5442,8 +5380,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty easy",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(1)
-
-			return 
 		end
 	},
 	{
@@ -5452,8 +5388,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty normal",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(2)
-
-			return 
 		end
 	},
 	{
@@ -5462,8 +5396,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty hard",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(3)
-
-			return 
 		end
 	},
 	{
@@ -5472,8 +5404,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty harder",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(4)
-
-			return 
 		end
 	},
 	{
@@ -5482,8 +5412,6 @@ Features that make player mechanics nicer to work with.
 		setting_name = "Set completed game difficulty hardest",
 		func = function ()
 			LevelUnlockUtils.debug_set_completed_game_difficulty(5)
-
-			return 
 		end
 	},
 	{
@@ -5495,8 +5423,6 @@ Features that make player mechanics nicer to work with.
 			local end_experience = experience + 1000
 
 			ScriptBackendProfileAttribute.set("experience", end_experience)
-
-			return 
 		end
 	}
 }
@@ -5532,8 +5458,6 @@ if platform == "ps4" or platform == "xb1" then
 				options[5] = "Unspawn All Breed"
 				options[6] = "Unspawn Nearby Breed"
 				options[7] = "Unspawn Specials"
-
-				return 
 			end,
 			func = function (options, index)
 				local conflict_director = Managers.state.conflict
@@ -5544,27 +5468,25 @@ if platform == "ps4" or platform == "xb1" then
 					if selected_value == "Switch Breed" then
 						local t = Managers.time:time("main")
 
-						conflict_director.debug_spawn_switch_breed(conflict_director, t)
+						conflict_director:debug_spawn_switch_breed(t)
 					elseif selected_value == "Spawn Breed" then
 						local t = Managers.time:time("main")
 
-						conflict_director.debug_spawn_breed(conflict_director, t)
+						conflict_director:debug_spawn_breed(t)
 					elseif selected_value == "Spawn Group" then
 						local t = Managers.time:time("main")
 
-						conflict_director.debug_spawn_group(conflict_director, t)
+						conflict_director:debug_spawn_group(t)
 					elseif selected_value == "Spawn Horde" then
-						conflict_director.debug_spawn_horde(conflict_director)
+						conflict_director:debug_spawn_horde()
 					elseif selected_value == "Unspawn All Breed" then
-						conflict_director.destroy_all_units(conflict_director)
+						conflict_director:destroy_all_units()
 					elseif selected_value == "Unspawn Nearby Breed" then
-						conflict_director.destroy_close_units(conflict_director, nil, 144)
+						conflict_director:destroy_close_units(nil, 144)
 					elseif selected_value == "Unspawn Specials" then
-						conflict_director.destroy_specials(conflict_director)
+						conflict_director:destroy_specials()
 					end
 				end
-
-				return 
 			end
 		},
 		{
@@ -5579,8 +5501,6 @@ if platform == "ps4" or platform == "xb1" then
 				options[2] = 50
 				options[3] = 100
 				options[4] = 200
-
-				return 
 			end,
 			func = function (options, index)
 				local debug_manager = Managers.state.debug
@@ -5590,10 +5510,8 @@ if platform == "ps4" or platform == "xb1" then
 					local time_scale_index = table.find(debug_manager.time_scale_list, time_scale_value)
 
 					assert(time_scale_index, "[DebugScreen] Selected time scale not found in Managers.state.debug.time_scale_list")
-					debug_manager.set_time_scale(debug_manager, time_scale_index)
+					debug_manager:set_time_scale(time_scale_index)
 				end
-
-				return 
 			end
 		}
 	}
@@ -5612,18 +5530,12 @@ end
 local callbacks = {
 	enable_locale_cycling = function (option)
 		enable_locale_cycling(option)
-
-		return 
 	end,
 	visualize_sound_occlusion = function (option)
 		World.visualize_sound_occlusion()
-
-		return 
 	end,
 	enable_chain_constraints = function (option)
 		World.enable_chain_constraints(option)
-
-		return 
 	end,
 	update_using_luajit = function (option)
 		if script_data.luajit_disabled then
@@ -5633,8 +5545,6 @@ local callbacks = {
 			jit.on()
 			print("lua jit is enabled")
 		end
-
-		return 
 	end,
 	enable_navigation_visual_debug = function (option)
 		if option and not VISUAL_DEBUGGING_ENABLED and Managers.state.entity then
@@ -5643,8 +5553,6 @@ local callbacks = {
 
 			GwNavWorld.init_visual_debug_server(nav_world, 4888)
 		end
-
-		return 
 	end
 }
 local data = {

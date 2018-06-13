@@ -210,4 +210,4 @@ for skin_name, settings in pairs(SkinSettings) do
 	settings.name = skin_name
 end
 
-return 
+return

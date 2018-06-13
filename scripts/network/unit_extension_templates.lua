@@ -994,6 +994,7 @@ unit_templates.get_extensions = function (unit, unit_template_name, is_husk, is_
 
 	return extensions, num_extensions
 end
+
 unit_templates.extensions_to_remove_on_death = function (unit_template_name, is_husk, is_server)
 	local extensions, num_extensions = nil
 	local remove_when_killed = unit_templates[unit_template_name].remove_when_killed

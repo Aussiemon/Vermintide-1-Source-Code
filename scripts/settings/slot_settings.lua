@@ -4,4 +4,4 @@ SlotSettings = {
 	dialogue_surrounded_count = 4
 }
 
-return 
+return

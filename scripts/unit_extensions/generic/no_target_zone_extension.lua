@@ -1,4 +1,5 @@
 NoTargetZoneExtension = class(NoTargetZoneExtension)
+
 NoTargetZoneExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self._world = extension_init_context.world
 	self._unit = unit
@@ -7,12 +8,11 @@ NoTargetZoneExtension.init = function (self, extension_init_context, unit, exten
 	local distance = Unit.get_data(self._unit, "no_target_zone_data", "distance") or 10
 	self._distance_sq = distance * distance
 	self._current_index = 0
-
-	return 
 end
+
 NoTargetZoneExtension.update = function (self, unit, input, dt, context, t)
 	if not self._is_server then
-		return 
+		return
 	end
 
 	local evaluate_players = false
@@ -32,13 +32,12 @@ NoTargetZoneExtension.update = function (self, unit, input, dt, context, t)
 	end
 
 	if evaluate_players then
-		self._evaluate_players(self)
+		self:_evaluate_players()
 	elseif self._cleanup_needed then
-		self._cleanup_data(self)
+		self:_cleanup_data()
 	end
-
-	return 
 end
+
 NoTargetZoneExtension._evaluate_players = function (self)
 	local num_players = #PLAYER_AND_BOT_UNITS
 	local pose, extents = Unit.box(self._unit)
@@ -62,9 +61,8 @@ NoTargetZoneExtension._evaluate_players = function (self)
 	end
 
 	self._cleanup_needed = true
-
-	return 
 end
+
 NoTargetZoneExtension._cleanup_data = function (self)
 	local num_players = #PLAYER_AND_BOT_UNITS
 
@@ -76,8 +74,6 @@ NoTargetZoneExtension._cleanup_data = function (self)
 
 	self._was_inside = {}
 	self._cleanup_needed = false
-
-	return 
 end
 
-return 
+return

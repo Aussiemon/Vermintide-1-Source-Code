@@ -80,16 +80,14 @@ LevelSettings.dlc_challenge_wizard = {
 	dlc_stat_dependency_func = function (statistics_db, stats_id)
 		if PLATFORM ~= "win32" then
 			local title_properties = Managers.backend:get_interface("title_properties")
-			local dlc_challenge_wizard_enabled = title_properties.get_value(title_properties, "dlc_challenge_wizard_enabled")
+			local dlc_challenge_wizard_enabled = title_properties:get_value("dlc_challenge_wizard_enabled")
 
 			return (dlc_challenge_wizard_enabled and "visible") or "locked", dlc_challenge_wizard_enabled, Localize("map_level_community_tooltip")
 		else
-			unlocked = 0 < statistics_db.get_persistent_stat(statistics_db, stats_id, "completed_levels", "dlc_challenge_wizard")
+			unlocked = statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_challenge_wizard") > 0
 
 			return (unlocked and "visible") or "hidden", unlocked
 		end
-
-		return 
 	end,
 	map_settings = {
 		sorting = 4,
@@ -107,4 +105,4 @@ LevelSettings.dlc_challenge_wizard = {
 	}
 }
 
-return 
+return

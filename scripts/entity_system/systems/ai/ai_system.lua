@@ -29,6 +29,7 @@ local extensions = {
 	"AiHuskBaseExtension",
 	"PlayerBotBase"
 }
+
 AISystem.init = function (self, context, name)
 	AISystem.super.init(self, context, name, extensions)
 
@@ -43,7 +44,7 @@ AISystem.init = function (self, context, name)
 		slots_cleared = {}
 	}
 
-	self.create_all_trees(self)
+	self:create_all_trees()
 
 	local nav_world = GwNavWorld.create(Matrix4x4.identity())
 	self._nav_world = nav_world
@@ -99,16 +100,15 @@ AISystem.init = function (self, context, name)
 	local network_event_delegate = context.network_event_delegate
 	self._network_event_delegate = network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	if not self.is_server then
-		self._initialize_client_traverse_logic(self, nav_world)
+		self:_initialize_client_traverse_logic(nav_world)
 	end
 
 	self._hot_join_sync_units = {}
-
-	return 
 end
+
 AISystem._initialize_client_traverse_logic = function (self, nav_world)
 	local layer_costs = {
 		bot_poison_wind = 1,
@@ -124,9 +124,8 @@ AISystem._initialize_client_traverse_logic = function (self, nav_world)
 
 	AiUtils.initialize_cost_table(self._navtag_layer_cost_table, layer_costs)
 	GwNavTraverseLogic.set_navtag_layer_cost_table(self._traverse_logic, self._navtag_layer_cost_table)
-
-	return 
 end
+
 AISystem.destroy = function (self)
 	AISystem.super.destroy(self)
 
@@ -149,9 +148,8 @@ AISystem.destroy = function (self)
 		GwNavTagLayerCostTable.destroy(self._navtag_layer_cost_table)
 		GwNavTraverseLogic.destroy(self._traverse_logic)
 	end
-
-	return 
 end
+
 AISystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local extension = AISystem.super.on_add_extension(self, world, unit, extension_name, extension_init_data)
 	self.unit_extension_data[unit] = extension
@@ -161,9 +159,9 @@ AISystem.on_add_extension = function (self, world, unit, extension_name, extensi
 			self.ai_blackboard_updates[#self.ai_blackboard_updates + 1] = unit
 		end
 
-		self.blackboards[unit] = extension.blackboard(extension)
+		self.blackboards[unit] = extension:blackboard()
 
-		self.set_default_blackboard_values(self, unit, extension.blackboard(extension))
+		self:set_default_blackboard_values(unit, extension:blackboard())
 	end
 
 	if extension_name == "AISimpleExtension" then
@@ -187,6 +185,7 @@ AISystem.on_add_extension = function (self, world, unit, extension_name, extensi
 
 	return extension
 end
+
 AISystem.set_default_blackboard_values = function (self, unit, blackboard)
 	blackboard.destination_dist = 0
 	blackboard.current_health_percent = 1
@@ -200,23 +199,21 @@ AISystem.set_default_blackboard_values = function (self, unit, blackboard)
 	blackboard.move_speed = 0
 	blackboard.total_slots_count = 0
 	blackboard.target_speed_away = 0
-
-	return 
 end
+
 AISystem.on_remove_extension = function (self, unit, extension_name)
-	self.on_freeze_extension(self, unit, extension_name)
+	self:on_freeze_extension(unit, extension_name)
 
 	if self._hot_join_sync_units[unit] then
 		self._hot_join_sync_units[unit] = nil
 	end
 
 	AISystem.super.on_remove_extension(self, unit, extension_name)
-
-	return 
 end
+
 AISystem.on_freeze_extension = function (self, unit, extension_name)
 	if self.unit_extension_data[unit] == nil then
-		return 
+		return
 	end
 
 	self.unit_extension_data[unit] = nil
@@ -248,38 +245,36 @@ AISystem.on_freeze_extension = function (self, unit, extension_name)
 	if extension_name == "AISimpleExtension" then
 		self.num_perception_units = self.num_perception_units - 1
 	end
-
-	return 
 end
+
 AISystem.register_prioritized_perception_unit_update = function (self, unit, ai_extension)
 	self.ai_units_perception_prioritized[unit] = ai_extension
-
-	return 
 end
+
 AISystem.update = function (self, context, t)
 	local dt = context.dt
 
 	if not ai_trees_created then
-		self.create_all_trees(self)
+		self:create_all_trees()
 	end
 
 	Profiler.start("PlayerBotBase")
-	self.update_extension(self, "PlayerBotBase", dt, context, t)
+	self:update_extension("PlayerBotBase", dt, context, t)
 	Profiler.stop("PlayerBotBase")
 	Profiler.start("AiHuskBaseExtension")
-	self.update_extension(self, "AiHuskBaseExtension", dt, context, t)
+	self:update_extension("AiHuskBaseExtension", dt, context, t)
 	Profiler.stop("AiHuskBaseExtension")
 	Profiler.start("AISimpleExtension")
-	self.update_alive(self)
-	self.update_perception(self, t, dt)
-	self.update_brains(self, t, dt)
-	self.update_game_objects(self)
-	self.update_broadphase(self)
+	self:update_alive()
+	self:update_perception(t, dt)
+	self:update_brains(t, dt)
+	self:update_game_objects()
+	self:update_broadphase()
 
 	if script_data.debug_enabled then
 		Profiler.start("update_debug")
-		self.update_debug_unit(self, t)
-		self.update_debug_draw(self, t)
+		self:update_debug_unit(t)
+		self:update_debug_draw(t)
 		Profiler.stop("update_debug")
 	end
 
@@ -292,19 +287,17 @@ AISystem.update = function (self, context, t)
 
 		self._units_to_destroy[id] = nil
 	end
-
-	return 
 end
+
 AISystem.physics_async_update = function (self, context, t)
 	local dt = context.dt
 
 	Profiler.start("update blackboards")
-	self.update_ai_blackboards_prioritized(self, t, dt)
-	self.update_ai_blackboards(self, t, dt)
+	self:update_ai_blackboards_prioritized(t, dt)
+	self:update_ai_blackboards(t, dt)
 	Profiler.stop("update blackboards")
-
-	return 
 end
+
 AISystem.update_alive = function (self)
 	Profiler.start("update_alive")
 
@@ -322,12 +315,11 @@ AISystem.update_alive = function (self)
 	end
 
 	Profiler.stop("update_alive")
-
-	return 
 end
+
 AISystem.update_perception = function (self, t, dt)
 	if script_data.disable_ai_perception then
-		return 
+		return
 	end
 
 	Profiler.start("update_perception")
@@ -405,9 +397,8 @@ AISystem.update_perception = function (self, t, dt)
 	self.current_perception_unit = current_perception_unit
 
 	Profiler.stop("update_perception")
-
-	return 
 end
+
 AISystem.update_brains = function (self, t, dt)
 	local number_ordinary_aggroed_enemies = 0
 	local number_special_aggored_enemies = 0
@@ -419,7 +410,7 @@ AISystem.update_brains = function (self, t, dt)
 	for unit, extension in pairs(self.ai_units_alive) do
 		local bt = extension._brain._bt
 		local blackboard = extension._blackboard
-		local result = bt.root(bt):evaluate(unit, blackboard, t, dt)
+		local result = bt:root():evaluate(unit, blackboard, t, dt)
 		local breed = blackboard.breed
 
 		if breed.special then
@@ -435,9 +426,8 @@ AISystem.update_brains = function (self, t, dt)
 
 	self.number_ordinary_aggroed_enemies = number_ordinary_aggroed_enemies
 	self.number_special_aggored_enemies = number_special_aggored_enemies
-
-	return 
 end
+
 AISystem.update_game_objects = function (self)
 	Profiler.start("update_game_objects")
 
@@ -447,17 +437,16 @@ AISystem.update_game_objects = function (self)
 	local unit_storage = Managers.state.unit_storage
 
 	for unit, extension in pairs(self.ai_units_alive) do
-		local game_object_id = unit_storage.go_id(unit_storage, unit)
-		local action_name = extension.current_action_name(extension)
+		local game_object_id = unit_storage:go_id(unit)
+		local action_name = extension:current_action_name()
 		local action_id = NetworkLookup_bt_action_names[action_name]
 
 		GameSession_set_game_object_field(game, game_object_id, "bt_action_name", action_id)
 	end
 
 	Profiler.stop("update_game_objects")
-
-	return 
 end
+
 AISystem.update_broadphase = function (self)
 	Profiler.start("update_broadphase")
 
@@ -475,30 +464,29 @@ AISystem.update_broadphase = function (self)
 	end
 
 	Profiler.stop("update_broadphase")
-
-	return 
 end
+
 AISystem.update_debug_unit = function (self, t)
 	local unit = script_data.debug_unit
 
 	if not unit_alive(unit) then
-		return 
+		return
 	end
 
 	local extension = self.ai_units_alive[unit]
 
 	if extension == nil then
-		return 
+		return
 	end
 
 	local blackboard = extension._blackboard
 	local leaf_node = extension._brain._bt:root()
 
-	while leaf_node and leaf_node.current_running_child(leaf_node, blackboard) do
-		leaf_node = leaf_node.current_running_child(leaf_node, blackboard)
+	while leaf_node and leaf_node:current_running_child(blackboard) do
+		leaf_node = leaf_node:current_running_child(blackboard)
 	end
 
-	local btnode_name = (leaf_node and leaf_node.id(leaf_node)) or "unknown_node"
+	local btnode_name = (leaf_node and leaf_node:id()) or "unknown_node"
 	blackboard.btnode_name = btnode_name
 	local breed = extension._breed
 	local debug_flag = breed.debug_flag
@@ -508,21 +496,20 @@ AISystem.update_debug_unit = function (self, t)
 			Debug.text("Enable debug setting %q for additional debugging of ai unit", debug_flag)
 		end
 
-		return 
+		return
 	end
 
 	local debug_class = breed.debug_class
 
 	debug_class.update(unit, blackboard, t)
-
-	return 
 end
+
 AISystem.update_debug_draw = function (self)
 	if script_data.debug_behaviour_trees then
 		for unit, extension in pairs(self.ai_units_alive) do
 			local brain = extension._brain
 
-			brain.debug_draw_behaviours(brain)
+			brain:debug_draw_behaviours()
 		end
 	end
 
@@ -541,9 +528,8 @@ AISystem.update_debug_draw = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 local PRIORITIZED_DISTANCE = 10
 
 local function update_blackboard(unit, blackboard, t, dt)
@@ -560,17 +546,17 @@ local function update_blackboard(unit, blackboard, t, dt)
 	end
 
 	local health_extension = ScriptUnit.extension(unit, "health_system")
-	blackboard.current_health_percent = health_extension.current_health_percent(health_extension)
+	blackboard.current_health_percent = health_extension:current_health_percent()
 	local current_position = POSITION_LOOKUP[unit]
 	local navigation_extension = blackboard.navigation_extension
 
 	if navigation_extension then
-		blackboard.destination_dist = navigation_extension.distance_to_destination(navigation_extension, current_position)
+		blackboard.destination_dist = navigation_extension:distance_to_destination(current_position)
 	end
 
 	local ai_slot_system = Managers.state.entity:system("ai_slot_system")
-	blackboard.have_slot = (ai_slot_system.ai_unit_have_slot(ai_slot_system, unit) and 1) or 0
-	blackboard.wait_slot_distance = ai_slot_system.ai_unit_wait_slot_distance(ai_slot_system, unit)
+	blackboard.have_slot = (ai_slot_system:ai_unit_have_slot(unit) and 1) or 0
+	blackboard.wait_slot_distance = ai_slot_system:ai_unit_wait_slot_distance(unit)
 	blackboard.total_slots_count = ai_slot_system.total_slots_count
 	local target_unit = blackboard.target_unit
 	local target_alive = unit_alive(target_unit)
@@ -594,7 +580,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 		local target_locomotion = ScriptUnit.has_extension(target_unit, "locomotion_system")
 
 		if target_locomotion and target_locomotion.average_velocity then
-			blackboard.target_speed_away = Vector3_dot(target_locomotion.average_velocity(target_locomotion), Vector3_normalize(POSITION_LOOKUP[target_unit] - current_position))
+			blackboard.target_speed_away = Vector3_dot(target_locomotion:average_velocity(), Vector3_normalize(POSITION_LOOKUP[target_unit] - current_position))
 		else
 			blackboard.target_speed_away = 0
 		end
@@ -603,7 +589,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 	end
 
 	local locomotion_extension = blackboard.locomotion_extension
-	blackboard.is_falling = locomotion_extension and locomotion_extension.is_falling(locomotion_extension)
+	blackboard.is_falling = locomotion_extension and locomotion_extension:is_falling()
 	blackboard.move_speed = locomotion_extension and locomotion_extension.move_speed
 
 	if blackboard.next_smart_object_data then
@@ -634,7 +620,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 		local target_dist = sqrt(flat_sq + z * z)
 		local inside_priority_distance = target_dist < PRIORITIZED_DISTANCE
 		blackboard.target_dist = target_dist
-		local slot_pos = ai_slot_system.ai_unit_slot_position(ai_slot_system, unit) or current_position
+		local slot_pos = ai_slot_system:ai_unit_slot_position(unit) or current_position
 		blackboard.slot_dist_z = slot_pos.z - current_position.z
 
 		return inside_priority_distance
@@ -650,6 +636,7 @@ local function update_blackboard(unit, blackboard, t, dt)
 end
 
 local MAX_PRIO_UPDATES_PER_FRAME = (PLATFORM == "win32" and 40) or 20
+
 AISystem.update_ai_blackboards_prioritized = function (self, t, dt)
 	Profiler.start("prio")
 
@@ -668,7 +655,7 @@ AISystem.update_ai_blackboards_prioritized = function (self, t, dt)
 
 	local i = 1
 
-	while i <= loops do
+	while loops >= i do
 		if num_prio < index then
 			index = 1
 		end
@@ -693,10 +680,10 @@ AISystem.update_ai_blackboards_prioritized = function (self, t, dt)
 	self.start_prio_index = index
 
 	Profiler.stop("prio")
-
-	return 
 end
+
 local AI_UPDATES_PER_FRAME = 2
+
 AISystem.update_ai_blackboards = function (self, t, dt)
 	Profiler.start("nonprio")
 
@@ -737,18 +724,20 @@ AISystem.update_ai_blackboards = function (self, t, dt)
 	self.ai_update_index = index
 
 	Profiler.stop("nonprio")
-
-	return 
 end
+
 AISystem.nav_world = function (self)
 	return self._nav_world
 end
+
 AISystem.client_traverse_logic = function (self)
 	return self._traverse_logic
 end
+
 AISystem.get_tri_on_navmesh = function (self, pos)
 	return GwNavQueries.triangle_from_position(self._nav_world, pos, 30, 30)
 end
+
 AISystem.set_allowed_layer = function (self, layer_name, allowed)
 	if self.is_server then
 		local entity_manager = Managers.state.entity
@@ -756,10 +745,10 @@ AISystem.set_allowed_layer = function (self, layer_name, allowed)
 		local layer_id = LAYER_ID_MAPPING[layer_name]
 		NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] = (allowed and 1) or 0
 		NAV_TAG_VOLUME_LAYER_COST_BOTS[layer_name] = (allowed and 1) or 0
-		local ai_extensions = entity_manager.get_entities(entity_manager, "AINavigationExtension")
+		local ai_extensions = entity_manager:get_entities("AINavigationExtension")
 
 		for _, extension in pairs(ai_extensions) do
-			extension.allow_layer(extension, layer_name, allowed)
+			extension:allow_layer(layer_name, allowed)
 
 			if not allowed then
 				local unit = extension._unit
@@ -770,10 +759,10 @@ AISystem.set_allowed_layer = function (self, layer_name, allowed)
 					if NavTagVolumeUtils.inside_nav_tag_layer(nav_world, unit_position, 0.5, 0.5, layer_name) then
 						AiUtils.kill_unit(unit, nil, nil, "inside_forbidden_tag_volume", Vector3(0, 0, 0))
 					else
-						local destination_position = extension.destination(extension)
+						local destination_position = extension:destination()
 
 						if NavTagVolumeUtils.inside_nav_tag_layer(nav_world, destination_position, 0.5, 0.5, layer_name) then
-							extension.reset_destination(extension)
+							extension:reset_destination()
 						end
 					end
 				end
@@ -782,19 +771,18 @@ AISystem.set_allowed_layer = function (self, layer_name, allowed)
 
 		local bot_nav_transition_manager = Managers.state.bot_nav_transition
 
-		bot_nav_transition_manager.allow_layer(bot_nav_transition_manager, layer_name, allowed)
+		bot_nav_transition_manager:allow_layer(layer_name, allowed)
 		Managers.state.entity:system("ai_slot_system"):set_allowed_layer(layer_name, allowed)
 		Managers.state.entity:system("ai_group_system"):set_allowed_layer(layer_name, allowed)
 		self.network_transmit:send_rpc_clients("rpc_set_allowed_nav_layer", layer_id, allowed)
 	end
-
-	return 
 end
+
 AISystem.alert_enemies_within_range = function (self, unit, position, radius)
 	if not NetworkUtils.network_safe_position(position) then
 		Application.warning("Trying to alert enemies outside of safe network position")
 
-		return 
+		return
 	end
 
 	if self.is_server then
@@ -804,41 +792,36 @@ AISystem.alert_enemies_within_range = function (self, unit, position, radius)
 
 		self.network_transmit:send_rpc_server("rpc_alert_enemies_within_range", unit_id, position, radius)
 	end
-
-	return 
 end
+
 AISystem.rpc_alert_enemies_within_range = function (self, peer_id, unit_id, position, radius)
 	local unit = Managers.state.unit_storage:unit(unit_id)
 
-	self.alert_enemies_within_range(self, unit, position, radius)
-
-	return 
+	self:alert_enemies_within_range(unit, position, radius)
 end
+
 AISystem.rpc_set_ward_state = function (self, peer_id, unit_id, state)
 	local unit = Managers.state.unit_storage:unit(unit_id)
 
 	AiUtils.stormvermin_champion_set_ward_state(unit, state, false)
-
-	return 
 end
+
 AISystem.rpc_set_critter_skull = function (self, peer_id, unit_id)
 	local unit = Managers.state.unit_storage:unit(unit_id)
 
 	if Unit.alive(unit) then
 		AiBreedSnippets.on_critter_rat_spawn(unit)
 	end
-
-	return 
 end
+
 AISystem.rpc_on_critter_rat_death = function (self, peer_id, unit_id)
 	local unit = Managers.state.unit_storage:unit(unit_id)
 
 	if Unit.alive(unit) then
 		AiBreedSnippets.on_critter_rat_husk_death(unit)
 	end
-
-	return 
 end
+
 AISystem.rpc_set_allowed_nav_layer = function (self, peer_id, layer_id, allowed)
 	local layer_name = LAYER_ID_MAPPING[layer_id]
 	NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] = (allowed and 1) or 0
@@ -849,15 +832,14 @@ AISystem.rpc_set_allowed_nav_layer = function (self, peer_id, layer_id, allowed)
 	else
 		GwNavTagLayerCostTable.forbid_layer(self._navtag_layer_cost_table, layer_id)
 	end
-
-	return 
 end
+
 AISystem.hot_join_sync = function (self, sender)
 	local size = #LAYER_ID_MAPPING
 
 	for i = NavTagVolumeStartLayer, size, 1 do
 		local layer_name = LAYER_ID_MAPPING[i]
-		local allowed = 0 < NAV_TAG_VOLUME_LAYER_COST_AI[layer_name]
+		local allowed = NAV_TAG_VOLUME_LAYER_COST_AI[layer_name] > 0
 
 		self.network_transmit:send_rpc("rpc_set_allowed_nav_layer", sender, i, allowed)
 	end
@@ -865,9 +847,8 @@ AISystem.hot_join_sync = function (self, sender)
 	for unit, func in pairs(self._hot_join_sync_units) do
 		func(sender, unit)
 	end
-
-	return 
 end
+
 AISystem.create_all_trees = function (self)
 	ai_trees_created = true
 
@@ -880,16 +861,14 @@ AISystem.create_all_trees = function (self)
 		local tree = BehaviorTree:new(root, tree_name)
 		self._behavior_trees[tree_name] = tree
 	end
-
-	return 
 end
+
 AISystem.behavior_tree = function (self, tree_name)
 	return self._behavior_trees[tree_name]
 end
+
 AISystem.register_unit_for_destruction = function (self, unit)
 	self._units_to_destroy[unit] = unit
-
-	return 
 end
 
-return 
+return

@@ -1,6 +1,7 @@
 local unit_get_data = Unit.get_data
 local script_data = script_data
 AiBreedSnippets = AiBreedSnippets or {}
+
 AiBreedSnippets.on_rat_ogre_spawn = function (unit, blackboard)
 	blackboard.cycle_rage_anim_index = 1
 	blackboard.slams = 0
@@ -14,7 +15,7 @@ AiBreedSnippets.on_rat_ogre_spawn = function (unit, blackboard)
 	if math.random() <= breed.chance_of_starting_angry then
 		local ai_simple = ScriptUnit.extension(unit, "ai_system")
 
-		ai_simple.set_perception(ai_simple, breed.perception, breed.target_selection_angry)
+		ai_simple:set_perception(breed.perception, breed.target_selection_angry)
 	else
 		local main_paths = conflict_director.main_path_info.main_paths
 		local _, travel_dist = MainPathUtils.closest_pos_at_main_path(main_paths, POSITION_LOOKUP[unit])
@@ -25,20 +26,18 @@ AiBreedSnippets.on_rat_ogre_spawn = function (unit, blackboard)
 		}
 	end
 
-	conflict_director.freeze_intensity_decay(conflict_director, 10)
-	conflict_director.add_unit_to_bosses(conflict_director, unit)
-
-	return 
+	conflict_director:freeze_intensity_decay(10)
+	conflict_director:add_unit_to_bosses(unit)
 end
+
 AiBreedSnippets.on_rat_ogre_death = function (unit, blackboard)
 	local conflict_director = Managers.state.conflict
 
-	conflict_director.freeze_intensity_decay(conflict_director, 1)
-	conflict_director.remove_unit_from_bosses(conflict_director, unit)
+	conflict_director:freeze_intensity_decay(1)
+	conflict_director:remove_unit_from_bosses(unit)
 	print("rat ogre died!")
-
-	return 
 end
+
 AiBreedSnippets.spawn_event_item_special = function (unit, blackboard)
 	local event_item = Managers.state.quest:is_mutator_active("event_items")
 
@@ -66,9 +65,8 @@ AiBreedSnippets.spawn_event_item_special = function (unit, blackboard)
 			end
 		end
 	end
-
-	return 
 end
+
 AiBreedSnippets.spawn_event_item = function (unit, blackboard)
 	local event_item = Managers.state.quest:is_mutator_active("event_items")
 
@@ -92,9 +90,8 @@ AiBreedSnippets.spawn_event_item = function (unit, blackboard)
 			Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
 		end
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_critter_rat_spawn = function (unit, blackboard, t)
 	local event_item = Managers.state.quest:is_mutator_active("event_items")
 
@@ -107,19 +104,17 @@ AiBreedSnippets.on_critter_rat_spawn = function (unit, blackboard, t)
 		Unit.set_local_position(hat_unit, 0, Vector3(0.07, -0.02, 0))
 		Unit.set_data(unit, "hat_unit", hat_unit)
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_critter_rat_hot_join_sync = function (sender, unit)
 	if Unit.alive(unit) then
 		local network_manager = Managers.state.network
-		local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+		local unit_id = network_manager:unit_game_object_id(unit)
 
 		RPC.rpc_set_critter_skull(sender, unit_id)
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
 	local hat_unit = Unit.get_data(unit, "hat_unit")
 
@@ -130,7 +125,7 @@ AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
 	end
 
 	local network_manager = Managers.state.network
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 
 	network_manager.network_transmit:send_rpc_clients("rpc_on_critter_rat_death", unit_id)
 
@@ -156,9 +151,8 @@ AiBreedSnippets.on_critter_rat_death = function (unit, blackboard, t)
 			Managers.state.unit_spawner:spawn_network_unit(unit_name, unit_template_name, extension_init_data, position, rotation)
 		end
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_critter_rat_husk_death = function (unit)
 	local hat_unit = Unit.get_data(unit, "hat_unit")
 
@@ -167,9 +161,8 @@ AiBreedSnippets.on_critter_rat_husk_death = function (unit)
 
 		World.destroy_unit(world, hat_unit)
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_loot_rat_update = function (unit, blackboard, t)
 	local t = Managers.time:time("game")
 	local cooldown_time = blackboard.dodge_cooldown_time
@@ -184,9 +177,8 @@ AiBreedSnippets.on_loot_rat_update = function (unit, blackboard, t)
 			blackboard.dodge_cooldown_time = t + blackboard.breed.dodge_cooldown
 		end
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_loot_rat_alerted = function (unit, blackboard, alerting_unit, enemy_unit)
 	local t = Managers.time:time("game")
 	local cooldown_time = blackboard.dodge_cooldown_time
@@ -195,7 +187,7 @@ AiBreedSnippets.on_loot_rat_alerted = function (unit, blackboard, alerting_unit,
 		local breed = blackboard.breed
 		local dodge_vector, threat_vector = nil
 
-		if unit == alerting_unit and 0 < blackboard.dodge_damage_points then
+		if unit == alerting_unit and blackboard.dodge_damage_points > 0 then
 			dodge_vector, threat_vector = LocomotionUtils.on_alerted_dodge(unit, blackboard, alerting_unit, enemy_unit)
 
 			if dodge_vector then
@@ -214,24 +206,22 @@ AiBreedSnippets.on_loot_rat_alerted = function (unit, blackboard, alerting_unit,
 
 		local ai_simple = ScriptUnit.extension(unit, "ai_system")
 
-		ai_simple.set_perception(ai_simple, breed.perception, breed.target_selection_alerted)
+		ai_simple:set_perception(breed.perception, breed.target_selection_alerted)
 
 		blackboard.dodge_vector = dodge_vector
 		blackboard.threat_vector = threat_vector
 		blackboard.dodge_cooldown_time = t + blackboard.breed.dodge_cooldown
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_loot_rat_stagger_action_done = function (unit)
 	if Unit.alive(unit) then
 		local damage_extension = ScriptUnit.extension(unit, "damage_system")
 
-		damage_extension.regen_dodge_damage_points(damage_extension)
+		damage_extension:regen_dodge_damage_points()
 	end
-
-	return 
 end
+
 AiBreedSnippets.on_grey_seer_spawn = function (unit, blackboard)
 	local level_key = Managers.state.game_mode:level_key()
 	local level_settings = LevelSettings[level_key]
@@ -266,8 +256,6 @@ AiBreedSnippets.on_grey_seer_spawn = function (unit, blackboard)
 	if action_data then
 		blackboard.next_auto_teleport_at = Managers.time:time("main") + action_data.time_until_auto_teleport
 	end
-
-	return 
 end
 
-return 
+return

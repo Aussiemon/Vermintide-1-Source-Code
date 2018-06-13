@@ -2351,8 +2351,6 @@ local animations = {
 				widgets.lock_block_right.style.texture_id.angle = math.pi
 				widgets.lock_cogwheel_bg_left.style.texture_id.angle = 0
 				widgets.lock_cogwheel_bg_right.style.texture_id.angle = 0
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local value = math.easeCubic(local_progress)
@@ -2373,11 +2371,9 @@ local animations = {
 				lock_stick_bottom_left_position[2] = lock_stick_bottom_left_default_position[2] - move_distance * value
 				lock_stick_bottom_right_position[1] = lock_stick_bottom_right_default_position[1] + move_distance * value
 				lock_stick_bottom_right_position[2] = lock_stick_bottom_right_default_position[2] - move_distance * value
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2385,7 +2381,7 @@ local animations = {
 			start_progress = 0.7 * lock_open_time_multiplier,
 			end_progress = 1.3 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 90
@@ -2411,11 +2407,9 @@ local animations = {
 				local lock_block_right_widget = widgets.lock_block_right
 				lock_block_left_widget.style.texture_id.angle = block_angle
 				lock_block_right_widget.style.texture_id.angle = block_angle + math.pi
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2423,7 +2417,7 @@ local animations = {
 			start_progress = 1.3 * lock_open_time_multiplier,
 			end_progress = 1.4 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 28
@@ -2434,11 +2428,9 @@ local animations = {
 				local lock_pillar_bottom_default_position = scenegraph_definition.lock_pillar_bottom.position
 				lock_pillar_top_position[2] = lock_pillar_top_default_position[2] + move_distance * value
 				lock_pillar_bottom_position[2] = lock_pillar_bottom_default_position[2] - move_distance * value
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2446,7 +2438,7 @@ local animations = {
 			start_progress = 1.5 * lock_open_time_multiplier,
 			end_progress = 1.9 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local value = math.easeCubic(local_progress)
@@ -2455,11 +2447,9 @@ local animations = {
 				local angle = math.pi * 0.5 * value
 				lock_cogwheel_bg_left_widget.style.texture_id.angle = angle
 				lock_cogwheel_bg_right_widget.style.texture_id.angle = angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2467,7 +2457,7 @@ local animations = {
 			start_progress = 2 * lock_open_time_multiplier,
 			end_progress = 3 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local cogwheel_value = math.ease_exp(local_progress)
@@ -2482,11 +2472,9 @@ local animations = {
 				lock_slot_holder_right_widget.style.texture_id.angle = -center_angle
 				lock_cogwheel_left_widget.style.texture_id.angle = cogwheel_angle
 				lock_cogwheel_right_widget.style.texture_id.angle = cogwheel_angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2494,7 +2482,7 @@ local animations = {
 			start_progress = 3 * lock_open_time_multiplier,
 			end_progress = 3.1 * lock_open_time_multiplier,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 28
@@ -2505,11 +2493,9 @@ local animations = {
 				local lock_pillar_right_default_position = scenegraph_definition.lock_pillar_right.position
 				lock_pillar_left_position[1] = lock_pillar_left_default_position[1] - move_distance * value
 				lock_pillar_right_position[1] = lock_pillar_right_default_position[1] + move_distance * value
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -2519,7 +2505,7 @@ local animations = {
 			start_progress = 2.6,
 			end_progress = 3.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local value = math.easeCubic(1 - local_progress)
@@ -2540,11 +2526,9 @@ local animations = {
 				lock_stick_bottom_left_position[2] = lock_stick_bottom_left_default_position[2] - move_distance * value
 				lock_stick_bottom_right_position[1] = lock_stick_bottom_right_default_position[1] + move_distance * value
 				lock_stick_bottom_right_position[2] = lock_stick_bottom_right_default_position[2] - move_distance * value
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2552,7 +2536,7 @@ local animations = {
 			start_progress = 1.8,
 			end_progress = 2.4,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 90
@@ -2578,11 +2562,9 @@ local animations = {
 				local lock_block_right_widget = widgets.lock_block_right
 				lock_block_left_widget.style.texture_id.angle = block_angle
 				lock_block_right_widget.style.texture_id.angle = block_angle + math.pi
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2590,7 +2572,7 @@ local animations = {
 			start_progress = 1.7,
 			end_progress = 1.8,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 28
@@ -2601,11 +2583,9 @@ local animations = {
 				local lock_pillar_bottom_default_position = scenegraph_definition.lock_pillar_bottom.position
 				lock_pillar_top_position[2] = lock_pillar_top_default_position[2] + move_distance * value
 				lock_pillar_bottom_position[2] = lock_pillar_bottom_default_position[2] - move_distance * value
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2613,7 +2593,7 @@ local animations = {
 			start_progress = 1.2,
 			end_progress = 1.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local value = math.easeCubic(1 - local_progress)
@@ -2622,11 +2602,9 @@ local animations = {
 				local angle = math.pi * 0.5 * value
 				lock_cogwheel_bg_left_widget.style.texture_id.angle = angle
 				lock_cogwheel_bg_right_widget.style.texture_id.angle = angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2634,7 +2612,7 @@ local animations = {
 			start_progress = 0.1,
 			end_progress = 1.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local cogwheel_value = math.ease_exp(1 - local_progress)
@@ -2652,15 +2630,11 @@ local animations = {
 				reward_box_final_widget.style.background.angle = -center_angle
 				lock_cogwheel_left_widget.style.texture_id.angle = cogwheel_angle
 				lock_cogwheel_right_widget.style.texture_id.angle = cogwheel_angle
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local reward_box_final_widget = widgets.reward_box_final_widget
 				reward_box_final_widget.style.frame.angle = 0
 				reward_box_final_widget.style.background.angle = 0
-
-				return 
 			end
 		},
 		{
@@ -2668,7 +2642,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.1,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local move_distance = 28
@@ -2679,11 +2653,9 @@ local animations = {
 				local lock_pillar_right_default_position = scenegraph_definition.lock_pillar_right.position
 				lock_pillar_left_position[1] = lock_pillar_left_default_position[1] - move_distance * value
 				lock_pillar_right_position[1] = lock_pillar_right_default_position[1] + move_distance * value
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

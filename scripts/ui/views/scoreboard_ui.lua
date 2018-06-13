@@ -67,6 +67,7 @@ local generic_input_actions = {
 ScoreboardUI = class(ScoreboardUI)
 local TOPICS_PER_PAGE = 3
 local PLAYER_NAME_MAX_LENGTH = 16
+
 ScoreboardUI.init = function (self, end_of_level_ui_context)
 	self.game_won = end_of_level_ui_context.game_won
 
@@ -95,10 +96,10 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	self.network_lobby = end_of_level_ui_context.network_lobby
 	self.voting_manager = Managers.state.voting
 
-	input_manager.create_input_service(input_manager, "scoreboard_ui", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "keyboard")
-	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "mouse")
-	input_manager.map_device_to_service(input_manager, "scoreboard_ui", "gamepad")
+	input_manager:create_input_service("scoreboard_ui", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("scoreboard_ui", "keyboard")
+	input_manager:map_device_to_service("scoreboard_ui", "mouse")
+	input_manager:map_device_to_service("scoreboard_ui", "gamepad")
 
 	self.platform = PLATFORM
 	self.vote_manager = Managers.state.voting
@@ -109,7 +110,7 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	self.timers = {}
 	self.ui_animations = {}
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.topic_widgets_draw_count = 0
 	local scoreboard_session_data = end_of_level_ui_context.scoreboard_session_data
@@ -128,9 +129,9 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	self.network_event_delegate = end_of_level_ui_context.network_event_delegate
 
 	self.network_event_delegate:register(self, "rpc_start_specific_level")
-	self.setup_level_voting(self)
+	self:setup_level_voting()
 
-	local input_service = input_manager.get_service(input_manager, "scoreboard_ui")
+	local input_service = input_manager:get_service("scoreboard_ui")
 	local gui_layer = definitions.scenegraph.root.position[3]
 	self._generic_input_actions = table.clone(generic_input_actions)
 
@@ -159,9 +160,8 @@ ScoreboardUI.init = function (self, end_of_level_ui_context)
 	end
 
 	self.menu_input_description = MenuInputDescriptionUI:new(end_of_level_ui_context, self.ui_renderer, input_service, 5, gui_layer, self._generic_input_actions.default)
-
-	return 
 end
+
 ScoreboardUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph)
 	self.voting_widget_1 = UIWidget.init(definitions.widgets.voting_widget_1)
@@ -193,8 +193,6 @@ ScoreboardUI.create_ui_elements = function (self)
 	self.player_entry_widgets = player_entry_widgets
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
 
 local function create_index_counter_widget_template()
@@ -284,23 +282,24 @@ ScoreboardUI.init_topic_index_counter = function (self, number_of_entries)
 	topic_index_counter_widget.style.list_style.start_index = 1
 	topic_index_counter_widget.style.list_style.num_draws = number_of_entries
 	topic_index_counter_widget.element.pass_data[1].num_list_elements = nil
-
-	return 
 end
+
 ScoreboardUI.input_service = function (self)
 	return self.input_manager:get_service("scoreboard_ui")
 end
+
 ScoreboardUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 ScoreboardUI.is_active = function (self)
 	return self.active
 end
+
 ScoreboardUI.is_completed = function (self)
 	return self.is_complete
 end
+
 ScoreboardUI.on_enter = function (self, ignore_input_blocking)
 	self.active = true
 	self.is_complete = nil
@@ -308,9 +307,9 @@ ScoreboardUI.on_enter = function (self, ignore_input_blocking)
 	local input_manager = self.input_manager
 
 	if not ignore_input_blocking and not chat_focused then
-		input_manager.block_device_except_service(input_manager, "scoreboard_ui", "keyboard")
-		input_manager.block_device_except_service(input_manager, "scoreboard_ui", "mouse")
-		input_manager.block_device_except_service(input_manager, "scoreboard_ui", "gamepad")
+		input_manager:block_device_except_service("scoreboard_ui", "keyboard")
+		input_manager:block_device_except_service("scoreboard_ui", "mouse")
+		input_manager:block_device_except_service("scoreboard_ui", "gamepad")
 	end
 
 	local ui_scenegraph = self.ui_scenegraph
@@ -319,25 +318,22 @@ ScoreboardUI.on_enter = function (self, ignore_input_blocking)
 	local from = 1200
 	local to = 0
 	local time = UISettings.scoreboard.open_duration
-	self.open_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+	self.open_window_animation = self:animate_element_by_time(target, target_index, from, to, time)
 	self.number_of_topic_pages = math.ceil(self.number_of_topics / TOPICS_PER_PAGE)
 
-	self.init_topic_index_counter(self, self.number_of_topic_pages)
-	self.move_topic_list(self, 1, true)
-	self.on_topic_widget_select(self, self.topic_widgets[1], 1, true)
-
-	return 
+	self:init_topic_index_counter(self.number_of_topic_pages)
+	self:move_topic_list(1, true)
+	self:on_topic_widget_select(self.topic_widgets[1], 1, true)
 end
+
 ScoreboardUI.on_open_complete = function (self)
 	self.open = true
-
-	return 
 end
+
 ScoreboardUI.on_close_complete = function (self)
 	self.open = false
-
-	return 
 end
+
 ScoreboardUI.on_exit = function (self)
 	self.open = nil
 	local ui_scenegraph = self.ui_scenegraph
@@ -346,12 +342,11 @@ ScoreboardUI.on_exit = function (self)
 	local from = 0
 	local to = 1200
 	local time = UISettings.scoreboard.close_duration
-	self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+	self.close_window_animation = self:animate_element_by_time(target, target_index, from, to, time)
 
-	self.play_sound(self, "Play_hud_button_close")
-
-	return 
+	self:play_sound("Play_hud_button_close")
 end
+
 ScoreboardUI.animate_window = function (self, open)
 	if not self.close_window_animation and not self.open_window_animation then
 		local ui_scenegraph = self.ui_scenegraph
@@ -363,9 +358,9 @@ ScoreboardUI.animate_window = function (self, open)
 			local to = 0
 			local time = UISettings.scoreboard.open_duration
 			self.opening_leaderboards = false
-			self.open_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+			self.open_window_animation = self:animate_element_by_time(target, target_index, from, to, time)
 
-			self.play_sound(self, "Play_hud_button_close")
+			self:play_sound("Play_hud_button_close")
 			self._leaderboards_ui:close()
 		else
 			self.open = false
@@ -373,42 +368,41 @@ ScoreboardUI.animate_window = function (self, open)
 			local to = (1200 * UISettings.ui_scale) / 100
 			local time = UISettings.scoreboard.close_duration
 			self.opening_leaderboards = true
-			self.close_window_animation = self.animate_element_by_time(self, target, target_index, from, to, time)
+			self.close_window_animation = self:animate_element_by_time(target, target_index, from, to, time)
 
-			self.play_sound(self, "Play_hud_button_open")
+			self:play_sound("Play_hud_button_open")
 			self._leaderboards_ui:open(Managers.state.game_mode:level_key())
 		end
 	end
-
-	return 
 end
+
 ScoreboardUI.on_close_complete = function (self)
 	local input_manager = self.input_manager
 
-	input_manager.device_unblock_all_services(input_manager, "keyboard")
-	input_manager.device_unblock_all_services(input_manager, "mouse")
-	input_manager.device_unblock_all_services(input_manager, "gamepad")
+	input_manager:device_unblock_all_services("keyboard")
+	input_manager:device_unblock_all_services("mouse")
+	input_manager:device_unblock_all_services("gamepad")
 
 	self.active = nil
 	self.is_complete = true
-
-	return 
 end
+
 ScoreboardUI.player_data_by_stats_id = function (self, stats_id)
 	return self.player_list[stats_id]
 end
+
 ScoreboardUI.update = function (self, dt)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 
 	if not self.active then
-		return 
+		return
 	end
 
 	if self.popup_id then
 		local popup_result = Managers.popup:query_result(self.popup_id)
 
 		if popup_result then
-			self.handle_popup_result(self, popup_result)
+			self:handle_popup_result(popup_result)
 		end
 	end
 
@@ -420,7 +414,7 @@ ScoreboardUI.update = function (self, dt)
 		if UIAnimation.completed(open_animation) then
 			self.open_window_animation = nil
 
-			self.on_open_complete(self)
+			self:on_open_complete()
 		end
 	else
 		local close_animation = self.close_window_animation
@@ -432,7 +426,7 @@ ScoreboardUI.update = function (self, dt)
 				self.close_window_animation = nil
 
 				if not self.opening_leaderboards then
-					self.on_close_complete(self)
+					self:on_close_complete()
 				end
 			end
 		end
@@ -447,57 +441,56 @@ ScoreboardUI.update = function (self, dt)
 	end
 
 	if self.open then
-		self.update_vote_counts(self)
-		self.update_start_level_timer(self, dt)
-		self.update_vote_options_fade_out(self, dt)
+		self:update_vote_counts()
+		self:update_start_level_timer(dt)
+		self:update_vote_options_fade_out(dt)
 
 		if gamepad_active then
 			if not self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = true
 
-				self.on_gamepad_activated(self)
+				self:on_gamepad_activated()
 			end
 
-			self.update_input_description(self)
+			self:update_input_description()
 		elseif self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = false
 
-			self.on_gamepad_deactivated(self)
+			self:on_gamepad_deactivated()
 		end
 
-		self.handle_interaction(self, dt)
+		self:handle_interaction(dt)
 	end
 
 	if self._leaderboards_ui then
 		local input_service = self.input_manager:get_service("scoreboard_ui")
 
-		if input_service.get(input_service, "refresh") or input_service.get(input_service, "back") then
-			self.animate_window(self, not self.open)
+		if input_service:get("refresh") or input_service:get("back") then
+			self:animate_window(not self.open)
 		end
 
 		self._leaderboards_ui:update(dt)
 	end
 
-	self.update_arrow_widget_mouse_input(self, self.topic_arrow_widget_left, "left")
-	self.update_arrow_widget_mouse_input(self, self.topic_arrow_widget_right, "right")
-	self.update_topic_widgets_mouse_input(self)
-	self.update_topic_scroll_animation(self, dt)
-	self.update_player_widgets_animations(self, dt)
+	self:update_arrow_widget_mouse_input(self.topic_arrow_widget_left, "left")
+	self:update_arrow_widget_mouse_input(self.topic_arrow_widget_right, "right")
+	self:update_topic_widgets_mouse_input()
+	self:update_topic_scroll_animation(dt)
+	self:update_player_widgets_animations(dt)
 
 	if self._leaderboards_ui and self._leaderboards_ui:enabled() then
 		self._leaderboards_ui:draw(dt)
 	end
 
-	self.draw(self, dt)
-
-	return 
+	self:draw(dt)
 end
+
 ScoreboardUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "scoreboard_ui")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("scoreboard_ui")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.window_widget)
@@ -568,9 +561,8 @@ ScoreboardUI.draw = function (self, dt)
 	if gamepad_active and not self.popup_id and not leaderboards_enabled then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
+
 ScoreboardUI.destroy = function (self)
 	rawset(_G, "ScoreboardUI_pointer", nil)
 	self.menu_input_description:destroy()
@@ -585,25 +577,22 @@ ScoreboardUI.destroy = function (self)
 
 	self.network_event_delegate:unregister(self)
 	GarbageLeakDetector.register_object(self, "ScoreboardUI")
-
-	return 
 end
+
 ScoreboardUI.on_gamepad_activated = function (self)
-	self.on_vote_selection_index_changed(self, 1)
-	self.update_input_description(self)
-
-	return 
+	self:on_vote_selection_index_changed(1)
+	self:update_input_description()
 end
+
 ScoreboardUI.on_gamepad_deactivated = function (self)
-	self.on_vote_selection_index_changed(self, nil)
-
-	return 
+	self:on_vote_selection_index_changed(nil)
 end
+
 ScoreboardUI.update_input_description = function (self)
 	local actions_name_to_use = "default"
 
 	if self._selected_player_index then
-		if self.get_player_widget_peer_id_by_index(self, self._selected_player_index) then
+		if self:get_player_widget_peer_id_by_index(self._selected_player_index) then
 			actions_name_to_use = "player_list_profile"
 		else
 			actions_name_to_use = "player_list"
@@ -618,21 +607,20 @@ ScoreboardUI.update_input_description = function (self)
 
 		self.menu_input_description:change_generic_actions(generic_actions)
 	end
-
-	return 
 end
+
 ScoreboardUI.handle_interaction = function (self, dt)
 	local wait_time = self.handle_input_wait_time
 
 	if wait_time then
 		wait_time = wait_time - dt
-		self.handle_input_wait_time = (0 < wait_time and wait_time) or nil
+		self.handle_input_wait_time = (wait_time > 0 and wait_time) or nil
 	elseif not self.topic_animation_time then
 		local delay_auto_pilot = nil
 		local input_service = self.input_manager:get_service("scoreboard_ui")
 
 		if not self.open_window_animation and not self.close_window_animation then
-			local can_vote = self.is_voting_possible(self)
+			local can_vote = self:is_voting_possible()
 
 			if can_vote then
 				local active_vote_list = self.active_vote_list
@@ -644,7 +632,7 @@ ScoreboardUI.handle_interaction = function (self, dt)
 							local widget_content = widget.content
 
 							if widget_content.button_hotspot.on_release then
-								self.on_vote_level_pressed(self, index)
+								self:on_vote_level_pressed(index)
 
 								break
 							end
@@ -661,7 +649,7 @@ ScoreboardUI.handle_interaction = function (self, dt)
 				if widget_element_content.button_hotspot.is_selected and i ~= selected_topic_counter_index then
 					delay_auto_pilot = true
 
-					self.move_topic_list(self, i)
+					self:move_topic_list(i)
 
 					break
 				end
@@ -671,68 +659,68 @@ ScoreboardUI.handle_interaction = function (self, dt)
 				if self.topic_arrow_widget_left.content.button_hotspot.on_release then
 					self.topic_arrow_widget_left.content.button_hotspot.on_release = nil
 
-					self.move_topic_list(self, self.topic_scroll_index - 1)
+					self:move_topic_list(self.topic_scroll_index - 1)
 				elseif self.topic_arrow_widget_right.content.button_hotspot.on_release then
 					self.topic_arrow_widget_right.content.button_hotspot.on_release = nil
 
-					self.move_topic_list(self, self.topic_scroll_index + 1)
+					self:move_topic_list(self.topic_scroll_index + 1)
 				end
 			end
 
 			local controller_cooldown = self.controller_cooldown
 
-			if controller_cooldown and 0 < controller_cooldown then
+			if controller_cooldown and controller_cooldown > 0 then
 				self.controller_cooldown = controller_cooldown - dt
 			elseif not self.topic_animation_time then
 				local selected_player_index = self._selected_player_index
-				local can_vote = self.is_voting_possible(self)
+				local can_vote = self:is_voting_possible()
 
-				if not selected_player_index and input_service.get(input_service, "move_left") then
-					self.set_player_widget_highlight_by_index(self, 1, true)
-
-					self.controller_cooldown = GamepadSettings.menu_cooldown
-
-					self.play_sound(self, "Play_hud_select")
-				elseif selected_player_index and can_vote and input_service.get(input_service, "move_right") then
-					self.set_player_widget_highlight_by_index(self, nil, true)
+				if not selected_player_index and input_service:get("move_left") then
+					self:set_player_widget_highlight_by_index(1, true)
 
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 
-					self.play_sound(self, "Play_hud_select")
-				elseif input_service.get(input_service, "move_up") then
+					self:play_sound("Play_hud_select")
+				elseif selected_player_index and can_vote and input_service:get("move_right") then
+					self:set_player_widget_highlight_by_index(nil, true)
+
+					self.controller_cooldown = GamepadSettings.menu_cooldown
+
+					self:play_sound("Play_hud_select")
+				elseif input_service:get("move_up") then
 					if selected_player_index then
 						local new_player_index = math.max(selected_player_index - 1, 1)
 
 						if new_player_index ~= selected_player_index then
-							self.set_player_widget_highlight_by_index(self, new_player_index, true)
+							self:set_player_widget_highlight_by_index(new_player_index, true)
 
 							self.controller_cooldown = GamepadSettings.menu_cooldown
 
-							self.play_sound(self, "Play_hud_select")
+							self:play_sound("Play_hud_select")
 						end
 					elseif can_vote and self.vote_selection_index then
 						local current_vote_selection_index = self.vote_selection_index
 						local new_vote_selection_index = math.max(current_vote_selection_index - 1, 1)
 
 						if new_vote_selection_index ~= current_vote_selection_index then
-							self.on_vote_selection_index_changed(self, new_vote_selection_index)
+							self:on_vote_selection_index_changed(new_vote_selection_index)
 
 							self.controller_cooldown = GamepadSettings.menu_cooldown
 
-							self.play_sound(self, "Play_hud_select")
+							self:play_sound("Play_hud_select")
 						end
 					end
-				elseif input_service.get(input_service, "move_down") then
+				elseif input_service:get("move_down") then
 					if selected_player_index then
 						local num_players = self._num_players
 						local new_player_index = math.min(selected_player_index + 1, num_players)
 
 						if new_player_index ~= selected_player_index then
-							self.set_player_widget_highlight_by_index(self, new_player_index, true)
+							self:set_player_widget_highlight_by_index(new_player_index, true)
 
 							self.controller_cooldown = GamepadSettings.menu_cooldown
 
-							self.play_sound(self, "Play_hud_select")
+							self:play_sound("Play_hud_select")
 						end
 					elseif can_vote and self.vote_selection_index then
 						local current_vote_selection_index = self.vote_selection_index
@@ -740,36 +728,36 @@ ScoreboardUI.handle_interaction = function (self, dt)
 						local new_vote_selection_index = math.min(current_vote_selection_index + 1, #active_vote_list)
 
 						if new_vote_selection_index ~= current_vote_selection_index then
-							self.on_vote_selection_index_changed(self, new_vote_selection_index)
+							self:on_vote_selection_index_changed(new_vote_selection_index)
 
 							self.controller_cooldown = GamepadSettings.menu_cooldown
 
-							self.play_sound(self, "Play_hud_select")
+							self:play_sound("Play_hud_select")
 						end
 					end
-				elseif input_service.get(input_service, "confirm") and not self._selected_player_index then
+				elseif input_service:get("confirm") and not self._selected_player_index then
 					local current_vote_selection_index = self.vote_selection_index
 
 					if can_vote and current_vote_selection_index then
-						self.on_vote_level_pressed(self, current_vote_selection_index)
+						self:on_vote_level_pressed(current_vote_selection_index)
 
 						self.controller_cooldown = GamepadSettings.menu_cooldown
 
-						self.set_player_widget_highlight_by_index(self, 1, true)
+						self:set_player_widget_highlight_by_index(1, true)
 					end
-				elseif input_service.get(input_service, "confirm") and self._selected_player_index then
-					local player_peer_id = self.get_player_widget_peer_id_by_index(self, self._selected_player_index)
+				elseif input_service:get("confirm") and self._selected_player_index then
+					local player_peer_id = self:get_player_widget_peer_id_by_index(self._selected_player_index)
 
 					if player_peer_id then
-						self.show_selected_player_gamercard(self, player_peer_id)
+						self:show_selected_player_gamercard(player_peer_id)
 
 						self.controller_cooldown = GamepadSettings.menu_cooldown
 					end
-				elseif input_service.get(input_service, "cycle_previous") then
+				elseif input_service:get("cycle_previous") then
 					delay_auto_pilot = true
 					local number_of_topics = self.number_of_topics
 					local topic_selected_index = self.topic_selected_index
-					local can_go_previous = 1 < self.topic_selected_data_index
+					local can_go_previous = self.topic_selected_data_index > 1
 
 					if topic_selected_index then
 						local new_topic_selected_index = nil
@@ -787,12 +775,12 @@ ScoreboardUI.handle_interaction = function (self, dt)
 							local visible_widget_count = math.min(self.topic_widgets_draw_count - self.widget_start_draw_index + 1, 3)
 
 							if topic_selected_index == widget_start_draw_index then
-								self.move_topic_list(self, self.topic_scroll_index - 1)
+								self:move_topic_list(self.topic_scroll_index - 1)
 
 								play_sound = false
 							end
 						else
-							self.move_topic_list(self, self.number_of_topic_pages)
+							self:move_topic_list(self.number_of_topic_pages)
 
 							new_topic_selected_index = self.topic_widgets_draw_count
 							play_sound = false
@@ -801,17 +789,17 @@ ScoreboardUI.handle_interaction = function (self, dt)
 						if new_topic_selected_index then
 							local topic_widgets = self.topic_widgets
 
-							self.on_topic_widget_deselect(self, topic_widgets[topic_selected_index], topic_selected_index, true)
-							self.on_topic_widget_select(self, topic_widgets[new_topic_selected_index], new_topic_selected_index, true)
+							self:on_topic_widget_deselect(topic_widgets[topic_selected_index], topic_selected_index, true)
+							self:on_topic_widget_select(topic_widgets[new_topic_selected_index], new_topic_selected_index, true)
 
 							self.controller_cooldown = GamepadSettings.menu_cooldown
 
 							if play_sound then
-								self.play_sound(self, "Play_hud_select")
+								self:play_sound("Play_hud_select")
 							end
 						end
 					end
-				elseif input_service.get(input_service, "cycle_next") then
+				elseif input_service:get("cycle_next") then
 					delay_auto_pilot = true
 					local number_of_topics = self.number_of_topics
 					local can_go_next = self.topic_selected_data_index < number_of_topics
@@ -834,12 +822,12 @@ ScoreboardUI.handle_interaction = function (self, dt)
 							local current_end_index = (self.widget_start_draw_index + visible_widget_count) - 1
 
 							if topic_selected_index == current_end_index then
-								self.move_topic_list(self, self.topic_scroll_index + 1)
+								self:move_topic_list(self.topic_scroll_index + 1)
 
 								play_sound = false
 							end
 						else
-							self.move_topic_list(self, 1)
+							self:move_topic_list(1)
 
 							new_topic_selected_index = self.widget_start_draw_index
 							play_sound = false
@@ -848,21 +836,21 @@ ScoreboardUI.handle_interaction = function (self, dt)
 						if new_topic_selected_index then
 							local topic_widgets = self.topic_widgets
 
-							self.on_topic_widget_deselect(self, topic_widgets[topic_selected_index], topic_selected_index, true)
-							self.on_topic_widget_select(self, topic_widgets[new_topic_selected_index], new_topic_selected_index, true)
+							self:on_topic_widget_deselect(topic_widgets[topic_selected_index], topic_selected_index, true)
+							self:on_topic_widget_select(topic_widgets[new_topic_selected_index], new_topic_selected_index, true)
 
 							self.controller_cooldown = GamepadSettings.menu_cooldown
 
 							if play_sound then
-								self.play_sound(self, "Play_hud_select")
+								self:play_sound("Play_hud_select")
 							end
 						end
 					end
 				end
 			end
 
-			if input_service.get(input_service, "toggle_menu", true) or input_service.get(input_service, "back", true) then
-				self.request_leave_game(self)
+			if input_service:get("toggle_menu", true) or input_service:get("back", true) then
+				self:request_leave_game()
 			end
 		end
 
@@ -870,9 +858,8 @@ ScoreboardUI.handle_interaction = function (self, dt)
 			self.auto_pilot_wait_time = UISettings.scoreboard.auto_pilot_wait_time
 		end
 	end
-
-	return 
 end
+
 ScoreboardUI.update_arrow_widget_mouse_input = function (self, widget, name)
 	local widget_content = widget.content
 	local button_hotspot = widget_content.button_hotspot
@@ -880,28 +867,27 @@ ScoreboardUI.update_arrow_widget_mouse_input = function (self, widget, name)
 
 	if button_hotspot.is_hover then
 		if not widget_content.animate_in then
-			self.on_arrow_widget_hover(self, widget, name)
+			self:on_arrow_widget_hover(widget, name)
 		end
 	elseif widget_content.animate_in then
-		self.on_arrow_widget_dehover(self, widget, name)
+		self:on_arrow_widget_dehover(widget, name)
 	end
 
 	if button_hotspot.is_clicked == 0 then
 		if not widget.content.animate_select then
 			delay_auto_pilot = true
 
-			self.on_arrow_widget_select(self, widget, name)
+			self:on_arrow_widget_select(widget, name)
 		end
 	elseif widget.content.animate_select then
-		self.on_arrow_widget_deselect(self, widget, name)
+		self:on_arrow_widget_deselect(widget, name)
 	end
 
 	if delay_auto_pilot then
 		self.auto_pilot_wait_time = UISettings.scoreboard.auto_pilot_wait_time
 	end
-
-	return 
 end
+
 ScoreboardUI.on_topic_index_selected = function (self, index)
 	self.selected_topic_counter_index = index
 	local topic_index_counter_widget = self.topic_index_counter_widget
@@ -910,9 +896,8 @@ ScoreboardUI.on_topic_index_selected = function (self, index)
 	for i = 1, #list_content, 1 do
 		list_content[i].button_hotspot.is_selected = i == index
 	end
-
-	return 
 end
+
 ScoreboardUI.select_topic_index_by_data_index = function (self, index)
 	local topic_widgets = self.topic_widgets
 
@@ -920,14 +905,13 @@ ScoreboardUI.select_topic_index_by_data_index = function (self, index)
 		local widget_data_index = widget.content.topic_data_index
 
 		if widget_data_index == index then
-			self.on_topic_widget_select(self, widget, widget_index)
+			self:on_topic_widget_select(widget, widget_index)
 
 			break
 		end
 	end
-
-	return 
 end
+
 ScoreboardUI.on_topic_widget_select = function (self, widget, widget_index, update_player_list)
 	widget.content.button_hotspot.is_selected = true
 	self.topic_selected_index = widget_index
@@ -944,12 +928,12 @@ ScoreboardUI.on_topic_widget_select = function (self, widget, widget_index, upda
 	local total_time = UISettings.scoreboard.topic_select_duration
 	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name] = self.animate_element_by_time(self, widget.style.background_select.color, 1, current_alpha, target_alpha, animation_duration)
-		ui_animations[animation_name .. "_background_hover"] = self.animate_element_by_time(self, widget.style.background_hover.color, 1, widget.style.background_hover.color[1], 0, animation_duration)
-		ui_animations[hover_animation_name .. "_score_text"] = self.animate_element_by_time(self, widget.style.score_text.text_color, 1, widget.style.score_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[hover_animation_name .. "_title_text"] = self.animate_element_by_time(self, widget.style.title_text.text_color, 1, widget.style.title_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[hover_animation_name .. "_player_name"] = self.animate_element_by_time(self, widget.style.player_name.text_color, 1, widget.style.player_name.text_color[1], background_target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name] = self:animate_element_by_time(widget.style.background_select.color, 1, current_alpha, target_alpha, animation_duration)
+		ui_animations[animation_name .. "_background_hover"] = self:animate_element_by_time(widget.style.background_hover.color, 1, widget.style.background_hover.color[1], 0, animation_duration)
+		ui_animations[hover_animation_name .. "_score_text"] = self:animate_element_by_time(widget.style.score_text.text_color, 1, widget.style.score_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[hover_animation_name .. "_title_text"] = self:animate_element_by_time(widget.style.title_text.text_color, 1, widget.style.title_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[hover_animation_name .. "_player_name"] = self:animate_element_by_time(widget.style.player_name.text_color, 1, widget.style.player_name.text_color[1], background_target_alpha, animation_duration)
 	else
 		widget.style.background_select.color[1] = target_alpha
 		widget.style.score_text.text_color[1] = background_target_alpha
@@ -959,11 +943,10 @@ ScoreboardUI.on_topic_widget_select = function (self, widget, widget_index, upda
 	end
 
 	if update_player_list then
-		self.set_player_list_data_by_index(self, self.topic_selected_data_index)
+		self:set_player_list_data_by_index(self.topic_selected_data_index)
 	end
-
-	return 
 end
+
 ScoreboardUI.on_topic_widget_deselect = function (self, widget, widget_index, instant_update)
 	self.topic_selected_index = nil
 	local ui_animations = self.ui_animations
@@ -978,20 +961,19 @@ ScoreboardUI.on_topic_widget_deselect = function (self, widget, widget_index, in
 	local total_time = UISettings.scoreboard.topic_deselect_duration
 	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
-	if not instant_update and 0 < animation_duration then
-		ui_animations[animation_name] = self.animate_element_by_time(self, widget_style.background_select.color, 1, current_alpha, target_alpha, animation_duration)
-		ui_animations[hover_animation_name .. "_score_text"] = self.animate_element_by_time(self, widget_style.score_text.text_color, 1, widget_style.score_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[hover_animation_name .. "_title_text"] = self.animate_element_by_time(self, widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[hover_animation_name .. "_player_name"] = self.animate_element_by_time(self, widget_style.player_name.text_color, 1, widget_style.player_name.text_color[1], background_target_alpha, animation_duration)
+	if not instant_update and animation_duration > 0 then
+		ui_animations[animation_name] = self:animate_element_by_time(widget_style.background_select.color, 1, current_alpha, target_alpha, animation_duration)
+		ui_animations[hover_animation_name .. "_score_text"] = self:animate_element_by_time(widget_style.score_text.text_color, 1, widget_style.score_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[hover_animation_name .. "_title_text"] = self:animate_element_by_time(widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[hover_animation_name .. "_player_name"] = self:animate_element_by_time(widget_style.player_name.text_color, 1, widget_style.player_name.text_color[1], background_target_alpha, animation_duration)
 	else
 		widget_style.background_select.color[1] = target_alpha
 		widget_style.score_text.text_color[1] = background_target_alpha
 		widget_style.title_text.text_color[1] = background_target_alpha
 		widget_style.player_name.text_color[1] = background_target_alpha
 	end
-
-	return 
 end
+
 ScoreboardUI.on_topic_widget_hover = function (self, widget, widget_index)
 	local ui_animations = self.ui_animations
 	local animation_name = "topic_widget_hover_" .. widget_index
@@ -1003,11 +985,11 @@ ScoreboardUI.on_topic_widget_hover = function (self, widget, widget_index)
 	local total_time = UISettings.scoreboard.topic_hover_duration
 	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_background_hover"] = self.animate_element_by_time(self, widget_style.background_hover.color, 1, current_alpha, target_alpha, animation_duration)
-		ui_animations[animation_name .. "_score_text"] = self.animate_element_by_time(self, widget_style.score_text.text_color, 1, widget_style.score_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[animation_name .. "_title_text"] = self.animate_element_by_time(self, widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[animation_name .. "_player_name"] = self.animate_element_by_time(self, widget_style.player_name.text_color, 1, widget_style.player_name.text_color[1], background_target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_background_hover"] = self:animate_element_by_time(widget_style.background_hover.color, 1, current_alpha, target_alpha, animation_duration)
+		ui_animations[animation_name .. "_score_text"] = self:animate_element_by_time(widget_style.score_text.text_color, 1, widget_style.score_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[animation_name .. "_title_text"] = self:animate_element_by_time(widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[animation_name .. "_player_name"] = self:animate_element_by_time(widget_style.player_name.text_color, 1, widget_style.player_name.text_color[1], background_target_alpha, animation_duration)
 	else
 		widget_style.background_hover.color[1] = target_alpha
 		widget_style.score_text.text_color[1] = background_target_alpha
@@ -1015,10 +997,9 @@ ScoreboardUI.on_topic_widget_hover = function (self, widget, widget_index)
 		widget_style.player_name.text_color[1] = background_target_alpha
 	end
 
-	self.play_sound(self, "Play_hud_hover")
-
-	return 
+	self:play_sound("Play_hud_hover")
 end
+
 ScoreboardUI.on_topic_widget_dehover = function (self, widget, widget_index)
 	local ui_animations = self.ui_animations
 	local animation_name = "topic_widget_hover_" .. widget_index
@@ -1031,20 +1012,19 @@ ScoreboardUI.on_topic_widget_dehover = function (self, widget, widget_index)
 	local total_time = UISettings.scoreboard.topic_dehover_duration
 	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_background_hover"] = self.animate_element_by_time(self, widget_style.background_hover.color, 1, current_alpha, target_alpha, animation_duration)
-		ui_animations[animation_name .. "_score_text"] = self.animate_element_by_time(self, widget_style.score_text.text_color, 1, widget_style.score_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[animation_name .. "_title_text"] = self.animate_element_by_time(self, widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], background_target_alpha, animation_duration)
-		ui_animations[animation_name .. "_player_name"] = self.animate_element_by_time(self, widget_style.player_name.text_color, 1, widget_style.player_name.text_color[1], background_target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_background_hover"] = self:animate_element_by_time(widget_style.background_hover.color, 1, current_alpha, target_alpha, animation_duration)
+		ui_animations[animation_name .. "_score_text"] = self:animate_element_by_time(widget_style.score_text.text_color, 1, widget_style.score_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[animation_name .. "_title_text"] = self:animate_element_by_time(widget_style.title_text.text_color, 1, widget_style.title_text.text_color[1], background_target_alpha, animation_duration)
+		ui_animations[animation_name .. "_player_name"] = self:animate_element_by_time(widget_style.player_name.text_color, 1, widget_style.player_name.text_color[1], background_target_alpha, animation_duration)
 	else
 		widget_style.background_hover.color[1] = target_alpha
 		widget_style.score_text.text_color[1] = background_target_alpha
 		widget_style.title_text.text_color[1] = background_target_alpha
 		widget_style.player_name.text_color[1] = background_target_alpha
 	end
-
-	return 
 end
+
 ScoreboardUI.clear_topic_widget_animations = function (self, widget, widget_index)
 	local ui_animations = self.ui_animations
 	local hover_animation_name = "topic_widget_hover_" .. widget_index
@@ -1061,9 +1041,8 @@ ScoreboardUI.clear_topic_widget_animations = function (self, widget, widget_inde
 	widget_style.score_text.text_color[1] = background_target_alpha
 	widget_style.title_text.text_color[1] = background_target_alpha
 	widget_style.player_name.text_color[1] = background_target_alpha
-
-	return 
 end
+
 ScoreboardUI.on_arrow_widget_hover = function (self, widget, name)
 	widget.content.animate_in = true
 	local ui_animations = self.ui_animations
@@ -1074,16 +1053,15 @@ ScoreboardUI.on_arrow_widget_hover = function (self, widget, name)
 	local total_time = UISettings.scoreboard.arrow_hover_duration
 	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_background"] = self.animate_element_by_time(self, widget.style.normal.color, 1, current_alpha, target_alpha, animation_duration)
-		ui_animations[animation_name .. "_glow"] = self.animate_element_by_time(self, widget.style.glow.color, 1, widget.style.glow.color[1], glow_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_background"] = self:animate_element_by_time(widget.style.normal.color, 1, current_alpha, target_alpha, animation_duration)
+		ui_animations[animation_name .. "_glow"] = self:animate_element_by_time(widget.style.glow.color, 1, widget.style.glow.color[1], glow_alpha, animation_duration)
 	else
 		widget.style.normal.color[1] = target_alpha
 		widget.style.glow.color[1] = glow_alpha
 	end
-
-	return 
 end
+
 ScoreboardUI.on_arrow_widget_dehover = function (self, widget, name)
 	widget.content.animate_in = nil
 	local ui_animations = self.ui_animations
@@ -1094,16 +1072,15 @@ ScoreboardUI.on_arrow_widget_dehover = function (self, widget, name)
 	local total_time = UISettings.scoreboard.arrow_dehover_duration
 	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_background"] = self.animate_element_by_time(self, widget.style.normal.color, 1, current_alpha, target_alpha, animation_duration)
-		ui_animations[animation_name .. "_glow"] = self.animate_element_by_time(self, widget.style.glow.color, 1, widget.style.glow.color[1], 0, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_background"] = self:animate_element_by_time(widget.style.normal.color, 1, current_alpha, target_alpha, animation_duration)
+		ui_animations[animation_name .. "_glow"] = self:animate_element_by_time(widget.style.glow.color, 1, widget.style.glow.color[1], 0, animation_duration)
 	else
 		widget.style.normal.color[1] = target_alpha
 		widget.style.glow.color[1] = 0
 	end
-
-	return 
 end
+
 ScoreboardUI.on_arrow_widget_select = function (self, widget, name)
 	widget.content.animate_select = true
 	local ui_animations = self.ui_animations
@@ -1114,14 +1091,13 @@ ScoreboardUI.on_arrow_widget_select = function (self, widget, name)
 	local total_time = UISettings.scoreboard.arrow_select_duration
 	local animation_duration = (target_alpha - current_alpha) / target_alpha * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_selected"] = self.animate_element_by_time(self, widget.style.selected.color, 1, current_alpha, target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_selected"] = self:animate_element_by_time(widget.style.selected.color, 1, current_alpha, target_alpha, animation_duration)
 	else
 		widget.style.selected.color[1] = target_alpha
 	end
-
-	return 
 end
+
 ScoreboardUI.on_arrow_widget_deselect = function (self, widget, name)
 	widget.content.animate_select = nil
 	local ui_animations = self.ui_animations
@@ -1133,34 +1109,32 @@ ScoreboardUI.on_arrow_widget_deselect = function (self, widget, name)
 	local total_time = UISettings.scoreboard.arrow_deselect_duration
 	local animation_duration = (1 - (hover_alpha - current_alpha) / hover_alpha) * total_time
 
-	if 0 < animation_duration then
-		ui_animations[animation_name .. "_selected"] = self.animate_element_by_time(self, widget.style.selected.color, 1, current_alpha, target_alpha, animation_duration)
+	if animation_duration > 0 then
+		ui_animations[animation_name .. "_selected"] = self:animate_element_by_time(widget.style.selected.color, 1, current_alpha, target_alpha, animation_duration)
 	else
 		widget.style.selected.color[1] = target_alpha
 	end
-
-	return 
 end
+
 ScoreboardUI.set_detailed_entry_default_data = function (self, index, player_hero_type, player_name, score)
 	local widget = self.player_entry_widgets[index]
 	local widget_content = widget.content
 	widget_content.icon = "end_screen_reward_hero_icon_witch_hunter"
 	widget_content.title_text = player_name
 	widget_content.score_text = score
-
-	return 
 end
+
 ScoreboardUI.set_detailed_entry_score = function (self, index, score)
 	local widget = self.player_entry_widgets[index]
 	widget.content.score_text = score
-
-	return 
 end
+
 ScoreboardUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.ease_out_quad)
 
 	return new_animation
 end
+
 ScoreboardUI.set_player_list_data_by_index = function (self, index)
 	self.current_player_list_data_index = index
 	local number_of_topics = self.number_of_topics
@@ -1173,17 +1147,17 @@ ScoreboardUI.set_player_list_data_by_index = function (self, index)
 	for i, score_data in ipairs(topic_scores) do
 		local score = math.floor(score_data.score)
 
-		self.set_player_widget_score_by_index(self, i, score)
+		self:set_player_widget_score_by_index(i, score)
 
-		local player_data = self.player_data_by_stats_id(self, score_data.stats_id)
+		local player_data = self:player_data_by_stats_id(score_data.stats_id)
 		local player_name = player_data.name
 		local player_peer_id = player_data.peer_id
 		local is_player_controlled = player_data.is_player_controlled
 
-		self.set_player_widget_name_by_index(self, i, player_name)
+		self:set_player_widget_name_by_index(i, player_name)
 
 		if is_player_controlled then
-			self.set_player_widget_peer_id_by_index(self, i, player_peer_id)
+			self:set_player_widget_peer_id_by_index(i, player_peer_id)
 		end
 
 		local is_own_player = self.stats_id == score_data.stats_id
@@ -1193,22 +1167,20 @@ ScoreboardUI.set_player_list_data_by_index = function (self, index)
 		end
 
 		local icon_mapping = (is_own_player and hero_icons.white) or hero_icons.yellow
-		local icon_texture = self.hero_icon_by_profile_index(self, player_data.profile_index, icon_mapping)
+		local icon_texture = self:hero_icon_by_profile_index(player_data.profile_index, icon_mapping)
 
-		self.set_player_widget_icon_by_index(self, i, icon_texture)
+		self:set_player_widget_icon_by_index(i, icon_texture)
 	end
 
 	self.update_player_list = nil
 	self.window_widget.content.player_list_topic = topic_title_text
-
-	return 
 end
+
 ScoreboardUI.set_player_widget_score_by_index = function (self, index, score)
 	local player_entry_widgets = self.player_entry_widgets
 	player_entry_widgets[index].content.score_text = score
-
-	return 
 end
+
 ScoreboardUI.set_player_widget_name_by_index = function (self, index, name)
 	local player_entry_widgets = self.player_entry_widgets
 	local widget = player_entry_widgets[index]
@@ -1219,26 +1191,24 @@ ScoreboardUI.set_player_widget_name_by_index = function (self, index, name)
 	end
 
 	widget.content.title_text = player_name
-
-	return 
 end
+
 ScoreboardUI.set_player_widget_peer_id_by_index = function (self, index, peer_id)
 	local player_entry_widgets = self.player_entry_widgets
 	player_entry_widgets[index].content.peer_id = peer_id
-
-	return 
 end
+
 ScoreboardUI.get_player_widget_peer_id_by_index = function (self, index)
 	local player_entry_widgets = self.player_entry_widgets
 
 	return player_entry_widgets[index].content.peer_id
 end
+
 ScoreboardUI.set_player_widget_icon_by_index = function (self, index, icon_texture)
 	local player_entry_widgets = self.player_entry_widgets
 	player_entry_widgets[index].content.icon = icon_texture
-
-	return 
 end
+
 ScoreboardUI.set_player_widget_highlight_by_index = function (self, index, reset_others)
 	local player_entry_widgets = self.player_entry_widgets
 
@@ -1253,9 +1223,8 @@ ScoreboardUI.set_player_widget_highlight_by_index = function (self, index, reset
 	end
 
 	self._selected_player_index = index
-
-	return 
 end
+
 ScoreboardUI.update_player_widgets_animations = function (self, dt)
 	local time = self.player_list_animation_time
 
@@ -1277,15 +1246,14 @@ ScoreboardUI.update_player_widgets_animations = function (self, dt)
 			widget_style.score_text.text_color[color_channel] = color_value
 		end
 
-		if 0.5 <= progress and self.update_player_list then
-			self.set_player_list_data_by_index(self, self.topic_selected_data_index)
+		if progress >= 0.5 and self.update_player_list then
+			self:set_player_list_data_by_index(self.topic_selected_data_index)
 		end
 
 		self.player_list_animation_time = (progress ~= 1 and time) or nil
 	end
-
-	return 
 end
+
 ScoreboardUI.hero_icon_by_profile_index = function (self, profile_index, icon_mapping)
 	local profile_data = SPProfiles[profile_index]
 	local display_name = profile_data.display_name
@@ -1293,11 +1261,12 @@ ScoreboardUI.hero_icon_by_profile_index = function (self, profile_index, icon_ma
 
 	return hero_icon
 end
+
 ScoreboardUI.setup_level_voting = function (self)
 	local voting_manager = self.voting_manager
 
-	if voting_manager and voting_manager.vote_in_progress(voting_manager) then
-		local active_vote_data = voting_manager.active_vote_data(voting_manager)
+	if voting_manager and voting_manager:vote_in_progress() then
+		local active_vote_data = voting_manager:active_vote_data()
 		self.active_vote_list = {}
 		local last_vote_widget_name = "voting_widget_3"
 
@@ -1347,18 +1316,16 @@ ScoreboardUI.setup_level_voting = function (self)
 		inn_vote_option_position[1] = last_vote_widget_position[1]
 		inn_vote_option_position[2] = last_vote_widget_position[2]
 	end
-
-	return 
 end
+
 ScoreboardUI.is_voting_possible = function (self)
 	if self.voting_disabled then
 		return false
 	else
 		return self.vote_manager:vote_in_progress()
 	end
-
-	return 
 end
+
 ScoreboardUI.on_vote_level_pressed = function (self, index)
 	local active_vote_data = self.active_vote_list[index]
 	local player = Managers.player:local_player()
@@ -1380,14 +1347,13 @@ ScoreboardUI.on_vote_level_pressed = function (self, index)
 
 	local vote_manager = self.vote_manager
 
-	vote_manager.vote(vote_manager, index)
+	vote_manager:vote(index)
 
 	self.voting_disabled = true
 
-	self.play_sound(self, "Play_hud_select")
-
-	return 
+	self:play_sound("Play_hud_select")
 end
+
 ScoreboardUI.on_vote_selection_index_changed = function (self, new_index)
 	local active_vote_list = self.active_vote_list
 
@@ -1441,24 +1407,23 @@ ScoreboardUI.on_vote_selection_index_changed = function (self, new_index)
 	end
 
 	self.vote_selection_index = new_index
-
-	return 
 end
+
 ScoreboardUI.update_vote_counts = function (self)
 	if self.level_voting_completed then
-		return 
+		return
 	end
 
 	local vote_manager = self.vote_manager
 	local vote_complete = false
 	local number_of_votes = 0
 	local current_vote_results = 0
-	local vote_in_progress = vote_manager.vote_in_progress(vote_manager)
+	local vote_in_progress = vote_manager:vote_in_progress()
 
 	if vote_in_progress then
-		number_of_votes, current_vote_results = vote_manager.number_of_votes(vote_manager)
+		number_of_votes, current_vote_results = vote_manager:number_of_votes()
 	else
-		local previous_voting_info = vote_manager.previous_vote_info(vote_manager)
+		local previous_voting_info = vote_manager:previous_vote_info()
 		number_of_votes = previous_voting_info.number_of_votes
 		current_vote_results = previous_voting_info.vote_results
 		vote_complete = true
@@ -1490,24 +1455,22 @@ ScoreboardUI.update_vote_counts = function (self)
 	end
 
 	if not vote_complete then
-		self.update_vote_timer_text(self)
+		self:update_vote_timer_text()
 	else
 		self.level_voting_completed = true
 
-		self.fade_out_failed_vote_options(self, highest_vote_option_index)
+		self:fade_out_failed_vote_options(highest_vote_option_index)
 	end
-
-	return 
 end
+
 ScoreboardUI.update_vote_timer_text = function (self, time_left)
 	local vote_manager = self.vote_manager
-	local vote_time_left = (time_left and time_left) or vote_manager.vote_time_left(vote_manager) or 0
+	local vote_time_left = (time_left and time_left) or vote_manager:vote_time_left() or 0
 	local widget = self.level_vote_texts
 	local time_text = string.format(" %02d:%02d", math.floor(vote_time_left / 60), vote_time_left % 60)
 	widget.content.timer_text = time_text
-
-	return 
 end
+
 ScoreboardUI.update_start_level_timer = function (self, dt)
 	local time = self.level_start_timer
 
@@ -1515,18 +1478,17 @@ ScoreboardUI.update_start_level_timer = function (self, dt)
 		time = time - dt
 
 		if time <= 0 then
-			self.update_vote_timer_text(self, 0)
+			self:update_vote_timer_text(0)
 
 			self.level_start_timer = nil
 		else
-			self.update_vote_timer_text(self, time)
+			self:update_vote_timer_text(time)
 
 			self.level_start_timer = time
 		end
 	end
-
-	return 
 end
+
 ScoreboardUI.rpc_start_specific_level = function (self, sender, level_key, time_until_start)
 	local widget = self.level_vote_texts
 	widget.content.title_text = "vote_completed"
@@ -1537,15 +1499,13 @@ ScoreboardUI.rpc_start_specific_level = function (self, sender, level_key, time_
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, prefix_text, font[1], scaled_font_size)
 	self.ui_scenegraph.level_vote_timer.local_position[1] = text_width
 	self.level_start_timer = time_until_start or 5
-
-	return 
 end
+
 ScoreboardUI.fade_out_failed_vote_options = function (self, successful_vote_index)
 	self.failed_vote_fade_timer = 0.5
 	self.successful_vote_index = successful_vote_index
-
-	return 
 end
+
 ScoreboardUI.update_vote_options_fade_out = function (self, dt)
 	local time = self.failed_vote_fade_timer
 
@@ -1553,8 +1513,8 @@ ScoreboardUI.update_vote_options_fade_out = function (self, dt)
 		local successful_vote_index = self.successful_vote_index
 		time = time - dt
 		local total_time = 0.5
-		local progress = (0 < time and time / total_time) or 0
-		self.failed_vote_fade_timer = (0 < time and time) or nil
+		local progress = (time > 0 and time / total_time) or 0
+		self.failed_vote_fade_timer = (time > 0 and time) or nil
 		local fade_alpha = math.min(180 + progress * 75, 255)
 		local active_vote_list = self.active_vote_list
 
@@ -1569,48 +1529,44 @@ ScoreboardUI.update_vote_options_fade_out = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 ScoreboardUI.request_leave_game = function (self)
 	if not self.popup_id then
 		local text = Localize("leave_game_popup_text")
 		self.popup_id = Managers.popup:queue_popup(text, Localize("popup_leave_game_topic"), "leave_game", Localize("popup_choice_yes"), "cancel_popup", Localize("popup_choice_no"))
 	end
-
-	return 
 end
+
 ScoreboardUI.leave_party = function (self)
 	self.ingame_ui.leave_game = true
-
-	return 
 end
+
 ScoreboardUI.handle_popup_result = function (self, popup_result)
 	if popup_result == "leave_game" then
 		self.popup_id = nil
 
-		self.leave_party(self)
+		self:leave_party()
 	elseif popup_result == "cancel_popup" then
 		self.popup_id = nil
 		local input_manager = self.input_manager
 
-		input_manager.block_device_except_service(input_manager, "scoreboard_ui", "keyboard")
-		input_manager.block_device_except_service(input_manager, "scoreboard_ui", "mouse")
-		input_manager.block_device_except_service(input_manager, "scoreboard_ui", "gamepad")
+		input_manager:block_device_except_service("scoreboard_ui", "keyboard")
+		input_manager:block_device_except_service("scoreboard_ui", "mouse")
+		input_manager:block_device_except_service("scoreboard_ui", "gamepad")
 	end
-
-	return 
 end
+
 ScoreboardUI.move_topic_list = function (self, new_topic_index, instant_update)
 	if not instant_update and self.topic_animation_time then
-		return 
+		return
 	end
 
 	local topic_scroll_index = self.topic_scroll_index
 	local number_of_topic_pages = self.number_of_topic_pages
 
 	if new_topic_index < 1 or number_of_topic_pages < new_topic_index or new_topic_index == topic_scroll_index then
-		return 
+		return
 	end
 
 	local ui_scenegraph = self.ui_scenegraph
@@ -1624,12 +1580,12 @@ ScoreboardUI.move_topic_list = function (self, new_topic_index, instant_update)
 		direction = "left"
 	end
 
-	self.on_topic_index_selected(self, new_topic_index)
+	self:on_topic_index_selected(new_topic_index)
 
 	local selected_topic_index = self.topic_selected_index
 
 	if selected_topic_index then
-		self.on_topic_widget_deselect(self, topic_widgets[selected_topic_index], selected_topic_index, true)
+		self:on_topic_widget_deselect(topic_widgets[selected_topic_index], selected_topic_index, true)
 	end
 
 	local topic_spacing = definitions.COMPACT_PREVIEW_SPACING
@@ -1651,8 +1607,8 @@ ScoreboardUI.move_topic_list = function (self, new_topic_index, instant_update)
 		local topic_scenegraph_width = topic_scenegraph.size[1]
 		topic_scenegraph.position[1] = topic_position_index_offset * topic_scenegraph_width + topic_spacing[1]
 
-		self.clear_compact_topic_data(self, i)
-		self.clear_topic_widget_animations(self, topic_widgets[i], i)
+		self:clear_compact_topic_data(i)
+		self:clear_topic_widget_animations(topic_widgets[i], i)
 	end
 
 	for i = 1, number_of_topic_pages, 1 do
@@ -1660,28 +1616,27 @@ ScoreboardUI.move_topic_list = function (self, new_topic_index, instant_update)
 		widget_element_content.disabled = true
 	end
 
-	self.draw_left_arrow = 1 < new_topic_index
+	self.draw_left_arrow = new_topic_index > 1
 	self.draw_right_arrow = new_topic_index < number_of_topic_pages
 	self.topic_arrow_widget_left.content.button_hotspot.disabled = self.draw_left_arrow
 	self.topic_arrow_widget_right.content.button_hotspot.disabled = self.draw_right_arrow
 	self.topic_scroll_index = new_topic_index
 	self.topic_animation_direction = direction
 
-	self.update_topic_data(self, direction)
+	self:update_topic_data(direction)
 
 	if instant_update then
 		self.topic_animation_time = nil
 
-		self.animate_scenegraph_to_position(self, "topic_widget_root", self.topic_widgets, 1, true)
-		self.on_topic_scroll_complete(self)
+		self:animate_scenegraph_to_position("topic_widget_root", self.topic_widgets, 1, true)
+		self:on_topic_scroll_complete()
 	else
 		self.topic_animation_time = 0
 
-		self.play_sound(self, "Play_hud_shift")
+		self:play_sound("Play_hud_shift")
 	end
-
-	return 
 end
+
 ScoreboardUI.update_topic_data = function (self, direction)
 	local number_of_topics = self.number_of_topics
 	local topic_score_data = self.topic_score_data
@@ -1706,24 +1661,23 @@ ScoreboardUI.update_topic_data = function (self, direction)
 			local topic_scores = topic_stat_data.scores
 			local topic_title_text = topic_stat_data.display_text
 			local best_score_data = topic_scores[1]
-			local player_data = self.player_data_by_stats_id(self, best_score_data.stats_id)
+			local player_data = self:player_data_by_stats_id(best_score_data.stats_id)
 			local player_name = player_data.name
 			local score = math.floor(best_score_data.score)
 
-			self.set_compact_topic_data(self, i, current_read_index, topic_title_text, score, player_name)
+			self:set_compact_topic_data(i, current_read_index, topic_title_text, score, player_name)
 
 			topic_widgets_draw_count = topic_widgets_draw_count + 1
 		else
-			self.set_compact_topic_data(self, i)
+			self:set_compact_topic_data(i)
 		end
 
 		current_read_index = current_read_index + 1
 	end
 
 	self.topic_widgets_draw_count = topic_widgets_draw_count
-
-	return 
 end
+
 ScoreboardUI.clear_compact_topic_data = function (self, topic_index)
 	local widget = self.topic_widgets[topic_index]
 	local widget_content = widget.content
@@ -1746,9 +1700,8 @@ ScoreboardUI.clear_compact_topic_data = function (self, topic_index)
 	widget_content.score_text = ""
 	widget_content.player_name = ""
 	widget_content.button_hotspot.disabled = true
-
-	return 
 end
+
 ScoreboardUI.set_compact_topic_data = function (self, topic_index, topic_data_index, title, score, player_name)
 	local widget = self.topic_widgets[topic_index]
 	local widget_content = widget.content
@@ -1769,7 +1722,7 @@ ScoreboardUI.set_compact_topic_data = function (self, topic_index, topic_data_in
 	local font, scaled_font_size = UIFontByResolution(title_style)
 	local text_width, _, _ = UIRenderer.text_size(self.ui_renderer, localized_title, font[1], scaled_font_size)
 
-	if 235 <= text_width then
+	if text_width >= 235 then
 		title_style.word_wrap = true
 		title_style.font_size = 22
 		title_style.offset[1] = 52
@@ -1787,9 +1740,8 @@ ScoreboardUI.set_compact_topic_data = function (self, topic_index, topic_data_in
 	widget_content.score_text = (score and score) or ""
 	widget_content.player_name = name
 	self.handle_input_wait_time = animation_duration
-
-	return 
 end
+
 ScoreboardUI.update_topic_scroll_animation = function (self, dt)
 	local time = self.topic_animation_time
 
@@ -1799,19 +1751,18 @@ ScoreboardUI.update_topic_scroll_animation = function (self, dt)
 		local progress = math.min(time / total_time, 1)
 		local catmullrom_value = math.catmullrom(progress, -6, 0, 1, 0)
 
-		self.animate_scenegraph_to_position(self, "topic_widget_root", self.topic_widgets, catmullrom_value, true)
+		self:animate_scenegraph_to_position("topic_widget_root", self.topic_widgets, catmullrom_value, true)
 
 		if progress == 1 then
-			self.on_topic_scroll_complete(self)
+			self:on_topic_scroll_complete()
 
 			self.topic_animation_time = nil
 		else
 			self.topic_animation_time = time
 		end
 	end
-
-	return 
 end
+
 ScoreboardUI.on_topic_scroll_complete = function (self)
 	local number_of_topic_pages = self.number_of_topic_pages
 	local current_scroll_index = self.topic_scroll_index
@@ -1831,11 +1782,10 @@ ScoreboardUI.on_topic_scroll_complete = function (self)
 	local topic_selected_data_index = self.topic_selected_data_index
 
 	if topic_selected_data_index then
-		self.select_topic_index_by_data_index(self, topic_selected_data_index)
+		self:select_topic_index_by_data_index(topic_selected_data_index)
 	end
-
-	return 
 end
+
 ScoreboardUI.animate_scenegraph_to_position = function (self, scenegraph_id, widget_list, progress, animate_in)
 	local topic_width = definitions.scenegraph.compact_preview_1.size[1]
 	local direction = self.topic_animation_direction
@@ -1847,9 +1797,8 @@ ScoreboardUI.animate_scenegraph_to_position = function (self, scenegraph_id, wid
 	local lerp_position = math.lerp(from_position, to_position, progress)
 	local root_position = ui_scenegraph[scenegraph_id].local_position
 	root_position[1] = lerp_position
-
-	return 
 end
+
 ScoreboardUI.update_topic_widgets_mouse_input = function (self)
 	local delay_auto_pilot = nil
 	local topic_widgets = self.topic_widgets
@@ -1874,11 +1823,11 @@ ScoreboardUI.update_topic_widgets_mouse_input = function (self)
 			local tweened_in = widget_content.tweened_in
 
 			if on_hover_enter and not is_selected then
-				self.on_topic_widget_hover(self, widget, i)
+				self:on_topic_widget_hover(widget, i)
 
 				hover_enter_topic_index = i
 			elseif on_hover_exit then
-				self.on_topic_widget_dehover(self, widget, i)
+				self:on_topic_widget_dehover(widget, i)
 
 				hover_exit_topic_index = i
 			end
@@ -1890,22 +1839,22 @@ ScoreboardUI.update_topic_widgets_mouse_input = function (self)
 		local widget_hover_index = hover_enter_topic_index - widget_start_draw_index + 1
 		local topic_hover_data_index = (self.selected_topic_counter_index - 1) * TOPICS_PER_PAGE + widget_hover_index
 
-		self.set_player_list_data_by_index(self, topic_hover_data_index)
+		self:set_player_list_data_by_index(topic_hover_data_index)
 	elseif hover_exit_topic_index then
 		local index = self.topic_selected_data_index or 1
 
-		self.set_player_list_data_by_index(self, index)
+		self:set_player_list_data_by_index(index)
 	end
 
 	local selected_index = self.topic_selected_index
 
 	if new_selection_index and new_selection_index ~= selected_index then
 		if selected_index then
-			self.on_topic_widget_deselect(self, topic_widgets[selected_index], selected_index)
+			self:on_topic_widget_deselect(topic_widgets[selected_index], selected_index)
 		end
 
-		self.on_topic_widget_select(self, topic_widgets[new_selection_index], new_selection_index, true)
-		self.play_sound(self, "Play_hud_select")
+		self:on_topic_widget_select(topic_widgets[new_selection_index], new_selection_index, true)
+		self:play_sound("Play_hud_select")
 
 		delay_auto_pilot = true
 	end
@@ -1913,9 +1862,8 @@ ScoreboardUI.update_topic_widgets_mouse_input = function (self)
 	if delay_auto_pilot then
 		self.auto_pilot_wait_time = UISettings.scoreboard.auto_pilot_wait_time
 	end
-
-	return 
 end
+
 ScoreboardUI.show_selected_player_gamercard = function (self, peer_id)
 	if peer_id then
 		local platform = self.platform
@@ -1937,8 +1885,6 @@ ScoreboardUI.show_selected_player_gamercard = function (self, peer_id)
 			Managers.account:show_player_profile_with_np_id(np_id)
 		end
 	end
-
-	return 
 end
 
-return 
+return

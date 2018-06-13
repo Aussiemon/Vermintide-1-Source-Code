@@ -2,22 +2,22 @@ require("scripts/managers/game_mode/game_modes/game_mode_base")
 
 script_data.disable_gamemode_end = script_data.disable_gamemode_end or Development.parameter("disable_gamemode_end")
 GameModeCoop = class(GameModeCoop, GameModeBase)
+
 GameModeCoop.init = function (self, settings, world, ...)
 	GameModeCoop.super.init(self, settings, world, ...)
 
 	self.about_to_lose = false
 	self.lost_condition_timer = nil
-
-	return 
 end
+
 GameModeCoop.evaluate_end_conditions = function (self, round_started, dt, t)
 	if script_data.disable_gamemode_end then
 		return false
 	end
 
 	local spawn_manager = Managers.state.spawn
-	local humans_dead = spawn_manager.all_humans_dead(spawn_manager)
-	local players_disabled = spawn_manager.all_players_disabled(spawn_manager)
+	local humans_dead = spawn_manager:all_humans_dead()
+	local players_disabled = spawn_manager:all_players_disabled()
 	local lost = humans_dead or players_disabled or self._level_failed
 
 	if self.about_to_lose then
@@ -47,8 +47,6 @@ GameModeCoop.evaluate_end_conditions = function (self, round_started, dt, t)
 	else
 		return false
 	end
-
-	return 
 end
 
-return 
+return

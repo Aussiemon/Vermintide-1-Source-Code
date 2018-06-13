@@ -1,4 +1,5 @@
 PlayerBotUnitFirstPerson = class(PlayerBotUnitFirstPerson)
+
 PlayerBotUnitFirstPerson.init = function (self, extension_init_context, unit, extension_init_data)
 	self.unit = unit
 	self.world = extension_init_context.world
@@ -11,9 +12,9 @@ PlayerBotUnitFirstPerson.init = function (self, extension_init_context, unit, ex
 	local attachment_unit_name = skin_settings.first_person_attachment.unit
 	local attachment_node_linking = skin_settings.first_person_attachment.attachment_node_linking
 	local unit_spawner = Managers.state.unit_spawner
-	local fp_unit = unit_spawner.spawn_local_unit(unit_spawner, unit_name)
+	local fp_unit = unit_spawner:spawn_local_unit(unit_name)
 	self.first_person_unit = fp_unit
-	self.first_person_attachment_unit = unit_spawner.spawn_local_unit(unit_spawner, attachment_unit_name)
+	self.first_person_attachment_unit = unit_spawner:spawn_local_unit(attachment_unit_name)
 
 	Unit.set_flow_variable(fp_unit, "character_vo", profile.character_vo)
 	Unit.set_flow_variable(fp_unit, "sound_character", profile.sound_character)
@@ -26,7 +27,7 @@ PlayerBotUnitFirstPerson.init = function (self, extension_init_context, unit, ex
 	Unit.set_local_position(fp_unit, 0, Unit.local_position(unit, 0))
 	Unit.set_local_rotation(fp_unit, 0, Unit.local_rotation(unit, 0))
 
-	self.player_height_wanted = self._player_height_from_name(self, "stand")
+	self.player_height_wanted = self:_player_height_from_name("stand")
 	self.player_height_current = self.player_height_wanted
 	self.player_height_previous = self.player_height_wanted
 	self.player_height_time_to_change = 0
@@ -38,28 +39,25 @@ PlayerBotUnitFirstPerson.init = function (self, extension_init_context, unit, ex
 		mode = "immediate",
 		name = "PlayerBotUnitFirstPerson"
 	})
+end
 
-	return 
-end
 PlayerBotUnitFirstPerson.reset = function (self)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.extensions_ready = function (self)
 	self.locomotion_extension = ScriptUnit.extension(self.unit, "locomotion_system")
 	self.inventory_extension = ScriptUnit.extension(self.unit, "inventory_system")
 	self.attachment_extension = ScriptUnit.extension(self.unit, "attachment_system")
 
-	self.set_first_person_mode(self, true)
-
-	return 
+	self:set_first_person_mode(true)
 end
+
 PlayerBotUnitFirstPerson.destroy = function (self)
 	local unit_spawner = Managers.state.unit_spawner
 
-	unit_spawner.mark_for_deletion(unit_spawner, self.first_person_unit)
-	unit_spawner.mark_for_deletion(unit_spawner, self.first_person_attachment_unit)
-
-	return 
+	unit_spawner:mark_for_deletion(self.first_person_unit)
+	unit_spawner:mark_for_deletion(self.first_person_attachment_unit)
 end
 
 local function ease_out_quad(t, b, c, d)
@@ -86,21 +84,20 @@ PlayerBotUnitFirstPerson.update_player_height = function (self, t)
 		Debug.text("self.player_height_change_start_time = " .. tostring(self.player_height_change_start_time))
 		Debug.text("time_changing_height = " .. tostring(time_changing_height))
 	end
-
-	return 
 end
+
 PlayerBotUnitFirstPerson._player_height_from_name = function (self, name)
 	local profile = self.profile
 
 	return profile.first_person_heights[name]
 end
-PlayerBotUnitFirstPerson.update = function (self, unit, input, dt, context, t)
-	self.update_player_height(self, t)
-	self.update_rotation(self, t, dt)
-	self.update_position(self)
 
-	return 
+PlayerBotUnitFirstPerson.update = function (self, unit, input, dt, context, t)
+	self:update_player_height(t)
+	self:update_rotation(t, dt)
+	self:update_position()
 end
+
 PlayerBotUnitFirstPerson.update_rotation = function (self, t, dt)
 	local first_person_unit = self.first_person_unit
 
@@ -122,64 +119,66 @@ PlayerBotUnitFirstPerson.update_rotation = function (self, t, dt)
 
 		Unit.set_local_rotation(first_person_unit, 0, look_rotation)
 	end
-
-	return 
 end
+
 PlayerBotUnitFirstPerson.update_position = function (self)
 	local position_root = Unit.local_position(self.unit, 0)
 	local offset_height = Vector3(0, 0, self.player_height_current)
 	local position = position_root + offset_height
 
 	Unit.set_local_position(self.first_person_unit, 0, position)
+end
 
-	return 
-end
 PlayerBotUnitFirstPerson.apply_recoil = function (self)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.get_first_person_unit = function (self)
 	return self.first_person_unit
 end
+
 PlayerBotUnitFirstPerson.get_first_person_mesh_unit = function (self)
 	return self.first_person_attachment_unit
 end
+
 PlayerBotUnitFirstPerson.set_look_delta = function (self, look_delta)
 	self.look_delta = look_delta
-
-	return 
 end
+
 PlayerBotUnitFirstPerson.play_animation_event = function (self, anim_event)
 	Unit.animation_event(self.first_person_unit, anim_event)
-
-	return 
 end
+
 PlayerBotUnitFirstPerson.current_position = function (self)
 	return Unit.local_position(self.first_person_unit, 0)
 end
+
 PlayerBotUnitFirstPerson.current_rotation = function (self)
 	return Unit.local_rotation(self.first_person_unit, 0)
 end
+
 PlayerBotUnitFirstPerson.current_camera_position = function (self)
 	return Unit.local_position(self.first_person_unit, 0)
 end
+
 PlayerBotUnitFirstPerson.set_rotation = function (self, new_rotation)
 	Unit.set_local_rotation(self.first_person_unit, 0, new_rotation)
 	Unit.set_local_rotation(self.unit, 0, new_rotation)
 	self.look_rotation:store(new_rotation)
-
-	return 
 end
+
 PlayerBotUnitFirstPerson.force_look_rotation = function (self, rot)
-	return 
+	return
 end
-PlayerBotUnitFirstPerson.set_wanted_player_height = function (self, state, t, time_to_change)
-	return 
-end
-PlayerBotUnitFirstPerson.toggle_visibility = function (self)
-	self.set_first_person_mode(self, not self.first_person_mode)
 
-	return 
+PlayerBotUnitFirstPerson.set_wanted_player_height = function (self, state, t, time_to_change)
+	return
 end
+
+PlayerBotUnitFirstPerson.toggle_visibility = function (self)
+	self:set_first_person_mode(not self.first_person_mode)
+end
+
 PlayerBotUnitFirstPerson.set_first_person_mode = function (self, active)
 	self.first_person_mode = active
 
@@ -191,9 +190,8 @@ PlayerBotUnitFirstPerson.set_first_person_mode = function (self, active)
 		self.inventory_extension:show_third_person_inventory(true)
 		self.attachment_extension:show_attachments(true)
 	end
-
-	return 
 end
+
 PlayerBotUnitFirstPerson.debug_set_first_person_mode = function (self, active, override)
 	if active then
 		Unit.set_unit_visibility(self.unit, not override)
@@ -205,71 +203,79 @@ PlayerBotUnitFirstPerson.debug_set_first_person_mode = function (self, active, o
 
 		self.first_person_debug = true
 	else
-		self.set_first_person_mode(self, self.first_person_mode)
+		self:set_first_person_mode(self.first_person_mode)
 
 		self.first_person_debug = false
 	end
+end
 
-	return 
-end
 PlayerBotUnitFirstPerson.hide_weapons = function (self)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.unhide_weapons = function (self)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.animation_set_variable = function (self, variable_name, value)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.animation_event = function (self, event)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.increase_aim_assist_multiplier = function (self)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.reset_aim_assist_multiplier = function (self)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.is_in_view = function (self, position)
 	return true
 end
+
 PlayerBotUnitFirstPerson.is_within_default_view = function (self, position)
 	return true
 end
+
 PlayerBotUnitFirstPerson.spawn_screen_particles = function (self, ...)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.destroy_screen_particles = function (self, ...)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.play_hud_sound_event = function (self, event, wwise_source_id, play_on_husk)
 	if play_on_husk and not LEVEL_EDITOR_TEST then
-		self.play_sound_event(self, event)
+		self:play_sound_event(event)
 
 		local network_manager = Managers.state.network
 		local network_transmit = network_manager.network_transmit
-		local unit_id = network_manager.unit_game_object_id(network_manager, self.unit)
+		local unit_id = network_manager:unit_game_object_id(self.unit)
 		local event_id = NetworkLookup.sound_events[event]
 
-		network_transmit.send_rpc_clients(network_transmit, "rpc_play_husk_sound_event", unit_id, event_id)
+		network_transmit:send_rpc_clients("rpc_play_husk_sound_event", unit_id, event_id)
 	end
+end
 
-	return 
-end
 PlayerBotUnitFirstPerson.create_screen_particles = function (self, ...)
-	return 
+	return
 end
+
 PlayerBotUnitFirstPerson.play_sound_event = function (self, event, position)
-	local sound_position = position or self.current_position(self)
+	local sound_position = position or self:current_position()
 	local wwise_source_id, wwise_world = WwiseUtils.make_position_auto_source(self.world, sound_position)
 
 	WwiseWorld.set_switch(wwise_world, "husk", "true", wwise_source_id)
 	WwiseWorld.trigger_event(wwise_world, event, wwise_source_id)
-
-	return 
 end
+
 PlayerBotUnitFirstPerson.play_camera_effect_sequence = function (self, event, t)
-	return 
+	return
 end
 
-return 
+return

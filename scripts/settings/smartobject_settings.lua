@@ -199,4 +199,4 @@ SmartObjectSettings.templates.rat_ogre = {
 	}
 }
 
-return 
+return

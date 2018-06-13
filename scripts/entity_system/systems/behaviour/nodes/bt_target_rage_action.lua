@@ -1,13 +1,14 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTTargetRageAction = class(BTTargetRageAction, BTNode)
+
 BTTargetRageAction.init = function (self, ...)
 	BTTargetRageAction.super.init(self, ...)
-
-	return 
 end
+
 BTTargetRageAction.name = "BTTargetRageAction"
 local POSITION_LOOKUP = POSITION_LOOKUP
+
 BTTargetRageAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	blackboard.action = action
@@ -24,13 +25,13 @@ BTTargetRageAction.enter = function (self, unit, blackboard, t)
 		local anim_driven = rage_anim ~= action.start_anims_name.fwd
 		blackboard.attack_anim_driven = anim_driven
 
-		locomotion_extension.use_lerp_rotation(locomotion_extension, not anim_driven)
+		locomotion_extension:use_lerp_rotation(not anim_driven)
 		LocomotionUtils.set_animation_driven_movement(unit, anim_driven, false, false)
 
 		if anim_driven then
 			blackboard.move_animation_name = rage_anim
 		else
-			locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+			locomotion_extension:use_lerp_rotation(true)
 			blackboard.navigation_extension:move_to(POSITION_LOOKUP[unit])
 
 			if blackboard.target_dist < action.change_target_fwd_close_dist then
@@ -45,15 +46,14 @@ BTTargetRageAction.enter = function (self, unit, blackboard, t)
 			QuickDrawerStay:vector(POSITION_LOOKUP[unit] + Vector3(0, 0, 1), Quaternion.forward(Unit.local_rotation(unit, 0)) * 3, Color(140, 0, 220))
 		end
 
-		if 7 < blackboard.target_dist then
+		if blackboard.target_dist > 7 then
 			blackboard.chasing_timer = 25
 		end
 	else
 		blackboard.abort_rage = true
 	end
-
-	return 
 end
+
 BTTargetRageAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.abort_rage = nil
 	blackboard.action = nil
@@ -61,9 +61,8 @@ BTTargetRageAction.leave = function (self, unit, blackboard, t, reason)
 
 	blackboard.locomotion_extension:use_lerp_rotation(true)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
-
-	return 
 end
+
 BTTargetRageAction.run = function (self, unit, blackboard, t, dt)
 	if blackboard.abort_rage then
 		return "failed"
@@ -89,10 +88,9 @@ BTTargetRageAction.run = function (self, unit, blackboard, t, dt)
 
 	return "done"
 end
+
 BTTargetRageAction.anim_cb_change_target_finished = function (self, unit, blackboard, action)
 	blackboard.target_changed = nil
-
-	return 
 end
 
-return 
+return

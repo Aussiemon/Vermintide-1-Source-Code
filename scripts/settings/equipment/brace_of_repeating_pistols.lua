@@ -70,7 +70,7 @@ weapon_template.actions = {
 				}
 			},
 			condition_func = function (unit, input_extension, ammo_extension)
-				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+				if ammo_extension and ammo_extension:total_remaining_ammo() <= 0 then
 					return false
 				end
 
@@ -196,4 +196,4 @@ weapon_template.compare_statistics = {
 Weapons = Weapons or {}
 Weapons.brace_of_repeating_pistols_template_1 = table.clone(weapon_template)
 
-return 
+return

@@ -4,14 +4,13 @@ local function readonlytable(table)
 		__index = table,
 		__newindex = function (table, key, value)
 			error("Coder trying to modify EntityManager's read-only empty table. Don't do it!")
-
-			return 
 		end
 	})
 end
 
 local EMPTY_TABLE = readonlytable({})
 EntityManager2 = class(EntityManager2)
+
 EntityManager2.init = function (self)
 	self.temp_table = {}
 	self._units = {}
@@ -20,14 +19,12 @@ EntityManager2.init = function (self)
 	self._systems = {}
 	self._extension_to_system_map = {}
 	self.system_to_extension_per_unit_type_map = {}
-
-	return 
 end
+
 EntityManager2.set_extension_extractor_function = function (self, extension_extractor_function)
 	self.extension_extractor_function = extension_extractor_function
-
-	return 
 end
+
 EntityManager2.register_system = function (self, system, system_name, extension_list)
 	assert(self._systems[system_name] == nil, "Tried to register system whose name '%s' was already registered.", system_name)
 
@@ -39,20 +36,22 @@ EntityManager2.register_system = function (self, system, system_name, extension_
 	end
 
 	GarbageLeakDetector.register_object(system, system_name)
-
-	return 
 end
+
 EntityManager2.system = function (self, system_name)
 	return self._systems[system_name]
 end
+
 EntityManager2.system_by_extension = function (self, extension_name)
 	local system_name = self._extension_to_system_map[extension_name]
 
 	return system_name and self._systems[system_name]
 end
+
 EntityManager2.get_entities = function (self, extension_name)
 	return self._extensions[extension_name] or EMPTY_TABLE
 end
+
 EntityManager2.destroy = function (self)
 	self.temp_table = nil
 	self._units = nil
@@ -63,9 +62,8 @@ EntityManager2.destroy = function (self)
 	self.extension_extractor_function = nil
 
 	GarbageLeakDetector.register_object(self, "EntityManager")
-
-	return 
 end
+
 EntityManager2.add_unit_extensions = function (self, world, unit, unit_template_name, all_extension_init_data)
 	all_extension_init_data = all_extension_init_data or EMPTY_TABLE
 	local extension_to_system_map = self._extension_to_system_map
@@ -117,7 +115,7 @@ EntityManager2.add_unit_extensions = function (self, world, unit, unit_template_
 
 		assert(system ~= nil, "Adding extension %q with no system is registered.", extension_name)
 
-		local extension = system.on_add_extension(system, world, unit, extension_name, extension_init_data)
+		local extension = system:on_add_extension(world, unit, extension_name, extension_init_data)
 
 		assert(extension, "System (%s) must return the created extension (%s)", extension_system_name, extension_name)
 
@@ -142,14 +140,14 @@ EntityManager2.add_unit_extensions = function (self, world, unit, unit_template_
 		local extension = extensions[extension_name]
 
 		if extension.extensions_ready ~= nil then
-			extension.extensions_ready(extension, world, unit)
+			extension:extensions_ready(world, unit)
 		end
 
 		local extension_system_name = extension_to_system_map[extension_name]
 		local system = self_systems[extension_system_name]
 
 		if system.extensions_ready ~= nil then
-			system.extensions_ready(system, world, unit, extension_name)
+			system:extensions_ready(world, unit, extension_name)
 		end
 
 		Profiler.stop(extension_name)
@@ -160,6 +158,7 @@ EntityManager2.add_unit_extensions = function (self, world, unit, unit_template_
 
 	return true
 end
+
 EntityManager2.sync_unit_extensions = function (self, unit, go_id)
 	Profiler.start("sync_extensions")
 
@@ -170,7 +169,7 @@ EntityManager2.sync_unit_extensions = function (self, unit, go_id)
 			Profiler.start(extension_name)
 
 			if extension.game_object_initialized ~= nil then
-				extension.game_object_initialized(extension, unit, go_id)
+				extension:game_object_initialized(unit, go_id)
 			end
 
 			Profiler.stop(extension_name)
@@ -178,27 +177,26 @@ EntityManager2.sync_unit_extensions = function (self, unit, go_id)
 	end
 
 	Profiler.stop("sync_extensions")
-
-	return 
 end
+
 EntityManager2.hot_join_sync = function (self, unit)
 	local unit_extensions = ScriptUnit.extensions(unit)
 
 	if not unit_extensions then
-		return 
+		return
 	end
 
 	Profiler.start("unit")
 
 	for system_name, extension in pairs(unit_extensions) do
 		if extension.hot_join_sync then
-			extension.hot_join_sync(extension, Managers.state.network:game_session_host())
+			extension:hot_join_sync(Managers.state.network:game_session_host())
 		end
 	end
-
-	return 
 end
+
 local TEMP_TABLE = {}
+
 EntityManager2.register_unit = function (self, world, unit, maybe_init_data, ...)
 	local extension_init_data = nil
 
@@ -211,14 +209,13 @@ EntityManager2.register_unit = function (self, world, unit, maybe_init_data, ...
 		}
 	end
 
-	if self.add_unit_extensions(self, world, unit, nil, extension_init_data) then
+	if self:add_unit_extensions(world, unit, nil, extension_init_data) then
 		TEMP_TABLE[1] = unit
 
-		self.register_units_extensions(self, TEMP_TABLE, 1)
+		self:register_units_extensions(TEMP_TABLE, 1)
 	end
-
-	return 
 end
+
 EntityManager2.add_and_register_units = function (self, world, unit_list, num_units)
 	Profiler.start("add_and_register_units")
 
@@ -230,20 +227,19 @@ EntityManager2.add_and_register_units = function (self, world, unit_list, num_un
 		local unit = unit_list[i]
 		local unit_template = Unit.get_data(unit, "unit_template")
 
-		if self.add_unit_extensions(self, world, unit, unit_template) then
+		if self:add_unit_extensions(world, unit, unit_template) then
 			num_added = num_added + 1
 			added_list[num_added] = unit
 		end
 	end
 
-	if 0 < num_added then
-		self.register_units_extensions(self, added_list, num_added)
+	if num_added > 0 then
+		self:register_units_extensions(added_list, num_added)
 	end
 
 	Profiler.stop("add_and_register_units")
-
-	return 
 end
+
 EntityManager2.register_units_extensions = function (self, unit_list, num_units)
 	Profiler.start("register_units_extensions")
 
@@ -251,23 +247,25 @@ EntityManager2.register_units_extensions = function (self, unit_list, num_units)
 	local self_extensions = self._extensions
 
 	for i = 1, num_units, 1 do
-		local unit = unit_list[i]
-		local unit_extensions = self_units[unit]
+		repeat
+			local unit = unit_list[i]
+			local unit_extensions = self_units[unit]
 
-		if not unit_extensions then
-		else
+			if not unit_extensions then
+				break
+			end
+
 			for extension_name, extension in pairs(unit_extensions) do
 				assert(not self_extensions[extension_name][unit], "Unit %q already has extension %s registered.", unit, extension_name)
 
 				self_extensions[extension_name][unit] = extension
 			end
-		end
+		until true
 	end
 
 	Profiler.stop("register_units_extensions")
-
-	return 
 end
+
 EntityManager2.remove_extensions_from_unit = function (self, unit, extensions_to_remove)
 	local unit_extensions_list = self._unit_extensions_list
 	local self_extensions = self._extensions
@@ -276,7 +274,7 @@ EntityManager2.remove_extensions_from_unit = function (self, unit, extensions_to
 	local extensions_list = unit_extensions_list[unit]
 
 	if not extensions_list then
-		return 
+		return
 	end
 
 	Profiler.start("remove_extensions_from_unit")
@@ -284,35 +282,33 @@ EntityManager2.remove_extensions_from_unit = function (self, unit, extensions_to
 	local num_ext = #extensions_list
 
 	for _, extension_name in ipairs(extensions_to_remove) do
-		local system = self.system_by_extension(self, extension_name)
+		local system = self:system_by_extension(extension_name)
 		local system_name = system.NAME
 
 		ScriptUnit_destroy_extension(unit, system_name)
 	end
 
 	for _, extension_name in ipairs(extensions_to_remove) do
-		local system = self.system_by_extension(self, extension_name)
+		local system = self:system_by_extension(extension_name)
 
-		system.on_remove_extension(system, unit, extension_name)
+		system:on_remove_extension(unit, extension_name)
 		assert(not ScriptUnit.has_extension(unit, system.NAME), "Extension was not properly destroyed for extension %s", extension_name)
 
 		self_extensions[extension_name][unit] = nil
 	end
 
 	Profiler.stop("remove_extensions_from_unit")
-
-	return 
 end
+
 EntityManager2.freeze_extensions = function (self, unit, extensions_to_freeze)
 	for i = 1, #extensions_to_freeze, 1 do
 		local extension_name = extensions_to_freeze[i]
-		local system = self.system_by_extension(self, extension_name)
+		local system = self:system_by_extension(extension_name)
 
-		system.on_freeze_extension(system, unit, extension_name)
+		system:on_freeze_extension(unit, extension_name)
 	end
-
-	return 
 end
+
 EntityManager2.unregister_units = function (self, units, num_units)
 	local self_units = self._units
 	local self_extensions = self._extensions
@@ -323,68 +319,71 @@ EntityManager2.unregister_units = function (self, units, num_units)
 	Profiler.start("destroy extensions")
 
 	for i = 1, num_units, 1 do
-		local unit = units[i]
-		local unit_extensions = ScriptUnit.extensions(unit)
+		repeat
+			local unit = units[i]
+			local unit_extensions = ScriptUnit.extensions(unit)
 
-		if not unit_extensions then
-		else
+			if not unit_extensions then
+				break
+			end
+
 			local extensions_list = unit_extensions_list[unit]
 
 			if not extensions_list then
-			else
-				Profiler.start("unit")
+				break
+			end
 
+			Profiler.start("unit")
+
+			for system_name, _ in pairs(unit_extensions) do
+				local system = self._systems[system_name]
+
+				ScriptUnit_destroy_extension(unit, system_name)
+			end
+
+			local system_to_extension_map = self.system_to_extension_per_unit_type_map[extensions_list]
+
+			if system_to_extension_map then
 				for system_name, _ in pairs(unit_extensions) do
+					local extension_name = system_to_extension_map[system_name]
 					local system = self._systems[system_name]
 
-					ScriptUnit_destroy_extension(unit, system_name)
+					system:on_remove_extension(unit, extension_name)
+					assert(not ScriptUnit.has_extension(unit, system.NAME), "Extension was not properly destroyed for extension %s", extension_name)
+
+					self_extensions[extension_name][unit] = nil
 				end
+			else
+				for i = #extensions_list, 1, -1 do
+					local extension_name = extensions_list[i]
+					local system = self:system_by_extension(extension_name)
 
-				local system_to_extension_map = self.system_to_extension_per_unit_type_map[extensions_list]
+					system:on_remove_extension(unit, extension_name)
+					assert(not ScriptUnit.has_extension(unit, system.NAME), "Extension was not properly destroyed for extension %s", extension_name)
 
-				if system_to_extension_map then
-					for system_name, _ in pairs(unit_extensions) do
-						local extension_name = system_to_extension_map[system_name]
-						local system = self._systems[system_name]
-
-						system.on_remove_extension(system, unit, extension_name)
-						assert(not ScriptUnit.has_extension(unit, system.NAME), "Extension was not properly destroyed for extension %s", extension_name)
-
-						self_extensions[extension_name][unit] = nil
-					end
-				else
-					for i = #extensions_list, 1, -1 do
-						local extension_name = extensions_list[i]
-						local system = self.system_by_extension(self, extension_name)
-
-						system.on_remove_extension(system, unit, extension_name)
-						assert(not ScriptUnit.has_extension(unit, system.NAME), "Extension was not properly destroyed for extension %s", extension_name)
-
-						self_extensions[extension_name][unit] = nil
-					end
+					self_extensions[extension_name][unit] = nil
 				end
-
-				ScriptUnit.remove_unit(unit)
-
-				self_units[unit] = nil
-				unit_extensions_list[unit] = nil
-
-				Profiler.stop("unit")
 			end
-		end
+
+			ScriptUnit.remove_unit(unit)
+
+			self_units[unit] = nil
+			unit_extensions_list[unit] = nil
+
+			Profiler.stop("unit")
+		until true
 	end
 
 	Profiler.stop("destroy extensions")
-
-	return 
 end
+
 EntityManager2.game_object_unit_destroyed = function (self, unit)
 	local unit_extensions_list = self._unit_extensions_list
 	local extensions_list = unit_extensions_list[unit]
 	local unit_extensions = ScriptUnit.extensions(unit)
 
 	if not unit_extensions then
-		return 
+		return
 	end
 
 	Profiler.start("unit")
@@ -394,19 +393,17 @@ EntityManager2.game_object_unit_destroyed = function (self, unit)
 		local extension = ScriptUnit.extension(unit, system_name)
 
 		if extension.game_object_unit_destroyed then
-			extension.game_object_unit_destroyed(extension)
+			extension:game_object_unit_destroyed()
 		end
 	end
-
-	return 
 end
+
 local TEMP_UNIT_TABLE = {}
+
 EntityManager2.unregister_unit = function (self, unit)
 	TEMP_UNIT_TABLE[1] = unit
 
-	self.unregister_units(self, TEMP_UNIT_TABLE, 1)
-
-	return 
+	self:unregister_units(TEMP_UNIT_TABLE, 1)
 end
 
-return 
+return

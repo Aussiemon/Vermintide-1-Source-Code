@@ -4,6 +4,7 @@ local DeathReactions = DeathReactions
 GenericDeathExtension = class(GenericDeathExtension)
 DeathReactions_profiler_names = DeathReactions_profiler_names or {}
 local profiler_names = DeathReactions_profiler_names
+
 GenericDeathExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self.network_type = extension_init_data.is_husk
 	local is_husk = extension_init_data.is_husk
@@ -25,9 +26,8 @@ GenericDeathExtension.init = function (self, extension_init_context, unit, exten
 		"start_" .. self.death_reaction_template,
 		"update_" .. self.death_reaction_template
 	}
-
-	return 
 end
+
 GenericDeathExtension.extensions_ready = function (self, world, unit)
 	self.damage_extension = ScriptUnit.extension(unit, "damage_system")
 
@@ -36,24 +36,24 @@ GenericDeathExtension.extensions_ready = function (self, world, unit)
 	self.health_extension = ScriptUnit.extension(unit, "health_system")
 
 	assert(self.health_extension)
+end
 
-	return 
-end
 GenericDeathExtension.destroy = function (self)
-	return 
+	return
 end
+
 GenericDeathExtension.force_end = function (self)
 	if not self.death_is_done and Unit.alive(self.unit) and not self.is_alive then
 		Managers.state.unit_spawner:mark_for_deletion(self.unit)
 
 		self.death_is_done = true
 	end
-
-	return 
 end
+
 GenericDeathExtension.is_wall_nailed = function (self)
 	return (self.cached_wall_nail_data and true) or false
 end
+
 GenericDeathExtension.nailing_hit = function (self, hit_ragdoll_actor, attack_direction, hit_speed)
 	local reaction_data = self.death_reaction_data
 
@@ -74,19 +74,18 @@ GenericDeathExtension.nailing_hit = function (self, hit_ragdoll_actor, attack_di
 		wall_nail_data[hit_ragdoll_actor] = data
 		self.cached_wall_nail_data = wall_nail_data
 	end
-
-	return 
 end
+
 GenericDeathExtension.enable_second_hit_ragdoll = function (self)
 	self.second_hit_ragdoll = true
-
-	return 
 end
+
 GenericDeathExtension.second_hit_ragdoll_allowed = function (self)
 	return self.second_hit_ragdoll
 end
+
 GenericDeathExtension.has_death_started = function (self)
 	return self.death_reaction ~= nil
 end
 
-return 
+return

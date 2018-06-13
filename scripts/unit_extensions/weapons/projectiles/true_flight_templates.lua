@@ -35,4 +35,4 @@ for name, template in pairs(TrueFlightTemplates) do
 	TrueFlightTemplatesLookup[template_index] = name
 end
 
-return 
+return

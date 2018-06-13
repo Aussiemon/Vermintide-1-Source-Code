@@ -4,6 +4,7 @@ local drag_colors = {
 	normal = Colors.get_color_table_with_alpha("drag_same_slot", 255),
 	hover = Colors.get_color_table_with_alpha("drag_same_slot_hover", 255)
 }
+
 AltarTraitProcUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.parent = parent
 	self.world = ingame_ui_context.world
@@ -24,43 +25,40 @@ AltarTraitProcUI.init = function (self, parent, position, animation_definitions,
 	self.scenegraph_definition.page_root.position = position
 	self.animations = {}
 
-	self.create_ui_elements(self)
-	self.clear_item_display_data(self)
+	self:create_ui_elements()
+	self:clear_item_display_data()
 
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, definitions.animations)
-
-	return 
 end
+
 AltarTraitProcUI.on_enter = function (self)
-	self.remove_item(self)
-
-	return 
+	self:remove_item()
 end
+
 AltarTraitProcUI.set_gamepad_focus = function (self, enabled)
 	self.use_gamepad = enabled
-
-	return 
 end
+
 AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 	local input_manager = self.input_manager
 	local input_service = self.parent:page_input_service()
 	local use_gamepad = self.use_gamepad
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	elseif use_gamepad then
 		if self.active_item_id then
 			local roll_button_widget = self.widgets_by_name.roll_button_widget
 			local roll_disabled = roll_button_widget.content.button_hotspot.disabled
 
-			if input_service.get(input_service, "special_1") or input_service.get(input_service, "back", true) then
+			if input_service:get("special_1") or input_service:get("back", true) then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 				self.gamepad_item_remove_request = true
-			elseif input_service.get(input_service, "refresh_press") and not roll_disabled and not self.charging and self.is_roll_possible(self) then
-				self.start_charge_progress(self)
-			elseif self.charging and not input_service.get(input_service, "refresh_hold") then
-				self.abort_charge_progress(self)
+			elseif input_service:get("refresh_press") and not roll_disabled and not self.charging and self:is_roll_possible() then
+				self:start_charge_progress()
+			elseif self.charging and not input_service:get("refresh_hold") then
+				self:abort_charge_progress()
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end
@@ -73,11 +71,11 @@ AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 			if number_of_traits_on_item and selected_trait_index then
 				local new_trait_index = nil
 
-				if input_service.get(input_service, "move_right") then
-					new_trait_index = self._get_next_free_trait_index(self, selected_trait_index, "right", number_of_traits_on_item)
+				if input_service:get("move_right") then
+					new_trait_index = self:_get_next_free_trait_index(selected_trait_index, "right", number_of_traits_on_item)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
-				elseif input_service.get(input_service, "move_left") then
-					new_trait_index = self._get_next_free_trait_index(self, selected_trait_index, "left", number_of_traits_on_item)
+				elseif input_service:get("move_left") then
+					new_trait_index = self:_get_next_free_trait_index(selected_trait_index, "left", number_of_traits_on_item)
 					self.controller_cooldown = GamepadSettings.menu_cooldown
 				end
 
@@ -87,15 +85,14 @@ AltarTraitProcUI.handle_gamepad_input = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 AltarTraitProcUI._get_next_free_trait_index = function (self, selected_trait_index, direction, number_of_traits_on_item)
 	local new_trait_index = selected_trait_index
 
 	if direction == "right" then
 		for i = selected_trait_index + 1, number_of_traits_on_item, 1 do
-			if not self._is_trait_index_locked(self, i) then
+			if not self:_is_trait_index_locked(i) then
 				new_trait_index = i
 
 				break
@@ -103,7 +100,7 @@ AltarTraitProcUI._get_next_free_trait_index = function (self, selected_trait_ind
 		end
 	elseif direction == "left" then
 		for i = selected_trait_index - 1, 1, -1 do
-			if not self._is_trait_index_locked(self, i) then
+			if not self:_is_trait_index_locked(i) then
 				new_trait_index = i
 
 				break
@@ -113,6 +110,7 @@ AltarTraitProcUI._get_next_free_trait_index = function (self, selected_trait_ind
 
 	return new_trait_index
 end
+
 AltarTraitProcUI._is_trait_index_locked = function (self, trait_index)
 	local widget_name = "trait_button_" .. trait_index
 	local widget = self.widgets_by_name[widget_name]
@@ -120,6 +118,7 @@ AltarTraitProcUI._is_trait_index_locked = function (self, trait_index)
 
 	return button_hotspot.disabled
 end
+
 AltarTraitProcUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.widgets = {}
@@ -138,10 +137,9 @@ AltarTraitProcUI.create_ui_elements = function (self)
 	roll_button_widget.content.enable_charge = true
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self._setup_candle_animations(self)
-
-	return 
+	self:_setup_candle_animations()
 end
+
 AltarTraitProcUI._setup_candle_animations = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local animations = self.animations
@@ -151,68 +149,66 @@ AltarTraitProcUI._setup_candle_animations = function (self)
 	local candle_glow_left_top_widget = widgets_by_name.candle_glow_left_top_widget
 	local candle_glow_left_widget = widgets_by_name.candle_glow_left_widget
 	local candle_glow_right_widget = widgets_by_name.candle_glow_right_widget
-	animations.candle_top_left_flame = self.animate_element_pulse(self, candle_top_left_widget.style.texture_id.color, 1, 255, 175, 2.3)
-	animations.candle_top_left_glow = self.animate_element_pulse(self, candle_glow_left_top_widget.style.texture_id.color, 1, 205, 125, 1.9)
-	animations.candle_left_flame = self.animate_element_pulse(self, candle_left_widget.style.texture_id.color, 1, 255, 210, 1)
-	animations.candle_left_glow = self.animate_element_pulse(self, candle_glow_left_widget.style.texture_id.color, 1, 205, 160, 1)
-	animations.candle_right_flame = self.animate_element_pulse(self, candle_right_widget.style.texture_id.color, 1, 255, 185, 1.5)
-	animations.candle_right_glow = self.animate_element_pulse(self, candle_glow_right_widget.style.texture_id.color, 1, 205, 125, 1.5)
-
-	return 
+	animations.candle_top_left_flame = self:animate_element_pulse(candle_top_left_widget.style.texture_id.color, 1, 255, 175, 2.3)
+	animations.candle_top_left_glow = self:animate_element_pulse(candle_glow_left_top_widget.style.texture_id.color, 1, 205, 125, 1.9)
+	animations.candle_left_flame = self:animate_element_pulse(candle_left_widget.style.texture_id.color, 1, 255, 210, 1)
+	animations.candle_left_glow = self:animate_element_pulse(candle_glow_left_widget.style.texture_id.color, 1, 205, 160, 1)
+	animations.candle_right_flame = self:animate_element_pulse(candle_right_widget.style.texture_id.color, 1, 255, 185, 1.5)
+	animations.candle_right_glow = self:animate_element_pulse(candle_glow_right_widget.style.texture_id.color, 1, 205, 125, 1.5)
 end
+
 AltarTraitProcUI.update_animations = function (self, dt)
 	local ui_animator = self.ui_animator
 
-	ui_animator.update(ui_animator, dt)
+	ui_animator:update(dt)
 
-	if self.current_value_animation_id and ui_animator.is_animation_completed(ui_animator, self.current_value_animation_id) then
+	if self.current_value_animation_id and ui_animator:is_animation_completed(self.current_value_animation_id) then
 		self.current_value_animation_id = nil
 
 		if self.rolling and self.new_rolling_value then
-			self.roll(self, self.new_rolling_value)
+			self:roll(self.new_rolling_value)
 
 			self.new_rolling_value = nil
 		end
 	end
 
-	if self.new_value_animation_id and ui_animator.is_animation_completed(ui_animator, self.new_value_animation_id) then
+	if self.new_value_animation_id and ui_animator:is_animation_completed(self.new_value_animation_id) then
 		self.new_value_animation_id = nil
 		self.roll_trait_index = nil
 		self.rolling = nil
 		self.roll_completed = true
 
-		self.update_selected_trait_description(self)
-		self.update_trait_cost_display(self)
+		self:update_selected_trait_description()
+		self:update_trait_cost_display()
 	end
-
-	return 
 end
+
 AltarTraitProcUI.update = function (self, dt)
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	if gamepad_active then
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 	end
 
 	self.roll_completed = nil
 
-	self.update_animations(self, dt)
+	self:update_animations(dt)
 
 	if self.rolling then
 		if self.roll_animation then
 			UIAnimation.update(self.roll_animation, dt)
 		end
 	else
-		self.handle_gamepad_input(self, dt)
+		self:handle_gamepad_input(dt)
 	end
 
 	for name, animation in pairs(self.animations) do
@@ -221,7 +217,7 @@ AltarTraitProcUI.update = function (self, dt)
 		if UIAnimation.completed(animation) then
 			self.animations[name] = nil
 
-			self.on_charge_animations_complete(self, name)
+			self:on_charge_animations_complete(name)
 		end
 	end
 
@@ -232,19 +228,19 @@ AltarTraitProcUI.update = function (self, dt)
 
 	if item_slot_button_hotspot.on_hover_enter and not self.rolling then
 		if self.active_item_id then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 		end
 
 		local bar_settings = UISettings.inventory.button_bars
 		local fade_in_time = bar_settings.background.fade_in_time
 		local alpha_hover = bar_settings.background.alpha_hover
 		local widget_hover_color = widget.style.hover_texture.color
-		self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
+		self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
 	elseif item_slot_button_hotspot.on_hover_exit then
 		local bar_settings = UISettings.inventory.button_bars
 		local fade_out_time = bar_settings.background.fade_out_time
 		local widget_hover_color = widget.style.hover_texture.color
-		self.animations.item_slot_hover = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
+		self.animations.item_slot_hover = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
 	end
 
 	if not self.rolling then
@@ -264,17 +260,17 @@ AltarTraitProcUI.update = function (self, dt)
 	local roll_button_hotspot = roll_button_content.button_hotspot
 
 	if roll_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
 	if not self.rolling and (roll_button_hotspot.on_release or self.gamepad_roll_request) then
 		roll_button_hotspot.on_release = nil
 
-		if self.can_afford_roll_cost(self) then
+		if self:can_afford_roll_cost() then
 			self.roll_trait_index = self.selected_trait_index
 			self.roll_request = true
 		else
-			self.roll_failed(self)
+			self:roll_failed()
 		end
 	end
 
@@ -289,7 +285,7 @@ AltarTraitProcUI.update = function (self, dt)
 			local button_hotspot = widget.content.button_hotspot
 
 			if button_hotspot.on_hover_enter and not button_hotspot.is_selected and current_traits_data[i] then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 		end
 	end
@@ -300,8 +296,8 @@ AltarTraitProcUI.update = function (self, dt)
 		local button_hotspot = widget.content.button_hotspot
 
 		if not button_hotspot.disabled and (button_hotspot.on_pressed or self.gamepad_changed_selected_trait_index == i) and not button_hotspot.is_selected and i ~= self.selected_trait_index then
-			self.play_sound(self, "Play_hud_select")
-			self.set_selected_trait(self, i)
+			self:play_sound("Play_hud_select")
+			self:set_selected_trait(i)
 
 			widget.content.button_hotspot.on_pressed = nil
 
@@ -311,37 +307,35 @@ AltarTraitProcUI.update = function (self, dt)
 
 	self.gamepad_changed_selected_trait_index = nil
 
-	self.on_item_dragged(self)
+	self:on_item_dragged()
 
-	if self.is_dragging_started(self) then
-		self.play_sound(self, "Play_hud_inventory_pickup_item")
+	if self:is_dragging_started() then
+		self:play_sound("Play_hud_inventory_pickup_item")
 	end
-
-	return 
 end
+
 AltarTraitProcUI.is_dragging_started = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	return widget.content.on_drag_started
 end
+
 AltarTraitProcUI.on_item_hover_enter = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_enter then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 AltarTraitProcUI.on_item_hover_exit = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 
 	if widget.content.button_hotspot.on_hover_exit then
 		return 0, self.active_item_id
 	end
-
-	return 
 end
+
 AltarTraitProcUI.is_slot_hovered = function (self, is_dragging_item)
 	local widget = self.widgets_by_name.item_button_widget
 	local internal_is_hover = widget.content.button_hotspot.internal_is_hover
@@ -361,6 +355,7 @@ AltarTraitProcUI.is_slot_hovered = function (self, is_dragging_item)
 
 	return internal_is_hover
 end
+
 AltarTraitProcUI.on_dragging_item_stopped = function (self)
 	local active_item_id = self.active_item_id
 
@@ -371,9 +366,8 @@ AltarTraitProcUI.on_dragging_item_stopped = function (self)
 			return active_item_id
 		end
 	end
-
-	return 
 end
+
 AltarTraitProcUI.on_item_dragged = function (self)
 	local widget = self.widgets_by_name.item_button_widget
 	local content = widget.content
@@ -384,9 +378,8 @@ AltarTraitProcUI.on_item_dragged = function (self)
 	elseif content.on_drag_stopped and icon_color[1] ~= 255 then
 		icon_color[1] = 255
 	end
-
-	return 
 end
+
 AltarTraitProcUI.can_select_trait = function (self, trait_name)
 	local active_item_id = self.active_item_id
 
@@ -394,10 +387,11 @@ AltarTraitProcUI.can_select_trait = function (self, trait_name)
 		return false
 	end
 
-	local proc_chance_data = self.get_trait_proc_data(self, active_item_id, trait_name)
+	local proc_chance_data = self:get_trait_proc_data(active_item_id, trait_name)
 
 	return (proc_chance_data and true) or false
 end
+
 AltarTraitProcUI.update_selected_trait_description = function (self)
 	local selected_index = self.selected_trait_index
 	local description_text = BackendUtils.get_item_trait_description(self.active_item_id, selected_index)
@@ -415,16 +409,15 @@ AltarTraitProcUI.update_selected_trait_description = function (self)
 	end
 
 	description_widget.content.text = description_text
-
-	return 
 end
+
 AltarTraitProcUI.set_selected_trait = function (self, selected_index)
 	local widget = self.widgets_by_name.roll_button_widget
 
 	if self.charging or widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	local num_traits = AltarSettings.num_traits
@@ -465,17 +458,16 @@ AltarTraitProcUI.set_selected_trait = function (self, selected_index)
 	end
 
 	if selected_index then
-		self.update_slider_by_trait(self, self.active_item_id, self.selected_trait_name)
+		self:update_slider_by_trait(self.active_item_id, self.selected_trait_name)
 	end
 
 	local roll_button_widget = widgets_by_name.roll_button_widget
 	roll_button_widget.content.default_text_on_disable = selected_index ~= nil
 	self.selected_trait_index = selected_index
 
-	self.update_trait_cost_display(self)
-
-	return 
+	self:update_trait_cost_display()
 end
+
 AltarTraitProcUI.get_trait_proc_data = function (self, backend_id, trait_name)
 	local buff_key = "proc_chance"
 	local trait_template = BuffTemplates[trait_name]
@@ -484,6 +476,7 @@ AltarTraitProcUI.get_trait_proc_data = function (self, backend_id, trait_name)
 
 	return proc_chance_data
 end
+
 AltarTraitProcUI.update_slider_by_trait = function (self, backend_id, trait_name)
 	if self.current_value_animation_id then
 		self.ui_animator:stop_animation(self.current_value_animation_id)
@@ -500,7 +493,7 @@ AltarTraitProcUI.update_slider_by_trait = function (self, backend_id, trait_name
 	local widget = self.widgets_by_name.slider_widget
 	local widget_content = widget.content
 	local draw_widget = false
-	local proc_chance_data = self.get_trait_proc_data(self, backend_id, trait_name)
+	local proc_chance_data = self:get_trait_proc_data(backend_id, trait_name)
 	local proc_data = {}
 
 	if proc_chance_data then
@@ -531,24 +524,23 @@ AltarTraitProcUI.update_slider_by_trait = function (self, backend_id, trait_name
 		local current_box_position = self.ui_scenegraph.proc_slider_current_box.local_position
 		local length_diff = math.abs(current_box_position[1] - progress * line_length)
 
-		if 0 < length_diff then
+		if length_diff > 0 then
 			local length_diff_fraction = length_diff / line_length
 			local speed = 1 + 1 - length_diff_fraction
-			self.current_value_animation_id = self.animate_current_value(self, "current_value", value, min_value, max_value, speed)
+			self.current_value_animation_id = self:animate_current_value("current_value", value, min_value, max_value, speed)
 		else
-			self.current_value_animation_id = self.animate_current_value(self, "change_box_values_only", value, min_value, max_value)
+			self.current_value_animation_id = self:animate_current_value("change_box_values_only", value, min_value, max_value)
 		end
 
 		min_display_text = min_display_text .. "%"
 		max_display_text = max_display_text .. "%"
-		self.min_max_value_animation_id = self.animate_min_max_change(self, min_display_text, max_display_text)
+		self.min_max_value_animation_id = self:animate_min_max_change(min_display_text, max_display_text)
 	end
 
 	self.selected_proc_data = proc_data
 	widget_content.visible = true
-
-	return 
 end
+
 AltarTraitProcUI.animate_min_max_change = function (self, min_display_text, max_display_text)
 	local widgets_by_name = self.widgets_by_name
 	local widget = widgets_by_name.slider_widget
@@ -561,6 +553,7 @@ AltarTraitProcUI.animate_min_max_change = function (self, min_display_text, max_
 
 	return self.ui_animator:start_animation(animation_name, widgets_by_name, self.scenegraph_definition, params)
 end
+
 AltarTraitProcUI.animate_current_value = function (self, animation_name, current_value, min, max, time_multiplier)
 	local widgets_by_name = self.widgets_by_name
 	local widget = widgets_by_name.slider_widget
@@ -577,6 +570,7 @@ AltarTraitProcUI.animate_current_value = function (self, animation_name, current
 
 	return self.ui_animator:start_animation(animation_name, widgets_by_name, self.scenegraph_definition, params, time_multiplier)
 end
+
 AltarTraitProcUI.animate_new_value = function (self, new_value, current_value, min, max, time_multiplier)
 	local widgets_by_name = self.widgets_by_name
 	local widget = widgets_by_name.slider_widget
@@ -595,6 +589,7 @@ AltarTraitProcUI.animate_new_value = function (self, new_value, current_value, m
 
 	return self.ui_animator:start_animation(animation_name, widgets_by_name, self.scenegraph_definition, params, time_multiplier)
 end
+
 AltarTraitProcUI.clear_item_display_data = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local num_traits = AltarSettings.num_traits
@@ -615,8 +610,8 @@ AltarTraitProcUI.clear_item_display_data = function (self)
 	description_widget.content.text = ""
 	description_widget.content.visible = false
 
-	self.set_description_text(self, "dlc1_1_roll_proc_description_1")
-	self.set_roll_button_disabled(self, true)
+	self:set_description_text("dlc1_1_roll_proc_description_1")
+	self:set_roll_button_disabled(true)
 
 	local ui_scenegraph = self.ui_scenegraph
 	local slider_widget = self.widgets_by_name.slider_widget
@@ -625,7 +620,7 @@ AltarTraitProcUI.clear_item_display_data = function (self)
 	ui_scenegraph.proc_slider_bar.size[1] = 0
 	ui_scenegraph.proc_slider_new_box.local_position[1] = 0
 
-	self.update_trait_alignment(self, num_traits - 1)
+	self:update_trait_alignment(num_traits - 1)
 
 	local slider_widget = widgets_by_name.slider_widget
 	local slider_widget_content = slider_widget.content
@@ -635,9 +630,8 @@ AltarTraitProcUI.clear_item_display_data = function (self)
 	slider_widget_content.current_proc_text = ""
 	ui_scenegraph.proc_slider_new_box.local_position[1] = 0
 	ui_scenegraph.proc_slider_current_box.local_position[1] = 0
-
-	return 
 end
+
 AltarTraitProcUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -654,42 +648,40 @@ AltarTraitProcUI.draw = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 AltarTraitProcUI.set_roll_button_disabled = function (self, disabled)
 	local widgets_by_name = self.widgets_by_name
 	local roll_button_widget = widgets_by_name.roll_button_widget
 	roll_button_widget.content.button_hotspot.disabled = disabled
 	roll_button_widget.content.show_title = disabled
 	roll_button_widget.content.show_glow = not disabled
-
-	return 
 end
+
 AltarTraitProcUI.is_roll_possible = function (self)
 	local widgets_by_name = self.widgets_by_name
 	local roll_button_widget = widgets_by_name.roll_button_widget
 
 	return not roll_button_widget.content.button_hotspot.disabled
 end
+
 AltarTraitProcUI.set_description_text = function (self, text)
 	local widgets_by_name = self.widgets_by_name
 	local description_widget = widgets_by_name.description_text_1
 	description_widget.content.text = text
-
-	return 
 end
+
 AltarTraitProcUI.add_item = function (self, backend_item_id, is_equipped)
 	local roll_button_widget = self.widgets_by_name.roll_button_widget
 
 	if self.charging or roll_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
-	self.clear_item_display_data(self)
-	self.play_sound(self, "Play_hud_inventory_drop_item")
+	self:clear_item_display_data()
+	self:play_sound("Play_hud_inventory_drop_item")
 
 	local item_data = BackendUtils.get_item_from_masterlist(backend_item_id)
 	local icon_texture = item_data.inventory_icon
@@ -715,7 +707,7 @@ AltarTraitProcUI.add_item = function (self, backend_item_id, is_equipped)
 		local trait_widget = widgets_by_name[widget_name]
 		local trait_widget_content = trait_widget.content
 		local trait_widget_hotspot = trait_widget_content.button_hotspot
-		trait_widget_hotspot.disabled = not self.can_select_trait(self, trait_name)
+		trait_widget_hotspot.disabled = not self:can_select_trait(trait_name)
 
 		if trait_name then
 			local trait_template = BuffTemplates[trait_name]
@@ -740,7 +732,7 @@ AltarTraitProcUI.add_item = function (self, backend_item_id, is_equipped)
 			trait_widget_hotspot.locked = not item_has_trait
 			trait_widget.style.texture_lock_id.color[1] = 255
 
-			if not trait_index_with_proc_data and self.get_trait_proc_data(self, backend_item_id, trait_name) then
+			if not trait_index_with_proc_data and self:get_trait_proc_data(backend_item_id, trait_name) then
 				trait_index_with_proc_data = i
 			elseif not trait_index_with_unlock and item_has_trait then
 				trait_index_with_unlock = i
@@ -758,20 +750,19 @@ AltarTraitProcUI.add_item = function (self, backend_item_id, is_equipped)
 	self.current_traits_data = current_traits_data
 	self.number_of_owned_traits = num_owned_traits
 
-	if 0 < number_of_traits_on_item then
-		self.set_roll_button_disabled(self, false)
+	if number_of_traits_on_item > 0 then
+		self:set_roll_button_disabled(false)
 	end
 
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	self.update_trait_alignment(self, number_of_traits_on_item)
+	self:update_trait_alignment(number_of_traits_on_item)
 
 	local new_trait_selection_index = trait_index_with_proc_data or trait_index_with_unlock
 
-	self.set_selected_trait(self, new_trait_selection_index)
-
-	return 
+	self:set_selected_trait(new_trait_selection_index)
 end
+
 AltarTraitProcUI.update_trait_alignment = function (self, number_of_traits)
 	local ui_scenegraph = self.ui_scenegraph
 	local width = 40
@@ -794,9 +785,8 @@ AltarTraitProcUI.update_trait_alignment = function (self, number_of_traits)
 		local widget = widgets_by_name[widget_name]
 		widget.content.visible = (i <= number_of_traits and true) or false
 	end
-
-	return 
 end
+
 AltarTraitProcUI.is_selected_trait_unlocked = function (self)
 	local active_item_id = self.active_item_id
 	local selected_trait_index = self.selected_trait_index
@@ -808,16 +798,15 @@ AltarTraitProcUI.is_selected_trait_unlocked = function (self)
 
 		return BackendUtils.item_has_trait(active_item_id, trait_name)
 	end
-
-	return 
 end
+
 AltarTraitProcUI.update_trait_cost_display = function (self, force_disable_button)
 	local roll_button_widget = self.widgets_by_name.roll_button_widget
-	local selected_trait_unlocked = self.is_selected_trait_unlocked(self)
+	local selected_trait_unlocked = self:is_selected_trait_unlocked()
 	local selected_proc_data = self.selected_proc_data
 	local has_selected_trait_max_proc_chance = selected_proc_data and selected_proc_data.current_value == selected_proc_data.max_value
-	local can_afford = self.can_afford_roll_cost(self)
-	local token_type, traits_cost, texture = self.get_roll_cost(self)
+	local can_afford = self:can_afford_roll_cost()
+	local token_type, traits_cost, texture = self:get_roll_cost()
 
 	if token_type then
 		roll_button_widget.content.texture_token_type = texture
@@ -835,7 +824,7 @@ AltarTraitProcUI.update_trait_cost_display = function (self, force_disable_butto
 
 	local button_enabled = selected_trait_unlocked and can_afford and not has_selected_trait_max_proc_chance
 
-	self.set_roll_button_disabled(self, not button_enabled)
+	self:set_roll_button_disabled(not button_enabled)
 
 	roll_button_widget.content.button_hotspot.is_selected = false
 	roll_button_widget.content.button_hotspot.is_hover = false
@@ -857,22 +846,22 @@ AltarTraitProcUI.update_trait_cost_display = function (self, force_disable_butto
 	if self.active_item_id then
 		if selected_trait_unlocked then
 			if has_selected_trait_max_proc_chance then
-				self.set_description_text(self, "dlc1_1_roll_proc_description_4")
+				self:set_description_text("dlc1_1_roll_proc_description_4")
 			else
-				self.set_description_text(self, "dlc1_1_roll_proc_description_2")
+				self:set_description_text("dlc1_1_roll_proc_description_2")
 			end
 		else
-			self.set_description_text(self, "dlc1_1_roll_proc_description_3")
+			self:set_description_text("dlc1_1_roll_proc_description_3")
 		end
 	else
-		self.set_description_text(self, "dlc1_1_roll_proc_description_1")
+		self:set_description_text("dlc1_1_roll_proc_description_1")
 	end
-
-	return 
 end
+
 AltarTraitProcUI.get_item_roll_info = function (self)
 	return self.active_item_id, self.selected_trait_name
 end
+
 AltarTraitProcUI.get_roll_cost = function (self)
 	local item_data = self.active_item_data
 
@@ -886,37 +875,35 @@ AltarTraitProcUI.get_roll_cost = function (self)
 
 		return token_type, traits_cost, texture
 	end
-
-	return 
 end
+
 AltarTraitProcUI.can_afford_roll_cost = function (self)
-	local token_type, traits_cost = self.get_roll_cost(self)
+	local token_type, traits_cost = self:get_roll_cost()
 
 	if traits_cost then
 		local num_tokens_owned = BackendUtils.get_tokens(token_type)
 
 		return traits_cost <= num_tokens_owned
 	end
-
-	return 
 end
+
 AltarTraitProcUI.refresh = function (self)
 	local selected_index = self.selected_trait_index
 
-	self.set_selected_trait(self, selected_index)
-
-	return 
+	self:set_selected_trait(selected_index)
 end
+
 AltarTraitProcUI.can_remove_item = function (self)
 	return self.active_item_id
 end
+
 AltarTraitProcUI.remove_item = function (self)
 	local roll_button_widget = self.widgets_by_name.roll_button_widget
 
 	if self.charging or roll_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	if self.current_value_animation_id then
@@ -948,7 +935,7 @@ AltarTraitProcUI.remove_item = function (self)
 	end
 
 	if self.active_item_id then
-		self.play_sound(self, "Play_hud_forge_item_remove")
+		self:play_sound("Play_hud_forge_item_remove")
 	end
 
 	self.active_item_id = nil
@@ -957,19 +944,18 @@ AltarTraitProcUI.remove_item = function (self)
 	self.selected_trait_name = nil
 	local roll_button_widget = widgets_by_name.roll_button_widget
 
-	self.clear_item_display_data(self)
+	self:clear_item_display_data()
 
 	local roll_button_widget = widgets_by_name.roll_button_widget
 	roll_button_widget.content.default_text_on_disable = false
-
-	return 
 end
+
 AltarTraitProcUI.roll = function (self, new_value)
 	self.rolling = true
 	local roll_button_widget = self.widgets_by_name.roll_button_widget
 	roll_button_widget.content.default_text_on_disable = false
 
-	self.set_roll_button_disabled(self, true)
+	self:set_roll_button_disabled(true)
 
 	if not self.current_value_animation_id then
 		local formatting = "%.1f"
@@ -980,7 +966,7 @@ AltarTraitProcUI.roll = function (self, new_value)
 		local current_value = selected_proc_data.current_value
 		local progress = (new_value - min_value) / (max_value - min_value)
 		local speed = 1 + 1 - progress
-		self.new_value_animation_id = self.animate_new_value(self, new_value, current_value, min_value, max_value, speed)
+		self.new_value_animation_id = self:animate_new_value(new_value, current_value, min_value, max_value, speed)
 		local improved_value_last_roll = current_value < new_value
 
 		if improved_value_last_roll then
@@ -991,29 +977,28 @@ AltarTraitProcUI.roll = function (self, new_value)
 	else
 		self.new_rolling_value = new_value
 	end
-
-	return 
 end
+
 AltarTraitProcUI.roll_failed = function (self)
 	self.roll_trait_index = nil
-
-	return 
 end
+
 AltarTraitProcUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 AltarTraitProcUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 AltarTraitProcUI.animate_element_pulse = function (self, target, target_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.pulse_animation, target, target_index, from, to, time)
 
 	return new_animation
 end
+
 AltarTraitProcUI.start_charge_progress = function (self)
 	self.charging = true
 	local animation_name = "gamepad_charge_progress"
@@ -1024,15 +1009,14 @@ AltarTraitProcUI.start_charge_progress = function (self)
 	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.roll_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
 	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
 
-	self.cancel_abort_animation(self)
+	self:cancel_abort_animation()
 
 	widget.content.charging = true
 	widget.style.progress_fill.color[1] = 255
 
-	self.play_sound(self, "Play_hud_reroll_traits_charge")
-
-	return 
+	self:play_sound("Play_hud_reroll_traits_charge")
 end
+
 AltarTraitProcUI.abort_charge_progress = function (self, force_shutdown)
 	local animation_name = "gamepad_charge_progress"
 	self.animations[animation_name] = nil
@@ -1040,16 +1024,15 @@ AltarTraitProcUI.abort_charge_progress = function (self, force_shutdown)
 	self.charging = nil
 	self.ui_scenegraph.roll_button_fill.size[1] = 0
 
-	self.play_sound(self, "Stop_hud_reroll_traits_charge")
+	self:play_sound("Stop_hud_reroll_traits_charge")
 
 	if force_shutdown then
-		self.cancel_abort_animation(self)
+		self:cancel_abort_animation()
 	else
-		self.start_abort_animation(self)
+		self:start_abort_animation()
 	end
-
-	return 
 end
+
 AltarTraitProcUI.on_charge_complete = function (self)
 	self.charging = nil
 	self.gamepad_roll_request = true
@@ -1066,10 +1049,9 @@ AltarTraitProcUI.on_charge_complete = function (self)
 	widget.style.text_disabled.text_color[1] = 0
 	widget.style.texture_token_type.color[1] = 0
 
-	self.play_sound(self, "Stop_hud_reroll_traits_charge")
-
-	return 
+	self:play_sound("Stop_hud_reroll_traits_charge")
 end
+
 AltarTraitProcUI.start_abort_animation = function (self)
 	local animation_name = "gamepad_charge_progress_abort"
 	local from = 0
@@ -1082,9 +1064,8 @@ AltarTraitProcUI.start_abort_animation = function (self)
 	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
-
-	return 
 end
+
 AltarTraitProcUI.cancel_abort_animation = function (self)
 	local animations = self.animations
 	animations.gamepad_charge_progress_abort = nil
@@ -1107,35 +1088,33 @@ AltarTraitProcUI.cancel_abort_animation = function (self)
 	widget.style.token_text.text_color[1] = 255
 	widget.style.text_disabled.text_color[1] = 255
 	widget.style.text.text_color[1] = 255
-
-	return 
 end
+
 AltarTraitProcUI.on_charge_animations_complete = function (self, animation_name)
 	if animation_name == "gamepad_charge_progress" then
-		self.on_charge_complete(self)
+		self:on_charge_complete()
 	end
 
 	if animation_name == "gamepad_charge_progress_abort" then
 		local widget = self.widgets_by_name.roll_button_widget
 		widget.content.show_cancel_text = false
 	end
-
-	return 
 end
+
 AltarTraitProcUI.on_gamepad_activated = function (self)
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "enchantment_view")
+	local input_service = input_manager:get_service("enchantment_view")
 	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
 	local button_texture = button_texture_data.texture
 	local button_size = button_texture_data.size
 	local widget = self.widgets_by_name.roll_button_widget
 	widget.content.progress_input_icon = button_texture
+end
 
-	return 
-end
 AltarTraitProcUI.on_gamepad_deactivated = function (self)
-	return 
+	return
 end
+
 AltarTraitProcUI.set_active = function (self, active)
 	self.active = active
 	local widget = self.widgets_by_name.roll_button_widget
@@ -1143,10 +1122,8 @@ AltarTraitProcUI.set_active = function (self, active)
 	if self.charging or widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
-
-	return 
 end
 
-return 
+return

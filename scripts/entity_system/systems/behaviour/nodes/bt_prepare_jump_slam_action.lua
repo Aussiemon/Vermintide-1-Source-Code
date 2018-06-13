@@ -2,12 +2,13 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 local position_lookup = POSITION_LOOKUP
 BTPrepareJumpSlamAction = class(BTPrepareJumpSlamAction, BTNode)
+
 BTPrepareJumpSlamAction.init = function (self, ...)
 	BTPrepareJumpSlamAction.super.init(self, ...)
-
-	return 
 end
+
 BTPrepareJumpSlamAction.name = "BTPrepareJumpSlamAction"
+
 BTPrepareJumpSlamAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	blackboard.jump_slam_data = {
@@ -16,9 +17,8 @@ BTPrepareJumpSlamAction.enter = function (self, unit, blackboard, t)
 		segment_list = {}
 	}
 	blackboard.move_state = nil
-
-	return 
 end
+
 BTPrepareJumpSlamAction.leave = function (self, unit, blackboard, t, reason)
 	if reason == "aborted" then
 		blackboard.jump_slam_data = nil
@@ -26,9 +26,8 @@ BTPrepareJumpSlamAction.leave = function (self, unit, blackboard, t, reason)
 
 		blackboard.navigation_extension:set_enabled(true)
 	end
-
-	return 
 end
+
 BTPrepareJumpSlamAction.run = function (self, unit, blackboard, t, dt)
 	local data = blackboard.jump_slam_data
 	local state = data.state
@@ -41,7 +40,7 @@ BTPrepareJumpSlamAction.run = function (self, unit, blackboard, t, dt)
 
 			return "done"
 		end
-	elseif 0 < data.num_jump_tries then
+	elseif data.num_jump_tries > 0 then
 		local success, velocity = BTPrepareJumpSlamAction.prepare_jump_new(blackboard, unit, data, t)
 
 		if success then
@@ -74,13 +73,13 @@ BTPrepareJumpSlamAction.run = function (self, unit, blackboard, t, dt)
 
 	return "running"
 end
+
 BTPrepareJumpSlamAction.start_jump_animation = function (blackboard, unit, velocity)
 	blackboard.navigation_extension:set_enabled(false)
 	Managers.state.network:anim_event(unit, "attack_jump")
 	LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
-
-	return 
 end
+
 BTPrepareJumpSlamAction.try_position = function (nav_world, pos, to_target_normalized)
 	local found_impact_pos = nil
 	local angle = 0
@@ -100,6 +99,7 @@ BTPrepareJumpSlamAction.try_position = function (nav_world, pos, to_target_norma
 
 	return found_impact_pos
 end
+
 BTPrepareJumpSlamAction.prepare_jump_old = function (blackboard, unit, data, t)
 	local p1 = position_lookup[unit]
 	local found_impact_pos = nil
@@ -116,7 +116,7 @@ BTPrepareJumpSlamAction.prepare_jump_old = function (blackboard, unit, data, t)
 	found_impact_pos = found_impact_pos or BTPrepareJumpSlamAction.try_position(blackboard.nav_world, p2, to_target_normalized)
 
 	if not found_impact_pos then
-		return 
+		return
 	end
 
 	p2 = found_impact_pos
@@ -129,6 +129,7 @@ BTPrepareJumpSlamAction.prepare_jump_old = function (blackboard, unit, data, t)
 
 	return success, velocity
 end
+
 BTPrepareJumpSlamAction.test_trajectory_old = function (blackboard, p1, p2, segment_list)
 	local physics_world = World.get_data(blackboard.world, "physics_world")
 	local gravity = -blackboard.breed.jump_slam_gravity
@@ -139,6 +140,7 @@ BTPrepareJumpSlamAction.test_trajectory_old = function (blackboard, p1, p2, segm
 
 	return success, velocity, time_of_flight
 end
+
 BTPrepareJumpSlamAction.prepare_jump_new = function (blackboard, unit, data, t)
 	local p1 = position_lookup[unit]
 	local found_impact_pos = nil
@@ -156,6 +158,7 @@ BTPrepareJumpSlamAction.prepare_jump_new = function (blackboard, unit, data, t)
 
 	return success, velocity
 end
+
 BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segment_list, to_target_normalized, multiple_raycasts)
 	local physics_world = World.physics_world(blackboard.world)
 	local gravity = -blackboard.breed.jump_slam_gravity
@@ -181,7 +184,7 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 	end
 
 	if not hit_pos then
-		return 
+		return
 	end
 
 	if script_data.debug_ai_movement then
@@ -197,7 +200,7 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 	end
 
 	if not hit_pos then
-		return 
+		return
 	end
 
 	if script_data.debug_ai_movement then
@@ -209,26 +212,26 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 
 		if multiple_raycasts then
 			if not in_los then
-				return 
+				return
 			end
 
 			in_los = WeaponHelper.ray_segmented_test(physics_world, segment_list, Vector3(0, 0, 3))
 
 			if not in_los then
-				return 
+				return
 			end
 
 			local right = Vector3.cross(Vector3.normalize(p2 - p1), Vector3.up()) * 1
 			in_los = WeaponHelper.ray_segmented_test(physics_world, segment_list, Vector3(0, 0, 1.5) + right)
 
 			if not in_los then
-				return 
+				return
 			end
 
 			in_los = WeaponHelper.ray_segmented_test(physics_world, segment_list, Vector3(0, 0, 1.5) - right)
 
 			if not in_los then
-				return 
+				return
 			end
 		end
 	end
@@ -236,4 +239,4 @@ BTPrepareJumpSlamAction.test_trajectory_new = function (blackboard, p1, p2, segm
 	return in_los, velocity, time_of_flight, hit_pos
 end
 
-return 
+return

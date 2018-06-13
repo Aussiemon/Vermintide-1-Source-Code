@@ -23,19 +23,19 @@ script_data.ledge_hanging_turned_off = script_data.ledge_hanging_turned_off or D
 TimesJumpedInAir = 0
 PlayerCharacterStateFalling = class(PlayerCharacterStateFalling, PlayerCharacterState)
 local position_lookup = POSITION_LOOKUP
+
 PlayerCharacterStateFalling.init = function (self, character_state_init_context)
 	PlayerCharacterState.init(self, character_state_init_context, "falling")
 
 	self.last_valid_nav_position = Vector3Box()
 	self.ladder_shaking = false
-
-	return 
 end
+
 PlayerCharacterStateFalling.on_enter = function (self, unit, input, dt, context, t, previous_state, params)
 	local input_extension = self.input_extension
 	local status_extension = self.status_extension
 
-	status_extension.set_falling_height(status_extension)
+	status_extension:set_falling_height()
 
 	self.falling_reason = previous_state
 
@@ -66,12 +66,11 @@ PlayerCharacterStateFalling.on_enter = function (self, unit, input, dt, context,
 	if previous_state ~= "jumping" then
 		ScriptUnit.extension(unit, "whereabouts_system"):set_fell()
 	end
-
-	return 
 end
+
 PlayerCharacterStateFalling.on_exit = function (self, unit, input, dt, context, t, next_state)
 	if not Managers.state.network:game() or not next_state then
-		return 
+		return
 	end
 
 	self.locomotion_extension:reset_maximum_upwards_velocity()
@@ -86,15 +85,14 @@ PlayerCharacterStateFalling.on_exit = function (self, unit, input, dt, context, 
 	else
 		ScriptUnit.extension(unit, "whereabouts_system"):set_no_landing()
 	end
-
-	return 
 end
+
 PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t)
 	local velocity = self.locomotion_extension:current_velocity()
 	local self_pos = POSITION_LOOKUP[unit]
 	local world = self.world
 
-	if 0 < velocity.z then
+	if velocity.z > 0 then
 		self.start_fall_height = position_lookup[unit].z
 	end
 
@@ -114,39 +112,39 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 	local status_extension = self.status_extension
 
 	if CharacterStateHelper.do_common_state_transitions(status_extension, csm) then
-		return 
+		return
 	end
 
 	if CharacterStateHelper.is_overcharge_exploding(status_extension) then
-		csm.change_state(csm, "overcharge_exploding")
+		csm:change_state("overcharge_exploding")
 
-		return 
+		return
 	end
 
 	local movement_settings_table = PlayerUnitMovementSettings.get_movement_settings_table(unit)
 
 	if CharacterStateHelper.is_pushed(status_extension) then
-		status_extension.set_pushed(status_extension, false)
-		csm.change_state(csm, "stunned", movement_settings_table.stun_settings.pushed)
+		status_extension:set_pushed(false)
+		csm:change_state("stunned", movement_settings_table.stun_settings.pushed)
 
-		return 
+		return
 	end
 
 	if CharacterStateHelper.is_block_broken(status_extension) then
-		status_extension.set_block_broken(status_extension, false)
-		csm.change_state(csm, "stunned", movement_settings_table.stun_settings.parry_broken)
+		status_extension:set_block_broken(false)
+		csm:change_state("stunned", movement_settings_table.stun_settings.parry_broken)
 
-		return 
+		return
 	end
 
 	if not csm.state_next and CharacterStateHelper.is_colliding_down(unit) then
 		if CharacterStateHelper.is_moving(input_extension) then
-			csm.change_state(csm, "walking")
+			csm:change_state("walking")
 		else
-			csm.change_state(csm, "standing")
+			csm:change_state("standing")
 		end
 
-		return 
+		return
 	end
 
 	local colliding_with_ladder, ladder_unit = CharacterStateHelper.is_colliding_with_gameplay_collision_box(world, unit, "filter_ladder_collision")
@@ -160,23 +158,23 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 		local distance = Vector3.dot(ladder_plane_inv_normal, ladder_offset)
 		local epsilon = 0.02
 
-		if self_pos.z < Vector3.z(Unit.world_position(ladder_unit, top_node)) and 0 < distance and distance < 0.7 + epsilon then
+		if self_pos.z < Vector3.z(Unit.world_position(ladder_unit, top_node)) and distance > 0 and distance < 0.7 + epsilon then
 			local params = self.temp_params
 			params.ladder_unit = ladder_unit
 
-			csm.change_state(csm, "climbing_ladder", params)
+			csm:change_state("climbing_ladder", params)
 
-			return 
+			return
 		end
 	end
 
 	if CharacterStateHelper.is_ledge_hanging(world, unit, self.temp_params) then
-		csm.change_state(csm, "ledge_hanging", self.temp_params)
+		csm:change_state("ledge_hanging", self.temp_params)
 
-		return 
+		return
 	end
 
-	if script_data.use_super_jumps and input_extension.get(input_extension, "jump") then
+	if script_data.use_super_jumps and input_extension:get("jump") then
 		self.times_jumped_in_air = math.min(#fix, self.times_jumped_in_air + 1)
 		local text = string.format("%sjump!", fix[self.times_jumped_in_air])
 
@@ -192,7 +190,7 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 
 	local inventory_extension = self.inventory_extension
 	local move_speed = movement_settings_table.move_speed
-	local move_speed_multiplier = status_extension.current_move_speed_multiplier(status_extension)
+	local move_speed_multiplier = status_extension:current_move_speed_multiplier()
 	move_speed = move_speed * move_speed_multiplier
 	move_speed = move_speed * movement_settings_table.player_speed_scale
 	move_speed = move_speed * movement_settings_table.player_air_speed_scale
@@ -205,34 +203,32 @@ PlayerCharacterStateFalling.update = function (self, unit, input, dt, context, t
 	local interactor_extension = self.interactor_extension
 
 	if CharacterStateHelper.is_starting_interaction(input_extension, interactor_extension) then
-		local config = interactor_extension.interaction_config(interactor_extension)
+		local config = interactor_extension:interaction_config()
 
-		interactor_extension.start_interaction(interactor_extension, "interacting")
+		interactor_extension:start_interaction("interacting")
 
 		if not config.allow_movement then
 			local params = self.temp_params
 			params.swap_to_3p = config.swap_to_3p
 
-			csm.change_state(csm, "interacting", params)
+			csm:change_state("interacting", params)
 		end
 
-		return 
+		return
 	end
 
 	if CharacterStateHelper.is_interacting(interactor_extension) then
-		local config = interactor_extension.interaction_config(interactor_extension)
+		local config = interactor_extension:interaction_config()
 
 		if not config.allow_movement then
 			local params = self.temp_params
 			params.swap_to_3p = config.swap_to_3p
 
-			csm.change_state(csm, "interacting", params)
+			csm:change_state("interacting", params)
 		end
 
-		return 
+		return
 	end
-
-	return 
 end
 
-return 
+return

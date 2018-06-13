@@ -3,23 +3,26 @@ require("scripts/managers/telemetry/telemetry_events")
 require("scripts/managers/telemetry/telemetry_rpc_listener")
 
 TelemetryManagerDummy = class(TelemetryManagerDummy)
+
 TelemetryManagerDummy.init = function (self)
 	self.events = TelemetryEvents:new(self)
 	self.rpc_listener = TelemetryRPCListener:new(self.events)
+end
 
-	return 
-end
 TelemetryManagerDummy.reset = function (self)
-	return 
+	return
 end
+
 TelemetryManagerDummy.update = function (self, dt)
-	return 
+	return
 end
+
 TelemetryManagerDummy.register_event = function (self, event_type, event_params)
-	return 
+	return
 end
+
 TelemetryManagerDummy.send = function (self)
 	return CurlToken:new()
 end
 
-return 
+return

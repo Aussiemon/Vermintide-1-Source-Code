@@ -9,4 +9,4 @@ NoneActLevels[#NoneActLevels + 1] = "dlc_stromdorf_town"
 LengthTypeByLevel.dlc_stromdorf_hills = "long"
 LengthTypeByLevel.dlc_stromdorf_town = "long"
 
-return 
+return

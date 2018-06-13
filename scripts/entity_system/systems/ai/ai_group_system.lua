@@ -13,17 +13,16 @@ local function readonlytable(table)
 		__index = table,
 		__newindex = function (table, key, value)
 			error("Coder trying to modify a AI group system read-only empty table. Don't do it!")
-
-			return 
 		end
 	})
 end
 
 local EMPTY_TABLE = readonlytable({})
+
 AIGroupSystem.init = function (self, context, system_name)
 	local entity_manager = context.entity_manager
 
-	entity_manager.register_system(entity_manager, self, system_name, extensions)
+	entity_manager:register_system(self, system_name, extensions)
 
 	self.entity_manager = entity_manager
 	self.is_server = context.is_server
@@ -36,13 +35,14 @@ AIGroupSystem.init = function (self, context, system_name)
 	self.unit_extension_data = {}
 	self.dummy_extension = readonlytable({})
 	self.group_uid = 0
+end
 
-	return 
-end
 AIGroupSystem.destroy = function (self)
-	return 
+	return
 end
+
 local dummy_input = readonlytable({})
+
 AIGroupSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local id = extension_init_data.id
 
@@ -99,6 +99,7 @@ AIGroupSystem.on_add_extension = function (self, world, unit, extension_name, ex
 
 	return extension
 end
+
 AIGroupSystem.on_remove_extension = function (self, unit, extension_name)
 	local extension = self.unit_extension_data[unit]
 
@@ -106,19 +107,18 @@ AIGroupSystem.on_remove_extension = function (self, unit, extension_name)
 		fassert(next(extension) == nil, "No extension data for unit %s", unit)
 		ScriptUnit.remove_extension(unit, self.NAME)
 
-		return 
+		return
 	end
 
-	self.on_freeze_extension(self, unit, extension_name)
+	self:on_freeze_extension(unit, extension_name)
 	ScriptUnit.remove_extension(unit, self.NAME)
-
-	return 
 end
+
 AIGroupSystem.on_freeze_extension = function (self, unit, extension_name)
 	local extension = self.unit_extension_data[unit]
 
 	if extension == self.dummy_extension or extension == nil or extension.frozen then
-		return 
+		return
 	end
 
 	local id = extension.id
@@ -146,19 +146,20 @@ AIGroupSystem.on_freeze_extension = function (self, unit, extension_name)
 	end
 
 	extension.frozen = true
+end
 
-	return 
-end
 AIGroupSystem.hot_join_sync = function (self, sender, player)
-	return 
+	return
 end
+
 local debug_drawer_info = {
 	mode = "retained",
 	name = "AIGroupTemplates_retained"
 }
+
 AIGroupSystem.update = function (self, context, t)
 	if not self.is_server then
-		return 
+		return
 	end
 
 	local world = self.world
@@ -167,7 +168,7 @@ AIGroupSystem.update = function (self, context, t)
 
 	for id, group in pairs(self.groups_to_initialize) do
 		if group.num_spawned_members == group.size then
-			if 0 < group.members_n then
+			if group.members_n > 0 then
 				local template = group.template
 				local template_init = AIGroupTemplates[template].init
 
@@ -191,16 +192,16 @@ AIGroupSystem.update = function (self, context, t)
 	if not script_data.ai_group_debug then
 		local drawer = Managers.state.debug:drawer(debug_drawer_info)
 
-		drawer.reset(drawer)
+		drawer:reset()
 	end
-
-	return 
 end
+
 AIGroupSystem.generate_group_id = function (self)
 	self.group_uid = self.group_uid + 1
 
 	return self.group_uid
 end
+
 AIGroupSystem.set_allowed_layer = function (self, layer_name, allowed)
 	local layer_id = LAYER_ID_MAPPING[layer_name]
 
@@ -213,8 +214,6 @@ AIGroupSystem.set_allowed_layer = function (self, layer_name, allowed)
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

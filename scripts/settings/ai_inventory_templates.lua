@@ -314,12 +314,14 @@ local melee_configurations = {
 	"sword",
 	"spear"
 }
+
 AIInventoryTemplates.random_melee = function ()
 	local index = math.random(1, #melee_configurations)
 	local config_name = melee_configurations[index]
 
 	return config_name
 end
+
 AIInventoryTemplates.default = function ()
 	return AIInventoryTemplates.random_melee()
 end
@@ -339,4 +341,4 @@ for config_name, config in pairs(InventoryConfigurations) do
 	end
 end
 
-return 
+return

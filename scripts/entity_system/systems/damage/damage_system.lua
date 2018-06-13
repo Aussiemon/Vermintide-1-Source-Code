@@ -25,27 +25,27 @@ local extensions = {
 	"MimicOwnerDamageExtension",
 	"LootRatDamageExtension"
 }
+
 DamageSystem.init = function (self, entity_system_creation_context, system_name)
 	DamageSystem.super.init(self, entity_system_creation_context, system_name, extensions)
 
 	local network_event_delegate = entity_system_creation_context.network_event_delegate
 	self.network_event_delegate = network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self.extension_unit_data = {}
 	self.inherited_extension_unit_data = {}
 	self.active_damage_buffer_index = 1
 	self.extension_init_context.system_data = self
-
-	return 
 end
+
 DamageSystem.destroy = function (self)
 	self.network_event_delegate:unregister(self)
-
-	return 
 end
+
 local dummy_input = {}
+
 DamageSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local extension = DamageSystem.super.on_add_extension(self, world, unit, extension_name, extension_init_data)
 
@@ -60,14 +60,15 @@ DamageSystem.on_add_extension = function (self, world, unit, extension_name, ext
 
 	return extension
 end
+
 DamageSystem.on_remove_extension = function (self, unit, extension_name)
 	DamageSystem.super.on_remove_extension(self, unit, extension_name)
 
 	self.extension_unit_data[unit] = nil
-
-	return 
 end
+
 local debug_found_units = {}
+
 DamageSystem.update = function (self, context, t)
 	local pdArray_set_empty = pdArray.set_empty
 	self.active_damage_buffer_index = 3 - self.active_damage_buffer_index
@@ -85,7 +86,7 @@ DamageSystem.update = function (self, context, t)
 	local dummy_input = dummy_input
 
 	for unit, extension in pairs(self.inherited_extension_unit_data) do
-		extension.update(extension, unit, dummy_input, dt, context, t)
+		extension:update(unit, dummy_input, dt, context, t)
 	end
 
 	if self.is_server and DebugKeyHandler.key_pressed("q", "Deal damage to enemies", "DamageSystem", "left ctrl") then
@@ -98,7 +99,7 @@ DamageSystem.update = function (self, context, t)
 
 		local damage_system = Managers.state.entity:system("damage_system")
 		local network_manager = Managers.state.network
-		local player_unit_id = network_manager.unit_game_object_id(network_manager, player_unit)
+		local player_unit_id = network_manager:unit_game_object_id(player_unit)
 		local player_unit_pos = Unit.world_position(player_unit, 0)
 		local hit_zone_id = NetworkLookup.hit_zones.full
 		local damage_type_id = NetworkLookup.damage_types.undefined
@@ -108,19 +109,18 @@ DamageSystem.update = function (self, context, t)
 			local unit = debug_found_units[i]
 			local unit_pos = Unit.world_position(unit, 0)
 			local damage_direction = Vector3.normalize(unit_pos - player_unit_pos)
-			local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+			local unit_id = network_manager:unit_game_object_id(unit)
 
-			damage_system.rpc_add_damage_network(damage_system, nil, unit_id, player_unit_id, false, 255, hit_zone_id, damage_type_id, damage_direction, damage_source_id)
+			damage_system:rpc_add_damage_network(nil, unit_id, player_unit_id, false, 255, hit_zone_id, damage_type_id, damage_direction, damage_source_id)
 		end
 	end
-
-	return 
 end
+
 DamageSystem.rpc_add_damage_network = function (self, sender, victim_unit_go_id, attacker_unit_go_id, attacker_is_level_unit, damage_amount, hit_zone_id, damage_type_id, damage_direction, damage_source_id)
 	assert(self.is_server, "Tried sending rpc_add_damage_network to something other than the server")
 
 	local unit_storage = self.unit_storage
-	local victim_unit = unit_storage.unit(unit_storage, victim_unit_go_id)
+	local victim_unit = unit_storage:unit(victim_unit_go_id)
 	local attacker_unit = nil
 
 	if attacker_is_level_unit then
@@ -134,13 +134,12 @@ DamageSystem.rpc_add_damage_network = function (self, sender, victim_unit_go_id,
 	local damage_source = NetworkLookup.damage_sources[damage_source_id]
 
 	if not Unit.alive(victim_unit) then
-		return 
+		return
 	end
 
 	DamageUtils.add_damage_network(victim_unit, attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source)
-
-	return 
 end
+
 DamageSystem.rpc_add_damage = function (self, sender, victim_unit_go_id, attacker_unit_go_id, attacker_is_level_unit, damage_amount, hit_zone_id, damage_type_id, damage_direction, damage_source_id, hit_ragdoll_actor_id)
 	local victim_unit = self.unit_storage:unit(victim_unit_go_id)
 	local attacker_unit = nil
@@ -157,7 +156,7 @@ DamageSystem.rpc_add_damage = function (self, sender, victim_unit_go_id, attacke
 	local hit_ragdoll_actor = NetworkLookup.hit_ragdoll_actors[hit_ragdoll_actor_id]
 
 	if not Unit.alive(victim_unit) then
-		return 
+		return
 	end
 
 	local attacker_unit_alive = Unit.alive(attacker_unit)
@@ -172,14 +171,14 @@ DamageSystem.rpc_add_damage = function (self, sender, victim_unit_go_id, attacke
 			if has_inventory_extension then
 				local inventory_extension = ScriptUnit.extension(attacker_unit, "ai_inventory_system")
 
-				inventory_extension.play_hit_sound(inventory_extension, victim_unit, damage_type)
+				inventory_extension:play_hit_sound(victim_unit, damage_type)
 			end
 		end
 
 		if ScriptUnit.has_extension(attacker_unit, "hud_system") then
 			local health_extension = ScriptUnit.extension(victim_unit, "health_system")
 			local damage_source = NetworkLookup.damage_sources[damage_source_id]
-			local should_indicate_hit = health_extension.is_alive(health_extension) and attacker_unit ~= victim_unit and damage_source ~= "wounded_degen"
+			local should_indicate_hit = health_extension:is_alive() and attacker_unit ~= victim_unit and damage_source ~= "wounded_degen"
 
 			if should_indicate_hit then
 				local hud_extension = ScriptUnit.extension(attacker_unit, "hud_system")
@@ -189,12 +188,11 @@ DamageSystem.rpc_add_damage = function (self, sender, victim_unit_go_id, attacke
 	end
 
 	ScriptUnit.extension(victim_unit, "damage_system"):add_damage((attacker_unit_alive and attacker_unit) or victim_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source, hit_ragdoll_actor)
-
-	return 
 end
+
 DamageSystem.rpc_add_damage_multiple = function (self, sender, victim_units, attacker_unit_go_id, damage_amount, hit_zone_id, damage_type_id, damage_source_id)
 	local unit_storage = self.unit_storage
-	local attacker_unit = unit_storage.unit(unit_storage, attacker_unit_go_id)
+	local attacker_unit = unit_storage:unit(attacker_unit_go_id)
 	local attacker_position = Unit.local_position(attacker_unit, 0)
 	local buff_extension = nil
 
@@ -208,39 +206,37 @@ DamageSystem.rpc_add_damage_multiple = function (self, sender, victim_units, att
 	local num_victims = #victim_units
 
 	for i = 1, num_victims, 1 do
-		local victim_unit_go_id = victim_units[i]
-		local victim_unit = unit_storage.unit(unit_storage, victim_unit_go_id)
+		repeat
+			local victim_unit_go_id = victim_units[i]
+			local victim_unit = unit_storage:unit(victim_unit_go_id)
 
-		if victim_unit then
-			if not Unit.alive(victim_unit) then
-			else
-				local victim_position = Unit.local_position(victim_unit, 0)
-				local damage_direction = Vector3.normalize(victim_position - attacker_position)
-
-				ScriptUnit.extension(victim_unit, "damage_system"):add_damage(attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source)
+			if not victim_unit or not Unit.alive(victim_unit) then
+				break
 			end
-		end
-	end
 
-	return 
+			local victim_position = Unit.local_position(victim_unit, 0)
+			local damage_direction = Vector3.normalize(victim_position - attacker_position)
+
+			ScriptUnit.extension(victim_unit, "damage_system"):add_damage(attacker_unit, damage_amount, hit_zone_name, damage_type, damage_direction, damage_source)
+		until true
+	end
 end
+
 DamageSystem.rpc_remove_assist_shield = function (self, sender, unit_go_id)
 	local unit = self.unit_storage:unit(unit_go_id)
 	local damage_extension = ScriptUnit.extension(unit, "damage_system")
 
-	damage_extension.remove_assist_shield(damage_extension, "blocked_damage")
-
-	return 
+	damage_extension:remove_assist_shield("blocked_damage")
 end
+
 DamageSystem._assist_shield = function (self, target_unit, shield_amount)
 	local damage_extension = ScriptUnit.extension(target_unit, "damage_system")
 	local status_extension = ScriptUnit.extension(target_unit, "status_system")
 
-	damage_extension.shield(damage_extension, shield_amount)
-	status_extension.set_shielded(status_extension, true)
-
-	return 
+	damage_extension:shield(shield_amount)
+	status_extension:set_shielded(true)
 end
+
 DamageSystem.rpc_request_heal = function (self, sender, unit_go_id, heal_amount, heal_type_id)
 	fassert(Managers.player.is_server or LEVEL_EDITOR_TEST, "trying to request a heal from a client")
 
@@ -248,7 +244,7 @@ DamageSystem.rpc_request_heal = function (self, sender, unit_go_id, heal_amount,
 	local unit = self.unit_storage:unit(unit_go_id)
 
 	if not Unit.alive(unit) then
-		return 
+		return
 	end
 
 	if heal_type == "shield_by_assist" then
@@ -256,43 +252,40 @@ DamageSystem.rpc_request_heal = function (self, sender, unit_go_id, heal_amount,
 	else
 		DamageUtils.heal_network(unit, unit, heal_amount, heal_type)
 	end
-
-	return 
 end
+
 DamageSystem.rpc_heal = function (self, sender, target_unit_go_id, healer_unit_go_id, damage_amount, heal_type_id)
 	local target_unit = self.unit_storage:unit(target_unit_go_id)
 
 	if not target_unit then
-		return 
+		return
 	end
 
 	if heal_type_id == NetworkLookup.heal_types.shield_by_assist then
-		self._assist_shield(self, target_unit, damage_amount)
+		self:_assist_shield(target_unit, damage_amount)
 	else
 		local damage_extension = ScriptUnit.extension(target_unit, "damage_system")
 		local status_extension = ScriptUnit.extension(target_unit, "status_system")
 
-		damage_extension.heal(damage_extension, target_unit, damage_amount)
-		status_extension.healed(status_extension, NetworkLookup.heal_types[heal_type_id])
+		damage_extension:heal(target_unit, damage_amount)
+		status_extension:healed(NetworkLookup.heal_types[heal_type_id])
 	end
-
-	return 
 end
+
 DamageSystem.rpc_area_damage = function (self, sender, go_id, position)
 	local unit = self.unit_storage:unit(go_id)
 	local area_damage_system = ScriptUnit.extension(unit, "area_damage_system")
 
 	if area_damage_system then
-		area_damage_system.start(area_damage_system)
+		area_damage_system:start()
 	end
-
-	return 
 end
+
 DamageSystem.rpc_take_falling_damage = function (self, sender, go_id, fall_height)
 	local unit = self.unit_storage:unit(go_id)
 
 	if not unit or not Unit.alive(unit) then
-		return 
+		return
 	end
 
 	fall_height = fall_height * 0.25
@@ -312,42 +305,39 @@ DamageSystem.rpc_take_falling_damage = function (self, sender, go_id, fall_heigh
 
 		DamageUtils.add_damage_network(unit, unit, fall_damage, hit_zone_name, damage_type, damage_direction, "ground_impact")
 	end
-
-	return 
 end
+
 DamageSystem.suicide = function (self, unit)
 	if not unit or not Unit.alive(unit) then
 		print("got suicide from deleted player unit")
 
-		return 
+		return
 	end
 
 	if not Unit.alive(unit) then
 		print("trying suicide but already dead")
 
-		return 
+		return
 	end
 
 	local health_extension = ScriptUnit.extension(unit, "health_system")
 
-	health_extension.set_max_health(health_extension, 100)
-	health_extension.set_current_damage(health_extension, 90)
+	health_extension:set_max_health(100)
+	health_extension:set_current_damage(90)
 
 	health_extension.state = "knocked_down"
 
 	DamageUtils.add_damage_network(unit, unit, 255, "torso", "cutting", Vector3(1, 0, 0), "suicide")
 
 	self.already_dead = true
-
-	return 
 end
+
 DamageSystem.rpc_suicide = function (self, sender, go_id)
 	local unit = self.unit_storage:unit(go_id)
 
-	self.suicide(self, unit)
-
-	return 
+	self:suicide(unit)
 end
+
 DamageSystem.rpc_level_object_damage = function (self, sender, level_object_id, damage_amount, attack_direction, damage_source_id)
 	if self.is_server then
 		Managers.state.network.network_transmit:send_rpc_clients_except("rpc_level_object_damage", sender, level_object_id, damage_amount, attack_direction, damage_source_id)
@@ -360,11 +350,10 @@ DamageSystem.rpc_level_object_damage = function (self, sender, level_object_id, 
 		local hit_zone_name = "full"
 		local damage_extension = ScriptUnit.extension(hit_unit, "damage_system")
 
-		damage_extension.add_damage(damage_extension, hit_unit, damage_amount, hit_zone_name, "destructible_level_object_hit", attack_direction, NetworkLookup.damage_sources[damage_source_id])
+		damage_extension:add_damage(hit_unit, damage_amount, hit_zone_name, "destructible_level_object_hit", attack_direction, NetworkLookup.damage_sources[damage_source_id])
 	end
-
-	return 
 end
+
 DamageSystem.rpc_level_object_heal = function (self, sender, level_object_id, heal_amount)
 	if self.is_server then
 		Managers.state.network.network_transmit:send_rpc_clients_except("rpc_level_object_heal", sender, level_object_id, heal_amount)
@@ -376,11 +365,10 @@ DamageSystem.rpc_level_object_heal = function (self, sender, level_object_id, he
 	if hit_unit and Unit.alive(hit_unit) then
 		local damage_extension = ScriptUnit.extension(hit_unit, "damage_system")
 
-		damage_extension.heal(damage_extension, hit_unit, heal_amount)
+		damage_extension:heal(hit_unit, heal_amount)
 	end
-
-	return 
 end
+
 DamageSystem.rpc_create_explosion = function (self, sender, attacker_unit_id, attacker_is_level_unit, position, rotation, explosion_template_name_id, scale, damage_source_id)
 	if self.is_server then
 		Managers.state.network.network_transmit:send_rpc_clients_except("rpc_create_explosion", sender, attacker_unit_id, attacker_is_level_unit, position, rotation, explosion_template_name_id, scale, damage_source_id)
@@ -401,9 +389,8 @@ DamageSystem.rpc_create_explosion = function (self, sender, attacker_unit_id, at
 	local is_husk = true
 
 	DamageUtils.create_explosion(self.world, attacker_unit, position, rotation, explosion_template.explosion, scale, damage_source, self.is_server, is_husk)
-
-	return 
 end
+
 DamageSystem.create_explosion = function (self, attacker_unit, position, rotation, explosion_template_name, scale, damage_source)
 	if not NetworkUtils.network_safe_position(position) then
 		return false
@@ -415,7 +402,7 @@ DamageSystem.create_explosion = function (self, attacker_unit, position, rotatio
 	DamageUtils.create_explosion(self.world, attacker_unit, position, rotation, explosion_template.explosion, scale, damage_source, self.is_server, is_husk)
 
 	local network_manager = Managers.state.network
-	local attacker_unit_id, attacker_is_level_unit = network_manager.game_object_or_level_id(network_manager, attacker_unit)
+	local attacker_unit_id, attacker_is_level_unit = network_manager:game_object_or_level_id(attacker_unit)
 	local explosion_template_id = NetworkLookup.explosion_templates[explosion_template_name]
 	local damage_source_id = NetworkLookup.damage_sources[damage_source]
 	scale = scale * 100
@@ -425,8 +412,6 @@ DamageSystem.create_explosion = function (self, attacker_unit, position, rotatio
 	else
 		network_manager.network_transmit:send_rpc_server("rpc_create_explosion", attacker_unit_id, attacker_is_level_unit, position, rotation, explosion_template_id, 1, damage_source_id)
 	end
-
-	return 
 end
 
-return 
+return

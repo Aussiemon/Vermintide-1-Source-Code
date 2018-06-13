@@ -70,4 +70,4 @@ ItemMasterList.potion_healing_draught_01 = {
 	}
 }
 
-return 
+return

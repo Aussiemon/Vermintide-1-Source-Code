@@ -114,4 +114,4 @@ LocalContractTemplates = {
 	}
 }
 
-return 
+return

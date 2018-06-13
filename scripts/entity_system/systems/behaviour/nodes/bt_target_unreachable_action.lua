@@ -1,32 +1,31 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTTargetUnreachableAction = class(BTTargetUnreachableAction, BTNode)
+
 BTTargetUnreachableAction.init = function (self, ...)
 	BTTargetUnreachableAction.super.init(self, ...)
-
-	return 
 end
+
 BTTargetUnreachableAction.name = "BTTargetUnreachableAction"
+
 BTTargetUnreachableAction.enter = function (self, unit, blackboard, t)
 	blackboard.unreachable_check_timer = t
 	blackboard.unreachable_timer = blackboard.chasing_timer or 0
-
-	return 
 end
+
 BTTargetUnreachableAction.leave = function (self, unit, blackboard, t)
 	blackboard.unreachable_check_timer = nil
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_max_speed(navigation_extension, default_move_speed)
-
-	return 
+	navigation_extension:set_max_speed(default_move_speed)
 end
+
 BTTargetUnreachableAction.run = function (self, unit, blackboard, t, dt)
 	local whereabouts_extension = ScriptUnit.extension(blackboard.target_unit, "whereabouts_system")
 	local pos = POSITION_LOOKUP[unit]
 	local enemy_pos = POSITION_LOOKUP[blackboard.target_unit]
-	local pos_list, player_on_mesh = whereabouts_extension.closest_positions_when_outside_navmesh(whereabouts_extension)
+	local pos_list, player_on_mesh = whereabouts_extension:closest_positions_when_outside_navmesh()
 	blackboard.target_outside_navmesh = not player_on_mesh
 	blackboard.unreachable_check_timer = t + 0.2
 	local closest_pos = nil
@@ -46,7 +45,7 @@ BTTargetUnreachableAction.run = function (self, unit, blackboard, t, dt)
 			score = score + dist_point + dist_player
 		end
 
-		if score < best_score then
+		if best_score > score then
 			closest_pos = test_pos
 			best_score = score
 		end
@@ -58,15 +57,16 @@ BTTargetUnreachableAction.run = function (self, unit, blackboard, t, dt)
 
 	local locomotion = blackboard.locomotion_extension
 
-	self.move_closer(self, unit, t, dt, blackboard, locomotion)
+	self:move_closer(unit, t, dt, blackboard, locomotion)
 
 	blackboard.unreachable_timer = blackboard.unreachable_timer + dt
 
 	return "running", "evaluate"
 end
+
 BTTargetUnreachableAction.move_closer = function (self, unit, t, dt, blackboard, locomotion)
 	local navigation_extension = blackboard.navigation_extension
-	local destination = navigation_extension.destination(navigation_extension)
+	local destination = navigation_extension:destination()
 	local to_vec = destination - POSITION_LOOKUP[unit]
 	local distance = Vector3.length(to_vec)
 
@@ -77,12 +77,12 @@ BTTargetUnreachableAction.move_closer = function (self, unit, t, dt, blackboard,
 	Debug.text("unreach dist to target:" .. tostring(distance) .. " flat:" .. tostring(flat_distance))
 
 	if distance < 1 then
-		navigation_extension.set_max_speed(navigation_extension, blackboard.breed.walk_speed)
-	elseif 2 < distance then
-		navigation_extension.set_max_speed(navigation_extension, blackboard.breed.run_speed)
+		navigation_extension:set_max_speed(blackboard.breed.walk_speed)
+	elseif distance > 2 then
+		navigation_extension:set_max_speed(blackboard.breed.run_speed)
 	end
 
-	if blackboard.move_state ~= "moving" and 0.5 < distance then
+	if blackboard.move_state ~= "moving" and distance > 0.5 then
 		print("GO TO UNREACHABLE MOVING", distance)
 
 		blackboard.move_state = "moving"
@@ -99,14 +99,12 @@ BTTargetUnreachableAction.move_closer = function (self, unit, t, dt, blackboard,
 	end
 
 	if blackboard.move_state == "moving" then
-		locomotion.set_wanted_rotation(locomotion, nil)
+		locomotion:set_wanted_rotation(nil)
 	else
 		local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 
-		locomotion.set_wanted_rotation(locomotion, rot)
+		locomotion:set_wanted_rotation(rot)
 	end
-
-	return 
 end
 
-return 
+return

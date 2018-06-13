@@ -1205,4 +1205,4 @@ quest_atlas = {
 	}
 }
 
-return 
+return

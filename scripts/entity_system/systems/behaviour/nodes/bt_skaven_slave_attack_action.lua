@@ -1,14 +1,15 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTSkavenSlaveAttackAction = class(BTSkavenSlaveAttackAction, BTNode)
+
 BTSkavenSlaveAttackAction.init = function (self, ...)
 	BTSkavenSlaveAttackAction.super.init(self, ...)
+end
 
-	return 
-end
 BTSkavenSlaveAttackAction.setup = function (self, unit, blackboard, profile)
-	return 
+	return
 end
+
 BTSkavenSlaveAttackAction.run = function (self, unit, blackboard, t, dt, bt_name)
 	if blackboard.slash_attacking then
 		Debug.text("slash action - running")
@@ -31,16 +32,15 @@ BTSkavenSlaveAttackAction.run = function (self, unit, blackboard, t, dt, bt_name
 	blackboard.slash_attacking = true
 	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
-	locomotion.start_slash_attack(locomotion, blackboard, t)
+	locomotion:start_slash_attack(blackboard, t)
 
 	return "running"
 end
+
 BTSkavenSlaveAttackAction.exit_running = function (self, unit, blackboard)
 	local locomotion = ScriptUnit.extension(unit, "locomotion_system")
 
-	locomotion.reset_attack(locomotion, blackboard)
-
-	return 
+	locomotion:reset_attack(blackboard)
 end
 
-return 
+return

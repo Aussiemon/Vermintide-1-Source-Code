@@ -38662,4 +38662,4 @@ ItemMasterList.es_repeating_handgun_0387 = {
 	}
 }
 
-return 
+return

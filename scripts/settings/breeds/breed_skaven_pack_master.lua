@@ -390,4 +390,4 @@ local action_data = {
 }
 BreedActions.skaven_pack_master = table.create_copy(BreedActions.skaven_pack_master, action_data)
 
-return 
+return

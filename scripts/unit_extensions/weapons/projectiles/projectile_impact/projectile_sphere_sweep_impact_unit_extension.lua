@@ -1,4 +1,5 @@
 ProjectileSphereSweepImpactUnitExtension = class(ProjectileSphereSweepImpactUnitExtension, ProjectileBaseImpactUnitExtension)
+
 ProjectileSphereSweepImpactUnitExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	ProjectileSphereSweepImpactUnitExtension.super.init(self, extension_init_context, unit, extension_init_data)
 
@@ -11,32 +12,30 @@ ProjectileSphereSweepImpactUnitExtension.init = function (self, extension_init_c
 	self.server_side_raycast = extension_init_data.server_side_raycast
 	self.is_server = Managers.player.is_server
 	self.radius = extension_init_data.radius
-
-	return 
 end
+
 ProjectileSphereSweepImpactUnitExtension.extensions_ready = function (self, world, unit)
 	self.locomotion_extension = ScriptUnit.extension(unit, "projectile_locomotion_system")
-
-	return 
 end
+
 ProjectileSphereSweepImpactUnitExtension.update = function (self, unit, input, dt, context, t)
 	ProjectileSphereSweepImpactUnitExtension.super.update(self, unit, input, dt, context, t)
 
 	if self.server_side_raycast and not self.is_server then
-		return 
+		return
 	end
 
 	if not self.server_side_raycast and not self.owner_is_local then
-		return 
+		return
 	end
 
 	local locomotion_extension = self.locomotion_extension
 
-	if not locomotion_extension.moved_this_frame(locomotion_extension) then
-		return 
+	if not locomotion_extension:moved_this_frame() then
+		return
 	end
 
-	local velocity = locomotion_extension.current_velocity(locomotion_extension)
+	local velocity = locomotion_extension:current_velocity()
 	local cached_position = POSITION_LOOKUP[unit]
 	local moved_position = cached_position + velocity
 	local physics_world = self.physics_world
@@ -72,13 +71,13 @@ ProjectileSphereSweepImpactUnitExtension.update = function (self, unit, input, d
 				end
 
 				assert(actor_index)
-				self.impact(self, hit_unit, hit_position, direction, hit_normal, actor_index)
+				self:impact(hit_unit, hit_position, direction, hit_normal, actor_index)
 
 				local network_manager = self.network_manager
-				local unit_id = network_manager.unit_game_object_id(network_manager, self.unit)
+				local unit_id = network_manager:unit_game_object_id(self.unit)
 
 				if ScriptUnit.has_extension(hit_unit, "locomotion_system") then
-					local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
+					local hit_unit_id = network_manager:unit_game_object_id(hit_unit)
 
 					if self.is_server then
 						network_manager.network_transmit:send_rpc_clients("rpc_projectile_impact_character", unit_id, hit_unit_id, hit_position, direction, hit_normal, actor_index)
@@ -106,8 +105,6 @@ ProjectileSphereSweepImpactUnitExtension.update = function (self, unit, input, d
 		QuickDrawerStay:sphere(moved_position, radius, Color(255, 0, 255, 0))
 		QuickDrawerStay:line(moved_position, cached_position, Color(255, 0, 255, 255))
 	end
-
-	return 
 end
 
-return 
+return

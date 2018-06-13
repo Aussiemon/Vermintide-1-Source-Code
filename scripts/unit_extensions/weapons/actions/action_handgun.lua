@@ -1,4 +1,5 @@
 ActionHandgun = class(ActionHandgun)
+
 ActionHandgun.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.weapon_system = weapon_system
 	self.owner_unit = owner_unit
@@ -20,9 +21,8 @@ ActionHandgun.init = function (self, world, item_name, is_server, owner_unit, da
 	end
 
 	self.is_server = is_server
-
-	return 
 end
+
 ActionHandgun.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 
@@ -43,11 +43,10 @@ ActionHandgun.client_owner_start_action = function (self, new_action, t)
 	if new_action.block then
 		local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
 
-		status_extension.set_blocking(status_extension, true)
+		status_extension:set_blocking(true)
 	end
-
-	return 
 end
+
 ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damage)
 	local owner_unit = self.owner_unit
 	local current_action = self.current_action
@@ -69,7 +68,7 @@ ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damag
 	if self.state == "shooting" then
 		local world = self.world
 		local buff_extension = ScriptUnit.extension(owner_unit, "buff_system")
-		local _, procced = buff_extension.apply_buffs_to_value(buff_extension, 0, StatBuffIndex.EXTRA_SHOT)
+		local _, procced = buff_extension:apply_buffs_to_value(0, StatBuffIndex.EXTRA_SHOT)
 		local add_spread = not self.extra_buff_shot
 
 		if not self.extra_buff_shot and procced then
@@ -87,25 +86,25 @@ ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damag
 		end
 
 		local first_person_extension = ScriptUnit.extension(owner_unit, "first_person_system")
-		local position = first_person_extension.current_position(first_person_extension)
-		local rotation = first_person_extension.current_rotation(first_person_extension)
+		local position = first_person_extension:current_position()
+		local rotation = first_person_extension:current_rotation()
 
 		if current_action.fire_at_gaze_setting then
 			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
 
 			if Application.user_setting(current_action.fire_at_gaze_setting) and HAS_TOBII and ScriptUnit.has_extension(owner_unit, "eyetracking_system") then
 				local eyetracking_extension = ScriptUnit.extension(owner_unit, "eyetracking_system")
-				rotation = eyetracking_extension.gaze_rotation(eyetracking_extension)
+				rotation = eyetracking_extension:gaze_rotation()
 			end
 		end
 
 		local spread_extension = self.spread_extension
 
 		if spread_extension then
-			rotation = spread_extension.get_randomised_spread(spread_extension, rotation)
+			rotation = spread_extension:get_randomised_spread(rotation)
 
 			if add_spread then
-				spread_extension.set_shooting(spread_extension)
+				spread_extension:set_shooting()
 			end
 		end
 
@@ -115,7 +114,7 @@ ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damag
 
 		if math.random() <= auto_hit_chance and Managers.input:is_device_active("gamepad") and ScriptUnit.has_extension(owner_unit, "smart_targeting_system") then
 			local targeting_extension = ScriptUnit.extension(owner_unit, "smart_targeting_system")
-			local targeting_data = targeting_extension.get_targeting_data(targeting_extension)
+			local targeting_data = targeting_extension:get_targeting_data()
 			local target_position = targeting_data.target_position
 
 			if target_position then
@@ -132,13 +131,13 @@ ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damag
 		end
 
 		if self.current_action.reset_aim_on_attack then
-			first_person_extension.reset_aim_assist_multiplier(first_person_extension)
+			first_person_extension:reset_aim_assist_multiplier()
 		end
 
 		local fire_sound_event = self.current_action.fire_sound_event
 
 		if fire_sound_event then
-			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event)
+			first_person_extension:play_hud_sound_event(fire_sound_event)
 		end
 
 		if current_action.alert_sound_range_fire then
@@ -152,22 +151,21 @@ ActionHandgun.client_owner_post_update = function (self, dt, t, world, can_damag
 		if self.active_reload_time < t then
 			local ammo_extension = self.ammo_extension
 
-			if (input_extension.get(input_extension, "weapon_reload") or input_extension.get_buffer(input_extension, "weapon_reload")) and ammo_extension.can_reload(ammo_extension) then
+			if (input_extension:get("weapon_reload") or input_extension:get_buffer("weapon_reload")) and ammo_extension:can_reload() then
 				local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
 
-				status_extension.set_zooming(status_extension, false)
+				status_extension:set_zooming(false)
 
 				local weapon_extension = ScriptUnit.extension(self.weapon_unit, "weapon_system")
 
-				weapon_extension.stop_action(weapon_extension, "reload")
+				weapon_extension:stop_action("reload")
 			end
-		elseif input_extension.get(input_extension, "weapon_reload") then
-			input_extension.add_buffer(input_extension, "weapon_reload", 0)
+		elseif input_extension:get("weapon_reload") then
+			input_extension:add_buffer("weapon_reload", 0)
 		end
 	end
-
-	return 
 end
+
 ActionHandgun.finish = function (self, reason)
 	local ammo_extension = self.ammo_extension
 	local current_action = self.current_action
@@ -175,20 +173,18 @@ ActionHandgun.finish = function (self, reason)
 	if reason ~= "new_interupting_action" then
 		local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
 
-		status_extension.set_zooming(status_extension, false)
+		status_extension:set_zooming(false)
 
-		if ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension.ammo_count(ammo_extension) == 0 and ammo_extension.can_reload(ammo_extension) then
-			ammo_extension.start_reload(ammo_extension, true)
+		if ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension:ammo_count() == 0 and ammo_extension:can_reload() then
+			ammo_extension:start_reload(true)
 		end
 	end
 
 	if current_action.block then
 		local status_extension = ScriptUnit.extension(self.owner_unit, "status_system")
 
-		status_extension.set_blocking(status_extension, false)
+		status_extension:set_blocking(false)
 	end
-
-	return 
 end
 
-return 
+return

@@ -1,4 +1,5 @@
 NavigationUtils = NavigationUtils or {}
+
 NavigationUtils.create_exclusive_box_obstacle_from_unit_data = function (nav_world, unit)
 	local is_exclusive = true
 	local color = Color(255, 255, 0, 0)
@@ -13,6 +14,7 @@ NavigationUtils.create_exclusive_box_obstacle_from_unit_data = function (nav_wor
 
 	return NavigationUtils.create_exclusive_box_obstacle_from_mesh(nav_world, unit, is_exclusive, color, has_layer, layer_idx, has_smartobject, smartobject_idx, mesh_name, padding_x, padding_y, padding_z)
 end
+
 NavigationUtils.create_exclusive_box_obstacle_from_mesh = function (nav_world, unit, is_exclusive, color, has_layer, layer_idx, has_smartobject, smartobject_idx, mesh_name, padding_x, padding_y, padding_z)
 	local mesh = Unit.mesh(unit, mesh_name)
 	local padding = Vector3(padding_x, padding_y, padding_z)
@@ -25,6 +27,7 @@ NavigationUtils.create_exclusive_box_obstacle_from_mesh = function (nav_world, u
 
 	return obstacle, transform
 end
+
 NavigationUtils.debug_draw_nav_mesh = function (nav_world, world, line_object)
 	GwNavWorld.build_database_visual_representation(nav_world)
 
@@ -49,8 +52,6 @@ NavigationUtils.debug_draw_nav_mesh = function (nav_world, world, line_object)
 
 	LineObject.dispatch(world, line_object)
 	LineObject.reset(line_object)
-
-	return 
 end
 
-return 
+return

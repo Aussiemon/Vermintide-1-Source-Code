@@ -51,4 +51,4 @@ DialogueLookup[DialogueLookup_n + 24] = "nfl_survival_generic_supply_room"
 DialogueLookup[DialogueLookup_n + 25] = "nfl_survival_generic_intro"
 DialogueLookup_n = DialogueLookup_n + 25
 
-return 
+return

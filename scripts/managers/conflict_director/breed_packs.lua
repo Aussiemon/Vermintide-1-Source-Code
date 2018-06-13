@@ -255,4 +255,4 @@ if #InterestPointPickListIndexLookup == 0 then
 	InterestPointPickList = weight_lookup
 end
 
-return 
+return

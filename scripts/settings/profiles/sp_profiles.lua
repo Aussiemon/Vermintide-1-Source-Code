@@ -161,8 +161,6 @@ function FindProfileIndex(profile_name)
 			return i
 		end
 	end
-
-	return 
 end
 
-return 
+return

@@ -132,14 +132,12 @@ local animations = {
 				background_top_widget.style.texture_id.color[1] = 0
 				background_bottom_widget.style.texture_id.color[1] = 0
 				background_center_widget.style.texture_id.color[1] = 255
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -152,8 +150,6 @@ local animations = {
 
 					WwiseWorld.trigger_event(params.wwise_world, "hud_difficulty_increased_start")
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeInCubic(progress)
@@ -162,11 +158,9 @@ local animations = {
 				local alpha = 255 * anim_fraction
 				background_top_widget.style.texture_id.color[1] = alpha
 				background_bottom_widget.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -174,7 +168,7 @@ local animations = {
 			start_progress = 0.2,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeOutCubic(progress)
@@ -191,11 +185,9 @@ local animations = {
 				current_background_top_size[2] = default_background_top_size[2] * anim_size_fraction
 				current_background_bottom_size[1] = default_background_bottom_size[1] * anim_size_fraction
 				current_background_bottom_size[2] = default_background_bottom_size[2] * anim_size_fraction
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -203,7 +195,7 @@ local animations = {
 			start_progress = 0.4,
 			end_progress = 0.7,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeOutCubic(progress)
@@ -227,11 +219,9 @@ local animations = {
 				local half_center_height = default_background_center_size[2] / 2
 				current_background_top_position[2] = default_background_top_position[2] + half_center_height * anim_fraction
 				current_background_bottom_position[2] = default_background_bottom_position[2] - half_center_height * anim_fraction
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -239,7 +229,7 @@ local animations = {
 			start_progress = 0.7,
 			end_progress = 0.9,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				if not params.played_text_reveal_sound_1 then
@@ -253,11 +243,9 @@ local animations = {
 				local text_style = difficulty_title_text_widget.style.text
 				text_style.text_color[1] = 255 * anim_fraction
 				text_style.font_size = 40 * math.catmullrom(math.easeOutCubic(progress), -0.5, 1, 1, -0.5)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -265,17 +253,15 @@ local animations = {
 			start_progress = 2.3,
 			end_progress = 2.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeOutCubic(progress)
 				local difficulty_title_text_widget = widgets.difficulty_title_text
 				difficulty_title_text_widget.style.text.text_color[1] = 255 - 255 * anim_fraction
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -283,7 +269,7 @@ local animations = {
 			start_progress = 2.6,
 			end_progress = 2.8,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				if not params.played_text_reveal_sound then
@@ -297,11 +283,9 @@ local animations = {
 				local text_style = difficulty_text_widget.style.text
 				text_style.text_color[1] = 255 * anim_fraction
 				text_style.font_size = 40 * math.catmullrom(math.easeOutCubic(progress), -0.5, 1, 1, -0.5)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -309,17 +293,15 @@ local animations = {
 			start_progress = 5.5,
 			end_progress = 6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeInCubic(progress)
 				local difficulty_text_widget = widgets.difficulty_text
 				difficulty_text_widget.style.text.text_color[1] = 255 - 255 * anim_fraction
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -327,7 +309,7 @@ local animations = {
 			start_progress = 6,
 			end_progress = 6.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local anim_fraction = math.easeInCubic(progress)
@@ -351,8 +333,6 @@ local animations = {
 				local half_center_height = default_background_center_size[2] / 2
 				current_background_top_position[2] = (default_background_top_position[2] + half_center_height) - half_center_height * anim_fraction
 				current_background_bottom_position[2] = default_background_bottom_position[2] - half_center_height + half_center_height * anim_fraction
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				if not params.played_end_sound then
@@ -360,8 +340,6 @@ local animations = {
 
 					WwiseWorld.trigger_event(params.wwise_world, "hud_difficulty_increased_end")
 				end
-
-				return 
 			end
 		},
 		{
@@ -369,7 +347,7 @@ local animations = {
 			start_progress = 6.3,
 			end_progress = 6.8,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, progress, params)
 				local background_top_widget = widgets.background_top
@@ -380,11 +358,9 @@ local animations = {
 				background_top_widget.style.texture_id.color[1] = alpha
 				background_bottom_widget.style.texture_id.color[1] = alpha
 				background_center_widget.style.texture_id.color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

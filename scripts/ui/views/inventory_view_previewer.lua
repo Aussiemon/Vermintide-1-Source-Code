@@ -1,5 +1,6 @@
 local DEFAULT_ANGLE = math.degrees_to_radians(0)
 InventoryViewPreviewer = class(InventoryViewPreviewer)
+
 InventoryViewPreviewer.init = function (self, ingame_ui_context)
 	self.profile_synchronizer = ingame_ui_context.profile_synchronizer
 	self.input_manager = ingame_ui_context.input_manager
@@ -9,14 +10,12 @@ InventoryViewPreviewer.init = function (self, ingame_ui_context)
 		[4] = {},
 		[5] = {}
 	}
-
-	return 
 end
+
 InventoryViewPreviewer.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "InventoryViewPreviewer")
-
-	return 
 end
+
 InventoryViewPreviewer.on_enter = function (self, viewport_widget)
 	self.viewport_widget = viewport_widget
 	local preview_pass_data = self.viewport_widget.element.pass_data[1]
@@ -54,14 +53,12 @@ InventoryViewPreviewer.on_enter = function (self, viewport_widget)
 	self.camera_distance_target = 2.6
 	self.camera_distance_modifier = 1
 	self.camera_zoom_lerp_t = 1
-
-	return 
 end
+
 InventoryViewPreviewer.prepare_exit = function (self)
-	self.clear_units(self)
-
-	return 
+	self:clear_units()
 end
+
 InventoryViewPreviewer.on_exit = function (self)
 	local max_shadow_casting_lights = Application.user_setting("render_settings", "max_shadow_casting_lights")
 
@@ -72,32 +69,31 @@ InventoryViewPreviewer.on_exit = function (self)
 	local package_manager = Managers.package
 
 	for package_name, _ in pairs(self.packages_to_load) do
-		package_manager.unload(package_manager, package_name, "InventoryViewPreviewer")
+		package_manager:unload(package_name, "InventoryViewPreviewer")
 
 		self.packages_to_load[package_name] = nil
 	end
 
 	for package_name, _ in pairs(self.loaded_packages) do
-		package_manager.unload(package_manager, package_name, "InventoryViewPreviewer")
+		package_manager:unload(package_name, "InventoryViewPreviewer")
 
 		self.loaded_packages[package_name] = nil
 	end
 
 	self.items_loaded = nil
-
-	return 
 end
+
 InventoryViewPreviewer.update = function (self, dt)
 	local character_unit = self.character_unit
 
 	if character_unit == nil then
-		return 
+		return
 	end
 
 	local unit_pose, unit_extents = Unit.box(character_unit)
 	self.camera_height_target = self.camera_lookat_height_target
 
-	if math.pi * 2 < self.camera_xy_angle_target then
+	if self.camera_xy_angle_target > math.pi * 2 then
 		self.camera_xy_angle_current = self.camera_xy_angle_current - math.pi * 2
 		self.camera_xy_angle_target = self.camera_xy_angle_target - math.pi * 2
 	end
@@ -139,13 +135,13 @@ InventoryViewPreviewer.update = function (self, dt)
 		self.camera_distance_target = self.camera_distance_default
 		self.camera_distance_target = 2.9
 	end
-
-	return 
 end
+
 local mouse_pos_temp = {}
+
 InventoryViewPreviewer.handle_input = function (self, input_service)
 	if not self.input_manager:is_device_active("mouse") then
-		return 
+		return
 	end
 
 	local hotspot_data = self.viewport_widget.content.button_hotspot
@@ -155,7 +151,7 @@ InventoryViewPreviewer.handle_input = function (self, input_service)
 		self.time_to_auto_zoom = math.huge
 	end
 
-	local mouse = input_service.get(input_service, "cursor")
+	local mouse = input_service:get("cursor")
 	local hotspot_data = self.viewport_widget.content.button_hotspot
 
 	if hotspot_data.on_double_click then
@@ -164,11 +160,11 @@ InventoryViewPreviewer.handle_input = function (self, input_service)
 
 	if hotspot_data.is_hover or self.is_moving_camera then
 		self.is_moving_camera = false
-		local mouse_position = input_service.get(input_service, "cursor")
-		local mouse_hold = input_service.get(input_service, "left_hold")
-		local mouse_scroll = input_service.get(input_service, "scroll_axis")
+		local mouse_position = input_service:get("cursor")
+		local mouse_hold = input_service:get("left_hold")
+		local mouse_scroll = input_service:get("scroll_axis")
 
-		if self.last_mouse_position and (mouse_hold or 0 < Vector3.length(mouse_scroll)) then
+		if self.last_mouse_position and (mouse_hold or Vector3.length(mouse_scroll) > 0) then
 			self.camera_xy_angle_target = self.camera_xy_angle_target - (mouse.x - self.last_mouse_position[1]) * 0.01
 			local new_camera_look_height = self.camera_lookat_height_target - (mouse.y - self.last_mouse_position[2]) * 0.005
 			self.camera_lookat_height_target = math.min(math.max(new_camera_look_height, 0.3), self.unit_max_look_height)
@@ -186,37 +182,34 @@ InventoryViewPreviewer.handle_input = function (self, input_service)
 		self.is_moving_camera = false
 		self.last_mouse_pos = nil
 	end
-
-	return 
 end
+
 InventoryViewPreviewer.handle_controller_input = function (self, input_service, dt)
 	if not self.input_manager:is_device_active("gamepad") then
-		return 
+		return
 	end
 
-	local move_left = input_service.get(input_service, "trigger_left_soft")
-	local move_right = input_service.get(input_service, "trigger_right_soft")
+	local move_left = input_service:get("trigger_left_soft")
+	local move_right = input_service:get("trigger_right_soft")
 	self.camera_xy_angle_target = self.camera_xy_angle_target + (move_left - move_right) * dt * 5
+end
 
-	return 
-end
 InventoryViewPreviewer.handle_character_preview_input = function (self)
-	return 
+	return
 end
+
 InventoryViewPreviewer.start_character_rotation = function (self, direction)
 	if direction then
 		self.rotation_direction = direction
 	end
-
-	return 
 end
+
 InventoryViewPreviewer.end_character_rotation = function (self)
 	print("end_character_rotation", self.rotation_direction)
-
-	return 
 end
+
 InventoryViewPreviewer.update_selected_character = function (self, profile_name)
-	self.clear_units(self)
+	self:clear_units()
 
 	local world = self.world
 	local sp_profile = SPProfiles[FindProfileIndex(profile_name)]
@@ -258,24 +251,22 @@ InventoryViewPreviewer.update_selected_character = function (self, profile_name)
 	self.camera_lookat_height_target = 0.9
 	self.time_to_auto_rotate = math.huge
 	self.time_to_auto_zoom = math.huge
-
-	return 
 end
+
 InventoryViewPreviewer.wield_weapon_slot = function (self, slot_type)
 	self.wielded_slot_type = slot_type
 
 	if self.item_names.melee then
-		self.equip_item(self, self.item_names.melee, "melee", 5)
+		self:equip_item(self.item_names.melee, "melee", 5)
 	elseif slot_type == "melee" then
 	end
 
 	if self.item_names.ranged then
-		self.equip_item(self, self.item_names.ranged, "ranged", 4)
+		self:equip_item(self.item_names.ranged, "ranged", 4)
 	elseif slot_type == "ranged" then
 	end
-
-	return 
 end
+
 InventoryViewPreviewer.unequip_item_in_slot = function (self, item_slot_type, equipment_slot_index)
 	local world = self.world
 
@@ -306,9 +297,8 @@ InventoryViewPreviewer.unequip_item_in_slot = function (self, item_slot_type, eq
 	end
 
 	self.item_names[item_slot_type] = nil
-
-	return 
 end
+
 InventoryViewPreviewer.equip_item = function (self, item_name, item_slot_type, equipment_slot_index)
 	self.items_loaded = nil
 	local item_data = ItemMasterList[item_name]
@@ -377,10 +367,9 @@ InventoryViewPreviewer.equip_item = function (self, item_name, item_slot_type, e
 		end
 	end
 
-	self.load_package(self, package_names, item_name)
-
-	return 
+	self:load_package(package_names, item_name)
 end
+
 InventoryViewPreviewer.load_package = function (self, package_names, item_name)
 	local package_names_to_load = {}
 
@@ -395,11 +384,10 @@ InventoryViewPreviewer.load_package = function (self, package_names, item_name)
 		local package_manager = Managers.package
 		local cb = callback(self, "on_load_complete", package_name, item_name)
 
-		package_manager.load(package_manager, package_name, "InventoryViewPreviewer", cb, true)
+		package_manager:load(package_name, "InventoryViewPreviewer", cb, true)
 	end
-
-	return 
 end
+
 InventoryViewPreviewer.on_load_complete = function (self, package_name, item_name)
 	local loaded_packages = self.loaded_packages
 	loaded_packages[package_name] = true
@@ -411,32 +399,33 @@ InventoryViewPreviewer.on_load_complete = function (self, package_name, item_nam
 		local item_slot_type = unit_spawn_data.item_slot_type
 
 		if item_names[item_slot_type] ~= item_name then
-			return 
+			return
 		end
 
 		local unit_name = unit_spawn_data.unit_name
 
 		if not loaded_packages[unit_name] then
-			return 
+			return
 		end
 	end
 
-	self._spawn_item(self, item_name)
+	self:_spawn_item(item_name)
 
-	self.items_loaded = self.update_package_loaded_status(self)
-
-	return 
+	self.items_loaded = self:update_package_loaded_status()
 end
+
 InventoryViewPreviewer.update_package_loaded_status = function (self)
 	for package_name, _ in pairs(self.packages_to_load) do
-		return 
+		return
 	end
 
 	return true
 end
+
 InventoryViewPreviewer.items_spawned = function (self)
 	return self.items_loaded
 end
+
 InventoryViewPreviewer._spawn_items = function (self)
 	local item_spawn_data = self.item_spawn_data
 	local loaded_packages = self.loaded_packages
@@ -448,17 +437,18 @@ InventoryViewPreviewer._spawn_items = function (self)
 			local unit_name = unit_spawn_data.unit_name
 
 			if not loaded_packages[unit_name] then
-				return 
+				return
 			end
 		end
 	end
 
 	for slot_type, item_name in pairs(self.item_names) do
-		self._spawn_item(self, item_name)
+		self:_spawn_item(item_name)
 	end
 
 	return true
 end
+
 InventoryViewPreviewer._spawn_item = function (self, item_name)
 	local world = self.world
 	local character_unit = self.character_unit
@@ -499,7 +489,7 @@ InventoryViewPreviewer._spawn_item = function (self, item_name)
 
 				local unit = World.spawn_unit(world, unit_name)
 
-				self.equip_item_unit(self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
+				self:equip_item_unit(unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
 
 				if unit_spawn_data.right_hand then
 					self.equipment_units[equipment_slot_index].right = unit
@@ -518,7 +508,7 @@ InventoryViewPreviewer._spawn_item = function (self, item_name)
 				local unit = World.spawn_unit(world, unit_name)
 				self.equipment_units[equipment_slot_index] = unit
 
-				self.equip_item_unit(self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
+				self:equip_item_unit(unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
 			end
 
 			local show_attachments_event = item_template.show_attachments_event
@@ -528,9 +518,8 @@ InventoryViewPreviewer._spawn_item = function (self, item_name)
 			end
 		end
 	end
-
-	return 
 end
+
 InventoryViewPreviewer.equip_item_unit = function (self, unit, item_slot_type, item_template, unit_attachment_node_linking, scene_graph_links)
 	local world = self.world
 	local character_unit = self.character_unit
@@ -560,9 +549,8 @@ InventoryViewPreviewer.equip_item_unit = function (self, unit, item_slot_type, i
 	end
 
 	GearUtils.link(world, unit_attachment_node_linking, scene_graph_links, character_unit, unit)
-
-	return 
 end
+
 InventoryViewPreviewer.clear_units = function (self)
 	local world = self.world
 
@@ -593,8 +581,6 @@ InventoryViewPreviewer.clear_units = function (self)
 
 		self.character_unit = nil
 	end
-
-	return 
 end
 
-return 
+return

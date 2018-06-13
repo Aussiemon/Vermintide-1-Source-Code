@@ -5,6 +5,7 @@ local PUSH_UPGRADES = {
 	heavy_sweep_push = "super_heavy_sweep_push",
 	weak_sweep_push = "upgraded_sweep_push"
 }
+
 ActionPushStagger.init = function (self, world, item_name, is_server, owner_unit, weapon_unit, first_person_unit, weapon_unit, weapon_system)
 	self.owner_unit = owner_unit
 	self.weapon_unit = weapon_unit
@@ -20,9 +21,8 @@ ActionPushStagger.init = function (self, world, item_name, is_server, owner_unit
 	if ScriptUnit.has_extension(weapon_unit, "ammo_system") then
 		self.ammo_extension = ScriptUnit.extension(weapon_unit, "ammo_system")
 	end
-
-	return 
 end
+
 ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.has_played_rumble_effect = false
@@ -49,7 +49,7 @@ ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 			cost = new_action.fatigue_cost
 		end
 
-		status_extension.add_fatigue_points(status_extension, cost, "push")
+		status_extension:add_fatigue_points(cost, "push")
 	end
 
 	self.block_end_time = t + 0.5
@@ -64,10 +64,9 @@ ActionPushStagger.client_owner_start_action = function (self, new_action, t)
 		end
 	end
 
-	status_extension.set_blocking(status_extension, true)
-
-	return 
+	status_extension:set_blocking(true)
 end
+
 local callback_context = {
 	has_gotten_callback = false,
 	overlap_units = {}
@@ -86,8 +85,6 @@ local function callback(actors)
 
 		overlap_units[callback_context.num_hits]:store(actor)
 	end
-
-	return 
 end
 
 ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_damage)
@@ -107,8 +104,8 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 
 		local status_extension = self._status_extension
 
-		status_extension.set_blocking(status_extension, false)
-		status_extension.set_has_blocked(status_extension, false)
+		status_extension:set_blocking(false)
+		status_extension:set_has_blocked(false)
 	end
 
 	if not callback_context.has_gotten_callback and can_damage then
@@ -124,7 +121,7 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 		self.waiting_for_callback = false
 		callback_context.has_gotten_callback = false
 		local network_manager = Managers.state.network
-		local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+		local attacker_unit_id = network_manager:unit_game_object_id(owner_unit)
 		local _, increase_damage_procc = self.owner_buff_extension:apply_buffs_to_value(0, StatBuffIndex.INCREASE_DAMAGE_TO_ENEMY_PUSH)
 		local buff_system = Managers.state.entity:system("buff_system")
 		local overlap_units = callback_context.overlap_units
@@ -134,10 +131,13 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 		local hit_once = false
 
 		for i = 1, num_hits, 1 do
-			local hit_actor = overlap_units[i]:unbox()
+			repeat
+				local hit_actor = overlap_units[i]:unbox()
 
-			if hit_actor == nil then
-			else
+				if hit_actor == nil then
+					break
+				end
+
 				local hit_unit = Actor.unit(hit_actor)
 				local breed = unit_get_data(hit_unit, "breed")
 
@@ -147,7 +147,7 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 					local hit_zone = breed.hit_zones_lookup[node]
 					local hit_zone_name = hit_zone.name
 					local attack_direction = Vector3.normalize(POSITION_LOOKUP[hit_unit] - POSITION_LOOKUP[owner_unit])
-					local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
+					local hit_unit_id = network_manager:unit_game_object_id(hit_unit)
 					local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 					local attack_template_name = current_action.attack_template
 
@@ -196,7 +196,7 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 					end
 
 					if increase_damage_procc or script_data.debug_legendary_traits then
-						buff_system.add_buff(buff_system, hit_unit, "increase_incoming_damage", owner_unit)
+						buff_system:add_buff(hit_unit, "increase_incoming_damage", owner_unit)
 					end
 
 					if Managers.state.controller_features and self.owner.local_player and not self.has_played_rumble_effect then
@@ -211,7 +211,7 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 
 					hit_once = true
 				end
-			end
+			until true
 		end
 
 		if hit_once and not Managers.player:owner(self.owner_unit).bot_player then
@@ -220,19 +220,18 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 			})
 		end
 	end
-
-	return 
 end
+
 ActionPushStagger.finish = function (self, reason)
 	self.waiting_for_callback = false
 	callback_context.has_gotten_callback = false
 	local ammo_extension = self.ammo_extension
 	local current_action = self.current_action
 
-	if reason ~= "new_interupting_action" and ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension.ammo_count(ammo_extension) == 0 and ammo_extension.can_reload(ammo_extension) then
+	if reason ~= "new_interupting_action" and ammo_extension and current_action.reload_when_out_of_ammo and ammo_extension:ammo_count() == 0 and ammo_extension:can_reload() then
 		local play_reload_animation = true
 
-		ammo_extension.start_reload(ammo_extension, play_reload_animation)
+		ammo_extension:start_reload(play_reload_animation)
 	end
 
 	local owner_unit = self.owner_unit
@@ -249,10 +248,8 @@ ActionPushStagger.finish = function (self, reason)
 
 	local status_extension = self._status_extension
 
-	status_extension.set_blocking(status_extension, false)
-	status_extension.set_has_blocked(status_extension, false)
-
-	return 
+	status_extension:set_blocking(false)
+	status_extension:set_has_blocked(false)
 end
 
-return 
+return

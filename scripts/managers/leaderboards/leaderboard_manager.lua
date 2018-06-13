@@ -3,6 +3,7 @@ require("scripts/managers/leaderboards/script_fetch_leaderboard_token")
 require("scripts/managers/leaderboards/leaderboard_settings")
 
 LeaderboardManager = class(LeaderboardManager)
+
 LeaderboardManager.init = function (self)
 	self._platform = PLATFORM
 
@@ -16,7 +17,7 @@ LeaderboardManager.init = function (self)
 
 			Application.error("[LeaderboardManager] Leaderboards disabled")
 
-			return 
+			return
 		end
 
 		self._current_leaderboard = "global"
@@ -31,22 +32,22 @@ LeaderboardManager.init = function (self)
 
 		Application.error("[LeaderboardManager] Leaderboards disabled")
 	end
-
-	return 
 end
+
 LeaderboardManager.initialized = function (self)
 	return self._leaderboards_initialized
 end
+
 LeaderboardManager.enabled = function (self)
 	return self._leaderboards_enabled and Managers.lobby and Managers.lobby:using_steam()
 end
+
 LeaderboardManager.cb_leaderboards_loaded = function (self, info)
 	Application.error("[LeaderboardManager] INFO: " .. info.result)
 
 	self._leaderboards_initialized = true
-
-	return 
 end
+
 LeaderboardManager._verify_data = function (self, score_data)
 	for idx, data_type in ipairs(self._score_data_setup) do
 		local data = score_data[idx]
@@ -72,10 +73,11 @@ LeaderboardManager._verify_data = function (self, score_data)
 
 	return false
 end
+
 LeaderboardManager.register_score = function (self, leaderboard_name, score, score_data)
 	self._score_template = LeaderboardSettings.template
 	self._score_data_setup = LeaderboardSettings.data_setup
-	local error, error_msg = self._verify_data(self, score_data)
+	local error, error_msg = self:_verify_data(score_data)
 
 	if error then
 		Application.error("[LeaderboardManager] ERROR: " .. error_msg)
@@ -85,9 +87,8 @@ LeaderboardManager.register_score = function (self, leaderboard_name, score, sco
 
 		Managers.token:register_token(script_token, callback(self, "cb_score_registered"))
 	end
-
-	return 
 end
+
 LeaderboardManager.get_leaderboard = function (self, leaderboard_name, leaderboard_type, in_callback, start_rank, num_ranks)
 	local token = nil
 
@@ -108,50 +109,45 @@ LeaderboardManager.get_leaderboard = function (self, leaderboard_name, leaderboa
 	local script_token = ScriptFetchLeaderboardToken:new(token, in_callback)
 
 	Managers.token:register_token(script_token, callback(self, "cb_leaderboard_fetched"))
-
-	return 
 end
+
 LeaderboardManager.get_global_leaderboard = function (self, leaderboard_name, in_callback, start_rank, num_ranks)
 	local token = Leaderboard.ranking_range(leaderboard_name, start_rank, num_ranks, self._score_template)
 	local script_token = ScriptFetchLeaderboardToken:new(token, in_callback)
 
 	Managers.token:register_token(script_token, callback(self, "cb_leaderboard_fetched"))
-
-	return 
 end
+
 LeaderboardManager.get_friend_leaderboard = function (self, leaderboard_name, in_callback)
 	local token = Leaderboard.ranking_for_friends(leaderboard_name, self._score_template)
 	local script_token = ScriptFetchLeaderboardToken:new(token, in_callback)
 
 	Managers.token:register_token(script_token, callback(self, "cb_leaderboard_fetched"))
-
-	return 
 end
+
 LeaderboardManager.get_around_player_leaderboard = function (self, leaderboard_name, in_callback)
 	local token = Leaderboard.ranking_around_self(leaderboard_name, 5, 15, self._score_template)
 	local script_token = ScriptFetchLeaderboardToken:new(token, in_callback)
 
 	Managers.token:register_token(script_token, callback(self, "cb_leaderboard_fetched"))
-
-	return 
 end
+
 LeaderboardManager.cb_score_registered = function (self, info)
 	Application.error("[LeaderboardManager] INFO: " .. info.result)
-
-	return 
 end
+
 LeaderboardManager.cb_leaderboard_fetched = function (self, info)
 	if info.callback then
-		info.callback(info)
+		info:callback()
 	end
-
-	return 
 end
+
 LeaderboardManager.update = function (self, dt)
-	return 
-end
-LeaderboardManager.destroy = function (self)
-	return 
+	return
 end
 
-return 
+LeaderboardManager.destroy = function (self)
+	return
+end
+
+return

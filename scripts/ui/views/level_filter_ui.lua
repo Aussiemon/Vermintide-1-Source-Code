@@ -4,6 +4,7 @@ local create_element = definitions.create_element
 local scenegraph_definition = definitions.scenegraph_definition
 local generic_input_actions = definitions.generic_input_actions
 LevelFilterUI = class(LevelFilterUI)
+
 LevelFilterUI.init = function (self, ingame_ui_context, map_save_data)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -28,29 +29,26 @@ LevelFilterUI.init = function (self, ingame_ui_context, map_save_data)
 		map_save_data.marked_levels_by_game_mode = marked_levels
 		self._marked_levels = marked_levels
 	end
-
-	return 
 end
+
 LevelFilterUI.setup_level_list = function (self, levels, game_mode)
 	self._levels = levels
 	self._active_game_mode = game_mode
 
-	self.create_ui_elements(self, levels)
-
-	return 
+	self:create_ui_elements(levels)
 end
+
 LevelFilterUI.get_level_information = function (self, level_key)
 	for index, level_information in ipairs(self._levels) do
 		if level_information.level_key == level_key then
 			return level_information
 		end
 	end
-
-	return 
 end
+
 LevelFilterUI.create_ui_elements = function (self, levels)
 	if not levels then
-		return 
+		return
 	end
 
 	self._draw = true
@@ -130,14 +128,13 @@ LevelFilterUI.create_ui_elements = function (self, levels)
 	self._level_list = level_list
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self._align_elements(self)
-	self.set_position_fraction(self, 0)
+	self:_align_elements()
+	self:set_position_fraction(0)
 
 	self._animation_state = "closed"
 	self._animate_button_pulse = false
-
-	return 
 end
+
 LevelFilterUI.get_unmarked_levels = function (self)
 	local return_list = {}
 	local elements_by_key = self._elements_by_key
@@ -158,6 +155,7 @@ LevelFilterUI.get_unmarked_levels = function (self)
 
 	return return_list
 end
+
 LevelFilterUI.get_marked_levels = function (self)
 	local return_list = {}
 	local elements_by_key = self._elements_by_key
@@ -177,6 +175,7 @@ LevelFilterUI.get_marked_levels = function (self)
 
 	return return_list
 end
+
 LevelFilterUI.get_number_of_playable_levels = function (self)
 	local elements_by_key = self._elements_by_key
 	local level_list = self._level_list
@@ -197,6 +196,7 @@ LevelFilterUI.get_number_of_playable_levels = function (self)
 
 	return counter
 end
+
 LevelFilterUI._align_elements = function (self)
 	local elements = self._elements
 	local total_height = 0
@@ -215,9 +215,8 @@ LevelFilterUI._align_elements = function (self)
 
 	self.ui_scenegraph.element_pivot.local_position[2] = total_height * 0.5 - 50
 	self.ui_scenegraph.bg_rect.size[2] = total_height + 10
-
-	return 
 end
+
 LevelFilterUI.set_level_marked = function (self, level_key, marked)
 	local elements_by_key = self._elements_by_key
 	local level_list = self._level_list
@@ -231,7 +230,7 @@ LevelFilterUI.set_level_marked = function (self, level_key, marked)
 		for level_index, level in ipairs(levels) do
 			if level == level_key then
 				if locked[level_index] then
-					return 
+					return
 				end
 
 				markers[level_index] = (marked ~= nil and marked) or not markers[level_index]
@@ -241,12 +240,12 @@ LevelFilterUI.set_level_marked = function (self, level_key, marked)
 			end
 		end
 	end
-
-	return 
 end
+
 LevelFilterUI.level_marked = function (self, level_key)
 	return self._marked_levels[self._active_game_mode][level_key]
 end
+
 LevelFilterUI.set_selected_level = function (self, level_key)
 	local level_settings = level_key and LevelSettings[level_key]
 	local level_image = level_settings and level_settings.level_image
@@ -279,37 +278,33 @@ LevelFilterUI.set_selected_level = function (self, level_key)
 			if level_settings.console_level_filter_image then
 				texture = level_settings.console_level_filter_image
 
-				self._set_background_texture(self, texture)
+				self:_set_background_texture(texture)
 			else
 				local area_settings = AreaSettings[area]
 				local console_map_textures = area_settings.console_map_textures
 				texture = console_map_textures.selected
 
-				self._set_background_texture(self, texture)
+				self:_set_background_texture(texture)
 			end
 
 			self.previous_area = self.selected_area
 			self.selected_area = texture
 		end
 	end
-
-	return 
 end
+
 LevelFilterUI._set_background_texture = function (self, texture)
 	local current_texture = self._background_2_widget.content.texture_id.texture_id
 	self._background_2_widget.content.texture_id.texture_id = texture
 	self._background_widget.content.texture_id.texture_id = current_texture
-
-	return 
 end
+
 LevelFilterUI._update_button_pulse = function (self, dt, t)
 	local fraction = 1 - (self._position_fraction or 0)
 	local time = t * 5
 	local anim_progress = 0.5 + math.sin(time) * 0.5
 	local widget = self._edge_button_glow_widget
 	widget.style.texture_id.color[1] = fraction * (100 + 155 * anim_progress)
-
-	return 
 end
 
 local function animate(widget, time, delay_time, fade_state)
@@ -328,8 +323,6 @@ local function animate(widget, time, delay_time, fade_state)
 
 		UIWidget.animate(widget, animation)
 	end
-
-	return 
 end
 
 LevelFilterUI.animate_button_fade = function (self, time, delay_time, fade_state)
@@ -341,29 +334,26 @@ LevelFilterUI.animate_button_fade = function (self, time, delay_time, fade_state
 	end
 
 	self._animate_button_pulse = false
-
-	return 
 end
+
 LevelFilterUI.animation_done = function (self)
 	self._animate_button_pulse = true
-
-	return 
 end
+
 LevelFilterUI.set_background_animation_fraction = function (self, fraction, direction)
 	if not self.previous_area or self.previous_area == self.selected_area then
-		return 
+		return
 	end
 
 	if direction < 0 then
-		self.set_widget_horizontal_fraction(self, self._background_2_widget, fraction, 2)
-		self.set_widget_horizontal_fraction(self, self._background_widget, 1 - fraction, 1)
+		self:set_widget_horizontal_fraction(self._background_2_widget, fraction, 2)
+		self:set_widget_horizontal_fraction(self._background_widget, 1 - fraction, 1)
 	else
-		self.set_widget_horizontal_fraction(self, self._background_2_widget, fraction, 1)
-		self.set_widget_horizontal_fraction(self, self._background_widget, 1 - fraction, 2)
+		self:set_widget_horizontal_fraction(self._background_2_widget, fraction, 1)
+		self:set_widget_horizontal_fraction(self._background_widget, 1 - fraction, 2)
 	end
-
-	return 
 end
+
 LevelFilterUI.set_widget_horizontal_fraction = function (self, widget, fraction, direction)
 	local scenegraph_id = widget.scenegraph_id
 	local content = widget.content
@@ -383,93 +373,87 @@ LevelFilterUI.set_widget_horizontal_fraction = function (self, widget, fraction,
 		uvs[1][1] = 0
 		offset[1] = default_width - new_width
 	end
-
-	return 
 end
+
 LevelFilterUI._update_animation = function (self, dt, t)
 	if not self._animation_speed then
-		return 
+		return
 	end
 
 	local state = self._animation_state
 
 	if state == "opened" then
-		return 
+		return
 	end
 
 	if state == "closed" then
-		return 
+		return
 	end
 
 	local fraction = math.clamp(self._position_fraction + self._animation_speed * math.min(dt, 0.03333333333333333), 0, 1)
 
-	self.set_position_fraction(self, fraction)
+	self:set_position_fraction(fraction)
 
-	if state == "open" and 1 <= self._position_fraction then
+	if state == "open" and self._position_fraction >= 1 then
 		self._animation_state = "opened"
 	elseif state == "close" and self._position_fraction <= 0 then
 		self._animation_state = "closed"
 	end
-
-	return 
 end
+
 LevelFilterUI.set_position_fraction = function (self, fraction)
 	self._position_fraction = fraction
 	local anim_fraction = math.easeCubic(fraction)
 	local value = -500 + 500 * anim_fraction
 	self.ui_scenegraph.background.local_position[1] = value
 	self._edge_button_mg_widget.style.texture_id.color[1] = fraction * 255
-
-	return 
 end
+
 LevelFilterUI.visibility_fraction = function (self)
 	return math.easeCubic(self._position_fraction)
 end
+
 LevelFilterUI.toggle_visibility = function (self)
 	local state = self._animation_state
 
 	if state == "open" or state == "opened" then
-		self.close(self)
+		self:close()
 	else
-		self.open(self)
+		self:open()
 	end
-
-	return 
 end
+
 LevelFilterUI.open = function (self, speed)
 	if self._animation_state ~= "opened" then
 		self._animation_speed = speed or 5
 		self._animation_state = "open"
 	end
-
-	return 
 end
+
 LevelFilterUI.close = function (self, speed)
 	if self._animation_state ~= "closed" then
 		self._animation_speed = -(speed or 5)
 		self._animation_state = "close"
 	end
-
-	return 
 end
+
 LevelFilterUI.update = function (self, dt, t)
 	if self._draw then
-		self._update_animation(self, dt, t)
+		self:_update_animation(dt, t)
 
 		if self._animate_button_pulse then
-			self._update_button_pulse(self, dt, t)
+			self:_update_button_pulse(dt, t)
 		end
 
-		self.draw(self, dt)
+		self:draw(dt)
 	end
-
-	return 
 end
+
 LevelFilterUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self._bg_rect_widget)
@@ -489,11 +473,10 @@ LevelFilterUI.draw = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 LevelFilterUI.destroy = function (self)
-	return 
+	return
 end
 
-return 
+return

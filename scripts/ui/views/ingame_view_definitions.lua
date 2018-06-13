@@ -191,4 +191,4 @@ IngameViewDefinitions = {
 	}
 }
 
-return 
+return

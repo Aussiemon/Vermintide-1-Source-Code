@@ -217,4 +217,4 @@ DialogueLookup[DialogueLookup_n + 107] = "pwh_curse"
 DialogueLookup[DialogueLookup_n + 108] = "pwh_targeted_by_ratling"
 DialogueLookup_n = DialogueLookup_n + 108
 
-return 
+return

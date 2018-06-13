@@ -688,4 +688,4 @@ local action_data = {
 action_data.anti_ladder_melee_slam.considerations = UtilityConsiderations.anti_ladder_melee_slam
 BreedActions.skaven_rat_ogre = table.create_copy(BreedActions.skaven_rat_ogre, action_data)
 
-return 
+return

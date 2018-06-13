@@ -1,11 +1,11 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTMeleeShoveAction = class(BTMeleeShoveAction, BTNode)
+
 BTMeleeShoveAction.init = function (self, ...)
 	BTMeleeShoveAction.super.init(self, ...)
-
-	return 
 end
+
 BTMeleeShoveAction.name = "BTMeleeShoveAction"
 local POSITION_LOOKUP = POSITION_LOOKUP
 
@@ -15,8 +15,6 @@ local function randomize(event)
 	else
 		return event
 	end
-
-	return 
 end
 
 BTMeleeShoveAction.enter = function (self, unit, blackboard, t)
@@ -29,7 +27,7 @@ BTMeleeShoveAction.enter = function (self, unit, blackboard, t)
 	local velocity_threshold = action.target_running_velocity_threshold
 	local dir = Vector3.normalize(target_pos - POSITION_LOOKUP[unit])
 	local target_running = velocity_threshold < Vector3.dot(target_velocity, dir)
-	local right = 0.5 < Math.random()
+	local right = Math.random() > 0.5
 	local attack_anim = nil
 	local anim_driven = false
 
@@ -55,7 +53,7 @@ BTMeleeShoveAction.enter = function (self, unit, blackboard, t)
 	blackboard.shove_data = {
 		shove_everybody = true,
 		start_time = t + 0.4,
-		overlap_context = ai_extension.get_overlap_context(ai_extension),
+		overlap_context = ai_extension:get_overlap_context(),
 		physics_world = World.get_data(blackboard.world, "physics_world"),
 		hand_node = hand_node,
 		elbow_node = elbow_node,
@@ -68,9 +66,8 @@ BTMeleeShoveAction.enter = function (self, unit, blackboard, t)
 	if not blackboard.fling_skaven then
 		Managers.state.conflict:freeze_intensity_decay(15)
 	end
-
-	return 
 end
+
 BTMeleeShoveAction.leave = function (self, unit, blackboard, t)
 	if blackboard.shove_data.animation_driven then
 		LocomotionUtils.set_animation_driven_movement(unit, false)
@@ -82,12 +79,12 @@ BTMeleeShoveAction.leave = function (self, unit, blackboard, t)
 	blackboard.fling_skaven = false
 	blackboard.attacking_target = nil
 	blackboard.keep_target = nil
-
-	return 
 end
+
 local MAX_SHOVE_ANGLE = math.pi / 6
 local MAX_SHOVE_X = math.cos(MAX_SHOVE_ANGLE)
 local MAX_SHOVE_Y = math.sin(MAX_SHOVE_ANGLE)
+
 BTMeleeShoveAction.run = function (self, unit, blackboard, t, dt)
 	if t < blackboard.anim_locked then
 		local data = blackboard.shove_data
@@ -116,8 +113,8 @@ BTMeleeShoveAction.run = function (self, unit, blackboard, t, dt)
 
 			local hit_actors, num_hit_actors = PhysicsWorld.immediate_overlap(data.physics_world, "position", oobb_pos, "rotation", arm_rot, "size", box_size, "shape", "oobb", "types", "dynamics", "collision_filter", "filter_player_and_enemy_hit_box_check", "use_global_table")
 
-			if 0 < num_hit_actors then
-				self.overlap_checks(self, unit, blackboard, t, hit_actors, num_hit_actors, hit_units, fwd_dir, action)
+			if num_hit_actors > 0 then
+				self:overlap_checks(unit, blackboard, t, hit_actors, num_hit_actors, hit_units, fwd_dir, action)
 			end
 
 			data.hand_pos:store(hand_pos)
@@ -132,6 +129,7 @@ BTMeleeShoveAction.run = function (self, unit, blackboard, t, dt)
 
 	return "done"
 end
+
 BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_actors, num_hit_actors, hit_units, fwd_dir, action)
 	local self_pos = POSITION_LOOKUP[unit]
 	local player_owner = Managers.player.owner
@@ -147,7 +145,7 @@ BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_act
 			if enemy_pos then
 				local shove_dir = Vector3.normalize(enemy_pos - self_pos)
 
-				if 0 < Vector3.dot(shove_dir, fwd_dir) then
+				if Vector3.dot(shove_dir, fwd_dir) > 0 then
 					if Managers.player:is_player_unit(hit_unit) then
 						local shove_speed = action.shove_speed
 						local blocked = false
@@ -160,14 +158,14 @@ BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_act
 						local push_velocity = shove_dir * shove_speed
 
 						Vector3.set_z(push_velocity, action.shove_z_speed)
-						self.hit_player(self, unit, blackboard, hit_unit, push_velocity, shove_dir, blocked)
+						self:hit_player(unit, blackboard, hit_unit, push_velocity, shove_dir, blocked)
 					else
 						local target_ai_blackboard = Unit.get_data(hit_unit, "blackboard")
 
 						if target_ai_blackboard then
 							local stagger_type, stagger_duration = DamageUtils.calculate_stagger(action.stagger_impact, action.stagger_duration, hit_unit, unit)
 
-							if 0 < stagger_type then
+							if stagger_type > 0 then
 								AiUtils.stagger(hit_unit, target_ai_blackboard, unit, shove_dir, action.stagger_distance, stagger_type, stagger_duration, nil, t)
 							end
 						end
@@ -178,9 +176,8 @@ BTMeleeShoveAction.overlap_checks = function (self, unit, blackboard, t, hit_act
 			end
 		end
 	end
-
-	return 
 end
+
 BTMeleeShoveAction.hit_player = function (self, unit, blackboard, target_unit, velocity, blocked_velocity, blocked)
 	local action = blackboard.action
 	local target_status_extension = ScriptUnit.extension(target_unit, "status_system")
@@ -193,7 +190,7 @@ BTMeleeShoveAction.hit_player = function (self, unit, blackboard, target_unit, v
 		if has_inventory_extension then
 			local inventory_extension = ScriptUnit.extension(unit, "ai_inventory_system")
 
-			inventory_extension.play_hit_sound(inventory_extension, target_unit, action.damage_type)
+			inventory_extension:play_hit_sound(target_unit, action.damage_type)
 		end
 	end
 
@@ -201,15 +198,12 @@ BTMeleeShoveAction.hit_player = function (self, unit, blackboard, target_unit, v
 	local status_extension = ScriptUnit.extension(target_unit, "status_system")
 
 	if not target_status_extension.knocked_down then
-		target_status_extension.set_catapulted(target_status_extension, true, velocity)
+		target_status_extension:set_catapulted(true, velocity)
 	end
-
-	return 
 end
+
 BTMeleeShoveAction.anim_cb_shove_done = function (self, unit, blackboard)
 	blackboard.shove_data.shove_everybody = nil
-
-	return 
 end
 
-return 
+return

@@ -2,23 +2,24 @@ MatchmakingStateFriendClient = class(MatchmakingStateFriendClient)
 MatchmakingStateFriendClient.NAME = "MatchmakingStateFriendClient"
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
+
 MatchmakingStateFriendClient.init = function (self, params)
 	self.matchmaking_ui = params.matchmaking_ui
 	self.matchmaking_manager = params.matchmaking_manager
 	self.handshaker_client = params.handshaker_client
 	self.wwise_world = params.wwise_world
+end
 
-	return 
-end
 MatchmakingStateFriendClient.destroy = function (self)
-	return 
+	return
 end
+
 MatchmakingStateFriendClient.on_enter = function (self, state_context)
 	self.matchmaking_ui:large_window_cancel_enable(false)
 	self.matchmaking_ui:large_window_ready_enable(true)
@@ -33,17 +34,15 @@ MatchmakingStateFriendClient.on_enter = function (self, state_context)
 	local window_title = (private_game and "status_private") or "status_matchmaking"
 
 	self.matchmaking_ui:large_window_set_title(window_title)
-
-	return 
 end
+
 MatchmakingStateFriendClient.on_exit = function (self)
 	self.matchmaking_ui:large_window_cancel_enable(true)
-
-	return 
 end
+
 MatchmakingStateFriendClient.update = function (self, dt, t)
 	if not Managers.state.game_mode or Managers.state.game_mode:level_key() ~= "inn_level" then
-		return 
+		return
 	end
 
 	local gamepad_active_last_frame = self._gamepad_active_last_frame
@@ -84,18 +83,18 @@ MatchmakingStateFriendClient.update = function (self, dt, t)
 			self.matchmaking_manager.ready_peers[peer_id] = self.ready
 		else
 			local player_manager = Managers.player
-			local player = player_manager.player(player_manager, peer_id, 1)
+			local player = player_manager:player(peer_id, 1)
 			local can_use_input = player and Unit.alive(player.player_unit)
 			local input_service = (can_use_input and Managers.input:get_service("ingame_menu")) or fake_input_service
 
-			if self.controller_cooldown and 0 < self.controller_cooldown then
+			if self.controller_cooldown and self.controller_cooldown > 0 then
 				self.controller_cooldown = self.controller_cooldown - dt
 			else
-				if input_service and input_service.get(input_service, "matchmaking_ready_instigate") then
+				if input_service and input_service:get("matchmaking_ready_instigate") then
 					self._started_readying = true
 				end
 
-				if input_service and input_service.get(input_service, "matchmaking_ready") and self._started_readying then
+				if input_service and input_service:get("matchmaking_ready") and self._started_readying then
 					local ready_changed = false
 
 					if gamepad_active then
@@ -149,19 +148,18 @@ MatchmakingStateFriendClient.update = function (self, dt, t)
 	end
 
 	self._gamepad_active_last_frame = gamepad_active
-
-	return 
 end
+
 MatchmakingStateFriendClient.rpc_matchmaking_set_ready = function (self, sender, client_cookie, host_cookie, peer_id, ready)
 	if not self.handshaker_client:validate_cookies(client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local matchmaking_manager = self.matchmaking_manager
-	local portrait_index = matchmaking_manager.get_portrait_index(matchmaking_manager, peer_id)
+	local portrait_index = matchmaking_manager:get_portrait_index(peer_id)
 
 	if not portrait_index then
-		return 
+		return
 	end
 
 	self.matchmaking_manager.ready_peers[peer_id] = ready
@@ -171,39 +169,34 @@ MatchmakingStateFriendClient.rpc_matchmaking_set_ready = function (self, sender,
 	if ready then
 		WwiseWorld.trigger_event(self.wwise_world, "Play_hud_matchmaking_ready")
 	end
-
-	return 
 end
+
 MatchmakingStateFriendClient.rpc_matchmaking_request_selected_level_reply = function (self, sender, client_cookie, host_cookie, selected_level_id)
 	if not self.handshaker_client:validate_cookies(client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local selected_level = NetworkLookup.level_keys[selected_level_id]
 
 	self.matchmaking_ui:large_window_set_level(selected_level)
-
-	return 
 end
+
 MatchmakingStateFriendClient.rpc_matchmaking_request_selected_difficulty_reply = function (self, sender, client_cookie, host_cookie, difficulty_id)
 	if not self.handshaker_client:validate_cookies(client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	local difficulty = NetworkLookup.difficulties[difficulty_id]
 
 	self.matchmaking_ui:large_window_set_difficulty(difficulty)
-
-	return 
 end
+
 MatchmakingStateFriendClient.rpc_matchmaking_status_message = function (self, sender, client_cookie, host_cookie, status_message)
 	if not self.handshaker_client:validate_cookies(client_cookie, host_cookie) then
-		return 
+		return
 	end
 
 	self.matchmaking_manager:set_status_message(status_message)
-
-	return 
 end
 
-return 
+return

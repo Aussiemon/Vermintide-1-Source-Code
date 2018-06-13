@@ -1,5 +1,6 @@
 LoreBookHelper = LoreBookHelper or {}
 local new_pages = {}
+
 LoreBookHelper.save_new_pages = function ()
 	local player_data = PlayerData
 	local new_lorebook_ids = player_data.new_lorebook_ids or {}
@@ -11,14 +12,12 @@ LoreBookHelper.save_new_pages = function ()
 	player_data.new_lorebook_ids = new_lorebook_ids
 
 	Managers.save:auto_save(SaveFileName, SaveData, nil)
-
-	return 
 end
+
 LoreBookHelper.mark_page_id_as_new = function (category_name)
 	new_pages[category_name] = true
-
-	return 
 end
+
 LoreBookHelper.unmark_page_id_as_new = function (page_id)
 	local player_data = PlayerData
 	local new_lorebook_ids = player_data.new_lorebook_ids
@@ -29,11 +28,10 @@ LoreBookHelper.unmark_page_id_as_new = function (page_id)
 	new_pages[page_id] = nil
 
 	Managers.save:auto_save(SaveFileName, SaveData, nil)
-
-	return 
 end
+
 LoreBookHelper.get_new_page_ids = function ()
 	return PlayerData.new_lorebook_ids
 end
 
-return 
+return

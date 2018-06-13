@@ -28,8 +28,6 @@ local function debug_print(format, ...)
 	if script_data.network_debug or StateMachine.DEBUG then
 		printf("[StateMachine] " .. format, ...)
 	end
-
-	return 
 end
 
 StateMachine.init = function (self, parent, start_state, params, profiling_debugging_enabled)
@@ -38,10 +36,9 @@ StateMachine.init = function (self, parent, start_state, params, profiling_debug
 	self._profiling_debugging_enabled = profiling_debugging_enabled
 
 	debug_print("Init %-30s", start_state.NAME)
-	self._change_state(self, start_state, params)
-
-	return 
+	self:_change_state(start_state, params)
 end
+
 StateMachine._change_state = function (self, new_state, params)
 	if self._state then
 		if self._state.on_exit and self._profiling_debugging_enabled then
@@ -64,11 +61,11 @@ StateMachine._change_state = function (self, new_state, params)
 
 		Profiler.start(scope_name)
 
-		self._state = new_state.new(new_state)
+		self._state = new_state:new()
 
 		Profiler.stop(scope_name)
 	else
-		self._state = new_state.new(new_state)
+		self._state = new_state:new()
 	end
 
 	self._state.parent = self._parent
@@ -86,21 +83,20 @@ StateMachine._change_state = function (self, new_state, params)
 	else
 		debug_print("Entering %-30s", new_state.NAME)
 	end
-
-	return 
 end
+
 StateMachine.state = function (self)
 	return self._state
 end
+
 StateMachine.update = function (self, dt, t)
 	local new_state = self._state:update(dt, t)
 
 	if new_state then
-		self._change_state(self, new_state, self._params)
+		self:_change_state(new_state, self._params)
 	end
-
-	return 
 end
+
 StateMachine.destroy = function (self, ...)
 	debug_print("destroying")
 
@@ -108,8 +104,6 @@ StateMachine.destroy = function (self, ...)
 		debug_print("Exiting %-30s with on_exit()", self._state.NAME)
 		self._state:on_exit(...)
 	end
-
-	return 
 end
 
-return 
+return

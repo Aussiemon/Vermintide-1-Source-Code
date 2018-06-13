@@ -1,5 +1,6 @@
 local definitions = local_require("scripts/ui/views/ingame_voting_ui_definitions")
 IngameVotingUI = class(IngameVotingUI)
+
 IngameVotingUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -7,12 +8,12 @@ IngameVotingUI.init = function (self, ingame_ui_context)
 	self.voting_manager = ingame_ui_context.voting_manager
 	self.platform = PLATFORM
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	rawset(_G, "ingame_voting_ui", self)
-
-	return 
 end
+
 local RELOAD_UI = false
+
 IngameVotingUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.scenegraph_definition = definitions.scenegraph_definition
@@ -21,18 +22,16 @@ IngameVotingUI.create_ui_elements = function (self)
 	self.option_yes = UIWidget.init(widget_definitions.option_yes)
 	self.option_no = UIWidget.init(widget_definitions.option_no)
 	RELOAD_UI = false
-
-	return 
 end
+
 IngameVotingUI.destroy = function (self)
 	self.voting_manager:allow_vote_input(false)
 
 	self.voting_manager = nil
 
 	rawset(_G, "ingame_voting_ui", nil)
-
-	return 
 end
+
 IngameVotingUI.get_text_width = function (self, text, text_style)
 	local font = UIFontByResolution(text_style)
 	local font_size = text_style.font_size
@@ -40,13 +39,14 @@ IngameVotingUI.get_text_width = function (self, text, text_style)
 
 	return text_width
 end
+
 IngameVotingUI.setup_option_input = function (self, option_widget, option, gamepad_active)
 	local total_width = 35
 	local text = option.text
 	local input_action = option.input
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "ingame_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("ingame_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local button_texture_data, input_text = UISettings.get_gamepad_input_texture_data(input_service, input_action, gamepad_active)
 
 	if not gamepad_active then
@@ -58,7 +58,7 @@ IngameVotingUI.setup_option_input = function (self, option_widget, option, gamep
 	local option_text = Localize(text)
 	option_widget.content.option_text = option_text
 	local option_text_style = option_widget.style.option_text
-	total_width = total_width + self.get_text_width(self, option_text, option_text_style)
+	total_width = total_width + self:get_text_width(option_text, option_text_style)
 
 	if button_texture_data then
 		local input_icon_scenegraph_id = option_widget.style.input_icon.scenegraph_id
@@ -71,14 +71,14 @@ IngameVotingUI.setup_option_input = function (self, option_widget, option, gamep
 	local scenegraph_id = option_widget.scenegraph_id
 	local horizontal_offset = total_width / 2 + 10
 	self.ui_scenegraph[scenegraph_id].local_position[1] = (left_side and -horizontal_offset) or horizontal_offset
+end
 
-	return 
-end
 IngameVotingUI.align_option_inputs = function (self)
-	return 
+	return
 end
+
 IngameVotingUI.start_vote = function (self, active_voting)
-	self.clear_input_progress(self)
+	self:clear_input_progress()
 
 	local vote_template = active_voting.template
 
@@ -118,12 +118,12 @@ IngameVotingUI.start_vote = function (self, active_voting)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 
 	if gamepad_active then
-		self.on_gamepad_activated(self, active_voting)
+		self:on_gamepad_activated(active_voting)
 	else
 		local vote_options = vote_template.vote_options
 
-		self.setup_option_input(self, self.option_yes, vote_options[1], gamepad_active)
-		self.setup_option_input(self, self.option_no, vote_options[2], gamepad_active)
+		self:setup_option_input(self.option_yes, vote_options[1], gamepad_active)
+		self:setup_option_input(self.option_no, vote_options[2], gamepad_active)
 	end
 
 	self.option_yes.content.has_voted = false
@@ -135,6 +135,7 @@ IngameVotingUI.start_vote = function (self, active_voting)
 
 	return true
 end
+
 IngameVotingUI.update_vote = function (self, votes)
 	local result_boxes = self.result_boxes
 	local voters = self.voters
@@ -167,20 +168,19 @@ IngameVotingUI.update_vote = function (self, votes)
 			option.content.option_text = sprintf("(%s)", tostring(self.vote_results[vote]))
 
 			if self.has_voted then
-				self.animate_option_get_vote(self, option)
+				self:animate_option_get_vote(option)
 			end
 		end
 	end
 
 	local voting_manager = self.voting_manager
-	local vote_time_left = voting_manager.vote_time_left(voting_manager)
+	local vote_time_left = voting_manager:vote_time_left()
 	local time_text = (vote_time_left and string.format(" %02d:%02d", math.floor(vote_time_left / 60), vote_time_left % 60)) or "00:00"
 	self.background.content.title_text = time_text
-
-	return 
 end
+
 IngameVotingUI.start_finish = function (self, previous_voting_info, t)
-	self.clear_input_progress(self)
+	self:clear_input_progress()
 
 	self.on_finish = true
 	self.finish_time = t + 2
@@ -197,13 +197,12 @@ IngameVotingUI.start_finish = function (self, previous_voting_info, t)
 
 	self.finish_option = option
 
-	self.update_vote(self, previous_voting_info.votes)
-	self.update_can_vote(self, false)
+	self:update_vote(previous_voting_info.votes)
+	self:update_can_vote(false)
 
 	self.menu_active = nil
-
-	return 
 end
+
 IngameVotingUI.stop_finish = function (self)
 	self.option_no.style.option_texture.color[1] = 255
 	self.option_yes.style.option_texture.color[1] = 255
@@ -211,17 +210,16 @@ IngameVotingUI.stop_finish = function (self)
 	self.option_yes.style.result_text.text_color[1] = 255
 	self.finish_option = nil
 	self.on_finish = nil
-
-	return 
 end
+
 IngameVotingUI.update_finish = function (self, dt, t)
 	if self.finish_time <= t then
-		self.stop_finish(self)
+		self:stop_finish()
 	else
 		self.finish_anim_t = self.finish_anim_t + dt * 8
 		local value = math.sirp(0, 1, self.finish_anim_t)
 
-		if 0.5 < value then
+		if value > 0.5 then
 			self.finish_option.style.option_texture.color[1] = 255
 			self.finish_option.style.result_text.text_color[1] = 255
 		else
@@ -229,12 +227,11 @@ IngameVotingUI.update_finish = function (self, dt, t)
 			self.finish_option.style.result_text.text_color[1] = 180
 		end
 	end
-
-	return 
 end
+
 IngameVotingUI.update = function (self, menu_active, dt, t)
 	if RELOAD_UI then
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 
 		self.vote_started = false
 	end
@@ -243,28 +240,28 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 	local voting_manager = self.voting_manager
 	local hold_input_pressed = false
 
-	if voting_manager.vote_in_progress(voting_manager) and voting_manager.is_ingame_vote(voting_manager) then
+	if voting_manager:vote_in_progress() and voting_manager:is_ingame_vote() then
 		if menu_active ~= self.menu_active then
 			self.menu_active = menu_active
 
-			self.update_can_vote(self, menu_active)
+			self:update_can_vote(menu_active)
 		end
 
 		if not self.vote_started then
 			if self.on_finish then
-				self.stop_finish(self)
+				self:stop_finish()
 			end
 
-			local start_successful = self.start_vote(self, voting_manager.active_voting)
+			local start_successful = self:start_vote(voting_manager.active_voting)
 
 			if not start_successful then
-				return 
+				return
 			end
 		end
 
-		hold_input_pressed = self.update_input_progress(self, voting_manager.active_voting)
+		hold_input_pressed = self:update_input_progress(voting_manager.active_voting)
 
-		self.update_vote(self, voting_manager.active_voting.votes)
+		self:update_vote(voting_manager.active_voting.votes)
 
 		if not self.has_voted then
 			local gamepad_active = self.input_manager:is_device_active("gamepad")
@@ -276,8 +273,8 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 				if vote_template then
 					local vote_options = vote_template.vote_options
 
-					self.setup_option_input(self, self.option_yes, vote_options[1])
-					self.setup_option_input(self, self.option_no, vote_options[2])
+					self:setup_option_input(self.option_yes, vote_options[1])
+					self:setup_option_input(self.option_no, vote_options[2])
 
 					self.gamepad_active = gamepad_active
 				end
@@ -286,40 +283,39 @@ IngameVotingUI.update = function (self, menu_active, dt, t)
 
 		draw = true
 	elseif self.vote_started then
-		local previous_voting_info = voting_manager.previous_vote_info(voting_manager)
+		local previous_voting_info = voting_manager:previous_vote_info()
 
-		self.start_finish(self, previous_voting_info, t)
+		self:start_finish(previous_voting_info, t)
 
 		self.vote_started = nil
 	end
 
 	if self.on_finish then
-		self.update_finish(self, dt, t)
+		self:update_finish(dt, t)
 
 		draw = true
 	end
 
 	if draw then
 		local input_manager = self.input_manager
-		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+		local gamepad_active = input_manager:is_device_active("gamepad")
 
 		if gamepad_active then
 			if not self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = true
 
-				self.on_gamepad_activated(self, voting_manager.active_voting)
+				self:on_gamepad_activated(voting_manager.active_voting)
 			end
 		elseif self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = false
 
-			self.on_gamepad_deactivated(self, voting_manager.active_voting)
+			self:on_gamepad_deactivated(voting_manager.active_voting)
 		end
 
-		self.draw(self, dt, hold_input_pressed)
+		self:draw(dt, hold_input_pressed)
 	end
-
-	return 
 end
+
 IngameVotingUI.on_gamepad_activated = function (self, active_voting)
 	if not self.has_voted then
 	end
@@ -338,12 +334,11 @@ IngameVotingUI.on_gamepad_activated = function (self, active_voting)
 		local vote_template = active_voting.template
 		local vote_options = vote_template.vote_options
 
-		self.setup_option_input(self, self.option_yes, vote_options[1], true)
-		self.setup_option_input(self, self.option_no, vote_options[2], true)
+		self:setup_option_input(self.option_yes, vote_options[1], true)
+		self:setup_option_input(self.option_no, vote_options[2], true)
 	end
-
-	return 
 end
+
 IngameVotingUI.on_gamepad_deactivated = function (self, active_voting)
 	if not self.has_voted then
 	end
@@ -352,29 +347,27 @@ IngameVotingUI.on_gamepad_deactivated = function (self, active_voting)
 		local vote_template = active_voting.template
 		local vote_options = vote_template.vote_options
 
-		self.setup_option_input(self, self.option_yes, vote_options[1])
-		self.setup_option_input(self, self.option_no, vote_options[2])
+		self:setup_option_input(self.option_yes, vote_options[1])
+		self:setup_option_input(self.option_no, vote_options[2])
 	end
-
-	return 
 end
+
 IngameVotingUI.draw = function (self, dt, hold_input_pressed)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_service = self.input_manager:get_service("ingame_menu")
 
-	self.update_pulse_animations(self, dt, hold_input_pressed)
+	self:update_pulse_animations(dt, hold_input_pressed)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 	UIRenderer.draw_widget(ui_renderer, self.background)
 	UIRenderer.draw_widget(ui_renderer, self.option_yes)
 	UIRenderer.draw_widget(ui_renderer, self.option_no)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 IngameVotingUI.update_pulse_animations = function (self, dt, hold_input_pressed)
 	if self.has_voted then
-		return 
+		return
 	end
 
 	local menu_active = self.menu_active
@@ -390,19 +383,18 @@ IngameVotingUI.update_pulse_animations = function (self, dt, hold_input_pressed)
 		local alpha = 100 + progress * 155
 		self.background.style.input_text.text_color[1] = alpha
 	end
-
-	return 
 end
+
 IngameVotingUI.update_can_vote = function (self, enabled)
 	self.background.content.can_vote = enabled
 	self.option_yes.content.can_vote = enabled
 	self.option_no.content.can_vote = enabled
 
 	self.voting_manager:allow_vote_input(enabled)
-
-	return 
 end
+
 local math_ease_cubic = math.easeCubic
+
 IngameVotingUI.animate_option_get_vote = function (self, option)
 	local fade_in_time = 0.1
 	local fade_out_time = 0.1
@@ -413,13 +405,11 @@ IngameVotingUI.animate_option_get_vote = function (self, option)
 	local function anim_func(t)
 		if t < fade_in_time then
 			return math_ease_cubic(t / fade_in_time)
-		elseif 0 < fade_out_time then
+		elseif fade_out_time > 0 then
 			return math_ease_cubic((1 - t) / fade_out_time)
 		else
 			return 0
 		end
-
-		return 
 	end
 
 	local start_size = 24
@@ -429,9 +419,8 @@ IngameVotingUI.animate_option_get_vote = function (self, option)
 	local nudge_animation = UIAnimation.init(UIAnimation.function_by_time, target, target_index, start_size, target_size, anim_time, anim_func)
 
 	UIWidget.animate(option, nudge_animation)
-
-	return 
 end
+
 IngameVotingUI.update_input_progress = function (self, active_voting)
 	local hold_input_pressed = false
 	local current_hold_input = active_voting.current_hold_input
@@ -502,6 +491,7 @@ IngameVotingUI.update_input_progress = function (self, active_voting)
 
 	return hold_input_pressed
 end
+
 IngameVotingUI.clear_input_progress = function (self)
 	if self.option_yes then
 		local style = self.option_yes.style.bar
@@ -525,8 +515,6 @@ IngameVotingUI.clear_input_progress = function (self)
 		size[1] = 0
 		uvs[2][1] = 1
 	end
-
-	return 
 end
 
-return 
+return

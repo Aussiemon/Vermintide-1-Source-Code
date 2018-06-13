@@ -4,34 +4,33 @@ require("scripts/managers/telemetry/telemetry_rpc_listener")
 
 local DEBUG = Development.parameter("debug-telemetry")
 TelemetryManager = class(TelemetryManager)
+
 TelemetryManager.init = function (self)
-	self.reset(self)
+	self:reset()
 
 	self.events = TelemetryEvents:new(self)
 	self.rpc_listener = TelemetryRPCListener:new(self.events)
-
-	return 
 end
+
 TelemetryManager.reset = function (self)
 	self._events_json = {}
 	self._current_tick = 0
-
-	return 
 end
+
 TelemetryManager.update = function (self, dt)
 	self._current_tick = self._current_tick + dt
-
-	return 
 end
+
 local BLACKLIST = table.set(TelemetrySettings.blacklist or {})
 local event_entry = {}
+
 TelemetryManager.register_event = function (self, event_type, event_params)
 	if BLACKLIST[event_type] then
 		if DEBUG then
 			printf("[TelemetryManager] Blacklisted event '%s'", event_type)
 		end
 
-		return 
+		return
 	end
 
 	for k, param in pairs(event_params) do
@@ -50,12 +49,12 @@ TelemetryManager.register_event = function (self, event_type, event_params)
 	if DEBUG then
 		printf("[TelemetryManager] Registering event '%s' %s", event_type, encoded_event)
 	end
-
-	return 
 end
+
 local TITLE_ID = TelemetrySettings.title_id
 local COMPRESS = T(TelemetrySettings.compress, true)
 local AUTH_TYPE = T(TelemetrySettings.auth_type, 0)
+
 TelemetryManager.send = function (self)
 	local events_as_string = table.concat(self._events_json, "\n")
 	local file_name = sprintf("%s_%s", TITLE_ID, math.uuid())
@@ -65,4 +64,4 @@ TelemetryManager.send = function (self)
 	return CurlToken:new(token)
 end
 
-return 
+return

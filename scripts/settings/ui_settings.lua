@@ -790,8 +790,6 @@ function ButtonTextureByName(button_name, platform)
 	else
 		return (platform == "win32" and button_mapping[platform]) or button_mapping[platform][button_name]
 	end
-
-	return 
 end
 
 UISettings.get_gamepad_input_texture_data = function (input_service, input_action, gamepad_active)
@@ -803,8 +801,8 @@ UISettings.get_gamepad_input_texture_data = function (input_service, input_actio
 
 	local button_texture_data = nil
 	local button_name = ""
-	local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
-	keymap_binding = keymap_binding or input_service.get_filter_keymapping(input_service, input_action, platform)
+	local keymap_binding = input_service:get_keymapping(input_action, platform)
+	keymap_binding = keymap_binding or input_service:get_filter_keymapping(input_action, platform)
 
 	if #keymap_binding < 3 then
 		return button_texture_data, button_name
@@ -827,4 +825,4 @@ UISettings.get_gamepad_input_texture_data = function (input_service, input_actio
 	return button_texture_data, button_name, keymap_binding
 end
 
-return 
+return

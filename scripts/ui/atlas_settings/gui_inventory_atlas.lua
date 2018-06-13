@@ -1639,4 +1639,4 @@ inventory_atlas = {
 	}
 }
 
-return 
+return

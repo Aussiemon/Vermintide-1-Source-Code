@@ -1,13 +1,11 @@
 return {
 	save = {
 		text_function = function (amount, player_1_name, player_2_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_saved_player_multiple"), player_1_name, player_2_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_saved_player"), player_1_name, player_2_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -18,13 +16,11 @@ return {
 	},
 	heal = {
 		text_function = function (amount, player_1_name, player_2_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_healed_player_multiple"), player_1_name, player_2_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_healed_player"), player_1_name, player_2_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -35,13 +31,11 @@ return {
 	},
 	revive = {
 		text_function = function (amount, player_1_name, player_2_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_revived_player_multiple"), player_1_name, player_2_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_revived_player"), player_1_name, player_2_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -52,13 +46,11 @@ return {
 	},
 	assisted_respawn = {
 		text_function = function (amount, player_1_name, player_2_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_rescued_player_multiple"), player_1_name, player_2_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_rescued_player"), player_1_name, player_2_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -69,13 +61,11 @@ return {
 	},
 	aid = {
 		text_function = function (amount, player_1_name, player_2_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_aided_player_multiple"), player_1_name, player_2_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_aided_player"), player_1_name, player_2_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -86,13 +76,11 @@ return {
 	},
 	give_item = {
 		text_function = function (amount, player_1_name, player_2_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_gave_item_player_multiple"), player_1_name, player_2_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_gave_item_player"), player_1_name, player_2_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -103,13 +91,11 @@ return {
 	},
 	picked_up_loot_dice = {
 		text_function = function (amount, player_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_picked_up_loot_dice_multiple"), player_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_picked_up_loot_dice"), player_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -120,13 +106,11 @@ return {
 	},
 	picked_up_event_item = {
 		text_function = function (amount, player_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_picked_up_event_item_multiple"), player_name, amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_picked_up_event_item"), player_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")
@@ -181,13 +165,11 @@ return {
 	},
 	killed_special = {
 		text_function = function (amount, player_name, breed_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("positive_reinforcement_player_killed_special_multiple"), player_name, Localize(breed_name), amount)
 			else
 				return string.format(Localize("positive_reinforcement_player_killed_special"), player_name, Localize(breed_name))
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return nil
@@ -198,13 +180,11 @@ return {
 	},
 	picked_up_endurance_badge = {
 		text_function = function (amount, player_name)
-			if 1 < amount then
+			if amount > 1 then
 				return string.format(Localize("dlc1_2_positive_reinforcement_player_picked_up_endurance_badge_multiple"), player_name, amount)
 			else
 				return string.format(Localize("dlc1_2_positive_reinforcement_player_picked_up_endurance_badge"), player_name)
 			end
-
-			return 
 		end,
 		sound_function = function ()
 			return script_data.reinforcement_ui_local_sound or "hud_achievement_unlock_02" or (script_data.enable_reinforcement_ui_remote_sound and "hud_info")

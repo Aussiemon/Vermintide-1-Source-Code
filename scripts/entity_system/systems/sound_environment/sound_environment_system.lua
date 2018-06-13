@@ -6,6 +6,7 @@ local extensions = {}
 local SOURCE_WEIGHT = 0.5
 local LISTENER_WEIGHT = 1 - SOURCE_WEIGHT
 local FULL_WEIGHT = 1
+
 SoundEnvironmentSystem.init = function (self, entity_system_creation_context, system_name)
 	SoundEnvironmentSystem.super.init(self, entity_system_creation_context, system_name, extensions)
 
@@ -24,15 +25,14 @@ SoundEnvironmentSystem.init = function (self, entity_system_creation_context, sy
 	local aux_bus_name = level_settings.player_aux_bus_name
 	local environment_state = level_settings.environment_state
 
-	self.register_sound_environment(self, "global", -1, ambient_sound_event, global_environment_fade_time, aux_bus_name, environment_state)
-	self.enter_environment(self, 0, "global")
+	self:register_sound_environment("global", -1, ambient_sound_event, global_environment_fade_time, aux_bus_name, environment_state)
+	self:enter_environment(0, "global")
 
 	self._updated_sources = {}
 	self._num_sources = 0
 	self._current_source_index = 0
-
-	return 
 end
+
 local environment_base = {
 	aux_bus_name = "",
 	prio = 0,
@@ -44,6 +44,7 @@ local environment_base = {
 		current_value = 0
 	}
 }
+
 SoundEnvironmentSystem.register_sound_environment = function (self, volume_name, prio, ambient_sound_event, fade_time, aux_bus_name, environment_state)
 	fassert(self._environments[volume_name] == nil, "Already registered sound environment with name %q", volume_name)
 
@@ -66,9 +67,8 @@ SoundEnvironmentSystem.register_sound_environment = function (self, volume_name,
 
 	environment.environment_state = environment_state
 	self._environments[volume_name] = environment
-
-	return 
 end
+
 SoundEnvironmentSystem._highest_prio_environment_at_position = function (self, position)
 	local level = LevelHelper:current_level(self.world)
 	local highest_prio = -math.huge
@@ -85,12 +85,13 @@ SoundEnvironmentSystem._highest_prio_environment_at_position = function (self, p
 
 	return highest_prio_env_name
 end
+
 SoundEnvironmentSystem.set_source_environment = function (self, source, position)
 	if not GameSettingsDevelopment.fade_environments then
-		return 
+		return
 	end
 
-	local volume_name = self._highest_prio_environment_at_position(self, position)
+	local volume_name = self:_highest_prio_environment_at_position(position)
 	local environments = self._environments
 	local wwise_world = self.wwise_world
 	local bus_name = environments[volume_name or "global"].source_aux_bus_name
@@ -120,6 +121,7 @@ SoundEnvironmentSystem.set_source_environment = function (self, source, position
 
 	return bus_name
 end
+
 SoundEnvironmentSystem.register_source_environment_update = function (self, source, unit, object)
 	self._updated_sources[#self._updated_sources + 1] = {
 		unit = unit,
@@ -127,9 +129,8 @@ SoundEnvironmentSystem.register_source_environment_update = function (self, sour
 		node = (object and Unit.node(unit, object)) or 0
 	}
 	self._num_sources = self._num_sources + 1
-
-	return 
 end
+
 SoundEnvironmentSystem.unregister_source_environment_update = function (self, source)
 	local num_sources = self._num_sources
 
@@ -147,13 +148,13 @@ SoundEnvironmentSystem.unregister_source_environment_update = function (self, so
 
 			self._num_sources = num_sources - 1
 
-			return 
+			return
 		end
 	end
-
-	return 
 end
+
 local UPDATE_MAX_AMOUNT = 3
+
 SoundEnvironmentSystem._update_source_environments = function (self)
 	local num_sources = self._num_sources
 	local amount_to_update = math.min(num_sources, UPDATE_MAX_AMOUNT)
@@ -164,30 +165,29 @@ SoundEnvironmentSystem._update_source_environments = function (self)
 		current_index = current_index % num_sources + 1
 		local data = updated_sources[current_index]
 		local pos = Unit.world_position(data.unit, data.node)
-		slot11 = self.set_source_environment(self, data.source, pos)
+		slot11 = self:set_source_environment(data.source, pos)
 	end
 
 	self._current_index = current_index
-
-	return 
 end
+
 SoundEnvironmentSystem.update = function (self, context, t)
 	local local_player = Managers.player:local_player()
 	local viewport_name = local_player.viewport_name
 	local pose = Managers.state.camera:listener_pose(viewport_name)
 	local position = Matrix4x4.translation(pose)
-	local highest_prio_env_name = self._highest_prio_environment_at_position(self, position)
+	local highest_prio_env_name = self:_highest_prio_environment_at_position(position)
 
 	if highest_prio_env_name then
 		if highest_prio_env_name ~= self._current_environment then
-			self.enter_environment(self, t, highest_prio_env_name, self._current_environment)
+			self:enter_environment(t, highest_prio_env_name, self._current_environment)
 		end
 	elseif self._current_environment ~= "global" then
-		self.enter_environment(self, t, "global", self._current_environment)
+		self:enter_environment(t, "global", self._current_environment)
 	end
 
 	if GameSettingsDevelopment.fade_environments then
-		self._update_fade(self, t)
+		self:_update_fade(t)
 
 		if script_data.debug_sound_environments then
 			local current_environment = self._current_environment
@@ -203,11 +203,10 @@ SoundEnvironmentSystem.update = function (self, context, t)
 			end
 		end
 
-		self._update_source_environments(self)
+		self:_update_source_environments()
 	end
-
-	return 
 end
+
 SoundEnvironmentSystem._update_fade = function (self, t)
 	local wwise_world = self.wwise_world
 	local environments = self._environments
@@ -231,9 +230,8 @@ SoundEnvironmentSystem._update_fade = function (self, t)
 			fade_environments[volume_name] = nil
 		end
 	end
-
-	return 
 end
+
 SoundEnvironmentSystem._add_fade_environment = function (self, t, volume_name, fade_time, target_value)
 	local environment = self._environments[volume_name]
 	local fade_info = environment.fade_info
@@ -242,10 +240,10 @@ SoundEnvironmentSystem._add_fade_environment = function (self, t, volume_name, f
 	fade_info.start_value = fade_info.current_value
 	fade_info.target_value = target_value
 	self._fade_environments[volume_name] = true
-
-	return 
 end
+
 local MAX_FADE_ENVIRONMENTS = 3
+
 SoundEnvironmentSystem._clamp_num_fade_environments = function (self)
 	local num_envs = 0
 	local least_env_name = nil
@@ -272,9 +270,8 @@ SoundEnvironmentSystem._clamp_num_fade_environments = function (self)
 
 		WwiseWorld.set_environment(self.wwise_world, env.player_aux_bus_name, 0)
 	end
-
-	return 
 end
+
 SoundEnvironmentSystem.enter_environment = function (self, t, volume_name, current_environment_name)
 	local environment = self._environments[volume_name]
 
@@ -282,7 +279,7 @@ SoundEnvironmentSystem.enter_environment = function (self, t, volume_name, curre
 		local fade_time = environment.fade_time
 		local fade_info = environment.fade_info
 
-		if 0 < fade_info.current_value then
+		if fade_info.current_value > 0 then
 			local current_value = fade_info.current_value
 			local target_value = 1
 			local delta = target_value - current_value
@@ -293,15 +290,15 @@ SoundEnvironmentSystem.enter_environment = function (self, t, volume_name, curre
 			end
 		end
 
-		self._add_fade_environment(self, t, volume_name, fade_time, 1)
+		self:_add_fade_environment(t, volume_name, fade_time, 1)
 
 		if current_environment_name then
-			self._add_fade_environment(self, t, current_environment_name, fade_time, 0)
+			self:_add_fade_environment(t, current_environment_name, fade_time, 0)
 		end
 
-		self._clamp_num_fade_environments(self)
+		self:_clamp_num_fade_environments()
 	else
-		self._set_environment(self, volume_name)
+		self:_set_environment(volume_name)
 	end
 
 	Wwise.set_state("interior_exterior", environment.environment_state)
@@ -324,9 +321,8 @@ SoundEnvironmentSystem.enter_environment = function (self, t, volume_name, curre
 	end
 
 	self._current_environment = volume_name
-
-	return 
 end
+
 SoundEnvironmentSystem._set_environment = function (self, volume_name)
 	local wwise_world = self.wwise_world
 	local environments = self._environments
@@ -334,8 +330,6 @@ SoundEnvironmentSystem._set_environment = function (self, volume_name)
 
 	WwiseWorld.reset_aux_environment(wwise_world)
 	WwiseWorld.set_environment(wwise_world, environment.player_aux_bus_name, FULL_WEIGHT)
-
-	return 
 end
 
-return 
+return

@@ -98,6 +98,7 @@ local time_to_fade = 3
 local draw_timers = {}
 DrawAiBehaviour = {}
 local nodes = {}
+
 DrawAiBehaviour.tree_width = function (gui, node)
 	local id = node._identifier
 	local min, max = Gui.text_extents(gui, id, font_mtrl, font_size)
@@ -130,9 +131,8 @@ DrawAiBehaviour.tree_width = function (gui, node)
 	else
 		return 1, text_width
 	end
-
-	return 
 end
+
 DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, y, draw_utility, extra_info)
 	local nodes = nodes
 	local identifier = node._identifier
@@ -275,7 +275,7 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 			num = num + 1
 		end
 
-		local action = bt.action_data(bt)
+		local action = bt:action_data()
 		local breed_action = action[text]
 		local utility = math.floor(Utility.get_action_utility(breed_action, text, blackboard, t) * 10) / 10
 
@@ -344,15 +344,13 @@ DrawAiBehaviour.draw_tree = function (bt, gui, node, blackboard, row, t, dt, x, 
 		ScriptGUI.irect(gui, res_x, res_y, start_x - xb, child_y - yb, (cx + xb) - node_spacing, child_y + node_height + yb, layer - 1, ocolor)
 	end
 
-	if running and 0.8 < x1 then
+	if running and x1 > 0.8 then
 		return x1 - 0.8, extra_height
 	elseif running and x1 < 0 then
 		return x1, extra_height
 	else
 		return running_outside_offset, extra_height
 	end
-
-	return 
 end
 
-return 
+return

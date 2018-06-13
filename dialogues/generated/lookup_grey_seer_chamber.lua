@@ -125,4 +125,4 @@ DialogueLookup[DialogueLookup_n + 61] = "egs_level_chamber_rasknitt_flees_two_b"
 DialogueLookup[DialogueLookup_n + 62] = "egs_level_chamber_rasknitt_flees_three_b"
 DialogueLookup_n = DialogueLookup_n + 62
 
-return 
+return

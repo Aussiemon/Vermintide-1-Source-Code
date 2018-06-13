@@ -48,9 +48,9 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
+				input_extension:clear_input_buffer()
 
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			projectile_info = Projectiles.fireball
 		},
@@ -100,9 +100,9 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				input_extension.clear_input_buffer(input_extension)
+				input_extension:clear_input_buffer()
 
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			projectile_info = Projectiles.fireball_charged
 		}
@@ -302,4 +302,4 @@ Weapons.staff_fireball_fireball_template_1_t3.actions.action_one.shoot_charged.p
 Weapons.staff_fireball_fireball_template_1_t3.compare_statistics.attacks.light_attack.damage = 0.75
 Weapons.staff_fireball_fireball_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 0.875
 
-return 
+return

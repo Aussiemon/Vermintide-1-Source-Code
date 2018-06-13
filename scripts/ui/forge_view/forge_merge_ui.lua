@@ -23,12 +23,13 @@ local rarity_order = {
 }
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
+
 ForgeMergeUI.init = function (self, parent, position, animation_definitions, ingame_ui_context)
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
@@ -58,21 +59,18 @@ ForgeMergeUI.init = function (self, parent, position, animation_definitions, ing
 	self.current_rarity = default_rarity
 	self.animations = {}
 
-	self.create_ui_elements(self)
-	self.update_description_text(self)
-
-	return 
+	self:create_ui_elements()
+	self:update_description_text()
 end
+
 ForgeMergeUI.on_enter = function (self)
-	self.clear_merged_item(self)
-
-	return 
+	self:clear_merged_item()
 end
+
 ForgeMergeUI.set_gamepad_focus = function (self, enabled)
 	self.use_gamepad = enabled
-
-	return 
 end
+
 ForgeMergeUI.handle_gamepad_input = function (self, dt)
 	local input_manager = self.input_manager
 	local input_service = self.parent:page_input_service()
@@ -80,45 +78,44 @@ ForgeMergeUI.handle_gamepad_input = function (self, dt)
 	local use_gamepad = self.use_gamepad
 	local controller_cooldown = self.controller_cooldown
 
-	if input_service.get(input_service, "back") then
+	if input_service:get("back") then
 		controller_cooldown = 0
 	end
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 
 		if use_gamepad then
 			local item_list = self.item_list
 			local num_items = table.size(item_list)
 
-			if 0 < num_items then
-				input_service.get(input_service, "back", true)
+			if num_items > 0 then
+				input_service:get("back", true)
 			end
 		end
 	elseif use_gamepad and not self.merging then
 		local item_list = self.item_list
 		local num_items = table.size(item_list)
 
-		if 0 < num_items then
+		if num_items > 0 then
 			local all_items_added = num_items == 5
-			local enough_tokens = self.tokens_required_to_merge <= BackendUtils.get_tokens(self.token_merge_type) and 1 <= num_items
+			local enough_tokens = self.tokens_required_to_merge <= BackendUtils.get_tokens(self.token_merge_type) and num_items >= 1
 
-			if input_service.get(input_service, "back", true) or input_service.get(input_service, "special_1") then
+			if input_service:get("back", true) or input_service:get("special_1") then
 				local id_to_remove = item_list[num_items]
 				self.gamepad_remove_item_id = id_to_remove
 				self.controller_cooldown = GamepadSettings.menu_cooldown
-			elseif input_service.get(input_service, "refresh_press") and (all_items_added or enough_tokens) then
-				self.start_charge_progress(self)
-			elseif self.charging and not input_service.get(input_service, "refresh_hold") then
-				self.abort_charge_progress(self)
+			elseif input_service:get("refresh_press") and (all_items_added or enough_tokens) then
+				self:start_charge_progress()
+			elseif self.charging and not input_service:get("refresh_hold") then
+				self:abort_charge_progress()
 
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.enough_tokens_available = function (self)
 	local available_tokens = BackendUtils.get_tokens(self.token_merge_type)
 	local needed_tokens = self.tokens_required_to_merge
@@ -126,6 +123,7 @@ ForgeMergeUI.enough_tokens_available = function (self)
 
 	return can_afford
 end
+
 ForgeMergeUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.widgets = {}
@@ -152,23 +150,22 @@ ForgeMergeUI.create_ui_elements = function (self)
 		self.animations.eye_glow = UIAnimation.init(UIAnimation.pulse_animation, merge_button_widget.style.eye_glow_texture.color, 1, 150, 255, 2)
 		self.animations.gamepad_glow = UIAnimation.init(UIAnimation.pulse_animation, merge_button_widget.style.gamepad_glow_texture.color, 1, 150, 255, 2)
 	end
-
-	return 
 end
+
 ForgeMergeUI.update = function (self, dt)
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	if gamepad_active then
 		if not self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = true
 
-			self.on_gamepad_activated(self)
+			self:on_gamepad_activated()
 		end
 	elseif self.gamepad_active_last_frame then
 		self.gamepad_active_last_frame = false
 
-		self.on_gamepad_deactivated(self)
+		self:on_gamepad_deactivated()
 	end
 
 	self.merge_completed = nil
@@ -185,29 +182,29 @@ ForgeMergeUI.update = function (self, dt)
 					local trail_anim_name = melt_trail_animation_event_names[i]
 
 					if name == trail_anim_name then
-						self.play_sound(self, "Play_hud_forge_melt_process")
+						self:play_sound("Play_hud_forge_melt_process")
 					end
 				end
 			end
 
 			if self.merging and name == "merge_animation" then
-				self.merge_animation_complete(self)
+				self:merge_animation_complete()
 			end
 
 			if name == self.trail_complete_animation_name then
-				self.on_trail_animation_complete(self)
+				self:on_trail_animation_complete()
 			elseif name == "door_slam" then
-				self.play_sound(self, "Play_hud_forge_stone_door")
+				self:play_sound("Play_hud_forge_stone_door")
 			elseif name == "reward_slot_glow" then
-				self.on_reward_slot_glow_animation_complete(self)
+				self:on_reward_slot_glow_animation_complete()
 			end
 
-			self.on_charge_animations_complete(self, name)
+			self:on_charge_animations_complete(name)
 		end
 	end
 
 	if not self.merging then
-		self.handle_gamepad_input(self, dt)
+		self:handle_gamepad_input(dt)
 	end
 
 	self.specific_slot_index = nil
@@ -221,19 +218,19 @@ ForgeMergeUI.update = function (self, dt)
 
 		if button_hotspot.on_hover_enter then
 			if widget.content.icon_texture_id then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 
 			local bar_settings = UISettings.inventory.button_bars
 			local fade_in_time = bar_settings.background.fade_in_time
 			local alpha_hover = bar_settings.background.alpha_hover
 			local widget_hover_color = widget.style.hover_texture.color
-			self.animations[widget_name .. "_hover"] = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
+			self.animations[widget_name .. "_hover"] = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], alpha_hover, fade_in_time)
 		elseif button_hotspot.on_hover_exit then
 			local bar_settings = UISettings.inventory.button_bars
 			local fade_out_time = bar_settings.background.fade_out_time
 			local widget_hover_color = widget.style.hover_texture.color
-			self.animations[widget_name .. "_hover"] = self.animate_element_by_time(self, widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
+			self.animations[widget_name .. "_hover"] = self:animate_element_by_time(widget_hover_color, 1, widget_hover_color[1], 0, fade_out_time)
 		end
 
 		local item_list = self.item_list
@@ -255,7 +252,7 @@ ForgeMergeUI.update = function (self, dt)
 	local merge_button_hotspot = merge_button_content.button_hotspot
 
 	if merge_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
 	local _internal_merge_request = self._internal_merge_request
@@ -267,8 +264,8 @@ ForgeMergeUI.update = function (self, dt)
 			local button_disabled = true
 			local show_tokens = false
 
-			self.set_merge_button_disabled(self, button_disabled, show_tokens)
-			self.fill_remaining_slots_with_tokens(self)
+			self:set_merge_button_disabled(button_disabled, show_tokens)
+			self:fill_remaining_slots_with_tokens()
 		end
 
 		self.merge_request = true
@@ -277,14 +274,13 @@ ForgeMergeUI.update = function (self, dt)
 	self.gamepad_merge_request = nil
 	self._internal_merge_request = nil
 
-	self.on_item_dragged(self)
+	self:on_item_dragged()
 
-	if self.is_dragging_started(self) then
-		self.play_sound(self, "Play_hud_inventory_pickup_item")
+	if self:is_dragging_started() then
+		self:play_sound("Play_hud_inventory_pickup_item")
 	end
-
-	return 
 end
+
 ForgeMergeUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
@@ -294,7 +290,7 @@ ForgeMergeUI.draw = function (self, dt)
 	local widgets_by_name = self.widgets_by_name
 	local merging = self.merging
 	local parent = self.parent
-	local playing_door_animation = ((self.animations.door_left_widget_uv or parent.diplay_popup_active(parent)) and true) or false
+	local playing_door_animation = ((self.animations.door_left_widget_uv or parent:diplay_popup_active()) and true) or false
 	local active_ui_renderer = (playing_door_animation and ui_renderer) or ui_top_renderer
 	local active_input_service = (playing_door_animation and fake_input_service) or input_service
 
@@ -314,9 +310,8 @@ ForgeMergeUI.draw = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 ForgeMergeUI.is_dragging_started = function (self)
 	for i = 1, num_item_buttons, 1 do
 		local widget_name = "item_button_" .. i .. "_widget"
@@ -326,12 +321,11 @@ ForgeMergeUI.is_dragging_started = function (self)
 			return true
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.on_item_hover_enter = function (self)
 	if self.merging then
-		return 
+		return
 	end
 
 	local widgets_by_name = self.widgets_by_name
@@ -347,12 +341,11 @@ ForgeMergeUI.on_item_hover_enter = function (self)
 			return i, item_backend_id
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.on_item_hover_exit = function (self)
 	if self.merging then
-		return 
+		return
 	end
 
 	local widgets_by_name = self.widgets_by_name
@@ -368,9 +361,8 @@ ForgeMergeUI.on_item_hover_exit = function (self)
 			return i, item_backend_id
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.is_slot_hovered = function (self, is_dragging_item)
 	local hovered_slot_index = nil
 	local drag_hover_color = drag_colors.hover
@@ -402,6 +394,7 @@ ForgeMergeUI.is_slot_hovered = function (self, is_dragging_item)
 
 	return hovered_slot_index
 end
+
 ForgeMergeUI.on_dragging_item_stopped = function (self)
 	for i = 1, num_item_buttons, 1 do
 		local widget_name = "item_button_" .. i .. "_widget"
@@ -413,9 +406,8 @@ ForgeMergeUI.on_dragging_item_stopped = function (self)
 			return backend_item_id
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.on_item_dragged = function (self)
 	for i = 1, num_item_buttons, 1 do
 		local widget_name = "item_button_" .. i .. "_widget"
@@ -429,16 +421,15 @@ ForgeMergeUI.on_item_dragged = function (self)
 			icon_color[1] = 255
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.add_item = function (self, backend_item_id, specific_slot_index)
 	local merge_button_widget = self.widgets_by_name.merge_button_widget
 
 	if self.charging or merge_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	specific_slot_index = nil
@@ -495,25 +486,26 @@ ForgeMergeUI.add_item = function (self, backend_item_id, specific_slot_index)
 	end
 
 	if is_added then
-		self.play_sound(self, "Play_hud_inventory_drop_item")
+		self:play_sound("Play_hud_inventory_drop_item")
 	end
 
 	local num_items = table.size(self.item_list)
 	self.num_items_to_merge = num_items
 
-	self.set_reward_texture(self)
-	self.update_token_cost(self)
-	self.update_token_cost_display(self)
-	self.update_description_text(self)
-	self.update_melted_iron_trail(self)
+	self:set_reward_texture()
+	self:update_token_cost()
+	self:update_token_cost_display()
+	self:update_description_text()
+	self:update_melted_iron_trail()
 
 	return is_added
 end
+
 ForgeMergeUI.fill_remaining_slots_with_tokens = function (self, remove_all_tokens)
 	if remove_all_tokens then
 	end
 
-	local texture_id = (0 < self.num_items_to_merge and ForgeSettings.token_textures_by_type[self.token_merge_type] .. "_large") or nil
+	local texture_id = (self.num_items_to_merge > 0 and ForgeSettings.token_textures_by_type[self.token_merge_type] .. "_large") or nil
 
 	for i = 1, num_item_buttons, 1 do
 		local widget_name = "item_button_" .. i .. "_widget"
@@ -528,20 +520,18 @@ ForgeMergeUI.fill_remaining_slots_with_tokens = function (self, remove_all_token
 	if not remove_all_tokens then
 		local force_fill = true
 
-		self.update_melted_iron_trail(self, force_fill)
+		self:update_melted_iron_trail(force_fill)
 	end
-
-	return 
 end
+
 ForgeMergeUI.clear_tokens_in_slots = function (self)
 	for i = 1, num_item_buttons, 1 do
 		local widget_name = "item_button_" .. i .. "_widget"
 		local widget = self.widgets_by_name[widget_name]
 		widget.content.bg_overlay_texture_id = nil
 	end
-
-	return 
 end
+
 ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 	local widgets_by_name = self.widgets_by_name
 	local num_items_to_merge = self.num_items_to_merge
@@ -577,7 +567,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 		end
 
 		slot_visible = force_fill or (not is_missing_item and i <= num_items_to_merge) or (all_items_added and i <= 6)
-		local trail_visible = force_fill or (not is_missing_item and not is_missing_next_item and i + 1 <= num_items_to_merge) or (all_items_added and i <= 6)
+		local trail_visible = force_fill or (not is_missing_item and not is_missing_next_item and num_items_to_merge >= i + 1) or (all_items_added and i <= 6)
 
 		if slot_texture_widget then
 			slot_texture_widget.content.visible = slot_visible
@@ -595,7 +585,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 			local current_gradient_threshold = slot_texture_widget.style.texture_id.gradient_threshold
 			local animation_time = (1 - current_gradient_threshold) * default_animation_time
 
-			if 0 < animation_time then
+			if animation_time > 0 then
 				local animation_name = "trail_" .. slot_texture
 				self.animations[animation_name] = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, slot_texture_widget.style.texture_id, "gradient_threshold", current_gradient_threshold, 1, animation_time, math.easeCubic)
 				melt_trail_animation_event_names[#melt_trail_animation_event_names + 1] = animation_name
@@ -612,7 +602,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 			local current_gradient_threshold = slot_trail_texture_widget.style.texture_id.gradient_threshold
 			local animation_time = (1 - current_gradient_threshold) * default_animation_time
 
-			if 0 < animation_time then
+			if animation_time > 0 then
 				local animation_name = "trail_" .. slot_trail_texture
 				self.animations[animation_name] = UIAnimation.init(UIAnimation.wait, wait_time, UIAnimation.function_by_time, slot_trail_texture_widget.style.texture_id, "gradient_threshold", current_gradient_threshold, 1, animation_time, math.easeCubic)
 
@@ -623,7 +613,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 				if i ~= 1 then
 					melt_trail_animation_event_names[#melt_trail_animation_event_names + 1] = animation_name
 				else
-					self.play_sound(self, "Play_hud_forge_melt_process")
+					self:play_sound("Play_hud_forge_melt_process")
 				end
 			end
 
@@ -635,18 +625,17 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 		end
 	end
 
-	self.melt_trail_animation_event_names = (0 < #melt_trail_animation_event_names and melt_trail_animation_event_names) or nil
-
-	return 
+	self.melt_trail_animation_event_names = (#melt_trail_animation_event_names > 0 and melt_trail_animation_event_names) or nil
 end
+
 ForgeMergeUI.on_trail_animation_complete = function (self)
 	local num_items_to_merge = self.num_items_to_merge
 	local no_items_added = num_items_to_merge == 0
 	local all_items_added = num_items_to_merge == 5
-	local enough_tokens = self.enough_tokens(self)
+	local enough_tokens = self:enough_tokens()
 
 	if all_items_added then
-		self.set_merge_button_disabled(self, false)
+		self:set_merge_button_disabled(false)
 	end
 
 	if num_items_to_merge < 5 and enough_tokens then
@@ -654,26 +643,26 @@ ForgeMergeUI.on_trail_animation_complete = function (self)
 	end
 
 	self.trail_complete_animation_name = nil
-
-	return 
 end
+
 ForgeMergeUI.is_merge_possible = function (self)
 	local num_items_to_merge = self.num_items_to_merge
 	local all_items_added = num_items_to_merge == 5
-	local enough_tokens = self.enough_tokens(self)
+	local enough_tokens = self:enough_tokens()
 	local trail_animation_complete = self.trail_complete_animation_name
 
 	return not trail_animation_complete and (all_items_added or enough_tokens)
 end
+
 ForgeMergeUI.update_description_text = function (self)
 	local widget = self.widgets_by_name.description_text_1
 	local num_items_to_merge = self.num_items_to_merge
 	local no_items_added = num_items_to_merge == 0
 	local all_items_added = num_items_to_merge == 5
-	local enough_tokens = self.enough_tokens(self)
+	local enough_tokens = self:enough_tokens()
 	local disable_button = all_items_added or not enough_tokens
 
-	self.set_merge_button_disabled(self, disable_button, not all_items_added and not no_items_added)
+	self:set_merge_button_disabled(disable_button, not all_items_added and not no_items_added)
 
 	if not all_items_added then
 		local num_missing_items = 5 - num_items_to_merge
@@ -696,20 +685,20 @@ ForgeMergeUI.update_description_text = function (self)
 		widget.content.text = text
 		widget.style.text.localize = false
 	end
-
-	return 
 end
+
 ForgeMergeUI.enough_tokens = function (self)
 	local token_merge_type = self.token_merge_type
 	local num_items_to_merge = self.num_items_to_merge
 	local tokens_required_to_merge = self.tokens_required_to_merge
 
-	return (num_items_to_merge and tokens_required_to_merge and token_merge_type and tokens_required_to_merge <= BackendUtils.get_tokens(token_merge_type) and 1 <= num_items_to_merge) or false
+	return (num_items_to_merge and tokens_required_to_merge and token_merge_type and tokens_required_to_merge <= BackendUtils.get_tokens(token_merge_type) and num_items_to_merge >= 1) or false
 end
+
 ForgeMergeUI.set_reward_texture = function (self, removing_all)
 	local widget = self.widgets_by_name.item_reward_slot_widget
 	local widget_content = widget.content
-	local current_type = not removing_all and self.get_reward_type(self)
+	local current_type = not removing_all and self:get_reward_type()
 
 	if current_type then
 		local reward_texture = "forge_icon_" .. current_type
@@ -722,14 +711,13 @@ ForgeMergeUI.set_reward_texture = function (self, removing_all)
 	else
 		widget_content.icon_texture_id = nil
 	end
-
-	return 
 end
+
 ForgeMergeUI.get_reward_type = function (self)
 	local num_items_to_merge = self.num_items_to_merge
 
 	if not num_items_to_merge or num_items_to_merge <= 0 then
-		return 
+		return
 	end
 
 	local is_same_type = true
@@ -758,24 +746,25 @@ ForgeMergeUI.get_reward_type = function (self)
 
 	return "any"
 end
+
 ForgeMergeUI.set_merged_item = function (self, item_key)
 	local item_data = ItemMasterList[item_key]
 	local icon_texture = item_data.inventory_icon
 	local item_name = item_data.name
 	local item_rarity = item_data.rarity
+end
 
-	return 
-end
 ForgeMergeUI.clear_merged_item = function (self)
-	return 
+	return
 end
+
 ForgeMergeUI.remove_item = function (self, item_index, ignore_sound, removing_all)
 	local merge_button_widget = self.widgets_by_name.merge_button_widget
 
 	if self.charging or merge_button_widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
 
 	local widget_name = "item_button_" .. item_index .. "_widget"
@@ -789,7 +778,7 @@ ForgeMergeUI.remove_item = function (self, item_index, ignore_sound, removing_al
 	local item_backend_id = self.item_list[item_index]
 
 	if item_backend_id and not ignore_sound then
-		self.play_sound(self, "Play_hud_forge_item_remove")
+		self:play_sound("Play_hud_forge_item_remove")
 	end
 
 	widget.content.icon_texture_id = nil
@@ -797,43 +786,45 @@ ForgeMergeUI.remove_item = function (self, item_index, ignore_sound, removing_al
 	local num_items = table.size(self.item_list)
 	self.num_items_to_merge = num_items
 
-	self.set_reward_texture(self, removing_all)
-	self.update_token_cost(self)
-	self.update_token_cost_display(self)
-	self.update_description_text(self)
-	self.update_melted_iron_trail(self)
-	self.clear_tokens_in_slots(self)
+	self:set_reward_texture(removing_all)
+	self:update_token_cost()
+	self:update_token_cost_display()
+	self:update_description_text()
+	self:update_melted_iron_trail()
+	self:clear_tokens_in_slots()
 
 	return item_backend_id
 end
+
 ForgeMergeUI.remove_item_by_id = function (self, backend_item_id)
 	for i = 1, num_item_buttons, 1 do
 		if self.item_list[i] == backend_item_id then
-			self.remove_item(self, i)
+			self:remove_item(i)
 
-			return 
+			return
 		end
 	end
-
-	return 
 end
+
 ForgeMergeUI.remove_all_items = function (self)
 	local backend_ids = {}
 
 	for i = 1, num_item_buttons, 1 do
-		backend_ids[i] = self.remove_item(self, i, true, true)
+		backend_ids[i] = self:remove_item(i, true, true)
 	end
 
 	self.num_items_to_merge = 0
 	local remove_all_tokens = true
 
-	self.fill_remaining_slots_with_tokens(self, remove_all_tokens)
+	self:fill_remaining_slots_with_tokens(remove_all_tokens)
 
 	return backend_ids
 end
+
 ForgeMergeUI.get_items = function (self)
 	return self.item_list, self.token_merge_type, self.tokens_required_to_merge
 end
+
 ForgeMergeUI.merge = function (self)
 	self.merging = true
 	local widgets_by_name = self.widgets_by_name
@@ -872,12 +863,12 @@ ForgeMergeUI.merge = function (self)
 	self.animations.door_right_widget_size = UIAnimation.init(UIAnimation.wait, 0.9, UIAnimation.function_by_time, right_door_current_size, 1, 0, right_door_default_size[1], 0.4, math.easeInCubic, UIAnimation.wait, 0.1, UIAnimation.function_by_time, right_door_current_size, 1, right_door_default_size[1], 0, 0.5, math.easeOutCubic)
 	local merge_button_widget = widgets_by_name.merge_button_widget
 	merge_button_widget.content.button_hotspot.disabled = true
-
-	return 
 end
+
 ForgeMergeUI.animation_doors = function (self)
 	return (self.animations.door_left_widget_uv and true) or false
 end
+
 ForgeMergeUI.on_reward_slot_glow_animation_complete = function (self)
 	local max_alpha = 255
 
@@ -900,25 +891,23 @@ ForgeMergeUI.on_reward_slot_glow_animation_complete = function (self)
 
 	local item_reward_slot_widget = self.widgets_by_name.item_reward_slot_widget
 	item_reward_slot_widget.style.glow_animation.color[1] = 0
-
-	return 
 end
+
 ForgeMergeUI.merge_animation_complete = function (self)
 	self.merging = nil
 	self.merge_completed = true
-
-	return 
 end
+
 ForgeMergeUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 ForgeMergeUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 ForgeMergeUI.set_merge_button_disabled = function (self, is_disabled, show_tokens)
 	local widgets_by_name = self.widgets_by_name
 	local merge_button_widget = widgets_by_name.merge_button_widget
@@ -927,9 +916,8 @@ ForgeMergeUI.set_merge_button_disabled = function (self, is_disabled, show_token
 	merge_button_widget.content.show_tokens = show_tokens
 	merge_button_widget.content.button_hotspot.is_selected = false
 	merge_button_widget.content.button_hotspot.is_hover = false
-
-	return 
 end
+
 ForgeMergeUI.update_token_cost = function (self)
 	local num_items = table.size(self.item_list)
 	local empty_slots = num_item_buttons - num_items
@@ -940,9 +928,8 @@ ForgeMergeUI.update_token_cost = function (self)
 	local key_table = VaultForgeMergeKeyTable[rarity]
 	local token_cost = (key_table[empty_slots] and Vault.withdraw_single_ex(key_table[empty_slots], costs[empty_slots])) or 0
 	self.tokens_required_to_merge = token_cost or 0
-
-	return 
 end
+
 ForgeMergeUI.update_token_cost_display = function (self)
 	local merge_button_widget = self.widgets_by_name.merge_button_widget
 	local merge_button_content = merge_button_widget.content
@@ -950,7 +937,7 @@ ForgeMergeUI.update_token_cost_display = function (self)
 	local needed_tokens = self.tokens_required_to_merge
 	local can_afford = (needed_tokens and needed_tokens <= available_tokens) or false
 
-	if needed_tokens and 0 < needed_tokens then
+	if needed_tokens and needed_tokens > 0 then
 		local rarity = self.current_rarity
 		local merge_cost_settings = ForgeSettings.merge_cost[rarity]
 		local token_texture = merge_cost_settings.token_texture
@@ -971,9 +958,8 @@ ForgeMergeUI.update_token_cost_display = function (self)
 		merge_button_widget.style.text_selected.text_color = Colors.get_table("red", 255)
 		merge_button_widget.style.text.text_color = Colors.get_table("red", 255)
 	end
-
-	return 
 end
+
 ForgeMergeUI.start_charge_progress = function (self)
 	self.charging = true
 	local animation_name = "gamepad_charge_progress"
@@ -984,15 +970,14 @@ ForgeMergeUI.start_charge_progress = function (self)
 	self.animations[animation_name] = UIAnimation.init(UIAnimation.function_by_time, self.ui_scenegraph.merge_button_fill.size, 1, from, to, animation_time, math.ease_out_quad)
 	self.animations[animation_name .. "_uv"] = UIAnimation.init(UIAnimation.function_by_time, widget.content.progress_fill.uvs[2], 1, 0, 1, animation_time, math.ease_out_quad)
 
-	self.cancel_abort_animation(self)
+	self:cancel_abort_animation()
 
 	widget.content.charging = true
 	widget.style.progress_fill.color[1] = 255
 
-	self.play_sound(self, "Play_hud_forge_charge")
-
-	return 
+	self:play_sound("Play_hud_forge_charge")
 end
+
 ForgeMergeUI.abort_charge_progress = function (self, force_shutdown)
 	local animation_name = "gamepad_charge_progress"
 	self.animations[animation_name] = nil
@@ -1000,16 +985,15 @@ ForgeMergeUI.abort_charge_progress = function (self, force_shutdown)
 	self.charging = nil
 	self.ui_scenegraph.merge_button_fill.size[1] = 0
 
-	self.play_sound(self, "Stop_hud_forge_charge")
+	self:play_sound("Stop_hud_forge_charge")
 
 	if force_shutdown then
-		self.cancel_abort_animation(self)
+		self:cancel_abort_animation()
 	else
-		self.start_abort_animation(self)
+		self:start_abort_animation()
 	end
-
-	return 
 end
+
 ForgeMergeUI.on_charge_complete = function (self)
 	self.charging = nil
 	self.gamepad_merge_request = true
@@ -1026,10 +1010,9 @@ ForgeMergeUI.on_charge_complete = function (self)
 	widget.style.text_disabled.text_color[1] = 0
 	widget.style.texture_token_type.color[1] = 0
 
-	self.play_sound(self, "Stop_hud_forge_charge")
-
-	return 
+	self:play_sound("Stop_hud_forge_charge")
 end
+
 ForgeMergeUI.start_abort_animation = function (self)
 	local animation_name = "gamepad_charge_progress_abort"
 	local from = 0
@@ -1042,9 +1025,8 @@ ForgeMergeUI.start_abort_animation = function (self)
 	self.animations[animation_name .. "2"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.token_text.text_color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "3"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.texture_token_type.color, 1, from, to, 0.3, math.easeInCubic)
 	self.animations[animation_name .. "4"] = UIAnimation.init(UIAnimation.wait, 0.8, UIAnimation.function_by_time, widget.style.text.text_color, 1, from, to, 0.3, math.easeInCubic)
-
-	return 
 end
+
 ForgeMergeUI.cancel_abort_animation = function (self)
 	local animations = self.animations
 	animations.gamepad_charge_progress_abort = nil
@@ -1067,21 +1049,19 @@ ForgeMergeUI.cancel_abort_animation = function (self)
 	widget.style.text_disabled.text_color[1] = 255
 	widget.style.token_text.text_color[1] = 255
 	widget.style.text.text_color[1] = 255
-
-	return 
 end
+
 ForgeMergeUI.on_charge_animations_complete = function (self, animation_name)
 	if animation_name == "gamepad_charge_progress" then
-		self.on_charge_complete(self)
+		self:on_charge_complete()
 	end
 
 	if animation_name == "gamepad_charge_progress_abort" then
 		local widget = self.widgets_by_name.merge_button_widget
 		widget.content.show_cancel_text = false
 	end
-
-	return 
 end
+
 ForgeMergeUI.on_gamepad_activated = function (self)
 	local input_service = self.input_manager:get_service("forge_view")
 	local button_texture_data = UISettings.get_gamepad_input_texture_data(input_service, "refresh", true)
@@ -1089,12 +1069,12 @@ ForgeMergeUI.on_gamepad_activated = function (self)
 	local button_size = button_texture_data.size
 	local widget = self.widgets_by_name.merge_button_widget
 	widget.content.progress_input_icon = button_texture
+end
 
-	return 
-end
 ForgeMergeUI.on_gamepad_deactivated = function (self)
-	return 
+	return
 end
+
 ForgeMergeUI.set_active = function (self, active)
 	self.active = active
 	local widget = self.widgets_by_name.merge_button_widget
@@ -1102,10 +1082,8 @@ ForgeMergeUI.set_active = function (self, active)
 	if self.charging or widget.content.show_cancel_text then
 		local force_cancel = true
 
-		self.abort_charge_progress(self, force_cancel)
+		self:abort_charge_progress(force_cancel)
 	end
-
-	return 
 end
 
-return 
+return

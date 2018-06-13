@@ -1,23 +1,26 @@
 StateMapViewIdle = class(StateMapViewIdle)
 StateMapViewIdle.NAME = "StateMapViewIdle"
+
 StateMapViewIdle.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewIdle")
 
 	local ingame_ui_context = params.ingame_ui_context
 	self.input_manager = ingame_ui_context.input_manager
 	self._map_view = params.map_view
+end
 
-	return 
-end
 StateMapViewIdle.on_exit = function (self, params)
-	return 
+	return
 end
+
 StateMapViewIdle.update = function (self, dt, t)
-	return self._wanted_state(self)
+	return self:_wanted_state()
 end
+
 StateMapViewIdle.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewIdle._wanted_state = function (self)
 	local new_state = self.parent:wanted_gamepad_state()
 
@@ -28,4 +31,4 @@ StateMapViewIdle._wanted_state = function (self)
 	return new_state
 end
 
-return 
+return

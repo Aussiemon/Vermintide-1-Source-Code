@@ -15,14 +15,14 @@ local function look_at_target_unit(unit, data, dt, unit_position, target_unit, t
 	if not target_unit or not Unit.alive(target_unit) then
 		AiUtils.set_default_anim_constraint(unit, head_constraint_target)
 
-		return 
+		return
 	end
 
 	local look_target = nil
 	local first_person_extension = ScriptUnit.has_extension(target_unit, "first_person_system")
 
 	if first_person_extension ~= nil then
-		look_target = first_person_extension.current_position(first_person_extension)
+		look_target = first_person_extension:current_position()
 	else
 		local head_index = Unit.node(target_unit, "j_head")
 		look_target = Unit.world_position(target_unit, head_index)
@@ -39,7 +39,7 @@ local function look_at_target_unit(unit, data, dt, unit_position, target_unit, t
 		local old_z = look_target.z
 		local rotation_right = Vector3.flat(Quaternion.right(rotation))
 
-		if 0 < Vector3.cross(rotation_forward_normalized, to_target_normalized).z then
+		if Vector3.cross(rotation_forward_normalized, to_target_normalized).z > 0 then
 			look_target = unit_position + (rotation_forward - rotation_right) * target_distance
 		else
 			look_target = unit_position + (rotation_forward + rotation_right) * target_distance
@@ -56,8 +56,6 @@ local function look_at_target_unit(unit, data, dt, unit_position, target_unit, t
 
 	data.previous_look_target:store(look_target)
 	Unit.animation_set_constraint_target(unit, head_constraint_target, look_target)
-
-	return 
 end
 
 AimTemplates.player = {
@@ -69,8 +67,6 @@ AimTemplates.player = {
 			data.aim_direction_pitch_var = Unit.animation_find_variable(unit, "aim_direction_pitch")
 			data.locomotion_extension = ScriptUnit.extension(unit, "locomotion_system")
 			data.status_extension = ScriptUnit.extension(unit, "status_system")
-
-			return 
 		end,
 		update = function (unit, t, dt, data)
 			local aim_direction = nil
@@ -113,14 +109,12 @@ AimTemplates.player = {
 
 			if game and go_id then
 				local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
-				local aim_position = first_person_extension.current_position(first_person_extension)
+				local aim_position = first_person_extension:current_position()
 				local network_aim_position = NetworkUtils.network_clamp_position(aim_position)
 
 				GameSession.set_game_object_field(game, go_id, "aim_direction", aim_direction)
 				GameSession.set_game_object_field(game, go_id, "aim_position", network_aim_position)
 			end
-
-			return 
 		end
 	},
 	husk = {
@@ -131,15 +125,13 @@ AimTemplates.player = {
 			data.packmaster_claw_aim_constraint = Unit.animation_find_constraint_target(unit, "packmaster_claw_target")
 			data.camera_attach_node = Unit.node(unit, "camera_attach")
 			data.status_extension = ScriptUnit.extension(unit, "status_system")
-
-			return 
 		end,
 		update = function (unit, t, dt, data)
 			local game = Managers.state.network:game()
 			local go_id = Managers.state.unit_storage:go_id(unit)
 
 			if not game or not go_id then
-				return 
+				return
 			end
 
 			local aim_direction = GameSession.game_object_field(game, go_id, "aim_direction")
@@ -190,8 +182,6 @@ AimTemplates.player = {
 
 				Unit.animation_set_constraint_target(unit, data.packmaster_claw_aim_constraint, node_position)
 			end
-
-			return 
 		end
 	}
 }
@@ -199,11 +189,9 @@ AimTemplates.packmaster_claw = {
 	owner = {
 		init = function (unit, data)
 			data.aim_constraint_anim_var = Unit.animation_find_constraint_target(unit, "aim_constraint_target")
-
-			return 
 		end,
 		update = function (unit, t, dt, data)
-			return 
+			return
 		end
 	}
 }
@@ -213,8 +201,6 @@ AimTemplates.ratling_gunner = {
 			local blackboard = Unit.get_data(unit, "blackboard")
 			data.blackboard = blackboard
 			data.constraint_target = Unit.animation_find_constraint_target(unit, "aim_target")
-
-			return 
 		end,
 		update = function (unit, t, dt, data)
 			local unit_position = POSITION_LOOKUP[unit]
@@ -237,15 +223,11 @@ AimTemplates.ratling_gunner = {
 			if game and go_id then
 				GameSession.set_game_object_field(game, go_id, "aim_target", aim_target)
 			end
-
-			return 
 		end
 	},
 	husk = {
 		init = function (unit, data)
 			data.constraint_target = Unit.animation_find_constraint_target(unit, "aim_target")
-
-			return 
 		end,
 		update = function (unit, t, dt, data)
 			local game = Managers.state.network:game()
@@ -261,8 +243,6 @@ AimTemplates.ratling_gunner = {
 
 				Unit.animation_set_constraint_target(unit, data.constraint_target, aim_target)
 			end
-
-			return 
 		end
 	}
 }
@@ -272,8 +252,6 @@ AimTemplates.innkeeper = {
 			data.constraint_target = Unit.animation_find_constraint_target(unit, "lookat")
 			data.current_target = nil
 			data.previous_look_target = Vector3Box()
-
-			return 
 		end,
 		update = function (unit, t, dt, data)
 			local ignore_aim_constraint = Unit.get_data(unit, "ignore_aim_constraint")
@@ -301,7 +279,7 @@ AimTemplates.innkeeper = {
 						dist_sq = dist_sq * stickiness_multiplier
 					end
 
-					if dist_sq < best_dist_sq then
+					if best_dist_sq > dist_sq then
 						best_dist_sq = dist_sq
 						best_player = player_unit
 					end
@@ -325,10 +303,8 @@ AimTemplates.innkeeper = {
 
 				data.current_target = best_player
 			end
-
-			return 
 		end
 	}
 }
 
-return 
+return

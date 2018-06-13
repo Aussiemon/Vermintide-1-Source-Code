@@ -1,18 +1,17 @@
 BackendBoonsLocal = class(BackendBoonsLocal)
+
 BackendBoonsLocal.init = function (self)
 	self._boons = {}
-
-	return 
 end
+
 BackendBoonsLocal.set_save = function (self, save_data)
 	if save_data then
 		save_data.boons = save_data.boons or {}
 		self._boons = save_data.boons
 		self._dirty = true
 	end
-
-	return 
 end
+
 BackendBoonsLocal.update = function (self)
 	local current_time = os.time()
 	local boons = self._boons
@@ -29,21 +28,23 @@ BackendBoonsLocal.update = function (self)
 			self._dirty = true
 		end
 	end
+end
 
-	return 
-end
 BackendBoonsLocal.refresh_boons = function (self)
-	return 
+	return
 end
+
 BackendBoonsLocal.is_dirty = function (self)
 	local dirty = self._dirty
 	self._dirty = false
 
 	return dirty
 end
+
 BackendBoonsLocal.get_boons = function (self)
 	return self._boons
 end
+
 BackendBoonsLocal.add_boon_debug = function (self, boon_name)
 	local boons = self._boons
 	local boon_template = BoonTemplates[boon_name]
@@ -53,15 +54,12 @@ BackendBoonsLocal.add_boon_debug = function (self, boon_name)
 		remaining_duration = boon_template.duration
 	}
 	self._dirty = true
-
-	return 
 end
+
 BackendBoonsLocal.clear_boons_debug = function (self)
 	table.clear_array(self._boons, #self._boons)
 
 	self._dirty = true
-
-	return 
 end
 
-return 
+return

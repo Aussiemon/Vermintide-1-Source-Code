@@ -66,4 +66,4 @@ for _, dlc in pairs(DLCSettings) do
 	end
 end
 
-return 
+return

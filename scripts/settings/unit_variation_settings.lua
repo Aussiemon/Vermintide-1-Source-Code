@@ -641,4 +641,4 @@ UnitVariationSettings = {
 	}
 }
 
-return 
+return

@@ -2,6 +2,7 @@ BackendQuestsLocal = class(BackendQuestsLocal)
 local MAX_NUMBER_OF_BOARD_QUESTS = 3
 local MAX_NUMBER_OF_BOARD_CONTRACTS = 8
 local SIMULATE_BACKEND_DELAY = true
+
 BackendQuestsLocal.init = function (self)
 	self._simulated_backend_delays = {
 		set_quests_active = {},
@@ -10,9 +11,8 @@ BackendQuestsLocal.init = function (self)
 		add_contracts_progress = {},
 		complete_contracts = {}
 	}
-
-	return 
 end
+
 BackendQuestsLocal.setup = function (self, save_data)
 	if save_data then
 		if not save_data.quests_and_contracts then
@@ -31,24 +31,22 @@ BackendQuestsLocal.setup = function (self, save_data)
 	end
 
 	self._setup = true
-
-	return 
 end
+
 BackendQuestsLocal.update = function (self, dt)
 	if not self._setup then
-		return 
+		return
 	end
 
 	if SIMULATE_BACKEND_DELAY then
-		self._simulate_backend_delay(self, dt)
+		self:_simulate_backend_delay(dt)
 	end
 
-	self._update_quests_complete(self)
-	self._update_contracts_complete(self)
-	self._update_rewards(self)
-
-	return 
+	self:_update_quests_complete()
+	self:_update_contracts_complete()
+	self:_update_rewards()
 end
+
 BackendQuestsLocal._simulate_backend_delay = function (self, dt)
 	local simulated_backend_delays = self._simulated_backend_delays
 	local set_quests_active = simulated_backend_delays.set_quests_active
@@ -58,7 +56,7 @@ BackendQuestsLocal._simulate_backend_delay = function (self, dt)
 		data.time = data.time - dt
 
 		if index == 1 and data.time <= 0 then
-			self._set_active_quest(self, data.quest_id, data.active)
+			self:_set_active_quest(data.quest_id, data.active)
 
 			data, set_quests_active[index] = nil
 		end
@@ -71,7 +69,7 @@ BackendQuestsLocal._simulate_backend_delay = function (self, dt)
 		data.time = data.time - dt
 
 		if index == 1 and data.time <= 0 then
-			self._complete_quest(self, data.quest_id)
+			self:_complete_quest(data.quest_id)
 
 			data, complete_quests[index] = nil
 		end
@@ -84,7 +82,7 @@ BackendQuestsLocal._simulate_backend_delay = function (self, dt)
 		data.time = data.time - dt
 
 		if index == 1 and data.time <= 0 then
-			self._set_contract_active(self, data.contract_id, data.active)
+			self:_set_contract_active(data.contract_id, data.active)
 
 			data, set_contracts_active[index] = nil
 		end
@@ -97,7 +95,7 @@ BackendQuestsLocal._simulate_backend_delay = function (self, dt)
 		data.time = data.time - dt
 
 		if index == 1 and data.time <= 0 then
-			self._add_contract_progress(self, data.contract_id, data.value)
+			self:_add_contract_progress(data.contract_id, data.value)
 
 			data, add_contracts_progress[index] = nil
 		end
@@ -110,14 +108,13 @@ BackendQuestsLocal._simulate_backend_delay = function (self, dt)
 		data.time = data.time - dt
 
 		if index == 1 and data.time <= 0 then
-			self._complete_contract(self, data.contract_id)
+			self:_complete_contract(data.contract_id)
 
 			data, complete_contracts[index] = nil
 		end
 	end
-
-	return 
 end
+
 BackendQuestsLocal._update_quests_complete = function (self)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -133,9 +130,8 @@ BackendQuestsLocal._update_quests_complete = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 BackendQuestsLocal._update_contracts_complete = function (self)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -151,9 +147,8 @@ BackendQuestsLocal._update_contracts_complete = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 BackendQuestsLocal._update_rewards = function (self)
 	local quest_rewards = self._quest_rewards_temp
 
@@ -172,12 +167,12 @@ BackendQuestsLocal._update_rewards = function (self)
 	else
 		self.contract_rewards = nil
 	end
-
-	return 
 end
+
 BackendQuestsLocal.initiated = function (self)
 	return true
 end
+
 BackendQuestsLocal.get_quests = function (self)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -185,7 +180,7 @@ BackendQuestsLocal.get_quests = function (self)
 	local new_quests_available = false
 
 	if previous_quest_update_time + 604800 < os.time() then
-		self._generate_new_quests(self, quests_and_contracts_save_data)
+		self:_generate_new_quests(quests_and_contracts_save_data)
 
 		new_quests_available = true
 	end
@@ -194,6 +189,7 @@ BackendQuestsLocal.get_quests = function (self)
 
 	return quests, new_quests_available
 end
+
 BackendQuestsLocal._generate_new_quests = function (self, save_data)
 	local quests = save_data.quests
 
@@ -213,11 +209,9 @@ BackendQuestsLocal._generate_new_quests = function (self, save_data)
 
 	save_data.quest_update_time = os.time()
 
-	self._save(self)
+	self:_save()
 
 	self._quests_dirty = true
-
-	return 
 end
 
 local function get_delay_time()
@@ -238,11 +232,10 @@ BackendQuestsLocal.set_active_quest = function (self, quest_id, active)
 			time = time
 		}
 	else
-		self._set_active_quest(self, quest_id, active)
+		self:_set_active_quest(quest_id, active)
 	end
-
-	return 
 end
+
 BackendQuestsLocal._set_active_quest = function (self, quest_id, active)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -254,12 +247,11 @@ BackendQuestsLocal._set_active_quest = function (self, quest_id, active)
 		quest.requirements.task.amount.acquired = 0
 	end
 
-	self._save(self)
+	self:_save()
 
 	self._quests_dirty = true
-
-	return 
 end
+
 BackendQuestsLocal.complete_quest = function (self, quest_id)
 	local complete_quests = self._simulated_backend_delays.complete_quests
 	local t = Managers.time:time("game")
@@ -271,11 +263,10 @@ BackendQuestsLocal.complete_quest = function (self, quest_id)
 			time = time
 		}
 	else
-		self._complete_quest(self, quest_id)
+		self:_complete_quest(quest_id)
 	end
-
-	return 
 end
+
 BackendQuestsLocal._complete_quest = function (self, quest_id)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -284,17 +275,17 @@ BackendQuestsLocal._complete_quest = function (self, quest_id)
 	self._quest_rewards_temp = table.clone(quest.rewards)
 	quests[quest_id] = nil
 
-	self._save(self)
+	self:_save()
 
 	self._quests_dirty = true
-
-	return 
 end
+
 local available_quests = {}
+
 BackendQuestsLocal.get_available_quests = function (self)
 	table.clear(available_quests)
 
-	local quests = self.get_quests(self)
+	local quests = self:get_quests()
 
 	for id, quest in pairs(quests) do
 		if not quest.active then
@@ -304,8 +295,9 @@ BackendQuestsLocal.get_available_quests = function (self)
 
 	return available_quests
 end
+
 BackendQuestsLocal.get_active_quest = function (self)
-	local quests = self.get_quests(self)
+	local quests = self:get_quests()
 
 	for id, quest in pairs(quests) do
 		if quest.active then
@@ -315,15 +307,18 @@ BackendQuestsLocal.get_active_quest = function (self)
 
 	return nil
 end
+
 BackendQuestsLocal.get_quest_rewards = function (self)
 	return self.quest_rewards
 end
+
 BackendQuestsLocal.are_quests_dirty = function (self)
 	local dirty = self._quests_dirty
 	self._quests_dirty = false
 
 	return dirty
 end
+
 BackendQuestsLocal.get_contracts = function (self)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -331,7 +326,7 @@ BackendQuestsLocal.get_contracts = function (self)
 	local new_contracts_available = false
 
 	if previous_contract_update_time + 86400 < os.time() then
-		self._generate_new_contracts(self, quests_and_contracts_save_data)
+		self:_generate_new_contracts(quests_and_contracts_save_data)
 
 		new_contracts_available = true
 	end
@@ -340,6 +335,7 @@ BackendQuestsLocal.get_contracts = function (self)
 
 	return contracts, new_contracts_available
 end
+
 BackendQuestsLocal._generate_new_contracts = function (self, save_data)
 	local contracts = save_data.contracts
 
@@ -356,7 +352,7 @@ BackendQuestsLocal._generate_new_contracts = function (self, save_data)
 		contracts[contract_id] = contract
 		save_data.index = contract_id + 1
 
-		if 0 < contract.rewards.quest.amount_sigils then
+		if contract.rewards.quest.amount_sigils > 0 then
 			local quests = save_data.quests
 			local rand = math.random(1, table.size(quests))
 			local index = 1
@@ -376,12 +372,11 @@ BackendQuestsLocal._generate_new_contracts = function (self, save_data)
 
 	save_data.contract_update_time = os.time()
 
-	self._save(self)
+	self:_save()
 
 	self._contracts_dirty = true
-
-	return 
 end
+
 BackendQuestsLocal.set_contract_active = function (self, contract_id, active)
 	local set_contracts_active = self._simulated_backend_delays.set_contracts_active
 	local t = Managers.time:time("game")
@@ -394,11 +389,10 @@ BackendQuestsLocal.set_contract_active = function (self, contract_id, active)
 			time = time
 		}
 	else
-		self._set_contract_active(self, contract_id, active)
+		self:_set_contract_active(contract_id, active)
 	end
-
-	return 
 end
+
 BackendQuestsLocal._set_contract_active = function (self, contract_id, active)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -410,12 +404,11 @@ BackendQuestsLocal._set_contract_active = function (self, contract_id, active)
 		contract.requirements.task.amount.acquired = 0
 	end
 
-	self._save(self)
+	self:_save()
 
 	self._contracts_dirty = true
-
-	return 
 end
+
 BackendQuestsLocal.add_contract_progress = function (self, contract_id, value)
 	local add_contracts_progress = self._simulated_backend_delays.add_contracts_progress
 	local t = Managers.time:time("game")
@@ -428,11 +421,10 @@ BackendQuestsLocal.add_contract_progress = function (self, contract_id, value)
 			time = time
 		}
 	else
-		self._add_contract_progress(self, contract_id, value)
+		self:_add_contract_progress(contract_id, value)
 	end
-
-	return 
 end
+
 BackendQuestsLocal._add_contract_progress = function (self, contract_id, value)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -442,12 +434,11 @@ BackendQuestsLocal._add_contract_progress = function (self, contract_id, value)
 	local required_value = contract.requirements.task.amount.required
 	contract.requirements.task.amount.acquired = current_value + math.min(value, required_value - current_value)
 
-	self._save(self)
+	self:_save()
 
 	self._contracts_dirty = true
-
-	return 
 end
+
 BackendQuestsLocal.complete_contract = function (self, contract_id)
 	local complete_contracts = self._simulated_backend_delays.complete_contracts
 	local t = Managers.time:time("game")
@@ -459,11 +450,10 @@ BackendQuestsLocal.complete_contract = function (self, contract_id)
 			time = time
 		}
 	else
-		self._complete_contract(self, contract_id)
+		self:_complete_contract(contract_id)
 	end
-
-	return 
 end
+
 BackendQuestsLocal._complete_contract = function (self, contract_id)
 	local player_data = PlayerData
 	local quests_and_contracts_save_data = self._quests_and_contracts
@@ -486,17 +476,17 @@ BackendQuestsLocal._complete_contract = function (self, contract_id)
 
 	contracts[contract_id] = nil
 
-	self._save(self)
+	self:_save()
 
 	self._contracts_dirty = true
-
-	return 
 end
+
 local available_contracts = {}
+
 BackendQuestsLocal.get_available_contracts = function (self)
 	table.clear(available_contracts)
 
-	local contracts = self.get_contracts(self)
+	local contracts = self:get_contracts()
 
 	for id, contract in pairs(contracts) do
 		if not contract.active then
@@ -506,11 +496,13 @@ BackendQuestsLocal.get_available_contracts = function (self)
 
 	return available_contracts
 end
+
 local active_contracts = {}
+
 BackendQuestsLocal.get_active_contracts = function (self)
 	table.clear(active_contracts)
 
-	local contracts = self.get_contracts(self)
+	local contracts = self:get_contracts()
 
 	for id, contract in pairs(contracts) do
 		if contract.active then
@@ -520,40 +512,49 @@ BackendQuestsLocal.get_active_contracts = function (self)
 
 	return active_contracts
 end
+
 BackendQuestsLocal.get_contract_rewards = function (self)
 	return self.contract_rewards
 end
+
 BackendQuestsLocal.are_contracts_dirty = function (self)
 	local dirty = self._contracts_dirty
 	self._contracts_dirty = false
 
 	return dirty
 end
+
 BackendQuestsLocal.query_boons = function (self)
-	return 
+	return
 end
+
 BackendQuestsLocal.query_expire_times = function (self)
-	return 
+	return
 end
+
 BackendQuestsLocal.are_expire_times_dirty = function (self)
-	return 
+	return
 end
+
 BackendQuestsLocal.get_expire_times = function (self)
-	return 
+	return
 end
+
 BackendQuestsLocal.are_status_dirty = function (self)
-	return 
+	return
 end
+
 BackendQuestsLocal.get_status = function (self)
-	return 
+	return
 end
+
 BackendQuestsLocal._save = function (self)
-	return 
+	return
 end
 
 function has_boons()
 	local quests = Managers.backend:get_interface("quests")
-	local contracts = quests.get_contracts(quests)
+	local contracts = quests:get_contracts()
 
 	for id, data in pairs(contracts) do
 		if data.active and data.rewards.boons then
@@ -562,35 +563,29 @@ function has_boons()
 			print("no boons :(")
 		end
 	end
-
-	return 
 end
 
 function add_progress()
 	local quests = Managers.backend:get_interface("quests")
-	local contracts = quests.get_contracts(quests)
+	local contracts = quests:get_contracts()
 
 	for id, data in pairs(contracts) do
 		if data.active then
 			table.dump(data.requirements.task, "tasks", 3)
-			quests.add_contract_progress(quests, id, 100)
+			quests:add_contract_progress(id, 100)
 		end
 	end
-
-	return 
 end
 
 function complete()
 	local quests = Managers.backend:get_interface("quests")
-	local contracts = quests.get_contracts(quests)
+	local contracts = quests:get_contracts()
 
 	for id, data in pairs(contracts) do
 		if data.active then
-			quests.complete_contract(quests, id)
+			quests:complete_contract(id)
 		end
 	end
-
-	return 
 end
 
-return 
+return

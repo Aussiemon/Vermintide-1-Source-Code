@@ -1194,4 +1194,4 @@ ItemMasterList.trinket_razer_promo = {
 	traits = {}
 }
 
-return 
+return

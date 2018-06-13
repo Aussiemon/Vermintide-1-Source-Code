@@ -8,11 +8,11 @@ if DETAILED_PROFILING then
 	detailed_profiler_start = Profiler.stop
 else
 	function detailed_profiler_start()
-		return 
+		return
 	end
 
 	function detailed_profiler_stop()
-		return 
+		return
 	end
 end
 
@@ -24,16 +24,15 @@ LocomotionTemplates.AiHuskLocomotionExtension = {
 		data.affected_by_gravity_update_units = {}
 		data.pure_network_update_units = {}
 		data.other_update_units = {}
-
-		return 
 	end
 }
 local LOLUPDATE = false
+
 LocomotionTemplates.AiHuskLocomotionExtension.update = function (data, t, dt)
 	local game = Managers.state.network:game()
 
 	if game == nil then
-		return 
+		return
 	end
 
 	data.game = game
@@ -49,9 +48,8 @@ LocomotionTemplates.AiHuskLocomotionExtension.update = function (data, t, dt)
 		EngineOptimizedExtensions.ai_husk_locomotion_update(dt, game, data.all_update_units)
 		Profiler.stop("EngineOptimizedExtensions")
 	end
-
-	return 
 end
+
 LocomotionTemplates.AiHuskLocomotionExtension.update_alive = function (data, t, dt)
 	Profiler.start("update_alive")
 
@@ -61,7 +59,7 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_alive = function (data, t, 
 
 	for unit, extension in pairs(all_update_units) do
 		local health_extension = ScriptUnit.extension(unit, "health_system")
-		local is_alive = health_extension.is_alive(health_extension)
+		local is_alive = health_extension:is_alive()
 
 		if not is_alive then
 			all_update_units[unit] = nil
@@ -71,9 +69,8 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_alive = function (data, t, 
 	end
 
 	Profiler.stop("update_alive")
-
-	return 
 end
+
 LocomotionTemplates.AiHuskLocomotionExtension.update_pure_network_update_units = function (data, t, dt)
 	Profiler.start("update_pure_network_update_units")
 
@@ -99,7 +96,7 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_pure_network_update_units =
 
 	for unit, extension in pairs(data.pure_network_update_units) do
 		local old_pos = POSITION_LOOKUP[unit]
-		local go_id = unit_storage.go_id(unit_storage, unit)
+		local go_id = unit_storage:go_id(unit)
 		local network_pos = GameSession_game_object_field(game, go_id, "position")
 		local has_teleported = GameSession_game_object_field(game, go_id, "has_teleported")
 		local network_rot = GameSession_game_object_field(game, go_id, "rotation")
@@ -164,10 +161,10 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_pure_network_update_units =
 	end
 
 	Profiler.stop("update_pure_network_update_units")
-
-	return 
 end
+
 local ALLOWED_MOVER_MOVE_DISTANCE = 0.5
+
 LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_check = function (data, t, dt)
 	Profiler.start("update_other_update_units_navmesh_check")
 
@@ -177,15 +174,15 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_
 	for unit, extension in pairs(data.other_update_units) do
 		if not extension.is_network_driven and not extension.hit_wall and Unit.mover(unit) == nil then
 			local current_position = Unit.local_position(unit, 0)
-			traverse_logic = traverse_logic or extension.traverse_logic(extension)
+			traverse_logic = traverse_logic or extension:traverse_logic()
 			physics_world = physics_world or World.physics_world(extension._world)
-			local velocity = extension.current_velocity(extension)
+			local velocity = extension:current_velocity()
 			local result = LocomotionUtils.navmesh_movement_check(current_position, velocity, nav_world, physics_world, traverse_logic)
 
 			if result == "navmesh_hit_wall" then
 				extension.hit_wall = true
 			elseif result == "navmesh_use_mover" then
-				extension.set_mover_disable_reason(extension, "not_constrained_by_mover", false)
+				extension:set_mover_disable_reason("not_constrained_by_mover", false)
 
 				local mover = Unit.mover(unit)
 
@@ -210,7 +207,7 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_
 						local debug_text = string.format("LD should check the Navmesh here, Mover separation failed for %s!", breed.name)
 
 						Debug.world_sticky_text(current_position + Vector3(0, 0, 5), debug_text, "red")
-						extension.set_mover_disable_reason(extension, "not_constrained_by_mover", true)
+						extension:set_mover_disable_reason("not_constrained_by_mover", true)
 
 						extension.hit_wall = true
 					end
@@ -220,9 +217,8 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units_navmesh_
 	end
 
 	Profiler.stop("update_other_update_units_navmesh_check")
-
-	return 
 end
+
 LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = function (data, t, dt)
 	Profiler.start("animation_update_units")
 
@@ -241,13 +237,13 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 
 	for unit, extension in pairs(data.other_update_units) do
 		local current_position = Unit.local_position(unit, 0)
-		traverse_logic = traverse_logic or extension.traverse_logic(extension)
+		traverse_logic = traverse_logic or extension:traverse_logic()
 		local wanted_pose = Unit.animation_wanted_root_pose(unit)
 		local wanted_position = Matrix4x4.translation(wanted_pose)
 		local wanted_rotation = nil
 
 		if extension.has_network_driven_rotation then
-			local go_id = unit_storage.go_id(unit_storage, unit)
+			local go_id = unit_storage:go_id(unit)
 			wanted_rotation = GameSession_game_object_field(game, go_id, "rotation")
 		else
 			local anim_rotation = Matrix4x4.rotation(wanted_pose)
@@ -274,7 +270,7 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 			final_position = Mover.position(mover)
 			final_velocity = (final_position - current_position) / dt
 
-			if Mover.collides_down(mover) and 0 < Mover.standing_frames(mover) then
+			if Mover.collides_down(mover) and Mover.standing_frames(mover) > 0 then
 				final_velocity.z = 0
 			else
 				final_velocity.z = wanted_velocity.z
@@ -309,8 +305,6 @@ LocomotionTemplates.AiHuskLocomotionExtension.update_other_update_units = functi
 	end
 
 	Profiler.stop("animation_update_units")
-
-	return 
 end
 
-return 
+return

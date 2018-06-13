@@ -14,6 +14,7 @@ local quick_play_data = {
 }
 StateMapViewStart = class(StateMapViewStart)
 StateMapViewStart.NAME = "StateMapViewStart"
+
 StateMapViewStart.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewStart")
 
@@ -33,8 +34,8 @@ StateMapViewStart.on_enter = function (self, params)
 	self.platform = PLATFORM
 	self.ui_animations = {}
 	local player_manager = Managers.player
-	local local_player = player_manager.local_player(player_manager)
-	self._stats_id = local_player.stats_id(local_player)
+	local local_player = player_manager:local_player()
+	self._stats_id = local_player:stats_id()
 	local input_service = self.input_manager:get_service("map_menu")
 	local gui_layer = UILayer.default + 30
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 4, gui_layer, generic_input_actions.default)
@@ -43,7 +44,7 @@ StateMapViewStart.on_enter = function (self, params)
 
 	if self.game_info.quick_play_difficulty_rank then
 		local saved_difficulty_rank = math.min(self.game_info.quick_play_difficulty_rank, DifficultySettings[DefaultStartingDifficulty].rank)
-		local closest_difficulty_rank_total, highest_difficulty_rank_total = self._get_start_difficulty_rank(self, saved_difficulty_rank, quick_play_data.game_mode, quick_play_data.area)
+		local closest_difficulty_rank_total, highest_difficulty_rank_total = self:_get_start_difficulty_rank(saved_difficulty_rank, quick_play_data.game_mode, quick_play_data.area)
 		self._current_choosen_difficulty_rank = closest_difficulty_rank_total
 		self._highest_difficulty_rank_total = highest_difficulty_rank_total or DifficultySettings[DefaultStartingDifficulty].rank
 	else
@@ -51,7 +52,7 @@ StateMapViewStart.on_enter = function (self, params)
 		self._highest_difficulty_rank_total = DifficultySettings[DefaultStartingDifficulty].rank
 	end
 
-	self.create_ui_elements(self, params)
+	self:create_ui_elements(params)
 	self._map_view:set_time_line_index(nil)
 	self._map_view:animate_title_text(self._title_text_widget)
 	self._map_view:set_mask_enabled(true)
@@ -71,9 +72,8 @@ StateMapViewStart.on_enter = function (self, params)
 			self.matchmaking_popup_id = Managers.popup:queue_popup(Localize("popup_matchmaking_region_not_fetched"), Localize("popup_discard_changes_topic"), "ok", Localize("button_ok"))
 		end
 	end
-
-	return 
 end
+
 StateMapViewStart._get_start_difficulty_rank = function (self, saved_rank, game_mode_name, area_name)
 	local level_list = self.map_view_area_handler:get_level_list_by_game_mode_and_area(game_mode_name, area_name)
 	local closest_difficulty_rank_total, highest_difficulty_rank_total = nil
@@ -81,8 +81,8 @@ StateMapViewStart._get_start_difficulty_rank = function (self, saved_rank, game_
 	for area, area_level_list in pairs(level_list) do
 		if area ~= "world" then
 			local difficulty_data = self.map_view_helper:get_difficulty_data_summary(area_level_list)
-			local closest_difficulty_rank = self._get_closest_unlocked_rank(self, saved_rank, difficulty_data)
-			local highest_difficulty_rank = self._get_highest_unlocked_rank(self, difficulty_data)
+			local closest_difficulty_rank = self:_get_closest_unlocked_rank(saved_rank, difficulty_data)
+			local highest_difficulty_rank = self:_get_highest_unlocked_rank(difficulty_data)
 
 			if not highest_difficulty_rank_total or (highest_difficulty_rank and highest_difficulty_rank_total < highest_difficulty_rank) then
 				highest_difficulty_rank_total = highest_difficulty_rank
@@ -96,6 +96,7 @@ StateMapViewStart._get_start_difficulty_rank = function (self, saved_rank, game_
 
 	return closest_difficulty_rank_total, math.min(highest_difficulty_rank_total, DifficultySettings[DefaultStartingDifficulty].rank)
 end
+
 StateMapViewStart._get_highest_unlocked_rank = function (self, difficulty_data)
 	local return_rank = nil
 
@@ -107,6 +108,7 @@ StateMapViewStart._get_highest_unlocked_rank = function (self, difficulty_data)
 
 	return return_rank
 end
+
 StateMapViewStart._get_closest_unlocked_rank = function (self, rank, difficulty_data)
 	local return_rank = nil
 
@@ -118,6 +120,7 @@ StateMapViewStart._get_closest_unlocked_rank = function (self, rank, difficulty_
 
 	return return_rank
 end
+
 StateMapViewStart.create_ui_elements = function (self, params)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._title_text_widget = UIWidget.init(widgets.title_text)
@@ -189,29 +192,28 @@ StateMapViewStart.create_ui_elements = function (self, params)
 	self._difficulty_arrow_up_widget.animations[up_animation] = true
 	self._difficulty_arrow_down_widget.animations[down_animation] = true
 
-	self._align_elements(self)
+	self:_align_elements()
 
 	if params.initial_state then
 		params.initial_state = nil
 
-		self._set_selection(self, 1, true)
+		self:_set_selection(1, true)
 	else
 		local selection_index = self.game_info.game_type_index
 
-		self._set_selection(self, selection_index, true)
+		self:_set_selection(selection_index, true)
 	end
 
-	self._update_elements(self, 0, true)
-	self._change_difficulty(self, 0, true)
+	self:_update_elements(0, true)
+	self:_change_difficulty(0, true)
 
 	self._selection_timer = nil
 
-	self.start_open_animation(self)
+	self:start_open_animation()
 
 	self._params = params
-
-	return 
 end
+
 StateMapViewStart._wanted_state = function (self)
 	local new_state = self.parent:wanted_gamepad_state()
 
@@ -221,6 +223,7 @@ StateMapViewStart._wanted_state = function (self)
 
 	return new_state
 end
+
 StateMapViewStart.on_exit = function (self, params)
 	if self.matchmaking_popup_id then
 		Managers.popup:cancel_popup(self.matchmaking_popup_id)
@@ -231,8 +234,6 @@ StateMapViewStart.on_exit = function (self, params)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
 
 local function anim_func(t)
@@ -283,10 +284,9 @@ StateMapViewStart.start_open_animation = function (self)
 		end
 	end
 
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewStart.start_close_animation = function (self)
 	self._transition_timer = 0.65
 
@@ -326,13 +326,12 @@ StateMapViewStart.start_close_animation = function (self)
 	end
 
 	self._map_view:animate_title_text(self._title_text_widget, true)
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewStart._update_transition_timer = function (self, dt)
 	if not self._transition_timer then
-		return 
+		return
 	end
 
 	if self._transition_timer == 0 then
@@ -340,14 +339,13 @@ StateMapViewStart._update_transition_timer = function (self, dt)
 	else
 		self._transition_timer = math.max(self._transition_timer - dt, 0)
 	end
-
-	return 
 end
+
 StateMapViewStart.update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self, self._params)
+		self:create_ui_elements(self._params)
 	end
 
 	if self.matchmaking_popup_id then
@@ -363,94 +361,93 @@ StateMapViewStart.update = function (self, dt, t)
 	local transitioning = self._map_view:transitioning()
 
 	if not transitioning and not self._transition_timer then
-		self._handle_input(self, dt, t)
+		self:_handle_input(dt, t)
 	end
 
-	self._update_elements(self, dt)
-	self.draw(self, dt, t)
-	self._update_transition_timer(self, dt)
+	self:_update_elements(dt)
+	self:draw(dt, t)
+	self:_update_transition_timer(dt)
 
-	local wanted_state = self._wanted_state(self)
+	local wanted_state = self:_wanted_state()
 
 	if not self._transition_timer then
 		return wanted_state or self._new_state
 	end
+end
 
-	return 
-end
 StateMapViewStart.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewStart._handle_input = function (self, dt, t)
 	if self._new_state then
-		return 
+		return
 	end
 
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	else
 		local new_selection_index = self._selection_index
 
-		if input_service.get(input_service, "move_left") or input_service.get(input_service, "move_left_hold") then
+		if input_service:get("move_left") or input_service:get("move_left_hold") then
 			new_selection_index = math.max(self._selection_index - 1, 1)
-		elseif input_service.get(input_service, "move_right") or input_service.get(input_service, "move_right_hold") then
+		elseif input_service:get("move_right") or input_service:get("move_right_hold") then
 			new_selection_index = math.min(self._selection_index + 1, #self._elements)
 		end
 
 		if new_selection_index and new_selection_index ~= self._selection_index then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 
-			self._set_selection(self, new_selection_index)
-		elseif input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back", true) then
+			self:_set_selection(new_selection_index)
+		elseif input_service:get("toggle_menu") or input_service:get("back", true) then
 			local return_to_game = not self.parent.ingame_ui.menu_active
 
 			self.parent:exit(return_to_game)
-		elseif PLATFORM == "ps4" and GameSettingsDevelopment.lobby_browser_enabled and input_service.get(input_service, "refresh") then
+		elseif PLATFORM == "ps4" and GameSettingsDevelopment.lobby_browser_enabled and input_service:get("refresh") then
 			self.parent:exit(nil, "lobby_browser_view")
 		elseif self._selection_index and self._selection_index == 1 then
-			if input_service.get(input_service, "confirm") then
-				self._play_sound(self, "hud_menu_press_start")
-				self._start_quick_game(self, t)
-			elseif input_service.get(input_service, "move_up") or input_service.get(input_service, "move_up_hold") then
+			if input_service:get("confirm") then
+				self:_play_sound("hud_menu_press_start")
+				self:_start_quick_game(t)
+			elseif input_service:get("move_up") or input_service:get("move_up_hold") then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 
-				if self._change_difficulty(self, 1) then
-					self._play_sound(self, "Play_hud_select")
+				if self:_change_difficulty(1) then
+					self:_play_sound("Play_hud_select")
 				end
-			elseif input_service.get(input_service, "move_down") or input_service.get(input_service, "move_down_hold") then
+			elseif input_service:get("move_down") or input_service:get("move_down_hold") then
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 
-				if self._change_difficulty(self, -1) then
-					self._play_sound(self, "Play_hud_select")
+				if self:_change_difficulty(-1) then
+					self:_play_sound("Play_hud_select")
 				end
 			end
 		elseif self._selection_index and self._selection_index == 2 then
-			if input_service.get(input_service, "confirm") then
-				self._play_sound(self, "Play_hud_main_menu_open")
+			if input_service:get("confirm") then
+				self:_play_sound("Play_hud_main_menu_open")
 
 				self._new_state = StateMapViewGameMode
 			end
-		elseif self._selection_index and self._selection_index == 3 and input_service.get(input_service, "confirm") then
-			self._play_sound(self, "Play_hud_main_menu_open")
+		elseif self._selection_index and self._selection_index == 3 and input_service:get("confirm") then
+			self:_play_sound("Play_hud_main_menu_open")
 			self._console_dlc_view:on_enter()
 		end
 	end
 
 	if self._new_state then
-		self.start_close_animation(self)
+		self:start_close_animation()
 	end
-
-	return 
 end
+
 StateMapViewStart.draw = function (self, dt, t)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	if self._console_dlc_view:active() then
 		self._console_dlc_view:update(dt, t)
@@ -480,14 +477,13 @@ StateMapViewStart.draw = function (self, dt, t)
 			self.menu_input_description:draw(ui_renderer, dt)
 		end
 	end
-
-	return 
 end
+
 StateMapViewStart._change_difficulty = function (self, value, ignore_animations)
 	local highest_available = self._highest_difficulty_rank_total
 
 	if highest_available < self._current_choosen_difficulty_rank + value or self._current_choosen_difficulty_rank + value < 1 then
-		return 
+		return
 	end
 
 	self._current_choosen_difficulty_rank = self._current_choosen_difficulty_rank + value
@@ -497,10 +493,10 @@ StateMapViewStart._change_difficulty = function (self, value, ignore_animations)
 	self.game_info.quick_play_difficulty_rank = self._current_choosen_difficulty_rank
 	local difficulty_rank = self._current_choosen_difficulty_rank
 	self._difficulty_arrow_up_widget.content.visible = difficulty_rank < DifficultySettings[DefaultStartingDifficulty].rank
-	self._difficulty_arrow_down_widget.content.visible = 1 < difficulty_rank
+	self._difficulty_arrow_down_widget.content.visible = difficulty_rank > 1
 
 	if not ignore_animations then
-		if 0 < value then
+		if value > 0 then
 			local up_arrow_scenegraph = self.ui_scenegraph.difficulty_arrow_up
 			local up_arrow_scenegraph_position = up_arrow_scenegraph.position
 			local animation_height_offset = UIAnimation.init(UIAnimation.function_by_time, up_arrow_scenegraph_position, 2, 40, 45, 0.2, math.ease_pulse)
@@ -532,6 +528,7 @@ StateMapViewStart._change_difficulty = function (self, value, ignore_animations)
 
 	return true
 end
+
 StateMapViewStart._align_elements = function (self)
 	local num_elements = #self._elements
 	local spacing = 50
@@ -543,16 +540,15 @@ StateMapViewStart._align_elements = function (self)
 		widget.offset[1] = start_offset + distance * (index - 1)
 		widget.content.position_offset = widget.offset[1]
 	end
-
-	return 
 end
+
 StateMapViewStart._set_selection = function (self, index, ignore_sound)
 	self.game_info.game_type_index = index
 
 	if self._selection_timer then
 		local instant = true
 
-		self._update_elements(self, 0, instant)
+		self:_update_elements(0, instant)
 	end
 
 	self._old_selection_index = self._selection_index
@@ -571,11 +567,10 @@ StateMapViewStart._set_selection = function (self, index, ignore_sound)
 	widget.style.description_rect.size[2] = text_height * #lines + text_style.font_size
 
 	if not ignore_sound then
-		self._play_sound(self, "Play_hud_hover")
+		self:_play_sound("Play_hud_hover")
 	end
-
-	return 
 end
+
 StateMapViewStart.update_selection_timer = function (self, dt)
 	local timer = self._selection_timer
 
@@ -585,7 +580,7 @@ StateMapViewStart.update_selection_timer = function (self, dt)
 		if timer == total_time then
 			self._selection_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
@@ -593,28 +588,26 @@ StateMapViewStart.update_selection_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewStart._update_elements = function (self, dt, instant)
-	local selection_progress = (instant and 1) or self.update_selection_timer(self, dt)
+	local selection_progress = (instant and 1) or self:update_selection_timer(dt)
 
 	if not selection_progress then
-		return 
+		return
 	end
 
 	for index, widget in ipairs(self._elements) do
-		self._animate_element(self, widget, index, selection_progress, instant)
+		self:_animate_element(widget, index, selection_progress, instant)
 	end
-
-	return 
 end
+
 StateMapViewStart._animate_element = function (self, widget, index, progress, instant)
 	local is_selection_widget = self._selection_index == index
 	local is_old_selection_widget = self._old_selection_index == index
 
 	if not is_selection_widget and not is_old_selection_widget and not instant then
-		return 
+		return
 	end
 
 	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
@@ -642,20 +635,18 @@ StateMapViewStart._animate_element = function (self, widget, index, progress, in
 	widget.style.text.text_color[4] = math.lerp(normal_text_color[4], selected_text_color[4], math.smoothstep(anim_progress, 0, 1))
 
 	if index == 1 then
-		self._animate_difficulty_selection(self, anim_progress)
+		self:_animate_difficulty_selection(anim_progress)
 	end
-
-	return 
 end
+
 StateMapViewStart._animate_difficulty_selection = function (self, progress)
 	local alpha = 255 * progress
 	self._difficulty_text_widget.style.text.text_color[1] = alpha
 	self._difficulty_arrow_up_widget.style.texture_id.color[1] = alpha
 	self._difficulty_arrow_down_widget.style.texture_id.color[1] = alpha
 	self._difficulty_text_bg_widget.style.texture_id.color[1] = alpha
-
-	return 
 end
+
 StateMapViewStart._show_store_page = function (self, dlc_name)
 	if self.platform == "win32" then
 		local dlc_id = Managers.unlock:dlc_id(dlc_name)
@@ -675,14 +666,12 @@ StateMapViewStart._show_store_page = function (self, dlc_name)
 			product_label
 		})
 	end
-
-	return 
 end
+
 StateMapViewStart._play_sound = function (self, event)
 	self._map_view:play_sound(event)
-
-	return 
 end
+
 StateMapViewStart._start_quick_game = function (self, t)
 	local game_info = self.game_info
 	local difficulty_rank = game_info.quick_play_difficulty_rank
@@ -703,8 +692,6 @@ StateMapViewStart._start_quick_game = function (self, t)
 	end
 
 	Managers.matchmaking:find_game(quick_play_data.level_key, difficulty_key, quick_play_data.private_game, quick_play_data.random_level, quick_play_data.game_mode, quick_play_data.area, t)
-
-	return 
 end
 
-return 
+return

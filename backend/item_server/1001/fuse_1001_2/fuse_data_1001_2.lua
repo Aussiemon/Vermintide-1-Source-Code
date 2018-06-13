@@ -40868,4 +40868,4 @@ ForgeUpgrade = {
 	}
 }
 
-return 
+return

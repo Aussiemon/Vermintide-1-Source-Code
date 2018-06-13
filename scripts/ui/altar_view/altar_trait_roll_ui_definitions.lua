@@ -1130,8 +1130,6 @@ local animations = {
 				ui_scenegraph.expand_frame_background.size[1] = expand_frame_background_default_size[1]
 
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_reroll_traits_window_move")
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local expand_frame_default_size = scenegraph_definition.expand_frame.size
@@ -1142,11 +1140,9 @@ local animations = {
 				ui_scenegraph.expand_frame_background.size[1] = progress * expand_frame_background_default_size[1]
 				local background_uvs = widgets.expand_frame_background.content.texture_id.uvs
 				background_uvs[1][1] = 1 - progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1158,19 +1154,15 @@ local animations = {
 				local widget_style_global = widget.style_global
 				local alpha = 0
 				widget_style_global.texture_color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
 				local widget_style_global = widget.style_global
 				local alpha = math.easeCubic(local_progress) * 255
 				widget_style_global.texture_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1182,19 +1174,15 @@ local animations = {
 				local widget_style_global = widget.style_global
 				local alpha = 0
 				widget_style_global.texture_color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
 				local widget_style_global = widget.style_global
 				local alpha = math.easeCubic(local_progress) * 255
 				widget_style_global.texture_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1220,8 +1208,6 @@ local animations = {
 
 					widget.content.visible = false
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = math.easeInCubic(local_progress) * 255
@@ -1244,11 +1230,9 @@ local animations = {
 						widget.content.visible = true
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1274,8 +1258,6 @@ local animations = {
 
 					widget.content.visible = false
 				end
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = math.easeInCubic(local_progress) * 255
@@ -1298,11 +1280,9 @@ local animations = {
 						widget.content.visible = true
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1313,18 +1293,14 @@ local animations = {
 				local alpha = 0
 				local widget = widgets.preview_window_1_title
 				widget.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = math.easeInCubic(local_progress) * 255
 				local widget = widgets.preview_window_1_title
 				widget.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1335,18 +1311,14 @@ local animations = {
 				local alpha = 0
 				local widget = widgets.preview_window_2_title
 				widget.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = math.easeInCubic(local_progress) * 255
 				local widget = widgets.preview_window_2_title
 				widget.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1356,13 +1328,13 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.7,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
-				return 
+				return
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1370,7 +1342,7 @@ local animations = {
 			start_progress = 0.7,
 			end_progress = 1.35,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
@@ -1393,11 +1365,9 @@ local animations = {
 						end
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1407,7 +1377,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.35,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
@@ -1430,11 +1400,9 @@ local animations = {
 						end
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1445,8 +1413,6 @@ local animations = {
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_reroll_traits_hover")
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
@@ -1456,11 +1422,9 @@ local animations = {
 				if widget_style_global.glow_corner_color[1] < alpha then
 					widget_style_global.glow_corner_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1468,7 +1432,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_button
@@ -1478,11 +1442,9 @@ local animations = {
 				if widget_style.button_frame_glow_texture.color[1] < alpha then
 					widget_style.button_frame_glow_texture.color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1490,7 +1452,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = local_progress * 255
@@ -1505,11 +1467,9 @@ local animations = {
 						color[1] = alpha
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1521,8 +1481,6 @@ local animations = {
 				local widget_style_global = widget.style_global
 				local alpha = 0
 				widget_style_global.glow_skull_color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
@@ -1532,11 +1490,9 @@ local animations = {
 				if widget_style_global.glow_skull_color[1] < alpha then
 					widget_style_global.glow_skull_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1546,7 +1502,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
@@ -1556,11 +1512,9 @@ local animations = {
 				if alpha < widget_style_global.glow_corner_color[1] then
 					widget_style_global.glow_corner_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1568,7 +1522,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_button
@@ -1578,11 +1532,9 @@ local animations = {
 				if alpha < widget_style.button_frame_glow_texture.color[1] then
 					widget_style.button_frame_glow_texture.color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1590,7 +1542,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = (1 - local_progress) * 255
@@ -1605,11 +1557,9 @@ local animations = {
 						color[1] = alpha
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1617,7 +1567,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
@@ -1627,11 +1577,9 @@ local animations = {
 				if alpha < widget_style_global.glow_skull_color[1] then
 					widget_style_global.glow_skull_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1642,8 +1590,6 @@ local animations = {
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_reroll_traits_hover")
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
@@ -1653,11 +1599,9 @@ local animations = {
 				if widget_style_global.glow_corner_color[1] < alpha then
 					widget_style_global.glow_corner_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1665,7 +1609,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_button
@@ -1675,11 +1619,9 @@ local animations = {
 				if widget_style.button_frame_glow_texture.color[1] < alpha then
 					widget_style.button_frame_glow_texture.color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1687,7 +1629,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = local_progress * 255
@@ -1702,11 +1644,9 @@ local animations = {
 						color[1] = alpha
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1718,8 +1658,6 @@ local animations = {
 				local widget_style_global = widget.style_global
 				local alpha = 0
 				widget_style_global.glow_skull_color[1] = alpha
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
@@ -1729,11 +1667,9 @@ local animations = {
 				if widget_style_global.glow_skull_color[1] < alpha then
 					widget_style_global.glow_skull_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1743,7 +1679,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
@@ -1753,11 +1689,9 @@ local animations = {
 				if alpha < widget_style_global.glow_corner_color[1] then
 					widget_style_global.glow_corner_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1765,7 +1699,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_button
@@ -1775,11 +1709,9 @@ local animations = {
 				if alpha < widget_style.button_frame_glow_texture.color[1] then
 					widget_style.button_frame_glow_texture.color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1787,7 +1719,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local alpha = (1 - local_progress) * 255
@@ -1802,11 +1734,9 @@ local animations = {
 						color[1] = alpha
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1814,7 +1744,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.15,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
@@ -1824,11 +1754,9 @@ local animations = {
 				if alpha < widget_style_global.glow_skull_color[1] then
 					widget_style_global.glow_skull_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1838,7 +1766,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
@@ -1855,11 +1783,9 @@ local animations = {
 				if alpha < glow_corner_color[1] then
 					glow_corner_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1867,7 +1793,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
@@ -1884,11 +1810,9 @@ local animations = {
 				if alpha < glow_corner_color[1] then
 					glow_corner_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1896,7 +1820,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
@@ -1923,16 +1847,12 @@ local animations = {
 						widget.content.visible = true
 					end
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				for i = 1, 8, 1 do
 					local widget = widgets["trait_preview_" .. i]
 					widget.content.visible = false
 				end
-
-				return 
 			end
 		},
 		{
@@ -1940,7 +1860,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_1_corner
@@ -1952,8 +1872,6 @@ local animations = {
 				if alpha < texture_color[1] then
 					texture_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local default_top_left = scenegraph_definition.pw_1_corner_top_left
@@ -1972,8 +1890,6 @@ local animations = {
 				bottom_left.local_position[2] = default_bottom_left.position[2]
 				bottom_right.local_position[1] = default_bottom_right.position[1]
 				bottom_right.local_position[2] = default_bottom_right.position[2]
-
-				return 
 			end
 		},
 		{
@@ -1981,7 +1897,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.preview_window_2_corner
@@ -1993,8 +1909,6 @@ local animations = {
 				if alpha < texture_color[1] then
 					texture_color[1] = alpha
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local default_top_left = scenegraph_definition.pw_2_corner_top_left
@@ -2013,8 +1927,6 @@ local animations = {
 				bottom_left.local_position[2] = default_bottom_left.position[2]
 				bottom_right.local_position[1] = default_bottom_right.position[1]
 				bottom_right.local_position[2] = default_bottom_right.position[2]
-
-				return 
 			end
 		},
 		{
@@ -2022,18 +1934,16 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
 				local alpha = (1 - progress) * 255
 				local widget = widgets.preview_window_1_title
 				widget.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2041,18 +1951,16 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.3,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local progress = math.easeOutCubic(local_progress)
 				local alpha = (1 - progress) * 255
 				local widget = widgets.preview_window_2_title
 				widget.style.text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -2060,7 +1968,7 @@ local animations = {
 			start_progress = 0.4,
 			end_progress = 0.9,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				if not params.close_sound_played then
@@ -2082,11 +1990,9 @@ local animations = {
 					local background_uvs = widgets.expand_frame_background.content.texture_id.uvs
 					background_uvs[1][1] = progress
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

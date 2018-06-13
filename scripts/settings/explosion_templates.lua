@@ -397,4 +397,4 @@ for name, templates in pairs(ExplosionTemplates) do
 	templates.name = name
 end
 
-return 
+return

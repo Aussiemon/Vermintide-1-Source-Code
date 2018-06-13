@@ -711,6 +711,7 @@ else
 end
 
 IngameView = class(IngameView)
+
 IngameView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -745,7 +746,7 @@ IngameView.init = function (self, ingame_ui_context)
 	self.layout_list = (is_in_inn and local_menu_layouts.in_menu) or local_menu_layouts.in_game
 	self.menu_definition = IngameViewDefinitions
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.ui_animations = {}
 	self.controller_grid_index = {
@@ -761,10 +762,10 @@ IngameView.init = function (self, ingame_ui_context)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, number_of_actvie_descriptions, gui_layer, generic_input_actions)
 
 	self.menu_input_description:set_input_description(nil)
-
-	return 
 end
+
 local MENU_ANIMATION_TIME = 0.3
+
 IngameView.on_enter = function (self, menu_to_enter)
 	assert(menu_to_enter ~= "MainMenu")
 
@@ -772,19 +773,18 @@ IngameView.on_enter = function (self, menu_to_enter)
 	self.active_menu = menu_to_enter
 	self.controller_cooldown = 0.2
 
-	self.update_menu_options(self)
-	self.update_menu_options_enabled_states(self)
+	self:update_menu_options()
+	self:update_menu_options_enabled_states()
 
 	if self.controller_selection_index then
 		local data = self.active_button_data[self.controller_selection_index]
 
 		if data.widget.content.button_hotspot.disabled then
-			self.setup_controller_selection(self)
+			self:setup_controller_selection()
 		end
 	end
-
-	return 
 end
+
 IngameView.create_ui_elements = function (self)
 	local widgets = self.menu_definition.widgets
 	self.stored_buttons = {
@@ -802,9 +802,8 @@ IngameView.create_ui_elements = function (self)
 	self.background_bottom_widget = UIWidget.init(widgets.background_bottom_widget)
 	self.gamepad_button_selection_widget = UIWidget.init(widgets.gamepad_button_selection)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(self.menu_definition.scenegraph_definition)
-
-	return 
 end
+
 IngameView.update_menu_options = function (self)
 	if script_data.pause_menu_full_access then
 		if not self.pause_menu_full_access then
@@ -860,7 +859,7 @@ IngameView.update_menu_options = function (self)
 				}
 			end
 
-			self.setup_button_layout(self, full_access_layout)
+			self:setup_button_layout(full_access_layout)
 		end
 	else
 		self.pause_menu_full_access = nil
@@ -882,12 +881,11 @@ IngameView.update_menu_options = function (self)
 				new_menu_layout = layout_list.client
 			end
 
-			self.setup_button_layout(self, new_menu_layout)
+			self:setup_button_layout(new_menu_layout)
 		end
 	end
-
-	return 
 end
+
 IngameView.update_menu_options_enabled_states = function (self)
 	local active_button_data = self.active_button_data
 
@@ -919,9 +917,8 @@ IngameView.update_menu_options_enabled_states = function (self)
 			end
 		end
 	end
-
-	return 
 end
+
 IngameView.setup_button_layout = function (self, layout_data)
 	local active_button_data = self.active_button_data
 
@@ -949,21 +946,19 @@ IngameView.setup_button_layout = function (self, layout_data)
 
 	local controller_selection_index = self.controller_selection_index
 
-	if controller_selection_index and #active_button_data < controller_selection_index then
-		self.controller_select_button_index(self, #active_button_data, true)
+	if controller_selection_index and controller_selection_index > #active_button_data then
+		self:controller_select_button_index(#active_button_data, true)
 	end
 
-	self.set_background_height(self, #active_button_data)
-
-	return 
+	self:set_background_height(#active_button_data)
 end
+
 IngameView.destroy = function (self)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 IngameView.set_background_height = function (self, num_buttons)
 	local background_bottom_definition = self.menu_definition.scenegraph_definition.background_bottom
 	local background_bottom_default_size = background_bottom_definition.size
@@ -976,12 +971,11 @@ IngameView.set_background_height = function (self, num_buttons)
 	local background_fraction = (dead_area + background_height) / background_bottom_default_size[2]
 	self.ui_scenegraph.background_bottom.size[2] = math.ceil(background_bottom_default_size[2] * background_fraction)
 	self.background_bottom_widget.content.texture_id.uvs[1][2] = 1 - background_fraction
-
-	return 
 end
+
 IngameView.update = function (self, dt)
-	self.update_menu_options(self)
-	self.update_menu_options_enabled_states(self)
+	self:update_menu_options()
+	self:update_menu_options_enabled_states()
 
 	if self._reinit_menu_input_description_next_update then
 		self._reinit_menu_input_description_next_update = nil
@@ -991,8 +985,8 @@ IngameView.update = function (self, dt)
 
 	local ui_renderer = self.ui_renderer
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "ingame_menu")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("ingame_menu")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local ui_animations = self.ui_animations
 
 	for name, ui_animation in pairs(ui_animations) do
@@ -1002,7 +996,7 @@ IngameView.update = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 
 	if gamepad_active and not self.gamepad_active_last_frame then
-		self.setup_controller_selection(self)
+		self:setup_controller_selection()
 	end
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
@@ -1023,24 +1017,24 @@ IngameView.update = function (self, dt)
 			UIRenderer.draw_widget(ui_renderer, widget)
 
 			if widget.content.button_hotspot.on_hover_enter then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 
-			if not ingame_ui.pending_transition(ingame_ui) then
+			if not ingame_ui:pending_transition() then
 				local mouse_input_approved = widget.content.button_hotspot.on_release
-				local gamepad_input_approved = self.controller_cooldown < 0 and self.controller_selection_index == index and input_service.get(input_service, "confirm", true)
+				local gamepad_input_approved = self.controller_cooldown < 0 and self.controller_selection_index == index and input_service:get("confirm", true)
 
 				if mouse_input_approved or gamepad_input_approved then
 					widget.content.button_hotspot.on_release = nil
 					local transition = data.transition
 					local fade = data.fade
 
-					self.play_sound(self, "Play_hud_select")
+					self:play_sound("Play_hud_select")
 
 					if fade then
-						ingame_ui.transition_with_fade(ingame_ui, transition)
+						ingame_ui:transition_with_fade(transition)
 					else
-						ingame_ui.handle_transition(ingame_ui, transition)
+						ingame_ui:handle_transition(transition)
 					end
 
 					self._reinit_menu_input_description_next_update = true
@@ -1053,30 +1047,28 @@ IngameView.update = function (self, dt)
 	UIRenderer.end_pass(ui_renderer)
 
 	if gamepad_active then
-		self.update_controller_input(self, input_service, dt)
+		self:update_controller_input(input_service, dt)
 
 		if not ingame_ui.popup_id then
 			self.menu_input_description:draw(ui_renderer, dt)
 		end
 	elseif self.gamepad_active_last_frame then
-		self.clear_controller_selection(self)
+		self:clear_controller_selection()
 	end
 
 	self.gamepad_active_last_frame = gamepad_active
 
-	if (input_service.get(input_service, "toggle_menu", true) or input_service.get(input_service, "back", true)) and not ingame_ui.pending_transition(ingame_ui) then
-		ingame_ui.handle_transition(ingame_ui, "exit_menu")
+	if (input_service:get("toggle_menu", true) or input_service:get("back", true)) and not ingame_ui:pending_transition() then
+		ingame_ui:handle_transition("exit_menu")
 	end
-
-	return 
 end
+
 IngameView.setup_controller_selection = function (self)
 	local selection_index = 1
 
-	self.controller_select_button_index(self, selection_index, true)
-
-	return 
+	self:controller_select_button_index(selection_index, true)
 end
+
 IngameView.controller_select_button_index = function (self, index, ignore_sound)
 	local selection_accepted = false
 	local active_button_data = self.active_button_data
@@ -1103,7 +1095,7 @@ IngameView.controller_select_button_index = function (self, index, ignore_sound)
 	end
 
 	if not ignore_sound and index ~= self.controller_selection_index then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
 	self.controller_selection_index = index
@@ -1111,6 +1103,7 @@ IngameView.controller_select_button_index = function (self, index, ignore_sound)
 
 	return selection_accepted
 end
+
 IngameView.clear_controller_selection = function (self)
 	local active_button_data = self.active_button_data
 
@@ -1118,73 +1111,71 @@ IngameView.clear_controller_selection = function (self)
 		local widget = data.widget
 		widget.content.button_hotspot.is_selected = false
 	end
-
-	return 
 end
+
 IngameView.update_controller_input = function (self, input_service, dt)
 	local num_buttons = #self.active_button_data
 
-	if 0 < self.controller_cooldown then
+	if self.controller_cooldown > 0 then
 		self.controller_cooldown = self.controller_cooldown - dt
 		local speed_multiplier = self.speed_multiplier or 1
 		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
 		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
 		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
 
-		return 
+		return
 	else
 		speed_multiplier = self.speed_multiplier or 1
-		local move_up = input_service.get(input_service, "move_up")
-		local move_up_hold = input_service.get(input_service, "move_up_hold")
-		local controller_selection_index = self.controller_selection_index
 
-		if move_up or move_up_hold then
-			local new_index = math.max(controller_selection_index - 1, 1)
-			local selection_accepted = self.controller_select_button_index(self, new_index)
+		repeat
+			local move_up = input_service:get("move_up")
+			local move_up_hold = input_service:get("move_up_hold")
+			local controller_selection_index = self.controller_selection_index
 
-			while not selection_accepted do
-				new_index = math.max(new_index - 1, 1)
-				selection_accepted = self.controller_select_button_index(self, new_index)
+			if move_up or move_up_hold then
+				local new_index = math.max(controller_selection_index - 1, 1)
+				local selection_accepted = self:controller_select_button_index(new_index)
+
+				while not selection_accepted do
+					new_index = math.max(new_index - 1, 1)
+					selection_accepted = self:controller_select_button_index(new_index)
+				end
+
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
+
+				return
 			end
 
-			self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
+			local move_down = input_service:get("move_down")
+			local move_down_hold = input_service:get("move_down_hold")
 
-			return 
-		end
+			if move_down or move_down_hold then
+				local new_index = math.min(controller_selection_index + 1, num_buttons)
+				local selection_accepted = self:controller_select_button_index(new_index)
 
-		local move_down = input_service.get(input_service, "move_down")
-		local move_down_hold = input_service.get(input_service, "move_down_hold")
+				while not selection_accepted do
+					new_index = math.min(new_index + 1, num_buttons)
+					selection_accepted = self:controller_select_button_index(new_index)
+				end
 
-		if move_down or move_down_hold then
-			local new_index = math.min(controller_selection_index + 1, num_buttons)
-			local selection_accepted = self.controller_select_button_index(self, new_index)
+				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 
-			while not selection_accepted do
-				new_index = math.min(new_index + 1, num_buttons)
-				selection_accepted = self.controller_select_button_index(self, new_index)
+				return
 			end
-
-			self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
-
-			return 
-		end
+		until true
 	end
 
 	self.speed_multiplier = 1
-
-	return 
 end
+
 IngameView.get_transition = function (self)
 	if self.leave_game then
 		return "leave_game"
 	end
-
-	return 
 end
+
 IngameView.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
 
-return 
+return

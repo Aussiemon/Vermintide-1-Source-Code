@@ -783,4 +783,4 @@ SpreadTemplates.rake_shot = table.create_copy(SpreadTemplates.rake_shot, SpreadT
 SpreadTemplates.rake_twin_shot = table.create_copy(SpreadTemplates.rake_twin_shot, SpreadTemplates.rake_twin_shot) or table.clone(SpreadTemplates.default)
 SpreadTemplates.rake_twin_shot = SpreadTemplates.rake_twin_shot or table.clone(SpreadTemplates.default)
 
-return 
+return

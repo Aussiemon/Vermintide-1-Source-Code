@@ -365,6 +365,7 @@ local splash_content = {
 	}
 }
 SplashView = class(SplashView)
+
 SplashView.init = function (self, input_manager, world)
 	if PLATFORM == "ps4" then
 		PS4.hide_splash_screen()
@@ -398,23 +399,22 @@ SplashView.init = function (self, input_manager, world)
 	end
 
 	if input_manager then
-		input_manager.create_input_service(input_manager, "splash_view", "SplashScreenKeymaps", "SplashScreenFilters")
-		input_manager.map_device_to_service(input_manager, "splash_view", "keyboard")
-		input_manager.map_device_to_service(input_manager, "splash_view", "gamepad")
+		input_manager:create_input_service("splash_view", "SplashScreenKeymaps", "SplashScreenFilters")
+		input_manager:map_device_to_service("splash_view", "keyboard")
+		input_manager:map_device_to_service("splash_view", "gamepad")
 
 		self.input_manager = input_manager
 	end
 
-	self._next_splash(self, true)
-
-	return 
+	self:_next_splash(true)
 end
+
 SplashView._next_splash = function (self, override_skip)
 	if not override_skip and (PLATFORM == "xb1" or PLATFORM == "ps4") and not self._allow_console_skip then
 		self._update_func = "_wait_for_allow_console_skip"
 		self._video_complete = true
 
-		return 
+		return
 	end
 
 	self._update_func = "do_nothing"
@@ -428,9 +428,8 @@ SplashView._next_splash = function (self, override_skip)
 	elseif not Managers.transition:loading_icon_active() then
 		Managers.transition:show_loading_icon()
 	end
-
-	return 
 end
+
 SplashView._update_video = function (self, gui, dt)
 	if not self.ui_renderer.video_player then
 		UIRenderer.create_video_player(self.ui_renderer, self._world, self._current_splash_data.video_name, false)
@@ -447,7 +446,7 @@ SplashView._update_video = function (self, gui, dt)
 				Managers.music:trigger_event(self._current_splash_data.sound_stop)
 			end
 
-			self._next_splash(self)
+			self:_next_splash()
 		else
 			if not self._sound_started then
 				if self._current_splash_data.sound_start then
@@ -460,9 +459,8 @@ SplashView._update_video = function (self, gui, dt)
 			UIRenderer.draw_widget(self.ui_renderer, self._current_widget)
 		end
 	end
-
-	return 
 end
+
 SplashView._update_texture = function (self, gui, dt)
 	local w, h = Gui.resolution()
 	local timer = self._current_splash_data.timer
@@ -470,7 +468,7 @@ SplashView._update_texture = function (self, gui, dt)
 	local total_time = self._current_splash_data.time
 	dt = math.min(dt, 0.03333333333333333)
 
-	if total_time - 0.5 < timer then
+	if timer > total_time - 0.5 then
 		local value = 255 * (timer - total_time - 0.5) / 0.5
 		self._current_widget.style.foreground.color[1] = value
 	elseif timer <= 0.5 then
@@ -485,34 +483,29 @@ SplashView._update_texture = function (self, gui, dt)
 	self._current_splash_data.timer = self._current_splash_data.timer - dt
 
 	if self._current_splash_data.timer <= 0 then
-		self._next_splash(self)
+		self:_next_splash()
 	end
-
-	return 
 end
 
 if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	SplashView._wait_for_allow_console_skip = function (self)
 		if self._allow_console_skip then
-			self._next_splash(self)
+			self:_next_splash()
 		end
-
-		return 
 	end
 end
 
 SplashView.set_index = function (self, index)
 	self._current_index = index
 
-	self._next_splash(self)
-
-	return 
+	self:_next_splash()
 end
+
 SplashView.update = function (self, dt)
 	if PLATFORM == "win32" and self._fram_skip_hack < 1 then
 		self._fram_skip_hack = self._fram_skip_hack + 1
 
-		return 
+		return
 	end
 
 	local w, h = Gui.resolution()
@@ -525,9 +518,9 @@ SplashView.update = function (self, dt)
 	local skip = nil
 
 	if PLATFORM == "xb1" or PLATFORM == "ps4" then
-		skip = self._get_console_input(self)
+		skip = self:_get_console_input()
 	else
-		skip = input_service.get(input_service, "skip_splash")
+		skip = input_service:get("skip_splash")
 	end
 
 	if skip and (not self._current_splash_data or not self._current_splash_data.forced) then
@@ -543,25 +536,22 @@ SplashView.update = function (self, dt)
 			self._sound_started = false
 		end
 
-		self._next_splash(self)
+		self:_next_splash()
 	elseif self[self._update_func] then
 		self[self._update_func](self, ui_renderer.gui, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
 
 if PLATFORM == "xb1" or PLATFORM == "ps4" then
 	SplashView.allow_console_skip = function (self)
 		self._allow_console_skip = true
-
-		return 
 	end
+
 	SplashView._get_console_input = function (self)
 		if not self._allow_console_skip then
-			return 
+			return
 		end
 
 		local pad = "Pad"
@@ -574,25 +564,24 @@ if PLATFORM == "xb1" or PLATFORM == "ps4" then
 				return true
 			end
 		end
-
-		return 
 	end
 end
 
 SplashView.render = function (self)
-	return 
+	return
 end
+
 SplashView.video_complete = function (self)
 	return self._video_complete
 end
+
 SplashView.destroy = function (self)
 	Managers.music:stop_all_sounds()
 	UIRenderer.destroy(self.ui_renderer, self._world)
-
-	return 
 end
+
 SplashView.is_completed = function (self)
 	return self._current_splash_data == nil
 end
 
-return 
+return

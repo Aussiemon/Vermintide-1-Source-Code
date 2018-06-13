@@ -11,14 +11,10 @@ local function reset_entities()
 	Entities = {}
 
 	rawset(_G, "G_Entities", Entities)
-
-	return 
 end
 
 local function remove_unit(unit)
 	Entities[unit] = nil
-
-	return 
 end
 
 local function local_remove_extension(unit, system_name)
@@ -28,8 +24,6 @@ local function local_remove_extension(unit, system_name)
 	fassert(unit_extensions[system_name], "Tried to remove system %s extension for unit %s", system_name, unit)
 
 	unit_extensions[system_name] = nil
-
-	return 
 end
 
 local function set_extension_script(unit, system_name, extension)
@@ -43,8 +37,6 @@ local function set_extension_script(unit, system_name, extension)
 	assert(type(extension) ~= "number", "Trying to set extension %s for unit %s to a number value", tostring(system_name), tostring(unit))
 
 	unit_extensions[system_name] = extension
-
-	return 
 end
 
 local function local_extension(unit, system_name)
@@ -68,6 +60,7 @@ ScriptUnit.extension_input = function (unit, system_name)
 
 	return extension.input
 end
+
 ScriptUnit.extension = function (unit, system_name)
 	local unit_extensions = Entities[unit]
 	local extension = unit_extensions and unit_extensions[system_name]
@@ -78,15 +71,19 @@ ScriptUnit.extension = function (unit, system_name)
 
 	return extension
 end
+
 ScriptUnit.extensions = function (unit)
 	return Entities[unit]
 end
+
 ScriptUnit.has_extension = local_extension
+
 ScriptUnit.has_extension_input = function (unit, extension_name)
 	local unit_extensions = Entities[unit]
 
 	return unit_extensions and unit_extensions[extension_name] and unit_extensions[extension_name].input
 end
+
 ScriptUnit.check_all_units_deleted = function ()
 	if next(Entities) then
 		print("------------ UNITS THAT HAVENT BEEN DELETED --------------")
@@ -99,41 +96,39 @@ ScriptUnit.check_all_units_deleted = function ()
 
 		assert(false, "Some units have not been cleaned up properly!")
 	end
-
-	return 
 end
+
 ScriptUnit.set_extension = function (unit, system_name, extension)
 	set_extension_script(unit, system_name, extension)
-
-	return 
 end
+
 ScriptUnit.add_extension = function (extension_init_context, unit, extension_name, extension_alias, extension_init_data, extension_pool_table)
 	local extension_class = rawget(_G, extension_name)
 
 	assert(extension_class, "No class found for extension with name %q", extension_name)
 
 	local extension = nil
-	extension = extension_class.new(extension_class, extension_init_context, unit, extension_init_data)
+	extension = extension_class:new(extension_init_context, unit, extension_init_data)
 
 	assert(not ScriptUnit.has_extension(unit, extension_alias), "An extension already exists with name %q belonging to unit %s", extension_alias, unit)
 	set_extension_script(unit, extension_alias, extension)
 
 	return extension
 end
+
 ScriptUnit.destroy_extension = function (unit, system_name)
 	local extension = ScriptUnit.extension(unit, system_name)
 
 	assert(extension.destroy, "[ScriptUnit] Extension for system %s for unit %s missing a destroy function.", system_name, unit)
-	extension.destroy(extension)
-
-	return 
+	extension:destroy()
 end
+
 ScriptUnit.remove_extension = function (unit, system_name)
 	local_remove_extension(unit, system_name)
-
-	return 
 end
+
 ScriptUnit.remove_unit = remove_unit
+
 ScriptUnit.extension_definitions = function (unit)
 	local extensions = {}
 	local i = 0
@@ -146,6 +141,7 @@ ScriptUnit.extension_definitions = function (unit)
 
 	return extensions
 end
+
 ScriptUnit.save_scene_graph = function (unit)
 	local link_table = {}
 
@@ -160,6 +156,7 @@ ScriptUnit.save_scene_graph = function (unit)
 
 	return link_table
 end
+
 ScriptUnit.restore_scene_graph = function (unit, link_table)
 	for i, link in ipairs(link_table) do
 		if link.parent then
@@ -167,8 +164,6 @@ ScriptUnit.restore_scene_graph = function (unit, link_table)
 			Unit.set_local_pose(unit, i, link.local_pose:unbox())
 		end
 	end
-
-	return 
 end
 
-return 
+return

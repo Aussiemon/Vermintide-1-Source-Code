@@ -105,4 +105,4 @@ QuestContractTexts = {
 	}
 }
 
-return 
+return

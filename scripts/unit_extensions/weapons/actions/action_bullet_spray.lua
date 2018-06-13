@@ -9,6 +9,7 @@ local NODES = {
 	"j_rightshoulder",
 	"j_spine"
 }
+
 ActionBulletSpray.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.owner_unit = owner_unit
 	self.owner_unit_first_person = first_person_unit
@@ -26,9 +27,8 @@ ActionBulletSpray.init = function (self, world, item_name, is_server, owner_unit
 	if ScriptUnit.has_extension(weapon_unit, "overcharge_system") then
 		self.overcharge_extension = ScriptUnit.extension(weapon_unit, "overcharge_system")
 	end
-
-	return 
 end
+
 ActionBulletSpray.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self._target_index = 1
@@ -43,9 +43,8 @@ ActionBulletSpray.client_owner_start_action = function (self, new_action, t)
 	self.CONE_COS_ALPHA = SPRAY_RANGE / cone_hypotenuse
 
 	self.overcharge_extension:add_charge(new_action.overcharge_type)
-
-	return 
 end
+
 ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_damage)
 	local current_action = self.current_action
 	local owner_unit_1p = self.owner_unit_first_person
@@ -56,7 +55,7 @@ ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_d
 	local target_index = self._target_index
 
 	if #targets == 0 and not self.shot then
-		self._select_targets(self, world, true)
+		self:_select_targets(world, true)
 
 		if not Managers.player:owner(self.owner_unit).bot_player then
 			Managers.state.controller_features:add_effect("rumble", {
@@ -70,7 +69,7 @@ ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_d
 			local play_on_husk = self.current_action.fire_sound_on_husk
 			local first_person_extension = ScriptUnit.extension(self.owner_unit, "first_person_system")
 
-			first_person_extension.play_hud_sound_event(first_person_extension, fire_sound_event, nil, play_on_husk)
+			first_person_extension:play_hud_sound_event(fire_sound_event, nil, play_on_husk)
 		end
 	end
 
@@ -79,7 +78,7 @@ ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_d
 		local ammo_extension = self.ammo_extension
 
 		if ammo_extension then
-			ammo_extension.use_ammo(ammo_extension, self.current_action.ammo_usage)
+			ammo_extension:use_ammo(self.current_action.ammo_usage)
 		end
 	end
 
@@ -104,7 +103,7 @@ ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_d
 
 		local target_position = Unit.world_position(current_target, Unit.node(current_target, node))
 		local direction = Vector3.normalize(target_position - player_position)
-		local result = self.raycast_to_target(self, world, player_position, direction, current_target)
+		local result = self:raycast_to_target(world, player_position, direction, current_target)
 		local target = nil
 
 		if current_action.area_damage then
@@ -117,30 +116,28 @@ ActionBulletSpray.client_owner_post_update = function (self, dt, t, world, can_d
 	end
 
 	self._target_index = target_index + 1
-
-	return 
 end
+
 ActionBulletSpray.finish = function (self, reason)
-	self._clear_targets(self)
+	self:_clear_targets()
 
 	local ammo_extension = self.ammo_extension
 
-	if ammo_extension and self.current_action.reload_when_out_of_ammo and ammo_extension.ammo_count(ammo_extension) == 0 and ammo_extension.can_reload(ammo_extension) then
+	if ammo_extension and self.current_action.reload_when_out_of_ammo and ammo_extension:ammo_count() == 0 and ammo_extension:can_reload() then
 		local play_reload_animation = true
 
-		ammo_extension.start_reload(ammo_extension, play_reload_animation)
+		ammo_extension:start_reload(play_reload_animation)
 	end
-
-	return 
 end
+
 ActionBulletSpray._clear_targets = function (self)
 	table.clear(self.targets)
-
-	return 
 end
+
 local actor_unit = Actor.unit
 local unit_local_position = Unit.local_position
 local vector3_distance = Vector3.distance
+
 ActionBulletSpray._select_targets = function (self, world, show_outline)
 	Profiler.start("bullet select targets")
 
@@ -157,7 +154,7 @@ ActionBulletSpray._select_targets = function (self, world, show_outline)
 		local eyetracking_extension = ScriptUnit.extension(self.owner_unit, "eyetracking_system")
 
 		if Application.user_setting(current_action.fire_at_gaze_setting) then
-			player_direction = eyetracking_extension.gaze_forward(eyetracking_extension)
+			player_direction = eyetracking_extension:gaze_forward()
 		end
 	end
 
@@ -198,11 +195,11 @@ ActionBulletSpray._select_targets = function (self, world, show_outline)
 				local breed = Unit.get_data(hit_unit, "breed")
 
 				if table.contains(PLAYER_AND_BOT_UNITS, hit_unit) and not ignore_hitting_allies then
-					if self._is_infront_player(self, player_position, player_direction, hit_position) and self._check_within_cone(self, player_position, player_direction, hit_unit, true) then
+					if self:_is_infront_player(player_position, player_direction, hit_position) and self:_check_within_cone(player_position, player_direction, hit_unit, true) then
 						targets[#targets + 1] = hit_unit
 						hit_units[hit_unit] = true
 					end
-				elseif breed and self._is_infront_player(self, player_position, player_direction, hit_position) and self._check_within_cone(self, player_position, player_direction, hit_unit) then
+				elseif breed and self:_is_infront_player(player_position, player_direction, hit_position) and self:_check_within_cone(player_position, player_direction, hit_unit) then
 					targets[#targets + 1] = hit_unit
 					hit_units[hit_unit] = true
 
@@ -223,9 +220,8 @@ ActionBulletSpray._select_targets = function (self, world, show_outline)
 	self.shot = true
 
 	Profiler.stop("bullet select targets")
-
-	return 
 end
+
 ActionBulletSpray._check_within_cone = function (self, player_position, player_direction, target, player)
 	local CONE_COS_ALPHA = self.CONE_COS_ALPHA
 
@@ -244,16 +240,16 @@ ActionBulletSpray._check_within_cone = function (self, player_position, player_d
 
 	return false
 end
+
 ActionBulletSpray._is_infront_player = function (self, player_position, player_direction, hit_position)
 	local player_to_hit_unit_dir = Vector3.normalize(hit_position - player_position)
 	local dot = Vector3.dot(player_to_hit_unit_dir, player_direction)
 
-	if 0 < dot then
+	if dot > 0 then
 		return true
 	end
-
-	return 
 end
+
 ActionBulletSpray.raycast_to_target = function (self, world, from_position, direction, target)
 	local physics_world = World.get_data(world, "physics_world")
 	local collision_filter = "filter_player_ray_projectile"
@@ -262,4 +258,4 @@ ActionBulletSpray.raycast_to_target = function (self, world, from_position, dire
 	return result
 end
 
-return 
+return

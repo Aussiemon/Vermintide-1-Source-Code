@@ -10,18 +10,19 @@ local extensions = {
 	"SoundSectorExtension"
 }
 SoundSectorSystem = class(SoundSectorSystem, ExtensionSystemBase)
+
 SoundSectorSystem.init = function (self, context, system_name)
 	self.unit_storage = context.unit_storage
 	local entity_manager = context.entity_manager
 
-	entity_manager.register_system(entity_manager, self, system_name, extensions)
+	entity_manager:register_system(self, system_name, extensions)
 
 	self.world = context.world
 	self.wwise_world = Managers.world:wwise_world(self.world)
 	local network_event_delegate = context.network_event_delegate
 	self.network_event_delegate = network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self.unit_input_data = {}
 	self.unit_extension_data = {}
@@ -39,14 +40,12 @@ SoundSectorSystem.init = function (self, context, system_name)
 
 	self.debug_gui_screen = World.create_screen_gui(self.world, "material", "materials/fonts/gw_fonts", "immediate")
 	script_data.sound_sector_system_debug = script_data.sound_sector_system_debug or Development.parameter("sound_sector_system_debug")
-
-	return 
 end
+
 SoundSectorSystem.destroy = function (self)
 	self.network_event_delegate:unregister(self)
-
-	return 
 end
+
 SoundSectorSystem.on_add_extension = function (self, world, unit, extension_name)
 	local extension = {}
 	local input = {}
@@ -59,7 +58,7 @@ SoundSectorSystem.on_add_extension = function (self, world, unit, extension_name
 	if extension_name == "SoundSectorExtension" then
 		self.entities[unit] = extension
 		local camera_position = Unit.local_position(self.camera_unit, 0)
-		local _, sector_index = self.calc_unit_sector(self, camera_position, unit)
+		local _, sector_index = self:calc_unit_sector(camera_position, unit)
 
 		if sector_index then
 			self._sectors[sector_index][unit] = unit
@@ -70,6 +69,7 @@ SoundSectorSystem.on_add_extension = function (self, world, unit, extension_name
 
 	return extension
 end
+
 SoundSectorSystem.extensions_ready = function (self, world, unit, extension_name)
 	if extension_name == "SoundSectorExtension" then
 		local extension = self.unit_extension_data[unit]
@@ -80,20 +80,18 @@ SoundSectorSystem.extensions_ready = function (self, world, unit, extension_name
 			self._sectors[sector_index][unit] = death_extension
 		end
 	end
-
-	return 
 end
+
 SoundSectorSystem.on_remove_extension = function (self, unit, extension_name)
-	self.on_freeze_extension(self, unit, extension_name)
+	self:on_freeze_extension(unit, extension_name)
 	ScriptUnit.remove_extension(unit, self.NAME)
-
-	return 
 end
+
 SoundSectorSystem.on_freeze_extension = function (self, unit, extension_name)
 	local extension = self.entities[unit]
 
 	if extension == nil then
-		return 
+		return
 	end
 
 	local unit_sector_index = extension.sector_index
@@ -105,16 +103,16 @@ SoundSectorSystem.on_freeze_extension = function (self, unit, extension_name)
 	self.entities[unit] = nil
 	self.unit_input_data[unit] = nil
 	self.unit_extension_data[unit] = nil
-
-	return 
 end
+
 local MIN_NUM_OF_UNITS = 7
+
 SoundSectorSystem.update = function (self, context, t, dt)
 	local world = self.world
 	local camera_position = Unit.local_position(self.camera_unit, 0)
 	local sector_sound_source_ids = self._sector_sound_source_ids
 
-	self.update_sectors(self, camera_position)
+	self:update_sectors(camera_position)
 
 	local entities = self.entities
 	local sector_sound_source_units = self._sector_sound_source_units
@@ -132,14 +130,15 @@ SoundSectorSystem.update = function (self, context, t, dt)
 		local num_of_units_in_sector = 0
 
 		for unit, death_extension in pairs(sector) do
-			if not death_extension.has_death_started(death_extension) then
-				if not entities[unit].has_target then
-				else
-					local position = POSITION_LOOKUP[unit]
-					units_center = units_center + position
-					num_of_units_in_sector = num_of_units_in_sector + 1
+			repeat
+				if death_extension:has_death_started() or not entities[unit].has_target then
+					break
 				end
-			end
+
+				local position = POSITION_LOOKUP[unit]
+				units_center = units_center + position
+				num_of_units_in_sector = num_of_units_in_sector + 1
+			until true
 		end
 
 		local has_enough_units = MIN_NUM_OF_UNITS <= num_of_units_in_sector
@@ -155,26 +154,25 @@ SoundSectorSystem.update = function (self, context, t, dt)
 			WwiseWorld_set_source_parameter(wwise_world, wwise_source_id, "enemy_count", num_of_units_in_sector)
 
 			if not is_playing_sound then
-				self.play_sector_sound_event(self, sector_index, num_of_units_in_sector, units_center)
+				self:play_sector_sound_event(sector_index, num_of_units_in_sector, units_center)
 			end
 		elseif is_playing_sound then
-			self.stop_sector_sound_event(self, sector_index)
+			self:stop_sector_sound_event(sector_index)
 		end
 
 		if script_data.sound_sector_system_debug and has_enough_units then
-			self.debug_draw(self, units_center, sector_index, camera_position)
+			self:debug_draw(units_center, sector_index, camera_position)
 		end
 	end
 
 	if script_data.sound_sector_system_debug then
-		self.debug_draw_hud(self, camera_position)
+		self:debug_draw_hud(camera_position)
 	end
-
-	return 
 end
+
 SoundSectorSystem.update_sectors = function (self, camera_position)
 	for unit, extension in pairs(self.entities) do
-		local _, sector_index = self.calc_unit_sector(self, camera_position, unit)
+		local _, sector_index = self:calc_unit_sector(camera_position, unit)
 		local unit_sector_index = extension.sector_index
 
 		if unit_sector_index ~= sector_index then
@@ -190,9 +188,8 @@ SoundSectorSystem.update_sectors = function (self, camera_position)
 			extension.sector_index = sector_index
 		end
 	end
-
-	return 
 end
+
 SoundSectorSystem.play_sector_sound_event = function (self, sector_index, num_of_units_in_sector, units_center)
 	local level_settings = LevelHelper:current_level_settings()
 	local terrain = level_settings.terrain or "city"
@@ -206,9 +203,8 @@ SoundSectorSystem.play_sector_sound_event = function (self, sector_index, num_of
 	Managers.state.entity:system("sound_environment_system"):register_source_environment_update(wwise_source_id, sound_source_unit)
 
 	self._sector_sound_source_ids[sector_index] = wwise_source_id
-
-	return 
 end
+
 SoundSectorSystem.stop_sector_sound_event = function (self, sector_index)
 	local wwise_source_id = self._sector_sound_source_ids[sector_index]
 
@@ -216,11 +212,11 @@ SoundSectorSystem.stop_sector_sound_event = function (self, sector_index)
 	WwiseWorld.trigger_event(self.wwise_world, "stop_distant_horde", wwise_source_id)
 
 	self._sector_sound_source_ids[sector_index] = nil
-
-	return 
 end
+
 local MIN_DISTANCE_THRESHOLD = 5
 local MAX_DISTANCE_THRESHOLD = 50
+
 SoundSectorSystem.calc_unit_sector = function (self, camera_position, unit)
 	local unit_position = POSITION_LOOKUP[unit]
 	local distance = Vector3.distance(camera_position, unit_position)
@@ -237,19 +233,20 @@ SoundSectorSystem.calc_unit_sector = function (self, camera_position, unit)
 
 	return angle, sector_index
 end
+
 SoundSectorSystem.hot_join_sync = function (self, sender)
-	return 
+	return
 end
+
 SoundSectorSystem.local_player_created = function (self, player)
 	self.camera_unit = player.camera_follow_unit
-
-	return 
 end
+
 SoundSectorSystem.rpc_enemy_has_target = function (self, sender, unit_id, has_target)
 	local unit = self.unit_storage:unit(unit_id)
 
 	if unit == nil then
-		return 
+		return
 	end
 
 	local sound_sector_extension = ScriptUnit.has_extension(unit, "sound_sector_system")
@@ -257,9 +254,8 @@ SoundSectorSystem.rpc_enemy_has_target = function (self, sender, unit_id, has_ta
 	if sound_sector_extension then
 		sound_sector_extension.has_target = has_target
 	end
-
-	return 
 end
+
 SoundSectorSystem.debug_draw_hud = function (self, camera_position)
 	local debug_center = Vector3(200, 200, 2)
 	local camera_rotation = Unit.local_rotation(self.camera_unit, 0)
@@ -272,12 +268,11 @@ SoundSectorSystem.debug_draw_hud = function (self, camera_position)
 	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3(-150, 0, 0), 3, 2, Color(255, 0, 100, 0))
 	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3(0, 150, 0), 3, 2, Color(255, 0, 100, 0))
 	ScriptGUI.hud_line(self.debug_gui_screen, debug_center, debug_center + Vector3(-0, -150, 0), 3, 2, Color(255, 0, 100, 0))
-
-	return 
 end
+
 SoundSectorSystem.debug_draw = function (self, sector_center, sector_index, camera_position)
 	if sector_center == false then
-		return 
+		return
 	end
 
 	local debug_center = Vector3(200, 200, 2)
@@ -296,8 +291,6 @@ SoundSectorSystem.debug_draw = function (self, sector_center, sector_index, came
 
 		Gui.text(self.debug_gui_screen, tostring(sector_index), font_mtrl, font_size, font, debug_pos, Color(255, 255, 0, 0))
 	end
-
-	return 
 end
 
-return 
+return

@@ -1354,7 +1354,7 @@ local widgets = {
 						style_id = "texture_id",
 						texture_id = "texture_id",
 						content_check_function = function (content, style)
-							return content.texture_id and 0 < style.gradient_threshold
+							return content.texture_id and style.gradient_threshold > 0
 						end
 					}
 				}
@@ -1454,7 +1454,7 @@ local widgets = {
 						style_id = "texture_id",
 						texture_id = "texture_id",
 						content_check_function = function (content, style)
-							return content.texture_id and 0 < style.gradient_threshold
+							return content.texture_id and style.gradient_threshold > 0
 						end
 					}
 				}
@@ -1554,7 +1554,7 @@ local widgets = {
 						style_id = "texture_id",
 						texture_id = "texture_id",
 						content_check_function = function (content, style)
-							return content.texture_id and 0 < style.gradient_threshold
+							return content.texture_id and style.gradient_threshold > 0
 						end
 					}
 				}

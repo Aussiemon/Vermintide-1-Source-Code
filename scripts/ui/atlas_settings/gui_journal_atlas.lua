@@ -1415,4 +1415,4 @@ journal_atlas = {
 	}
 }
 
-return 
+return

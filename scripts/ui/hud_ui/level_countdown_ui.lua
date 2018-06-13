@@ -1,5 +1,6 @@
 local definitions = local_require("scripts/ui/hud_ui/level_countdown_ui_definitions")
 LevelCountdownUI = class(LevelCountdownUI)
+
 LevelCountdownUI.init = function (self, ingame_ui_context)
 	self.level_transition_handler = ingame_ui_context.level_transition_handler
 	self.network_event_delegate = ingame_ui_context.network_event_delegate
@@ -14,30 +15,28 @@ LevelCountdownUI.init = function (self, ingame_ui_context)
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	self.network_event_delegate:register(self, "rpc_start_game_countdown", "rpc_stop_enter_game_countdown")
 
 	self.colors = {
 		white = Colors.get_table("white"),
 		cheeseburger = Colors.get_table("cheeseburger")
 	}
-
-	return 
 end
+
 LevelCountdownUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.countdown_widget = UIWidget.init(definitions.widgets.fullscreen_countdown)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 LevelCountdownUI.update = function (self, dt)
 	local enter_game = self.enter_game
 	local ui_suspended = self.ingame_ui.menu_suspended
 
 	if ui_suspended and not enter_game then
-		return 
+		return
 	end
 
 	if enter_game then
@@ -45,15 +44,15 @@ LevelCountdownUI.update = function (self, dt)
 			self.enter_game_started = nil
 		end
 
-		self.update_enter_game_counter(self, dt)
-		self.draw(self, dt)
+		self:update_enter_game_counter(dt)
+		self:draw(dt)
 	end
-
-	return 
 end
+
 LevelCountdownUI.is_enter_game = function (self)
 	return self.enter_game
 end
+
 LevelCountdownUI.draw = function (self, dt)
 	self.anim_t = math.max(self.anim_t + dt)
 	local bg_color = self.countdown_widget.style.background_rect.color
@@ -70,21 +69,18 @@ LevelCountdownUI.draw = function (self, dt)
 
 	UIRenderer.draw_texture(ui_renderer, "gradient_dice_game_reward", Vector3(0, 0, UILayer.controller_description), Vector2(w * inverse_scale, h * inverse_scale))
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 LevelCountdownUI.rpc_start_game_countdown = function (self, sender)
 	self.ingame_ui:handle_transition("close_active")
-	self.start_enter_game_counter(self)
-
-	return 
+	self:start_enter_game_counter()
 end
+
 LevelCountdownUI.rpc_stop_enter_game_countdown = function (self, sender)
 	self.ingame_ui:unsuspend_active_view()
-	self.stop_enter_game_countdown(self)
-
-	return 
+	self:stop_enter_game_countdown()
 end
+
 LevelCountdownUI.start_enter_game_counter = function (self)
 	self.enter_game_started = true
 	self.enter_game = true
@@ -97,13 +93,12 @@ LevelCountdownUI.start_enter_game_counter = function (self)
 	widget_content.timer_text = self.total_start_game_time
 	local input_manager = self.input_manager
 
-	input_manager.block_device_except_service(input_manager, "popup", "keyboard", 1)
-	input_manager.block_device_except_service(input_manager, "popup", "mouse", 1)
-	input_manager.block_device_except_service(input_manager, "popup", "gamepad", 1)
-	self.play_sound(self, "Play_hud_matchmaking_countdown_enter")
-
-	return 
+	input_manager:block_device_except_service("popup", "keyboard", 1)
+	input_manager:block_device_except_service("popup", "mouse", 1)
+	input_manager:block_device_except_service("popup", "gamepad", 1)
+	self:play_sound("Play_hud_matchmaking_countdown_enter")
 end
+
 LevelCountdownUI.stop_enter_game_countdown = function (self)
 	self.enter_game = nil
 	self.enter_game_timer = nil
@@ -111,18 +106,17 @@ LevelCountdownUI.stop_enter_game_countdown = function (self)
 	local input_manager = self.input_manager
 
 	if not Managers.chat:chat_is_focused() then
-		input_manager.device_unblock_all_services(input_manager, "keyboard", 1)
-		input_manager.device_unblock_all_services(input_manager, "mouse", 1)
-		input_manager.device_unblock_all_services(input_manager, "gamepad", 1)
+		input_manager:device_unblock_all_services("keyboard", 1)
+		input_manager:device_unblock_all_services("mouse", 1)
+		input_manager:device_unblock_all_services("gamepad", 1)
 	end
-
-	return 
 end
+
 LevelCountdownUI.update_enter_game_counter = function (self, dt)
 	local time = self.enter_game_timer
 
 	if not time then
-		return 
+		return
 	end
 
 	local total_time = self.total_start_game_time
@@ -132,17 +126,17 @@ LevelCountdownUI.update_enter_game_counter = function (self, dt)
 	local colors = self.colors
 	time = time + dt
 
-	if time <= total_time then
+	if total_time >= time then
 		local new_timer_value = math.round(total_time - time)
 
 		if new_timer_value ~= self.last_timer_value then
 			if new_timer_value ~= 0 then
-				self.play_sound(self, "Play_hud_matchmaking_countdown")
+				self:play_sound("Play_hud_matchmaking_countdown")
 
 				widget_content.timer_text = new_timer_value
 				self.color_timer = 0
 			else
-				self.play_sound(self, "Play_hud_matchmaking_countdown_final")
+				self:play_sound("Play_hud_matchmaking_countdown_final")
 
 				widget_content.info_text = ""
 				widget_content.timer_text = Localize("game_starts_prepare")
@@ -172,19 +166,15 @@ LevelCountdownUI.update_enter_game_counter = function (self, dt)
 	end
 
 	self.enter_game_timer = time
-
-	return 
 end
+
 LevelCountdownUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 LevelCountdownUI.destroy = function (self)
 	self.network_event_delegate:unregister(self)
-	self.stop_enter_game_countdown(self)
-
-	return 
+	self:stop_enter_game_countdown()
 end
 
-return 
+return

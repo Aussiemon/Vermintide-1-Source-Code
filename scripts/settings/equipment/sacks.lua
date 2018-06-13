@@ -74,7 +74,7 @@ weapon_template.actions = {
 			condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -109,4 +109,4 @@ Weapons.sack.actions.action_one.default.projectile_info.projectile_unit_name = "
 Weapons.sack.left_hand_unit = "units/weapons/player/wpn_sacks/wpn_sacks_01"
 Weapons.sack.wield_anim = "to_sack"
 
-return 
+return

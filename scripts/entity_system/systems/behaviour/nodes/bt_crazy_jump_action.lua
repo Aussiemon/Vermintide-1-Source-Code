@@ -3,19 +3,17 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 BTCrazyJumpAction = class(BTCrazyJumpAction, BTNode)
 local position_lookup = POSITION_LOOKUP
 local PLAYER_AND_BOT_UNITS = PLAYER_AND_BOT_UNITS
+
 BTCrazyJumpAction.init = function (self, ...)
 	BTCrazyJumpAction.super.init(self, ...)
-
-	return 
 end
+
 BTCrazyJumpAction.name = "BTCrazyJumpAction"
 
 local function debug3d(unit, text, color_name)
 	if script_data.debug_ai_movement then
 		Debug.world_sticky_text(position_lookup[unit], text, color_name)
 	end
-
-	return 
 end
 
 BTCrazyJumpAction.enter = function (self, unit, blackboard, t)
@@ -30,7 +28,7 @@ BTCrazyJumpAction.enter = function (self, unit, blackboard, t)
 		data.start_jump = t + 0.3
 		data.delay_jump_start = nil
 	else
-		network_manager.anim_event(network_manager, unit, "jump_start")
+		network_manager:anim_event(unit, "jump_start")
 
 		data.state = "push_off"
 		data.start_jump = t + 0.3
@@ -38,30 +36,29 @@ BTCrazyJumpAction.enter = function (self, unit, blackboard, t)
 	end
 
 	data.target_unit = blackboard.target_unit
-	data.overlap_context = ai_extension.get_overlap_context(ai_extension)
+	data.overlap_context = ai_extension:get_overlap_context()
 	data.anim_jump_rot_var = Unit.animation_find_variable(unit, "jump_rotation")
 
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_gravity(locomotion_extension, blackboard.breed.jump_gravity)
-	locomotion_extension.set_check_falling(locomotion_extension, false)
-
-	return 
+	locomotion_extension:set_gravity(blackboard.breed.jump_gravity)
+	locomotion_extension:set_check_falling(false)
 end
+
 BTCrazyJumpAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.skulk_pos = nil
 	blackboard.comitted_to_target = false
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_mover_displacement(locomotion_extension)
+	locomotion_extension:set_mover_displacement()
 
 	if reason == "aborted" then
 		aiprint(" ----> CRAZY JUMP WAS ABORTED BY OTHER ACTION ")
 
 		if blackboard.jump_data.updating_jump_rot then
-			self.update_anim_variable_done(self, unit, blackboard.jump_data)
+			self:update_anim_variable_done(unit, blackboard.jump_data)
 		end
 
 		blackboard.jump_data = nil
@@ -72,7 +69,7 @@ BTCrazyJumpAction.leave = function (self, unit, blackboard, t, reason)
 
 		blackboard.high_ground_opportunity = nil
 
-		locomotion_extension.set_movement_type(locomotion_extension, "snap_to_navmesh")
+		locomotion_extension:set_movement_type("snap_to_navmesh")
 	end
 
 	if reason == "failed" then
@@ -82,19 +79,19 @@ BTCrazyJumpAction.leave = function (self, unit, blackboard, t, reason)
 
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_enabled(navigation_extension, true)
-	locomotion_extension.set_check_falling(locomotion_extension, true)
-
-	return 
+	navigation_extension:set_enabled(true)
+	locomotion_extension:set_check_falling(true)
 end
+
 local enter_snap_state_distance = 2.7
+
 BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 	local locomotion = blackboard.locomotion_extension
 	local data = blackboard.jump_data
 	local target_unit = data.target_unit
 
 	if script_data.debug_ai_movement then
-		self.debug(self, unit, blackboard, data, t)
+		self:debug(unit, blackboard, data, t)
 	end
 
 	if not AiUtils.is_of_interest_to_gutter_runner(unit, target_unit, blackboard) then
@@ -111,16 +108,16 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 	if data.state == "align_for_push_off" then
 		local rot = LocomotionUtils.rotation_towards_unit(unit, target_unit)
 
-		locomotion.set_wanted_rotation(locomotion, rot)
+		locomotion:set_wanted_rotation(rot)
 	else
-		locomotion.set_wanted_rotation(locomotion, nil)
+		locomotion:set_wanted_rotation(nil)
 	end
 
 	if data.start_jump < t then
 		if data.state == "align_for_push_off" then
 			local network_manager = Managers.state.network
 
-			network_manager.anim_event(network_manager, unit, "jump_start")
+			network_manager:anim_event(unit, "jump_start")
 
 			data.state = "push_off"
 			data.start_jump = t + 0.3
@@ -134,7 +131,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 				blackboard.last_jump = t
 
 				BTCrazyJumpAction:setup_jump(unit, blackboard, data)
-				locomotion.set_mover_displacement(locomotion, Vector3(0, 0, 0.5), 0.5)
+				locomotion:set_mover_displacement(Vector3(0, 0, 0.5), 0.5)
 				debug3d(unit, "JumpAction push_off ok", "green")
 			else
 				debug3d(unit, "JumpAction push_off no angle", "red")
@@ -160,12 +157,12 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 				if status_extension.pounced_down then
 					data.state = "pounce_down_fail"
 
-					self.update_anim_variable_done(self, unit, data)
+					self:update_anim_variable_done(unit, data)
 
 					data.fail_time = t + 1
 					local network_manager = Managers.state.network
 
-					network_manager.anim_event(network_manager, unit, "jump_fail")
+					network_manager:anim_event(unit, "jump_fail")
 					LocomotionUtils.set_animation_driven_movement(unit, true, false, false)
 					aiprint("fail already snapped!")
 					debug3d(unit, "JumpAction ai_air->pounce_down_fail pounced_down already", "red")
@@ -175,12 +172,12 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 
 				data.state = "snapping"
 
-				self.update_anim_variable_done(self, unit, data)
+				self:update_anim_variable_done(unit, data)
 
 				return "running"
 			end
 
-			local hit_player = self.check_colliding_players(self, unit, blackboard, pos)
+			local hit_player = self:check_colliding_players(unit, blackboard, pos)
 
 			if hit_player then
 				debug3d(unit, "JumpAction in_air accidental!", "green")
@@ -194,9 +191,9 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 				if Mover.collides_sides(mover) then
 					data.state = "hit_obstacle"
 
-					self.update_anim_variable_done(self, unit, data)
+					self:update_anim_variable_done(unit, data)
 					debug3d(unit, "JumpAction in_air->hit_obstacle collides_sides", "red")
-				elseif Mover.collides_down(mover) and 0.1 < t - blackboard.last_jump then
+				elseif Mover.collides_down(mover) and t - blackboard.last_jump > 0.1 then
 					debug3d(unit, "JumpAction in_air failed collides_down", "red")
 
 					blackboard.skulk_pos = nil
@@ -208,7 +205,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 		elseif data.state == "in_air_no_target" then
 			local callback_context = data.overlap_context
 			local pos = Unit.world_position(unit, callback_context.spine_node)
-			local hit_player = self.check_colliding_players(self, unit, blackboard, pos)
+			local hit_player = self:check_colliding_players(unit, blackboard, pos)
 
 			if hit_player then
 				debug3d(unit, "JumpAction in_air_no_target accidental!", "green")
@@ -221,9 +218,9 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 			if Mover.collides_sides(mover) then
 				data.state = "hit_obstacle"
 
-				self.update_anim_variable_done(self, unit, data)
+				self:update_anim_variable_done(unit, data)
 				debug3d(unit, "JumpAction in_air_no_target->hit_obstacle collides_sides", "red")
-			elseif Mover.collides_down(mover) and 0.1 < t - blackboard.last_jump then
+			elseif Mover.collides_down(mover) and t - blackboard.last_jump > 0.1 then
 				debug3d(unit, "JumpAction in_air_no_target failed collides_down", "red")
 
 				blackboard.skulk_pos = nil
@@ -262,7 +259,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 				QuickDrawer:sphere(pos, snap_distance)
 			end
 
-			local hit_player = self.check_colliding_players(self, unit, blackboard, pos)
+			local hit_player = self:check_colliding_players(unit, blackboard, pos)
 
 			if hit_player then
 				debug3d(unit, "JumpAction snapping accidental!", "green")
@@ -293,7 +290,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 
 				local mover = Unit.mover(unit)
 
-				if Mover.collides_down(mover) and 0.1 < t - blackboard.last_jump then
+				if Mover.collides_down(mover) and t - blackboard.last_jump > 0.1 then
 					debug3d(unit, "JumpAction snapping failed collides_down", "red")
 
 					blackboard.skulk_pos = nil
@@ -305,7 +302,7 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 
 			return "running"
 		elseif data.state == "landing" then
-			self.update_anim_variable_done(self, unit, data)
+			self:update_anim_variable_done(unit, data)
 
 			if data.land_time then
 				if data.land_time < t then
@@ -315,19 +312,19 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 				end
 			else
 				LocomotionUtils.set_animation_driven_movement(unit, false)
-				locomotion.set_wanted_velocity(locomotion, Vector3.zero())
-				locomotion.set_movement_type(locomotion, "snap_to_navmesh")
+				locomotion:set_wanted_velocity(Vector3.zero())
+				locomotion:set_movement_type("snap_to_navmesh")
 
 				local network_manager = Managers.state.network
 
-				network_manager.anim_event(network_manager, unit, "jump_land")
+				network_manager:anim_event(unit, "jump_land")
 
 				data.land_time = t + 0.5
 			end
 
 			return "running"
 		elseif data.state == "hit_obstacle" then
-			locomotion.set_wanted_velocity(locomotion, Vector3.zero())
+			locomotion:set_wanted_velocity(Vector3.zero())
 
 			blackboard.is_falling = true
 
@@ -337,19 +334,19 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 			local standing_frames = Mover.standing_frames(mover)
 			local network_manager = Managers.state.network
 
-			network_manager.anim_event(network_manager, unit, "to_upright")
-			network_manager.anim_event(network_manager, unit, "jump_down")
+			network_manager:anim_event(unit, "to_upright")
+			network_manager:anim_event(unit, "jump_down")
 
-			local wanted_velocity = locomotion.current_velocity(locomotion)
+			local wanted_velocity = locomotion:current_velocity()
 
-			locomotion.set_wanted_velocity(locomotion, wanted_velocity)
+			locomotion:set_wanted_velocity(wanted_velocity)
 
-			if 0 < standing_frames then
+			if standing_frames > 0 then
 				Debug.sticky_text("Gutter runner - in air hit obstacle, but have landed again")
 
 				return "failed"
 			else
-				network_manager.anim_event(network_manager, unit, "jump_down_land")
+				network_manager:anim_event(unit, "jump_down_land")
 
 				return "running"
 			end
@@ -374,13 +371,15 @@ BTCrazyJumpAction.run = function (self, unit, blackboard, t, dt)
 
 	return "running"
 end
+
 local use_overlap = true
+
 BTCrazyJumpAction.check_colliding_players = function (self, unit, blackboard, pos)
 	if use_overlap then
 		local radius = 1
 		local hit_actors, actor_count = PhysicsWorld.immediate_overlap(self.physics_world, "shape", "sphere", "position", pos, "size", radius, "types", "both", "collision_filter", "filter_player_and_husk_trigger", "use_global_table")
 
-		if 0 < actor_count then
+		if actor_count > 0 then
 			for i = 1, actor_count, 1 do
 				local hit_actor = hit_actors[i]
 				local hit_unit = Actor.unit(hit_actor)
@@ -410,24 +409,23 @@ BTCrazyJumpAction.check_colliding_players = function (self, unit, blackboard, po
 
 		return hit_unit
 	end
-
-	return 
 end
+
 BTCrazyJumpAction.setup_jump = function (self, unit, blackboard, data)
 	local jump_target_pos = data.jump_target_pos:unbox()
 	local jump_velocity = data.jump_velocity_boxed:unbox()
 	local navigation_extension = blackboard.navigation_extension
 
-	navigation_extension.set_enabled(navigation_extension, false)
+	navigation_extension:set_enabled(false)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
 
 	local breed = blackboard.breed
 	local override_mover_move_distance = breed.override_mover_move_distance
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_affected_by_gravity(locomotion_extension, true)
-	locomotion_extension.set_movement_type(locomotion_extension, "constrained_by_mover", override_mover_move_distance)
-	locomotion_extension.set_wanted_velocity(locomotion_extension, jump_velocity)
+	locomotion_extension:set_affected_by_gravity(true)
+	locomotion_extension:set_movement_type("constrained_by_mover", override_mover_move_distance)
+	locomotion_extension:set_wanted_velocity(jump_velocity)
 
 	data.overlap_context.spine_node = Unit.node(unit, "j_neck")
 	data.overlap_context.enemy_spine_node = data.enemy_spine_node
@@ -435,26 +433,25 @@ BTCrazyJumpAction.setup_jump = function (self, unit, blackboard, data)
 	self.physics_world = World.get_data(world, "physics_world")
 	local animation_system = Managers.state.entity:system("animation_system")
 
-	animation_system.start_anim_variable_update_by_distance(animation_system, unit, data.anim_jump_rot_var, jump_target_pos, 2, true)
+	animation_system:start_anim_variable_update_by_distance(unit, data.anim_jump_rot_var, jump_target_pos, 2, true)
 
 	data.updating_jump_rot = true
-
-	return 
 end
+
 BTCrazyJumpAction.update_anim_variable_done = function (self, unit, data)
 	local animation_system = Managers.state.entity:system("animation_system")
 
-	animation_system.set_update_anim_variable_done(animation_system, unit)
+	animation_system:set_update_anim_variable_done(unit)
 
 	data.updating_jump_rot = false
-
-	return 
 end
+
 local INDEX_POSITION = 1
 local INDEX_DISTANCE = 2
 local INDEX_NORMAL = 3
 local INDEX_ACTOR = 4
 local hit_units = {}
+
 BTCrazyJumpAction.ray_cast = function (from, to, blackboard, ignore_unit)
 	local direction = to - from
 	local normalized_direction = Vector3.normalize(direction)
@@ -486,6 +483,7 @@ BTCrazyJumpAction.ray_cast = function (from, to, blackboard, ignore_unit)
 
 	return nil
 end
+
 BTCrazyJumpAction.debug = function (self, unit, blackboard, data, t)
 	if data.state == "in_air" or data.state == "snapping" then
 		local callback_context = data.overlap_context
@@ -504,8 +502,6 @@ BTCrazyJumpAction.debug = function (self, unit, blackboard, data, t)
 			QuickDrawer:sphere(closest_point_on_velocity, 0.05, Color(255, 0, 200, 100))
 		end
 	end
-
-	return 
 end
 
-return 
+return

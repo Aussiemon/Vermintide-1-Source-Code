@@ -43,11 +43,11 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 					name = "AIGroupTemplates_retained"
 				})
 
-				drawer.sphere(drawer, goal_destination, 3, Colors.get("red"))
-				drawer.vector(drawer, random_group_member_pos, goal_destination - random_group_member_pos, Colors.get("red"))
+				drawer:sphere(goal_destination, 3, Colors.get("red"))
+				drawer:vector(random_group_member_pos, goal_destination - random_group_member_pos, Colors.get("red"))
 			end
 
-			return 
+			return
 		end
 
 		goal_destination.z = altitude
@@ -74,7 +74,7 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 					local breed = blackboard.breed
 					local navigation_extension = blackboard.navigation_extension
 
-					navigation_extension.set_max_speed(navigation_extension, breed.walk_speed)
+					navigation_extension:set_max_speed(breed.walk_speed)
 
 					if script_data.ai_group_debug then
 						local drawer = Managers.state.debug:drawer({
@@ -82,7 +82,7 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 							name = "AIGroupTemplates_retained"
 						})
 
-						drawer.sphere(drawer, goal_destination, 0.4, Colors.get("green"))
+						drawer:sphere(goal_destination, 0.4, Colors.get("green"))
 					end
 
 					break
@@ -102,7 +102,7 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 						name = "AIGroupTemplates_retained"
 					})
 
-					drawer.sphere(drawer, POSITION_LOOKUP[unit], 0.4, Colors.get("red"))
+					drawer:sphere(POSITION_LOOKUP[unit], 0.4, Colors.get("red"))
 				end
 			end
 		end
@@ -115,14 +115,12 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 				name = "AIGroupTemplates_retained"
 			})
 
-			drawer.sphere(drawer, goal_destination, 3, Colors.get("green"))
-			drawer.vector(drawer, random_group_member_pos, goal_destination - random_group_member_pos, Colors.get("green"))
+			drawer:sphere(goal_destination, 3, Colors.get("green"))
+			drawer:vector(random_group_member_pos, goal_destination - random_group_member_pos, Colors.get("green"))
 		end
-
-		return 
 	end,
 	destroy = function (world, nav_world, group)
-		return 
+		return
 	end,
 	update = function (world, nav_world, group, t)
 		if group.state == "moving_to_goal" then
@@ -142,7 +140,7 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 						local breed = blackboard.breed
 						local navigation_extension = blackboard.navigation_extension
 
-						navigation_extension.set_max_speed(navigation_extension, breed.run_speed)
+						navigation_extension:set_max_speed(breed.run_speed)
 					else
 						all_done = false
 					end
@@ -158,13 +156,11 @@ AIGroupTemplates.clan_rat_patrol_to_end_of_level = {
 						name = "AIGroupTemplates_retained"
 					})
 
-					drawer.reset(drawer)
-					drawer.sphere(drawer, group.destination:unbox(), 3, Colors.get("green"))
+					drawer:reset()
+					drawer:sphere(group.destination:unbox(), 3, Colors.get("green"))
 				end
 			end
 		end
-
-		return 
 	end
 }
 AIGroupTemplates.clan_rat_patrol_random = {
@@ -172,11 +168,9 @@ AIGroupTemplates.clan_rat_patrol_random = {
 		group.destination = Vector3Box(0, 0, 0)
 		group.state = "chilling"
 		group.choose_target_time = t + 1
-
-		return 
 	end,
 	destroy = function (world, nav_world, group)
-		return 
+		return
 	end,
 	update = function (world, nav_world, group, t)
 		local drawer = Managers.state.debug:drawer({
@@ -223,7 +217,7 @@ AIGroupTemplates.clan_rat_patrol_random = {
 			if player_count == 0 then
 				group.choose_target_time = t + 5
 
-				return 
+				return
 			end
 
 			player_center_pos = player_center_pos * 1 / player_count
@@ -232,10 +226,10 @@ AIGroupTemplates.clan_rat_patrol_random = {
 			local ai_to_player_direction = Vector3.normalize(player_center_pos - random_group_member_pos)
 			local search_origin = random_group_member_pos + ai_to_player_direction * 20
 
-			drawer.reset(drawer)
-			drawer.sphere(drawer, search_origin, 2)
-			drawer.vector(drawer, random_group_member_pos, ai_to_player_vector)
-			drawer.circle(drawer, search_origin, 30, Vector3.up())
+			drawer:reset()
+			drawer:sphere(search_origin, 2)
+			drawer:vector(random_group_member_pos, ai_to_player_vector)
+			drawer:circle(search_origin, 30, Vector3.up())
 
 			local rand_angle_offset = math.random(1, 100)
 
@@ -246,11 +240,11 @@ AIGroupTemplates.clan_rat_patrol_random = {
 				local goal_destination = search_origin + offset
 				local success, altitude = GwNavQueries.triangle_from_position(nav_world, goal_destination, 20, 20)
 
-				if success and 100 < Vector3.distance_squared(goal_destination, random_group_member_pos) then
+				if success and Vector3.distance_squared(goal_destination, random_group_member_pos) > 100 then
 					goal_destination.z = altitude
 
-					drawer.sphere(drawer, goal_destination, 2)
-					drawer.vector(drawer, random_group_member_pos, goal_destination - random_group_member_pos)
+					drawer:sphere(goal_destination, 2)
+					drawer:vector(random_group_member_pos, goal_destination - random_group_member_pos)
 					group.destination:store(goal_destination)
 
 					local members = group.members
@@ -271,13 +265,11 @@ AIGroupTemplates.clan_rat_patrol_random = {
 
 					group.state = "moving_to_goal"
 
-					return 
+					return
 				end
 			end
 		end
-
-		return 
 	end
 }
 
-return 
+return

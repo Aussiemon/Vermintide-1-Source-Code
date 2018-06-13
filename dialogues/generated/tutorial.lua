@@ -2813,6 +2813,4 @@ return function ()
 			}
 		}
 	})
-
-	return 
 end

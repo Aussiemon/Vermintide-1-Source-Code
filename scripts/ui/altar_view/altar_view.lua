@@ -41,12 +41,13 @@ local input_description_data = {
 AltarView = class(AltarView)
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
+
 AltarView.init = function (self, ingame_ui_context)
 	self.world = ingame_ui_context.world
 	self.player_manager = ingame_ui_context.player_manager
@@ -66,10 +67,10 @@ AltarView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "enchantment_view", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "enchantment_view", "keyboard")
-	input_manager.map_device_to_service(input_manager, "enchantment_view", "mouse")
-	input_manager.map_device_to_service(input_manager, "enchantment_view", "gamepad")
+	input_manager:create_input_service("enchantment_view", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("enchantment_view", "keyboard")
+	input_manager:map_device_to_service("enchantment_view", "mouse")
+	input_manager:map_device_to_service("enchantment_view", "gamepad")
 	rawset(_G, "my_global_pointer", self)
 
 	self.ui_animations = {}
@@ -80,23 +81,22 @@ AltarView.init = function (self, ingame_ui_context)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, number_of_actvie_descriptions, gui_layer, generic_input_actions)
 
 	self.menu_input_description:set_input_description(nil)
-	self.create_ui_pages(self, ingame_ui_context)
-	self.create_ui_elements(self)
+	self:create_ui_pages(ingame_ui_context)
+	self:create_ui_elements()
 
 	self.bar_animations = {}
 	self.ui_animator = UIAnimator:new(self.ui_scenegraph, forge_animation_definitions)
 
-	self.on_forge_selection_bar_index_changed(self, 1, true)
+	self:on_forge_selection_bar_index_changed(1, true)
 
 	self.ingame_ui_context = ingame_ui_context
-	self.confirmation_popup = self.create_confirmation_popup(self)
+	self.confirmation_popup = self:create_confirmation_popup()
 
-	self.fit_title(self)
+	self:fit_title()
 
 	DO_RELOAD = false
-
-	return 
 end
+
 AltarView.fit_title = function (self)
 	local style = self.widgets_by_name.title_widget.style.text
 	local text = Localize(self.widgets_by_name.title_widget.content.text)
@@ -115,9 +115,8 @@ AltarView.fit_title = function (self)
 			style.font_size = style.font_size - 1
 		end
 	until not continue
-
-	return 
 end
+
 AltarView.create_confirmation_popup = function (self)
 	local context = {
 		wwise_world = self.wwise_world,
@@ -129,31 +128,33 @@ AltarView.create_confirmation_popup = function (self)
 
 	return CraftConfirmationPopup:new(context, position)
 end
+
 AltarView.queue_popup = function (self, text, ...)
 	return self.confirmation_popup:queue_popup(text, ...)
 end
+
 AltarView.cancel_popup = function (self, popup_id)
 	self.confirmation_popup:cancel_popup(popup_id)
-
-	return 
 end
+
 AltarView.cancel_all_popups = function (self)
 	self.confirmation_popup:cancel_all_popups()
-
-	return 
 end
+
 AltarView.page_input_service = function (self)
 	return (self.input_blocked and fake_input_service) or self.input_manager:get_service("enchantment_view")
 end
+
 AltarView.input_service = function (self)
 	local confirmation_popup = self.confirmation_popup
 
-	if confirmation_popup.active_popup(confirmation_popup) then
-		return confirmation_popup.input_service(confirmation_popup)
+	if confirmation_popup:active_popup() then
+		return confirmation_popup:input_service()
 	end
 
 	return self.input_manager:get_service("enchantment_view")
 end
+
 AltarView.create_ui_pages = function (self, ingame_ui_context)
 	local items_ui_position = definitions.scenegraph_definition.items_ui_page.position
 	local scenegraph_definition = definitions.scenegraph_definition
@@ -168,7 +169,7 @@ AltarView.create_ui_pages = function (self, ingame_ui_context)
 	trait_proc_ui_page.active = false
 	craft_ui_page.active = false
 
-	compare_ui_page.set_title_text(compare_ui_page, "inventory_screen_compare_button")
+	compare_ui_page:set_title_text("inventory_screen_compare_button")
 
 	self.ui_pages = {
 		items = items_ui_page,
@@ -182,9 +183,8 @@ AltarView.create_ui_pages = function (self, ingame_ui_context)
 		trait_proc = trait_proc_ui_page,
 		craft = craft_ui_page
 	}
-
-	return 
 end
+
 AltarView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.widgets = {}
@@ -216,9 +216,8 @@ AltarView.create_ui_elements = function (self)
 	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 AltarView.on_enter = function (self)
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -228,23 +227,22 @@ AltarView.on_enter = function (self)
 
 	local input_manager = self.input_manager
 
-	input_manager.block_device_except_service(input_manager, "enchantment_view", "keyboard", 1)
-	input_manager.block_device_except_service(input_manager, "enchantment_view", "mouse", 1)
-	input_manager.block_device_except_service(input_manager, "enchantment_view", "gamepad", 1)
-	self.create_display_item_popup(self)
-	self.play_sound(self, "Play_hud_reroll_traits_open")
+	input_manager:block_device_except_service("enchantment_view", "keyboard", 1)
+	input_manager:block_device_except_service("enchantment_view", "mouse", 1)
+	input_manager:block_device_except_service("enchantment_view", "gamepad", 1)
+	self:create_display_item_popup()
+	self:play_sound("Play_hud_reroll_traits_open")
 
 	self.active = true
 
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_on")
-
-	return 
 end
+
 AltarView.post_update_on_enter = function (self)
 	local ui_pages = self.ui_pages
 
 	for ui_name, ui_page in pairs(ui_pages) do
-		ui_page.on_enter(ui_page)
+		ui_page:on_enter()
 	end
 
 	local my_profile = self.profile_synchronizer:profile_by_peer(self.peer_id, self.local_player_id)
@@ -255,14 +253,13 @@ AltarView.post_update_on_enter = function (self)
 	local selected_item = ui_pages.items:selected_item()
 	local item_backend_id = selected_item and selected_item.backend_id
 
-	self.compare_item_with_loadout_item(self, item_backend_id)
-	self.refresh_tokens(self)
-
-	return 
+	self:compare_item_with_loadout_item(item_backend_id)
+	self:refresh_tokens()
 end
+
 AltarView.on_exit = function (self)
 	self.ui_pages.items:clear_disabled_backend_ids()
-	self.close_item_display_popup(self)
+	self:close_item_display_popup()
 	self.confirmation_popup:cancel_all_popups()
 
 	local viewport_name = "player_1"
@@ -276,9 +273,8 @@ AltarView.on_exit = function (self)
 	self.active = nil
 
 	WwiseWorld.trigger_event(self.wwise_world, "hud_in_inventory_state_off")
-
-	return 
 end
+
 AltarView.exit = function (self, return_to_game)
 	if self.menu_locked then
 		if not self.popup_id then
@@ -286,29 +282,27 @@ AltarView.exit = function (self, return_to_game)
 			self.popup_id = Managers.popup:queue_popup(text, Localize("dlc1_1_trait_roll_error_topic"), "cancel_popup", Localize("popup_choice_ok"))
 		end
 
-		return 
+		return
 	end
 
 	local exit_transition = (return_to_game and "exit_menu") or "ingame_menu"
 
 	self.ingame_ui:transition_with_fade(exit_transition)
-	self.play_sound(self, "Play_hud_reroll_traits_window_minimize")
+	self:play_sound("Play_hud_reroll_traits_window_minimize")
 
 	self.exiting = true
 
 	self.ui_pages.items:on_focus_lost()
-
-	return 
 end
+
 AltarView.transitioning = function (self)
 	if self.exiting then
 		return true
 	else
 		return not self.active
 	end
-
-	return 
 end
+
 AltarView.suspend = function (self)
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -320,9 +314,8 @@ AltarView.suspend = function (self)
 	self.input_manager:device_unblock_all_services("gamepad", 1)
 
 	self.suspended = true
-
-	return 
 end
+
 AltarView.unsuspend = function (self)
 	local viewport_name = "player_1"
 	local world = Managers.world:world("level_world")
@@ -334,15 +327,15 @@ AltarView.unsuspend = function (self)
 	self.input_manager:block_device_except_service("enchantment_view", "gamepad", 1)
 
 	self.suspended = nil
+end
 
-	return 
-end
 AltarView.update = function (self, dt)
-	return 
+	return
 end
+
 AltarView.post_update = function (self, dt)
 	if DO_RELOAD then
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 
 		DO_RELOAD = false
 	end
@@ -360,7 +353,7 @@ AltarView.post_update = function (self, dt)
 	local can_display_item_popup = self.can_display_item_popup
 
 	if can_display_item_popup and self.craft_item_key then
-		self.display_item_popup(self, self.craft_item_key)
+		self:display_item_popup(self.craft_item_key)
 
 		self.craft_item_key = nil
 		self.can_display_item_popup = nil
@@ -372,21 +365,21 @@ AltarView.post_update = function (self, dt)
 		local item_display_popup = self.item_display_popup
 
 		if item_display_popup then
-			item_display_popup.on_exit(item_display_popup)
+			item_display_popup:on_exit()
 
 			self.close_item_popup = nil
 
-			self.on_item_display_popup_closed(self)
+			self:on_item_display_popup_closed()
 		end
 	end
 
 	if self.suspended then
-		return 
+		return
 	end
 
 	local input_manager = self.input_manager
-	local input_service = self.page_input_service(self)
-	local transitioning = self.transitioning(self)
+	local input_service = self:page_input_service()
+	local transitioning = self:transitioning()
 
 	self.ui_animator:update(dt)
 
@@ -403,7 +396,7 @@ AltarView.post_update = function (self, dt)
 	local exit_button_widget = self.widgets_by_name.exit_button_widget
 
 	if not self.active then
-		return 
+		return
 	end
 
 	local forge_selection_bar = self.forge_selection_bar_widget
@@ -413,7 +406,7 @@ AltarView.post_update = function (self, dt)
 
 		for i = 1, #forge_selection_bar_content, 1 do
 			if not forge_selection_bar_content[i].disable_button and (forge_selection_bar_content[i].on_pressed or self.gamepad_changed_selection_bar_index == i) and i ~= self.selected_selection_bar_index then
-				self.on_forge_selection_bar_index_changed(self, i)
+				self:on_forge_selection_bar_index_changed(i)
 
 				break
 			end
@@ -422,61 +415,60 @@ AltarView.post_update = function (self, dt)
 		self.gamepad_changed_selection_bar_index = nil
 
 		if exit_button_widget.content.button_hotspot.on_hover_enter then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 		end
 
-		if (not self.input_blocked and exit_button_widget.content.button_hotspot.on_release) or input_service.get(input_service, "toggle_menu") then
+		if (not self.input_blocked and exit_button_widget.content.button_hotspot.on_release) or input_service:get("toggle_menu") then
 			local return_to_game = not self.ingame_ui.menu_active
 
-			self.play_sound(self, "Play_hud_hover")
-			self.exit(self, return_to_game)
+			self:play_sound("Play_hud_hover")
+			self:exit(return_to_game)
 
-			transitioning = self.transitioning(self)
+			transitioning = self:transitioning()
 		end
 	end
 
 	if not transitioning then
-		self.handle_index_changes(self)
+		self:handle_index_changes()
 	end
 
-	self.update_button_bar_animation(self, forge_selection_bar, "forge_selection_bar", dt)
+	self:update_button_bar_animation(forge_selection_bar, "forge_selection_bar", dt)
 
 	for ui_name, ui_page in pairs(self.ui_pages) do
 		if ui_page.active then
-			ui_page.update(ui_page, dt)
+			ui_page:update(dt)
 		end
 	end
 
 	if not transitioning then
-		local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+		local gamepad_active = input_manager:is_device_active("gamepad")
 
 		if gamepad_active then
 			if not self.gamepad_active_last_frame then
 				self.gamepad_active_last_frame = true
 
-				self.on_gamepad_activated(self)
+				self:on_gamepad_activated()
 			end
 
-			self.handle_gamepad_input(self, dt)
+			self:handle_gamepad_input(dt)
 		elseif self.gamepad_active_last_frame then
 			self.gamepad_active_last_frame = false
 
-			self.on_gamepad_deactivated(self)
+			self:on_gamepad_deactivated()
 		end
 
-		self.handle_item_drag(self)
+		self:handle_item_drag()
 	end
 
 	if self.active then
-		self.draw(self, dt)
+		self:draw(dt)
 	end
 
 	if self.item_display_popup.active then
 		self.item_display_popup:update(dt, self.input_manager:get_service("enchantment_view"))
 	end
-
-	return 
 end
+
 AltarView.on_forge_selection_bar_index_changed = function (self, index, ignore_sound)
 	local forge_selection_bar = self.forge_selection_bar_widget
 	local forge_selection_bar_content = forge_selection_bar.content
@@ -486,18 +478,18 @@ AltarView.on_forge_selection_bar_index_changed = function (self, index, ignore_s
 	end
 
 	if not ignore_sound then
-		self.play_sound(self, "Play_hud_next_tab")
+		self:play_sound("Play_hud_next_tab")
 	end
 
 	if index == 1 then
-		self.select_craft_page(self, ignore_sound)
-		self.set_gamepad_active_forge_page(self, "craft")
+		self:select_craft_page(ignore_sound)
+		self:set_gamepad_active_forge_page("craft")
 	elseif index == 2 then
-		self.select_trait_reroll_page(self, ignore_sound)
-		self.set_gamepad_active_forge_page(self, "trait_reroll")
+		self:select_trait_reroll_page(ignore_sound)
+		self:set_gamepad_active_forge_page("trait_reroll")
 	else
-		self.select_trait_proc_page(self, ignore_sound)
-		self.set_gamepad_active_forge_page(self, "trait_proc")
+		self:select_trait_proc_page(ignore_sound)
+		self:set_gamepad_active_forge_page("trait_proc")
 	end
 
 	if self.selected_selection_bar_index then
@@ -516,16 +508,14 @@ AltarView.on_forge_selection_bar_index_changed = function (self, index, ignore_s
 		selected_index = index
 	})
 	self.selected_selection_bar_index = index
-
-	return 
 end
+
 AltarView.set_menu_locked_state = function (self, is_locked)
 	self.menu_locked = is_locked
 
-	self.set_selection_bar_disabled(self, is_locked)
-
-	return 
+	self:set_selection_bar_disabled(is_locked)
 end
+
 AltarView.set_selection_bar_disabled = function (self, disabled)
 	local forge_selection_bar = self.forge_selection_bar_widget
 	local forge_selection_bar_content = forge_selection_bar.content
@@ -535,9 +525,8 @@ AltarView.set_selection_bar_disabled = function (self, disabled)
 			forge_selection_bar_content[i].disable_button = disabled
 		end
 	end
-
-	return 
 end
+
 AltarView.select_craft_page = function (self, ignore_sound)
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
@@ -546,11 +535,11 @@ AltarView.select_craft_page = function (self, ignore_sound)
 	local trait_reroll_ui_page = ui_pages.trait_reroll
 	local craft_ui_page = ui_pages.craft
 
-	craft_ui_page.set_active(craft_ui_page, true)
-	trait_proc_ui_page.set_active(trait_proc_ui_page, false)
-	trait_reroll_ui_page.set_active(trait_reroll_ui_page, false)
-	trait_proc_ui_page.remove_item(trait_proc_ui_page)
-	trait_reroll_ui_page.remove_item(trait_reroll_ui_page)
+	craft_ui_page:set_active(true)
+	trait_proc_ui_page:set_active(false)
+	trait_reroll_ui_page:set_active(false)
+	trait_proc_ui_page:remove_item()
+	trait_reroll_ui_page:remove_item()
 
 	local accepted_rarities = {
 		common = false,
@@ -561,51 +550,50 @@ AltarView.select_craft_page = function (self, ignore_sound)
 		unique = false
 	}
 
-	items_page.clear_disabled_backend_ids(items_page)
-	items_page.set_accepted_rarities(items_page, accepted_rarities)
-	items_page.set_disable_non_trait_items(items_page, false)
-	items_page.set_disable_loadout_items(items_page, false)
+	items_page:clear_disabled_backend_ids()
+	items_page:set_accepted_rarities(accepted_rarities)
+	items_page:set_disable_non_trait_items(false)
+	items_page:set_disable_loadout_items(false)
 
 	local item_filter = "item_key == trinket_class_bw or item_key == trinket_class_dr or item_key == trinket_class_es or item_key == trinket_class_we or item_key == trinket_class_wh"
 
-	items_page.set_item_filter(items_page, item_filter)
-	items_page.set_rarity(items_page, nil)
-	items_page.set_drag_enabled(items_page, true)
-	items_page.set_gamepad_focus(items_page, true)
+	items_page:set_item_filter(item_filter)
+	items_page:set_rarity(nil)
+	items_page:set_drag_enabled(true)
+	items_page:set_gamepad_focus(true)
 
-	local slot_type_changed = items_page.set_selected_slot_type(items_page, "trinket")
+	local slot_type_changed = items_page:set_selected_slot_type("trinket")
 
 	if slot_type_changed then
-		items_page.refresh(items_page)
+		items_page:refresh()
 	end
 
-	if not items_page.selected_item(items_page) then
-		items_page.on_inventory_item_selected(items_page, 1)
+	if not items_page:selected_item() then
+		items_page:on_inventory_item_selected(1)
 	end
 
 	local current_compare_item = compare_ui_page.item
 
 	if current_compare_item then
-		local selected_item = items_page.selected_item(items_page)
+		local selected_item = items_page:selected_item()
 
 		if selected_item then
 			local item_backend_id = selected_item and selected_item.backend_id
 			local compare_item_backend_id = current_compare_item.backend_id
 
 			if item_backend_id ~= compare_item_backend_id then
-				self.compare_item_with_loadout_item(self, item_backend_id)
+				self:compare_item_with_loadout_item(item_backend_id)
 			end
 		else
-			compare_ui_page.clear_item_selected(compare_ui_page)
+			compare_ui_page:clear_item_selected()
 		end
 	end
 
 	if not ignore_sound then
-		self.play_sound(self, "Play_hud_reroll_traits_switch_category3")
+		self:play_sound("Play_hud_reroll_traits_switch_category3")
 	end
-
-	return 
 end
+
 AltarView.select_trait_reroll_page = function (self, ignore_sound)
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
@@ -614,11 +602,11 @@ AltarView.select_trait_reroll_page = function (self, ignore_sound)
 	local trait_reroll_ui_page = ui_pages.trait_reroll
 	local craft_ui_page = ui_pages.craft
 
-	craft_ui_page.set_active(craft_ui_page, false)
-	trait_proc_ui_page.set_active(trait_proc_ui_page, false)
-	trait_reroll_ui_page.set_active(trait_reroll_ui_page, true)
-	craft_ui_page.remove_item(craft_ui_page)
-	trait_proc_ui_page.remove_item(trait_proc_ui_page)
+	craft_ui_page:set_active(false)
+	trait_proc_ui_page:set_active(false)
+	trait_reroll_ui_page:set_active(true)
+	craft_ui_page:remove_item()
+	trait_proc_ui_page:remove_item()
 
 	local accepted_rarities = {
 		common = true,
@@ -628,48 +616,47 @@ AltarView.select_trait_reroll_page = function (self, ignore_sound)
 		unique = true
 	}
 
-	items_page.clear_disabled_backend_ids(items_page)
-	items_page.set_accepted_rarities(items_page, accepted_rarities)
-	items_page.set_disable_non_trait_items(items_page, false)
-	items_page.set_disable_loadout_items(items_page, false)
-	items_page.set_item_filter(items_page, nil)
-	items_page.set_rarity(items_page, nil)
-	items_page.set_drag_enabled(items_page, true)
-	items_page.set_gamepad_focus(items_page, true)
+	items_page:clear_disabled_backend_ids()
+	items_page:set_accepted_rarities(accepted_rarities)
+	items_page:set_disable_non_trait_items(false)
+	items_page:set_disable_loadout_items(false)
+	items_page:set_item_filter(nil)
+	items_page:set_rarity(nil)
+	items_page:set_drag_enabled(true)
+	items_page:set_gamepad_focus(true)
 
-	local slot_type_changed = items_page.set_selected_slot_type(items_page, "weapons")
+	local slot_type_changed = items_page:set_selected_slot_type("weapons")
 
 	if slot_type_changed then
-		items_page.refresh(items_page)
+		items_page:refresh()
 	end
 
-	if not items_page.selected_item(items_page) then
-		items_page.on_inventory_item_selected(items_page, 1)
+	if not items_page:selected_item() then
+		items_page:on_inventory_item_selected(1)
 	end
 
 	local current_compare_item = compare_ui_page.item
 
 	if current_compare_item then
-		local selected_item = items_page.selected_item(items_page)
+		local selected_item = items_page:selected_item()
 
 		if selected_item then
 			local item_backend_id = selected_item and selected_item.backend_id
 			local compare_item_backend_id = current_compare_item.backend_id
 
 			if item_backend_id ~= compare_item_backend_id then
-				self.compare_item_with_loadout_item(self, item_backend_id)
+				self:compare_item_with_loadout_item(item_backend_id)
 			end
 		else
-			compare_ui_page.clear_item_selected(compare_ui_page)
+			compare_ui_page:clear_item_selected()
 		end
 	end
 
 	if not ignore_sound then
-		self.play_sound(self, "Play_hud_reroll_traits_switch_category1")
+		self:play_sound("Play_hud_reroll_traits_switch_category1")
 	end
-
-	return 
 end
+
 AltarView.select_trait_proc_page = function (self, ignore_sound)
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
@@ -678,11 +665,11 @@ AltarView.select_trait_proc_page = function (self, ignore_sound)
 	local trait_reroll_ui_page = ui_pages.trait_reroll
 	local craft_ui_page = ui_pages.craft
 
-	craft_ui_page.set_active(craft_ui_page, false)
-	trait_proc_ui_page.set_active(trait_proc_ui_page, true)
-	trait_reroll_ui_page.set_active(trait_reroll_ui_page, false)
-	craft_ui_page.remove_item(craft_ui_page)
-	trait_reroll_ui_page.remove_item(trait_reroll_ui_page)
+	craft_ui_page:set_active(false)
+	trait_proc_ui_page:set_active(true)
+	trait_reroll_ui_page:set_active(false)
+	craft_ui_page:remove_item()
+	trait_reroll_ui_page:remove_item()
 
 	local accepted_rarities = {
 		common = true,
@@ -692,55 +679,54 @@ AltarView.select_trait_proc_page = function (self, ignore_sound)
 		unique = false
 	}
 
-	items_page.clear_disabled_backend_ids(items_page)
-	items_page.set_accepted_rarities(items_page, accepted_rarities)
-	items_page.set_disable_non_trait_items(items_page, true)
-	items_page.set_disable_loadout_items(items_page, false)
-	items_page.set_item_filter(items_page, nil)
-	items_page.set_rarity(items_page, nil)
-	items_page.set_drag_enabled(items_page, true)
-	items_page.set_gamepad_focus(items_page, true)
+	items_page:clear_disabled_backend_ids()
+	items_page:set_accepted_rarities(accepted_rarities)
+	items_page:set_disable_non_trait_items(true)
+	items_page:set_disable_loadout_items(false)
+	items_page:set_item_filter(nil)
+	items_page:set_rarity(nil)
+	items_page:set_drag_enabled(true)
+	items_page:set_gamepad_focus(true)
 
-	local slot_type_changed = items_page.set_selected_slot_type(items_page, "weapons")
+	local slot_type_changed = items_page:set_selected_slot_type("weapons")
 
 	if slot_type_changed then
-		items_page.refresh(items_page)
+		items_page:refresh()
 	end
 
-	if not items_page.selected_item(items_page) then
-		items_page.on_inventory_item_selected(items_page, 1)
+	if not items_page:selected_item() then
+		items_page:on_inventory_item_selected(1)
 	end
 
 	local current_compare_item = compare_ui_page.item
 
 	if current_compare_item then
-		local selected_item = items_page.selected_item(items_page)
+		local selected_item = items_page:selected_item()
 
 		if selected_item then
 			local item_backend_id = selected_item and selected_item.backend_id
 			local compare_item_backend_id = current_compare_item.backend_id
 
 			if item_backend_id ~= compare_item_backend_id then
-				self.compare_item_with_loadout_item(self, item_backend_id)
+				self:compare_item_with_loadout_item(item_backend_id)
 			end
 		else
-			compare_ui_page.clear_item_selected(compare_ui_page)
+			compare_ui_page:clear_item_selected()
 		end
 	end
 
 	if not ignore_sound then
-		self.play_sound(self, "Play_hud_reroll_traits_switch_category2")
+		self:play_sound("Play_hud_reroll_traits_switch_category2")
 	end
-
-	return 
 end
+
 AltarView.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_top_renderer = self.ui_top_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = self.page_input_service(self)
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = self:page_input_service()
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local widgets_by_name = self.widgets_by_name
 
 	UIRenderer.begin_pass(ui_top_renderer, ui_scenegraph, input_service, dt)
@@ -781,16 +767,15 @@ AltarView.draw = function (self, dt)
 
 	for ui_name, ui_page in pairs(self.ui_pages) do
 		if ui_page.active then
-			ui_page.draw(ui_page, dt)
+			ui_page:draw(dt)
 		end
 	end
 
 	if gamepad_active and not self.popup_id then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
+
 AltarView.handle_item_drag = function (self)
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
@@ -806,27 +791,26 @@ AltarView.handle_item_drag = function (self)
 	end
 
 	if active_page then
-		local current_selected_list_index = items_page.current_selected_list_index(items_page)
-		local dragged_upgrade_item_backend_id = active_page.on_dragging_item_stopped(active_page)
+		local current_selected_list_index = items_page:current_selected_list_index()
+		local dragged_upgrade_item_backend_id = active_page:on_dragging_item_stopped()
 
-		if dragged_upgrade_item_backend_id and items_page.on_item_list_hover(items_page) then
-			if active_page.can_remove_item(active_page) then
-				active_page.remove_item(active_page)
-				items_page.refresh_items_status(items_page)
-				items_page.set_backend_id_disabled_state(items_page, dragged_upgrade_item_backend_id, false)
+		if dragged_upgrade_item_backend_id and items_page:on_item_list_hover() then
+			if active_page:can_remove_item() then
+				active_page:remove_item()
+				items_page:refresh_items_status()
+				items_page:set_backend_id_disabled_state(dragged_upgrade_item_backend_id, false)
 			end
 		else
-			local dragged_stopped, dragged_list_item = items_page.on_dragging_item_stopped(items_page)
-			local slot_hovered = active_page.is_slot_hovered(active_page, dragged_list_item ~= nil)
+			local dragged_stopped, dragged_list_item = items_page:on_dragging_item_stopped()
+			local slot_hovered = active_page:is_slot_hovered(dragged_list_item ~= nil)
 
 			if dragged_stopped and dragged_list_item and slot_hovered then
 				items_page.item_selected = dragged_list_item
 			end
 		end
 	end
-
-	return 
 end
+
 AltarView.handle_index_changes = function (self)
 	local gamepad_active = self.input_manager:is_device_active("gamepad")
 	local ui_pages = self.ui_pages
@@ -838,69 +822,69 @@ AltarView.handle_index_changes = function (self)
 	local character_changed = items_page.character_changed
 
 	if character_changed then
-		items_page.set_selected_hero(items_page, character_changed)
+		items_page:set_selected_hero(character_changed)
 
-		local selected_item = items_page.selected_item(items_page)
+		local selected_item = items_page:selected_item()
 		local item_backend_id = selected_item and selected_item.backend_id
 
-		self.compare_item_with_loadout_item(self, item_backend_id)
+		self:compare_item_with_loadout_item(item_backend_id)
 	end
 
-	local list_item_pressed, inventory_list_index_pressed = items_page.is_list_item_pressed(items_page)
+	local list_item_pressed, inventory_list_index_pressed = items_page:is_list_item_pressed()
 	self.gamepad_request_melt_item = nil
-	local inventory_list_index_changed = items_page.has_list_index_changed(items_page)
+	local inventory_list_index_changed = items_page:has_list_index_changed()
 
 	if inventory_list_index_changed then
 		local play_sound = true
 
-		items_page.on_inventory_item_selected(items_page, inventory_list_index_changed, play_sound)
+		items_page:on_inventory_item_selected(inventory_list_index_changed, play_sound)
 
-		local selected_item = items_page.selected_item(items_page)
+		local selected_item = items_page:selected_item()
 		local item_backend_id = selected_item and selected_item.backend_id
 
-		self.compare_item_with_loadout_item(self, item_backend_id)
+		self:compare_item_with_loadout_item(item_backend_id)
 	end
 
-	local current_selected_list_index = items_page.current_selected_list_index(items_page)
+	local current_selected_list_index = items_page:current_selected_list_index()
 	local trait_reroll_item_remove_request = trait_reroll_ui_page.item_remove_request
 
 	if trait_reroll_item_remove_request then
-		items_page.set_backend_id_disabled_state(items_page, trait_reroll_ui_page.active_item_id, false)
-		trait_reroll_ui_page.remove_item(trait_reroll_ui_page)
-		items_page.refresh_items_status(items_page)
+		items_page:set_backend_id_disabled_state(trait_reroll_ui_page.active_item_id, false)
+		trait_reroll_ui_page:remove_item()
+		items_page:refresh_items_status()
 	end
 
 	local pressed_item_backend_id = trait_reroll_ui_page.pressed_item_backend_id
 
 	if pressed_item_backend_id then
-		local item_list_index = items_page.index_by_backend_id(items_page, pressed_item_backend_id)
+		local item_list_index = items_page:index_by_backend_id(pressed_item_backend_id)
 
 		if item_list_index and item_list_index ~= current_selected_list_index then
 			local play_sound = true
 
-			items_page.on_inventory_item_selected(items_page, item_list_index, play_sound)
-			self.compare_item_with_loadout_item(self, pressed_item_backend_id)
+			items_page:on_inventory_item_selected(item_list_index, play_sound)
+			self:compare_item_with_loadout_item(pressed_item_backend_id)
 		end
 	end
 
 	local trait_proc_item_remove_request = trait_proc_ui_page.item_remove_request
 
 	if trait_proc_item_remove_request then
-		items_page.set_backend_id_disabled_state(items_page, trait_proc_ui_page.active_item_id, false)
-		trait_proc_ui_page.remove_item(trait_proc_ui_page)
-		items_page.refresh_items_status(items_page)
+		items_page:set_backend_id_disabled_state(trait_proc_ui_page.active_item_id, false)
+		trait_proc_ui_page:remove_item()
+		items_page:refresh_items_status()
 	end
 
 	local pressed_item_backend_id = trait_proc_ui_page.pressed_item_backend_id
 
 	if pressed_item_backend_id then
-		local item_list_index = items_page.index_by_backend_id(items_page, pressed_item_backend_id)
+		local item_list_index = items_page:index_by_backend_id(pressed_item_backend_id)
 
 		if item_list_index and item_list_index ~= current_selected_list_index then
 			local play_sound = true
 
-			items_page.on_inventory_item_selected(items_page, item_list_index, play_sound)
-			self.compare_item_with_loadout_item(self, pressed_item_backend_id)
+			items_page:on_inventory_item_selected(item_list_index, play_sound)
+			self:compare_item_with_loadout_item(pressed_item_backend_id)
 		end
 	end
 
@@ -910,31 +894,30 @@ AltarView.handle_index_changes = function (self)
 		local active_item_id = craft_ui_page.active_item_id
 
 		if active_item_id then
-			items_page.set_backend_id_disabled_state(items_page, active_item_id, false)
+			items_page:set_backend_id_disabled_state(active_item_id, false)
 		end
 
-		craft_ui_page.remove_item(craft_ui_page)
-		items_page.refresh_items_status(items_page)
-		items_page.set_gamepad_focus(items_page, true)
+		craft_ui_page:remove_item()
+		items_page:refresh_items_status()
+		items_page:set_gamepad_focus(true)
 	end
 
 	local pressed_item_backend_id = craft_ui_page.pressed_item_backend_id
 
 	if pressed_item_backend_id then
-		local item_list_index = items_page.index_by_backend_id(items_page, pressed_item_backend_id)
+		local item_list_index = items_page:index_by_backend_id(pressed_item_backend_id)
 
 		if item_list_index and item_list_index ~= current_selected_list_index then
 			local play_sound = true
 
-			items_page.on_inventory_item_selected(items_page, item_list_index, play_sound)
-			self.compare_item_with_loadout_item(self, pressed_item_backend_id)
+			items_page:on_inventory_item_selected(item_list_index, play_sound)
+			self:compare_item_with_loadout_item(pressed_item_backend_id)
 		end
 	end
 
-	self.handle_page_requests(self)
-
-	return 
+	self:handle_page_requests()
 end
+
 AltarView.handle_page_requests = function (self)
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
@@ -955,7 +938,7 @@ AltarView.handle_page_requests = function (self)
 		end
 	end
 
-	local current_selected_list_index = items_page.current_selected_list_index(items_page)
+	local current_selected_list_index = items_page:current_selected_list_index()
 
 	if trait_reroll_ui_page.active then
 		local poll_reroll_traits_state = self.poll_reroll_traits_state
@@ -971,11 +954,11 @@ AltarView.handle_page_requests = function (self)
 			self.poll_reroll_traits_state = 1
 
 			ScriptBackendItem.set_rerolling_trait_state(true)
-			self.set_input_blocked(self, true)
-			self.set_menu_locked_state(self, true)
+			self:set_input_blocked(true)
+			self:set_menu_locked_state(true)
 		elseif reroll_traits_new_item_key then
-			trait_reroll_ui_page.reroll(trait_reroll_ui_page, reroll_traits_new_item_key)
-			self.refresh_tokens(self, true)
+			trait_reroll_ui_page:reroll(reroll_traits_new_item_key)
+			self:refresh_tokens(true)
 
 			self.poll_reroll_traits_state = nil
 		elseif trait_reroll_ui_page.rerolling then
@@ -983,7 +966,7 @@ AltarView.handle_page_requests = function (self)
 				items_page.active = false
 				compare_ui_page.active = false
 
-				self.set_input_blocked(self, false)
+				self:set_input_blocked(false)
 			elseif trait_reroll_ui_page.reroll_option_selected then
 				local reroll_option_keep_old = trait_reroll_ui_page.reroll_option_keep_old
 
@@ -991,7 +974,7 @@ AltarView.handle_page_requests = function (self)
 
 				self.poll_reroll_traits_state = 2
 
-				self.set_input_blocked(self, true)
+				self:set_input_blocked(true)
 			elseif new_item_data then
 				local new_item_backend_id = new_item_data.backend_id
 				local slot = new_item_data.slot
@@ -1001,63 +984,63 @@ AltarView.handle_page_requests = function (self)
 					local active_item_data = trait_reroll_ui_page.active_item_data
 					local item_for_profile = active_item_data.can_wield[1]
 					local player_manager = self.player_manager
-					local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
+					local player = player_manager:player_from_peer_id(self.peer_id)
 					local player_unit = player.player_unit
 					local player_profile_index = player.profile_index
 
 					if Unit.alive(player_unit) and FindProfileIndex(item_for_profile) == player_profile_index then
 						local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
-						local resyncing_loadout = inventory_extension.resyncing_loadout(inventory_extension)
+						local resyncing_loadout = inventory_extension:resyncing_loadout()
 
 						if resyncing_loadout or not Managers.state.network:game() then
-							return 
+							return
 						end
 
-						inventory_extension.create_equipment_in_slot(inventory_extension, slot, new_item_backend_id)
+						inventory_extension:create_equipment_in_slot(slot, new_item_backend_id)
 					end
 				end
 
-				trait_reroll_ui_page.on_traits_option_response_done(trait_reroll_ui_page, new_item_backend_id)
+				trait_reroll_ui_page:on_traits_option_response_done(new_item_backend_id)
 
 				self.poll_reroll_traits_state = nil
 				items_page.active = true
 				compare_ui_page.active = true
 
 				if new_item_backend_id then
-					items_page.refresh(items_page)
-					self.compare_item_with_loadout_item(self, new_item_backend_id)
-					items_page.set_backend_id_disabled_state(items_page, new_item_backend_id, true)
-					items_page.on_inventory_item_selected(items_page, current_selected_list_index or 1)
+					items_page:refresh()
+					self:compare_item_with_loadout_item(new_item_backend_id)
+					items_page:set_backend_id_disabled_state(new_item_backend_id, true)
+					items_page:on_inventory_item_selected(current_selected_list_index or 1)
 				end
 			end
 		elseif trait_reroll_ui_page.reroll_completed_value then
-			self.set_input_blocked(self, false)
-			self.set_menu_locked_state(self, false)
+			self:set_input_blocked(false)
+			self:set_menu_locked_state(false)
 			ScriptBackendItem.set_rerolling_trait_state(false)
 		elseif item_selected_backend_id then
 			local current_item_id = trait_reroll_ui_page.active_item_id
 
 			if current_item_id then
-				items_page.set_backend_id_disabled_state(items_page, current_item_id, false)
+				items_page:set_backend_id_disabled_state(current_item_id, false)
 			end
 
 			local item_selected_is_equipped = items_page.item_selected_is_equipped
 
-			trait_reroll_ui_page.add_item(trait_reroll_ui_page, item_selected_backend_id, nil, item_selected_is_equipped)
-			items_page.refresh_items_status(items_page)
-			items_page.set_backend_id_disabled_state(items_page, item_selected_backend_id, true)
+			trait_reroll_ui_page:add_item(item_selected_backend_id, nil, item_selected_is_equipped)
+			items_page:refresh_items_status()
+			items_page:set_backend_id_disabled_state(item_selected_backend_id, true)
 		end
 	elseif trait_proc_ui_page.active then
 		if trait_proc_ui_page.roll_request then
-			local item_backend_id, selected_trait_name = trait_proc_ui_page.get_item_roll_info(trait_proc_ui_page)
+			local item_backend_id, selected_trait_name = trait_proc_ui_page:get_item_roll_info()
 			local variable_name = "proc_chance"
 			local new_variable_value = self.forge_logic:reroll_trait_variable(item_backend_id, selected_trait_name, variable_name)
 
-			trait_proc_ui_page.roll(trait_proc_ui_page, new_variable_value)
-			self.set_input_blocked(self, true)
+			trait_proc_ui_page:roll(new_variable_value)
+			self:set_input_blocked(true)
 		elseif trait_proc_ui_page.roll_completed then
-			self.set_input_blocked(self, false)
-			self.refresh_tokens(self, true)
+			self:set_input_blocked(false)
+			self:refresh_tokens(true)
 
 			local better_proc_chance = trait_proc_ui_page.improved_value_last_roll
 
@@ -1068,36 +1051,36 @@ AltarView.handle_page_requests = function (self)
 					local slot_type = active_item_data.slot_type
 					local slot = (slot_type == "melee" and "slot_melee") or "slot_ranged"
 					local player_manager = self.player_manager
-					local player = player_manager.player_from_peer_id(player_manager, self.peer_id)
+					local player = player_manager:player_from_peer_id(self.peer_id)
 					local player_unit = player.player_unit
 					local player_profile_index = player.profile_index
 
 					if Unit.alive(player_unit) and FindProfileIndex(item_for_profile) == player_profile_index then
 						local inventory_extension = ScriptUnit.extension(player_unit, "inventory_system")
 
-						inventory_extension.rewield_wielded_slot(inventory_extension)
-						inventory_extension.apply_buffs_to_ammo(inventory_extension)
+						inventory_extension:rewield_wielded_slot()
+						inventory_extension:apply_buffs_to_ammo()
 					end
 				end
 
 				local selected_item = ui_pages.items:selected_item()
 				local item_backend_id = selected_item and selected_item.backend_id
 
-				self.compare_item_with_loadout_item(self, item_backend_id)
-				items_page.refresh_items_status(items_page)
+				self:compare_item_with_loadout_item(item_backend_id)
+				items_page:refresh_items_status()
 			end
 		elseif item_selected_backend_id then
 			local current_item_id = trait_proc_ui_page.active_item_id
 
 			if current_item_id then
-				items_page.set_backend_id_disabled_state(items_page, current_item_id, false)
+				items_page:set_backend_id_disabled_state(current_item_id, false)
 			end
 
 			local item_selected_is_equipped = items_page.item_selected_is_equipped
 
-			trait_proc_ui_page.add_item(trait_proc_ui_page, item_selected_backend_id, item_selected_is_equipped)
-			items_page.refresh_items_status(items_page)
-			items_page.set_backend_id_disabled_state(items_page, item_selected_backend_id, true)
+			trait_proc_ui_page:add_item(item_selected_backend_id, item_selected_is_equipped)
+			items_page:refresh_items_status()
+			items_page:set_backend_id_disabled_state(item_selected_backend_id, true)
 		end
 	elseif craft_ui_page.active then
 		if confirm_popup_id then
@@ -1105,23 +1088,23 @@ AltarView.handle_page_requests = function (self)
 			local current_item_id = craft_ui_page.active_item_id
 
 			if current_item_id then
-				items_page.set_backend_id_disabled_state(items_page, current_item_id, false)
+				items_page:set_backend_id_disabled_state(current_item_id, false)
 			end
 
-			craft_ui_page.add_item(craft_ui_page, item_selected_backend_id)
-			items_page.refresh_items_status(items_page)
-			items_page.set_backend_id_disabled_state(items_page, item_selected_backend_id, true)
-			items_page.set_gamepad_focus(items_page, false)
+			craft_ui_page:add_item(item_selected_backend_id)
+			items_page:refresh_items_status()
+			items_page:set_backend_id_disabled_state(item_selected_backend_id, true)
+			items_page:set_gamepad_focus(false)
 		elseif craft_ui_page.craft_request then
-			local selected_slot_name = craft_ui_page.selected_slot_name(craft_ui_page)
-			local selected_token_rarity = craft_ui_page.selected_token_rarity(craft_ui_page)
-			local selected_profile_name = craft_ui_page.selected_profile_name(craft_ui_page)
+			local selected_slot_name = craft_ui_page:selected_slot_name()
+			local selected_token_rarity = craft_ui_page:selected_token_rarity()
+			local selected_profile_name = craft_ui_page:selected_profile_name()
 			local rarity_settings = AltarSettings.pray_for_loot_cost[selected_token_rarity]
 			local token_type = rarity_settings.token_type
 
 			self.forge_logic:pray_for_loot(selected_profile_name, selected_token_rarity, selected_slot_name)
-			craft_ui_page.craft(craft_ui_page)
-			self.set_input_blocked(self, true)
+			craft_ui_page:craft()
+			self:set_input_blocked(true)
 		elseif craft_ui_page.crafting and craft_ui_page.craft_animation_ready then
 			local item_key, item_backend_id = self.forge_logic:poll_pray_for_loot()
 
@@ -1129,29 +1112,29 @@ AltarView.handle_page_requests = function (self)
 				self.craft_item_key = item_key
 				self.can_display_item_popup = true
 
-				items_page.refresh(items_page)
-				items_page.set_rarity(items_page, nil)
-				items_page.on_inventory_item_selected(items_page, current_selected_list_index or 1)
-				craft_ui_page.on_world_unit_spawn(craft_ui_page)
-				self.refresh_tokens(self, true)
+				items_page:refresh()
+				items_page:set_rarity(nil)
+				items_page:on_inventory_item_selected(current_selected_list_index or 1)
+				craft_ui_page:on_world_unit_spawn()
+				self:refresh_tokens(true)
 			end
 		elseif craft_ui_page.crafting and self.item_display_popup.active then
 			local popup_close_widget = self.popup_close_widget
 
 			if (not self.close_item_popup and popup_close_widget.content.button_hotspot.on_pressed) or self.input_manager:any_input_pressed() then
-				self.close_item_display_popup(self)
+				self:close_item_display_popup()
 			end
 		end
 	end
+end
 
-	return 
-end
 AltarView.spawn_confirm_popup = function (self, localized_text, return_data)
-	return self.queue_popup(self, localized_text, return_data, "confirm", Localize("input_description_confirm"), "cancel", Localize("input_description_cancel"))
+	return self:queue_popup(localized_text, return_data, "confirm", Localize("input_description_confirm"), "cancel", Localize("input_description_cancel"))
 end
+
 AltarView.compare_item_with_loadout_item = function (self, item_backend_id)
 	if not item_backend_id then
-		return 
+		return
 	end
 
 	local ui_pages = self.ui_pages
@@ -1162,7 +1145,7 @@ AltarView.compare_item_with_loadout_item = function (self, item_backend_id)
 	local item_type = item.slot_type
 
 	if item_type == "melee" or item_type == "ranged" then
-		local selected_profile_name = items_page.current_profile_name(items_page)
+		local selected_profile_name = items_page:current_profile_name()
 		local slot_names_by_type = InventorySettings.slot_names_by_type
 		local slots_by_name = InventorySettings.slots_by_name
 		local slot_name = slot_names_by_type[item_type][1]
@@ -1170,10 +1153,9 @@ AltarView.compare_item_with_loadout_item = function (self, item_backend_id)
 		loadout_item_backend_id = loadout_item.backend_id
 	end
 
-	compare_ui_page.on_item_selected(compare_ui_page, item_backend_id, loadout_item_backend_id)
-
-	return 
+	compare_ui_page:on_item_selected(item_backend_id, loadout_item_backend_id)
 end
+
 AltarView.refresh_tokens = function (self, play_animation)
 	local num_tokens = AltarSettings.num_token_types
 	local token_widgets_by_name = self.token_widgets_by_name
@@ -1199,14 +1181,12 @@ AltarView.refresh_tokens = function (self, play_animation)
 			widget.content.num_tokens = num_tokens
 		end
 	end
-
-	return 
 end
+
 AltarView.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 AltarView.update_button_bar_animation = function (self, widget, widget_name, dt)
 	local content = widget.content
 	local style = widget.style
@@ -1229,21 +1209,21 @@ AltarView.update_button_bar_animation = function (self, widget, widget_name, dt)
 		local is_selected = content[i].is_selected
 
 		if not is_selected and button_hotspot.on_hover_enter then
-			self.play_sound(self, "Play_hud_hover")
+			self:play_sound("Play_hud_hover")
 
 			local background_fade_in_time = bar_settings.background.fade_in_time
 			local icon_fade_in_time = bar_settings.icon.fade_in_time
 			local background_alpha_hover = bar_settings.background.alpha_hover
 			local icon_alpha_hover = bar_settings.icon.alpha_hover
-			active_animations[button_style_name] = self.animate_element_by_time(self, button_style.color, 1, button_style.color[1], background_alpha_hover, background_fade_in_time)
-			active_animations[icon_texture_id] = self.animate_element_by_time(self, icon_style.color, 1, icon_style.color[1], icon_alpha_hover, icon_fade_in_time)
+			active_animations[button_style_name] = self:animate_element_by_time(button_style.color, 1, button_style.color[1], background_alpha_hover, background_fade_in_time)
+			active_animations[icon_texture_id] = self:animate_element_by_time(icon_style.color, 1, icon_style.color[1], icon_alpha_hover, icon_fade_in_time)
 		elseif button_hotspot.on_hover_exit then
 			local background_fade_out_time = bar_settings.background.fade_out_time
 			local icon_fade_out_time = bar_settings.icon.fade_out_time
 			local background_alpha_normal = bar_settings.background.alpha_normal
 			local icon_alpha_normal = bar_settings.icon.alpha_normal
-			active_animations[button_style_name] = self.animate_element_by_time(self, button_style.color, 1, button_style.color[1], background_alpha_normal, background_fade_out_time)
-			active_animations[icon_texture_id] = self.animate_element_by_time(self, icon_style.color, 1, icon_style.color[1], icon_alpha_normal, icon_fade_out_time)
+			active_animations[button_style_name] = self:animate_element_by_time(button_style.color, 1, button_style.color[1], background_alpha_normal, background_fade_out_time)
+			active_animations[icon_texture_id] = self:animate_element_by_time(icon_style.color, 1, icon_style.color[1], icon_alpha_normal, icon_fade_out_time)
 		end
 
 		if active_animations then
@@ -1259,20 +1239,18 @@ AltarView.update_button_bar_animation = function (self, widget, widget_name, dt)
 
 		self.bar_animations[widget_name][i] = active_animations
 	end
-
-	return 
 end
+
 AltarView.set_input_blocked = function (self, blocked)
 	self.input_blocked = blocked
 	local ui_pages = self.ui_pages
 	local items_page = ui_pages.items
 	local compare_ui_page = ui_pages.compare
 
-	items_page.disable_input(items_page, blocked)
-	compare_ui_page.disable_input(compare_ui_page, blocked)
-
-	return 
+	items_page:disable_input(blocked)
+	compare_ui_page:disable_input(blocked)
 end
+
 AltarView.create_display_item_popup = function (self)
 	if not self.item_display_popup then
 		local ingame_ui_context = self.ingame_ui_context
@@ -1280,42 +1258,38 @@ AltarView.create_display_item_popup = function (self)
 		local world_name = "exotic_reward_preview"
 		self.item_display_popup = ItemDisplayPopup:new(ingame_ui_context, world_name, "lua_spin_altar", position, self)
 	end
-
-	return 
 end
+
 AltarView.display_item_popup = function (self, item_key)
 	self.item_display_popup:on_enter(item_key)
-
-	return 
 end
+
 AltarView.diplay_popup_active = function (self)
 	if self.item_display_popup.active then
 		return true
 	end
-
-	return 
 end
+
 AltarView.close_item_display_popup = function (self)
 	self.close_item_popup = true
-
-	return 
 end
+
 AltarView.on_item_display_popup_closed = function (self)
 	local ui_pages = self.ui_pages
 	local craft_ui_page = ui_pages.craft
 
 	if craft_ui_page.active and craft_ui_page.crafting then
-		self.set_input_blocked(self, false)
-		craft_ui_page.world_unit_presentation_complete(craft_ui_page)
+		self:set_input_blocked(false)
+		craft_ui_page:world_unit_presentation_complete()
 	end
-
-	return 
 end
+
 AltarView.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 AltarView.destroy = function (self)
 	self.confirmation_popup:cancel_all_popups()
 
@@ -1329,7 +1303,7 @@ AltarView.destroy = function (self)
 	local item_display_popup = self.item_display_popup
 
 	if item_display_popup then
-		item_display_popup.destroy(item_display_popup)
+		item_display_popup:destroy()
 
 		self.item_display_popup = nil
 	end
@@ -1341,9 +1315,8 @@ AltarView.destroy = function (self)
 	ScriptWorld.activate_viewport(world, viewport)
 
 	UIPasses.is_dragging_item = false
-
-	return 
 end
+
 AltarView.on_gamepad_activated = function (self)
 	local ui_pages = self.ui_pages
 
@@ -1354,14 +1327,12 @@ AltarView.on_gamepad_activated = function (self)
 	if gamepad_selected_page and ui_pages[gamepad_selected_page].set_gamepad_focus then
 		ui_pages[gamepad_selected_page]:set_gamepad_focus(true)
 	end
-
-	return 
 end
+
 AltarView.set_gamepad_active_forge_page = function (self, name)
-	self.set_gamepad_page_focus(self, name)
-
-	return 
+	self:set_gamepad_page_focus(name)
 end
+
 AltarView.set_gamepad_page_focus = function (self, name)
 	local ui_pages = self.ui_pages
 	local gamepad_selected_page = self.gamepad_selected_page
@@ -1381,10 +1352,9 @@ AltarView.set_gamepad_page_focus = function (self, name)
 	self.gamepad_selected_page = name
 	self.gamepad_active_actions_name = nil
 
-	self.update_input_description(self)
-
-	return 
+	self:update_input_description()
 end
+
 AltarView.update_input_description = function (self)
 	local ui_pages = self.ui_pages
 	local gamepad_selected_page = self.gamepad_selected_page
@@ -1396,7 +1366,7 @@ AltarView.update_input_description = function (self)
 		actions_name_to_use = "default"
 
 		if gamepad_selected_page == "craft" then
-			local can_afford = page.can_afford_craft_cost(page)
+			local can_afford = page:can_afford_craft_cost()
 			local active_item_id = page.active_item_id
 
 			if active_item_id then
@@ -1421,7 +1391,7 @@ AltarView.update_input_description = function (self)
 				actions_name_to_use = "default_tokens_missing"
 			end
 		elseif gamepad_selected_page == "trait_proc" then
-			local can_afford = page.can_afford_roll_cost(page)
+			local can_afford = page:can_afford_roll_cost()
 			local active_item_id = page.active_item_id
 			local selected_item, is_equipped, is_active = ui_pages.items:selected_item()
 
@@ -1446,7 +1416,7 @@ AltarView.update_input_description = function (self)
 				actions_name_to_use = "disabled_item"
 			end
 		elseif gamepad_selected_page == "trait_reroll" then
-			local can_afford = page.can_afford_reroll_cost(page)
+			local can_afford = page:can_afford_reroll_cost()
 			local active_item_id = page.active_item_id
 			local selected_item, is_equipped, is_active = ui_pages.items:selected_item()
 			actions_name_to_use = (active_item_id and ((page.handling_reroll_answer and "select_trait_setup") or (is_selected_item and ((can_afford and "item_added_and_selected_and_afford") or "item_added_and_selected")) or (can_afford and "item_added_and_afford") or "item_added")) or (is_active and "default") or "disabled_item"
@@ -1459,9 +1429,8 @@ AltarView.update_input_description = function (self)
 
 		self.menu_input_description:set_input_description(input_description_data)
 	end
-
-	return 
 end
+
 AltarView.on_gamepad_deactivated = function (self)
 	local ui_pages = self.ui_pages
 
@@ -1472,27 +1441,26 @@ AltarView.on_gamepad_deactivated = function (self)
 	if gamepad_selected_page and ui_pages[gamepad_selected_page].set_gamepad_focus then
 		ui_pages[gamepad_selected_page]:set_gamepad_focus(false)
 	end
-
-	return 
 end
+
 AltarView.handle_gamepad_input = function (self, dt)
-	self.update_input_description(self)
+	self:update_input_description()
 
 	local ui_pages = self.ui_pages
-	local input_service = self.page_input_service(self)
+	local input_service = self:page_input_service()
 	local gamepad_selected_page = self.gamepad_selected_page
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	else
-		if input_service.get(input_service, "back") then
+		if input_service:get("back") then
 			local return_to_game = not self.ingame_ui.menu_active
 
-			self.exit(self, return_to_game)
-			self.play_sound(self, "Play_hud_select")
+			self:exit(return_to_game)
+			self:play_sound("Play_hud_select")
 
-			return 
+			return
 		end
 
 		local selected_selection_bar_index = self.selected_selection_bar_index
@@ -1500,12 +1468,12 @@ AltarView.handle_gamepad_input = function (self, dt)
 		if selected_selection_bar_index then
 			local new_selection_bar_index = nil
 
-			if input_service.get(input_service, "trigger_cycle_next") then
+			if input_service:get("trigger_cycle_next") then
 				local forge_selection_bar = self.forge_selection_bar_widget
 				local forge_selection_bar_content = forge_selection_bar.content
 				new_selection_bar_index = math.min(selected_selection_bar_index + 1, #forge_selection_bar_content)
 				self.controller_cooldown = GamepadSettings.menu_cooldown
-			elseif input_service.get(input_service, "trigger_cycle_previous") then
+			elseif input_service:get("trigger_cycle_previous") then
 				new_selection_bar_index = math.max(selected_selection_bar_index - 1, 1)
 				self.controller_cooldown = GamepadSettings.menu_cooldown
 			end
@@ -1515,8 +1483,6 @@ AltarView.handle_gamepad_input = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

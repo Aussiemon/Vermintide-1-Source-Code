@@ -88,10 +88,8 @@ function populate_player_data_from_save(save_data, id, version_match)
 	local input_manager = Managers.input
 
 	if input_manager then
-		input_manager.apply_saved_keymaps(input_manager)
+		input_manager:apply_saved_keymaps()
 	end
-
-	return 
 end
 
-return 
+return

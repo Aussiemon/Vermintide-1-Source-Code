@@ -1177,4 +1177,4 @@ contract_bg_atlas = {
 	}
 }
 
-return 
+return

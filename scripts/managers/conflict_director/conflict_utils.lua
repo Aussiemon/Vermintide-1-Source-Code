@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/settings/breeds")
 require("scripts/settings/conflict_settings")
 
@@ -25,15 +23,15 @@ local colors = {
 	QuaternionBox(255, 0, 220, 0),
 	QuaternionBox(200, 235, 235, 235)
 }
+
 ConflictUtils.random_interval = function (numbers)
 	if type(numbers) == "table" then
 		return math_random(numbers[1], numbers[2])
 	else
 		return numbers
 	end
-
-	return 
 end
+
 local clusters_sizes = {}
 local cluster_index_lookup = {}
 local cluster_work_queue = {
@@ -41,6 +39,7 @@ local cluster_work_queue = {
 	false,
 	false
 }
+
 ConflictUtils.cluster_positions = function (positions, min_dist)
 	local clusters = {
 		positions[1]
@@ -61,7 +60,7 @@ ConflictUtils.cluster_positions = function (positions, min_dist)
 
 	local work_size = #work_queue
 
-	while 0 < work_size do
+	while work_size > 0 do
 		local clustered = false
 
 		for i = 1, #clusters, 1 do
@@ -98,6 +97,7 @@ ConflictUtils.cluster_positions = function (positions, min_dist)
 
 	return clusters, clusters_sizes, cluster_index_lookup
 end
+
 local loneliness = {}
 local max_cluster_score = {
 	1,
@@ -105,6 +105,7 @@ local max_cluster_score = {
 	3,
 	6
 }
+
 ConflictUtils.cluster_weight_and_loneliness = function (positions, min_dist)
 	local distance_squared = Vector3.distance_squared
 	min_dist = min_dist * min_dist
@@ -168,6 +169,7 @@ ConflictUtils.cluster_weight_and_loneliness = function (positions, min_dist)
 
 	return cluster_utility, loneliest_index, loneliest_value, loneliness
 end
+
 ConflictUtils.average_player_position = function ()
 	local player_count = 0
 	local player_center_pos = Vector3.zero()
@@ -191,15 +193,17 @@ ConflictUtils.average_player_position = function ()
 
 	return player_center_pos
 end
+
 local found_cover_units = {}
 local hidden_cover_units = {}
+
 ConflictUtils.hidden_cover_points = function (center_position, avoid_pos_list, min_rad, max_rad, dot_threshold)
 	if script_data.debug_near_cover_points then
 		local free_flight_manager = Managers.free_flight
-		local in_free_flight = free_flight_manager.active(free_flight_manager, "global")
+		local in_free_flight = free_flight_manager:active("global")
 
 		if in_free_flight then
-			center_position = free_flight_manager.camera_position_rotation(free_flight_manager)
+			center_position = free_flight_manager:camera_position_rotation()
 		end
 	end
 
@@ -260,6 +264,7 @@ ConflictUtils.hidden_cover_points = function (center_position, avoid_pos_list, m
 
 	return num_found, hidden_cover_units
 end
+
 ConflictUtils.test_is_cover_point_hidden = function ()
 	local bp = Managers.state.conflict.level_analysis.cover_points_broadphase
 	local num_found_cover_units = Broadphase.query(bp, PLAYER_POSITIONS[1], 20, found_cover_units)
@@ -282,9 +287,8 @@ ConflictUtils.test_is_cover_point_hidden = function ()
 			QuickDrawer:line(pos + Vector3(0, 0, 1), pos + Quaternion.forward(rot) * 2 + Vector3(0, 0, 1), red)
 		end
 	end
-
-	return 
 end
+
 ConflictUtils.is_cover_point_hidden = function (cover_point_unit, avoid_pos_list, min_rad, long_distance_sqr)
 	local vector3_normalize = Vector3.normalize
 	local quaternion_forward = Quaternion.forward
@@ -319,15 +323,14 @@ ConflictUtils.is_cover_point_hidden = function (cover_point_unit, avoid_pos_list
 	if num_valid == num_to_avoid then
 		return true
 	end
-
-	return 
 end
+
 ConflictUtils.get_random_hidden_spawner = function (center_pos, radius, pick_closest_spawner)
 	local spawner_system = Managers.state.entity:system("spawner_system")
 	local amount = Broadphase.query(spawner_system.hidden_spawners_broadphase, center_pos, radius, found_cover_units)
 
 	if amount <= 0 then
-		return 
+		return
 	end
 
 	if pick_closest_spawner then
@@ -338,6 +341,7 @@ ConflictUtils.get_random_hidden_spawner = function (center_pos, radius, pick_clo
 
 	return found_cover_units[index]
 end
+
 ConflictUtils.get_biggest_cluster = function (clusters_sizes)
 	local biggest = 1
 
@@ -355,6 +359,7 @@ ConflictUtils.get_biggest_cluster = function (clusters_sizes)
 
 	return biggest
 end
+
 ConflictUtils.filter_positions = function (center_pos, main_target_pos, spawner_units, min_dist, max_dist)
 	local list = {}
 	max_dist = max_dist * max_dist
@@ -377,6 +382,7 @@ ConflictUtils.filter_positions = function (center_pos, main_target_pos, spawner_
 
 	return list
 end
+
 ConflictUtils.filter_horde_spawners = function (player_positions, spawner_units, min_dist, max_dist)
 	local list = {}
 	max_dist = max_dist * max_dist
@@ -402,6 +408,7 @@ ConflictUtils.filter_horde_spawners = function (player_positions, spawner_units,
 
 	return list
 end
+
 ConflictUtils.filter_horde_spawners_strictly = function (player_positions, spawner_units, min_dist, max_dist)
 	local list = {}
 	max_dist = max_dist * max_dist
@@ -433,6 +440,7 @@ ConflictUtils.filter_horde_spawners_strictly = function (player_positions, spawn
 
 	return list
 end
+
 ConflictUtils.get_hidden_pos = function (world, nav_world, center_pos, avoid_positions, radius, radius_spread, avoid_dist_sqr, max_tries, cake_slice_dir, cake_slice_angle_radians)
 	local h = Vector3(0, 0, 1)
 	local half_radius_spread = radius_spread * 0.5
@@ -470,15 +478,15 @@ ConflictUtils.get_hidden_pos = function (world, nav_world, center_pos, avoid_pos
 			end
 		end
 	end
-
-	return 
 end
+
 local work_list = {}
 local work_list_lookup = {}
+
 ConflictUtils.condense_array_randomly = function (array, wanted_size)
 	local array_size = #array
 
-	if array_size <= wanted_size then
+	if wanted_size >= array_size then
 		return array
 	end
 
@@ -498,6 +506,7 @@ ConflictUtils.condense_array_randomly = function (array, wanted_size)
 
 	return work_list
 end
+
 ConflictUtils.find_center_tri = function (nav_world, pos)
 	local success, altitude = GwNavQueries.triangle_from_position(nav_world, pos, 30, 30)
 
@@ -506,9 +515,8 @@ ConflictUtils.find_center_tri = function (nav_world, pos)
 
 		return pos
 	end
-
-	return 
 end
+
 ConflictUtils.simulate_dummy_target = function (nav_world, center_pos, t)
 	local radius = 15
 	local add_vec = Vector3(radius, 0, 1)
@@ -524,6 +532,7 @@ ConflictUtils.simulate_dummy_target = function (nav_world, center_pos, t)
 
 	return pos
 end
+
 ConflictUtils.check_spawn_pos = function (mesh, pos)
 	local poly = NavigationMesh.find_polygon(mesh, pos)
 
@@ -536,12 +545,16 @@ ConflictUtils.check_spawn_pos = function (mesh, pos)
 
 			if math.abs(cpos.z - triangle_center.z) < 3 then
 				return true
+
+				if true then
+				end
 			end
 		end
 	end
 
 	return false
 end
+
 ConflictUtils.get_spawn_pos_on_circle_segment = function (nav_world, center_pos, radius, direction, width, tries)
 	local lifted = center_pos + Vector3.up() * 1
 	local _, base_angle = math.cartesian_to_polar(direction.x, direction.y)
@@ -563,6 +576,7 @@ ConflictUtils.get_spawn_pos_on_circle_segment = function (nav_world, center_pos,
 
 	return false
 end
+
 ConflictUtils.test_cake_slice = function (nav_world, center_pos, t)
 	local cake_slice_dir = Quaternion.rotate(Quaternion(Vector3.up(), math.degrees_to_radians(t % 20 / 20 * 360)), Vector3(0, 20, 0))
 
@@ -575,9 +589,8 @@ ConflictUtils.test_cake_slice = function (nav_world, center_pos, t)
 			QuickDrawer:sphere(v, 0.5, Color(0, 0, 175))
 		end
 	end
-
-	return 
 end
+
 ConflictUtils.get_spawn_pos_on_cake_slice = function (nav_world, center_pos, radius1, radius2, cake_slice_dir, cake_slice_angle_radians, tries)
 	local slice_angle = math.atan2(cake_slice_dir.x, cake_slice_dir.y)
 	local half_slice_angle = cake_slice_angle_radians * 0.5
@@ -598,6 +611,7 @@ ConflictUtils.get_spawn_pos_on_cake_slice = function (nav_world, center_pos, rad
 
 	return false
 end
+
 ConflictUtils.get_spawn_pos_on_circle = function (nav_world, center_pos, dist, spread, tries)
 	for i = 1, tries, 1 do
 		local add_vec = Vector3(dist + (math.random() - 0.5) * spread, 0, 1)
@@ -611,6 +625,7 @@ ConflictUtils.get_spawn_pos_on_circle = function (nav_world, center_pos, dist, s
 
 	return false
 end
+
 ConflictUtils.get_spawn_pos_on_circle_horde = function (nav_world, center_pos, dist, spread, tries)
 	for i = 1, tries, 1 do
 		local add_vec = Vector3(dist + (math.random() - 0.5) * spread, 0, 1)
@@ -644,6 +659,7 @@ ConflictUtils.get_spawn_pos_on_circle_horde = function (nav_world, center_pos, d
 
 	return false
 end
+
 ConflictUtils.get_hidden_spawn_point = function (world, nav_world, center_pos, dist, spread, tries, player_pos)
 	local physics_world = World.get_data(world, "physics_world")
 	local point = ConflictUtils.get_spawn_pos_on_circle_horde(nav_world, center_pos, dist, spread, tries)
@@ -702,24 +718,26 @@ ConflictUtils.get_hidden_spawn_point = function (world, nav_world, center_pos, d
 
 	return point, hit
 end
+
 ConflictUtils.pick_horde_pos = function (world, nav_world, navigation_group_manager, center_pos, dist, spread, tries)
 	local player_pos = nil
 	local poly = GwNavTraversal.get_seed_triangle(nav_world, center_pos)
-	local cluster_group = (poly and navigation_group_manager.get_polygon_group(navigation_group_manager, poly)) or nil
+	local cluster_group = (poly and navigation_group_manager:get_polygon_group(poly)) or nil
 
-	if cluster_group and cluster_group.get_distance_from_finish(cluster_group) < math.huge and 1 < math.random(1, 3) then
+	if cluster_group and cluster_group:get_distance_from_finish() < math.huge and math.random(1, 3) > 1 then
 		tries = tries / 2
 		local spawn_group = ConflictUtils.get_group(cluster_group, cluster_group, dist, tries)
 		player_pos = center_pos
-		center_pos = spawn_group.get_group_center(spawn_group):unbox()
+		center_pos = spawn_group:get_group_center():unbox()
 		dist = 0
 	end
 
 	return ConflictUtils.get_hidden_spawn_point(world, nav_world, center_pos, dist, spread, tries, player_pos)
 end
+
 ConflictUtils.get_group = function (group, initial_group, wanted_distance, tries)
-	local initial_group_dist = initial_group.get_distance_from_finish(initial_group)
-	local group_dist = group.get_distance_from_finish(group)
+	local initial_group_dist = initial_group:get_distance_from_finish()
+	local group_dist = group:get_distance_from_finish()
 
 	assert(initial_group_dist < math.huge, "got unexpected value for distance from finish %s for initial group %s", initial_group_dist, initial_group)
 	assert(group_dist < math.huge, "got unexpected value for distance from finish %s for group %s", group_dist, group)
@@ -731,14 +749,14 @@ ConflictUtils.get_group = function (group, initial_group, wanted_distance, tries
 	end
 
 	tries = tries - 1
-	local group_neighbours = group.get_group_neighbours(group)
+	local group_neighbours = group:get_group_neighbours()
 	local furthest_group = next(group_neighbours, nil) or group
-	local furthest_group_dist = furthest_group.get_distance_from_finish(furthest_group)
+	local furthest_group_dist = furthest_group:get_distance_from_finish()
 
 	for group_neighbour, _ in pairs(group_neighbours) do
-		furthest_group_dist = furthest_group.get_distance_from_finish(furthest_group)
+		furthest_group_dist = furthest_group:get_distance_from_finish()
 
-		if furthest_group_dist < group_neighbour.get_distance_from_finish(group_neighbour) and 2 < math.random(1, 5) then
+		if furthest_group_dist < group_neighbour:get_distance_from_finish() and math.random(1, 5) > 2 then
 			furthest_group = group_neighbour
 		end
 	end
@@ -750,9 +768,8 @@ ConflictUtils.get_group = function (group, initial_group, wanted_distance, tries
 	else
 		return ConflictUtils.get_group(furthest_group, initial_group, wanted_distance, tries)
 	end
-
-	return 
 end
+
 ConflictUtils.get_closest_spawn_dist = function (mesh, unit_list, ray_from, ray_to, dir, radius)
 	if #unit_list == 0 then
 		return ray_to
@@ -786,10 +803,10 @@ ConflictUtils.get_closest_spawn_dist = function (mesh, unit_list, ray_from, ray_
 	else
 		return ray_to
 	end
-
-	return 
 end
+
 local MAX_TRIED_POSITIONS = 256
+
 ConflictUtils.tetris_spawn = function (world, spawn_func, player, spawn_list, pos, rot)
 	local already_spawned = {}
 	local mesh = Managers.state.level:nav_mesh()
@@ -834,24 +851,21 @@ ConflictUtils.tetris_spawn = function (world, spawn_func, player, spawn_list, po
 		loops = loops + 1
 		spawn_index = spawn_index + 1
 	end
-
-	return 
 end
+
 ConflictUtils.boxify_pos_array = function (array)
 	for i = 1, #array, 1 do
 		array[i] = Vector3Box(array[i])
 	end
-
-	return 
 end
+
 ConflictUtils.reset_spawn_debug_values = function ()
 	debug_table = {
 		{},
 		{}
 	}
-
-	return 
 end
+
 ConflictUtils.debug_update = function ()
 	if script_data.ai_horde_spawning_debugging_disabled == false then
 		Profiler.start("ConflictUtils.debug_update")
@@ -867,7 +881,7 @@ ConflictUtils.debug_update = function ()
 			radius = sphere[2]
 			color = colors[sphere[3]]:unbox()
 
-			drawer.sphere(drawer, pointa, radius, color)
+			drawer:sphere(pointa, radius, color)
 		end
 
 		for _, line in ipairs(debug_table[LINES]) do
@@ -875,23 +889,22 @@ ConflictUtils.debug_update = function ()
 			pointb = line[2]:unbox()
 			color = colors[line[3]]:unbox()
 
-			drawer.line(drawer, pointa, pointb, color)
+			drawer:line(pointa, pointb, color)
 		end
 
 		Profiler.stop("ConflictUtils.debug_update")
 	end
-
-	return 
 end
+
 ConflictUtils.draw_stack_of_balls = function (pos, a, r, g, b)
 	QuickDrawer:sphere(pos + Vector3(0, 0, 1), 0.4, Color(a, r, g, b))
 	QuickDrawer:sphere(pos + Vector3(0, 0, 1.5), 0.3, Color(a, r * 0.75, g * 0.75, b * 0.75))
 	QuickDrawer:sphere(pos + Vector3(0, 0, 2), 0.2, Color(a, r * 0.5, g * 0.5, b * 0.5))
 	QuickDrawer:sphere(pos + Vector3(0, 0, 2.5), 0.1, Color(a, r * 0.25, g * 0.25, b * 0.25))
-
-	return 
 end
+
 local level_portals = {}
+
 ConflictUtils.get_teleporter_portals = function ()
 	local level_key = Managers.state.game_mode:level_key()
 	local level_name = LevelSettings[level_key].level_name
@@ -916,7 +929,9 @@ ConflictUtils.get_teleporter_portals = function ()
 
 	return portals
 end
+
 local InterestPointUnitsLookup = InterestPointUnitsLookup
+
 ConflictUtils.interest_point_outside_nav_mesh = function (nav_world, unit_name, pos, interest_point_rot)
 	local lookup = InterestPointUnitsLookup[unit_name]
 
@@ -931,9 +946,8 @@ ConflictUtils.interest_point_outside_nav_mesh = function (nav_world, unit_name, 
 			return point_world_position
 		end
 	end
-
-	return 
 end
+
 ConflictUtils.generate_spawn_point_lookup = function (world)
 	local InterestPointUnits = InterestPointUnits
 	local lookup = {}
@@ -967,22 +981,20 @@ ConflictUtils.generate_spawn_point_lookup = function (world)
 	end
 
 	InterestPointUnitsLookup = lookup
-
-	return 
 end
+
 ConflictUtils.display_number_of_breeds = function (header, num_spawned, num_spawned_by_breed)
 	local s = header .. tostring(num_spawned) .. ", "
 
 	for breed_name, amount in pairs(num_spawned_by_breed) do
-		if 0 < amount then
+		if amount > 0 then
 			s = s .. breed_name .. "=" .. amount .. ", "
 		end
 	end
 
 	Debug.text(s)
-
-	return 
 end
+
 ConflictUtils.show_where_ai_is = function (spawned)
 	local POSITION_LOOKUP = POSITION_LOOKUP
 	local h = Vector3(0, 0, 40)
@@ -994,9 +1006,8 @@ ConflictUtils.show_where_ai_is = function (spawned)
 
 		QuickDrawer:line(pos, pos + h, Color(unpack(breed.debug_color)))
 	end
-
-	return 
 end
+
 ConflictUtils.make_roaming_spawns = function (self, nav_world, level_analysis)
 	Profiler.start("make_spawns")
 
@@ -1013,10 +1024,10 @@ ConflictUtils.make_roaming_spawns = function (self, nav_world, level_analysis)
 		false
 	}
 	local offset = Vector3(0, 0, 0.1)
-	local seed_pos = level_analysis.get_start_and_finish(level_analysis)
+	local seed_pos = level_analysis:get_start_and_finish()
 
 	if seed_pos then
-		seed_pos = seed_pos.unbox(seed_pos)
+		seed_pos = seed_pos:unbox()
 	else
 		local level_key = Managers.state.game_mode:level_key()
 		local level_name = LevelSettings[level_key].level_name
@@ -1080,4 +1091,4 @@ ConflictUtils.make_roaming_spawns = function (self, nav_world, level_analysis)
 	return list
 end
 
-return 
+return

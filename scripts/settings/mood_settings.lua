@@ -74,4 +74,4 @@ MoodSettings = {
 	}
 }
 
-return 
+return

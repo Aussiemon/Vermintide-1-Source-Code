@@ -77,4 +77,4 @@ EnvironmentalHazards = {
 	}
 }
 
-return 
+return

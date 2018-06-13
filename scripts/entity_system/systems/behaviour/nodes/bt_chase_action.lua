@@ -1,12 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTChaseAction = class(BTChaseAction, BTNode)
+
 BTChaseAction.init = function (self, ...)
 	BTChaseAction.super.init(self, ...)
-
-	return 
 end
+
 BTChaseAction.name = "BTChaseAction"
+
 BTChaseAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	blackboard.action = action
@@ -14,7 +15,7 @@ BTChaseAction.enter = function (self, unit, blackboard, t)
 	Managers.state.network:anim_event(unit, "to_combat")
 
 	if blackboard.move_state ~= "moving" then
-		self.start_moving(self, unit, blackboard, t)
+		self:start_moving(unit, blackboard, t)
 	end
 
 	blackboard.attack_cooldown = blackboard.attack_cooldown or t - 1
@@ -28,12 +29,11 @@ BTChaseAction.enter = function (self, unit, blackboard, t)
 
 	blackboard.attack_range = action.range
 	local network_manager = Managers.state.network
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 
 	Managers.state.network.network_transmit:send_rpc_all("rpc_enemy_has_target", unit_id, true)
-
-	return 
 end
+
 BTChaseAction.leave = function (self, unit, blackboard, t)
 	blackboard.running_attack_action = nil
 	blackboard.attacks_done = 0
@@ -45,9 +45,8 @@ BTChaseAction.leave = function (self, unit, blackboard, t)
 
 		blackboard.start_anim_locked_time = nil
 	end
-
-	return 
 end
+
 BTChaseAction.attack = function (self, unit, t, dt, blackboard, locomotion, action)
 	if blackboard.move_state ~= "attacking" then
 		blackboard.move_state = "attacking"
@@ -60,10 +59,9 @@ BTChaseAction.attack = function (self, unit, t, dt, blackboard, locomotion, acti
 
 	local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 
-	locomotion.set_wanted_rotation(locomotion, rot)
-
-	return 
+	locomotion:set_wanted_rotation(rot)
 end
+
 BTChaseAction.run = function (self, unit, blackboard, t, dt)
 	Profiler.start("BTChaseAction")
 
@@ -88,23 +86,24 @@ BTChaseAction.run = function (self, unit, blackboard, t, dt)
 	if t < blackboard.anim_locked then
 		local rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 
-		locomotion.set_wanted_rotation(locomotion, rot)
+		locomotion:set_wanted_rotation(rot)
 	elseif blackboard.target_dist <= action.range and blackboard.slot_layer == 1 then
-		self.attack(self, unit, t, dt, blackboard, locomotion, action)
+		self:attack(unit, t, dt, blackboard, locomotion, action)
 	else
-		self.follow(self, unit, t, dt, blackboard, locomotion, action)
+		self:follow(unit, t, dt, blackboard, locomotion, action)
 	end
 
 	Profiler.stop()
 
 	return "running"
 end
+
 BTChaseAction.start_moving = function (self, unit, blackboard, t)
 	local navigation_extension = blackboard.navigation_extension
-	local destination = navigation_extension.destination(navigation_extension)
+	local destination = navigation_extension:destination()
 	local distance = Vector3.distance(POSITION_LOOKUP[unit], destination)
 
-	if 0.5 < distance then
+	if distance > 0.5 then
 		local action = blackboard.action
 		local start_anim, anim_locked = LocomotionUtils.get_start_anim(unit, blackboard, action.start_anims)
 
@@ -118,26 +117,25 @@ BTChaseAction.start_moving = function (self, unit, blackboard, t)
 	end
 
 	blackboard.anim_locked = blackboard.anim_locked or t
-
-	return 
 end
+
 BTChaseAction.follow = function (self, unit, t, dt, blackboard, locomotion, action)
 	LocomotionUtils.follow_slotted_target(unit, blackboard, t)
 
 	local current_position = POSITION_LOOKUP[unit]
 	local breed = blackboard.breed
 	local navigation_extension = blackboard.navigation_extension
-	local destination = navigation_extension.destination(navigation_extension)
+	local destination = navigation_extension:destination()
 	local distance = Vector3.distance(current_position, destination)
 	local rot = nil
 
 	if distance < 1 then
-		navigation_extension.set_max_speed(navigation_extension, breed.walk_speed)
-	elseif 2 < distance then
-		navigation_extension.set_max_speed(navigation_extension, breed.run_speed)
+		navigation_extension:set_max_speed(breed.walk_speed)
+	elseif distance > 2 then
+		navigation_extension:set_max_speed(breed.run_speed)
 	end
 
-	if blackboard.move_state ~= "moving" and 0.5 < distance then
+	if blackboard.move_state ~= "moving" and distance > 0.5 then
 		blackboard.move_state = "moving"
 		local start_anim, anim_driven = LocomotionUtils.get_start_anim(unit, blackboard, blackboard.action.start_anims)
 
@@ -146,7 +144,7 @@ BTChaseAction.follow = function (self, unit, t, dt, blackboard, locomotion, acti
 		blackboard.move_state = "idle"
 		local animation = "idle"
 
-		if blackboard.slot_layer ~= nil and 1 < blackboard.slot_layer then
+		if blackboard.slot_layer ~= nil and blackboard.slot_layer > 1 then
 			animation = "shout"
 		end
 
@@ -155,7 +153,7 @@ BTChaseAction.follow = function (self, unit, t, dt, blackboard, locomotion, acti
 		rot = LocomotionUtils.rotation_towards_unit_flat(unit, blackboard.target_unit)
 	end
 
-	locomotion.set_wanted_rotation(locomotion, rot)
+	locomotion:set_wanted_rotation(rot)
 
 	if blackboard.time_to_next_friend_alert < t then
 		blackboard.time_to_next_friend_alert = t + 0.5
@@ -164,8 +162,6 @@ BTChaseAction.follow = function (self, unit, t, dt, blackboard, locomotion, acti
 	end
 
 	blackboard.attack_cooldown = t - 1
-
-	return 
 end
 
-return 
+return

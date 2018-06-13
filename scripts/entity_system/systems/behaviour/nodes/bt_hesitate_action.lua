@@ -1,11 +1,11 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTHesitateAction = class(BTHesitateAction, BTNode)
+
 BTHesitateAction.init = function (self, ...)
 	BTHesitateAction.super.init(self, ...)
-
-	return 
 end
+
 BTHesitateAction.name = "BTHesitateAction"
 local HESITATION_TIMER = 5
 
@@ -21,12 +21,13 @@ local HESITATION_EXIT_UPPER_BOUND = 1.4
 local RE_RAYCAST_DOT = math.sin(math.pi / 3)
 local DO_DOT_CHECK_FOR_RE_RAYCAST = false
 local WALL_ROTATION_FACTOR = 1
+
 BTHesitateAction.enter = function (self, unit, blackboard, t)
 	blackboard.navigation_extension:set_enabled(false)
 
 	local ai_slot_system = Managers.state.entity:system("ai_slot_system")
 
-	ai_slot_system.do_slot_search(ai_slot_system, unit, true)
+	ai_slot_system:do_slot_search(unit, true)
 
 	blackboard.hesitation = 0
 
@@ -34,7 +35,7 @@ BTHesitateAction.enter = function (self, unit, blackboard, t)
 	LocomotionUtils.set_animation_driven_movement(unit, true, false, true)
 	LocomotionUtils.set_animation_rotation_scale(unit, 1)
 	Managers.state.network:anim_event(unit, "to_combat")
-	self._select_new_hesitate_anim(self, unit, blackboard)
+	self:_select_new_hesitate_anim(unit, blackboard)
 
 	blackboard.hesitate_wall = false
 	blackboard.outnumber_multiplier = 1
@@ -43,7 +44,7 @@ BTHesitateAction.enter = function (self, unit, blackboard, t)
 	blackboard.hesitate_timer = nil
 	blackboard.do_wall_check = true
 
-	if 0.5 < Math.random() then
+	if Math.random() > 0.5 then
 		blackboard.oh_shit_proximity_panic_override = true
 	else
 		blackboard.oh_shit_proximity_panic_override = false
@@ -52,9 +53,8 @@ BTHesitateAction.enter = function (self, unit, blackboard, t)
 	blackboard.active_node = self
 	blackboard.move_state = "idle"
 	blackboard.spawn_to_running = nil
-
-	return 
 end
+
 BTHesitateAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.locomotion_extension:use_lerp_rotation(true)
 	LocomotionUtils.set_animation_driven_movement(unit, false)
@@ -73,15 +73,14 @@ BTHesitateAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.oh_shit_proximity_panic_override = false
 	blackboard.hesitating = false
 	blackboard.hesitate_finished = nil
-
-	return 
 end
+
 local BROADPHASE_QUERY_RESULT = {}
+
 BTHesitateAction.anim_cb_hesitate_finished = function (self, unit, blackboard)
 	blackboard.hesitate_finished = true
-
-	return 
 end
+
 BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 	local debug = script_data.ai_hesitation_debug
 	local locomotion_extension = blackboard.locomotion_extension
@@ -92,7 +91,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 		rot = Quaternion.lerp(rot, hesitate_wall_rotation, WALL_ROTATION_FACTOR)
 	end
 
-	locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
+	locomotion_extension:set_wanted_rotation(rot)
 
 	local current_pos = POSITION_LOOKUP[unit]
 	local pos = blackboard.hesitate_wall_position and blackboard.hesitate_wall_position:unbox()
@@ -100,8 +99,8 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 	if pos and hesitate_wall_rotation then
 		local diff = Vector3.flat(pos - current_pos)
 
-		if 0.05 <= Vector3.dot(diff, Quaternion.forward(hesitate_wall_rotation)) then
-			locomotion_extension.set_wanted_velocity_flat(locomotion_extension, diff * 2)
+		if Vector3.dot(diff, Quaternion.forward(hesitate_wall_rotation)) >= 0.05 then
+			locomotion_extension:set_wanted_velocity_flat(diff * 2)
 
 			if debug then
 				Debug.text("hesitate lerp wanted velocity: " .. tostring(diff * 2))
@@ -243,7 +242,7 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 
 				local network_manager = Managers.state.network
 
-				network_manager.anim_event(network_manager, unit, "hesitate_wall")
+				network_manager:anim_event(unit, "hesitate_wall")
 
 				blackboard.hesitate_wall = true
 				blackboard.hesitate_wall_rotation = QuaternionBox(Quaternion.look(Vector3.flat(normal), Vector3.up()))
@@ -263,12 +262,12 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 					print("forcing no bwd hesitations")
 				end
 
-				self._select_new_hesitate_anim(self, unit, blackboard)
+				self:_select_new_hesitate_anim(unit, blackboard)
 			end
 		end
 
 		if blackboard.hesitate_finished and not blackboard.hesitate_wall then
-			self._select_new_hesitate_anim(self, unit, blackboard)
+			self:_select_new_hesitate_anim(unit, blackboard)
 
 			blackboard.hesitate_finished = nil
 
@@ -279,9 +278,8 @@ BTHesitateAction.run = function (self, unit, blackboard, t, dt)
 
 		return "running"
 	end
-
-	return 
 end
+
 BTHesitationVariations = {
 	hesitate = {
 		"hesitate"
@@ -295,18 +293,19 @@ BTHesitationVariations = {
 		"hesitate_bwd"
 	}
 }
+
 BTHesitateAction._select_new_hesitate_anim = function (self, unit, blackboard)
 	local anim = nil
 
 	if not blackboard.do_wall_check then
 		anim = "hesitate"
 	elseif blackboard.last_hesitate_anim == "hesitate_bwd" then
-		if 0.3333333333333333 < Math.random() then
+		if Math.random() > 0.3333333333333333 then
 			anim = "hesitate"
 		else
 			anim = "hesitate_bwd"
 		end
-	elseif 0.3333333333333333 < Math.random() then
+	elseif Math.random() > 0.3333333333333333 then
 		anim = "hesitate_bwd"
 	else
 		anim = "hesitate"
@@ -317,8 +316,6 @@ BTHesitateAction._select_new_hesitate_anim = function (self, unit, blackboard)
 	Managers.state.network:anim_event(unit, variation_table[Math.random(1, #variation_table)])
 
 	blackboard.last_hesitate_anim = anim
-
-	return 
 end
 
-return 
+return

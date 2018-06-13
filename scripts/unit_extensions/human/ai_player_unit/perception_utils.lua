@@ -2,14 +2,6 @@
 --   Code may be incomplete or incorrect.
 -- WARNING: Error occurred during decompilation.
 --   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/unit_extensions/human/ai_player_unit/ai_utils")
 
 PerceptionUtils = {}
@@ -23,6 +15,7 @@ local PLAYER_AND_BOT_POSITIONS = PLAYER_AND_BOT_POSITIONS
 local PLAYER_UNITS = PLAYER_UNITS
 local AI_UTILS = AI_UTILS
 local ScriptUnit_extension = ScriptUnit.extension
+
 PerceptionUtils.pick_closest_target = function (unit, blackboard, breed)
 	local pos = POSITION_LOOKUP[unit]
 	local closest_enemy = nil
@@ -39,6 +32,7 @@ PerceptionUtils.pick_closest_target = function (unit, blackboard, breed)
 
 	return closest_enemy, closest_dist
 end
+
 PerceptionUtils.pick_closest_target_infinte_range = function (unit, blackboard, breed)
 	local pos = POSITION_LOOKUP[unit]
 	local closest_enemy = nil
@@ -55,6 +49,7 @@ PerceptionUtils.pick_closest_target_infinte_range = function (unit, blackboard, 
 
 	return closest_enemy, closest_dist
 end
+
 PerceptionUtils.healthy_players = function (unit, blackboard, breed)
 	local special_targets = blackboard.group_blackboard.special_targets
 	local vector3_distance = Vector3.distance
@@ -95,10 +90,12 @@ PerceptionUtils.healthy_players = function (unit, blackboard, breed)
 
 	return best_unit
 end
+
 local found_units = {}
 local healthy_targets = {}
 local healthy_target_positions = {}
 local num_healthy_targets = 0
+
 PerceptionUtils.special_opportunity = function (unit, blackboard)
 	num_healthy_targets = 0
 	local num_enemies = #PLAYER_AND_BOT_UNITS
@@ -109,13 +106,13 @@ PerceptionUtils.special_opportunity = function (unit, blackboard)
 		local status_extension = ScriptUnit.extension(enemy_unit, "status_system")
 
 		if not status_extension.spawn_grace and not status_extension.using_transport then
-			if status_extension.is_knocked_down(status_extension) then
+			if status_extension:is_knocked_down() then
 				urgency_to_engage = 10
-			elseif status_extension.is_grabbed_by_pack_master(status_extension) then
+			elseif status_extension:is_grabbed_by_pack_master() then
 				urgency_to_engage = 10
-			elseif status_extension.get_is_ledge_hanging(status_extension) then
+			elseif status_extension:get_is_ledge_hanging() then
 				urgency_to_engage = 10
-			elseif status_extension.is_pounced_down(status_extension) then
+			elseif status_extension:is_pounced_down() then
 				urgency_to_engage = 10
 			elseif status_extension.under_ratling_gunner_attack then
 				urgency_to_engage = 10
@@ -133,11 +130,11 @@ PerceptionUtils.special_opportunity = function (unit, blackboard)
 
 	local rats_per_player_slot = blackboard.total_slots_count / num_healthy_targets
 
-	if 4 <= rats_per_player_slot then
+	if rats_per_player_slot >= 4 then
 		urgency_to_engage = 10
 	end
 
-	if 0 < urgency_to_engage then
+	if urgency_to_engage > 0 then
 		local pos = POSITION_LOOKUP[unit]
 		local closest_dist = math.huge
 		local closest_unit = nil
@@ -170,9 +167,11 @@ PerceptionUtils.special_opportunity = function (unit, blackboard)
 
 	return urgency_to_engage
 end
+
 PerceptionUtils.pick_ninja_skulking_target = function (unit, blackboard, breed)
 	return PerceptionUtils.pick_solitary_target(unit, blackboard, breed)
 end
+
 PerceptionUtils.pick_ninja_approach_target = function (unit, blackboard, breed)
 	local target_unit = blackboard.target_unit
 
@@ -190,7 +189,7 @@ PerceptionUtils.pick_ninja_approach_target = function (unit, blackboard, breed)
 		local enemy_unit = PLAYER_AND_BOT_UNITS[i]
 		local status_extension = ScriptUnit.extension(enemy_unit, "status_system")
 
-		if not status_extension.is_disabled(status_extension) then
+		if not status_extension:is_disabled() then
 			local enemy_pos = POSITION_LOOKUP[enemy_unit]
 			local pos = POSITION_LOOKUP[unit]
 			local dist = Vector3.distance(pos, enemy_pos)
@@ -211,6 +210,7 @@ PerceptionUtils.pick_ninja_approach_target = function (unit, blackboard, breed)
 
 	return closest_enemy, closest_dist, urgency_to_engage
 end
+
 PerceptionUtils.pick_solitary_target = function (unit, blackboard, breed)
 	local pos = POSITION_LOOKUP[unit]
 	local closest_enemy = nil
@@ -225,7 +225,7 @@ PerceptionUtils.pick_solitary_target = function (unit, blackboard, breed)
 
 	if unit_alive(target_unit) then
 		local status_extension = ScriptUnit.extension(target_unit, "status_system")
-		local is_pounced_by_me = status_extension.is_pounced_down(status_extension) and status_extension.get_pouncer_unit(status_extension) == unit
+		local is_pounced_by_me = status_extension:is_pounced_down() and status_extension:get_pouncer_unit() == unit
 
 		if is_pounced_by_me then
 			return target_unit, blackboard.target_dist, 100
@@ -248,12 +248,12 @@ PerceptionUtils.pick_solitary_target = function (unit, blackboard, breed)
 		local dummy, enemy_pos, loneliness_value = nil
 		dummy, enemy_pos, loneliness_value, enemy_unit = Managers.state.conflict:get_cluster_and_loneliness(10)
 
-		if 4 < loneliness_value and AiUtils.is_of_interest_to_gutter_runner(unit, enemy_unit, blackboard) then
-			if 15 < loneliness_value then
+		if loneliness_value > 4 and AiUtils.is_of_interest_to_gutter_runner(unit, enemy_unit, blackboard) then
+			if loneliness_value > 15 then
 				urgency_to_engage = 10
-			elseif 10 < loneliness_value and 3 <= blackboard.total_slots_count then
+			elseif loneliness_value > 10 and blackboard.total_slots_count >= 3 then
 				urgency_to_engage = 5
-			elseif 4 < loneliness_value and 6 <= blackboard.total_slots_count then
+			elseif loneliness_value > 4 and blackboard.total_slots_count >= 6 then
 				urgency_to_engage = 5
 			else
 				urgency_to_engage = 1
@@ -278,6 +278,7 @@ PerceptionUtils.pick_solitary_target = function (unit, blackboard, breed)
 
 	return closest_enemy, closest_dist, urgency_to_engage
 end
+
 PerceptionUtils.pick_closest_target_only_human = function (unit, blackboard, breed)
 	local pos = POSITION_LOOKUP[unit]
 	local closest_enemy = nil
@@ -295,6 +296,7 @@ PerceptionUtils.pick_closest_target_only_human = function (unit, blackboard, bre
 
 	return closest_enemy, closest_dist
 end
+
 local DOGPILE_SCORE = 2.5
 local DISABLED_SLOT_SCORE = 2.5
 local ALL_SLOTS_DISABLED_SCORE = 600
@@ -307,7 +309,7 @@ local function _calculate_horde_pick_closest_target_with_spillover_score(target_
 	local exceptions = target_type and breed.perception_exceptions and breed.perception_exceptions[target_type]
 
 	if exceptions then
-		return 
+		return
 	end
 
 	local dogpile_count = 0
@@ -319,7 +321,7 @@ local function _calculate_horde_pick_closest_target_with_spillover_score(target_
 		local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
 
 		if not target_slot_extension.valid_target then
-			return 
+			return
 		end
 
 		dogpile_count = target_slot_extension.slots_count
@@ -327,12 +329,12 @@ local function _calculate_horde_pick_closest_target_with_spillover_score(target_
 		disabled_slots_count = target_slot_extension.disabled_slots_count
 		all_slots_disabled = disabled_slots_count == total_slots_count
 		local status_ext = ScriptUnit.has_extension(target_unit, "status_system")
-		local on_ladder = status_ext and status_ext.get_is_on_ladder(status_ext)
+		local on_ladder = status_ext and status_ext:get_is_on_ladder()
 
 		if on_ladder then
 			local max_allowed = (is_previous_attacker and total_slots_count) or total_slots_count - 1
 
-			if max_allowed < dogpile_count then
+			if dogpile_count > max_allowed then
 				all_slots_disabled = true
 			end
 		end
@@ -385,7 +387,7 @@ PerceptionUtils.horde_pick_closest_target_with_spillover = function (ai_unit, bl
 	for target_unit, end_of_override_t in pairs(override_targets) do
 		local target_unit_alive = unit_alive(target_unit)
 		local status_extension = target_unit_alive and ScriptUnit.extension(target_unit, "status_system")
-		local is_incapacitated = target_unit_alive and status_extension.is_disabled(status_extension)
+		local is_incapacitated = target_unit_alive and status_extension:is_disabled()
 
 		if not target_unit_alive or end_of_override_t < t or is_incapacitated then
 			override_targets[target_unit] = nil
@@ -417,6 +419,7 @@ PerceptionUtils.horde_pick_closest_target_with_spillover = function (ai_unit, bl
 
 	return best_target_unit, distance_to_target_sq
 end
+
 local HEAR_DISTANCE = 1
 local raycast_points = {
 	"j_hips",
@@ -430,7 +433,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 	local exceptions = target_type and breed.perception_exceptions and breed.perception_exceptions[target_type]
 
 	if exceptions then
-		return 
+		return
 	end
 
 	local target_unit_position = POSITION_LOOKUP[target_unit]
@@ -442,7 +445,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 		if target_unit ~= target_current and detection_radius_sq < distance_sq then
 			Profiler.stop("line of sight checks")
 
-			return 
+			return
 		end
 
 		local random_point = raycast_points[Math.random(1, #raycast_points)]
@@ -461,7 +464,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 				if result then
 					Profiler.stop("line of sight checks")
 
-					return 
+					return
 				end
 			end
 		end
@@ -478,7 +481,7 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 		local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
 
 		if not target_slot_extension.valid_target then
-			return 
+			return
 		end
 
 		dogpile_count = target_slot_extension.slots_count
@@ -486,12 +489,12 @@ local function _calculate_closest_target_with_spillover_score(target_unit, targe
 		disabled_slots_count = target_slot_extension.disabled_slots_count
 		all_slots_disabled = disabled_slots_count == total_slots_count
 		local status_ext = ScriptUnit.has_extension(target_unit, "status_system")
-		local on_ladder = status_ext and status_ext.get_is_on_ladder(status_ext)
+		local on_ladder = status_ext and status_ext:get_is_on_ladder()
 
 		if on_ladder then
 			local max_allowed = (is_previous_attacker and total_slots_count) or total_slots_count - 1
 
-			if max_allowed < dogpile_count then
+			if dogpile_count > max_allowed then
 				all_slots_disabled = true
 			end
 		end
@@ -554,7 +557,7 @@ PerceptionUtils.pick_closest_target_with_spillover = function (ai_unit, blackboa
 	for target_unit, end_of_override_t in pairs(override_targets) do
 		local target_unit_alive = unit_alive(target_unit)
 		local status_extension = target_unit_alive and ScriptUnit.extension(target_unit, "status_system")
-		local is_incapacitated = target_unit_alive and status_extension.is_disabled(status_extension)
+		local is_incapacitated = target_unit_alive and status_extension:is_disabled()
 
 		if not target_unit_alive or end_of_override_t < t or is_incapacitated then
 			override_targets[target_unit] = nil
@@ -586,7 +589,9 @@ PerceptionUtils.pick_closest_target_with_spillover = function (ai_unit, blackboa
 
 	return best_target_unit, distance_to_target_sq
 end
+
 local storm_patrol_debug_draw_count = 0
+
 PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard, breed)
 	assert(ScriptUnit.has_extension(ai_unit, "ai_slot_system"))
 
@@ -608,96 +613,109 @@ PerceptionUtils.storm_patrol_passive_perception = function (ai_unit, blackboard,
 		local attacker_pos = POSITION_LOOKUP[blackboard_target]
 
 		for _, target_unit in pairs(global_targets) do
-			if not AiUtils_unit_alive(target_unit) then
-			elseif ScriptUnit.has_extension(target_unit, "ai_slot_system") then
-				local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
+			repeat
+				if not AiUtils_unit_alive(target_unit) then
+					break
+				end
 
-				if not target_slot_extension.valid_target then
-					if false then
+				if ScriptUnit.has_extension(target_unit, "ai_slot_system") then
+					local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
+
+					if not target_slot_extension.valid_target then
+						break
 					end
 				else
-					local target_unit_position = POSITION_LOOKUP[target_unit]
-					local distance_sq = Vector3.distance_squared(attacker_pos, target_unit_position)
-
-					if distance_sq < detection_radius_sqr then
-						group_targets[target_unit] = true
-					end
+					break
 				end
-			end
+
+				local target_unit_position = POSITION_LOOKUP[target_unit]
+				local distance_sq = Vector3.distance_squared(attacker_pos, target_unit_position)
+
+				if distance_sq < detection_radius_sqr then
+					group_targets[target_unit] = true
+				end
+			until true
 		end
 	end
 
 	for _, target_unit in ipairs(global_targets) do
-		if not AiUtils_unit_alive(target_unit) then
-		elseif ScriptUnit.has_extension(target_unit, "ai_slot_system") then
-			local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
+		repeat
+			if not AiUtils_unit_alive(target_unit) then
+				break
+			end
 
-			if not target_slot_extension.valid_target then
-				if false then
+			if ScriptUnit.has_extension(target_unit, "ai_slot_system") then
+				local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
+
+				if not target_slot_extension.valid_target then
+					break
 				end
 			else
-				local target_unit_position = POSITION_LOOKUP[target_unit]
-				local is_bot = Managers.player:owner(target_unit).bot_player
-				local distance_sq = Vector3.distance_squared(ai_unit_position, target_unit_position)
-				local view_cone_dot = 0.5
+				break
+			end
 
-				if distance_sq < detection_radius_sqr then
-					local anchor_direction = blackboard.anchor_direction
-					local ai_unit_rotation = (anchor_direction and anchor_direction.unbox(anchor_direction)) or Quaternion.forward(Unit.world_rotation(ai_unit, 0))
-					local ai_unit_direction = Vector3.normalize(ai_unit_rotation)
-					local ai_unit_to_target_dir = Vector3.normalize(target_unit_position - ai_unit_position)
-					local dot = Vector3.dot(ai_unit_to_target_dir, ai_unit_direction)
+			local target_unit_position = POSITION_LOOKUP[target_unit]
+			local is_bot = Managers.player:owner(target_unit).bot_player
+			local distance_sq = Vector3.distance_squared(ai_unit_position, target_unit_position)
+			local view_cone_dot = 0.5
 
-					if (view_cone_dot < dot and not is_bot) or distance_sq < breed.panic_close_detection_radius_sq then
-						local physics_world = World.get_data(Unit.world(target_unit), "physics_world")
-						local see_you = PerceptionUtils.raycast_spine_to_spine(ai_unit, target_unit, physics_world)
+			if distance_sq < detection_radius_sqr then
+				local anchor_direction = blackboard.anchor_direction
+				local ai_unit_rotation = (anchor_direction and anchor_direction:unbox()) or Quaternion.forward(Unit.world_rotation(ai_unit, 0))
+				local ai_unit_direction = Vector3.normalize(ai_unit_rotation)
+				local ai_unit_to_target_dir = Vector3.normalize(target_unit_position - ai_unit_position)
+				local dot = Vector3.dot(ai_unit_to_target_dir, ai_unit_direction)
 
-						if see_you then
-							group_targets[target_unit] = true
+				if (view_cone_dot < dot and not is_bot) or distance_sq < breed.panic_close_detection_radius_sq then
+					local physics_world = World.get_data(Unit.world(target_unit), "physics_world")
+					local see_you = PerceptionUtils.raycast_spine_to_spine(ai_unit, target_unit, physics_world)
 
-							if distance_sq < distance_to_target_sq then
-								best_target_unit = target_unit
-								distance_to_target_sq = distance_sq
-							end
+					if see_you then
+						group_targets[target_unit] = true
+
+						if distance_sq < distance_to_target_sq then
+							best_target_unit = target_unit
+							distance_to_target_sq = distance_sq
 						end
 					end
 				end
-
-				if script_data.debug_storm_vermin_patrol then
-					local drawer = Managers.state.debug:drawer({
-						mode = "retained",
-						name = "storm_vermin_patrol_targeting_retained"
-					})
-					storm_patrol_debug_draw_count = storm_patrol_debug_draw_count + 1
-
-					if group.num_indexed_members < storm_patrol_debug_draw_count then
-						drawer.reset(drawer)
-
-						storm_patrol_debug_draw_count = 1
-					end
-
-					local anchor_direction = blackboard.anchor_direction
-					local ai_unit_rotation = (anchor_direction and anchor_direction.unbox(anchor_direction)) or Quaternion.forward(Unit.world_rotation(ai_unit, 0))
-					local ai_unit_direction = Vector3.normalize(ai_unit_rotation)
-					local angle = math.acos(view_cone_dot) * 180 / math.pi
-					local view_vector_center = ai_unit_direction * breed.patrol_detection_radius
-					local view_vector_left = Quaternion.rotate(Quaternion.from_euler_angles_xyz(0, 0, angle), view_vector_center)
-					local view_vector_right = Quaternion.rotate(Quaternion.from_euler_angles_xyz(0, 0, -angle), view_vector_center)
-
-					drawer.line(drawer, ai_unit_position, ai_unit_position + view_vector_center, Colors.get("red"))
-					drawer.line(drawer, ai_unit_position, ai_unit_position + view_vector_left, Colors.get("red"))
-					drawer.line(drawer, ai_unit_position, ai_unit_position + view_vector_right, Colors.get("red"))
-
-					local panic_close_detection_radius = math.sqrt(breed.panic_close_detection_radius_sq)
-
-					drawer.circle(drawer, ai_unit_position, panic_close_detection_radius, Vector3.up(), Colors.get("red"))
-				end
 			end
-		end
+
+			if script_data.debug_storm_vermin_patrol then
+				local drawer = Managers.state.debug:drawer({
+					mode = "retained",
+					name = "storm_vermin_patrol_targeting_retained"
+				})
+				storm_patrol_debug_draw_count = storm_patrol_debug_draw_count + 1
+
+				if group.num_indexed_members < storm_patrol_debug_draw_count then
+					drawer:reset()
+
+					storm_patrol_debug_draw_count = 1
+				end
+
+				local anchor_direction = blackboard.anchor_direction
+				local ai_unit_rotation = (anchor_direction and anchor_direction:unbox()) or Quaternion.forward(Unit.world_rotation(ai_unit, 0))
+				local ai_unit_direction = Vector3.normalize(ai_unit_rotation)
+				local angle = math.acos(view_cone_dot) * 180 / math.pi
+				local view_vector_center = ai_unit_direction * breed.patrol_detection_radius
+				local view_vector_left = Quaternion.rotate(Quaternion.from_euler_angles_xyz(0, 0, angle), view_vector_center)
+				local view_vector_right = Quaternion.rotate(Quaternion.from_euler_angles_xyz(0, 0, -angle), view_vector_center)
+
+				drawer:line(ai_unit_position, ai_unit_position + view_vector_center, Colors.get("red"))
+				drawer:line(ai_unit_position, ai_unit_position + view_vector_left, Colors.get("red"))
+				drawer:line(ai_unit_position, ai_unit_position + view_vector_right, Colors.get("red"))
+
+				local panic_close_detection_radius = math.sqrt(breed.panic_close_detection_radius_sq)
+
+				drawer:circle(ai_unit_position, panic_close_detection_radius, Vector3.up(), Colors.get("red"))
+			end
+		until true
 	end
 
 	return nil
 end
+
 PerceptionUtils.storm_patrol_death_squad_perception = function (ai_unit, blackboard, breed)
 	assert(ScriptUnit.has_extension(ai_unit, "ai_slot_system"))
 
@@ -741,17 +759,44 @@ PerceptionUtils.storm_patrol_death_squad_perception = function (ai_unit, blackbo
 	end
 
 	for target_unit, _ in pairs(group_targets) do
-		if not valid_players_and_bots[target_unit] then
-			group_targets[target_unit] = nil
-		else
-			local status_extension = ScriptUnit.extension(target_unit, "status_system")
-
-			if status_extension.using_transport or status_extension.spawn_grace then
+		repeat
+			if not valid_players_and_bots[target_unit] then
 				group_targets[target_unit] = nil
 			else
-				local score_dogpile = 0
+				local status_extension = ScriptUnit.extension(target_unit, "status_system")
+
+				if status_extension.using_transport or status_extension.spawn_grace then
+					group_targets[target_unit] = nil
+				else
+					local score_dogpile = 0
+
+					if ScriptUnit.has_extension(target_unit, "ai_slot_system") then
+						local target_slot_extension = ScriptUnit.extension(target_unit, "ai_slot_system")
+
+						if not target_slot_extension.valid_target then
+							break
+						end
+
+						score_dogpile = target_slot_extension.slots_count * DOGPILE_SCORE
+					end
+
+					local aggro_extension = ScriptUnit.extension(target_unit, "aggro_system")
+					local aggro_modifier = aggro_extension.aggro_modifier
+					local target_unit_position = POSITION_LOOKUP[target_unit]
+					local distance_sq = Vector3.distance_squared(ai_unit_position, target_unit_position)
+					local score_distance = distance_sq * 0.1
+					local score_stickyness = (target_unit == target_current and -5) or 0
+					local knocked_down_modifer = (status_extension:is_knocked_down() and 5) or 0
+					local score = score_dogpile + score_distance + score_stickyness + knocked_down_modifer + aggro_modifier
+
+					if best_score > score then
+						best_score = score
+						best_target_unit = target_unit
+						distance_to_target_sq = distance_sq
+					end
+				end
 			end
-		end
+		until true
 	end
 
 	if distance_to_target_sq == nil then
@@ -760,10 +805,13 @@ PerceptionUtils.storm_patrol_death_squad_perception = function (ai_unit, blackbo
 
 	return best_target_unit, distance_to_target_sq
 end
+
 PerceptionUtils.pick_no_targets = function ()
-	return 
+	return
 end
+
 local rat_ogre_in_dist_squared_idle = 2025
+
 PerceptionUtils.pick_rat_ogre_target_idle = function (unit, blackboard, breed, t)
 	local w = blackboard.waiting
 
@@ -771,7 +819,7 @@ PerceptionUtils.pick_rat_ogre_target_idle = function (unit, blackboard, breed, t
 		local num_players = #PLAYER_AND_BOT_UNITS
 
 		if num_players <= 0 then
-			return 
+			return
 		end
 
 		w.next_player_unit_index = w.next_player_unit_index + 1
@@ -790,7 +838,7 @@ PerceptionUtils.pick_rat_ogre_target_idle = function (unit, blackboard, breed, t
 			if los then
 				local ai_simple = ScriptUnit_extension(unit, "ai_system")
 
-				ai_simple.set_perception(ai_simple, breed.perception, breed.target_selection_angry)
+				ai_simple:set_perception(breed.perception, breed.target_selection_angry)
 
 				local urgency_to_engage = 100
 				local enemy_dist = math.sqrt(dist_squared)
@@ -815,10 +863,10 @@ PerceptionUtils.pick_rat_ogre_target_idle = function (unit, blackboard, breed, t
 
 		w.next_update_time = t + 0.5
 	end
-
-	return 
 end
+
 local score_table = {}
+
 PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, breed, t)
 	local vector3_distance = Vector3.distance
 	local wanted_enemy = nil
@@ -949,6 +997,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 
 	return wanted_enemy, wanted_dist
 end
+
 PerceptionUtils.debug_rat_ogre_perception = function (gui, t, x1, y1, blackboard)
 	local tiny_font_size = 16
 	local tiny_font = "gw_arial_16"
@@ -1003,9 +1052,8 @@ PerceptionUtils.debug_rat_ogre_perception = function (gui, t, x1, y1, blackboard
 	y2 = y2 + 20
 
 	ScriptGUI.icrect(gui, resx, resy, borderx, bordery, x1 + debug_win_width, y2, layer - 1, Color(200, 20, 20, 20))
-
-	return 
 end
+
 PerceptionUtils.pick_pack_master_target = function (unit, blackboard, breed)
 	local is_of_interest_to_packmaster = AiUtils.is_of_interest_to_packmaster
 	local pos = POSITION_LOOKUP[unit]
@@ -1021,7 +1069,7 @@ PerceptionUtils.pick_pack_master_target = function (unit, blackboard, breed)
 				dist_sq = dist_sq * 0.8
 			end
 
-			if dist_sq < closest_dist_sq then
+			if closest_dist_sq > dist_sq then
 				closest_dist_sq = dist_sq
 				closest_enemy = enemy_unit
 			end
@@ -1059,12 +1107,7 @@ function double_raycast(blackboard, from, cast_template, enemy_unit, physics_wor
 		cast_table[target_node_name] = false
 	else
 		is_hit, hit_pos = PhysicsWorld.immediate_raycast(physics_world, target_unit_position, -normalized_direction, distance, "closest", "collision_filter", filter)
-
-		if is_hit then
-			cast_table[target_node_name] = false
-		else
-			cast_table[target_node_name] = true
-		end
+		cast_table[target_node_name] = not is_hit
 	end
 
 	for i = 1, cast_table_size, 1 do
@@ -1082,7 +1125,7 @@ local function target_allowed_for_ratling(unit)
 	if unit_alive(unit) then
 		local status_ext = ScriptUnit.extension(unit, "status_system")
 
-		return not status_ext.is_dead(status_ext) and not status_ext.is_knocked_down(status_ext) and not status_ext.get_is_ledge_hanging(status_ext) and not status_ext.is_ready_for_assisted_respawn(status_ext) and not status_ext.is_hanging_from_hook(status_ext)
+		return not status_ext:is_dead() and not status_ext:is_knocked_down() and not status_ext:get_is_ledge_hanging() and not status_ext:is_ready_for_assisted_respawn() and not status_ext:is_hanging_from_hook()
 	end
 
 	return false
@@ -1129,6 +1172,7 @@ PerceptionUtils.pick_ratling_gun_target = function (unit, blackboard, old_target
 
 	return closest_enemy, visible_node_name, old_target_visible, old_target_visible_node_name
 end
+
 PerceptionUtils.raycast_spine_to_spine = function (from_unit, to_unit, physics_world)
 	local is_creature = ScriptUnit.has_extension(to_unit, "locomotion_system")
 
@@ -1152,20 +1196,19 @@ PerceptionUtils.raycast_spine_to_spine = function (from_unit, to_unit, physics_w
 	else
 		return true
 	end
-
-	return 
 end
+
 PerceptionUtils.pick_area_target = function (unit, blackboard, breed, radius, max_distance)
 	local target = nil
 	local enemies_in_area = 0
 	local circles = {}
 	local positions = PLAYER_AND_BOT_POSITIONS
 
-	if 1 < #positions then
+	if #positions > 1 then
 		circles = PerceptionUtils._find_circles(unit, positions, radius, max_distance)
 	end
 
-	if 0 < #circles then
+	if #circles > 0 then
 		local best_circle = PerceptionUtils._pick_best_circle(circles, positions, radius)
 		target = best_circle.pos
 		enemies_in_area = best_circle.targets
@@ -1180,6 +1223,7 @@ PerceptionUtils.pick_area_target = function (unit, blackboard, breed, radius, ma
 
 	return target, enemies_in_area
 end
+
 PerceptionUtils._find_circles = function (unit, target_positions, radius, max_distance)
 	local unit_position = POSITION_LOOKUP[unit]
 	local circles = {}
@@ -1228,6 +1272,7 @@ PerceptionUtils._find_circles = function (unit, target_positions, radius, max_di
 
 	return circles
 end
+
 PerceptionUtils._pick_best_circle = function (circles, positions, radius)
 	for _, c in ipairs(circles) do
 		for _, enemy_pos in pairs(positions) do
@@ -1251,6 +1296,7 @@ PerceptionUtils._pick_best_circle = function (circles, positions, radius)
 
 	return circles[best_target]
 end
+
 PerceptionUtils.debug_draw_pick_area_target = function (circles, target, radius, positions)
 	local drawer = Managers.state.debug:drawer({
 		mode = "retained",
@@ -1258,7 +1304,7 @@ PerceptionUtils.debug_draw_pick_area_target = function (circles, target, radius,
 	})
 	local z_offset = Vector3.up() * 0.3
 
-	drawer.reset(drawer)
+	drawer:reset()
 
 	for i = 1, #circles, 2 do
 		local circle_1 = circles[i]
@@ -1267,29 +1313,28 @@ PerceptionUtils.debug_draw_pick_area_target = function (circles, target, radius,
 		local color2 = math.random(255)
 		local color3 = math.random(255)
 
-		drawer.circle(drawer, circle_1.pos + z_offset, radius, Vector3.up(), Color(255, color1, color2, color3), 100)
-		drawer.circle(drawer, circle_2.pos + z_offset, radius, Vector3.up(), Color(255, color1, color2, color3), 100)
+		drawer:circle(circle_1.pos + z_offset, radius, Vector3.up(), Color(255, color1, color2, color3), 100)
+		drawer:circle(circle_2.pos + z_offset, radius, Vector3.up(), Color(255, color1, color2, color3), 100)
 
 		for i = 1, circle_1.targets, 1 do
-			drawer.circle(drawer, circle_1.pos + z_offset, 0.5 + i * 0.1, Vector3.up(), Color(255, color1, color2, color3), 100)
+			drawer:circle(circle_1.pos + z_offset, 0.5 + i * 0.1, Vector3.up(), Color(255, color1, color2, color3), 100)
 		end
 
 		for i = 1, circle_2.targets, 1 do
-			drawer.circle(drawer, circle_2.pos + z_offset, 0.5 + i * 0.1, Vector3.up(), Color(255, color1, color2, color3), 100)
+			drawer:circle(circle_2.pos + z_offset, 0.5 + i * 0.1, Vector3.up(), Color(255, color1, color2, color3), 100)
 		end
 	end
 
 	for _, p in pairs(positions) do
-		drawer.sphere(drawer, p + z_offset, 0.1, Color(255, 230, 83, 230))
+		drawer:sphere(p + z_offset, 0.1, Color(255, 230, 83, 230))
 	end
 
 	if target then
-		drawer.sphere(drawer, target + z_offset, 0.2, Color(255, 255, 0, 0))
-		drawer.circle(drawer, target + z_offset, radius, Vector3.up(), Color(255, 255, 0, 0), 20)
+		drawer:sphere(target + z_offset, 0.2, Color(255, 255, 0, 0))
+		drawer:circle(target + z_offset, radius, Vector3.up(), Color(255, 255, 0, 0), 20)
 	end
-
-	return 
 end
+
 PerceptionUtils.debug_draw_throw_trajectory = function (points)
 	local drawer = Managers.state.debug:drawer({
 		mode = "retained",
@@ -1297,11 +1342,10 @@ PerceptionUtils.debug_draw_throw_trajectory = function (points)
 	})
 
 	for i = 1, #points, 1 do
-		drawer.sphere(drawer, points[i], 0.05, Color(255, 255, 255, 255))
+		drawer:sphere(points[i], 0.05, Color(255, 255, 255, 255))
 	end
-
-	return 
 end
+
 PerceptionUtils.perception_continuous_rat_ogre = function (unit, blackboard, breed, t, dt)
 	AiUtils.update_aggro(unit, blackboard, breed, t, dt)
 
@@ -1314,15 +1358,18 @@ PerceptionUtils.perception_continuous_rat_ogre = function (unit, blackboard, bre
 
 	return true
 end
+
 PerceptionUtils.perception_continuous_keep_target = function (unit, blackboard, breed, t, dt)
 	local target_unit = blackboard.target_unit
 	local target_alive = AiUtils_unit_alive(target_unit)
 
 	return not target_alive
 end
+
 PerceptionUtils.perception_no_seeing = function (self, unit, blackboard, breed, pick_target_func, t)
-	return 
+	return
 end
+
 PerceptionUtils.perception_all_seeing = function (unit, blackboard, breed, pick_target_func, t)
 	local target_unit = blackboard.target_unit
 	local closest_enemy, closest_dist = pick_target_func(unit, blackboard, breed)
@@ -1351,12 +1398,11 @@ PerceptionUtils.perception_all_seeing = function (unit, blackboard, breed, pick_
 		blackboard.target_unit = nil
 		blackboard.target_dist = math.huge
 	end
-
-	return 
 end
+
 PerceptionUtils.perception_pack_master = function (unit, blackboard, breed, pick_target_func, t)
 	if blackboard.drag_target_unit then
-		return 
+		return
 	end
 
 	local target_unit = blackboard.target_unit
@@ -1367,7 +1413,7 @@ PerceptionUtils.perception_pack_master = function (unit, blackboard, breed, pick
 		local dist = Vector3.distance(pos, enemy_pos)
 		blackboard.target_dist = dist
 
-		return 
+		return
 	end
 
 	local closest_enemy, closest_dist = pick_target_func(unit, blackboard, breed)
@@ -1395,14 +1441,13 @@ PerceptionUtils.perception_pack_master = function (unit, blackboard, breed, pick
 		blackboard.target_unit = nil
 		blackboard.target_dist = math.huge
 	end
-
-	return 
 end
+
 PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_target_func, t, dt)
 	local target_unit_old = blackboard.target_unit
 
 	if blackboard.keep_target then
-		return 
+		return
 	end
 
 	PerceptionUtils.perception_all_seeing_re_evaluate(unit, blackboard, breed, pick_target_func, t)
@@ -1419,7 +1464,7 @@ PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_ta
 		local z = offset.z
 		blackboard.target_flat_distance = math.sqrt(x * x + y * y)
 		blackboard.target_height_distance = z
-		local is_on_ladder, ladder_unit = status_extension.get_is_on_ladder(status_extension)
+		local is_on_ladder, ladder_unit = status_extension:get_is_on_ladder()
 
 		if is_on_ladder then
 			local foot, top = ScriptUnit.extension(ladder_unit, "ladder_system"):ladder_extents()
@@ -1456,14 +1501,13 @@ PerceptionUtils.perception_rat_ogre = function (unit, blackboard, breed, pick_ta
 				local event_data = FrameTable.alloc_table()
 				event_data.attack_tag = "rat_ogre_change_target"
 
-				dialogue_input.trigger_networked_dialogue_event(dialogue_input, "enemy_attack", event_data)
+				dialogue_input:trigger_networked_dialogue_event("enemy_attack", event_data)
 				Profiler.stop("dialogue trigger")
 			end
 		end
 	end
-
-	return 
 end
+
 PerceptionUtils.perception_all_seeing_re_evaluate = function (unit, blackboard, breed, pick_target_func, t)
 	local target_unit = blackboard.target_unit
 	local target_alive = AiUtils_unit_alive(target_unit)
@@ -1504,9 +1548,8 @@ PerceptionUtils.perception_all_seeing_re_evaluate = function (unit, blackboard, 
 		blackboard.target_dist = math.huge
 		blackboard.urgency_to_engage = nil
 	end
-
-	return 
 end
+
 PerceptionUtils.perception_regular = function (unit, blackboard, breed, pick_target_func, t)
 	local target_unit = blackboard.target_unit
 	local target_alive = AiUtils_unit_alive(target_unit)
@@ -1532,13 +1575,13 @@ PerceptionUtils.perception_regular = function (unit, blackboard, breed, pick_tar
 
 		blackboard.delayed_target_unit = nil
 	end
-
-	return 
 end
+
 local ai_units = {}
+
 PerceptionUtils.alert_enemies_within_range = function (___world, player_unit, is_server, alert_position, alert_radius)
 	if not is_server then
-		return 
+		return
 	end
 
 	local ScriptUnit_extension = ScriptUnit.extension
@@ -1556,11 +1599,10 @@ PerceptionUtils.alert_enemies_within_range = function (___world, player_unit, is
 			name = "sound_alert"
 		})
 
-		drawer.sphere(drawer, alert_position, alert_radius, Colors.get("red"))
+		drawer:sphere(alert_position, alert_radius, Colors.get("red"))
 	end
-
-	return 
 end
+
 PerceptionUtils.pack_master_has_line_of_sight_for_attack = function (physics_world, packmaster_unit, target_unit)
 
 	-- Decompilation error in this vicinity:
@@ -1571,8 +1613,12 @@ PerceptionUtils.pack_master_has_line_of_sight_for_attack = function (physics_wor
 	local offset = start_pos - end_pos
 	local success = nil
 	local hits = PhysicsWorld.linear_sphere_sweep(physics_world, start_pos, end_pos, radius, max_hits, "types", "both", "collision_filter", "filter_ai_mover", "report_initial_overlap")
+	local hit_offset = hits[1].position - start_pos
+	local sweep_offset = end_pos - start_pos
+	local hit_dist = Vector3.dot(hit_offset, Vector3.normalize(sweep_offset))
+	success = Vector3.length(sweep_offset) < hit_dist and true
 
 	return success
 end
 
-return 
+return

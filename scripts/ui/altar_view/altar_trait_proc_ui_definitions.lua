@@ -737,7 +737,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -745,11 +745,9 @@ local animations = {
 				local alpha = (1 - local_progress) * 255
 				widget_style.min_text.text_color[1] = alpha
 				widget_style.max_text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -757,18 +755,16 @@ local animations = {
 			start_progress = 0.2,
 			end_progress = 0.21,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_content = widget.content
 				widget_content.min_text = params.min_display_text
 				widget_content.max_text = params.max_display_text
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -776,7 +772,7 @@ local animations = {
 			start_progress = 0.21,
 			end_progress = 0.4,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -784,11 +780,9 @@ local animations = {
 				local alpha = local_progress * 255
 				widget_style.min_text.text_color[1] = alpha
 				widget_style.max_text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -798,7 +792,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -806,11 +800,9 @@ local animations = {
 				local alpha = (1 - local_progress) * 255
 				widget_style.current_proc_text.text_color[1] = alpha
 				widget_style.new_proc_text.text_color[1] = 0
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -821,8 +813,6 @@ local animations = {
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				local current_box_position = ui_scenegraph.proc_slider_current_box.local_position
 				params.start_x_position = current_box_position[1]
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				if not params.move_sound_played then
@@ -842,18 +832,16 @@ local animations = {
 				local current_bar_length = bar_default_length * line_end_progress
 				local new_box_x_position = current_bar_length * eased_progress
 
-				if new_box_x_position < start_x_position then
+				if start_x_position > new_box_x_position then
 					current_box_position[1] = start_x_position - (start_x_position - current_bar_length) * eased_progress
 				elseif start_x_position < new_box_x_position then
 					current_box_position[1] = start_x_position + (current_bar_length - start_x_position) * eased_progress
 				else
 					current_box_position[1] = new_box_x_position
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -862,7 +850,7 @@ local animations = {
 			start_relative_to = 2,
 			duration = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				if not params.value_change_sound_played then
@@ -882,11 +870,9 @@ local animations = {
 				widget_content.new_proc_text = string.format(formatting, min_value)
 				local alpha = local_progress * 255
 				widget_style.current_proc_text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -896,7 +882,7 @@ local animations = {
 			start_progress = 0,
 			end_progress = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -904,11 +890,9 @@ local animations = {
 				local alpha = (1 - local_progress) * 255
 				widget_style.current_proc_text.text_color[1] = alpha
 				widget_style.new_proc_text.text_color[1] = 0
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -916,7 +900,7 @@ local animations = {
 			start_progress = 0.2,
 			end_progress = 0.21,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				if not params.value_change_sound_played then
@@ -933,11 +917,9 @@ local animations = {
 				local min_value = params.min_value * multiplier
 				widget_content.current_proc_text = string.format(formatting, current_value)
 				widget_content.new_proc_text = string.format(formatting, min_value)
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -945,18 +927,16 @@ local animations = {
 			start_progress = 0.21,
 			end_progress = 0.4,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 				local alpha = local_progress * 255
 				widget_style.current_proc_text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -968,8 +948,6 @@ local animations = {
 			end_progress = 1.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_invocate_start")
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -990,13 +968,9 @@ local animations = {
 				if current_box_position[1] < new_box_position[1] then
 					current_box_position[1] = new_bar_length
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_invocate_stop_bad")
-
-				return 
 			end
 		},
 		{
@@ -1008,8 +982,6 @@ local animations = {
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 				widget_style.new_proc_text.text_color[1] = 255
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -1030,11 +1002,9 @@ local animations = {
 				end
 
 				widget_content.new_proc_text = text
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1043,17 +1013,15 @@ local animations = {
 			start_relative_to = 1,
 			duration = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 				widget_style.new_box_glow.color[1] = math.ease_pulse(local_progress) * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1062,7 +1030,7 @@ local animations = {
 			start_relative_to = 3,
 			duration = 0.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				if not params.move_sound_played then
@@ -1089,11 +1057,9 @@ local animations = {
 				new_box_position[1] = new_bar_length
 				local bar_uvs = widget_content.bar_content.uvs
 				bar_uvs[2][1] = 1 - eased_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1102,7 +1068,7 @@ local animations = {
 			start_relative_to = 3,
 			duration = 0.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -1117,11 +1083,9 @@ local animations = {
 				local progress_value = min_value + math.max(new_value - min_value, 0) * eased_progress
 				local text = string.format(formatting, progress_value)
 				widget_content.new_proc_text = text
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1130,18 +1094,16 @@ local animations = {
 			start_relative_to = 4,
 			duration = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 				local alpha = (1 - local_progress) * 255
 				widget_style.new_proc_text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	},
@@ -1153,8 +1115,6 @@ local animations = {
 			end_progress = 1.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_invocate_start")
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -1175,13 +1135,9 @@ local animations = {
 				if current_box_position[1] < new_box_position[1] then
 					current_box_position[1] = new_bar_length
 				end
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
 				WwiseWorld.trigger_event(params.wwise_world, "Play_hud_invocate_stop_good")
-
-				return 
 			end
 		},
 		{
@@ -1193,8 +1149,6 @@ local animations = {
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 				widget_style.new_proc_text.text_color[1] = 255
-
-				return 
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -1215,11 +1169,9 @@ local animations = {
 				end
 
 				widget_content.new_proc_text = text
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1228,24 +1180,22 @@ local animations = {
 			start_relative_to = 1,
 			duration = 0.5,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 
-				if 0.5 < local_progress and not params.glow_sound_played then
+				if local_progress > 0.5 and not params.glow_sound_played then
 					WwiseWorld.trigger_event(params.wwise_world, "Play_hud_reroll_traits_random_enchant")
 
 					params.glow_sound_played = true
 				end
 
 				widget_style.current_box_glow.color[1] = math.ease_pulse(local_progress) * 255
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1254,7 +1204,7 @@ local animations = {
 			start_relative_to = 3,
 			duration = 0.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				if not params.move_sound_played then
@@ -1281,11 +1231,9 @@ local animations = {
 				new_box_position[1] = new_bar_length
 				local bar_uvs = widget_content.bar_content.uvs
 				bar_uvs[2][1] = 1 - eased_progress
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1294,7 +1242,7 @@ local animations = {
 			start_relative_to = 3,
 			duration = 0.6,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
@@ -1309,11 +1257,9 @@ local animations = {
 				local progress_value = min_value + math.max(new_value - min_value, 0) * eased_progress
 				local text = string.format(formatting, progress_value)
 				widget_content.new_proc_text = text
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		},
 		{
@@ -1322,18 +1268,16 @@ local animations = {
 			start_relative_to = 4,
 			duration = 0.2,
 			init = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end,
 			update = function (ui_scenegraph, scenegraph_definition, widgets, local_progress, params)
 				local widget = widgets.slider_widget
 				local widget_style = widget.style
 				local alpha = (1 - local_progress) * 255
 				widget_style.new_proc_text.text_color[1] = alpha
-
-				return 
 			end,
 			on_complete = function (ui_scenegraph, scenegraph_definition, widgets, params)
-				return 
+				return
 			end
 		}
 	}

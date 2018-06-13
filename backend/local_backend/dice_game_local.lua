@@ -312,8 +312,6 @@ local function get_random_trinket(rarity)
 	else
 		print("found no trinket of rarity" .. rarity)
 	end
-
-	return 
 end
 
 local function get_random_hat(rarity, hero_name)
@@ -327,8 +325,6 @@ local function get_random_hat(rarity, hero_name)
 	else
 		print("found no hat of rarity" .. rarity)
 	end
-
-	return 
 end
 
 function get_win_list(num_successes, difficulty, hero_name)
@@ -395,7 +391,7 @@ LevelRewards = {
 		return rarity, item_type
 	end,
 	reward_by_level = function (self, level)
-		local rarity, item_type = self.reward_settings_by_level(self, level)
+		local rarity, item_type = self:reward_settings_by_level(level)
 
 		if item_type then
 			local reward_table = LevellingRewards[rarity][item_type]
@@ -403,8 +399,6 @@ LevelRewards = {
 
 			return reward_name
 		end
-
-		return 
 	end,
 	level_up_rewards = function (self, start_level, end_level)
 		local start_level = tonumber(start_level)
@@ -419,7 +413,7 @@ LevelRewards = {
 		end
 
 		for ii = start_level + 1, end_level, 1 do
-			local reward = self.reward_by_level(self, ii)
+			local reward = self:reward_by_level(ii)
 
 			if reward then
 				rewards[#rewards + 1] = reward
@@ -430,4 +424,4 @@ LevelRewards = {
 	end
 }
 
-return 
+return

@@ -13,24 +13,22 @@ local function trigger_player_taking_damage_buffs(player_unit, attacker_unit, is
 	if ScriptUnit.has_extension(player_unit, "buff_system") then
 		local buff_extension = ScriptUnit.extension(player_unit, "buff_system")
 
-		if buff_extension.has_buff_type(buff_extension, "chance_to_bonus_fatigue_reg_damage_taken") then
+		if buff_extension:has_buff_type("chance_to_bonus_fatigue_reg_damage_taken") then
 			local percentage_chance = 1
-			percentage_chance = buff_extension.apply_buffs_to_value(buff_extension, percentage_chance, StatBuffIndex.CHANCE_TO_BONUS_FATIGUE_REG_DAMAGE_TAKEN, BuffTypes.PLAYER) - 1
+			percentage_chance = buff_extension:apply_buffs_to_value(percentage_chance, StatBuffIndex.CHANCE_TO_BONUS_FATIGUE_REG_DAMAGE_TAKEN, BuffTypes.PLAYER) - 1
 			percentage_chance = 1 - percentage_chance
 
 			if percentage_chance <= math.random() then
-				buff_extension.add_buff(buff_extension, "melee_weapon_proc_bonus_fatigue_regen")
+				buff_extension:add_buff("melee_weapon_proc_bonus_fatigue_regen")
 			end
 		end
 	end
-
-	return 
 end
 
 local function trigger_player_friendly_fire_dialogue(player_unit, attacker_unit)
 	local player_manager = Managers.player
 
-	if player_unit ~= attacker_unit and player_manager.is_player_unit(player_manager, attacker_unit) then
+	if player_unit ~= attacker_unit and player_manager:is_player_unit(attacker_unit) then
 		local profile_name_victim = ScriptUnit.extension(player_unit, "dialogue_system").context.player_profile
 		local profile_name_attacker = ScriptUnit.extension(attacker_unit, "dialogue_system").context.player_profile
 		local dialogue_input = ScriptUnit.extension_input(player_unit, "dialogue_system")
@@ -38,20 +36,18 @@ local function trigger_player_friendly_fire_dialogue(player_unit, attacker_unit)
 		event_data.target = profile_name_victim
 		event_data.player_profile = profile_name_attacker
 
-		dialogue_input.trigger_dialogue_event(dialogue_input, "friendly_fire", event_data)
+		dialogue_input:trigger_dialogue_event("friendly_fire", event_data)
 	end
-
-	return 
 end
 
 local function trigger_enemy_armor_hit_dialogue(enemy_unit, player_unit, damage_dealt, hit)
 	local player_manager = Managers.player
-	local owner = player_manager.unit_owner(player_manager, player_unit)
+	local owner = player_manager:unit_owner(player_unit)
 
-	if player_manager.is_player_unit(player_manager, player_unit) and not owner.remote and player_unit ~= enemy_unit and Unit.alive(enemy_unit) then
+	if player_manager:is_player_unit(player_unit) and not owner.remote and player_unit ~= enemy_unit and Unit.alive(enemy_unit) then
 		local buff_extension = ScriptUnit.extension(player_unit, "buff_system")
 
-		if buff_extension and buff_extension.has_buff_type(buff_extension, "armor penetration") == false and damage_dealt < 0.5 then
+		if buff_extension and buff_extension:has_buff_type("armor penetration") == false and damage_dealt < 0.5 then
 			local breed_data = Unit.get_data(enemy_unit, "breed")
 
 			if breed_data and breed_data.armor_category == 2 and hit[4] ~= "head" and hit[4] ~= "neck" then
@@ -59,8 +55,6 @@ local function trigger_enemy_armor_hit_dialogue(enemy_unit, player_unit, damage_
 			end
 		end
 	end
-
-	return 
 end
 
 HitReactions.templates = {
@@ -76,11 +70,9 @@ HitReactions.templates = {
 			end
 
 			trigger_enemy_armor_hit_dialogue(unit, attacker_unit, damage_taken, hit)
-
-			return 
 		end,
 		husk = function (unit, dt, context, t, hit)
-			return 
+			return
 		end
 	},
 	player = {
@@ -90,8 +82,8 @@ HitReactions.templates = {
 			if not ignored_damage_types[damage_type] then
 				local first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 
-				if 0 < hit[DamageDataIndex.DAMAGE_AMOUNT] then
-					first_person_extension.animation_event(first_person_extension, "shake_get_hit")
+				if hit[DamageDataIndex.DAMAGE_AMOUNT] > 0 then
+					first_person_extension:animation_event("shake_get_hit")
 				end
 
 				local attacker = hit[DamageDataIndex.ATTACKER]
@@ -99,39 +91,32 @@ HitReactions.templates = {
 				trigger_player_taking_damage_buffs(unit, attacker, true)
 				trigger_player_friendly_fire_dialogue(unit, attacker)
 			end
-
-			return 
 		end,
 		husk = function (unit, dt, context, t, hit)
 			local attacker = hit[DamageDataIndex.ATTACKER]
 
 			trigger_player_taking_damage_buffs(unit, attacker, false)
 			trigger_player_friendly_fire_dialogue(unit, attacker)
-
-			return 
 		end
 	},
 	level_object = {
 		unit = function (unit, dt, context, t, hit)
 			local health_extension = ScriptUnit.extension(unit, "health_system")
-			local current_health = health_extension.current_health(health_extension)
+			local current_health = health_extension:current_health()
 
 			Unit.set_flow_variable(unit, "current_health", current_health)
 			Unit.flow_event(unit, "lua_on_damage_taken")
-
-			return 
 		end,
 		husk = function (unit, dt, context, t, hit)
 			local health_extension = ScriptUnit.extension(unit, "health_system")
-			local current_health = health_extension.current_health(health_extension)
+			local current_health = health_extension:current_health()
 
 			Unit.set_flow_variable(unit, "current_health", current_health)
 			Unit.flow_event(unit, "lua_on_damage_taken")
-
-			return 
 		end
 	}
 }
+
 HitReactions.get_reaction = function (hit_reaction_template, is_husk)
 	local templates = HitReactions.templates
 	local husk_key = (is_husk and "husk") or "unit"
@@ -144,4 +129,4 @@ HitReactions.get_reaction = function (hit_reaction_template, is_husk)
 	return reaction_table.unit
 end
 
-return 
+return

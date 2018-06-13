@@ -35,4 +35,4 @@ ItemMasterList.potion_speed_boost_01 = {
 	}
 }
 
-return 
+return

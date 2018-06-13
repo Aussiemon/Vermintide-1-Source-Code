@@ -3,28 +3,26 @@ local RPCS = {
 	"rpc_accept_join_voip_room"
 }
 VOIPManager = class(VOIPManager)
+
 VOIPManager.init = function (self)
 	self.room_id = nil
 	self.peers = {}
-
-	return 
 end
+
 VOIPManager.register_network_event_delegate = function (self, network_event_delegate)
 	self.network_event_delegate = network_event_delegate
 
-	network_event_delegate.register(network_event_delegate, self, unpack(RPCS))
+	network_event_delegate:register(self, unpack(RPCS))
 
 	self.peer_id = Network.peer_id()
-
-	return 
 end
+
 VOIPManager.unregister_network_event_delegate = function (self)
 	self.network_event_delegate:unregister(self)
 
 	self.network_event_delegate = nil
-
-	return 
 end
+
 VOIPManager.create_room = function (self)
 	self.room_id = SteamVoip.create_room()
 
@@ -33,17 +31,15 @@ VOIPManager.create_room = function (self)
 
 	self.client = SteamVoip.join_room(self.peer_id, self.room_id)
 	self.is_server = true
-
-	return 
 end
+
 VOIPManager.join_room = function (self)
 	local network_manager = Managers.state.network
 	local network_transmit = network_manager.network_transmit
 
-	network_transmit.send_rpc_server(network_transmit, "rpc_request_join_voip_room")
-
-	return 
+	network_transmit:send_rpc_server("rpc_request_join_voip_room")
 end
+
 VOIPManager.update = function (self, dt, t)
 	SteamVoip.update(self)
 
@@ -57,69 +53,62 @@ VOIPManager.update = function (self, dt, t)
 			end
 		end
 	end
-
-	return 
 end
+
 VOIPManager.room_member_added = function (self, room_id, peer_id)
 	local timpani_world = nil
 	local dummy_sound_event = ""
 
 	return timpani_world, dummy_sound_event
 end
+
 VOIPManager.room_member_removed = function (self, room_id, peer_id)
-	return 
+	return
 end
+
 VOIPManager.mute_peer = function (self, peer_id)
 	local voip_client = self.client
 
 	SteamVoipClient:select_in(voip_client, false, peer_id)
 	SteamVoipClient:select_out(voip_client, false, peer_id)
-
-	return 
 end
+
 VOIPManager.mute_all = function (self)
 	local voip_client = self.client
 
 	SteamVoipClient:select_in(voip_client, false)
 	SteamVoipClient:select_out(voip_client, false)
-
-	return 
 end
+
 VOIPManager.unmute_peer = function (self, peer_id)
 	local voip_client = self.client
 
 	SteamVoipClient:select_in(voip_client, true, peer_id)
 	SteamVoipClient:select_out(voip_client, true, peer_id)
-
-	return 
 end
+
 VOIPManager.unmute_all = function (self)
 	local voip_client = self.client
 
 	SteamVoipClient:select_in(voip_client, true)
 	SteamVoipClient:select_out(voip_client, true)
-
-	return 
 end
+
 VOIPManager.destroy = function (self)
 	if self.is_server then
 		SteamVoip.destroy_room(self.room_id)
 	end
-
-	return 
 end
+
 VOIPManager.rpc_request_join_voip_room = function (self, sender)
 	fassert(self.is_server, "Requesting to join a clients room, clients cant have rooms")
 	SteamVoipRoom.add_member(self.room_id, sender)
 	RPC.rpc_accept_join_voip_room(sender, self.room_id)
-
-	return 
 end
+
 VOIPManager.rpc_accept_join_voip_room = function (self, sender, room_id)
 	self.room_id = room_id
 	self.client = SteamVoip.join_room(self.peer_id, room_id)
-
-	return 
 end
 
-return 
+return

@@ -7,8 +7,6 @@ local function debug_print(...)
 	if LEADERBOARD_DEBUG then
 		print("[LeaderboardsUI]", string.format(...))
 	end
-
-	return 
 end
 
 local generic_input_actions = {
@@ -37,6 +35,7 @@ local generic_input_actions = {
 	}
 }
 LeaderboardsUI = class(LeaderboardsUI)
+
 LeaderboardsUI.init = function (self, context, input_service_name)
 	self._world = Managers.world:world("level_world")
 	self._wwise_world = Wwise.wwise_world(self._world)
@@ -70,10 +69,9 @@ LeaderboardsUI.init = function (self, context, input_service_name)
 		"leaderboard_friends"
 	}
 
-	self._create_ui_elements(self)
-
-	return 
+	self:_create_ui_elements()
 end
+
 LeaderboardsUI.open = function (self, level_key)
 	if not self._open_window_animation and not self._close_window_animation then
 		local level_key = level_key or Managers.state.game_mode:level_key()
@@ -83,16 +81,15 @@ LeaderboardsUI.open = function (self, level_key)
 		self._level_key = level_key
 		self._profile_index = Managers.player:local_player().profile_index
 
-		self.select_button_index(self, self._profile_index)
+		self:select_button_index(self._profile_index)
 
 		local ui_scenegraph = self._ui_scenegraph
 		local target = ui_scenegraph.root.local_position
 		local target_index = 2
-		self._open_window_animation = self.animate_element_by_time(self, target, target_index, (-1200 * UISettings.ui_scale) / 100, 0, UISettings.scoreboard.open_duration)
+		self._open_window_animation = self:animate_element_by_time(target, target_index, (-1200 * UISettings.ui_scale) / 100, 0, UISettings.scoreboard.open_duration)
 	end
-
-	return 
 end
+
 LeaderboardsUI.on_open_complete = function (self)
 	self._open = true
 	local profile_index = Managers.player:local_player().profile_index
@@ -109,9 +106,9 @@ LeaderboardsUI.on_open_complete = function (self)
 		}
 		self._current_leaderboard = nil
 
-		self._create_entries(self, nil)
+		self:_create_entries(nil)
 
-		return 
+		return
 	end
 
 	local leaderboard_name = self._level_key .. "_" .. display_name
@@ -135,30 +132,28 @@ LeaderboardsUI.on_open_complete = function (self)
 			Managers.account:get_leaderboard(leaderboard_name, Leaderboards.OVERALL, callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
 		end
 	end
-
-	return 
 end
+
 LeaderboardsUI.close = function (self)
 	if not self._open_window_animation and not self._close_window_animation then
 		local ui_scenegraph = self._ui_scenegraph
 		local target = ui_scenegraph.root.local_position
 		local target_index = 2
-		self._close_window_animation = self.animate_element_by_time(self, target, target_index, 0, (-1200 * UISettings.ui_scale) / 100, UISettings.scoreboard.close_duration)
+		self._close_window_animation = self:animate_element_by_time(target, target_index, 0, (-1200 * UISettings.ui_scale) / 100, UISettings.scoreboard.close_duration)
 		self._open = false
 	end
-
-	return 
 end
+
 LeaderboardsUI.on_close_complete = function (self)
 	self._enabled = false
-
-	return 
 end
+
 LeaderboardsUI.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.ease_out_quad)
 
 	return new_animation
 end
+
 LeaderboardsUI._add_leaderboard_type_animation = function (self)
 	self._window_widget.content.leaderboard_type = self._leaderboard_strings[self._current_leaderboard_type]
 	self._leaderboard_type_animation = {
@@ -175,14 +170,13 @@ LeaderboardsUI._add_leaderboard_type_animation = function (self)
 		},
 		font_size = definitions.widgets.window.style.leaderboard_type.font_size
 	}
-
-	return 
 end
+
 LeaderboardsUI._update_leaderboard_animation = function (self, dt)
 	local leaderboard_type_animation = self._leaderboard_type_animation
 
 	if not leaderboard_type_animation then
-		return 
+		return
 	end
 
 	local progress = leaderboard_type_animation.animation_func(leaderboard_type_animation.timer / leaderboard_type_animation.duration)
@@ -198,12 +192,12 @@ LeaderboardsUI._update_leaderboard_animation = function (self, dt)
 		self._window_widget.style.leaderboard_type.font_size = leaderboard_type_animation.font_size
 		self._leaderboard_type_animation = nil
 	end
-
-	return 
 end
+
 LeaderboardsUI.enabled = function (self)
 	return self._enabled
 end
+
 LeaderboardsUI._create_ui_elements = function (self)
 	self._ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph)
 	self._window_widget = UIWidget.init(definitions.widgets.window)
@@ -220,14 +214,13 @@ LeaderboardsUI._create_ui_elements = function (self)
 	}, "loading_icon"))
 
 	UIRenderer.clear_scenegraph_queue(self._ui_renderer)
-	self.select_button_index(self, self._profile_index)
+	self:select_button_index(self._profile_index)
 
 	local level_key = Managers.state.game_mode:level_key()
 	local display_name = LevelSettings[level_key].display_name
 	self._window_widget.content.leaderboard_header = display_name
-
-	return 
 end
+
 LeaderboardsUI._create_entries = function (self, leaderboard_data)
 	self._has_entries = nil
 	self._current_index = 1
@@ -240,7 +233,7 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 	self._updating_leaderboard = false
 
 	if PLATFORM == "win32" then
-		if leaderboard_data and 0 < leaderboard_data.entry_count then
+		if leaderboard_data and leaderboard_data.entry_count > 0 then
 			for idx, entry in ipairs(leaderboard_data.scores) do
 				local time_in_sec = entry.data[7] or math.random(86400)
 				local time = string.format("%.2d:%.2d:%.2d", time_in_sec / 3600, (time_in_sec / 60) % 60, time_in_sec % 60)
@@ -256,7 +249,7 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 	elseif PLATFORM == "xb1" then
 		if leaderboard_data and leaderboard_data.error then
 			self._entries[#self._entries + 1] = definitions.create_empty_entry()
-		elseif leaderboard_data and 0 < leaderboard_data.num_rows then
+		elseif leaderboard_data and leaderboard_data.num_rows > 0 then
 			local my_xuid = Managers.account:xbox_user_id()
 
 			for idx, entry in ipairs(leaderboard_data.leaderboard) do
@@ -281,9 +274,8 @@ LeaderboardsUI._create_entries = function (self, leaderboard_data)
 			self._entries[#self._entries + 1] = definitions.create_empty_entry()
 		end
 	end
-
-	return 
 end
+
 LeaderboardsUI._rotate_loading_icon = function (self, dt)
 	local loading_icon_style = self._loading_icon.style.texture_id
 	local angle_fraction = loading_icon_style.fraction or 0
@@ -291,13 +283,13 @@ LeaderboardsUI._rotate_loading_icon = function (self, dt)
 	local angle = angle_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
-
-	return 
 end
+
 local DO_RELOAD = true
+
 LeaderboardsUI.update = function (self, dt)
 	if DO_RELOAD then
-		self._create_ui_elements(self)
+		self:_create_ui_elements()
 
 		if self._current_leaderboard then
 			if PLATFORM == "win32" then
@@ -315,8 +307,8 @@ LeaderboardsUI.update = function (self, dt)
 	end
 
 	if self._open then
-		self._handle_input(self, dt)
-		self._update_list_scroll(self, dt)
+		self:_handle_input(dt)
+		self:_update_list_scroll(dt)
 	end
 
 	local open_animation = self._open_window_animation
@@ -327,7 +319,7 @@ LeaderboardsUI.update = function (self, dt)
 		if UIAnimation.completed(open_animation) then
 			self._open_window_animation = nil
 
-			self.on_open_complete(self)
+			self:on_open_complete()
 		end
 	else
 		local close_animation = self._close_window_animation
@@ -338,28 +330,27 @@ LeaderboardsUI.update = function (self, dt)
 			if UIAnimation.completed(close_animation) then
 				self._close_window_animation = nil
 
-				self.on_close_complete(self)
+				self:on_close_complete()
 			end
 		end
 	end
 
-	self._update_leaderboard_animation(self, dt)
+	self:_update_leaderboard_animation(dt)
 
 	if #self._entries == 0 then
-		self._rotate_loading_icon(self, dt)
+		self:_rotate_loading_icon(dt)
 	end
-
-	return 
 end
+
 LeaderboardsUI._update_list_scroll = function (self, dt)
 	local num_entries = #self._entries
 
-	if 15 < #self._entries then
+	if #self._entries > 15 then
 		local length = num_entries * definitions.entry_size[2]
 		local area_length = definitions.entry_area[2]
 		local diff = length - area_length
 		local step = diff / num_entries
-		local target_pos = (1 < self._current_index and step * self._current_index) or 0
+		local target_pos = (self._current_index > 1 and step * self._current_index) or 0
 		local current_pos = self._ui_scenegraph.entry_root.local_position[2]
 		self._ui_scenegraph.entry_root.local_position = {
 			0,
@@ -367,14 +358,12 @@ LeaderboardsUI._update_list_scroll = function (self, dt)
 			0
 		}
 	end
-
-	return 
 end
+
 LeaderboardsUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self._wwise_world, event)
-
-	return 
 end
+
 LeaderboardsUI._handle_input = function (self, dt)
 	if self._updating_leaderboard then
 		self._menu_input_description:enable_button(1, false)
@@ -390,9 +379,9 @@ LeaderboardsUI._handle_input = function (self, dt)
 	self._current_index = self._current_index or 1
 	local controller_cooldown = (gamepad_active and self._controller_cooldown) or 0
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self._controller_cooldown = controller_cooldown - dt
-	elseif has_entries and input_service.get(input_service, "move_down_hold") then
+	elseif has_entries and input_service:get("move_down_hold") then
 		if self._entries[self._current_index] and self._entries[self._current_index].content then
 			self._entries[self._current_index].content.highlight_enabled = nil
 		end
@@ -405,8 +394,8 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 		self._controller_cooldown = GamepadSettings.menu_cooldown
 
-		self.play_sound(self, "Play_hud_select")
-	elseif has_entries and input_service.get(input_service, "move_up_hold") then
+		self:play_sound("Play_hud_select")
+	elseif has_entries and input_service:get("move_up_hold") then
 		if self._entries[self._current_index] and self._entries[self._current_index].content then
 			self._entries[self._current_index].content.highlight_enabled = nil
 		end
@@ -419,19 +408,19 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 		self._controller_cooldown = GamepadSettings.menu_cooldown
 
-		self.play_sound(self, "Play_hud_select")
+		self:play_sound("Play_hud_select")
 	end
 
-	if has_entries and input_service.get(input_service, "confirm") then
+	if has_entries and input_service:get("confirm") then
 		if PLATFORM == "xb1" and self._entries[self._current_index] and self._entries[self._current_index].content then
 			local xuid = self._entries[self._current_index].content.id
 
 			if xuid then
-				self.play_sound(self, "Play_hud_select")
+				self:play_sound("Play_hud_select")
 				XboxLive.show_gamercard(Managers.account:user_id(), xuid)
 			end
 		end
-	elseif not self._updating_leaderboard and input_service.get(input_service, "cycle_next") then
+	elseif not self._updating_leaderboard and input_service:get("cycle_next") then
 		local num_characters = #LeaderboardSettings.characters
 		self._profile_index = math.clamp(self._profile_index + 1, 1, num_characters)
 		local profile_name = LeaderboardSettings.characters[self._profile_index]
@@ -442,12 +431,12 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 			self._entries = {}
 
-			self.select_button_index(self, self._profile_index)
+			self:select_button_index(self._profile_index)
 
 			self._current_leaderboard = current_leaderboard
 			self._controller_cooldown = GamepadSettings.menu_cooldown
 
-			self.play_sound(self, "Play_hud_select")
+			self:play_sound("Play_hud_select")
 
 			if PLATFORM == "win32" then
 				self._updating_leaderboard = true
@@ -459,7 +448,7 @@ LeaderboardsUI._handle_input = function (self, dt)
 				Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
 			end
 		end
-	elseif not self._updating_leaderboard and input_service.get(input_service, "cycle_previous") then
+	elseif not self._updating_leaderboard and input_service:get("cycle_previous") then
 		local num_characters = #LeaderboardSettings.characters
 		self._profile_index = math.clamp(self._profile_index - 1, 1, num_characters)
 		local profile_name = LeaderboardSettings.characters[self._profile_index]
@@ -470,12 +459,12 @@ LeaderboardsUI._handle_input = function (self, dt)
 
 			self._entries = {}
 
-			self.select_button_index(self, self._profile_index)
+			self:select_button_index(self._profile_index)
 
 			self._current_leaderboard = current_leaderboard
 			self._controller_cooldown = GamepadSettings.menu_cooldown
 
-			self.play_sound(self, "Play_hud_select")
+			self:play_sound("Play_hud_select")
 
 			self._updating_leaderboard = true
 
@@ -485,13 +474,13 @@ LeaderboardsUI._handle_input = function (self, dt)
 				Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
 			end
 		end
-	elseif not self._updating_leaderboard and input_service.get(input_service, "special_1") then
-		self.play_sound(self, "Play_hud_select")
+	elseif not self._updating_leaderboard and input_service:get("special_1") then
+		self:play_sound("Play_hud_select")
 
 		self._entries = {}
 		self._current_leaderboard_type = 1 + self._current_leaderboard_type % #self._leaderboard_types
 
-		self._add_leaderboard_type_animation(self)
+		self:_add_leaderboard_type_animation()
 
 		self._updating_leaderboard = true
 
@@ -501,9 +490,8 @@ LeaderboardsUI._handle_input = function (self, dt)
 			Managers.account:get_leaderboard(self._current_leaderboard, self._leaderboard_types[self._current_leaderboard_type], callback(self, "_create_entries"), 20, nil, LeaderboardSettings.template)
 		end
 	end
-
-	return 
 end
+
 LeaderboardsUI.select_button_index = function (self, index)
 	local widget_style = self._character_selection_bar_widget.style
 
@@ -526,15 +514,14 @@ LeaderboardsUI.select_button_index = function (self, index)
 			icon_texture_id_style.color[1] = 178.5
 		end
 	end
-
-	return 
 end
+
 LeaderboardsUI.draw = function (self, dt)
 	local ui_renderer = self._ui_renderer
 	local ui_scenegraph = self._ui_scenegraph
 	local input_manager = Managers.input
-	local input_service = input_manager.get_service(input_manager, self._input_service_name)
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service(self._input_service_name)
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 	UIRenderer.draw_widget(ui_renderer, self._window_widget)
@@ -553,11 +540,10 @@ LeaderboardsUI.draw = function (self, dt)
 	if self._open and Managers.input:is_device_active("gamepad") then
 		self._menu_input_description:draw(self._ui_renderer, dt)
 	end
-
-	return 
 end
+
 LeaderboardsUI.destroy = function (self)
-	return 
+	return
 end
 
-return 
+return

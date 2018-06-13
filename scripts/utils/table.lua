@@ -16,4 +16,4 @@ table.table_as_sorted_string_arrays = function (source, key_dest, value_dest)
 	return count
 end
 
-return 
+return

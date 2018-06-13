@@ -293,7 +293,7 @@ weapon_template.actions = {
 				}
 			},
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			critical_strike = {},
 			default_target = {
@@ -641,7 +641,7 @@ weapon_template.actions = {
 			chain_condition_func = function (attacker_unit, input_extension)
 				local status_extension = ScriptUnit.extension(attacker_unit, "status_system")
 
-				return not status_extension.fatigued(status_extension)
+				return not status_extension:fatigued()
 			end
 		}
 	},
@@ -658,7 +658,7 @@ weapon_template.actions = {
 			end,
 			total_time = math.huge,
 			enter_function = function (attacker_unit, input_extension)
-				return input_extension.reset_release_input(input_extension)
+				return input_extension:reset_release_input()
 			end,
 			buff_data = {
 				{
@@ -831,4 +831,4 @@ Weapons.one_handed_hammer_template_2_t3_un = table.clone(Weapons.one_handed_hamm
 Weapons.one_handed_hammer_template_2_t3_un.actions.action_inspect.default.anim_event = "inspect_start_2"
 Weapons.one_handed_hammer_template_2_t3_un.actions.action_inspect.default.anim_end_event = "inspect_end_2"
 
-return 
+return

@@ -926,4 +926,4 @@ for name, data in pairs(Projectiles) do
 	data.name = name
 end
 
-return 
+return

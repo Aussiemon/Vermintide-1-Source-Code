@@ -7,6 +7,7 @@ local generic_input_actions = definitions.generic_input_actions
 local DO_RELOAD = false
 StateMapViewSelectDifficulty = class(StateMapViewSelectDifficulty)
 StateMapViewSelectDifficulty.NAME = "StateMapViewSelectDifficulty"
+
 StateMapViewSelectDifficulty.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewSelectDifficulty")
 
@@ -40,13 +41,12 @@ StateMapViewSelectDifficulty.on_enter = function (self, params)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 2, gui_layer, generic_input_actions.default)
 
 	self.menu_input_description:set_input_description(nil)
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	self._map_view:set_time_line_index(3)
 	self._map_view:animate_title_text(self._title_text_widget)
 	self._map_view:set_mask_enabled(true)
-
-	return 
 end
+
 StateMapViewSelectDifficulty.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._frame_left_widget = UIWidget.init(widgets.frame_left)
@@ -89,18 +89,17 @@ StateMapViewSelectDifficulty.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	local difficulty_rank = self.game_info.difficulty_rank or default_rank
-	local widget_index = self._get_widget_index_by_rank(self, difficulty_rank, true) or 1
+	local widget_index = self:_get_widget_index_by_rank(difficulty_rank, true) or 1
 
-	self._align_elements(self, widget_index)
-	self._set_selection(self, widget_index)
-	self._update_elements(self, 0, true)
+	self:_align_elements(widget_index)
+	self:_set_selection(widget_index)
+	self:_update_elements(0, true)
 
 	self._selection_timer = nil
 
-	self.start_open_animation(self)
-
-	return 
+	self:start_open_animation()
 end
+
 StateMapViewSelectDifficulty._get_widget_index_by_rank = function (self, rank, use_closest_unlocked_index)
 	local elements = self._elements
 	local difficulty_index_table = self._difficulty_index_table
@@ -119,9 +118,8 @@ StateMapViewSelectDifficulty._get_widget_index_by_rank = function (self, rank, u
 	if use_closest_unlocked_index then
 		return closest_unlocked_index
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty._get_widget_index_by_read_index = function (self, index)
 	local difficulty_index_table = self._difficulty_index_table
 
@@ -130,19 +128,17 @@ StateMapViewSelectDifficulty._get_widget_index_by_read_index = function (self, i
 			return value
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty.on_exit = function (self, params)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 StateMapViewSelectDifficulty._update_transition_timer = function (self, dt)
 	if not self._transition_timer then
-		return 
+		return
 	end
 
 	if self._transition_timer == 0 then
@@ -150,67 +146,66 @@ StateMapViewSelectDifficulty._update_transition_timer = function (self, dt)
 	else
 		self._transition_timer = math.max(self._transition_timer - dt, 0)
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty.update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
 	if not self._transition_timer then
-		self._handle_input(self, dt)
+		self:_handle_input(dt)
 	end
 
-	self._update_elements(self, dt)
-	self.draw(self, dt)
-	self._update_transition_timer(self, dt)
+	self:_update_elements(dt)
+	self:draw(dt)
+	self:_update_transition_timer(dt)
 
 	if not self._transition_timer then
 		return self._new_state
 	end
+end
 
-	return 
-end
 StateMapViewSelectDifficulty.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewSelectDifficulty._handle_input = function (self, dt)
 	if self._new_state then
-		return 
+		return
 	end
 
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local going_back = false
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	elseif not self._selection_timer then
 		local new_selection_index = nil
 
-		if input_service.get(input_service, "move_left") or input_service.get(input_service, "move_left_hold") then
+		if input_service:get("move_left") or input_service:get("move_left_hold") then
 			new_selection_index = math.max(self._selection_index - 1, 1)
-		elseif input_service.get(input_service, "move_right") or input_service.get(input_service, "move_right_hold") then
+		elseif input_service:get("move_right") or input_service:get("move_right_hold") then
 			new_selection_index = math.min(self._selection_index + 1, #self._elements)
 		end
 
 		if new_selection_index and new_selection_index ~= self._selection_index then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 
-			self._set_selection(self, new_selection_index)
-			self._play_sound(self, "Play_hud_shift")
-		elseif input_service.get(input_service, "confirm", true) and self._selection_index then
+			self:_set_selection(new_selection_index)
+			self:_play_sound("Play_hud_shift")
+		elseif input_service:get("confirm", true) and self._selection_index then
 			if not self._is_selected_difficulty_locked then
 				self.game_info.difficulty_rank = self._selected_difficulty_rank
 				self._new_state = StateMapViewSummary
 
-				self._play_sound(self, "Play_hud_main_menu_open")
+				self:_play_sound("Play_hud_main_menu_open")
 			end
-		elseif input_service.get(input_service, "back", true) then
+		elseif input_service:get("back", true) then
 			local game_info = self.game_info
 
 			if game_info.change_difficulty then
@@ -234,10 +229,10 @@ StateMapViewSelectDifficulty._handle_input = function (self, dt)
 				self._new_state = StateMapViewSelectLevel
 			end
 
-			self._play_sound(self, "Play_hud_select")
+			self:_play_sound("Play_hud_select")
 
 			going_back = true
-		elseif input_service.get(input_service, "toggle_menu") then
+		elseif input_service:get("toggle_menu") then
 			local return_to_game = not self.parent.ingame_ui.menu_active
 
 			self._map_view:exit(return_to_game)
@@ -245,16 +240,15 @@ StateMapViewSelectDifficulty._handle_input = function (self, dt)
 	end
 
 	if self._new_state then
-		self.start_close_animation(self, going_back)
+		self:start_close_animation(going_back)
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self._start_game_detail_widget)
@@ -277,8 +271,6 @@ StateMapViewSelectDifficulty.draw = function (self, dt)
 	if not self._transition_timer then
 		self.menu_input_description:draw(ui_renderer, dt)
 	end
-
-	return 
 end
 
 local function anim_func(t)
@@ -327,10 +319,9 @@ StateMapViewSelectDifficulty.start_open_animation = function (self)
 	local selection_text_animation = UIAnimation.init(UIAnimation.wait, 0.5, UIAnimation.function_by_time, selection_text_widget.style.text.text_color, 1, 0, 255, 0.15, math.easeCubic)
 
 	UIWidget.animate(selection_text_widget, selection_text_animation)
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewSelectDifficulty.start_close_animation = function (self, going_back)
 	self._transition_timer = (going_back and 0.9) or 0.75
 
@@ -403,10 +394,9 @@ StateMapViewSelectDifficulty.start_close_animation = function (self, going_back)
 
 	UIWidget.animate(selection_text_widget, selection_text_animation)
 	self._map_view:animate_title_text(self._title_text_widget, true)
-	self._play_sound(self, "Play_hud_map_console_change_state_vertical")
-
-	return 
+	self:_play_sound("Play_hud_map_console_change_state_vertical")
 end
+
 StateMapViewSelectDifficulty._align_elements = function (self, selected_index)
 	local num_elements = #self._elements
 	local spacing = 15
@@ -418,12 +408,11 @@ StateMapViewSelectDifficulty._align_elements = function (self, selected_index)
 		widget.offset[1] = start_offset + distance * (index - 1)
 		widget.content.position_offset = widget.offset[1]
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty._set_selection = function (self, index)
 	if self._selection_timer then
-		return 
+		return
 	end
 
 	self._selection_timer = 0
@@ -440,9 +429,8 @@ StateMapViewSelectDifficulty._set_selection = function (self, index)
 	local input_descriptions = (locked and generic_input_actions.locked) or generic_input_actions.default
 
 	self.menu_input_description:change_generic_actions(input_descriptions)
-
-	return 
 end
+
 StateMapViewSelectDifficulty.update_selection_timer = function (self, dt)
 	local timer = self._selection_timer
 
@@ -452,7 +440,7 @@ StateMapViewSelectDifficulty.update_selection_timer = function (self, dt)
 		if timer == total_time then
 			self._selection_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
@@ -460,14 +448,13 @@ StateMapViewSelectDifficulty.update_selection_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty._update_elements = function (self, dt, instant)
-	local selection_progress = (instant and 1) or self.update_selection_timer(self, dt)
+	local selection_progress = (instant and 1) or self:update_selection_timer(dt)
 
 	if not selection_progress then
-		return 
+		return
 	end
 
 	local num_elements = #self._elements
@@ -492,17 +479,16 @@ StateMapViewSelectDifficulty._update_elements = function (self, dt, instant)
 		local position = current_position - input_offset
 		widget.offset[1] = position
 
-		if 1 <= selection_progress then
+		if selection_progress >= 1 then
 			widget.content.position_offset = position
 		end
 
 		local position_progress = 1 - math.clamp(math.abs(position) / (distance * 2), 0, 1)
 
-		self._animate_element(self, widget, index, selection_progress, position_progress)
+		self:_animate_element(widget, index, selection_progress, position_progress)
 	end
-
-	return 
 end
+
 StateMapViewSelectDifficulty._animate_element = function (self, widget, index, progress, distance_progress)
 	local is_selection_widget = self._selection_index == index
 	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
@@ -511,11 +497,11 @@ StateMapViewSelectDifficulty._animate_element = function (self, widget, index, p
 	local locked_style = widget_style.locked_texture
 	local banner_style = widget_style.banner_texture
 	local locked_text_style = widget_style.locked_text
-	local alpha = (0.5 < distance_progress and 255) or distance_progress / 0.5 * 255
+	local alpha = (distance_progress > 0.5 and 255) or distance_progress / 0.5 * 255
 	local locked_text_color = locked_text_style.text_color
 	local locked_text_rect_color = locked_text_style.rect_color
-	locked_text_color[1] = (0.5 < distance_progress and (distance_progress - 0.5) / 0.5 * 255) or 0
-	locked_text_rect_color[1] = (0.5 < distance_progress and (distance_progress - 0.5) / 0.5 * 150) or 0
+	locked_text_color[1] = (distance_progress > 0.5 and (distance_progress - 0.5) / 0.5 * 255) or 0
+	locked_text_rect_color[1] = (distance_progress > 0.5 and (distance_progress - 0.5) / 0.5 * 150) or 0
 	local banner_color = banner_style.color
 	local lock_color = locked_style.color
 	local color_value = 100 + distance_progress * 155
@@ -568,13 +554,10 @@ StateMapViewSelectDifficulty._animate_element = function (self, widget, index, p
 	locked_size[2] = locked_default_height * distance_progress
 	locked_offset[1] = locked_default_offset_width * distance_progress
 	locked_offset[2] = locked_default_offset_height * distance_progress
-
-	return 
 end
+
 StateMapViewSelectDifficulty._play_sound = function (self, event)
 	self._map_view:play_sound(event)
-
-	return 
 end
 
-return 
+return

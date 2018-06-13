@@ -2392,6 +2392,4 @@ return function ()
 			}
 		}
 	})
-
-	return 
 end

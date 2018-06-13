@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 BackendManagerLocal = class(BackendManagerLocal)
 BackendManagerLocalEnabled = BackendManagerLocalEnabled or false
 
@@ -9,12 +7,10 @@ function make_script_backend_local()
 	make_script_backend_profile_attribute_local()
 
 	BackendManagerLocalEnabled = true
-
-	return 
 end
 
 BackendManagerLocal.init = function (self)
-	fassert(self.verify_data(self, DefaultLocalBackendData), "Mismatch between (local) default equipment and ItemMasterList")
+	fassert(self:verify_data(DefaultLocalBackendData), "Mismatch between (local) default equipment and ItemMasterList")
 
 	self._file_name = "backend_local"
 
@@ -46,8 +42,6 @@ BackendManagerLocal.init = function (self)
 
 			self._interfaces.boons:set_save(self._save_data)
 			self._interfaces.quests:setup(self._save_data)
-
-			return 
 		end
 
 		Managers.save:auto_load(self._file_name, load_callback)
@@ -73,17 +67,18 @@ BackendManagerLocal.init = function (self)
 	end
 
 	self._quests = BackendQuestsLocal:new()
+end
 
-	return 
-end
 BackendManagerLocal.reset = function (self)
-	return 
+	return
 end
+
 BackendManagerLocal.get_interface = function (self, interface_name, player_id)
 	fassert(self._interfaces[interface_name], "Requesting unknown interface %q", interface_name)
 
 	return self._interfaces[interface_name]
 end
+
 BackendManagerLocal.verify_data = function (self, data)
 	local valid = true
 
@@ -99,12 +94,15 @@ BackendManagerLocal.verify_data = function (self, data)
 
 	return valid
 end
+
 BackendManagerLocal.is_disconnected = function (self)
 	return false
 end
+
 BackendManagerLocal.is_waiting_for_user_input = function (self)
 	return false
 end
+
 BackendManagerLocal.start_tutorial = function (self)
 	print("[BackendManager] Backend Disabled Tutorial")
 	fassert(self._script_backend_items_backup == nil, "Tutorial already started")
@@ -112,23 +110,23 @@ BackendManagerLocal.start_tutorial = function (self)
 	self._script_backend_items_backup = ScriptBackendItem
 
 	make_script_backend_item_tutorial()
-
-	return 
 end
+
 BackendManagerLocal.stop_tutorial = function (self)
 	fassert(self._script_backend_items_backup ~= nil, "Stopping tutorial without starting it")
 
 	ScriptBackendItem = self._script_backend_items_backup
 	self._script_backend_items_backup = nil
+end
 
-	return 
-end
 BackendManagerLocal.signin = function (self)
-	return 
+	return
 end
+
 BackendManagerLocal.item_script_type = function (self)
 	return ScriptBackendItem.type()
 end
+
 BackendManagerLocal._get_loadout_item_id = function (self, profile, slot)
 	local save_data = self._save_data
 	local save_data_slots = save_data.loadout
@@ -142,20 +140,22 @@ BackendManagerLocal._get_loadout_item_id = function (self, profile, slot)
 
 	return nil
 end
+
 BackendManagerLocal._set_loadout_item = function (self, item_id, profile, slot)
 	local save_data = self._save_data
 	local save_data_slots = save_data.loadout
 	local profile_slots = save_data_slots[profile]
 	profile_slots[slot] = item_id
-
-	return 
 end
+
 BackendManagerLocal._get_all_backend_items = function (self)
 	return self._save_data.items
 end
+
 BackendManagerLocal._get_loadout = function (self)
 	return self._save_data.loadout
 end
+
 BackendManagerLocal._get_items = function (self, profile, slot, rarity)
 	local item_list = {}
 	local item_master_list = ItemMasterList
@@ -164,51 +164,65 @@ BackendManagerLocal._get_items = function (self, profile, slot, rarity)
 	local save_data_items_n = #save_data_items
 
 	for id, _ in pairs(save_data_items) do
-		local key = ScriptBackendItemLocal.get_key(id)
-		local item_data = item_master_list[key]
-		local wrong_slot = slot and slot ~= item_data.slot_type
+		repeat
+			local key = ScriptBackendItemLocal.get_key(id)
+			local item_data = item_master_list[key]
+			local wrong_slot = slot and slot ~= item_data.slot_type
 
-		if wrong_slot then
-		else
+			if wrong_slot then
+				break
+			end
+
 			local wrong_rarity = rarity and rarity ~= item_data.rarity
 
 			if wrong_rarity then
-			elseif profile ~= "all" then
-				local can_wield = ScriptBackendCommon.can_wield(profile, item_data)
-			else
-				item_list[#item_list + 1] = id
+				break
 			end
-		end
+
+			if profile ~= "all" then
+				local can_wield = ScriptBackendCommon.can_wield(profile, item_data)
+
+				if not can_wield then
+					break
+				end
+			end
+
+			item_list[#item_list + 1] = id
+		until true
 	end
 
 	return item_list
 end
+
 BackendManagerLocal.get_stats = function (self)
 	return self._save_data.stats
 end
+
 BackendManagerLocal.set_stats = function (self, stats)
 	self._save_data.stats = stats
+end
 
-	return 
-end
 BackendManagerLocal.destroy = function (self)
-	return 
+	return
 end
+
 BackendManagerLocal.update = function (self, dt)
 	self._interfaces.quests:update(dt)
 	self._interfaces.boons:update()
+end
 
-	return 
-end
 BackendManagerLocal.set_popup_handler = function (self, popup_handler)
-	return 
+	return
 end
+
 BackendManagerLocal.available = function (self)
-	return 
+	return
 end
+
 BackendManagerLocal.profiles_loaded = function (self)
 	return self._save_loaded
 end
+
 BackendManagerLocal._remove_item = function (self, item_id)
 	local item_id = tonumber(item_id)
 	local save_data = self._save_data
@@ -218,6 +232,7 @@ BackendManagerLocal._remove_item = function (self, item_id)
 
 	return exists
 end
+
 BackendManagerLocal._add_item = function (self, item_key)
 	local save_data = self._save_data
 	local save_data_items = save_data.items
@@ -238,13 +253,12 @@ BackendManagerLocal._add_item = function (self, item_key)
 
 	return item_id
 end
+
 BackendManagerLocal.commit = function (self)
 	local function save_callback(info)
 		if info.error then
 			Application.warning("save error %q", info.error)
 		end
-
-		return 
 	end
 
 	if Application.platform() == "win32" then
@@ -252,8 +266,6 @@ BackendManagerLocal.commit = function (self)
 	elseif Application.platform() == "ps4" then
 		Managers.save:auto_save(SaveFileName, SaveData, save_callback)
 	end
-
-	return 
 end
 
-return 
+return

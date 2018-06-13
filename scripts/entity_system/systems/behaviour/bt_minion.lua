@@ -5,8 +5,6 @@ for breed, actions in pairs(BreedActions) do
 	setmetatable(actions, {
 		__index = function (t, k)
 			error(string.format("Trying to access BreedActions.%s.%s that doesn't exist", breed, k))
-
-			return 
 		end
 	})
 end
@@ -1241,4 +1239,4 @@ else
 	end
 end
 
-return 
+return

@@ -1,5 +1,3 @@
--- WARNING: Error occurred during decompilation.
---   Code may be incomplete or incorrect.
 require("scripts/settings/level_unlock_settings")
 require("scripts/managers/achievements/achievement_templates")
 
@@ -31,7 +29,7 @@ local platform_functions = {
 			return token < time
 		end,
 		reset = function ()
-			return 
+			return
 		end
 	},
 	steam = {
@@ -44,8 +42,6 @@ local platform_functions = {
 			if result.done then
 				return true, result.error
 			end
-
-			return 
 		end,
 		is_unlocked = function (template)
 			local unlocked, error_msg = Achievement.unlocked(template.name)
@@ -65,13 +61,9 @@ local platform_functions = {
 			if result.done then
 				return true, result.error
 			end
-
-			return 
 		end,
 		reset = function ()
 			Achievement.reset()
-
-			return 
 		end
 	},
 	ps4 = {
@@ -107,13 +99,9 @@ local platform_functions = {
 			elseif result == Trophies.UNKNOWN then
 				return true, "unknown"
 			end
-
-			return 
 		end,
 		reset = function ()
 			errorf("Tried to reset Trophies, not implemented!")
-
-			return 
 		end
 	},
 	xb1 = {
@@ -128,7 +116,7 @@ local platform_functions = {
 		end,
 		unlock = function (player_id, template)
 			if not rawget(_G, "XB1Achievements") or Achievements.is_refreshing(XB1Achievements) then
-				return 
+				return
 			end
 
 			assert(template.ID_XB1, "[AchievementManager] There is no Achievement ID specified for achievement: " .. template.name)
@@ -152,12 +140,11 @@ local platform_functions = {
 		end,
 		reset = function ()
 			errorf("Tried to reset Achievements, not implemented!")
-
-			return 
 		end
 	}
 }
 AchievementManager = class(AchievementManager)
+
 AchievementManager.init = function (self, world, statistics_db)
 	self.world = world
 	self.statistics_db = statistics_db
@@ -188,7 +175,7 @@ AchievementManager.init = function (self, world, statistics_db)
 			if Managers.account:user_detached() then
 				self._xbox_achievements_initialized = false
 			else
-				self._initialize_xbox_achivements(self)
+				self:_initialize_xbox_achivements()
 			end
 		end
 
@@ -206,14 +193,12 @@ AchievementManager.init = function (self, world, statistics_db)
 	self._enabled = true
 
 	Managers.state.event:register(self, "event_enable_achievements", "event_enable_achievements")
-
-	return 
 end
+
 AchievementManager.event_enable_achievements = function (self, enable)
 	self._enabled = enable
-
-	return 
 end
+
 AchievementManager._initialize_xbox_achivements = function (self)
 	local setup_data = require("scripts/settings/events_xb1")
 
@@ -222,21 +207,20 @@ AchievementManager._initialize_xbox_achivements = function (self)
 	Achievements.refresh(XB1Achievements)
 
 	self._xbox_achievements_initialized = true
-
-	return 
 end
+
 AchievementManager.destroy = function (self)
 	if self.gui then
 		World.destroy_gui(self.world, self.gui)
 
 		self.gui = nil
 	end
-
-	return 
 end
+
 local ACHIEVEMENTS_PER_FRAME = 1
 local AchievementTemplates = AchievementTemplates
 local AchievementTemplates_n = AchievementTemplates_n
+
 AchievementManager.has_unlocked = function (self, ...)
 	local num_template_names = select("#", ...)
 	local templates = AchievementTemplates
@@ -255,6 +239,7 @@ AchievementManager.has_unlocked = function (self, ...)
 
 	return true
 end
+
 AchievementManager.update = function (self, dt, t)
 	if self.error_timeout then
 		self.error_timeout = self.error_timeout - dt
@@ -263,23 +248,23 @@ AchievementManager.update = function (self, dt, t)
 			self.error_timeout = nil
 		end
 
-		return 
+		return
 	end
 
 	if not self._enabled then
-		return 
+		return
 	end
 
 	if self.platform == "xb1" and not self._xbox_achievements_initialized then
 		if not Managers.account:user_detached() then
-			self._initialize_xbox_achivements(self)
+			self:_initialize_xbox_achivements()
 		end
 
-		return 
+		return
 	end
 
 	local player_manager = Managers.player
-	local player = player_manager.local_player(player_manager)
+	local player = player_manager:local_player()
 
 	if player ~= nil then
 		local statistics_db = self.statistics_db
@@ -289,10 +274,10 @@ AchievementManager.update = function (self, dt, t)
 		local completed_achievements = self.completed_achievements
 		local platform = self.platform
 		local platform_functions = platform_functions[platform]
-		local platform_id = player.platform_id(player)
-		local stats_id = player.stats_id(player)
+		local platform_id = player:platform_id()
+		local stats_id = player:stats_id()
 
-		self.debug_draw(self)
+		self:debug_draw()
 
 		if not self.checked_version_number then
 			if not self.version_token then
@@ -303,7 +288,7 @@ AchievementManager.update = function (self, dt, t)
 				else
 					self.version_token = token
 
-					return 
+					return
 				end
 			else
 				local done, error_msg = platform_functions.version_progress(self.version_token)
@@ -314,12 +299,12 @@ AchievementManager.update = function (self, dt, t)
 					if error_msg then
 						print("[AchievementManager] Couldn't update achievement version number stat")
 
-						return 
+						return
 					else
 						self.checked_version_number = true
 					end
 				else
-					return 
+					return
 				end
 			end
 		end
@@ -345,7 +330,7 @@ AchievementManager.update = function (self, dt, t)
 
 		local to_process = ACHIEVEMENTS_PER_FRAME
 
-		while 0 < to_process do
+		while to_process > 0 do
 			to_process = to_process - 1
 			self.next_achievement_to_process_index = self.next_achievement_to_process_index % achievements_n + 1
 			local template = achievements[self.next_achievement_to_process_index]
@@ -360,6 +345,12 @@ AchievementManager.update = function (self, dt, t)
 
 				if result then
 					local token, error_msg = platform_functions.unlock(platform_id, template)
+
+					if token then
+						if token or error_msg then
+							ScriptApplication.send_to_crashify("[AchievementManager]", "ERROR: %s", error_msg)
+						end
+					end
 				end
 			end
 		end
@@ -380,9 +371,8 @@ AchievementManager.update = function (self, dt, t)
 			end
 		end
 	end
-
-	return 
 end
+
 AchievementManager._test = function (self)
 	if not self._achievements then
 		self._achievements = Achievements(Managers.account:user_id())
@@ -399,9 +389,8 @@ AchievementManager._test = function (self)
 	end
 
 	slot1 = self._info and 0
-
-	return 
 end
+
 AchievementManager.reset = function (self)
 	local platform = self.platform
 	local platform_functions = platform_functions[platform]
@@ -413,12 +402,12 @@ AchievementManager.reset = function (self)
 	end
 
 	self.in_progress = {}
-
-	return 
 end
+
 local font_size = 16
 local font = "gw_arial_16"
 local font_mtrl = "materials/fonts/" .. font
+
 AchievementManager.debug_draw = function (self)
 	if script_data.achievement_debug then
 		if self.gui == nil then
@@ -461,8 +450,6 @@ AchievementManager.debug_draw = function (self)
 	end
 
 	self.statistics_db:debug_draw()
-
-	return 
 end
 
 if PLATFORM == "xb1" then
@@ -480,9 +467,8 @@ if PLATFORM == "xb1" then
 		self._hero_stats_initialized = true
 
 		Application.warning("[AchievementManager] Hero stats initialized!")
-
-		return 
 	end
+
 	AchievementManager.write_hero_stats = function (self)
 		local xbox_user_id = Managers.account:xbox_user_id()
 		local player_session_id = Managers.account:player_session_id()
@@ -491,21 +477,21 @@ if PLATFORM == "xb1" then
 		if not player then
 			Application.warning("[AchievementManager] Hero stats update --> FAILED! due to missing player")
 
-			return 
+			return
 		end
 
-		local stats_id = player.stats_id(player)
+		local stats_id = player:stats_id()
 
 		if not stats_id then
 			Application.warning("[AchievementManager] Hero stats update --> FAILED! due to missing stats_id")
 
-			return 
+			return
 		end
 
 		if not self._hero_stats_initialized then
 			Application.warning("[AchievementManager] Hero stats update --> FAILED! Stats were not initialized!")
 
-			return 
+			return
 		end
 
 		local final_value = nil
@@ -528,9 +514,7 @@ if PLATFORM == "xb1" then
 		end
 
 		Application.warning("[AchievementManager] Hero stats update --> SUCCESS!")
-
-		return 
 	end
 end
 
-return 
+return

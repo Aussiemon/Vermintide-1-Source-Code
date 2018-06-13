@@ -17,4 +17,4 @@ DialogueLookup[DialogueLookup_n + 7] = "ntw_challenge_level_almost_closed"
 DialogueLookup[DialogueLookup_n + 8] = "ntw_challange_level_closing_time"
 DialogueLookup_n = DialogueLookup_n + 8
 
-return 
+return

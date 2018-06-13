@@ -591,4 +591,4 @@ DialogueLookup[DialogueLookup_n + 294] = "pwh_karak_azgaraz_witch_hunter_quest_s
 DialogueLookup[DialogueLookup_n + 295] = "pes_karak_azgaraz_witch_hunter_quest_story_two_03"
 DialogueLookup_n = DialogueLookup_n + 295
 
-return 
+return

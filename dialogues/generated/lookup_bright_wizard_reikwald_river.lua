@@ -27,4 +27,4 @@ DialogueLookup[DialogueLookup_n + 12] = "pbw_reikwald_river_intro_b"
 DialogueLookup[DialogueLookup_n + 13] = "pbw_reikwald_river_intro_c"
 DialogueLookup_n = DialogueLookup_n + 13
 
-return 
+return

@@ -5,21 +5,22 @@ local command_to_query_concept = {
 	clan_rat_attack = "commanding"
 }
 BTGiveCommandAction = class(BTGiveCommandAction, BTNode)
+
 BTGiveCommandAction.init = function (self, ...)
 	BTGiveCommandAction.super.init(self, ...)
-
-	return 
 end
+
 BTGiveCommandAction.name = "BTGiveCommandAction"
+
 BTGiveCommandAction.enter = function (self, unit, blackboard, t)
 	blackboard.navigation_extension:set_enabled(false)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
 
 	local network_manager = Managers.state.network
 
-	network_manager.anim_event(network_manager, unit, "order")
+	network_manager:anim_event(unit, "order")
 
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 
 	network_manager.network_transmit:send_rpc_all("rpc_ai_inventory_wield", unit_id)
 
@@ -27,15 +28,14 @@ BTGiveCommandAction.enter = function (self, unit, blackboard, t)
 	local message_id = NetworkLookup.tutorials[blackboard.breed.name]
 
 	network_manager.network_transmit:send_rpc_all("rpc_tutorial_message", template_id, message_id)
-
-	return 
 end
+
 BTGiveCommandAction.leave = function (self, unit, blackboard, t)
 	blackboard.navigation_extension:set_enabled(true)
 
 	local network_manager = Managers.state.network
 
-	network_manager.anim_event(network_manager, unit, "to_combat")
+	network_manager:anim_event(unit, "to_combat")
 
 	blackboard.target_unit = blackboard.command_target
 
@@ -47,9 +47,8 @@ BTGiveCommandAction.leave = function (self, unit, blackboard, t)
 	blackboard.command_target = nil
 	blackboard.command_num_units = nil
 	blackboard.anim_cb_stormvermin_voice = nil
-
-	return 
 end
+
 BTGiveCommandAction.run = function (self, unit, blackboard, t, dt)
 	local command_target = blackboard.command_target
 
@@ -60,7 +59,7 @@ BTGiveCommandAction.run = function (self, unit, blackboard, t, dt)
 	local rot = LocomotionUtils.rotation_towards_unit_flat(unit, command_target)
 	local locomotion_extension = blackboard.locomotion_extension
 
-	locomotion_extension.set_wanted_rotation(locomotion_extension, rot)
+	locomotion_extension:set_wanted_rotation(rot)
 
 	if blackboard.anim_cb_stormvermin_voice then
 		blackboard.anim_cb_stormvermin_voice = nil
@@ -73,18 +72,18 @@ BTGiveCommandAction.run = function (self, unit, blackboard, t, dt)
 			event_data.num_units = blackboard.command_num_units
 
 			if blackboard.command_target_previous == nil or command_target == blackboard.command_target_previous then
-				dialogue_input.trigger_networked_dialogue_event(dialogue_input, "commanding", event_data)
+				dialogue_input:trigger_networked_dialogue_event("commanding", event_data)
 			else
-				dialogue_input.trigger_networked_dialogue_event(dialogue_input, "command_change_target", event_data)
+				dialogue_input:trigger_networked_dialogue_event("command_change_target", event_data)
 			end
 		elseif order == "cheer" then
 		elseif order == "rally" then
 		elseif order == "command_globadier" then
-			dialogue_input.trigger_networked_dialogue_event(dialogue_input, "command_globadier", event_data)
+			dialogue_input:trigger_networked_dialogue_event("command_globadier", event_data)
 		elseif order == "command_gutter_runner" then
-			dialogue_input.trigger_networked_dialogue_event(dialogue_input, "command_gutter_runner", event_data)
+			dialogue_input:trigger_networked_dialogue_event("command_gutter_runner", event_data)
 		elseif order == "command_rat_ogre" then
-			dialogue_input.trigger_networked_dialogue_event(dialogue_input, "command_rat_ogre", event_data)
+			dialogue_input:trigger_networked_dialogue_event("command_rat_ogre", event_data)
 		end
 	end
 
@@ -95,4 +94,4 @@ BTGiveCommandAction.run = function (self, unit, blackboard, t, dt)
 	return "running", "evaluate"
 end
 
-return 
+return

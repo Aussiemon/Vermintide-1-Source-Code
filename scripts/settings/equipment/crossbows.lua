@@ -139,7 +139,7 @@ weapon_template.actions = {
 				return end_reason ~= "new_interupting_action"
 			end,
 			condition_func = function (unit, input_extension, ammo_extension)
-				if ammo_extension and ammo_extension.total_remaining_ammo(ammo_extension) <= 0 then
+				if ammo_extension and ammo_extension:total_remaining_ammo() <= 0 then
 					return false
 				end
 
@@ -263,4 +263,4 @@ Weapons.crossbow_template_1_t3.actions.action_one.zoomed_shot.projectile_info = 
 Weapons.crossbow_template_1_t3.compare_statistics.attacks.light_attack.damage = 1
 Weapons.crossbow_template_1_t3.compare_statistics.attacks.heavy_attack.damage = 1
 
-return 
+return

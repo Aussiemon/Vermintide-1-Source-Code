@@ -464,11 +464,12 @@ end
 UIAtlasHelper.has_atlas_settings_by_texture_name = function (texture_name)
 	return (ui_atlas_settings[texture_name] and true) or false
 end
+
 UIAtlasHelper.get_atlas_settings_by_texture_name = function (texture_name)
 	assert(texture_name, "[UIAtlasHelper] - Trying to access atlas settings for a texture without a name")
 
 	if none_atlas_textures[texture_name] then
-		return 
+		return
 	end
 
 	local texture_settings = ui_atlas_settings[texture_name]
@@ -478,4 +479,4 @@ UIAtlasHelper.get_atlas_settings_by_texture_name = function (texture_name)
 	return texture_settings
 end
 
-return 
+return

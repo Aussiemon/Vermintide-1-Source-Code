@@ -572,7 +572,7 @@ local gamma_adjuster_definition = {
 				content_check_hover = "hotspot",
 				pass_type = "held",
 				held_function = function (ui_scenegraph, ui_style, ui_content, input_service)
-					local cursor = UIInverseScaleVectorToResolution(input_service.get(input_service, "cursor"))
+					local cursor = UIInverseScaleVectorToResolution(input_service:get("cursor"))
 					local scenegraph_id = ui_content.scenegraph_id
 					local world_position = UISceneGraph.get_world_position(ui_scenegraph, scenegraph_id)
 					local size_x = ui_style.size[1]
@@ -586,8 +586,6 @@ local gamma_adjuster_definition = {
 					if old_value ~= value then
 						ui_content.changed = true
 					end
-
-					return 
 				end
 			},
 			{
@@ -614,8 +612,6 @@ local gamma_adjuster_definition = {
 					else
 						ui_style.value_text.text_color = ui_style.value_text.default_color
 					end
-
-					return 
 				end
 			},
 			{
@@ -896,6 +892,7 @@ local function get_slider_value(min, max, value)
 end
 
 TitleLoadingUI = class(TitleLoadingUI)
+
 TitleLoadingUI.init = function (self, world, params, force_done)
 	if PLATFORM == "win32" then
 		Application.set_time_step_policy("no_smoothing", "clear_history", "throttle", 60)
@@ -921,10 +918,9 @@ TitleLoadingUI.init = function (self, world, params, force_done)
 	Managers.input:map_device_to_service("title_loading_ui", "keyboard")
 	Managers.input:map_device_to_service("title_loading_ui", "mouse")
 	Managers.input:map_device_to_service("title_loading_ui", "gamepad")
-	self._setup_gui(self, self._gamma)
-
-	return 
+	self:_setup_gui(self._gamma)
 end
+
 TitleLoadingUI._setup_gui = function (self, gamma)
 	local materials = {
 		"material",
@@ -944,10 +940,9 @@ TitleLoadingUI._setup_gui = function (self, gamma)
 
 	self._ui_renderer = UIRenderer.create(self._world, unpack(materials))
 
-	self._create_elements(self)
-
-	return 
+	self:_create_elements()
 end
+
 TitleLoadingUI._create_elements = function (self)
 	self._ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._video_widget = UIWidget.init(UIWidgets.create_splash_video(first_time_video))
@@ -962,16 +957,16 @@ TitleLoadingUI._create_elements = function (self)
 		local gamma_adjuster = UIWidget.init(gamma_adjuster_definition)
 		self._gamma_adjuster = gamma_adjuster
 
-		self.setup_gamma_menu(self)
+		self:setup_gamma_menu()
 	else
 		self._gamma_done = true
 	end
 
 	DO_RELOAD = false
-
-	return 
 end
+
 DO_RELOAD = true
+
 TitleLoadingUI.setup_gamma_menu = function (self)
 	local gamma_adjuster = self._gamma_adjuster
 	local min = gamma_adjuster.content.min
@@ -979,7 +974,7 @@ TitleLoadingUI.setup_gamma_menu = function (self)
 	local gamma = Application.user_setting("render_settings", "gamma") or 2.2
 	local value = get_slider_value(min, max, gamma)
 	gamma_adjuster.content.internal_value = value
-	local texture_data, input_text = self._get_input_gamepad_texture_data(self, "confirm")
+	local texture_data, input_text = self:_get_input_gamepad_texture_data("confirm")
 	gamma_adjuster.content.gamepad_accept_icon = texture_data.texture
 	self._ui_scenegraph.console_input_icon_2.size[1] = texture_data.size[1]
 	self._ui_scenegraph.console_input_icon_2.size[2] = texture_data.size[2]
@@ -988,25 +983,23 @@ TitleLoadingUI.setup_gamma_menu = function (self)
 	gamma_adjuster.content.gamepad_navigation_icon = texture_data.texture
 	self._ui_scenegraph.console_input_icon_1.size[1] = texture_data.size[1]
 	self._ui_scenegraph.console_input_icon_1.size[2] = texture_data.size[2]
-
-	return 
 end
+
 TitleLoadingUI.update = function (self, dt)
 	if DO_RELOAD then
-		self._create_elements(self)
+		self:_create_elements()
 	end
 
 	if not self._gamma_done then
-		self._update_gamma_adjuster(self, dt)
+		self:_update_gamma_adjuster(dt)
 	else
-		self._update_input_text(self, dt)
-		self._update_input(self, dt)
+		self:_update_input_text(dt)
+		self:_update_input(dt)
 	end
 
-	self._render(self, dt)
-
-	return 
+	self:_render(dt)
 end
+
 TitleLoadingUI._update_gamma_adjuster = function (self, dt)
 	local gamma_adjuster = self._gamma_adjuster
 	local gamma_adjuster_content = gamma_adjuster.content
@@ -1014,7 +1007,7 @@ TitleLoadingUI._update_gamma_adjuster = function (self, dt)
 	gamma_adjuster_content.gamepad_active = gamepad_active
 
 	if gamepad_active then
-		self._handle_gamma_gamepad_input(self, dt)
+		self:_handle_gamma_gamepad_input(dt)
 	end
 
 	if gamma_adjuster_content.changed then
@@ -1051,13 +1044,12 @@ TitleLoadingUI._update_gamma_adjuster = function (self, dt)
 
 		ShowCursorStack.pop()
 	end
-
-	return 
 end
+
 TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 	local input_service = Managers.input:get_service("title_loading_ui")
 
-	if input_service.get(input_service, "confirm") then
+	if input_service:get("confirm") then
 		self._done_button.content.button_hotspot.on_release = true
 	else
 		local gamma_adjuster = self._gamma_adjuster
@@ -1069,7 +1061,7 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 		if input_cooldown then
 			on_cooldown_last_frame = true
 			local new_cooldown = math.max(input_cooldown - dt, 0)
-			input_cooldown = (0 < new_cooldown and new_cooldown) or nil
+			input_cooldown = (new_cooldown > 0 and new_cooldown) or nil
 			gamma_adjuster_content.input_cooldown = input_cooldown
 		end
 
@@ -1080,24 +1072,24 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 		local diff = max - min
 		local total_step = diff * 10^num_decimals
 		local step = 1 / total_step
-		local move = input_service.get(input_service, "analog_input")
+		local move = input_service:get("analog_input")
 		local analog_speed = 0.01
 		local current_time = Managers.time:time("main")
 		local input_been_made = false
 
-		if input_service.get(input_service, "move_left_hold") then
+		if input_service:get("move_left_hold") then
 			if not input_cooldown then
 				gamma_adjuster_content.internal_value = math.clamp(internal_value - step, 0, 1)
 				gamma_adjuster_content.last_update = current_time
 				input_been_made = true
 			end
-		elseif input_service.get(input_service, "move_right_hold") then
+		elseif input_service:get("move_right_hold") then
 			if not input_cooldown then
 				gamma_adjuster_content.internal_value = math.clamp(internal_value + step, 0, 1)
 				gamma_adjuster_content.last_update = current_time
 				input_been_made = true
 			end
-		elseif 0 < math.abs(move.x) then
+		elseif math.abs(move.x) > 0 then
 			gamma_adjuster_content.changed = true
 			gamma_adjuster_content.internal_value = math.clamp(internal_value + math.sign(move.x) * math.pow(move.x, 2) * total_step * dt * analog_speed, 0, 1)
 		end
@@ -1118,15 +1110,14 @@ TitleLoadingUI._handle_gamma_gamepad_input = function (self, dt)
 			return true
 		end
 	end
-
-	return 
 end
+
 TitleLoadingUI._get_input_texture_data = function (self, input_action)
 	local input_service = Managers.input:get_service("title_loading_ui")
 
 	if Managers.input:is_device_active("keyboard") or Managers.input:is_device_active("mouse") then
 		local platform = PLATFORM
-		local keymap_binding = input_service.get_keymapping(input_service, input_action, platform)
+		local keymap_binding = input_service:get_keymapping(input_action, platform)
 		local device_type = keymap_binding[1]
 		local key_index = keymap_binding[2]
 		local key_action_type = keymap_binding[3]
@@ -1135,19 +1126,19 @@ TitleLoadingUI._get_input_texture_data = function (self, input_action)
 	elseif Managers.input:is_device_active("gamepad") then
 		return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 	end
-
-	return 
 end
+
 TitleLoadingUI._get_input_gamepad_texture_data = function (self, input_action)
 	local input_service = Managers.input:get_service("title_loading_ui")
 
 	return UISettings.get_gamepad_input_texture_data(input_service, input_action, true)
 end
+
 TitleLoadingUI._update_input_text = function (self, dt)
 	local widget_content = self._skip_widget.content
 	local widget_style = self._skip_widget.style
 	local ui_scenegraph = self._ui_scenegraph
-	local texture_data, input_text = self._get_input_texture_data(self, "cancel_video_1")
+	local texture_data, input_text = self:_get_input_texture_data("cancel_video_1")
 
 	if not texture_data then
 		if widget_content.input_text ~= input_text then
@@ -1187,10 +1178,10 @@ TitleLoadingUI._update_input_text = function (self, dt)
 	end
 
 	self._can_draw_input_widget = true
-
-	return 
 end
+
 INPUTS_TO_REMOVE = {}
+
 TitleLoadingUI._update_any_held = function (self)
 	local held = false
 
@@ -1228,32 +1219,33 @@ TitleLoadingUI._update_any_held = function (self)
 
 	return held
 end
+
 TitleLoadingUI._update_input = function (self, dt)
 	if self._force_done then
-		self._handle_skip_fade(self, 0)
+		self:_handle_skip_fade(0)
 
-		return 
+		return
 	end
 
 	local total_hold_time = 1
 	local total_fade_time = 1
 	self._fade_timer = math.clamp((self._fade_timer or 0) - dt, 0, total_fade_time)
 	local input_service = Managers.input:get_service("title_loading_ui")
-	local cancel_video = input_service.get(input_service, "cancel_video")
+	local cancel_video = input_service:get("cancel_video")
 
-	if self._update_any_held(self) then
+	if self:_update_any_held() then
 		self._fade_timer = total_fade_time
 		self._cancel_timer = (self._cancel_timer or 0) + dt
 	else
 		self._cancel_timer = (self._cancel_timer or 0) - dt * 3
 	end
 
-	self._handle_skip_fade(self, self._fade_timer / total_fade_time * 255)
+	self:_handle_skip_fade(self._fade_timer / total_fade_time * 255)
 
 	self._cancel_timer = math.clamp(self._cancel_timer, 0, total_hold_time)
 	local progress = self._cancel_timer / total_hold_time
 
-	if 1 <= progress or (cancel_video and self._cancel_video) then
+	if progress >= 1 or (cancel_video and self._cancel_video) then
 		self._cancel_timer = nil
 		self._force_done = true
 
@@ -1274,9 +1266,8 @@ TitleLoadingUI._update_input = function (self, dt)
 	end
 
 	self._cancel_video = self._cancel_video or cancel_video
-
-	return 
 end
+
 TitleLoadingUI._handle_skip_fade = function (self, alpha)
 	local skip_input_style = self._skip_widget.style
 	skip_input_style.input_text_1.text_color[1] = alpha
@@ -1285,13 +1276,12 @@ TitleLoadingUI._handle_skip_fade = function (self, alpha)
 	skip_input_style.input_icon.color[1] = alpha
 	skip_input_style.input_icon_bar.color[1] = alpha
 	skip_input_style.keyboard_input_icon.color[1] = alpha
-
-	return 
 end
+
 TitleLoadingUI._render = function (self, dt)
 	local input_manager = Managers.input
-	local input_service = input_manager.get_service(input_manager, "title_loading_ui")
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = input_manager:get_service("title_loading_ui")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(self._ui_renderer, self._ui_scenegraph, input_service, dt, nil, self.render_settings)
 
@@ -1302,7 +1292,7 @@ TitleLoadingUI._render = function (self, dt)
 			UIRenderer.draw_widget(self._ui_renderer, self._done_button)
 		end
 	else
-		self._render_video(self, dt)
+		self:_render_video(dt)
 
 		if self._can_draw_input_widget then
 			UIRenderer.draw_widget(self._ui_renderer, self._skip_widget)
@@ -1311,16 +1301,15 @@ TitleLoadingUI._render = function (self, dt)
 
 	UIRenderer.draw_widget(self._ui_renderer, self._dead_space_filler_widget)
 	UIRenderer.end_pass(self._ui_renderer)
-
-	return 
 end
+
 TitleLoadingUI._render_video = function (self, dt)
 	if not self._trailer then
-		return 
+		return
 	end
 
 	if self._done then
-		return 
+		return
 	end
 
 	if not self._ui_renderer.video_player then
@@ -1354,9 +1343,8 @@ TitleLoadingUI._render_video = function (self, dt)
 			UIRenderer.draw_widget(self._ui_renderer, self._video_widget)
 		end
 	end
-
-	return 
 end
+
 TitleLoadingUI.destroy = function (self)
 	Managers.music:stop_all_sounds()
 	UIRenderer.destroy(self._ui_renderer, self._world)
@@ -1376,12 +1364,12 @@ TitleLoadingUI.destroy = function (self)
 
 		self._needs_cursor_pop = false
 	end
-
-	return 
 end
+
 TitleLoadingUI.is_done = function (self)
 	return self._gamma_done and (self._force_done or self._done)
 end
+
 TitleLoadingUI.force_done = function (self)
 	self._force_done = true
 	self._cancel_timer = nil
@@ -1391,8 +1379,6 @@ TitleLoadingUI.force_done = function (self)
 	end
 
 	self._skip_widget.style.input_icon_bar.gradient_threshold = 0
-
-	return 
 end
 
-return 
+return

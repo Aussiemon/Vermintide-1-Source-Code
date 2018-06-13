@@ -1,4 +1,5 @@
 ForgeTester = class(ForgeTester)
+
 ForgeTester.init = function (self)
 	self._item_pool = {
 		plentiful = {},
@@ -20,18 +21,17 @@ ForgeTester.init = function (self)
 		ranged = true
 	}
 	self._state = "create_item"
-
-	return 
 end
-ForgeTester.start = function (self, rarity)
-	self.refresh_item_pool(self)
 
-	self._rarity = rarity or self._select_rarity(self)
+ForgeTester.start = function (self, rarity)
+	self:refresh_item_pool()
+
+	self._rarity = rarity or self:_select_rarity()
 
 	if not self._rarity then
 		self._state = "done"
 
-		return 
+		return
 	end
 
 	local update = callback(self, "update")
@@ -41,49 +41,48 @@ ForgeTester.start = function (self, rarity)
 	self._state = "create_item"
 	self._fused_times = 0
 	self._errors = {}
-
-	return 
 end
+
 ForgeTester.stop = function (self)
 	self._item_pool = {
 		plentiful = {},
 		common = {},
 		rare = {}
 	}
-
-	return 
 end
+
 ForgeTester._select_rarity = function (self)
 	local available = {}
 
 	for rarity, pool in pairs(self._item_pool) do
-		if 5 < #self._item_pool[rarity] then
+		if #self._item_pool[rarity] > 5 then
 			available[#available + 1] = rarity
 		end
 	end
 
 	if table.is_empty(available) then
-		return 
+		return
 	end
 
 	return available[Math.random(#available)]
 end
+
 ForgeTester.update = function (self, dt)
 	local rarity = self._rarity
 
 	if self._state == "create_item" then
-		self.fuse_one(self, rarity)
+		self:fuse_one(rarity)
 
 		self._fused_times = self._fused_times + 1
 		self._state = "poll"
 	elseif self._state == "poll" then
-		local result = self.poll_answer(self)
+		local result = self:poll_answer()
 
 		if result then
 			self._state = "select"
 		end
 	elseif self._state == "select" then
-		local next_rarity = self._select_rarity(self)
+		local next_rarity = self:_select_rarity()
 
 		if next_rarity then
 			self._rarity = next_rarity
@@ -97,9 +96,8 @@ ForgeTester.update = function (self, dt)
 			self._state = "done"
 		end
 	end
-
-	return 
 end
+
 ForgeTester.useable_items = function (self)
 	if self._useable_items then
 		return self._useable_items
@@ -130,6 +128,7 @@ ForgeTester.useable_items = function (self)
 
 	return useable_items
 end
+
 ForgeTester.refresh_item_pool = function (self)
 	self._item_pool = {
 		plentiful = {},
@@ -158,6 +157,7 @@ ForgeTester.refresh_item_pool = function (self)
 
 	return item_pool
 end
+
 ForgeTester.fuse_one = function (self, rarity)
 	local items = {}
 	local num_items = 0
@@ -171,7 +171,7 @@ ForgeTester.fuse_one = function (self, rarity)
 		table.remove(pool_rarity, id)
 
 		num_items = num_items + 1
-	until 5 <= num_items
+	until num_items >= 5
 
 	local items_to_merge = ""
 	local item_types = {}
@@ -192,17 +192,15 @@ ForgeTester.fuse_one = function (self, rarity)
 		rarity = self._upgrade_rarity[rarity],
 		item_types = item_types
 	}
-
-	return 
 end
+
 ForgeTester._report_error = function (self, ...)
 	local formatted = string.format(...)
 
 	Application.error(formatted)
 	table.insert(formatted)
-
-	return 
 end
+
 ForgeTester._verify_result = function (self, items)
 	local num_items = 0
 
@@ -211,39 +209,37 @@ ForgeTester._verify_result = function (self, items)
 		local rarity = config.rarity
 
 		if rarity ~= self._expected_result.rarity then
-			self._report_error(self, "Unexpected rarity %s", rarity)
+			self:_report_error("Unexpected rarity %s", rarity)
 		end
 
 		local item_type = config.item_type
 
 		if not self._expected_result.item_types[item_type] then
-			self._report_error(self, "Unexpected item_type %s", item_type)
+			self:_report_error("Unexpected item_type %s", item_type)
 		end
 
 		num_items = num_items + 1
 	end
 
 	if num_items ~= 1 then
-		self._report_error(self, "Unexpected number of items %d", num_items)
+		self:_report_error("Unexpected number of items %d", num_items)
 	end
 
 	self._expected_result = nil
-
-	return 
 end
+
 ForgeTester.poll_answer = function (self)
 	local items, parameters, error_message = BackendSession.poll_item_server()
 
 	if error_message then
 		Application.error(error_message)
 	elseif items then
-		self._verify_result(self, items)
+		self:_verify_result(items)
 
 		return true
 	end
-
-	return 
 end
+
 ForgeTester.activate_item_creator = function (self)
 	self._create_items_pool = {
 		common = 2000,
@@ -256,9 +252,8 @@ ForgeTester.activate_item_creator = function (self)
 	local update = callback(self, "update_item_creator")
 
 	Managers.debug_updator:add_updator(update, "ForgeTesterItemCreator")
-
-	return 
 end
+
 ForgeTester.stop_item_creator = function (self)
 	print("Done generating items")
 
@@ -266,9 +261,8 @@ ForgeTester.stop_item_creator = function (self)
 	self._creator_next_item = nil
 
 	Managers.debug_updator:remove_updator_by_name("ForgeTesterItemCreator")
-
-	return 
 end
+
 ForgeTester.update_item_creator = function (self)
 	local a = Math.random()
 
@@ -300,7 +294,7 @@ ForgeTester.update_item_creator = function (self)
 				local time = Managers.time:time("main")
 				self._creator_next_item = time + self._commit_wait_time
 
-				self._create_items(self, rarity, amount)
+				self:_create_items(rarity, amount)
 			end
 		else
 			print("Done generating items")
@@ -318,11 +312,10 @@ ForgeTester.update_item_creator = function (self)
 			self._creator_next_item = nil
 		end
 	end
-
-	return 
 end
+
 ForgeTester._create_items = function (self, rarity, amount)
-	local useable_items = self.useable_items(self)
+	local useable_items = self:useable_items()
 	local items_to_create = {}
 	local all_rarity = useable_items[rarity]
 
@@ -334,8 +327,6 @@ ForgeTester._create_items = function (self, rarity, amount)
 	end
 
 	Backend.commit()
-
-	return 
 end
 
-return 
+return

@@ -29,4 +29,4 @@ telemetry_survey_atlas = {
 	}
 }
 
-return 
+return

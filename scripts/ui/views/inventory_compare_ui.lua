@@ -35,12 +35,13 @@ local compare_bar_colors = {
 }
 local fake_input_service = {
 	get = function ()
-		return 
+		return
 	end,
 	has = function ()
-		return 
+		return
 	end
 }
+
 InventoryCompareUI.init = function (self, parent, window_position, animation_definitions, ingame_ui_context, input_service_name)
 	self.parent = parent
 	self.ui_renderer = ingame_ui_context.ui_renderer
@@ -57,47 +58,46 @@ InventoryCompareUI.init = function (self, parent, window_position, animation_def
 	self.ui_animator = UIAnimator:new(self.scenegraph_definition, animation_definitions)
 	self.animation_definitions = animation_definitions
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	local light_attack_widget = self.light_attack_info_widget
 	local heavy_attack_widget = self.heavy_attack_info_widget
 	light_attack_widget.content.title_text = Localize("item_compare_attack_title_light")
 	heavy_attack_widget.content.title_text = Localize("item_compare_attack_title_heavy")
 
-	self.set_attack_title(self, light_attack_widget, "light_attack_frame", 1, Localize("item_compare_damage"))
-	self.set_attack_title(self, light_attack_widget, "light_attack_frame", 2, Localize("item_compare_armor_penetration"))
-	self.set_attack_title(self, light_attack_widget, "light_attack_frame", 3, Localize("item_compare_status"))
-	self.set_attack_title(self, light_attack_widget, "light_attack_frame", 4, Localize("item_compare_head_shot"))
-	self.set_attack_title(self, light_attack_widget, "light_attack_frame", 5, Localize("item_compare_elemental"))
-	self.set_attack_title(self, heavy_attack_widget, "heavy_attack_frame", 1, Localize("item_compare_damage"))
-	self.set_attack_title(self, heavy_attack_widget, "heavy_attack_frame", 2, Localize("item_compare_armor_penetration"))
-	self.set_attack_title(self, heavy_attack_widget, "heavy_attack_frame", 3, Localize("item_compare_status"))
-	self.set_attack_title(self, heavy_attack_widget, "heavy_attack_frame", 4, Localize("item_compare_head_shot"))
-	self.set_attack_title(self, heavy_attack_widget, "heavy_attack_frame", 5, Localize("item_compare_elemental"))
+	self:set_attack_title(light_attack_widget, "light_attack_frame", 1, Localize("item_compare_damage"))
+	self:set_attack_title(light_attack_widget, "light_attack_frame", 2, Localize("item_compare_armor_penetration"))
+	self:set_attack_title(light_attack_widget, "light_attack_frame", 3, Localize("item_compare_status"))
+	self:set_attack_title(light_attack_widget, "light_attack_frame", 4, Localize("item_compare_head_shot"))
+	self:set_attack_title(light_attack_widget, "light_attack_frame", 5, Localize("item_compare_elemental"))
+	self:set_attack_title(heavy_attack_widget, "heavy_attack_frame", 1, Localize("item_compare_damage"))
+	self:set_attack_title(heavy_attack_widget, "heavy_attack_frame", 2, Localize("item_compare_armor_penetration"))
+	self:set_attack_title(heavy_attack_widget, "heavy_attack_frame", 3, Localize("item_compare_status"))
+	self:set_attack_title(heavy_attack_widget, "heavy_attack_frame", 4, Localize("item_compare_head_shot"))
+	self:set_attack_title(heavy_attack_widget, "heavy_attack_frame", 5, Localize("item_compare_elemental"))
 
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 
-	self.clear_item_selected(self)
-
-	return 
+	self:clear_item_selected()
 end
+
 InventoryCompareUI.disable_input = function (self, blocked)
 	self.input_blocked = blocked
+end
 
-	return 
-end
 InventoryCompareUI.on_enter = function (self)
-	return 
+	return
 end
+
 InventoryCompareUI.on_exit = function (self)
-	return 
+	return
 end
+
 InventoryCompareUI.destroy = function (self)
 	self.ui_animator = nil
-
-	return 
 end
+
 InventoryCompareUI.create_ui_elements = function (self)
 	self.light_attack_info_widget = definitions.create_attack_detailed_info_widget(NUM_STATS_BARS, "light_attack_frame")
 	self.heavy_attack_info_widget = definitions.create_attack_detailed_info_widget(NUM_STATS_BARS, "heavy_attack_frame")
@@ -127,20 +127,19 @@ InventoryCompareUI.create_ui_elements = function (self)
 	self.description_field_widget = UIWidget.init(self.widgets_definitions.item_description_field)
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 InventoryCompareUI.update = function (self, dt)
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	local gamepad_scroll_value = nil
 
 	if gamepad_active then
 		local input_service_name = self.input_service_name
-		local input_service = (self.input_blocked and fake_input_service) or input_manager.get_service(input_manager, input_service_name)
-		local scroll_axis = input_service.get(input_service, "gamepad_right_axis")
+		local input_service = (self.input_blocked and fake_input_service) or input_manager:get_service(input_service_name)
+		local scroll_axis = input_service:get("gamepad_right_axis")
 
-		if scroll_axis and 0 < Vector3.length(scroll_axis) then
+		if scroll_axis and Vector3.length(scroll_axis) > 0 then
 			local current_scroll_value = self.scroll_value
 			local scroll_step = self.scroll_field_widget.content.scroll_step or 0.1
 			gamepad_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
@@ -148,10 +147,9 @@ InventoryCompareUI.update = function (self, dt)
 		end
 	end
 
-	self.update_scroll(self, gamepad_scroll_value)
-
-	return 
+	self:update_scroll(gamepad_scroll_value)
 end
+
 InventoryCompareUI.set_scrollbar_length = function (self, total_height, start_scroll_value, draw_attack_info)
 	local ui_scenegraph = self.ui_scenegraph
 	local actual_height = 0
@@ -173,7 +171,7 @@ InventoryCompareUI.set_scrollbar_length = function (self, total_height, start_sc
 		total_height = total_height + default_height
 	end
 
-	if total_height <= default_height then
+	if default_height >= total_height then
 		bar_fraction = 1
 	else
 		local height_fraction = default_height / total_height
@@ -186,27 +184,25 @@ InventoryCompareUI.set_scrollbar_length = function (self, total_height, start_sc
 	self.scroll_field_widget.content.scroll_step = step_fraction
 	scrollbar_content.button_scroll_step = step_fraction
 
-	self.set_scroll_amount(self, start_scroll_value or 0)
+	self:set_scroll_amount(start_scroll_value or 0)
 
 	self.draw_scrollbar = draw_scrollbar
-
-	return 
 end
+
 InventoryCompareUI.update_scroll = function (self, override_value)
 	local scroll_bar_value = self.scrollbar_widget.content.scroll_bar_info.value
 	local mouse_scroll_value = self.scroll_field_widget.content.internal_scroll_value
 	local current_scroll_value = self.scroll_value
 
 	if override_value and override_value ~= current_scroll_value then
-		self.set_scroll_amount(self, override_value)
+		self:set_scroll_amount(override_value)
 	elseif current_scroll_value ~= mouse_scroll_value then
-		self.set_scroll_amount(self, mouse_scroll_value)
+		self:set_scroll_amount(mouse_scroll_value)
 	elseif current_scroll_value ~= scroll_bar_value then
-		self.set_scroll_amount(self, scroll_bar_value)
+		self:set_scroll_amount(scroll_bar_value)
 	end
-
-	return 
 end
+
 InventoryCompareUI.set_scroll_amount = function (self, value)
 	local current_scroll_value = self.scroll_value
 
@@ -220,16 +216,15 @@ InventoryCompareUI.set_scroll_amount = function (self, value)
 		self.scroll_field_widget.content.internal_scroll_value = value
 		self.scroll_value = value
 	end
-
-	return 
 end
+
 InventoryCompareUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
 	local input_service_name = self.input_service_name
-	local input_service = (self.input_blocked and fake_input_service) or input_manager.get_service(input_manager, input_service_name)
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local input_service = (self.input_blocked and fake_input_service) or input_manager:get_service(input_service_name)
+	local gamepad_active = input_manager:is_device_active("gamepad")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self.window_title_text_widget)
@@ -273,30 +268,28 @@ InventoryCompareUI.draw = function (self, dt)
 			UIRenderer.draw_widget(ui_renderer, widget)
 		end
 
-		if 0 < number_of_traits_on_item then
+		if number_of_traits_on_item > 0 then
 			UIRenderer.draw_widget(ui_renderer, self.traits_title_widget)
 			UIRenderer.draw_widget(ui_renderer, self.trait_background_widget)
 		end
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 InventoryCompareUI.set_title_text = function (self, text)
 	local widget = self.window_title_text_widget
 	widget.content.text = text
-
-	return 
 end
+
 InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_item_backend_id)
 	if not item_backend_id then
 		self.item = nil
 
-		return 
+		return
 	end
 
-	self.clear_item_selected(self)
+	self:clear_item_selected()
 
 	local item = BackendUtils.get_item_from_masterlist(item_backend_id)
 	self.scrollbar_widget.content.scroll_bar_info.bar_height_percentage = (item and 0.5) or 1
@@ -311,10 +304,10 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		local info_widget_content = info_widget.content
 		local info_widget_style = info_widget.style
 		local item_name = item.name
-		local rarity_color = self.get_rarity_color(self, item.rarity)
+		local rarity_color = self:get_rarity_color(item.rarity)
 		local item_name = Localize(item.display_name)
 
-		if info_widget_style.text_title and 25 < UTF8Utils.string_length(item_name) and not UIRenderer.crop_text_width(self.ui_renderer, item_name, 400, info_widget_style.text_title) then
+		if info_widget_style.text_title and UTF8Utils.string_length(item_name) > 25 and not UIRenderer.crop_text_width(self.ui_renderer, item_name, 400, info_widget_style.text_title) then
 		end
 
 		info_widget_content.text_title = item_name
@@ -349,36 +342,36 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		local light_attack_statistics = stats_by_attack and stats_by_attack.light_attack and stats_by_attack.light_attack
 		local light_attack_compare_statistics = item_compare_statistics_attacks and item_compare_statistics_attacks.light_attack and item_compare_statistics_attacks.light_attack
 
-		self.set_item_data(self, self.light_attack_info_widget, "light_attack_frame", light_attack_statistics, light_attack_compare_statistics)
+		self:set_item_data(self.light_attack_info_widget, "light_attack_frame", light_attack_statistics, light_attack_compare_statistics)
 
 		local heavy_attack_statistics = stats_by_attack and stats_by_attack.heavy_attack and stats_by_attack.heavy_attack
 		local heavy_attack_compare_statistics = item_compare_statistics_attacks and item_compare_statistics_attacks.heavy_attack and item_compare_statistics_attacks.heavy_attack
 
-		self.set_item_data(self, self.heavy_attack_info_widget, "heavy_attack_frame", heavy_attack_statistics, heavy_attack_compare_statistics)
+		self:set_item_data(self.heavy_attack_info_widget, "heavy_attack_frame", heavy_attack_statistics, heavy_attack_compare_statistics)
 
 		local light_attack_perks = perks_by_attack and perks_by_attack.light_attack and perks_by_attack.light_attack
 
-		self.set_perks(self, self.light_attack_info_widget, light_attack_perks)
+		self:set_perks(self.light_attack_info_widget, light_attack_perks)
 
 		local heavy_attack_perks = perks_by_attack and perks_by_attack.heavy_attack and perks_by_attack.heavy_attack
 
-		self.set_perks(self, self.heavy_attack_info_widget, heavy_attack_perks)
+		self:set_perks(self.heavy_attack_info_widget, heavy_attack_perks)
 
-		local light_attack_frame_height = self.calculate_attack_frame_height(self, self.light_attack_info_widget, "light_attack_frame", light_attack_perks and true, light_attack_statistics)
-		local heavy_attack_frame_height = self.calculate_attack_frame_height(self, self.heavy_attack_info_widget, "heavy_attack_frame", heavy_attack_perks and true, heavy_attack_statistics)
+		local light_attack_frame_height = self:calculate_attack_frame_height(self.light_attack_info_widget, "light_attack_frame", light_attack_perks and true, light_attack_statistics)
+		local heavy_attack_frame_height = self:calculate_attack_frame_height(self.heavy_attack_info_widget, "heavy_attack_frame", heavy_attack_perks and true, heavy_attack_statistics)
 
 		if draw_stamina then
 			local max_fatigue_points = item_template.max_fatigue_points
 
-			self.set_stamina(self, max_fatigue_points or 0)
+			self:set_stamina(max_fatigue_points or 0)
 		end
 
 		if draw_ammo then
-			self.set_ammo(self, item_template)
+			self:set_ammo(item_template)
 		end
 
-		self.trait_widgets_height = self.set_traits_info(self, item, traits)
-		local total_description_height = self.set_item_description(self, item.description)
+		self.trait_widgets_height = self:set_traits_info(item, traits)
+		local total_description_height = self:set_item_description(item.description)
 		self.total_description_height = total_description_height
 		total_widgets_height = total_widgets_height + total_description_height + self.trait_widgets_height
 		self.draw_attack_info = draw_attack_info
@@ -386,15 +379,14 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		self.draw_ammo = draw_ammo
 	end
 
-	show_traits = 0 < self.number_of_traits_on_item
-	local height, spacing_height = self.handle_widget_positions(self, draw_attack_info, show_traits, self.draw_stamina, self.draw_ammo)
+	show_traits = self.number_of_traits_on_item > 0
+	local height, spacing_height = self:handle_widget_positions(draw_attack_info, show_traits, self.draw_stamina, self.draw_ammo)
 	total_widgets_height = total_widgets_height + spacing_height
 	self.total_widgets_height = total_widgets_height
 
-	self.set_scrollbar_length(self, total_widgets_height, 0, draw_attack_info)
-
-	return 
+	self:set_scrollbar_length(total_widgets_height, 0, draw_attack_info)
 end
+
 InventoryCompareUI.handle_widget_positions = function (self, show_attack_info, show_traits, show_stamina, show_ammo)
 	local ui_scenegraph = self.ui_scenegraph
 	local scenegraph_definition = self.scenegraph_definition
@@ -479,6 +471,7 @@ InventoryCompareUI.handle_widget_positions = function (self, show_attack_info, s
 
 	return total_height, math.max(total_spacing - 150, 0)
 end
+
 InventoryCompareUI.calculate_attack_frame_height = function (self, widget, scenegraph_id, using_perks, attack_statistics)
 	local ui_scenegraph = self.ui_scenegraph
 	local widget_content = widget.content
@@ -487,7 +480,7 @@ InventoryCompareUI.calculate_attack_frame_height = function (self, widget, scene
 
 	if attack_statistics then
 		if using_perks then
-			local _, perk_text_height = self.get_text_size(self, widget_content.perk_text, widget_style.perk_text)
+			local _, perk_text_height = self:get_text_size(widget_content.perk_text, widget_style.perk_text)
 			total_height = total_height + perk_text_height
 		end
 
@@ -507,28 +500,30 @@ InventoryCompareUI.calculate_attack_frame_height = function (self, widget, scene
 
 	return total_height
 end
+
 InventoryCompareUI.get_text_size = function (self, localized_text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, localized_text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 InventoryCompareUI.get_word_wrap_size = function (self, localized_text, text_style, text_area_width)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local lines = UIRenderer.word_wrap(self.ui_renderer, localized_text, font[1], scaled_font_size, text_area_width)
-	local text_width, text_height = self.get_text_size(self, localized_text, text_style)
+	local text_width, text_height = self:get_text_size(localized_text, text_style)
 
 	return text_width, text_height * #lines
 end
+
 InventoryCompareUI.clear_item_selected = function (self)
 	self.item = nil
 
-	self.reset_stat_bars(self, self.light_attack_info_widget, "light_attack_frame")
-	self.reset_stat_bars(self, self.heavy_attack_info_widget, "heavy_attack_frame")
-	self.set_scroll_amount(self, 0)
-
-	return 
+	self:reset_stat_bars(self.light_attack_info_widget, "light_attack_frame")
+	self:reset_stat_bars(self.heavy_attack_info_widget, "heavy_attack_frame")
+	self:set_scroll_amount(0)
 end
+
 InventoryCompareUI.set_item_data = function (self, widget, scenegraph_id, stats_data, compare_stats_data)
 	if stats_data then
 		local counter = 0
@@ -546,13 +541,13 @@ InventoryCompareUI.set_item_data = function (self, widget, scenegraph_id, stats_
 				if compare_stats_data then
 					for compare_key, compare_value in pairs(compare_stats_data) do
 						if key == compare_key then
-							self.set_bar_value(self, widget, scenegraph_id, index, value, compare_value)
+							self:set_bar_value(widget, scenegraph_id, index, value, compare_value)
 
 							break
 						end
 					end
 				else
-					self.set_bar_value(self, widget, scenegraph_id, index, value, value)
+					self:set_bar_value(widget, scenegraph_id, index, value, value)
 				end
 
 				counter = counter + 1
@@ -561,9 +556,8 @@ InventoryCompareUI.set_item_data = function (self, widget, scenegraph_id, stats_
 
 		widget.content.number_of_bars = counter
 	end
-
-	return 
 end
+
 InventoryCompareUI.reset_stat_bars = function (self, widget, scenegraph_id)
 	local ui_scenegraph = self.ui_scenegraph
 
@@ -577,9 +571,8 @@ InventoryCompareUI.reset_stat_bars = function (self, widget, scenegraph_id)
 		widget.content[bar_background] = stats_bar_backgrouds.disabled
 		widget.content[bar_background_active] = false
 	end
-
-	return 
 end
+
 InventoryCompareUI.set_bar_value = function (self, widget, scenegraph_id, index, value, compare_value)
 	local ui_scenegraph = self.ui_scenegraph
 	local bar = "bar_" .. index
@@ -631,9 +624,8 @@ InventoryCompareUI.set_bar_value = function (self, widget, scenegraph_id, index,
 	ui_scenegraph[stats_bar_scenegraph_id].size[1] = normal_bar_value
 	ui_scenegraph[stats_compare_bar_scenegraph_id].size[1] = compare_bar_value
 	ui_scenegraph[stats_bar_edge_marker_scenegraph_id].position[1] = edge_marker_position_value
-
-	return 
 end
+
 InventoryCompareUI.set_perks = function (self, widget, perks)
 	if perks then
 		local text = ""
@@ -653,15 +645,13 @@ InventoryCompareUI.set_perks = function (self, widget, perks)
 	else
 		widget.content.use_perks = nil
 	end
-
-	return 
 end
+
 InventoryCompareUI.set_attack_title = function (self, widget, scenegraph_id, row_index, text)
 	local title_text_name = scenegraph_id .. "_title_text_" .. row_index
 	widget.content[title_text_name] = text
-
-	return 
 end
+
 InventoryCompareUI.set_stamina = function (self, max_fatigue_points)
 	local max_shields = 6
 	local remaining_fatigue_points = max_fatigue_points
@@ -672,7 +662,7 @@ InventoryCompareUI.set_stamina = function (self, max_fatigue_points)
 	for i = 1, max_shields, 1 do
 		remaining_fatigue_points = remaining_fatigue_points - 2
 
-		if 0 <= remaining_fatigue_points then
+		if remaining_fatigue_points >= 0 then
 			widget_content.icon_textures[i] = "fatigue_icon_full"
 		elseif remaining_fatigue_points == -1 then
 			widget_content.icon_textures[i] = "fatigue_icon_broken"
@@ -680,9 +670,8 @@ InventoryCompareUI.set_stamina = function (self, max_fatigue_points)
 			widget_content.icon_textures[i] = "fatigue_icon_empty"
 		end
 	end
-
-	return 
 end
+
 InventoryCompareUI.set_ammo = function (self, item_template)
 	local widget = self.ammo_field_widget
 	local widget_content = widget.content
@@ -694,9 +683,8 @@ InventoryCompareUI.set_ammo = function (self, item_template)
 	local ammo_text_2 = (not single_clip and tostring(max_ammo - ammo_count)) or tostring(ammo_count)
 	widget_content.ammo_text_1 = ammo_text_1
 	widget_content.ammo_text_2 = ammo_text_2
-
-	return 
 end
+
 InventoryCompareUI.set_item_description = function (self, text)
 	local widget = self.description_field_widget
 	local widget_content = widget.content
@@ -705,10 +693,11 @@ InventoryCompareUI.set_item_description = function (self, text)
 	local scenegraph_id = "item_description_field"
 	local description_field_scenegraph = self.ui_scenegraph[scenegraph_id]
 	local scaled_text_area_width = UIScaleVectorToResolution(description_field_scenegraph.size)
-	local _, description_text_height = self.get_word_wrap_size(self, description_text, widget.style.description_text, scaled_text_area_width[1])
+	local _, description_text_height = self:get_word_wrap_size(description_text, widget.style.description_text, scaled_text_area_width[1])
 
 	return description_text_height + 60
 end
+
 InventoryCompareUI.set_traits_info = function (self, item, traits)
 	local item_backend_id = item.backend_id
 	local slot_type = item.slot_type
@@ -768,7 +757,7 @@ InventoryCompareUI.set_traits_info = function (self, item, traits)
 				local trait_scenegraph_name = "trait_button_" .. i
 				local description_scenegraph_id = "trait_description_" .. i
 				local description_field_scenegraph = ui_scenegraph[description_scenegraph_id]
-				local _, description_text_height = self.get_word_wrap_size(self, description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
+				local _, description_text_height = self:get_word_wrap_size(description_text, trait_widget_style.description_text, description_field_scenegraph.size[1])
 				local trait_total_height = icon_height + description_text_spacing + description_text_height
 
 				if not is_first_widget then
@@ -788,15 +777,15 @@ InventoryCompareUI.set_traits_info = function (self, item, traits)
 	ui_scenegraph.item_traits_background_center.size[2] = (total_traits_height + trait_start_spacing + trait_end_spacing) - background_default_height
 	self.number_of_traits_on_item = number_of_traits_on_item
 
-	return math.ceil((0 < self.number_of_traits_on_item and total_traits_height + trait_start_spacing + trait_end_spacing) or 0)
+	return math.ceil((self.number_of_traits_on_item > 0 and total_traits_height + trait_start_spacing + trait_end_spacing) or 0)
 end
+
 InventoryCompareUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 InventoryCompareUI.get_rarity_color = function (self, rarity)
 	return Colors.get_table(rarity or "white")
 end
 
-return 
+return

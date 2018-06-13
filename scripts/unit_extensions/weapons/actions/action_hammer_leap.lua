@@ -1,4 +1,5 @@
 ActionHammerLeap = class(ActionHammerLeap)
+
 ActionHammerLeap.init = function (self, world, item_name, is_server, owner_unit, damage_unit, first_person_unit, weapon_unit, weapon_system)
 	self.owner_unit = owner_unit
 	self.owner_unit_first_person = first_person_unit
@@ -15,17 +16,15 @@ ActionHammerLeap.init = function (self, world, item_name, is_server, owner_unit,
 	self.min_angle = 50
 	self.distance_before_leap = 2
 	self.radius = 2.5
-
-	return 
 end
+
 ActionHammerLeap.client_owner_start_action = function (self, new_action, t)
 	self.current_action = new_action
 	self.landed = false
 	self.target_position = nil
 	self.started_hammer_leap = false
-
-	return 
 end
+
 ActionHammerLeap.client_owner_post_update = function (self, dt, t, world, can_damage)
 	local physics_world = World.get_data(world, "physics_world")
 	local owner_unit_1p = self.owner_unit_first_person
@@ -39,16 +38,15 @@ ActionHammerLeap.client_owner_post_update = function (self, dt, t, world, can_da
 		local dot = Vector3.dot(normal, Vector3.up())
 		local color = Color(255, 255, 50, 50)
 
-		if Vector3.distance(player_position, hit_position) <= self.attack_range and 0.8 <= dot then
+		if Vector3.distance(player_position, hit_position) <= self.attack_range and dot >= 0.8 then
 			color = Color(255, 50, 255, 50)
 			self.target_position = Vector3Box(hit_position)
 		end
 
 		QuickDrawer:sphere(hit_position, self.radius, color)
 	end
-
-	return 
 end
+
 ActionHammerLeap.update_is_finished = function (self, dt, t, world, reason)
 	if reason == "weapon_wielded" or reason == "stunned" or reason == "knocked_down" or not self.target_position then
 		return true, reason
@@ -66,7 +64,7 @@ ActionHammerLeap.update_is_finished = function (self, dt, t, world, reason)
 		local direction = Quaternion.rotate(Quaternion.axis_angle(Vector3.cross(target_vector_flat, Vector3.up()), angle), target_vector_flat)
 		local velocity = direction * speed
 
-		status_extension.set_hammer_leaping(status_extension, true, velocity)
+		status_extension:set_hammer_leaping(true, velocity)
 
 		self.started_hammer_leap = true
 		local mover = Unit.mover(owner_unit)
@@ -80,11 +78,11 @@ ActionHammerLeap.update_is_finished = function (self, dt, t, world, reason)
 
 	return false
 end
+
 ActionHammerLeap.player_landed = function (self)
 	self.landed = true
-
-	return 
 end
+
 ActionHammerLeap.finish = function (self, reason)
 	local owner_unit = self.owner_unit
 
@@ -99,15 +97,15 @@ ActionHammerLeap.finish = function (self, reason)
 	local mover = Unit.mover(owner_unit)
 
 	Mover.set_collision_filter(mover, "filter_player_mover")
-
-	return 
 end
+
 local hit_units = {}
+
 ActionHammerLeap.landing_overlap_callback = function (self, actors)
 	local num_actors = #actors
 	local network_manager = Managers.state.network
 	local owner_unit = self.owner_unit
-	local attacker_unit_id = network_manager.unit_game_object_id(network_manager, owner_unit)
+	local attacker_unit_id = network_manager:unit_game_object_id(owner_unit)
 
 	for i = 1, num_actors, 1 do
 		local hit_actor = actors[i]
@@ -120,14 +118,14 @@ ActionHammerLeap.landing_overlap_callback = function (self, actors)
 			local hit_zone = breed.hit_zones_lookup[node]
 			local hit_zone_name = hit_zone.name
 			local attack_direction = Vector3.normalize(Unit.world_position(hit_unit, 0) - POSITION_LOOKUP[owner_unit])
-			local hit_unit_id = network_manager.unit_game_object_id(network_manager, hit_unit)
+			local hit_unit_id = network_manager:unit_game_object_id(hit_unit)
 			local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 			local attack_template_id = 2
 			local attack_template_damage_type_id = 0
 			local weapon_system = Managers.state.entity:system("weapon_system")
 
 			if self.is_server or LEVEL_EDITOR_TEST then
-				weapon_system.rpc_attack_hit(weapon_system, nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id)
+				weapon_system:rpc_attack_hit(nil, NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id)
 			else
 				network_manager.network_transmit:send_rpc_server("rpc_attack_hit", NetworkLookup.damage_sources[self.item_name], attacker_unit_id, hit_unit_id, attack_template_id, hit_zone_id, attack_direction, attack_template_damage_type_id)
 			end
@@ -135,8 +133,6 @@ ActionHammerLeap.landing_overlap_callback = function (self, actors)
 	end
 
 	table.clear(hit_units)
-
-	return 
 end
 
-return 
+return

@@ -14,8 +14,6 @@ local function animate_widget_scenegraph_on_select(widget_scenegraph, default_sc
 	if color then
 		color[1] = math.min(progress * 4, 1) * 255
 	end
-
-	return 
 end
 
 local tab_widget_select = {
@@ -24,7 +22,7 @@ local tab_widget_select = {
 		start_progress = 0,
 		end_progress = UISettings.inventory.button_bars.selected_fade_in,
 		init = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
 			local catmullrom_value = (progress == 1 and 1) or math.catmullrom(progress, 1, 0.95, 1, 0.7)
@@ -33,11 +31,9 @@ local tab_widget_select = {
 			local button_default_scenegraph_definition = scenegraph_definition[scenegraph_id]
 
 			animate_widget_scenegraph_on_select(button_scenegraph_definition, button_default_scenegraph_definition, progress, catmullrom_value)
-
-			return 
 		end,
 		on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end
 	}
 }
@@ -47,13 +43,13 @@ local tab_widget_deselect = {
 		start_progress = 0,
 		end_progress = UISettings.inventory.button_bars.selected_fade_out,
 		init = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, params)
-			return 
+			return
 		end,
 		on_complete = function (ui_scenegraph, scenegraph_definition, widget, params)
-			return 
+			return
 		end
 	}
 }

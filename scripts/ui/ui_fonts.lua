@@ -216,8 +216,6 @@ function UISetupFontHeights(gui)
 			}
 		end
 	end
-
-	return 
 end
 
 function UIGetFontHeight(gui, font_name, font_size)
@@ -242,4 +240,4 @@ function UIGetFontHeight(gui, font_name, font_size)
 	return height, min.y, max.y
 end
 
-return 
+return

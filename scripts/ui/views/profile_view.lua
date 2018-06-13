@@ -5,6 +5,7 @@ require("scripts/ui/views/profile_world_view")
 local definitions = local_require("scripts/ui/views/profile_view_definitions")
 local profile_view_definitions = definitions.profile_view
 ProfileView = class(ProfileView)
+
 ProfileView.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.top_renderer = ingame_ui_context.ui_top_renderer
@@ -19,29 +20,28 @@ ProfileView.init = function (self, ingame_ui_context)
 	local input_manager = ingame_ui_context.input_manager
 	self.input_manager = input_manager
 
-	input_manager.create_input_service(input_manager, "profile_menu", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "profile_menu", "keyboard")
-	input_manager.map_device_to_service(input_manager, "profile_menu", "mouse")
-	input_manager.map_device_to_service(input_manager, "profile_menu", "gamepad")
+	input_manager:create_input_service("profile_menu", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("profile_menu", "keyboard")
+	input_manager:map_device_to_service("profile_menu", "mouse")
+	input_manager:map_device_to_service("profile_menu", "gamepad")
 	rawset(_G, "global_profile_view", self)
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.profile_world_view = ProfileWorldView:new(ingame_ui_context)
-
-	return 
 end
+
 ProfileView.input_service = function (self)
 	return self.input_manager:get_service("profile_menu")
 end
+
 ProfileView.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(profile_view_definitions.scenegraph)
 	self.dead_space_4k_filler = UIWidget.init(UIWidgets.create_4k_filler())
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 	UIRenderer.clear_scenegraph_queue(self.top_renderer)
-
-	return 
 end
+
 ProfileView.on_enter = function (self)
 	self.cancel_input_disabled = self.ingame_ui.initial_profile_view
 	local viewport_name = "player_1"
@@ -61,9 +61,8 @@ ProfileView.on_enter = function (self)
 
 	self.waiting_for_post_update_enter = true
 	self.active = true
-
-	return 
 end
+
 ProfileView.post_update_on_enter = function (self)
 	self.button_widgets = {}
 
@@ -82,9 +81,8 @@ ProfileView.post_update_on_enter = function (self)
 	self.profile_world_view:on_enter(self.viewport_widget, input_service, self.character_info_widget, self.button_widgets, self.cancel_input_disabled)
 
 	self.waiting_for_post_update_enter = nil
-
-	return 
 end
+
 ProfileView.on_exit = function (self)
 	self.exiting = nil
 	self.active = nil
@@ -106,9 +104,8 @@ ProfileView.on_exit = function (self)
 
 		self.respawn_player_unit = nil
 	end
-
-	return 
 end
+
 ProfileView.post_update_on_exit = function (self)
 	if self.viewport_widget ~= nil then
 		self.profile_world_view:on_exit()
@@ -116,9 +113,8 @@ ProfileView.post_update_on_exit = function (self)
 
 		self.viewport_widget = nil
 	end
-
-	return 
 end
+
 ProfileView.exit = function (self, return_to_game)
 	local exit_transition = "exit_menu"
 
@@ -139,18 +135,16 @@ ProfileView.exit = function (self, return_to_game)
 	WwiseWorld.trigger_event(wwise_world, "Play_hud_button_close")
 
 	self.exiting = true
-
-	return 
 end
+
 ProfileView.transitioning = function (self)
 	if self.exiting then
 		return true
 	else
 		return not self.active
 	end
-
-	return 
 end
+
 ProfileView.suspend = function (self)
 	self.suspended = true
 
@@ -169,9 +163,8 @@ ProfileView.suspend = function (self)
 	local world = previewer_pass_data.world
 
 	ScriptWorld.deactivate_viewport(world, viewport)
-
-	return 
 end
+
 ProfileView.unsuspend = function (self)
 	self.input_manager:block_device_except_service("profile_menu", "keyboard", 1)
 	self.input_manager:block_device_except_service("profile_menu", "mouse", 1)
@@ -192,9 +185,8 @@ ProfileView.unsuspend = function (self)
 	end
 
 	self.suspended = nil
-
-	return 
 end
+
 ProfileView.destroy = function (self)
 	if self.viewport_widget ~= nil then
 		self.profile_world_view:on_exit()
@@ -205,9 +197,8 @@ ProfileView.destroy = function (self)
 
 	self.profile_world_view:destroy()
 	rawset(_G, "global_profile_view", nil)
-
-	return 
 end
+
 ProfileView.change_profile = function (self, index)
 	local peer_id = self.peer_id
 	local player = self.player_manager:player_from_peer_id(peer_id)
@@ -215,31 +206,30 @@ ProfileView.change_profile = function (self, index)
 	if player.player_unit then
 		self.despawning_player_unit = player.player_unit
 
-		player.despawn(player)
+		player:despawn()
 	else
 		self.profile_synchronizer:request_select_profile(index, self.local_player_id)
 	end
 
 	self.pending_profile_request = true
 	self.requested_profile_index = index
-
-	return 
 end
+
 ProfileView.pending_profile_change = function (self)
 	return self.pending_profile_request
 end
+
 ProfileView.save_selected_profile = function (self, profile_index)
 	local save_manager = Managers.save
 	local save_data = SaveData
 	SaveData.wanted_profile_index = profile_index
 
-	save_manager.auto_save(save_manager, SaveFileName, SaveData, nil)
-
-	return 
+	save_manager:auto_save(SaveFileName, SaveData, nil)
 end
+
 ProfileView.update = function (self, dt)
 	if self.suspended or self.waiting_for_post_update_enter then
-		return 
+		return
 	end
 
 	if self.button_widgets then
@@ -260,45 +250,43 @@ ProfileView.update = function (self, dt)
 
 	local input_service = self.input_manager:get_service("profile_menu")
 
-	self.handle_input(self, input_service, dt)
-	self.update_profile_request(self)
+	self:handle_input(input_service, dt)
+	self:update_profile_request()
 
 	if self.viewport_widget then
 		self.profile_world_view:update(dt, input_service)
 	end
 
 	if self.active then
-		self.draw_widgets(self, dt, input_service)
+		self:draw_widgets(dt, input_service)
 	end
 
 	Profiler.stop("ProfileView")
-
-	return 
 end
+
 ProfileView.post_update = function (self, dt, t)
 	if self.viewport_widget then
 		self.profile_world_view:post_update(dt, t)
 	end
 
-	self.update_animations(self, dt)
-
-	return 
+	self:update_animations(dt)
 end
+
 ProfileView.handle_input = function (self, input_service, dt)
 	if next(self.ui_animations) ~= nil then
-		return 
+		return
 	end
 
-	local transitioning = self.transitioning(self)
+	local transitioning = self:transitioning()
 
-	if not self.cancel_input_disabled and not transitioning and not self.pending_profile_change(self) and (input_service.get(input_service, "toggle_menu") or input_service.get(input_service, "back")) then
-		self.exit(self)
+	if not self.cancel_input_disabled and not transitioning and not self:pending_profile_change() and (input_service:get("toggle_menu") or input_service:get("back")) then
+		self:exit()
 	end
 
 	local input_manager = self.input_manager
 
 	if not transitioning then
-		if input_manager.is_device_active(input_manager, "gamepad") then
+		if input_manager:is_device_active("gamepad") then
 			self.profile_world_view:handle_controller_input(input_service, dt)
 		elseif PLATFORM == "win32" then
 			self.profile_world_view:handle_mouse_input(input_service, dt)
@@ -312,14 +300,13 @@ ProfileView.handle_input = function (self, input_service, dt)
 			local selected_unit = self.profile_world_view.selected_unit
 			local profile_index = self.profile_world_view.units[selected_unit]
 
-			self.change_profile(self, profile_index)
-		elseif not self.pending_profile_change(self) then
-			self.exit(self)
+			self:change_profile(profile_index)
+		elseif not self:pending_profile_change() then
+			self:exit()
 		end
 	end
-
-	return 
 end
+
 ProfileView.update_animations = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 
@@ -330,16 +317,15 @@ ProfileView.update_animations = function (self, dt)
 			self.ui_animations[name] = nil
 		end
 	end
-
-	return 
 end
+
 ProfileView.update_profile_request = function (self)
 	if self.pending_profile_request then
 		local synchronizer = self.profile_synchronizer
 
 		if self.despawning_player_unit then
 			if not Unit.alive(self.despawning_player_unit) then
-				synchronizer.request_select_profile(synchronizer, self.requested_profile_index, self.local_player_id)
+				synchronizer:request_select_profile(self.requested_profile_index, self.local_player_id)
 
 				self.requested_profile_index = nil
 				self.despawning_player_unit = nil
@@ -349,39 +335,38 @@ ProfileView.update_profile_request = function (self)
 				end
 			end
 		else
-			local result, result_local_player_id = synchronizer.profile_request_result(synchronizer)
+			local result, result_local_player_id = synchronizer:profile_request_result()
 			local local_player_id = self.local_player_id
 
 			assert(not result or local_player_id == result_local_player_id, "Local player id mismatch between ui and request.")
 
 			if result == "success" then
 				local peer_id = self.peer_id
-				local profile_index = synchronizer.profile_by_peer(synchronizer, peer_id, local_player_id)
+				local profile_index = synchronizer:profile_by_peer(peer_id, local_player_id)
 				local player = self.player_manager:player(peer_id, local_player_id)
 				player.profile_index = profile_index
 				self.respawn_player_unit = nil
 
-				self.exit(self)
-				synchronizer.clear_profile_request_result(synchronizer)
+				self:exit()
+				synchronizer:clear_profile_request_result()
 
 				self.pending_profile_request = nil
 
-				self.save_selected_profile(self, profile_index)
+				self:save_selected_profile(profile_index)
 			elseif result then
 				local peer_id = self.peer_id
-				local profile_index = synchronizer.profile_by_peer(synchronizer, peer_id, local_player_id)
+				local profile_index = synchronizer:profile_by_peer(peer_id, local_player_id)
 				self.profile_world_view.state = "selecting_profile"
 
-				synchronizer.clear_profile_request_result(synchronizer)
+				synchronizer:clear_profile_request_result()
 
 				self.pending_profile_request = nil
 				self.respawn_player_unit = true
 			end
 		end
 	end
-
-	return 
 end
+
 ProfileView.draw_widgets = function (self, dt, input_service)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -412,17 +397,14 @@ ProfileView.draw_widgets = function (self, dt, input_service)
 	if self.viewport_widget then
 		self.profile_world_view:draw_widgets(dt, input_service)
 	end
-
-	return 
 end
+
 ProfileView.block_accept_button = function (self, block_button)
 	self.profile_world_view.blocked_accept = block_button
-
-	return 
 end
 
 if rawget(_G, "global_profile_view") then
 	global_profile_view:create_ui_elements()
 end
 
-return 
+return

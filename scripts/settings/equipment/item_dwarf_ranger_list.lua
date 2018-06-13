@@ -37219,4 +37219,4 @@ ItemMasterList.dr_drakegun_0001 = {
 	traits = {}
 }
 
-return 
+return

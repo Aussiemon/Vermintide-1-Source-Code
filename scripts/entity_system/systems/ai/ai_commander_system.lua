@@ -2,6 +2,7 @@ AICommanderSystem = class(AICommanderSystem, ExtensionSystemBase)
 local extensions = {
 	"AICommanderExtension"
 }
+
 AICommanderSystem.init = function (self, context, name)
 	AICommanderSystem.super.init(self, context, name, extensions)
 
@@ -11,19 +12,18 @@ AICommanderSystem.init = function (self, context, name)
 	local update_frequency = 2
 	self.update_cooldown = 1 / update_frequency
 	self.last_slot_count = 0
-
-	return 
 end
+
 AICommanderSystem.destroy = function (self)
 	for commander_unit, extension in pairs(self.commander_units) do
 		ScriptUnit.remove_extension(commander_unit, self.name)
 	end
 
 	self.commander_units = nil
-
-	return 
 end
+
 local dummy_input = {}
+
 AICommanderSystem.on_add_extension = function (self, world, unit, extension_name, extension_init_data)
 	local extension = {
 		last_command_t = 0
@@ -35,28 +35,27 @@ AICommanderSystem.on_add_extension = function (self, world, unit, extension_name
 
 	return extension
 end
+
 AICommanderSystem.on_remove_extension = function (self, unit, extension_name)
 	ScriptUnit.remove_extension(unit, self.NAME)
 
 	self.commander_units[unit] = nil
-
-	return 
 end
+
 AICommanderSystem.update = function (self, context, t)
 	local lol = math.random()
 
 	if t < self.last_update_t + self.update_cooldown then
-		return 
+		return
 	end
 
 	self.last_update_t = t
 
 	AICommanderSystem.super.update(self, context, t)
-	self.command_noncore_rats(self, t)
-	self.command_core_rats(self, t)
-
-	return 
+	self:command_noncore_rats(t)
+	self:command_core_rats(t)
 end
+
 AICommanderSystem.command_noncore_rats = function (self, t)
 	local specials = Managers.state.conflict._alive_specials
 
@@ -102,7 +101,7 @@ AICommanderSystem.command_noncore_rats = function (self, t)
 					local commander_position = POSITION_LOOKUP[commander_unit]
 					local distance_to_special_sq = Vector3.distance_squared(commander_position, special_position)
 
-					if 4 < distance_to_special_sq then
+					if distance_to_special_sq > 4 then
 						local commander_score = 1 / distance_to_special_sq
 
 						if best_commander_score < commander_score then
@@ -120,10 +119,10 @@ AICommanderSystem.command_noncore_rats = function (self, t)
 			end
 		end
 	end
-
-	return 
 end
+
 local nearby_ais = {}
+
 AICommanderSystem.command_core_rats = function (self, t)
 	local ai_slot_system = Managers.state.entity:system("ai_slot_system")
 	local target_units = ai_slot_system.target_units
@@ -176,8 +175,6 @@ AICommanderSystem.command_core_rats = function (self, t)
 			blackboard.command_num_units = slots_n
 		end
 	end
-
-	return 
 end
 
-return 
+return

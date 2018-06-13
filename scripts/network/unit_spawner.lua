@@ -6,7 +6,7 @@ local function call_destroy_listener(unit_destroy_listeners, unit)
 	local listeners = unit_destroy_listeners[unit]
 
 	if not listeners then
-		return 
+		return
 	end
 
 	for _, listener in pairs(listeners) do
@@ -14,12 +14,11 @@ local function call_destroy_listener(unit_destroy_listeners, unit)
 	end
 
 	unit_destroy_listeners[unit] = nil
-
-	return 
 end
 
 local Unit_alive = Unit.alive
 UnitSpawner = class(UnitSpawner)
+
 UnitSpawner.init = function (self, world, entity_manager, is_server)
 	self.world = world
 	self.entity_manager = entity_manager
@@ -44,17 +43,15 @@ UnitSpawner.init = function (self, world, entity_manager, is_server)
 	self.unit_death_watch_lookup = {}
 	self.unit_death_watch_list_n = 0
 	self.unit_death_watch_list_dirty = false
-
-	return 
 end
+
 UnitSpawner.destroy = function (self)
 	GarbageLeakDetector.register_object(self, "UnitSpawner")
 
 	self.unit_destroy_listeners = nil
 	self.entity_manager = nil
-
-	return 
 end
+
 UnitSpawner.set_gameobject_initializer_data = function (self, initializer_function_table, extraction_function_table, gameobject_context)
 	self.game_session = Network.game_session()
 
@@ -67,24 +64,20 @@ UnitSpawner.set_gameobject_initializer_data = function (self, initializer_functi
 	self.gameobject_functor_context = gameobject_context
 	self.gameobject_initializers = initializer_function_table
 	self.gameobject_extractors = extraction_function_table
-
-	return 
 end
+
 UnitSpawner.set_unit_storage = function (self, unit_storage)
 	self.unit_storage = unit_storage
-
-	return 
 end
+
 UnitSpawner.set_gameobject_to_unit_creator_function = function (self, func)
 	self.create_unit_from_gameobject_function = func
-
-	return 
 end
+
 UnitSpawner.set_unit_template_lookup_table = function (self, template_lut)
 	self.unit_template_lut = template_lut
-
-	return 
 end
+
 UnitSpawner.push_unit_to_death_watch_list = function (self, unit, t, data)
 	local is_husk = NetworkUnit.is_husk_unit(unit)
 	local extensions_to_remove_on_death = unit_templates.extensions_to_remove_on_death(data.breed.unit_template, is_husk, self.is_server)
@@ -100,9 +93,8 @@ UnitSpawner.push_unit_to_death_watch_list = function (self, unit, t, data)
 		data = data
 	}
 	self.unit_death_watch_lookup[unit] = self.unit_death_watch_list[self.unit_death_watch_list_n]
-
-	return 
 end
+
 UnitSpawner.prioritize_death_watch_unit = function (self, unit, t)
 	local death_data = self.unit_death_watch_lookup[unit]
 
@@ -110,9 +102,8 @@ UnitSpawner.prioritize_death_watch_unit = function (self, unit, t)
 		death_data.t = t
 		self.unit_death_watch_list_dirty = true
 	end
-
-	return 
 end
+
 UnitSpawner.update_death_watch_list = function (self)
 	if script_data.debug_death_watch_list then
 		Debug.text("Death Watch List (%i)", self.unit_death_watch_list_n)
@@ -157,9 +148,8 @@ UnitSpawner.update_death_watch_list = function (self)
 
 		self.unit_death_watch_list_dirty = true
 	end
-
-	return 
 end
+
 UnitSpawner.mark_for_deletion = function (self, unit, recycle_type)
 	assert(Unit_alive(unit), "Tried to destroy a unit (%s) that was already destroyed.", tostring(unit))
 	self.deletion_queue:push_back(unit)
@@ -176,26 +166,25 @@ UnitSpawner.mark_for_deletion = function (self, unit, recycle_type)
 		self.unit_death_watch_list_n = math.max(self.unit_death_watch_list_n - 1, 0)
 		self.unit_death_watch_list_dirty = true
 	end
-
-	return 
 end
+
 UnitSpawner.is_marked_for_deletion = function (self, unit)
 	local deletion_queue = self.deletion_queue
-	local is_marked = deletion_queue.contains(deletion_queue, unit)
+	local is_marked = deletion_queue:contains(unit)
 
 	return is_marked
 end
+
 UnitSpawner.commit_and_remove_pending_units = function (self)
 	local n_commited = 0
 	local n_removed = 0
 
 	repeat
-		n_commited = self.commit_pending_unit_system_registrations(self)
-		n_removed = self.remove_units_marked_for_deletion(self)
+		n_commited = self:commit_pending_unit_system_registrations()
+		n_removed = self:remove_units_marked_for_deletion()
 	until n_commited + n_removed == 0
-
-	return 
 end
+
 UnitSpawner.commit_pending_unit_system_registrations = function (self)
 	assert(not self.locked)
 
@@ -222,6 +211,7 @@ UnitSpawner.commit_pending_unit_system_registrations = function (self)
 
 	return num_pending_units
 end
+
 UnitSpawner.remove_units_marked_for_deletion = function (self)
 	assert(not self.locked)
 
@@ -247,13 +237,13 @@ UnitSpawner.remove_units_marked_for_deletion = function (self)
 		number_of_deleted_units = number_of_deleted_units + 1
 		temp_deleted_units_list[number_of_deleted_units] = unit
 
-		if 0 < pending_extension_adds_list_n and pending_extension_adds_map[unit] then
+		if pending_extension_adds_list_n > 0 and pending_extension_adds_map[unit] then
 			pending_extension_adds_map[unit] = nil
 			pending_extension_adds_list_n = pending_extension_adds_list_n - 1
 		end
 
 		Profiler.stop("pre_delete_cleanup")
-		entity_manager.unregister_units(entity_manager, temp_deleted_units_list, number_of_deleted_units)
+		entity_manager:unregister_units(temp_deleted_units_list, number_of_deleted_units)
 		Profiler.start("destroy listeners")
 
 		for i = 1, number_of_deleted_units, 1 do
@@ -295,7 +285,9 @@ UnitSpawner.spawn_local_unit = function (self, unit_name, position, rotation, ma
 
 	return unit
 end
+
 local TEMP_SINGLE_UNIT_ARRAY = {}
+
 UnitSpawner.create_unit_extensions = function (self, world, unit, unit_template_name, extension_init_data)
 	local any_extensions_added = self.entity_manager:add_unit_extensions(world, unit, unit_template_name, extension_init_data)
 
@@ -311,25 +303,25 @@ UnitSpawner.create_unit_extensions = function (self, world, unit, unit_template_
 			self.pending_extension_adds_map[unit] = true
 		end
 	end
-
-	return 
 end
+
 UnitSpawner.spawn_local_unit_with_extensions = function (self, unit_name, unit_template_name, extension_init_data, position, rotation, material)
-	local unit = self.spawn_local_unit(self, unit_name, position, rotation, material)
+	local unit = self:spawn_local_unit(unit_name, position, rotation, material)
 	unit_template_name = unit_template_name or Unit.get_data(unit, "unit_template")
 
 	Profiler.start("create_unit_extensions")
-	self.create_unit_extensions(self, self.world, unit, unit_template_name, extension_init_data)
+	self:create_unit_extensions(self.world, unit, unit_template_name, extension_init_data)
 	Profiler.stop("create_unit_extensions")
 
 	return unit, unit_template_name
 end
+
 UnitSpawner.spawn_network_unit = function (self, unit_name, unit_template_name, extension_init_data, position, rotation, material)
 	if not self.game_session then
-		return 
+		return
 	end
 
-	local unit, final_unit_template_name = self.spawn_local_unit_with_extensions(self, unit_name, unit_template_name, extension_init_data, position, rotation, material)
+	local unit, final_unit_template_name = self:spawn_local_unit_with_extensions(unit_name, unit_template_name, extension_init_data, position, rotation, material)
 	local unit_template = self.unit_template_lut[final_unit_template_name]
 
 	Profiler.start("make unit networked")
@@ -347,6 +339,7 @@ UnitSpawner.spawn_network_unit = function (self, unit_name, unit_template_name, 
 
 	return unit, go_id
 end
+
 UnitSpawner.world_delete_units = function (self, world, units_list, units_list_n)
 	local game_session = self.game_session
 	local unit_storage = self.unit_storage
@@ -359,7 +352,7 @@ UnitSpawner.world_delete_units = function (self, world, units_list, units_list_n
 
 			local unit = units_list[i]
 			local unit_is_alive, unit_alive_name = Unit_alive(unit)
-			local go_id_to_remove = unit_storage.go_id(unit_storage, unit)
+			local go_id_to_remove = unit_storage:go_id(unit)
 
 			if not unit_is_alive then
 				assert(false)
@@ -367,7 +360,7 @@ UnitSpawner.world_delete_units = function (self, world, units_list, units_list_n
 
 			if go_id_to_remove then
 				GameSession.destroy_game_object(game_session, go_id_to_remove)
-				unit_storage.remove(unit_storage, go_id_to_remove)
+				unit_storage:remove(go_id_to_remove)
 				NetworkUnit.remove_unit(unit)
 			end
 
@@ -388,10 +381,10 @@ UnitSpawner.world_delete_units = function (self, world, units_list, units_list_n
 				assert(false)
 			end
 
-			local go_id_to_remove = unit_storage.go_id(unit_storage, unit)
+			local go_id_to_remove = unit_storage:go_id(unit)
 
 			if go_id_to_remove then
-				unit_storage.remove(unit_storage, go_id_to_remove)
+				unit_storage:remove(go_id_to_remove)
 				NetworkUnit.remove_unit(unit)
 			end
 
@@ -404,11 +397,10 @@ UnitSpawner.world_delete_units = function (self, world, units_list, units_list_n
 	end
 
 	Profiler.stop("delete units")
-
-	return 
 end
+
 UnitSpawner.spawn_unit_from_game_object = function (self, go_id, owner_id, go_template)
-	local unit = self.create_unit_from_gameobject_function(self, self.game_session, go_id, go_template)
+	local unit = self:create_unit_from_gameobject_function(self.game_session, go_id, go_template)
 
 	NetworkUnit.add_unit(unit)
 	NetworkUnit.set_is_husk_unit(unit, true)
@@ -424,21 +416,19 @@ UnitSpawner.spawn_unit_from_game_object = function (self, go_id, owner_id, go_te
 	local unit_template_name, extension_init_data = go_extract_functor(self.game_session, go_id, owner_id, unit, self.gameobject_functor_context)
 	local is_husk = true
 
-	self.create_unit_extensions(self, self.world, unit, unit_template_name, extension_init_data, is_husk)
-
-	return 
+	self:create_unit_extensions(self.world, unit, unit_template_name, extension_init_data, is_husk)
 end
+
 UnitSpawner.destroy_game_object_unit = function (self, go_id, owner_id)
 	local unit_storage = self.unit_storage
-	local unit = unit_storage.unit(unit_storage, go_id)
+	local unit = unit_storage:unit(go_id)
 
 	assert(unit)
 	self.entity_manager:game_object_unit_destroyed(unit)
-	self.mark_for_deletion(self, unit)
-	unit_storage.remove(unit_storage, go_id)
-
-	return 
+	self:mark_for_deletion(unit)
+	unit_storage:remove(go_id)
 end
+
 UnitSpawner.add_destroy_listener = function (self, unit, identifier, callback, post_cleanup_listener)
 	local destroy_listeners = (post_cleanup_listener and self.unit_destroy_listeners_post_cleanup) or self.unit_destroy_listeners
 	local listeners = destroy_listeners[unit]
@@ -451,9 +441,8 @@ UnitSpawner.add_destroy_listener = function (self, unit, identifier, callback, p
 	assert(listeners[identifier] == nil, "Tried to register a unit destroy listener identifier (%s) twice for the same unit %s", tostring(identifier), tostring(unit))
 
 	listeners[identifier] = callback
-
-	return 
 end
+
 UnitSpawner.remove_destroy_listener = function (self, unit, identifier, post_cleanup_listener)
 	local destroy_listeners = (post_cleanup_listener and self.unit_destroy_listeners_post_cleanup) or self.unit_destroy_listeners
 	local listeners = destroy_listeners[unit]
@@ -463,8 +452,6 @@ UnitSpawner.remove_destroy_listener = function (self, unit, identifier, post_cle
 	else
 		printf("[UnitSpawner] [%s] failed to remove listener [%s] from unit [%s]", self.identifier_tag, tostring(identifier), tostring(unit))
 	end
-
-	return 
 end
 
-return 
+return

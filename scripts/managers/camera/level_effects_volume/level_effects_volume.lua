@@ -1,4 +1,5 @@
 LevelEffectsVolume = class(LevelEffectsVolume)
+
 LevelEffectsVolume.init = function (self, world, parent, volume_name, prio, particles_action, screen_particles_action)
 	self._world = world
 	self._parent = parent
@@ -14,18 +15,19 @@ LevelEffectsVolume.init = function (self, world, parent, volume_name, prio, part
 	self._is_inside = false
 
 	fassert(Level.has_volume(self._level, self._volume_name), "[LevelEffectsVolume] No volume named %q exists in current level", self._volume_name)
-
-	return 
 end
+
 LevelEffectsVolume.is_inside = function (self)
 	return self._is_inside
 end
+
 LevelEffectsVolume.update = function (self, position)
 	local was_inside = self._is_inside
 	self._is_inside = Level.is_point_inside_volume(self._level, self._volume_name, position)
 
 	return self._is_inside and not was_inside
 end
+
 LevelEffectsVolume.on_enter = function (self)
 	if self._particles_action ~= "none" then
 		local action_name = self._particles_action .. "_level_particles"
@@ -38,9 +40,8 @@ LevelEffectsVolume.on_enter = function (self)
 
 		self._parent[action_name](self._parent, self._level_screen_partiles, self._viewport_name)
 	end
-
-	return 
 end
+
 LevelEffectsVolume.on_exit = function (self)
 	if self._particles_action ~= "none" then
 		self._parent:reset_level_particles(self._level_particles, self._viewport_name)
@@ -51,21 +52,20 @@ LevelEffectsVolume.on_exit = function (self)
 	end
 
 	self._is_inside = false
-
-	return 
 end
+
 LevelEffectsVolume.volume_name = function (self)
 	return self._volume_name
 end
+
 LevelEffectsVolume.prio = function (self)
 	return self._prio
 end
+
 LevelEffectsVolume.destroy = function (self)
 	if self._is_inside then
-		self.on_exit(self)
+		self:on_exit()
 	end
-
-	return 
 end
 
-return 
+return

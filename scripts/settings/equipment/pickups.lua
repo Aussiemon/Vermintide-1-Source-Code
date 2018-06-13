@@ -224,14 +224,14 @@ Pickups.ammo.all_ammo = {
 	hud_description = "pickup_all_ammo",
 	pickup_sound_event_func = function (interactor_unit, interactable_unit, data)
 		local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
-		local full_ammo = inventory_extension.has_full_ammo(inventory_extension)
+		local full_ammo = inventory_extension:has_full_ammo()
 
 		return (full_ammo and "pickup_ammo_full") or "pickup_ammo"
 	end,
 	can_interact_func = function (interactor_unit, interactable_unit, data)
 		local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
 
-		return inventory_extension.has_ammo_consuming_weapon_equipped(inventory_extension)
+		return inventory_extension:has_ammo_consuming_weapon_equipped()
 	end
 }
 Pickups.ammo.all_ammo_small = {
@@ -246,7 +246,7 @@ Pickups.ammo.all_ammo_small = {
 	can_interact_func = function (interactor_unit, interactable_unit, data)
 		local inventory_extension = ScriptUnit.extension(interactor_unit, "inventory_system")
 
-		return inventory_extension.has_ammo_consuming_weapon_equipped(inventory_extension)
+		return inventory_extension:has_ammo_consuming_weapon_equipped()
 	end
 }
 Pickups.grenades = Pickups.grenades or {}
@@ -324,7 +324,7 @@ Pickups.special = {
 
 			local dice_keeper = params.dice_keeper
 
-			return dice_keeper.num_bonus_dice_spawned(dice_keeper) < 2
+			return dice_keeper:num_bonus_dice_spawned() < 2
 		end
 	},
 	event_item = {
@@ -371,7 +371,7 @@ local function lorebook_all_pages_unlocked(pages, statistics_db, stats_id)
 	for i = 1, num_pages, 1 do
 		local category_name = pages[i]
 		local id = LorebookCategoryLookup[category_name]
-		local unlocked = statistics_db.get_persistent_lorebook_stat(statistics_db, stats_id, "lorebook_unlocks", id)
+		local unlocked = statistics_db:get_persistent_lorebook_stat(stats_id, "lorebook_unlocks", id)
 
 		if not unlocked then
 			return false
@@ -383,14 +383,14 @@ end
 
 local function num_lorebook_pages_collected_sesssion(level_key)
 	local mission_system = Managers.state.entity:system("mission_system")
-	local active_missions, completed_missions = mission_system.get_missions(mission_system)
+	local active_missions, completed_missions = mission_system:get_missions()
 	local mission_data = active_missions.lorebook_page_hidden_mission
 	local difficulty_manager = Managers.state.difficulty
-	local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
+	local difficulty_rank = difficulty_manager:get_difficulty_rank()
 	local n_collected_session = 0
 
 	if mission_data then
-		n_collected_session = mission_data.get_current_amount(mission_data)
+		n_collected_session = mission_data:get_current_amount()
 	end
 
 	return n_collected_session
@@ -398,7 +398,7 @@ end
 
 local function lorebook_pages_in_level(level_key)
 	local difficulty_manager = Managers.state.difficulty
-	local difficulty_rank = difficulty_manager.get_difficulty_rank(difficulty_manager)
+	local difficulty_rank = difficulty_manager:get_difficulty_rank()
 	local level_settings = LevelSettings[level_key]
 	local pickup_settings = (level_settings.pickup_settings and level_settings.pickup_settings[difficulty_rank]) or nil
 	local n_pages_in_level = (pickup_settings and pickup_settings.lorebook_pages) or math.huge
@@ -418,14 +418,14 @@ local function lorebook_unlocked_pages(statistics_db)
 	local level_pages = LorebookCollectablePages[level_key]
 	local any_level_pages = LorebookCollectablePages.any
 	local local_player = Managers.player:local_player()
-	local stats_id = local_player.stats_id(local_player)
+	local stats_id = local_player:stats_id()
 	local unlocked_all = true
 
-	if 0 < #level_pages then
+	if #level_pages > 0 then
 		unlocked_all = lorebook_all_pages_unlocked(level_pages, statistics_db, stats_id)
 	end
 
-	if unlocked_all and 0 < #any_level_pages then
+	if unlocked_all and #any_level_pages > 0 then
 		unlocked_all = lorebook_all_pages_unlocked(any_level_pages, statistics_db, stats_id)
 	end
 
@@ -449,7 +449,7 @@ Pickups.lorebook_pages = {
 			return unlocked_all or unlocked_all_session
 		end,
 		can_spawn_func = function (params, is_debug_spawn)
-			if params and params.num_spawned_lorebook_pages and 1 <= params.num_spawned_lorebook_pages then
+			if params and params.num_spawned_lorebook_pages and params.num_spawned_lorebook_pages >= 1 then
 				return false
 			end
 
@@ -499,4 +499,4 @@ for group, pickups in pairs(Pickups) do
 	NearPickupSpawnChance[group] = NearPickupSpawnChance[group] or 0
 end
 
-return 
+return

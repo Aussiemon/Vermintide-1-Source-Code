@@ -85,4 +85,4 @@ popup_atlas = {
 	}
 }
 
-return 
+return

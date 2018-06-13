@@ -1,18 +1,19 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTPanicAction = class(BTPanicAction, BTNode)
+
 BTPanicAction.init = function (self, ...)
 	BTPanicAction.super.init(self, ...)
-
-	return 
 end
+
 BTPanicAction.name = "BTPanicAction"
+
 BTPanicAction.enter = function (self, unit, blackboard, t)
 	self.length_weight = 5
 	blackboard.is_panicking = true
 	blackboard.panic = blackboard.panic or {}
 	blackboard.panic.panic_timer = 2
-	local escape_direction = self.get_shortest_panic_zone_escape_direction(self, unit, blackboard)
+	local escape_direction = self:get_shortest_panic_zone_escape_direction(unit, blackboard)
 
 	if blackboard.panic.escape_direction == nil then
 		blackboard.panic.escape_direction = Vector3Box(escape_direction)
@@ -24,20 +25,19 @@ BTPanicAction.enter = function (self, unit, blackboard, t)
 		blackboard.panic.escape_position = Vector3Box(0, 0, 0)
 	end
 
-	self.set_new_escape_position(self, unit, blackboard)
+	self:set_new_escape_position(unit, blackboard)
 
 	local ai_navigation = blackboard.navigation_extension
 
-	ai_navigation.set_max_speed(ai_navigation, blackboard.breed.run_speed)
+	ai_navigation:set_max_speed(blackboard.breed.run_speed)
 	Managers.state.network:anim_event(unit, "move_fwd")
 
 	local dialogue_input = ScriptUnit.extension_input(unit, "dialogue_system")
 	local event_data = FrameTable.alloc_table()
 
-	dialogue_input.trigger_networked_dialogue_event(dialogue_input, "panic", event_data)
-
-	return 
+	dialogue_input:trigger_networked_dialogue_event("panic", event_data)
 end
+
 BTPanicAction.leave = function (self, unit, blackboard, t)
 	local category_name = "panic"
 
@@ -48,8 +48,8 @@ BTPanicAction.leave = function (self, unit, blackboard, t)
 	local default_move_speed = AiUtils.get_default_breed_move_speed(unit, blackboard)
 	local ai_navigation = blackboard.navigation_extension
 
-	ai_navigation.set_max_speed(ai_navigation, default_move_speed)
-	ai_navigation.move_to(ai_navigation, current_position)
+	ai_navigation:set_max_speed(default_move_speed)
+	ai_navigation:move_to(current_position)
 
 	if Network.game_session() then
 		Managers.state.network:anim_event(unit, "idle")
@@ -58,16 +58,15 @@ BTPanicAction.leave = function (self, unit, blackboard, t)
 	local locomotion = blackboard.locomotion_extension
 	local current_rotation = Unit.local_rotation(unit, 0)
 
-	locomotion.set_wanted_rotation(locomotion, Quaternion.conjugate(current_rotation))
-
-	return 
+	locomotion:set_wanted_rotation(Quaternion.conjugate(current_rotation))
 end
+
 BTPanicAction.run = function (self, unit, blackboard, t, dt)
 	local category_name = "panic"
 
 	Managers.state.debug_text:clear_unit_text(unit, category_name)
 
-	if 0 < blackboard.panic.panic_timer then
+	if blackboard.panic.panic_timer > 0 then
 		blackboard.panic.panic_timer = blackboard.panic.panic_timer - dt
 
 		if script_data.ai_debug_panic_zones then
@@ -84,21 +83,20 @@ BTPanicAction.run = function (self, unit, blackboard, t, dt)
 		local destination_distance = blackboard.destination_dist
 
 		if destination_distance < 0.25 then
-			self.set_new_escape_position(self, unit, blackboard)
+			self:set_new_escape_position(unit, blackboard)
 		end
 
 		local escape_position = blackboard.panic.escape_position:unbox()
 		local ai_navigation = blackboard.navigation_extension
 
-		ai_navigation.move_to(ai_navigation, escape_position)
+		ai_navigation:move_to(escape_position)
 
 		return "running"
 	else
 		return "done"
 	end
-
-	return 
 end
+
 BTPanicAction.set_new_escape_position = function (self, unit, blackboard)
 	local current_position = POSITION_LOOKUP[unit]
 	local escape_direction = blackboard.panic.escape_direction:unbox()
@@ -110,23 +108,23 @@ BTPanicAction.set_new_escape_position = function (self, unit, blackboard)
 		new_escape_position.z = altitude
 
 		blackboard.panic.escape_position:store(new_escape_position)
-	elseif not self.find_new_escape_direction(self, unit, blackboard) then
+	elseif not self:find_new_escape_direction(unit, blackboard) then
 		local damage_type = "forced"
 		local damage_direction = Vector3(0, 0, -1)
 
 		AiUtils.kill_unit(unit, nil, nil, damage_type, damage_direction)
 		print("BTPanicAction: Could not find new escape direction! Killing unit!")
 	end
-
-	return 
 end
+
 local DEGREES_TO_ROTATE = 5
 local RADIANS_TO_ROTATE = math.degrees_to_radians(DEGREES_TO_ROTATE)
+
 BTPanicAction.find_new_escape_direction = function (self, unit, blackboard)
 	local current_rotation = RADIANS_TO_ROTATE
 
 	while current_rotation < math.pi do
-		if self._try_rotated_escape_direction(self, unit, current_rotation, blackboard) or self._try_rotated_escape_direction(self, unit, -current_rotation, blackboard) then
+		if self:_try_rotated_escape_direction(unit, current_rotation, blackboard) or self:_try_rotated_escape_direction(unit, -current_rotation, blackboard) then
 			return true
 		end
 
@@ -135,6 +133,7 @@ BTPanicAction.find_new_escape_direction = function (self, unit, blackboard)
 
 	return false
 end
+
 BTPanicAction._try_rotated_escape_direction = function (self, unit, radians_to_rotate, blackboard)
 	local current_position = POSITION_LOOKUP[unit]
 	local escape_direction = blackboard.panic.escape_direction:unbox()
@@ -154,9 +153,8 @@ BTPanicAction._try_rotated_escape_direction = function (self, unit, radians_to_r
 	else
 		return false
 	end
-
-	return 
 end
+
 BTPanicAction.get_shortest_panic_zone_escape_direction = function (self, unit, blackboard)
 	local panic_zone = blackboard.panic_zone
 	local position = POSITION_LOOKUP[unit]
@@ -167,4 +165,4 @@ BTPanicAction.get_shortest_panic_zone_escape_direction = function (self, unit, b
 	return escape_direction
 end
 
-return 
+return

@@ -1,6 +1,7 @@
 require("scripts/settings/perlin_light_configurations")
 
 PerlinLightExtension = class(PerlinLightExtension)
+
 PerlinLightExtension.init = function (self, extension_init_context, unit)
 	self._unit = unit
 	self._flicker_config_name = Unit.get_data(unit, "flicker_config")
@@ -11,10 +12,10 @@ PerlinLightExtension.init = function (self, extension_init_context, unit)
 	self._light = Unit.light(unit, 0)
 	self._color = Vector3Box(Light.color(self._light))
 	self._start_pos = Vector3Box(Unit.local_position(unit, self._node))
-
-	return 
 end
+
 local calculate_perlin_value, calc_interpolated_noise = nil
+
 PerlinLightExtension.update = function (self, unit, input, dt, context, t)
 	local config = PerlinLightConfigurations[self._flicker_config_name]
 	local perlin_value = calculate_perlin_value(t * config.frequency_multiplier, config.persistance, config.octaves, self._seed_flicker)
@@ -30,11 +31,10 @@ PerlinLightExtension.update = function (self, unit, input, dt, context, t)
 
 		Unit.set_local_position(self._unit, self._node, self._start_pos:unbox() + Vector3(perlin_value_x * 0.1, perlin_value_y * 0.1, 0))
 	end
-
-	return 
 end
+
 PerlinLightExtension.destroy = function (self)
-	return 
+	return
 end
 
 function calculate_perlin_value(x, persistance, number_of_octaves, seed)
@@ -76,4 +76,4 @@ end
 if not Math.calculate_perlin_value then
 end
 
-return 
+return

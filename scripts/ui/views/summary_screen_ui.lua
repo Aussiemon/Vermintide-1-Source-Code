@@ -28,6 +28,7 @@ local dice_textures = {
 	wood = "dice_01"
 }
 SummaryScreenUI = class(SummaryScreenUI)
+
 SummaryScreenUI.init = function (self, end_of_level_ui_context)
 	self.ui_renderer = end_of_level_ui_context.ui_renderer
 	self.timers = {}
@@ -47,19 +48,18 @@ SummaryScreenUI.init = function (self, end_of_level_ui_context)
 	self.input_manager = input_manager
 	self.last_level_key = end_of_level_ui_context.last_level_key
 
-	input_manager.create_input_service(input_manager, "summary_screen_ui", "IngameMenuKeymaps", "IngameMenuFilters")
-	input_manager.map_device_to_service(input_manager, "summary_screen_ui", "keyboard")
-	input_manager.map_device_to_service(input_manager, "summary_screen_ui", "mouse")
-	input_manager.map_device_to_service(input_manager, "summary_screen_ui", "gamepad")
+	input_manager:create_input_service("summary_screen_ui", "IngameMenuKeymaps", "IngameMenuFilters")
+	input_manager:map_device_to_service("summary_screen_ui", "keyboard")
+	input_manager:map_device_to_service("summary_screen_ui", "mouse")
+	input_manager:map_device_to_service("summary_screen_ui", "gamepad")
 	rawset(_G, "SummaryScreenUI_pointer", self)
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	local world = self.world_manager:world("level_world")
 	self.wwise_world = Managers.world:wwise_world(world)
 	self.item_reward_popup = RewardPopupHandler:new(self.input_manager, self.ui_renderer, 2, "summary_screen_ui")
-
-	return 
 end
+
 SummaryScreenUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph)
 	self.summary_window_widget = UIWidget.init(definitions.widgets.summary_window)
@@ -87,47 +87,45 @@ SummaryScreenUI.create_ui_elements = function (self)
 	self.summary_widgets = summary_widgets
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
+
 SummaryScreenUI.update = function (self, dt)
 	if not self.is_active then
-		return 
+		return
 	elseif self.is_complete then
 		self.is_active = nil
 	end
 
-	self.skip_current_step(self)
-	self.update_timers(self, dt)
+	self:skip_current_step()
+	self:update_timers(dt)
 
-	if self.timer_done(self, "start_timer") then
+	if self:timer_done("start_timer") then
 		self.playing = true
 
-		self.remove_timer(self, "start_timer")
-		self.tween_in(self)
+		self:remove_timer("start_timer")
+		self:tween_in()
 	end
 
-	self.update_summary_screen(self, dt)
-	self.update_bar_progress(self)
+	self:update_summary_screen(dt)
+	self:update_bar_progress()
 
 	if self.reward_widget_open_animation_time then
-		self.reward_widget_open_animation_time = self.update_reward_screen_animations(self, self.reward_widget_open_animation_time, dt)
+		self.reward_widget_open_animation_time = self:update_reward_screen_animations(self.reward_widget_open_animation_time, dt)
 	end
 
 	if self.playing then
-		self.draw(self, dt)
+		self:draw(dt)
 	end
 
 	if self.draw_item_popup then
 		self.item_reward_popup:update(dt)
 
 		if self.item_reward_popup:is_animation_completed() then
-			self.on_hide_item_popup(self)
+			self:on_hide_item_popup()
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -139,7 +137,7 @@ SummaryScreenUI.draw = function (self, dt)
 	UIRenderer.draw_widget(ui_renderer, self.summary_entries_mask_widget)
 	UIRenderer.draw_widget(ui_renderer, self.summary_entries_top_mask_widget)
 	UIRenderer.draw_widget(ui_renderer, self.experience_bar_hero_widget)
-	self.update_bar_glow_locations(self, dt)
+	self:update_bar_glow_locations(dt)
 
 	if self.show_reward_widget then
 		UIRenderer.draw_widget(ui_renderer, self.reward_widget)
@@ -166,24 +164,22 @@ SummaryScreenUI.draw = function (self, dt)
 	end
 
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 SummaryScreenUI.input_service = function (self)
 	return self.input_manager:get_service("summary_screen_ui")
 end
+
 SummaryScreenUI.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
+
 SummaryScreenUI.update_bar_glow_locations = function (self, dt)
 	local hero_widget = self.experience_bar_hero_widget
 	local hero_content = hero_widget.content
 	local hero_style = hero_widget.style
-
-	return 
 end
+
 SummaryScreenUI.destroy = function (self)
 	self.item_reward_popup:destroy()
 
@@ -193,53 +189,51 @@ SummaryScreenUI.destroy = function (self)
 
 	rawset(_G, "SummaryScreenUI_pointer", nil)
 	GarbageLeakDetector.register_object(self, "SummaryScreenUI")
-
-	return 
 end
+
 SummaryScreenUI.skip_current_step = function (self)
 	if self.can_skip then
 		local input_service = self.input_manager:get_service("summary_screen_ui")
 
-		if input_service.get(input_service, "skip") then
+		if input_service:get("skip") then
 			self.skip_step = true
 		elseif self.skip_step then
 			self.skip_step = nil
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.on_complete = function (self)
 	self.is_complete = true
 	self.playing = nil
-
-	return 
 end
+
 SummaryScreenUI.active = function (self)
 	return self.is_active
 end
+
 SummaryScreenUI.on_enter = function (self, ignore_input_blocking)
 	self.is_active = true
 	local chat_focused = Managers.chat:chat_is_focused()
 	local input_manager = self.input_manager
 
 	if not ignore_input_blocking and not chat_focused then
-		input_manager.block_device_except_service(input_manager, "summary_screen_ui", "keyboard")
-		input_manager.block_device_except_service(input_manager, "summary_screen_ui", "mouse")
-		input_manager.block_device_except_service(input_manager, "summary_screen_ui", "gamepad")
+		input_manager:block_device_except_service("summary_screen_ui", "keyboard")
+		input_manager:block_device_except_service("summary_screen_ui", "mouse")
+		input_manager:block_device_except_service("summary_screen_ui", "gamepad")
 	end
 
 	local player_level, experience = self.rewards:get_level_start()
 	local backend_manager = Managers.backend
 
-	self.set_experience_bar_by_experience(self, self.experience_bar_hero_widget, experience)
+	self:set_experience_bar_by_experience(self.experience_bar_hero_widget, experience)
 
-	if self.has_gained_rewards(self) then
+	if self:has_gained_rewards() then
 		local delay_time = UISettings.summary_screen.start_delay_time
 
-		self.add_timer(self, "start_timer", delay_time, 0, 1)
+		self:add_timer("start_timer", delay_time, 0, 1)
 	else
-		self.on_complete(self)
+		self:on_complete()
 	end
 
 	if self.game_won and self.game_mode_key ~= "survival" then
@@ -255,9 +249,8 @@ SummaryScreenUI.on_enter = function (self, ignore_input_blocking)
 	end
 
 	self._show_failed_game_popup = not self.game_won
-
-	return 
 end
+
 SummaryScreenUI.add_bonus = function (self, icon_texture, value)
 	if not self.visible_bonus_widgets then
 		self.visible_bonus_widgets = {}
@@ -295,11 +288,10 @@ SummaryScreenUI.add_bonus = function (self, icon_texture, value)
 	widget_content.value_text = "x" .. tostring(total_value)
 	widget_content.value = total_value
 
-	self.tween_in_bonus_widget(self, "bonus_icon_" .. next_bonus_index, bonus_widget, initialize, icon_default_size)
-	self.play_sound(self, "Play_hud_end_screen_unlock_dice")
-
-	return 
+	self:tween_in_bonus_widget("bonus_icon_" .. next_bonus_index, bonus_widget, initialize, icon_default_size)
+	self:play_sound("Play_hud_end_screen_unlock_dice")
 end
+
 SummaryScreenUI.add_bar_progress = function (self, bar_name, current_experience, widget, experience_gained)
 	if not self.bar_progress_data then
 		self.bar_progress_data = {}
@@ -324,26 +316,25 @@ SummaryScreenUI.add_bar_progress = function (self, bar_name, current_experience,
 	}
 	self.bar_progress_data[#self.bar_progress_data + 1] = progress_data
 
-	self.add_timer(self, bar_name, time, 0, 1)
-	self.play_sound(self, "Play_hud_end_screen_big_counter_loop")
-
-	return 
+	self:add_timer(bar_name, time, 0, 1)
+	self:play_sound("Play_hud_end_screen_big_counter_loop")
 end
+
 SummaryScreenUI.update_bar_progress = function (self)
 	local bar_progress_data = self.bar_progress_data
 
 	if not bar_progress_data then
-		return 
+		return
 	end
 
 	local reward_added = false
 
 	for index, bar_data in ipairs(bar_progress_data) do
 		local name = bar_data.name
-		local progress = self.get_timer_progress(self, name)
-		local smoothstep = self.get_timer_smoothstep(self, name)
+		local progress = self:get_timer_progress(name)
+		local smoothstep = self:get_timer_smoothstep(name)
 
-		if progress and 0 < progress and not self.timer_paused(self, name) then
+		if progress and progress > 0 and not self:timer_paused(name) then
 			local bar_widget = bar_data.widget
 			local current_level = bar_data.current_level
 			local experience_to_add = bar_data.experience_to_add
@@ -370,7 +361,7 @@ SummaryScreenUI.update_bar_progress = function (self)
 						description_text = Localize(unlock_template.description)
 					}
 
-					self.add_reward(self, reward_data)
+					self:add_reward(reward_data)
 
 					reward_added = true
 					reward_backend_item = unlock_template.backend_item
@@ -388,14 +379,14 @@ SummaryScreenUI.update_bar_progress = function (self)
 							item_key = item_key
 						}
 
-						self.add_reward(self, reward_data)
+						self:add_reward(reward_data)
 
 						reward_added = true
 					end
 				end
 			end
 
-			self.set_experience_bar_by_fraction(self, bar_widget, current_level, bar_fraction)
+			self:set_experience_bar_by_fraction(bar_widget, current_level, bar_fraction)
 
 			bar_data.last_bar_fraction = bar_fraction
 			widget_style.level_box_bg_lit.color[1] = bar_fraction * 255
@@ -408,7 +399,7 @@ SummaryScreenUI.update_bar_progress = function (self)
 				glow_alpha_fraction = math.min(smoothstep / (1 - glow_alpha_value_turn_progress), 1)
 			end
 
-			widget_style.bar_glow.color[1] = (0.03 < bar_fraction and glow_alpha_fraction * 255) or 0
+			widget_style.bar_glow.color[1] = (bar_fraction > 0.03 and glow_alpha_fraction * 255) or 0
 			widget_style.bar_glow.offset[1] = bar_fraction * widget_style.bar.size[1] - 6
 			local current_glow_texture = widget_content.bar_glow
 
@@ -438,23 +429,22 @@ SummaryScreenUI.update_bar_progress = function (self)
 						description_text = Localize(description_text) .. " " .. token_amount_text
 					}
 
-					self.add_reward(self, reward_data)
+					self:add_reward(reward_data)
 
 					reward_added = true
 				elseif not reward_added then
 					self.bar_progress_data[index] = nil
 
 					if #self.bar_progress_data < 1 then
-						self.play_sound(self, "Stop_hud_end_screen_big_counter_loop")
-						self.tween_out(self)
+						self:play_sound("Stop_hud_end_screen_big_counter_loop")
+						self:tween_out()
 					end
 				end
 			end
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.set_experience_bar_by_experience = function (self, bar_widget, current_experience)
 	local level, progress, experience_into_level = ExperienceSettings.get_level(current_experience)
 	local next_level = level + 1
@@ -463,9 +453,8 @@ SummaryScreenUI.set_experience_bar_by_experience = function (self, bar_widget, c
 	bar_content.bar_value = progress
 	bar_content.level_text = level
 	bar_content.experience_text = string.format("%d/%d", experience_into_level, needed_experience)
-
-	return 
 end
+
 SummaryScreenUI.set_experience_bar_by_fraction = function (self, bar_widget, level, fraction)
 	local next_level = level + 1
 	local max_exp = ExperienceSettings.get_experience_required_for_level(next_level)
@@ -474,16 +463,14 @@ SummaryScreenUI.set_experience_bar_by_fraction = function (self, bar_widget, lev
 	bar_content.bar_value = fraction
 	bar_content.level_text = level
 	bar_content.experience_text = string.format("%d/%d", level_experience, max_exp)
-
-	return 
 end
+
 SummaryScreenUI.display_total_experience = function (self, value)
 	local summary_window_widget = self.summary_window_widget
 	local summary_window_content = summary_window_widget.content
 	summary_window_content.total_experience_text = value
-
-	return 
 end
+
 SummaryScreenUI.setup_summary_entries = function (self)
 	self.can_skip = true
 	self.visible_summary_entry_widgets = {}
@@ -518,7 +505,7 @@ SummaryScreenUI.setup_summary_entries = function (self)
 		local entry_time = ((text or NUM_OF_SUMMARY_WIDGETS <= index) and start_delay_time) or 0
 		start_time = start_time + entry_time
 
-		self.add_timer(self, start_timer_name, start_time, 0, 1)
+		self:add_timer(start_timer_name, start_time, 0, 1)
 
 		self.summary_presentation_entries[index] = entry
 
@@ -528,9 +515,8 @@ SummaryScreenUI.setup_summary_entries = function (self)
 			self.summary_entry_widget_height = current_size[2]
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.has_gained_rewards = function (self)
 	local mission_rewards = self.rewards:get_mission_results(self.game_won, self.game_mode_key)
 	local gained_xp = 0
@@ -549,21 +535,22 @@ SummaryScreenUI.has_gained_rewards = function (self)
 		end
 	end
 
-	if 0 < gained_xp or 0 < gained_values then
+	if gained_xp > 0 or gained_values > 0 then
 		return true
 	end
 
 	return false
 end
+
 SummaryScreenUI.update_summary_entries = function (self, dt)
 	local entries = self.summary_presentation_entries
 
 	if not entries then
-		return 
+		return
 	end
 
-	if self.update_summary_widgets_position_animation(self, dt) then
-		return 
+	if self:update_summary_widgets_position_animation(dt) then
+		return
 	end
 
 	for index, entry in ipairs(entries) do
@@ -572,11 +559,11 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 
 		if update then
 			if entry.start_counter_sound then
-				if 1 < index then
-					self.play_sound(self, "Stop_hud_end_screen_small_counter_loop")
+				if index > 1 then
+					self:play_sound("Stop_hud_end_screen_small_counter_loop")
 				end
 
-				self.play_sound(self, "Play_hud_end_screen_small_counter_loop")
+				self:play_sound("Play_hud_end_screen_small_counter_loop")
 
 				entry.start_counter_sound = false
 			end
@@ -593,84 +580,85 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 			if not entry.initialized then
 				local count_time = UISettings.summary_screen.summary_entry_experience_count_time
 
-				self.add_timer(self, value_timer_name, count_time, 0, 1)
+				self:add_timer(value_timer_name, count_time, 0, 1)
 
 				widget.content.title_text = entry.title_text or ""
 				local total_value_text = ""
 
-				if 0 < experience then
+				if experience > 0 then
 					total_value_text = tostring(experience) .. "xp"
-				elseif 0 < value then
+				elseif value > 0 then
 					total_value_text = "x" .. tostring(value)
 				end
 
 				local value_text_style = widget_style.value_text
-				local text_width, text_height = self.get_text_size(self, total_value_text, value_text_style)
+				local text_width, text_height = self:get_text_size(total_value_text, value_text_style)
 				local value_text_scenegraph_id = value_text_style.scenegraph_id
 				local text_size = self.ui_scenegraph[value_text_scenegraph_id].size
 				text_size[1] = (text_width < definitions.MAX_SUMMARY_TITLE_WIDTH and text_width) or definitions.MAX_SUMMARY_TITLE_WIDTH
 
 				if icon then
-					self.set_entry_widget_icon(self, widget, icon)
+					self:set_entry_widget_icon(widget, icon)
 				end
 
 				local entry_fade_in_name = string.format("%s%s", entry.name, "_fade_in")
 
-				self.tween_in_entry_passes(self, entry_fade_in_name, entry.widget)
+				self:tween_in_entry_passes(entry_fade_in_name, entry.widget)
 
 				entry.initialized = true
 
-				self.set_summary_entries_paused_state(self, true)
+				self:set_summary_entries_paused_state(true)
 			end
 
-			if self.has_timer(self, value_timer_name) then
-				local timer_done = self.timer_done(self, value_timer_name)
-				local smoothstep = self.get_timer_smoothstep(self, value_timer_name)
+			if self:has_timer(value_timer_name) then
+				local timer_done = self:timer_done(value_timer_name)
+				local smoothstep = self:get_timer_smoothstep(value_timer_name)
 
-				if 0 < experience then
+				if experience > 0 then
 					presentation_amount = math.round(experience * smoothstep)
 					widget_content.value_text = presentation_amount .. "xp"
-				elseif 0 < value then
+				elseif value > 0 then
 					local scalar = math.round(value * smoothstep)
 					local value_amount = scalar + 1
 
-					if value == scalar and not (value_amount - 1) then
+					if value == scalar then
+						value_amount = value_amount - 1
 					end
 
 					widget_content.value_text = "x" .. value_amount
 				end
 
 				if timer_done then
-					self.remove_timer(self, value_timer_name)
+					self:remove_timer(value_timer_name)
 
 					update = false
 					local total_experience_gained = self.total_experience_gained or 0
 					local total_display_experience = total_experience_gained + presentation_amount
 					self.total_experience_gained = total_display_experience
 
-					self.display_total_experience(self, total_display_experience)
+					self:display_total_experience(total_display_experience)
 
 					if entry.bonus and icon then
-						self.add_bonus(self, icon, value)
+						self:add_bonus(icon, value)
 					end
 
 					if index == #entries then
-						self.play_sound(self, "Stop_hud_end_screen_small_counter_loop")
-						self.display_bar_progress(self)
+						self:play_sound("Stop_hud_end_screen_small_counter_loop")
+						self:display_bar_progress()
 					else
-						self.set_summary_entries_paused_state(self, false)
+						self:set_summary_entries_paused_state(false)
 					end
 				end
 			end
-		elseif self.timer_done(self, start_timer_name) then
+		elseif self:timer_done(start_timer_name) then
 			entry.update = true
 
-			self.remove_timer(self, start_timer_name)
+			self:remove_timer(start_timer_name)
 
 			if index <= NUM_OF_SUMMARY_WIDGETS then
 				self.visible_summary_entry_widgets[index] = entry.widget
 
-				self.align_summary_entry_widgets(self)
+				self:align_summary_entry_widgets()
 			else
 				local is_next_entry_empty = entry.title_text == nil
 				local num_animation_steps = self.summary_entries_animation_steps or 1
@@ -680,7 +668,7 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 						local next_entry = entries[i]
 						next_entry.update = true
 
-						self.remove_timer(self, next_entry.start_timer_name)
+						self:remove_timer(next_entry.start_timer_name)
 
 						num_animation_steps = num_animation_steps + 1
 
@@ -690,7 +678,7 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 					end
 				end
 
-				self.set_summary_entries_paused_state(self, true)
+				self:set_summary_entries_paused_state(true)
 
 				self.summary_entries_animation_steps = num_animation_steps
 
@@ -702,9 +690,8 @@ SummaryScreenUI.update_summary_entries = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.set_summary_entries_paused_state = function (self, pause)
 	local entries = self.summary_presentation_entries
 
@@ -712,13 +699,13 @@ SummaryScreenUI.set_summary_entries_paused_state = function (self, pause)
 		if not entry.update then
 			local start_timer_name = entry.start_timer_name
 
-			self.set_timer_paused(self, start_timer_name, pause)
+			self:set_timer_paused(start_timer_name, pause)
 		end
 	end
-
-	return 
 end
+
 local set_local_position = UISceneGraph.set_local_position
+
 SummaryScreenUI.align_summary_entry_widgets = function (self)
 	local start_position = self.summary_entries_animation_position or 0
 	local ui_scenegraph = self.ui_scenegraph
@@ -732,9 +719,8 @@ SummaryScreenUI.align_summary_entry_widgets = function (self)
 		local widget_height = -(current_size[2] * offset_index + SUMMARY_WIDGET_SPACING * offset_index)
 		current_position[2] = start_position + widget_height
 	end
-
-	return 
 end
+
 SummaryScreenUI.update_summary_widgets_position_animation = function (self, dt)
 	local time = self.summary_entries_animation_time
 
@@ -751,10 +737,10 @@ SummaryScreenUI.update_summary_widgets_position_animation = function (self, dt)
 				local num_visible_entry_widgets = #visible_entry_widgets
 				visible_entry_widgets[num_visible_entry_widgets + 1] = widget_to_move
 
-				self.reset_summary_entry_widget(self, widget_to_move)
+				self:reset_summary_entry_widget(widget_to_move)
 			end
 
-			self.set_summary_entries_paused_state(self, false)
+			self:set_summary_entries_paused_state(false)
 
 			self.summary_entries_animation_time = nil
 			self.summary_entries_animation_position = nil
@@ -767,13 +753,12 @@ SummaryScreenUI.update_summary_widgets_position_animation = function (self, dt)
 			self.summary_entries_animation_position = progress * end_position
 		end
 
-		self.align_summary_entry_widgets(self)
+		self:align_summary_entry_widgets()
 
 		return true
 	end
-
-	return 
 end
+
 SummaryScreenUI.reset_summary_entry_widget = function (self, widget)
 	local widget_content = widget.content
 	local widget_style = widget.style
@@ -783,15 +768,15 @@ SummaryScreenUI.reset_summary_entry_widget = function (self, widget)
 	widget_style.icon_texture.color[1] = 0
 	widget_style.title_text.text_color[1] = 0
 	widget_style.value_text.text_color[1] = 0
-
-	return 
 end
+
 SummaryScreenUI.get_text_size = function (self, text, text_style)
 	local font, scaled_font_size = UIFontByResolution(text_style)
 	local text_width, text_height, min = UIRenderer.text_size(self.ui_renderer, text, font[1], scaled_font_size)
 
 	return text_width, text_height
 end
+
 SummaryScreenUI.set_entry_widget_icon = function (self, widget, icon_texture)
 	local widget_content = widget.content
 	local widget_style = widget.style
@@ -806,9 +791,8 @@ SummaryScreenUI.set_entry_widget_icon = function (self, widget, icon_texture)
 	size[1] = default_size[1]
 	size[2] = default_size[2]
 	position[1] = -(size[1] + 2)
-
-	return 
 end
+
 SummaryScreenUI.update_summary_screen = function (self, dt)
 	local ui_animations = self.ui_animations
 	local summary_screen_animation = self.summary_screen_animation
@@ -839,23 +823,22 @@ SummaryScreenUI.update_summary_screen = function (self, dt)
 			self.summary_screen_animation = nil
 
 			if self.end_on_tween_complete then
-				self.on_complete(self)
+				self:on_complete()
 			else
-				self.setup_summary_entries(self)
+				self:setup_summary_entries()
 			end
 		end
 	else
-		self.update_summary_entries(self, dt)
+		self:update_summary_entries(dt)
 	end
-
-	return 
 end
+
 SummaryScreenUI.display_bar_progress = function (self)
 	local total_experience_gained = self.total_experience_gained
 	local experience = 0
 	local backend_manager = Managers.backend
 
-	if backend_manager.available(backend_manager) and backend_manager.profiles_loaded(backend_manager) then
+	if backend_manager:available() and backend_manager:profiles_loaded() then
 		local player_level = nil
 		player_level, experience = self.rewards:get_level_start()
 		local new_experience = experience + total_experience_gained
@@ -866,39 +849,36 @@ SummaryScreenUI.display_bar_progress = function (self)
 		print("Failed initialized experience for experience bar")
 	end
 
-	self.add_bar_progress(self, "hero_bar", experience, self.experience_bar_hero_widget, total_experience_gained)
-
-	return 
+	self:add_bar_progress("hero_bar", experience, self.experience_bar_hero_widget, total_experience_gained)
 end
+
 SummaryScreenUI.add_reward = function (self, reward_data)
 	local reward_stack = self._reward_stack
 
 	table.insert(reward_stack, 1, reward_data)
 
 	if not self.draw_item_popup and not self.show_reward_widget then
-		self.start_next_reward(self)
+		self:start_next_reward()
 	end
-
-	return 
 end
+
 SummaryScreenUI.start_next_reward = function (self)
 	local reward_stack = self._reward_stack
 	local num_rewards = #reward_stack
 
-	if 0 < num_rewards then
+	if num_rewards > 0 then
 		local reward_data = reward_stack[num_rewards]
 		reward_stack[num_rewards] = nil
 		local reward_type = reward_data.reward_type
 
 		if reward_type == "item" then
-			self.display_item_popup(self, reward_data.item_key)
+			self:display_item_popup(reward_data.item_key)
 		else
-			self.display_reward_screen(self, reward_data.bar_name, reward_data.title_text, reward_data.icon_name, reward_data.description_text, reward_data.icon_text)
+			self:display_reward_screen(reward_data.bar_name, reward_data.title_text, reward_data.icon_name, reward_data.description_text, reward_data.icon_text)
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.display_item_popup = function (self, item_key)
 	local bar_progress_data = self.bar_progress_data
 
@@ -906,7 +886,7 @@ SummaryScreenUI.display_item_popup = function (self, item_key)
 		for index, bar_data in ipairs(bar_progress_data) do
 			local name = bar_data.name
 
-			self.set_timer_paused(self, name, true)
+			self:set_timer_paused(name, true)
 		end
 	end
 
@@ -914,10 +894,9 @@ SummaryScreenUI.display_item_popup = function (self, item_key)
 
 	self.draw_item_popup = true
 
-	self.play_sound(self, "Pause_hud_end_screen_big_counter_loop")
-
-	return 
+	self:play_sound("Pause_hud_end_screen_big_counter_loop")
 end
+
 SummaryScreenUI.on_hide_item_popup = function (self)
 	local bar_progress_data = self.bar_progress_data
 
@@ -925,18 +904,17 @@ SummaryScreenUI.on_hide_item_popup = function (self)
 		for index, bar_data in ipairs(bar_progress_data) do
 			local name = bar_data.name
 
-			self.set_timer_paused(self, name, false)
+			self:set_timer_paused(name, false)
 		end
 	end
 
-	self.play_sound(self, "Resume_hud_end_screen_big_counter_loop")
+	self:play_sound("Resume_hud_end_screen_big_counter_loop")
 
 	self.draw_item_popup = nil
 
-	self.start_next_reward(self)
-
-	return 
+	self:start_next_reward()
 end
+
 SummaryScreenUI.display_reward_screen = function (self, bar_name, title_text, icon_name, description_text, icon_text)
 	if bar_name == "hero_bar" then
 		local bar_progress_data = self.bar_progress_data
@@ -945,7 +923,7 @@ SummaryScreenUI.display_reward_screen = function (self, bar_name, title_text, ic
 			for index, bar_data in ipairs(bar_progress_data) do
 				local name = bar_data.name
 
-				self.set_timer_paused(self, name, true)
+				self:set_timer_paused(name, true)
 			end
 		end
 
@@ -978,12 +956,11 @@ SummaryScreenUI.display_reward_screen = function (self, bar_name, title_text, ic
 		widget_style.glow_left.color[1] = 255
 		widget_style.glow_right.color[1] = 255
 
-		self.play_sound(self, "Pause_hud_end_screen_big_counter_loop")
-		self.play_sound(self, "Play_hud_end_screen_unlock_item")
+		self:play_sound("Pause_hud_end_screen_big_counter_loop")
+		self:play_sound("Play_hud_end_screen_unlock_item")
 	end
-
-	return 
 end
+
 SummaryScreenUI.on_hide_reward_screen = function (self)
 	local bar_progress_data = self.bar_progress_data
 
@@ -991,18 +968,17 @@ SummaryScreenUI.on_hide_reward_screen = function (self)
 		for index, bar_data in ipairs(bar_progress_data) do
 			local name = bar_data.name
 
-			self.set_timer_paused(self, name, false)
+			self:set_timer_paused(name, false)
 		end
 	end
 
-	self.play_sound(self, "Resume_hud_end_screen_big_counter_loop")
+	self:play_sound("Resume_hud_end_screen_big_counter_loop")
 
 	self.show_reward_widget = nil
 
-	self.start_next_reward(self)
-
-	return 
+	self:start_next_reward()
 end
+
 SummaryScreenUI.update_reward_screen_animations = function (self, time, dt)
 	local state_index = self.reward_screen_state_index
 	local reward_state = REWARD_SCREEN_STATES[state_index]
@@ -1051,7 +1027,7 @@ SummaryScreenUI.update_reward_screen_animations = function (self, time, dt)
 		local widget_style = self.reward_widget.style
 		widget_style.highlight_glow.color[1] = alpha
 
-		if 0.4 < progress then
+		if progress > 0.4 then
 			widget_style.glow_middle.color[1] = alpha
 			widget_style.glow_left.color[1] = alpha
 			widget_style.glow_right.color[1] = alpha
@@ -1093,7 +1069,7 @@ SummaryScreenUI.update_reward_screen_animations = function (self, time, dt)
 		self.reward_widget.style.sun_right.color[1] = alpha
 	end
 
-	if 1 <= progress then
+	if progress >= 1 then
 		local next_reward_state = REWARD_SCREEN_STATES[state_index + 1]
 
 		if next_reward_state then
@@ -1101,37 +1077,34 @@ SummaryScreenUI.update_reward_screen_animations = function (self, time, dt)
 			self.reward_screen_state_index = state_index + 1
 
 			if next_reward_state == "close" then
-				self.play_sound(self, "Play_hud_end_screen_unlock_item_close")
+				self:play_sound("Play_hud_end_screen_unlock_item_close")
 			end
 
 			return time
 		end
 
-		self.on_hide_reward_screen(self)
+		self:on_hide_reward_screen()
 
 		return nil
 	else
 		return time
 	end
-
-	return 
 end
+
 SummaryScreenUI.tween_in = function (self)
-	self.play_sound(self, "Play_hud_end_screen_enter")
-	self.tween_in_summary_screen(self)
-	self.tween_in_experience_bar_screen(self)
-
-	return 
+	self:play_sound("Play_hud_end_screen_enter")
+	self:tween_in_summary_screen()
+	self:tween_in_experience_bar_screen()
 end
+
 SummaryScreenUI.tween_out = function (self)
-	self.play_sound(self, "Play_hud_end_screen_exit")
-	self.tween_out_summary_screen(self)
-	self.tween_out_experience_bar_screen(self)
+	self:play_sound("Play_hud_end_screen_exit")
+	self:tween_out_summary_screen()
+	self:tween_out_experience_bar_screen()
 
 	self.end_on_tween_complete = true
-
-	return 
 end
+
 SummaryScreenUI.tween_in_bonus_widget = function (self, name, widget, first_time, icon_target_size)
 	local widget_style = widget.style
 	local icon_scenegraph_id = widget_style.icon_texture.scenegraph_id
@@ -1155,14 +1128,13 @@ SummaryScreenUI.tween_in_bonus_widget = function (self, name, widget, first_time
 	self.ui_animations[name .. "_icon_size_y"] = UIAnimation.init(UIAnimation.catmullrom, icon_size, 2, icon_target_size[2], p1, p2, p3, p4, time)
 	local value = widget.content.value
 
-	if 0 < value then
+	if value > 0 then
 		local value_text_style = widget.style.value_text
 		local text_size = 20
 		self.ui_animations[name .. "_title_text"] = UIAnimation.init(UIAnimation.catmullrom, value_text_style, "font_size", text_size, p1, p2, p3, p4, time)
 	end
-
-	return 
 end
+
 SummaryScreenUI.tween_in_entry_passes = function (self, name, widget)
 	local widget_style = widget.style
 	local title_text_style = widget_style.title_text
@@ -1176,10 +1148,9 @@ SummaryScreenUI.tween_in_entry_passes = function (self, name, widget)
 	self.ui_animations[name .. "_value_text"] = UIAnimation.init(UIAnimation.function_by_time, value_text_style.text_color, target_index, from, to, time, math.easeInCubic)
 	self.ui_animations[name .. "_icon_textures"] = UIAnimation.init(UIAnimation.function_by_time, icon_style.color, target_index, from, to, time, math.easeInCubic)
 
-	self.play_sound(self, "Play_hud_end_screen_small_counter_headers")
-
-	return 
+	self:play_sound("Play_hud_end_screen_small_counter_headers")
 end
+
 SummaryScreenUI.tween_in_experience_bar_screen = function (self)
 	local destination = self.ui_scenegraph.experience_bars_window.local_position
 	local destination_index = 2
@@ -1188,9 +1159,8 @@ SummaryScreenUI.tween_in_experience_bar_screen = function (self)
 	local time = UISettings.summary_screen.tween_in_time
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, destination, destination_index, from, to, time, math.ease_out_quad)
 	self.experience_bar_screen_animation = new_animation
-
-	return 
 end
+
 SummaryScreenUI.tween_in_summary_screen = function (self)
 	local destination = self.ui_scenegraph.summary_window.local_position
 	local destination_index = 2
@@ -1199,9 +1169,8 @@ SummaryScreenUI.tween_in_summary_screen = function (self)
 	local time = UISettings.summary_screen.tween_in_time
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, destination, destination_index, from, to, time, math.ease_out_quad)
 	self.summary_screen_animation = new_animation
-
-	return 
 end
+
 SummaryScreenUI.tween_out_experience_bar_screen = function (self)
 	local destination = self.ui_scenegraph.experience_bars_window.local_position
 	local destination_index = 2
@@ -1210,9 +1179,8 @@ SummaryScreenUI.tween_out_experience_bar_screen = function (self)
 	local time = UISettings.summary_screen.tween_out_time
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, destination, destination_index, from, to, time, math.easeInCubic)
 	self.experience_bar_screen_animation = new_animation
-
-	return 
 end
+
 SummaryScreenUI.tween_out_summary_screen = function (self)
 	local destination = self.ui_scenegraph.summary_window.local_position
 	local destination_index = 2
@@ -1221,13 +1189,12 @@ SummaryScreenUI.tween_out_summary_screen = function (self)
 	local time = UISettings.summary_screen.tween_out_time
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, destination, destination_index, from, to, time, math.easeInCubic)
 	self.summary_screen_animation = new_animation
-
-	return 
 end
+
 SummaryScreenUI.add_timer = function (self, name, total_time, from, to)
 	local timers = self.timers
 
-	if not timers[name] and 0 < total_time then
+	if not timers[name] and total_time > 0 then
 		local new_timer = {
 			current_time = 0,
 			multiplier = 1,
@@ -1237,39 +1204,35 @@ SummaryScreenUI.add_timer = function (self, name, total_time, from, to)
 		}
 		self.timers[name] = new_timer
 	end
-
-	return 
 end
+
 SummaryScreenUI.restart_timer = function (self, name)
 	local timer = self.timers[name]
 	timer.current_time = 0
 	timer.progress = 0
 	timer.finnished = nil
-
-	return 
 end
+
 SummaryScreenUI.set_timer_multiplier = function (self, name, time_multiplier)
 	local timer = self.timers[name]
 	timer.multiplier = time_multiplier
-
-	return 
 end
+
 SummaryScreenUI.get_timer_multiplier = function (self, name)
 	local timer = self.timers[name]
 
 	return timer.multiplier
 end
+
 SummaryScreenUI.set_timer_paused = function (self, name, is_paused)
 	local timer = self.timers[name]
 	timer.paused = is_paused
-
-	return 
 end
+
 SummaryScreenUI.remove_timer = function (self, name)
 	self.timers[name] = nil
-
-	return 
 end
+
 SummaryScreenUI.update_timers = function (self, dt)
 	local timers = self.timers
 
@@ -1292,9 +1255,8 @@ SummaryScreenUI.update_timers = function (self, dt)
 			end
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.get_timer_smoothstep = function (self, name)
 	local smoothstep_timer = self.timers[name]
 
@@ -1305,9 +1267,8 @@ SummaryScreenUI.get_timer_smoothstep = function (self, name)
 			return 0
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.get_timer_progress = function (self, name)
 	local smoothstep_timer = self.timers[name]
 
@@ -1318,35 +1279,30 @@ SummaryScreenUI.get_timer_progress = function (self, name)
 			return 0
 		end
 	end
-
-	return 
 end
+
 SummaryScreenUI.has_timer = function (self, name)
 	local smoothstep_timer = self.timers[name]
 
 	if smoothstep_timer then
 		return true
 	end
-
-	return 
 end
+
 SummaryScreenUI.timer_paused = function (self, name)
 	local smoothstep_timer = self.timers[name]
 
 	if smoothstep_timer then
 		return smoothstep_timer.paused
 	end
-
-	return 
 end
+
 SummaryScreenUI.timer_done = function (self, name)
 	local smoothstep_timer = self.timers[name]
 
 	if smoothstep_timer then
 		return smoothstep_timer.finnished
 	end
-
-	return 
 end
 
-return 
+return

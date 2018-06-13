@@ -1,5 +1,6 @@
 local definitions = local_require("scripts/ui/views/mission_objective_ui_definitions")
 MissionObjectiveUI = class(MissionObjectiveUI)
+
 MissionObjectiveUI.init = function (self, ingame_ui_context)
 	self.ui_renderer = ingame_ui_context.ui_renderer
 	self.ingame_ui = ingame_ui_context.ingame_ui
@@ -11,12 +12,12 @@ MissionObjectiveUI.init = function (self, ingame_ui_context)
 	self.current_mission_objective = nil
 	self.index_count = 0
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 	rawset(_G, "mission_objective_ui", self)
-
-	return 
 end
+
 local DO_RELOAD = true
+
 MissionObjectiveUI.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(definitions.scenegraph_definition)
 	self.area_text_box = UIWidget.init(definitions.widget_definitions.area_text_box)
@@ -25,32 +26,29 @@ MissionObjectiveUI.create_ui_elements = function (self)
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
 
 	DO_RELOAD = false
-
-	return 
 end
+
 MissionObjectiveUI.destroy = function (self)
 	rawset(_G, "mission_objective_ui", nil)
-
-	return 
 end
+
 MissionObjectiveUI.update = function (self, dt)
 	if DO_RELOAD then
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
-	self.update_animations(self, dt)
-	self.update_icon_position(self, dt)
-	self.next_mission_objective(self, dt)
-	self.draw(self, dt)
-
-	return 
+	self:update_animations(dt)
+	self:update_icon_position(dt)
+	self:next_mission_objective(dt)
+	self:draw(dt)
 end
+
 MissionObjectiveUI.add_mission_objective = function (self, mission_name, text)
 	local saved_mission_objectives = self.saved_mission_objectives
 
 	for _, mission_data in pairs(saved_mission_objectives) do
 		if mission_data.mission_name == mission_name then
-			return 
+			return
 		end
 	end
 
@@ -58,9 +56,8 @@ MissionObjectiveUI.add_mission_objective = function (self, mission_name, text)
 		mission_name = mission_name,
 		text = text
 	}
-
-	return 
 end
+
 MissionObjectiveUI.complete_mission = function (self, mission_name, remove_immediately)
 	local index = nil
 
@@ -88,9 +85,8 @@ MissionObjectiveUI.complete_mission = function (self, mission_name, remove_immed
 		self.mission_icon_left_animation = nil
 		self.mission_icon_right_animation = nil
 	end
-
-	return 
 end
+
 MissionObjectiveUI.update_mission = function (self, mission_name, text)
 	local index = nil
 
@@ -116,11 +112,10 @@ MissionObjectiveUI.update_mission = function (self, mission_name, text)
 			self.mission_icon_right_animation = UIAnimation.init(UIAnimation.function_by_time, widget.style.mission_icon_right.color, 1, 0, 255, ui_settings.fade_time, math.easeInCubic, UIAnimation.wait, ui_settings.wait_time, UIAnimation.function_by_time, widget.style.mission_icon_right.color, 1, 255, 0, ui_settings.fade_time, math.easeInCubic)
 		end
 	end
-
-	return 
 end
+
 MissionObjectiveUI.next_mission_objective = function (self, dt)
-	if not self.current_mission_objective and 0 < #self.saved_mission_objectives then
+	if not self.current_mission_objective and #self.saved_mission_objectives > 0 then
 		local current_mission_data = self.saved_mission_objectives[1]
 		self.area_text_box_animation = nil
 		local ui_settings = UISettings.mission_objective
@@ -131,9 +126,8 @@ MissionObjectiveUI.next_mission_objective = function (self, dt)
 		self.mission_icon_right_animation = UIAnimation.init(UIAnimation.function_by_time, widget.style.mission_icon_right.color, 1, 0, 255, ui_settings.fade_time, math.easeInCubic, UIAnimation.wait, ui_settings.wait_time, UIAnimation.function_by_time, widget.style.mission_icon_right.color, 1, 255, 0, ui_settings.fade_time, math.easeInCubic)
 		self.current_mission_objective = current_mission_data.mission_name
 	end
-
-	return 
 end
+
 MissionObjectiveUI.update_animations = function (self, dt)
 	local area_text_box_animation = self.area_text_box_animation
 
@@ -164,9 +158,8 @@ MissionObjectiveUI.update_animations = function (self, dt)
 			self.mission_icon_right_animation = nil
 		end
 	end
-
-	return 
 end
+
 MissionObjectiveUI.update_icon_position = function (self, dt)
 	local content = self.area_text_box.content
 	local style = self.area_text_box.style
@@ -177,9 +170,8 @@ MissionObjectiveUI.update_icon_position = function (self, dt)
 	local ui_scenegraph = self.ui_scenegraph
 	ui_scenegraph.mission_icon_left.position[1] = -width * 0.5 - ui_scenegraph.mission_icon_left.size[1] * 0.5
 	ui_scenegraph.mission_icon_right.position[1] = width * 0.5 + ui_scenegraph.mission_icon_right.size[1] * 0.5
-
-	return 
 end
+
 MissionObjectiveUI.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
@@ -188,8 +180,6 @@ MissionObjectiveUI.draw = function (self, dt)
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 	UIRenderer.draw_widget(ui_renderer, self.area_text_box)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
 
-return 
+return

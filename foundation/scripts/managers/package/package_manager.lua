@@ -3,20 +3,18 @@ local function debug_print(format, ...)
 	end
 
 	print(string.format("[PackageManager] " .. format, ...))
-
-	return 
 end
 
 PackageManager = PackageManager or {}
+
 PackageManager.init = function (self)
 	self._packages = {}
 	self._asynch_packages = {}
 	self._references = {}
 	self._queued_async_packages = {}
 	self._queue_order = {}
-
-	return 
 end
+
 PackageManager.load = function (self, package_name, reference_name, callback, asynchronous, prioritize)
 	debug_print("Load:  %s, %s, %s, %s", package_name, reference_name, (asynchronous and "async-read") or "sync-read", (prioritize and "prioritized") or "")
 
@@ -24,7 +22,7 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 		self._references[package_name][reference_name] = true
 
 		if not asynchronous and self._asynch_packages[package_name] then
-			self.force_load(self, package_name)
+			self:force_load(package_name)
 
 			if callback then
 				Profiler.start("PACKAGE CALLBACK")
@@ -32,7 +30,7 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 				Profiler.stop("PACKAGE CALLBACK")
 			end
 		elseif not asynchronous and self._queued_async_packages[package_name] then
-			self.force_load_queued_package(self, package_name)
+			self:force_load_queued_package(package_name)
 
 			if callback then
 				Profiler.start("PACKAGE CALLBACK")
@@ -101,9 +99,8 @@ PackageManager.load = function (self, package_name, reference_name, callback, as
 			}
 		end
 	end
-
-	return 
 end
+
 PackageManager.force_load = function (self, package_name)
 	debug_print("Force_load:  %s", package_name)
 
@@ -131,10 +128,9 @@ PackageManager.force_load = function (self, package_name)
 		Profiler.stop("PACKAGE CALLBACK")
 	end
 
-	self._pop_queue(self)
-
-	return 
+	self:_pop_queue()
 end
+
 PackageManager.force_load_queued_package = function (self, package_name)
 	debug_print("Force_load_queued_package:  %s", package_name)
 
@@ -166,15 +162,14 @@ PackageManager.force_load_queued_package = function (self, package_name)
 	local index = table.find(self._queue_order, package_name)
 
 	table.remove(self._queue_order, index)
-	self._pop_queue(self)
-
-	return 
+	self:_pop_queue()
 end
+
 PackageManager._pop_queue = function (self)
 	local queued_package_name = nil
 	local index = 1
 
-	while 0 < #self._queue_order and index <= #self._queue_order do
+	while #self._queue_order > 0 and index <= #self._queue_order do
 		queued_package_name = self._queue_order[index]
 
 		if self._queued_async_packages[queued_package_name] then
@@ -203,9 +198,8 @@ PackageManager._pop_queue = function (self)
 	else
 		table.clear(self._queue_order)
 	end
-
-	return 
 end
+
 PackageManager.unload = function (self, package_name, reference_name)
 	debug_print("Unload:  %s, %s", package_name, reference_name)
 
@@ -235,12 +229,11 @@ PackageManager.unload = function (self, package_name, reference_name)
 		self._queued_async_packages[package_name] = nil
 
 		if table.is_empty(self._asynch_packages) then
-			self._pop_queue(self)
+			self:_pop_queue()
 		end
 	end
-
-	return 
 end
+
 PackageManager.can_unload = function (self, package_name)
 	local resource_handle = self._packages[package_name]
 
@@ -254,29 +247,30 @@ PackageManager.can_unload = function (self, package_name)
 
 	return true
 end
+
 PackageManager.destroy = function (self)
 	debug_print("Destroy()")
 
 	for package_name, _ in pairs(self._packages) do
 		for reference_name, _ in pairs(self._references[package_name]) do
-			self.unload(self, package_name, reference_name)
+			self:unload(package_name, reference_name)
 		end
 	end
 
 	for package_name, _ in pairs(self._asynch_packages) do
 		for reference_name, _ in pairs(self._references[package_name]) do
-			self.unload(self, package_name, reference_name)
+			self:unload(package_name, reference_name)
 		end
 	end
 
 	table.clear(self._queue_order)
 	table.clear(self._queued_async_packages)
-
-	return 
 end
+
 PackageManager.is_loading = function (self, package)
 	return self._packages[package] == nil and (self._asynch_packages[package] ~= nil or self._queued_async_packages[package] ~= nil)
 end
+
 PackageManager.has_loaded = function (self, package, reference_name)
 	local loaded = self._packages[package] ~= nil and self._asynch_packages[package] == nil and self._queued_async_packages[package] == nil
 
@@ -285,9 +279,8 @@ PackageManager.has_loaded = function (self, package, reference_name)
 	else
 		return loaded
 	end
-
-	return 
 end
+
 PackageManager.update = function (self)
 	Profiler.start("PackageManager:update()")
 
@@ -296,16 +289,15 @@ PackageManager.update = function (self)
 
 		if ResourcePackage.has_loaded(resource_handle) then
 			debug_print("Finished loading asynchronous package:  %s", package_name)
-			self.force_load(self, package_name)
+			self:force_load(package_name)
 
 			break
 		end
 	end
 
 	Profiler.stop("PackageManager:update()")
-
-	return 
 end
+
 local PM_UNIT_TEST = false
 
 if PM_UNIT_TEST then
@@ -314,8 +306,6 @@ if PM_UNIT_TEST then
 
 	local function printf(f, ...)
 		print(string.format(f, ...))
-
-		return 
 	end
 
 	rawset(_G, "printf", printf)
@@ -328,28 +318,28 @@ if PM_UNIT_TEST then
 
 	local pm = PackageManager
 
-	pm.init(pm)
-	pm.load(pm, "resource_packages/strings", "unit_test_1")
-	assert(pm.has_loaded(pm, "resource_packages/strings") == true)
-	pm.unload(pm, "resource_packages/strings", "unit_test_1")
-	assert(pm.has_loaded(pm, "resource_packages/strings") == false)
-	pm.load(pm, "resource_packages/strings", "unit_test_1")
-	pm.load(pm, "resource_packages/strings", "unit_test_2")
-	pm.unload(pm, "resource_packages/strings", "unit_test_1")
-	assert(pm.has_loaded(pm, "resource_packages/strings") == true)
-	pm.unload(pm, "resource_packages/strings", "unit_test_2")
-	assert(pm.has_loaded(pm, "resource_packages/strings") == false)
-	pm.load(pm, "resource_packages/strings", "unit_test_1")
-	pm.load(pm, "resource_packages/strings", "unit_test_1")
-	pm.load(pm, "resource_packages/strings", "unit_test_1")
-	pm.unload(pm, "resource_packages/strings", "unit_test_1")
-	assert(pm.has_loaded(pm, "resource_packages/strings") == false)
-	pm.load(pm, "resource_packages/strings", "unit_test_1")
-	pm.destroy(pm)
-	assert(pm.is_loading(pm, "resource_packages/strings") == false)
-	pm.load(pm, "resource_packages/strings", "unit_test_1", nil, true)
-	pm.destroy(pm)
-	assert(pm.is_loading(pm, "resource_packages/strings") == false)
+	pm:init()
+	pm:load("resource_packages/strings", "unit_test_1")
+	assert(pm:has_loaded("resource_packages/strings") == true)
+	pm:unload("resource_packages/strings", "unit_test_1")
+	assert(pm:has_loaded("resource_packages/strings") == false)
+	pm:load("resource_packages/strings", "unit_test_1")
+	pm:load("resource_packages/strings", "unit_test_2")
+	pm:unload("resource_packages/strings", "unit_test_1")
+	assert(pm:has_loaded("resource_packages/strings") == true)
+	pm:unload("resource_packages/strings", "unit_test_2")
+	assert(pm:has_loaded("resource_packages/strings") == false)
+	pm:load("resource_packages/strings", "unit_test_1")
+	pm:load("resource_packages/strings", "unit_test_1")
+	pm:load("resource_packages/strings", "unit_test_1")
+	pm:unload("resource_packages/strings", "unit_test_1")
+	assert(pm:has_loaded("resource_packages/strings") == false)
+	pm:load("resource_packages/strings", "unit_test_1")
+	pm:destroy()
+	assert(pm:is_loading("resource_packages/strings") == false)
+	pm:load("resource_packages/strings", "unit_test_1", nil, true)
+	pm:destroy()
+	assert(pm:is_loading("resource_packages/strings") == false)
 
 	table.is_empty = nil
 
@@ -358,4 +348,4 @@ if PM_UNIT_TEST then
 	script_data.package_debug = old_debug
 end
 
-return 
+return

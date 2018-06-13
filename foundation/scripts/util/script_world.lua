@@ -1,27 +1,25 @@
 ScriptWorld = ScriptWorld or {}
+
 ScriptWorld.name = function (world)
 	return World.get_data(world, "name")
 end
+
 ScriptWorld.activate = function (world)
 	World.set_data(world, "active", true)
-
-	return 
 end
+
 ScriptWorld.deactivate = function (world)
 	World.set_data(world, "active", false)
-
-	return 
 end
+
 ScriptWorld.pause = function (world)
 	World.set_data(world, "paused", true)
-
-	return 
 end
+
 ScriptWorld.unpause = function (world)
 	World.set_data(world, "paused", false)
-
-	return 
 end
+
 ScriptWorld.create_viewport = function (world, name, template, layer)
 	local viewports = World.get_data(world, "viewports")
 
@@ -42,6 +40,7 @@ ScriptWorld.create_viewport = function (world, name, template, layer)
 
 	return viewport
 end
+
 ScriptWorld.create_global_free_flight_viewport = function (world, template)
 	fassert(not World.has_data(world, "global_free_flight_viewport"), "Trying to spawn global freeflight viewport when one already exists.")
 
@@ -85,6 +84,7 @@ ScriptWorld.create_global_free_flight_viewport = function (world, template)
 
 	return free_flight_viewport
 end
+
 ScriptWorld.destroy_global_free_flight_viewport = function (world)
 	local viewport = World.get_data(world, "global_free_flight_viewport")
 
@@ -96,12 +96,12 @@ ScriptWorld.destroy_global_free_flight_viewport = function (world)
 	World.destroy_unit(world, camera_unit)
 	Application.destroy_viewport(world, viewport)
 	World.set_data(world, "global_free_flight_viewport", nil)
-
-	return 
 end
+
 ScriptWorld.global_free_flight_viewport = function (world)
 	return World.get_data(world, "global_free_flight_viewport")
 end
+
 ScriptWorld.create_free_flight_viewport = function (world, overridden_viewport_name, template)
 	local overridden_viewport = ScriptWorld.viewport(world, overridden_viewport_name)
 	local free_flight_viewport = Application.create_viewport(world, template)
@@ -128,6 +128,7 @@ ScriptWorld.create_free_flight_viewport = function (world, overridden_viewport_n
 
 	return free_flight_viewport
 end
+
 ScriptWorld.destroy_free_flight_viewport = function (world, name)
 	local viewports = World.get_data(world, "free_flight_viewports")
 
@@ -141,9 +142,8 @@ ScriptWorld.destroy_free_flight_viewport = function (world, name)
 	World.destroy_unit(world, camera_unit)
 	Application.destroy_viewport(world, viewport)
 	ScriptWorld._update_render_queue(world)
-
-	return 
 end
+
 ScriptWorld.destroy_viewport = function (world, name)
 	local viewports = World.get_data(world, "viewports")
 
@@ -157,26 +157,24 @@ ScriptWorld.destroy_viewport = function (world, name)
 	World.destroy_unit(world, camera_unit)
 	Application.destroy_viewport(world, viewport)
 	ScriptWorld._update_render_queue(world)
-
-	return 
 end
+
 ScriptWorld.activate_viewport = function (world, viewport)
 	Viewport.set_data(viewport, "active", true)
 	ScriptWorld._update_render_queue(world)
-
-	return 
 end
+
 ScriptWorld.deactivate_viewport = function (world, viewport)
 	Viewport.set_data(viewport, "active", false)
 	ScriptWorld._update_render_queue(world)
-
-	return 
 end
+
 ScriptWorld.has_viewport = function (world, name)
 	local viewports = World.get_data(world, "viewports")
 
 	return (viewports[name] and true) or false
 end
+
 ScriptWorld.viewport = function (world, name, return_free_flight_viewport)
 	local viewport = nil
 
@@ -190,6 +188,7 @@ ScriptWorld.viewport = function (world, name, return_free_flight_viewport)
 
 	return viewport
 end
+
 ScriptWorld.free_flight_viewport = function (world, name)
 	local viewports = World.get_data(world, "free_flight_viewports")
 
@@ -197,6 +196,7 @@ ScriptWorld.free_flight_viewport = function (world, name)
 
 	return viewports[name]
 end
+
 ScriptWorld.update = function (world, dt, anim_callback, scene_callback)
 	if World.get_data(world, "active") then
 		if World.get_data(world, "paused") then
@@ -221,14 +221,13 @@ ScriptWorld.update = function (world, dt, anim_callback, scene_callback)
 	else
 		World.update_timer(world, dt)
 	end
-
-	return 
 end
+
 ScriptWorld.render = function (world)
 	local shading_env = World.get_data(world, "shading_environment")
 
 	if not shading_env then
-		return 
+		return
 	end
 
 	local global_free_flight_viewport = World.get_data(world, "global_free_flight_viewport")
@@ -250,7 +249,7 @@ ScriptWorld.render = function (world)
 		local render_queue = World.get_data(world, "render_queue")
 
 		if table.is_empty(render_queue) then
-			return 
+			return
 		end
 
 		if not World.get_data(world, "avoid_blend") then
@@ -273,9 +272,8 @@ ScriptWorld.render = function (world)
 			Application.render_world(world, camera, viewport, shading_env)
 		end
 	end
-
-	return 
 end
+
 ScriptWorld._update_render_queue = function (world)
 	local render_queue = {}
 	local viewports = World.get_data(world, "viewports")
@@ -293,9 +291,8 @@ ScriptWorld._update_render_queue = function (world)
 
 	table.sort(render_queue, comparator)
 	World.set_data(world, "render_queue", render_queue)
-
-	return 
 end
+
 ScriptWorld.create_shading_environment = function (world, shading_environment_name, shading_callback, mood_setting)
 	local shading_env = World.create_shading_environment(world, shading_environment_name)
 
@@ -308,6 +305,7 @@ ScriptWorld.create_shading_environment = function (world, shading_environment_na
 
 	return shading_env
 end
+
 ScriptWorld.load_level = function (world, name, object_sets, position, rotation, shading_callback, mood_setting)
 	local levels = World.get_data(world, "levels")
 
@@ -320,7 +318,7 @@ ScriptWorld.load_level = function (world, name, object_sets, position, rotation,
 
 	local shading_env_name = Level.get_data(level, "shading_environment")
 
-	if 0 < shading_env_name.len(shading_env_name) then
+	if shading_env_name:len() > 0 then
 		local shading_env = World.get_data(world, "shading_environment")
 
 		if shading_env then
@@ -345,6 +343,7 @@ ScriptWorld.load_level = function (world, name, object_sets, position, rotation,
 
 	return level
 end
+
 ScriptWorld.level = function (world, name)
 	local levels = World.get_data(world, "levels")
 
@@ -352,6 +351,7 @@ ScriptWorld.level = function (world, name)
 
 	return levels[name]
 end
+
 ScriptWorld.destroy_level = function (world, name)
 	local levels = World.get_data(world, "levels")
 
@@ -359,9 +359,8 @@ ScriptWorld.destroy_level = function (world, name)
 	World.destroy_level(world, levels[name])
 
 	levels[name] = nil
-
-	return 
 end
+
 ScriptWorld.create_particles_linked = function (world, effect_name, unit, node, policy, pose)
 	local id = World.create_particles(world, effect_name, Vector3(0, 0, 0))
 	pose = pose or Matrix4x4.identity()
@@ -371,4 +370,4 @@ ScriptWorld.create_particles_linked = function (world, effect_name, unit, node, 
 	return id
 end
 
-return 
+return

@@ -1378,9 +1378,11 @@ local function create_board_contract_widget(parent_scenegraph_id)
 		end
 	}
 	local key_reward_texture_pass2 = table.clone(key_reward_texture_pass)
+
 	key_reward_texture_pass2.content_check_function = function (content)
 		return content.has_key_2
 	end
+
 	key_reward_texture_pass2.style_id = "key_reward_texture_2"
 	passes[#passes + 1] = key_reward_texture_pass
 	passes[#passes + 1] = key_reward_texture_pass2
@@ -2009,9 +2011,11 @@ local function create_log_contract_widget(parent_scenegraph_id)
 		end
 	}
 	local key_reward_texture_pass2 = table.clone(key_reward_texture_pass)
+
 	key_reward_texture_pass2.content_check_function = function (content)
 		return content.has_key_2
 	end
+
 	key_reward_texture_pass2.style_id = "key_reward_texture_2"
 	passes[#passes + 1] = key_reward_texture_pass
 	passes[#passes + 1] = key_reward_texture_pass2

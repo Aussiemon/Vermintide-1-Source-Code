@@ -1,7 +1,7 @@
 MissionTemplates = {
 	collect = {
 		init = function (mission_data, unit)
-			assert(0 < mission_data.collect_amount, "Collect mission with 0 needed collects")
+			assert(mission_data.collect_amount > 0, "Collect mission with 0 needed collects")
 
 			local collect_amount = mission_data.collect_amount
 			local mission_text = Localize(mission_data.text)
@@ -18,8 +18,6 @@ MissionTemplates = {
 					Vault.deposit_single(self.mission_text, value)
 
 					self.current_amount = value
-
-					return 
 				end,
 				increase_current_amount = function (self, amount)
 					local ret = Vault.single_add_ex(self.mission_text, amount, self.current_amount)
@@ -52,39 +50,35 @@ MissionTemplates = {
 		update = function (data, positive, unique_id, peer_id, dt, network_time)
 			local collect_amount = data.collect_amount
 			local evaluate_at_level_end = data.evaluate_at_level_end
-			local current_amount = data.increase_current_amount(data, (positive and 1) or -1)
+			local current_amount = data:increase_current_amount((positive and 1) or -1)
 
 			return not evaluate_at_level_end and current_amount == collect_amount
 		end,
 		update_text = function (data)
 			local collect_amount = data.collect_amount
-			local current_amount = data.get_current_amount(data)
+			local current_amount = data:get_current_amount()
 			local text = string.format("%s/%s\n%s", tostring(current_amount), tostring(collect_amount), data.mission_text)
 			local center_text = string.format("%s/%s %s", tostring(current_amount), tostring(collect_amount), data.mission_text)
 			data.text = text
 			data.center_text = center_text
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
-			return data.get_current_amount(data) == data.collect_amount, data.get_current_amount(data) / data.collect_amount
+			return data:get_current_amount() == data.collect_amount, data:get_current_amount() / data.collect_amount
 		end,
 		create_sync_data = function (data)
 			local sync_data = {
-				data.get_current_amount(data)
+				data:get_current_amount()
 			}
 
 			return sync_data
 		end,
 		sync = function (data, sync_data)
-			data.set_current_amount(data, sync_data[1])
-
-			return 
+			data:set_current_amount(sync_data[1])
 		end
 	},
 	defend = {
 		init = function (mission_data, unit)
-			assert(0 < mission_data.defend_amount, "Defend mission with 0 needed defends")
+			assert(mission_data.defend_amount > 0, "Defend mission with 0 needed defends")
 
 			local defend_amount = mission_data.defend_amount
 			local mission_text = Localize(mission_data.text)
@@ -113,8 +107,6 @@ MissionTemplates = {
 			local current_amount = data.current_amount
 			local text = data.mission_text
 			data.text = text
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
 			return data.current_amount == data.defend_amount, data.current_amount / data.defend_amount
@@ -129,8 +121,6 @@ MissionTemplates = {
 		sync = function (data, sync_data)
 			local current_amount = sync_data[1]
 			data.current_amount = current_amount
-
-			return 
 		end
 	},
 	simple = {
@@ -157,7 +147,7 @@ MissionTemplates = {
 			return true
 		end,
 		update_text = function (data)
-			return 
+			return
 		end,
 		evaluate_mission = function (data, dt)
 			return data.done, (data.done and 1) or 0
@@ -168,7 +158,7 @@ MissionTemplates = {
 			return sync_data
 		end,
 		sync = function (data, sync_data)
-			return 
+			return
 		end
 	},
 	timed = {
@@ -199,15 +189,13 @@ MissionTemplates = {
 			local time = math.ceil(data.time_left)
 			local minutes = math.floor(time / 60)
 			local seconds = time % 60
-			local sminutes = (10 <= minutes and tostring(minutes)) or string.format("0%s", tostring(minutes))
-			local sseconds = (10 <= seconds and tostring(seconds)) or string.format("0%s", tostring(seconds))
+			local sminutes = (minutes >= 10 and tostring(minutes)) or string.format("0%s", tostring(minutes))
+			local sseconds = (seconds >= 10 and tostring(seconds)) or string.format("0%s", tostring(seconds))
 			local text = string.format("%s:%s\n%s", sminutes, sseconds, data.mission_text)
 			data.text = text
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
-			return 0 < data.time_left, 0
+			return data.time_left > 0, 0
 		end,
 		create_sync_data = function (data)
 			local sync_data = {
@@ -219,8 +207,6 @@ MissionTemplates = {
 		sync = function (data, sync_data)
 			local end_time = sync_data[1]
 			data.end_time = end_time
-
-			return 
 		end
 	},
 	goal = {
@@ -240,12 +226,10 @@ MissionTemplates = {
 			return data
 		end,
 		update = function (data, positive, unique_id, peer_id, dt, network_time)
-			return 
+			return
 		end,
 		update_text = function (data)
 			data.text = data.mission_text
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
 			data.end_time = Managers.state.network:network_time() - data.start_time
@@ -265,8 +249,6 @@ MissionTemplates = {
 			data.start_time = start_time
 			local generic_counter = sync_data[2]
 			data.generic_counter = generic_counter
-
-			return 
 		end
 	},
 	players_alive = {
@@ -286,12 +268,10 @@ MissionTemplates = {
 			return data
 		end,
 		update = function (data, positive, unique_id, peer_id, dt, network_time)
-			return 
+			return
 		end,
 		update_text = function (data)
 			data.text = ""
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
 			local players = Managers.player:human_and_bot_players()
@@ -303,7 +283,7 @@ MissionTemplates = {
 				if Unit.alive(unit) then
 					local status_extension = ScriptUnit.extension(unit, "status_system")
 
-					if not status_extension.is_disabled(status_extension) then
+					if not status_extension:is_disabled() then
 						num_alive = num_alive + 1
 					end
 				end
@@ -313,11 +293,9 @@ MissionTemplates = {
 		end,
 		create_sync_data = function (data)
 			local sync_data = {}
-
-			return 
 		end,
 		sync = function (data, sync_data)
-			return 
+			return
 		end
 	},
 	survival = {
@@ -391,8 +369,6 @@ MissionTemplates = {
 				data.wave_state = data.states.wave
 				data.wave = data.wave + 1
 			end
-
-			return 
 		end,
 		update_text = function (data)
 			if PLATFORM == "xb1" then
@@ -414,8 +390,6 @@ MissionTemplates = {
 			else
 				data.text = data.mission_text .. " " .. data.wave - data.starting_wave
 			end
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
 			return false, data.wave_completed
@@ -445,8 +419,6 @@ MissionTemplates = {
 			data.wave_completed_time = wave_completed_time
 			local starting_wave = sync_data[6]
 			data.starting_wave = starting_wave
-
-			return 
 		end
 	},
 	tutorial = {
@@ -471,8 +443,6 @@ MissionTemplates = {
 		end,
 		update_text = function (data)
 			data.text = ""
-
-			return 
 		end,
 		evaluate_mission = function (data, dt)
 			return data.done, (data.done and 1) or 0
@@ -483,15 +453,18 @@ MissionTemplates = {
 			return sync_data
 		end,
 		sync = function (data, sync_data)
-			return 
+			return
 		end
 	}
 }
 MissionTemplates.collect_uncompletable = table.clone(MissionTemplates.collect)
+
 MissionTemplates.collect_uncompletable.evaluate_mission = function (data, dt)
-	return false, data.get_current_amount(data)
+	return false, data:get_current_amount()
 end
+
 MissionTemplates.collect_unique_uncompletable = table.clone(MissionTemplates.collect)
+
 MissionTemplates.collect_unique_uncompletable.init = function (mission_data, unit)
 	local evaluate_at_level_end = mission_data.evaluate_at_level_end
 	local data = {
@@ -504,8 +477,6 @@ MissionTemplates.collect_unique_uncompletable.init = function (mission_data, uni
 			end
 
 			self.unique_ids_per_peer[peer_id][unique_id] = true
-
-			return 
 		end,
 		get_current_amount = function (self)
 			return table.size(self.unique_ids_per_peer[Network.peer_id()] or {})
@@ -526,38 +497,39 @@ MissionTemplates.collect_unique_uncompletable.init = function (mission_data, uni
 
 	return data
 end
+
 MissionTemplates.collect_unique_uncompletable.update = function (data, positive, unique_id, peer_id, dt, network_time)
-	data.add_unique_id_for_peer(data, peer_id, unique_id)
+	data:add_unique_id_for_peer(peer_id, unique_id)
 
 	return false
 end
+
 MissionTemplates.collect_unique_uncompletable.update_text = function (data)
 	data.text = ""
+end
 
-	return 
-end
 MissionTemplates.collect_unique_uncompletable.evaluate_mission = function (data, dt)
-	return false, data.get_current_amount(data)
+	return false, data:get_current_amount()
 end
+
 MissionTemplates.collect_unique_uncompletable.create_sync_data = function (data, peer_id)
 	local sync_data = {}
 	local counter = 1
 
-	for unique_id, _ in pairs(data.get_unique_ids_for_peer_id(data, peer_id)) do
+	for unique_id, _ in pairs(data:get_unique_ids_for_peer_id(peer_id)) do
 		sync_data[counter] = unique_id
 		counter = counter + 1
 	end
 
 	return sync_data
 end
+
 MissionTemplates.collect_unique_uncompletable.sync = function (data, sync_data)
 	local peer_id = Network.peer_id()
 
 	for _, unique_id in pairs(sync_data) do
-		data.add_unique_id_for_peer(data, peer_id, unique_id)
+		data:add_unique_id_for_peer(peer_id, unique_id)
 	end
-
-	return 
 end
 
-return 
+return

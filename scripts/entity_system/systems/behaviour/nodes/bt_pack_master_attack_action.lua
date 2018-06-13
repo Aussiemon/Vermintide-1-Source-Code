@@ -1,12 +1,13 @@
 require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTPackMasterAttackAction = class(BTPackMasterAttackAction, BTNode)
+
 BTPackMasterAttackAction.init = function (self, ...)
 	BTPackMasterAttackAction.super.init(self, ...)
-
-	return 
 end
+
 BTPackMasterAttackAction.name = "BTPackMasterAttackAction"
+
 BTPackMasterAttackAction.enter = function (self, unit, blackboard, t)
 	local action = self._tree_node.action_data
 	blackboard.action = action
@@ -17,9 +18,9 @@ BTPackMasterAttackAction.enter = function (self, unit, blackboard, t)
 	blackboard.drag_target_unit = blackboard.target_unit
 	local network_manager = Managers.state.network
 
-	network_manager.anim_event(network_manager, unit, "to_combat")
+	network_manager:anim_event(unit, "to_combat")
 
-	local unit_id = network_manager.unit_game_object_id(network_manager, unit)
+	local unit_id = network_manager:unit_game_object_id(unit)
 
 	network_manager.network_transmit:send_rpc_all("rpc_enemy_has_target", unit_id, true)
 
@@ -27,9 +28,8 @@ BTPackMasterAttackAction.enter = function (self, unit, blackboard, t)
 
 	blackboard.navigation_extension:set_enabled(false)
 	blackboard.locomotion_extension:set_wanted_velocity(Vector3.zero())
-
-	return 
 end
+
 BTPackMasterAttackAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.move_state = nil
 
@@ -56,9 +56,8 @@ BTPackMasterAttackAction.leave = function (self, unit, blackboard, t, reason)
 	blackboard.attack_time_ends = nil
 	blackboard.attack_cooldown = t + blackboard.action.cooldown
 	blackboard.action = nil
-
-	return 
 end
+
 BTPackMasterAttackAction.run = function (self, unit, blackboard, t, dt)
 	if not AiUtils.is_of_interest_to_packmaster(unit, blackboard.target_unit) then
 		return "failed"
@@ -67,7 +66,7 @@ BTPackMasterAttackAction.run = function (self, unit, blackboard, t, dt)
 	if blackboard.attack_aborted then
 		local network_manager = Managers.state.network
 
-		network_manager.anim_event(network_manager, unit, "idle")
+		network_manager:anim_event(unit, "idle")
 
 		return "failed"
 	end
@@ -76,10 +75,11 @@ BTPackMasterAttackAction.run = function (self, unit, blackboard, t, dt)
 		return "done"
 	end
 
-	self.attack(self, unit, t, dt, blackboard)
+	self:attack(unit, t, dt, blackboard)
 
 	return "running"
 end
+
 BTPackMasterAttackAction.attack = function (self, unit, t, dt, blackboard)
 	local action = blackboard.action
 	local locomotion_extension = blackboard.locomotion_extension
@@ -87,7 +87,7 @@ BTPackMasterAttackAction.attack = function (self, unit, t, dt, blackboard)
 	if blackboard.move_state ~= "attacking" then
 		blackboard.move_state = "attacking"
 
-		locomotion_extension.use_lerp_rotation(locomotion_extension, true)
+		locomotion_extension:use_lerp_rotation(true)
 		LocomotionUtils.set_animation_driven_movement(unit, true, false, true)
 		Managers.state.network:anim_event(unit, action.attack_anim)
 
@@ -96,14 +96,13 @@ BTPackMasterAttackAction.attack = function (self, unit, t, dt, blackboard)
 
 	local rotation = LocomotionUtils.rotation_towards_unit(unit, blackboard.target_unit)
 
-	locomotion_extension.set_wanted_rotation(locomotion_extension, rotation)
+	locomotion_extension:set_wanted_rotation(rotation)
 
 	if blackboard.attack_time_ends < t then
 		blackboard.attack_aborted = true
 	end
-
-	return 
 end
+
 BTPackMasterAttackAction.attack_success = function (self, unit, blackboard)
 	if blackboard.active_node and blackboard.active_node == BTPackMasterAttackAction then
 		local target_unit = blackboard.target_unit
@@ -129,11 +128,9 @@ BTPackMasterAttackAction.attack_success = function (self, unit, blackboard)
 		local first_person_extension = ScriptUnit.has_extension(blackboard.target_unit, "first_person_system")
 
 		if blackboard.attack_success and first_person_extension then
-			first_person_extension.animation_event(first_person_extension, "shake_get_hit")
+			first_person_extension:animation_event("shake_get_hit")
 		end
 	end
-
-	return 
 end
 
-return 
+return

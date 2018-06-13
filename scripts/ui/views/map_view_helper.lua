@@ -1,5 +1,6 @@
 MapViewHelper = class(MapViewHelper)
 DEBUG_UNLOCK_ALL = false
+
 MapViewHelper.init = function (self, statistics_db, player_stats_id)
 	self.statistics_db = statistics_db
 	self.player_stats_id = player_stats_id
@@ -16,9 +17,8 @@ MapViewHelper.init = function (self, statistics_db, player_stats_id)
 	end
 
 	self.difficulty_manager = Managers.state.difficulty
-
-	return 
 end
+
 MapViewHelper.get_level_visibility = function (self, level_key, level_settings)
 	if DEBUG_UNLOCK_ALL or script_data.unlock_all_levels then
 		return "visible"
@@ -27,13 +27,12 @@ MapViewHelper.get_level_visibility = function (self, level_key, level_settings)
 	local game_mode = level_settings.game_mode or "adventure"
 
 	if game_mode == "adventure" then
-		return self.get_adventure_level_visibility(self, level_key, level_settings)
+		return self:get_adventure_level_visibility(level_key, level_settings)
 	elseif game_mode == "survival" then
-		return self.get_survival_level_visibility(self, level_key, level_settings)
+		return self:get_survival_level_visibility(level_key, level_settings)
 	end
-
-	return 
 end
+
 MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_settings)
 	local statistics_db = self.statistics_db
 	local player_stats_id = self.player_stats_id
@@ -88,7 +87,7 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 
 		for i = 1, #act_levels, 1 do
 			local act_level_key = act_levels[i]
-			local level_stat = statistics_db.get_persistent_stat(statistics_db, player_stats_id, "completed_levels", act_level_key)
+			local level_stat = statistics_db:get_persistent_stat(player_stats_id, "completed_levels", act_level_key)
 			local level_completed = level_stat and level_stat ~= 0
 
 			if not level_completed then
@@ -115,8 +114,9 @@ MapViewHelper.get_adventure_level_visibility = function (self, level_key, level_
 
 	return "visible"
 end
+
 MapViewHelper.get_survival_level_visibility = function (self, level_key, level_settings)
-	local is_required_act_unlocked = self.is_survival_unlocked(self)
+	local is_required_act_unlocked = self:is_survival_unlocked()
 	local dlc_name = level_settings.dlc_name
 
 	if dlc_name then
@@ -146,15 +146,15 @@ MapViewHelper.get_survival_level_visibility = function (self, level_key, level_s
 
 		return "locked", tooltip_text
 	end
-
-	return 
 end
+
 MapViewHelper.get_completed_level_difficulty = function (self, level_key)
 	local statistics_db = self.statistics_db
 	local player_stats_id = self.player_stats_id
 
 	return LevelUnlockUtils.completed_level_difficulty_index(statistics_db, player_stats_id, level_key)
 end
+
 MapViewHelper.is_survival_unlocked = function (self)
 	local statistics_db = self.statistics_db
 	local player_stats_id = self.player_stats_id
@@ -163,11 +163,13 @@ MapViewHelper.is_survival_unlocked = function (self)
 
 	return is_required_act_unlocked
 end
+
 local difficulty_data_layout = {
 	available = false,
 	tooltip = Localize("map_confirm_button_disabled_tooltip"),
 	setting_text = Localize("dlc1_2_difficulty_unavailable")
 }
+
 MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 	local statistics_db = self.statistics_db
 	local player_stats_id = self.player_stats_id
@@ -191,12 +193,12 @@ MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 		layout.key = difficulty_key
 		layout.rank = rank
 		layout.unlocked = i <= LevelUnlockUtils.unlocked_level_difficulty_index(statistics_db, player_stats_id, level_key)
-		layout.completed = (0 < highest_completed_difficulty_index and i <= highest_completed_difficulty_index) or false
+		layout.completed = (highest_completed_difficulty_index > 0 and i <= highest_completed_difficulty_index) or false
 		layout.available = true
 		layout.setting_text = Localize(settings.display_name)
 
 		if level_settings.game_mode == "survival" then
-			layout.scores = self._get_survival_level_difficulty_score(self, statistics_db, level_settings, difficulty_key)
+			layout.scores = self:_get_survival_level_difficulty_score(statistics_db, level_settings, difficulty_key)
 		end
 
 		if layout.unlocked then
@@ -213,6 +215,7 @@ MapViewHelper.get_difficulty_data = function (self, level_key, level_settings)
 
 	return difficulty_data
 end
+
 MapViewHelper.get_difficulty_data_summary = function (self, level_data_list)
 	local summary_difficulty_data = {
 		table.clone(difficulty_data_layout),
@@ -266,6 +269,7 @@ MapViewHelper.get_difficulty_data_summary = function (self, level_data_list)
 
 	return summary_difficulty_data
 end
+
 MapViewHelper._get_survival_level_difficulty_score = function (self, statistics_db, level_settings, difficulty)
 	local level_id = level_settings.level_id
 	local scores = {
@@ -277,4 +281,4 @@ MapViewHelper._get_survival_level_difficulty_score = function (self, statistics_
 	return scores
 end
 
-return 
+return

@@ -49,8 +49,6 @@ function force_render(dt)
 	end
 
 	render()
-
-	return 
 end
 
 Boot.pre_state_machine_update = function (self, dt)
@@ -69,13 +67,12 @@ Boot.pre_state_machine_update = function (self, dt)
 
 		local state_machine_class, start_state, params = Bulldozer.entrypoint()
 
-		self._setup_statemachine(self, state_machine_class, start_state, params)
+		self:_setup_statemachine(state_machine_class, start_state, params)
 
 		Boot.has_pre_state_machine_update = nil
 	end
-
-	return 
 end
+
 Boot.update = function (self, dt)
 	if PlayerUnitLocomotionExtension then
 		PlayerUnitLocomotionExtension.set_new_frame()
@@ -128,28 +125,24 @@ Boot.update = function (self, dt)
 
 	end_function_call_collection()
 	table.clear(Boot.flow_return_table)
-
-	return 
 end
+
 Boot.shutdown = function (self, dt)
 	if Bulldozer.rift then
 		Oculus.destroy_device(Bulldozer.rift_info.hmd_device)
 	end
 
 	Boot:foundation_shutdown()
-
-	return 
 end
+
 Bulldozer = Bulldozer or {}
 
 function project_setup()
 	Bulldozer:setup()
-
-	return 
 end
 
 Bulldozer.setup = function (self)
-	self._init_localizer(self)
+	self:_init_localizer()
 
 	script_data.settings = Application.settings()
 	script_data.build_identifier = Application.build_identifier()
@@ -201,10 +194,10 @@ Bulldozer.setup = function (self)
 					break
 				end
 
-				local find_start, find_end = svn_info_line.find(svn_info_line, "Revision: ")
+				local find_start, find_end = svn_info_line:find("Revision: ")
 
 				if find_start and find_end then
-					local svn_revision = svn_info_line.sub(svn_info_line, find_end + 1)
+					local svn_revision = svn_info_line:sub(find_end + 1)
 					script_data.settings.content_revision = svn_revision
 
 					break
@@ -243,16 +236,16 @@ Bulldozer.setup = function (self)
 		end
 	end
 
-	self._require_scripts(self)
+	self:_require_scripts()
 
 	if Development.parameter("paste_revision_to_clipboard") then
 		Clipboard.put(string.format("%s | %s", tostring(script_data.settings.content_revision), tostring(script_data.build_identifier)))
 	end
 
-	self._handle_graphics_quality(self)
+	self:_handle_graphics_quality()
 	DefaultUserSettings.set_default_user_settings()
 	Application.set_time_step_policy("no_smoothing")
-	self._load_user_settings(self)
+	self:_load_user_settings()
 
 	if Development.parameter("network_log_spew") then
 		Network.log(Network.SPEW)
@@ -276,8 +269,8 @@ Bulldozer.setup = function (self)
 		DebugHelper.enable_physics_dump()
 	end
 
-	self._init_random(self)
-	self._init_mouse(self)
+	self:_init_random()
+	self:_init_mouse()
 
 	if rawget(_G, "Steam") then
 		print("[Boot] User ID:", Steam.user_id(), Steam.user_name())
@@ -301,7 +294,7 @@ Bulldozer.setup = function (self)
 		Synergy.connect(synergy_settings.ip, synergy_settings.client_name, resx, resy)
 	end
 
-	self._init_localization_manager(self)
+	self:_init_localization_manager()
 	require("scripts/ui/views/ingame_ui")
 	require("scripts/ui/views/end_of_level_ui")
 	require("scripts/ui/views/title_loading_ui")
@@ -311,9 +304,8 @@ Bulldozer.setup = function (self)
 	if PLATFORM == "win32" then
 		Managers.mod = ModManager:new()
 	end
-
-	return 
 end
+
 Bulldozer._require_scripts = function (self)
 	local function core_require(path, ...)
 		for _, s in ipairs({
@@ -321,8 +313,6 @@ Bulldozer._require_scripts = function (self)
 		}) do
 			require("core/" .. path .. "/" .. s)
 		end
-
-		return 
 	end
 
 	local function game_require(path, ...)
@@ -331,8 +321,6 @@ Bulldozer._require_scripts = function (self)
 		}) do
 			require("scripts/" .. path .. "/" .. s)
 		end
-
-		return 
 	end
 
 	local function foundation_require(path, ...)
@@ -341,8 +329,6 @@ Bulldozer._require_scripts = function (self)
 		}) do
 			require("foundation/scripts/" .. path .. "/" .. s)
 		end
-
-		return 
 	end
 
 	Managers.package:load("resource_packages/foundation_scripts", "boot")
@@ -359,9 +345,8 @@ Bulldozer._require_scripts = function (self)
 	game_require("managers", "news_ticker/news_ticker_manager", "player/player_manager", "player/player_bot", "save/save_manager", "save/save_data", "perfhud/perfhud_manager", "music/music_manager", "transition/transition_manager", "smoketest/smoketest_manager", "debug/updator", "invite/invite_manager", "unlock/unlock_manager", "popup/popup_manager", "popup/simple_popup", "light_fx/light_fx_manager", "play_go/play_go_manager", "controller_features/controller_features_manager", "leaderboards/leaderboard_manager", "mod/mod_manager", "curl/curl_manager", "telemetry/telemetry_create")
 	game_require("helpers", "effect_helper", "weapon_helper", "item_helper", "lorebook_helper", "ui_atlas_helper", "scoreboard_helper")
 	game_require("network", "unit_spawner", "unit_storage", "network_unit")
-
-	return 
 end
+
 Bulldozer._handle_graphics_quality = function (self)
 	local graphics_quality = Application.user_setting("graphics_quality")
 
@@ -372,7 +357,7 @@ Bulldozer._handle_graphics_quality = function (self)
 	end
 
 	if LEVEL_EDITOR_TEST or graphics_quality == "custom" or not GraphicsQuality[graphics_quality] then
-		return 
+		return
 	end
 
 	local settings = GraphicsQuality[graphics_quality]
@@ -422,29 +407,26 @@ Bulldozer._handle_graphics_quality = function (self)
 
 	Application.apply_user_settings()
 	Application.save_user_settings()
-
-	return 
 end
+
 Bulldozer._init_random = function (self)
 	local seed = (os.clock() * 10000) % 1000
 
 	math.randomseed(seed)
 	math.random(5, 30000)
-
-	return 
 end
+
 Bulldozer._init_mouse = function (self)
 	Window.set_cursor("gui/cursors/mouse_cursor")
 	Window.set_clip_cursor(true)
-
-	return 
 end
+
 Bulldozer._init_managers = function (self)
 	print("init managers")
 
 	Managers.save = SaveManager:new(script_data.settings.disable_cloud_save)
 
-	self._init_backend(self)
+	self:_init_backend()
 
 	if PLATFORM ~= "win32" then
 		Managers.splitscreen = SplitscreenTester:new()
@@ -468,17 +450,15 @@ Bulldozer._init_managers = function (self)
 	if GameSettingsDevelopment.use_leaderboards or Development.parameter("use_leaderboards") then
 		Managers.leaderboards = LeaderboardManager:new()
 	end
-
-	return 
 end
+
 Bulldozer._init_backend = function (self)
 	Managers.backend = BackendManager:new()
-
-	return 
 end
+
 Bulldozer._load_user_settings = function (self)
 	if PLATFORM ~= "win32" then
-		return 
+		return
 	end
 
 	local max_fps = Application.user_setting("max_fps")
@@ -496,9 +476,8 @@ Bulldozer._load_user_settings = function (self)
 	if max_frames then
 		Application.set_max_frame_stacking(max_frames)
 	end
-
-	return 
 end
+
 Bulldozer._init_localizer = function (self)
 	local has_steam = rawget(_G, "Steam")
 	local language_id = Application.user_setting("language_id") or (has_steam and Steam:language()) or "en"
@@ -506,9 +485,8 @@ Bulldozer._init_localizer = function (self)
 	Application.set_resource_property_preference_order(language_id)
 	Managers.package:load("resource_packages/post_localization_boot", "boot")
 	Managers.package:load("resource_packages/strings", "boot")
-
-	return 
 end
+
 Bulldozer._init_localization_manager = function (self)
 	Managers.localizer = LocalizationManager:new("localization/game")
 
@@ -529,7 +507,7 @@ Bulldozer._init_localization_manager = function (self)
 
 		fassert(input_service, "[key_parser] No input service with the name %s", input_service_name)
 
-		local key = input_service.get_keymapping(input_service, key_name)
+		local key = input_service:get_keymapping(key_name)
 
 		fassert(key, "[key_parser] There is no such key: %s in input service: %s", key_name, input_service_name)
 
@@ -554,9 +532,8 @@ Bulldozer._init_localization_manager = function (self)
 	end
 
 	Managers.localizer:add_macro("KEY", key_parser)
-
-	return 
 end
+
 Bulldozer.rift_start = function (self)
 	local hmd_device = Oculus.create_device()
 	local info = Oculus.hmd_info(hmd_device)
@@ -569,9 +546,8 @@ Bulldozer.rift_start = function (self)
 	Bulldozer.half_eye_shift = info.interpupillary_distance * 0.5 * info.horizontal_screen_size * 0.25
 	Bulldozer.left_lens_center = Vector3Box(1 - 2 * info.lens_separation_distance * info.horizontal_screen_size, 0.5)
 	Bulldozer.right_lens_center = Vector3Box(1 - 2 * info.lens_separation_distance * info.horizontal_screen_size, 0.5)
-
-	return 
 end
+
 Bulldozer.entrypoint = function (self)
 	local args = {
 		Application.argv()
@@ -639,8 +615,9 @@ Bulldozer.entrypoint = function (self)
 
 	return GameStateMachine, StateSplashScreen, params
 end
+
 script_data = script_data or {}
 __dgaa = 11.59
 __dgaa = 12.29
 
-return 
+return

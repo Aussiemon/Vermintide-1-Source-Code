@@ -756,4 +756,4 @@ ItemMasterList.ww_hood_0011 = {
 	}
 }
 
-return 
+return

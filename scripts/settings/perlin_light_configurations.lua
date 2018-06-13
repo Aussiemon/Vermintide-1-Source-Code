@@ -60,4 +60,4 @@ PerlinLightConfigurations.ambient_torch01 = {
 	}
 }
 
-return 
+return

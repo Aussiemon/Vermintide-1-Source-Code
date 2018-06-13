@@ -837,8 +837,6 @@ local animation_sequence = {
 			ui_scenegraph.glow_background.size[1] = 0
 			ui_scenegraph.glow_background.size[2] = 0
 			widget_style.glow_background.color[1] = 0
-
-			return 
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 7, 7, 1, 1)
@@ -849,11 +847,9 @@ local animation_sequence = {
 			cross_scenegraph.size[1] = catmullrom_value * cross_default_size[1]
 			cross_scenegraph.size[2] = catmullrom_value * cross_default_size[2]
 			cross_style.color[1] = local_progress * 255
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -862,7 +858,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.13,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 0.7, 1, 1, 0.7)
@@ -871,11 +867,9 @@ local animation_sequence = {
 			local cross_default_size = cross_definition.size
 			cross_scenegraph.size[1] = catmullrom_value * cross_default_size[1]
 			cross_scenegraph.size[2] = catmullrom_value * cross_default_size[2]
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -884,7 +878,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.22,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 0.7, 1, 1, 0.7)
@@ -897,11 +891,9 @@ local animation_sequence = {
 			local rotation_angle = local_progress * degree_amount - degree_amount * 0.5
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -910,7 +902,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.23,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local style = widget.style.top
@@ -918,11 +910,9 @@ local animation_sequence = {
 			local rotation_angle = (local_progress - 1) * degree_amount
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -931,7 +921,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.22,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 9, 9, 1, 1)
@@ -944,11 +934,9 @@ local animation_sequence = {
 			sun_scenegraph.size[2] = catmullrom_value * sun_default_size[2]
 			sun_scenegraph.local_position[2] = sun_default_position[2] - (1 - catmullrom_value) * -50
 			sun_style.color[1] = local_progress * 255
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -957,7 +945,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.24,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 0, 1, 1, 0.7)
@@ -968,11 +956,9 @@ local animation_sequence = {
 			scenegraph.size[1] = catmullrom_value * default_size[1]
 			scenegraph.size[2] = catmullrom_value * default_size[2]
 			scenegraph.local_position[2] = default_position[2] - (1 - catmullrom_value) * -50
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -981,7 +967,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.3,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			widget.style.hammer_left.color[1] = 255
@@ -996,11 +982,9 @@ local animation_sequence = {
 			local rotation_angle = (local_progress * 720) % 360
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1009,7 +993,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.3,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			widget.style.hammer_right.color[1] = 255
@@ -1024,11 +1008,9 @@ local animation_sequence = {
 			local rotation_angle = (local_progress * 720) % 360
 			local radians = math.degrees_to_radians(-rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1037,7 +1019,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.4,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
@@ -1045,11 +1027,9 @@ local animation_sequence = {
 			local rotation_angle = catmullrom_value * -35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1058,7 +1038,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.4,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
@@ -1066,11 +1046,9 @@ local animation_sequence = {
 			local rotation_angle = catmullrom_value * 35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1079,7 +1057,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.7,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			widget.style.banner_holder_left.color[1] = 255
@@ -1089,11 +1067,9 @@ local animation_sequence = {
 			local default_position = definition.position
 			local default_size = definition.size
 			scenegraph.local_position[1] = default_position[1] + catmullrom_value * default_size[1]
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1102,7 +1078,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.7,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			widget.style.banner_holder_right.color[1] = 255
@@ -1112,11 +1088,9 @@ local animation_sequence = {
 			local default_position = definition.position
 			local default_size = definition.size
 			scenegraph.local_position[1] = default_position[1] - catmullrom_value * default_size[1]
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1125,7 +1099,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.63,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
@@ -1133,11 +1107,9 @@ local animation_sequence = {
 			local rotation_angle = catmullrom_value * 35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1146,7 +1118,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.63,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 0) or math.catmullrom(local_progress, -0.7, 0, 0, -0.7)
@@ -1154,11 +1126,9 @@ local animation_sequence = {
 			local rotation_angle = catmullrom_value * -35
 			local radians = math.degrees_to_radians(rotation_angle)
 			style.angle = radians
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1167,17 +1137,15 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.98,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, -10, 0, 1, 0)
 			local content = widget.content.banner_left
 			content.bar_value = catmullrom_value
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1186,17 +1154,15 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.75,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, -10, 0, 1, 0)
 			local content = widget.content.banner_right
 			content.bar_value = catmullrom_value
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1205,7 +1171,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.62,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 10, 3, 1, 1)
@@ -1216,11 +1182,9 @@ local animation_sequence = {
 			scenegraph.size[2] = catmullrom_value * definition.size[2]
 			style.color[1] = local_progress * 255
 			widget.style.icon_frame.color[1] = style.color[1]
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1229,16 +1193,14 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.61,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 15, 9, 1, 1)
 			local style = widget.style.title_text
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1247,7 +1209,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.63,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local catmullrom_value = (local_progress == 1 and 1) or math.catmullrom(local_progress, 1.7, 1, 1, 1.7)
@@ -1272,11 +1234,9 @@ local animation_sequence = {
 			widget_scenegraph_sun.size[1] = catmullrom_value * sun_default_size[1]
 			widget_scenegraph_sun.size[2] = catmullrom_value * sun_default_size[2]
 			widget_scenegraph_sun.local_position[2] = sun_default_position[2] + cross_half_height_diff
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	},
 	{
@@ -1285,7 +1245,7 @@ local animation_sequence = {
 		is_completed = false,
 		end_progress = 0.68,
 		init = function (ui_scenegraph, scenegraph_definition, widget)
-			return 
+			return
 		end,
 		update = function (ui_scenegraph, scenegraph_definition, widget, progress, local_progress)
 			local widget_scenegraph_glow_background = ui_scenegraph.glow_background
@@ -1296,11 +1256,9 @@ local animation_sequence = {
 			style.color[1] = 150 * fraction
 			widget_scenegraph_glow_background.size[1] = fraction * glow_background_default_size[1]
 			widget_scenegraph_glow_background.size[2] = fraction * glow_background_default_size[2]
-
-			return 
 		end,
 		on_complete = function ()
-			return 
+			return
 		end
 	}
 }

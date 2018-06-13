@@ -263,8 +263,6 @@ local definitions = {
 								click_check_content_id = "button_hotspot",
 								click_function = function (ui_scenegraph, ui_style, ui_content, input_service)
 									ui_content.button_hotspot.is_selected = true
-
-									return 
 								end
 							},
 							{
@@ -416,8 +414,6 @@ local function setup_list_hover_area(width, height)
 	size[1] = width
 	size[2] = height
 	offset[2] = 0
-
-	return 
 end
 
 local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_field_height)
@@ -447,8 +443,6 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 						local current_scroll_value = ui_content.internal_scroll_value
 						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
-
-						return 
 					end
 				}
 			}
@@ -460,8 +454,6 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 		style = {},
 		scenegraph_id = scenegraph_id
 	}
-
-	return 
 end
 
 local function lobby_level_display_name(lobby_data)
@@ -531,24 +523,22 @@ function level_is_locked(lobby_data)
 	end
 
 	local player_manager = Managers.player
-	local player = player_manager.local_player(player_manager)
-	local statistics_db = player_manager.statistics_db(player_manager)
-	local player_stats_id = player.stats_id(player)
+	local player = player_manager:local_player()
+	local statistics_db = player_manager:statistics_db()
+	local player_stats_id = player:stats_id()
 	local level_unlocked = LevelUnlockUtils.level_unlocked(statistics_db, player_stats_id, level)
 
 	if not level_unlocked then
 		return true
 	end
-
-	return 
 end
 
 function difficulty_is_locked(lobby_data)
 	local level_key = lobby_data.selected_level_key or lobby_data.level_key
 	local player_manager = Managers.player
-	local player = player_manager.local_player(player_manager)
-	local statistics_db = player_manager.statistics_db(player_manager)
-	local player_stats_id = player.stats_id(player)
+	local player = player_manager:local_player()
+	local statistics_db = player_manager:statistics_db()
+	local player_stats_id = player:stats_id()
 	local difficulty = lobby_data.difficulty
 
 	if not difficulty or not level_key then
@@ -562,7 +552,7 @@ function difficulty_is_locked(lobby_data)
 	end
 
 	local difficulty_manager = Managers.state.difficulty
-	local level_difficulties = difficulty_manager.get_level_difficulties(difficulty_manager, level_key)
+	local level_difficulties = difficulty_manager:get_level_difficulties(level_key)
 	local unlocked_difficulty_key = level_difficulties[unlocked_level_difficulty_index]
 	local unlocked_difficulty_settings = DifficultySettings[unlocked_difficulty_key]
 	local difficulty_setting = DifficultySettings[difficulty]
@@ -570,8 +560,6 @@ function difficulty_is_locked(lobby_data)
 	if unlocked_difficulty_settings.rank < difficulty_setting.rank then
 		return true
 	end
-
-	return 
 end
 
 function status_is_locked(lobby_data)
@@ -615,7 +603,7 @@ local function create_lobby_list_entry_content(lobby_data)
 	end
 
 	if host == my_peer_id or not title_text then
-		return 
+		return
 	end
 
 	local level_text = lobby_level_display_name(lobby_data)
@@ -781,6 +769,7 @@ local function create_lobby_list_entry_style()
 end
 
 LobbyItemsList = class(LobbyItemsList)
+
 LobbyItemsList.init = function (self, position, ingame_ui_context, settings)
 	self.ui_renderer = ingame_ui_context.ui_top_renderer
 	self.input_manager = ingame_ui_context.input_manager
@@ -819,7 +808,7 @@ LobbyItemsList.init = function (self, position, ingame_ui_context, settings)
 	self.lobby_list = {}
 	self.input_service_name = settings.input_service_name
 
-	self.create_ui_elements(self)
+	self:create_ui_elements()
 
 	self.list_style = {
 		vertical_alignment = "top",
@@ -833,16 +822,14 @@ LobbyItemsList.init = function (self, position, ingame_ui_context, settings)
 		item_styles = {}
 	}
 	self.selected_list_index = 1
-
-	return 
 end
+
 LobbyItemsList.destroy = function (self)
 	self.ui_animator:destroy()
 
 	self.ui_animator = nil
-
-	return 
 end
+
 LobbyItemsList.create_ui_elements = function (self)
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(self.scenegraph_definition)
 	local scrollbar_scenegraph_id = "scrollbar_root"
@@ -863,8 +850,6 @@ LobbyItemsList.create_ui_elements = function (self)
 	self.country_text_button.style.text_hover.horizontal_alignment = "right"
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-
-	return 
 end
 
 local function sort_lobbies_on_host_asc(lobby_a, lobby_b)
@@ -934,7 +919,7 @@ local function sort_lobbies_on_num_players_desc(lobby_a, lobby_b)
 	local num_players_a = tonumber(lobby_a.num_players) or 0
 	local num_players_b = tonumber(lobby_b.num_players) or 0
 
-	return num_players_b < num_players_a
+	return num_players_a > num_players_b
 end
 
 local function sort_lobbies_on_country_asc(lobby_a, lobby_b)
@@ -956,12 +941,12 @@ LobbyItemsList.update = function (self, dt, loading, ignore_gamepad_input)
 
 	if loading then
 		if not self._loading_previous_frame then
-			self.loading_overlay_fade_in(self, 180)
+			self:loading_overlay_fade_in(180)
 		end
 
-		self.rotate_loading_icon(self, dt)
+		self:rotate_loading_icon(dt)
 	elseif self._loading_previous_frame then
-		self.loading_overlay_fade_out(self)
+		self:loading_overlay_fade_out()
 	end
 
 	self._loading_previous_frame = loading
@@ -972,15 +957,15 @@ LobbyItemsList.update = function (self, dt, loading, ignore_gamepad_input)
 	local hover_list_index = self.hover_list_index
 	local number_of_items_in_list = self.number_of_items_in_list
 	local input_manager = self.input_manager
-	local gamepad_active = input_manager.is_device_active(input_manager, "gamepad")
+	local gamepad_active = input_manager:is_device_active("gamepad")
 	self.lobby_list_index_changed = nil
 	self.inventory_list_index_pressed = nil
 	local num_list_content = #list_content
 
 	if gamepad_active and not ignore_gamepad_input then
-		if 0 < number_of_items_in_list then
-			self.handle_gamepad_input(self, dt, number_of_items_in_list)
-			self.update_gamepad_list_scroll(self)
+		if number_of_items_in_list > 0 then
+			self:handle_gamepad_input(dt, number_of_items_in_list)
+			self:update_gamepad_list_scroll()
 		end
 	else
 		self.gamepad_changed_selected_list_index = nil
@@ -992,20 +977,20 @@ LobbyItemsList.update = function (self, dt, loading, ignore_gamepad_input)
 
 		if not button_content.fake then
 			if button_hotspot.on_hover_enter then
-				self.play_sound(self, "Play_hud_hover")
+				self:play_sound("Play_hud_hover")
 			end
 
 			if (button_hotspot.is_selected or self.gamepad_changed_selected_list_index == i) and i ~= selected_list_index then
 				self.lobby_list_index_changed = i
 
-				self.play_sound(self, "Play_hud_select")
+				self:play_sound("Play_hud_select")
 
 				break
 			end
 		end
 	end
 
-	self.update_scroll(self)
+	self:update_scroll()
 
 	if self.inventory_list_animation_time then
 	end
@@ -1018,87 +1003,86 @@ LobbyItemsList.update = function (self, dt, loading, ignore_gamepad_input)
 	local country_button_hotspot = self.country_text_button.content.button_text
 
 	if host_button_hotspot.on_hover_enter or level_button_hotspot.on_hover_enter or difficulty_button_hotspot.on_hover_enter or status_button_hotspot.on_hover_enter or player_button_hotspot.on_hover_enter or country_button_hotspot.on_hover_enter then
-		self.play_sound(self, "Play_hud_hover")
+		self:play_sound("Play_hud_hover")
 	end
 
 	if host_button_hotspot.on_pressed then
-		local sort_func = self._pick_sort_func(self, sort_lobbies_on_host_asc, sort_lobbies_on_host_desc)
+		local sort_func = self:_pick_sort_func(sort_lobbies_on_host_asc, sort_lobbies_on_host_desc)
 		local lobbies = self.lobbies
 
-		self.populate_lobby_list(self, lobbies, sort_func)
-		self.play_sound(self, "Play_hud_select")
+		self:populate_lobby_list(lobbies, sort_func)
+		self:play_sound("Play_hud_select")
 	end
 
 	if level_button_hotspot.on_pressed then
-		local sort_func = self._pick_sort_func(self, sort_lobbies_on_levels_asc, sort_lobbies_on_levels_desc)
+		local sort_func = self:_pick_sort_func(sort_lobbies_on_levels_asc, sort_lobbies_on_levels_desc)
 		local lobbies = self.lobbies
 
-		self.populate_lobby_list(self, lobbies, sort_func)
-		self.play_sound(self, "Play_hud_select")
+		self:populate_lobby_list(lobbies, sort_func)
+		self:play_sound("Play_hud_select")
 	end
 
 	if difficulty_button_hotspot.on_pressed then
-		local sort_func = self._pick_sort_func(self, sort_lobbies_on_difficulty_asc, sort_lobbies_on_difficulty_desc)
+		local sort_func = self:_pick_sort_func(sort_lobbies_on_difficulty_asc, sort_lobbies_on_difficulty_desc)
 		local lobbies = self.lobbies
 
-		self.populate_lobby_list(self, lobbies, sort_func)
-		self.play_sound(self, "Play_hud_select")
+		self:populate_lobby_list(lobbies, sort_func)
+		self:play_sound("Play_hud_select")
 	end
 
 	if status_button_hotspot.on_pressed then
-		local sort_func = self._pick_sort_func(self, sort_lobbies_on_status_asc, sort_lobbies_on_status_desc)
+		local sort_func = self:_pick_sort_func(sort_lobbies_on_status_asc, sort_lobbies_on_status_desc)
 		local lobbies = self.lobbies
 
-		self.populate_lobby_list(self, lobbies, sort_func)
-		self.play_sound(self, "Play_hud_select")
+		self:populate_lobby_list(lobbies, sort_func)
+		self:play_sound("Play_hud_select")
 	end
 
 	if player_button_hotspot.on_pressed then
-		local sort_func = self._pick_sort_func(self, sort_lobbies_on_num_players_asc, sort_lobbies_on_num_players_desc)
+		local sort_func = self:_pick_sort_func(sort_lobbies_on_num_players_asc, sort_lobbies_on_num_players_desc)
 		local lobbies = self.lobbies
 
-		self.populate_lobby_list(self, lobbies, sort_func)
-		self.play_sound(self, "Play_hud_select")
+		self:populate_lobby_list(lobbies, sort_func)
+		self:play_sound("Play_hud_select")
 	end
 
 	if country_button_hotspot.on_pressed then
-		local sort_func = self._pick_sort_func(self, sort_lobbies_on_country_asc, sort_lobbies_on_country_desc)
+		local sort_func = self:_pick_sort_func(sort_lobbies_on_country_asc, sort_lobbies_on_country_desc)
 		local lobbies = self.lobbies
 
-		self.populate_lobby_list(self, lobbies, sort_func)
-		self.play_sound(self, "Play_hud_select")
+		self:populate_lobby_list(lobbies, sort_func)
+		self:play_sound("Play_hud_select")
 	end
-
-	return 
 end
+
 LobbyItemsList.handle_gamepad_input = function (self, dt, num_elements)
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, self.input_service_name)
+	local input_service = input_manager:get_service(self.input_service_name)
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 		local speed_multiplier = self.speed_multiplier or 1
 		local decrease = GamepadSettings.menu_speed_multiplier_frame_decrease
 		local min_multiplier = GamepadSettings.menu_min_speed_multiplier
 		self.speed_multiplier = math.max(speed_multiplier - decrease, min_multiplier)
 
-		return 
+		return
 	else
 		selected_list_index = self.selected_list_index or 1
 
 		if selected_list_index then
 			local speed_multiplier = self.speed_multiplier or 1
 			local new_list_index = nil
-			local move_up = input_service.get(input_service, "move_up")
-			local move_up_hold = input_service.get(input_service, "move_up_hold")
+			local move_up = input_service:get("move_up")
+			local move_up_hold = input_service:get("move_up_hold")
 
 			if move_up or move_up_hold then
 				new_list_index = math.max(selected_list_index - 1, 1)
 				self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
 			else
-				local move_down = input_service.get(input_service, "move_down")
-				local move_down_hold = input_service.get(input_service, "move_down_hold")
+				local move_down = input_service:get("move_down")
+				local move_down_hold = input_service:get("move_down_hold")
 
 				if move_down or move_down_hold then
 					self.controller_cooldown = GamepadSettings.menu_cooldown * speed_multiplier
@@ -1109,23 +1093,22 @@ LobbyItemsList.handle_gamepad_input = function (self, dt, num_elements)
 			if new_list_index and new_list_index ~= selected_list_index then
 				self.gamepad_changed_selected_list_index = new_list_index
 
-				return 
+				return
 			end
 		end
 	end
 
 	self.speed_multiplier = 1
-
-	return 
 end
+
 LobbyItemsList.update_gamepad_list_scroll = function (self)
 	local selected_list_index = self.selected_list_index
 
 	if not selected_list_index then
-		return 
+		return
 	end
 
-	local is_outside, state = self.is_entry_outside(self, selected_list_index)
+	local is_outside, state = self:is_entry_outside(selected_list_index)
 
 	while is_outside do
 		local button_scroll_step = self.scrollbar_widget.content.button_scroll_step
@@ -1138,14 +1121,13 @@ LobbyItemsList.update_gamepad_list_scroll = function (self)
 		end
 
 		if scroll_value ~= self.scroll_value then
-			self.set_scroll_amount(self, scroll_value)
+			self:set_scroll_amount(scroll_value)
 		end
 
-		is_outside, state = self.is_entry_outside(self, self.selected_list_index)
+		is_outside, state = self:is_entry_outside(self.selected_list_index)
 	end
-
-	return 
 end
+
 LobbyItemsList.is_entry_outside = function (self, index)
 	local item_list_widget = self.item_list_widget
 
@@ -1165,6 +1147,7 @@ LobbyItemsList.is_entry_outside = function (self, index)
 
 	return false
 end
+
 LobbyItemsList._pick_sort_func = function (self, sort_func_asc, sort_func_desc)
 	local sort_func = self.sort_lobbies_function
 
@@ -1178,6 +1161,7 @@ LobbyItemsList._pick_sort_func = function (self, sort_func_asc, sort_func_desc)
 
 	return sort_func
 end
+
 LobbyItemsList.rotate_loading_icon = function (self, dt)
 	local loading_icon_style = self.loading_icon.style.texture_id
 	local angle_fraction = loading_icon_style.fraction or 0
@@ -1186,9 +1170,8 @@ LobbyItemsList.rotate_loading_icon = function (self, dt)
 	local angle = anim_fraction * math.degrees_to_radians(360)
 	loading_icon_style.angle = angle
 	loading_icon_style.fraction = angle_fraction
-
-	return 
 end
+
 LobbyItemsList.loading_overlay_fade_in = function (self, alpha)
 	local widget = self.loading_icon
 	local style = widget.style
@@ -1202,9 +1185,8 @@ LobbyItemsList.loading_overlay_fade_in = function (self, alpha)
 	table.clear(self.loading_overlay.animations)
 
 	self.loading_overlay.style.rect.color[1] = alpha
-
-	return 
 end
+
 LobbyItemsList.loading_overlay_fade_out = function (self)
 	local function fade(widget, color)
 		local animation = UIAnimation.init(UIAnimation.function_by_time, color, 1, color[1], 0, 0.3, math.easeOutCubic)
@@ -1212,16 +1194,13 @@ LobbyItemsList.loading_overlay_fade_out = function (self)
 		table.clear(widget.animations)
 
 		widget.animations[animation] = true
-
-		return 
 	end
 
 	fade(self.loading_overlay, self.loading_overlay.style.rect.color)
 	fade(self.loading_icon, self.loading_icon.style.texture_id.color)
 	fade(self.loading_text, self.loading_text.style.text.text_color)
-
-	return 
 end
+
 LobbyItemsList.animate_loading_text = function (self)
 	local widget = self.loading_text
 	local style = widget.style
@@ -1234,14 +1213,13 @@ LobbyItemsList.animate_loading_text = function (self)
 
 		widget.animations[animation] = true
 	end
-
-	return 
 end
+
 LobbyItemsList.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, self.input_service_name)
+	local input_service = input_manager:get_service(self.input_service_name)
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt)
 	UIRenderer.draw_widget(ui_renderer, self.item_list_widget)
@@ -1257,14 +1235,12 @@ LobbyItemsList.draw = function (self, dt)
 	UIRenderer.draw_widget(ui_renderer, self.loading_icon)
 	UIRenderer.draw_widget(ui_renderer, self.loading_text)
 	UIRenderer.end_pass(ui_renderer)
-
-	return 
 end
+
 LobbyItemsList.sort_lobbies = function (self, lobbies, sort_func)
 	table.sort(lobbies, sort_func)
-
-	return 
 end
+
 LobbyItemsList.convert_to_array = function (self, table)
 	local array = {}
 
@@ -1274,6 +1250,7 @@ LobbyItemsList.convert_to_array = function (self, table)
 
 	return array
 end
+
 LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_reset)
 	local settings = self.settings
 	local item_list_widget = self.item_list_widget
@@ -1281,11 +1258,11 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 	local list_style = self.list_style
 	local num_lobbies = 0
 	local sort_func = self.sort_lobbies_function
-	local selected_lobby = self.selected_lobby(self)
-	local lobbies_array = self.convert_to_array(self, lobbies)
+	local selected_lobby = self:selected_lobby()
+	local lobbies_array = self:convert_to_array(lobbies)
 
 	if sort_func then
-		self.sort_lobbies(self, lobbies_array, sort_func)
+		self:sort_lobbies(lobbies_array, sort_func)
 	end
 
 	for lobby_id, lobby_data in pairs(lobbies_array) do
@@ -1315,7 +1292,7 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 	if num_lobbies < num_draws then
 		local num_empty = num_draws - num_lobbies % num_draws
 
-		if num_empty <= num_draws then
+		if num_draws >= num_empty then
 			for i = 1, num_empty, 1 do
 				local content = create_empty_lobby_list_entry_content()
 				local style = create_lobby_list_entry_style()
@@ -1326,29 +1303,27 @@ LobbyItemsList.populate_lobby_list = function (self, lobbies, ignore_scroll_rese
 		end
 	end
 
-	self.set_scrollbar_length(self, nil, ignore_scroll_reset)
+	self:set_scrollbar_length(nil, ignore_scroll_reset)
 
 	if selected_lobby then
-		self.set_selected_lobby(self, selected_lobby)
+		self:set_selected_lobby(selected_lobby)
 	else
-		self.on_lobby_selected(self, 1, false)
+		self:on_lobby_selected(1, false)
 	end
-
-	return 
 end
+
 LobbyItemsList.update_scroll = function (self)
 	local scroll_bar_value = self.scrollbar_widget.content.scroll_bar_info.value
 	local mouse_scroll_value = self.scroll_field_widget.content.internal_scroll_value
 	local current_scroll_value = self.scroll_value
 
 	if current_scroll_value ~= mouse_scroll_value then
-		self.set_scroll_amount(self, mouse_scroll_value)
+		self:set_scroll_amount(mouse_scroll_value)
 	elseif current_scroll_value ~= scroll_bar_value then
-		self.set_scroll_amount(self, scroll_bar_value)
+		self:set_scroll_amount(scroll_bar_value)
 	end
-
-	return 
 end
+
 LobbyItemsList.set_scroll_amount = function (self, value)
 	local current_scroll_value = self.scroll_value
 
@@ -1358,11 +1333,10 @@ LobbyItemsList.set_scroll_amount = function (self, value)
 		self.scroll_field_widget.content.internal_scroll_value = value
 		self.scroll_value = value
 
-		self.scroll_inventory_list(self, value)
+		self:scroll_inventory_list(value)
 	end
-
-	return 
 end
+
 LobbyItemsList.set_scrollbar_length = function (self, start_scroll_value, ignore_scroll_reset)
 	local settings = self.settings
 	local columns = settings.columns
@@ -1374,7 +1348,7 @@ LobbyItemsList.set_scrollbar_length = function (self, start_scroll_value, ignore
 	local bar_fraction = 0
 	local step_fraction = 0
 
-	if 0 < item_diff_count then
+	if item_diff_count > 0 then
 		local number_of_elements_per_step = (columns and columns) or 1
 		local number_of_steps_possible = math.ceil(item_diff_count / number_of_elements_per_step)
 		local number_of_steps_total = math.ceil(number_of_items_in_list / number_of_elements_per_step)
@@ -1394,13 +1368,12 @@ LobbyItemsList.set_scrollbar_length = function (self, start_scroll_value, ignore
 		local current_scroll_value = self.scroll_value
 		self.scroll_value = nil
 
-		self.set_scroll_amount(self, current_scroll_value or 0)
+		self:set_scroll_amount(current_scroll_value or 0)
 	else
-		self.set_scroll_amount(self, start_scroll_value or 0)
+		self:set_scroll_amount(start_scroll_value or 0)
 	end
-
-	return 
 end
+
 LobbyItemsList.scroll_inventory_list = function (self, value)
 	local item_list_widget = self.item_list_widget
 
@@ -1422,20 +1395,19 @@ LobbyItemsList.scroll_inventory_list = function (self, value)
 			list_style.start_index = new_start_index
 		end
 	end
-
-	return 
 end
+
 LobbyItemsList.on_lobby_selected = function (self, index, play_sound)
 	local item_list_widget = self.item_list_widget
 	local list_content = item_list_widget.content.list_content
 	local number_of_items_in_list = self.number_of_items_in_list
 
 	if not number_of_items_in_list or number_of_items_in_list < 1 then
-		return 
+		return
 	end
 
 	if play_sound then
-		self.play_sound(self, self.item_select_sound_event)
+		self:play_sound(self.item_select_sound_event)
 	end
 
 	if index and list_content[index] then
@@ -1446,14 +1418,13 @@ LobbyItemsList.on_lobby_selected = function (self, index, play_sound)
 		self.lobby_list_select_animation_time = 0
 		self.selected_list_index = index
 	end
-
-	return 
 end
+
 LobbyItemsList.selected_lobby = function (self)
 	local selected_list_index = self.selected_list_index
 
 	if not selected_list_index then
-		return 
+		return
 	end
 
 	local item_list_widget = self.item_list_widget
@@ -1461,11 +1432,12 @@ LobbyItemsList.selected_lobby = function (self)
 	local selected_list_content = list_content[selected_list_index]
 
 	if not selected_list_content then
-		return 
+		return
 	end
 
 	return selected_list_content.lobby_data
 end
+
 LobbyItemsList.set_selected_lobby = function (self, selected_lobby_data)
 	self.selected_list_index = nil
 	local selected_lobby_id = selected_lobby_data.id
@@ -1479,21 +1451,19 @@ LobbyItemsList.set_selected_lobby = function (self, selected_lobby_data)
 		local lobby_id = lobby_data.id
 
 		if selected_lobby_id == lobby_id then
-			self.on_lobby_selected(self, i, false)
+			self:on_lobby_selected(i, false)
 		end
 	end
-
-	return 
 end
+
 LobbyItemsList.animate_element_by_time = function (self, target, destination_index, from, to, time)
 	local new_animation = UIAnimation.init(UIAnimation.function_by_time, target, destination_index, from, to, time, math.easeInCubic)
 
 	return new_animation
 end
+
 LobbyItemsList.play_sound = function (self, event)
 	WwiseWorld.trigger_event(self.wwise_world, event)
-
-	return 
 end
 
-return 
+return

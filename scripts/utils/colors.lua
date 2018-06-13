@@ -966,6 +966,7 @@ Colors.get = function (name)
 
 	return Color(color[1], color[2], color[3], color[4])
 end
+
 Colors.get_table = function (name)
 	local color = Colors.color_definitions[name]
 	local color_table = {
@@ -977,12 +978,14 @@ Colors.get_table = function (name)
 
 	return color_table
 end
+
 Colors.get_color_with_alpha = function (name, alpha)
 	local color = Colors.color_definitions[name]
 	local new_color = Color(alpha, color[2], color[3], color[4])
 
 	return new_color
 end
+
 Colors.get_color_table_with_alpha = function (name, alpha)
 	local color = Colors.color_definitions[name]
 	local color_table = {
@@ -994,6 +997,7 @@ Colors.get_color_table_with_alpha = function (name, alpha)
 
 	return color_table
 end
+
 Colors.get_random_color = function ()
 	local counted = 0
 	local to_count = math.random(Colors.num_colors)
@@ -1005,14 +1009,14 @@ Colors.get_random_color = function ()
 			return name, color_table
 		end
 	end
-
-	return 
 end
+
 Colors.get_indexed = function (index)
 	local color = Colors.indexed_colors[index]
 
 	return Color(color[1], color[2], color[3], color[4])
 end
+
 Colors.lerp_color_tables = function (color1, color2, t, result)
 	result = result or {}
 
@@ -1092,4 +1096,4 @@ if not Colors.distinct_colors_lookup then
 	Colors.distinct_colors_lookup = colors
 end
 
-return 
+return

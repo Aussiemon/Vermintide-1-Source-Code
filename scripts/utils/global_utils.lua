@@ -7,7 +7,7 @@ local function ignore_ai_target(unit)
 	if ScriptUnit.has_extension(unit, "status_system") then
 		local status_extension = ScriptUnit.extension(unit, "status_system")
 
-		return status_extension.is_ready_for_assisted_respawn(status_extension)
+		return status_extension:is_ready_for_assisted_respawn()
 	end
 
 	return false
@@ -23,8 +23,6 @@ local resolution_lookup = RESOLUTION_LOOKUP
 function CLEAR_POSITION_LOOKUP()
 	table.clear(position_lookup)
 	table.clear(position_lookup_backup)
-
-	return 
 end
 
 local world_position = Unit.world_position
@@ -39,8 +37,6 @@ function UPDATE_POSITION_LOOKUP()
 			position_lookup_backup[unit] = world_position(unit, 0)
 		end
 	end
-
-	return 
 end
 
 function UPDATE_RESOLUTION_LOOKUP(force_update)
@@ -62,15 +58,13 @@ function UPDATE_RESOLUTION_LOOKUP(force_update)
 	resolution_lookup.modified = resolution_modified
 
 	Profiler.stop("UPDATE_RESOLUTION_LOOKUP")
-
-	return 
 end
 
 local cleared = false
 
 function VALIDATE_POSITION_LOOKUP()
 	if not script_data.debug_enabled then
-		return 
+		return
 	end
 
 	if script_data.disable_debug_position_lookup then
@@ -79,7 +73,7 @@ function VALIDATE_POSITION_LOOKUP()
 			cleared = true
 		end
 
-		return 
+		return
 	end
 
 	Profiler.start("VALIDATE_POSITION_LOOKUP")
@@ -93,15 +87,13 @@ function VALIDATE_POSITION_LOOKUP()
 
 		local other_pos = position_lookup_backup[unit]
 
-		if other_pos and 0.0001 < Vector3.distance_squared(pos, other_pos) then
+		if other_pos and Vector3.distance_squared(pos, other_pos) > 0.0001 then
 			assert(false, "Modified cached vector3, bad coder!! [%s ==> %s]", tostring(other_pos), tostring(pos))
 		end
 	end
 
 	table.clear(position_lookup_backup)
 	Profiler.stop("VALIDATE_POSITION_LOOKUP")
-
-	return 
 end
 
 PLAYER_UNITS = {}
@@ -138,7 +130,7 @@ function UPDATE_PLAYER_LISTS()
 			human_and_bot_unit_positions[num_human_and_bot_units] = pos
 			valid_humans_and_bots[unit] = true
 
-			if player.is_player_controlled(player) then
+			if player:is_player_controlled() then
 				num_human_units = num_human_units + 1
 				human_units[num_human_units] = unit
 				human_unit_positions[num_human_units] = pos
@@ -179,8 +171,6 @@ function UPDATE_PLAYER_LISTS()
 		ai_target_units[j] = nil
 		j = j + 1
 	end
-
-	return 
 end
 
 function REMOVE_PLAYER_UNIT_FROM_LISTS(player_unit)
@@ -218,8 +208,6 @@ function REMOVE_PLAYER_UNIT_FROM_LISTS(player_unit)
 			break
 		end
 	end
-
-	return 
 end
 
 function REMOVE_AGGRO_UNITS(aggro_unit)
@@ -234,8 +222,6 @@ function REMOVE_AGGRO_UNITS(aggro_unit)
 			break
 		end
 	end
-
-	return 
 end
 
-return 
+return

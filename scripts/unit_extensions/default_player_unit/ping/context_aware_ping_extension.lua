@@ -1,29 +1,30 @@
 local PING_COOLDOWN = 2
 local PING_RANGE = 50
 ContextAwarePingExtension = class(ContextAwarePingExtension)
+
 ContextAwarePingExtension.init = function (self, extension_init_context, unit, extension_init_data)
 	self._world = extension_init_context.world
 	self._physics_world = World.get_data(self._world, "physics_world")
 	self._unit = unit
 	self._player = extension_init_data.player
 	self.ping_timer = 0
-
-	return 
 end
+
 ContextAwarePingExtension.extensions_ready = function (self, world, unit)
 	self.input_extension = ScriptUnit.extension(unit, "input_system")
 	self.first_person_extension = ScriptUnit.extension(unit, "first_person_system")
 	self.status_extension = ScriptUnit.extension(unit, "status_system")
+end
 
-	return 
-end
 ContextAwarePingExtension.destroy = function (self)
-	return 
+	return
 end
+
 local INDEX_POSITION = 1
 local INDEX_DISTANCE = 2
 local INDEX_NORMAL = 3
 local INDEX_ACTOR = 4
+
 ContextAwarePingExtension.update = function (self, unit, input, dt, context, t)
 	local ping = self.input_extension:get("ping")
 
@@ -35,15 +36,15 @@ ContextAwarePingExtension.update = function (self, unit, input, dt, context, t)
 			pinged_unit = unit
 		else
 			local first_person_extension = self.first_person_extension
-			local camera_position = first_person_extension.current_position(first_person_extension)
+			local camera_position = first_person_extension:current_position()
 			local camera_forward = nil
 			local HAS_TOBII = rawget(_G, "Tobii") and Tobii.device_status() == Tobii.DEVICE_TRACKING and Application.user_setting("tobii_eyetracking")
 
 			if HAS_TOBII and Application.user_setting("tobii_tag_at_gaze") then
 				local eyetracking_extension = ScriptUnit.extension(self._unit, "eyetracking_system")
-				camera_forward = eyetracking_extension.gaze_forward(eyetracking_extension)
+				camera_forward = eyetracking_extension:gaze_forward()
 			else
-				local camera_rotation = first_person_extension.current_rotation(first_person_extension)
+				local camera_rotation = first_person_extension:current_rotation()
 				camera_forward = Quaternion.forward(camera_rotation)
 			end
 
@@ -61,11 +62,11 @@ ContextAwarePingExtension.update = function (self, unit, input, dt, context, t)
 							local health_ext = ScriptUnit.has_extension(hit_unit, "health_system")
 							local status_ext = ScriptUnit.has_extension(hit_unit, "status_system")
 							local is_pickup = ScriptUnit.has_extension(hit_unit, "pickup_system")
-							local is_alive = health_ext and health_ext.is_alive(health_ext)
+							local is_alive = health_ext and health_ext:is_alive()
 							local is_skaven = Unit.get_data(hit_unit, "breed") ~= nil
-							local is_incapacitated_player = status_ext and status_ext.is_disabled(status_ext)
+							local is_incapacitated_player = status_ext and status_ext:is_disabled()
 
-							if (is_pickup or (is_alive and is_skaven) or (is_alive and is_incapacitated_player)) and not darkness_system.is_in_darkness(darkness_system, hit[INDEX_POSITION]) then
+							if (is_pickup or (is_alive and is_skaven) or (is_alive and is_incapacitated_player)) and not darkness_system:is_in_darkness(hit[INDEX_POSITION]) then
 								pinged_unit = hit_unit
 
 								break
@@ -81,8 +82,8 @@ ContextAwarePingExtension.update = function (self, unit, input, dt, context, t)
 
 		if pinged_unit and not LEVEL_EDITOR_TEST then
 			local network_manager = Managers.state.network
-			local pinger_unit_id = network_manager.unit_game_object_id(network_manager, unit)
-			local pinged_unit_id = network_manager.unit_game_object_id(network_manager, pinged_unit)
+			local pinger_unit_id = network_manager:unit_game_object_id(unit)
+			local pinged_unit_id = network_manager:unit_game_object_id(pinged_unit)
 
 			network_manager.network_transmit:send_rpc_server("rpc_ping_unit", pinger_unit_id, pinged_unit_id)
 		end
@@ -91,8 +92,6 @@ ContextAwarePingExtension.update = function (self, unit, input, dt, context, t)
 			self.ping_timer = t + PING_COOLDOWN
 		end
 	end
-
-	return 
 end
 
-return 
+return

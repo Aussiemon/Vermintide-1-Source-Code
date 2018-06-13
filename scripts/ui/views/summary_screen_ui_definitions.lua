@@ -1196,7 +1196,7 @@ local widget_definitions = {
 					style_id = "glow_left",
 					texture_id = "glow_left",
 					content_check_function = function (content)
-						return 0 < content.glow_middle.fraction
+						return content.glow_middle.fraction > 0
 					end
 				},
 				{
@@ -1204,7 +1204,7 @@ local widget_definitions = {
 					style_id = "glow_right",
 					texture_id = "glow_right",
 					content_check_function = function (content)
-						return 0 < content.glow_middle.fraction
+						return content.glow_middle.fraction > 0
 					end
 				},
 				{
@@ -1444,7 +1444,7 @@ local function create_bonus_entries(num_of_dices)
 		local scenegraph_value_text_id = string.format("%s%d%s", "summary_bonus_value_", i, "_id")
 		local parent_scenegraph_id = nil
 
-		if 1 < i then
+		if i > 1 then
 			parent_scenegraph_id = string.format("%s%d%s", "summary_bonus_", i - 1, "_id")
 		else
 			parent_scenegraph_id = "summary_window_dice_text"

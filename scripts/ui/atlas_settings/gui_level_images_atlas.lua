@@ -477,4 +477,4 @@ level_images_atlas = {
 	}
 }
 
-return 
+return

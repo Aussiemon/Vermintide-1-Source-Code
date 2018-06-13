@@ -30,11 +30,12 @@ end
 
 function profiler_scopes_trace()
 	if overloaded then
-		return 
+		return
 	end
 
 	overloaded = true
 	local Profiler_start = Profiler.start
+
 	Profiler.start = function (scope)
 		if scope == nil then
 			Application.error("Profiler with nil scope")
@@ -62,10 +63,10 @@ function profiler_scopes_trace()
 		depth = depth + 1
 
 		Profiler_start(scope)
-
-		return 
 	end
+
 	local Profiler_stop = Profiler.stop
+
 	Profiler.stop = function (scope)
 		Profiler_stop()
 
@@ -101,9 +102,8 @@ function profiler_scopes_trace()
 
 			started_scopes2[#started_scopes2 + 1] = str
 		end
-
-		return 
 	end
+
 	local real_update = update
 
 	function update(...)
@@ -123,11 +123,7 @@ function profiler_scopes_trace()
 		dump = false
 		started_scopes = {}
 		started_scopes2 = {}
-
-		return 
 	end
-
-	return 
 end
 
 function profiler_scopes_dump()
@@ -135,16 +131,12 @@ function profiler_scopes_dump()
 
 	dump_light = true
 	dump = true
-
-	return 
 end
 
 function profiler_scopes_dump_light()
 	profiler_scopes_trace()
 
 	dump_light = true
-
-	return 
 end
 
 if Development.parameter("validate_profiling_scopes") or Development.parameter("debug_profiling_scopes") then
@@ -152,4 +144,4 @@ if Development.parameter("validate_profiling_scopes") or Development.parameter("
 	profiler_scopes_dump_light()
 end
 
-return 
+return

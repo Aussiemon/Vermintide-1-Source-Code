@@ -7,6 +7,7 @@ local placeholder_icon_textures = {
 	hat = "icons_placeholder_hat_01",
 	trinket = "icons_placeholder_trinket_01"
 }
+
 BackendUtils.get_inventory_items = function (profile, slot, rarity)
 	local item_id_list = ScriptBackendItem.get_items(profile, slot, rarity)
 	local items = {}
@@ -57,8 +58,6 @@ local function get_trait_description_value(value, formatting, trait_info, buff_t
 	end
 
 	error("")
-
-	return 
 end
 
 BackendUtils.get_trait_description = function (trait_key, rarity)
@@ -79,6 +78,7 @@ BackendUtils.get_trait_description = function (trait_key, rarity)
 
 	return description_text
 end
+
 BackendUtils.get_item_trait_description = function (backend_id, id)
 	local all_items = ScriptBackendItem.get_all_backend_items()
 	local backend_item = all_items[backend_id]
@@ -116,6 +116,7 @@ BackendUtils.get_item_trait_description = function (backend_id, id)
 
 	return description_text
 end
+
 BackendUtils.get_inventory_items_except_loadout = function (profile, slot, rarity)
 	if profile == "all" then
 		return {}
@@ -148,9 +149,10 @@ BackendUtils.get_inventory_items_except_loadout = function (profile, slot, rarit
 
 	return items
 end
+
 BackendUtils.get_loadout_item = function (profile, slot)
 	if profile == "all" then
-		return 
+		return
 	end
 
 	local backend_id = ScriptBackendItem.get_loadout_item_id(profile, slot)
@@ -158,6 +160,7 @@ BackendUtils.get_loadout_item = function (profile, slot)
 
 	return item_data
 end
+
 BackendUtils.get_item_from_masterlist = function (backend_id)
 	local item_master_list = ItemMasterList
 	local key = ScriptBackendItem.get_key(backend_id)
@@ -167,13 +170,13 @@ BackendUtils.get_item_from_masterlist = function (backend_id)
 
 	return item_data
 end
+
 BackendUtils.set_loadout_item = function (item, profile, slot)
 	local backend_id = item and item.backend_id
 
 	ScriptBackendItem.set_loadout_item(backend_id, profile, slot)
-
-	return 
 end
+
 BackendUtils.get_item_template = function (item_data)
 	local template = item_data.temporary_template or item_data.template
 	local item_template = Weapons[template]
@@ -189,9 +192,8 @@ BackendUtils.get_item_template = function (item_data)
 	end
 
 	fassert(false, "no item_template for item: " .. item_data.key .. ", template name = " .. template)
-
-	return 
 end
+
 BackendUtils.get_item_units = function (item_data)
 	local left_hand_unit = item_data.left_hand_unit
 	local right_hand_unit = item_data.right_hand_unit
@@ -208,19 +210,18 @@ BackendUtils.get_item_units = function (item_data)
 	end
 
 	fassert(false, "no left hand or right hand unit defined for : " .. item.key)
-
-	return 
 end
+
 BackendUtils.debug_add_all_items_to_backend_local = function ()
 	DefaultLocalBackendData.items = {}
-
-	return 
 end
+
 BackendUtils.get_traits = function (backend_id)
 	local traits = ScriptBackendItem.get_traits(backend_id)
 
 	return traits
 end
+
 BackendUtils.item_has_trait = function (backend_id, trait_name)
 	local traits = ScriptBackendItem.get_traits(backend_id)
 
@@ -229,9 +230,8 @@ BackendUtils.item_has_trait = function (backend_id, trait_name)
 			return true
 		end
 	end
-
-	return 
 end
+
 BackendUtils.add_trait = function (item_id, trait_name, variable, chance)
 	if BackendUtils.item_has_trait(item_id, trait_name) then
 		if chance then
@@ -240,34 +240,33 @@ BackendUtils.add_trait = function (item_id, trait_name, variable, chance)
 			print(string.format("item_id: %d has the trait: %s", item_id, trait_name))
 		end
 
-		return 
+		return
 	end
 
 	ScriptBackendItem.add_trait(item_id, trait_name, variable, chance)
-
-	return 
 end
+
 BackendUtils.remove_item = function (item_id)
 	return ScriptBackendItem.remove_item(item_id)
 end
+
 BackendUtils.get_tokens = function (token_type)
 	return Vault.withdraw_single(token_type, ScriptBackendProfileAttribute.get(token_type) or 0)
 end
+
 BackendUtils.add_tokens = function (amount, token_type)
 	local num_tokens = Vault.single_add(token_type, amount, ScriptBackendProfileAttribute.get(token_type) or 0)
 
 	ScriptBackendProfileAttribute.set(token_type, num_tokens)
-
-	return 
 end
+
 BackendUtils.remove_tokens = function (amount, token_type)
 	local num_tokens = Vault.single_add(token_type, -amount, ScriptBackendProfileAttribute.get(token_type) or 0)
 
-	fassert(0 <= num_tokens, "trying to remove %d, tokens for %s (%d)which would result in a negative amount of tokens", amount, token_type, num_tokens)
+	fassert(num_tokens >= 0, "trying to remove %d, tokens for %s (%d)which would result in a negative amount of tokens", amount, token_type, num_tokens)
 	ScriptBackendProfileAttribute.set(token_type, num_tokens)
-
-	return 
 end
+
 BackendUtils.format_profile_hash = function (hash, num_chars, block_length, block_divider)
 	if not hash then
 		return "n/a"
@@ -288,4 +287,4 @@ BackendUtils.format_profile_hash = function (hash, num_chars, block_length, bloc
 	return str
 end
 
-return 
+return

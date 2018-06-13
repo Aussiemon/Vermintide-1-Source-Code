@@ -2,24 +2,24 @@ require("scripts/entity_system/systems/behaviour/nodes/bt_node")
 
 BTBotTransportedIdleAction = class(BTBotTransportedIdleAction, BTNode)
 BTBotTransportedIdleAction.name = "BTBotTransportedIdleAction"
+
 BTBotTransportedIdleAction.init = function (self, ...)
 	BTBotTransportedIdleAction.super.init(self, ...)
-
-	return 
 end
+
 BTBotTransportedIdleAction.enter = function (self, unit, blackboard, t)
 	local network_manager = Managers.state.network
 	local animation = blackboard.idle_animation or "idle"
 
-	network_manager.anim_event(network_manager, unit, animation)
+	network_manager:anim_event(unit, animation)
+end
 
-	return 
-end
 BTBotTransportedIdleAction.leave = function (self, unit, blackboard, t)
-	return 
+	return
 end
+
 BTBotTransportedIdleAction.run = function (self, unit, blackboard, t, dt)
 	return "running"
 end
 
-return 
+return

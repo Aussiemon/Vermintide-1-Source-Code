@@ -181,8 +181,6 @@ local widget_definitions = {
 								if not ui_content.fake then
 									ui_content.button_hotspot.is_selected = true
 								end
-
-								return 
 							end
 						},
 						{
@@ -1534,7 +1532,7 @@ local function set_item_element_info(item_element, is_room_item, item, item_colo
 	content.allow_equipped_drag = allow_equipped_drag or false
 	local item_name = (item.name and item.localized_name) or "Unknown"
 
-	if style.text_title and 25 < UTF8Utils.string_length(item_name) and not UIRenderer.crop_text_width(ui_renderer, item_name, 400, style.text_title) then
+	if style.text_title and UTF8Utils.string_length(item_name) > 25 and not UIRenderer.crop_text_width(ui_renderer, item_name, 400, style.text_title) then
 	end
 
 	content.title = item_name
@@ -1548,8 +1546,6 @@ local function set_item_element_info(item_element, is_room_item, item, item_colo
 	style.trait_slot_2_tooltip.last_line_color = ((is_trinket or not temp_traits_unlocked[2]) and table.clone(red_color)) or nil
 	style.trait_slot_3_tooltip.last_line_color = ((is_trinket or not temp_traits_unlocked[3]) and table.clone(red_color)) or nil
 	style.trait_slot_4_tooltip.last_line_color = ((is_trinket or not temp_traits_unlocked[4]) and table.clone(red_color)) or nil
-
-	return 
 end
 
 local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_field_height)
@@ -1578,8 +1574,6 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 						local current_scroll_value = ui_content.internal_scroll_value
 						current_scroll_value = current_scroll_value + scroll_step * -scroll_axis.y
 						ui_content.internal_scroll_value = math.clamp(current_scroll_value, 0, 1)
-
-						return 
 					end
 				}
 			}
@@ -1591,8 +1585,6 @@ local function setup_mouse_scroll_widget_definition(scroll_field_width, scroll_f
 		style = {},
 		scenegraph_id = scenegraph_id
 	}
-
-	return 
 end
 
 return {

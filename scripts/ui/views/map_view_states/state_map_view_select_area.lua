@@ -8,6 +8,7 @@ local generic_input_actions = definitions.generic_input_actions
 local DO_RELOAD = false
 StateMapViewSelectArea = class(StateMapViewSelectArea)
 StateMapViewSelectArea.NAME = "StateMapViewSelectArea"
+
 StateMapViewSelectArea.on_enter = function (self, params)
 	print("[MapViewState] Enter Substate StateMapViewSelectArea")
 
@@ -29,12 +30,11 @@ StateMapViewSelectArea.on_enter = function (self, params)
 	self.menu_input_description = MenuInputDescriptionUI:new(ingame_ui_context, self.ui_renderer, input_service, 2, gui_layer, generic_input_actions.default)
 
 	self.menu_input_description:set_input_description(nil)
-	self.create_ui_elements(self)
-
-	return 
+	self:create_ui_elements()
 end
+
 StateMapViewSelectArea.create_ui_elements = function (self)
-	self._setup_elements_level_data(self)
+	self:_setup_elements_level_data()
 
 	self.ui_scenegraph = UISceneGraph.init_scenegraph(scenegraph_definition)
 	self._overlay_widget = UIWidget.init(widgets.overlay)
@@ -89,19 +89,18 @@ StateMapViewSelectArea.create_ui_elements = function (self)
 	self._borders = borders
 
 	UIRenderer.clear_scenegraph_queue(self.ui_renderer)
-	self._align_elements(self)
-	self._gather_area_statistics(self)
+	self:_align_elements()
+	self:_gather_area_statistics()
 
 	local area = self.game_info.area or "ubersreik"
 	local area_index = area_list_index_by_name[area]
 
-	self._set_selection(self, area_index, true)
-	self._update_elements(self, 0, true)
+	self:_set_selection(area_index, true)
+	self:_update_elements(0, true)
 
 	self._selection_timer = nil
-
-	return 
 end
+
 StateMapViewSelectArea._gather_area_statistics = function (self)
 	local map_view_area_handler = self.map_view_area_handler
 	local map_view_helper = self.map_view_helper
@@ -121,7 +120,7 @@ StateMapViewSelectArea._gather_area_statistics = function (self)
 
 			if map_settings and map_settings.area == area then
 				num_levels = num_levels + 1
-				local difficulties, _ = difficulty_manager.get_level_difficulties(difficulty_manager, level_key)
+				local difficulties, _ = difficulty_manager:get_level_difficulties(level_key)
 				local highest_available_difficulty_rank = 1
 
 				for _, difficulty_name in ipairs(difficulties) do
@@ -132,7 +131,7 @@ StateMapViewSelectArea._gather_area_statistics = function (self)
 					end
 				end
 
-				local highest_completed_difficulty_rank = map_view_helper.get_completed_level_difficulty(map_view_helper, level_key)
+				local highest_completed_difficulty_rank = map_view_helper:get_completed_level_difficulty(level_key)
 				local level_progress = highest_completed_difficulty_rank / highest_available_difficulty_rank
 				total_progress = total_progress + level_progress
 			end
@@ -144,15 +143,14 @@ StateMapViewSelectArea._gather_area_statistics = function (self)
 		widget.content.progress_text = math.floor(progression_fraction * 100) .. "% " .. Localize("dlc1_2_survival_mission_wave_completed")
 		widget.content.levels_count_text = string.format(Localize("map_screen_level_count"), unlocked_levels, num_levels)
 	end
-
-	return 
 end
+
 StateMapViewSelectArea._setup_elements_level_data = function (self)
 	local map_view_area_handler = self.map_view_area_handler
 
-	map_view_area_handler.set_active_area(map_view_area_handler, "world")
+	map_view_area_handler:set_active_area("world")
 
-	self._active_level_list = map_view_area_handler.active_level_list(map_view_area_handler)
+	self._active_level_list = map_view_area_handler:active_level_list()
 	local num_unlocked_levels_by_area = {}
 	local game_mode = self.game_info.game_mode
 
@@ -160,7 +158,7 @@ StateMapViewSelectArea._setup_elements_level_data = function (self)
 		local level_information = area_data.level_information
 		local area = level_information.area
 		num_unlocked_levels_by_area[area] = 0
-		local level_list = map_view_area_handler.get_level_list_by_game_mode_and_area(map_view_area_handler, game_mode, area)
+		local level_list = map_view_area_handler:get_level_list_by_game_mode_and_area(game_mode, area)
 
 		for level_key, level_information in pairs(level_list) do
 			local visibility = level_information.visibility
@@ -173,106 +171,104 @@ StateMapViewSelectArea._setup_elements_level_data = function (self)
 
 	self._num_unlocked_levels_by_area = num_unlocked_levels_by_area
 	self._num_levels = #self._active_level_list
-
-	return 
 end
+
 StateMapViewSelectArea.on_exit = function (self, params)
 	self.menu_input_description:destroy()
 
 	self.menu_input_description = nil
-
-	return 
 end
+
 StateMapViewSelectArea._update_filter_animation = function (self, dt)
 	local level_filter = self.level_filter
-	local fraction = level_filter.visibility_fraction(level_filter)
+	local fraction = level_filter:visibility_fraction()
 	local ui_scenegraph = self.ui_scenegraph
 	ui_scenegraph.overlay.local_position[1] = 250 * fraction
-
-	return 
 end
+
 StateMapViewSelectArea.update = function (self, dt, t)
 	if DO_RELOAD then
 		DO_RELOAD = false
 
-		self.create_ui_elements(self)
+		self:create_ui_elements()
 	end
 
-	self._handle_input(self, dt)
-	self._update_elements(self, dt)
+	self:_handle_input(dt)
+	self:_update_elements(dt)
 	self.level_filter:update(dt, t)
-	self._update_filter_animation(self, dt)
-	self.draw(self, dt)
+	self:_update_filter_animation(dt)
+	self:draw(dt)
 
 	return self._new_state
 end
+
 StateMapViewSelectArea.post_update = function (self, dt, t)
-	return 
+	return
 end
+
 StateMapViewSelectArea._handle_input = function (self, dt)
 	if self._new_state then
-		return 
+		return
 	end
 
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 	local controller_cooldown = self.controller_cooldown
 
-	if controller_cooldown and 0 < controller_cooldown then
+	if controller_cooldown and controller_cooldown > 0 then
 		self.controller_cooldown = controller_cooldown - dt
 	else
 		local new_selection_index = nil
 
-		if input_service.get(input_service, "move_left") or input_service.get(input_service, "move_left_hold") then
+		if input_service:get("move_left") or input_service:get("move_left_hold") then
 			new_selection_index = 1
-		elseif input_service.get(input_service, "move_right") or input_service.get(input_service, "move_right_hold") then
+		elseif input_service:get("move_right") or input_service:get("move_right_hold") then
 			new_selection_index = 2
 		end
 
 		if new_selection_index and new_selection_index ~= self._selection_index then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 
-			self._set_selection(self, new_selection_index)
-		elseif input_service.get(input_service, "confirm", true) then
+			self:_set_selection(new_selection_index)
+		elseif input_service:get("confirm", true) then
 			if self._selection_index and not self._is_selected_area_locked then
 				local area_name = self._area_list_by_index[self._selection_index]
 				local map_view_area_handler = self.map_view_area_handler
 				local play_sound = false
 				local instant_change = true
 
-				map_view_area_handler.set_selected_level(map_view_area_handler, self._selection_index, play_sound, instant_change)
-				map_view_area_handler.open_selected_area(map_view_area_handler)
+				map_view_area_handler:set_selected_level(self._selection_index, play_sound, instant_change)
+				map_view_area_handler:open_selected_area()
 
 				self._new_state = StateMapViewSelectLevel
 
-				self._play_sound(self, "Play_hud_select")
+				self:_play_sound("Play_hud_select")
 			elseif self._is_selected_area_locked and self._selected_area_dlc_name then
 				local dlc_name = self._selected_area_dlc_name
 
-				self._play_sound(self, "Play_hud_select")
-				self._show_store_page(self, dlc_name)
+				self:_play_sound("Play_hud_select")
+				self:_show_store_page(dlc_name)
 			end
-		elseif input_service.get(input_service, "back", true) then
+		elseif input_service:get("back", true) then
 			self.map_view_area_handler:set_active_area(self.game_info.area)
 
 			self._new_state = StateMapViewOverview
 
-			self._play_sound(self, "Play_hud_select")
-		elseif input_service.get(input_service, "cycle_previous") then
+			self:_play_sound("Play_hud_select")
+		elseif input_service:get("cycle_previous") then
 			self.controller_cooldown = GamepadSettings.menu_cooldown
 			local level_filter = self.level_filter
 
-			level_filter.toggle_visibility(level_filter)
+			level_filter:toggle_visibility()
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectArea.draw = function (self, dt)
 	local ui_renderer = self.ui_renderer
 	local ui_scenegraph = self.ui_scenegraph
 	local input_manager = self.input_manager
-	local input_service = input_manager.get_service(input_manager, "map_menu")
+	local input_service = input_manager:get_service("map_menu")
 
 	UIRenderer.begin_pass(ui_renderer, ui_scenegraph, input_service, dt, nil, self.render_settings)
 	UIRenderer.draw_widget(ui_renderer, self._title_text_widget)
@@ -290,9 +286,8 @@ StateMapViewSelectArea.draw = function (self, dt)
 
 	UIRenderer.end_pass(ui_renderer)
 	self.menu_input_description:draw(ui_renderer, dt)
-
-	return 
 end
+
 StateMapViewSelectArea._align_elements = function (self)
 	local num_elements = #self._elements
 	local spacing = 0
@@ -310,14 +305,13 @@ StateMapViewSelectArea._align_elements = function (self)
 	for index, widget in ipairs(self._borders) do
 		widget.offset[1] = start_offset + distance * (index - 1)
 	end
-
-	return 
 end
+
 StateMapViewSelectArea._set_selection = function (self, index, ignore_sound)
 	if self._selection_timer then
 		local instant = true
 
-		self._update_elements(self, 0, instant)
+		self:_update_elements(0, instant)
 	end
 
 	self._selection_timer = 0
@@ -342,11 +336,10 @@ StateMapViewSelectArea._set_selection = function (self, index, ignore_sound)
 	end
 
 	if not ignore_sound then
-		self._play_sound(self, "Play_hud_hover")
+		self:_play_sound("Play_hud_hover")
 	end
-
-	return 
 end
+
 StateMapViewSelectArea.update_selection_timer = function (self, dt)
 	local timer = self._selection_timer
 
@@ -356,7 +349,7 @@ StateMapViewSelectArea.update_selection_timer = function (self, dt)
 		if timer == total_time then
 			self._selection_timer = nil
 
-			return 
+			return
 		else
 			timer = math.min(timer + dt, total_time)
 			self._selection_timer = timer
@@ -364,22 +357,20 @@ StateMapViewSelectArea.update_selection_timer = function (self, dt)
 			return timer / total_time
 		end
 	end
-
-	return 
 end
+
 StateMapViewSelectArea._update_elements = function (self, dt, instant)
-	local selection_progress = (instant and 1) or self.update_selection_timer(self, dt)
+	local selection_progress = (instant and 1) or self:update_selection_timer(dt)
 
 	if not selection_progress then
-		return 
+		return
 	end
 
 	for index, widget in ipairs(self._elements) do
-		self._animate_element(self, widget, index, selection_progress)
+		self:_animate_element(widget, index, selection_progress)
 	end
-
-	return 
 end
+
 StateMapViewSelectArea._animate_element = function (self, widget, index, progress)
 	local is_selection_widget = self._selection_index == index
 	local anim_progress = (is_selection_widget and math.easeCubic(progress)) or math.easeCubic(1 - progress)
@@ -422,9 +413,8 @@ StateMapViewSelectArea._animate_element = function (self, widget, index, progres
 	levels_count_text_style.text_color[2] = widget.style.text.text_color[2]
 	levels_count_text_style.text_color[3] = widget.style.text.text_color[3]
 	levels_count_text_style.text_color[4] = widget.style.text.text_color[4]
-
-	return 
 end
+
 StateMapViewSelectArea._show_store_page = function (self, dlc_name)
 	if self.platform == "win32" then
 		local dlc_id = Managers.unlock:dlc_id(dlc_name)
@@ -444,13 +434,10 @@ StateMapViewSelectArea._show_store_page = function (self, dlc_name)
 			product_label
 		})
 	end
-
-	return 
 end
+
 StateMapViewSelectArea._play_sound = function (self, event)
 	self._map_view:play_sound(event)
-
-	return 
 end
 
-return 
+return

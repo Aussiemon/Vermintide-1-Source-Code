@@ -16,8 +16,6 @@ BreedHitZonesLookup = BreedHitZonesLookup or {}
 setmetatable(UtilityConsiderations, {
 	__index = function (t, k)
 		error(string.format("Trying to access UtilityConsiderations %s that doesn't exist", k))
-
-		return 
 	end
 })
 dofile("scripts/settings/breeds/breed_skaven_clan_rat")
@@ -156,4 +154,4 @@ for name, breed in pairs(Breeds) do
 	end
 end
 
-return 
+return

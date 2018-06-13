@@ -1,5 +1,6 @@
 MatchmakingStateSearchGame = class(MatchmakingStateSearchGame)
 MatchmakingStateSearchGame.NAME = "MatchmakingStateSearchGame"
+
 MatchmakingStateSearchGame.init = function (self, params)
 	self.lobby = params.lobby
 	self.lobby_finder = params.lobby_finder
@@ -8,12 +9,12 @@ MatchmakingStateSearchGame.init = function (self, params)
 	self.connection_handler = params.network_transmit.connection_handler
 	self.matchmaking_ui = params.matchmaking_ui
 	self.level_transition_handler = params.level_transition_handler
+end
 
-	return 
-end
 MatchmakingStateSearchGame.destroy = function (self)
-	return 
+	return
 end
+
 MatchmakingStateSearchGame.on_enter = function (self, state_context)
 	self.state_context = state_context
 	self.game_search_data = state_context.game_search_data
@@ -56,14 +57,12 @@ MatchmakingStateSearchGame.on_enter = function (self, state_context)
 	local window_title = (private_game and "status_private") or "status_matchmaking"
 
 	self.matchmaking_ui:large_window_set_title(window_title)
-
-	return 
 end
+
 MatchmakingStateSearchGame.on_exit = function (self)
 	self.matchmaking_ui:large_window_ready_enable(false)
-
-	return 
 end
+
 MatchmakingStateSearchGame.update = function (self, dt, t)
 	local gamepad_active_last_frame = self._gamepad_active_last_frame
 	local gamepad_active = Managers.input:is_device_active("gamepad")
@@ -80,7 +79,7 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 
 	local num_connections = table.size(self.connection_handler.current_connections)
 
-	if 0 < num_connections then
+	if num_connections > 0 then
 		mm_printf("Leaving MatchmakingStateSearchGame and becoming host due to having connections, probably a friend joining.")
 
 		return MatchmakingStateHostGame, self.state_context
@@ -95,15 +94,15 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 
 		self.next_state_timer = self.next_state_timer - dt
 
-		if 0 < self.next_state_timer then
+		if self.next_state_timer > 0 then
 			return nil
 		end
 
 		return MatchmakingStateRequestJoinGame, self.state_context
 	end
 
-	local new_lobby = self.search_for_game(self, dt)
-	local search_time_ended = self.update_search_timer(self, dt)
+	local new_lobby = self:search_for_game(dt)
+	local search_time_ended = self:update_search_timer(dt)
 
 	if search_time_ended then
 		local distance_filter = self.state_context.game_search_data.distance_filter
@@ -126,14 +125,14 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 	local become_host = false
 	local input_service = Managers.input:get_service("ingame_menu")
 
-	if self.controller_cooldown and 0 < self.controller_cooldown then
+	if self.controller_cooldown and self.controller_cooldown > 0 then
 		self.controller_cooldown = self.controller_cooldown - dt
 	else
-		if input_service and input_service.get(input_service, "matchmaking_ready_instigate") then
+		if input_service and input_service:get("matchmaking_ready_instigate") then
 			self._started_readying = true
 		end
 
-		if input_service.get(input_service, "matchmaking_ready") and self.next_state_timer == nil and self._started_readying then
+		if input_service:get("matchmaking_ready") and self.next_state_timer == nil and self._started_readying then
 			if gamepad_active then
 				local total_time = 1
 				local cancel_timer = self.cancel_timer
@@ -181,7 +180,7 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 
 		self.next_state_timer = self.next_state_timer - dt
 
-		if 0 < self.next_state_timer then
+		if self.next_state_timer > 0 then
 			return nil
 		end
 
@@ -199,6 +198,7 @@ MatchmakingStateSearchGame.update = function (self, dt, t)
 
 	return nil
 end
+
 MatchmakingStateSearchGame.search_for_game = function (self, dt)
 	local search_data = self.game_search_data
 	local wait_time = self.search_wait_timer
@@ -211,11 +211,11 @@ MatchmakingStateSearchGame.search_for_game = function (self, dt)
 		else
 			self.search_wait_timer = wait_time
 
-			return 
+			return
 		end
 	end
 
-	local lobbies = self.get_lobbies(self)
+	local lobbies = self:get_lobbies()
 	local active_lobby, wanted_profile_index = nil
 	local profile_priority = search_data.profile_priority
 	local quick_game = search_data.quick_game
@@ -235,7 +235,7 @@ MatchmakingStateSearchGame.search_for_game = function (self, dt)
 	matchmaking_manager.debug.progression = search_data.player_progression
 	matchmaking_manager.debug.lobbies = lobbies
 	matchmaking_manager.debug.distance = string.format("%s (max:%s)", search_data.distance_filter, MatchmakingSettings.max_distance_filter)
-	active_lobby = self.find_matchmaking_lobby(self, lobbies, search_data, wanted_profile, quick_game, game_mode)
+	active_lobby = self:find_matchmaking_lobby(lobbies, search_data, wanted_profile, quick_game, game_mode)
 
 	if active_lobby then
 		if active_lobby.matchmaking == "searching" then
@@ -264,9 +264,11 @@ MatchmakingStateSearchGame.search_for_game = function (self, dt)
 
 	return active_lobby
 end
+
 MatchmakingStateSearchGame.get_lobbies = function (self)
 	return self.lobby_finder:lobbies()
 end
+
 MatchmakingStateSearchGame.find_matchmaking_lobby = function (self, lobbies, search_data, wanted_profile_id, quick_game, game_mode)
 	local level_key = search_data.level_key
 	local level_filter = search_data.level_filter
@@ -280,7 +282,7 @@ MatchmakingStateSearchGame.find_matchmaking_lobby = function (self, lobbies, sea
 
 	if level_filter then
 		for _, filter_level_key in ipairs(level_filter) do
-			local matched_lobby = self.lobby_match(self, lobbies, filter_level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
+			local matched_lobby = self:lobby_match(lobbies, filter_level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
 
 			print("find_matchmaking_lobby: ", filter_level_key, matched_lobby)
 
@@ -289,17 +291,16 @@ MatchmakingStateSearchGame.find_matchmaking_lobby = function (self, lobbies, sea
 			end
 		end
 	else
-		return self.lobby_match(self, lobbies, level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
+		return self:lobby_match(lobbies, level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
 	end
-
-	return 
 end
+
 MatchmakingStateSearchGame.lobby_match = function (self, lobbies, level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
 	local best_lobby_data = nil
 	local matchmaking_manager = self.matchmaking_manager
 
 	for _, lobby_data in ipairs(lobbies) do
-		local lobby_match = matchmaking_manager.lobby_match(matchmaking_manager, lobby_data, level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
+		local lobby_match = matchmaking_manager:lobby_match(lobby_data, level_key, difficulty, game_mode, wanted_profile_id, player_peer_id)
 
 		if lobby_match then
 			if lobby_data.matchmaking == "searching" then
@@ -314,6 +315,7 @@ MatchmakingStateSearchGame.lobby_match = function (self, lobbies, level_key, dif
 
 	return best_lobby_data
 end
+
 MatchmakingStateSearchGame.update_search_timer = function (self, dt)
 	local total_search_timer = self.total_search_timer
 	self.total_search_timer = total_search_timer + dt
@@ -324,4 +326,4 @@ MatchmakingStateSearchGame.update_search_timer = function (self, dt)
 	return MatchmakingSettings.TOTAL_GAME_SEARCH_TIME <= self.total_search_timer
 end
 
-return 
+return

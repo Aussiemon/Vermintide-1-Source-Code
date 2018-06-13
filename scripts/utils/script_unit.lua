@@ -1,13 +1,13 @@
 ScriptUnit = ScriptUnit or {}
+
 ScriptUnit.destroy_extension = function (unit, system_name)
 	local extension = ScriptUnit.extension(unit, system_name)
 
 	if extension.destroy then
-		extension.destroy(extension)
+		extension:destroy()
 	end
-
-	return 
 end
+
 ScriptUnit.optimize = function (unit)
 	if Unit.alive(unit) then
 		local disable_shadows = Unit.get_data(unit, "disable_shadows")
@@ -40,8 +40,6 @@ ScriptUnit.optimize = function (unit)
 			end
 		end
 	end
-
-	return 
 end
 
-return 
+return

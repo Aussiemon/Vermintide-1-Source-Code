@@ -1,6 +1,7 @@
 require("scripts/misc/script_retrieve_auth_session_token")
 
 GrantDlcFromOwnership = class(GrantDlcFromOwnership)
+
 GrantDlcFromOwnership.init = function (self, name, current_app_id, app_id_to_check, unlock_class, host_address, use_fallback)
 	self._name = name
 	self._current_app_id = current_app_id
@@ -24,9 +25,8 @@ GrantDlcFromOwnership.init = function (self, name, current_app_id, app_id_to_che
 		2 = "Already Granted",
 		["-1"] = "No Return Code"
 	}
-
-	return 
 end
+
 GrantDlcFromOwnership.execute = function (self)
 	if self._unlock_class:owned() then
 		print("########################################################################")
@@ -38,14 +38,14 @@ GrantDlcFromOwnership.execute = function (self)
 
 		self._done = true
 
-		return 
+		return
 	end
 
 	if not rawget(_G, "Steam") then
 		Application.warning("[GrantDlcFromOwnership] Steam not initialized --> Skipping")
 
 		if self._use_fallback then
-			self._run_fallback(self)
+			self:_run_fallback()
 		end
 
 		self._done = true
@@ -60,21 +60,20 @@ GrantDlcFromOwnership.execute = function (self)
 			Application.warning("[GrantDlcFromOwnership] Could not retrieve Steam Auth Session Ticket --> Skipping")
 
 			if self._use_fallback then
-				self._run_fallback(self)
+				self:_run_fallback()
 			end
 
 			self._done = true
 		end
 	end
-
-	return 
 end
+
 GrantDlcFromOwnership.cb_auth_session_ticket_received = function (self, info)
 	if info.error then
 		Application.warning("[GrantDlcFromOwnership] Could not retrieve Auth Session Ticket from Steam --> Skipping")
 
 		if self._use_fallback then
-			self._run_fallback(self)
+			self:_run_fallback()
 		end
 
 		self._done = true
@@ -84,9 +83,8 @@ GrantDlcFromOwnership.cb_auth_session_ticket_received = function (self, info)
 		print(string.format("******** Sending request: %q", request))
 		Managers.curl:get(request, nil, callback(self, "cb_grant_response"))
 	end
-
-	return 
 end
+
 GrantDlcFromOwnership.cb_grant_response = function (self, success, code, headers, data, userdata)
 	self._done = true
 	self._success = success
@@ -135,9 +133,8 @@ GrantDlcFromOwnership.cb_grant_response = function (self, success, code, headers
 	end
 
 	print("########################################################################")
-
-	return 
 end
+
 GrantDlcFromOwnership._run_fallback = function (self)
 	print("########################################################################")
 	print("[GrantDlcFromOwnership]")
@@ -159,14 +156,14 @@ GrantDlcFromOwnership._run_fallback = function (self)
 	end
 
 	print("########################################################################")
-
-	return 
 end
+
 GrantDlcFromOwnership.done = function (self)
 	return self._done
 end
+
 GrantDlcFromOwnership.granted = function (self)
 	return self._granted
 end
 
-return 
+return
