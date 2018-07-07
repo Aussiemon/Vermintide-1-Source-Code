@@ -430,7 +430,8 @@ StateSplashScreen._init_localizer = function (self)
 		if button_index then
 			key_locale_name = device.button_name(button_index)
 
-			if device_type == "keyboard" and not device.button_locale_name(button_index) then
+			if device_type == "keyboard" then
+				key_locale_name = device.button_locale_name(button_index) or key_locale_name
 			end
 
 			if device_type == "mouse" then
@@ -445,9 +446,7 @@ StateSplashScreen._init_localizer = function (self)
 
 			if button_index then
 				key_locale_name = Keyboard.button_name(button_index)
-
-				if not Keyboard.button_locale_name(button_index) then
-				end
+				key_locale_name = Keyboard.button_locale_name(button_index) or key_locale_name
 			else
 				key_locale_name = string.format("<Mapping missing for key %s on device %s>", key_name, device_type)
 			end

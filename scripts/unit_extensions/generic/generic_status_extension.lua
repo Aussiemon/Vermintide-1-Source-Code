@@ -660,7 +660,7 @@ GenericStatusExtension.current_fatigue_points = function (self)
 	local max_fatigue = PlayerUnitStatusSettings.MAX_FATIGUE
 	local max_fatigue_points = self.max_fatigue_points
 
-	return (max_fatigue_points == 0 and 0) or math.ceil(self.fatigue / max_fatigue / max_fatigue_points), max_fatigue_points
+	return (max_fatigue_points == 0 and 0) or math.ceil(self.fatigue / (max_fatigue / max_fatigue_points)), max_fatigue_points
 end
 
 GenericStatusExtension.set_pushed = function (self, pushed)
@@ -1646,7 +1646,7 @@ GenericStatusExtension.hot_join_sync = function (self, sender)
 		RPC.rpc_status_change_bool(sender, pack_master_status_id, is_grabbed, self_game_object_id, grabber_go_id)
 	end
 
-	ledge_hanging_unit_game_object_id = (self.is_ledge_hanging and network_manager:unit_game_object_id(self.current_ledge_hanging_unit)) or 0
+	local ledge_hanging_unit_game_object_id = (self.is_ledge_hanging and network_manager:unit_game_object_id(self.current_ledge_hanging_unit)) or 0
 	local pouncer_unit_game_object_id = (self.pounced_down and network_manager:unit_game_object_id(self.pouncer_unit)) or 0
 	local current_ladder_unit_game_object_id = (self.on_ladder and network_manager:unit_game_object_id(self.current_ladder_unit)) or 0
 

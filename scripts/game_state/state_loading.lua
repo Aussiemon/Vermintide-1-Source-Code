@@ -169,20 +169,15 @@ StateLoading._setup_first_time_ui = function (self)
 
 		if platform == "win32" then
 			local level_name = (Boot.loading_context and Boot.loading_context.level_key) or LevelSettings.default_start_level
-
-			if not check_bool_string(Development.parameter("auto_host_level")) then
-				auto_skip = level_name ~= LevelSettings.default_start_level
-				auto_skip = loading_context.join_lobby_data or Development.parameter("auto_join") or auto_skip or Development.parameter("skip_splash")
-				local save_data = SaveData
-				params.gamma = not save_data.gamma_corrected
-				params.trailer = not GameSettingsDevelopment.disable_intro_trailer and not Application.user_setting("disable_intro_cinematic")
-			end
+			level_name = check_bool_string(Development.parameter("auto_host_level")) or level_name
+			auto_skip = level_name ~= LevelSettings.default_start_level
+			auto_skip = loading_context.join_lobby_data or Development.parameter("auto_join") or auto_skip or Development.parameter("skip_splash")
+			local save_data = SaveData
+			params.gamma = not save_data.gamma_corrected
+			params.trailer = not GameSettingsDevelopment.disable_intro_trailer and not Application.user_setting("disable_intro_cinematic")
 		elseif platform == "ps4" or platform == "xb1" then
 			local level_name = (Boot.loading_context and Boot.loading_context.level_key) or LevelSettings.default_start_level
-
-			if not check_bool_string(Development.parameter("auto_host_level")) then
-			end
-
+			level_name = check_bool_string(Development.parameter("auto_host_level")) or level_name
 			auto_skip = level_name ~= LevelSettings.default_start_level
 			auto_skip = loading_context.join_lobby_data or Development.parameter("auto_join") or auto_skip or Development.parameter("skip_splash")
 			params.gamma = loading_context.gamma_correct
@@ -292,7 +287,7 @@ StateLoading.setup_loading_view = function (self, level_key)
 		end
 	end
 
-	has_loaded_new = new_ui_package_name and package_manager:has_loaded(new_ui_package_name, "global_loading_screens")
+	local has_loaded_new = new_ui_package_name and package_manager:has_loaded(new_ui_package_name, "global_loading_screens")
 	local is_loading_new = new_ui_package_name and package_manager:is_loading(new_ui_package_name)
 
 	if not has_loaded_new and not is_loading_new then
@@ -332,7 +327,7 @@ StateLoading.setup_menu_assets = function (self)
 		package_manager:load(package_name_ingame, reference_name, nil, true, true)
 		package_manager:load(package_name_inn, reference_name, nil, true, true)
 	else
-		should_load_inn_package = self._level_key == "inn_level"
+		local should_load_inn_package = self._level_key == "inn_level"
 
 		if should_load_inn_package then
 			if ingame_package_loaded then

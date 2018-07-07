@@ -239,7 +239,8 @@ BackendManagerLocal._add_item = function (self, item_key)
 	local item_id = 0
 
 	for id, data in pairs(save_data_items) do
-		if item_id < id and not id then
+		if item_id < id then
+			item_id = id or item_id
 		end
 	end
 

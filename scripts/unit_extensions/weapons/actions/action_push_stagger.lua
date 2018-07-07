@@ -151,7 +151,8 @@ ActionPushStagger.client_owner_post_update = function (self, dt, t, world, can_d
 					local hit_zone_id = NetworkLookup.hit_zones[hit_zone_name]
 					local attack_template_name = current_action.attack_template
 
-					if self.owner_buff_extension:has_buff_type("push_increase") and not PUSH_UPGRADES[attack_template_name] then
+					if self.owner_buff_extension:has_buff_type("push_increase") then
+						attack_template_name = PUSH_UPGRADES[attack_template_name] or attack_template_name
 					end
 
 					local attack_template = AttackTemplates[attack_template_name]

@@ -73,7 +73,6 @@ function calc_interpolated_noise(x, seed)
 	return math.lerp(v1, v2, remainder)
 end
 
-if not Math.calculate_perlin_value then
-end
+calculate_perlin_value = Math.calculate_perlin_value or calculate_perlin_value
 
 return

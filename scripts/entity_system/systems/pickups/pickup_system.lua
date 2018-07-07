@@ -387,7 +387,7 @@ PickupSystem.spawn_spread_pickups = function (self, spawners, pickup_settings, c
 						end
 					end
 
-					spawn_debt = spawn_debt - num_spawned_pickups_in_section - 1
+					spawn_debt = spawn_debt - (num_spawned_pickups_in_section - 1)
 				else
 					spawn_debt = spawn_debt + 1
 				end

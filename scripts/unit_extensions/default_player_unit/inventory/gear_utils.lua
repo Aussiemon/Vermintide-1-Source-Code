@@ -321,13 +321,12 @@ GearUtils.wield_slot = function (equipment, slot_data, unit_1p, unit_3p, buff_ex
 			local ammo_extension = ScriptUnit.extension(equipment.right_hand_wielded_unit, "ammo_system")
 
 			if ammo_extension:can_reload() and ammo_extension:ammo_count() == 0 then
-				if not item_template.wield_anim_not_loaded then
-				end
-
+				wield_anim = item_template.wield_anim_not_loaded or wield_anim
 				local play_reload_animation = ammo_extension.play_reload_anim_on_wield_reload
 
 				ammo_extension:start_reload(play_reload_animation)
-			elseif ammo_extension:total_remaining_ammo() == 0 and not item_template.wield_anim_no_ammo then
+			elseif ammo_extension:total_remaining_ammo() == 0 then
+				wield_anim = item_template.wield_anim_no_ammo or wield_anim
 			end
 		end
 
@@ -335,13 +334,12 @@ GearUtils.wield_slot = function (equipment, slot_data, unit_1p, unit_3p, buff_ex
 			local ammo_extension = ScriptUnit.extension(equipment.left_hand_wielded_unit, "ammo_system")
 
 			if ammo_extension:can_reload() and ammo_extension:ammo_count() == 0 then
-				if not item_template.wield_anim_not_loaded then
-				end
-
+				wield_anim = item_template.wield_anim_not_loaded or wield_anim
 				local play_reload_animation = ammo_extension.play_reload_anim_on_wield_reload
 
 				ammo_extension:start_reload(play_reload_animation)
-			elseif ammo_extension:total_remaining_ammo() == 0 and not item_template.wield_anim_no_ammo then
+			elseif ammo_extension:total_remaining_ammo() == 0 then
+				wield_anim = item_template.wield_anim_no_ammo or wield_anim
 			end
 		end
 

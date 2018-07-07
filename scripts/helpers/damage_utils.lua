@@ -63,7 +63,7 @@ DamageUtils.calculate_damage = function (damage_table, target_unit, attacker_uni
 		end
 	end
 
-	hit_ward = hit_zone_name == "ward"
+	local hit_ward = hit_zone_name == "ward"
 	local damage = nil
 
 	if has_damage_boost and not hit_ward then
@@ -319,7 +319,7 @@ DamageUtils.create_explosion = function (world, attacker_unit, position, rotatio
 			end
 		end
 
-		do_damage = explosion_template.damage or (explosion_template.damage_min and explosion_template.damage_max) or false
+		local do_damage = explosion_template.damage or (explosion_template.damage_min and explosion_template.damage_max) or false
 		local ignore_attacker_unit = explosion_template.ignore_attacker_unit
 		local collision_filter = "filter_explosion_overlap_no_player"
 		local difficulty_settings = Managers.state.difficulty:get_difficulty_settings()
@@ -1044,7 +1044,7 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 		end
 	end
 
-	boon_handler = attacked_player and attacked_player.boon_handler
+	local boon_handler = attacked_player and attacked_player.boon_handler
 
 	if boon_handler then
 		local boon_name = "reduced_damage"
@@ -1058,7 +1058,7 @@ DamageUtils.apply_buffs_to_damage = function (current_damage, attacked_unit, att
 		end
 	end
 
-	boon_handler = attacker_player and attacker_player.boon_handler
+	local boon_handler = attacker_player and attacker_player.boon_handler
 
 	if boon_handler and not DamageUtils.is_player_unit(attacked_unit) then
 		local boon_name = "increased_damage"
@@ -1698,7 +1698,7 @@ DamageUtils.process_projectile_hit = function (world, damage_source, owner_unit,
 						predicted_damage = attack.get_damage_amount(damage_source, attack_template, owner_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 					end
 
-					no_damage = predicted_damage <= 0
+					local no_damage = predicted_damage <= 0
 
 					if breed then
 						local enemy_type = breed.name

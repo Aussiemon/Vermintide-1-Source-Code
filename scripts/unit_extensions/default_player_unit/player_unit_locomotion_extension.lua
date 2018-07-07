@@ -246,7 +246,7 @@ PlayerUnitLocomotionExtension.moving_on_slope = function (self, calculate_fall_v
 		end
 	end
 
-	on_slope = Mover.standing_frames(mover) < slope_traversion_settings.standing_frames or slippery
+	local on_slope = Mover.standing_frames(mover) < slope_traversion_settings.standing_frames or slippery
 	self.allow_jump = not calculate_fall_velocity or Mover.flying_frames(mover) <= slope_traversion_settings.jump_disallowed_frames
 
 	return on_slope and calculate_fall_velocity

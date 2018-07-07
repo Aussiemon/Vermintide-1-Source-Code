@@ -45,7 +45,8 @@ if Development.parameter("network_timeout_really_long") then
 	network_timeout = 10000
 end
 
-if Development.parameter("network_timeout") and not Development.parameter("network_timeout") then
+if Development.parameter("network_timeout") then
+	network_timeout = Development.parameter("network_timeout") or network_timeout
 end
 
 GameSettingsDevelopment.network_timeout = network_timeout

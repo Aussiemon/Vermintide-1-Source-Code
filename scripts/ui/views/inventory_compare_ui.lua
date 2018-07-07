@@ -307,7 +307,8 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		local rarity_color = self:get_rarity_color(item.rarity)
 		local item_name = Localize(item.display_name)
 
-		if info_widget_style.text_title and UTF8Utils.string_length(item_name) > 25 and not UIRenderer.crop_text_width(self.ui_renderer, item_name, 400, info_widget_style.text_title) then
+		if info_widget_style.text_title and UTF8Utils.string_length(item_name) > 25 then
+			item_name = UIRenderer.crop_text_width(self.ui_renderer, item_name, 400, info_widget_style.text_title) or item_name
 		end
 
 		info_widget_content.text_title = item_name
@@ -379,7 +380,7 @@ InventoryCompareUI.on_item_selected = function (self, item_backend_id, compare_i
 		self.draw_ammo = draw_ammo
 	end
 
-	show_traits = self.number_of_traits_on_item > 0
+	local show_traits = self.number_of_traits_on_item > 0
 	local height, spacing_height = self:handle_widget_positions(draw_attack_info, show_traits, self.draw_stamina, self.draw_ammo)
 	total_widgets_height = total_widgets_height + spacing_height
 	self.total_widgets_height = total_widgets_height

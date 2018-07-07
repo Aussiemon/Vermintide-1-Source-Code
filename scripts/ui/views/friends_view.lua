@@ -361,7 +361,8 @@ local EMPTY_TABLE = {}
 FriendsView.cb_refresh_friends_done = function (self, friends_list, use_cached_friends_list)
 	Profiler.start("FriendsView:cb_refresh_friends_done()")
 
-	if use_cached_friends_list and not self.cached_friends_list then
+	if use_cached_friends_list then
+		friends_list = self.cached_friends_list or friends_list
 	end
 
 	if friends_list then

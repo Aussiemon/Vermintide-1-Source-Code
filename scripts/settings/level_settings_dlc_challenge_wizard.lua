@@ -84,7 +84,7 @@ LevelSettings.dlc_challenge_wizard = {
 
 			return (dlc_challenge_wizard_enabled and "visible") or "locked", dlc_challenge_wizard_enabled, Localize("map_level_community_tooltip")
 		else
-			unlocked = statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_challenge_wizard") > 0
+			local unlocked = statistics_db:get_persistent_stat(stats_id, "completed_levels", "dlc_challenge_wizard") > 0
 
 			return (unlocked and "visible") or "hidden", unlocked
 		end

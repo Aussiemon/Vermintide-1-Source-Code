@@ -89,10 +89,12 @@ UIPasses.texture_uv_dynamic_color_uvs_size_offset = {
 		end
 	end,
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
-		if pass_definition.content_id and not ui_content[pass_definition.content_id] then
+		if pass_definition.content_id then
+			ui_content = ui_content[pass_definition.content_id] or ui_content
 		end
 
-		if pass_definition.style_id and not ui_style[pass_definition.style_id] then
+		if pass_definition.style_id then
+			ui_style = ui_style[pass_definition.style_id] or ui_style
 		end
 
 		local color, uvs, size, offset = pass_definition.dynamic_function(ui_content, ui_style, size, dt, ui_renderer)
@@ -649,7 +651,8 @@ UIPasses.texture_uv_dynamic_size_uvs = {
 		return pass_definition.content_id
 	end,
 	draw = function (ui_renderer, pass_data, ui_scenegraph, pass_definition, ui_style, ui_content, position, size, input_service, dt)
-		if pass_definition.content_id and not ui_content[pass_definition.content_id] then
+		if pass_definition.content_id then
+			ui_content = ui_content[pass_definition.content_id] or ui_content
 		end
 
 		local color = ui_style.color
@@ -1045,9 +1048,7 @@ UIPasses.text = {
 			font_name = font[3]
 			font_size = font[2]
 			font_material = font[1]
-
-			if not ui_style.font_size then
-			end
+			font_size = ui_style.font_size or font_size
 		end
 
 		local text = ui_content[pass_data.text_id]
@@ -1061,7 +1062,7 @@ UIPasses.text = {
 			local texts = UIRenderer.word_wrap(ui_renderer, text, font_material, font_size, size[1])
 			local text_start_index = ui_content.text_start_index or 1
 			local max_texts = ui_content.max_texts or #texts
-			local num_texts = math.min(#texts - text_start_index - 1, max_texts)
+			local num_texts = math.min(#texts - (text_start_index - 1), max_texts)
 			local inv_scale = RESOLUTION_LOOKUP.inv_scale
 			local full_font_height = (font_max + math.abs(font_min)) * inv_scale
 			local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
@@ -1237,7 +1238,7 @@ UIPasses.text = {
 
 				UIRenderer.draw_text(ui_renderer, rest_string, font_material, font_size, font_name, position, ui_style.text_color, retained_id, ui_style.color_override)
 			else
-				retained_id = retained_ids and ((new_retained_ids and true) or retained_ids[1])
+				local retained_id = retained_ids and ((new_retained_ids and true) or retained_ids[1])
 				retained_id = UIRenderer.draw_text(ui_renderer, sub_string, font_material, font_size, font_name, position, ui_style.text_color, retained_id, ui_style.color_override)
 
 				if new_retained_ids then
@@ -1327,9 +1328,7 @@ UIPasses.lorebook_multiple_texts = {
 			font_name = font[3]
 			font_size = font[2]
 			font_material = font[1]
-
-			if not ui_style.font_size then
-			end
+			font_size = ui_style.font_size or font_size
 		end
 
 		local text_color = ui_style.text_color
@@ -1871,9 +1870,7 @@ UIPasses.tooltip_text = {
 			font_name = font[3]
 			font_size = font[2]
 			font_material = font[1]
-
-			if not ui_style.font_size then
-			end
+			font_size = ui_style.font_size or font_size
 		end
 
 		local text = ui_content[pass_data.text_id]
@@ -1887,7 +1884,7 @@ UIPasses.tooltip_text = {
 		local texts = UIRenderer.word_wrap(ui_renderer, text, font_material, font_size, max_width)
 		local text_start_index = ui_content.text_start_index or 1
 		local max_texts = ui_content.max_texts or #texts
-		local num_texts = math.min(#texts - text_start_index - 1, max_texts)
+		local num_texts = math.min(#texts - (text_start_index - 1), max_texts)
 		local full_font_height = (font_max + math.abs(font_min)) * RESOLUTION_LOOKUP.inv_scale
 		local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
 		local fixed_position = ui_style.fixed_position
@@ -1985,9 +1982,7 @@ UIPasses.rect_text = {
 			font_name = font[3]
 			font_size = font[2]
 			font_material = font[1]
-
-			if not ui_style.font_size then
-			end
+			font_size = ui_style.font_size or font_size
 		end
 
 		local text = ui_content[pass_data.text_id]
@@ -2001,7 +1996,7 @@ UIPasses.rect_text = {
 		local texts = UIRenderer.word_wrap(ui_renderer, text, font_material, font_size, max_width)
 		local text_start_index = ui_content.text_start_index or 1
 		local max_texts = ui_content.max_texts or #texts
-		local num_texts = math.min(#texts - text_start_index - 1, max_texts)
+		local num_texts = math.min(#texts - (text_start_index - 1), max_texts)
 		local full_font_height = (font_max + math.abs(font_min)) * RESOLUTION_LOOKUP.inv_scale
 		local text_offset = Vector3(0, (ui_style.grow_downward and full_font_height) or -full_font_height, 0)
 		rect_text_size[2] = full_font_height * num_texts

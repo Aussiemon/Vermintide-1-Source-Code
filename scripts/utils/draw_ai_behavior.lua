@@ -104,7 +104,8 @@ DrawAiBehaviour.tree_width = function (gui, node)
 	local min, max = Gui.text_extents(gui, id, font_mtrl, font_size)
 	local text_width = (max.x - min.x) / res_x + res_x * 5e-06
 
-	if text_width < min_node_width and not min_node_width then
+	if text_width < min_node_width then
+		text_width = min_node_width or text_width
 	end
 
 	nodes[id] = {

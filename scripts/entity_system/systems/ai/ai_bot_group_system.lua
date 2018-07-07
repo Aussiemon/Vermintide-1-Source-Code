@@ -600,10 +600,7 @@ AIBotGroupSystem._find_destination_points_outside_volume = function (self, nav_w
 	if num_points < needed_points then
 		for i = num_points + 1, needed_points, 1 do
 			points[i] = points[current_index] or last_point or origin_point
-
-			if not points[current_index] then
-			end
-
+			last_point = points[current_index] or last_point
 			current_index = current_index + 1
 		end
 	end
@@ -882,7 +879,7 @@ AIBotGroupSystem._calculate_opportunity_utility = function (self, bot_unit, self
 		end
 	end
 
-	stickyness_modifier = (potential_target == current_target and STICKYNESS_DISTANCE_MODIFIER) or 0
+	local stickyness_modifier = (potential_target == current_target and STICKYNESS_DISTANCE_MODIFIER) or 0
 	local proximity = 1 / (distance + stickyness_modifier)
 
 	return proximity, distance

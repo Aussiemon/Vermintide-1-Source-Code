@@ -643,7 +643,7 @@ InventoryItemsList.remove_item = function (self, item_backend_id, ignore_scroll_
 			local selected_list_index = self.selected_list_index
 			local move_scroll = false
 
-			if num_draws > num_items - list_start_index - 1 then
+			if num_draws > num_items - (list_start_index - 1) then
 				list_style.list_start_index = math.max(list_start_index - 1, 1)
 
 				if list_start_index > 1 then

@@ -1019,7 +1019,7 @@ StateInGameRunning.server_start_next_level_vote = function (self, is_game_won)
 			return Managers.state.voting:request_vote("vote_for_level", level_vote_data, Network.peer_id())
 		end
 
-		next_level_key = (is_game_won and LevelUnlockUtils.get_next_level_in_order(statistics_db, player_stats_id, current_level_key)) or current_level_key
+		local next_level_key = (is_game_won and LevelUnlockUtils.get_next_level_in_order(statistics_db, player_stats_id, current_level_key)) or current_level_key
 		local random_level_list = {}
 
 		for i = 1, #LevelUnlockOrder, 1 do

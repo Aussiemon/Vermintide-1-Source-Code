@@ -942,7 +942,7 @@ PerceptionUtils.pick_rat_ogre_target_with_weights = function (unit, blackboard, 
 				end
 			end
 
-			aggro = blackboard.aggro_list[enemy_unit] or 0
+			local aggro = blackboard.aggro_list[enemy_unit] or 0
 			local enemy_disabled = status_extension.is_ledge_hanging or status_extension.knocked_down
 
 			if enemy_disabled then

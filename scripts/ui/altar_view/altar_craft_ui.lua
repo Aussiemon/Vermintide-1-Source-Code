@@ -245,7 +245,7 @@ AltarCraftUI.handle_gamepad_input = function (self, dt)
 						end
 					end
 				else
-					use_button_glow = (self.active_item_id and true) or false
+					local use_button_glow = (self.active_item_id and true) or false
 
 					self:_set_token_step_button_glow_state((gamepad_setting_selection == 1 and use_button_glow) or false)
 					self:_set_weapon_type_step_button_glow_state((gamepad_setting_selection == 2 and use_button_glow) or false)

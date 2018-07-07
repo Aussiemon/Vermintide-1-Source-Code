@@ -59,7 +59,8 @@ LevelSelectView.update = function (self, dt)
 	if Keyboard.pressed(Keyboard.button_index("up")) then
 		current_selection = current_selection - 1
 
-		if current_selection <= 0 and not #level_array then
+		if current_selection <= 0 then
+			current_selection = #level_array or current_selection
 		end
 	end
 

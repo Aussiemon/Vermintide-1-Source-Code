@@ -1129,7 +1129,7 @@ LobbyBrowseView.handle_gamepad_navigation_input = function (self, dt)
 
 		return
 	else
-		speed_multiplier = self.speed_multiplier or 1
+		local speed_multiplier = self.speed_multiplier or 1
 		local move_up = input_service:get("move_up")
 		local move_up_hold = input_service:get("move_up_hold")
 

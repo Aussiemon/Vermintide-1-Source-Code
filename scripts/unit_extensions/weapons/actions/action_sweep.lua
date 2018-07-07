@@ -202,7 +202,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 		return
 	end
 
-	final_frame = not can_damage and self.could_damage_last_update
+	local final_frame = not can_damage and self.could_damage_last_update
 	self.could_damage_last_update = can_damage
 	local position_previous = self.stored_position:unbox()
 	local rotation_previous = self.stored_rotation:unbox()
@@ -402,7 +402,7 @@ ActionSweep._do_overlap = function (self, dt, t, unit, owner_unit, current_actio
 						hit_armor = status_extension:is_blocking()
 					end
 
-					abort_attack = self.number_of_hit_enemies == max_targets or hit_armor
+					local abort_attack = self.number_of_hit_enemies == max_targets or hit_armor
 
 					self:_play_hit_animations(owner_unit, current_action, abort_attack, hit_zone_name, armor_category)
 

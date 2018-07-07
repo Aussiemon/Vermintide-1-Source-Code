@@ -72,7 +72,7 @@ ActionShotgun.client_owner_post_update = function (self, dt, t, world, can_damag
 			end
 		end
 
-		num_shots = current_action.shot_count or 1
+		local num_shots = current_action.shot_count or 1
 		local ammo_usage = current_action.ammo_usage
 
 		if not Managers.player:owner(self.owner_unit).bot_player then

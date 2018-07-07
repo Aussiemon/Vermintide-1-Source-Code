@@ -1532,7 +1532,8 @@ local function set_item_element_info(item_element, is_room_item, item, item_colo
 	content.allow_equipped_drag = allow_equipped_drag or false
 	local item_name = (item.name and item.localized_name) or "Unknown"
 
-	if style.text_title and UTF8Utils.string_length(item_name) > 25 and not UIRenderer.crop_text_width(ui_renderer, item_name, 400, style.text_title) then
+	if style.text_title and UTF8Utils.string_length(item_name) > 25 then
+		item_name = UIRenderer.crop_text_width(ui_renderer, item_name, 400, style.text_title) or item_name
 	end
 
 	content.title = item_name

@@ -307,9 +307,9 @@ WeaponUnitExtension.start_action = function (self, action_name, sub_action_name,
 
 		if self.ammo_extension then
 			if self.ammo_extension:total_remaining_ammo() == 0 then
-				if not current_action_settings.anim_event_no_ammo_left then
-				end
-			elseif self.ammo_extension:total_remaining_ammo() == 1 and not current_action_settings.anim_event_last_ammo then
+				event = current_action_settings.anim_event_no_ammo_left or event
+			elseif self.ammo_extension:total_remaining_ammo() == 1 then
+				event = current_action_settings.anim_event_last_ammo or event
 			end
 		end
 

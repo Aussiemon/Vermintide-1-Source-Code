@@ -519,13 +519,13 @@ InteractionUI.update = function (self, dt, t, my_player)
 							texture_size_x = texture_size_x + text_width
 
 							if texture_size_y < sizes[i][2] then
-								if not sizes[i][2] then
-								end
+								texture_size_y = sizes[i][2] or texture_size_y
 							end
 						else
 							texture_size_x = texture_size_x + sizes[i][1]
 
-							if texture_size_y < sizes[i][2] and not sizes[i][2] then
+							if texture_size_y < sizes[i][2] then
+								texture_size_y = sizes[i][2] or texture_size_y
 							end
 						end
 					end

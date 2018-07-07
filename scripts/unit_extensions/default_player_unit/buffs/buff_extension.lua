@@ -130,15 +130,9 @@ BuffExtension.add_buff = function (self, template_name, params)
 			local end_time = duration and start_time + duration
 
 			if params then
-				if not params.external_optional_bonus then
-				end
-
-				if not params.external_optional_multiplier then
-				end
-
-				if not params.external_optional_proc_chance then
-				end
-
+				bonus = params.external_optional_bonus or bonus
+				multiplier = params.external_optional_multiplier or multiplier
+				proc_chance = params.external_optional_proc_chance or proc_chance
 				buff.damage_source = params.damage_source
 			end
 

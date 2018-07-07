@@ -1606,7 +1606,8 @@ OptionsView.apply_changes = function (self, user_settings, render_settings, pend
 	elseif not self.delayed_title_change then
 		local error_text = Localize(save_error_code_key_lookup[save_error_code])
 
-		if error_path and not string.format(error_text, error_path) then
+		if error_path then
+			error_text = string.format(error_text, error_path) or error_text
 		end
 
 		self.save_error_popup_id = Managers.popup:queue_popup(error_text, Localize("popup_save_error"), "ok", Localize("popup_choice_ok"))
@@ -4980,6 +4981,7 @@ OptionsView.reload_language = function (self, language_id)
 			key_locale_name = device.button_name(button_index)
 
 			if device_type == "keyboard" and not device.button_locale_name(button_index) then
+				key_locale_name = key_locale_name
 			end
 
 			if device_type == "mouse" then
@@ -5001,6 +5003,7 @@ OptionsView.reload_language = function (self, language_id)
 				key_locale_name = Keyboard.button_name(button_index)
 
 				if not Keyboard.button_locale_name(button_index) then
+					key_locale_name = key_locale_name
 				end
 			else
 				key_locale_name = string.format("<Mapping missing for key %s on device %s>", key_name, device_type)

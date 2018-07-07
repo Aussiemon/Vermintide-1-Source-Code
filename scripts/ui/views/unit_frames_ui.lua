@@ -412,7 +412,7 @@ UnitFramesUI.update_teammates_unit_frames = function (self, dt, t, ui_scenegraph
 					grimoire_icon_style.offset[1] = bar_offset / 2
 				end
 
-				low_health = (not is_dead and not is_knocked_down and health_percent < UISettings.unit_frames.low_health_threshold) or nil
+				local low_health = (not is_dead and not is_knocked_down and health_percent < UISettings.unit_frames.low_health_threshold) or nil
 				portrait_content.hp_bar.low_health = low_health
 				portrait_content.hp_bar.is_knocked_down = is_knocked_down
 				portrait_content.hp_bar.is_wounded = is_wounded

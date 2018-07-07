@@ -339,7 +339,7 @@ local function sort_levels_by_order(a, b)
 
 		return a_order < b_order
 	else
-		a_order = a_settings.console_sorting or 99
+		local a_order = a_settings.console_sorting or 99
 		local b_order = b_settings.console_sorting or 99
 
 		return a_order < b_order

@@ -372,7 +372,7 @@ MatchmakingManager.update = function (self, dt, t)
 			Profiler.stop("Update profile slots")
 		end
 
-		state_name = self._state and self._state.NAME
+		local state_name = self._state and self._state.NAME
 		local is_matchmaking = state_name == "MatchmakingStateSearchPlayers" or state_name == "MatchmakingStateSearchGame"
 
 		if is_matchmaking and self.matchmaking_ui.is_in_inn then
@@ -1073,7 +1073,7 @@ MatchmakingManager.lobby_match = function (self, lobby_data, level_key, difficul
 			return false
 		end
 	else
-		lobby_level = lobby_data.selected_level_key or lobby_data.level_key
+		local lobby_level = lobby_data.selected_level_key or lobby_data.level_key
 
 		if lobby_level then
 			local difficulty_settings = DifficultySettings
@@ -1240,7 +1240,7 @@ MatchmakingManager.rpc_matchmaking_request_selected_level = function (self, send
 
 		self.handshaker_host:send_rpc_to_client("rpc_matchmaking_request_selected_level_reply", sender, selected_level_id)
 	else
-		state_name = (self._state and self._state.NAME) or "none"
+		local state_name = (self._state and self._state.NAME) or "none"
 
 		mm_printf_force("rpc_matchmaking_request_selected_level, got this in wrong state current_state:%s", state_name)
 	end
@@ -1268,7 +1268,7 @@ MatchmakingManager.rpc_matchmaking_request_selected_difficulty = function (self,
 
 		self.handshaker_host:send_rpc_to_client("rpc_matchmaking_request_selected_difficulty_reply", sender, difficulty_id)
 	else
-		state_name = (self._state and self._state.NAME) or "none"
+		local state_name = (self._state and self._state.NAME) or "none"
 
 		mm_printf_force("rpc_matchmaking_request_selected_difficulty, got this in wrong state current_state:%s", state_name)
 	end
@@ -1298,7 +1298,7 @@ MatchmakingManager.rpc_matchmaking_request_status_message = function (self, send
 
 		self.handshaker_host:send_rpc_to_client("rpc_matchmaking_status_message", sender, status_message)
 	else
-		state_name = (self._state and self._state.NAME) or "none"
+		local state_name = (self._state and self._state.NAME) or "none"
 
 		mm_printf_force("rpc_matchmaking_request_status_message, got this in wrong state current_state:%s", state_name)
 	end

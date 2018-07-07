@@ -29,7 +29,7 @@ BoonUI.init = function (self, ingame_ui_context)
 		BOON_HEIGHT
 	}
 	local position = {
-		(1920 + boon_pivot_position[1]) - size[1] - BOON_WIDTH * 1.5,
+		(1920 + boon_pivot_position[1]) - (size[1] - BOON_WIDTH * 1.5),
 		0
 	}
 	self.cleanui_data = {}

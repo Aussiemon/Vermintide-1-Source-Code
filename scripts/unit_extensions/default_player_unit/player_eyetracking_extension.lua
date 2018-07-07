@@ -171,7 +171,7 @@ PlayerEyeTrackingExtension.update_gaze_aim = function (self, dt)
 		first_person_extension:play_animation_event("tobii_aim_inactive")
 	end
 
-	has_device = Tobii.device_status() == Tobii.DEVICE_TRACKING
+	local has_device = Tobii.device_status() == Tobii.DEVICE_TRACKING
 	local has_presence = Tobii.user_presence() == Tobii.USER_PRESENT
 
 	if (not has_device or not has_presence) and self.fire_at_gaze_enabled then

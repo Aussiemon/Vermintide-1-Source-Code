@@ -2018,9 +2018,7 @@ LorebookView.setup_page_texts = function (self, style, content, text)
 		font_name = font[3]
 		font_size = font[2]
 		font_material = font[1]
-
-		if not text_style.font_size then
-		end
+		font_size = text_style.font_size or font_size
 	end
 
 	if text_style.localize then

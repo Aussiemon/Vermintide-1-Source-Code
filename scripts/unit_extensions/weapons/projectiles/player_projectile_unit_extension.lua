@@ -425,7 +425,7 @@ PlayerProjectileUnitExtension.hit_enemy_damage = function (self, damage_data, hi
 		predicted_damage = attack.get_damage_amount(self.item_name, attack_template, owner_unit, hit_unit, hit_zone_name, attack_direction, attack_damage_value, hit_ragdoll_actor, backstab_multiplier, hawkeye_multiplier)
 	end
 
-	no_damage = predicted_damage <= 0
+	local no_damage = predicted_damage <= 0
 
 	if no_damage then
 		self.did_damage = false
@@ -597,7 +597,7 @@ PlayerProjectileUnitExtension.hit_player_damage = function (self, damage_data, h
 		predicted_damage = attack.get_damage_amount(self.item_name, attack_template, owner_unit, hit_unit, hit_zone_name, hit_direction, attack_damage_value, nil, backstab_multiplier)
 	end
 
-	no_damage = predicted_damage <= 0
+	local no_damage = predicted_damage <= 0
 
 	if no_damage then
 		self.did_damage = false

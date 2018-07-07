@@ -403,7 +403,7 @@ EnemyRecycler.deactivate_area = function (self, area)
 						}
 					end
 
-					claim_unit = point.claim_unit or (type(point[1]) ~= "number" and point[1])
+					local claim_unit = point.claim_unit or (type(point[1]) ~= "number" and point[1])
 
 					if claim_unit and unit_alive(claim_unit) then
 						local blackboard = Unit.get_data(claim_unit, "blackboard")

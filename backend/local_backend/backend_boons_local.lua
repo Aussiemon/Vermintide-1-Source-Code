@@ -20,7 +20,7 @@ BackendBoonsLocal.update = function (self)
 		local boon_name = boon.name
 		local start_time = boon.start_time
 		local boon_template = BoonTemplates[boon_name]
-		local remaining_duration = boon_template.duration - current_time - start_time
+		local remaining_duration = boon_template.duration - (current_time - start_time)
 
 		if remaining_duration < 0 then
 			table.remove(boons, ii)

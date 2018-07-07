@@ -2145,7 +2145,7 @@ MapView.handle_gamepad_navigation_input = function (self, dt)
 				end
 			end
 
-			num_settings_widgets = (player_list_active and self.number_of_player) or #menu_widgets
+			local num_settings_widgets = (player_list_active and self.number_of_player) or #menu_widgets
 			local new_selection_index = gamepad_selected_settings_index
 
 			if input_service:get("move_down") then

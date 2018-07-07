@@ -84,7 +84,7 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 		Managers.state.debug_text:output_world_text(material, 0.1, draw_pos, 30, "material_text", Vector3(0, 255, 0))
 	end
 
-	sound = effect_settings.sound and effect_settings.sound[material]
+	local sound = effect_settings.sound and effect_settings.sound[material]
 
 	if sound then
 		local wwise_source_id, wwise_world = WwiseUtils.make_position_auto_source(world, position)
@@ -119,7 +119,7 @@ EffectHelper.play_surface_material_effects = function (effect_name, world, hit_u
 		WwiseWorld.trigger_event(wwise_world, sound.event, wwise_source_id)
 	end
 
-	particles = effect_settings.particles and effect_settings.particles[material]
+	local particles = effect_settings.particles and effect_settings.particles[material]
 
 	if particles then
 		local forward = -Quaternion.forward(rotation)
@@ -198,7 +198,7 @@ EffectHelper.play_skinned_surface_material_effects = function (effect_name, worl
 		WwiseWorld.trigger_event(wwise_world, sound.event, source_id)
 	end
 
-	particles = effect_settings.particles and effect_settings.particles[material]
+	local particles = effect_settings.particles and effect_settings.particles[material]
 
 	if particles then
 		local normal_rotation = Quaternion.look(normal, Vector3.up())
@@ -206,7 +206,7 @@ EffectHelper.play_skinned_surface_material_effects = function (effect_name, worl
 		World.create_particles(world, particles, position, normal_rotation)
 	end
 
-	flow_event = effect_settings.flow_event and effect_settings.flow_event[material]
+	local flow_event = effect_settings.flow_event and effect_settings.flow_event[material]
 
 	if flow_event and hit_unit then
 		Unit.flow_event(hit_unit, flow_event)

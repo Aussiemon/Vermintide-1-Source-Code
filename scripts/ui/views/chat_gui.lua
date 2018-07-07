@@ -99,11 +99,11 @@ end
 ChatGui.set_font_size = function (self, font_size)
 	self.chat_output_widget.style.text.font_size = font_size
 	self.chat_input_widget.style.text.font_size = font_size + 2
-	self.chat_input_widget.style.background.size[2] = definitions.CHAT_HEIGHT - 26 - 200 - (font_size + 4)
+	self.chat_input_widget.style.background.size[2] = definitions.CHAT_HEIGHT - 26 - (200 - (font_size + 4))
 	self.chat_input_widget.style.text.caret_size[2] = font_size + 6
 	local ui_scenegraph = self.ui_scenegraph
 	local scenegraph_definition = definitions.scenegraph_definition
-	ui_scenegraph[self.chat_input_widget.style.text.scenegraph_id].size[2] = definitions.CHAT_HEIGHT - 26 - 200 - (font_size + 4)
+	ui_scenegraph[self.chat_input_widget.style.text.scenegraph_id].size[2] = definitions.CHAT_HEIGHT - 26 - (200 - (font_size + 4))
 	ui_scenegraph[self.chat_output_widget.style.text.scenegraph_id].size[2] = definitions.CHAT_HEIGHT - 26 - (font_size + 4)
 end
 
@@ -272,7 +272,7 @@ ChatGui._update_chat_messages = function (self)
 					sender = player:name()
 				end
 
-				localized_display_name = ingame_display_name and Localize(ingame_display_name)
+				local localized_display_name = ingame_display_name and Localize(ingame_display_name)
 				local sender = sender or (rawget(_G, "Steam") and Steam.user_name(new_message.message_sender)) or tostring(new_message.message_sender)
 				local message = string.format("%s", tostring(new_message.message))
 				new_message_table.is_dev = new_message.is_dev
@@ -480,7 +480,7 @@ ChatGui._update_input = function (self, input_service, menu_input_service, dt, n
 			end
 		end
 
-		auto_close = chat_close_time and chat_close_time == 0
+		local auto_close = chat_close_time and chat_close_time == 0
 
 		if tab_hotspot.on_pressed or (input_service:get("deactivate_chat_input") and not block_chat_activation) or menu_close_press_outside_area or auto_close then
 			if chat_focused and (tab_hotspot.on_pressed or (input_service:get("deactivate_chat_input") and not block_chat_activation) or menu_close_press_outside_area) then

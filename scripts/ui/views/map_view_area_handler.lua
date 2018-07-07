@@ -30,7 +30,7 @@ local function sort_level_information_list(a, b)
 
 		return a_order < b_order
 	else
-		a_order = a_settings.console_sorting or 99
+		local a_order = a_settings.console_sorting or 99
 		local b_order = b_settings.console_sorting or 99
 
 		return a_order < b_order
@@ -62,7 +62,7 @@ local function sort_level_list(a, b)
 
 		return a_order < b_order
 	else
-		a_order = a_settings.console_sorting or 99
+		local a_order = a_settings.console_sorting or 99
 		local b_order = b_settings.console_sorting or 99
 
 		return a_order < b_order

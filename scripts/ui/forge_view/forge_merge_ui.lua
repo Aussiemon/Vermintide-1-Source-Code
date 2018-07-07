@@ -566,7 +566,7 @@ ForgeMergeUI.update_melted_iron_trail = function (self, force_fill)
 			end
 		end
 
-		slot_visible = force_fill or (not is_missing_item and i <= num_items_to_merge) or (all_items_added and i <= 6)
+		local slot_visible = force_fill or (not is_missing_item and i <= num_items_to_merge) or (all_items_added and i <= 6)
 		local trail_visible = force_fill or (not is_missing_item and not is_missing_next_item and num_items_to_merge >= i + 1) or (all_items_added and i <= 6)
 
 		if slot_texture_widget then
@@ -673,7 +673,7 @@ ForgeMergeUI.update_description_text = function (self)
 			local localization_text = Localize(localization_key)
 			text = string.format(localization_text, num_missing_items)
 		else
-			localization_key = (num_missing_items == 5 and "merge_description_1") or "merge_description_2"
+			local localization_key = (num_missing_items == 5 and "merge_description_1") or "merge_description_2"
 			local localization_text = Localize(localization_key)
 			text = string.format(localization_text, num_missing_items)
 		end

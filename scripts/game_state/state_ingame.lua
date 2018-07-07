@@ -1593,7 +1593,7 @@ StateIngame._check_and_add_end_game_telemetry = function (self, application_shut
 			reason = "forced_exit"
 		end
 	else
-		level_related_reason = self.exit_type == "load_next_level" or self.exit_type == "reload_level"
+		local level_related_reason = self.exit_type == "load_next_level" or self.exit_type == "reload_level"
 
 		if level_related_reason then
 			if Managers.state.game_mode:game_won() then

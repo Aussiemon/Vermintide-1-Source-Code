@@ -192,7 +192,7 @@ Staggers = {
 			end
 		end
 
-		stagger_type_table = attack_template.stagger_impact or nil
+		local stagger_type_table = attack_template.stagger_impact or nil
 		local stagger_duration_table = attack_template.stagger_duration or nil
 		local stagger_type, stagger_duration = DamageUtils.calculate_stagger(stagger_type_table, stagger_duration_table, hit_unit, attacker_unit, attack_template)
 		local angle = attack_template.stagger_angle or 0
